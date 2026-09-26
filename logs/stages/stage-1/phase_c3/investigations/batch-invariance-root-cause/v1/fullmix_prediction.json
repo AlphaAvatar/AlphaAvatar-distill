@@ -1,0 +1,31 @@
+{
+ "schema": "aadistill.prediction/v1",
+ "_contract": "Written and COMMITTED before the measurement it predicts. A prediction recorded afterwards is an explanation, and this investigation exists because an explanation was mistaken for a measurement.",
+ "investigation_id": "batch_invariance_root_cause_v1",
+ "recorded_utc": "2026-09-26T00:10:00Z",
+ "predicts": "attempt bi_20260926_d3, reports *_fullmix",
+
+ "question": "The four measured reports read 8 of the 67 items in calib.domain_balanced@v1. A formal search reads all 67. Does the FFN selection result survive the full mixture, or was it an artefact of the subsample?",
+
+ "reasoning_stated_in_advance": {
+  "why_it_could_shrink": "ffn_abs_sum is a SUM over tokens. With ~8x more tokens the sum grows ~8x while the accumulated reordering error grows only ~sqrt(8), so the RELATIVE drift should fall by roughly sqrt(8) ~ 2.8x. The cutoff margins are a property of the importance DISTRIBUTION; a better-estimated distribution does not systematically widen its relative gaps.",
+  "why_it_should_survive_anyway": "At 8 items the relative statistic drift is ~1e-03 on the parent against a minimum relative cutoff margin of ~2e-07 to ~8e-06 -- two to four orders of magnitude of headroom. Dividing the drift by 2.8 does not close a gap that size."
+ },
+
+ "predicted": {
+  "parent_relative_statistic_drift_falls_by_roughly": "2 to 4x",
+  "parent_layers_with_moved_selection_at_keep_0.50_bs4": ">= 20 of 36",
+  "a4_596m_layers_with_moved_selection_at_keep_0.50_bs4": ">= 15 of 28",
+  "selection_is_batch_invariant_at_every_ratio_and_size": false,
+  "_confidence": "The direction is arithmetic and I am confident in it. The magnitudes are a guess, stated so they can be wrong."
+ },
+
+ "what_would_falsify_the_consequence_claim": [
+  "selection identical at every keep ratio and micro batch size on the full mixture -- in which case the 8-item numbers were a subsample artefact and the DECISION claim does not transfer to a formal search",
+  "a drop to a handful of layers, which would make the effect real but marginal at the scale C3 runs"
+ ],
+
+ "_what_it_would_NOT_falsify": "The root cause. A shape-dependent GEMM is a property of the kernel and the matrix shapes, not of how many calibration items are summed afterwards. K/N separating the exact projections from the divergent ones is unaffected by item count.",
+
+ "scope": "Only statistics_decomposition and ffn_selection are rerun at 67 items. The case matrix and causal KL are not: batching 67 items into one [67, T, 151936] logit block is 41 GiB, and neither of them is what this variant asks."
+}

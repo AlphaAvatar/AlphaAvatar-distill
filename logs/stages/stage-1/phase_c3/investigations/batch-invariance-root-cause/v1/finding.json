@@ -2,7 +2,7 @@
  "schema": "aadistill.validation_finding/v1",
  "_contract": "DERIVED, not written. Every number here was read from a report.json emitted by batch_invariance_diagnostic.py, and the verdict is computed by scripts/validation/batch_invariance_finding.py. It authorizes nothing and changes nothing.",
  "investigation_id": "batch_invariance_root_cause_v1",
- "derived_utc": "2026-09-25T23:59:25.712996+00:00",
+ "derived_utc": "2026-09-26T00:09:07.709781+00:00",
  "supersedes_or_adjudicates": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
  "_the_prior_record_is_not_rewritten": "It is historical evidence. This record states what its claims do and do not reproduce; it does not edit them.",
  "reports": [
@@ -26,6 +26,23 @@
    "attn_resolved": "sdpa",
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": null,
+   "executable_git_head": null,
+   "executable_clean_at_head": null,
+   "stages_run": [
+    "backend_matrix",
+    "case_matrix",
+    "causal_kl",
+    "ffn_selection",
+    "first_divergence",
+    "fp32_control",
+    "gemm_isolation",
+    "length_sweep",
+    "reduction_control",
+    "repeatability",
+    "statistics_decomposition"
+   ],
    "params_hidden": 1024,
    "params_layers": 28
   },
@@ -43,6 +60,23 @@
    "attn_resolved": "sdpa",
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": null,
+   "executable_git_head": null,
+   "executable_clean_at_head": null,
+   "stages_run": [
+    "backend_matrix",
+    "case_matrix",
+    "causal_kl",
+    "ffn_selection",
+    "first_divergence",
+    "fp32_control",
+    "gemm_isolation",
+    "length_sweep",
+    "reduction_control",
+    "repeatability",
+    "statistics_decomposition"
+   ],
    "params_hidden": 1024,
    "params_layers": 28
   },
@@ -60,6 +94,23 @@
    "attn_resolved": "eager",
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": null,
+   "executable_git_head": null,
+   "executable_clean_at_head": null,
+   "stages_run": [
+    "backend_matrix",
+    "case_matrix",
+    "causal_kl",
+    "ffn_selection",
+    "first_divergence",
+    "fp32_control",
+    "gemm_isolation",
+    "length_sweep",
+    "reduction_control",
+    "repeatability",
+    "statistics_decomposition"
+   ],
    "params_hidden": 2560,
    "params_layers": 36
   },
@@ -77,9 +128,43 @@
    "attn_resolved": "sdpa",
    "calibration": "frozen_calibration_mixture",
    "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": null,
+   "executable_git_head": null,
+   "executable_clean_at_head": null,
+   "stages_run": [
+    "backend_matrix",
+    "case_matrix",
+    "causal_kl",
+    "ffn_selection",
+    "first_divergence",
+    "fp32_control",
+    "gemm_isolation",
+    "length_sweep",
+    "reduction_control",
+    "repeatability",
+    "statistics_decomposition"
+   ],
    "params_hidden": 2560,
    "params_layers": 36
   }
+ },
+ "executables": {
+  "per_report": {
+   "a4_596m_B_image_sdpa": null,
+   "a4_596m_C_science_sdpa": null,
+   "parent_C_science_eager": null,
+   "parent_C_science_sdpa": null
+  },
+  "distinct_executables": 0,
+  "all_reports_share_one_executable": false,
+  "_absent_means_older": "a report with no `executable` block predates the field; its code identity is the session's recorded source sha, not this file",
+  "reports_without_an_executable_identity": [
+   "a4_596m_B_image_sdpa",
+   "a4_596m_C_science_sdpa",
+   "parent_C_science_eager",
+   "parent_C_science_sdpa"
+  ]
  },
  "a4_claims_adjudicated": {
   "bf16_batched_vs_solo_logits_relative": {

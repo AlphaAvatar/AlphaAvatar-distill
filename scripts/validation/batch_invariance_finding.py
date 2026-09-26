@@ -116,6 +116,16 @@ def environments(reports: dict) -> dict:
                                  "config._attn_implementation"),
             "calibration": dig(r, "calibration", "kind"),
             "calibration_content_sha256": dig(r, "calibration", "content_sha256"),
+            "calibration_n_items": dig(r, "calibration", "n_items"),
+            #: WHICH executable produced this report. One investigation can
+            #: collect reports from two commits, and without this a reader
+            #: compares numbers from different code with no way to notice.
+            "executable_sha256": dig(r, "executable", "sha256"),
+            "executable_git_head": dig(r, "executable", "git_head"),
+            "executable_clean_at_head": dig(r, "executable",
+                                            "this_file_is_clean_at_git_head"),
+            "stages_run": sorted(k for k, v in (r.get("stage_status") or {}).items()
+                                 if v == "ok"),
             "params_hidden": dig(r, "model", "hidden_size"),
             "params_layers": dig(r, "model", "num_hidden_layers"),
         }
@@ -140,6 +150,22 @@ def _derived(report: dict, name: str):
             return None
         return max(r["importance_rel_l2_drift"] for r in rows)
     return None
+
+
+def _executables(reports: dict) -> dict:
+    """Do all the reports come from the same code? Said, not assumed."""
+    shas = {label: dig(r, "executable", "sha256") for label, r in reports.items()}
+    distinct = sorted({v for v in shas.values() if v})
+    return {
+        "per_report": shas,
+        "distinct_executables": len(distinct),
+        "all_reports_share_one_executable": len(distinct) == 1,
+        "_absent_means_older": ("a report with no `executable` block predates "
+                                "the field; its code identity is the session's "
+                                "recorded source sha, not this file"),
+        "reports_without_an_executable_identity": sorted(
+            k for k, v in shas.items() if not v),
+    }
 
 
 def adjudicate(reports: dict, a4: dict) -> dict:
@@ -382,6 +408,7 @@ def build(reports: dict) -> dict:
             "and do not reproduce; it does not edit them."),
         "reports": sorted(reports),
         "environments": environments(reports),
+        "executables": _executables(reports),
         "a4_claims_adjudicated": checks,
         "mechanism": mechanism(reports),
         **v,

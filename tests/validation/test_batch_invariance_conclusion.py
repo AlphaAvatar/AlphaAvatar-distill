@@ -307,3 +307,60 @@ def test_a_stage_that_declared_itself_absent_does_not_raise(derive, marker):
     out = derive(_report(ffn_selection=marker))
     assert out["ffn_selection_is_batch_invariant"] is None
     assert out["divergence_locus"] == "no_divergence_observed"
+
+
+def test_a_statistics_only_run_does_not_report_no_divergence(derive):
+    """The rehearsal's third case, and the worst kind: self-contradiction.
+
+    `--only statistics_decomposition,ffn_selection` is a legitimate mode -- the
+    full-mixture variant uses it, because batching 67 items into one logit
+    block is 41 GiB. Such a run produced `divergence_locus =
+    no_divergence_observed` while its own `every_batch_size_bit_identical` was
+    `False`. The report disagreed with itself, in the field a reader quotes.
+    """
+    stages = {k: v for k, v in CLEAN_STAGES.items()
+              if k in ("statistics_decomposition", "ffn_selection")}
+    stages["statistics_decomposition"] = {"every_batch_size_bit_identical": False}
+    out = derive({"stages": stages, "model": {}})
+    assert out["any_divergence_observed"] is True
+    assert "statistics_decomposition" in out["stages_reporting_a_divergence"]
+    assert out["divergence_locus"] == "observed_but_not_localized"
+
+
+def test_a_moved_selection_alone_counts_as_observed(derive):
+    stages = {"ffn_selection": {**CLEAN_STAGES["ffn_selection"],
+                                "selection_is_batch_invariant": False,
+                                "n_layers_with_moved_selection": 26}}
+    out = derive({"stages": stages, "model": {}})
+    assert out["stages_reporting_a_divergence"] == ["ffn_selection"]
+    assert out["divergence_locus"] == "observed_but_not_localized"
+
+
+def test_a_localized_run_still_beats_observed_but_not_localized(derive):
+    """The weak branch must stay last."""
+    out = derive(_report(
+        statistics_decomposition={"every_batch_size_bit_identical": False},
+        gemm_isolation={"a_bare_gemm_is_shape_dependent": True}))
+    assert out["divergence_locus"] == "gemm_level_shape_dependent_accumulation"
+
+
+def test_clean_statistics_do_not_manufacture_a_divergence(derive):
+    out = derive(_report())
+    assert out["stages_reporting_a_divergence"] == []
+    assert out["divergence_locus"] == "no_divergence_observed"
+
+
+def test_every_report_names_the_executable_that_produced_it():
+    """P4's evidence-code version, which the reports did not carry.
+
+    It became load-bearing when one investigation collected reports from two
+    commits: without it a reader compares numbers from different code with no
+    way to notice.
+    """
+    mod = _module()
+    ident = mod.executable_identity()
+    assert ident["file"] == "batch_invariance_diagnostic.py"
+    assert len(ident["sha256"]) == 64
+    import hashlib
+    assert ident["sha256"] == hashlib.sha256(SCRIPT.read_bytes()).hexdigest()
+    assert "git_head" in ident and "this_file_is_clean_at_git_head" in ident

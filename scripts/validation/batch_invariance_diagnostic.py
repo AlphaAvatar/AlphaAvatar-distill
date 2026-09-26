@@ -117,6 +117,36 @@ def compare_logits(a, b) -> dict:
 # --- environment ------------------------------------------------------------
 
 
+def executable_identity() -> dict:
+    """WHICH executable produced this report.
+
+    P4 asks for the evaluation code version and the reports did not carry it.
+    It became load-bearing the moment one investigation collected reports from
+    two commits: without this a reader compares numbers from different code and
+    has no way to notice.
+    """
+    import hashlib
+    import subprocess
+
+    src = Path(__file__).resolve()
+    out = {"file": src.name,
+           "sha256": hashlib.sha256(src.read_bytes()).hexdigest()}
+    try:
+        r = subprocess.run(["git", "-C", str(REPO), "rev-parse", "HEAD"],
+                           capture_output=True, text=True, timeout=20)
+        out["git_head"] = r.stdout.strip() or None
+        d = subprocess.run(["git", "-C", str(REPO), "status", "--porcelain",
+                            "--", str(src)], capture_output=True, text=True,
+                           timeout=20)
+        #: A dirty file means the sha256 above is the truth and the commit is
+        #: not. Said plainly rather than left for a reader to infer.
+        out["this_file_is_clean_at_git_head"] = not d.stdout.strip()
+    except Exception:                                       # noqa: BLE001
+        out["git_head"] = None
+        out["this_file_is_clean_at_git_head"] = None
+    return out
+
+
 def environment_identity(device: str) -> dict:
     """What actually ran. Recorded as data, never inferred from an image name."""
     import torch
@@ -1276,6 +1306,16 @@ def derive_conclusion(report: dict) -> dict:
             "backend_matrix": some_backend,
             "first_divergence": got(
                 "first_divergence", "first_tap_that_is_not_bit_identical") is not None,
+            #: The statistics too. A `--only statistics_decomposition,ffn_selection`
+            #: run reported locus `no_divergence_observed` while its own
+            #: `every_batch_size_bit_identical` was False -- the report
+            #: contradicting itself, which is the exact failure this function
+            #: exists to prevent.
+            "statistics_decomposition": got(
+                "statistics_decomposition",
+                "every_batch_size_bit_identical") is False,
+            "ffn_selection": got(
+                "ffn_selection", "selection_is_batch_invariant") is False,
         }.items() if value
     ]
 
@@ -1306,6 +1346,10 @@ def derive_conclusion(report: dict) -> dict:
     #: ladder returned for a run whose padding sweep had named the knob exactly.
     elif pad_moves:
         locus = "padded_width_dependent"
+    #: Weaker still: the only stages that ran were the ones downstream of the
+    #: forward, so they can say THAT it moved and nothing about where.
+    elif observed:
+        locus = "observed_but_not_localized"
     else:
         locus = "undetermined"
 
@@ -1409,6 +1453,7 @@ def main(argv=None) -> int:
         "dtype": args.dtype,
         "answers_the_accelerator_question": device.startswith("cuda"),
         "config": cfg,
+        "executable": executable_identity(),
         "environment": environment_identity(device),
         "stages": {},
         "stage_status": {},
