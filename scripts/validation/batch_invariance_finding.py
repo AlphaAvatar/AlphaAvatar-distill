@@ -536,6 +536,18 @@ def split_k_control(reports: dict) -> dict:
             "torch": dig(r, "environment", "torch"),
             "tuple_supported": bc.get("tuple_form_supported"),
             "split_k_state": bc.get("split_k_state"),
+            "blas_library": bc.get("blas_library"),
+            "blas_request_honoured": bc.get("blas_request_honoured"),
+            "gemm_probe_ran": bc.get("gemm_probe_ran"),
+            #: `allow_splitk=False` requires cuBLASLt, so control C changes the
+            #: BLAS library too. `cublaslt_defaults` isolates that change, and
+            #: this field is what stops "split-K was the cause" being said when
+            #: the cause was the library.
+            "improvement_attributable_to": bc.get("improvement_attributable_to"),
+            "backend_switch_alone_fixes_it": bc.get(
+                "backend_switch_alone_fixes_it"),
+            "split_k_flag_adds_something_beyond_the_backend": bc.get(
+                "split_k_flag_adds_something_beyond_the_backend"),
             "policy_readback": {
                 name: dig(row, "policy", "readback")
                 for name, row in controls.items()},
@@ -593,11 +605,25 @@ def split_k_control(reports: dict) -> dict:
     solo_kept = all(v["historical_solo_preserved"] for v in science.values())
     better = any(v["split_k_off_beats_boolean"] for v in science.values())
 
+    #: Attribution, across the reports that could run the intervention.
+    attributions = {v["improvement_attributable_to"] for v in science.values()}
+    out["improvement_attributable_to"] = (
+        attributions.pop() if len(attributions) == 1 else sorted(attributions))
+    out["backend_switch_alone_fixes_it"] = all(
+        v["backend_switch_alone_fixes_it"] for v in science.values())
+
     if ops_invariant and solo_kept:
         out["verdict"] = "SPLIT_K_CONFIRMED_AND_FIXABLE"
         out["why"] = ("forbidding split-K makes both operator selections "
                       "invariant across micro batch size while leaving the "
                       "historical solo output unchanged")
+        if out["backend_switch_alone_fixes_it"]:
+            out["_attribution_caveat"] = (
+                "selecting cuBLASLt ALONE already removes it, so the fix is "
+                "the BLAS library and not the split-K flag. The name of this "
+                "verdict is about the hypothesis being actionable, not about "
+                "which of the two changes did the work -- see "
+                "`improvement_attributable_to`.")
     elif every_gemm_exact or better or ops_invariant:
         out["verdict"] = "SPLIT_K_PARTIAL"
         out["why"] = ("forbidding split-K materially improves the numerics but "
