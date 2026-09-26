@@ -693,6 +693,47 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "statistics this invocation COLLECTED, and reports "
             "`micro_batch_size: None` in the supplied case -- a batch size for a "
             "pass that never ran would describe work the operator did not do.",
+        "src/aadistill/runtime/cost.py":
+            "`operator_cost` prices `plan.forward_passes` GENERICALLY instead of "
+            "only for the one operator named by id, and the forward and "
+            "statistics arms became ADDITIVE rather than alternatives. THIS IS A "
+            "DECLARED SEMANTIC CHANGE to estimated cost. It moves no existing "
+            "number: `depth.causal_kl_greedy_v1` keeps its own earlier branch "
+            "unchanged, and every other shipped operator declares zero forwards "
+            "and zero stats -- both asserted by walking the live registry in "
+            "tests/runtime/test_forward_pass_pricing.py. What changes is that "
+            "the NEXT forward-heavy operator prices above zero instead of free.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "`FixedPathStep` gained an optional `config` mapping, merged over "
+            "the executor-derived operator config for that step alone. THIS IS A "
+            "DECLARED SEMANTIC CHANGE to step identity: a step carrying a config "
+            "serializes it, so its `spec_hash` and `compute_state_id` differ "
+            "from the same step without one. It is additive -- `as_dict()` omits "
+            "the key entirely when the config is empty, so every historical "
+            "path serializes to the bytes it always did, pinned by a frozen "
+            "serialization test. The field exists so one step's protocol (the "
+            "pilot's calibration forward batch size) is part of what its "
+            "identity commits to, rather than an invisible runtime flag.",
+     }),
+    ("2998313dfa372f840595e7f87b5587e3c89334d3",
+     "a step config that cannot rewrite the run it executes in",
+     {
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "two corrections to the config field declared by the round above, "
+            "both narrowings. (a) `step_operator_config` now FAILS CLOSED on "
+            "`EXECUTOR_DERIVED_CONFIG_KEYS`: a step declaring "
+            "`n_calibration_items` raises `FixedPathError` instead of "
+            "overriding it. That key is `len(ctx.calibration_items)`, not "
+            "operator policy, and the previous last-writer-wins merge let a "
+            "step be PLANNED against a corpus it would not EXECUTE against -- "
+            "the plan being what the cost model and the reachability check "
+            "read. (b) `__post_init__` canonicalises `config` to a key-sorted "
+            "`MappingProxyType` and `as_dict()` copies out, so a frozen "
+            "dataclass holding a live dict can no longer have its identity "
+            "moved by the caller afterwards. THIS IS A DECLARED SEMANTIC "
+            "CHANGE: one previously-accepted input is now refused, and config "
+            "key order no longer reaches the hash. No existing step declares a "
+            "config, so no historical identity moves.",
      }),
 )
 

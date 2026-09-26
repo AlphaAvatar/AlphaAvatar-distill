@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 105,
- "digest": "f7b60b71accf7b948081b279cb39b4b8057df87e8a14b75f0d367c5ba94dff75",
+ "digest": "cced156421cf2ac9675e96ef5efcafe8eb5373a36c91e493df486cff5dedd6d5",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -444,8 +444,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/fixed_path.py",
-   "sha256": "da36d15223d9a49ad29ba68d7f943199d2a22628961ea869b1bd9d12824ed2bb",
-   "bytes": 35544
+   "sha256": "e4001c34962bd3c6d97f256cbbbf5fbc708cef94cb444a0c75019537462bc951",
+   "bytes": 39049
   },
   {
    "path": "src/aadistill/initialization/planning/generation.py",

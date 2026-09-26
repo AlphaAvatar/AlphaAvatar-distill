@@ -37,6 +37,7 @@ import json
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
+from types import MappingProxyType
 from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
@@ -141,15 +142,29 @@ class FixedPathStep:
     #: other operator's identity moves.
     config: Mapping[str, Any] | None = None
 
+    def __post_init__(self) -> None:
+        #: FROZEN MEANS FROZEN. The dataclass is frozen but a `dict` handed in
+        #: stays mutable through the caller's own reference, so
+        #: `step.config["..."] = x` would silently change the serialized
+        #: identity of an apparently immutable object. Since this field BEARS
+        #: IDENTITY, it is canonicalised once here -- sorted and wrapped -- so
+        #: the stored value cannot be reached or reordered afterwards.
+        if self.config is not None:
+            frozen = MappingProxyType(
+                {k: self.config[k] for k in sorted(self.config)})
+            object.__setattr__(self, "config", frozen)
+
     def as_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {
             "impl_id": self.impl_id, "profile_id": self.profile_id,
             "expected_artifact_digest": self.expected_artifact_digest,
             "label": self.label}
         if self.config:
-            #: Sorted, so two equal configs built in different key orders hash
-            #: identically -- the same property `ArchSpec` relies on.
-            out["config"] = {k: self.config[k] for k in sorted(self.config)}
+            #: Already sorted by `__post_init__`, so two equal configs built in
+            #: different key orders hash identically -- the same property
+            #: `ArchSpec` relies on. Copied out as a plain dict so callers
+            #: cannot reach the stored mapping through the serialization.
+            out["config"] = dict(self.config)
         return out
 
 
@@ -375,19 +390,33 @@ def require_root_on_declared_device(model: Any, spec: FixedPathSpec) -> str:
     return verify_root_placement(model, spec.device)["resolved"]
 
 
-def step_operator_config(step: FixedPathStep, n_items: int) -> dict[str, Any]:
-    """The config one step's operator is applied with.
+#: Keys the EXECUTOR owns. A step may not declare them, because they are facts
+#: about the run rather than operator policy: `n_calibration_items` is
+#: `len(ctx.calibration_items)`, and a step that could override it would plan
+#: as if there were 8 items while executing against 67.
+EXECUTOR_DERIVED_CONFIG_KEYS = frozenset({"n_calibration_items"})
 
-    The derived part (`n_calibration_items`) plus whatever the step itself
-    declares, the step winning. Empty for every historical step, so this is an
-    identity for them -- and it is a named function rather than two lines
-    inside the executor so that a test can show the merge happens without
-    materializing a 4B checkpoint to find out.
+
+def step_operator_config(step: FixedPathStep, n_items: int) -> dict[str, Any]:
+    """The config one step's operator is applied with. FAILS CLOSED.
+
+    The derived part plus whatever the step declares -- and a step that names
+    an executor-owned key raises rather than winning. "Last writer wins" was
+    the first version and it let a step lie about the corpus it was running
+    against, which is the one thing a plan must not be able to do.
+
+    A named function rather than two lines inside the executor so a test can
+    show the merge happens without materializing a 4B checkpoint to find out.
     """
-    config: dict[str, Any] = {"n_calibration_items": n_items}
-    if step.config:
-        config.update(step.config)
-    return config
+    declared = dict(step.config or {})
+    overlap = EXECUTOR_DERIVED_CONFIG_KEYS & declared.keys()
+    if overlap:
+        raise FixedPathError(
+            f"step {step.impl_id!r} declares executor-owned config "
+            f"{sorted(overlap)}; these describe the run, not the operator, and "
+            "a step that could override them would plan against a different "
+            "corpus than it executes on")
+    return {"n_calibration_items": n_items, **declared}
 
 
 def materialize_fixed_path(

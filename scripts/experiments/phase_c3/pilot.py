@@ -34,22 +34,51 @@ from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.planning.fixed_path import FixedPathStep
 
 __all__ = [
-    "PREFIX_EXECUTION", "PREFIX_IMPL_IDS", "CAUSAL_IMPL_ID",
-    "FROZEN_PARENT_DIGEST", "CALIBRATION_PROFILE_ID", "BATCH_SIZE_CONFIG_KEY",
-    "PILOT_SEED_NAMESPACE", "C0_PREREGISTRATION_SHA256",
+    "PREFIX_EXECUTION", "PREFIX_STEPS", "CAUSAL_IMPL_ID",
+    "FROZEN_PARENT_DIGEST", "CAUSAL_PROFILE_ID", "BATCH_SIZE_CONFIG_KEY",
+    "PILOT_SEED_NAMESPACE", "C0_PREREGISTRATION_SHA256", "CAUSAL_STEP_LABEL",
+    "C1_PATH_RECORD", "C1_ARM_IDENTITIES",
     "prefix_steps", "causal_step", "derive_pilot_seed", "PILOT_SEED",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
 PREFIX_EXECUTION = ExecutionConfig(micro_batch_size=1)
 
-#: The historical C1 pre-ATTENTION prefix, in order.
-PREFIX_IMPL_IDS = ("depth.causal_kl_greedy_v1",
-                   "ffn.activation_importance_v0",
-                   "width.global_pca_v0")
+#: The historical C1 pre-ATTENTION prefix: (impl_id, profile_id), in order.
+#:
+#: THE PROFILES ARE NOT UNIFORM and must not be inferred from ATTENTION's.
+#: WIDTH ran against `calib.reasoning_heavy@v2`, not `domain_balanced`. The
+#: first version of this module assigned one profile to all three and would
+#: have replayed WIDTH against the wrong mixture, reconstructing a different
+#: parent -- the digest gate would have refused it, but only after an
+#: expensive replay had already been paid for.
+#:
+#: Source: the committed C1 replay record and arm identities, cross-checked
+#: against the C2 baseline-completion protocol. `C1_PATH_RECORD` below is what
+#: the test reads, so this constant cannot drift from the frozen path without
+#: something turning red.
+PREFIX_STEPS = (
+    ("depth.causal_kl_greedy_v1", "calib.domain_balanced@v1"),
+    ("ffn.activation_importance_v0", "calib.domain_balanced@v1"),
+    ("width.global_pca_v0", "calib.reasoning_heavy@v2"),
+)
+
+#: The committed record the prefix is checked against. Evidence, not a copy.
+C1_PATH_RECORD = "logs/stages/stage-1/phase_c1/runs/attempt9/c1_replay_record.json"
+C1_ARM_IDENTITIES = ("logs/stages/stage-1/phase_c1/runs/attempt18/evidence/"
+                     "c1_arm_identities.json")
 
 CAUSAL_IMPL_ID = "attention.causal_kl_v1"
-CALIBRATION_PROFILE_ID = "calib.domain_balanced@v1"
+#: ATTENTION's own profile. Deliberately a separate constant from the prefix's:
+#: sharing one name is what let a single profile be applied to every step.
+CAUSAL_PROFILE_ID = "calib.domain_balanced@v1"
+
+#: THE SAME LABEL IN BOTH ARMS. `label` participates in `as_dict()` and so in
+#: the step hash, so "causal ATTENTION B1" / "B4" would introduce a SECOND
+#: identity difference -- and then the two steps would differ even if the
+#: protocol config were dropped. The arm names belong in the pilot record;
+#: the only intentional step-identity difference is the batch size.
+CAUSAL_STEP_LABEL = "causal ATTENTION"
 
 #: `replay_digests.parent` from the C1 authorization. The prefix replay is
 #: gated on reproducing exactly this.
@@ -67,19 +96,23 @@ C0_PREREGISTRATION_SHA256 = (
 PILOT_SEED_NAMESPACE = "phase-c3:batch-adoption-pilot:0"
 
 
-def prefix_steps(*, parent_digest: str | None = None) -> list[FixedPathStep]:
-    """The three pre-ATTENTION steps. NONE of them carries a config.
+def prefix_steps(*, pin_parent: bool = False) -> list[FixedPathStep]:
+    """The three pre-ATTENTION steps, each with ITS OWN profile.
 
-    The B1/B4 variation begins at ATTENTION; a config on a prefix step would
-    move that boundary and change the parent both arms are supposed to share.
+    NONE of them carries a config: the B1/B4 variation begins at ATTENTION,
+    and a config on a prefix step would move that boundary and change the
+    parent both arms are supposed to share.
+
+    `pin_parent` pins the LAST step -- WIDTH -- to the frozen digest, which is
+    where the gate belongs: that step's output IS the pre-ATTENTION parent.
     """
-    steps = [FixedPathStep(impl_id=i, profile_id=CALIBRATION_PROFILE_ID)
-             for i in PREFIX_IMPL_IDS]
-    if parent_digest is not None:
+    steps = [FixedPathStep(impl_id=impl, profile_id=profile)
+             for impl, profile in PREFIX_STEPS]
+    if pin_parent:
         last = steps[-1]
         steps[-1] = FixedPathStep(impl_id=last.impl_id,
                                   profile_id=last.profile_id,
-                                  expected_artifact_digest=parent_digest,
+                                  expected_artifact_digest=FROZEN_PARENT_DIGEST,
                                   label="pre-ATTENTION parent")
     return steps
 
@@ -96,8 +129,8 @@ def causal_step(batch_size: int, *, label: str = "") -> FixedPathStep:
                          f"got {batch_size}")
     return FixedPathStep(
         impl_id=CAUSAL_IMPL_ID,
-        profile_id=CALIBRATION_PROFILE_ID,
-        label=label or f"causal ATTENTION B{batch_size}",
+        profile_id=CAUSAL_PROFILE_ID,
+        label=label or CAUSAL_STEP_LABEL,
         config={BATCH_SIZE_CONFIG_KEY: int(batch_size)})
 
 

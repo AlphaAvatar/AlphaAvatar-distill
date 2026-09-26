@@ -87,13 +87,168 @@ def test_the_executor_merges_a_step_config_over_the_derived_one():
         "n_calibration_items": 67, "calibration_forward_batch_size": 4}
 
 
-def test_a_step_config_can_override_the_derived_key():
-    """Last writer wins, and it is the step. Stated because it is a choice."""
-    from aadistill.initialization.planning.fixed_path import step_operator_config
+def test_a_step_may_not_override_an_executor_derived_key():
+    """REVERSED. The first version asserted "last writer wins", which is unsafe.
+
+    `n_calibration_items` is not operator policy -- it is
+    `len(ctx.calibration_items)`. A step allowed to override it would PLAN as
+    if there were 8 items while EXECUTING against 67, and the plan is what the
+    cost model and the reachability check read. It fails closed.
+    """
+    from aadistill.initialization.planning.fixed_path import (
+        FixedPathError, step_operator_config,
+    )
 
     step = FixedPathStep(impl_id="x", profile_id="p",
                          config={"n_calibration_items": 8})
-    assert step_operator_config(step, 67)["n_calibration_items"] == 8
+    with pytest.raises(FixedPathError, match="executor-owned"):
+        step_operator_config(step, 67)
+
+
+def test_the_refusal_names_the_offending_key_and_the_step():
+    from aadistill.initialization.planning.fixed_path import (
+        FixedPathError, step_operator_config,
+    )
+
+    step = FixedPathStep(impl_id="attention.causal_kl_v1", profile_id="p",
+                         config={"n_calibration_items": 8,
+                                 "calibration_forward_batch_size": 4})
+    with pytest.raises(FixedPathError) as excinfo:
+        step_operator_config(step, 67)
+    assert "n_calibration_items" in str(excinfo.value)
+    assert "attention.causal_kl_v1" in str(excinfo.value)
+
+
+def test_the_pilot_causal_step_survives_the_collision_check():
+    """The real arms must pass the guard that the unsafe case fails."""
+    from aadistill.initialization.planning.fixed_path import step_operator_config
+
+    from experiments.phase_c3.pilot import causal_step
+
+    for bs in (1, 4):
+        merged = step_operator_config(causal_step(bs), 67)
+        assert merged == {"n_calibration_items": 67,
+                          "calibration_forward_batch_size": bs}
+
+
+def test_the_real_item_count_reaches_the_plan():
+    """The operator must be PLANNED against the corpus it will execute on."""
+    from aadistill.initialization.planning.fixed_path import step_operator_config
+
+    from experiments.phase_c3.pilot import causal_step
+
+    assert step_operator_config(causal_step(4), 67)["n_calibration_items"] == 67
+    assert step_operator_config(causal_step(4), 8)["n_calibration_items"] == 8
+
+
+# --- the identity-bearing config must be immutable -------------------------
+
+
+def test_mutating_the_input_dict_afterwards_does_not_move_the_hash():
+    """A frozen dataclass holding a live dict is frozen in name only."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    source = {"calibration_forward_batch_size": 4}
+    step = FixedPathStep(impl_id="x", profile_id="p", config=source)
+    before = sha256_json(step.as_dict())
+
+    source["calibration_forward_batch_size"] = 1
+    source["injected"] = True
+    assert sha256_json(step.as_dict()) == before
+
+
+def test_the_stored_config_cannot_be_mutated_through_the_step():
+    step = FixedPathStep(impl_id="x", profile_id="p", config={"a": 1})
+    with pytest.raises(TypeError):
+        step.config["b"] = 2
+
+
+def test_the_serialization_is_a_copy_not_the_stored_mapping():
+    """Mutating what `as_dict()` returns must not reach the step."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    step = FixedPathStep(impl_id="x", profile_id="p", config={"a": 1})
+    before = sha256_json(step.as_dict())
+    step.as_dict()["config"]["a"] = 99
+    assert sha256_json(step.as_dict()) == before
+
+
+# --- the prefix must match the FROZEN C1 path, not a pilot constant --------
+
+
+def _committed_c1_path():
+    """The four steps as the committed C1 replay record declares them."""
+    import json
+
+    from experiments.phase_c3.pilot import C1_PATH_RECORD
+
+    doc = json.loads((REPO / C1_PATH_RECORD).read_text())
+    return doc["path"]["steps"]
+
+
+def test_the_pilot_prefix_matches_the_committed_c1_path():
+    """Read from the RECORD, so the pilot constant cannot drift from the path.
+
+    The first version of the pilot gave all three prefix steps
+    `calib.domain_balanced@v1`. WIDTH actually ran against
+    `calib.reasoning_heavy@v2`, so it would have replayed the wrong mixture
+    and reconstructed a different parent -- refused by the digest gate, but
+    only after an expensive replay.
+    """
+    from experiments.phase_c3.pilot import prefix_steps
+
+    committed = _committed_c1_path()[:3]
+    pilot = prefix_steps()
+    assert len(pilot) == 3
+    for step, record in zip(pilot, committed):
+        assert step.impl_id == record["impl_id"]
+        assert step.profile_id == record["profile_id"]
+
+
+def test_the_frozen_profiles_are_not_uniform():
+    """States the trap explicitly, so a future uniform refactor fails here."""
+    from experiments.phase_c3.pilot import prefix_steps
+
+    by_impl = {s.impl_id: s.profile_id for s in prefix_steps()}
+    assert by_impl["depth.causal_kl_greedy_v1"] == "calib.domain_balanced@v1"
+    assert by_impl["ffn.activation_importance_v0"] == "calib.domain_balanced@v1"
+    assert by_impl["width.global_pca_v0"] == "calib.reasoning_heavy@v2"
+    assert len(set(by_impl.values())) == 2, "the prefix uses TWO profiles"
+
+
+def test_only_the_width_step_is_pinned_to_the_frozen_parent_digest():
+    from experiments.phase_c3.pilot import FROZEN_PARENT_DIGEST, prefix_steps
+
+    steps = prefix_steps(pin_parent=True)
+    pinned = [s for s in steps if s.expected_artifact_digest]
+    assert len(pinned) == 1
+    assert pinned[0].impl_id == "width.global_pca_v0"
+    assert pinned[0].expected_artifact_digest == FROZEN_PARENT_DIGEST
+
+
+def test_the_frozen_digest_matches_the_committed_arm_identity():
+    """The digest is evidence, cross-checked against a second committed file."""
+    import json
+
+    from experiments.phase_c3.pilot import C1_ARM_IDENTITIES, FROZEN_PARENT_DIGEST
+
+    arms = json.loads((REPO / C1_ARM_IDENTITIES).read_text())
+    assert arms["parent"]["artifact_digest"] == FROZEN_PARENT_DIGEST
+    assert arms["parent"]["impl_id"] == "width.global_pca_v0"
+    assert arms["parent"]["profile_id"] == "calib.reasoning_heavy@v2"
+
+
+def test_both_arms_differ_only_by_the_protocol_config():
+    """Same impl, same profile, same label. Only the batch size separates them."""
+    from experiments.phase_c3.pilot import BATCH_SIZE_CONFIG_KEY, causal_step
+
+    b1, b4 = causal_step(1), causal_step(4)
+    assert b1.impl_id == b4.impl_id
+    assert b1.profile_id == b4.profile_id
+    assert b1.label == b4.label, (
+        "a differing label is a SECOND identity difference; the arm names "
+        "belong in the pilot record, not the step")
+    assert set(b1.config) == set(b4.config) == {BATCH_SIZE_CONFIG_KEY}
 
 
 def test_the_committed_c1_fixed_path_hash_is_unchanged():
