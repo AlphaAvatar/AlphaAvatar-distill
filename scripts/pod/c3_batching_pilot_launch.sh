@@ -1,0 +1,269 @@
+#!/usr/bin/env bash
+# The C3 batching-adoption pilot: one owned session, one prefix, two scorers.
+#
+# Modelled on batch_invariance_diagnostic_launch.sh, which is the launcher that
+# has actually worked on this provider and this image. What differs, and why:
+#
+#   * THE PRICE IS RE-QUERIED LIVE, immediately before creation, and every
+#     derived bound -- session ceiling, deadline, watchdog, ledger -- is built
+#     from the live number. `L40S_MEASURED.price_per_hour_usd = $0.99` is
+#     historical throughput-profile provenance and has already been reported to
+#     a maintainer as though it were a quote. It is not one.
+#   * The payload is a DRIVER, not a diagnostic: it replays the frozen prefix
+#     once, verifies eea90c91..., and scores both arms from that one parent.
+#   * The gate is a ratio of two measured wall clocks, so the two arms must run
+#     under the same card and the same pinned runtime, in the order the pilot
+#     record froze before either result existed.
+#
+# ONE resource, ONE job, teardown in a trap on every exit path.
+#
+#   nohup bash scripts/pod/c3_batching_pilot_launch.sh <run-id> > LOG 2>&1 &
+#
+set -uo pipefail
+
+RUN_ID="${1:?usage: $0 <run-id>}"
+REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
+OUT="${REPO_DIR}/artifacts/pilots/c3_batching_adoption/${RUN_ID}"
+BRANCH="review/c3-operator-batching"
+COMMIT="${PILOT_COMMIT:?PILOT_COMMIT must name the exact source to run}"
+
+#: The FORMAL image. The science runs under /opt/train (torch 2.11.0+cu128,
+#: transformers 5.13.1) built offline from the relay wheelhouse, which is what
+#: C1 attempts 17 and 18 recorded and therefore what a claim about C3's
+#: scorer has to be made in.
+IMAGE="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
+GPU="NVIDIA L40S"
+#: NO LARGER CLASS IS AUTHORIZED. The derived conservative VRAM bound is
+#: 13.24 GiB for the B4 arm against this card's 48 GiB; a bigger card is not a
+#: fallback for a bound that does not fit.
+DISK_GB=120
+
+CAMPAIGN="logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/campaign.json"
+SESSION_CAP="${SESSION_CAP:-2.50}"
+
+mkdir -p "$OUT"
+LOG="${OUT}/launch.log"
+POD_ID=""
+STARTED_EPOCH=""
+
+say() { echo "[$(date -u +%H:%M:%S)] $*" | tee -a "$LOG"; }
+
+KEY=$(grep -i apikey ~/.runpod/config.toml | sed "s/.*= *//;s/[\"']//g")
+gql() {
+  curl -s --max-time 30 -H "Authorization: Bearer ${KEY}" \
+       -H "Content-Type: application/json" -d "$1" https://api.runpod.io/graphql
+}
+
+# --- THE LIVE QUOTE, before anything is derived from a price ----------------
+# Not a constant, not the measured profile's field, and not the last session's
+# number. If the live rate makes the ceiling infeasible this script STOPS; it
+# does not quietly shrink the scientific work to fit.
+say "re-querying ${GPU} securePrice"
+PRICE_JSON=$(gql "{\"query\":\"query { gpuTypes(input:{id:\\\"${GPU}\\\"}) { id securePrice lowestPrice(input:{gpuCount:1}) { stockStatus } } }\"}")
+echo "$PRICE_JSON" >> "$LOG"
+read -r RATE_USD_H STOCK < <(echo "$PRICE_JSON" | python3 -c "
+import json,sys
+try:
+    rows = json.load(sys.stdin)['data']['gpuTypes'] or []
+except Exception:
+    rows = []
+if not rows:
+    print('', ''); raise SystemExit
+r = rows[0]
+print(r.get('securePrice') or '', (r.get('lowestPrice') or {}).get('stockStatus') or '')
+" 2>/dev/null || echo " ")
+if [ -z "$RATE_USD_H" ]; then
+  say "no live securePrice for ${GPU}; refusing to price a session from a"
+  say "historical constant. Nothing created, nothing billed."
+  exit 4
+fi
+say "live securePrice \$${RATE_USD_H}/h (stock ${STOCK:-unknown})"
+printf '%s' "$RATE_USD_H" > "${OUT}/live_price_usd_per_hour"
+
+# --- the budget, DERIVED by a tested script, from the LIVE rate -------------
+# The ceiling is owned by the AUTHORIZATION record and the costs by the
+# CAMPAIGN record -- one owner each. This script computes none of it.
+BUDGET=$("${REPO_DIR}/.venv/bin/python" \
+         "${REPO_DIR}/scripts/pod/engineering_campaign_budget.py" \
+         "${REPO_DIR}/${CAMPAIGN}" --session-cap "$SESSION_CAP" --rate "$RATE_USD_H")
+if [ $? -ne 0 ]; then
+  say "budget could not be established; not creating a pod"
+  exit 4
+fi
+read -r CAMPAIGN_CEILING SPENT_USD TEARDOWN_RESERVE REMAINING_USD \
+        CEILING_USD MAX_SECONDS BUDGET_OK <<<"$BUDGET"
+if [ "$BUDGET_OK" != "yes" ]; then
+  say "campaign \$${CAMPAIGN_CEILING}, spent \$${SPENT_USD}, remaining \$${REMAINING_USD};"
+  say "after the \$${TEARDOWN_RESERVE} teardown reserve that funds only \$${CEILING_USD}"
+  say "at the LIVE rate of \$${RATE_USD_H}/h. Below what a useful attempt needs."
+  say "STOPPING rather than shrinking the scientific work."
+  exit 4
+fi
+
+# --- the relay credential, at $0 --------------------------------------------
+HF_TOKEN="${HF_TOKEN:-$("${REPO_DIR}/.venv/bin/python" -c \
+  'from huggingface_hub import get_token; print(get_token() or "")' 2>/dev/null)}"
+if [ -z "$HF_TOKEN" ]; then
+  say "no Hugging Face credential: neither \$HF_TOKEN nor a stored login."
+  say "Refusing to create a pod that cannot obtain its inputs."
+  exit 4
+fi
+export HF_TOKEN
+
+# --- the payload, rendered from the COMMIT ----------------------------------
+# From `git show ${COMMIT}:`, never the working tree: the pod checks out
+# ${COMMIT}, so shipping the working copy would leave a record naming a commit
+# that never produced it.
+REMOTE_SH="${OUT}/remote.sh"
+REMOTE_SRC="scripts/pod/c3_batching_pilot_remote.sh"
+if ! git -C "$REPO_DIR" show "${COMMIT}:${REMOTE_SRC}" > "${REMOTE_SH}.in" 2>/dev/null; then
+  say "commit ${COMMIT} does not contain ${REMOTE_SRC}; nothing to ship"
+  exit 4
+fi
+sed -e "s|@BRANCH@|${BRANCH}|g" -e "s|@COMMIT@|${COMMIT}|g" \
+    -e "s|@RUN_ID@|${RUN_ID}|g" "${REMOTE_SH}.in" > "$REMOTE_SH"
+rm -f "${REMOTE_SH}.in"
+if grep -q '@[A-Z_]\{2,\}@' "$REMOTE_SH"; then
+  say "unsubstituted placeholder in the rendered payload:"
+  grep -n '@[A-Z_]\{2,\}@' "$REMOTE_SH" | tee -a "$LOG"
+  exit 4
+fi
+
+# --- teardown, on every exit path -------------------------------------------
+WATCHDOG_PID=""
+teardown() {
+  local rc=$?
+  if [ -n "$WATCHDOG_PID" ] && [ -r "/proc/${WATCHDOG_PID}/cmdline" ] \
+     && tr '\0' ' ' < "/proc/${WATCHDOG_PID}/cmdline" | grep -q "watchdog.py.*${POD_ID}"; then
+    say "stopping watchdog ${WATCHDOG_PID}"
+    kill "$WATCHDOG_PID" 2>/dev/null || true
+  fi
+  if [ -n "$POD_ID" ]; then
+    say "teardown: removing pod ${POD_ID}"
+    for attempt in 1 2 3 4 5; do
+      runpodctl remove pod "$POD_ID" >>"$LOG" 2>&1 \
+        || runpodctl pod delete "$POD_ID" >>"$LOG" 2>&1 || true
+      sleep 6
+      local still
+      still=$(gql "{\"query\":\"query { myself { pods { id } } }\"}" \
+              | python3 -c "import json,sys;print(sum(1 for p in json.load(sys.stdin)['data']['myself']['pods'] if p['id']=='${POD_ID}'))" 2>/dev/null || echo 1)
+      if [ "$still" = "0" ]; then
+        say "teardown: provider confirms ${POD_ID} is gone (attempt ${attempt})"
+        printf '%s' "confirmed" > "${OUT}/teardown_confirmed"
+        break
+      fi
+      say "teardown: still listed after attempt ${attempt}; retrying"
+    done
+  fi
+  if [ -n "$STARTED_EPOCH" ]; then
+    local elapsed=$(( $(date -u +%s) - STARTED_EPOCH ))
+    python3 - "$OUT" "$elapsed" "$RATE_USD_H" "$POD_ID" "$rc" "$DISK_GB" <<'PY'
+import json, sys
+out, elapsed, rate, pod, rc, disk_gb = (
+    sys.argv[1], int(sys.argv[2]), float(sys.argv[3]), sys.argv[4],
+    int(sys.argv[5]), int(sys.argv[6]))
+minutes = elapsed / 60.0
+gpu = round(minutes / 60.0 * rate, 4)
+# Container disk is billed SEPARATELY at $0.10/GB/month. A GPU-only ceiling
+# once missed $1.69 of it and nothing in that record disagreed.
+disk = round(disk_gb * 0.10 / (30 * 24 * 60) * minutes, 4)
+json.dump({"elapsed_minutes": round(minutes, 3), "rate_usd_per_hour": rate,
+           "_rate_is": "the LIVE securePrice quoted immediately before creation",
+           "container_disk_gb": disk_gb, "gpu_usd": gpu,
+           "container_disk_usd": disk, "all_in_usd": round(gpu + disk, 4),
+           "pod_id": pod or None, "script_exit": rc,
+           "_basis": "wall clock from pod creation to confirmed teardown x the "
+                     "live secure rate, plus container disk billed separately"},
+          open(f"{out}/cost.json", "w"), indent=1)
+PY
+    say "cost: $(python3 -c "import json;print(json.load(open('${OUT}/cost.json'))['all_in_usd'])") USD all-in"
+  fi
+  say "exit ${rc}"
+}
+trap teardown EXIT
+
+# --- acquire ----------------------------------------------------------------
+say "budget: campaign \$${CAMPAIGN_CEILING} - spent \$${SPENT_USD} = \$${REMAINING_USD}"
+say "        less \$${TEARDOWN_RESERVE} reserve, capped at \$${SESSION_CAP} -> session \$${CEILING_USD}"
+say "creating ${GPU} at the live \$${RATE_USD_H}/h, useful runtime ${MAX_SECONDS}s"
+STARTED_EPOCH=$(date -u +%s)
+CREATE=$(runpodctl create pod \
+  --name "c3-pilot-${RUN_ID}" \
+  --imageName "$IMAGE" \
+  --gpuType "$GPU" \
+  --gpuCount 1 \
+  --containerDiskSize "$DISK_GB" \
+  --volumeSize 0 \
+  --ports "22/tcp" \
+  --cost "$RATE_USD_H" \
+  --startSSH \
+  --secureCloud 2>&1)
+echo "$CREATE" >>"$LOG"
+POD_ID=$(echo "$CREATE" | sed -n 's/.*pod "\([a-z0-9]\{10,\}\)".*/\1/p' | head -1)
+[ -z "$POD_ID" ] && POD_ID=$(echo "$CREATE" | grep -oE '\b[a-z0-9]{13,16}\b' | head -1)
+if [ -z "$POD_ID" ]; then say "FAILED to create a pod; nothing billed"; exit 3; fi
+say "pod ${POD_ID}"
+printf '%s' "$POD_ID" > "${OUT}/pod_id"
+printf '%s' "$STARTED_EPOCH" > "${OUT}/pod_start_epoch"
+
+# --- the independent watchdog ------------------------------------------------
+# The EXIT trap is the FIRST layer and does not run if this script is SIGKILLed
+# or the box reboots. RunPod's own --terminate-after has never been observed to
+# fire here, so a separate process owns the deadline and outlives this one.
+WATCHDOG_MINUTES=$(python3 -c "print(int(${MAX_SECONDS}/60) + 12)")
+setsid nohup "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/pod/watchdog.py" \
+  --pod-id "$POD_ID" --session-start-epoch "$STARTED_EPOCH" \
+  --price-per-hour "$RATE_USD_H" --hard-minutes "$WATCHDOG_MINUTES" \
+  --authorized-usd "$CEILING_USD" \
+  --journal "${OUT}/watchdog.jsonl" > "${OUT}/watchdog.out" 2>&1 < /dev/null &
+WATCHDOG_PID=$!
+say "watchdog pid ${WATCHDOG_PID}, hard deadline ${WATCHDOG_MINUTES} min"
+printf '%s' "$WATCHDOG_PID" > "${OUT}/watchdog_pid"
+
+# --- readiness: GraphQL runtime, never the CLI uptime field -----------------
+SSH_HOST=""; SSH_PORT=""
+for _ in $(seq 1 90); do
+  sleep 10
+  INFO=$(gql "{\"query\":\"query { pod(input:{podId:\\\"${POD_ID}\\\"}) { runtime { uptimeInSeconds ports { ip publicPort privatePort isIpPublic } } } }\"}")
+  read -r SSH_HOST SSH_PORT < <(echo "$INFO" | python3 -c "
+import json,sys
+try:
+    rt=json.load(sys.stdin)['data']['pod']['runtime'] or {}
+except Exception: rt={}
+for p in (rt.get('ports') or []):
+    if p.get('privatePort')==22 and p.get('isIpPublic'):
+        print(p['ip'], p['publicPort']); break
+else: print('', '')
+" 2>/dev/null || echo " ")
+  [ -n "$SSH_HOST" ] && break
+  say "waiting for a public port 22 mapping..."
+done
+if [ -z "$SSH_HOST" ]; then say "pod never exposed port 22 in 15 min"; exit 3; fi
+say "ssh ${SSH_HOST}:${SSH_PORT}"
+
+SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -o ServerAliveInterval=30 -p ${SSH_PORT} root@${SSH_HOST}"
+for _ in $(seq 1 30); do $SSH true 2>/dev/null && break; sleep 5; done
+
+# --- run --------------------------------------------------------------------
+say "setup + pilot (bounded at ${MAX_SECONDS}s)"
+timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
+RC=$?
+say "remote finished rc=${RC}"
+
+# --- collect BEFORE teardown ------------------------------------------------
+# Gated on the pod having RUN, never on it having SUCCEEDED: a pilot that died
+# in its second arm still measured the first, and $2.82 of verified checkpoints
+# were once deleted by a collector that ran only on a clean terminal state.
+say "fetching evidence"
+scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P "${SSH_PORT}" \
+    "root@${SSH_HOST}:/workspace/out" "${OUT}/" >>"$LOG" 2>&1 \
+  || say "WARNING: could not fetch /workspace/out"
+SUMMARY=$(find "$OUT" -name pilot_summary.json | head -1)
+if [ -n "$SUMMARY" ]; then
+  say "verdict: $(python3 -c "import json;print(json.load(open('${SUMMARY}')).get('verdict','(none)'))" 2>/dev/null || echo unreadable)"
+else
+  say "no pilot_summary.json retrieved"
+  FAIL=$(find "$OUT" -name pilot_failure.json | head -1)
+  [ -n "$FAIL" ] && say "failure: $(python3 -c "import json;print(json.load(open('${FAIL}'))['error'])" 2>/dev/null)"
+fi
+exit "$RC"

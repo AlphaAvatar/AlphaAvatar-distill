@@ -249,8 +249,21 @@ def test_a_step_may_not_be_added_twice_for_one_kind():
 
 
 def test_an_unknown_arm_is_refused():
-    with pytest.raises(KeyError):
+    """B2 is not a wider pilot, it is a different experiment."""
+    with pytest.raises(ValueError, match="preregisters arms"):
         pilot.arm_spec(2, repo_root=REPO)
+
+
+@pytest.mark.parametrize("bad", ["4", 4.0, True, None])
+def test_a_non_int_arm_is_refused_not_coerced(bad):
+    """`ARM_IDS[int(batch_size)]` would have accepted `4.0` and `True`."""
+    with pytest.raises((TypeError, ValueError)):
+        pilot.arm_spec(bad, repo_root=REPO)
+
+
+def test_the_two_preregistered_arms_are_exactly_b1_and_b4():
+    assert sorted(pilot.ARM_IDS) == [1, 4]
+    assert pilot.arm_id(1) == "causal-B1" and pilot.arm_id(4) == "causal-B4"
 
 
 def test_the_prefix_steps_carry_no_config(tmp_path):

@@ -1,0 +1,12 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "The canonical owner of this pilot's COSTS. The ceiling is owned by authorization.json, which this file points at by PATH; scripts/pod/engineering_campaign_budget.py reads both and derives the session limit. The launcher carries no copy of any of it, because two places holding the same number is how one of them comes to be wrong. Read before each paid action. A rerun does NOT reset it and a replacement resource does NOT receive a fresh allocation.",
+ "campaign_id": "c3_batching_adoption_pilot",
+ "scope": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/scope.json",
+ "authorization": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/authorization.json",
+ "_authorization_is_a_PATH_not_an_object": "derive_budget.engineering_campaigns resolves `granted_utc` by reading this field as a relative path. An inline object leaves the date unresolved and the attribution `unknown`.",
+ "_the_ceiling_is_NOT_restated_here": "It lives in authorization.json and nowhere else.",
+ "_inherits_nothing": "This is a NEW campaign, distinct from the CLOSED batch-invariance root-cause diagnostic. That campaign's $0.7319 stays booked on its own record and is NOT charged here; the two ceilings are separate and neither funds the other.",
+ "teardown_reserve_usd": 0.1,
+ "subruns": []
+}

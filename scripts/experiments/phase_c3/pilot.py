@@ -36,7 +36,8 @@ from typing import Any
 
 from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.planning.fixed_path import (
-    FixedPathSpec, FixedPathStep, StepResult, materialize_fixed_path)
+    FixedPathSpec, FixedPathStep, StepResult, VerifiedSuffix,
+    materialize_fixed_path, materialize_fixed_path_suffix)
 from aadistill.initialization.specs.arch import ArchSpec
 
 __all__ = [
@@ -45,7 +46,8 @@ __all__ = [
     "PILOT_SEED_NAMESPACE", "C0_PREREGISTRATION_SHA256", "CAUSAL_STEP_LABEL",
     "C1_PATH_RECORD", "C1_ARM_IDENTITIES", "root_binding",
     "prefix_steps", "causal_step", "derive_pilot_seed", "PILOT_SEED",
-    "target_spec", "arm_spec", "replay_prefix", "ARM_IDS",
+    "target_spec", "arm_spec", "replay_prefix", "ARM_IDS", "arm_id",
+    "prefix_spec", "verified_parent", "run_arm", "CAUSAL_STEP_INDEX",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
@@ -131,6 +133,16 @@ def causal_step(batch_size: int, *, label: str = "") -> FixedPathStep:
     config is what makes `causal-B1` and `causal-B4` distinct states, which
     they must be, because they can materialize different head maps.
     """
+    #: STRICT, and deliberately not `int(batch_size)`. The value is hashed
+    #: into the step identity, so `4`, `4.0`, `"4"` and `True` must not be
+    #: allowed to mean the same protocol while serializing to four different
+    #: states. Same rule the operator applies when it reads the field back,
+    #: so the constructor cannot build a step the operator will refuse.
+    if isinstance(batch_size, bool) or not isinstance(batch_size, int):
+        raise TypeError(
+            f"{BATCH_SIZE_CONFIG_KEY} must be an int, not "
+            f"{type(batch_size).__name__} ({batch_size!r}); it is hashed into "
+            "the step identity and must not be coerced")
     if batch_size < 1:
         raise ValueError(f"calibration forward batch size must be >= 1, "
                          f"got {batch_size}")
@@ -138,7 +150,7 @@ def causal_step(batch_size: int, *, label: str = "") -> FixedPathStep:
         impl_id=CAUSAL_IMPL_ID,
         profile_id=CAUSAL_PROFILE_ID,
         label=label or CAUSAL_STEP_LABEL,
-        config={BATCH_SIZE_CONFIG_KEY: int(batch_size)})
+        config={BATCH_SIZE_CONFIG_KEY: batch_size})
 
 
 def derive_pilot_seed(base: str = C0_PREREGISTRATION_SHA256,
@@ -160,8 +172,26 @@ def derive_pilot_seed(base: str = C0_PREREGISTRATION_SHA256,
 PILOT_SEED = derive_pilot_seed()
 
 
-#: The two arms, named once. The batch size is the arm.
+#: THE PREREGISTERED ARMS, and the only batch sizes this pilot may build.
+#:
+#: The restriction lives here rather than in the operator: the core must stay
+#: able to run at any batch size a later experiment declares, but THIS pilot's
+#: arm definition is frozen at B1 and B4, and a third arm would be a different
+#: experiment rather than a wider one.
 ARM_IDS = {1: "causal-B1", 4: "causal-B4"}
+
+
+def arm_id(batch_size: int) -> str:
+    """The arm's name, refusing anything the preregistration does not name."""
+    if isinstance(batch_size, bool) or not isinstance(batch_size, int):
+        raise TypeError(
+            f"arm batch size must be an int, not {type(batch_size).__name__} "
+            f"({batch_size!r})")
+    if batch_size not in ARM_IDS:
+        raise ValueError(
+            f"the pilot preregisters arms {sorted(ARM_IDS)}; {batch_size} is "
+            "not one of them and would be a different experiment")
+    return ARM_IDS[batch_size]
 
 
 def _path_record(repo_root: str | Path) -> dict:
@@ -212,7 +242,7 @@ def arm_spec(batch_size: int, *, repo_root: str | Path = ".",
     repo_id, revision = root_binding(repo_root)
     steps = tuple(prefix_steps(pin_parent=pin_parent)) + (causal_step(batch_size),)
     return FixedPathSpec(
-        path_id=f"autoinit.v1.phase_c3.pilot.{ARM_IDS[int(batch_size)]}",
+        path_id=f"autoinit.v1.phase_c3.pilot.{arm_id(batch_size)}",
         family=target.family, target_spec=target, steps=steps,
         root_repo_id=repo_id, root_revision=revision,
         device=device, seed=seed, max_shard_size=max_shard_size)
@@ -244,3 +274,100 @@ def replay_prefix(
         spec, adapter=adapter, root_loader=root_loader, workdir=workdir,
         repo_root=repo_root, calibration_items=calibration_items,
         on_step=on_step, deadline=deadline, execution=PREFIX_EXECUTION)
+
+
+#: The causal step's index in the four-step frozen path. The prefix is
+#: everything before it.
+CAUSAL_STEP_INDEX = len(PREFIX_STEPS)
+
+
+def prefix_spec(*, repo_root: str | Path = ".", device: str = "cpu",
+                seed: int = 0,
+                max_shard_size: str | int | None = None) -> FixedPathSpec:
+    """The three pre-ATTENTION steps as a path of their own.
+
+    THE PREFIX RUNS ONCE PER PILOT, not once per arm. Attempt 18's evidence
+    puts the frozen parent replay at ~24 minutes; doing it twice would buy
+    nothing, because the second run can only either reproduce
+    `eea90c91…` — in which case it was redundant — or fail to, in which
+    case the pilot is over anyway. Worse, it would let the two arms be
+    compared against two *different* checkpoints that merely happen to share
+    a digest.
+
+    So: one replay, one gated parent, and both arms execute as SUFFIXES from
+    it, each re-identifying it from disk before their causal step. The WIDTH
+    step is pinned, so this path cannot complete without having produced the
+    frozen parent.
+    """
+    target = target_spec(repo_root)
+    repo_id, revision = root_binding(repo_root)
+    return FixedPathSpec(
+        path_id="autoinit.v1.phase_c3.pilot.shared-prefix",
+        family=target.family, target_spec=target,
+        steps=tuple(prefix_steps(pin_parent=True)),
+        root_repo_id=repo_id, root_revision=revision,
+        device=device, seed=seed, max_shard_size=max_shard_size)
+
+
+def verified_parent(prefix_results: Sequence[StepResult],
+                    arm: FixedPathSpec,
+                    *,
+                    expected_digest: str = FROZEN_PARENT_DIGEST
+                    ) -> VerifiedSuffix:
+    """The premise each arm asserts about the shared parent, per arm.
+
+    `expected_digest` defaults to the frozen parent, which is what the pilot
+    always passes. It is a parameter only so a toy-scale execution can drive
+    THIS function rather than a copy of it — the code path is identical, and
+    a copy is exactly what would not notice this function changing.
+
+    `expected_path_hash` is THIS ARM's hash, not the prefix's: the suffix
+    machinery's first question is whether the spec it was handed is the frozen
+    path it claims to be, and an arm's identity is its own full four-step
+    path. What makes the two arms share a parent is the next check — that this
+    path's prefix equals the prefix that was actually executed — which is
+    exactly the guarantee wanted here.
+    """
+    if not prefix_results:
+        raise ValueError("the prefix produced no steps; there is no parent")
+    parent = prefix_results[-1]
+    if parent.index != CAUSAL_STEP_INDEX - 1:
+        raise ValueError(
+            f"the parent is step {parent.index}, but the causal step is "
+            f"{CAUSAL_STEP_INDEX} and must continue from "
+            f"{CAUSAL_STEP_INDEX - 1}")
+    return VerifiedSuffix(
+        start_index=CAUSAL_STEP_INDEX,
+        parent=parent,
+        expected_parent_artifact_digest=expected_digest,
+        expected_path_hash=arm.spec_hash,
+        prefix_reference_steps=tuple(arm.steps[:CAUSAL_STEP_INDEX]),
+        expected_suffix_steps=tuple(
+            (s.impl_id, s.profile_id) for s in arm.steps[CAUSAL_STEP_INDEX:]))
+
+
+def run_arm(
+    arm: FixedPathSpec,
+    *,
+    adapter: Any,
+    parent_loader: Callable[[], Any],
+    workdir: str | Path,
+    verified: VerifiedSuffix,
+    repo_root: str | Path = ".",
+    calibration_items: Mapping[str, Sequence[Any]] | None = None,
+    on_step: Callable[[StepResult], None] | None = None,
+    deadline: Any = None,
+) -> tuple[list[StepResult], dict[str, Any]]:
+    """One arm's causal step, from the already-verified shared parent.
+
+    `execution` is not a parameter here either, and for a sharper reason than
+    in `replay_prefix`: this step's batch size comes from its own hashed
+    config, so an `ExecutionConfig` reaching the causal operator would be
+    inert at best and misleading at worst. `PREFIX_EXECUTION` is passed so the
+    value is stated rather than defaulted, but the operator does not read it.
+    """
+    return materialize_fixed_path_suffix(
+        arm, adapter=adapter, root_loader=parent_loader, workdir=workdir,
+        verified=verified, repo_root=repo_root,
+        calibration_items=calibration_items, on_step=on_step,
+        deadline=deadline, execution=PREFIX_EXECUTION)

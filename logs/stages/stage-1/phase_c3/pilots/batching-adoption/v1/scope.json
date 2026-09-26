@@ -1,0 +1,101 @@
+{
+ "schema": "aadistill.validation_scope/v1",
+ "investigation_id": "c3_batching_adoption_pilot_v1",
+ "title": "Is padded B4 causal-KL scoring worth adopting?",
+ "question": "Does B4 padded batching make the real attention.causal_kl_v1 scorer materially faster than B1, and if the resulting head maps differ, does that difference matter downstream after the frozen recovery process?",
+ "_not_the_question": "whether padded batching reproduces every intermediate top-k choice. That question was answered NO by the batch-invariance investigation and is not what adoption turns on.",
+ "is_formal_c3": false,
+ "_why_not": "formal C3 is the causal-KL ATTENTION isolation experiment against B. This pilot decides an execution-protocol adoption question about the scorer that experiment would use. It shares the operator and nothing else: no C3 seed set exists, the confirmation battery is untouched, and no incumbent can be named here.",
+ "arms": [
+  {
+   "arm_id": "causal-B1",
+   "calibration_forward_batch_size": 1
+  },
+  {
+   "arm_id": "causal-B4",
+   "calibration_forward_batch_size": 4
+  }
+ ],
+ "_arms_differ_only_by": "the calibration_forward_batch_size in the causal step's hashed config. Same impl_id, same profile_id, same step label, same seed, same parent.",
+ "arm_order": [
+  "causal-B1",
+  "causal-B4"
+ ],
+ "_arm_order_is_predeclared": "FROZEN HERE, before either scorer runs. Whichever arm goes first pays for allocator growth and autotuning that the second does not, so the order is part of the protocol; choosing it after seeing the timings would be choosing the result.",
+ "frozen_inputs": {
+  "parent_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "root_repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "root_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+  "prefix": [
+   [
+    "depth.causal_kl_greedy_v1",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "ffn.activation_importance_v0",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "width.global_pca_v0",
+    "calib.reasoning_heavy@v2"
+   ]
+  ],
+  "prefix_execution": {
+   "micro_batch_size": 1
+  },
+  "causal_step": [
+   "attention.causal_kl_v1",
+   "calib.domain_balanced@v1"
+  ],
+  "calibration_profile": "calib.domain_balanced@v1",
+  "n_calibration_items": 67
+ },
+ "prefix_replays_per_pilot": 1,
+ "_why_one": "attempt 18 measured the frozen parent replay at ~24 minutes. A second replay can only reproduce the parent -- in which case it was redundant -- or fail to, in which case the pilot is over. Worse, it would let the two arms be compared against two DIFFERENT checkpoints that merely share a digest. One replay, one gated parent, both arms as verified suffixes from it, each re-identifying it from disk.",
+ "speed_gate": {
+  "statistic": "full causal scorer wall clock, B1 / B4",
+  "threshold": 1.25,
+  "predeclared": true,
+  "_measured_not_inferred": "from the two scorers' own synchronized clocks. NOT from FLOPs, NOT from the physical invocation count, and NOT from B1/B4 = 4.",
+  "_fairness": "before each timed scorer: the same verified parent is loaded, the same small untimed warm-up runs, CUDA is synchronized, and only then does the clock start. Same card, same pinned runtime, arm order predeclared before either result is read."
+ },
+ "decision_rules": [
+  {
+   "if": "speedup < 1.25",
+   "then": "STOP, no recovery",
+   "verdict": "B4_NOT_WORTH_ADOPTION_PILOT"
+  },
+  {
+   "if": "speedup >= 1.25 AND head maps identical",
+   "then": "STOP, no recovery",
+   "verdict": "B4_STRUCTURALLY_EQUIVALENT_AND_FASTER"
+  },
+  {
+   "if": "speedup >= 1.25 AND head maps differ",
+   "then": "exactly one paired recovery pair",
+   "verdict": "descriptive paired evidence only"
+  }
+ ],
+ "recovery_if_triggered": {
+  "probes": 2,
+  "seed": 1139220455,
+  "_seed_scope": "PILOT-ONLY. Not a historical A/B/C1/C2 recovery seed and not reusable as a formal C3 seed. There is NO formal C3 seed set.",
+  "recipe": "e1_p1_kd_heavy@0.86M, unchanged",
+  "evaluation": "recovery_search_v2",
+  "forbidden": [
+   "c1_confirmation_v1",
+   "formal C3 seeds",
+   "formal C3 bootstrap",
+   "the reserved final-promotion battery"
+  ]
+ },
+ "may_not_produce": [
+  "a formal GO or NO_GO",
+  "a confidence interval",
+  "a formal C3 incumbent",
+  "any change to DEFAULT_MICRO_BATCH_SIZE or to state identity semantics"
+ ],
+ "_one_seed": "a one-seed pair is not a statistical promotion test. It may report only descriptive paired differences; the maintainer chooses the formal C3 execution protocol afterwards.",
+ "artifact_lifecycle": "Keep both scorer children until the adoption decision is secured. If recovery runs, keep both recovery checkpoints until recovery_search_v2 scoring and evidence are admitted. After terminal closeout a validly scored checkpoint with no remaining consumer needs its evidence retained and its weights may be removed, per the existing artifact policy.",
+ "owner": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/"
+}

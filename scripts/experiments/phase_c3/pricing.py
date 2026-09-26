@@ -69,6 +69,25 @@ ARMS = (1, 4)
 
 #: The deployment dtype for the logits the scorer holds.
 BF16_BYTES = 2
+FP32_BYTES = 4
+
+#: `forward_kl_mean_batch`'s chunk, as the operator calls it.
+REDUCER_CHUNK = 512
+
+#: Live `[B, chunk, V]` float32 tensors at the reducer's peak. Counted from
+#: the loop body rather than guessed: the upcast slice, `p_log`, `q_log`,
+#: `p_log.exp()` and `(p_log - q_log)` can all be resident inside
+#: `(p_log.exp() * (p_log - q_log)).sum(-1)`. Five is the conservative
+#: reading; the allocator may free the upcast slice earlier, and a bound that
+#: is too tight is the one that fails on the pod.
+REDUCER_LIVE_FP32_BLOCKS = 5
+
+#: Everything that is not logits or reducer: CUDA context, cuBLAS workspaces,
+#: allocator fragmentation. A round conservative allowance, not a measurement.
+RUNTIME_OVERHEAD_GIB = 1.5
+
+#: The card this pilot is authorized on, and nothing larger.
+L40S_VRAM_GIB = 48.0
 
 
 def target_spec(repo: str | Path) -> ArchSpec:
@@ -132,7 +151,7 @@ def grouping(items, batch_size: int) -> dict:
 
 
 def derive(repo: str | Path, price_per_hour_usd: float,
-           tflops: float) -> dict:
+           tflops: float, *, weight_bytes: int = BF16_BYTES) -> dict:
     parent, target = parent_spec(repo), target_spec(repo)
     items = mixture(repo)
     n_q = parent["num_attention_heads"]
@@ -172,10 +191,27 @@ def derive(repo: str | Path, price_per_hour_usd: float,
         #: chunks are on top of this and are bounded by `chunk=512` positions.
         logit_bytes = (batch_size * g["max_group_width"]
                        * target["vocab_size"] * BF16_BYTES)
+        #: THE REDUCER'S TRANSIENT, which the logit blocks do not cover.
+        #: `forward_kl_mean_batch` upcasts a `[B, chunk, V]` slice to float32
+        #: and holds several such tensors at once; chunking bounds it by
+        #: `chunk` rather than by the longest item, but it is NOT small: at
+        #: B4 it is larger than the logit blocks themselves.
+        reducer_bytes = (REDUCER_LIVE_FP32_BLOCKS * batch_size
+                         * min(REDUCER_CHUNK, g["max_group_width"])
+                         * target["vocab_size"] * FP32_BYTES)
+        #: The weights the scorer forwards through, in the dtype it loads.
+        model_bytes = QWEN3_ADAPTER.param_count(parent) * weight_bytes
+        total_bytes = (2 * logit_bytes + reducer_bytes + model_bytes
+                       + int(RUNTIME_OVERHEAD_GIB * 2 ** 30))
         arms[f"B{batch_size}"] = {
             **g,
             "peak_logit_bytes": 2 * logit_bytes,
             "peak_logit_gib": round(2 * logit_bytes / 2 ** 30, 3),
+            "reducer_transient_gib": round(reducer_bytes / 2 ** 30, 3),
+            "model_weights_gib": round(model_bytes / 2 ** 30, 3),
+            "runtime_overhead_gib": RUNTIME_OVERHEAD_GIB,
+            "peak_vram_bound_gib": round(total_bytes / 2 ** 30, 3),
+            "fits_l40s": total_bytes / 2 ** 30 < L40S_VRAM_GIB,
             "item_forward_equivalents": plan.forward_passes,
             "physical_forward_invocations": physical,
             "estimated_gpu_seconds": cost.gpu_seconds,
@@ -194,6 +230,19 @@ def derive(repo: str | Path, price_per_hour_usd: float,
                      "kv_heads": parent["num_key_value_heads"],
                      "layers": parent["num_hidden_layers"],
                      "ablations": ablations},
+        "vram_bound": {
+            "_contract": ("A CONSERVATIVE TOTAL, not the logit blocks alone. "
+                          "Logits + reducer float32 transient + weights + "
+                          "runtime overhead, against the only authorized "
+                          "card."),
+            "card": "L40S", "card_vram_gib": L40S_VRAM_GIB,
+            "weight_bytes_per_param": weight_bytes,
+            "reducer_chunk": REDUCER_CHUNK,
+            "reducer_live_fp32_blocks": REDUCER_LIVE_FP32_BLOCKS,
+            "worst_arm_gib": max(a["peak_vram_bound_gib"]
+                                 for a in arms.values()),
+            "fits": all(a["fits_l40s"] for a in arms.values()),
+        },
         "hardware_estimate": {"price_per_hour_usd": price_per_hour_usd,
                               "effective_tflops": tflops,
                               "_not_a_quote": "re-query the provider before acquiring"},
@@ -226,13 +275,15 @@ def main() -> int:
           f"{doc['geometry']['parent_q_heads']} heads = "
           f"{doc['geometry']['ablations']} ablations, + 1 reference")
     print(f"{'':>4} {'groups':>7} {'item-fwd':>10} {'physical':>9} "
-          f"{'padded':>8} {'pad/valid':>10} {'logitGiB':>9} {'gpu_s':>9} {'usd':>7}")
+          f"{'padded':>8} {'pad/valid':>10} {'logitGiB':>9} {'vramGiB':>8} "
+          f"{'gpu_s':>9} {'usd':>7}")
     for name, arm in doc["arms"].items():
         print(f"{name:>4} {arm['n_groups']:>7} {arm['item_forward_equivalents']:>10,} "
               f"{arm['physical_forward_invocations']:>9,} "
               f"{arm['padded_positions']:>8,} "
               f"{arm['padding_overhead_ratio']:>10.4f} "
               f"{arm['peak_logit_gib']:>9.2f} "
+              f"{arm['peak_vram_bound_gib']:>8.2f} "
               f"{arm['estimated_gpu_seconds']:>9.0f} "
               f"{arm['estimated_usd']:>7.2f}")
     d = doc["derived"]
@@ -240,6 +291,15 @@ def main() -> int:
           f"physical B1/B4 = {d['physical_invocation_ratio_b1_over_b4']:.2f}x  |  "
           f"both arms ~${d['both_arms_estimated_usd']:.2f} "
           f"(estimate at ${args.price_per_hour_usd}/h, not a quote)")
+    v = doc["vram_bound"]
+    print(f"VRAM bound (logits + reducer fp32 + weights + "
+          f"{v['runtime_overhead_gib'] if 'runtime_overhead_gib' in v else RUNTIME_OVERHEAD_GIB} GiB overhead): "
+          f"worst arm {v['worst_arm_gib']:.2f} GiB of {v['card_vram_gib']:.0f} "
+          f"GiB {v['card']} -> fits={v['fits']}")
+    if not v["fits"]:
+        print("REFUSING: the conservative VRAM bound does not fit the only "
+              "authorized card")
+        return 2
     if not d["arms_price_identically"]:
         print("REFUSING: the two arms do not price identically; the estimate "
               "would be asserting the pilot's result")

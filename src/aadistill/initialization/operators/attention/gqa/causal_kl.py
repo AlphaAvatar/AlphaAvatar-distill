@@ -58,6 +58,7 @@ registering at import would add a branch to searches that never asked for one.
 
 from __future__ import annotations
 
+import math
 import time
 from collections.abc import Mapping, Sequence
 from contextlib import contextmanager
@@ -135,13 +136,48 @@ def resolve_forward_batch_size(config: Mapping[str, Any] | None) -> int:
     Deliberately NOT `ctx.execution.micro_batch_size`. See the module docstring:
     for this operator the batch size changes what the result means, so it is
     read from the step's own hashed config and from nowhere else.
+
+    STRICT, and deliberately not `int(value)`. This field is IDENTITY-BEARING:
+    it is serialized into the step config and therefore into the state id. A
+    coercion would let `4`, `4.0`, `"4"` and — via `bool` being an `int` —
+    `True` mean the same execution while hashing to four different states, so
+    a replay could disagree with its own record about what it ran. The rule is
+    `ExecutionConfig`'s, for the same reason: must be an int, must not be a
+    bool, must be at least 1.
     """
     value = (config or {}).get(BATCH_SIZE_CONFIG_KEY, 1)
-    size = int(value)
-    if size < 1:
+    if isinstance(value, bool) or not isinstance(value, int):
         raise OperatorError(
-            f"{BATCH_SIZE_CONFIG_KEY} must be >= 1, got {value!r}")
-    return size
+            f"{BATCH_SIZE_CONFIG_KEY} must be an int, not "
+            f"{type(value).__name__} ({value!r}); this field is hashed into "
+            "the step identity and must not be coerced")
+    if value < 1:
+        raise OperatorError(
+            f"{BATCH_SIZE_CONFIG_KEY} must be >= 1, got {value!r}; 1 is the "
+            "one-item-per-forward reference path")
+    return value
+
+
+def _refuse_non_finite(values: Any, where: str) -> None:
+    """A non-finite causal score is a FAILED SCORER, never a zero.
+
+    60k forwards feed a `sorted()` that materializes a head map. One NaN sorts
+    to an arbitrary position and the map that comes out is a fiction nothing
+    downstream can distinguish from a measurement. Clamping or substituting
+    would be worse: it would produce a plausible map from a broken run.
+    """
+    if isinstance(values, torch.Tensor):
+        if bool(torch.isfinite(values).all()):
+            return
+        bad = (~torch.isfinite(values)).nonzero().flatten().tolist()
+        raise OperatorError(
+            f"non-finite causal KL at {where}: rows {bad} of "
+            f"{values.tolist()}. The scorer failed; a head map must not be "
+            "materialized from it.")
+    if not math.isfinite(float(values)):
+        raise OperatorError(
+            f"non-finite causal KL at {where}: {values!r}. The scorer failed; "
+            "a head map must not be materialized from it.")
 
 
 @contextmanager
@@ -164,6 +200,43 @@ def head_ablated(out_projection: Any, head: int, head_dim: int):
             out_projection.weight[:, cols] = saved
 
 
+def _cuda_sync(device: Any) -> None:
+    """Block until the device is idle, or do nothing off CUDA."""
+    if torch.device(device).type == "cuda":
+        torch.cuda.synchronize(device)
+
+
+def warm_up(model, items: Sequence[Mapping[str, Any]], device: Any,
+            *, batch_size: int = 1, n: int = 2) -> dict[str, Any]:
+    """Untimed forwards so the first timed one is not paying for the last.
+
+    Allocator growth, autotuning and kernel selection all happen on the first
+    forwards of a given shape, and they would land entirely on whichever arm
+    ran first -- which is a difference between the ARMS' ORDER, not between
+    B1 and B4. Both arms run the same warm-up before their timer starts.
+
+    It contributes NO causal evidence: it ablates nothing, its logits are
+    discarded, and it returns only how much work it did so a record can show
+    the two arms were warmed identically.
+    """
+    if n < 1 or not items:
+        return {"warmup_forwards": 0, "warmup_items": 0}
+    used = list(items)[:max(batch_size, 1) * n]
+    forwards = 0
+    with torch.no_grad():
+        for batch in micro_batches(used, max(batch_size, 1),
+                                   pad_id=(resolve_pad_id(model)
+                                           if batch_size > 1 else 0),
+                                   device=device):
+            if batch_size > 1:
+                _forward_block(model, batch, device)
+            else:
+                _forward_item(model, batch.items[0], device)
+            forwards += 1
+    _cuda_sync(device)
+    return {"warmup_forwards": forwards, "warmup_items": len(used)}
+
+
 @torch.no_grad()
 def _forward_block(model, batch, device: str) -> torch.Tensor:
     """One micro-batch's prediction-position logits as a `[B, T_pred, V]` block.
@@ -182,6 +255,43 @@ def _forward_block(model, batch, device: str) -> torch.Tensor:
 def _forward_item(model, item, device: str) -> torch.Tensor:
     """One item's prediction-position logits, `[T-1, V]`, left on the device."""
     return model(item["input_ids"].to(device), use_cache=False).logits[0, :-1]
+
+
+def _group_decisions(scores: Sequence[float], n_q: int, n_kv: int,
+                     keep_q: int) -> list[dict[str, Any]]:
+    """Where each GQA group's cut fell, and by how much.
+
+    A head map records WHAT was chosen. This records how nearly it went the
+    other way: the two scores either side of the cut, and the margin between
+    them. Without it a selection that turned on the twelfth decimal place is
+    indistinguishable from one that was never in doubt -- which is exactly the
+    question a B1-vs-B4 head-map delta raises.
+
+    The ranking here reproduces `select_q_heads_by_score`'s ordering rule
+    (descending score, ties to the lower head index) rather than inventing a
+    second one; the selected set is checked against it below, so the two
+    cannot drift.
+    """
+    per_g_t, per_g_s = n_q // n_kv, keep_q // n_kv
+    out: list[dict[str, Any]] = []
+    for g in range(n_kv):
+        members = list(range(g * per_g_t, (g + 1) * per_g_t))
+        ranked = sorted(members, key=lambda h: (-float(scores[h]), h))
+        selected, rejected = ranked[:per_g_s], ranked[per_g_s:]
+        cut_sel = float(scores[selected[-1]]) if selected else None
+        cut_rej = float(scores[rejected[0]]) if rejected else None
+        out.append({
+            "group": g,
+            "member_heads": members,
+            "ranked_heads": ranked,
+            "selected_heads": sorted(selected),
+            "cutoff_selected": cut_sel,
+            "cutoff_rejected": cut_rej,
+            "cutoff_margin": (None if cut_sel is None or cut_rej is None
+                              else cut_sel - cut_rej),
+            "scores": [float(scores[h]) for h in members],
+        })
+    return out
 
 
 class AttentionCausalKLV1(OperatorImplementation):
@@ -280,6 +390,20 @@ class AttentionCausalKLV1(OperatorImplementation):
         per_head: list[list[dict[str, list[float]]]] = [
             [{} for _ in range(n_q)] for _ in blocks]
 
+        #: THE RAW SCIENTIFIC EVIDENCE, `[layer][head][item]` in the ORIGINAL
+        #: item order rather than the order the groups happen to visit. About
+        #: 60k floats at the real geometry, which is small enough that
+        #: discarding it to keep only the head map would be throwing away the
+        #: landscape that produced the decision. Item metadata is stored ONCE,
+        #: as parallel columns, rather than repeated per value.
+        #: The row is derived from the CONTIGUOUS grouping, not from object
+        #: identity: `micro_batches` yields consecutive slices in the mixture's
+        #: own order and never sorts by length, so `row0 + j` is exactly the
+        #: item's index in `items`. An `id()` map would break silently the day
+        #: the batcher copied a mapping.
+        per_item: list[list[list[float | None]]] = [
+            [[None] * len(items) for _ in range(n_q)] for _ in blocks]
+
         #: GROUP OUTER, ABLATION INNER — and this ordering is why the operator
         #: is affordable. The reference is the same tensor for every ablation
         #: of a given group, so computing it once per group turns
@@ -298,11 +422,19 @@ class AttentionCausalKLV1(OperatorImplementation):
         #: instant. The two questions ("where is it?" and "has it run too
         #: long?") are asked together because they are asked for the same
         #: reason.
+        #: TIMED HONESTLY. CUDA kernels are asynchronous, so a timer that
+        #: does not synchronize attributes the tail of the scoring loop to
+        #: whatever runs next -- and the B1/B4 adoption gate is a ratio of two
+        #: wall clocks, so a mis-attributed tail moves the verdict. The
+        #: synchronize is once at the start and once at the end, not per
+        #: forward, so it costs nothing measurable and perturbs no kernel.
+        _cuda_sync(compute)
         started = time.monotonic()
         total_units = len(groups) * len(out_projections)
         unit = 0
 
         physical_invocations = 0
+        row0 = 0
         for g_index, group in enumerate(groups):
             if batch_size > 1:
                 reference = _forward_block(model, group, compute)
@@ -327,12 +459,26 @@ class AttentionCausalKLV1(OperatorImplementation):
                             #: positions, and ONE host transfer for the batch.
                             values = forward_kl_mean_batch(reference, ablated,
                                                            mask, chunk=512)
-                            for item, value in zip(group.items, values.tolist()):
+                            #: BEFORE the host conversion, so the refusal names
+                            #: the rows rather than a list of floats that has
+                            #: already lost which device produced them.
+                            _refuse_non_finite(
+                                values,
+                                f"layer {layer} head {head} group {g_index} "
+                                f"(B{batch_size}, {len(group.items)} items)")
+                            for j, (item, value) in enumerate(
+                                    zip(group.items, values.tolist())):
                                 bucket.setdefault(item["subtype"], []).append(value)
+                                per_item[layer][head][row0 + j] = value
                         else:
-                            bucket.setdefault(
-                                group.items[0]["subtype"], []).append(
-                                    forward_kl_mean(reference, ablated, chunk=512))
+                            item = group.items[0]
+                            value = forward_kl_mean(reference, ablated, chunk=512)
+                            _refuse_non_finite(
+                                value,
+                                f"layer {layer} head {head} item "
+                                f"{item.get('item_id', g_index)!r} (B1)")
+                            bucket.setdefault(item["subtype"], []).append(value)
+                            per_item[layer][head][row0] = value
                         del ablated
                     unit += 1
                     mins = (time.monotonic() - started) / 60.0
@@ -350,6 +496,14 @@ class AttentionCausalKLV1(OperatorImplementation):
                             f"({physical_invocations} forwards done)")
             finally:
                 del reference
+            row0 += len(group.items)
+
+        _cuda_sync(compute)
+        #: THE SCORER's wall clock, which is what the adoption gate compares.
+        #: Everything after this point -- aggregation, selection, building the
+        #: child, writing it -- is identical work in both arms, so including
+        #: it would dilute the ratio with a constant.
+        scorer_seconds = time.monotonic() - started
 
         #: One domain-balanced score per head, then the same per-group top-k
         #: every operator of this topology uses.
@@ -357,9 +511,23 @@ class AttentionCausalKLV1(OperatorImplementation):
         for layer in range(len(blocks)):
             layer_scores = []
             for head in range(n_q):
+                missing = [i for i, v in enumerate(per_item[layer][head])
+                           if v is None]
+                if missing:
+                    raise OperatorError(
+                        f"layer {layer} head {head}: {len(missing)} of "
+                        f"{len(items)} items produced no causal KL "
+                        f"(rows {missing[:8]}); the evidence is incomplete "
+                        "and a head map must not be materialized from it")
                 means = {k: sum(v) / len(v)
                          for k, v in per_head[layer][head].items()}
                 primary, _ = domain_balanced_score(means, domains)
+                #: AGAIN, on the aggregate. The per-item guard above cannot
+                #: catch a mean that overflows, and this value is the one
+                #: `sorted()` actually reads.
+                _refuse_non_finite(primary,
+                                   f"aggregate score for layer {layer} "
+                                   f"head {head}")
                 layer_scores.append(primary)
             scores_per_layer.append(layer_scores)
 
@@ -367,6 +535,7 @@ class AttentionCausalKLV1(OperatorImplementation):
         builder = ChildBuilder(adapter, model, new_spec, seed=ctx.seed)
 
         retained, kept_per_layer = [], []
+        gqa_decisions: list[list[dict[str, Any]]] = []
         for idx, (src, dst) in enumerate(zip(adapter.blocks(model),
                                              adapter.blocks(builder.model))):
             s_out, d_out = (attention_out_projection(adapter, src),
@@ -380,6 +549,7 @@ class AttentionCausalKLV1(OperatorImplementation):
             retained.append(sum(scores[h] for h in kept) / total
                             if total > 0 else 0.0)
             kept_per_layer.append(list(kept))
+            gqa_decisions.append(_group_decisions(scores, n_q, n_kv, keep_q))
 
             transformed = {id(d_q.weight), id(d_out.weight)}
             builder.assign(d_q.weight, s_q.weight[rows])
@@ -418,9 +588,35 @@ class AttentionCausalKLV1(OperatorImplementation):
                    "valid_tokens": valid_tokens,
                    "padded_positions": int(padded_positions),
                    "ablations": len(blocks) * n_q,
+                   #: The scoring loop alone, synchronized at both ends. The
+                   #: B1/B4 gate is a ratio of THIS, not of `apply` -- the
+                   #: aggregation, selection and child build after it are
+                   #: identical in both arms and would dilute the ratio.
+                   "scorer_seconds": round(scorer_seconds, 4),
                    "seconds": round(time.monotonic() - started, 3),
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},
-            artifacts={"kept_heads": kept_per_layer},
+            artifacts={
+                "kept_heads": kept_per_layer,
+                #: THE LANDSCAPE, not only the decision. Reconstructing why a
+                #: head was dropped needs the per-item values, the aggregate
+                #: scores and where each GQA group's cut fell -- a head map
+                #: alone cannot distinguish a decisive margin from a tie.
+                #: Item metadata is stored once as parallel columns; the
+                #: values are `[layer][head][item]` in the mixture's order.
+                "causal_head_evidence": {
+                    "score": "domain-balanced forward KL(parent || head ablated)",
+                    "calibration_forward_batch_size": batch_size,
+                    "item_ids": [str(i.get("item_id", n))
+                                 for n, i in enumerate(items)],
+                    "item_domains": [str(i["domain"]) for i in items],
+                    "item_subtypes": [str(i["subtype"]) for i in items],
+                    "item_prediction_positions": [
+                        int(i["input_ids"].shape[-1]) - 1 for i in items],
+                    "per_item_kl": per_item,
+                    "head_scores": scores_per_layer,
+                    "gqa_decisions": gqa_decisions,
+                },
+            },
         )
 
 

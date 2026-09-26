@@ -42,14 +42,14 @@ RATE_USD_H=1.09
 
 # --- the budget, DERIVED by a tested script --------------------------------
 # Not inline. The arithmetic used to live here in bash, where the only way to
-# find out what it computed was to create a pod; `batch_invariance_budget.py`
+# find out what it computed was to create a pod; `engineering_campaign_budget.py`
 # has unit tests and this script just obeys it. The ceiling is owned by the
 # AUTHORIZATION record and the costs by the CAMPAIGN record -- one owner each,
 # because while two copies of a number agree, no gate can tell you which it read.
 CAMPAIGN="logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/campaign.json"
 SESSION_CAP="${SESSION_CAP:-2.50}"
 BUDGET=$("${REPO_DIR}/.venv/bin/python" \
-         "${REPO_DIR}/scripts/pod/batch_invariance_budget.py" \
+         "${REPO_DIR}/scripts/pod/engineering_campaign_budget.py" \
          "${REPO_DIR}/${CAMPAIGN}" --session-cap "$SESSION_CAP" --rate "$RATE_USD_H")
 BUDGET_RC=$?
 if [ "$BUDGET_RC" -ne 0 ]; then

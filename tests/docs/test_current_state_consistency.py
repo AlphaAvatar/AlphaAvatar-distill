@@ -266,8 +266,25 @@ class TestTheSnapshotStatesTheRequiredFacts:
                 f"closed and owes nothing: {s['phase_c']['c2'][gone]!r}")
         #: C3 is not blocked on C2 naming an incumbent -- C2 named none, and
         #: the old precondition would read as C3 being permanently blocked.
-        assert s["phase_c"]["c3"].startswith("NOT STARTED")
-        assert not re.search(r"cannot start before C2 names", s["phase_c"]["c3"])
+        #: `c3` became a dict when the operator landed, matching `c1` and
+        #: `c2`'s shape. Read the status field rather than the object: a
+        #: `startswith` on the whole dict raises, and a `str(...)` around it
+        #: would pass on any dict that happened to mention the phrase.
+        c3 = s["phase_c"]["c3"]
+        assert isinstance(c3, dict), "c3 is no longer a structured entry"
+        assert c3["status"].startswith("NOT STARTED")
+        #: The four facts §5 requires the machine-readable state to carry, so
+        #: implementing the operator can never be mistaken for starting C3.
+        assert "NO frozen seed set" in c3["status"]
+        assert "ENGINEERING state only" in c3["operator"]
+        assert "does NOT start formal C3" in c3["operator"]
+        assert c3["batching_adoption_pilot"].startswith("AUTHORIZED")
+        assert "NOT EXECUTED" in c3["batching_adoption_pilot"]
+        assert "not formal C3" in c3["batching_adoption_pilot"]
+        #: Over every field of the entry, not over `str(dict)`: the stale
+        #: precondition could reappear in any one of them.
+        assert not re.search(r"cannot start before C2 names",
+                             " ".join(str(v) for v in c3.values()))
 
     def test_the_migration_is_stated_as_engineering_not_as_a_c1_result(self):
         """Asked of the migration's OWN field, not of the whole snapshot.

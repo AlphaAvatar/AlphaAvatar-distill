@@ -292,8 +292,17 @@ class StepResult:
 #: What each operator kind must record about the choice it made, so a replay
 #: mismatch can be diagnosed rather than merely observed. Keys are the operator
 #: `produces` names; DEPTH additionally carries its removal order in `trace`.
+#:
+#: `causal_head_evidence` is the scoring LANDSCAPE, not another chosen set: the
+#: per-item KLs, the aggregate head scores and where each GQA group's cut fell.
+#: It is here rather than in `trace` because `trace` is execution telemetry —
+#: how long, how many forwards, which batch size — and this is the scientific
+#: measurement the selection was derived from. An operator that does not
+#: produce the key serializes exactly as it always did, because the
+#: comprehension below filters on presence.
 SELECTION_ARTIFACTS = ("kept_blocks", "removed_blocks", "kept_neurons",
-                       "kept_heads", "projection_diagnostics")
+                       "kept_heads", "projection_diagnostics",
+                       "causal_head_evidence")
 
 
 def _selection_evidence(artifacts: Mapping[str, Any]) -> dict[str, Any]:

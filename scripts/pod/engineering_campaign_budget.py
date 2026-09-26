@@ -1,11 +1,19 @@
 #!/usr/bin/env python3
-"""What the batch-invariance diagnostic may spend on one session.
+"""What an engineering campaign may spend on one session.
+
+SHARED, and named for what it does rather than for the first campaign that
+used it. Nothing here knows about batch invariance or about the C3 pilot: it
+takes a campaign record, follows that record's `authorization` path to the
+ceiling, recomputes the spend from components and floors what is left. It was
+`batch_invariance_budget.py` until a second campaign needed it, and a second
+campaign reading a file named for the first is how a number gets read out of
+the wrong book.
 
 Extracted from the launcher so it can be tested. The launcher used to carry the
 arithmetic inline in bash, where the only way to find out what it computed was
 to create a pod.
 
-    python scripts/pod/batch_invariance_budget.py CAMPAIGN.json [--session-cap N]
+    python scripts/pod/engineering_campaign_budget.py CAMPAIGN.json [--session-cap N]
 
 prints one line of shell-readable fields:
 

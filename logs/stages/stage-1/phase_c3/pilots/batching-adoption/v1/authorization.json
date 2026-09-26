@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.validation_authorization/v1",
+ "investigation_id": "c3_batching_adoption_pilot_v1",
+ "granted_utc": "2026-09-27T00:00:00Z",
+ "granted_by": "maintainer, 'Final Pre-Pilot Corrections + Conditional B1/B4 Pilot Authorization'",
+ "quote": "Once §§1-11 pass at $0, this message authorizes the batching-adoption pilot. No additional reviewer approval is required before the B1/B4 scorer measurement.",
+ "authorizes": "one owned pilot session that replays the frozen pre-ATTENTION prefix ONCE, verifies the parent, and scores attention.causal_kl_v1 at B1 and at B4 from that one parent; and, only if the measured speedup clears 1.25x AND the head maps differ, exactly one paired recovery pair at the pilot-only seed.",
+
+ "all_in_ceiling_usd": 5.0,
+ "_ceiling_is_cumulative": "across every resource and subrun of this pilot, including setup, the frozen-parent replay, both scorers, any engineering retry, at most one paired recovery pair, the pilot evaluation, transfer, storage and teardown. A rerun does NOT reset it and a replacement resource does NOT receive a fresh allocation.",
+
+ "conditional_on": {
+  "zero_dollar_blockers": "sections 1-11 of the authorizing message",
+  "_meaning": "the authorization activates only once those pass; it is not permission to skip them"
+ },
+
+ "project_cap_usd": 370.0,
+ "_project_position_at_grant": {
+  "cumulative_spend_usd": 342.7021,
+  "_source": "logs/state/current.json budget, derived by scripts/consolidate/derive_budget.py",
+  "_fits": "342.7021 + 5.00 = 347.7021 < 370.00"
+ },
+
+ "separate_from": {
+  "c3_stage_envelope_usd": 25.0,
+  "_note": "this $5.00 is NOT charged against the C3 science envelope, and formal C3 remains NOT STARTED. The $25.00 figure is NOT current spend permission: a fully spent $5.00 pilot followed by a fully spent $25.00 C3 would be $372.70 against a $370.00 cap, so formal C3 must be RE-PRICED and separately budget-authorized after this pilot."
+ },
+
+ "gpu_class": "L40S",
+ "_no_larger_class_authorized": "the authorizing message states this explicitly; a bigger card is not a fallback for a bound that does not fit",
+ "dtype": "bfloat16",
+ "capability_floor": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 20,
+  "_why_20": "the derived conservative bound is 13.24 GiB for the B4 arm -- two bf16 logit blocks, the reducer's float32 transient, the 713M parent and a 1.5 GiB runtime allowance. Owner: scripts/experiments/phase_c3/pricing.py."
+ },
+
+ "live_quote_required": true,
+ "_live_quote": "re-query L40S securePrice immediately before resource creation. L40S_MEASURED.price_per_hour_usd = $0.99 is historical throughput-profile provenance and MUST NOT be used as the billing quote. If the live price makes the $5.00 ceiling infeasible, STOP -- do not shrink the scientific work.",
+
+ "scientific_use": false,
+ "_scientific_use_false": "this pilot decides an ENGINEERING adoption question (is padded B4 scoring worth adopting) and may produce descriptive paired evidence. It may NOT produce a formal GO/NO_GO, a confidence interval or a C3 incumbent.",
+ "promotes": null,
+
+ "does_not_authorize": [
+  "formal C3 science of any kind",
+  "the C1 confirmation battery, formal C3 seeds, formal C3 bootstrap or the reserved final-promotion battery",
+  "more than one paired recovery pair, or any recovery at all unless the speed gate clears AND the head maps differ",
+  "changing DEFAULT_MICRO_BATCH_SIZE, state identity semantics, operator scientific definitions or the recovery recipe",
+  "spending any part of the C3 $25.00 stage envelope",
+  "a GPU class larger than L40S",
+  "a network volume without a concrete consumer"
+ ]
+}

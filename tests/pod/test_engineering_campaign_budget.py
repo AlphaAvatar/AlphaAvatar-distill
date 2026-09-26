@@ -19,11 +19,11 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "scripts/pod/batch_invariance_budget.py"
+SCRIPT = REPO / "scripts/pod/engineering_campaign_budget.py"
 
 
 def _module():
-    spec = importlib.util.spec_from_file_location("batch_invariance_budget", SCRIPT)
+    spec = importlib.util.spec_from_file_location("engineering_campaign_budget", SCRIPT)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module

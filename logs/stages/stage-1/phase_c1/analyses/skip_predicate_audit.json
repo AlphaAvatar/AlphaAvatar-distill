@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 239,
+ "modules_scanned": 242,
  "test_ignores": [],
  "n_predicates": 128,
  "by_signal": {
@@ -220,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_attention_causal_kl.py",
-   "line": 594,
+   "line": 912,
    "kind": "pytest.skip",
    "function": "test_the_domain_map_agrees_on_the_real_frozen_mixture",
    "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
@@ -1228,7 +1228,7 @@
   },
   {
    "file": "tests/docs/test_repository_structure.py",
-   "line": 335,
+   "line": 354,
    "kind": "skipif",
    "function": "<module>",
    "condition": "_logs_tree_is_partial()",
@@ -2286,5 +2286,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "8f0636c74858213e3a43c1b5c4207e00c721e2a12ed13dd531f0017bca6e59da"
+ "digest": "b0bc18a03152e69020974c75e4ae6aa8431b26435de36fede23fac838e893ee7"
 }

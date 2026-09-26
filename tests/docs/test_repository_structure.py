@@ -238,14 +238,33 @@ def test_the_two_state_views_agree_on_what_is_running_and_authorized():
 
 def test_the_snapshot_stays_minimal_and_declares_its_contract():
     """It had grown to 33 KB and 28 keys by absorbing per-attempt history that
-    already lived in the per-run directories."""
+    already lived in the per-run directories.
+
+    The ceiling moved 12_000 -> 13_000 on 2026-09-27, and the reason is
+    recorded here rather than left as a bare number. The snapshot began
+    carrying a SECOND live authorization — the C3 batching-adoption pilot,
+    with its own ceiling and its own not-formal-C3 boundary — alongside the
+    C1 execution package. That is current state, which this file owns, and
+    not history, which it does not. A raise for history would be the failure
+    this guard exists to catch, so the shape check below now asks that
+    question directly instead of leaving the byte count to imply it.
+    """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 12_000, (
+    assert len(SNAPSHOT.read_bytes()) < 13_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")
+    #: THE THING THE BYTE COUNT IS A PROXY FOR. A snapshot absorbing history
+    #: grows one key per attempt; a snapshot tracking current state does not.
+    import re
+
+    per_attempt = [k for k in snap
+                   if re.search(r"attempt[_ ]?\d|run[_ ]?\d|_20\d{6}", k)]
+    assert not per_attempt, (
+        f"the snapshot has grown per-attempt keys {per_attempt}; those belong "
+        "in the per-run directories, not in the live snapshot")
     for key in ("budget", "frozen", "running", "authorized", "prepared_launch",
                 "next_starting_point"):
         assert key in snap, key

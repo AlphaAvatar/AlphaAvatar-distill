@@ -9,6 +9,7 @@ process-wide runtime default.
 
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -294,6 +295,76 @@ def test_no_deadline_is_still_allowed(geo, target):
     assert out.trace["seconds"] >= 0
 
 
+def test_the_scorer_clock_is_bracketed_by_cuda_syncs():
+    """STRUCTURAL, because this dev box has no CUDA to measure it on.
+
+    CUDA kernels are asynchronous: without a synchronize the timer stops
+    while work is still queued, and the tail lands on whatever runs next. The
+    adoption gate is a RATIO of two such clocks, so a mis-attributed tail
+    moves the verdict — and a CPU test cannot tell the difference, which is
+    exactly why the shape is asserted rather than the number.
+    """
+    import ast
+    import inspect
+
+    from aadistill.initialization.operators.attention.gqa import causal_kl as m
+
+    import textwrap
+
+    #: `dedent`, not `lstrip`: the latter strips only the FIRST line, so a
+    #: method's body stays indented and `ast.parse` raises IndentationError.
+    src = textwrap.dedent(inspect.getsource(m.AttentionCausalKLV1.apply))
+    tree = ast.parse(src)
+    lines = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "_cuda_sync":
+            lines.append(node.lineno)
+        if (isinstance(node, ast.Assign)
+                and any(getattr(t, "id", None) == "started" for t in node.targets)):
+            start_line = node.lineno
+        if (isinstance(node, ast.Assign)
+                and any(getattr(t, "id", None) == "scorer_seconds"
+                        for t in node.targets)):
+            stop_line = node.lineno
+    assert len(lines) >= 2, "the scorer clock is not synchronized at both ends"
+    assert any(l < start_line for l in lines), "no sync before the timer starts"
+    assert any(start_line < l < stop_line for l in lines), (
+        "no sync before the timer stops")
+
+
+def test_the_warm_up_contributes_no_causal_evidence(geo, target):
+    """It ablates nothing and its logits are discarded; it exists only so the
+    first TIMED forward is not paying for allocator growth and autotuning
+    that would otherwise land entirely on whichever arm ran first."""
+    from aadistill.initialization.operators.attention.gqa.causal_kl import warm_up
+
+    model = build_tiny_model(GEOMETRY)
+    before = [p.detach().clone() for p in model.parameters()]
+    info = warm_up(model, items(), "cpu", batch_size=4, n=2)
+    assert info["warmup_forwards"] >= 1 and info["warmup_items"] >= 1
+    assert all(torch.equal(a, b) for a, b in zip(before, model.parameters()))
+    #: And it changes nothing about the scores that follow.
+    a = run(build_tiny_model(GEOMETRY), geo, target, items())
+    warm_up(model, items(), "cpu", batch_size=1, n=2)
+    b = run(build_tiny_model(GEOMETRY), geo, target, items())
+    assert a.artifacts["kept_heads"] == b.artifacts["kept_heads"]
+
+
+def test_the_warm_up_is_a_no_op_when_asked_for_nothing():
+    from aadistill.initialization.operators.attention.gqa.causal_kl import warm_up
+
+    model = build_tiny_model(GEOMETRY)
+    assert warm_up(model, [], "cpu")["warmup_forwards"] == 0
+    assert warm_up(model, items(), "cpu", n=0)["warmup_forwards"] == 0
+
+
+def test_the_scorer_clock_excludes_the_child_build(geo, target):
+    """The gate compares the SCORER; aggregation, selection and the child
+    build are identical in both arms and would dilute the ratio."""
+    out = run(build_tiny_model(GEOMETRY), geo, target, items())
+    assert 0 < out.trace["scorer_seconds"] <= out.trace["seconds"]
+
+
 def test_progress_is_printed_and_bounded(geo, target, capfd):
     model = build_tiny_model(GEOMETRY)
     run(model, geo, target, items())
@@ -380,6 +451,115 @@ def test_the_retained_share_is_reported_per_layer(geo, target):
     assert out.local_metrics.values["op.attention.retained_causal_kl_min"] == min(shares)
 
 
+# --- the evidence: the landscape, not only the decision -------------------
+
+def _evidence(out):
+    return out.artifacts["causal_head_evidence"]
+
+
+def test_the_per_item_landscape_is_retained(geo, target):
+    """A head map cannot distinguish a decisive margin from a tie."""
+    calib = items()
+    out = run(build_tiny_model(GEOMETRY), geo, target, calib)
+    ev = _evidence(out)
+    L, H, N = (GEOMETRY["num_hidden_layers"], GEOMETRY["num_attention_heads"],
+               len(calib))
+    assert len(ev["per_item_kl"]) == L
+    assert all(len(layer) == H for layer in ev["per_item_kl"])
+    assert all(len(head) == N for layer in ev["per_item_kl"] for head in layer)
+    assert all(isinstance(v, float) for layer in ev["per_item_kl"]
+               for head in layer for v in head)
+
+
+def test_item_metadata_is_stored_once_as_columns(geo, target):
+    """Not repeated 60k times. Columns, parallel to the value axis."""
+    calib = items()
+    ev = _evidence(run(build_tiny_model(GEOMETRY), geo, target, calib))
+    assert ev["item_ids"] == [i["item_id"] for i in calib]
+    assert ev["item_domains"] == [i["domain"] for i in calib]
+    assert ev["item_subtypes"] == [i["subtype"] for i in calib]
+    assert ev["item_prediction_positions"] == [
+        int(i["input_ids"].shape[-1]) - 1 for i in calib]
+
+
+def test_the_values_are_in_the_mixtures_own_order_not_the_batchers(geo, target):
+    """B1 and B4 visit items in different GROUPINGS but the same ORDER; the
+    evidence must be indexed by the mixture, or the two arms' landscapes
+    could not be compared row by row."""
+    calib = ragged_items()
+    b1 = _evidence(run(build_tiny_model(GEOMETRY), geo, target, calib,
+                       batch_size=1))
+    b4 = _evidence(run(build_tiny_model(GEOMETRY), geo, target, calib,
+                       batch_size=4))
+    assert b1["item_ids"] == b4["item_ids"] == [i["item_id"] for i in calib]
+    for l in range(GEOMETRY["num_hidden_layers"]):
+        for h in range(GEOMETRY["num_attention_heads"]):
+            for a, b in zip(b1["per_item_kl"][l][h], b4["per_item_kl"][l][h]):
+                assert a == pytest.approx(b, abs=1e-6)
+
+
+def test_the_aggregate_scores_are_retained_per_head(geo, target):
+    out = run(build_tiny_model(GEOMETRY), geo, target, items())
+    ev = _evidence(out)
+    assert len(ev["head_scores"]) == GEOMETRY["num_hidden_layers"]
+    assert all(len(s) == GEOMETRY["num_attention_heads"]
+               for s in ev["head_scores"])
+
+
+def test_each_gqa_group_records_its_cut(geo, target):
+    out = run(build_tiny_model(GEOMETRY), geo, target, items())
+    ev = _evidence(out)
+    n_kv = GEOMETRY["num_key_value_heads"]
+    per_group = KEEP_HEADS // n_kv
+    for layer_decisions, kept in zip(ev["gqa_decisions"],
+                                     out.artifacts["kept_heads"]):
+        assert len(layer_decisions) == n_kv
+        for d in layer_decisions:
+            assert len(d["selected_heads"]) == per_group
+            assert d["ranked_heads"][:per_group] == sorted(
+                d["selected_heads"], key=lambda h: (
+                    -d["scores"][h - d["member_heads"][0]], h))
+            assert d["cutoff_selected"] >= d["cutoff_rejected"]
+            assert d["cutoff_margin"] == pytest.approx(
+                d["cutoff_selected"] - d["cutoff_rejected"])
+        #: And the decisions agree with the map the operator actually built.
+        assert sorted(h for d in layer_decisions
+                      for h in d["selected_heads"]) == kept
+
+
+def test_the_cut_is_consistent_with_the_shared_selector(geo, target):
+    """The decision record reproduces `select_q_heads_by_score`, not a second
+    ordering rule that could drift from it."""
+    from aadistill.initialization.operators.attention.gqa._common import (
+        select_q_heads_by_score)
+
+    out = run(build_tiny_model(GEOMETRY), geo, target, items())
+    ev = _evidence(out)
+    for layer, scores in enumerate(ev["head_scores"]):
+        expected = select_q_heads_by_score(
+            scores, GEOMETRY["num_attention_heads"],
+            GEOMETRY["num_key_value_heads"], KEEP_HEADS)
+        assert out.artifacts["kept_heads"][layer] == expected
+
+
+def test_no_logits_are_retained(geo, target):
+    """The evidence is scores, not 60k x 151936 floats."""
+    ev = _evidence(run(build_tiny_model(GEOMETRY), geo, target, items()))
+    assert "logits" not in json.dumps(ev)[:200].lower()
+    assert set(ev) == {
+        "score", "calibration_forward_batch_size", "item_ids", "item_domains",
+        "item_subtypes", "item_prediction_positions", "per_item_kl",
+        "head_scores", "gqa_decisions"}
+
+
+def test_the_evidence_is_json_serializable(geo, target):
+    """It has to reach a record, so it may hold no tensors and no NaN."""
+    ev = _evidence(run(build_tiny_model(GEOMETRY), geo, target, items()))
+    text = json.dumps(ev)
+    assert "NaN" not in text and "Infinity" not in text
+    assert json.loads(text)["head_scores"] == ev["head_scores"]
+
+
 # --- the batch size is CONFIG, and nothing else ----------------------------
 
 def test_the_batch_size_comes_from_the_step_config(geo, target):
@@ -439,10 +619,148 @@ def test_the_operator_source_never_reads_micro_batch_size():
     assert "micro_batch_size" not in live
 
 
-@pytest.mark.parametrize("bad", [0, -1, "0"])
+@pytest.mark.parametrize("bad", [0, -1])
 def test_a_batch_size_below_one_is_refused(bad):
-    with pytest.raises(OperatorError, match=BATCH_SIZE_CONFIG_KEY):
+    with pytest.raises(OperatorError, match="must be >= 1"):
         resolve_forward_batch_size({BATCH_SIZE_CONFIG_KEY: bad})
+
+
+@pytest.mark.parametrize("bad", ["4", 4.0, 4.7, True, False, None, [4]])
+def test_a_non_int_batch_size_is_REFUSED_not_coerced(bad):
+    """`int(value)` would accept every one of these.
+
+    The field is hashed into the step identity, so `4`, `4.0`, `"4"` and
+    `True` must not be allowed to mean the same execution while serializing to
+    four different states -- a replay would then disagree with its own record
+    about what it ran. Same rule as `ExecutionConfig`, for the same reason.
+    """
+    with pytest.raises(OperatorError, match="must be an int"):
+        resolve_forward_batch_size({BATCH_SIZE_CONFIG_KEY: bad})
+
+
+def test_the_resolver_does_not_call_int():
+    """Executable check: a future edit cannot reintroduce the coercion."""
+    import ast
+    import inspect
+
+    from aadistill.initialization.operators.attention.gqa import causal_kl as m
+
+    tree = ast.parse(inspect.getsource(m.resolve_forward_batch_size).lstrip())
+    calls = {getattr(n.func, "id", "") for n in ast.walk(tree)
+             if isinstance(n, ast.Call)}
+    assert "int" not in calls, "the identity-bearing field is being coerced"
+
+
+def test_the_pilot_step_constructor_refuses_the_same_values():
+    """The pilot must not build a step the operator will later refuse."""
+    from experiments.phase_c3.pilot import causal_step
+
+    for bad in ("4", 4.0, True, None):
+        with pytest.raises((TypeError, ValueError)):
+            causal_step(bad)
+
+
+# --- a non-finite score is a FAILED scorer, never a zero ------------------
+
+
+class _Poison:
+    """Makes one forward return non-finite logits, then restores itself."""
+
+    def __init__(self, model, adapter, layer=1):
+        self.proj = adapter.attention(adapter.blocks(model)[layer]).o_proj
+        self.saved = None
+
+    def __enter__(self):
+        self.saved = self.proj.weight.detach().clone()
+        with torch.no_grad():
+            self.proj.weight.fill_(float("inf"))
+        return self
+
+    def __exit__(self, *exc):
+        with torch.no_grad():
+            self.proj.weight.copy_(self.saved)
+        return False
+
+
+@pytest.mark.parametrize("batch_size", [1, 4])
+def test_a_non_finite_kl_refuses_rather_than_scoring_zero(geo, target,
+                                                          batch_size):
+    """60k forwards feed a `sorted()` that materializes a head map. One NaN
+    sorts to an arbitrary position and the map is a fiction."""
+    model = build_tiny_model(GEOMETRY)
+    with _Poison(model, QWEN3_ADAPTER):
+        with pytest.raises(OperatorError, match="non-finite causal KL"):
+            run(model, geo, target, items(), batch_size=batch_size)
+
+
+@pytest.mark.parametrize("batch_size", [1, 4])
+def test_the_refusal_names_where_it_happened(geo, target, batch_size):
+    model = build_tiny_model(GEOMETRY)
+    with _Poison(model, QWEN3_ADAPTER):
+        with pytest.raises(OperatorError) as exc:
+            run(model, geo, target, items(), batch_size=batch_size)
+    text = str(exc.value)
+    assert "layer" in text and "head" in text
+    assert (f"B{batch_size}" in text) or ("B1" in text and batch_size == 1)
+
+
+@pytest.mark.parametrize("batch_size", [1, 4])
+def test_the_model_is_fully_restored_after_a_refusal(geo, target, batch_size):
+    """The `finally` in `head_ablated` must survive this exception too."""
+    model = build_tiny_model(GEOMETRY)
+    poison = _Poison(model, QWEN3_ADAPTER)
+    with poison:
+        before = [p.detach().clone() for p in model.parameters()]
+        with pytest.raises(OperatorError):
+            run(model, geo, target, items(), batch_size=batch_size)
+        assert all(torch.equal(a, b)
+                   for a, b in zip(before, model.parameters()))
+
+
+def test_a_non_finite_aggregate_refuses_before_materialization(geo, target,
+                                                               monkeypatch):
+    """The per-item guard cannot catch a mean that overflows, and the
+    aggregate is the value `sorted()` actually reads."""
+    from aadistill.initialization.operators.attention.gqa import causal_kl as m
+
+    calls = {"n": 0}
+
+    def poisoned(means, domains):
+        calls["n"] += 1
+        return (float("nan") if calls["n"] == 5 else 1.0), {}
+
+    monkeypatch.setattr(m, "domain_balanced_score", poisoned)
+    model = build_tiny_model(GEOMETRY)
+    before = [p.detach().clone() for p in model.parameters()]
+    with pytest.raises(OperatorError, match="aggregate score"):
+        run(model, geo, target, items())
+    assert all(torch.equal(a, b) for a, b in zip(before, model.parameters()))
+
+
+def test_a_missing_item_value_refuses(geo, target, monkeypatch):
+    """Incomplete evidence must not be aggregated into a confident score."""
+    from aadistill.initialization.operators.attention.gqa import causal_kl as m
+
+    real = m.micro_batches
+
+    def short(items_, batch_size, **kw):
+        groups = list(real(items_, batch_size, **kw))
+        return iter(groups[:-1])          # one group never scored
+
+    monkeypatch.setattr(m, "micro_batches", short)
+    with pytest.raises(OperatorError, match="produced no causal KL"):
+        run(build_tiny_model(GEOMETRY), geo, target, items())
+
+
+def test_nothing_is_clamped_or_substituted():
+    """Stated as source, because a clamp would pass every test above."""
+    import inspect
+
+    from aadistill.initialization.operators.attention.gqa import causal_kl as m
+
+    src = inspect.getsource(m)
+    for banned in ("nan_to_num", "torch.clamp", "= 0.0 if", "or 0.0"):
+        assert banned not in src, f"the scorer appears to substitute: {banned}"
 
 
 def test_resolve_accepts_a_missing_config():

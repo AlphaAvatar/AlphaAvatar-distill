@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "PACKAGE APPROVED 2026-09-11, AMENDED the same day: MONEY bounds the sessions, not a count. An approval is NOT a launch. That package is C1's and its round ended with a verdict; C2 baseline completion is DONE. NOTHING may launch now. Owner: logs/budget/decisions.md.",
+  "note": "TWO, and they are separate. (1) PACKAGE APPROVED 2026-09-11, AMENDED the same day: money bounds the sessions, not a count; that package is C1's and its round ended with a verdict. (2) The C3 BATCHING-ADOPTION PILOT, authorized 2026-09-27 with its own $5.00 all-in ceiling, conditional on the $0 blockers passing. An approval is NOT a launch. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -20,7 +20,7 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "no C2 launch is prepared and none may be: C2 is closed and further C2 scientific spend is not authorized. The attempt6 grant written during the campaign is historical and confers nothing -- no readiness record, authorization or bundle exists for it. C3 has no chain of any kind."
+  "note": "No chain exists. C2 is closed and no C2 launch may be prepared. The C3 batching-adoption pilot is AUTHORIZED but has no readiness record, authorization document or bundle yet; formal C3 has no chain of any kind."
  },
  "budget": {
   "cumulative_spend_usd": 342.7021,
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -124,7 +124,12 @@
    "probes_owed": 0,
    "closure": "see the top-level `c2_closure`"
   },
-  "c3": "NOT STARTED, and the next scientific stage. causal-KL ATTENTION isolation. C2 named no new incumbent, so a C3 design starts from B = the frozen C1 treatment unless its own design review decides otherwise; the operator does not exist yet. To be designed and authorized independently from the final C2 remote HEAD. NOT authorized and NOT prepared.",
+  "c3": {
+   "status": "NOT STARTED, and the next scientific stage: causal-KL ATTENTION isolation from B. NOT authorized, NOT prepared, NO frozen seed set.",
+   "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
+   "batching_adoption_pilot": "AUTHORIZED 2026-09-27, NOT EXECUTED. B1-vs-B4 causal scoring off ONE replayed frozen parent; pilot-only seed 1139220455; $5.00 all-in. Also not formal C3.",
+   "budget": "formal C3 must be RE-PRICED and separately authorized; the old $25 envelope is not current permission under the $370.00 cap."
+  },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
  "storage": {
@@ -133,7 +138,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOTHING IS BLOCKED and NO SPEND IS AUTHORIZED. C2 is CLOSED WITHOUT PROMOTION by maintainer decision 2026-09-24: no new incumbent, B from C1 stands, no probes owed, and further C2 scientific spend is NOT authorized.",
+ "blocker": "C2 is CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24): no new incumbent, B from C1 stands, no probes owed, no further C2 scientific spend. The only authorized spend is the C3 batching-adoption pilot, $5.00 all-in, which is engineering-scale and is NOT formal C3.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -161,7 +166,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",
@@ -174,7 +179,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "design and authorize C3 from the final C2 remote HEAD. Nothing is prepared and nothing may launch. No C2 work remains.",
+ "next": "execute the C3 batching-adoption pilot (B1 vs B4 causal scoring) inside its $5.00 ceiling, then re-price and separately authorize formal C3.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",

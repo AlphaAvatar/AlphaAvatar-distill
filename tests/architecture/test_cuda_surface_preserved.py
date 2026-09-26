@@ -733,7 +733,14 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "moved by the caller afterwards. THIS IS A DECLARED SEMANTIC "
             "CHANGE: one previously-accepted input is now refused, and config "
             "key order no longer reaches the hash. No existing step declares a "
-            "config, so no historical identity moves.",
+            "config, so no historical identity moves. (c) "
+            "`SELECTION_ARTIFACTS` gained `causal_head_evidence`, so an "
+            "operator's scoring LANDSCAPE — per-item KLs, aggregate head "
+            "scores, per-GQA-group cutoffs — reaches the persisted "
+            "`StepResult` instead of being discarded at the executor "
+            "boundary. Additive and presence-filtered: an operator that does "
+            "not produce the key serializes exactly as before, which is every "
+            "historical one.",
         "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
             "NEW MODULE: `attention.causal_kl_v1`, the C3 candidate. THIS IS A "
             "DECLARED SEMANTIC CHANGE by construction -- new executable core is "

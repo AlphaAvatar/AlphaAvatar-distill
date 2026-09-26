@@ -135,6 +135,81 @@ def test_peak_logit_residency_is_reported_and_fits_the_card(doc):
 
 
 @needs_mixture
+def test_the_vram_bound_is_more_than_the_logit_blocks(doc):
+    """4.62 GiB is the LOGITS. It is not the pod's VRAM requirement.
+
+    At B4 the reducer's float32 transient is larger than the logit blocks it
+    reduces: `forward_kl_mean_batch` upcasts a `[B, chunk, V]` slice and
+    holds several such tensors inside one expression. Reporting the logit
+    figure as the readiness bound would understate the requirement by more
+    than a factor of two.
+    """
+    b4 = doc["arms"]["B4"]
+    assert b4["reducer_transient_gib"] > b4["peak_logit_gib"], (
+        "the reducer transient is being understated")
+    assert b4["peak_vram_bound_gib"] > 2 * b4["peak_logit_gib"]
+    assert b4["peak_vram_bound_gib"] == pytest.approx(
+        b4["peak_logit_gib"] + b4["reducer_transient_gib"]
+        + b4["model_weights_gib"] + b4["runtime_overhead_gib"], abs=0.01)
+
+
+@needs_mixture
+def test_the_bound_includes_the_weights_and_an_overhead_allowance(doc):
+    for arm in doc["arms"].values():
+        assert arm["model_weights_gib"] > 1.0, "the parent is 713M parameters"
+        assert arm["runtime_overhead_gib"] > 0
+
+
+@needs_mixture
+def test_the_worst_arm_fits_the_only_authorized_card(doc):
+    v = doc["vram_bound"]
+    assert v["card"] == "L40S" and v["card_vram_gib"] == 48.0
+    assert v["worst_arm_gib"] == max(a["peak_vram_bound_gib"]
+                                     for a in doc["arms"].values())
+    assert v["fits"] is True
+    #: Headroom, not a squeeze: this bound is conservative but the pod also
+    #: holds a tokenizer, the checkpoint writer's buffers and whatever the
+    #: driver does between steps.
+    assert v["worst_arm_gib"] < 0.6 * v["card_vram_gib"]
+
+
+@needs_mixture
+def test_a_heavier_dtype_still_has_to_fit():
+    """If the parent were loaded in float32 the bound must still be checked,
+    not assumed from the bf16 figure."""
+    register_builtin_operators()
+    causal_kl.register(replace=True)
+    try:
+        fp32 = pricing.derive(REPO, 1.09, 90.0, weight_bytes=4)
+    finally:
+        causal_kl.unregister()
+    assert fp32["vram_bound"]["worst_arm_gib"] > 0
+    assert fp32["arms"]["B4"]["model_weights_gib"] == pytest.approx(
+        2 * 1.329, abs=0.05)
+
+
+def test_the_reducer_block_count_matches_the_reducer_source():
+    """The constant is read FROM the reducer's loop, not invented.
+
+    If `forward_kl_mean_batch` grows another live `[B, chunk, V]` float32
+    tensor, this bound silently understates. Counting the upcast expressions
+    is crude, but it fails loudly when the loop changes, which a written
+    constant would not.
+    """
+    import inspect
+
+    from aadistill.initialization.statistics import contribution
+
+    src = inspect.getsource(contribution.forward_kl_mean_batch)
+    body = src[src.index("for a in range("):]
+    upcasts = body.count(".float()") + body.count("log_softmax")
+    assert upcasts <= pricing.REDUCER_LIVE_FP32_BLOCKS, (
+        f"the reducer loop now holds more float32 blocks ({upcasts}) than "
+        f"the VRAM bound allows for ({pricing.REDUCER_LIVE_FP32_BLOCKS})")
+    assert pricing.REDUCER_CHUNK == 512, "the operator calls it with chunk=512"
+
+
+@needs_mixture
 def test_the_residency_is_derived_from_the_widest_group(doc):
     for arm in doc["arms"].values():
         expected = 2 * (arm["calibration_forward_batch_size"]
