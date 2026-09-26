@@ -1448,7 +1448,39 @@ in. Both were measured here, and they agree.
 
 <!-- readiness:end -->
 
-## The full suite is not green: 14 failures, one family
+## The full suite is not green: 11 failures, one family
+
+**Current measurement, 2026-09-26 at `a76cce7f` on a clean tree: 11 failed,
+4881 passed, 228 skipped** over all of `tests/`, in 45m26s. Those eleven are
+**exactly** the set that is red at `ab53ba14`, the pre-refactor base — checked
+by running the same nodeids in a detached worktree at that commit. **Zero new
+failures** from the batching/topology refactor or from this investigation.
+
+<details><summary>the 11, by nodeid</summary>
+
+```text
+autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
+autoinit/test_c2_behavioural_proposal.py::test_the_ceiling_fits_the_project_cap_with_headroom
+autoinit/test_phase_c2_full_search.py::test_the_budget_position_is_derived_not_restated
+autoinit/test_phase_c2_full_search.py::test_the_documents_are_deterministic_and_regenerating_verifies_them
+autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does
+pod/test_c1_one_provider_resource.py::test_M_the_live_grant_and_the_launcher_agree_on_acquisition
+pod/test_c1_session_contract.py::test_the_writer_refuses_to_rewrite_the_frozen_preregistration
+pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest
+pod/test_phase_c2_full_search_chain.py::test_the_proposal_regenerates_byte_identically
+pod/test_phase_c2_full_search_chain.py::test_the_proposal_reproduces_the_live_identities
+pod/test_phase_c2_full_search_chain.py::test_the_proposal_states_the_figures_a_launch_review_needs
+```
+
+</details>
+
+**Three were mine and are fixed**, not carried: `test_every_pod_script_is_classified`
+(two uncatalogued `scripts/pod` entries) and two budget-snapshot tests left
+stale when the C3 engineering campaign booked its first `$0.0822`. A previous
+report claimed zero new failures when there were three; see the C3 section.
+
+The historical measurement below is kept because the family analysis is still
+the right reading of why these stay red.
 
 Measured on the settled tree, 2026-09-19: **14 failed, 3207 passed, 15
 skipped** over `tests/{docs,pod,architecture,autoinit,validation}`, with
