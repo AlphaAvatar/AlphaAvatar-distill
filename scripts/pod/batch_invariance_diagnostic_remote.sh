@@ -226,6 +226,10 @@ print('  /opt/train: torch', torch.__version__, '| transformers', transformers._
 #                      which is the closest reachable neighbour of a4's own
 #                      unpinned runtime. This is the environment control: it
 #                      asks whether the runtime alone moves the answer.
+#: WHICH diagnostic a wave runs. Defaults to the batch-invariance one so every
+#: existing call site is unchanged; the parallel-item continuation sets it.
+DIAG=${DIAG:-scripts/validation/batch_invariance_diagnostic.py}
+
 run_one() {
   local label="$1" python="$2" attn="$3" ckpt="$4" only="${5:-}" nitems="${6:-}" \
         policy="${7:-}"
@@ -241,7 +245,7 @@ run_one() {
   AAD_WHEELHOUSE_SOURCE="AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312" \
   AAD_REQUIREMENTS="requirements-cu128.txt" \
   PYTHONPATH=src:scripts timeout "${RUN_MAX_S:-1500}" \
-  "$python" scripts/validation/batch_invariance_diagnostic.py \
+  "$python" "$DIAG" \
       --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
       ${attn:+--attn "$attn"} ${ckpt:+--checkpoint "$ckpt"} \
       ${only:+--only "$only"} ${nitems:+--n-items "$nitems"} \
@@ -260,23 +264,45 @@ run_one() {
 
 cd /workspace/repo
 
-# --- Outcome B: localize what split-K-off did NOT fix -----------------------
-# The control has already answered. Forbidding split-K (with cuBLASLt, which it
-# requires) makes every bare GEMM bit-exact on both checkpoints, and on the
-# parent the EQUAL-LENGTH batch becomes bit-identical to solo. It does not fix
-# the ragged padded path, it does not preserve the historical solo output, and
-# FFN selection still moves in 31 of 36 layers.
+# --- parallel independent B=1 item forwards ---------------------------------
+# A DIFFERENT architecture from padded tensor batching, and the distinction is
+# the point. Each item is presented to the model as [1, T_i] exactly as it was
+# historically -- no padding, no batch dimension, the same attention path, the
+# HISTORICAL numerical policy (no split-K intervention here). Only the schedule
+# changes: N forwards submitted to N CUDA streams, one synchronize, then
+# compare each against its own sequential B=1 oracle. The bar is bitwise.
 #
-# So the remaining question is the narrow one the review names for Outcome B:
-# under split-K off, WHERE does solo first stop agreeing with a ragged batch?
-# `--bf16-policy splitk_off` applies the policy before the model loads, so the
-# case matrix and the layer-by-layer tap walk are measured under it rather than
-# under whatever the build ships. The run REFUSES if the policy is unavailable.
-run_one parent_localize_under_splitk_off /opt/train/bin/python sdpa "" \
-        case_matrix,first_divergence 8 splitk_off
+# `--only` and `--bf16-policy` do not apply to this diagnostic; it takes
+# `--concurrency` and `--concurrency-sweep` instead, so the wave is invoked
+# directly rather than through run_one's flag set.
+DIAG_PI=scripts/validation/parallel_item_forward_diagnostic.py
+run_parallel_item() {
+  local label="$1" ckpt="$2" conc="$3" sweep="$4"
+  local dir="${OUTROOT}/${label}"
+  mkdir -p "$dir"
+  say "parallel-item ${label} (ckpt=${ckpt:-hub-parent} conc=${conc} sweep=${sweep})"
+  local t=$(date -u +%s)
+  AAD_CONTAINER_IMAGE="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404" \
+  AAD_WHEELHOUSE_SOURCE="AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312" \
+  AAD_REQUIREMENTS="requirements-cu128.txt" \
+  PYTHONPATH=src:scripts timeout "${RUN_MAX_S:-1500}" \
+  /opt/train/bin/python "$DIAG_PI" \
+      --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
+      --scheduler streams --n-items 8 --concurrency "$conc" \
+      --concurrency-sweep "$sweep" \
+      ${ckpt:+--checkpoint "$ckpt"} \
+      --out "$dir" > "${dir}/stdout.log" 2>&1
+  local rc=$?
+  tail -40 "${dir}/stdout.log"
+  say "  ${label} rc=${rc} in $(( $(date -u +%s) - t ))s"
+  echo "${label} rc=${rc}" >> "${OUTROOT}/run_status.txt"
+}
+
+# The parent first: it is the object C3 calibrates on. 8 is included in the
+# sweep only for the 596M, where eight concurrent [1, T] activations are small.
+run_parallel_item parent_parallel_b1 "" 4 1,2,4
 if [ -n "$A4_CKPT" ]; then
-  run_one a4_596m_localize_under_splitk_off /opt/train/bin/python sdpa "$A4_CKPT" \
-          case_matrix,first_divergence 8 splitk_off
+  run_parallel_item a4_596m_parallel_b1 "$A4_CKPT" 4 1,2,4,8
 fi
 
 say "done; reports:"

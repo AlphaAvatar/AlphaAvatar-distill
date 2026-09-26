@@ -717,6 +717,22 @@ def build(reports: dict, prior: dict | None = None) -> dict:
         "reports": sorted(reports),
         "environments": environments(reports),
         "executables": _executables(reports),
+        #: TWO SCOPES, NAMED. `verdict` below adjudicates the a4 claims;
+        #: `split_k_control.verdict` answers whether forbidding split-K repairs
+        #: the divergence. A reader of splitk_finding.json saw a top-level
+        #: NOT_ESTABLISHED beside a nested SPLIT_K_PARTIAL and had no way to
+        #: tell they were about different questions. The bare `verdict` key is
+        #: kept so existing readers do not break; these two are unambiguous.
+        "overall_batch_invariance_verdict": v["verdict"],
+        "_overall_verdict_scope": (
+            "adjudicates the a4 finding's claims against the same quantities "
+            "measured here; NOT_ESTABLISHED means this evidence set did not "
+            "run the stages that vote on them, not that nothing was found"),
+        "split_k_control_verdict": split_k_control(reports).get("verdict"),
+        "_split_k_verdict_scope": (
+            "answers only whether forbidding split-K removes the "
+            "shape-dependent divergence while preserving the historical solo "
+            "path; it says nothing about the a4 claims"),
         "a4_claims_adjudicated": checks,
         "mechanism": mechanism(reports),
         "subsample_sensitivity": subsample_sensitivity(reports),
