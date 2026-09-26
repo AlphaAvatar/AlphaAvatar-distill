@@ -454,7 +454,55 @@ def subsample_sensitivity(reports: dict) -> dict:
     return out
 
 
-def build(reports: dict) -> dict:
+def cross_session(reports: dict, prior: dict) -> dict:
+    """Do two SESSIONS on two pods agree, label for label?
+
+    Within-run repeatability is already measured (each shape repeats itself
+    bit-identically). This is the stronger claim: a different pod on a different
+    host, hours apart, reproducing the same numbers. If it holds, the effect is
+    a property of the computation and not of a run -- which is what lets the
+    word "deterministic" be used about a divergence.
+    """
+    if not prior:
+        return {"compared": False,
+                "why": "no prior session's reports were supplied"}
+    out, shared = {}, sorted(set(reports) & set(prior))
+    for label in shared:
+        a, b = prior[label], reports[label]
+        pairs = {
+            "case_matrix_A_vs_E_rel_l2": (
+                dig(a, "stages", "case_matrix", "comparisons", "A_vs_E", "rel_l2"),
+                dig(b, "stages", "case_matrix", "comparisons", "A_vs_E", "rel_l2")),
+            "ffn_layers_with_moved_selection": (
+                dig(a, "conclusion", "ffn_layers_with_moved_selection"),
+                dig(b, "conclusion", "ffn_layers_with_moved_selection")),
+            "ffn_abs_sum_rel_l2_bs4": (
+                dig(a, "stages", "statistics_decomposition",
+                    "by_micro_batch_size", "4", "ffn_abs_sum", "rel_l2"),
+                dig(b, "stages", "statistics_decomposition",
+                    "by_micro_batch_size", "4", "ffn_abs_sum", "rel_l2")),
+            "divergence_locus": (dig(a, "conclusion", "divergence_locus"),
+                                 dig(b, "conclusion", "divergence_locus")),
+        }
+        out[label] = {
+            "prior": {k: v[0] for k, v in pairs.items()},
+            "this_session": {k: v[1] for k, v in pairs.items()},
+            "identical": {k: v[0] == v[1] for k, v in pairs.items()},
+            "all_identical": all(v[0] == v[1] for v in pairs.values()),
+        }
+    return {
+        "compared": True,
+        "labels_in_both_sessions": shared,
+        "per_label": out,
+        "every_shared_label_reproduces_exactly": bool(out) and all(
+            v["all_identical"] for v in out.values()),
+        "_reading": ("exact equality, not a tolerance. Two pods hours apart "
+                     "producing the same float means the divergence is a "
+                     "property of the computation and not of a run."),
+    }
+
+
+def build(reports: dict, prior: dict | None = None) -> dict:
     a4 = {}
     p = REPO / A4_FINDING
     if p.is_file():
@@ -480,6 +528,7 @@ def build(reports: dict) -> dict:
         "a4_claims_adjudicated": checks,
         "mechanism": mechanism(reports),
         "subsample_sensitivity": subsample_sensitivity(reports),
+        "cross_session_reproducibility": cross_session(reports, prior or {}),
         **v,
         "localization": {
             label: {
@@ -525,13 +574,16 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("reports", nargs="+", help="directories holding report.json")
     ap.add_argument("--out", required=True)
+    ap.add_argument("--prior", nargs="*", default=(),
+                    help="an EARLIER session's report directories; matching "
+                         "labels are compared for exact equality")
     args = ap.parse_args(argv)
 
     reports = load_reports(args.reports)
     if not reports:
         say("no reports could be read; refusing to derive a finding from nothing")
         return 4
-    doc = build(reports)
+    doc = build(reports, load_reports(args.prior) if args.prior else None)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1) + "\n")

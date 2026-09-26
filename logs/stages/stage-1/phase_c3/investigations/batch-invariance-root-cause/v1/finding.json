@@ -2,7 +2,7 @@
  "schema": "aadistill.validation_finding/v1",
  "_contract": "DERIVED, not written. Every number here was read from a report.json emitted by batch_invariance_diagnostic.py, and the verdict is computed by scripts/validation/batch_invariance_finding.py. It authorizes nothing and changes nothing.",
  "investigation_id": "batch_invariance_root_cause_v1",
- "derived_utc": "2026-09-26T00:21:13.561343+00:00",
+ "derived_utc": "2026-09-26T00:23:41.693244+00:00",
  "supersedes_or_adjudicates": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
  "_the_prior_record_is_not_rewritten": "It is historical evidence. This record states what its claims do and do not reproduce; it does not edit them.",
  "reports": [
@@ -881,6 +881,103 @@
   },
   "decision_claim_survives_everywhere_it_was_tested": true,
   "_prediction_record": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/fullmix_prediction.json"
+ },
+ "cross_session_reproducibility": {
+  "compared": true,
+  "labels_in_both_sessions": [
+   "a4_596m_B_image_sdpa",
+   "a4_596m_C_science_sdpa",
+   "parent_C_science_eager",
+   "parent_C_science_sdpa"
+  ],
+  "per_label": {
+   "a4_596m_B_image_sdpa": {
+    "prior": {
+     "case_matrix_A_vs_E_rel_l2": 0.1603345423936844,
+     "ffn_layers_with_moved_selection": 26,
+     "ffn_abs_sum_rel_l2_bs4": 0.03938467055559158,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "this_session": {
+     "case_matrix_A_vs_E_rel_l2": 0.1603345423936844,
+     "ffn_layers_with_moved_selection": 26,
+     "ffn_abs_sum_rel_l2_bs4": 0.03938467055559158,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "identical": {
+     "case_matrix_A_vs_E_rel_l2": true,
+     "ffn_layers_with_moved_selection": true,
+     "ffn_abs_sum_rel_l2_bs4": true,
+     "divergence_locus": true
+    },
+    "all_identical": true
+   },
+   "a4_596m_C_science_sdpa": {
+    "prior": {
+     "case_matrix_A_vs_E_rel_l2": 0.15590862929821014,
+     "ffn_layers_with_moved_selection": 26,
+     "ffn_abs_sum_rel_l2_bs4": 0.03931969776749611,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "this_session": {
+     "case_matrix_A_vs_E_rel_l2": 0.15590862929821014,
+     "ffn_layers_with_moved_selection": 26,
+     "ffn_abs_sum_rel_l2_bs4": 0.03931969776749611,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "identical": {
+     "case_matrix_A_vs_E_rel_l2": true,
+     "ffn_layers_with_moved_selection": true,
+     "ffn_abs_sum_rel_l2_bs4": true,
+     "divergence_locus": true
+    },
+    "all_identical": true
+   },
+   "parent_C_science_eager": {
+    "prior": {
+     "case_matrix_A_vs_E_rel_l2": 0.015722760930657387,
+     "ffn_layers_with_moved_selection": 35,
+     "ffn_abs_sum_rel_l2_bs4": 0.0011176274856552482,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "this_session": {
+     "case_matrix_A_vs_E_rel_l2": 0.015722760930657387,
+     "ffn_layers_with_moved_selection": 35,
+     "ffn_abs_sum_rel_l2_bs4": 0.0011176274856552482,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "identical": {
+     "case_matrix_A_vs_E_rel_l2": true,
+     "ffn_layers_with_moved_selection": true,
+     "ffn_abs_sum_rel_l2_bs4": true,
+     "divergence_locus": true
+    },
+    "all_identical": true
+   },
+   "parent_C_science_sdpa": {
+    "prior": {
+     "case_matrix_A_vs_E_rel_l2": 0.012187184765934944,
+     "ffn_layers_with_moved_selection": 34,
+     "ffn_abs_sum_rel_l2_bs4": 0.0010941611835733056,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "this_session": {
+     "case_matrix_A_vs_E_rel_l2": 0.012187184765934944,
+     "ffn_layers_with_moved_selection": 34,
+     "ffn_abs_sum_rel_l2_bs4": 0.0010941611835733056,
+     "divergence_locus": "gemm_level_shape_dependent_accumulation"
+    },
+    "identical": {
+     "case_matrix_A_vs_E_rel_l2": true,
+     "ffn_layers_with_moved_selection": true,
+     "ffn_abs_sum_rel_l2_bs4": true,
+     "divergence_locus": true
+    },
+    "all_identical": true
+   }
+  },
+  "every_shared_label_reproduces_exactly": true,
+  "_reading": "exact equality, not a tolerance. Two pods hours apart producing the same float means the divergence is a property of the computation and not of a run."
  },
  "verdict": "CONFIRMED",
  "why": "FFN top-k selection moves between micro batch sizes on the same object a4 measured, under the pinned science runtime",

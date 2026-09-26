@@ -1370,6 +1370,13 @@ split-K signature:
 Every bit-identical projection has `K/N ≤ 1.0`; every divergent one `≥ 1.6`.
 The separation is clean in all four reports.
 
+**It reproduces exactly across pods.** The four labels `d2` and `d3` share
+agree to every digit on two different pods hours apart — `A_vs_E` relative
+`1.218718e-02` both times on the parent, the same 34 of 36 layers, the same
+statistic drift, the same locus. Within-run repeatability was already
+bit-identical; this is the stronger claim, and it is what makes "deterministic
+divergence" a fair description rather than a contradiction.
+
 **Four things it is NOT**, each measured rather than argued:
 
 * **not nondeterminism** — each shape repeats itself bit-identically, 3×;
