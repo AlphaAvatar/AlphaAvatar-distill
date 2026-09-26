@@ -1,0 +1,1912 @@
+{
+ "schema": "aadistill.validation_finding/v1",
+ "_contract": "DERIVED, not written. Every number here was read from a report.json emitted by batch_invariance_diagnostic.py, and the verdict is computed by scripts/validation/batch_invariance_finding.py. It authorizes nothing and changes nothing.",
+ "investigation_id": "batch_invariance_root_cause_v1",
+ "derived_utc": "2026-09-26T10:15:20.453112+00:00",
+ "supersedes_or_adjudicates": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/finding.json",
+ "_the_prior_record_is_not_rewritten": "It is historical evidence. This record states what its claims do and do not reproduce; it does not edit them.",
+ "reports": [
+  "a4_596m_localize_under_splitk_off",
+  "a4_596m_splitk",
+  "b_image_splitk_api_probe",
+  "parent_localize_under_splitk_off",
+  "parent_splitk"
+ ],
+ "environments": {
+  "a4_596m_splitk": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.126.09",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 67,
+   "executable_sha256": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "executable_git_head": "821185d53cce3dc42ce58b9dedc97e15f6a0de19",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "bf16_controls",
+    "operator_acceptance",
+    "performance",
+    "solo_preservation"
+   ],
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "b_image_splitk_api_probe": {
+   "torch": "2.9.1+cu130",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.126.09",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "executable_git_head": "821185d53cce3dc42ce58b9dedc97e15f6a0de19",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "bf16_controls"
+   ],
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "parent_splitk": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.126.09",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 67,
+   "executable_sha256": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "executable_git_head": "821185d53cce3dc42ce58b9dedc97e15f6a0de19",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "bf16_controls",
+    "operator_acceptance",
+    "performance",
+    "solo_preservation"
+   ],
+   "params_hidden": 2560,
+   "params_layers": 36
+  },
+  "a4_596m_localize_under_splitk_off": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.126.09",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d",
+   "executable_git_head": "fe55b16ec5f5b65fb73fe215f1067a0e61837d8c",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "case_matrix",
+    "first_divergence"
+   ],
+   "params_hidden": 1024,
+   "params_layers": 28
+  },
+  "parent_localize_under_splitk_off": {
+   "torch": "2.11.0+cu128",
+   "transformers": "5.13.1",
+   "python": "3.12.3",
+   "gpu": "NVIDIA L40S",
+   "nvidia_driver": "580.126.09",
+   "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+   "dtype": "bfloat16",
+   "device": "cuda",
+   "checkpoint": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "attn_requested": "sdpa",
+   "attn_resolved": "sdpa",
+   "calibration": "frozen_calibration_mixture",
+   "calibration_content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+   "calibration_n_items": 8,
+   "executable_sha256": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d",
+   "executable_git_head": "fe55b16ec5f5b65fb73fe215f1067a0e61837d8c",
+   "executable_clean_at_head": true,
+   "stages_run": [
+    "case_matrix",
+    "first_divergence"
+   ],
+   "params_hidden": 2560,
+   "params_layers": 36
+  }
+ },
+ "executables": {
+  "per_report": {
+   "a4_596m_splitk": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "b_image_splitk_api_probe": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "parent_splitk": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+   "a4_596m_localize_under_splitk_off": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d",
+   "parent_localize_under_splitk_off": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d"
+  },
+  "distinct_executables": 2,
+  "all_reports_share_one_executable": false,
+  "_absent_means_older": "a report with no `executable` block predates the field; its code identity is the session's recorded source sha, not this file",
+  "reports_without_an_executable_identity": []
+ },
+ "a4_claims_adjudicated": {
+  "bf16_batched_vs_solo_logits_relative": {
+   "claim": "a padded batched forward differs from a solo one on the logits",
+   "a4_reported": 0.0488,
+   "measured_here": {
+    "a4_596m_localize_under_splitk_off": {
+     "measured": 0.018688514828681946,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 0.38296136944020376,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    },
+    "parent_localize_under_splitk_off": {
+     "measured": 0.010741688311100006,
+     "a4": 0.0488,
+     "ratio_here_over_a4": 0.2201165637520493,
+     "same_order_of_magnitude": false,
+     "differs_by_more_than_10x": false
+    }
+   },
+   "_field_path": [
+    "case_matrix",
+    "comparisons",
+    "A_vs_E",
+    "rel_l2"
+   ]
+  },
+  "fp32_batched_vs_solo_logits_relative": {
+   "claim": "the same comparison in float32 is orders of magnitude smaller",
+   "a4_reported": 9.144e-06,
+   "measured_here": {},
+   "_field_path": [
+    "fp32_control",
+    "case_matrix",
+    "comparisons",
+    "A_vs_E",
+    "rel_l2"
+   ]
+  },
+  "ffn_activation_statistic_drift": {
+   "claim": "the FFN activation statistic moves between bs=1 and bs=3",
+   "a4_reported": 0.02167,
+   "measured_here": {},
+   "_field_path": [
+    "statistics_decomposition",
+    "by_micro_batch_size",
+    "3",
+    "ffn_abs_sum",
+    "rel_l2"
+   ]
+  },
+  "ffn_importance_drift": {
+   "claim": "the per-neuron importance the top-k reads moves at bs=3",
+   "a4_reported": 0.02167,
+   "measured_here": {},
+   "_field_path": [
+    "__derived__",
+    "max_importance_rel_l2_drift_bs3"
+   ]
+  },
+  "causal_kl_relative": {
+   "claim": "the scored causal KL moves solo vs batched",
+   "a4_reported": 0.007064,
+   "measured_here": {},
+   "_field_path": [
+    "causal_kl",
+    "max_rel_diff"
+   ]
+  }
+ },
+ "mechanism": {
+  "per_report": {},
+  "holds_under_every_runtime_measured": true,
+  "runtimes_measured": [
+   "2.11.0+cu128",
+   "2.9.1+cu130"
+  ],
+  "fp32_removes_the_shape_dependence": null,
+  "collector_reduction_order_contributes": false,
+  "bs1_unpadded_is_exact_everywhere": true,
+  "_reading": "a projection whose GEMM is bit-identical across shapes and one whose GEMM is not, measured side by side on the same weights, is the mechanism; `fp32_removes_the_shape_dependence` says whether the dtype is the CAUSE or the SCALE, and `collector_reduction_order_contributes` rules the accumulator in or out"
+ },
+ "subsample_sensitivity": {
+  "pairs": {},
+  "_prediction_record": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/fullmix_prediction.json"
+ },
+ "cross_session_reproducibility": {
+  "compared": false,
+  "why": "no prior session's reports were supplied"
+ },
+ "split_k_control": {
+  "per_report": {
+   "a4_596m_splitk": {
+    "torch": "2.11.0+cu128",
+    "localization_under_splitk_off": null,
+    "tuple_supported": true,
+    "split_k_state": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": false
+    },
+    "blas_library": {
+     "default": "_BlasBackend.Cublas",
+     "reduced_precision_off_splitk_on": "_BlasBackend.Cublas",
+     "cublaslt_defaults": "_BlasBackend.Cublaslt",
+     "reduced_precision_off_splitk_off": "_BlasBackend.Cublaslt"
+    },
+    "blas_request_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "gemm_probe_ran": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "improvement_attributable_to": "cublaslt_backend_alone",
+    "backend_switch_alone_fixes_it": true,
+    "split_k_flag_adds_something_beyond_the_backend": false,
+    "policy_readback": {
+     "default": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "reduced_precision_off_splitk_on": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "cublaslt_defaults": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "reduced_precision_off_splitk_off": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": false,
+      "allow_splitk_readable": true
+     }
+    },
+    "policy_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "gemm_by_control": {
+     "default": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.00048828125,
+       "rms": 4.3652216845657676e-05,
+       "rel_l2": 0.002121125813573599,
+       "bitwise_identical": false
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.0009765625,
+       "rms": 7.795200508553535e-05,
+       "rel_l2": 0.003176786471158266,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_on": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.00048828125,
+       "rms": 3.2616799217066728e-06,
+       "rel_l2": 0.00013292317453306168,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "cublaslt_defaults": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_off": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     }
+    },
+    "projections_still_shape_dependent": {
+     "default": [
+      "attn_out",
+      "ffn_out"
+     ],
+     "reduced_precision_off_splitk_on": [
+      "ffn_out"
+     ],
+     "cublaslt_defaults": [],
+     "reduced_precision_off_splitk_off": []
+    },
+    "split_k_off_makes_every_gemm_exact": true,
+    "split_k_off_beats_boolean": true,
+    "historical_solo_preserved": false,
+    "all_three_shapes_agree_under_splitk_off": false,
+    "full_model": {
+     "solo_default_vs_solo_splitk_off": {
+      "n": 95567744,
+      "max_abs": 2.396484375,
+      "mean_abs": 0.1608647257089615,
+      "rms": 0.23518885672092438,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.052863672375679016,
+      "cosine": 0.9987324476242065,
+      "bitwise_identical": false,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.01945231482386589,
+      "argmax_agreement": 0.9411764740943909,
+      "top5_set_agreement": 0.6534181237220764,
+      "top20_set_agreement": 0.316375195980072
+     },
+     "equal_batch_vs_solo_both_splitk_off": {
+      "n": 95567744,
+      "max_abs": 1.337890625,
+      "mean_abs": 0.040191635489463806,
+      "rms": 0.06319363415241241,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.014455997385084629,
+      "cosine": 0.999895453453064,
+      "bitwise_identical": false,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.0017236293060705066,
+      "argmax_agreement": 0.9761526584625244,
+      "top5_set_agreement": 0.8887122273445129,
+      "top20_set_agreement": 0.6661367416381836
+     },
+     "ragged_batch_vs_solo_both_splitk_off": {
+      "n": 95567744,
+      "max_abs": 1.6875,
+      "mean_abs": 0.060956746339797974,
+      "rms": 0.08169586956501007,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.018688514828681946,
+      "cosine": 0.999835193157196,
+      "bitwise_identical": false,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.003389771794900298,
+      "argmax_agreement": 0.9634340405464172,
+      "top5_set_agreement": 0.839427649974823,
+      "top20_set_agreement": 0.526232123374939
+     }
+    },
+    "operator_acceptance": {
+     "n_items": 67,
+     "ffn_invariant": false,
+     "attention_invariant": true,
+     "by_control": {
+      "default": {
+       "ffn_layers_moved": 21,
+       "attention_layers_moved": 0,
+       "n_layers": 28
+      },
+      "cublaslt_defaults": {
+       "ffn_layers_moved": 23,
+       "attention_layers_moved": 0,
+       "n_layers": 28
+      },
+      "reduced_precision_off_splitk_off": {
+       "ffn_layers_moved": 18,
+       "attention_layers_moved": 0,
+       "n_layers": 28
+      }
+     }
+    },
+    "performance": {
+     "n_items": 16,
+     "n_items_available": 67,
+     "total_tokens": 8303,
+     "default_bs4_seconds": 0.6799891786649823,
+     "default_bs1_seconds": 0.783500756137073,
+     "splitk_off_supported": true,
+     "splitk_off_bs4_seconds": 0.6771557265892625,
+     "splitk_off_bs1_seconds": 0.7783601861447096,
+     "splitk_off_slowdown_vs_default_batched": 0.9958330924011427,
+     "invariant_batched_speedup_vs_solo": 1.1494552221616727
+    }
+   },
+   "b_image_splitk_api_probe": {
+    "torch": "2.9.1+cu130",
+    "localization_under_splitk_off": null,
+    "tuple_supported": false,
+    "split_k_state": {
+     "default": null,
+     "reduced_precision_off_splitk_on": null,
+     "cublaslt_defaults": null,
+     "reduced_precision_off_splitk_off": null
+    },
+    "blas_library": {
+     "default": "_BlasBackend.Cublas",
+     "reduced_precision_off_splitk_on": "_BlasBackend.Cublas",
+     "cublaslt_defaults": "_BlasBackend.Cublaslt",
+     "reduced_precision_off_splitk_off": "_BlasBackend.Cublaslt"
+    },
+    "blas_request_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "gemm_probe_ran": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": null
+    },
+    "improvement_attributable_to": "undetermined",
+    "backend_switch_alone_fixes_it": null,
+    "split_k_flag_adds_something_beyond_the_backend": null,
+    "policy_readback": {
+     "default": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": null,
+      "allow_splitk_readable": false
+     },
+     "reduced_precision_off_splitk_on": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": null,
+      "allow_splitk_readable": false
+     },
+     "cublaslt_defaults": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": null,
+      "allow_splitk_readable": false
+     },
+     "reduced_precision_off_splitk_off": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": null,
+      "allow_splitk_readable": false
+     }
+    },
+    "policy_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": false
+    },
+    "gemm_by_control": {
+     "default": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.00048828125,
+       "rms": 4.3652216845657676e-05,
+       "rel_l2": 0.002121125580742955,
+       "bitwise_identical": false
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.0009765625,
+       "rms": 7.795199780957773e-05,
+       "rel_l2": 0.0031767862383276224,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_on": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.00048828125,
+       "rms": 3.2616799217066728e-06,
+       "rel_l2": 0.00013292317453306168,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "cublaslt_defaults": {
+      "q": {
+       "M": 4,
+       "K": 1024,
+       "N": 2048,
+       "K_over_N": 0.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 1024,
+       "N": 1024,
+       "K_over_N": 1.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 1024,
+       "N": 3072,
+       "K_over_N": 0.3333,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 2048,
+       "N": 1024,
+       "K_over_N": 2.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 3072,
+       "N": 1024,
+       "K_over_N": 3.0,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 1024,
+       "N": 151936,
+       "K_over_N": 0.0067,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_off": {}
+    },
+    "projections_still_shape_dependent": {
+     "default": [
+      "attn_out",
+      "ffn_out"
+     ],
+     "reduced_precision_off_splitk_on": [
+      "ffn_out"
+     ],
+     "cublaslt_defaults": []
+    },
+    "split_k_off_makes_every_gemm_exact": false,
+    "split_k_off_beats_boolean": false,
+    "historical_solo_preserved": null,
+    "all_three_shapes_agree_under_splitk_off": null,
+    "full_model": {
+     "solo_default_vs_solo_splitk_off": null,
+     "equal_batch_vs_solo_both_splitk_off": null,
+     "ragged_batch_vs_solo_both_splitk_off": null
+    },
+    "operator_acceptance": {
+     "n_items": null,
+     "ffn_invariant": null,
+     "attention_invariant": null,
+     "by_control": {}
+    },
+    "performance": {}
+   },
+   "parent_splitk": {
+    "torch": "2.11.0+cu128",
+    "localization_under_splitk_off": null,
+    "tuple_supported": true,
+    "split_k_state": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": false
+    },
+    "blas_library": {
+     "default": "_BlasBackend.Cublas",
+     "reduced_precision_off_splitk_on": "_BlasBackend.Cublas",
+     "cublaslt_defaults": "_BlasBackend.Cublaslt",
+     "reduced_precision_off_splitk_off": "_BlasBackend.Cublaslt"
+    },
+    "blas_request_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "gemm_probe_ran": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "improvement_attributable_to": "the_split_k_flag",
+    "backend_switch_alone_fixes_it": false,
+    "split_k_flag_adds_something_beyond_the_backend": true,
+    "policy_readback": {
+     "default": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "reduced_precision_off_splitk_on": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "cublaslt_defaults": {
+      "allow_reduced_precision": true,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": true,
+      "allow_splitk_readable": true
+     },
+     "reduced_precision_off_splitk_off": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": false,
+      "allow_splitk_readable": true
+     }
+    },
+    "policy_honoured": {
+     "default": true,
+     "reduced_precision_off_splitk_on": true,
+     "cublaslt_defaults": true,
+     "reduced_precision_off_splitk_off": true
+    },
+    "gemm_by_control": {
+     "default": {
+      "q": {
+       "M": 4,
+       "K": 2560,
+       "N": 4096,
+       "K_over_N": 0.625,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0009765625,
+       "rms": 7.084793469402939e-05,
+       "rel_l2": 0.0033229284454137087,
+       "bitwise_identical": false
+      },
+      "v": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0009765625,
+       "rms": 7.625597936566919e-05,
+       "rel_l2": 0.0032100630924105644,
+       "bitwise_identical": false
+      },
+      "gate": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 4096,
+       "N": 2560,
+       "K_over_N": 1.6,
+       "max_abs": 0.0009765625,
+       "rms": 7.302800804609433e-05,
+       "rel_l2": 0.002671897644177079,
+       "bitwise_identical": false
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 9728,
+       "N": 2560,
+       "K_over_N": 3.8,
+       "max_abs": 0.00390625,
+       "rms": 0.000151642962009646,
+       "rel_l2": 0.0035018455237150192,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 2560,
+       "N": 151936,
+       "K_over_N": 0.0168,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_on": {
+      "q": {
+       "M": 4,
+       "K": 2560,
+       "N": 4096,
+       "K_over_N": 0.625,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.00048828125,
+       "rms": 2.1996600025886437e-06,
+       "rel_l2": 0.00010316899715689942,
+       "bitwise_identical": false
+      },
+      "v": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.00048828125,
+       "rms": 2.0393119939399185e-06,
+       "rel_l2": 8.584701572544873e-05,
+       "bitwise_identical": false
+      },
+      "gate": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 4096,
+       "N": 2560,
+       "K_over_N": 1.6,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 9728,
+       "N": 2560,
+       "K_over_N": 3.8,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 2560,
+       "N": 151936,
+       "K_over_N": 0.0168,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "cublaslt_defaults": {
+      "q": {
+       "M": 4,
+       "K": 2560,
+       "N": 4096,
+       "K_over_N": 0.625,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 4096,
+       "N": 2560,
+       "K_over_N": 1.6,
+       "max_abs": 0.0009765625,
+       "rms": 7.302800804609433e-05,
+       "rel_l2": 0.002671897644177079,
+       "bitwise_identical": false
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 9728,
+       "N": 2560,
+       "K_over_N": 3.8,
+       "max_abs": 0.0029296875,
+       "rms": 0.00016027357196435332,
+       "rel_l2": 0.0037011457607150078,
+       "bitwise_identical": false
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 2560,
+       "N": 151936,
+       "K_over_N": 0.0168,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     },
+     "reduced_precision_off_splitk_off": {
+      "q": {
+       "M": 4,
+       "K": 2560,
+       "N": 4096,
+       "K_over_N": 0.625,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "k": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "v": {
+       "M": 4,
+       "K": 2560,
+       "N": 1024,
+       "K_over_N": 2.5,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "gate": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "up": {
+       "M": 4,
+       "K": 2560,
+       "N": 9728,
+       "K_over_N": 0.2632,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "attn_out": {
+       "M": 4,
+       "K": 4096,
+       "N": 2560,
+       "K_over_N": 1.6,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "ffn_out": {
+       "M": 4,
+       "K": 9728,
+       "N": 2560,
+       "K_over_N": 3.8,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      },
+      "lm_head": {
+       "M": 4,
+       "K": 2560,
+       "N": 151936,
+       "K_over_N": 0.0168,
+       "max_abs": 0.0,
+       "rms": 0.0,
+       "rel_l2": 0.0,
+       "bitwise_identical": true
+      }
+     }
+    },
+    "projections_still_shape_dependent": {
+     "default": [
+      "attn_out",
+      "ffn_out",
+      "k",
+      "v"
+     ],
+     "reduced_precision_off_splitk_on": [
+      "k",
+      "v"
+     ],
+     "cublaslt_defaults": [
+      "attn_out",
+      "ffn_out"
+     ],
+     "reduced_precision_off_splitk_off": []
+    },
+    "split_k_off_makes_every_gemm_exact": true,
+    "split_k_off_beats_boolean": true,
+    "historical_solo_preserved": false,
+    "all_three_shapes_agree_under_splitk_off": false,
+    "full_model": {
+     "solo_default_vs_solo_splitk_off": {
+      "n": 95567744,
+      "max_abs": 1.8125,
+      "mean_abs": 0.03908125311136246,
+      "rms": 0.05614486336708069,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.011783556081354618,
+      "cosine": 0.999930739402771,
+      "bitwise_identical": false,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.000686906510964036,
+      "argmax_agreement": 0.9872814416885376,
+      "top5_set_agreement": 0.9173291325569153,
+      "top20_set_agreement": 0.7790143489837646
+     },
+     "equal_batch_vs_solo_both_splitk_off": {
+      "n": 95567744,
+      "max_abs": 0.0,
+      "mean_abs": 0.0,
+      "rms": 0.0,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.0,
+      "cosine": 1.0000001192092896,
+      "bitwise_identical": true,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.0,
+      "argmax_agreement": 1.0,
+      "top5_set_agreement": 1.0,
+      "top20_set_agreement": 1.0
+     },
+     "ragged_batch_vs_solo_both_splitk_off": {
+      "n": 95567744,
+      "max_abs": 2.3125,
+      "mean_abs": 0.03514058142900467,
+      "rms": 0.0511927455663681,
+      "p50_abs": null,
+      "p95_abs": null,
+      "p99_abs": null,
+      "rel_l2": 0.010741688311100006,
+      "cosine": 0.999942421913147,
+      "bitwise_identical": false,
+      "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+      "forward_kl_per_position_mean": 0.0006426058243960142,
+      "argmax_agreement": 0.9841017723083496,
+      "top5_set_agreement": 0.9220985770225525,
+      "top20_set_agreement": 0.7885532975196838
+     }
+    },
+    "operator_acceptance": {
+     "n_items": 67,
+     "ffn_invariant": false,
+     "attention_invariant": false,
+     "by_control": {
+      "default": {
+       "ffn_layers_moved": 34,
+       "attention_layers_moved": 1,
+       "n_layers": 36
+      },
+      "cublaslt_defaults": {
+       "ffn_layers_moved": 31,
+       "attention_layers_moved": 2,
+       "n_layers": 36
+      },
+      "reduced_precision_off_splitk_off": {
+       "ffn_layers_moved": 31,
+       "attention_layers_moved": 1,
+       "n_layers": 36
+      }
+     }
+    },
+    "performance": {
+     "n_items": 16,
+     "n_items_available": 67,
+     "total_tokens": 8303,
+     "default_bs4_seconds": 4.537689381279051,
+     "default_bs1_seconds": 4.314134856685996,
+     "splitk_off_supported": true,
+     "splitk_off_bs4_seconds": 4.559817705303431,
+     "splitk_off_bs1_seconds": 4.311533775180578,
+     "splitk_off_slowdown_vs_default_batched": 1.0048765620925206,
+     "invariant_batched_speedup_vs_solo": 0.9455495929510344
+    }
+   },
+   "a4_596m_localize_under_splitk_off": {
+    "torch": "2.11.0+cu128",
+    "localization_under_splitk_off": {
+     "policy_readback": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": false,
+      "allow_splitk_readable": true
+     },
+     "blas": "_BlasBackend.Cublaslt",
+     "mask_presence_exact": true,
+     "equal_length_batch_exact": false,
+     "neighbour_content_irrelevant": true,
+     "ragged_padding_exact": false,
+     "solo_vs_ragged_max_abs": 1.6875,
+     "first_divergent_tap": "L00.out.attn_out",
+     "first_divergent_tap_max_abs": 0.0078125,
+     "divergent_taps_in_order": [
+      "L00.out.attn_out",
+      "L00.ffn_norm",
+      "L00.in.gate",
+      "L00.in.up",
+      "L00.out.ffn_out",
+      "L00.block_out",
+      "L01.attn_norm",
+      "L01.in.q"
+     ],
+     "divergence_enters_inside_attention": true,
+     "remaining_driver": "batch_dimension_and_padding"
+    },
+    "tuple_supported": null,
+    "split_k_state": null,
+    "blas_library": null,
+    "blas_request_honoured": null,
+    "gemm_probe_ran": null,
+    "improvement_attributable_to": null,
+    "backend_switch_alone_fixes_it": null,
+    "split_k_flag_adds_something_beyond_the_backend": null,
+    "policy_readback": {},
+    "policy_honoured": {},
+    "gemm_by_control": {},
+    "projections_still_shape_dependent": null,
+    "split_k_off_makes_every_gemm_exact": null,
+    "split_k_off_beats_boolean": null,
+    "historical_solo_preserved": null,
+    "all_three_shapes_agree_under_splitk_off": null,
+    "full_model": {
+     "solo_default_vs_solo_splitk_off": null,
+     "equal_batch_vs_solo_both_splitk_off": null,
+     "ragged_batch_vs_solo_both_splitk_off": null
+    },
+    "operator_acceptance": {
+     "n_items": null,
+     "ffn_invariant": null,
+     "attention_invariant": null,
+     "by_control": {}
+    },
+    "performance": {}
+   },
+   "parent_localize_under_splitk_off": {
+    "torch": "2.11.0+cu128",
+    "localization_under_splitk_off": {
+     "policy_readback": {
+      "allow_reduced_precision": false,
+      "allow_reduced_precision_readable": true,
+      "allow_splitk": false,
+      "allow_splitk_readable": true
+     },
+     "blas": "_BlasBackend.Cublaslt",
+     "mask_presence_exact": true,
+     "equal_length_batch_exact": true,
+     "neighbour_content_irrelevant": true,
+     "ragged_padding_exact": false,
+     "solo_vs_ragged_max_abs": 2.3125,
+     "first_divergent_tap": "L00.out.attn_out",
+     "first_divergent_tap_max_abs": 0.015625,
+     "divergent_taps_in_order": [
+      "L00.out.attn_out",
+      "L00.ffn_norm",
+      "L00.in.gate",
+      "L00.in.up",
+      "L00.out.ffn_out",
+      "L00.block_out",
+      "L01.attn_norm",
+      "L01.in.q"
+     ],
+     "divergence_enters_inside_attention": true,
+     "remaining_driver": "padding"
+    },
+    "tuple_supported": null,
+    "split_k_state": null,
+    "blas_library": null,
+    "blas_request_honoured": null,
+    "gemm_probe_ran": null,
+    "improvement_attributable_to": null,
+    "backend_switch_alone_fixes_it": null,
+    "split_k_flag_adds_something_beyond_the_backend": null,
+    "policy_readback": {},
+    "policy_honoured": {},
+    "gemm_by_control": {},
+    "projections_still_shape_dependent": null,
+    "split_k_off_makes_every_gemm_exact": null,
+    "split_k_off_beats_boolean": null,
+    "historical_solo_preserved": null,
+    "all_three_shapes_agree_under_splitk_off": null,
+    "full_model": {
+     "solo_default_vs_solo_splitk_off": null,
+     "equal_batch_vs_solo_both_splitk_off": null,
+     "ragged_batch_vs_solo_both_splitk_off": null
+    },
+    "operator_acceptance": {
+     "n_items": null,
+     "ffn_invariant": null,
+     "attention_invariant": null,
+     "by_control": {}
+    },
+    "performance": {}
+   }
+  },
+  "localizations": {
+   "a4_596m_localize_under_splitk_off": {
+    "policy_readback": {
+     "allow_reduced_precision": false,
+     "allow_reduced_precision_readable": true,
+     "allow_splitk": false,
+     "allow_splitk_readable": true
+    },
+    "blas": "_BlasBackend.Cublaslt",
+    "mask_presence_exact": true,
+    "equal_length_batch_exact": false,
+    "neighbour_content_irrelevant": true,
+    "ragged_padding_exact": false,
+    "solo_vs_ragged_max_abs": 1.6875,
+    "first_divergent_tap": "L00.out.attn_out",
+    "first_divergent_tap_max_abs": 0.0078125,
+    "divergent_taps_in_order": [
+     "L00.out.attn_out",
+     "L00.ffn_norm",
+     "L00.in.gate",
+     "L00.in.up",
+     "L00.out.ffn_out",
+     "L00.block_out",
+     "L01.attn_norm",
+     "L01.in.q"
+    ],
+    "divergence_enters_inside_attention": true,
+    "remaining_driver": "batch_dimension_and_padding"
+   },
+   "parent_localize_under_splitk_off": {
+    "policy_readback": {
+     "allow_reduced_precision": false,
+     "allow_reduced_precision_readable": true,
+     "allow_splitk": false,
+     "allow_splitk_readable": true
+    },
+    "blas": "_BlasBackend.Cublaslt",
+    "mask_presence_exact": true,
+    "equal_length_batch_exact": true,
+    "neighbour_content_irrelevant": true,
+    "ragged_padding_exact": false,
+    "solo_vs_ragged_max_abs": 2.3125,
+    "first_divergent_tap": "L00.out.attn_out",
+    "first_divergent_tap_max_abs": 0.015625,
+    "divergent_taps_in_order": [
+     "L00.out.attn_out",
+     "L00.ffn_norm",
+     "L00.in.gate",
+     "L00.in.up",
+     "L00.out.ffn_out",
+     "L00.block_out",
+     "L01.attn_norm",
+     "L01.in.q"
+    ],
+    "divergence_enters_inside_attention": true,
+    "remaining_driver": "padding"
+   }
+  },
+  "runtimes_tested": [
+   "2.11.0+cu128",
+   "2.9.1+cu130"
+  ],
+  "tuple_supported_by_runtime": {
+   "2.11.0+cu128": null,
+   "2.9.1+cu130": false
+  },
+  "improvement_attributable_to": [
+   "cublaslt_backend_alone",
+   "the_split_k_flag"
+  ],
+  "backend_switch_alone_fixes_it": false,
+  "verdict": "SPLIT_K_PARTIAL",
+  "why": "forbidding split-K materially improves the numerics but does not satisfy every acceptance criterion; the per-report fields say which",
+  "every_gemm_exact_under_splitk_off": true,
+  "both_operators_invariant": false,
+  "historical_solo_preserved": false,
+  "_the_outcome_to_avoid": "solo and batch agreeing at a THIRD value. `historical_solo_preserved` false with `both_operators_invariant` true is not a transparent fix."
+ },
+ "verdict": "NOT_ESTABLISHED",
+ "why": "no report ran the keep-ratio and batch-size sweep, so the headline configuration being invariant says nothing about the configurations a4 quoted",
+ "_verdict_turns_on": "FFN top-k SELECTION, not a logit norm: a magnitude that moves no decision changes no operator output",
+ "objects_adjudicated": [
+  "a4_596m_localize_under_splitk_off",
+  "a4_596m_splitk"
+ ],
+ "_a4_measured_the_596m_student": true,
+ "_object_geometry": {
+  "a4_596m_localize_under_splitk_off": {
+   "hidden_size": 1024,
+   "num_hidden_layers": 28,
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "a4_596m_splitk": {
+   "hidden_size": 1024,
+   "num_hidden_layers": 28,
+   "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  }
+ },
+ "_pool_selection": "reports whose label names the a4 object, falling back to every report when none does; the geometry above is what a reader should check that against",
+ "sweep_reported": {
+  "a4_596m_splitk": null,
+  "a4_596m_localize_under_splitk_off": null
+ },
+ "_reports_without_a_sweep": [
+  "a4_596m_localize_under_splitk_off",
+  "a4_596m_splitk"
+ ],
+ "selection": {
+  "a4_596m_splitk": {
+   "headline_layers_moved": null,
+   "n_layers": null,
+   "invariant_everywhere": null,
+   "by_keep_ratio": {}
+  },
+  "a4_596m_localize_under_splitk_off": {
+   "headline_layers_moved": null,
+   "n_layers": null,
+   "invariant_everywhere": null,
+   "by_keep_ratio": {}
+  }
+ },
+ "localization": {
+  "a4_596m_splitk": {
+   "locus": "no_divergence_observed",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": null,
+   "forward_drift_max_abs": null,
+   "reduction_order_drift_max_abs": null,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  },
+  "b_image_splitk_api_probe": {
+   "locus": "no_divergence_observed",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": null,
+   "forward_drift_max_abs": null,
+   "reduction_order_drift_max_abs": null,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  },
+  "parent_splitk": {
+   "locus": "no_divergence_observed",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": null,
+   "forward_drift_max_abs": null,
+   "reduction_order_drift_max_abs": null,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  },
+  "a4_596m_localize_under_splitk_off": {
+   "locus": "observed_but_not_localized",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": "L00.out.attn_out",
+   "forward_drift_max_abs": null,
+   "reduction_order_drift_max_abs": null,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  },
+  "parent_localize_under_splitk_off": {
+   "locus": "observed_but_not_localized",
+   "driver": null,
+   "deterministic": null,
+   "bare_gemm_shape_dependent": null,
+   "padding_alone_is_inert": null,
+   "batch_size_alone_moves_it": null,
+   "backends_diverging": null,
+   "backends_exact": null,
+   "removed_by_disabling_bf16_reduced_precision_reduction": null,
+   "first_divergent_tap": "L00.out.attn_out",
+   "forward_drift_max_abs": null,
+   "reduction_order_drift_max_abs": null,
+   "causal_kl_max_rel_diff": null,
+   "causal_kl_item_ranking_identical": null
+  }
+ },
+ "authorizes": null,
+ "changes": null,
+ "_c3_status": "NOT STARTED"
+}

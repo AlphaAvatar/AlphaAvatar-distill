@@ -173,6 +173,31 @@
    "teardown_confirmed": true,
    "watchdog": "started, pid 3432490, stopped by the trap after teardown",
    "no_science_ran": true
+  },
+  {
+   "subrun_id": "bi_20260926_d6",
+   "pod_id": "sjhg5lcu03wesf",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 2.3,
+   "cost_usd": 0.0424,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x quoted secure rate, plus container disk billed separately",
+   "executed_source_sha": "fe55b16ec5f5b65fb73fe215f1067a0e61837d8c",
+   "verdict": "COMPLETE",
+   "purpose": "Outcome B localization: under split-K off, WHERE does solo first stop agreeing with a ragged batch",
+   "reports": [
+    "parent_localize_under_splitk_off",
+    "a4_596m_localize_under_splitk_off"
+   ],
+   "per_report_seconds": [
+    9,
+    5
+   ],
+   "_why_so_cheap": "the image was warm; setup took 73 s rather than the usual 120",
+   "teardown_confirmed": true,
+   "watchdog": "started, pid 3438828, stopped by the trap after teardown",
+   "no_science_ran": true
   }
  ],
  "rate_basis": {

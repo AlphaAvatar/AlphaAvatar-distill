@@ -515,7 +515,11 @@ def split_k_control(reports: dict) -> dict:
     out: dict = {"per_report": {}}
     for label, r in reports.items():
         bc = r["stages"].get("bf16_controls") or {}
-        if not bc or "error" in bc:
+        is_localization = dig(r, "run_bf16_policy", "requested") == "splitk_off"
+        #: A localization run carries no control matrix -- it runs the case
+        #: matrix and the tap walk UNDER the policy instead. Skipping it for
+        #: lacking `bf16_controls` dropped the Outcome-B answer on the floor.
+        if ("error" in bc) or (not bc and not is_localization):
             continue
         sp = r["stages"].get("solo_preservation") or {}
         oa = r["stages"].get("operator_acceptance") or {}
@@ -532,8 +536,50 @@ def split_k_control(reports: dict) -> dict:
                         "bitwise_identical": v["bitwise_identical"]}
                     for n, v in (row.get("per_projection") or {}).items()}
 
+        #: Outcome B: where does it STILL diverge once split-K is forbidden?
+        #: Present only in the runs launched with `--bf16-policy splitk_off`,
+        #: whose case matrix and tap walk were measured under that policy.
+        localize = None
+        if dig(r, "run_bf16_policy", "requested") == "splitk_off":
+            cm = r["stages"].get("case_matrix") or {}
+            fd = r["stages"].get("first_divergence") or {}
+            comp = cm.get("comparisons") or {}
+            localize = {
+                "policy_readback": dig(r, "run_bf16_policy", "applied",
+                                       "readback"),
+                "blas": dig(r, "run_bf16_policy", "applied", "blas", "readback"),
+                "mask_presence_exact": dig(comp, "A_vs_B", "bitwise_identical"),
+                "equal_length_batch_exact": dig(comp, "B_vs_C",
+                                                "bitwise_identical"),
+                "neighbour_content_irrelevant": dig(comp, "C_vs_D",
+                                                    "bitwise_identical"),
+                "ragged_padding_exact": dig(comp, "C_vs_E",
+                                            "bitwise_identical"),
+                "solo_vs_ragged_max_abs": dig(comp, "A_vs_E", "max_abs"),
+                "first_divergent_tap": dig(
+                    fd, "first_tap_that_is_not_bit_identical", "tap"),
+                "first_divergent_tap_max_abs": dig(
+                    fd, "first_tap_that_is_not_bit_identical", "max_abs"),
+                "divergent_taps_in_order": [
+                    x["tap"] for x in (fd.get("per_tap") or [])
+                    if not x["bitwise_identical"]][:8],
+            }
+            #: The projections come BEFORE the attention output in tap order,
+            #: so if none of them appears the divergence enters inside the
+            #: attention computation itself rather than in a linear.
+            first = localize["first_divergent_tap"] or ""
+            localize["divergence_enters_inside_attention"] = first.endswith(
+                ".out.attn_out")
+            localize["remaining_driver"] = (
+                "padding" if localize["equal_length_batch_exact"]
+                and localize["ragged_padding_exact"] is False
+                else "batch_dimension_and_padding"
+                if localize["ragged_padding_exact"] is False
+                else "none_observed")
+
         out["per_report"][label] = {
             "torch": dig(r, "environment", "torch"),
+            "localization_under_splitk_off": localize,
             "tuple_supported": bc.get("tuple_form_supported"),
             "split_k_state": bc.get("split_k_state"),
             "blas_library": bc.get("blas_library"),
@@ -586,7 +632,13 @@ def split_k_control(reports: dict) -> dict:
         }
 
     per = out["per_report"]
-    science = {k: v for k, v in per.items() if v["tuple_supported"]}
+    #: Only CONTROL-MATRIX reports vote on the verdict; a localization run
+    #: measures where the residual lives, not whether the intervention worked.
+    science = {k: v for k, v in per.items()
+               if v["tuple_supported"] and not v.get("localization_under_splitk_off")}
+    out["localizations"] = {
+        k: v["localization_under_splitk_off"] for k, v in per.items()
+        if v.get("localization_under_splitk_off")}
     out["runtimes_tested"] = sorted({v["torch"] for v in per.values()})
     out["tuple_supported_by_runtime"] = {
         v["torch"]: v["tuple_supported"] for v in per.values()}

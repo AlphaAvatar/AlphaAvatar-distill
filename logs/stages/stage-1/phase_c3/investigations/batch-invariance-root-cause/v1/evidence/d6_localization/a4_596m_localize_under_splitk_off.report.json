@@ -1,0 +1,2379 @@
+{
+  "run_id": "bi_20260926_d6-a4_596m_localize_under_splitk_off",
+  "started_utc": "2026-09-26T10:13:03.976907+00:00",
+  "question": "does evaluating a calibration item alone and beside others give the same scientific decision, and if not, which operation first stops agreeing",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "answers_the_accelerator_question": true,
+  "config": {
+    "source": {
+      "local_paths": [],
+      "relay_repo": null,
+      "relay_path": null,
+      "hub_id": "Qwen/Qwen3-4B-Thinking-2507"
+    },
+    "calibration_profile": "calib.domain_balanced@v1",
+    "n_items": 8,
+    "micro_batch_size": 4,
+    "equal_batch": 4,
+    "focal_length": 512,
+    "neighbour_lengths": [
+      384,
+      640,
+      256
+    ],
+    "focal_layer": 17,
+    "bypass_layer": 17,
+    "ffn_keep_ratio": 0.5,
+    "ffn_keep_ratios": [
+      0.32,
+      0.5,
+      0.75,
+      0.9
+    ],
+    "micro_batch_sweep": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "gemm_rows": 512,
+    "gemm_pad": 128,
+    "batch_sweep": [
+      1,
+      2,
+      3,
+      4,
+      8
+    ],
+    "pad_sweep": [
+      0,
+      1,
+      8,
+      64,
+      128
+    ],
+    "length_fractions": [
+      0.125,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "length_sweep_pad": 64,
+    "perf_items": 16,
+    "seed": 20260925,
+    "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "executable": {
+    "file": "batch_invariance_diagnostic.py",
+    "sha256": "ede44aeaf40199661887c6ae89c31fab44d7c301bbf641e0cb98b3adb9566f3d",
+    "git_head": "fe55b16ec5f5b65fb73fe215f1067a0e61837d8c",
+    "this_file_is_clean_at_git_head": true
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.8.0-110-generic-x86_64-with-glibc2.39",
+    "torch": "2.11.0+cu128",
+    "torch_cuda_build": "12.8",
+    "torch_cudnn": 91900,
+    "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "wheelhouse_source": "AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312",
+    "requirements_file": "requirements-cu128.txt",
+    "transformers": "5.13.1",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.23.0",
+    "numpy": "2.5.1",
+    "triton": "3.6.0",
+    "gpu": "NVIDIA L40S",
+    "compute_capability": "8.9",
+    "total_vram_gib": 44.392,
+    "driver_bf16_supported": true,
+    "nvidia_driver": "580.126.09",
+    "numerics": {
+      "float32_matmul_precision": "highest",
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "deterministic_algorithms": false,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction_split_k": true,
+      "cuda.matmul.allow_fp16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_fp16_reduced_precision_reduction_split_k": true,
+      "cuda.matmul.allow_tf32": false,
+      "_split_k_is_readable": true,
+      "cudnn.allow_tf32": true
+    }
+  },
+  "stages": {
+    "case_matrix": {
+      "cases": [
+        "A_solo_no_mask",
+        "B_solo_ones_mask",
+        "C_equal_batch_duplicates",
+        "D_equal_batch_diff_neighbours",
+        "E_ragged_padded_masked",
+        "F_ragged_padded_no_mask"
+      ],
+      "focal_positions": 629,
+      "batch_padded_width": 646,
+      "focal_row_is_padded_in_this_batch": true,
+      "comparisons": {
+        "A_vs_B": {
+          "n": 95567744,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        },
+        "B_vs_C": {
+          "n": 95567744,
+          "max_abs": 1.337890625,
+          "mean_abs": 0.040191635489463806,
+          "rms": 0.06319363415241241,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.014455997385084629,
+          "cosine": 0.999895453453064,
+          "bitwise_identical": false,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0017236293060705066,
+          "argmax_agreement": 0.9761526584625244,
+          "top5_set_agreement": 0.8887122273445129,
+          "top20_set_agreement": 0.6661367416381836
+        },
+        "C_vs_D": {
+          "n": 95567744,
+          "max_abs": 0.0,
+          "mean_abs": 0.0,
+          "rms": 0.0,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.0,
+          "cosine": 1.0000001192092896,
+          "bitwise_identical": true,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0,
+          "argmax_agreement": 1.0,
+          "top5_set_agreement": 1.0,
+          "top20_set_agreement": 1.0
+        },
+        "C_vs_E": {
+          "n": 95567744,
+          "max_abs": 1.05859375,
+          "mean_abs": 0.06098476052284241,
+          "rms": 0.08115550875663757,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.018565641716122627,
+          "cosine": 0.9998376369476318,
+          "bitwise_identical": false,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0034485452342778444,
+          "argmax_agreement": 0.9666137099266052,
+          "top5_set_agreement": 0.842607319355011,
+          "top20_set_agreement": 0.526232123374939
+        },
+        "E_vs_F": {
+          "n": 95567744,
+          "max_abs": 1.05859375,
+          "mean_abs": 0.06098476052284241,
+          "rms": 0.08115550875663757,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.018485818058252335,
+          "cosine": 0.9998376369476318,
+          "bitwise_identical": false,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.0034093232825398445,
+          "argmax_agreement": 0.9666137099266052,
+          "top5_set_agreement": 0.842607319355011,
+          "top20_set_agreement": 0.526232123374939
+        },
+        "A_vs_E": {
+          "n": 95567744,
+          "max_abs": 1.6875,
+          "mean_abs": 0.060956746339797974,
+          "rms": 0.08169586956501007,
+          "p50_abs": null,
+          "p95_abs": null,
+          "p99_abs": null,
+          "rel_l2": 0.018688514828681946,
+          "cosine": 0.999835193157196,
+          "bitwise_identical": false,
+          "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+          "forward_kl_per_position_mean": 0.003389771794900298,
+          "argmax_agreement": 0.9634340405464172,
+          "top5_set_agreement": 0.839427649974823,
+          "top20_set_agreement": 0.526232123374939
+        }
+      },
+      "_only_focal_real_positions_compared": true,
+      "_reading": {
+        "A_vs_B": "mask-presence path",
+        "B_vs_C": "pure batch-shape/kernel effect",
+        "C_vs_D": "cross-row dependence (must be nil)",
+        "C_vs_E": "ragged/padding path",
+        "E_vs_F": "mask vs padding shape, for a causal decoder",
+        "A_vs_F": "the end-to-end solo-vs-production difference"
+      }
+    },
+    "first_divergence": {
+      "n_taps": 282,
+      "first_tap_that_is_not_bit_identical": {
+        "tap": "L00.out.attn_out",
+        "n": 644096,
+        "max_abs": 0.0078125,
+        "mean_abs": 4.394057668832829e-06,
+        "rms": 3.68125838576816e-05,
+        "p50_abs": 0.0,
+        "p95_abs": 1.52587890625e-05,
+        "p99_abs": 0.0001220703125,
+        "rel_l2": 0.000676102819852531,
+        "cosine": 0.9999997615814209,
+        "bitwise_identical": false,
+        "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+      },
+      "per_tap": [
+        {
+          "tap": "embedding",
+          "max_abs": 0.0,
+          "rel_l2": 0.0,
+          "cosine": 0.9999999403953552,
+          "bitwise_identical": true
+        },
+        {
+          "tap": "L00.attn_norm",
+          "max_abs": 0.0,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true
+        },
+        {
+          "tap": "L00.in.q",
+          "max_abs": 0.0,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true
+        },
+        {
+          "tap": "L00.in.k",
+          "max_abs": 0.0,
+          "rel_l2": 0.0,
+          "cosine": 1.0,
+          "bitwise_identical": true
+        },
+        {
+          "tap": "L00.in.v",
+          "max_abs": 0.0,
+          "rel_l2": 0.0,
+          "cosine": 0.9999999403953552,
+          "bitwise_identical": true
+        },
+        {
+          "tap": "L00.out.attn_out",
+          "max_abs": 0.0078125,
+          "rel_l2": 0.000676102819852531,
+          "cosine": 0.9999997615814209,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L00.ffn_norm",
+          "max_abs": 0.125,
+          "rel_l2": 0.0007811849354766309,
+          "cosine": 0.9999997019767761,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L00.in.gate",
+          "max_abs": 0.0078125,
+          "rel_l2": 0.0014705508947372437,
+          "cosine": 0.9999989867210388,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L00.in.up",
+          "max_abs": 0.0078125,
+          "rel_l2": 0.001512744463980198,
+          "cosine": 0.999998927116394,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L00.out.ffn_out",
+          "max_abs": 0.015625,
+          "rel_l2": 0.0018358466913923621,
+          "cosine": 0.9999982714653015,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L00.block_out",
+          "max_abs": 0.03125,
+          "rel_l2": 0.0016075727762654424,
+          "cosine": 0.9999986886978149,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.attn_norm",
+          "max_abs": 0.125,
+          "rel_l2": 0.0017514858627691865,
+          "cosine": 0.9999985098838806,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.in.q",
+          "max_abs": 0.0078125,
+          "rel_l2": 0.0017361822538077831,
+          "cosine": 0.9999985098838806,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.in.k",
+          "max_abs": 0.00390625,
+          "rel_l2": 0.001626659999601543,
+          "cosine": 0.9999986886978149,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.in.v",
+          "max_abs": 0.001953125,
+          "rel_l2": 0.0025223183911293745,
+          "cosine": 0.9999967813491821,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.out.attn_out",
+          "max_abs": 0.001953125,
+          "rel_l2": 0.00355129805393517,
+          "cosine": 0.9999936819076538,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.ffn_norm",
+          "max_abs": 0.125,
+          "rel_l2": 0.0022343227174133062,
+          "cosine": 0.9999974966049194,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.in.gate",
+          "max_abs": 0.0625,
+          "rel_l2": 0.001419383566826582,
+          "cosine": 0.999998927116394,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.in.up",
+          "max_abs": 0.125,
+          "rel_l2": 0.002727594692260027,
+          "cosine": 0.9999962449073792,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.out.ffn_out",
+          "max_abs": 0.109375,
+          "rel_l2": 0.0050894394516944885,
+          "cosine": 0.9999871253967285,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L01.block_out",
+          "max_abs": 0.09375,
+          "rel_l2": 0.0028935817535966635,
+          "cosine": 0.9999959468841553,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.attn_norm",
+          "max_abs": 0.15625,
+          "rel_l2": 0.0030132574029266834,
+          "cosine": 0.9999954104423523,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.in.q",
+          "max_abs": 0.005859375,
+          "rel_l2": 0.0030658661853522062,
+          "cosine": 0.9999952912330627,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.in.k",
+          "max_abs": 0.015625,
+          "rel_l2": 0.0030963581521064043,
+          "cosine": 0.9999952912330627,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.in.v",
+          "max_abs": 0.00390625,
+          "rel_l2": 0.004338482394814491,
+          "cosine": 0.9999905824661255,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.out.attn_out",
+          "max_abs": 0.0029296875,
+          "rel_l2": 0.006792886182665825,
+          "cosine": 0.9999769330024719,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.ffn_norm",
+          "max_abs": 0.1875,
+          "rel_l2": 0.0035030017606914043,
+          "cosine": 0.9999939203262329,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.in.gate",
+          "max_abs": 0.125,
+          "rel_l2": 0.001992725534364581,
+          "cosine": 0.9999979734420776,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.in.up",
+          "max_abs": 0.125,
+          "rel_l2": 0.003317310241982341,
+          "cosine": 0.9999945759773254,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.out.ffn_out",
+          "max_abs": 0.125,
+          "rel_l2": 0.008091377094388008,
+          "cosine": 0.9999675750732422,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L02.block_out",
+          "max_abs": 0.25,
+          "rel_l2": 0.004261171445250511,
+          "cosine": 0.9999908804893494,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.attn_norm",
+          "max_abs": 0.25,
+          "rel_l2": 0.0042026755400002,
+          "cosine": 0.9999912977218628,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.in.q",
+          "max_abs": 0.01171875,
+          "rel_l2": 0.0034176853951066732,
+          "cosine": 0.999994158744812,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.in.k",
+          "max_abs": 0.0107421875,
+          "rel_l2": 0.003488688264042139,
+          "cosine": 0.9999940395355225,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.in.v",
+          "max_abs": 0.0078125,
+          "rel_l2": 0.005837318487465382,
+          "cosine": 0.9999830722808838,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.out.attn_out",
+          "max_abs": 0.0068359375,
+          "rel_l2": 0.008774010464549065,
+          "cosine": 0.9999614953994751,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.ffn_norm",
+          "max_abs": 0.25,
+          "rel_l2": 0.004812221974134445,
+          "cosine": 0.9999884366989136,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.in.gate",
+          "max_abs": 0.15625,
+          "rel_l2": 0.0024721166118979454,
+          "cosine": 0.9999969601631165,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.in.up",
+          "max_abs": 0.15625,
+          "rel_l2": 0.005982959643006325,
+          "cosine": 0.9999821186065674,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.out.ffn_out",
+          "max_abs": 0.0859375,
+          "rel_l2": 0.011037087999284267,
+          "cosine": 0.9999392032623291,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L03.block_out",
+          "max_abs": 0.3125,
+          "rel_l2": 0.0057022483088076115,
+          "cosine": 0.9999837875366211,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.attn_norm",
+          "max_abs": 0.171875,
+          "rel_l2": 0.005788099952042103,
+          "cosine": 0.9999831914901733,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.in.q",
+          "max_abs": 0.025390625,
+          "rel_l2": 0.004934989381581545,
+          "cosine": 0.9999878406524658,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.in.k",
+          "max_abs": 0.0234375,
+          "rel_l2": 0.005329514387995005,
+          "cosine": 0.9999858140945435,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.in.v",
+          "max_abs": 0.0274658203125,
+          "rel_l2": 0.008503659628331661,
+          "cosine": 0.9999638795852661,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.out.attn_out",
+          "max_abs": 0.0087890625,
+          "rel_l2": 0.008796648122370243,
+          "cosine": 0.9999614357948303,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.ffn_norm",
+          "max_abs": 0.25,
+          "rel_l2": 0.0060777063481509686,
+          "cosine": 0.9999815225601196,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.in.gate",
+          "max_abs": 0.21875,
+          "rel_l2": 0.0033454890362918377,
+          "cosine": 0.9999942779541016,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.in.up",
+          "max_abs": 0.2890625,
+          "rel_l2": 0.007019644137471914,
+          "cosine": 0.999975323677063,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.out.ffn_out",
+          "max_abs": 0.0625,
+          "rel_l2": 0.007969598285853863,
+          "cosine": 0.9999687075614929,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L04.block_out",
+          "max_abs": 0.3125,
+          "rel_l2": 0.006062071304768324,
+          "cosine": 0.9999817609786987,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.attn_norm",
+          "max_abs": 0.1953125,
+          "rel_l2": 0.006206147372722626,
+          "cosine": 0.9999808073043823,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.in.q",
+          "max_abs": 0.046875,
+          "rel_l2": 0.004970017820596695,
+          "cosine": 0.9999876022338867,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.in.k",
+          "max_abs": 0.0556640625,
+          "rel_l2": 0.005085597280412912,
+          "cosine": 0.9999871253967285,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.in.v",
+          "max_abs": 0.0299072265625,
+          "rel_l2": 0.009321387857198715,
+          "cosine": 0.9999566078186035,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.out.attn_out",
+          "max_abs": 0.53125,
+          "rel_l2": 0.010903975926339626,
+          "cosine": 0.9999406337738037,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.ffn_norm",
+          "max_abs": 0.28125,
+          "rel_l2": 0.006588159594684839,
+          "cosine": 0.9999783039093018,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.in.gate",
+          "max_abs": 0.26953125,
+          "rel_l2": 0.006388129200786352,
+          "cosine": 0.9999796152114868,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.in.up",
+          "max_abs": 0.20703125,
+          "rel_l2": 0.009878752753138542,
+          "cosine": 0.9999512434005737,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.out.ffn_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.014480162411928177,
+          "cosine": 0.9999103546142578,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L05.block_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.008292275480926037,
+          "cosine": 0.9999659061431885,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.attn_norm",
+          "max_abs": 0.296875,
+          "rel_l2": 0.0073973205871880054,
+          "cosine": 0.9999726414680481,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.in.q",
+          "max_abs": 0.0625,
+          "rel_l2": 0.004872058518230915,
+          "cosine": 0.9999881982803345,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.in.k",
+          "max_abs": 0.05078125,
+          "rel_l2": 0.006023869384080172,
+          "cosine": 0.9999818801879883,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.in.v",
+          "max_abs": 0.033203125,
+          "rel_l2": 0.011000998318195343,
+          "cosine": 0.9999395608901978,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.out.attn_out",
+          "max_abs": 0.0146484375,
+          "rel_l2": 0.011361542157828808,
+          "cosine": 0.9999368190765381,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.ffn_norm",
+          "max_abs": 0.265625,
+          "rel_l2": 0.008300451561808586,
+          "cosine": 0.999965488910675,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.in.gate",
+          "max_abs": 0.1025390625,
+          "rel_l2": 0.007197987753897905,
+          "cosine": 0.9999741911888123,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.in.up",
+          "max_abs": 0.10546875,
+          "rel_l2": 0.011513778939843178,
+          "cosine": 0.9999338388442993,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.out.ffn_out",
+          "max_abs": 0.0859375,
+          "rel_l2": 0.013683225028216839,
+          "cosine": 0.9999067783355713,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L06.block_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.009652222506701946,
+          "cosine": 0.9999538660049438,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.attn_norm",
+          "max_abs": 0.3125,
+          "rel_l2": 0.00913983304053545,
+          "cosine": 0.9999581575393677,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.in.q",
+          "max_abs": 0.0625,
+          "rel_l2": 0.005937817972153425,
+          "cosine": 0.9999823570251465,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.in.k",
+          "max_abs": 0.078125,
+          "rel_l2": 0.006916551850736141,
+          "cosine": 0.9999761581420898,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.in.v",
+          "max_abs": 0.0478515625,
+          "rel_l2": 0.012679033912718296,
+          "cosine": 0.9999198317527771,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.out.attn_out",
+          "max_abs": 0.0390625,
+          "rel_l2": 0.009505553171038628,
+          "cosine": 0.9999561309814453,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.ffn_norm",
+          "max_abs": 0.3125,
+          "rel_l2": 0.008842583745718002,
+          "cosine": 0.9999609589576721,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.in.gate",
+          "max_abs": 0.15185546875,
+          "rel_l2": 0.006610937416553497,
+          "cosine": 0.999978244304657,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.in.up",
+          "max_abs": 0.09765625,
+          "rel_l2": 0.011139321140944958,
+          "cosine": 0.9999380707740784,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.out.ffn_out",
+          "max_abs": 0.0390625,
+          "rel_l2": 0.013731378130614758,
+          "cosine": 0.9999058246612549,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L07.block_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.009539957158267498,
+          "cosine": 0.9999547004699707,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.attn_norm",
+          "max_abs": 0.3125,
+          "rel_l2": 0.00918940082192421,
+          "cosine": 0.999957799911499,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.in.q",
+          "max_abs": 0.0390625,
+          "rel_l2": 0.005969567224383354,
+          "cosine": 0.9999823570251465,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.in.k",
+          "max_abs": 0.063385009765625,
+          "rel_l2": 0.006839554291218519,
+          "cosine": 0.999976634979248,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.in.v",
+          "max_abs": 0.03125,
+          "rel_l2": 0.011754720471799374,
+          "cosine": 0.9999310970306396,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.out.attn_out",
+          "max_abs": 0.0546875,
+          "rel_l2": 0.0100582679733634,
+          "cosine": 0.9999499320983887,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.ffn_norm",
+          "max_abs": 0.375,
+          "rel_l2": 0.010014073923230171,
+          "cosine": 0.9999499320983887,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.in.gate",
+          "max_abs": 0.3515625,
+          "rel_l2": 0.008171948604285717,
+          "cosine": 0.9999667406082153,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.in.up",
+          "max_abs": 0.11328125,
+          "rel_l2": 0.012525389902293682,
+          "cosine": 0.9999216198921204,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.out.ffn_out",
+          "max_abs": 0.046875,
+          "rel_l2": 0.015270640142261982,
+          "cosine": 0.9998835325241089,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L08.block_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.011260242201387882,
+          "cosine": 0.9999367594718933,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.attn_norm",
+          "max_abs": 0.25,
+          "rel_l2": 0.011112822219729424,
+          "cosine": 0.999938428401947,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.in.q",
+          "max_abs": 0.078125,
+          "rel_l2": 0.007445903494954109,
+          "cosine": 0.9999722838401794,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.in.k",
+          "max_abs": 0.04296875,
+          "rel_l2": 0.009506049565970898,
+          "cosine": 0.9999548196792603,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.in.v",
+          "max_abs": 0.04296875,
+          "rel_l2": 0.014332085847854614,
+          "cosine": 0.9998972415924072,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.out.attn_out",
+          "max_abs": 0.0625,
+          "rel_l2": 0.0109477574005723,
+          "cosine": 0.999940812587738,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.ffn_norm",
+          "max_abs": 0.4375,
+          "rel_l2": 0.012506334111094475,
+          "cosine": 0.9999219179153442,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.in.gate",
+          "max_abs": 0.420654296875,
+          "rel_l2": 0.01092128362506628,
+          "cosine": 0.9999403357505798,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.in.up",
+          "max_abs": 0.20703125,
+          "rel_l2": 0.014033286832273006,
+          "cosine": 0.9999015927314758,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.out.ffn_out",
+          "max_abs": 0.078125,
+          "rel_l2": 0.017927559092640877,
+          "cosine": 0.9998394250869751,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L09.block_out",
+          "max_abs": 1.5,
+          "rel_l2": 0.01387784257531166,
+          "cosine": 0.999903678894043,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.attn_norm",
+          "max_abs": 0.28125,
+          "rel_l2": 0.01398164127022028,
+          "cosine": 0.9999022483825684,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.in.q",
+          "max_abs": 0.125,
+          "rel_l2": 0.010922129265964031,
+          "cosine": 0.9999403357505798,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.in.k",
+          "max_abs": 0.087890625,
+          "rel_l2": 0.013477619737386703,
+          "cosine": 0.9999091625213623,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.in.v",
+          "max_abs": 0.078125,
+          "rel_l2": 0.017705485224723816,
+          "cosine": 0.9998432993888855,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.out.attn_out",
+          "max_abs": 0.0791015625,
+          "rel_l2": 0.010748480446636677,
+          "cosine": 0.9999423623085022,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.ffn_norm",
+          "max_abs": 0.2578125,
+          "rel_l2": 0.012891232967376709,
+          "cosine": 0.9999169707298279,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.in.gate",
+          "max_abs": 0.25,
+          "rel_l2": 0.010912292636930943,
+          "cosine": 0.9999404549598694,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.in.up",
+          "max_abs": 0.25,
+          "rel_l2": 0.01336363423615694,
+          "cosine": 0.9999107718467712,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.out.ffn_out",
+          "max_abs": 3.5,
+          "rel_l2": 0.022162877023220062,
+          "cosine": 0.9997612237930298,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L10.block_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.01955721341073513,
+          "cosine": 0.9998108744621277,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.attn_norm",
+          "max_abs": 2.0625,
+          "rel_l2": 0.018613912165164948,
+          "cosine": 0.9998267889022827,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.in.q",
+          "max_abs": 0.3125,
+          "rel_l2": 0.015463443472981453,
+          "cosine": 0.9998830556869507,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.in.k",
+          "max_abs": 0.2171630859375,
+          "rel_l2": 0.01673051528632641,
+          "cosine": 0.9998614192008972,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.in.v",
+          "max_abs": 0.125,
+          "rel_l2": 0.019724925979971886,
+          "cosine": 0.9998070597648621,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.out.attn_out",
+          "max_abs": 0.0703125,
+          "rel_l2": 0.010892115533351898,
+          "cosine": 0.9999406933784485,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.ffn_norm",
+          "max_abs": 2.0625,
+          "rel_l2": 0.018740935251116753,
+          "cosine": 0.9998244047164917,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.in.gate",
+          "max_abs": 0.28125,
+          "rel_l2": 0.017364421859383583,
+          "cosine": 0.9998513460159302,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.in.up",
+          "max_abs": 0.171875,
+          "rel_l2": 0.018997225910425186,
+          "cosine": 0.9998218417167664,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.out.ffn_out",
+          "max_abs": 0.1796875,
+          "rel_l2": 0.028576983138918877,
+          "cosine": 0.9995976686477661,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L11.block_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.02035711705684662,
+          "cosine": 0.9997946619987488,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.attn_norm",
+          "max_abs": 1.953125,
+          "rel_l2": 0.020408570766448975,
+          "cosine": 0.9997917413711548,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.in.q",
+          "max_abs": 0.4375,
+          "rel_l2": 0.016460707411170006,
+          "cosine": 0.9998672008514404,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.in.k",
+          "max_abs": 0.215087890625,
+          "rel_l2": 0.019108379259705544,
+          "cosine": 0.9998185038566589,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.in.v",
+          "max_abs": 0.1796875,
+          "rel_l2": 0.022933918982744217,
+          "cosine": 0.999739408493042,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.out.attn_out",
+          "max_abs": 0.0703125,
+          "rel_l2": 0.013688929378986359,
+          "cosine": 0.9999076128005981,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.ffn_norm",
+          "max_abs": 2.0,
+          "rel_l2": 0.01968049630522728,
+          "cosine": 0.9998063445091248,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.in.gate",
+          "max_abs": 0.25,
+          "rel_l2": 0.017008716240525246,
+          "cosine": 0.9998569488525391,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.in.up",
+          "max_abs": 0.1875,
+          "rel_l2": 0.021279245615005493,
+          "cosine": 0.999775767326355,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.out.ffn_out",
+          "max_abs": 0.125,
+          "rel_l2": 0.02917618304491043,
+          "cosine": 0.9995774626731873,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L12.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.020656544715166092,
+          "cosine": 0.9997882843017578,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.attn_norm",
+          "max_abs": 2.375,
+          "rel_l2": 0.02077825367450714,
+          "cosine": 0.9997841119766235,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.in.q",
+          "max_abs": 0.53125,
+          "rel_l2": 0.016587862744927406,
+          "cosine": 0.9998645782470703,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.in.k",
+          "max_abs": 0.28515625,
+          "rel_l2": 0.018972251564264297,
+          "cosine": 0.9998206496238708,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.in.v",
+          "max_abs": 0.25,
+          "rel_l2": 0.02527814358472824,
+          "cosine": 0.9996826648712158,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.out.attn_out",
+          "max_abs": 0.11328125,
+          "rel_l2": 0.014848298393189907,
+          "cosine": 0.9998903274536133,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.ffn_norm",
+          "max_abs": 2.5625,
+          "rel_l2": 0.02001602202653885,
+          "cosine": 0.9997996091842651,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.in.gate",
+          "max_abs": 0.3125,
+          "rel_l2": 0.01862480863928795,
+          "cosine": 0.9998283982276917,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.in.up",
+          "max_abs": 0.21875,
+          "rel_l2": 0.023080091923475266,
+          "cosine": 0.9997353553771973,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.out.ffn_out",
+          "max_abs": 0.203125,
+          "rel_l2": 0.02991635911166668,
+          "cosine": 0.9995559453964233,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L13.block_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.021046774461865425,
+          "cosine": 0.9997807741165161,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.attn_norm",
+          "max_abs": 2.375,
+          "rel_l2": 0.022399000823497772,
+          "cosine": 0.9997490644454956,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.in.q",
+          "max_abs": 0.8125,
+          "rel_l2": 0.018725862726569176,
+          "cosine": 0.9998260140419006,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.in.k",
+          "max_abs": 0.419921875,
+          "rel_l2": 0.020105674862861633,
+          "cosine": 0.9997984766960144,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.in.v",
+          "max_abs": 0.265625,
+          "rel_l2": 0.026942774653434753,
+          "cosine": 0.9996392130851746,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.out.attn_out",
+          "max_abs": 0.1171875,
+          "rel_l2": 0.01745062693953514,
+          "cosine": 0.9998487830162048,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.ffn_norm",
+          "max_abs": 2.3125,
+          "rel_l2": 0.02138473279774189,
+          "cosine": 0.999771237373352,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.in.gate",
+          "max_abs": 0.75,
+          "rel_l2": 0.01757129095494747,
+          "cosine": 0.9998456239700317,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.in.up",
+          "max_abs": 0.3125,
+          "rel_l2": 0.02261665277183056,
+          "cosine": 0.9997453689575195,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.out.ffn_out",
+          "max_abs": 0.34375,
+          "rel_l2": 0.0360417403280735,
+          "cosine": 0.9993505477905273,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L14.block_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.0217503160238266,
+          "cosine": 0.9997654557228088,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.attn_norm",
+          "max_abs": 2.125,
+          "rel_l2": 0.02398390881717205,
+          "cosine": 0.9997124075889587,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.in.q",
+          "max_abs": 0.6875,
+          "rel_l2": 0.020794887095689774,
+          "cosine": 0.9997849464416504,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.in.k",
+          "max_abs": 0.3515625,
+          "rel_l2": 0.020766066387295723,
+          "cosine": 0.9997846484184265,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.in.v",
+          "max_abs": 0.4765625,
+          "rel_l2": 0.029208572581410408,
+          "cosine": 0.9995754361152649,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.out.attn_out",
+          "max_abs": 0.09375,
+          "rel_l2": 0.019194485619664192,
+          "cosine": 0.9998162984848022,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.ffn_norm",
+          "max_abs": 1.9375,
+          "rel_l2": 0.021729810163378716,
+          "cosine": 0.9997638463973999,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.in.gate",
+          "max_abs": 1.140625,
+          "rel_l2": 0.018578529357910156,
+          "cosine": 0.999828040599823,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.in.up",
+          "max_abs": 0.609375,
+          "rel_l2": 0.022876393049955368,
+          "cosine": 0.9997401237487793,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.out.ffn_out",
+          "max_abs": 0.4375,
+          "rel_l2": 0.03514247015118599,
+          "cosine": 0.9993857145309448,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L15.block_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.02094007097184658,
+          "cosine": 0.9997823238372803,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.attn_norm",
+          "max_abs": 2.484375,
+          "rel_l2": 0.022544370964169502,
+          "cosine": 0.9997458457946777,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.in.q",
+          "max_abs": 1.0,
+          "rel_l2": 0.017311645671725273,
+          "cosine": 0.9998511075973511,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.in.k",
+          "max_abs": 0.453125,
+          "rel_l2": 0.020480116829276085,
+          "cosine": 0.999790608882904,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.in.v",
+          "max_abs": 0.67919921875,
+          "rel_l2": 0.02917369082570076,
+          "cosine": 0.9995768070220947,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.out.attn_out",
+          "max_abs": 0.4375,
+          "rel_l2": 0.017311977222561836,
+          "cosine": 0.9998510479927063,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.ffn_norm",
+          "max_abs": 2.0263671875,
+          "rel_l2": 0.019908372312784195,
+          "cosine": 0.9998018741607666,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.in.gate",
+          "max_abs": 0.8984375,
+          "rel_l2": 0.017852365970611572,
+          "cosine": 0.99984210729599,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.in.up",
+          "max_abs": 0.50115966796875,
+          "rel_l2": 0.021898463368415833,
+          "cosine": 0.9997619390487671,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.out.ffn_out",
+          "max_abs": 0.171875,
+          "rel_l2": 0.033511772751808167,
+          "cosine": 0.999439537525177,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L16.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.01905420795083046,
+          "cosine": 0.9998200535774231,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.attn_norm",
+          "max_abs": 1.625,
+          "rel_l2": 0.019695550203323364,
+          "cosine": 0.9998060464859009,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.in.q",
+          "max_abs": 0.5625,
+          "rel_l2": 0.016116783022880554,
+          "cosine": 0.9998711943626404,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.in.k",
+          "max_abs": 0.265625,
+          "rel_l2": 0.017911242321133614,
+          "cosine": 0.9998406171798706,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.in.v",
+          "max_abs": 0.5625,
+          "rel_l2": 0.027844250202178955,
+          "cosine": 0.9996140003204346,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.out.attn_out",
+          "max_abs": 0.09375,
+          "rel_l2": 0.0188849288970232,
+          "cosine": 0.9998235106468201,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.ffn_norm",
+          "max_abs": 1.5,
+          "rel_l2": 0.018783070147037506,
+          "cosine": 0.9998235702514648,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.in.gate",
+          "max_abs": 0.6513671875,
+          "rel_l2": 0.016844119876623154,
+          "cosine": 0.999860405921936,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.in.up",
+          "max_abs": 0.3125,
+          "rel_l2": 0.021013235673308372,
+          "cosine": 0.9997808933258057,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.out.ffn_out",
+          "max_abs": 0.25,
+          "rel_l2": 0.03432830795645714,
+          "cosine": 0.9994122982025146,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L17.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.018881140276789665,
+          "cosine": 0.9998233318328857,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.attn_norm",
+          "max_abs": 1.34375,
+          "rel_l2": 0.019233746454119682,
+          "cosine": 0.9998151659965515,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.in.q",
+          "max_abs": 0.5,
+          "rel_l2": 0.015150940045714378,
+          "cosine": 0.9998870491981506,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.in.k",
+          "max_abs": 0.328125,
+          "rel_l2": 0.019386816769838333,
+          "cosine": 0.9998130202293396,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.in.v",
+          "max_abs": 0.4921875,
+          "rel_l2": 0.027178777381777763,
+          "cosine": 0.9996329545974731,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.out.attn_out",
+          "max_abs": 0.1796875,
+          "rel_l2": 0.018358459696173668,
+          "cosine": 0.999832034111023,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.ffn_norm",
+          "max_abs": 1.21875,
+          "rel_l2": 0.018265318125486374,
+          "cosine": 0.9998331665992737,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.in.gate",
+          "max_abs": 0.890625,
+          "rel_l2": 0.015024599619209766,
+          "cosine": 0.9998893737792969,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.in.up",
+          "max_abs": 0.3770751953125,
+          "rel_l2": 0.019397523254156113,
+          "cosine": 0.9998129606246948,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.out.ffn_out",
+          "max_abs": 0.29541015625,
+          "rel_l2": 0.03108803555369377,
+          "cosine": 0.9995178580284119,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L18.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.01827338896691799,
+          "cosine": 0.9998337030410767,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.attn_norm",
+          "max_abs": 1.0,
+          "rel_l2": 0.018410295248031616,
+          "cosine": 0.9998306035995483,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.in.q",
+          "max_abs": 0.59375,
+          "rel_l2": 0.014034170657396317,
+          "cosine": 0.9999035000801086,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.in.k",
+          "max_abs": 0.3671875,
+          "rel_l2": 0.01658749394118786,
+          "cosine": 0.9998632669448853,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.in.v",
+          "max_abs": 0.5126953125,
+          "rel_l2": 0.025771573185920715,
+          "cosine": 0.9996693134307861,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.out.attn_out",
+          "max_abs": 0.125,
+          "rel_l2": 0.01833505928516388,
+          "cosine": 0.9998331069946289,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.ffn_norm",
+          "max_abs": 1.0625,
+          "rel_l2": 0.017913559451699257,
+          "cosine": 0.9998395442962646,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.in.gate",
+          "max_abs": 1.609375,
+          "rel_l2": 0.01409350335597992,
+          "cosine": 0.9999028444290161,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.in.up",
+          "max_abs": 0.375,
+          "rel_l2": 0.01743636466562748,
+          "cosine": 0.9998489618301392,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.out.ffn_out",
+          "max_abs": 0.2265625,
+          "rel_l2": 0.029786355793476105,
+          "cosine": 0.9995578527450562,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L19.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.018302414566278458,
+          "cosine": 0.9998329877853394,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.attn_norm",
+          "max_abs": 1.0,
+          "rel_l2": 0.018259989097714424,
+          "cosine": 0.999833345413208,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.in.q",
+          "max_abs": 0.75,
+          "rel_l2": 0.012425929307937622,
+          "cosine": 0.9999248385429382,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.in.k",
+          "max_abs": 0.40625,
+          "rel_l2": 0.015158756636083126,
+          "cosine": 0.9998863935470581,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.in.v",
+          "max_abs": 0.359375,
+          "rel_l2": 0.02533564530313015,
+          "cosine": 0.9996801614761353,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.out.attn_out",
+          "max_abs": 0.15625,
+          "rel_l2": 0.018065543845295906,
+          "cosine": 0.999836802482605,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.ffn_norm",
+          "max_abs": 0.9375,
+          "rel_l2": 0.017660129815340042,
+          "cosine": 0.9998442530632019,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.in.gate",
+          "max_abs": 1.25,
+          "rel_l2": 0.01333532016724348,
+          "cosine": 0.9999120235443115,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.in.up",
+          "max_abs": 0.375,
+          "rel_l2": 0.015637587755918503,
+          "cosine": 0.9998787045478821,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.out.ffn_out",
+          "max_abs": 0.61328125,
+          "rel_l2": 0.02695823460817337,
+          "cosine": 0.9996370077133179,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L20.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.017949504777789116,
+          "cosine": 0.9998390674591064,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.attn_norm",
+          "max_abs": 0.9375,
+          "rel_l2": 0.018068093806505203,
+          "cosine": 0.9998368620872498,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.in.q",
+          "max_abs": 0.875,
+          "rel_l2": 0.012782801873981953,
+          "cosine": 0.9999194145202637,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.in.k",
+          "max_abs": 0.6793212890625,
+          "rel_l2": 0.016967225819826126,
+          "cosine": 0.9998568892478943,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.in.v",
+          "max_abs": 1.125,
+          "rel_l2": 0.02767910249531269,
+          "cosine": 0.9996175765991211,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.out.attn_out",
+          "max_abs": 0.611328125,
+          "rel_l2": 0.022128432989120483,
+          "cosine": 0.9997561573982239,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.ffn_norm",
+          "max_abs": 0.875,
+          "rel_l2": 0.018102558329701424,
+          "cosine": 0.999836266040802,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.in.gate",
+          "max_abs": 0.5078125,
+          "rel_l2": 0.01335905585438013,
+          "cosine": 0.9999114274978638,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.in.up",
+          "max_abs": 0.375,
+          "rel_l2": 0.01718921586871147,
+          "cosine": 0.9998530149459839,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.out.ffn_out",
+          "max_abs": 0.5625,
+          "rel_l2": 0.025306107476353645,
+          "cosine": 0.9996827840805054,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L21.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.018150854855775833,
+          "cosine": 0.9998353719711304,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.attn_norm",
+          "max_abs": 0.875,
+          "rel_l2": 0.01789822056889534,
+          "cosine": 0.9998399019241333,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.in.q",
+          "max_abs": 0.9375,
+          "rel_l2": 0.012045193463563919,
+          "cosine": 0.9999281764030457,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.in.k",
+          "max_abs": 0.625,
+          "rel_l2": 0.014541048556566238,
+          "cosine": 0.9998944997787476,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.in.v",
+          "max_abs": 1.03125,
+          "rel_l2": 0.025158891454339027,
+          "cosine": 0.9996838569641113,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.out.attn_out",
+          "max_abs": 0.25,
+          "rel_l2": 0.020906787365674973,
+          "cosine": 0.9997820854187012,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.ffn_norm",
+          "max_abs": 0.71875,
+          "rel_l2": 0.017660604789853096,
+          "cosine": 0.9998440742492676,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.in.gate",
+          "max_abs": 0.453125,
+          "rel_l2": 0.013724310323596,
+          "cosine": 0.9999061822891235,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.in.up",
+          "max_abs": 0.3046875,
+          "rel_l2": 0.016403043642640114,
+          "cosine": 0.9998658299446106,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.out.ffn_out",
+          "max_abs": 0.8125,
+          "rel_l2": 0.02203413099050522,
+          "cosine": 0.9997597932815552,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L22.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.017416542395949364,
+          "cosine": 0.9998483657836914,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.attn_norm",
+          "max_abs": 0.75,
+          "rel_l2": 0.01708088256418705,
+          "cosine": 0.9998540878295898,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.in.q",
+          "max_abs": 1.0,
+          "rel_l2": 0.011519125662744045,
+          "cosine": 0.9999343752861023,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.in.k",
+          "max_abs": 0.8125,
+          "rel_l2": 0.01627540774643421,
+          "cosine": 0.9998680949211121,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.in.v",
+          "max_abs": 0.742919921875,
+          "rel_l2": 0.025898108258843422,
+          "cosine": 0.9996647834777832,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.out.attn_out",
+          "max_abs": 0.296875,
+          "rel_l2": 0.020679118111729622,
+          "cosine": 0.9997870922088623,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.ffn_norm",
+          "max_abs": 0.78125,
+          "rel_l2": 0.01737988367676735,
+          "cosine": 0.9998489618301392,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.in.gate",
+          "max_abs": 0.5439453125,
+          "rel_l2": 0.015108569525182247,
+          "cosine": 0.9998858571052551,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.in.up",
+          "max_abs": 0.390625,
+          "rel_l2": 0.017261624336242676,
+          "cosine": 0.9998511075973511,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.out.ffn_out",
+          "max_abs": 0.9375,
+          "rel_l2": 0.024092897772789,
+          "cosine": 0.9997115731239319,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L23.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.017231512814760208,
+          "cosine": 0.9998515248298645,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.attn_norm",
+          "max_abs": 0.6875,
+          "rel_l2": 0.017027145251631737,
+          "cosine": 0.9998549818992615,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.in.q",
+          "max_abs": 1.5625,
+          "rel_l2": 0.012941524386405945,
+          "cosine": 0.9999164342880249,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.in.k",
+          "max_abs": 1.43359375,
+          "rel_l2": 0.015099477022886276,
+          "cosine": 0.9998860359191895,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.in.v",
+          "max_abs": 1.53125,
+          "rel_l2": 0.025094270706176758,
+          "cosine": 0.9996852874755859,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.out.attn_out",
+          "max_abs": 0.359375,
+          "rel_l2": 0.021368952468037605,
+          "cosine": 0.9997729063034058,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.ffn_norm",
+          "max_abs": 0.59375,
+          "rel_l2": 0.017373116686940193,
+          "cosine": 0.9998490214347839,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.in.gate",
+          "max_abs": 0.8984375,
+          "rel_l2": 0.015678880736231804,
+          "cosine": 0.9998771548271179,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.in.up",
+          "max_abs": 0.453125,
+          "rel_l2": 0.016217799857258797,
+          "cosine": 0.9998685717582703,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.out.ffn_out",
+          "max_abs": 1.125,
+          "rel_l2": 0.02716217376291752,
+          "cosine": 0.9996389150619507,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L24.block_out",
+          "max_abs": 8.0,
+          "rel_l2": 0.017863206565380096,
+          "cosine": 0.9998406171798706,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.attn_norm",
+          "max_abs": 0.65625,
+          "rel_l2": 0.017376920208334923,
+          "cosine": 0.9998490810394287,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.in.q",
+          "max_abs": 1.25,
+          "rel_l2": 0.013100256212055683,
+          "cosine": 0.9999144077301025,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.in.k",
+          "max_abs": 1.125,
+          "rel_l2": 0.018867000937461853,
+          "cosine": 0.9998220801353455,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.in.v",
+          "max_abs": 4.625,
+          "rel_l2": 0.025590650737285614,
+          "cosine": 0.9996725916862488,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.out.attn_out",
+          "max_abs": 1.296875,
+          "rel_l2": 0.021840181201696396,
+          "cosine": 0.9997625350952148,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.ffn_norm",
+          "max_abs": 0.5625,
+          "rel_l2": 0.017338581383228302,
+          "cosine": 0.9998496770858765,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.in.gate",
+          "max_abs": 0.818359375,
+          "rel_l2": 0.01613643765449524,
+          "cosine": 0.999870240688324,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.in.up",
+          "max_abs": 0.8984375,
+          "rel_l2": 0.01517656072974205,
+          "cosine": 0.9998853802680969,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.out.ffn_out",
+          "max_abs": 0.75,
+          "rel_l2": 0.026131508871912956,
+          "cosine": 0.999658465385437,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L25.block_out",
+          "max_abs": 6.0,
+          "rel_l2": 0.017736824229359627,
+          "cosine": 0.9998427629470825,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.attn_norm",
+          "max_abs": 0.625,
+          "rel_l2": 0.01727300137281418,
+          "cosine": 0.999850869178772,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.in.q",
+          "max_abs": 1.765625,
+          "rel_l2": 0.013794350437819958,
+          "cosine": 0.9999053478240967,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.in.k",
+          "max_abs": 1.26953125,
+          "rel_l2": 0.015927618369460106,
+          "cosine": 0.999873161315918,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.in.v",
+          "max_abs": 2.4375,
+          "rel_l2": 0.024006351828575134,
+          "cosine": 0.9997121095657349,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.out.attn_out",
+          "max_abs": 1.3125,
+          "rel_l2": 0.02017205022275448,
+          "cosine": 0.9997965097427368,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.ffn_norm",
+          "max_abs": 0.46875,
+          "rel_l2": 0.017942510545253754,
+          "cosine": 0.9998391270637512,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.in.gate",
+          "max_abs": 0.80859375,
+          "rel_l2": 0.015031188726425171,
+          "cosine": 0.9998873472213745,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.in.up",
+          "max_abs": 0.625,
+          "rel_l2": 0.010893157683312893,
+          "cosine": 0.9999411702156067,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.out.ffn_out",
+          "max_abs": 5.0,
+          "rel_l2": 0.022217411547899246,
+          "cosine": 0.9997560977935791,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L26.block_out",
+          "max_abs": 8.25,
+          "rel_l2": 0.01807178184390068,
+          "cosine": 0.9998369216918945,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.attn_norm",
+          "max_abs": 0.640625,
+          "rel_l2": 0.017701199278235435,
+          "cosine": 0.9998433589935303,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.in.q",
+          "max_abs": 1.75,
+          "rel_l2": 0.012931774370372295,
+          "cosine": 0.9999170303344727,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.in.k",
+          "max_abs": 1.25,
+          "rel_l2": 0.015413546934723854,
+          "cosine": 0.9998815059661865,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.in.v",
+          "max_abs": 1.125,
+          "rel_l2": 0.023444561287760735,
+          "cosine": 0.9997250437736511,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.out.attn_out",
+          "max_abs": 1.25,
+          "rel_l2": 0.020139535889029503,
+          "cosine": 0.9997972249984741,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.ffn_norm",
+          "max_abs": 0.5625,
+          "rel_l2": 0.019172562286257744,
+          "cosine": 0.9998161792755127,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.in.gate",
+          "max_abs": 1.640625,
+          "rel_l2": 0.01714431867003441,
+          "cosine": 0.9998539090156555,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.in.up",
+          "max_abs": 1.875,
+          "rel_l2": 0.01585019752383232,
+          "cosine": 0.9998748302459717,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.out.ffn_out",
+          "max_abs": 8.5,
+          "rel_l2": 0.025336654856801033,
+          "cosine": 0.9996815919876099,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "L27.block_out",
+          "max_abs": 10.75,
+          "rel_l2": 0.020948173478245735,
+          "cosine": 0.9997809529304504,
+          "bitwise_identical": false
+        },
+        {
+          "tap": "final_norm",
+          "max_abs": 7.5,
+          "rel_l2": 0.01848597638309002,
+          "cosine": 0.9998290538787842,
+          "bitwise_identical": false
+        }
+      ],
+      "final_logits": {
+        "n": 95567744,
+        "max_abs": 1.6875,
+        "mean_abs": 0.060956746339797974,
+        "rms": 0.08169586956501007,
+        "p50_abs": null,
+        "p95_abs": null,
+        "p99_abs": null,
+        "rel_l2": 0.018688514828681946,
+        "cosine": 0.999835193157196,
+        "bitwise_identical": false,
+        "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+        "forward_kl_per_position_mean": 0.003389771794900298,
+        "argmax_agreement": 0.9634340405464172,
+        "top5_set_agreement": 0.839427649974823,
+        "top20_set_agreement": 0.526232123374939
+      },
+      "_note": "taps are listed in EXECUTION order, so the first non-identical tap is where solo and batched stop agreeing"
+    }
+  },
+  "stage_status": {
+    "repeatability": "skipped",
+    "case_matrix": "ok",
+    "first_divergence": "ok",
+    "gemm_isolation": "skipped",
+    "bf16_controls": "skipped",
+    "solo_preservation": "skipped",
+    "length_sweep": "skipped",
+    "statistics_decomposition": "skipped",
+    "ffn_selection": "skipped",
+    "causal_kl": "skipped",
+    "operator_acceptance": "skipped",
+    "performance": "skipped",
+    "backend_matrix": "skipped",
+    "fp32_control": "skipped"
+  },
+  "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "run_bf16_policy": {
+    "requested": "splitk_off",
+    "applied": {
+      "requested": {
+        "allow_reduced_precision": false,
+        "allow_splitk": false,
+        "blas_library": "cublaslt"
+      },
+      "supported": true,
+      "error": null,
+      "blas": {
+        "requested": "cublaslt",
+        "error": null,
+        "readback": "_BlasBackend.Cublaslt",
+        "honoured": true
+      },
+      "form": "tuple",
+      "setter_accepted": true,
+      "readback": {
+        "allow_reduced_precision": false,
+        "allow_reduced_precision_readable": true,
+        "allow_splitk": false,
+        "allow_splitk_readable": true
+      },
+      "gemm_probe": {
+        "probed": true,
+        "ran": true,
+        "error": null
+      },
+      "honoured": true
+    }
+  },
+  "requested_attn_implementation": "sdpa",
+  "model": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "vocab_size": 151936,
+    "attention": {
+      "config._attn_implementation": "sdpa",
+      "config.attn_implementation": null,
+      "first_block_attn_class": "Qwen3Attention"
+    },
+    "param_dtype": "torch.bfloat16"
+  },
+  "calibration": {
+    "requested": "calib.domain_balanced@v1",
+    "kind": "frozen_calibration_mixture",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+    "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "n_items": 8,
+    "lengths": [
+      629,
+      234,
+      527,
+      646,
+      672,
+      317,
+      309,
+      490
+    ]
+  },
+  "focal": {
+    "length": 629,
+    "neighbour_lengths": [
+      234,
+      527,
+      646
+    ]
+  },
+  "conclusion": {
+    "each_shape_internally_deterministic": null,
+    "any_divergence_observed": true,
+    "stages_reporting_a_divergence": [
+      "case_matrix",
+      "first_divergence"
+    ],
+    "divergence_locus": "observed_but_not_localized",
+    "divergence_driver": null,
+    "a_bare_gemm_is_shape_dependent": null,
+    "padding_alone_is_inert": null,
+    "batch_size_alone_moves_the_forward": null,
+    "focal_row_independent_of_neighbour_tokens": true,
+    "bf16_tuple_policy_supported": null,
+    "split_k_off_makes_every_gemm_exact": null,
+    "split_k_off_beats_reduced_precision_off_alone": null,
+    "split_k_state_by_control": null,
+    "blas_library_by_control": null,
+    "improvement_attributable_to": null,
+    "backend_switch_alone_fixes_it": null,
+    "projections_still_shape_dependent_by_control": null,
+    "historical_solo_output_is_preserved": null,
+    "all_three_shapes_agree_under_splitk_off": null,
+    "batch_under_splitk_off_equals_historical_solo": null,
+    "ffn_selection_invariant_under_splitk_off": null,
+    "attention_selection_invariant_under_splitk_off": null,
+    "both_operators_invariant_under_splitk_off": null,
+    "invariant_batched_speedup_vs_solo": null,
+    "splitk_off_slowdown_vs_default_batched": null,
+    "every_attention_backend_diverges": null,
+    "no_attention_backend_diverges": null,
+    "attention_backends_diverging": null,
+    "attention_backends_exact": null,
+    "attention_implementation_of_the_main_run": "sdpa",
+    "ffn_selection_is_batch_invariant": null,
+    "ffn_layers_with_moved_selection": null,
+    "ffn_selection_invariant_at_every_ratio_and_batch_size": null,
+    "ffn_headline_micro_batch_size": null,
+    "ffn_headline_keep_ratio": null,
+    "statistics_bit_identical_at_every_batch_size": null,
+    "causal_kl_max_rel_diff": null,
+    "causal_kl_item_ranking_identical": null,
+    "_derivation": "locus (WHERE): nondeterminism first; then, only if SOME stage observed a divergence at all, a bare GEMM, then a backend that diverges while another is exact, then every backend diverging, then anything between a GEMM and the logits, then padded width as the weakest localization. driver (WHAT) is independent and comes from the length sweep, which varies padded width and batch size one at a time."
+  },
+  "finished_utc": "2026-09-26T10:13:07.153634+00:00"
+}

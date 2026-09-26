@@ -1444,6 +1444,54 @@ alone — `allow_splitk=False` requires cuBLASLt, so the intervention changes tw
 things, and without that control an improvement could not be attributed to
 either. `improvement_attributable_to` is a derived field for exactly that.
 
+**The control ran, and the answer is SPLIT_K_PARTIAL.** Derived by
+`batch_invariance_finding.py` into
+[`splitk_finding.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/splitk_finding.json)
+from five reports across three pods (`d4` `$0.0934`, `d5` `$0.1543`, `d6`
+`$0.0424`).
+
+**Fixed — every bare GEMM becomes bit-exact**, and the fourth control was
+needed to say why. On the parent the two changes repair **disjoint** sets:
+
+| control | BLAS | split-K | still shape-dependent |
+| --- | --- | --- | --- |
+| default | cuBLAS | on | attn_out, ffn_out, k, v |
+| reduced-precision off | cuBLAS | on | k, v |
+| cuBLASLt alone | cuBLASLt | on | attn_out, ffn_out |
+| **both off** | **cuBLASLt** | **off** | **none** |
+
+On the 596M the backend alone suffices. So neither "split-K was the cause" nor
+"cuBLASLt was the cause" is right on its own, and the derived field reads
+`both_changes_are_needed_and_repair_disjoint_sets`.
+
+**Not fixed, and one of these is disqualifying.** The **historical solo output
+changes** under the new policy — `max_abs 1.812` on the parent, argmax
+`0.9873`. That is the condition the review named: batch and solo agreeing at a
+*third* value is not invariance. FFN selection still moves **31 of 36** layers
+(from 34). And batching buys nothing on this workload anyway: `bs=4` runs at
+`0.946×` the speed of `bs=1` for the statistics collector, while split-K-off
+itself costs only `1.005×`.
+
+**ATTENTION was never the problem** — 0 of 28 layers on the 596M, 1–2 of 36 on
+the parent, at every control including the default.
+
+**The residual is the PADDING path, and it enters inside attention.** Under
+split-K off on the parent: mask presence exact, neighbour content exact,
+**equal-length batch now bit-identical to solo**, ragged padded batch still
+`2.312`. The first divergent tap of 362 is **`L00.out.attn_out`** — the q, k
+and v projections are exact, so the difference is introduced by the attention
+computation over a padded width, not by any linear. On the 596M the
+equal-length batch is not yet exact either, so its residual is
+`batch_dimension_and_padding`.
+
+**API facts, from the runtimes rather than from reading them.** torch
+`2.11.0+cu128` accepts the tuple and exposes a readable `..._split_k`, but
+`allow_splitk=False` **requires the cuBLASLt backend** — it accepts at the
+setter and raises inside `F.linear`, which is why every policy here is proved
+by running a real bf16 GEMM under it. torch `2.9.1+cu130` cannot express the
+tuple at all: `set_allow_bf16_reduction_cublas expects a bool`. Recorded
+UNSUPPORTED.
+
 **What it means for C3, stated but NOT acted on.** Operators whose output is a
 dense top-k over activation statistics are not reproducible across
 `micro_batch_size` on this hardware in bf16, and `DEFAULT_MICRO_BATCH_SIZE` is
@@ -1579,9 +1627,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$5.5060` of `$6.0000` |
-| package | `$28.3309` of `$51.4425` |
-| project cap | `$342.4642` spent of `$370.0000`, leaving `$27.5358` |
+| GPU engineering | `$5.3093` of `$6.0000` |
+| package | `$28.1342` of `$51.4425` |
+| project cap | `$342.6609` spent of `$370.0000`, leaving `$27.3391` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

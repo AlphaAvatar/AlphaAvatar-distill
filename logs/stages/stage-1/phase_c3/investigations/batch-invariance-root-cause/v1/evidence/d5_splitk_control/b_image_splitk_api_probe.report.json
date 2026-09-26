@@ -1,0 +1,888 @@
+{
+  "run_id": "bi_20260926_d5-b_image_splitk_api_probe",
+  "started_utc": "2026-09-26T10:06:25.274922+00:00",
+  "question": "does evaluating a calibration item alone and beside others give the same scientific decision, and if not, which operation first stops agreeing",
+  "device": "cuda",
+  "dtype": "bfloat16",
+  "answers_the_accelerator_question": true,
+  "config": {
+    "source": {
+      "local_paths": [],
+      "relay_repo": null,
+      "relay_path": null,
+      "hub_id": "Qwen/Qwen3-4B-Thinking-2507"
+    },
+    "calibration_profile": "calib.domain_balanced@v1",
+    "n_items": 8,
+    "micro_batch_size": 4,
+    "equal_batch": 4,
+    "focal_length": 512,
+    "neighbour_lengths": [
+      384,
+      640,
+      256
+    ],
+    "focal_layer": 17,
+    "bypass_layer": 17,
+    "ffn_keep_ratio": 0.5,
+    "ffn_keep_ratios": [
+      0.32,
+      0.5,
+      0.75,
+      0.9
+    ],
+    "micro_batch_sweep": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "gemm_rows": 512,
+    "gemm_pad": 128,
+    "batch_sweep": [
+      1,
+      2,
+      3,
+      4,
+      8
+    ],
+    "pad_sweep": [
+      0,
+      1,
+      8,
+      64,
+      128
+    ],
+    "length_fractions": [
+      0.125,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "length_sweep_pad": 64,
+    "perf_items": 16,
+    "seed": 20260925,
+    "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint"
+  },
+  "executable": {
+    "file": "batch_invariance_diagnostic.py",
+    "sha256": "d9f59a453b8adc433776362a67c281b1ffc50e2ad855e8866009cbabb4bfe12d",
+    "git_head": "821185d53cce3dc42ce58b9dedc97e15f6a0de19",
+    "this_file_is_clean_at_git_head": true
+  },
+  "environment": {
+    "python": "3.12.3",
+    "platform": "Linux-6.8.0-110-generic-x86_64-with-glibc2.39",
+    "torch": "2.9.1+cu130",
+    "torch_cuda_build": "13.0",
+    "torch_cudnn": 91300,
+    "container_image": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "wheelhouse_source": "AlphaAvatar/aadistill-artifacts:transfer/wheelhouse_cu128_cp312",
+    "requirements_file": "requirements-cu128.txt",
+    "transformers": "5.13.1",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.8.0",
+    "huggingface_hub": "1.23.0",
+    "numpy": "2.5.1",
+    "triton": "3.5.1",
+    "gpu": "NVIDIA L40S",
+    "compute_capability": "8.9",
+    "total_vram_gib": 44.392,
+    "driver_bf16_supported": true,
+    "nvidia_driver": "580.126.09",
+    "numerics": {
+      "float32_matmul_precision": "highest",
+      "cudnn_benchmark": false,
+      "cudnn_deterministic": false,
+      "deterministic_algorithms": false,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_bf16_reduced_precision_reduction_split_k": "<absent in this build>",
+      "cuda.matmul.allow_fp16_reduced_precision_reduction": true,
+      "cuda.matmul.allow_fp16_reduced_precision_reduction_split_k": "<absent in this build>",
+      "cuda.matmul.allow_tf32": false,
+      "_split_k_is_readable": false,
+      "cudnn.allow_tf32": true
+    }
+  },
+  "stages": {
+    "bf16_controls": {
+      "policy_before": {
+        "allow_reduced_precision": true,
+        "allow_reduced_precision_readable": true,
+        "allow_splitk": null,
+        "allow_splitk_readable": false
+      },
+      "controls": {
+        "default": {
+          "policy": {
+            "requested": {
+              "allow_reduced_precision": true,
+              "allow_splitk": null,
+              "blas_library": "cublas"
+            },
+            "supported": true,
+            "error": null,
+            "blas": {
+              "requested": "cublas",
+              "error": null,
+              "readback": "_BlasBackend.Cublas",
+              "honoured": true
+            },
+            "form": "bool",
+            "setter_accepted": true,
+            "readback": {
+              "allow_reduced_precision": true,
+              "allow_reduced_precision_readable": true,
+              "allow_splitk": null,
+              "allow_splitk_readable": false
+            },
+            "gemm_probe": {
+              "probed": true,
+              "ran": true,
+              "error": null
+            },
+            "honoured": true
+          },
+          "gemm": {
+            "shape_solo": [
+              1,
+              512
+            ],
+            "shape_batched": [
+              4,
+              640
+            ],
+            "per_projection": {
+              "q": {
+                "in_features": 1024,
+                "out_features": 2048,
+                "dtype": "torch.bfloat16",
+                "n": 1048576,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "k": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 0.9999999403953552,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "v": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "gate": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "up": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0000001192092896,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "attn_out": {
+                "in_features": 2048,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.00048828125,
+                "mean_abs": 1.6036752640502527e-05,
+                "rms": 4.3652216845657676e-05,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0001220703125,
+                "p99_abs": 0.000244140625,
+                "rel_l2": 0.002121125580742955,
+                "cosine": 0.9999977350234985,
+                "bitwise_identical": false,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "ffn_out": {
+                "in_features": 3072,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0009765625,
+                "mean_abs": 4.219027323415503e-05,
+                "rms": 7.795199780957773e-05,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0001983642578125,
+                "p99_abs": 0.000244140625,
+                "rel_l2": 0.0031767862383276224,
+                "cosine": 0.9999949932098389,
+                "bitwise_identical": false,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "lm_head": {
+                "in_features": 1024,
+                "out_features": 151936,
+                "dtype": "torch.bfloat16",
+                "n": 77791232,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": null,
+                "p95_abs": null,
+                "p99_abs": null,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              }
+            },
+            "a_bare_gemm_is_shape_dependent": true,
+            "_reading": "true here means the divergence is a GEMM-level property of this dtype/backend and is not introduced by attention, masking, padding semantics or the operator code"
+          },
+          "logits_solo_vs_batched": {
+            "n": 95567744,
+            "max_abs": 9.5078125,
+            "mean_abs": 0.4544436037540436,
+            "rms": 0.7141714692115784,
+            "p50_abs": null,
+            "p95_abs": null,
+            "p99_abs": null,
+            "rel_l2": 0.1603345423936844,
+            "cosine": 0.9872286319732666,
+            "bitwise_identical": false,
+            "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+            "forward_kl_per_position_mean": 0.19407548010349274,
+            "argmax_agreement": 0.847376823425293,
+            "top5_set_agreement": 0.4054054021835327,
+            "top20_set_agreement": 0.10651828348636627
+          }
+        },
+        "reduced_precision_off_splitk_on": {
+          "policy": {
+            "requested": {
+              "allow_reduced_precision": false,
+              "allow_splitk": null,
+              "blas_library": "cublas"
+            },
+            "supported": true,
+            "error": null,
+            "blas": {
+              "requested": "cublas",
+              "error": null,
+              "readback": "_BlasBackend.Cublas",
+              "honoured": true
+            },
+            "form": "bool",
+            "setter_accepted": true,
+            "readback": {
+              "allow_reduced_precision": false,
+              "allow_reduced_precision_readable": true,
+              "allow_splitk": null,
+              "allow_splitk_readable": false
+            },
+            "gemm_probe": {
+              "probed": true,
+              "ran": true,
+              "error": null
+            },
+            "honoured": true
+          },
+          "gemm": {
+            "shape_solo": [
+              1,
+              512
+            ],
+            "shape_batched": [
+              4,
+              640
+            ],
+            "per_projection": {
+              "q": {
+                "in_features": 1024,
+                "out_features": 2048,
+                "dtype": "torch.bfloat16",
+                "n": 1048576,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "k": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 0.9999999403953552,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "v": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "gate": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "up": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0000001192092896,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "attn_out": {
+                "in_features": 2048,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0000001192092896,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "ffn_out": {
+                "in_features": 3072,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.00048828125,
+                "mean_abs": 5.5915094776537444e-08,
+                "rms": 3.2616799217066728e-06,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.00013292317453306168,
+                "cosine": 1.0,
+                "bitwise_identical": false,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "lm_head": {
+                "in_features": 1024,
+                "out_features": 151936,
+                "dtype": "torch.bfloat16",
+                "n": 77791232,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": null,
+                "p95_abs": null,
+                "p99_abs": null,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              }
+            },
+            "a_bare_gemm_is_shape_dependent": true,
+            "_reading": "true here means the divergence is a GEMM-level property of this dtype/backend and is not introduced by attention, masking, padding semantics or the operator code"
+          },
+          "logits_solo_vs_batched": {
+            "n": 95567744,
+            "max_abs": 2.6875,
+            "mean_abs": 0.14734308421611786,
+            "rms": 0.230706587433815,
+            "p50_abs": null,
+            "p95_abs": null,
+            "p99_abs": null,
+            "rel_l2": 0.05292573943734169,
+            "cosine": 0.9986187815666199,
+            "bitwise_identical": false,
+            "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+            "forward_kl_per_position_mean": 0.025052420794963837,
+            "argmax_agreement": 0.9189189076423645,
+            "top5_set_agreement": 0.6645469069480896,
+            "top20_set_agreement": 0.34022256731987
+          }
+        },
+        "cublaslt_defaults": {
+          "policy": {
+            "requested": {
+              "allow_reduced_precision": true,
+              "allow_splitk": null,
+              "blas_library": "cublaslt"
+            },
+            "supported": true,
+            "error": null,
+            "blas": {
+              "requested": "cublaslt",
+              "error": null,
+              "readback": "_BlasBackend.Cublaslt",
+              "honoured": true
+            },
+            "form": "bool",
+            "setter_accepted": true,
+            "readback": {
+              "allow_reduced_precision": true,
+              "allow_reduced_precision_readable": true,
+              "allow_splitk": null,
+              "allow_splitk_readable": false
+            },
+            "gemm_probe": {
+              "probed": true,
+              "ran": true,
+              "error": null
+            },
+            "honoured": true
+          },
+          "gemm": {
+            "shape_solo": [
+              1,
+              512
+            ],
+            "shape_batched": [
+              4,
+              640
+            ],
+            "per_projection": {
+              "q": {
+                "in_features": 1024,
+                "out_features": 2048,
+                "dtype": "torch.bfloat16",
+                "n": 1048576,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "k": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 0.9999999403953552,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "v": {
+                "in_features": 1024,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "gate": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "up": {
+                "in_features": 1024,
+                "out_features": 3072,
+                "dtype": "torch.bfloat16",
+                "n": 1572864,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0000001192092896,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "attn_out": {
+                "in_features": 2048,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0000001192092896,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "ffn_out": {
+                "in_features": 3072,
+                "out_features": 1024,
+                "dtype": "torch.bfloat16",
+                "n": 524288,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": 0.0,
+                "p95_abs": 0.0,
+                "p99_abs": 0.0,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              },
+              "lm_head": {
+                "in_features": 1024,
+                "out_features": 151936,
+                "dtype": "torch.bfloat16",
+                "n": 77791232,
+                "max_abs": 0.0,
+                "mean_abs": 0.0,
+                "rms": 0.0,
+                "p50_abs": null,
+                "p95_abs": null,
+                "p99_abs": null,
+                "rel_l2": 0.0,
+                "cosine": 1.0,
+                "bitwise_identical": true,
+                "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)"
+              }
+            },
+            "a_bare_gemm_is_shape_dependent": false,
+            "_reading": "true here means the divergence is a GEMM-level property of this dtype/backend and is not introduced by attention, masking, padding semantics or the operator code"
+          },
+          "logits_solo_vs_batched": {
+            "n": 95567744,
+            "max_abs": 1.28125,
+            "mean_abs": 0.04914950951933861,
+            "rms": 0.06790764629840851,
+            "p50_abs": null,
+            "p95_abs": null,
+            "p99_abs": null,
+            "rel_l2": 0.015497294254601002,
+            "cosine": 0.9998798966407776,
+            "bitwise_identical": false,
+            "_rel_l2_formula": "||b-a||_2 / max(||a||_2, 1e-12)",
+            "forward_kl_per_position_mean": 0.0023940177634358406,
+            "argmax_agreement": 0.9713831543922424,
+            "top5_set_agreement": 0.8362480401992798,
+            "top20_set_agreement": 0.5612082481384277
+          }
+        },
+        "reduced_precision_off_splitk_off": {
+          "policy": {
+            "requested": {
+              "allow_reduced_precision": false,
+              "allow_splitk": false,
+              "blas_library": "cublaslt"
+            },
+            "supported": false,
+            "error": "RuntimeError: set_allow_bf16_reduction_cublas expects a bool, but got tuple",
+            "blas": {
+              "requested": "cublaslt",
+              "error": null,
+              "readback": "_BlasBackend.Cublaslt",
+              "honoured": true
+            },
+            "setter_accepted": false,
+            "form": "UNSUPPORTED",
+            "readback": {
+              "allow_reduced_precision": true,
+              "allow_reduced_precision_readable": true,
+              "allow_splitk": null,
+              "allow_splitk_readable": false
+            },
+            "gemm_probe": {
+              "probed": false,
+              "reason": "the setter itself refused"
+            },
+            "honoured": false
+          },
+          "gemm": null,
+          "logits_solo_vs_batched": null,
+          "_why_absent": "this build cannot express the requested policy; recorded UNSUPPORTED rather than substituting the boolean form"
+        }
+      },
+      "blas_before": "_BlasBackend.Cublas",
+      "tuple_form_supported": false,
+      "split_k_state": {
+        "default": null,
+        "reduced_precision_off_splitk_on": null,
+        "cublaslt_defaults": null,
+        "reduced_precision_off_splitk_off": null
+      },
+      "blas_library": {
+        "default": "_BlasBackend.Cublas",
+        "reduced_precision_off_splitk_on": "_BlasBackend.Cublas",
+        "cublaslt_defaults": "_BlasBackend.Cublaslt",
+        "reduced_precision_off_splitk_off": "_BlasBackend.Cublaslt"
+      },
+      "blas_request_honoured": {
+        "default": true,
+        "reduced_precision_off_splitk_on": true,
+        "cublaslt_defaults": true,
+        "reduced_precision_off_splitk_off": true
+      },
+      "gemm_probe_ran": {
+        "default": true,
+        "reduced_precision_off_splitk_on": true,
+        "cublaslt_defaults": true,
+        "reduced_precision_off_splitk_off": null
+      },
+      "projections_still_shape_dependent": {
+        "default": [
+          "attn_out",
+          "ffn_out"
+        ],
+        "reduced_precision_off_splitk_on": [
+          "ffn_out"
+        ],
+        "cublaslt_defaults": []
+      },
+      "split_k_off_makes_every_gemm_exact": false,
+      "split_k_off_is_strictly_better_than_boolean": false,
+      "backend_switch_alone_fixes_it": null,
+      "split_k_flag_adds_something_beyond_the_backend": null,
+      "improvement_attributable_to": "undetermined",
+      "_reading": {
+        "default": "cuBLAS,   allow_reduced_precision=True,  allow_splitk=True",
+        "reduced_precision_off_splitk_on": "cuBLAS,   allow_reduced_precision=False, allow_splitk=True  <- what the previous round actually ran",
+        "cublaslt_defaults": "cuBLASLt, allow_reduced_precision=True,  allow_splitk=True  <- the BACKEND change alone, so C is attributable",
+        "reduced_precision_off_splitk_off": "cuBLASLt, allow_reduced_precision=False, allow_splitk=False <- the intervention that had never been performed",
+        "_the_boolean_does_not_disable_split_k": "torch's parser returns (value, True) for a bool; only the tuple form reaches the second flag",
+        "_and_the_tuple_needs_cublaslt": "torch accepts (False, False) at the setter and then raises inside F.linear unless the BLAS library is cuBLASLt -- which is why every policy here is proved by running a real bf16 GEMM under it"
+      }
+    }
+  },
+  "stage_status": {
+    "repeatability": "skipped",
+    "case_matrix": "skipped",
+    "first_divergence": "skipped",
+    "gemm_isolation": "skipped",
+    "bf16_controls": "ok",
+    "solo_preservation": "skipped",
+    "length_sweep": "skipped",
+    "statistics_decomposition": "skipped",
+    "ffn_selection": "skipped",
+    "causal_kl": "skipped",
+    "operator_acceptance": "skipped",
+    "performance": "skipped",
+    "backend_matrix": "skipped",
+    "fp32_control": "skipped"
+  },
+  "checkpoint": "/workspace/a4ckpt/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "requested_attn_implementation": "sdpa",
+  "model": {
+    "hidden_size": 1024,
+    "num_hidden_layers": 28,
+    "intermediate_size": 3072,
+    "vocab_size": 151936,
+    "attention": {
+      "config._attn_implementation": "sdpa",
+      "config.attn_implementation": null,
+      "first_block_attn_class": "Qwen3Attention"
+    },
+    "param_dtype": "torch.bfloat16"
+  },
+  "calibration": {
+    "requested": "calib.domain_balanced@v1",
+    "kind": "frozen_calibration_mixture",
+    "profile_hash": "11f36a88bad4879f8ab0e3586ca1f0af035401e505dc97815bed8d47b9f32e9b",
+    "content_sha256": "d65c1f40e4837ea1bd5bcc33c68041a13b797c68f5be3c0686e0142ed761028f",
+    "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+    "n_items": 8,
+    "lengths": [
+      629,
+      234,
+      527,
+      646,
+      672,
+      317,
+      309,
+      490
+    ]
+  },
+  "focal": {
+    "length": 629,
+    "neighbour_lengths": [
+      234,
+      527,
+      646
+    ]
+  },
+  "conclusion": {
+    "each_shape_internally_deterministic": null,
+    "any_divergence_observed": false,
+    "stages_reporting_a_divergence": [],
+    "divergence_locus": "no_divergence_observed",
+    "divergence_driver": null,
+    "a_bare_gemm_is_shape_dependent": null,
+    "padding_alone_is_inert": null,
+    "batch_size_alone_moves_the_forward": null,
+    "focal_row_independent_of_neighbour_tokens": null,
+    "bf16_tuple_policy_supported": false,
+    "split_k_off_makes_every_gemm_exact": false,
+    "split_k_off_beats_reduced_precision_off_alone": false,
+    "split_k_state_by_control": {
+      "default": null,
+      "reduced_precision_off_splitk_on": null,
+      "cublaslt_defaults": null,
+      "reduced_precision_off_splitk_off": null
+    },
+    "blas_library_by_control": {
+      "default": "_BlasBackend.Cublas",
+      "reduced_precision_off_splitk_on": "_BlasBackend.Cublas",
+      "cublaslt_defaults": "_BlasBackend.Cublaslt",
+      "reduced_precision_off_splitk_off": "_BlasBackend.Cublaslt"
+    },
+    "improvement_attributable_to": "undetermined",
+    "backend_switch_alone_fixes_it": null,
+    "projections_still_shape_dependent_by_control": {
+      "default": [
+        "attn_out",
+        "ffn_out"
+      ],
+      "reduced_precision_off_splitk_on": [
+        "ffn_out"
+      ],
+      "cublaslt_defaults": []
+    },
+    "historical_solo_output_is_preserved": null,
+    "all_three_shapes_agree_under_splitk_off": null,
+    "batch_under_splitk_off_equals_historical_solo": null,
+    "ffn_selection_invariant_under_splitk_off": null,
+    "attention_selection_invariant_under_splitk_off": null,
+    "both_operators_invariant_under_splitk_off": null,
+    "invariant_batched_speedup_vs_solo": null,
+    "splitk_off_slowdown_vs_default_batched": null,
+    "every_attention_backend_diverges": null,
+    "no_attention_backend_diverges": null,
+    "attention_backends_diverging": null,
+    "attention_backends_exact": null,
+    "attention_implementation_of_the_main_run": "sdpa",
+    "ffn_selection_is_batch_invariant": null,
+    "ffn_layers_with_moved_selection": null,
+    "ffn_selection_invariant_at_every_ratio_and_batch_size": null,
+    "ffn_headline_micro_batch_size": null,
+    "ffn_headline_keep_ratio": null,
+    "statistics_bit_identical_at_every_batch_size": null,
+    "causal_kl_max_rel_diff": null,
+    "causal_kl_item_ranking_identical": null,
+    "_derivation": "locus (WHERE): nondeterminism first; then, only if SOME stage observed a divergence at all, a bare GEMM, then a backend that diverges while another is exact, then every backend diverging, then anything between a GEMM and the logits, then padded width as the weakest localization. driver (WHAT) is independent and comes from the length sweep, which varies padded width and batch size one at a time."
+  },
+  "finished_utc": "2026-09-26T10:06:29.727155+00:00"
+}
