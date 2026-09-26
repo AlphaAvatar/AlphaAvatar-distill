@@ -30,6 +30,23 @@
    "repair": "stage every profile the pilot's own steps name, derived from the pilot module rather than listed; add a --check-inputs mode that resolves the REAL profiles at $0 before the GPU work; exclude work/ from the fetch; persist each prefix step through on_step as it completes.",
    "teardown": "confirmed by provider query: pods 0, networkVolumes 0",
    "artifacts_kept": "every JSON, log and text record. The 9 partial .safetensors from the aborted transfer were removed: incomplete bytes from a failed run's intermediates, with no consumer."
+  },
+  {
+   "subrun_id": "c3pilot_20260927_a2",
+   "pod_id": null,
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 0.0,
+   "cost_usd": 0.0,
+   "cost_basis": "no resource was created; the provider refused",
+   "executed_source_sha": "fdcb78b7532bd6040231a3438cb1e73c4f68ab1b",
+   "verdict": "FAIL",
+   "failure_class": "provider_capacity",
+   "stage_reached": "acquisition; the $0 gates all passed",
+   "failure": "'There are no longer any instances available with the requested specifications' -- L40S secure stock was reported Low at quote time and was gone one second later. Nothing was created and nothing billed.",
+   "second_defect": "MINE, and it is why this attempt has a record at all: the launcher's fallback pod-id regex `\\b[a-z0-9]{13,16}\\b` matched the word `specifications` out of that error, so a REFUSED create yielded a pod id, a watchdog was started against it, and the script polled a pod that had never existed. No resource was billing, but the same bug against a partially-created pod would have been an unowned one.",
+   "repair": "recognise the provider's refusal text; require a digit in the fallback id; and CONFIRM the id against `myself { pods }` before starting a watchdog, because the provider is the only authority on whether a pod exists.",
+   "teardown": "nothing to tear down; confirmed pods 0, networkVolumes 0"
   }
  ]
 }

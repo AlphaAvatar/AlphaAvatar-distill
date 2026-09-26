@@ -318,3 +318,47 @@ def test_the_remote_payload_checks_real_inputs_before_the_gpu_work():
     assert "e8_inputs_20260810" not in src, (
         "the payload still fetches a mixture from the relay by name; the list "
         "is derived and pushed now")
+
+
+# --- the create must not turn an error into a pod id ----------------------
+
+def test_the_pod_id_regex_does_not_match_the_providers_error_text():
+    """`specifications` is fourteen lowercase letters.
+
+    The fallback was `\\b[a-z0-9]{13,16}\\b`, so "There are no longer any
+    instances available with the requested specifications" yielded a pod id.
+    A watchdog was started against it and the launcher polled a pod that had
+    never existed. Every real RunPod id contains a digit.
+    """
+    import re
+
+    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    m = re.search(r"POD_ID=\$\(echo \"\$CREATE\" \| grep -oE '([^']+)'", src)
+    assert m, "no fallback pod-id pattern found in the launcher"
+    pattern = m.group(1).replace("\\\\", "\\")
+    error = ("Error: There are no longer any instances available with the "
+             "requested specifications. Please refresh and try again.")
+    hits = [h for h in re.findall(pattern, error) if 13 <= len(h) <= 16]
+    assert not hits, f"the fallback still matches the error text: {hits}"
+    #: And it still finds a real id.
+    ok = [h for h in re.findall(pattern, 'pod "7ucb8jox3buc29" created')
+          if 13 <= len(h) <= 16]
+    assert ok == ["7ucb8jox3buc29"], ok
+
+
+def test_the_launcher_confirms_the_pod_with_the_provider():
+    """Parsing is a guess; the provider is the authority. A pod id this
+    script believes in but the provider has never heard of leaves the
+    watchdog guarding nothing."""
+    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    create_at = src.index("runpodctl create pod")
+    #: The START of the watchdog, not the string "watchdog.py" — that also
+    #: appears in the teardown's pid check, which is EARLIER in the file and
+    #: made this assertion compare the wrong two positions.
+    watchdog_at = src.index("setsid nohup")
+    confirm_at = src.index("the provider does not list a pod")
+    assert create_at < confirm_at < watchdog_at, (
+        "the pod must be confirmed with the provider BEFORE a watchdog is "
+        "started against it")
+    assert "no longer any instances" in src, (
+        "the launcher does not recognise the provider's refusal text")

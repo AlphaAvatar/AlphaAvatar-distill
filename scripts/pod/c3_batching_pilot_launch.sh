@@ -253,9 +253,33 @@ CREATE=$(runpodctl create pod \
   --secureCloud 2>&1)
 echo "$CREATE" >>"$LOG"
 POD_ID=$(echo "$CREATE" | sed -n 's/.*pod "\([a-z0-9]\{10,\}\)".*/\1/p' | head -1)
-[ -z "$POD_ID" ] && POD_ID=$(echo "$CREATE" | grep -oE '\b[a-z0-9]{13,16}\b' | head -1)
+#: The fallback regex used to be `\b[a-z0-9]{13,16}\b`, which matched the word
+#: `specifications` out of "There are no longer any instances available with
+#: the requested specifications" -- so a REFUSED create produced a pod id, a
+#: watchdog was started against it, and the script polled a nonexistent pod
+#: for fifteen minutes. An error is checked for first, and the id is then
+#: confirmed against the provider, because the only authority on whether a pod
+#: exists is the provider.
+if echo "$CREATE" | grep -qiE '^error:|no longer any instances|not available|insufficient'; then
+  say "provider refused the create:"
+  echo "$CREATE" | grep -iE '^error:|no longer any instances|not available|insufficient' | while read -r l; do say "  $l"; done
+  POD_ID=""
+fi
+[ -z "$POD_ID" ] && POD_ID=$(echo "$CREATE" | grep -oE '\b[a-z0-9]*[0-9][a-z0-9]*\b' | grep -E '^.{13,16}$' | head -1)
 if [ -z "$POD_ID" ]; then say "FAILED to create a pod; nothing billed"; exit 3; fi
-say "pod ${POD_ID}"
+#: CONFIRMED, not parsed. A pod id this script believes in but the provider
+#: has never heard of is worse than no pod: the watchdog guards nothing and
+#: the teardown has nothing to remove, while a real resource could be billing
+#: under an id nobody recorded.
+EXISTS=$(gql "{\"query\":\"query { myself { pods { id } } }\"}" \
+         | python3 -c "import json,sys;print(sum(1 for p in json.load(sys.stdin)['data']['myself']['pods'] if p['id']=='${POD_ID}'))" 2>/dev/null || echo 0)
+if [ "$EXISTS" != "1" ]; then
+  say "the provider does not list a pod ${POD_ID}; the create did not succeed."
+  say "Full output:"; echo "$CREATE" | while read -r l; do say "  $l"; done
+  POD_ID=""
+  exit 3
+fi
+say "pod ${POD_ID} (confirmed by the provider)"
 printf '%s' "$POD_ID" > "${OUT}/pod_id"
 printf '%s' "$STARTED_EPOCH" > "${OUT}/pod_start_epoch"
 
