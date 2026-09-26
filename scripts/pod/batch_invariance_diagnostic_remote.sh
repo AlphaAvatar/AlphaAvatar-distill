@@ -227,10 +227,11 @@ print('  /opt/train: torch', torch.__version__, '| transformers', transformers._
 #                      unpinned runtime. This is the environment control: it
 #                      asks whether the runtime alone moves the answer.
 run_one() {
-  local label="$1" python="$2" attn="$3" ckpt="$4"
+  local label="$1" python="$2" attn="$3" ckpt="$4" only="${5:-}" nitems="${6:-}"
   local dir="${OUTROOT}/${label}"
   mkdir -p "$dir"
-  say "diagnostic ${label} (python=${python} attn=${attn:-default} ckpt=${ckpt:-hub-parent})"
+  say "diagnostic ${label} (python=${python} attn=${attn:-default} ckpt=${ckpt:-hub-parent}" \
+      "only=${only:-all} n_items=${nitems:-default})"
   local t=$(date -u +%s)
   # Full output to a file that travels back with the report; only the tail to
   # the launcher log. A diagnostic whose stderr was truncated to fit a console
@@ -242,6 +243,7 @@ run_one() {
   "$python" scripts/validation/batch_invariance_diagnostic.py \
       --run-id "@RUN_ID@-${label}" --device cuda --dtype bfloat16 \
       ${attn:+--attn "$attn"} ${ckpt:+--checkpoint "$ckpt"} \
+      ${only:+--only "$only"} ${nitems:+--n-items "$nitems"} \
       --out "$dir" > "${dir}/stdout.log" 2>&1
   local rc=$?
   #: Per-run, not just per-session. The session bound would let one hung run
@@ -259,6 +261,25 @@ run_one parent_C_science_sdpa  /opt/train/bin/python sdpa  ""
 run_one parent_C_science_eager /opt/train/bin/python eager ""
 if [ -n "$A4_CKPT" ]; then
   run_one a4_596m_C_science_sdpa /opt/train/bin/python sdpa "$A4_CKPT"
+fi
+
+# --- the whole mixture, not a subsample -------------------------------------
+# The runs above read the first EIGHT items of calib.domain_balanced@v1; a formal
+# search reads all 67. More tokens means each per-neuron mean is averaged over
+# ~8x more of them, so the drift from a reordered reduction should fall while the
+# cutoff margins stay where they are -- which is exactly the mechanism by which a
+# subsample could overstate how many layers move.
+#
+# Only the two stages whose answer is a scientific DECISION. The full matrix is
+# not rerun: the case matrix and causal KL would batch 67 items into one
+# [67, T, 151936] logit block, which is 41 GiB and would OOM, and neither of them
+# is what this variant is asking about.
+MIX=${FULL_MIXTURE_ITEMS:-67}
+run_one parent_C_science_sdpa_fullmix /opt/train/bin/python sdpa "" \
+        statistics_decomposition,ffn_selection "$MIX"
+if [ -n "$A4_CKPT" ]; then
+  run_one a4_596m_C_science_sdpa_fullmix /opt/train/bin/python sdpa "$A4_CKPT" \
+          statistics_decomposition,ffn_selection "$MIX"
 fi
 
 # Environment B needs transformers; it comes from the SAME wheelhouse, pinned to
