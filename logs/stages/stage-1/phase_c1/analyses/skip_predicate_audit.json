@@ -220,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_attention_causal_kl.py",
-   "line": 517,
+   "line": 594,
    "kind": "pytest.skip",
    "function": "test_the_domain_map_agrees_on_the_real_frozen_mixture",
    "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
@@ -2286,5 +2286,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "26f57518426489ade56c833a4f445287cfe731884ae3b3d7967c22c8fbe99430"
+ "digest": "8f0636c74858213e3a43c1b5c4207e00c721e2a12ed13dd531f0017bca6e59da"
 }

@@ -1635,6 +1635,14 @@ computes 36.7% more token-positions than B1. A 1.25x speedup gate is therefore
 asking the packing to win back that overhead *and* a quarter again — which is
 exactly why the gate was predeclared rather than chosen afterwards.
 
+**It is visible and stoppable.** 897 corpus passes is tens of minutes to
+hours, and the first version had neither a progress line nor a deadline check
+— the pair whose absence let `depth.causal_kl_greedy_v1` run 10.78 h against a
+3.0 h budget, silent for 10 h 47 m. One line and one `ctx.deadline.check()`
+per (group, layer): 28 per group rather than 896. A stop names the group, the
+layer and the forwards completed, and — tested by stopping it — leaves every
+parameter of the model it was handed unchanged.
+
 **Not done, and not authorized.** No pilot campaign or authorization document
 exists, no launcher, no `$5.00` ceiling created, no paid execution. Formal C3
 remains **NOT STARTED** with its `$25.00` stage envelope untouched, and the
@@ -1658,11 +1666,19 @@ set**.
 
 ## The full suite is not green: 11 failures, one family
 
-**Current measurement, 2026-09-26 at `5c287faf` on a clean tree: 11 failed,
-4881 passed, 228 skipped** over all of `tests/`, in 45m50s — the identical
-set to the runs at `50056199` and `a76cce7f`, and the same set that is red
-at `ab53ba14`. Zero new and zero fixed across the split-K continuation and
-the parallel-item round. Those eleven are
+**Current measurement, 2026-09-26 at `679f0113` on a clean tree: 12 failed,
+4988 passed, 228 skipped** over all of `tests/`, in 46m33s. Eleven are the
+documented set below. The twelfth,
+`test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one`,
+was the audit record going stale *again* between the suite starting and the
+round's last commit: that record pins a **line number**, so inserting tests
+above an existing skip in the same file is enough to move it. Regenerated at
+`679f0113`; it is a derived record with an owner, not a defect.
+
+The previous measurement, at `5c287faf`: 11 failed, 4881 passed, 228 skipped
+in 45m50s — the identical set to `50056199` and `a76cce7f`, and the same set
+that is red at `ab53ba14`. Zero new and zero fixed across the split-K
+continuation and the parallel-item round. Those eleven are
 **exactly** the set that is red at `ab53ba14`, the pre-refactor base — checked
 by running the same nodeids in a detached worktree at that commit. **Zero new
 failures** from the batching/topology refactor or from this investigation.
