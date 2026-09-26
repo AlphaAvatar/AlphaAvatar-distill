@@ -278,9 +278,25 @@ class TestTheSnapshotStatesTheRequiredFacts:
         assert "NO frozen seed set" in c3["status"]
         assert "ENGINEERING state only" in c3["operator"]
         assert "does NOT start formal C3" in c3["operator"]
-        assert c3["batching_adoption_pilot"].startswith("AUTHORIZED")
-        assert "NOT EXECUTED" in c3["batching_adoption_pilot"]
-        assert "not formal C3" in c3["batching_adoption_pilot"]
+        #: A VERDICT SET, not a phrase. The pilot moved from authorized to
+        #: executed on 2026-09-27, and pinning the earlier wording would have
+        #: made a true update look like a regression. What must hold in every
+        #: state is that the pilot is not mistaken for formal C3.
+        pilot = c3["batching_adoption_pilot"]
+        assert any(pilot.startswith(state) for state in
+                   ("AUTHORIZED", "EXECUTED", "NOT AUTHORIZED")), pilot
+        if pilot.startswith("AUTHORIZED"):
+            assert "NOT EXECUTED" in pilot
+        else:
+            #: An executed pilot owes its verdict and its record.
+            assert "result.json" in pilot, "no owner for the pilot's figures"
+            assert any(v in pilot for v in (
+                "B4_NOT_WORTH_ADOPTION_PILOT",
+                "B4_STRUCTURALLY_EQUIVALENT_AND_FASTER",
+                "B4_FASTER_AND_STRUCTURALLY_DIFFERENT_RECOVERY_TRIGGERED")), (
+                    "an executed pilot states no predeclared verdict")
+        assert "ot formal C3" in pilot, (
+            "the pilot must never read as formal C3, in any state")
         #: Over every field of the entry, not over `str(dict)`: the stale
         #: precondition could reappear in any one of them.
         assert not re.search(r"cannot start before C2 names",

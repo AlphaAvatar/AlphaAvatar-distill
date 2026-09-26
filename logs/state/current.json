@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "TWO, and they are separate. (1) PACKAGE APPROVED 2026-09-11, AMENDED the same day: money bounds the sessions, not a count; that package is C1's and its round ended with a verdict. (2) The C3 BATCHING-ADOPTION PILOT, authorized 2026-09-27 with its own $5.00 all-in ceiling, conditional on the $0 blockers passing. An approval is NOT a launch. Owner: logs/budget/decisions.md.",
+  "note": "The C1 execution package (approved 2026-09-11, amended the same day; that round ended with a verdict). The C3 batching-adoption pilot authorization of 2026-09-27 is SPENT AND CLOSED -- it executed, returned B4_NOT_WORTH_ADOPTION_PILOT, and authorizes nothing further. An approval is not a launch. NOTHING may launch now. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -23,20 +23,20 @@
   "note": "No chain exists. C2 is closed and no C2 launch may be prepared. The C3 batching-adoption pilot is AUTHORIZED but has no readiness record, authorization document or bundle yet; formal C3 has no chain of any kind."
  },
  "budget": {
-  "cumulative_spend_usd": 343.9386,
+  "cumulative_spend_usd": 346.0499,
   "authorized_cap_usd": 370.0,
-  "remaining_usd": 26.0614,
+  "remaining_usd": 23.9501,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 22.8249,
-  "engineering_remaining_usd": 4.0316,
-  "package_remaining_usd": 26.8565,
+  "engineering_remaining_usd": 1.9203,
+  "package_remaining_usd": 24.7452,
   "per_session_ceiling_usd": 15.1475,
   "full_ceiling_sessions_fundable": 1,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
-  "_package_spent_usd": 24.586,
+  "_package_spent_usd": 26.6973,
   "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "planning_floor_usd": 13.4401
  },
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -127,7 +127,7 @@
   "c3": {
    "status": "NOT STARTED, and the next scientific stage: causal-KL ATTENTION isolation from B. NOT authorized, NOT prepared, NO frozen seed set.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
-   "batching_adoption_pilot": "AUTHORIZED 2026-09-27, NOT EXECUTED. B1-vs-B4 causal scoring off ONE replayed frozen parent; pilot-only seed 1139220455; $5.00 all-in. Also not formal C3.",
+   "batching_adoption_pilot": "EXECUTED and CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT. One prefix replay reproduced eea90c91346a0745 exactly; both arms scored from it. B1 2190.2s vs B4 3187.2s = 0.6872x against a predeclared 1.25x gate, so B4 is SLOWER and no recovery ran. Head maps differ in 16/448 retained slots (3.57%), descriptive only. $3.3478 of $5.00. Owner: logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json. Not formal C3.",
    "budget": "formal C3 must be RE-PRICED and separately authorized; the old $25 envelope is not current permission under the $370.00 cap."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
@@ -138,7 +138,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "C2 is CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24): no new incumbent, B from C1 stands, no probes owed, no further C2 scientific spend. The only authorized spend is the C3 batching-adoption pilot, $5.00 all-in, which is engineering-scale and is NOT formal C3.",
+ "blocker": "NOTHING IS BLOCKED and NO SPEND IS AUTHORIZED. C2 is CLOSED WITHOUT PROMOTION (2026-09-24). The C3 batching-adoption pilot is CLOSED with a verdict (2026-09-27) and its authorization is spent. Formal C3 is NOT STARTED, has no frozen seed set, and needs re-pricing and a separate budget authorization: at $346.0499 of the $370.00 cap, the old $25.00 envelope is not fundable.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -166,7 +166,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",
@@ -179,7 +179,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "execute the C3 batching-adoption pilot (B1 vs B4 causal scoring) inside its $5.00 ceiling, then re-price and separately authorize formal C3.",
+ "next": "re-price formal C3 against the $370.00 cap and obtain a separate budget authorization. The pilot's answer -- padded B4 causal scoring is 1.46x SLOWER, not faster -- means formal C3 should be priced at B=1.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",

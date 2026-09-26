@@ -1643,11 +1643,61 @@ per (group, layer): 28 per group rather than 896. A stop names the group, the
 layer and the forwards completed, and — tested by stopping it — leaves every
 parameter of the model it was handed unchanged.
 
-**Not done, and not authorized.** No pilot campaign or authorization document
-exists, no launcher, no `$5.00` ceiling created, no paid execution. Formal C3
-remains **NOT STARTED** with its `$25.00` stage envelope untouched, and the
-pilot seed `1139220455` is pilot-only — there is still **no frozen C3 seed
-set**.
+### The pilot RAN, and B4 is slower: `B4_NOT_WORTH_ADOPTION_PILOT`
+
+**Measured 2026-09-27, `c3pilot_20260927_a5`, `$2.1113`, pod `m8t9tf8ftqlmh3`.**
+Owner: [`result.json`](../stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json).
+
+|  | scorer | physical invocations | item-forward equiv. | padded positions | peak VRAM |
+| --- | --- | --- | --- | --- | --- |
+| causal-B1 | **2190.2 s** | 60,099 | 60,099 | 0 | 3.94 GiB |
+| causal-B4 | **3187.2 s** | 15,249 | 60,099 | 21,978 | 11.76 GiB |
+
+**Speedup 0.6872× against a predeclared 1.25× gate. B4 is 1.46× SLOWER**, so
+the gate is not met and no recovery was triggered — the speed gate is first,
+and that ordering was frozen before either clock was read. Issuing a quarter
+of the kernel launches did not make it faster: the pre-run derivation had
+already shown B4 computes **36.7% more token-positions** than B1 on this
+mixture, and the measured penalty exceeds even that.
+
+**The frozen parent reproduced exactly, twice.** One replay per pilot, at B=1:
+DEPTH 1225.9 s, FFN 45.2 s, RESIDUAL_WIDTH 34.0 s → `eea90c91346a0745…` in
+22.1 min, and again on attempt a4 in 21.5 min. Both arms re-identified that
+one checkpoint from disk before scoring (`premise: verified`). This is the
+first time this tree has been shown to reconstruct the C1 pre-ATTENTION parent
+bit-for-bit.
+
+**The head maps do differ, and far less than the layer count suggests:**
+
+```text
+layers          5 / 28        <- the number that overstates
+GQA groups     16 / 224
+retained slots 16 / 448       = 3.57%
+```
+
+All 16 changed selections are "wide" crossings, but the margins are small in
+absolute terms (1.94e-06 … 6.76e-03) and 15 of the 16 sit in layers 1–4.
+Rank correlation is 0.981 overall (per-layer min 0.793); score drift has
+abs_max 0.284 with a median relative drift of 0.24% and a p95 of 27.5%. **This
+is descriptive only** — the pilot may not and does not produce a GO/NO_GO, a
+confidence interval or an incumbent.
+
+**Four attempts preceded it, all engineering, all repaired, each caught
+earlier than the last:** a1 `$0.7209` (staged one of the two calibration
+mixtures; found 24 min in at WIDTH), a2 `$0.0000` (provider capacity — and my
+pod-id regex matched the word `specifications` out of the refusal), a3
+`$0.0391` (`ssh` ate the push list; **a1's repair caught a1's failure in 2
+minutes instead of 24**), a4 `$0.4765` (the prefix reproduced `eea90c91…`,
+then the parent loaded on cpu against a `cuda:0` path — the CPU-rehearsal
+blind spot). Every pod torn down and confirmed.
+
+**Pilot spend `$3.3478` of the `$5.00` ceiling. Project `$346.0499` of
+`$370.00`.**
+
+**Formal C3 remains NOT STARTED**, has **no frozen seed set**, and must be
+**re-priced and separately budget-authorized** before launch: the old
+`$25.00` envelope is not current permission at this cap. The pilot seed
+`1139220455` is pilot-only.
 
 ## Readiness
 
@@ -1771,9 +1821,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$4.0316` of `$6.0000` |
-| package | `$26.8565` of `$51.4425` |
-| project cap | `$343.9386` spent of `$370.0000`, leaving `$26.0614` |
+| GPU engineering | `$1.9203` of `$6.0000` |
+| package | `$24.7452` of `$51.4425` |
+| project cap | `$346.0499` spent of `$370.0000`, leaving `$23.9501` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -89,6 +89,23 @@
    "_why_no_dollar_zero_check_caught_it": "the toy path declares device cpu, so a cpu/cuda mismatch cannot arise in it. This is the CPU-rehearsal blind spot the repository has recorded before: assert placement, not arithmetic.",
    "repair": "load the parent ON the declared device and in the prefix's dtype; read the PILOT's summary by path, never the first match by name. Five $0 tests, two of which execute the real loader against a real saved checkpoint and assert placement and dtype.",
    "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
+  },
+  {
+   "subrun_id": "c3pilot_20260927_a5",
+   "pod_id": "m8t9tf8ftqlmh3",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 114.467,
+   "cost_usd": 2.1113,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "53e6f8f88b55fd4dd767073de132665ee277ab17",
+   "verdict": "COMPLETE",
+   "scientific_verdict": "B4_NOT_WORTH_ADOPTION_PILOT",
+   "stage_reached": "closeout; all seven steps executed",
+   "result": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json",
+   "summary": "one prefix replay reproduced eea90c91346a0745 exactly in 22.1 min; both arms scored from that one verified parent. B1 2190.2s, B4 3187.2s -> speedup 0.6872x against a predeclared 1.25x gate. B4 is SLOWER. Head maps differ in 16 of 448 retained slots, but the speed gate is first and no recovery was triggered.",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
   }
  ]
 }
