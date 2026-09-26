@@ -61,6 +61,69 @@ def load_scope(repo: Path) -> dict:
     return json.loads((repo / PILOT_DIR / "scope.json").read_text())
 
 
+def required_profiles(repo: Path) -> list:
+    """Every calibration mixture the REAL pilot path resolves, derived.
+
+    DERIVED, not listed. Attempt a1 staged one mixture and died 24 minutes in
+    because the prefix uses two — DEPTH and FFN on `domain_balanced@v1`,
+    WIDTH on `reasoning_heavy@v2` — which is the exact non-uniformity a
+    review had already corrected in the pilot module. A hand-written list is
+    a second place for that fact to be wrong; this asks the steps.
+
+    Each entry carries the profile's OWN `items_path` and `items_file_sha256`,
+    so a stager verifies against the profile rather than against a constant
+    copied beside it.
+    """
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    from experiments.calibration import register_builtin_profiles
+    from experiments.phase_c3 import pilot
+
+    register_builtin_profiles()
+    seen, out = set(), []
+    steps = list(pilot.prefix_steps()) + [pilot.causal_step(1)]
+    for step in steps:
+        if step.profile_id in seen:
+            continue
+        seen.add(step.profile_id)
+        profile = get_profile(step.profile_id)
+        out.append({"profile_id": step.profile_id,
+                    "items_path": profile.items_path,
+                    "items_file_sha256": profile.items_file_sha256,
+                    "materialized": bool(profile.materialized)})
+    return out
+
+
+def check_inputs(repo: Path) -> int:
+    """Resolve every required mixture for real, and say what is missing.
+
+    This is the check attempt a1 did not have. The pod-side preflight it DID
+    have runs the driver's `--toy` mode, which supplies `calibration_items`
+    explicitly and therefore never resolves a profile at all — so the one
+    gate standing before 24 minutes of GPU work could not see the one input
+    that was absent.
+    """
+    from aadistill.initialization.calibration.profiles import (
+        CalibrationError, get_profile)
+
+    missing = []
+    for entry in required_profiles(repo):
+        try:
+            items = get_profile(entry["profile_id"]).resolve(repo)
+        except (CalibrationError, OSError) as exc:
+            missing.append(f"{entry['profile_id']}: {exc}")
+            _say(f"  MISSING {entry['profile_id']} -> {entry['items_path']}")
+            continue
+        _say(f"  ok {entry['profile_id']}: {len(items)} items from "
+             f"{entry['items_path']}")
+    if missing:
+        _say("INPUTS UNAVAILABLE; the pilot would fail after the GPU work:")
+        for m in missing:
+            _say(f"  {m}")
+        return 30
+    return 0
+
+
 # --- toy mode: the same sequence, at a geometry a CPU can finish -----------
 
 TOY_PARENT = dict(hidden_size=32, num_hidden_layers=4, intermediate_size=64,
@@ -219,10 +282,24 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     _say("stage 1/7: replaying the frozen prefix ONCE at B=1")
     t0 = time.monotonic()
     prefix: list = []
+
+    def prefix_step_done(step) -> None:
+        """PERSIST AS EACH STEP LANDS, not when all three have.
+
+        Attempt a1 ran DEPTH and FFN for 24 minutes and recorded neither,
+        because the prefix stage was written only after `replay_prefix`
+        returned and the third step raised. A completed unit of work must
+        survive the failure of a later one.
+        """
+        prefix.append(step)
+        checkpoint("prefix_steps", [s.as_dict() for s in prefix])
+        _say(f"  step {step.index} {step.kind} done in {step.seconds:.1f}s, "
+             f"digest {step.identity.artifact_digest[:16]}…")
+
     pilot.replay_prefix(spec, adapter=QWEN3_ADAPTER, root_loader=root_loader,
                         workdir=out_dir / "work", repo_root=repo,
                         calibration_items=calibration,
-                        on_step=prefix.append, deadline=deadline)
+                        on_step=prefix_step_done, deadline=deadline)
     prefix_seconds = time.monotonic() - t0
     if not prefix:
         raise PilotError("the prefix produced no steps")
@@ -408,11 +485,23 @@ def _peak_vram(device: str) -> int | None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default="")
     ap.add_argument("--repo", default=str(REPO))
     ap.add_argument("--device", default=None)
     ap.add_argument("--toy", action="store_true")
+    ap.add_argument("--required-inputs", action="store_true",
+                    help="print the mixtures the real path needs, one JSON "
+                         "object per line, and exit")
+    ap.add_argument("--check-inputs", action="store_true",
+                    help="resolve every required mixture for real and exit")
     args = ap.parse_args(argv)
+
+    if args.required_inputs:
+        for entry in required_profiles(Path(args.repo)):
+            print(json.dumps(entry, sort_keys=True))
+        return 0
+    if args.check_inputs:
+        return check_inputs(Path(args.repo))
 
     device = args.device
     if device is None:
@@ -423,6 +512,8 @@ def main(argv=None) -> int:
         except Exception:
             device = "cpu"
 
+    if not args.out:
+        ap.error("--out is required unless --required-inputs/--check-inputs")
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     try:

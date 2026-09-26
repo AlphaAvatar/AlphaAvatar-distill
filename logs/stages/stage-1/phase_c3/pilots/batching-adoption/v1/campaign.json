@@ -8,5 +8,28 @@
  "_the_ceiling_is_NOT_restated_here": "It lives in authorization.json and nowhere else.",
  "_inherits_nothing": "This is a NEW campaign, distinct from the CLOSED batch-invariance root-cause diagnostic. That campaign's $0.7319 stays booked on its own record and is NOT charged here; the two ceilings are separate and neither funds the other.",
  "teardown_reserve_usd": 0.1,
- "subruns": []
+ "subruns": [
+  {
+   "subrun_id": "c3pilot_20260927_a1",
+   "pod_id": "7ucb8jox3buc29",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "_rate_source": "live securePrice re-queried immediately before creation",
+   "container_disk_gb": 120,
+   "elapsed_minutes": 39.083,
+   "cost_usd": 0.7209,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "7e688ee009cf8f0e87e623e81bcaf22160ca26c0",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "prefix step 2 of 3 (WIDTH), before any causal scoring",
+   "failure": "calib.reasoning_heavy@v2: artifacts/stage1/reasoning_heavy_v2/items.jsonl is missing. The remote payload staged ONE calibration mixture. The prefix uses TWO -- DEPTH and FFN on domain_balanced@v1, WIDTH on reasoning_heavy@v2 -- which is the exact non-uniformity a maintainer review had already corrected in the pilot module, and I staged for the uniform case anyway.",
+   "second_defect": "the pod-side preflight PASSED. It runs the driver's --toy mode, which supplies `calibration_items` explicitly and therefore never resolves a profile at all, so the one check placed before the GPU work could not see the one input that was missing.",
+   "third_defect": "the launcher fetched /workspace/out wholesale: 9.1 GiB of prefix checkpoints over a 0.72 MB/s uplink, with the pod still billing. Killed after ~15 min. The evidence is JSON; nothing on the dev box consumes those weights.",
+   "fourth_defect": "24 minutes of DEPTH and FFN produced NO recorded stage: the driver checkpoints `prefix` only after all three steps return, so a failure in the third discards the evidence of the first two.",
+   "repair": "stage every profile the pilot's own steps name, derived from the pilot module rather than listed; add a --check-inputs mode that resolves the REAL profiles at $0 before the GPU work; exclude work/ from the fetch; persist each prefix step through on_step as it completes.",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0",
+   "artifacts_kept": "every JSON, log and text record. The 9 partial .safetensors from the aborted transfer were removed: incomplete bytes from a failed run's intermediates, with no consumer."
+  }
+ ]
 }

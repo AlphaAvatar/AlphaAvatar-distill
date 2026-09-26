@@ -60,35 +60,27 @@ SOURCE_SHA=$(git rev-parse HEAD)
 say "source ${SOURCE_SHA}"
 printf '%s\n' "$SOURCE_SHA" > "${OUTROOT}/source_sha"
 
-# --- science inputs: the frozen calibration mixture -------------------------
-# artifacts/ is gitignored, so the 67-item mixture is NOT in the clone. Without
-# it nothing can run: the prefix resolves `calib.domain_balanced@v1` and
-# `calib.reasoning_heavy@v2` from it, and so does the causal scorer.
-say "fetching the frozen calibration mixture from the relay"
-python3 - <<'PY'
-import hashlib, os, pathlib, shutil, sys, time
-from huggingface_hub import hf_hub_download
-DEST = pathlib.Path("/workspace/repo/artifacts/stage1/e8_calibration_v1")
-DEST.mkdir(parents=True, exist_ok=True)
-PINNED = "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
-for attempt in range(4):
-    try:
-        p = hf_hub_download("AlphaAvatar/aadistill-artifacts", repo_type="model",
-                            filename="e8_inputs_20260810/calibration_v1/items.jsonl",
-                            token=os.environ["HF_TOKEN"])
-        break
-    except Exception as exc:
-        print(f"  attempt {attempt+1}: {exc}", flush=True)
-        time.sleep(8 * (attempt + 1))
-else:
-    sys.exit("CALIBRATION FETCH FAILED")
-got = hashlib.sha256(pathlib.Path(p).read_bytes()).hexdigest()
-if got != PINNED:
-    sys.exit(f"CALIBRATION HASH MISMATCH: {got} != {PINNED}")
-shutil.copy(p, DEST / "items.jsonl")
-print(f"  items.jsonl staged, sha256 {got}", flush=True)
-PY
-[ $? -eq 0 ] || { say "CALIBRATION INPUT UNAVAILABLE"; note "calibration_missing"; exit 22; }
+# --- science inputs: the calibration mixtures, PUSHED by the launcher -------
+# artifacts/ is gitignored, so no mixture is in the clone. Attempt a1 fetched
+# ONE from the relay and died 24 minutes in at the WIDTH step, because the
+# prefix uses TWO -- and the second, `reasoning_heavy_v2`, is a DEV-BOX-ONLY
+# asset that was built at $0 and never uploaded, so no relay fetch could have
+# produced it at all.
+#
+# Both now arrive over scp before this script runs, staged under
+# /workspace/mixtures at their repository-relative paths. This step only moves
+# them into place; the profiles verify their own pinned hashes when they
+# resolve, and `--check-inputs` below makes that happen before any GPU work.
+say "staging the pushed calibration mixtures"
+if [ ! -d /workspace/mixtures ]; then
+  say "NO MIXTURES WERE PUSHED"; note "mixtures_missing"; exit 22
+fi
+(cd /workspace/mixtures && find . -type f -print0 | tar --null -cf - --files-from=-) \
+  | (cd /workspace/repo && tar --no-same-owner -xf -) \
+  || { say "COULD NOT STAGE THE MIXTURES"; note "mixtures_stage_failed"; exit 22; }
+find /workspace/mixtures -type f | while read -r f; do
+  say "  ${f#/workspace/mixtures/} ($(stat -c%s "$f") B)"
+done
 
 # --- the root teacher -------------------------------------------------------
 # Public hub. Fetched HERE rather than lazily inside the driver so a network
@@ -177,6 +169,21 @@ print(json.dumps({
 PY
 /opt/train/bin/python -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)" \
   || { say "NO CUDA UNDER /opt/train"; note "no_cuda"; exit 28; }
+
+# --- the input check the last attempt did not have --------------------------
+# THIS resolves the REAL profiles. The toy preflight below cannot: it supplies
+# `calibration_items` explicitly and never touches the profile registry, so it
+# passed on attempt a1 while the mixture the prefix needed was absent. A check
+# that cannot see the thing that is missing is not a check.
+say "checking the real calibration inputs resolve"
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_batching_pilot_driver.py \
+    --check-inputs 2>&1 | tee "${OUTROOT}/check_inputs.log"
+CHK_RC=${PIPESTATUS[0]}
+if [ "$CHK_RC" -ne 0 ]; then
+  say "REQUIRED CALIBRATION INPUTS UNAVAILABLE (rc=${CHK_RC})"
+  note "check_inputs_failed"
+  exit 30
+fi
 
 # --- a $0 self-check before the science -------------------------------------
 # The three process-global registries the driver needs are EMPTY in a fresh

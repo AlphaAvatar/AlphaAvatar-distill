@@ -110,6 +110,59 @@ if [ -z "$HF_TOKEN" ]; then
 fi
 export HF_TOKEN
 
+# --- the calibration mixtures, VERIFIED HERE and pushed later ---------------
+# Attempt a1 died 24 minutes in because the pod had one mixture and the prefix
+# needs two: DEPTH and FFN on `domain_balanced@v1`, WIDTH on
+# `reasoning_heavy@v2`. And `reasoning_heavy_v2` is a DEV-BOX-ONLY asset --
+# built here at $0 and never uploaded -- so no relay fetch could ever have
+# produced it.
+#
+# So the list is DERIVED from the pilot's own steps, each entry carrying the
+# profile's own pinned sha256, and both files travel from this machine. 1.4 MB
+# over a measured 0.72 MB/s uplink is about two seconds, and it removes the
+# question of which mixture lives where.
+INPUTS="${OUT}/required_inputs.jsonl"
+"${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/pod/c3_batching_pilot_driver.py" \
+    --required-inputs --repo "$REPO_DIR" > "$INPUTS" 2>>"$LOG"
+if [ ! -s "$INPUTS" ]; then
+  say "could not derive the required calibration mixtures; not creating a pod"
+  exit 4
+fi
+MIX_OK=$("${REPO_DIR}/.venv/bin/python" - "$REPO_DIR" "$INPUTS" <<'PY'
+import hashlib, json, pathlib, sys
+repo, listing = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
+bad = []
+for line in listing.read_text().splitlines():
+    if not line.strip():
+        continue
+    e = json.loads(line)
+    f = repo / e["items_path"]
+    if not f.is_file():
+        bad.append(f"{e['profile_id']}: {e['items_path']} is absent on this machine")
+        continue
+    got = hashlib.sha256(f.read_bytes()).hexdigest()
+    if e["items_file_sha256"] and got != e["items_file_sha256"]:
+        bad.append(f"{e['profile_id']}: {e['items_path']} hashes {got[:16]}…, "
+                   f"the profile pins {e['items_file_sha256'][:16]}…")
+    else:
+        print(f"  {e['profile_id']} -> {e['items_path']} ({f.stat().st_size} B)",
+              file=sys.stderr)
+for b in bad:
+    print(f"  {b}", file=sys.stderr)
+print("no" if bad else "yes")
+PY
+)
+say "calibration mixtures required by the pilot's own steps ($(wc -l < "$INPUTS")):"
+while read -r line; do
+  [ -z "$line" ] && continue
+  say "  $(printf '%s' "$line" | python3 -c "import json,sys;e=json.load(sys.stdin);print(e['profile_id'],'->',e['items_path'])")"
+done < "$INPUTS"
+if [ "$MIX_OK" != "yes" ]; then
+  say "a required mixture is missing or has drifted on THIS machine."
+  say "Refusing to create a pod that cannot resolve its own prefix."
+  exit 4
+fi
+
 # --- the payload, rendered from the COMMIT ----------------------------------
 # From `git show ${COMMIT}:`, never the working tree: the pod checks out
 # ${COMMIT}, so shipping the working copy would leave a record naming a commit
@@ -244,6 +297,23 @@ say "ssh ${SSH_HOST}:${SSH_PORT}"
 SSH="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=15 -o ServerAliveInterval=30 -p ${SSH_PORT} root@${SSH_HOST}"
 for _ in $(seq 1 30); do $SSH true 2>/dev/null && break; sleep 5; done
 
+# --- push the mixtures -------------------------------------------------------
+# BEFORE the payload runs, so a transport failure costs seconds rather than a
+# wheelhouse build and a root-teacher download.
+say "pushing the calibration mixtures"
+$SSH "mkdir -p /workspace/mixtures" >>"$LOG" 2>&1
+while read -r line; do
+  [ -z "$line" ] && continue
+  REL=$(printf '%s' "$line" | python3 -c "import json,sys;print(json.load(sys.stdin)['items_path'])")
+  DIR=$(dirname "$REL")
+  $SSH "mkdir -p /workspace/mixtures/${DIR}" >>"$LOG" 2>&1
+  timeout 300 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+      -P "${SSH_PORT}" "${REPO_DIR}/${REL}" \
+      "root@${SSH_HOST}:/workspace/mixtures/${REL}" >>"$LOG" 2>&1 \
+    || { say "FAILED to push ${REL}"; exit 3; }
+  say "  pushed ${REL}"
+done < "$INPUTS"
+
 # --- run --------------------------------------------------------------------
 say "setup + pilot (bounded at ${MAX_SECONDS}s)"
 timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
@@ -254,10 +324,23 @@ say "remote finished rc=${RC}"
 # Gated on the pod having RUN, never on it having SUCCEEDED: a pilot that died
 # in its second arm still measured the first, and $2.82 of verified checkpoints
 # were once deleted by a collector that ran only on a clean terminal state.
-say "fetching evidence"
-scp -r -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P "${SSH_PORT}" \
-    "root@${SSH_HOST}:/workspace/out" "${OUT}/" >>"$LOG" 2>&1 \
-  || say "WARNING: could not fetch /workspace/out"
+# EVIDENCE ONLY. Attempt a1 pulled `/workspace/out` wholesale: 9.1 GiB of
+# prefix checkpoints over a 0.72 MB/s uplink, with the pod still billing, and
+# it had to be killed after ~15 minutes. Nothing on this machine consumes
+# those weights -- the decision reads scores, digests and per-item values, all
+# of which are JSON. The checkpoints stay on the pod and die with it.
+say "fetching evidence (JSON and logs only; checkpoints stay on the pod)"
+$SSH "cd /workspace/out && find . \( -name '*.json' -o -name '*.log' -o -name '*.txt' -o -name '*.jsonl' \) -not -path './*/work/*' -print0 | tar --null -czf /workspace/evidence.tgz --files-from=-" >>"$LOG" 2>&1 \
+  || say "WARNING: could not pack the evidence"
+timeout 600 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -P "${SSH_PORT}" \
+    "root@${SSH_HOST}:/workspace/evidence.tgz" "${OUT}/evidence.tgz" >>"$LOG" 2>&1 \
+  || say "WARNING: could not fetch the evidence archive"
+if [ -f "${OUT}/evidence.tgz" ]; then
+  mkdir -p "${OUT}/out"
+  tar --no-same-owner -xzf "${OUT}/evidence.tgz" -C "${OUT}/out" >>"$LOG" 2>&1 \
+    || say "WARNING: could not unpack the evidence archive"
+  say "evidence: $(du -sh "${OUT}/out" 2>/dev/null | cut -f1), $(find "${OUT}/out" -type f | wc -l) files"
+fi
 SUMMARY=$(find "$OUT" -name pilot_summary.json | head -1)
 if [ -n "$SUMMARY" ]; then
   say "verdict: $(python3 -c "import json;print(json.load(open('${SUMMARY}')).get('verdict','(none)'))" 2>/dev/null || echo unreadable)"
