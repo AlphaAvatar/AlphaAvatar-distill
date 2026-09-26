@@ -65,8 +65,22 @@ CLEAN_STAGES: dict = {
     "backend_matrix": {"backends_diverging": [], "backends_exact": ["sdpa"],
                        "every_backend_diverges": False,
                        "no_backend_diverges": True},
-    "reduction_control": {"applicable": True,
-                          "divergence_removed_by_disabling": False},
+    "bf16_controls": {
+        "tuple_form_supported": True,
+        "split_k_off_makes_every_gemm_exact": True,
+        "split_k_off_is_strictly_better_than_boolean": True,
+        "split_k_state": {"default": True,
+                          "reduced_precision_off_splitk_on": True,
+                          "reduced_precision_off_splitk_off": False},
+        "projections_still_shape_dependent": {
+            "default": ["k", "v", "attn_out", "ffn_out"],
+            "reduced_precision_off_splitk_on": ["k", "v"],
+            "reduced_precision_off_splitk_off": []},
+    },
+    "solo_preservation": {"ran": True,
+                          "historical_solo_output_is_preserved": True,
+                          "all_three_shapes_agree_under_splitk_off": True,
+                          "batch_under_splitk_off_equals_historical_solo": True},
     "statistics_decomposition": {"every_batch_size_bit_identical": True},
     "ffn_selection": {"selection_is_batch_invariant": True,
                       "n_layers_with_moved_selection": 0,
@@ -74,6 +88,11 @@ CLEAN_STAGES: dict = {
                       "headline_micro_batch_size": 4,
                       "headline_keep_ratio": 0.5},
     "causal_kl": {"max_rel_diff": 0.0, "item_ranking_identical": True},
+    "operator_acceptance": {"ffn_invariant_under_splitk_off": True,
+                            "attention_invariant_under_splitk_off": True,
+                            "both_operators_invariant_under_splitk_off": True},
+    "performance": {"invariant_batched_speedup_vs_solo": 2.4,
+                    "splitk_off_slowdown_vs_default_batched": 1.1},
 }
 
 

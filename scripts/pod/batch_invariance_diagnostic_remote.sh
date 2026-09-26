@@ -257,43 +257,47 @@ run_one() {
 }
 
 cd /workspace/repo
-run_one parent_C_science_sdpa  /opt/train/bin/python sdpa  ""
-run_one parent_C_science_eager /opt/train/bin/python eager ""
-if [ -n "$A4_CKPT" ]; then
-  run_one a4_596m_C_science_sdpa /opt/train/bin/python sdpa "$A4_CKPT"
-fi
 
-# --- the whole mixture, not a subsample -------------------------------------
-# The runs above read the first EIGHT items of calib.domain_balanced@v1; a formal
-# search reads all 67. More tokens means each per-neuron mean is averaged over
-# ~8x more of them, so the drift from a reordered reduction should fall while the
-# cutoff margins stay where they are -- which is exactly the mechanism by which a
-# subsample could overstate how many layers move.
+# --- the split-K causal control ---------------------------------------------
+# A NARROW CONTINUATION, not the diagnostic matrix again. The previous session
+# established determinism, mask exactness, neighbour independence, backend
+# breadth, zero collector-reduction drift, bare-GEMM shape dependence, the fp32
+# magnitude collapse, and exact cross-session reproduction. None of that is
+# bought twice.
 #
-# Only the two stages whose answer is a scientific DECISION. The full matrix is
-# not rerun: the case matrix and causal KL would batch 67 items into one
-# [67, T, 151936] logit block, which is 41 GiB and would OOM, and neither of them
-# is what this variant is asking about.
+# What had never been asked: `allow_bf16_reduced_precision_reduction = False`
+# is a BOOL, and torch's parser returns `(value, True)` for a bool -- split-K
+# stayed ON. Only the tuple form reaches the second flag. So the controls are:
+#
+#   default                           reduced=True   splitk=True
+#   reduced_precision_off_splitk_on   reduced=False  splitk=True   <- the old run
+#   reduced_precision_off_splitk_off  reduced=False  splitk=False  <- the new one
+#
+# Verified at $0 from the pytorch sources: v2.11.0 supports the tuple and
+# exposes a readable `..._split_k`; v2.9.1 does not. The 2.9.1 arm therefore
+# expects UNSUPPORTED and records it rather than substituting the boolean.
+SPLITK_STAGES=bf16_controls,solo_preservation,operator_acceptance,performance
 MIX=${FULL_MIXTURE_ITEMS:-67}
-run_one parent_C_science_sdpa_fullmix /opt/train/bin/python sdpa "" \
-        statistics_decomposition,ffn_selection "$MIX"
+
+# The parent first: it is the object C3's operators calibrate on, so if the
+# session is cut short the decisive arm exists.
+run_one parent_splitk /opt/train/bin/python sdpa "" "$SPLITK_STAGES" "$MIX"
 if [ -n "$A4_CKPT" ]; then
-  run_one a4_596m_C_science_sdpa_fullmix /opt/train/bin/python sdpa "$A4_CKPT" \
-          statistics_decomposition,ffn_selection "$MIX"
+  run_one a4_596m_splitk /opt/train/bin/python sdpa "$A4_CKPT" \
+          "$SPLITK_STAGES" "$MIX"
 fi
 
-# Environment B needs transformers; it comes from the SAME wheelhouse, pinned to
-# the same 5.13.1, so the only variable between B and C is torch itself.
+# The historical engineering runtime. Expected to report the tuple UNSUPPORTED
+# on torch 2.9.1 -- which is itself the answer to "does the tuple API behave
+# differently there", and costs one short run to establish from the runtime
+# rather than from my reading of its source.
 say "environment B: image python + wheelhouse transformers 5.13.1"
 python3 -m pip install -q --break-system-packages --no-cache-dir --no-index \
   --find-links "$WHEELHOUSE" transformers==5.13.1 tokenizers safetensors huggingface_hub numpy 2>&1 | tail -3
 if python3 -c "import torch, transformers, numpy" 2>/dev/null; then
   python3 -c "import torch;print('  env B torch', torch.__version__)"
-  if [ -n "$A4_CKPT" ]; then
-    run_one a4_596m_B_image_sdpa python3 sdpa "$A4_CKPT"
-  else
-    run_one parent_B_image_sdpa python3 sdpa ""
-  fi
+  run_one b_image_splitk_api_probe python3 sdpa "${A4_CKPT}" \
+          bf16_controls 8
 else
   say "  environment B not constructible; recording that rather than guessing"
   note "env_b_unavailable"

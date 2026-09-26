@@ -214,13 +214,110 @@ def _numeric_policy() -> dict:
         "deterministic_algorithms": torch.are_deterministic_algorithms_enabled(),
     }
     for attr in ("allow_bf16_reduced_precision_reduction",
+                 "allow_bf16_reduced_precision_reduction_split_k",
                  "allow_fp16_reduced_precision_reduction",
+                 "allow_fp16_reduced_precision_reduction_split_k",
                  "allow_tf32"):
-        policy[f"cuda.matmul.{attr}"] = getattr(
-            torch.backends.cuda.matmul, attr, "<absent in this build>")
+        #: `getattr(..., default)` does not work here: this object's
+        #: `__getattr__` raises AttributeError for an unknown name, which the
+        #: default swallows -- but on torch 2.9.1 the `_split_k` names do not
+        #: exist at all, and reporting them as a default would misdescribe the
+        #: runtime. Caught explicitly so "absent" is a recorded fact.
+        try:
+            policy[f"cuda.matmul.{attr}"] = getattr(
+                torch.backends.cuda.matmul, attr)
+        except AttributeError:
+            policy[f"cuda.matmul.{attr}"] = "<absent in this build>"
+    policy["_split_k_is_readable"] = not isinstance(
+        policy.get("cuda.matmul.allow_bf16_reduced_precision_reduction_split_k"),
+        str)
     policy["cudnn.allow_tf32"] = getattr(torch.backends.cudnn, "allow_tf32",
                                          "<absent in this build>")
     return policy
+
+
+# --- the bf16 reduction policy, read and written HONESTLY --------------------
+#
+# `allow_bf16_reduced_precision_reduction = False` does NOT disable split-K.
+# torch's own parser is explicit about it:
+#
+#     if isinstance(value, bool):
+#         return value, True          # <- allow_splitk stays True
+#
+# and the tuple form is the only way to reach the second flag:
+#
+#     allow_splitk = _ensure_bool(value[1], "allow_splitk")
+#
+# The previous round's `reduction_control` set the bool, described itself as
+# turning off "bf16 split-k reduction", and reported that disabling it did not
+# remove the divergence. The first half was wrong, and the second half was
+# measured at the LOGIT level while the per-projection table underneath showed
+# `attn_out` and `ffn_out` going bit-exact. Both are corrected here.
+#
+# Verified at $0 against the pytorch sources for the two runtimes in play:
+#   v2.11.0  tuple SUPPORTED, `..._split_k` readable   <- the science runtime
+#   v2.9.1   bool only, no split_k attribute           <- engineering runtime
+
+BF16_REDUCED = "allow_bf16_reduced_precision_reduction"
+BF16_SPLIT_K = "allow_bf16_reduced_precision_reduction_split_k"
+
+#: The three states this investigation must keep apart. Named, so that a report
+#: can never again call two different things "disabled".
+CONTROL_A = "default"
+CONTROL_B = "reduced_precision_off_splitk_on"
+CONTROL_C = "reduced_precision_off_splitk_off"
+
+
+def read_bf16_policy() -> dict:
+    """What the runtime says the two flags actually are, right now."""
+    import torch
+
+    out = {}
+    for name, attr in (("allow_reduced_precision", BF16_REDUCED),
+                       ("allow_splitk", BF16_SPLIT_K)):
+        try:
+            out[name] = bool(getattr(torch.backends.cuda.matmul, attr))
+            out[f"{name}_readable"] = True
+        except AttributeError:
+            out[name] = None
+            out[f"{name}_readable"] = False
+    return out
+
+
+def set_bf16_policy(reduced: bool, splitk: bool | None) -> dict:
+    """Request a policy, then READ BACK what the runtime accepted.
+
+    `splitk=None` means "use the boolean form", which is control B and leaves
+    split-K on. A build that cannot express `splitk=False` is recorded
+    UNSUPPORTED rather than silently given the boolean, because that
+    substitution is the whole defect being corrected.
+    """
+    import torch
+
+    matmul = torch.backends.cuda.matmul
+    requested = {"allow_reduced_precision": reduced, "allow_splitk": splitk}
+    result = {"requested": requested, "supported": None, "error": None}
+    try:
+        if splitk is None:
+            setattr(matmul, BF16_REDUCED, bool(reduced))
+            result["form"] = "bool"
+        else:
+            setattr(matmul, BF16_REDUCED, (bool(reduced), bool(splitk)))
+            result["form"] = "tuple"
+        result["supported"] = True
+    except (TypeError, AttributeError, RuntimeError) as exc:
+        result["supported"] = False
+        result["error"] = f"{type(exc).__name__}: {exc}"
+        result["form"] = "UNSUPPORTED"
+    result["readback"] = read_bf16_policy()
+    #: Did the runtime actually DO what was asked? A request that silently
+    #: lands somewhere else is the failure mode this whole section exists for.
+    rb = result["readback"]
+    result["honoured"] = (
+        result["supported"] is True
+        and rb["allow_reduced_precision"] == bool(reduced)
+        and (splitk is None or rb["allow_splitk"] == bool(splitk)))
+    return result
 
 
 # --- the world --------------------------------------------------------------
@@ -563,41 +660,154 @@ def stage_gemm_isolation(cfg, ctx) -> dict:
     }
 
 
-# --- 5. the reduced-precision-reduction control -----------------------------
+# --- 5. the THREE bf16 controls, and the split-K causal test ----------------
 
 
-def stage_reduction_control(cfg, ctx) -> dict:
-    """Turn off bf16 split-k reduction and ask the same question again.
+def stage_bf16_controls(cfg, ctx) -> dict:
+    """Default vs reduced-precision-off vs split-K-off. Three states, named.
 
-    A control, not a proposal. If flipping it removes the divergence, the cause
-    is named: accumulate-in-bf16 during the GEMM's reduction, whose split
-    depends on the tile count and therefore on the batch shape.
+    The previous round ran two and called the second one "split-K off". It was
+    not: the boolean form leaves `allow_splitk = True`. So the causal question
+    -- does forbidding split-K remove the shape dependence? -- had never been
+    asked. This asks it, and reads the runtime back after every request rather
+    than trusting the assignment.
     """
     import torch
 
-    knob = "allow_bf16_reduced_precision_reduction"
-    matmul = torch.backends.cuda.matmul
-    if not hasattr(matmul, knob):
-        return {"applicable": False,
-                "reason": f"torch.backends.cuda.matmul.{knob} absent in "
-                          f"torch {torch.__version__}"}
-    before = getattr(matmul, knob)
-    out = {"applicable": True, "value_before": bool(before)}
+    before = read_bf16_policy()
+    controls = {
+        CONTROL_A: (True, None),      # whatever the build ships, restated
+        CONTROL_B: (False, None),     # the boolean form: split-K STAYS ON
+        CONTROL_C: (False, False),    # the tuple form: split-K OFF
+    }
+    out: dict = {"policy_before": before, "controls": {}}
     try:
-        for value in (True, False):
-            setattr(matmul, knob, value)
-            out[f"with_{knob}_{value}"] = {
-                "gemm": stage_gemm_isolation(cfg, ctx),
-                "logits": _solo_vs_batched_logits(ctx),
-            }
+        for name, (reduced, splitk) in controls.items():
+            applied = set_bf16_policy(reduced, splitk)
+            row = {"policy": applied}
+            if applied["supported"]:
+                row["gemm"] = stage_gemm_isolation(cfg, ctx)
+                row["logits_solo_vs_batched"] = _solo_vs_batched_logits(ctx)
+            else:
+                row["gemm"] = None
+                row["logits_solo_vs_batched"] = None
+                row["_why_absent"] = (
+                    "this build cannot express the requested policy; recorded "
+                    "UNSUPPORTED rather than substituting the boolean form")
+            out["controls"][name] = row
     finally:
-        setattr(matmul, knob, before)
-    on = out[f"with_{knob}_True"]["logits"]
-    off = out[f"with_{knob}_False"]["logits"]
-    out["divergence_removed_by_disabling"] = bool(
-        off["bitwise_identical"] and not on["bitwise_identical"])
-    out["max_abs_on"], out["max_abs_off"] = on["max_abs"], off["max_abs"]
+        #: Restore whatever the build started with, via the tuple when the
+        #: build has one, so the rest of the run is not left under a policy
+        #: this stage chose.
+        set_bf16_policy(bool(before["allow_reduced_precision"]),
+                        before["allow_splitk"]
+                        if before["allow_splitk_readable"] else None)
+
+    a, b, c = (out["controls"].get(k) or {} for k in
+               (CONTROL_A, CONTROL_B, CONTROL_C))
+    out["tuple_form_supported"] = bool((c.get("policy") or {}).get("supported"))
+    out["split_k_state"] = {
+        name: ((row.get("policy") or {}).get("readback") or {}).get("allow_splitk")
+        for name, row in out["controls"].items()}
+
+    def moved(row):
+        g = row.get("gemm") or {}
+        return sorted(n for n, v in (g.get("per_projection") or {}).items()
+                      if not v["bitwise_identical"])
+
+    out["projections_still_shape_dependent"] = {
+        name: moved(row) for name, row in out["controls"].items()
+        if row.get("gemm")}
+    still = out["projections_still_shape_dependent"]
+    #: THE causal question, as a field.
+    out["split_k_off_makes_every_gemm_exact"] = (
+        CONTROL_C in still and still[CONTROL_C] == [])
+    out["split_k_off_is_strictly_better_than_boolean"] = (
+        CONTROL_B in still and CONTROL_C in still
+        and set(still[CONTROL_C]) < set(still[CONTROL_B]))
+    out["_reading"] = {
+        CONTROL_A: "allow_reduced_precision=True,  allow_splitk=True",
+        CONTROL_B: "allow_reduced_precision=False, allow_splitk=True  "
+                   "<- what the previous round actually ran",
+        CONTROL_C: "allow_reduced_precision=False, allow_splitk=False "
+                   "<- the intervention that had never been performed",
+        "_the_boolean_does_not_disable_split_k":
+            "torch's parser returns (value, True) for a bool; only the tuple "
+            "form reaches the second flag",
+    }
     return out
+
+
+def stage_solo_preservation(cfg, ctx) -> dict:
+    """Does the historical SOLO path survive the new policy, unchanged?
+
+    As important as making batching agree, and easy to forget: a policy that
+    made batch and solo agree by moving BOTH to a third numerical result would
+    not be invariance, it would be a new experiment wearing invariance's name.
+    Same checkpoint, same item, same shape -- only the policy moves.
+    """
+    import torch
+
+    model, focal, device = ctx["model"], ctx["focal"], ctx["device"]
+    ids, L = focal.to(device), focal.shape[1]
+    before = read_bf16_policy()
+    try:
+        set_bf16_policy(bool(before["allow_reduced_precision"]),
+                        before["allow_splitk"]
+                        if before["allow_splitk_readable"] else None)
+        with torch.no_grad():
+            solo_default = model(ids).logits[0, :L].clone()
+
+        applied = set_bf16_policy(False, False)
+        if not applied["supported"]:
+            return {"ran": False, "reason": "tuple policy unsupported",
+                    "policy": applied}
+        with torch.no_grad():
+            solo_splitk_off = model(ids).logits[0, :L].clone()
+            #: C -- equal-length batch of identical copies. The pure batch
+            #: dimension, with no padding involved at all.
+            dup = ids.repeat(int(cfg["equal_batch"]), 1)
+            equal_splitk_off = model(
+                dup, attention_mask=torch.ones_like(dup)).logits[0, :L].clone()
+            #: E -- the production path: ragged, right-padded, masked.
+            bi, bm, _ = _ragged(focal, ctx["others"], ctx)
+            batch_splitk_off = model(bi, attention_mask=bm).logits[0, :L].clone()
+    finally:
+        set_bf16_policy(bool(before["allow_reduced_precision"]),
+                        before["allow_splitk"]
+                        if before["allow_splitk_readable"] else None)
+
+    solo_vs_solo = compare_logits(solo_default, solo_splitk_off)
+    batch_vs_default = compare_logits(solo_default, batch_splitk_off)
+    equal_vs_default = compare_logits(solo_default, equal_splitk_off)
+    equal_vs_solo_off = compare_logits(solo_splitk_off, equal_splitk_off)
+    ragged_vs_solo_off = compare_logits(solo_splitk_off, batch_splitk_off)
+    return {
+        "ran": True,
+        "focal_positions": int(L),
+        "equal_batch_size": int(cfg["equal_batch"]),
+        "solo_default_vs_solo_splitk_off": solo_vs_solo,
+        "batch_splitk_off_vs_solo_default": batch_vs_default,
+        #: A / C / E under the new policy, which is the minimum full-model
+        #: comparison: A is the historical shape, C the pure batch dimension,
+        #: E the ragged padded production path.
+        "equal_batch_splitk_off_vs_solo_default": equal_vs_default,
+        "equal_batch_vs_solo_both_splitk_off": equal_vs_solo_off,
+        "ragged_batch_vs_solo_both_splitk_off": ragged_vs_solo_off,
+        "all_three_shapes_agree_under_splitk_off": (
+            equal_vs_solo_off["bitwise_identical"]
+            and ragged_vs_solo_off["bitwise_identical"]),
+        #: The clean execution-only repair, as two propositions.
+        "historical_solo_output_is_preserved": solo_vs_solo["bitwise_identical"],
+        "batch_under_splitk_off_equals_historical_solo":
+            batch_vs_default["bitwise_identical"],
+        "equal_batch_under_splitk_off_equals_historical_solo":
+            equal_vs_default["bitwise_identical"],
+        "_the_outcome_to_avoid": (
+            "solo and batch agreeing with EACH OTHER at a third value. If "
+            "`historical_solo_output_is_preserved` is false, the policy is a "
+            "numerical change to the historical path and not a transparent fix."),
+    }
 
 
 def _solo_vs_batched_logits(ctx) -> dict:
@@ -1022,6 +1232,248 @@ def stage_ffn_selection(cfg, ctx) -> dict:
     }
 
 
+# --- 9b. the thing the project actually cares about -------------------------
+
+
+def _ffn_selection(model, adapter, states, ratio):
+    """kept-neuron index per layer, per collected batch size."""
+    import torch
+    from aadistill.initialization.transforms.project import ffn_neuron_importance
+
+    out: dict = {}
+    for index, block in enumerate(adapter.blocks(model)):
+        w = adapter.stream_out_projections(block)["ffn_out"].weight.detach().cpu()
+        for bs, state in states.items():
+            imp = ffn_neuron_importance(state, index, w)
+            keep = max(1, int(round(imp.numel() * ratio)))
+            out.setdefault(bs, {})[index] = torch.topk(
+                imp, keep).indices.sort().values
+    return out
+
+
+def _attention_selection(model, adapter, states, keep_q):
+    """kept query-head index per layer, per collected batch size.
+
+    `head_write_energy` refuses a host statistic meeting a device weight, so
+    the o_proj weight is brought to the statistic rather than the reverse --
+    the caller owns the co-location, and this caller chooses the host.
+    """
+    from aadistill.initialization.operators.attention.gqa._common import (
+        select_q_heads_by_score)
+    from aadistill.initialization.operators.attention.gqa._statistics import (
+        head_write_energy)
+
+    spec = model.config
+    n_q, n_kv = spec.num_attention_heads, spec.num_key_value_heads
+    head_dim = getattr(spec, "head_dim", None) or spec.hidden_size // n_q
+    out: dict = {}
+    for index, block in enumerate(adapter.blocks(model)):
+        w = adapter.stream_out_projections(block)["attn_out"].weight.detach().cpu()
+        for bs, state in states.items():
+            scores = head_write_energy(state, index, w, n_q, head_dim)
+            out.setdefault(bs, {})[index] = select_q_heads_by_score(
+                scores, n_q, n_kv, keep_q)
+    return out
+
+
+def stage_operator_acceptance(cfg, ctx) -> dict:
+    """bs=1 vs bs=4 discrete operator outputs, under each bf16 control.
+
+    Raw floats agreeing bit-for-bit is not the requirement; the requirement is
+    that the DECISION does not move. So this runs the two real selections --
+    FFN kept neurons and ATTENTION kept query heads -- on the frozen mixture
+    and asks whether the index sets are equal.
+    """
+    import torch
+    from aadistill.initialization.calibration.batching import micro_batches
+    from aadistill.initialization.statistics.collect import ActivationStatsCollector
+    from aadistill.initialization.operators.attention.gqa._statistics import (
+        AttentionHeadStatsCollector)
+
+    model, adapter, device = ctx["model"], ctx["adapter"], ctx["device"]
+    items, pad = ctx["items"], _pad_id(ctx)
+    sizes = [1, int(cfg["micro_batch_size"])]
+    spec = model.config
+    n_q, n_kv = spec.num_attention_heads, spec.num_key_value_heads
+    head_dim = getattr(spec, "head_dim", None) or spec.hidden_size // n_q
+    keep_q = max(n_kv, (n_q // 2 // n_kv) * n_kv)          # half, group-aligned
+    ffn_ratio = float(cfg["ffn_keep_ratio"])
+
+    def collect(bs):
+        """One pass per collector, each alone. NOT both at once.
+
+        Both collectors DRIVE their own forward -- `process_batch` calls
+        `self.model(...)` -- so running them together is two forwards, not one,
+        and each collector's hooks also fire during the OTHER's forward with
+        its own `_valid_mask` unset. That silently accumulates padded rows.
+        The first rehearsal of this stage read 28 of 28 FFN layers moved on CPU
+        float32, where the true answer is zero: I had manufactured the
+        divergence I was measuring. Separate passes cost a second forward and
+        are the only correct way to drive two self-driving collectors.
+        """
+        ffn = ActivationStatsCollector(
+            model, [adapter.stream_out_projections(b)["ffn_out"]
+                    for b in adapter.blocks(model)])
+        try:
+            for batch in micro_batches(items, bs, pad_id=pad, device=device):
+                ffn.process_batch(batch)
+            ffn_state = ffn.state()
+        finally:
+            ffn.close()
+
+        attn = AttentionHeadStatsCollector(
+            model, [adapter.stream_out_projections(b)["attn_out"]
+                    for b in adapter.blocks(model)],
+            num_heads=n_q, head_dim=head_dim)
+        try:
+            for batch in micro_batches(items, bs, pad_id=pad, device=device):
+                attn.process_batch(batch)
+            attn_state = attn.state()
+        finally:
+            attn.close()
+        return ffn_state, attn_state
+
+    before = read_bf16_policy()
+    results: dict = {}
+    wanted = {CONTROL_A: (True, None), CONTROL_C: (False, False)}
+    try:
+        for name, (reduced, splitk) in wanted.items():
+            applied = set_bf16_policy(reduced, splitk)
+            if not applied["supported"]:
+                results[name] = {"ran": False, "policy": applied}
+                continue
+            ffn_states, attn_states = {}, {}
+            for bs in sizes:
+                f, a = collect(bs)
+                ffn_states[bs], attn_states[bs] = f, a
+            fsel = _ffn_selection(model, adapter, ffn_states, ffn_ratio)
+            asel = _attention_selection(model, adapter, attn_states, keep_q)
+            ref = sizes[0]
+            rows = []
+            for index in sorted(fsel[ref]):
+                same_f = bool(torch.equal(fsel[ref][index], fsel[sizes[1]][index]))
+                same_a = asel[ref][index] == asel[sizes[1]][index]
+                rows.append({
+                    "layer": index,
+                    "ffn_selection_identical": same_f,
+                    "ffn_neurons_swapped": len(
+                        set(fsel[ref][index].tolist())
+                        - set(fsel[sizes[1]][index].tolist())),
+                    "attention_selection_identical": same_a,
+                    "attention_heads_swapped": len(
+                        set(asel[ref][index]) - set(asel[sizes[1]][index])),
+                })
+            results[name] = {
+                "ran": True,
+                "policy": applied,
+                "n_layers": len(rows),
+                "ffn_layers_moved": sum(1 for r in rows
+                                        if not r["ffn_selection_identical"]),
+                "attention_layers_moved": sum(
+                    1 for r in rows if not r["attention_selection_identical"]),
+                "ffn_selection_invariant": all(
+                    r["ffn_selection_identical"] for r in rows),
+                "attention_selection_invariant": all(
+                    r["attention_selection_identical"] for r in rows),
+                "per_layer": rows,
+            }
+            del ffn_states, attn_states
+            if device.startswith("cuda"):
+                torch.cuda.empty_cache()
+    finally:
+        set_bf16_policy(bool(before["allow_reduced_precision"]),
+                        before["allow_splitk"]
+                        if before["allow_splitk_readable"] else None)
+
+    c = results.get(CONTROL_C) or {}
+    return {
+        "n_items": len(items),
+        "micro_batch_sizes": sizes,
+        "ffn_keep_ratio": ffn_ratio,
+        "attention_keep_q": keep_q,
+        "attention_heads": [n_q, n_kv, head_dim],
+        "by_control": results,
+        #: THE acceptance criterion, as one field per operator.
+        "ffn_invariant_under_splitk_off": c.get("ffn_selection_invariant"),
+        "attention_invariant_under_splitk_off": c.get(
+            "attention_selection_invariant"),
+        "both_operators_invariant_under_splitk_off": bool(
+            c.get("ffn_selection_invariant")
+            and c.get("attention_selection_invariant")),
+        "_reading": ("bit-identical floats are not the requirement; an "
+                     "unmoved DECISION is. These are the two real selections "
+                     "an initialization run makes."),
+    }
+
+
+def stage_performance(cfg, ctx) -> dict:
+    """What the invariant path costs. Three wall times, same workload.
+
+    Not a benchmark. The question is only whether a batched path that is
+    numerically invariant still buys anything over running items one at a time.
+    """
+    import time
+
+    import torch
+    from aadistill.initialization.calibration.batching import micro_batches
+    from aadistill.initialization.statistics.collect import ActivationStatsCollector
+
+    model, adapter, device = ctx["model"], ctx["adapter"], ctx["device"]
+    #: CAPPED, and the cap is reported. Six timed passes over the full frozen
+    #: mixture would cost more GPU minutes than the measurement is worth, and
+    #: the question -- is the invariant batched path still faster than one item
+    #: at a time -- is a ratio that a representative slice answers.
+    items = ctx["items"][: int(cfg["perf_items"])]
+    pad = _pad_id(ctx)
+    sync = torch.cuda.synchronize if device.startswith("cuda") else (lambda: None)
+
+    def timed(bs):
+        collector = ActivationStatsCollector(
+            model, [adapter.stream_out_projections(b)["ffn_out"]
+                    for b in adapter.blocks(model)])
+        try:
+            sync(); t0 = time.perf_counter()
+            for batch in micro_batches(items, bs, pad_id=pad, device=device):
+                collector.process_batch(batch)
+            sync()
+            return time.perf_counter() - t0
+        finally:
+            collector.close()
+
+    before = read_bf16_policy()
+    out: dict = {"n_items": len(items),
+                 "n_items_available": len(ctx["items"]),
+                 "_items_are_capped": len(items) < len(ctx["items"]),
+                 "total_tokens": sum(int(i["input_ids"].shape[1]) for i in items)}
+    bs = int(cfg["micro_batch_size"])
+    try:
+        set_bf16_policy(True, None)
+        timed(bs)                                  # warm the kernels, discard
+        out[f"default_bs{bs}_seconds"] = timed(bs)
+        out["default_bs1_seconds"] = timed(1)
+        applied = set_bf16_policy(False, False)
+        out["splitk_off_supported"] = bool(applied["supported"])
+        if applied["supported"]:
+            timed(bs)
+            out[f"splitk_off_bs{bs}_seconds"] = timed(bs)
+            out["splitk_off_bs1_seconds"] = timed(1)
+    finally:
+        set_bf16_policy(bool(before["allow_reduced_precision"]),
+                        before["allow_splitk"]
+                        if before["allow_splitk_readable"] else None)
+
+    d_b = out.get(f"default_bs{bs}_seconds")
+    s_b = out.get(f"splitk_off_bs{bs}_seconds")
+    s_1 = out.get("splitk_off_bs1_seconds")
+    out["splitk_off_slowdown_vs_default_batched"] = (
+        s_b / d_b if d_b and s_b else None)
+    out["invariant_batched_speedup_vs_solo"] = (s_1 / s_b if s_b and s_1 else None)
+    out["_reading"] = ("the second ratio is the one that matters: if the "
+                       "invariant batched path is still faster than one item "
+                       "at a time, batching is worth keeping")
+    return out
+
+
 # --- 10. the quantity C3's DEPTH search would actually read -----------------
 
 
@@ -1167,6 +1619,7 @@ DEFAULTS: dict = {
     "pad_sweep": [0, 1, 8, 64, 128],
     "length_fractions": [0.125, 0.25, 0.5, 1.0],
     "length_sweep_pad": 64,
+    "perf_items": 16,
     "seed": 20260925,
 }
 
@@ -1233,11 +1686,14 @@ STAGES = (
     ("case_matrix", stage_case_matrix),
     ("first_divergence", stage_first_divergence),
     ("gemm_isolation", stage_gemm_isolation),
-    ("reduction_control", stage_reduction_control),
+    ("bf16_controls", stage_bf16_controls),
+    ("solo_preservation", stage_solo_preservation),
     ("length_sweep", stage_length_sweep),
     ("statistics_decomposition", stage_statistics_decomposition),
     ("ffn_selection", stage_ffn_selection),
     ("causal_kl", stage_causal_kl),
+    ("operator_acceptance", stage_operator_acceptance),
+    ("performance", stage_performance),
     ("backend_matrix", stage_backend_matrix),
     ("fp32_control", stage_fp32_control),
 )
@@ -1286,7 +1742,14 @@ def derive_conclusion(report: dict) -> dict:
     pad_inert = got("length_sweep", "padding_alone_is_inert")
     batch_moves = got("length_sweep", "batch_size_alone_moves_it")
     cross_row = got("case_matrix", "comparisons", "C_vs_D", "bitwise_identical")
-    fixed_by_knob = got("reduction_control", "divergence_removed_by_disabling")
+    #: The name changed because the old one described something it did not do.
+    #: `reduced_precision_off_splitk_on` is what the boolean actually gave.
+    splitk_off_exact = got("bf16_controls", "split_k_off_makes_every_gemm_exact")
+    splitk_off_better = got("bf16_controls",
+                            "split_k_off_is_strictly_better_than_boolean")
+    tuple_supported = got("bf16_controls", "tuple_form_supported")
+    solo_preserved = got("solo_preservation",
+                         "historical_solo_output_is_preserved")
     every_backend = got("backend_matrix", "every_backend_diverges")
     no_backend = got("backend_matrix", "no_backend_diverges")
     some_backend = bool(got("backend_matrix", "backends_diverging") or [])
@@ -1363,7 +1826,27 @@ def derive_conclusion(report: dict) -> dict:
         "padding_alone_is_inert": pad_inert,
         "batch_size_alone_moves_the_forward": batch_moves,
         "focal_row_independent_of_neighbour_tokens": cross_row,
-        "removed_by_disabling_bf16_reduced_precision_reduction": fixed_by_knob,
+        "bf16_tuple_policy_supported": tuple_supported,
+        "split_k_off_makes_every_gemm_exact": splitk_off_exact,
+        "split_k_off_beats_reduced_precision_off_alone": splitk_off_better,
+        "split_k_state_by_control": got("bf16_controls", "split_k_state"),
+        "projections_still_shape_dependent_by_control": got(
+            "bf16_controls", "projections_still_shape_dependent"),
+        "historical_solo_output_is_preserved": solo_preserved,
+        "all_three_shapes_agree_under_splitk_off": got(
+            "solo_preservation", "all_three_shapes_agree_under_splitk_off"),
+        "batch_under_splitk_off_equals_historical_solo": got(
+            "solo_preservation", "batch_under_splitk_off_equals_historical_solo"),
+        "ffn_selection_invariant_under_splitk_off": got(
+            "operator_acceptance", "ffn_invariant_under_splitk_off"),
+        "attention_selection_invariant_under_splitk_off": got(
+            "operator_acceptance", "attention_invariant_under_splitk_off"),
+        "both_operators_invariant_under_splitk_off": got(
+            "operator_acceptance", "both_operators_invariant_under_splitk_off"),
+        "invariant_batched_speedup_vs_solo": got(
+            "performance", "invariant_batched_speedup_vs_solo"),
+        "splitk_off_slowdown_vs_default_batched": got(
+            "performance", "splitk_off_slowdown_vs_default_batched"),
         "every_attention_backend_diverges": every_backend,
         "no_attention_backend_diverges": no_backend,
         "attention_backends_diverging": got("backend_matrix", "backends_diverging"),
