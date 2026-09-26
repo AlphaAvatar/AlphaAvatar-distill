@@ -502,6 +502,120 @@ def cross_session(reports: dict, prior: dict) -> dict:
     }
 
 
+def split_k_control(reports: dict) -> dict:
+    """The causal question, from the three named controls.
+
+    `allow_bf16_reduced_precision_reduction = False` is a BOOL and torch's
+    parser returns `(value, True)` for a bool, so split-K stayed on. The
+    previous round ran that and called it split-K off. Here the two are
+    separated, every policy request is read back from the runtime, and the
+    verdict is whether FORBIDDING split-K removes the shape dependence while
+    leaving the historical solo path where it was.
+    """
+    out: dict = {"per_report": {}}
+    for label, r in reports.items():
+        bc = r["stages"].get("bf16_controls") or {}
+        if not bc or "error" in bc:
+            continue
+        sp = r["stages"].get("solo_preservation") or {}
+        oa = r["stages"].get("operator_acceptance") or {}
+        pf = r["stages"].get("performance") or {}
+        controls = bc.get("controls") or {}
+
+        def gemm_table(name):
+            row = (controls.get(name) or {}).get("gemm") or {}
+            return {n: {"M": (row.get("shape_batched") or [None])[0],
+                        "K": v["in_features"], "N": v["out_features"],
+                        "K_over_N": round(v["in_features"] / v["out_features"], 4),
+                        "max_abs": v["max_abs"], "rms": v["rms"],
+                        "rel_l2": v["rel_l2"],
+                        "bitwise_identical": v["bitwise_identical"]}
+                    for n, v in (row.get("per_projection") or {}).items()}
+
+        out["per_report"][label] = {
+            "torch": dig(r, "environment", "torch"),
+            "tuple_supported": bc.get("tuple_form_supported"),
+            "split_k_state": bc.get("split_k_state"),
+            "policy_readback": {
+                name: dig(row, "policy", "readback")
+                for name, row in controls.items()},
+            "policy_honoured": {
+                name: dig(row, "policy", "honoured")
+                for name, row in controls.items()},
+            "gemm_by_control": {name: gemm_table(name) for name in controls},
+            "projections_still_shape_dependent":
+                bc.get("projections_still_shape_dependent"),
+            "split_k_off_makes_every_gemm_exact":
+                bc.get("split_k_off_makes_every_gemm_exact"),
+            "split_k_off_beats_boolean":
+                bc.get("split_k_off_is_strictly_better_than_boolean"),
+            "historical_solo_preserved": sp.get(
+                "historical_solo_output_is_preserved"),
+            "all_three_shapes_agree_under_splitk_off": sp.get(
+                "all_three_shapes_agree_under_splitk_off"),
+            "full_model": {
+                k: sp.get(k) for k in
+                ("solo_default_vs_solo_splitk_off",
+                 "equal_batch_vs_solo_both_splitk_off",
+                 "ragged_batch_vs_solo_both_splitk_off")},
+            "operator_acceptance": {
+                "n_items": oa.get("n_items"),
+                "ffn_invariant": oa.get("ffn_invariant_under_splitk_off"),
+                "attention_invariant": oa.get(
+                    "attention_invariant_under_splitk_off"),
+                "by_control": {
+                    name: {k: row.get(k) for k in
+                           ("ffn_layers_moved", "attention_layers_moved",
+                            "n_layers")}
+                    for name, row in (oa.get("by_control") or {}).items()
+                    if row.get("ran")}},
+            "performance": {k: v for k, v in pf.items()
+                            if not k.startswith("_") and "error" not in str(k)},
+        }
+
+    per = out["per_report"]
+    science = {k: v for k, v in per.items() if v["tuple_supported"]}
+    out["runtimes_tested"] = sorted({v["torch"] for v in per.values()})
+    out["tuple_supported_by_runtime"] = {
+        v["torch"]: v["tuple_supported"] for v in per.values()}
+
+    #: THE VERDICT, computed. Three outcomes, as the review named them.
+    if not science:
+        out["verdict"] = "SPLIT_K_UNTESTABLE"
+        out["why"] = ("no runtime in this evidence set supports the tuple "
+                      "policy, so the intervention could not be performed")
+        return out
+    every_gemm_exact = all(v["split_k_off_makes_every_gemm_exact"]
+                           for v in science.values())
+    ops_invariant = all(v["operator_acceptance"]["ffn_invariant"]
+                        and v["operator_acceptance"]["attention_invariant"]
+                        for v in science.values())
+    solo_kept = all(v["historical_solo_preserved"] for v in science.values())
+    better = any(v["split_k_off_beats_boolean"] for v in science.values())
+
+    if ops_invariant and solo_kept:
+        out["verdict"] = "SPLIT_K_CONFIRMED_AND_FIXABLE"
+        out["why"] = ("forbidding split-K makes both operator selections "
+                      "invariant across micro batch size while leaving the "
+                      "historical solo output unchanged")
+    elif every_gemm_exact or better or ops_invariant:
+        out["verdict"] = "SPLIT_K_PARTIAL"
+        out["why"] = ("forbidding split-K materially improves the numerics but "
+                      "does not satisfy every acceptance criterion; the "
+                      "per-report fields say which")
+    else:
+        out["verdict"] = "SPLIT_K_FALSIFIED"
+        out["why"] = ("forbidding split-K does not remove the shape-dependent "
+                      "divergence; the split-K hypothesis does not hold")
+    out["every_gemm_exact_under_splitk_off"] = every_gemm_exact
+    out["both_operators_invariant"] = ops_invariant
+    out["historical_solo_preserved"] = solo_kept
+    out["_the_outcome_to_avoid"] = (
+        "solo and batch agreeing at a THIRD value. `historical_solo_preserved` "
+        "false with `both_operators_invariant` true is not a transparent fix.")
+    return out
+
+
 def build(reports: dict, prior: dict | None = None) -> dict:
     a4 = {}
     p = REPO / A4_FINDING
@@ -529,6 +643,7 @@ def build(reports: dict, prior: dict | None = None) -> dict:
         "mechanism": mechanism(reports),
         "subsample_sensitivity": subsample_sensitivity(reports),
         "cross_session_reproducibility": cross_session(reports, prior or {}),
+        "split_k_control": split_k_control(reports),
         **v,
         "localization": {
             label: {
