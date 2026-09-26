@@ -163,10 +163,25 @@ def _toy_root():
     return model
 
 
-def _load_checkpoint(path: str):
+def _load_checkpoint(path: str, device: str, dtype=None):
+    """The parent, ON THE DECLARED DEVICE and in the declared dtype.
+
+    BOTH arguments are load-bearing and neither was here. Attempt a4 replayed
+    the frozen prefix correctly — `eea90c91…`, 21.5 minutes — and then died
+    one second into the first arm: the parent came back on `cpu` while the
+    path declared `cuda:0`, and `verify_root_placement` rightly refused. The
+    toy path cannot see it, because there the declared device IS cpu.
+
+    The dtype is the quieter half. `from_pretrained` defaults to float32, so
+    a parent written in bfloat16 would have been silently upcast and the two
+    arms would have measured a different model from the one the prefix built
+    — a scientific difference, not a performance one, and nothing downstream
+    would have said so.
+    """
     from transformers import AutoModelForCausalLM
 
-    return AutoModelForCausalLM.from_pretrained(path).eval()
+    model = AutoModelForCausalLM.from_pretrained(path, dtype=dtype)
+    return model.to(device).eval()
 
 
 def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
@@ -214,7 +229,15 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     if sorted(order) != sorted(sizes):
         raise PilotError(f"the record's arm_order {order} does not name its "
                          f"own arms {sorted(sizes)}")
-    _say(f"predeclared arm order {order}, gate {threshold}x")
+    #: The dtype the prefix built the parent in, so the arms load the model
+    #: the prefix wrote rather than a float32 promotion of it.
+    weight_dtype = None
+    if not toy:
+        import torch
+
+        weight_dtype = torch.bfloat16
+    _say(f"predeclared arm order {order}, gate {threshold}x, "
+         f"device {device}, dtype {weight_dtype or 'float32 (toy)'}")
 
     record: dict = {
         "schema": "aadistill.phase_c3.batching_pilot_result/v1",
@@ -348,7 +371,7 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
         #: conditions, which is a difference between the POSITIONS and not
         #: between B1 and B4.
         def parent_loader(path=parent.checkpoint_path):
-            return _load_checkpoint(path)
+            return _load_checkpoint(path, device, dtype=weight_dtype)
 
         #: RESET, or the second arm inherits the first arm's peak and the
         #: two numbers stop being comparable -- `max_memory_allocated` is a

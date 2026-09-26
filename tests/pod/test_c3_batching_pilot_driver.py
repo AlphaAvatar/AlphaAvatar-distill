@@ -421,3 +421,97 @@ def test_every_ssh_invocation_inside_a_loop_passes_dash_n():
             if stripped.startswith("$SSH ") and not stripped.startswith("$SSH -n"):
                 raise AssertionError(
                     f"ssh without -n inside a read loop: {stripped!r}")
+
+
+# --- the parent must load where the path says, in what the prefix wrote ---
+
+def test_the_checkpoint_loader_places_the_model_on_the_declared_device(tmp_path):
+    """EXECUTED against a real saved checkpoint. `.to(device)` was missing.
+
+    Attempt a4 replayed the frozen prefix correctly — `eea90c91…`, 21.5
+    minutes — and died one second into the first arm because the parent came
+    back on `cpu` while the path declared `cuda:0`. A CPU box cannot
+    reproduce that mismatch, but it CAN check that the loader applies the
+    device it is given rather than ignoring it, which is the defect.
+    """
+    import importlib.util
+
+    import torch
+    from transformers import Qwen3Config, Qwen3ForCausalLM
+
+    spec = importlib.util.spec_from_file_location("c3drv", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    ckpt = tmp_path / "ckpt"
+    Qwen3ForCausalLM(Qwen3Config(
+        hidden_size=32, num_hidden_layers=2, intermediate_size=48,
+        num_attention_heads=4, num_key_value_heads=2, head_dim=8,
+        vocab_size=64, max_position_embeddings=128)).save_pretrained(ckpt)
+
+    model = mod._load_checkpoint(str(ckpt), "cpu")
+    places = {p.device.type for p in model.parameters()}
+    assert places == {"cpu"}, places
+    assert not model.training, "the loader must return an eval model"
+
+
+def test_the_loader_honours_the_dtype_it_is_given(tmp_path):
+    """The quieter half. `from_pretrained` defaults to float32, so a parent
+    written in bfloat16 would be silently upcast and the arms would measure a
+    different model from the one the prefix built."""
+    import importlib.util
+
+    import torch
+    from transformers import Qwen3Config, Qwen3ForCausalLM
+
+    spec = importlib.util.spec_from_file_location("c3drv", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    ckpt = tmp_path / "ckpt"
+    Qwen3ForCausalLM(Qwen3Config(
+        hidden_size=32, num_hidden_layers=2, intermediate_size=48,
+        num_attention_heads=4, num_key_value_heads=2, head_dim=8,
+        vocab_size=64, max_position_embeddings=128)).save_pretrained(ckpt)
+
+    bf16 = mod._load_checkpoint(str(ckpt), "cpu", dtype=torch.bfloat16)
+    assert {p.dtype for p in bf16.parameters()} == {torch.bfloat16}
+    fp32 = mod._load_checkpoint(str(ckpt), "cpu", dtype=torch.float32)
+    assert {p.dtype for p in fp32.parameters()} == {torch.float32}
+
+
+def test_the_arm_loader_forwards_the_run_device_and_dtype():
+    """Structural, because a CPU box cannot tell `cuda:0` from a default."""
+    import ast
+    import textwrap
+
+    src = DRIVER.read_text()
+    tree = ast.parse(src)
+    found = False
+    for node in ast.walk(tree):
+        if isinstance(node, ast.FunctionDef) and node.name == "parent_loader":
+            body = ast.dump(node)
+            assert "_load_checkpoint" in body
+            assert "device" in body, "the arm loader ignores the run device"
+            assert "weight_dtype" in body, "the arm loader ignores the dtype"
+            found = True
+    assert found, "no parent_loader in the driver"
+    del textwrap
+
+
+def test_the_real_path_loads_in_bfloat16_not_float32():
+    """The prefix builds the parent in bfloat16; the arms must read that."""
+    src = DRIVER.read_text()
+    assert "weight_dtype = torch.bfloat16" in src
+    assert "if not toy:" in src
+
+
+def test_the_launcher_reads_the_pilots_summary_not_the_preflights():
+    """`find -name pilot_summary.json | head -1` matched the PREFLIGHT on a4
+    and reported a toy verdict as the session's, on a run whose real arms had
+    never started."""
+    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    assert "-path '*/pilot/pilot_summary.json'" in src
+    assert "-name pilot_summary.json" not in src, (
+        "the launcher can still pick up the preflight's summary")
+    assert "-path '*/pilot/pilot_failure.json'" in src

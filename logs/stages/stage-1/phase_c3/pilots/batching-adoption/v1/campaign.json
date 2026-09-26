@@ -65,6 +65,30 @@
    "what_worked": "this is a1's failure caught by a1's repair. The same missing mixture cost $0.7209 and 24 minutes on a1; here --check-inputs refused it in 2 minutes for $0.0391, before the root teacher was fetched and before any GPU work, with the reason named in check_inputs.log.",
    "repair": "read the listing on fd 3, pass `ssh -n`, and COUNT what was pushed against what was required -- 'the loop ran' and 'the loop ran to the end' are different claims and a3 could not tell them apart. Three $0 tests, one of which executes the failing and the fixed loop shapes against a stdin-draining stand-in.",
    "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
+  },
+  {
+   "subrun_id": "c3pilot_20260927_a4",
+   "pod_id": "ks8pm799bytys9",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 25.95,
+   "cost_usd": 0.4765,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "f00deeb09f5510398eba89f57d9a48041b26d300",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "causal-B1, one second in; the prefix COMPLETED and verified",
+   "achieved": {
+    "prefix_replay": "COMPLETE and VERIFIED. DEPTH 1184.7s, FFN 51.1s, RESIDUAL_WIDTH 36.5s; the parent reproduced the frozen digest eea90c91346a0745 exactly, in 21.5 minutes against attempt 18's ~24.",
+    "_significance": "the pilot's central premise -- that this tree can reconstruct the frozen pre-ATTENTION parent bit-for-bit -- is now MEASURED rather than assumed."
+   },
+   "failure": "FixedPathRootDeviceMismatch: the arm's parent loader returned a model on cpu while the path declares cuda:0. `_load_checkpoint` called `from_pretrained(path).eval()` and never applied the device.",
+   "second_defect": "the same loader took no dtype, so `from_pretrained`'s float32 default would have silently upcast a bfloat16 parent -- the two arms would have measured a different model from the one the prefix built, and nothing downstream would have said so.",
+   "third_defect": "the launcher reported `verdict: B4_STRUCTURALLY_EQUIVALENT_AND_FASTER` for this session. That was the PREFLIGHT's toy verdict: `find -name pilot_summary.json | head -1` matched out/preflight/. The real arms never ran.",
+   "_why_no_dollar_zero_check_caught_it": "the toy path declares device cpu, so a cpu/cuda mismatch cannot arise in it. This is the CPU-rehearsal blind spot the repository has recorded before: assert placement, not arithmetic.",
+   "repair": "load the parent ON the declared device and in the prefix's dtype; read the PILOT's summary by path, never the first match by name. Five $0 tests, two of which execute the real loader against a real saved checkpoint and assert placement and dtype.",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
   }
  ]
 }

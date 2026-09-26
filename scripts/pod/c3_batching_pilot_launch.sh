@@ -381,12 +381,15 @@ if [ -f "${OUT}/evidence.tgz" ]; then
     || say "WARNING: could not unpack the evidence archive"
   say "evidence: $(du -sh "${OUT}/out" 2>/dev/null | cut -f1), $(find "${OUT}/out" -type f | wc -l) files"
 fi
-SUMMARY=$(find "$OUT" -name pilot_summary.json | head -1)
+# THE PILOT's summary, never the preflight's. `find | head -1` matched
+# `out/preflight/pilot_summary.json` on attempt a4 and reported a TOY verdict
+# as the session's, on a run whose real arms had never started.
+SUMMARY=$(find "$OUT" -path '*/pilot/pilot_summary.json' | head -1)
 if [ -n "$SUMMARY" ]; then
   say "verdict: $(python3 -c "import json;print(json.load(open('${SUMMARY}')).get('verdict','(none)'))" 2>/dev/null || echo unreadable)"
 else
   say "no pilot_summary.json retrieved"
-  FAIL=$(find "$OUT" -name pilot_failure.json | head -1)
+  FAIL=$(find "$OUT" -path '*/pilot/pilot_failure.json' | head -1)
   [ -n "$FAIL" ] && say "failure: $(python3 -c "import json;print(json.load(open('${FAIL}'))['error'])" 2>/dev/null)"
 fi
 exit "$RC"
