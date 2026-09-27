@@ -117,7 +117,7 @@
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
-   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 frozen, the joint re-search complete with an accepted Top-5, all 12 behavioural probes trained and scored. No canonical verdict and no new incumbent; B stands. Every figure and its claim boundary: see `c2_closure`.",
+   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 DONE and FROZEN, the joint re-search complete with an accepted, frozen Top-5, all 12 behavioural probes trained and scored. No canonical verdict and no new incumbent; B stands. Every figure and its claim boundary: see `c2_closure`.",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "campaign": "c2-behavioural-12probe-v1",
    "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/",
