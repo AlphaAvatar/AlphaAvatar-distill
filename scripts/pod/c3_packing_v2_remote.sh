@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# The pod side of the C3 packing-optimization pilot. Shipped as a FILE, never as
+# The pod side of the C3 packing-optimization v2 selection round. Shipped as a FILE, never as
 # an inline heredoc: an unquoted heredoc is expanded by the LOCAL shell, which
 # has already executed a `pip install` on the dev box and wasted a paid pod.
 #
@@ -29,7 +29,6 @@ export HF_HOME=/workspace/hf
 export PIP_DISABLE_PIP_VERSION_CHECK=1
 export PYTHONHASHSEED=7          # a per-process random hash has failed a gate before
 export TOKENIZERS_PARALLELISM=false
-SCREEN_FROM="${SCREEN_FROM:-}"
 
 note() { echo "$*" >> "${OUTROOT}/session_notes.txt"; }
 
@@ -182,7 +181,7 @@ PY
 # passed on attempt a1 while the mixture the prefix needed was absent. A check
 # that cannot see the thing that is missing is not a check.
 say "checking the real calibration inputs resolve"
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_pilot_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_v2_driver.py \
     --check-inputs 2>&1 | tee "${OUTROOT}/check_inputs.log"
 CHK_RC=${PIPESTATUS[0]}
 if [ "$CHK_RC" -ne 0 ]; then
@@ -206,7 +205,7 @@ fi
 PREFLIGHT_TIMEOUT="${PREFLIGHT_TIMEOUT:-420}"
 say "preflight: the driver's own toy sequence on cuda:0, bounded at ${PREFLIGHT_TIMEOUT}s"
 timeout "${PREFLIGHT_TIMEOUT}" env PYTHONPATH=src:scripts /opt/train/bin/python -u \
-    scripts/pod/c3_packing_pilot_driver.py --toy --device cuda:0 \
+    scripts/pod/c3_packing_v2_driver.py --toy --device cuda:0 \
     --out "${OUTROOT}/preflight" 2>&1 | tee "${OUTROOT}/preflight.log"
 PRE_RC=${PIPESTATUS[0]}
 if [ "$PRE_RC" -eq 124 ]; then
@@ -225,20 +224,16 @@ fi
 say "preflight ok"
 
 # --- the pilot ---------------------------------------------------------------
-say "PILOT: parent, then the three-layer packing screen, then at most one full scorer"
-SCREEN_ARG=""
-if [ -n "${SCREEN_FROM:-}" ] && [ -f "${SCREEN_FROM}" ]; then
-  SCREEN_ARG="--screen-from ${SCREEN_FROM}"
-  say "reusing the measured screen at ${SCREEN_FROM}"
-fi
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_pilot_driver.py \
-    --out "${OUTROOT}/packing" ${SCREEN_ARG} 2>&1 | tee "${OUTROOT}/packing.log"
+say "V2: parent, counterbalanced R0/R2/R3/R4 screen, then at most one full pair"
+#: v2 measures its OWN counterbalanced screen; there is nothing to reuse.
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_v2_driver.py \
+    --out "${OUTROOT}/packing2" 2>&1 | tee "${OUTROOT}/packing2.log"
 RC=${PIPESTATUS[0]}
 say "pilot rc=${RC}"
 
 # Evidence is written stage by stage, so there is something to fetch on every
 # path out of here. Nothing below decides anything; the launcher collects.
-if [ -f "${OUTROOT}/pilot/packing_result.json" ]; then
-  say "verdict: $(python3 -c "import json;print(json.load(open('${OUTROOT}/pilot/packing_result.json')).get('verdict'))" 2>/dev/null)"
+if [ -f "${OUTROOT}/pilot/packing_v2_result.json" ]; then
+  say "verdict: $(python3 -c "import json;print(json.load(open('${OUTROOT}/pilot/packing_v2_result.json')).get('verdict'))" 2>/dev/null)"
 fi
 exit "$RC"

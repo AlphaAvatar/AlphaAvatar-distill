@@ -312,3 +312,92 @@ def test_the_launcher_can_push_a_measured_screen():
     assert "--screen-from" in remote
     #: And it is OPTIONAL: with no screen pushed, the pod measures one.
     assert 'SCREEN_FROM="${SCREEN_FROM:-}"' in remote
+
+
+# --- the three v1 preflight defects, each repaired and each tested -------
+
+def test_the_preflight_is_bounded_and_the_timeout_path_EXECUTES(tmp_path):
+    """v1 attempt b3 hung here for 23+ minutes and cost $0.4863.
+
+    The script is checked for the bound, and the bound's HANDLING is then
+    executed for real against a command that hangs: `timeout` must report
+    124 and the script must translate that into its own refusal. Asserting
+    only that the word `timeout` appears would pass on a script that ignored
+    the exit status.
+    """
+    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
+    assert "timeout \"${PREFLIGHT_TIMEOUT}\"" in block
+    assert "PIPESTATUS[0]" in block, (
+        "the exit status would be tee's, not the preflight's")
+    assert '-eq 124' in block and "exit 31" in block
+
+    #: The handling, executed. Same shape as the script: a bounded command
+    #: that hangs, its status taken from PIPESTATUS through a pipe.
+    probe = '''
+    timeout 1 bash -c 'sleep 30' 2>&1 | tee /dev/null
+    RC=${PIPESTATUS[0]}
+    if [ "$RC" -eq 124 ]; then echo "TIMED_OUT"; exit 31; fi
+    echo "NOT_DETECTED"; exit 0
+    '''
+    done = subprocess.run(["bash", "-c", probe], capture_output=True,
+                          text=True, timeout=60, stdin=subprocess.DEVNULL)
+    assert done.stdout.strip() == "TIMED_OUT", done.stdout + done.stderr
+    assert done.returncode == 31
+
+
+def test_the_preflight_streams_instead_of_hiding(tmp_path):
+    """23 minutes looked exactly like 16 seconds because the output went to
+    a file and only the completion line reached the launch log."""
+    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
+    assert "| tee" in block, "the preflight's output is still hidden"
+    assert "python -u" in block, "python would buffer it anyway"
+    assert '> "${OUTROOT}/preflight.log" 2>&1' not in block
+
+
+def test_the_preflight_runs_on_the_device_the_pod_has():
+    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
+    assert "--device cuda:0" in block
+    assert "--device cpu" not in block, (
+        "a cpu preflight under a CUDA-built torch is what oversubscribed")
+
+
+def test_both_drivers_hold_torch_to_the_cgroup_grant():
+    """`nproc` reports the host. `apply_cpu_budget` reads the quota and has
+    since E8b; nothing in these drivers had ever called it."""
+    for name in ("c3_packing_pilot_driver.py", "c3_batching_pilot_driver.py"):
+        src = (REPO / "scripts/pod" / name).read_text()
+        assert "apply_cpu_budget" in src, f"{name} never pins its CPU budget"
+
+
+def test_the_cpu_budget_prefers_the_quota_over_the_visible_cpus(tmp_path,
+                                                                monkeypatch):
+    """EXECUTED against a fake cgroup file, because a dev box has no quota
+    and would otherwise take the affinity branch and prove nothing."""
+    sys.path.insert(0, str(REPO / "src"))
+    from aadistill.initialization import device
+
+    fake = tmp_path / "cpu.max"
+    fake.write_text("400000 100000\n")          # 4 CPUs granted
+    real_paths = []
+
+    class _P(type(fake)):
+        pass
+
+    orig = device.Path
+
+    class Shim:
+        def __init__(self, p):
+            self._p = fake if str(p).endswith("cgroup/cpu.max") else orig(p)
+            real_paths.append(str(p))
+
+        def read_text(self):
+            return self._p.read_text()
+
+    monkeypatch.setattr(device, "Path", Shim)
+    n, source = device.cpu_budget()
+    assert (n, source) == (4, "cgroup.v2"), (n, source)
+    assert any("cgroup/cpu.max" in p for p in real_paths)
+    del _P, real_paths

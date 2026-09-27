@@ -1,0 +1,88 @@
+{
+ "schema": "aadistill.validation_scope/v1",
+ "investigation_id": "c3_packing_optimization_v2",
+ "title": "Among length-aware B2, B3 and B4, which is the best robust throughput?",
+
+ "question": "Among length-aware B2, B3 and B4 causal-KL execution, which protocol provides the best robust throughput on the real frozen workload, before paying for a full scorer?",
+ "is_formal_c3": false,
+
+ "_why_v1_was_not_enough": "v1 ran ONE ordered pass and separated its two leading candidates by 0.76% (P2 252.614s, P3 250.686s) while their peak VRAM differed by 4.8 GiB (6.53 vs 11.30). Whichever protocol runs last has the warmer allocator, and that advantage is worth more than 0.76%. One obvious protocol, B3, had never been derived at all.",
+ "_v1_is_preserved": "packing-optimization/v1 remains valid for the protocol it used: screen complete, P3 advanced under the v1 single-screen rule, full scorer not funded. Its 1.1581x / 1.1670x are historical CONTEXT and are NOT timing replicates in the v2 statistic.",
+
+ "protocols": [
+  {"protocol": "R0", "calibration_forward_batch_size": 1, "calibration_batch_packing": "original_order_v1", "role": "reference"},
+  {"protocol": "R2", "calibration_forward_batch_size": 2, "calibration_batch_packing": "length_sorted_v1", "role": "candidate"},
+  {"protocol": "R3", "calibration_forward_batch_size": 3, "calibration_batch_packing": "length_sorted_v1", "role": "candidate, never derived before v2"},
+  {"protocol": "R4", "calibration_forward_batch_size": 4, "calibration_batch_packing": "length_sorted_v1", "role": "candidate"}
+ ],
+ "_not_rerun": ["B2 original_order_v1", "B4 original_order_v1"],
+ "_their_role_is_answered": "v1 measured B2-consecutive at 1.0111x against B2-sorted at 1.1581x with the SAME invocation count, which is what established that packing rather than batch size is the variable.",
+
+ "_b3_needed_no_core_change": "the packer and attention.causal_kl_v1 are parameterized in batch size. A `batch_size == 3` branch anywhere would be the defect, not the feature; a $0 test greps for one.",
+
+ "screen": {
+  "layers": [0, 13, 27],
+  "_why_these": "early, middle and late depth; the model forward still traverses the whole model.",
+  "all_items": true,
+  "all_heads": true,
+  "rounds": {"A": ["R0", "R2", "R3", "R4"], "B": ["R4", "R3", "R2", "R0"]},
+  "_counterbalanced": "round B is the exact reverse of round A, so a position advantage in one round is a position disadvantage in the other and pooling cancels it. Frozen here before any timing.",
+  "reference_protocol": "R0",
+  "primary_statistic": "pooled_wall_seconds = round_A_wall + round_B_wall",
+  "_selection_is_pooled": "not the best single pass",
+  "stability_tolerance": 0.05,
+  "_stability_guard": "R0 is measured in both rounds. If |A-B|/mean(A,B) > 5% the environment cannot carry a sub-percent decision: STOP with TIMING_SCREEN_UNSTABLE. Do NOT add repeats opportunistically -- choosing the statistic after seeing the spread is choosing the result.",
+  "near_tie_fraction": 0.02,
+  "_near_tie_rule": "candidates whose pooled wall is within 2% of the fastest are operationally TIED. Among tied candidates select by (1) lower peak VRAM, (2) then smaller calibration_forward_batch_size, (3) then lexical protocol id. Frozen before v2 timing, because a 0.5-1% fluctuation must not buy an execution mode that nearly doubles memory pressure.",
+  "advance_threshold": 1.10,
+  "stop_verdict": "NO_PACKING_V2_CANDIDATE_WORTH_FULL_SCORER"
+ },
+
+ "full_scorer": {
+  "_fresh_b1_is_mandatory": "v1 measured same-session P0 / scaled prior B1 = 1.2467x, far outside the preregistered +/-5% bound, so the 2190.1708s result CANNOT serve as a reference for a new speed claim. If v2 advances, a fresh full B1 and one full candidate run on the SAME session, card and runtime. No exception.",
+  "order": ["fresh_full_B1", "selected_candidate"],
+  "_order_predeclared": "before execution, and not chosen after the screen",
+  "_same_contract": "identical warm-up and CUDA synchronization as the screen",
+  "gate": {"statistic": "fresh_full_B1_seconds / candidate_full_seconds", "threshold": 1.25},
+  "_no_relaxation": "the adoption threshold does not move because this is a third attempt"
+ },
+
+ "structural_comparison": {
+  "_only_after": "the full candidate clears 1.25x",
+  "reference": "the verified landscape from the FRESH full B1 of this session",
+  "report": ["changed layers", "changed GQA groups / 224", "changed retained-head slots / 448", "symmetric difference", "head-score absolute and relative drift", "rank correlation", "cutoff margins"],
+  "_not_layer_count_alone": "a layer counts as changed if one slot in it differs; that measures spread, not magnitude."
+ },
+
+ "recovery": {
+  "authorized": false,
+  "_rule": "NOT AUTHORIZED IN v2. Even if the full speedup reaches 1.25x AND the head maps differ, STOP after the structural comparison and return for review.",
+  "_why": "budget and accounting clarity: first prove an execution protocol is worth adopting, only then spend on downstream-equivalence recovery.",
+  "pilot_seed": 1139220455,
+  "_seed_state": "UNCONSUMED, and it stays unconsumed unless a later authorization explicitly uses it."
+ },
+
+ "frozen_inputs": {
+  "parent_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "parent_weights_digest": "2be3a4fe00233415a9382892237c26d1b96228d41f327397f6fcf06600909ba0",
+  "calibration_profile": "calib.domain_balanced@v1",
+  "n_calibration_items": 67,
+  "_parent_reuse": "search the durable store first; replay once at B1 only if the exact bytes are absent. ONE replay, and the same verified parent feeds every screen round and both full scorers."
+ },
+ "_full_layers": 28,
+
+ "aggregation_order": {
+  "_rule": "execution may reorder; aggregation may NOT. Preserved from v1.",
+  "_how": "per-item KL is written by original_item_index and aggregated by walking the frozen mixture from 0, so subtype accumulation, domain aggregation and item-to-score attribution are independent of the packing."
+ },
+
+ "do_not_change": [
+  "forward_kl_mean_batch chunk=512 -- a separate numerical variable",
+  "micro_batches' default ordering",
+  "the operator impl_id",
+  "DEFAULT_MICRO_BATCH_SIZE",
+  "state identity semantics"
+ ],
+ "may_not_produce": ["a formal GO or NO_GO", "a confidence interval", "a formal C3 incumbent", "any recovery evidence"],
+ "owner": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/"
+}

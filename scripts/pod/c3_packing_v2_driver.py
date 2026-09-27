@@ -1,22 +1,26 @@
 #!/usr/bin/env python3
-"""The packing-optimization pilot, as one owned sequence.
+"""Packing optimization v2: counterbalanced selection, then one full pair.
 
-    python scripts/pod/c3_packing_pilot_driver.py --out /workspace/out/packing
+    python scripts/pod/c3_packing_v2_driver.py --out /workspace/out/packing2
 
-    1. obtain the verified pre-ATTENTION parent
-         reuse it if durable bytes exist; otherwise replay the prefix ONCE at B1
+    1. obtain the verified pre-ATTENTION parent (reuse if durable, else ONE
+       B1 replay)
     2. verify eea90c91...
-    3. short three-layer throughput screen over P0/P1/P2/P3
-    4. apply the screen gate (>= 1.10x over the same-session P0)
-    5. apply the +/-5% B1 comparability rule against the prior full B1
-    6. if a candidate advances, run ONE full 28-layer scorer for it
-    7. apply the 1.25x adoption gate and compare head maps
+    3. COUNTERBALANCED two-round screen over R0/R2/R3/R4
+    4. the stability guard, then the near-tie rule, then the 1.10x pooled
+       advance gate
+    5. a FRESH full B1 — mandatory, because v1 measured the prior one at
+       1.2467x of this hardware and the +/-5% rule refused it
+    6. one full selected candidate, same session, card and runtime
+    7. the 1.25x adoption gate, and the structural comparison if it clears
 
-Every stage persists as it completes. Selection at step 4 is by measured wall
-time alone; no head-map or quality result chooses which packing advances.
+RECOVERY IS NOT AUTHORIZED IN v2. Even if the gate clears and the head maps
+differ, this stops after the structural comparison and returns for review.
 
-`--toy` runs the identical sequence at a CPU geometry — same pilot functions,
-same operator, same screen, same comparator, same records, nothing stubbed.
+Every stage persists as it completes. Selection reads wall time and peak
+VRAM only; no head-map or quality result chooses a protocol.
+
+`--toy` runs the identical sequence at a CPU geometry.
 """
 
 from __future__ import annotations
@@ -32,7 +36,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-PILOT_DIR = "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v1"
+PILOT_DIR = "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2"
 
 
 class PilotError(RuntimeError):
@@ -40,7 +44,7 @@ class PilotError(RuntimeError):
 
 
 def _say(msg: str) -> None:
-    print(f"[packing {time.strftime('%H:%M:%S', time.gmtime())}] {msg}",
+    print(f"[v2 {time.strftime('%H:%M:%S', time.gmtime())}] {msg}",
           flush=True)
 
 
@@ -55,8 +59,7 @@ def load_scope(repo: Path) -> dict:
 
 
 def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
-        parent_dir: str | None = None, screen_from: str | None = None,
-        deadline=None) -> dict:
+        parent_dir: str | None = None, deadline=None) -> dict:
     import torch
 
     from aadistill.initialization.adapters import register_builtin_adapters
@@ -89,20 +92,22 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
 
     scope = load_scope(repo)
     screen_cfg = scope["screen"]
-    full_gate = float(scope["full_scorer_gate"]["threshold"])
+    full_gate = float(scope["full_scorer"]["gate"]["threshold"])
     protocols = {p["protocol"]: p for p in scope["protocols"]}
 
     record: dict = {
-        "schema": "aadistill.phase_c3.packing_pilot_result/v1",
+        "schema": "aadistill.phase_c3.packing_v2_result/v1",
         "toy": toy, "device": device,
         "screen": {"layers": screen_cfg["layers"],
-                   "protocol_order": screen_cfg["protocol_order"],
-                   "advance_threshold": screen_cfg["advance_threshold"]},
+                   "rounds": screen_cfg["rounds"],
+                   "advance_threshold": screen_cfg["advance_threshold"],
+                   "near_tie_fraction": screen_cfg["near_tie_fraction"],
+                   "stability_tolerance": screen_cfg["stability_tolerance"]},
         "full_scorer_gate": full_gate,
         "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "stages": {},
     }
-    result_path = out_dir / "packing_result.json"
+    result_path = out_dir / "packing_v2_result.json"
     _write(result_path, record)
 
     def checkpoint(stage: str, payload) -> None:
@@ -215,121 +220,96 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     _say(f"stage 2/7: parent verified {expected_digest[:16]}… "
          f"(replays this session: {replays})")
 
-    # --- 3. the screen ------------------------------------------------------
-    _say("stage 3/7: three-layer throughput screen")
-    from c3_packing_screen import run as run_screen
+    # --- 3. the counterbalanced screen -------------------------------------
+    _say("stage 3/7: counterbalanced two-round screen")
+    from c3_packing_screen_v2 import run as run_screen_v2
 
-    #: A toy run has no frozen mixture and a 3-layer geometry, so it supplies
-    #: its own items and its own layers. THE REAL PATH PASSES NEITHER — the
-    #: screen resolves the mixture and reads the layers from the record, and
-    #: a $0 test asserts that this call site overrides nothing when `toy` is
-    #: false.
-    screen_kwargs = {"items": items, "layers": [0, 1]} if toy else {}
-    if screen_from:
-        #: REUSED, not re-paid for. The screen is a MEASUREMENT: rerunning
-        #: it would cost 18 minutes of GPU to reproduce numbers already in
-        #: hand, and the budget for this campaign does not have 18 minutes
-        #: to spare. The file's sha256 is recorded so the selection stays
-        #: auditable, and it must already carry a decided gate.
-        import hashlib
-
-        src = Path(screen_from)
-        screen = json.loads(src.read_text())
-        digest = hashlib.sha256(src.read_bytes()).hexdigest()
-        if "screen_gate" not in screen:
-            raise PilotError(
-                f"{screen_from} holds no decided screen_gate; a reused "
-                "screen must already have selected a candidate")
-        screen["_reused_from"] = {"file": str(src), "sha256": digest}
-        _say(f"stage 3/7: REUSING the measured screen from {src.name} "
-             f"({digest[:16]}…)")
-    else:
-        screen = run_screen(parent_path, out_dir / "screen", repo=repo,
-                            device=device, deadline=deadline, **screen_kwargs)
+    #: Toy-only overrides. The REAL path passes none of these: it resolves
+    #: the frozen mixture, reads the layers from the record, and holds the
+    #: record's 5% stability tolerance.
+    #: The toy tolerance is an env var so a $0 test can force the UNSTABLE
+    #: branch and watch the driver stop, instead of only asserting that the
+    #: branch is written above the selection.
+    screen_kwargs = ({"items": items, "layers": [0, 1],
+                      "stability_tolerance": float(
+                          os.environ.get("C3_TOY_STABILITY_TOLERANCE", "0.95"))}
+                     if toy else {})
+    screen = run_screen_v2(parent_path, out_dir / "screen", repo=repo,
+                           device=device, deadline=deadline, **screen_kwargs)
     checkpoint("screen", screen)
 
-    # --- 4. the screen gate -------------------------------------------------
-    gate = screen["screen_gate"]
-    checkpoint("screen_gate", gate)
-    if not gate["advances"]:
-        record["verdict"] = "NO_BATCH_PACKING_CANDIDATE_WORTH_FULL_SCORER"
+    # --- 4. stability, then the tie rule, then the advance gate ----------
+    if not screen["stability"]["stable"]:
+        record["verdict"] = "TIMING_SCREEN_UNSTABLE"
         record["recovery_triggered"] = False
         record["finished_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ",
                                                time.gmtime())
         _write(result_path, record)
-        _say(f"VERDICT {record['verdict']} — best "
-             f"{gate['best']['protocol'] if gate['best'] else None} at "
-             f"{gate['best']['screen_speedup'] if gate['best'] else 0}x")
+        _say(f"VERDICT {record['verdict']} — R0 varied "
+             f"{screen['stability']['relative'] * 100:.2f}% between rounds")
         return record
 
-    winner = gate["best"]["protocol"]
-    _say(f"stage 4/7: {winner} advances at {gate['best']['screen_speedup']}x")
+    sel = screen["selection"]
+    checkpoint("selection", sel)
+    if not sel["advances"]:
+        record["verdict"] = "NO_PACKING_V2_CANDIDATE_WORTH_FULL_SCORER"
+        record["recovery_triggered"] = False
+        record["finished_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ",
+                                               time.gmtime())
+        _write(result_path, record)
+        _say(f"VERDICT {record['verdict']} — best {sel['selected']} at "
+             f"{sel['selected_speedup']}x")
+        return record
 
-    # --- 5. the +/-5% B1 comparability rule --------------------------------
-    comp = scope["b1_comparability"]
-    prior = float(comp["prior_full_b1_seconds"])
-    ref_name = screen_cfg["reference_protocol"]
-    ref = screen["results"][ref_name]
-    #: The prior full B1 scored 28 layers; this screen scored len(layers).
-    #: Scale the prior to the screen's work to compare like with like.
-    n_layers_full = int(scope.get("_full_layers", 28))
-    scale = len(screen_cfg["layers"]) / n_layers_full
-    expected = prior * scale
-    ratio = ref["wall_seconds"] / expected
-    comparable = abs(ratio - 1.0) <= float(comp["tolerance"])
-    checkpoint("b1_comparability", {
-        "prior_full_b1_seconds": prior, "screen_layers": screen_cfg["layers"],
-        "full_layers": n_layers_full, "scale": scale,
-        "expected_screen_seconds": round(expected, 3),
-        "observed_screen_seconds": ref["wall_seconds"],
-        "ratio": round(ratio, 4), "tolerance": comp["tolerance"],
-        "comparable": comparable,
-        "_meaning": ("if comparable, the prior full B1 may serve as the "
-                     "full-run reference; if not, a new full B1 is required "
-                     "before any full-scorer speed claim"),
-        "_predeclared": True,
-    })
-    _say(f"stage 5/7: same-session P0 is {ratio:.4f}x the scaled prior B1 "
-         f"-> {'comparable' if comparable else 'NOT comparable'}")
+    winner = sel["selected"]
+    reference = sel["reference"]
+    _say(f"stage 4/7: {winner} selected at {sel['selected_speedup']}x pooled "
+         f"(tied: {sel['tied_with_fastest']})")
 
-    # --- 6. one full scorer -------------------------------------------------
-    todo = [winner] if comparable else [ref_name, winner]
-    _say(f"stage 6/7: full scorer for {todo}")
-    full: dict = {}
-    for name in todo:
-        spec_p = protocols[name]
+    # --- 5-6. a FRESH full B1, then the candidate -------------------------
+    #: MANDATORY and not conditional. v1 measured the prior full B1 at
+    #: 1.2467x of this hardware, far outside the ±5% bound, so there is no
+    #: usable historical reference and the order is predeclared in the
+    #: record rather than chosen now.
+    order = list(scope["full_scorer"]["order"])
+    assert order == ["fresh_full_B1", "selected_candidate"], order
+    _say(f"stage 5/7: fresh full {reference}, then full {winner}")
+    full = {}
+    for which in order:
+        name = reference if which == "fresh_full_B1" else winner
         full[name] = _full_scorer(
-            parent_path, spec_p, out_dir, repo=repo, device=device,
-            dtype=weight_dtype, expected_digest=expected_digest,
-            toy=toy, toy_target=(TOY_TARGET if toy else None),
-            deadline=deadline)
+            parent_path, protocols[name], out_dir, repo=repo, device=device,
+            dtype=weight_dtype, expected_digest=expected_digest, toy=toy,
+            toy_target=(TOY_TARGET if toy else None), deadline=deadline)
         checkpoint(f"full_{name}", full[name])
         _say(f"  {name}: scorer {full[name]['scorer_seconds']:.1f}s")
 
-    reference_seconds = (prior if comparable
-                         else full[ref_name]["scorer_seconds"])
-    sp = speedup(reference_seconds, full[winner]["scorer_seconds"])
-    sp["reference_source"] = ("prior full B1 (comparable)" if comparable
-                              else "this session's full B1")
+    sp = speedup(full[reference]["scorer_seconds"],
+                 full[winner]["scorer_seconds"])
+    sp["reference_source"] = "this session's fresh full B1 (mandatory)"
     checkpoint("speed", sp)
 
+    # --- 7. the adoption gate, then the structural comparison -------------
     if sp["speedup"] < full_gate:
         record["verdict"] = "PACKED_BATCH_NOT_WORTH_ADOPTION"
-        record["recovery_triggered"] = False
     else:
-        b1_ev = _reference_landscape(repo, scope, full.get(ref_name))
         structural = compare_head_maps(
-            b1_ev, full[winner]["causal_head_evidence"])
+            full[reference]["causal_head_evidence"],
+            full[winner]["causal_head_evidence"])
         checkpoint("structural", structural)
         record["verdict"] = (
             "PACKED_BATCH_STRUCTURALLY_EQUIVALENT_AND_FASTER"
             if structural["identical"]
-            else "PACKED_BATCH_FASTER_AND_STRUCTURALLY_DIFFERENT_RECOVERY_TRIGGERED")
-        record["recovery_triggered"] = not structural["identical"]
+            else "PACKED_BATCH_FASTER_AND_STRUCTURALLY_DIFFERENT")
+    #: RECOVERY IS NOT AUTHORIZED IN v2, whatever the structural result.
+    record["recovery_triggered"] = False
+    record["_recovery"] = (
+        "NOT AUTHORIZED in v2. Even a differing head map stops here and "
+        "returns for review; the pilot seed 1139220455 stays unconsumed.")
     record["winner"] = winner
     record["finished_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     _write(result_path, record)
-    _say(f"VERDICT {record['verdict']} (speedup {sp['speedup']}x)")
+    _say(f"VERDICT {record['verdict']} (full speedup {sp['speedup']}x)")
     return record
 
 
@@ -403,36 +383,10 @@ def pilot_toy_items():
     return _toy_items()
 
 
-def _reference_landscape(repo: Path, scope: dict, fresh):
-    """The B1 landscape to compare against: the committed one if it verifies.
-
-    §13: prefer the previous B1 raw evidence when its committed sha256 still
-    matches. If it cannot be verified, a new B1 full scorer is used rather
-    than an approximation — which is why `fresh` is the fallback and not a
-    reconstruction.
-    """
-    import hashlib
-
-    if fresh is not None:
-        return fresh["causal_head_evidence"]
-    ref = scope["structural_comparison"]["reuse_if_verifiable"]
-    path = repo / ref["file"]
-    if not path.is_file():
-        raise PilotError(
-            f"the prior B1 evidence {ref['file']} is absent and no fresh B1 "
-            "was run; refusing to approximate a reference landscape")
-    got = hashlib.sha256(path.read_bytes()).hexdigest()
-    if got != ref["sha256"]:
-        raise PilotError(
-            f"the prior B1 evidence hashes {got}, the record pins "
-            f"{ref['sha256']}; refusing to compare against unverified bytes")
-    doc = json.loads(path.read_text())
-    for name, stage in doc.get("stages", {}).items():
-        if not isinstance(stage, dict) or "step" not in stage:
-            continue
-        if stage.get("calibration_forward_batch_size") == 1:
-            return stage["step"]["selection"]["causal_head_evidence"]
-    raise PilotError("the prior evidence holds no B1 arm")
+#: v1 had a `_reference_landscape` helper that could fall back to the prior
+#: committed B1 evidence. v2 has no such path: the ±5% rule already refused
+#: that reference, so a fresh full B1 is mandatory and the comparison always
+#: has one. A fallback here would be a way to skip it.
 
 
 def main(argv=None) -> int:
@@ -442,9 +396,6 @@ def main(argv=None) -> int:
     ap.add_argument("--parent", default=None,
                     help="a durable verified parent to reuse instead of "
                          "replaying the prefix")
-    ap.add_argument("--screen-from", default=None,
-                    help="a completed screen.json to reuse instead of "
-                         "re-measuring it")
     ap.add_argument("--device", default=None)
     ap.add_argument("--toy", action="store_true")
     ap.add_argument("--required-inputs", action="store_true",
@@ -479,9 +430,9 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     try:
         run(out, repo=Path(args.repo), toy=args.toy, device=device,
-            parent_dir=args.parent, screen_from=args.screen_from)
+            parent_dir=args.parent)
     except Exception as exc:      # noqa: BLE001 - a paid pod has died in one
-        _write(out / "packing_failure.json", {
+        _write(out / "packing_v2_failure.json", {
             "error": f"{type(exc).__name__}: {exc}",
             "utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())})
         _say(f"FAILED {type(exc).__name__}: {exc}")

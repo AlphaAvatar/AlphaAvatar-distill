@@ -69,6 +69,15 @@ PARENT_Q_HEADS = 32
 #: Both arms of the CLOSED adoption pilot. Kept so its table reproduces.
 ARMS = (1, 4)
 
+#: The v2 protocols. B3 is here because the core is parameterized in batch
+#: size and nothing needed adding for it -- the v1 table simply never asked.
+V2_PROTOCOLS = (
+    ("R0", 1, ORIGINAL_ORDER_V1, "reference"),
+    ("R2", 2, LENGTH_SORTED_V1, "v1 measured 1.1581x on a single ordered pass"),
+    ("R3", 3, LENGTH_SORTED_V1, "never derived before"),
+    ("R4", 4, LENGTH_SORTED_V1, "v1 measured 1.1670x, 0.76% from R2, at 4.8 GiB more"),
+)
+
 #: The protocols the packing-optimization pilot derives. `B4 original` is
 #: already MEASURED (0.6872x) and is here only so the table shows the
 #: comparison the new candidates are being judged against.
@@ -331,8 +340,8 @@ if __name__ == "__main__":
 
 # --- the packing-optimization pilot's $0 table -----------------------------
 
-def packing_table(repo: str | Path = ".", *, weight_bytes: int = BF16_BYTES
-                  ) -> dict:
+def packing_table(repo: str | Path = ".", *, weight_bytes: int = BF16_BYTES,
+                  protocols=None) -> dict:
     """Every candidate protocol's cost in positions, invocations and bytes.
 
     From the REAL frozen item lengths, through the real packing policy. Not
@@ -351,7 +360,7 @@ def packing_table(repo: str | Path = ".", *, weight_bytes: int = BF16_BYTES
     vocab = target["vocab_size"]
 
     rows = []
-    for name, bs, packing, note in PROTOCOLS:
+    for name, bs, packing, note in (protocols or PROTOCOLS):
         prof = padding_profile(lengths, bs, packing=packing)
         #: Two logit blocks live at once: the group's reference for the whole
         #: group, and one ablated block freed each iteration.
@@ -391,6 +400,18 @@ def packing_table(repo: str | Path = ".", *, weight_bytes: int = BF16_BYTES
                      "forwards_per_group": per_group},
         "protocols": rows,
     }
+
+
+def v2_packing_table(repo: str | Path = ".", **kw) -> dict:
+    """The v2 candidates' cost in positions, invocations and bytes.
+
+    Same derivation, different protocol set. B3 required no core change: the
+    packer and the operator are parameterized in batch size, and a
+    `batch_size == 3` branch anywhere would be the defect, not the feature.
+    """
+    doc = packing_table(repo, protocols=V2_PROTOCOLS, **kw)
+    doc["schema"] = "aadistill.phase_c3.packing_table_v2/v1"
+    return doc
 
 
 def print_packing_table(doc: dict) -> None:

@@ -142,6 +142,10 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     from experiments.phase_c3 import pilot
     from experiments.phase_c3.compare import compare_head_maps, speedup, verdict
 
+    from aadistill.initialization.device import apply_cpu_budget
+
+    _say(f"cpu budget: {apply_cpu_budget()}")
+
     #: THREE PROCESS-GLOBAL REGISTRIES, ALL EMPTY IN A FRESH INTERPRETER.
     #: A pytest session hides every one of them, because some sibling test has
     #: always filled them first; this driver is the first code in this project

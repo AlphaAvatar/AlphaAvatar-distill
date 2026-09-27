@@ -82,6 +82,11 @@ to appear below.
 | `c3_packing_pilot_driver.py` | the pilot: obtain the parent, three-layer screen over P0/P1/P2/P3, screen gate, the ±5% B1 comparability rule, at most one full 28-layer scorer, the 1.25× adoption gate. Selection at the screen is by measured wall time **alone**. `--toy` runs the identical seven steps at a CPU geometry |
 | `c3_packing_screen.py` | the throughput screen. Calls `score_heads` — the function the real scorer calls, not a copy — with all 67 items, all 32 heads and three predeclared layers, so the model forward still traverses the whole model. A screened landscape is incomplete by construction and the operator refuses one, so nothing here can become a head map |
 
+| `c3_packing_v2_launch.sh` | the packing-v2 launcher. Same proven shape, pointed at the v2 campaign and payload, and it pushes **no** measured screen: v2 measures its own, and a pushed one would be a timing replicate from another card |
+| `c3_packing_v2_remote.sh` | that round's pod side. The preflight is **bounded, streamed and runs on `cuda:0`** — v1's hung for 23+ minutes on `cpu` under a CUDA torch, unbounded and writing to a hidden file, and cost `$0.4863` |
+| `c3_packing_v2_driver.py` | parent, counterbalanced screen, the three frozen gates, then a **mandatory fresh full B1** and one full candidate. Recovery is not authorized in v2 and the driver has no verdict that triggers it. The prior 2190.1708 s B1 has no fallback path: the ±5% rule already refused it |
+| `c3_packing_screen_v2.py` | two rounds in opposite orders, pooled. `stability()` and `check_rounds()` and `select()` are pure functions carrying the verdicts, so the stability guard, the counterbalance check and the near-tie rule are all testable without a GPU — each survived a mutation until it was moved out of `run` |
+
 ## TERMINATED — the paid device canary
 
 | file | status |

@@ -1,0 +1,59 @@
+{
+ "schema": "aadistill.validation_authorization/v1",
+ "investigation_id": "c3_packing_optimization_v2",
+ "granted_utc": "2026-09-27T18:00:00Z",
+ "granted_by": "maintainer, 'Packing Optimization v2'",
+ "quote": "Create a NEW engineering campaign c3_packing_optimization_v2 with cumulative all-in ceiling: $4.00",
+ "authorizes": "one owned session: obtain the verified pre-ATTENTION parent (reuse if durable, else replay once at B1); run a COUNTERBALANCED two-round screen over R0/R2/R3/R4; and, only if the pooled screen advances a candidate, a fresh full B1 and one full selected candidate on the same session, card and runtime.",
+
+ "all_in_ceiling_usd": 4.0,
+ "_ceiling_is_cumulative": "across every resource and subrun: parent replay, the counterbalanced screen, the fresh full B1, one full candidate, evidence transfer and teardown. A rerun does NOT reset it.",
+
+ "_predecessors_are_terminal": {
+  "c3_batching_adoption_pilot": {"spent_usd": 3.3478, "ceiling_usd": 5.0},
+  "c3_packing_optimization_pilot": {"spent_usd": 1.276, "ceiling_usd": 3.0},
+  "_note": "neither remaining allowance transfers. v1's screen is historical CONTEXT, not a timing replicate in the v2 statistic."
+ },
+
+ "_funded_by": {
+  "amendment": "gpu_engineering_allowance_usd $6.00 -> $10.00 (package_total_usd $51.4425 -> $55.4425), maintainer decision 2026-09-27",
+  "owner": "configs/experiments/phase_c1/authorization.json :: execution_package",
+  "decision_record": "logs/budget/decisions.md, 2026-09-27",
+  "_engineering_only": "formal_allowance_usd, the per-session hard ceiling and the project cumulative cap did NOT move"
+ },
+
+ "project_cap_usd": 370.0,
+ "_project_position_at_grant": {
+  "cumulative_spend_usd": 347.3259,
+  "_fully_spent_v2_would_be": 351.3259,
+  "_headroom_after": 18.6741,
+  "_therefore": "the historical $25 formal C3 envelope is still NOT funded permission"
+ },
+
+ "gpu_class": "L40S",
+ "_no_larger_class_authorized": true,
+ "dtype": "bfloat16",
+ "capability_floor": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 20,
+  "_why_20": "the worst derived bound across R0/R2/R3/R4 is 13.24 GiB (R4). Owner: v2_packing_table in scripts/experiments/phase_c3/pricing.py."
+ },
+
+ "live_quote_required": true,
+ "_live_quote": "re-query L40S securePrice immediately before creation. If the live price makes the $4.00 ceiling infeasible, STOP.",
+
+ "scientific_use": false,
+ "promotes": null,
+ "does_not_authorize": [
+  "RECOVERY OF ANY KIND -- explicitly excluded even if the full gate clears and the head maps differ. Stop after the structural comparison and return for review.",
+  "consuming the pilot seed 1139220455, which remains unconsumed",
+  "formal C3 science of any kind, or the C1 confirmation battery",
+  "more than one full candidate scorer",
+  "reusing the prior 2190.1708s full B1 as a reference -- the +/-5% rule already refused it",
+  "relaxing the 1.25x full-scorer adoption threshold",
+  "changing forward_kl_mean_batch chunk=512, micro_batches' default ordering, the operator impl_id, DEFAULT_MICRO_BATCH_SIZE or state identity semantics",
+  "adding batch-size-specific core behaviour, for B3 or any other size",
+  "a GPU class larger than L40S, or a network volume without a concrete consumer"
+ ]
+}

@@ -1,0 +1,10 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "_contract": "The canonical owner of this campaign's COSTS. The ceiling is owned by authorization.json, which this file points at by PATH.",
+ "campaign_id": "c3_packing_optimization_v2",
+ "scope": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/scope.json",
+ "authorization": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/authorization.json",
+ "_inherits_nothing": "v1 is terminal at $1.2760 of its own $3.00 and its remaining allowance does not transfer.",
+ "teardown_reserve_usd": 0.1,
+ "subruns": []
+}

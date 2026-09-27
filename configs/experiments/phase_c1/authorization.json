@@ -54,8 +54,8 @@
   "formal_attempts_include_the_first": true,
   "per_attempt_hard_ceiling_usd": 15.1475,
   "formal_allowance_usd": 45.4425,
-  "gpu_engineering_allowance_usd": 6.0,
-  "package_total_usd": 51.4425,
+  "gpu_engineering_allowance_usd": 10.0,
+  "package_total_usd": 55.4425,
   "cumulative_spend_at_approval_usd": 267.8998,
   "reconciliation_margin_usd": 0.6577,
   "limits_do_not_transfer": "the engineering allowance, the per-session ceiling, the package total and the project cap bind SEPARATELY. An unspent engineering allowance does not raise the per-session ceiling, and the $0.6577 margin is for real accounting corrections, not spending. The attempt COUNT is no longer one of these limits -- see _attempts_amendment_2026_09_11b -- but the money is unchanged, and money is what now bounds how many sessions are possible.",
@@ -111,7 +111,8 @@
    "between_batches": "after a batch is exhausted, inspect the failure mode and supply before continuing. Low stock is a reason to back off at $0 and pick a better moment, not a proven cause -- one Medium success and one Low failure is not a finding, and nothing about it is written into src/aadistill.",
    "release_rule": "a returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence that a resource stopped billing. Only the provider saying so is. If it cannot be confirmed, no further resource is created and the state is reconciled first."
   },
-  "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much."
+  "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much.",
+  "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY."
  },
  "authorized_stages": [
   0,

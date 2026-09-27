@@ -8490,3 +8490,57 @@ on a paid pod.
 - **Revisit when:** attempt4 reaches a terminal behavioural result — GO, NO_GO
   or INCONCLUSIVE, all complete — or when a further attempt would exceed
   `$35.7600`.
+
+## 2026-09-27 — The GPU engineering allowance rises `$6.00` → `$10.00`, and nothing else moves
+
+- **Context:** the C3 packing-optimization v1 screen measured that packing,
+  not batch size, is the performance variable — B2-consecutive 1.011× against
+  B2-sorted 1.158× at the *same* invocation count, and B4-sorted 1.167× where
+  B4-consecutive had measured 0.687×. Two candidates then sat 0.76% apart on
+  a single ordered pass while differing by 4.8 GiB of peak VRAM, and one
+  obvious protocol — B3 — had never been derived at all. A refined,
+  counterbalanced selection round is warranted.
+
+  The obstacle was arithmetic rather than scientific. Project cumulative
+  spend stood at `$347.3259` of an unchanged `$370.00` cap, leaving `$22.6741`
+  of project headroom — but the **engineering** allowance had only `$0.6443`
+  left. Granting a new engineering campaign without touching that would have
+  been granting a ceiling nothing could be spent under.
+
+- **Decision:** raise `gpu_engineering_allowance_usd` from `$6.00` to
+  `$10.00`, and consequently `package_total_usd` from `$51.4425` to
+  `$55.4425`. Recorded at the single owner,
+  `configs/experiments/phase_c1/authorization.json :: execution_package`.
+
+  **Unchanged, deliberately:** `formal_allowance_usd` `$45.4425`, the
+  per-session hard ceiling `$15.1475`, and the project cumulative cap
+  `$370.00`. The four limits bind separately and always have.
+
+- **Alternatives considered:** raising the project cap instead — rejected,
+  because the constraint is not project headroom and moving a cap to solve a
+  sub-allocation problem would put two different pressures on one number.
+  Spending the formal allowance on engineering — rejected for the same
+  reason, and because it would quietly convert science money into
+  infrastructure money.
+
+- **Expected upside:** the packing question gets a robust answer before any
+  full scorer is paid for. The v1 screen already says the answer matters:
+  a protocol choice that costs nothing scientifically is worth 15% of every
+  future causal-KL scorer run.
+
+- **Risks:** an engineering allowance that rises once can rise again, which
+  is how a soft budget becomes no budget. Two mitigations, both structural:
+  the project cap did **not** move, so the outer bound is untouched; and the
+  v2 campaign carries its own `$4.00` cumulative ceiling, so this allowance
+  is not directly spendable.
+
+- **What this does NOT do:** it transfers no money into formal C3, which
+  remains NOT STARTED, has no frozen seed set, and is separately
+  unauthorized. After a fully spent v2 campaign the project would stand at
+  `$351.3259`, leaving about `$18.6741` — so the historical "`$25` formal C3
+  envelope" still is not funded permission and formal C3 must be re-priced
+  and separately authorized, or the cap separately amended.
+
+- **Revisit when:** v2 reaches a terminal result, or the engineering
+  allowance is exhausted again — whichever comes first. A third raise should
+  be refused in favour of asking what keeps consuming it.
