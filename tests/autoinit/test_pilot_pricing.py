@@ -275,3 +275,93 @@ def test_the_module_pins_no_live_price_as_a_constant():
                 assert "PRICE" not in name.upper() and "USD" not in name.upper(), (
                     f"{name} pins a price in the module; the live quote is "
                     "re-queried at acquisition")
+
+
+# --- the packing-optimization pilot's $0 table ---------------------------
+
+@pytest.fixture(scope="module")
+def table():
+    if not BUILT:
+        pytest.skip("artifacts/ is not built in this tree")
+    register_builtin_operators()
+    causal_kl.register(replace=True)
+    try:
+        return pricing.packing_table(REPO)
+    finally:
+        causal_kl.unregister()
+
+
+@needs_mixture
+def test_the_table_covers_every_candidate_and_the_measured_baseline(table):
+    got = {(r["calibration_forward_batch_size"],
+            r["calibration_batch_packing"]) for r in table["protocols"]}
+    assert got == {(1, "original_order_v1"), (2, "original_order_v1"),
+                   (2, "length_sorted_v1"), (4, "length_sorted_v1"),
+                   (4, "original_order_v1")}
+
+
+@needs_mixture
+def test_the_algorithmic_work_is_identical_across_protocols(table):
+    """Packing changes how item-forwards are grouped, not how many there are."""
+    assert len({r["item_forward_equivalents"] for r in table["protocols"]}) == 1
+    assert table["protocols"][0]["item_forward_equivalents"] == 60_099
+    assert len({r["valid_positions"] for r in table["protocols"]}) == 1
+
+
+@needs_mixture
+def test_the_physical_counts_match_the_derivation(table):
+    by = {(r["calibration_forward_batch_size"],
+           r["calibration_batch_packing"]): r for r in table["protocols"]}
+    assert by[(1, "original_order_v1")]["physical_forward_invocations"] == 60_099
+    assert by[(2, "original_order_v1")]["physical_forward_invocations"] == 30_498
+    assert by[(4, "length_sorted_v1")]["physical_forward_invocations"] == 15_249
+    #: Packing does not change the count at a given batch size.
+    assert (by[(2, "original_order_v1")]["physical_forward_invocations"]
+            == by[(2, "length_sorted_v1")]["physical_forward_invocations"])
+
+
+@needs_mixture
+def test_sorting_is_what_reduces_the_padding(table):
+    """The question P1 and P3 exist to separate, answered on positions."""
+    by = {(r["calibration_forward_batch_size"],
+           r["calibration_batch_packing"]): r for r in table["protocols"]}
+    b4_orig = by[(4, "original_order_v1")]["padded_positions"]
+    b4_sort = by[(4, "length_sorted_v1")]["padded_positions"]
+    b2_orig = by[(2, "original_order_v1")]["padded_positions"]
+    b2_sort = by[(2, "length_sorted_v1")]["padded_positions"]
+    #: The measured B4 protocol's padding, reproduced by the deriver.
+    assert b4_orig == 21_978, b4_orig
+    assert by[(4, "original_order_v1")]["padding_over_valid"] == pytest.approx(
+        0.3673, abs=1e-4)
+    #: Sorting cuts it several-fold at BOTH batch sizes.
+    assert b4_sort < b4_orig / 5
+    assert b2_sort < b2_orig / 5
+    #: And B1 pads nothing under either.
+    assert by[(1, "original_order_v1")]["padded_positions"] == 0
+
+
+@needs_mixture
+def test_the_main_candidate_pads_least_of_the_batched_protocols(table):
+    by = {(r["calibration_forward_batch_size"],
+           r["calibration_batch_packing"]): r for r in table["protocols"]}
+    batched = {k: v["padding_over_valid"] for k, v in by.items() if k[0] > 1}
+    assert min(batched, key=batched.get) == (2, "length_sorted_v1")
+    assert batched[(2, "length_sorted_v1")] < 0.05
+
+
+@needs_mixture
+def test_every_protocol_fits_the_only_authorized_card(table):
+    for r in table["protocols"]:
+        assert r["fits_l40s"], r["protocol"]
+        assert r["peak_vram_bound_gib"] < 0.6 * pricing.L40S_VRAM_GIB
+
+
+@needs_mixture
+def test_the_padding_is_derived_from_the_real_lengths_not_a_total(table):
+    """Not inferred from the previous B4 figure: the lengths are read."""
+    m = table["mixture"]
+    assert m["n_items"] == 67 and m["valid_positions"] == 59_830
+    assert m["min_length"] < m["max_length"], "the mixture really is ragged"
+    #: Every group width is a real item length.
+    for r in table["protocols"]:
+        assert r["max_group_width"] == m["max_length"]

@@ -741,6 +741,39 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "boundary. Additive and presence-filtered: an operator that does "
             "not produce the key serializes exactly as before, which is every "
             "historical one.",
+        "src/aadistill/initialization/calibration/packing.py":
+            "NEW MODULE: named deterministic packing policies. THIS IS A "
+            "DECLARED SEMANTIC CHANGE by construction -- new executable core "
+            "is semantic whatever it contains. `pack(lengths, batch_size, "
+            "packing)` is pure integer work returning groups of ORIGINAL "
+            "indices, so a protocol's padding cost is a $0 fact derived from "
+            "the frozen mixture rather than a number a pod discovers. "
+            "`length_sorted_v1` sorts by (length ascending, original index "
+            "ascending) and splits contiguously. "
+            "`micro_batches`'s DEFAULT IS UNCHANGED and still never sorts -- "
+            "asserted by a test -- so nothing that does not ask for a policy "
+            "behaves differently. It forwards on the calibration mixture, so "
+            "it joins CURRENT_CUDA_SURFACE and owes the new validation.",
+        "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
+            "THIS IS A DECLARED SEMANTIC CHANGE, in three parts. (a) The "
+            "scoring loop is extracted as `score_heads`, so a throughput "
+            "screen measures the function the operator calls rather than a "
+            "copy of it; its `layers` argument restricts which blocks are "
+            "ablated and exists ONLY for timing -- `apply` never passes it, "
+            "and a partial landscape is refused at aggregation. (b) The "
+            "operator binds a SECOND identity-bearing config key, "
+            "`calibration_batch_packing`: B2-consecutive and B2-length-sorted "
+            "run the same forwards over the same items and can select "
+            "different heads, so a config binding only the batch size would "
+            "give two protocols one state id. (c) THE AGGREGATION NOW WALKS "
+            "THE FROZEN MIXTURE ORDER. It previously appended per-item KLs in "
+            "group execution order; under a reordering packing that would "
+            "move batch composition AND float summation order together, and "
+            "neither effect could be attributed. Values are written by "
+            "original index and the subtype buckets are built from "
+            "`enumerate(items)`. For every existing protocol -- every "
+            "consecutive-order run -- execution order IS mixture order, so no "
+            "historical number moves.",
         "src/aadistill/initialization/operators/attention/gqa/causal_kl.py":
             "NEW MODULE: `attention.causal_kl_v1`, the C3 candidate. THIS IS A "
             "DECLARED SEMANTIC CHANGE by construction -- new executable core is "
@@ -822,6 +855,7 @@ HISTORICAL_SURFACE_SUCCESSORS = {
 #: present. That is a consistency check on a human list, not a derivation.
 CURRENT_CUDA_SURFACE = (
     "src/aadistill/initialization/calibration/batching.py",
+    "src/aadistill/initialization/calibration/packing.py",
     "src/aadistill/initialization/execution.py",
     "src/aadistill/initialization/device.py",
     "src/aadistill/initialization/planning/fixed_path.py",

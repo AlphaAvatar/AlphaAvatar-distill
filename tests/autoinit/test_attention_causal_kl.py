@@ -313,22 +313,24 @@ def test_the_scorer_clock_is_bracketed_by_cuda_syncs():
 
     #: `dedent`, not `lstrip`: the latter strips only the FIRST line, so a
     #: method's body stays indented and `ast.parse` raises IndentationError.
-    src = textwrap.dedent(inspect.getsource(m.AttentionCausalKLV1.apply))
+    #: `score_heads` now, not `apply`: the loop was extracted so a timing
+    #: screen measures THIS code instead of a copy of it, and the clock went
+    #: with the loop.
+    src = textwrap.dedent(inspect.getsource(m.score_heads))
     tree = ast.parse(src)
-    lines = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Call) and getattr(node.func, "id", "") == "_cuda_sync":
-            lines.append(node.lineno)
-        if (isinstance(node, ast.Assign)
-                and any(getattr(t, "id", None) == "started" for t in node.targets)):
-            start_line = node.lineno
-        if (isinstance(node, ast.Assign)
-                and any(getattr(t, "id", None) == "scorer_seconds"
-                        for t in node.targets)):
-            stop_line = node.lineno
-    assert len(lines) >= 2, "the scorer clock is not synchronized at both ends"
-    assert any(l < start_line for l in lines), "no sync before the timer starts"
-    assert any(start_line < l < stop_line for l in lines), (
+    syncs = [n.lineno for n in ast.walk(tree)
+             if isinstance(n, ast.Call)
+             and getattr(n.func, "id", "") == "_cuda_sync"]
+    starts = [n.lineno for n in ast.walk(tree) if isinstance(n, ast.Assign)
+              and any(getattr(t, "id", None) == "started" for t in n.targets)]
+    #: `scorer_seconds` is a dict KEY now, not an assignment, so the stop is
+    #: anchored on the return that carries it.
+    returns = [n.lineno for n in ast.walk(tree) if isinstance(n, ast.Return)]
+    assert len(syncs) >= 2, "the scorer clock is not synchronized at both ends"
+    assert starts and returns
+    start_line, stop_line = starts[0], max(returns)
+    assert any(l < start_line for l in syncs), "no sync before the timer starts"
+    assert any(start_line < l < stop_line for l in syncs), (
         "no sync before the timer stops")
 
 
@@ -547,9 +549,10 @@ def test_no_logits_are_retained(geo, target):
     ev = _evidence(run(build_tiny_model(GEOMETRY), geo, target, items()))
     assert "logits" not in json.dumps(ev)[:200].lower()
     assert set(ev) == {
-        "score", "calibration_forward_batch_size", "item_ids", "item_domains",
-        "item_subtypes", "item_prediction_positions", "per_item_kl",
-        "head_scores", "gqa_decisions"}
+        "score", "calibration_forward_batch_size", "calibration_batch_packing",
+        "item_ids", "item_domains", "item_subtypes",
+        "item_prediction_positions", "per_item_kl", "head_scores",
+        "gqa_decisions"}
 
 
 def test_the_evidence_is_json_serializable(geo, target):
@@ -741,13 +744,13 @@ def test_a_missing_item_value_refuses(geo, target, monkeypatch):
     """Incomplete evidence must not be aggregated into a confident score."""
     from aadistill.initialization.operators.attention.gqa import causal_kl as m
 
-    real = m.micro_batches
+    real = m.packed_batches
 
     def short(items_, batch_size, **kw):
         groups = list(real(items_, batch_size, **kw))
         return iter(groups[:-1])          # one group never scored
 
-    monkeypatch.setattr(m, "micro_batches", short)
+    monkeypatch.setattr(m, "packed_batches", short)
     with pytest.raises(OperatorError, match="produced no causal KL"):
         run(build_tiny_model(GEOMETRY), geo, target, items())
 

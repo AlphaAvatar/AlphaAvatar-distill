@@ -1653,12 +1653,21 @@ Owner: [`result.json`](../stages/stage-1/phase_c3/pilots/batching-adoption/v1/re
 | causal-B1 | **2190.2 s** | 60,099 | 60,099 | 0 | 3.94 GiB |
 | causal-B4 | **3187.2 s** | 15,249 | 60,099 | 21,978 | 11.76 GiB |
 
-**Speedup 0.6872× against a predeclared 1.25× gate. B4 is 1.46× SLOWER**, so
-the gate is not met and no recovery was triggered — the speed gate is first,
-and that ordering was frozen before either clock was read. Issuing a quarter
-of the kernel launches did not make it faster: the pre-run derivation had
-already shown B4 computes **36.7% more token-positions** than B1 on this
-mixture, and the measured penalty exceeds even that.
+**Speedup 0.6872× against a predeclared 1.25× gate**, so the gate is not met
+and no recovery was triggered — the speed gate is first, and that ordering was
+frozen before either clock was read. Issuing a quarter of the kernel launches
+did not make it faster: the pre-run derivation had already shown this protocol
+computes **36.7% more token-positions** than B1 on this mixture, and the
+measured penalty exceeds even that.
+
+**WHAT THIS DOES AND DOES NOT ESTABLISH.** The measured protocol was
+`batch_size=4` **and** original frozen item order **and** consecutive grouping
+**and** right padding to each group's longest item — four things varied at
+once. The verdict belongs to that protocol. It does **not** establish that
+padded model batching is unhelpful in general: the generic batcher states
+plainly that it never sorts by length, so a smaller batch with deterministic
+length-aware packing is an obvious degree of freedom that has not been
+measured. That is what the packing-optimization pilot below tests.
 
 **The frozen parent reproduced exactly, twice.** One replay per pilot, at B=1:
 DEPTH 1225.9 s, FFN 45.2 s, RESIDUAL_WIDTH 34.0 s → `eea90c91346a0745…` in

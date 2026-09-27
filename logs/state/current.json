@@ -127,7 +127,7 @@
   "c3": {
    "status": "NOT STARTED, and the next scientific stage: causal-KL ATTENTION isolation from B. NOT authorized, NOT prepared, NO frozen seed set.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
-   "batching_adoption_pilot": "EXECUTED and CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT. One prefix replay reproduced eea90c91346a0745 exactly; both arms scored from it. B1 2190.2s vs B4 3187.2s = 0.6872x against a predeclared 1.25x gate, so B4 is SLOWER and no recovery ran. Head maps differ in 16/448 retained slots (3.57%), descriptive only. $3.3478 of $5.00. Owner: logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json. Not formal C3.",
+   "batching_adoption_pilot": "EXECUTED and CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, for batch_size=4 + packing=original_order_consecutive AND NO OTHER PROTOCOL. B1 2190.2s vs B4 3187.2s = 0.6872x against a predeclared 1.25x gate; no recovery ran. Head maps differ in 16/448 slots, descriptive only. $3.3478 of $5.00. It does NOT establish that padded batching is unhelpful in general. Owner: .../pilots/batching-adoption/v1/result.json. Not formal C3.",
    "budget": "formal C3 must be RE-PRICED and separately authorized; the old $25 envelope is not current permission under the $370.00 cap."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
@@ -179,7 +179,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "re-price formal C3 against the $370.00 cap and obtain a separate budget authorization. The pilot's answer -- padded B4 causal scoring is 1.46x SLOWER, not faster -- means formal C3 should be priced at B=1.",
+ "next": "the packing-optimization pilot: does a SMALLER batch with deterministic length-aware packing beat B1, where consecutive original-order B4 did not. Then re-price formal C3 against the $370.00 cap and obtain a separate budget authorization.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",

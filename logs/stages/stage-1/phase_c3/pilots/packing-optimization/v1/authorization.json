@@ -1,0 +1,55 @@
+{
+ "schema": "aadistill.validation_authorization/v1",
+ "investigation_id": "c3_packing_optimization_pilot_v1",
+ "granted_utc": "2026-09-27T12:00:00Z",
+ "granted_by": "maintainer, 'Length-Aware Small-Batch Causal-KL Optimization'",
+ "quote": "Create a separate packing-optimization campaign with cumulative all-in ceiling: $3.00",
+ "authorizes": "one owned session that obtains the verified pre-ATTENTION parent (reused if durable, replayed once at B1 if not), runs a short three-layer throughput screen over four packing protocols, and -- only if a candidate clears the screen gate -- one full 28-layer scorer for that candidate; plus a B1 rerun only if the +/-5% comparability rule requires one, and at most one paired recovery pair if the full gate clears and the head maps differ.",
+
+ "all_in_ceiling_usd": 3.0,
+ "_ceiling_is_cumulative": "across every resource and subrun of this pilot: parent replay if required, the timing screen, at most one full candidate scorer, a B1 rerun only if the comparability rule demands it, at most one paired recovery pair, evaluation, transfer and teardown. A rerun does NOT reset it.",
+
+ "_predecessor_is_terminal": {
+  "campaign": "c3_batching_adoption_pilot",
+  "spent_usd": 3.3478,
+  "ceiling_usd": 5.0,
+  "_note": "that pilot is TERMINAL and its remaining $1.6522 does NOT transfer. Its verdict, B4_NOT_WORTH_ADOPTION_PILOT, applies to batch_size=4 + original_order_consecutive and to no other protocol."
+ },
+
+ "project_cap_usd": 370.0,
+ "_project_position_at_grant": {
+  "cumulative_spend_usd": 346.0499,
+  "_fits": "346.0499 + 3.00 = 349.0499 < 370.00"
+ },
+
+ "separate_from": {
+  "c3_stage_envelope_usd": 25.0,
+  "_note": "formal C3 remains NOT STARTED and separately unauthorized; it must be re-priced against the $370.00 cap before launch."
+ },
+
+ "gpu_class": "L40S",
+ "_no_larger_class_authorized": true,
+ "dtype": "bfloat16",
+ "capability_floor": {
+  "compute_capability_min": "8.0",
+  "native_bf16": true,
+  "free_vram_gib_min": 20,
+  "_why_20": "the worst derived bound across the four protocols is 13.24 GiB (B4). Owner: the packing table in scripts/experiments/phase_c3/pricing.py."
+ },
+
+ "live_quote_required": true,
+ "_live_quote": "re-query L40S securePrice immediately before resource creation. If the live price makes the $3.00 ceiling infeasible, STOP -- do not shrink the scientific work.",
+
+ "scientific_use": false,
+ "promotes": null,
+ "does_not_authorize": [
+  "formal C3 science of any kind",
+  "the C1 confirmation battery, formal C3 seeds, formal C3 bootstrap or the reserved final-promotion battery",
+  "more than one full-scorer candidate",
+  "relaxing the 1.25x full-scorer adoption threshold because this is a second attempt",
+  "changing the forward_kl_mean_batch chunk=512 contract, which is a separate numerical variable",
+  "changing DEFAULT_MICRO_BATCH_SIZE, micro_batches' default ordering, state identity semantics or operator scientific definitions",
+  "a GPU class larger than L40S",
+  "a network volume without a concrete consumer"
+ ]
+}

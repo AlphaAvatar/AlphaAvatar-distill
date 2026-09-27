@@ -1,0 +1,161 @@
+{
+ "schema": "aadistill.validation_scope/v1",
+ "investigation_id": "c3_packing_optimization_pilot_v1",
+ "title": "Does a smaller batch with length-aware packing beat B1?",
+ "question": "Consecutive original-order B4 lost to B1 by 1.46x. The generic batcher never sorts by length, so that protocol paid 36.73% padding overhead. Does a SMALLER batch with deterministic length-aware packing reach the 1.25x full-scorer adoption threshold?",
+ "_what_the_previous_pilot_did_not_establish": "that padded model batching is unhelpful in general. It measured ONE protocol -- batch_size=4 AND original frozen order AND consecutive grouping AND right padding -- and four things varied at once.",
+ "is_formal_c3": false,
+ "protocols": [
+  {
+   "protocol": "P0",
+   "calibration_forward_batch_size": 1,
+   "calibration_batch_packing": "original_order_v1",
+   "role": "reference"
+  },
+  {
+   "protocol": "P1",
+   "calibration_forward_batch_size": 2,
+   "calibration_batch_packing": "original_order_v1",
+   "role": "separates the batch-size effect from the packing effect"
+  },
+  {
+   "protocol": "P2",
+   "calibration_forward_batch_size": 2,
+   "calibration_batch_packing": "length_sorted_v1",
+   "role": "the main candidate"
+  },
+  {
+   "protocol": "P3",
+   "calibration_forward_batch_size": 4,
+   "calibration_batch_packing": "length_sorted_v1",
+   "role": "did B4 fail because of its batch size or because of its packing?"
+  }
+ ],
+ "_already_measured": {
+  "protocol": "B4 + original_order_v1",
+  "full_scorer_speedup": 0.6872,
+  "owner": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json",
+  "_not_rerun": "it is measured; rerunning it would buy nothing"
+ },
+ "packing_policy": {
+  "length_sorted_v1": "sort by (token_length ascending, original_index ascending), split contiguously into groups of batch_size. No randomness, no device dependence, no model-family knowledge.",
+  "_ascending": "with a short final partial group, descending leaves the largest item paired with much shorter ones, which is the case that pads worst.",
+  "_default_unchanged": "micro_batches() still groups consecutively in the mixture's own order and still never sorts. Only this operator's step config selects a policy."
+ },
+ "aggregation_order": {
+  "_rule": "execution may reorder; aggregation may NOT.",
+  "_why": "sorting changes batch composition. If it also changed the float summation order, a packing change would move two variables at once and neither could be attributed.",
+  "_how": "the scorer writeseach value into per_item[layer][head][original_index]; the aggregation walks the frozen mixture from 0 to build subtype buckets."
+ },
+ "identity": {
+  "_both_keys_are_hashed": "calibration_forward_batch_size AND calibration_batch_packing. B2-consecutive and B2-sorted run the same number of forwards over the same items and can select different heads.",
+  "impl_id": "attention.causal_kl_v1 (UNCHANGED)"
+ },
+ "frozen_inputs": {
+  "parent_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "parent_weights_digest": "2be3a4fe00233415a9382892237c26d1b96228d41f327397f6fcf06600909ba0",
+  "calibration_profile": "calib.domain_balanced@v1",
+  "n_calibration_items": 67,
+  "_parent_reuse": "search the durable store first; replay the 22-minute prefix at B1 only if the exact bytes are absent."
+ },
+ "screen": {
+  "layers": [
+   0,
+   13,
+   27
+  ],
+  "_why_these": "early, middle and late depth. The model forward still traverses the whole model, so this measures kernel and packing throughput without paying for all 28 scorer layers.",
+  "all_items": true,
+  "all_heads": true,
+  "protocol_order": [
+   "P0",
+   "P1",
+   "P2",
+   "P3"
+  ],
+  "_order_predeclared": "frozen here before any timing is read. Whichever protocol runs first pays for allocator growth and autotuning the others do not.",
+  "reference_protocol": "P0",
+  "advance_threshold": 1.1,
+  "_selection": "the fastest non-reference candidate by measured wall time ALONE. No head-map or quality result selects which packing advances.",
+  "stop_verdict": "NO_BATCH_PACKING_CANDIDATE_WORTH_FULL_SCORER"
+ },
+ "b1_comparability": {
+  "_rule": "predeclared before reading candidate timing.",
+  "prior_full_b1_seconds": 2190.1708,
+  "tolerance": 0.05,
+  "_meaning": "if this session's P0 screen throughput agrees with the prior B1 evidence within +/-5%, the prior full B1 scorer may serve as the full-run reference. If it differs by more, a new full B1 must be run before any full-scorer speed claim.",
+  "_prior_b1_owner": "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1/result.json",
+  "_scaling": "the prior full B1 scored 28 layers; the screen scores len(screen.layers). The prior is scaled by len(layers)/28 so the comparison is like with like."
+ },
+ "full_scorer_gate": {
+  "statistic": "full-scorer reference seconds / candidate full-scorer seconds",
+  "threshold": 1.25,
+  "_unchanged": "the adoption threshold does NOT relax because this is a second optimization attempt."
+ },
+ "decision_rules": [
+  {
+   "if": "no screen candidate reaches 1.10x",
+   "then": "STOP, no full scorer, no recovery",
+   "verdict": "NO_BATCH_PACKING_CANDIDATE_WORTH_FULL_SCORER"
+  },
+  {
+   "if": "full-scorer speedup < 1.25x",
+   "then": "STOP, no recovery",
+   "verdict": "PACKED_BATCH_NOT_WORTH_ADOPTION"
+  },
+  {
+   "if": "speedup >= 1.25x AND head maps identical",
+   "then": "STOP, no recovery",
+   "verdict": "PACKED_BATCH_STRUCTURALLY_EQUIVALENT_AND_FASTER"
+  },
+  {
+   "if": "speedup >= 1.25x AND head maps differ",
+   "then": "exactly one paired recovery pair",
+   "verdict": "descriptive paired evidence only"
+  }
+ ],
+ "recovery_if_triggered": {
+  "probes": 2,
+  "seed": 1139220455,
+  "_seed_state": "PILOT-ONLY and NOT YET CONSUMED by recovery. Not a formal C3 seed; there is no formal C3 seed set.",
+  "recipe": "e1_p1_kd_heavy@0.86M, unchanged",
+  "evaluation": "recovery_search_v2",
+  "forbidden": [
+   "c1_confirmation_v1",
+   "formal C3 seeds",
+   "formal C3 bootstrap",
+   "the reserved final-promotion battery"
+  ]
+ },
+ "structural_comparison": {
+  "reference": "the verified B1 causal landscape from the completed pilot",
+  "reuse_if_verifiable": {
+   "file": "artifacts/pilots/c3_batching_adoption/c3pilot_20260927_a5/out/pilot/pilot_result.json",
+   "sha256": "cdfc4810a3971f1fd37792cb4d3b1340e1cf5fdb9efff27530a6579d028ccf04",
+   "_else": "generate a new B1 full scorer rather than approximating it"
+  },
+  "report": [
+   "changed layers",
+   "changed GQA groups / 224",
+   "changed retained slots / 448",
+   "symmetric-difference heads",
+   "per-head score drift",
+   "rank correlations",
+   "cutoff crossings and margins"
+  ]
+ },
+ "do_not_change": [
+  "forward_kl_mean_batch chunk=512 -- a separate numerical variable",
+  "micro_batches' default ordering",
+  "the operator impl_id",
+  "DEFAULT_MICRO_BATCH_SIZE",
+  "state identity semantics"
+ ],
+ "may_not_produce": [
+  "a formal GO or NO_GO",
+  "a confidence interval",
+  "a formal C3 incumbent"
+ ],
+ "owner": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v1/",
+ "_full_layers": 28
+}

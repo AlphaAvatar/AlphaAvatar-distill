@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 242,
+ "modules_scanned": 244,
  "test_ignores": [],
- "n_predicates": 129,
+ "n_predicates": 131,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 50,
+  "filesystem_premise_onpod": 52,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
@@ -111,7 +111,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 38,
-  "same_on_pod": 72
+  "same_on_pod": 74
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -220,7 +220,7 @@
   },
   {
    "file": "tests/autoinit/test_attention_causal_kl.py",
-   "line": 912,
+   "line": 915,
    "kind": "pytest.skip",
    "function": "test_the_domain_map_agrees_on_the_real_frozen_mixture",
    "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
@@ -821,6 +821,22 @@
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_pilot_pricing.py::doc",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/autoinit/test_pilot_pricing.py",
+   "line": 285,
+   "kind": "pytest.skip",
+   "function": "table",
+   "condition": "not BUILT",
+   "expanded": "not BUILT | BUILT=(REPO / \"artifacts/stage1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_pilot_pricing.py::table",
    "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
@@ -1461,6 +1477,22 @@
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/pod/test_c3_batching_pilot_driver.py::test_check_inputs_resolves_the_real_profiles",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/pod/test_c3_packing_pilot.py",
+   "line": 173,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
+   "expanded": "not (REPO / \"artifacts/stage1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/pod/test_c3_packing_pilot.py",
    "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
@@ -2302,5 +2334,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "7c4c5883429445b5010d78084e53d380cdca1b8b1fd4a9cab5ffcbf30aece627"
+ "digest": "1587e5914d60010f83d5069e05f0b29f5f678b363e071dcd4ac6f1f786883adc"
 }

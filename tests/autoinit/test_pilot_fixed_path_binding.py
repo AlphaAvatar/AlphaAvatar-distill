@@ -128,7 +128,8 @@ def test_the_pilot_causal_step_survives_the_collision_check():
     for bs in (1, 4):
         merged = step_operator_config(causal_step(bs), 67)
         assert merged == {"n_calibration_items": 67,
-                          "calibration_forward_batch_size": bs}
+                          "calibration_forward_batch_size": bs,
+                          "calibration_batch_packing": "original_order_v1"}
 
 
 def test_the_real_item_count_reaches_the_plan():
@@ -248,7 +249,11 @@ def test_both_arms_differ_only_by_the_protocol_config():
     assert b1.label == b4.label, (
         "a differing label is a SECOND identity difference; the arm names "
         "belong in the pilot record, not the step")
-    assert set(b1.config) == set(b4.config) == {BATCH_SIZE_CONFIG_KEY}
+    from experiments.phase_c3.pilot import PACKING_CONFIG_KEY
+
+    assert set(b1.config) == set(b4.config) == {BATCH_SIZE_CONFIG_KEY,
+                                                PACKING_CONFIG_KEY}
+    assert b1.config[PACKING_CONFIG_KEY] == b4.config[PACKING_CONFIG_KEY]
 
 
 def test_the_committed_c1_fixed_path_hash_is_unchanged():
@@ -378,3 +383,38 @@ def test_every_prefix_step_the_pilot_declares_carries_no_config():
             f"{step.impl_id} carries a config; the prefix must be identical "
             "for both pilot arms")
         assert step.impl_id != "attention.causal_kl_v1"
+
+
+def test_the_packing_key_moved_the_constructor_but_not_the_record():
+    """The completed pilot's hashes are EVIDENCE, not something to recompute.
+
+    `causal_step` now emits both protocol keys, so what it builds today
+    hashes differently from what attempt a5 ran. That is correct and must be
+    visible rather than silent: a5's `path_hash` lives in its own result
+    record, which describes what executed, and nothing recomputes it.
+    """
+    import json
+
+    from aadistill.initialization.operators.attention.gqa import causal_kl
+    from aadistill.initialization.operators.register import (
+        register_builtin_operators)
+
+    from experiments.phase_c3.pilot import arm_spec
+
+    #: `FixedPathSpec.__post_init__` resolves every step, so the operator has
+    #: to be registered for an arm spec to be constructible at all.
+    register_builtin_operators()
+    causal_kl.register(replace=True)
+
+    record = json.loads((REPO / "logs/stages/stage-1/phase_c3/pilots/"
+                         "batching-adoption/v1/result.json").read_text())
+    for arm in ("causal-B1", "causal-B4"):
+        recorded = record["arms"][arm]["path_hash"]
+        assert len(recorded) == 64, recorded
+        live = arm_spec(record["arms"][arm][
+            "calibration_forward_batch_size"], repo_root=REPO).spec_hash
+        assert live != recorded, (
+            "the constructor reproduces the historical hash; then the "
+            "packing key is NOT in the identity and two protocols could "
+            "share a state id")
+    causal_kl.unregister()

@@ -22,7 +22,7 @@
   "speedup": 0.6872,
   "gate_threshold": 1.25,
   "gate_met": false,
-  "_finding": "B4 is SLOWER than B1 by a factor of 1.46, not faster. The pre-run derivation predicted B4 computes 36.7% more token-positions than B1 on this mixture; the measured penalty is larger than that."
+  "_finding": "Consecutive original-order B4 is SLOWER than B1 by a factor of 1.46 on this mixture. The pre-run derivation predicted this protocol computes 36.7% more token-positions than B1; the measured penalty exceeds that. This is a statement about B4-consecutive-original-order, not about batching."
  },
  "prefix": {
   "replay_count": 1,
@@ -575,5 +575,11 @@
   "a confidence interval",
   "a formal C3 incumbent",
   "a reason to change DEFAULT_MICRO_BATCH_SIZE"
- ]
+ ],
+ "_measured_protocol": {
+  "calibration_forward_batch_size": 4,
+  "packing": "original_order_consecutive",
+  "_scope_of_the_verdict": "The verdict below is about THIS protocol and no other. B4 varied four things at once -- batch size, original frozen item order, consecutive grouping, and right padding to each group's longest item -- and the generic batcher never sorts by length. A smaller batch with deterministic length-aware packing is an untested degree of freedom. This result does NOT establish that padded model batching is not useful."
+ },
+ "VERDICT_scope": "B4_NOT_WORTH_ADOPTION_PILOT applies to batch_size=4 + packing=original_order_consecutive. Other batch sizes and packings are UNMEASURED."
 }

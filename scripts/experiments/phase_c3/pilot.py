@@ -48,6 +48,7 @@ __all__ = [
     "prefix_steps", "causal_step", "derive_pilot_seed", "PILOT_SEED",
     "target_spec", "arm_spec", "replay_prefix", "ARM_IDS", "arm_id",
     "prefix_spec", "verified_parent", "run_arm", "CAUSAL_STEP_INDEX",
+    "PACKING_CONFIG_KEY", "DEFAULT_PACKING",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
@@ -99,6 +100,13 @@ FROZEN_PARENT_DIGEST = (
 #: operator has measured output sensitivity to it.
 BATCH_SIZE_CONFIG_KEY = "calibration_forward_batch_size"
 
+#: The second identity-bearing protocol key. Batch composition moves causal
+#: scores, and the packing policy decides composition just as much as the
+#: batch size does: B2-consecutive and B2-length-sorted run the same number of
+#: forwards over the same items and can still select different heads.
+PACKING_CONFIG_KEY = "calibration_batch_packing"
+DEFAULT_PACKING = "original_order_v1"
+
 #: The C0 preregistration digest -- an identity frozen before any candidate.
 C0_PREREGISTRATION_SHA256 = (
     "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280")
@@ -126,7 +134,8 @@ def prefix_steps(*, pin_parent: bool = False) -> list[FixedPathStep]:
     return steps
 
 
-def causal_step(batch_size: int, *, label: str = "") -> FixedPathStep:
+def causal_step(batch_size: int, *, packing: str = DEFAULT_PACKING,
+                label: str = "") -> FixedPathStep:
     """The one step that binds the numerical protocol into its identity.
 
     Same `impl_id` in both arms -- the implementation is not what differs. The
@@ -146,11 +155,20 @@ def causal_step(batch_size: int, *, label: str = "") -> FixedPathStep:
     if batch_size < 1:
         raise ValueError(f"calibration forward batch size must be >= 1, "
                          f"got {batch_size}")
+    from aadistill.initialization.calibration.packing import PACKING_POLICIES
+
+    if not isinstance(packing, str) or packing not in PACKING_POLICIES:
+        raise ValueError(
+            f"{PACKING_CONFIG_KEY} must be one of {list(PACKING_POLICIES)}, "
+            f"got {packing!r}")
+    #: BOTH keys, always. A step that carried only the batch size would give
+    #: two different protocols the same state id.
     return FixedPathStep(
         impl_id=CAUSAL_IMPL_ID,
         profile_id=CAUSAL_PROFILE_ID,
         label=label or CAUSAL_STEP_LABEL,
-        config={BATCH_SIZE_CONFIG_KEY: batch_size})
+        config={BATCH_SIZE_CONFIG_KEY: batch_size,
+                PACKING_CONFIG_KEY: packing})
 
 
 def derive_pilot_seed(base: str = C0_PREREGISTRATION_SHA256,
@@ -230,6 +248,7 @@ def target_spec(repo_root: str | Path = ".") -> ArchSpec:
 
 def arm_spec(batch_size: int, *, repo_root: str | Path = ".",
              device: str = "cpu", seed: int = 0,
+             packing: str = DEFAULT_PACKING,
              pin_parent: bool = True,
              max_shard_size: str | int | None = None) -> FixedPathSpec:
     """One arm's complete path: the frozen prefix plus the causal step.
@@ -240,9 +259,12 @@ def arm_spec(batch_size: int, *, repo_root: str | Path = ".",
     """
     target = target_spec(repo_root)
     repo_id, revision = root_binding(repo_root)
-    steps = tuple(prefix_steps(pin_parent=pin_parent)) + (causal_step(batch_size),)
+    steps = tuple(prefix_steps(pin_parent=pin_parent)) + (
+        causal_step(batch_size, packing=packing),)
     return FixedPathSpec(
-        path_id=f"autoinit.v1.phase_c3.pilot.{arm_id(batch_size)}",
+        path_id=(f"autoinit.v1.phase_c3.pilot.{arm_id(batch_size)}"
+                 if packing == DEFAULT_PACKING
+                 else f"autoinit.v1.phase_c3.pilot.B{batch_size}-{packing}"),
         family=target.family, target_spec=target, steps=steps,
         root_repo_id=repo_id, root_revision=revision,
         device=device, seed=seed, max_shard_size=max_shard_size)

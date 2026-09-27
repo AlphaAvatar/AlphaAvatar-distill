@@ -42,6 +42,8 @@ from aadistill.initialization.adapters import QWEN3_ADAPTER  # noqa: E402
 from aadistill.initialization.calibration.batching import micro_batches  # noqa: E402
 from aadistill.initialization.calibration.items import (  # noqa: E402
     prepare_calibration_items)
+from aadistill.initialization.calibration.packing import (  # noqa: E402
+    LENGTH_SORTED_V1, ORIGINAL_ORDER_V1, item_lengths, padding_profile)
 from aadistill.initialization.operators.attention.gqa.causal_kl import (  # noqa: E402
     ATTENTION_CAUSAL_KL_V1, BATCH_SIZE_CONFIG_KEY)
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
@@ -64,8 +66,19 @@ C1_ARM_IDENTITIES = ("logs/stages/stage-1/phase_c1/runs/attempt18/evidence/"
 #: with ATTENTION not yet applied, so it still carries all of them.
 PARENT_Q_HEADS = 32
 
-#: Both arms. The only difference between them.
+#: Both arms of the CLOSED adoption pilot. Kept so its table reproduces.
 ARMS = (1, 4)
+
+#: The protocols the packing-optimization pilot derives. `B4 original` is
+#: already MEASURED (0.6872x) and is here only so the table shows the
+#: comparison the new candidates are being judged against.
+PROTOCOLS = (
+    ("P0", 1, ORIGINAL_ORDER_V1, "reference"),
+    ("P1", 2, ORIGINAL_ORDER_V1, "separates batch size from packing"),
+    ("P2", 2, LENGTH_SORTED_V1, "the main candidate"),
+    ("P3", 4, LENGTH_SORTED_V1, "was B4 bad, or was its packing bad?"),
+    ("--", 4, ORIGINAL_ORDER_V1, "MEASURED 2026-09-27: 0.6872x"),
+)
 
 #: The deployment dtype for the logits the scorer holds.
 BF16_BYTES = 2
@@ -314,3 +327,91 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+# --- the packing-optimization pilot's $0 table -----------------------------
+
+def packing_table(repo: str | Path = ".", *, weight_bytes: int = BF16_BYTES
+                  ) -> dict:
+    """Every candidate protocol's cost in positions, invocations and bytes.
+
+    From the REAL frozen item lengths, through the real packing policy. Not
+    inferred from the previous B4 totals: those describe one protocol, and
+    the whole question here is what a different grouping of the same items
+    costs.
+    """
+    parent, target = parent_spec(repo), target_spec(repo)
+    items = mixture(repo)
+    lengths = item_lengths(items)
+    n_q = parent["num_attention_heads"]
+    ablations = parent["num_hidden_layers"] * n_q
+    #: One reference forward per group plus one ablated forward per
+    #: (group, layer, head) -- so `n_groups * (ablations + 1)`.
+    per_group = ablations + 1
+    vocab = target["vocab_size"]
+
+    rows = []
+    for name, bs, packing, note in PROTOCOLS:
+        prof = padding_profile(lengths, bs, packing=packing)
+        #: Two logit blocks live at once: the group's reference for the whole
+        #: group, and one ablated block freed each iteration.
+        logit_bytes = 2 * bs * prof["max_group_width"] * vocab * BF16_BYTES
+        #: The reducer upcasts a [B, chunk, V] slice to float32 and holds
+        #: several such tensors inside one expression.
+        reducer_bytes = (REDUCER_LIVE_FP32_BLOCKS * bs
+                         * min(REDUCER_CHUNK, prof["max_group_width"])
+                         * vocab * FP32_BYTES)
+        model_bytes = QWEN3_ADAPTER.param_count(parent) * weight_bytes
+        total = (logit_bytes + reducer_bytes + model_bytes
+                 + int(RUNTIME_OVERHEAD_GIB * 2 ** 30))
+        rows.append({
+            "protocol": name, "note": note,
+            "calibration_forward_batch_size": bs,
+            "calibration_batch_packing": packing,
+            **prof,
+            "physical_forward_invocations": prof["n_groups"] * per_group,
+            "item_forward_equivalents": per_group * len(items),
+            "peak_logit_gib": round(logit_bytes / 2 ** 30, 3),
+            "reducer_transient_gib": round(reducer_bytes / 2 ** 30, 3),
+            "model_weights_gib": round(model_bytes / 2 ** 30, 3),
+            "peak_vram_bound_gib": round(total / 2 ** 30, 3),
+            "fits_l40s": total / 2 ** 30 < L40S_VRAM_GIB,
+        })
+    return {
+        "schema": "aadistill.phase_c3.packing_table/v1",
+        "_contract": ("Derived from the frozen mixture's real lengths. "
+                      "`item_forward_equivalents` is identical for every "
+                      "protocol -- the algorithmic work does not change -- "
+                      "and only the packing of it does."),
+        "mixture": {"path": MIXTURE, "n_items": len(items),
+                    "valid_positions": sum(lengths),
+                    "min_length": min(lengths), "max_length": max(lengths)},
+        "geometry": {"layers": parent["num_hidden_layers"],
+                     "parent_q_heads": n_q, "ablations": ablations,
+                     "forwards_per_group": per_group},
+        "protocols": rows,
+    }
+
+
+def print_packing_table(doc: dict) -> None:
+    print(f"mixture: {doc['mixture']['n_items']} items, "
+          f"{doc['mixture']['valid_positions']:,} valid positions, "
+          f"lengths {doc['mixture']['min_length']}..{doc['mixture']['max_length']}")
+    g = doc["geometry"]
+    print(f"geometry: {g['layers']} layers x {g['parent_q_heads']} heads = "
+          f"{g['ablations']} ablations; {g['forwards_per_group']} forwards "
+          f"per group")
+    print(f"{'':>4} {'B':>2} {'packing':>18} {'grp':>4} {'physical':>9} "
+          f"{'padded':>8} {'pad/val':>8} {'maxW':>5} {'logit':>6} {'red':>6} "
+          f"{'vram':>6} {'fits':>5}")
+    for r in doc["protocols"]:
+        print(f"{r['protocol']:>4} {r['calibration_forward_batch_size']:>2} "
+              f"{r['calibration_batch_packing']:>18} {r['n_groups']:>4} "
+              f"{r['physical_forward_invocations']:>9,} "
+              f"{r['padded_positions']:>8,} "
+              f"{r['padding_over_valid']:>8.4f} {r['max_group_width']:>5} "
+              f"{r['peak_logit_gib']:>6.2f} {r['reducer_transient_gib']:>6.2f} "
+              f"{r['peak_vram_bound_gib']:>6.2f} "
+              f"{'yes' if r['fits_l40s'] else 'NO':>5}")
+    same = {r["item_forward_equivalents"] for r in doc["protocols"]}
+    print(f"item-forward equivalents: {same.pop():,} for every protocol")

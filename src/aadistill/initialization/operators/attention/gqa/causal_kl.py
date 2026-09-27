@@ -70,6 +70,11 @@ from aadistill.initialization.calibration.batching import (
     micro_batches,
     resolve_pad_id,
 )
+from aadistill.initialization.calibration.packing import (
+    ORIGINAL_ORDER_V1,
+    PACKING_POLICIES,
+    packed_batches,
+)
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.device import model_device
 from aadistill.initialization.operators._common import (
@@ -106,10 +111,18 @@ from aadistill.initialization.statistics.contribution import (
 
 HEADS_FIELD = "num_attention_heads"
 
-#: The step-config key that carries the numerical protocol into the identity.
-#: Named here, in the operator that reads it, so the pilot's constant and the
-#: executor's merge cannot disagree about its spelling.
+#: The step-config keys that carry the numerical protocol into the identity.
+#: Named here, in the operator that reads them, so the pilot's constants and
+#: the executor's merge cannot disagree about their spelling.
+#:
+#: BOTH are identity-bearing. Batch composition is measured to move causal
+#: scores and head maps, and the packing policy decides composition just as
+#: much as the batch size does: B2-consecutive and B2-length-sorted run the
+#: same number of forwards over the same items and can still select different
+#: heads. A config that bound only the size would give two different results
+#: the same state id.
 BATCH_SIZE_CONFIG_KEY = "calibration_forward_batch_size"
+PACKING_CONFIG_KEY = "calibration_batch_packing"
 
 
 def domain_subtype_map(items: Sequence[Mapping[str, Any]]) -> dict[str, list[str]]:
@@ -128,6 +141,26 @@ def domain_subtype_map(items: Sequence[Mapping[str, Any]]) -> dict[str, list[str
         if item["subtype"] not in subs:
             subs.append(item["subtype"])
     return {k: sorted(v) for k, v in sorted(out.items())}
+
+
+def resolve_packing(config: Mapping[str, Any] | None) -> str:
+    """The declared packing policy, defaulting to the frozen mixture's order.
+
+    Strict for the same reason the batch size is: this value is serialized
+    into the step config and therefore into the state id, so an unrecognised
+    spelling must refuse rather than fall back to a default that would give a
+    different result the wrong identity.
+    """
+    value = (config or {}).get(PACKING_CONFIG_KEY, ORIGINAL_ORDER_V1)
+    if not isinstance(value, str):
+        raise OperatorError(
+            f"{PACKING_CONFIG_KEY} must be a string, not "
+            f"{type(value).__name__} ({value!r})")
+    if value not in PACKING_POLICIES:
+        raise OperatorError(
+            f"unknown {PACKING_CONFIG_KEY} {value!r}; known: "
+            f"{list(PACKING_POLICIES)}")
+    return value
 
 
 def resolve_forward_batch_size(config: Mapping[str, Any] | None) -> int:
@@ -294,6 +327,142 @@ def _group_decisions(scores: Sequence[float], n_q: int, n_kv: int,
     return out
 
 
+@torch.no_grad()
+def score_heads(model, items, out_projections, *, n_q: int, head_dim: int,
+                device: Any, batch_size: int = 1,
+                packing: str = ORIGINAL_ORDER_V1,
+                layers: Sequence[int] | None = None,
+                deadline: Any = None, progress: bool = True) -> dict[str, Any]:
+    """The scoring loop. ONE implementation, used by `apply` and by timing.
+
+    Extracted so a throughput screen can measure THIS code rather than a
+    second copy of it. Three paid failures in this project came from
+    measuring a stage beside the thing it was supposed to describe; a screen
+    that reimplemented the loop would be the same mistake with a new name.
+
+    `layers` restricts which blocks are ablated. It exists ONLY for timing: a
+    partial run produces an incomplete landscape, so `apply` never passes it
+    and the result of a restricted run can never become a head map — the
+    caller gets `per_item_kl` with `None` in every unscored slot, and the
+    aggregation refuses on exactly that.
+
+    Returns the landscape indexed by ORIGINAL item position, never by
+    execution order, so a reordering packing cannot silently reattribute a
+    value to the wrong item.
+    """
+    if packing not in PACKING_POLICIES:
+        raise OperatorError(f"unknown packing {packing!r}")
+    chosen = list(range(len(out_projections))) if layers is None else list(layers)
+    for layer in chosen:
+        if not 0 <= layer < len(out_projections):
+            raise OperatorError(
+                f"layer {layer} is outside 0..{len(out_projections) - 1}")
+
+    #: Built ONCE and reused for every ablation. Two reasons, the same two
+    #: the DEPTH search has: the padded id tensors are identical for all of
+    #: them, and a grouping that could differ between ablations would make one
+    #: head's score depend on something other than which head was zeroed.
+    groups = list(packed_batches(
+        items, batch_size, packing=packing,
+        pad_id=(resolve_pad_id(model) if batch_size > 1 else 0),
+        device=device))
+
+    per_item: list[list[list[float | None]]] = [
+        [[None] * len(items) for _ in range(n_q)]
+        for _ in range(len(out_projections))]
+
+    #: BOUNDED PROGRESS, AND THE DEADLINE CHECKED WHERE THE COST IS. 896
+    #: ablations over 67 items is tens of minutes to hours; the DEPTH search
+    #: learned that the expensive way, silent for 10 h 47 m. One line per
+    #: (group, layer), and the wall clock checked at the same instant.
+    #:
+    #: TIMED HONESTLY: CUDA kernels are asynchronous, so a timer that does not
+    #: synchronize attributes the tail of the loop to whatever runs next -- and
+    #: the adoption gate is a ratio of two wall clocks.
+    _cuda_sync(device)
+    started = time.monotonic()
+    total_units = len(groups) * len(chosen)
+    unit = physical_invocations = 0
+    executed_positions = 0
+
+    for g_index, packed in enumerate(groups):
+        group = packed.batch
+        rows = packed.original_indices
+        if batch_size > 1:
+            reference = _forward_block(model, group, device)
+            mask = group.prediction_mask().to(reference.device)
+        else:
+            reference = _forward_item(model, group.items[0], device)
+            mask = None
+        physical_invocations += 1
+        executed_positions += group.size * int(group.input_ids.shape[1])
+        try:
+            for layer in chosen:
+                out_projection = out_projections[layer]
+                for head in range(n_q):
+                    with head_ablated(out_projection, head, head_dim):
+                        if batch_size > 1:
+                            ablated = _forward_block(model, group, device)
+                        else:
+                            ablated = _forward_item(model, group.items[0],
+                                                    device)
+                    physical_invocations += 1
+                    executed_positions += group.size * int(
+                        group.input_ids.shape[1])
+                    if batch_size > 1:
+                        values = forward_kl_mean_batch(reference, ablated,
+                                                       mask, chunk=512)
+                        _refuse_non_finite(
+                            values,
+                            f"layer {layer} head {head} group {g_index} "
+                            f"(B{batch_size}/{packing}, {group.size} items)")
+                        #: BY ORIGINAL INDEX. Under a reordering packing the
+                        #: row order is not the mixture order.
+                        for j, value in enumerate(values.tolist()):
+                            per_item[layer][head][rows[j]] = value
+                    else:
+                        value = forward_kl_mean(reference, ablated, chunk=512)
+                        _refuse_non_finite(
+                            value,
+                            f"layer {layer} head {head} item "
+                            f"{group.items[0].get('item_id', rows[0])!r} "
+                            f"(B1/{packing})")
+                        per_item[layer][head][rows[0]] = value
+                    del ablated
+                unit += 1
+                if progress:
+                    mins = (time.monotonic() - started) / 60.0
+                    rate = physical_invocations / mins if mins > 0 else 0.0
+                    print(f"attention.causal_kl_v1: group {g_index + 1}/"
+                          f"{len(groups)} layer {layer} · {unit}/{total_units} "
+                          f"units · {physical_invocations} forwards · "
+                          f"{mins:.1f} min · {rate:.1f} fwd/min", flush=True)
+                if deadline is not None:
+                    deadline.check(
+                        f"attention.causal_kl_v1 group {g_index + 1}/"
+                        f"{len(groups)} layer {layer} "
+                        f"({physical_invocations} forwards done)")
+        finally:
+            del reference
+
+    _cuda_sync(device)
+    valid = sum(int(i["input_ids"].shape[-1]) for i in items)
+    return {
+        "per_item_kl": per_item,
+        "scorer_seconds": time.monotonic() - started,
+        "physical_forward_invocations": physical_invocations,
+        "executed_positions": executed_positions,
+        "valid_tokens": valid,
+        "padded_positions": sum(
+            p.batch.size * int(p.batch.input_ids.shape[1])
+            - p.batch.n_valid_tokens for p in groups),
+        "n_groups": len(groups),
+        "layers_scored": chosen,
+        "packing": packing,
+        "calibration_forward_batch_size": batch_size,
+    }
+
+
 class AttentionCausalKLV1(OperatorImplementation):
     impl_id = "attention.causal_kl_v1"
     kind = "ATTENTION"
@@ -363,6 +532,7 @@ class AttentionCausalKLV1(OperatorImplementation):
 
     @torch.no_grad()
     def apply(self, ctx: OperatorContext) -> OperatorOutcome:
+        apply_started = time.monotonic()
         adapter = ctx.adapter
         model = ctx.model
         items = list(ctx.calibration_items)
@@ -372,138 +542,18 @@ class AttentionCausalKLV1(OperatorImplementation):
         compute = model_device(model)
         domains = domain_subtype_map(items)
         batch_size = resolve_forward_batch_size(ctx.config)
-
-        #: Built ONCE and reused for every ablation. Two reasons, the same two
-        #: the DEPTH search has: the padded id tensors are identical for all
-        #: 896 of them, and a grouping that could differ between ablations
-        #: would make one head's score depend on something other than which
-        #: head was zeroed.
-        groups = list(micro_batches(
-            items, batch_size,
-            pad_id=(resolve_pad_id(model) if batch_size > 1 else 0),
-            device=compute))
+        packing = resolve_packing(ctx.config)
 
         blocks = list(adapter.blocks(model))
         out_projections = [attention_out_projection(adapter, b) for b in blocks]
 
-        #: (layer, head) -> subtype -> per-item KLs, appended in group order.
-        per_head: list[list[dict[str, list[float]]]] = [
-            [{} for _ in range(n_q)] for _ in blocks]
-
-        #: THE RAW SCIENTIFIC EVIDENCE, `[layer][head][item]` in the ORIGINAL
-        #: item order rather than the order the groups happen to visit. About
-        #: 60k floats at the real geometry, which is small enough that
-        #: discarding it to keep only the head map would be throwing away the
-        #: landscape that produced the decision. Item metadata is stored ONCE,
-        #: as parallel columns, rather than repeated per value.
-        #: The row is derived from the CONTIGUOUS grouping, not from object
-        #: identity: `micro_batches` yields consecutive slices in the mixture's
-        #: own order and never sorts by length, so `row0 + j` is exactly the
-        #: item's index in `items`. An `id()` map would break silently the day
-        #: the batcher copied a mapping.
-        per_item: list[list[list[float | None]]] = [
-            [[None] * len(items) for _ in range(n_q)] for _ in blocks]
-
-        #: GROUP OUTER, ABLATION INNER — and this ordering is why the operator
-        #: is affordable. The reference is the same tensor for every ablation
-        #: of a given group, so computing it once per group turns
-        #: `2 * ablations` corpus passes into `ablations + 1`. It does not
-        #: touch the estimand: for a fixed (layer, head) the per-item values
-        #: are still appended in group order, so every mean below is over the
-        #: same values in the same order that the ablation-outer nesting would
-        #: have produced.
-        #: BOUNDED PROGRESS, AND THE DEADLINE CHECKED WHERE THE COST IS.
-        #:
-        #: 896 ablations over 67 items is tens of minutes to hours. The DEPTH
-        #: search learned this the expensive way -- attempt 10 was silent for
-        #: 10 h 47 m and nobody could tell a working search from a stalled
-        #: one -- so this prints one line per (group, layer), which is 28 lines
-        #: per group rather than 896, and checks the wall clock at the same
-        #: instant. The two questions ("where is it?" and "has it run too
-        #: long?") are asked together because they are asked for the same
-        #: reason.
-        #: TIMED HONESTLY. CUDA kernels are asynchronous, so a timer that
-        #: does not synchronize attributes the tail of the scoring loop to
-        #: whatever runs next -- and the B1/B4 adoption gate is a ratio of two
-        #: wall clocks, so a mis-attributed tail moves the verdict. The
-        #: synchronize is once at the start and once at the end, not per
-        #: forward, so it costs nothing measurable and perturbs no kernel.
-        _cuda_sync(compute)
-        started = time.monotonic()
-        total_units = len(groups) * len(out_projections)
-        unit = 0
-
-        physical_invocations = 0
-        row0 = 0
-        for g_index, group in enumerate(groups):
-            if batch_size > 1:
-                reference = _forward_block(model, group, compute)
-                mask = group.prediction_mask().to(reference.device)
-            else:
-                reference = _forward_item(model, group.items[0], compute)
-                mask = None
-            physical_invocations += 1
-            try:
-                for layer, out_projection in enumerate(out_projections):
-                    for head in range(n_q):
-                        with head_ablated(out_projection, head, head_dim):
-                            if batch_size > 1:
-                                ablated = _forward_block(model, group, compute)
-                            else:
-                                ablated = _forward_item(model, group.items[0],
-                                                        compute)
-                        physical_invocations += 1
-                        bucket = per_head[layer][head]
-                        if batch_size > 1:
-                            #: ONE mean per row over that row's OWN valid
-                            #: positions, and ONE host transfer for the batch.
-                            values = forward_kl_mean_batch(reference, ablated,
-                                                           mask, chunk=512)
-                            #: BEFORE the host conversion, so the refusal names
-                            #: the rows rather than a list of floats that has
-                            #: already lost which device produced them.
-                            _refuse_non_finite(
-                                values,
-                                f"layer {layer} head {head} group {g_index} "
-                                f"(B{batch_size}, {len(group.items)} items)")
-                            for j, (item, value) in enumerate(
-                                    zip(group.items, values.tolist())):
-                                bucket.setdefault(item["subtype"], []).append(value)
-                                per_item[layer][head][row0 + j] = value
-                        else:
-                            item = group.items[0]
-                            value = forward_kl_mean(reference, ablated, chunk=512)
-                            _refuse_non_finite(
-                                value,
-                                f"layer {layer} head {head} item "
-                                f"{item.get('item_id', g_index)!r} (B1)")
-                            bucket.setdefault(item["subtype"], []).append(value)
-                            per_item[layer][head][row0] = value
-                        del ablated
-                    unit += 1
-                    mins = (time.monotonic() - started) / 60.0
-                    rate = physical_invocations / mins if mins > 0 else 0.0
-                    print(f"attention.causal_kl_v1: group {g_index + 1}/"
-                          f"{len(groups)} layer {layer + 1}/"
-                          f"{len(out_projections)} · {unit}/{total_units} units "
-                          f"· {physical_invocations} forwards · {mins:.1f} min "
-                          f"· {rate:.1f} fwd/min", flush=True)
-                    if ctx.deadline is not None:
-                        ctx.deadline.check(
-                            f"attention.causal_kl_v1 group {g_index + 1}/"
-                            f"{len(groups)} layer {layer + 1}/"
-                            f"{len(out_projections)} "
-                            f"({physical_invocations} forwards done)")
-            finally:
-                del reference
-            row0 += len(group.items)
-
-        _cuda_sync(compute)
-        #: THE SCORER's wall clock, which is what the adoption gate compares.
-        #: Everything after this point -- aggregation, selection, building the
-        #: child, writing it -- is identical work in both arms, so including
-        #: it would dilute the ratio with a constant.
-        scorer_seconds = time.monotonic() - started
+        scored = score_heads(
+            model, items, out_projections, n_q=n_q, head_dim=head_dim,
+            device=compute, batch_size=batch_size, packing=packing,
+            deadline=ctx.deadline)
+        per_item = scored["per_item_kl"]
+        physical_invocations = scored["physical_forward_invocations"]
+        scorer_seconds = scored["scorer_seconds"]
 
         #: One domain-balanced score per head, then the same per-group top-k
         #: every operator of this topology uses.
@@ -511,16 +561,28 @@ class AttentionCausalKLV1(OperatorImplementation):
         for layer in range(len(blocks)):
             layer_scores = []
             for head in range(n_q):
-                missing = [i for i, v in enumerate(per_item[layer][head])
-                           if v is None]
+                values = per_item[layer][head]
+                missing = [i for i, v in enumerate(values) if v is None]
                 if missing:
                     raise OperatorError(
                         f"layer {layer} head {head}: {len(missing)} of "
                         f"{len(items)} items produced no causal KL "
                         f"(rows {missing[:8]}); the evidence is incomplete "
                         "and a head map must not be materialized from it")
-                means = {k: sum(v) / len(v)
-                         for k, v in per_head[layer][head].items()}
+                #: THE FROZEN MIXTURE ORDER, not the execution order.
+                #:
+                #: A packing policy may reorder which items share a forward.
+                #: If the aggregation also followed that order, changing the
+                #: packing would move BOTH the batch composition and the
+                #: floating-point summation order, and the two effects could
+                #: not be told apart. So the buckets are filled here, by
+                #: walking `items` from 0, and the scoring loop below writes
+                #: only into `per_item[...][original_index]`.
+                buckets: dict[str, list[float]] = {}
+                for index, item in enumerate(items):
+                    buckets.setdefault(item["subtype"], []).append(
+                        values[index])
+                means = {k: sum(v) / len(v) for k, v in buckets.items()}
                 primary, _ = domain_balanced_score(means, domains)
                 #: AGAIN, on the aggregate. The per-item guard above cannot
                 #: catch a mean that overflows, and this value is the one
@@ -559,9 +621,8 @@ class AttentionCausalKLV1(OperatorImplementation):
         copy_embeddings_and_final_norm(builder, adapter, model)
         child = builder.finish()
 
-        valid_tokens = sum(int(item["input_ids"].shape[-1]) for item in items)
-        padded_positions = sum(
-            g.size * int(g.input_ids.shape[1]) - g.n_valid_tokens for g in groups)
+        valid_tokens = scored["valid_tokens"]
+        padded_positions = scored["padded_positions"]
         return OperatorOutcome(
             model=child,
             local_metrics=OperatorLocalMetrics(
@@ -583,7 +644,9 @@ class AttentionCausalKLV1(OperatorImplementation):
                    #: states how it ran without a reader having to resolve the
                    #: step.
                    "calibration_forward_batch_size": batch_size,
+                   "calibration_batch_packing": packing,
                    "physical_forward_invocations": physical_invocations,
+                   "executed_positions": scored["executed_positions"],
                    "item_forward_equivalents": (len(blocks) * n_q + 1) * len(items),
                    "valid_tokens": valid_tokens,
                    "padded_positions": int(padded_positions),
@@ -593,7 +656,7 @@ class AttentionCausalKLV1(OperatorImplementation):
                    #: aggregation, selection and child build after it are
                    #: identical in both arms and would dilute the ratio.
                    "scorer_seconds": round(scorer_seconds, 4),
-                   "seconds": round(time.monotonic() - started, 3),
+                   "seconds": round(time.monotonic() - apply_started, 3),
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},
             artifacts={
                 "kept_heads": kept_per_layer,
@@ -606,6 +669,7 @@ class AttentionCausalKLV1(OperatorImplementation):
                 "causal_head_evidence": {
                     "score": "domain-balanced forward KL(parent || head ablated)",
                     "calibration_forward_batch_size": batch_size,
+                    "calibration_batch_packing": packing,
                     "item_ids": [str(i.get("item_id", n))
                                  for n, i in enumerate(items)],
                     "item_domains": [str(i["domain"]) for i in items],
