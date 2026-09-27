@@ -1826,8 +1826,12 @@ volumes 0**.
 
 ## The full suite is not green: 11 failures, one family
 
-**Current measurement, 2026-09-26 at `679f0113` on a clean tree: 12 failed,
-4988 passed, 228 skipped** over all of `tests/`, in 46m33s. Eleven are the
+**Current measurement, 2026-09-27 at `9d618427` on a clean tree: 11 failed,
+5201 passed, 228 skipped** in 46m44s — the documented eleven exactly, zero
+new and zero fixed against `ab53ba14`.
+
+The previous measurement, 2026-09-26 at `679f0113`: 12 failed,
+4988 passed, 228 skipped over all of `tests/`, in 46m33s. Eleven are the
 documented set below. The twelfth,
 `test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one`,
 was the audit record going stale *again* between the suite starting and the
