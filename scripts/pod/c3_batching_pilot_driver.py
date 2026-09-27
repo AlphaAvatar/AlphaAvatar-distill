@@ -92,7 +92,14 @@ def _toy_items():
     return out
 
 
-def _toy_root():
+def _toy_root(device: str = "cpu"):
+    """The toy root, ON THE DECLARED DEVICE.
+
+    It ignored the device until the v2 preflight moved to `cuda:0` and
+    `verify_root_placement` refused it in five seconds — the same class of
+    bug that cost attempt a4 twenty minutes, and the reason the preflight
+    now runs on the device the pod actually has instead of on cpu.
+    """
     import torch
     from transformers import Qwen3Config, Qwen3ForCausalLM
 
@@ -104,7 +111,7 @@ def _toy_root():
         for m in model.modules():
             if m.__class__.__name__ == "Qwen3RMSNorm":
                 m.weight.uniform_(0.5, 1.5)
-    return model
+    return model.to(device)
 
 
 def _load_checkpoint(path: str, device: str, dtype=None):
@@ -206,7 +213,7 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
         items = _toy_items()
         calibration = {"calib.domain_balanced@v1": items,
                        "calib.reasoning_heavy@v2": items}
-        root_loader = _toy_root
+        root_loader = lambda: _toy_root(device)
 
         def toy_spec(digest):
             steps = list(pilot.prefix_steps(pin_parent=False))

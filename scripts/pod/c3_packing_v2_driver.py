@@ -139,14 +139,14 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
         _say("toy: discovery pass to learn this machine's parent digest")
         found: list = []
         pilot.replay_prefix(toy_spec(None), adapter=QWEN3_ADAPTER,
-                            root_loader=_toy_root,
+                            root_loader=lambda: _toy_root(device),
                             workdir=out_dir / "discover", repo_root=repo,
                             calibration_items=calibration,
                             on_step=found.append)
         expected_digest = found[-1].identity.artifact_digest
         spec = toy_spec(expected_digest)
         weight_dtype = None
-        root_loader = _toy_root
+        root_loader = lambda: _toy_root(device)
     else:
         spec = pilot.prefix_spec(repo_root=repo, device=device)
         calibration = None

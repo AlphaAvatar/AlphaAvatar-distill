@@ -23,6 +23,24 @@
    "_the_detection_worked": "v1's b1 defect -- a fallback regex that matched the word `specifications` out of this exact error and produced a pod id -- was repaired after that attempt. All four refusals here were recognised as refusals, created nothing, and started no watchdog.",
    "_not_retried_further": "four identical infrastructure failures means change the approach, not retry harder. The GPU class is fixed by the authorization and no larger card is permitted, so the only handling is to back off and wait for capacity.",
    "teardown": "nothing to tear down; provider confirms pods 0, networkVolumes 0"
+  },
+  {
+   "subrun_id": "c3pack2_20260927_v5",
+   "pod_id": "gbiz85xcmiq6gh",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 3.633,
+   "cost_usd": 0.067,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "36e63d4f",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "the toy preflight, 5 seconds in, before any science",
+   "failure": "FixedPathRootDeviceMismatch: the toy root model was on cpu while the path declared cuda:0. `_toy_root` never applied a device, which went unnoticed while the preflight itself ran on cpu.",
+   "_caused_by_a_repair": "moving the preflight to cuda:0 -- one of the three §18 repairs -- is what exposed it. The same class of bug cost attempt a4 twenty minutes of GPU; here the repaired preflight refused it in FIVE SECONDS, before the root teacher was fetched and before any parent replay.",
+   "repair": "`_toy_root(device)` applies it, and every toy driver forwards the run device. Two $0 tests: the loader honours the argument, and all three drivers pass it.",
+   "teardown": "confirmed: pods 0, networkVolumes 0"
   }
  ]
 }

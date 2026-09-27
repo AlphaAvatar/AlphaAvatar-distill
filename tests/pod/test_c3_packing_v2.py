@@ -355,3 +355,32 @@ def test_v1_is_not_rewritten():
     assert v1["status"] == "SCREEN COMPLETE; FULL SCORER NOT FUNDED"
     assert v1["screen"]["gate"]["best"]["protocol"] == "P3"
     assert scope()["_v1_is_preserved"]
+
+
+def test_the_toy_root_honours_the_device_it_is_given():
+    """It ignored it until the v2 preflight moved to `cuda:0`, and
+    `verify_root_placement` refused in five seconds — the same class of bug
+    that cost attempt a4 twenty minutes. A CPU box cannot see a cpu/cuda
+    mismatch, but it can see whether the argument is applied."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "c3b", REPO / "scripts/pod/c3_batching_pilot_driver.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.path.insert(0, str(REPO / "src"))
+    sys.path.insert(0, str(REPO / "scripts"))
+    spec.loader.exec_module(mod)
+    model = mod._toy_root("cpu")
+    assert {p.device.type for p in model.parameters()} == {"cpu"}
+    import inspect
+
+    assert "device" in inspect.signature(mod._toy_root).parameters
+    assert ".to(device)" in inspect.getsource(mod._toy_root)
+
+
+def test_every_toy_driver_forwards_the_run_device_to_its_root():
+    for name in ("c3_packing_v2_driver.py", "c3_packing_pilot_driver.py",
+                 "c3_batching_pilot_driver.py"):
+        src = (REPO / "scripts/pod" / name).read_text()
+        assert "_toy_root(device)" in src, (
+            f"{name} builds its toy root without the run device")
