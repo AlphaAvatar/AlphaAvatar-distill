@@ -1757,6 +1757,57 @@ both full scorers. The measured screen is reusable — pushable with
 required first: bound the preflight, run it on `cuda:0` or pin its thread
 count from the cgroup quota, and stream its output.
 
+### Packing v2: ready and blocked on L40S capacity
+
+**Owner:** [`packing-optimization/v2/`](../stages/stage-1/phase_c3/pilots/packing-optimization/v2/).
+Every `$0` gate passes; four acquisition attempts were refused for capacity
+and created nothing.
+
+**Why v2 exists.** v1 separated its two leading candidates by 0.76% from one
+ordered pass, while their peak VRAM differed by 4.8 GiB — and B3 had never
+been derived. A sub-percent gap from a single pass cannot decide that.
+
+**The `$0` table**, from the real frozen lengths (`packing_table.json`):
+
+|    | B | packing | groups | physical | padded | pad/valid | VRAM |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| R0 | 1 | original | 67 | 60,099 | 0 | 0.0000 | 5.43 GiB |
+| R2 | 2 | sorted | 34 | 30,498 | 1,103 | 0.0184 | 8.04 GiB |
+| R3 | 3 | sorted | 23 | 20,631 | 2,398 | 0.0401 | 10.64 GiB |
+| R4 | 4 | sorted | 17 | 15,249 | 2,691 | 0.0450 | 13.24 GiB |
+
+B3 needed no core change; a `batch_size == 3` branch anywhere would be the
+defect and a test greps for one.
+
+**The design.** Round A `R0→R2→R3→R4`, round B its exact reverse, selection
+on the **pooled** sum — so the advantage a single pass hands to whatever runs
+last cancels. Three gates, frozen before any timing: a 5% stability guard on
+R0 measured twice, a 2% near-tie rule breaking to lower VRAM, and a 1.10×
+pooled advance gate. On v1's own numbers the tie rule would have chosen P2
+(6.53 GiB) over P3 (11.30 GiB).
+
+**A fresh full B1 is mandatory** if the screen advances — the prior
+`2190.1708 s` has no fallback path, because v1's ±5% rule already refused it.
+The 1.25× adoption gate is unchanged. **Recovery is not authorized in v2**:
+the driver has no verdict that triggers it and never names the pilot seed,
+which stays unconsumed.
+
+**The v1 preflight defects are repaired**: bounded (and the timeout handling
+is executed against a hanging command, not grepped for), streamed, and on
+`cuda:0`. Both drivers now call `apply_cpu_budget()`, which has read the
+cgroup quota correctly since E8b and which nothing had ever called.
+
+**Budget.** The engineering allowance rose `$6.00` → `$10.00` (package total
+`$51.4425` → `$55.4425`) by maintainer decision, recorded in
+[`decisions.md`](../budget/decisions.md); the formal allowance, the
+per-session ceiling and the `$370.00` cap did not move. The v2 campaign
+ceiling is `$4.00`, spent `$0.0000`.
+
+**Blocked on:** L40S secure capacity. Four refusals at 13:12–13:15, all
+recognised as refusals — the v1 defect that turned this exact error text into
+a pod id is repaired — creating nothing and starting no watchdog. No larger
+card is authorized, so the only handling is to wait.
+
 ## Readiness
 
 <!-- readiness:begin -->

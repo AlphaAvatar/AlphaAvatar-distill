@@ -6,5 +6,23 @@
  "authorization": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/authorization.json",
  "_inherits_nothing": "v1 is terminal at $1.2760 of its own $3.00 and its remaining allowance does not transfer.",
  "teardown_reserve_usd": 0.1,
- "subruns": []
+ "subruns": [
+  {
+   "subrun_id": "c3pack2_20260927_v1..v4",
+   "pod_id": null,
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "elapsed_minutes": 0.0,
+   "cost_usd": 0.0,
+   "cost_basis": "NO RESOURCE WAS CREATED in any of the four. Each cost.json records $0.0003, which is the launcher's wall-clock arithmetic over the ~1 second between stamping the start epoch and the provider's refusal; there was nothing to bill. Booked at $0.00.",
+   "executed_source_sha": "385b0f80",
+   "verdict": "FAIL",
+   "failure_class": "provider_capacity",
+   "stage_reached": "acquisition; every $0 gate passed",
+   "failure": "four consecutive refusals: 'There are no longer any instances available with the requested specifications'. L40S secure stock reported Low at each quote and gone by the create.",
+   "_the_detection_worked": "v1's b1 defect -- a fallback regex that matched the word `specifications` out of this exact error and produced a pod id -- was repaired after that attempt. All four refusals here were recognised as refusals, created nothing, and started no watchdog.",
+   "_not_retried_further": "four identical infrastructure failures means change the approach, not retry harder. The GPU class is fixed by the authorization and no larger card is permitted, so the only handling is to back off and wait for capacity.",
+   "teardown": "nothing to tear down; provider confirms pods 0, networkVolumes 0"
+  }
+ ]
 }

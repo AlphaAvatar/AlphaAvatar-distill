@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "The C1 execution package (approved 2026-09-11, amended the same day; that round ended with a verdict). The C3 batching-adoption authorization is SPENT AND CLOSED. The C3 packing-optimization authorization is SPENT DOWN to $1.6240, which cannot fund its remaining chain, so it authorizes no further launch. An approval is not a launch. NOTHING may launch now. Owner: logs/budget/decisions.md.",
+  "note": "The C1 execution package (approved 2026-09-11, amended 2026-09-11b and 2026-09-27: GPU engineering allowance $6.00 -> $10.00, engineering only). The C3 batching-adoption and packing-v1 authorizations are spent. The C3 PACKING-V2 authorization of 2026-09-27 is LIVE at $4.00 all-in and has created no resource. An approval is not a launch. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -128,7 +128,8 @@
    "status": "NOT STARTED, and the next scientific stage: causal-KL ATTENTION isolation from B. NOT authorized, NOT prepared, NO frozen seed set. Must be RE-PRICED and separately authorized; the old $25 envelope is not current permission under the $370.00 cap.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
    "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, for batch_size=4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
-   "packing_optimization_pilot": "EXECUTED IN PART 2026-09-27: screen MEASURED, full scorer NOT FUNDED. Packing buys the speed, not batch size: 1.011x / 1.158x / 1.167x for B2-consecutive / B2-sorted / B4-sorted vs same-session B1, so B4 failed on its PACKING. The 1.25x adoption gate is unmeasured. STOPPED under the fits-the-budget rule at $1.2760 of $3.00. Not formal C3. Owner: .../pilots/packing-optimization/v1/screen_result.json."
+   "packing_optimization_pilot": "EXECUTED IN PART 2026-09-27: screen MEASURED, full scorer NOT FUNDED. Packing buys the speed, not batch size: 1.011x / 1.158x / 1.167x for B2-consecutive / B2-sorted / B4-sorted vs same-session B1, so B4 failed on its PACKING. The 1.25x adoption gate is unmeasured. STOPPED under the fits-the-budget rule at $1.2760 of $3.00. Not formal C3. Owner: .../pilots/packing-optimization/v1/screen_result.json.",
+   "packing_optimization_v2": "READY, BLOCKED ON CAPACITY 2026-09-27. Counterbalanced R0/R2/R3/R4 screen with three frozen gates (5% stability, 2% near-tie to lower VRAM, 1.10x pooled advance); fresh full B1 mandatory; 1.25x adoption gate unchanged; RECOVERY NOT AUTHORIZED. B3 derived at $0 and needed no core change. Ceiling $4.00, spent $0.00; four L40S capacity refusals created nothing. Not formal C3. Owner: .../pilots/packing-optimization/v2/."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
@@ -138,7 +139,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NOTHING IS BLOCKED and NO SPEND IS AUTHORIZED. C2 is CLOSED WITHOUT PROMOTION (2026-09-24). The C3 batching-adoption pilot is CLOSED with a verdict. The C3 packing-optimization pilot STOPPED with its screen measured and its full-scorer leg unfunded at $1.2760 of $3.00; resuming needs about $2.00 more. Formal C3 is NOT STARTED, has no frozen seed set, and needs re-pricing and a separate budget authorization.",
+ "blocker": "The C3 packing-v2 round is READY and BLOCKED ON L40S SECURE CAPACITY: four refusals created nothing and no larger card is authorized. C2 is CLOSED WITHOUT PROMOTION. The batching-adoption pilot is CLOSED with a verdict; packing v1 stopped with its screen measured. Formal C3 is NOT STARTED, has no frozen seed set, and needs re-pricing and a separate budget authorization.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -166,7 +167,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",
@@ -179,7 +180,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "decide whether to fund the packing pilot's full-scorer leg (~$2.00: parent replay plus a fresh full B1 and the P3 candidate; the measured screen is reusable). Then re-price formal C3 against the $370.00 cap.",
+ "next": "acquire an L40S and run the packing-v2 counterbalanced round inside its $4.00 ceiling. Then re-price formal C3 against the $370.00 cap.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
