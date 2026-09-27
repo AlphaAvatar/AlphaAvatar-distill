@@ -197,3 +197,37 @@ def test_the_screen_layers_are_predeclared_and_span_the_depth():
     s = scope()
     assert s["screen"]["layers"] == [0, 13, 27]
     assert max(s["screen"]["layers"]) == s["_full_layers"] - 1
+
+
+def test_both_drivers_answer_the_input_modes_their_launchers_call():
+    """The packing launcher asked its own driver for `--required-inputs`,
+    got an argparse error, and refused to create a pod. Correct — and only
+    because the refusal was fail-closed. Both drivers now delegate to the
+    pilot module, which owns the fact."""
+    env = {"PYTHONHASHSEED": "7", "PATH": "/usr/bin:/bin",
+           "PYTHONPATH": f"{REPO / 'src'}:{REPO / 'scripts'}"}
+    rows = {}
+    for name in ("c3_batching_pilot_driver.py", "c3_packing_pilot_driver.py"):
+        done = subprocess.run(
+            [sys.executable, str(REPO / "scripts/pod" / name),
+             "--required-inputs"],
+            cwd=REPO, capture_output=True, text=True, timeout=300, env=env)
+        assert done.returncode == 0, f"{name}: {done.stderr[-800:]}"
+        rows[name] = [json.loads(l) for l in done.stdout.splitlines() if l.strip()]
+        assert len(rows[name]) == 2, rows[name]
+    #: One answer, not two implementations of it.
+    assert list(rows.values())[0] == list(rows.values())[1]
+
+
+def test_each_launcher_asks_its_own_driver():
+    """A launcher pointed at the other pilot's driver would derive the right
+    mixtures by luck and the wrong pilot's anything else."""
+    pairs = {
+        "c3_batching_pilot_launch.sh": "c3_batching_pilot_driver.py",
+        "c3_packing_pilot_launch.sh": "c3_packing_pilot_driver.py",
+    }
+    for launcher, driver in pairs.items():
+        src = (REPO / "scripts/pod" / launcher).read_text()
+        assert driver in src, f"{launcher} does not name {driver}"
+        other = [d for d in pairs.values() if d != driver][0]
+        assert other not in src, f"{launcher} names the other pilot's driver"

@@ -519,12 +519,16 @@ def main(argv=None) -> int:
                     help="resolve every required mixture for real and exit")
     args = ap.parse_args(argv)
 
-    if args.required_inputs:
-        for entry in required_profiles(Path(args.repo)):
-            print(json.dumps(entry, sort_keys=True))
-        return 0
-    if args.check_inputs:
-        return check_inputs(Path(args.repo))
+    if args.required_inputs or args.check_inputs:
+        #: DELEGATED to the pilot module: the answer is a fact about the
+        #: pilot's steps, and the packing pilot needs the same one.
+        from experiments.phase_c3 import pilot
+
+        if args.required_inputs:
+            for entry in pilot.required_profiles(Path(args.repo)):
+                print(json.dumps(entry, sort_keys=True))
+            return 0
+        return pilot.check_inputs(Path(args.repo), say=_say)
 
     device = args.device
     if device is None:

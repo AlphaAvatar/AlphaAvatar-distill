@@ -401,14 +401,29 @@ def _reference_landscape(repo: Path, scope: dict, fresh):
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out", default="")
     ap.add_argument("--repo", default=str(REPO))
     ap.add_argument("--parent", default=None,
                     help="a durable verified parent to reuse instead of "
                          "replaying the prefix")
     ap.add_argument("--device", default=None)
     ap.add_argument("--toy", action="store_true")
+    ap.add_argument("--required-inputs", action="store_true",
+                    help="print the mixtures the real path needs and exit")
+    ap.add_argument("--check-inputs", action="store_true",
+                    help="resolve every required mixture for real and exit")
     args = ap.parse_args(argv)
+
+    #: Both delegate to the pilot module: the answer is a fact about the
+    #: pilot's steps, and two copies is one place for it to be wrong.
+    if args.required_inputs or args.check_inputs:
+        from experiments.phase_c3 import pilot
+
+        if args.required_inputs:
+            for entry in pilot.required_profiles(Path(args.repo)):
+                print(json.dumps(entry, sort_keys=True))
+            return 0
+        return pilot.check_inputs(Path(args.repo), say=_say)
 
     device = args.device
     if device is None:
@@ -419,6 +434,8 @@ def main(argv=None) -> int:
         except Exception:
             device = "cpu"
 
+    if not args.out:
+        ap.error("--out is required unless --required-inputs/--check-inputs")
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     try:

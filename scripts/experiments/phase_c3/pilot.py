@@ -49,6 +49,7 @@ __all__ = [
     "target_spec", "arm_spec", "replay_prefix", "ARM_IDS", "arm_id",
     "prefix_spec", "verified_parent", "run_arm", "CAUSAL_STEP_INDEX",
     "PACKING_CONFIG_KEY", "DEFAULT_PACKING",
+    "required_profiles", "check_inputs",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
@@ -393,3 +394,64 @@ def run_arm(
         verified=verified, repo_root=repo_root,
         calibration_items=calibration_items, on_step=on_step,
         deadline=deadline, execution=PREFIX_EXECUTION)
+
+
+def required_profiles(repo_root: str | Path = ".") -> list[dict[str, Any]]:
+    """Every calibration mixture the pilot's OWN steps resolve, derived.
+
+    DERIVED, not listed. The batching pilot's first attempt staged one
+    mixture and died 24 minutes in because the prefix uses two -- DEPTH and
+    FFN on `domain_balanced@v1`, WIDTH on `reasoning_heavy@v2` -- which is
+    the exact non-uniformity a review had already corrected in this module.
+    A hand-written list is a second place for that fact to be wrong.
+
+    It lives HERE rather than in a driver because it is a fact about the
+    pilot's steps, and every pilot that replays this prefix needs the same
+    answer. The packing pilot's launcher asked its own driver for it, got an
+    argparse error, and refused to create a pod -- correctly, and only
+    because the refusal was fail-closed.
+    """
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    from experiments.calibration import register_builtin_profiles
+
+    register_builtin_profiles()
+    seen, out = set(), []
+    for step in list(prefix_steps()) + [causal_step(1)]:
+        if step.profile_id in seen:
+            continue
+        seen.add(step.profile_id)
+        profile = get_profile(step.profile_id)
+        out.append({"profile_id": step.profile_id,
+                    "items_path": profile.items_path,
+                    "items_file_sha256": profile.items_file_sha256,
+                    "materialized": bool(profile.materialized)})
+    return out
+
+
+def check_inputs(repo_root: str | Path = ".", say=print) -> int:
+    """Resolve every required mixture for real. 0, or 30 with what is missing.
+
+    The check a toy preflight cannot perform: `--toy` supplies
+    `calibration_items` explicitly and never touches the profile registry, so
+    it passes while the mixture the prefix needs is absent.
+    """
+    from aadistill.initialization.calibration.profiles import (
+        CalibrationError, get_profile)
+
+    missing = []
+    for entry in required_profiles(repo_root):
+        try:
+            items = get_profile(entry["profile_id"]).resolve(repo_root)
+        except (CalibrationError, OSError) as exc:
+            missing.append(f"{entry['profile_id']}: {exc}")
+            say(f"  MISSING {entry['profile_id']} -> {entry['items_path']}")
+            continue
+        say(f"  ok {entry['profile_id']}: {len(items)} items from "
+            f"{entry['items_path']}")
+    if missing:
+        say("INPUTS UNAVAILABLE; the pilot would fail after the GPU work:")
+        for m in missing:
+            say(f"  {m}")
+        return 30
+    return 0
