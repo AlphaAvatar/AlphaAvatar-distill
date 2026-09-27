@@ -1,0 +1,76 @@
+{
+ "schema": "aadistill.autoinit.c3_pricing/v1",
+ "_contract": "A FRESH price from the current implementation's measured durations. It carries no obsolete worst case: the $25 figure predates the causal operator existing and is not an input.",
+ "priced_utc": "2026-09-28T00:00:00Z",
+ "gpu": "NVIDIA L40S",
+ "rate_usd_per_hour": 1.09,
+ "_rate_is": "the live securePrice observed repeatedly on 2026-09-27; it is re-queried immediately before acquisition and this price is invalid if it has moved",
+ "container_disk_gb": 120,
+ "components": {
+  "setup": {
+   "minutes": 10.0,
+   "_measured": "C1 attempt 18 completed setup in 6 min at $0.11; 10 allows for a cold image"
+  },
+  "stage_B_C_gates": {
+   "minutes": 3.0,
+   "_measured": "attempt 18: 14 gates, all passed, inside its 6-min setup window"
+  },
+  "stage_D_parent_replay": {
+   "minutes": 22.0,
+   "_measured": "21.5, 21.8 and 21.9 min across three 2026-09-27 sessions; the frozen digest reproduced every time"
+  },
+  "stage_E_incumbent_attention": {
+   "minutes": 0.2,
+   "_measured": "attention.activation_importance_v1 took 11.2732 s in C1 attempt 18"
+  },
+  "stage_F_treatment_causal_b3": {
+   "minutes": 38.2,
+   "_measured": "2289.3682 s, the packing-v2 full scorer for exactly this protocol"
+  },
+  "stage_G_recovery_6_probes": {
+   "minutes": 370.8,
+   "_measured": "attempt 18: 61.8 min mean over six probes, same recipe e1_p1_kd_heavy@0.86M"
+  },
+  "stage_H_evaluate_6_probes": {
+   "minutes": 158.4,
+   "_measured": "attempt 18: 26.4 min mean over six"
+  },
+  "stage_I_decide_and_closeout": {
+   "minutes": 12.0,
+   "_measured": "attempt 18 collected 164 files across 22 classes inside its 561.57 min total"
+  }
+ },
+ "expected": {
+  "minutes": 614.6,
+  "hours": 10.24,
+  "usd": 11.336,
+  "_cross_check": "C1 attempt 18 ran this same chain end to end in 561.57 min for $10.2018. C3 differs by ONE stage: the causal B3 treatment replaces an 11-second ATTENTION operator with a 38.2-minute one."
+ },
+ "hard_ceiling": {
+  "usd": 15.1475,
+  "_it_is_the_per_session_ceiling": "the package's existing per_attempt_hard_ceiling_usd, unchanged. It is a BOUND, not an estimate.",
+  "minutes_it_buys": 821.0,
+  "slack_over_expected_minutes": 207.0,
+  "_why_that_slack_is_the_right_size": "setup has been observed at 5, 8.5 and 150+ minutes on the same image in this project, and the six probes are priced from a MEAN. The slack absorbs a cold image plus ~30% over-run on training and evaluation."
+ },
+ "reserves": {
+  "teardown_usd": 0.1,
+  "artifact_transfer_usd": 0.15,
+  "_both_inside_the_hard_ceiling": true
+ },
+ "fit": {
+  "project_cumulative_spend_usd": 350.0307,
+  "project_cap_usd": 370.0,
+  "project_headroom_usd": 19.9693,
+  "formal_allowance_remaining_usd": 22.8249,
+  "hard_ceiling_usd": 15.1475,
+  "fits_project_headroom": true,
+  "headroom_after_a_fully_spent_session_usd": 4.8218,
+  "fits_formal_allowance": true,
+  "_binding_constraint": "the PROJECT cap, not the formal allowance"
+ },
+ "_what_is_not_priced_here": [
+  "C4, which this authorizes nothing about",
+  "any second formal attempt: the hard ceiling is per session and a retry after formal measurement has begun is not permitted by the protocol"
+ ]
+}

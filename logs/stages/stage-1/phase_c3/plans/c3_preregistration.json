@@ -1,0 +1,199 @@
+{
+ "schema": "aadistill.autoinit.c3_preregistration/v2",
+ "_contract": "Frozen BEFORE any C3 behavioural result exists. THREE arms and nine probes, per the 2026-09-28 supplement, which supersedes the six-probe design.",
+ "stage": "C3",
+ "preregistered_utc": "2026-09-28T00:00:00Z",
+ "authorization": "maintainer, 'Formal C3 End-to-End Execution Authorization'",
+ "claim_boundary": {
+  "primary_contrast": "causal-B1 - incumbent B",
+  "_primary_is_the_operator_isolation": "this contrast owns the formal scientific claim about causal-KL itself, with model-forward batching held at the incumbent's own B1/original-order protocol so it is not a second variable.",
+  "secondary_contrasts": [
+   "causal-B3 - causal-B1  (the numerical protocol's downstream effect)",
+   "causal-B3 - incumbent B  (the practical optimized treatment)"
+  ],
+  "_not_three_promotion_hypotheses": "only the primary is an operator-promotion test. The other two are prespecified secondary/practical contrasts and may not be substituted for it after seeing results.",
+  "_all_three_reported_completely": true,
+  "_no_post_hoc_b1_b3_selection": "the B1/B3 deployment choice is left to the post-C3 review. No non-inferiority boundary is preregistered here, because inventing a tolerance after seeing the data is the failure this clause exists to prevent, and none is needed for an automatic decision."
+ },
+ "arms": {
+  "A_incumbent": {
+   "name": "B (incumbent)",
+   "attention": [
+    "attention.activation_importance_v1",
+    "calib.domain_balanced@v1"
+   ],
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+   "num_parameters": 596049920,
+   "_source": "the frozen C1 treatment, unchanged",
+   "_durable": false,
+   "_therefore": "rebuilt through the frozen verified path from the same parent, gated on the digest above. Searched 2026-09-28: absent from the relay and from the out-of-tree store."
+  },
+  "B_causal_b1": {
+   "name": "causal-KL B1",
+   "attention": [
+    "attention.causal_kl_v1",
+    "calib.domain_balanced@v1"
+   ],
+   "config": {
+    "calibration_forward_batch_size": 1,
+    "calibration_batch_packing": "original_order_v1"
+   },
+   "_role": "the clean operator-isolation causal arm: causal-KL importance against activation importance, without batching as an extra variable.",
+   "_config_is_identity_bearing": true
+  },
+  "C_causal_b3": {
+   "name": "causal-KL B3 optimized",
+   "attention": [
+    "attention.causal_kl_v1",
+    "calib.domain_balanced@v1"
+   ],
+   "config": {
+    "calibration_forward_batch_size": 3,
+    "calibration_batch_packing": "length_sorted_v1"
+   },
+   "_role": "the optimized practical treatment.",
+   "_config_is_identity_bearing": true,
+   "_protocol_provenance": "packing-v2 counterbalanced screen: pooled 492.553 s against B1's 586.509 s, fastest of four and lower-memory than B4."
+  },
+  "_operator_semantics": "one-shot for both causal arms: every query head scored independently against the INTACT pre-ATTENTION parent. No delete-and-rescore, no joint subset search.",
+  "_only_intended_difference": "the initialization. Same teacher, corpus, ordering rule, optimizer, runtime contract, battery, scoring, seeds and bootstrap across all three arms."
+ },
+ "shared_parent": {
+  "artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "weights_digest": "2be3a4fe00233415a9382892237c26d1b96228d41f327397f6fcf06600909ba0",
+  "prefix": [
+   [
+    "depth.causal_kl_greedy_v1",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "ffn.activation_importance_v0",
+    "calib.domain_balanced@v1"
+   ],
+   [
+    "width.global_pca_v0",
+    "calib.reasoning_heavy@v2"
+   ]
+  ],
+  "execution": {
+   "micro_batch_size": 1
+  },
+  "_explicit_not_default": "bound to B1 explicitly. Repository defaults are MEASURED to change structural decisions, so no formal result may depend on whatever DEFAULT_MICRO_BATCH_SIZE happens to be.",
+  "replays_permitted": 1,
+  "_durable": false
+ },
+ "seeds": {
+  "recovery": [
+   217230555,
+   1151307191,
+   2045359208
+  ],
+  "bootstrap": 654678655,
+  "namespace_rule": "uint32_be(SHA256(base + ':' + namespace)[0:4]) mod 2**31",
+  "base_digest": "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280",
+  "namespaces": [
+   "phase-c3:recovery-seed:0",
+   "phase-c3:recovery-seed:1",
+   "phase-c3:recovery-seed:2",
+   "phase-c3:bootstrap"
+  ],
+  "_mechanical": "no human choice; reproducible from the base digest alone",
+  "_disjoint_from": {
+   "c1": [
+    1635674081,
+    1656475568,
+    696460635
+   ],
+   "pilot": [
+    1139220455
+   ],
+   "_checked": "none of the four C3 seeds appears anywhere in logs/ or configs/ as of 2026-09-28"
+  },
+  "_no_fourth_seed": true
+ },
+ "recovery": {
+  "probes": 9,
+  "arms": 3,
+  "seeds_per_arm": 3,
+  "recipe": "e1_p1_kd_heavy@0.86M",
+  "tokens": 860000,
+  "ce": 0.25,
+  "kd": 1,
+  "temperature": 1,
+  "kd_scope": "all",
+  "block_len": 8192,
+  "_fresh": "every probe fresh; no new reuse semantics are invented",
+  "_matrix": "3 arms x the SAME 3 seeds; no arm elimination, no successive halving, all nine complete before interpretation"
+ },
+ "evaluation": {
+  "battery": "c1_confirmation_v1",
+  "scoring_contract": "c1_confirmation_scoring@v1",
+  "scoring_contract_digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+  "_not_used": [
+   "recovery_search_v2 (engineering only)",
+   "the reserved final-promotion battery"
+  ],
+  "scorable_prompts": 850
+ },
+ "estimand": {
+  "primary": "Delta = causal-KL-B3 treatment - incumbent B, on correct_overall",
+  "aggregation": "prompt mean of the mean over the three fixed paired seeds",
+  "_seeds_are_blocks": "three FIXED experimental blocks, not an IID sample from a seed population"
+ },
+ "inference": {
+  "method": "stratified prompt-cluster bootstrap",
+  "iterations": 20000,
+  "seed": 654678655,
+  "sesoi": 0.01
+ },
+ "decision_rule": {
+  "GO": [
+   "one-sided LCB > 0",
+   "Delta correct_overall >= +0.010",
+   "at least 2 of 3 seed-specific deltas > 0",
+   "all behavioural guardrails pass"
+  ],
+  "NO_GO": [
+   "UCB < +0.010",
+   "or any frozen veto fires"
+  ],
+  "otherwise": "INCONCLUSIVE",
+  "_no_fourth_seed": true,
+  "_no_forced_winner": true,
+  "_no_rerun_of_a_valid_inconclusive": true,
+  "_stop_after_first_complete_valid_result": true,
+  "_applies_to": "the PRIMARY contrast, causal-B1 - B",
+  "_secondary_contrasts_use": "the same paired prompt-level machinery -- Delta, LCB/UCB, three seed deltas, usable deltas, McNemar counts, per-domain breakdowns -- reported completely, but they do not redefine the primary verdict."
+ },
+ "guardrails": {
+  "pooled_usable_delta_min": -0.05,
+  "per_seed_usable_delta_min": -0.1,
+  "_plus": "the existing catastrophic capability and protocol-validity vetoes",
+  "_usable_rollout_is_not_positive_credit": true,
+  "_no_weighted_scalar": true
+ },
+ "terminal_outcomes": {
+  "GO": "promote attention.causal_kl_v1 + B3/length_sorted_v1 as the ATTENTION treatment for this path. C4 becomes scientifically eligible but is NOT authorized.",
+  "NO_GO": "B remains incumbent",
+  "INCONCLUSIVE": "B remains incumbent"
+ },
+ "pricing": "logs/stages/stage-1/phase_c3/plans/c3_pricing_9probe.json",
+ "_initializations_are_seed_independent": "THREE initialization states are constructed and verified ONCE each, then fanned out into three recovery seeds. The causal scorers are NOT rerun per seed.",
+ "interpretation_matrix": {
+  "A": "primary GO and B3 not materially worse than B1 -> causal-KL supported; B3 adoption considered on its downstream and engineering evidence",
+  "B": "primary GO and B3 materially degrades vs B1 -> causal-KL supported, B3 NOT automatically promoted; the numerically safer B1 path stands",
+  "C": "primary not GO but B3-vs-B looks better -> NOT proof that causal-KL alone is superior. Report as 'causal-KL + B3 protocol differs from causal-B1' and return for review. No post-hoc relabelling.",
+  "D": "neither causal arm improves over B -> B remains incumbent"
+ },
+ "execution_status": {
+  "state": "NOT LAUNCHED -- the nine-probe chain does not fit the budget",
+  "hard_ceiling_usd": 22.1451,
+  "project_headroom_usd": 19.9693,
+  "project_shortfall_usd": 2.1758,
+  "per_session_ceiling_usd": 15.1475,
+  "session_shortfall_on_expected_usd": 1.9597,
+  "_stopped_before_provider_acquisition": true
+ },
+ "preregistration_sha256": "fdf1d4c266facd9540b85c3e38f064f91464f4395dacc094946b53bcabc508a2"
+}
