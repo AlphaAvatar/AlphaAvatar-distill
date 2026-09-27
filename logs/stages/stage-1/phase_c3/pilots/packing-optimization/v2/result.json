@@ -1,0 +1,243 @@
+{
+ "schema": "aadistill.phase_c3.packing_v2_result/v1",
+ "_contract": "The committed record of the v2 counterbalanced selection round. Raw per-item landscapes stay in the gitignored artifact tree; their sha256 is below.",
+ "VERDICT": "PACKED_BATCH_NOT_WORTH_ADOPTION",
+ "recovery_triggered": false,
+ "_recovery": "NOT AUTHORIZED in v2 and not triggered: the gate did not clear. Pilot seed 1139220455 remains unconsumed.",
+ "is_formal_c3": false,
+ "subrun_id": "c3pack2_20260927_v6",
+ "pod_id": "gbiz85xcmiq6gh",
+ "gpu": "NVIDIA L40S",
+ "device": "cuda:0",
+ "executed_source_sha": "6d5ac130e72b30c4d0be8900124012cc65e239ea",
+ "cost_usd": 2.6378,
+ "rate_usd_per_hour": 1.09,
+ "parent": {
+  "source": "replayed",
+  "replay_count": 1,
+  "wall_seconds": 1312.948,
+  "artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "weights_digest": "2be3a4fe00233415a9382892237c26d1b96228d41f327397f6fcf06600909ba0"
+ },
+ "screen": {
+  "layers": [
+   0,
+   13,
+   27
+  ],
+  "rounds": {
+   "A": [
+    "R0",
+    "R2",
+    "R3",
+    "R4"
+   ],
+   "B": [
+    "R4",
+    "R3",
+    "R2",
+    "R0"
+   ]
+  },
+  "_counterbalanced": "round B is the exact reverse of round A",
+  "measurements": {
+   "R0": {
+    "A": {
+     "wall_seconds": 293.326,
+     "position": 1,
+     "physical_forward_invocations": 6499,
+     "peak_vram_gib": 3.942,
+     "padded_positions_full_corpus": 0,
+     "padding_over_valid": 0.0,
+     "n_groups": 67,
+     "calibration_forward_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1"
+    },
+    "B": {
+     "wall_seconds": 293.1832,
+     "position": 4,
+     "physical_forward_invocations": 6499,
+     "peak_vram_gib": 3.942,
+     "padded_positions_full_corpus": 0,
+     "padding_over_valid": 0.0,
+     "n_groups": 67,
+     "calibration_forward_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1"
+    }
+   },
+   "R2": {
+    "A": {
+     "wall_seconds": 252.9178,
+     "position": 2,
+     "physical_forward_invocations": 3298,
+     "peak_vram_gib": 6.526,
+     "padded_positions_full_corpus": 1103,
+     "padding_over_valid": 0.01843556744108307,
+     "n_groups": 34,
+     "calibration_forward_batch_size": 2,
+     "calibration_batch_packing": "length_sorted_v1"
+    },
+    "B": {
+     "wall_seconds": 252.6052,
+     "position": 3,
+     "physical_forward_invocations": 3298,
+     "peak_vram_gib": 6.526,
+     "padded_positions_full_corpus": 1103,
+     "padding_over_valid": 0.01843556744108307,
+     "n_groups": 34,
+     "calibration_forward_batch_size": 2,
+     "calibration_batch_packing": "length_sorted_v1"
+    }
+   },
+   "R3": {
+    "A": {
+     "wall_seconds": 246.3253,
+     "position": 3,
+     "physical_forward_invocations": 2231,
+     "peak_vram_gib": 9.116,
+     "padded_positions_full_corpus": 2398,
+     "padding_over_valid": 0.04008022731071369,
+     "n_groups": 23,
+     "calibration_forward_batch_size": 3,
+     "calibration_batch_packing": "length_sorted_v1"
+    },
+    "B": {
+     "wall_seconds": 246.2273,
+     "position": 2,
+     "physical_forward_invocations": 2231,
+     "peak_vram_gib": 9.116,
+     "padded_positions_full_corpus": 2398,
+     "padding_over_valid": 0.04008022731071369,
+     "n_groups": 23,
+     "calibration_forward_batch_size": 3,
+     "calibration_batch_packing": "length_sorted_v1"
+    }
+   },
+   "R4": {
+    "A": {
+     "wall_seconds": 250.41,
+     "position": 4,
+     "physical_forward_invocations": 1649,
+     "peak_vram_gib": 11.296,
+     "padded_positions_full_corpus": 2691,
+     "padding_over_valid": 0.04497743606886177,
+     "n_groups": 17,
+     "calibration_forward_batch_size": 4,
+     "calibration_batch_packing": "length_sorted_v1"
+    },
+    "B": {
+     "wall_seconds": 250.6078,
+     "position": 1,
+     "physical_forward_invocations": 1649,
+     "peak_vram_gib": 11.296,
+     "padded_positions_full_corpus": 2691,
+     "padding_over_valid": 0.04497743606886177,
+     "n_groups": 17,
+     "calibration_forward_batch_size": 4,
+     "calibration_batch_packing": "length_sorted_v1"
+    }
+   }
+  },
+  "pooled_seconds": {
+   "R0": 586.5092,
+   "R2": 505.523,
+   "R3": 492.5526,
+   "R4": 501.0178
+  },
+  "round_variation": {
+   "R0": {
+    "abs_difference": 0.1428,
+    "relative": 0.000487
+   },
+   "R2": {
+    "abs_difference": 0.3126,
+    "relative": 0.001237
+   },
+   "R3": {
+    "abs_difference": 0.098,
+    "relative": 0.000398
+   },
+   "R4": {
+    "abs_difference": 0.1978,
+    "relative": 0.00079
+   }
+  },
+  "stability": {
+   "_predeclared": true,
+   "_tolerance_source": "record",
+   "abs_difference": 0.1428,
+   "mean": 293.2546,
+   "relative": 0.000487,
+   "round_A": 293.326,
+   "round_B": 293.1832,
+   "stable": true,
+   "tolerance": 0.05
+  },
+  "speedups_vs_R0": {
+   "R2": 1.1602,
+   "R3": 1.1908,
+   "R4": 1.1706
+  },
+  "selection": {
+   "_selection_is_speed_and_memory_only": "no head-map or quality result is read to choose a protocol",
+   "_tie_break": "lower peak VRAM, then smaller batch size, then id",
+   "advance_threshold": 1.1,
+   "advances": true,
+   "fastest_candidate": "R3",
+   "near_tie_fraction": 0.02,
+   "pooled_seconds": {
+    "R0": 586.5092,
+    "R2": 505.523,
+    "R3": 492.5526,
+    "R4": 501.0178
+   },
+   "reference": "R0",
+   "selected": "R3",
+   "selected_speedup": 1.1908,
+   "speedups_vs_reference": {
+    "R2": 1.1602,
+    "R3": 1.1908,
+    "R4": 1.1706
+   },
+   "tied_with_fastest": [
+    "R3",
+    "R4"
+   ]
+  }
+ },
+ "full_scorer": {
+  "order": [
+   "R0 (fresh full B1)",
+   "R3 (selected candidate)"
+  ],
+  "_order_predeclared": true,
+  "R0_seconds": 2720.6646,
+  "R3_seconds": 2289.3682,
+  "measured_speedup": 1.1884,
+  "gate": 1.25,
+  "gate_met": false,
+  "reference_source": "this session's fresh full B1 (mandatory)",
+  "R0_invocations": 60099,
+  "R3_invocations": 20631,
+  "R0_child_digest": "see raw"
+ },
+ "findings": {
+  "b3_is_the_fastest_and_it_is_new": "R3 (B3, length-sorted) pooled 492.553s against R4's 501.018s and R2's 505.523s. v1's single ordered pass had put R4 marginally ahead; counterbalancing reorders them. B3 had never been measured before v2 and it wins on BOTH axes -- fastest and lower VRAM than R4 -- so the near-tie rule confirms the choice rather than overriding it.",
+  "position_was_not_the_confound": "round-to-round variation was 0.04-0.12% for every protocol, and R4 ran position 4 then position 1 for 250.41s and 250.61s. On this card position is worth ~0.1%, so v1's 0.76% gap was real but small. Counterbalancing did not correct a bias; it produced a clean enough number to reorder two candidates that were genuinely close.",
+  "the_screen_predicted_the_full_scorer_to_0_2_percent": "screen 1.1908x, full 1.1884x. A three-layer screen over all items and all heads is an excellent and cheap predictor of the full-scorer ratio on this workload.",
+  "the_comparability_rule_changed_the_sign_of_the_answer": "the fresh full B1 measured 2720.66s against the prior session's 2190.17s -- 1.242x, matching the 1.2467x the v1 screen predicted. Using the stale reference would have given 2190.17/2289.37 = 0.9567x, i.e. it would have reported the candidate as SLOWER than B1. The +/-5% rule did not merely tighten a number; it prevented a wrong conclusion in the opposite direction.",
+  "adoption": "1.1884x against a 1.25x gate. Length-aware packing is worth about 19% of a full causal-KL scorer on this workload -- real, reproducible, and below the threshold set for adopting it."
+ },
+ "raw_evidence": {
+  "file": "out/packing2/packing_v2_result.json",
+  "bytes": 4897635,
+  "sha256": "eb871b4a3c615532cb3f399de6a6a15f1d18e8e3e2bcb104763b9545c1b29ac8",
+  "_location": "gitignored artifact tree"
+ },
+ "may_not_be_read_as": [
+  "a formal C3 result",
+  "an adoption decision in favour of any batching",
+  "a reason to change DEFAULT_MICRO_BATCH_SIZE",
+  "evidence about downstream equivalence -- no recovery was run"
+ ]
+}

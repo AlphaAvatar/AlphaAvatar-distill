@@ -41,6 +41,23 @@
    "_caused_by_a_repair": "moving the preflight to cuda:0 -- one of the three §18 repairs -- is what exposed it. The same class of bug cost attempt a4 twenty minutes of GPU; here the repaired preflight refused it in FIVE SECONDS, before the root teacher was fetched and before any parent replay.",
    "repair": "`_toy_root(device)` applies it, and every toy driver forwards the run device. Two $0 tests: the loader honours the argument, and all three drivers pass it.",
    "teardown": "confirmed: pods 0, networkVolumes 0"
+  },
+  {
+   "subrun_id": "c3pack2_20260927_v6",
+   "pod_id": "gbiz85xcmiq6gh",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 143.017,
+   "cost_usd": 2.6378,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "6d5ac130e72b30c4d0be8900124012cc65e239ea",
+   "verdict": "COMPLETE",
+   "scientific_verdict": "PACKED_BATCH_NOT_WORTH_ADOPTION",
+   "stage_reached": "closeout; all seven steps executed",
+   "result": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v2/result.json",
+   "summary": "parent replayed once and verified eea90c91346a0745 in 21.9 min; counterbalanced screen stable to 0.049%; R3 (B3 length-sorted) fastest at 1.1908x pooled and selected; fresh full B1 2720.66s vs R3 2289.37s = 1.1884x against a 1.25x gate. Not adopted. No structural comparison (gate did not clear) and no recovery (not authorized).",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0"
   }
  ]
 }

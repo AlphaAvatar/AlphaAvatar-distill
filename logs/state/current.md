@@ -1757,56 +1757,57 @@ both full scorers. The measured screen is reusable — pushable with
 required first: bound the preflight, run it on `cuda:0` or pin its thread
 count from the cgroup quota, and stream its output.
 
-### Packing v2: ready and blocked on L40S capacity
+### Packing v2: `PACKED_BATCH_NOT_WORTH_ADOPTION` at 1.1884×
 
-**Owner:** [`packing-optimization/v2/`](../stages/stage-1/phase_c3/pilots/packing-optimization/v2/).
-Every `$0` gate passes; four acquisition attempts were refused for capacity
-and created nothing.
+**Measured 2026-09-27, `c3pack2_20260927_v6`, `$2.6378`.** Owner:
+[`v2/result.json`](../stages/stage-1/phase_c3/pilots/packing-optimization/v2/result.json).
 
-**Why v2 exists.** v1 separated its two leading candidates by 0.76% from one
-ordered pass, while their peak VRAM differed by 4.8 GiB — and B3 had never
-been derived. A sub-percent gap from a single pass cannot decide that.
+The counterbalanced screen — round A `R0→R2→R3→R4`, round B its exact
+reverse, selection on the pooled sum:
 
-**The `$0` table**, from the real frozen lengths (`packing_table.json`):
-
-|    | B | packing | groups | physical | padded | pad/valid | VRAM |
+|    | round A | round B | pooled | var | vs R0 | peak VRAM | inv |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| R0 | 1 | original | 67 | 60,099 | 0 | 0.0000 | 5.43 GiB |
-| R2 | 2 | sorted | 34 | 30,498 | 1,103 | 0.0184 | 8.04 GiB |
-| R3 | 3 | sorted | 23 | 20,631 | 2,398 | 0.0401 | 10.64 GiB |
-| R4 | 4 | sorted | 17 | 15,249 | 2,691 | 0.0450 | 13.24 GiB |
+| R0 B1 orig | 293.33 s | 293.18 s | 586.509 s | 0.05% | 1.000 | 3.94 GiB | 6,499 |
+| R2 B2 sort | 252.92 s | 252.61 s | 505.523 s | 0.12% | 1.160 | 6.53 GiB | 3,298 |
+| **R3 B3 sort** | 246.33 s | 246.23 s | **492.553 s** | 0.04% | **1.191** | 9.12 GiB | 2,231 |
+| R4 B4 sort | 250.41 s | 250.61 s | 501.018 s | 0.08% | 1.171 | 11.30 GiB | 1,649 |
 
-B3 needed no core change; a `batch_size == 3` branch anywhere would be the
-defect and a test greps for one.
+**B3 wins, and it had never been measured.** v1's single pass put R4
+marginally ahead; pooling reorders them. R3 is fastest *and* lower-memory
+than R4, so the near-tie rule confirms the choice rather than overriding it.
 
-**The design.** Round A `R0→R2→R3→R4`, round B its exact reverse, selection
-on the **pooled** sum — so the advantage a single pass hands to whatever runs
-last cancels. Three gates, frozen before any timing: a 5% stability guard on
-R0 measured twice, a 2% near-tie rule breaking to lower VRAM, and a 1.10×
-pooled advance gate. On v1's own numbers the tie rule would have chosen P2
-(6.53 GiB) over P3 (11.30 GiB).
+**Position was not the confound.** Variation is 0.04–0.12% everywhere, and
+R4 ran position 4 then position 1 for 250.41 s and 250.61 s. On this card
+position is worth ~0.1%, so v1's 0.76% gap was real but small —
+counterbalancing did not correct a bias, it produced a clean enough number
+to reorder two genuinely close candidates.
 
-**A fresh full B1 is mandatory** if the screen advances — the prior
-`2190.1708 s` has no fallback path, because v1's ±5% rule already refused it.
-The 1.25× adoption gate is unchanged. **Recovery is not authorized in v2**:
-the driver has no verdict that triggers it and never names the pilot seed,
-which stays unconsumed.
+**The full pair:** fresh full B1 **2720.66 s**, R3 **2289.37 s** →
+**1.1884×** against the 1.25× gate. **Not adopted.** No structural
+comparison (the gate did not clear) and no recovery (not authorized in v2);
+the pilot seed `1139220455` remains unconsumed.
 
-**The v1 preflight defects are repaired**: bounded (and the timeout handling
-is executed against a hanging command, not grepped for), streamed, and on
-`cuda:0`. Both drivers now call `apply_cpu_budget()`, which has read the
-cgroup quota correctly since E8b and which nothing had ever called.
+**Two things the protocol earned:**
 
-**Budget.** The engineering allowance rose `$6.00` → `$10.00` (package total
-`$51.4425` → `$55.4425`) by maintainer decision, recorded in
-[`decisions.md`](../budget/decisions.md); the formal allowance, the
-per-session ceiling and the `$370.00` cap did not move. The v2 campaign
-ceiling is `$4.00`, spent `$0.0000`.
+* **The ±5% comparability rule changed the sign of the answer.** The fresh
+  B1 measured 2720.66 s against the prior session's 2190.17 s — 1.242×,
+  matching the 1.2467× v1 predicted. The stale reference would have given
+  `2190.17/2289.37 = 0.957×`, reporting the candidate as *slower*. The rule
+  did not tighten a number; it prevented a wrong conclusion in the opposite
+  direction.
+* **The three-layer screen predicted the full scorer to 0.2%** — 1.1908×
+  against 1.1884×. A cheap screen over all items and all heads is a very
+  good predictor of the full ratio on this workload.
 
-**Blocked on:** L40S secure capacity. Four refusals at 13:12–13:15, all
-recognised as refusals — the v1 defect that turned this exact error text into
-a pod id is repaired — creating nothing and starting no watchdog. No larger
-card is authorized, so the only handling is to wait.
+**So: length-aware packing is worth about 19% of a full causal-KL scorer.**
+Real, reproducible across two sessions, and below the threshold set for
+adopting it.
+
+Campaign `$2.7048` of `$4.00`; project `$350.0307` of `$370.00`. Six
+acquisition attempts: four L40S capacity refusals at `$0.00`, one `$0.067`
+where the repaired preflight caught a toy root on the wrong device in five
+seconds, then this one. All torn down, provider confirms **pods 0,
+volumes 0**.
 
 ## Readiness
 
@@ -1930,9 +1931,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$4.5773` of `$10.0000` |
-| package | `$27.4022` of `$55.4425` |
-| project cap | `$347.3929` spent of `$370.0000`, leaving `$22.6071` |
+| GPU engineering | `$1.9395` of `$10.0000` |
+| package | `$24.7644` of `$55.4425` |
+| project cap | `$350.0307` spent of `$370.0000`, leaving `$19.9693` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
