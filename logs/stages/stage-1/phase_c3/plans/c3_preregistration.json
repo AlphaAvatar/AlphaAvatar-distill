@@ -195,5 +195,6 @@
   "session_shortfall_on_expected_usd": 1.9597,
   "_stopped_before_provider_acquisition": true
  },
- "preregistration_sha256": "fdf1d4c266facd9540b85c3e38f064f91464f4395dacc094946b53bcabc508a2"
+ "preregistration_sha256": "6d1d1121e5fded887385df379ed053cf496d8b254b5273b455bf992b072c056e",
+ "_sha256_correction": "2026-09-28: the stamp read fdf1d4c266facd9540b85c3e38f064f91464f4395dacc094946b53bcabc508a2, which no canonicalization of this document reproduces -- it was hand-written, and the file had no producer and no consumer, so nothing checked it. The value below is now sha256_json(document minus preregistration_sha256), the convention autoinit_c1_launch.py verifies. NOTHING IN THE DOCUMENT CHANGED: the body hashes identically to the committed f1cf3e36 version, so the arms, seeds, contrasts and decision rule are exactly as preregistered. Only the stamp became true. Caught before any launch and before any result exists. tests/docs/test_c3_preregistration.py now verifies it."
 }

@@ -1809,6 +1809,85 @@ where the repaired preflight caught a toy root on the wrong device in five
 seconds, then this one. All torn down, provider confirms **pods 0,
 volumes 0**.
 
+### Formal C3: priced for nine probes, and it does not fit
+
+**NOT LAUNCHED. Nothing was created; no provider resource exists.** Owners:
+[`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json)
+(hash-bound `6d1d1121e5fded88`) and
+[`c3_pricing_9probe.json`](../stages/stage-1/phase_c3/plans/c3_pricing_9probe.json).
+
+**Stamp corrected before any launch.** The preregistration was committed with `fdf1d4c2…`, which no canonicalization of the document reproduces — it was hand-written, and unlike C1, phase B and continuation B the C3 plan had no producer *and no consumer*, so nothing ever checked it. The body is byte-identical to the committed `f1cf3e36` version; only the stamp became true, so the arms, seeds, contrasts and decision rule are exactly as preregistered. `tests/docs/test_c3_preregistration.py` now verifies the stamp, the launcher's convention, the design it binds, and that no document quotes a stale value. Had this survived to a launch, a preregistration whose stamp does not verify would have been a scientific problem rather than a clerical one: nothing afterwards distinguishes "the stamp was wrong" from "the document moved after the science started".
+
+The 2026-09-28 supplement makes C3 a **three-arm, nine-probe** experiment:
+incumbent B, causal-KL B1, causal-KL B3/length-sorted, each over the same
+three fresh seeds. Priced from measured components:
+
+| | minutes | source |
+| --- | --- | --- |
+| setup + gates | 13.0 | attempt 18 |
+| parent replay | 22.0 | measured 21.5 / 21.8 / 21.9 |
+| arm A ATTENTION | 0.2 | measured 11.2732 s |
+| arm B causal-B1 | 45.3 | **measured** 2720.6646 s |
+| arm C causal-B3 | 38.2 | **measured** 2289.3682 s |
+| recovery ×9 | 556.2 | 61.8 min/probe measured |
+| evaluation ×9 | 237.6 | 26.4 min/probe measured |
+| decide + close | 15.0 | attempt 18 |
+| **expected** | **927.5** | **15.46 h = `$17.1072`** |
+| **hard** | **1200.6** | **20.01 h = `$22.1451`** |
+
+**Two independent shortfalls, and closing either alone is not enough:**
+
+1. **Project cap** — hard `$22.1451` against `$19.9693` headroom: **short by
+   `$2.1758`**. A cap of at least `$372.1758` closes it.
+2. **Per-session ceiling** — the *expected* `$17.1072` already exceeds the
+   `$15.1475` per-session hard ceiling by **`$1.9597`**, so the chain does
+   not fit one session even with a higher cap. Holding the hard bound needs
+   a per-session ceiling of at least `$22.1451`.
+
+Splitting across two sessions is not a fix: formal measurement may not be
+retried, resumed or pooled once begun, and no resume contract exists for a
+partially trained nine-probe matrix.
+
+**C3's own allowance is not the problem.** The formal allowance has
+`$22.8249` of `$45.4425` left, which already covers the `$22.1451` hard
+ceiling with `$0.6798` to spare. Both binding limits are outside the
+experiment's book — the project-wide cumulative cap and the per-session
+ceiling — so this is a decision about those two numbers, not about whether
+C3 was funded generously enough. Derived live by
+`scripts/consolidate/derive_budget.py`, not restated from a document.
+
+**Nothing was reduced to fit** — not the arms, seeds, battery, 860k tokens,
+evaluation or decision rule — and the expected value is not offered as a
+bound.
+
+**What is ready.** The preregistration is frozen before any result: three
+arms with both protocol fields identity-bearing; seeds
+`[217230555, 1151307191, 2045359208]` and bootstrap `654678655`, derived
+mechanically from the C0 digest and colliding with no historical or pilot
+seed; the primary contrast fixed as **causal-B1 − B** with the two secondary
+contrasts named; the four-case interpretation matrix frozen so no post-hoc
+relabelling is possible. Three initializations are built once each and fanned
+out across seeds — the causal scorers are not rerun per seed.
+
+Also established at `$0`: **incumbent B's bytes are not durable** (the C2
+record naming its digest is a probe trained *from* B and holds no weights),
+so B is rebuilt through the frozen path under its digest gate, ~11 s once the
+shared parent exists.
+
+**What is NOT ready, and must be finished before any funded launch.** The
+*plan* is three-arm; the *executor* is not.
+`scripts/experiments/phase_c3/session.py::build_arm_specs` still builds **two**
+arms (`{"incumbent", "treatment"}`) — it was written against the earlier
+two-arm design, takes no arm argument, and has never been exercised end to
+end. `TREATMENT_CONFIG` hardcodes B3 + `length_sorted_v1`, so the
+causal-B1 + `original_order_v1` arm **does not exist in code at all**, and
+`arm_prefix_is_shared` unpacks those two keys by name so it needs the same
+change. Also owed: the three-seed fan-out over three built-once
+initializations, and a `$0` toy run before any of it is trusted. This is
+ordinary engineering inside the existing envelope and needs no new decision —
+but it is **not** done, and the frozen preregistration must not be read as
+implying the launcher matches it.
+
 ## Readiness
 
 <!-- readiness:begin -->
@@ -1826,9 +1905,23 @@ volumes 0**.
 
 ## The full suite is not green: 11 failures, one family
 
-**Current measurement, 2026-09-27 at `9d618427` on a clean tree: 11 failed,
-5201 passed, 228 skipped** in 46m44s — the documented eleven exactly, zero
-new and zero fixed against `ab53ba14`.
+**Current measurement, 2026-09-28: 11 failed, 5205 passed, 228 skipped** in
+45m44s — the documented eleven exactly, zero new against `ab53ba14`.
+
+That run first reported **12**. The twelfth,
+`pod/test_continuation_b_one_probe_contract.py::test_what_the_route_lands_on_is_actually_current`,
+was mine and is fixed. It is worth recording *why*, because the defect was
+invisible: the stamp-correction note added to this file above began as a
+`> **Stamp corrected 2026-09-28 …**` blockquote, and `current_region` ends
+the "current claims" region at the first **dated** `> **` quote. One dated
+blockquote therefore pushed the budget table, the blocker and every figure
+below it outside the region, and the guard failed for the one reason its own
+docstring says it must never fail for — it could not see the figures it
+exists to check. The note is now an ordinary paragraph. **A dated `> **`
+blockquote in `current.md` is a region terminator, not a formatting choice.**
+
+The preceding measurement, 2026-09-27 at `9d618427` on a clean tree: 11
+failed, 5201 passed, 228 skipped in 46m44s.
 
 The previous measurement, 2026-09-26 at `679f0113`: 12 failed,
 4988 passed, 228 skipped over all of `tests/`, in 46m33s. Eleven are the

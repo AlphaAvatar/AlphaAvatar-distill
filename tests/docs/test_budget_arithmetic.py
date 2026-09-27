@@ -143,14 +143,45 @@ def test_fitting_and_the_reserve_are_consistent_by_construction():
 
 
 def test_no_document_claims_a_full_attempt_does_not_fit_when_it_does():
-    """The regression. Prose may not contradict the arithmetic above it."""
+    """The regression. Prose may not contradict the arithmetic above it.
+
+    REFINED 2026-09-28. The guard matched any "does not fit" near the
+    ceiling figure, which conflated two different claims:
+
+      (a) "one attempt AT the per-session ceiling does not fit the cap"
+          -- false while cumulative + ceiling <= cap, and the defect this
+          test exists to catch;
+      (b) "this chain needs MORE than the per-session ceiling and therefore
+          does not fit"  -- which can be perfectly true, and is, for the
+          nine-probe C3 chain at $22.1451 against a $15.1475 ceiling.
+
+    A window that also states a required amount ABOVE the ceiling is making
+    claim (b). Suppressing it would have forced prose to obscure a real
+    shortfall in order to satisfy a guard about a different number.
+    """
     d = _derive()
     if not d["full_attempt_fits"]:
         return                       # the claim would be TRUE; nothing to check
 
+    import re
+
+    def is_about_a_larger_requirement(window: str) -> bool:
+        #: Any dollar amount in the window that EXCEEDS the per-session
+        #: ceiling means the sentence is about a chain bigger than one
+        #: attempt, not about whether one attempt fits.
+        for raw in re.findall(r"\$\s?([0-9]+(?:\.[0-9]+)?)", window):
+            try:
+                if float(raw) > d["ceiling"]:
+                    return True
+            except ValueError:
+                continue
+        return False
+
     offenders = []
     for path in (SNAPSHOT, LEDGER, STATE):
         for window in _windows_around_the_ceiling(path, d["ceiling"]):
+            if is_about_a_larger_requirement(window):
+                continue
             for claim in DOES_NOT_FIT_CLAIMS:
                 if claim in window:
                     offenders.append(

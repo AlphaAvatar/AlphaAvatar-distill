@@ -273,9 +273,25 @@ class TestTheSnapshotStatesTheRequiredFacts:
         c3 = s["phase_c"]["c3"]
         assert isinstance(c3, dict), "c3 is no longer a structured entry"
         assert c3["status"].startswith("NOT STARTED")
-        #: The four facts §5 requires the machine-readable state to carry, so
+        #: The facts §5 requires the machine-readable state to carry, so
         #: implementing the operator can never be mistaken for starting C3.
-        assert "NO frozen seed set" in c3["status"]
+        #:
+        #: A VERDICT SET on the seeds, not a phrase. §5 asked for "NO frozen
+        #: seed set" when none existed; the 3-arm supplement then REQUIRED
+        #: three mechanically derived seeds to be frozen in the
+        #: preregistration, so pinning the old wording would have made
+        #: obeying the instruction look like a regression. What must hold in
+        #: every state is that the status says where the seeds stand AND does
+        #: not read as executed -- a frozen set is a design that was written
+        #: down, never one that was run.
+        status = c3["status"]
+        no_set = "NO frozen seed set" in status
+        frozen_unrun = ("preregistered" in status
+                        and "NOT LAUNCHED" in status
+                        and "hash-bound" in status)
+        assert no_set or frozen_unrun, (
+            "c3.status states neither that there is no frozen seed set nor "
+            f"that a preregistered, hash-bound, unlaunched one exists: {status!r}")
         assert "ENGINEERING state only" in c3["operator"]
         assert "does NOT start formal C3" in c3["operator"]
         #: A VERDICT SET, not a phrase. The pilot moved from authorized to
