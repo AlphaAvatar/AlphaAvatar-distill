@@ -53,19 +53,10 @@ def load_scope(repo: Path) -> dict:
 
 
 def resolve_items(repo: Path, profile_id: str):
-    """The frozen mixture, PREPARED for an operator.
+    """Delegates. The pilot module owns this; see the note there."""
+    from experiments.phase_c3.pilot import resolve_items as _resolve
 
-    `profile.resolve` returns the raw records — `ids`, not `input_ids` — and
-    every operator reads the prepared form. The screen went straight from one
-    to the other and died on `item 0 has no input_ids to measure`; caught at
-    toy scale, which is what the toy run is for.
-    """
-    from aadistill.initialization.calibration.items import (
-        prepare_calibration_items)
-    from aadistill.initialization.calibration.profiles import get_profile
-
-    raw = get_profile(profile_id).resolve(repo)
-    return prepare_calibration_items(raw, profile_id=profile_id)
+    return _resolve(repo, profile_id)
 
 
 def run(parent_dir: str, out_dir: Path, *, repo: Path, device: str,

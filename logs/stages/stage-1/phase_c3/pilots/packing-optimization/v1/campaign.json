@@ -6,5 +6,97 @@
  "authorization": "logs/stages/stage-1/phase_c3/pilots/packing-optimization/v1/authorization.json",
  "_inherits_nothing": "A NEW campaign. The batching-adoption pilot is terminal at $3.3478 of its own $5.00 and its remaining allowance does not transfer.",
  "teardown_reserve_usd": 0.1,
- "subruns": []
+ "subruns": [
+  {
+   "subrun_id": "c3pack_20260927_b1",
+   "pod_id": null,
+   "cost_usd": 0.0,
+   "cost_basis": "no resource was created",
+   "executed_source_sha": "a799e23c",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "the $0 input-derivation gate, before acquisition",
+   "failure": "the launcher asked its own driver for --required-inputs; the packing driver had no such mode (it lived in the batching driver) and argparse errored. The gate is fail-closed, so no pod was created and nothing was billed.",
+   "repair": "required_profiles/check_inputs moved to experiments/phase_c3/pilot.py, which owns the steps the answer derives from; both drivers delegate.",
+   "teardown": "nothing to tear down"
+  },
+  {
+   "subrun_id": "c3pack_20260927_b2",
+   "pod_id": "p6doyk8jeydg1u",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 42.817,
+   "cost_usd": 0.7897,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "fcb42627bfd5167410540e1aa78c90e19d26c398",
+   "verdict": "PARTIAL",
+   "achieved": {
+    "parent": "replayed ONCE at B1 and verified eea90c91346a0745 in 21.8 min (DEPTH 1198.6s, FFN 52.4s, WIDTH 36.3s) -- the third exact reproduction",
+    "screen": "COMPLETE: four protocols, 67 items, 32 heads, layers [0,13,27]",
+    "screen_gate": "P3 advances at 1.167x over the same-session P0 (threshold 1.10x); P2 1.158x; P1 1.011x",
+    "comparability": "same-session P0 is 1.2467x the scaled prior full B1 -> NOT comparable, so a fresh full B1 is required before any full-scorer speed claim"
+   },
+   "screen_results": {
+    "P0": {
+     "calibration_forward_batch_size": 1,
+     "calibration_batch_packing": "original_order_v1",
+     "wall_seconds": 292.5478,
+     "physical_forward_invocations": 6499,
+     "invocations_per_minute": 1332.91,
+     "valid_positions_per_second": 19633.3,
+     "peak_vram_gib": 3.942,
+     "padding_over_valid_full_corpus": 0.0,
+     "executed_padded_positions": 0,
+     "n_groups": 67
+    },
+    "P1": {
+     "calibration_forward_batch_size": 2,
+     "calibration_batch_packing": "original_order_v1",
+     "wall_seconds": 289.324,
+     "physical_forward_invocations": 3298,
+     "invocations_per_minute": 683.94,
+     "valid_positions_per_second": 19852.07,
+     "peak_vram_gib": 6.548,
+     "padding_over_valid_full_corpus": 0.20033428046130702,
+     "executed_padded_positions": 1162642,
+     "n_groups": 34
+    },
+    "P2": {
+     "calibration_forward_batch_size": 2,
+     "calibration_batch_packing": "length_sorted_v1",
+     "wall_seconds": 252.614,
+     "physical_forward_invocations": 3298,
+     "invocations_per_minute": 783.33,
+     "valid_positions_per_second": 22736.98,
+     "peak_vram_gib": 6.526,
+     "padding_over_valid_full_corpus": 0.01843556744108307,
+     "executed_padded_positions": 106991,
+     "n_groups": 34
+    },
+    "P3": {
+     "calibration_forward_batch_size": 4,
+     "calibration_batch_packing": "length_sorted_v1",
+     "wall_seconds": 250.6859,
+     "physical_forward_invocations": 1649,
+     "invocations_per_minute": 394.68,
+     "valid_positions_per_second": 22911.86,
+     "peak_vram_gib": 11.296,
+     "padding_over_valid_full_corpus": 0.04497743606886177,
+     "executed_padded_positions": 261027,
+     "n_groups": 17
+    }
+   },
+   "screen_speedups": {
+    "P3": 1.167,
+    "P2": 1.1581,
+    "P1": 1.0111
+   },
+   "failure": "the FULL scorer raised PackingError: item 0 has no input_ids to measure, one second after the screen finished. _full_scorer resolved the profile without preparing the items.",
+   "_the_same_gap_twice": "the screen hit this identical line earlier in the session's own toy run and was fixed there. The full scorer hit it twenty minutes of paid GPU later because the fix went to ONE call site, and the toy path supplies its own items so the real branch never ran.",
+   "repair": "one resolve_items in the pilot module; the screen delegates and the full scorer calls it. A $0 test greps EVERY scripts/pod/c3_*.py for a profile resolve without preparation, which immediately found a third, dead, copy in the batching driver; it was deleted.",
+   "teardown": "confirmed by provider query: pods 0, networkVolumes 0",
+   "evidence": "out/packing/screen/screen.json is complete and fetched; the screen need not be re-measured"
+  }
+ ]
 }

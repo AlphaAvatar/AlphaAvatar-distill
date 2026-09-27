@@ -1468,7 +1468,7 @@
   },
   {
    "file": "tests/pod/test_c3_batching_pilot_driver.py",
-   "line": 250,
+   "line": 248,
    "kind": "pytest.skip",
    "function": "test_check_inputs_resolves_the_real_profiles",
    "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
@@ -1484,7 +1484,7 @@
   },
   {
    "file": "tests/pod/test_c3_packing_pilot.py",
-   "line": 173,
+   "line": 177,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
@@ -2334,5 +2334,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "1587e5914d60010f83d5069e05f0b29f5f678b363e071dcd4ac6f1f786883adc"
+ "digest": "97d221954db2f8ed5028a484dc1bf9a47f7ae1b7d7157968367dfd219a786096"
 }

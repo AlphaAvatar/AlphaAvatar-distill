@@ -29,6 +29,7 @@ export HF_HOME=/workspace/hf
 export PIP_DISABLE_PIP_VERSION_CHECK=1
 export PYTHONHASHSEED=7          # a per-process random hash has failed a gate before
 export TOKENIZERS_PARALLELISM=false
+SCREEN_FROM="${SCREEN_FROM:-}"
 
 note() { echo "$*" >> "${OUTROOT}/session_notes.txt"; }
 
@@ -209,8 +210,13 @@ say "preflight ok: $(python3 -c "import json;print(json.load(open('${OUTROOT}/pr
 
 # --- the pilot ---------------------------------------------------------------
 say "PILOT: parent, then the three-layer packing screen, then at most one full scorer"
+SCREEN_ARG=""
+if [ -n "${SCREEN_FROM:-}" ] && [ -f "${SCREEN_FROM}" ]; then
+  SCREEN_ARG="--screen-from ${SCREEN_FROM}"
+  say "reusing the measured screen at ${SCREEN_FROM}"
+fi
 PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_pilot_driver.py \
-    --out "${OUTROOT}/packing" 2>&1 | tee "${OUTROOT}/packing.log"
+    --out "${OUTROOT}/packing" ${SCREEN_ARG} 2>&1 | tee "${OUTROOT}/packing.log"
 RC=${PIPESTATUS[0]}
 say "pilot rc=${RC}"
 

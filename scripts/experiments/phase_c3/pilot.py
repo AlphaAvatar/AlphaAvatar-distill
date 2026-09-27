@@ -49,7 +49,7 @@ __all__ = [
     "target_spec", "arm_spec", "replay_prefix", "ARM_IDS", "arm_id",
     "prefix_spec", "verified_parent", "run_arm", "CAUSAL_STEP_INDEX",
     "PACKING_CONFIG_KEY", "DEFAULT_PACKING",
-    "required_profiles", "check_inputs",
+    "required_profiles", "check_inputs", "resolve_items",
 ]
 
 #: EXPLICIT, and deliberately not `DEFAULT_EXECUTION`. See the module docstring.
@@ -455,3 +455,24 @@ def check_inputs(repo_root: str | Path = ".", say=print) -> int:
             say(f"  {m}")
         return 30
     return 0
+
+
+def resolve_items(repo_root: str | Path, profile_id: str):
+    """The frozen mixture, RESOLVED and PREPARED. One implementation.
+
+    `profile.resolve` returns the raw records -- `ids`, not `input_ids` --
+    and every operator reads the prepared form. That gap cost two paid
+    failures: the screen hit it first and was fixed there, and the FULL
+    SCORER hit the identical line twenty minutes of GPU time later, because
+    the fix had been applied at one call site and the toy path supplies its
+    own items so the real branch never ran.
+
+    It lives here, beside `required_profiles`, so there is one place to get
+    it wrong and one place that is tested against the real mixture.
+    """
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items)
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    raw = get_profile(profile_id).resolve(repo_root)
+    return prepare_calibration_items(raw, profile_id=profile_id)

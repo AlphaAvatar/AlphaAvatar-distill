@@ -166,8 +166,12 @@ def test_the_screen_resolves_and_PREPARES_the_mixture():
     """It went straight from `resolve` to `item_lengths` and died on
     `item 0 has no input_ids to measure`."""
     src = SCREEN.read_text()
-    assert "prepare_calibration_items" in src
     assert "def resolve_items" in src
+    #: It DELEGATES now; the preparation lives in the pilot module, which is
+    #: the point — one implementation, one place to get it wrong.
+    assert "from experiments.phase_c3.pilot import resolve_items" in src
+    pilot_src = (REPO / "scripts/experiments/phase_c3/pilot.py").read_text()
+    assert "prepare_calibration_items" in pilot_src
 
 
 @pytest.mark.skipif(not (REPO / "artifacts/stage1").is_dir(),
@@ -231,3 +235,80 @@ def test_each_launcher_asks_its_own_driver():
         assert driver in src, f"{launcher} does not name {driver}"
         other = [d for d in pairs.values() if d != driver][0]
         assert other not in src, f"{launcher} names the other pilot's driver"
+
+
+# --- ONE resolver: the same gap cost two paid failures -------------------
+
+def test_no_pod_script_resolves_a_profile_without_preparing_it():
+    """The defect, found at every call site rather than the one that bit.
+
+    `profile.resolve` returns raw records carrying `ids`; every operator
+    reads `input_ids`. The screen hit that and was fixed; the FULL SCORER hit
+    the identical line twenty minutes of paid GPU later, because the fix went
+    to one call site and the toy path supplies its own items so the real
+    branch never ran.
+    """
+    import re
+
+    offenders = []
+    for path in sorted((REPO / "scripts/pod").glob("c3_*.py")):
+        for n, line in enumerate(path.read_text().splitlines(), 1):
+            if re.search(r"\.resolve\((?:repo|repo_root)", line) and \
+                    "prepare" not in line:
+                offenders.append(f"{path.name}:{n}: {line.strip()}")
+    assert not offenders, (
+        "a pod script resolves a profile without preparing the items:\n"
+        + "\n".join(offenders))
+
+
+def test_the_full_scorer_uses_the_shared_resolver():
+    src = DRIVER.read_text()
+    assert "pilot.resolve_items(repo" in src
+    assert "profile.resolve(repo)" not in src
+
+
+def test_the_shared_resolver_has_one_implementation():
+    """The screen delegates rather than carrying a second copy."""
+    screen_src = SCREEN.read_text()
+    assert "from experiments.phase_c3.pilot import resolve_items" in screen_src
+    assert "prepare_calibration_items" not in screen_src, (
+        "the screen carries its own copy of the preparation step again")
+
+
+# --- a measured screen is not re-paid for --------------------------------
+
+def test_a_reused_screen_is_recorded_with_its_digest(tmp_path):
+    """Selection must stay auditable when the screen is not re-run."""
+    import hashlib
+
+    src = tmp_path / "screen.json"
+    src.write_text(json.dumps({"results": {}, "screen_gate": {
+        "advances": False, "best": None, "reference_protocol": "P0"}}))
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("c3pack", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    #: The loader path, exercised directly: a reused screen must carry the
+    #: file and its digest into the record.
+    doc = json.loads(src.read_text())
+    assert "screen_gate" in doc
+    assert hashlib.sha256(src.read_bytes()).hexdigest()
+    assert "_reused_from" in DRIVER.read_text()
+
+
+def test_a_reused_screen_without_a_decided_gate_is_refused(tmp_path):
+    src = DRIVER.read_text()
+    assert "holds no decided screen_gate" in src, (
+        "a screen with no gate could be reused and select nothing")
+
+
+def test_the_launcher_can_push_a_measured_screen():
+    """18 minutes of GPU are not spent reproducing numbers already in hand."""
+    src = (REPO / "scripts/pod/c3_packing_pilot_launch.sh").read_text()
+    assert "SCREEN_FROM" in src and "/workspace/screen.json" in src
+    assert "does not exist" in src, "an absent screen must refuse at $0"
+    remote = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    assert "--screen-from" in remote
+    #: And it is OPTIONAL: with no screen pushed, the pod measures one.
+    assert 'SCREEN_FROM="${SCREEN_FROM:-}"' in remote

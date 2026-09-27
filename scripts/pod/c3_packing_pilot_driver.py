@@ -55,7 +55,8 @@ def load_scope(repo: Path) -> dict:
 
 
 def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
-        parent_dir: str | None = None, deadline=None) -> dict:
+        parent_dir: str | None = None, screen_from: str | None = None,
+        deadline=None) -> dict:
     import torch
 
     from aadistill.initialization.adapters import register_builtin_adapters
@@ -214,8 +215,27 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     #: a $0 test asserts that this call site overrides nothing when `toy` is
     #: false.
     screen_kwargs = {"items": items, "layers": [0, 1]} if toy else {}
-    screen = run_screen(parent_path, out_dir / "screen", repo=repo,
-                        device=device, deadline=deadline, **screen_kwargs)
+    if screen_from:
+        #: REUSED, not re-paid for. The screen is a MEASUREMENT: rerunning
+        #: it would cost 18 minutes of GPU to reproduce numbers already in
+        #: hand, and the budget for this campaign does not have 18 minutes
+        #: to spare. The file's sha256 is recorded so the selection stays
+        #: auditable, and it must already carry a decided gate.
+        import hashlib
+
+        src = Path(screen_from)
+        screen = json.loads(src.read_text())
+        digest = hashlib.sha256(src.read_bytes()).hexdigest()
+        if "screen_gate" not in screen:
+            raise PilotError(
+                f"{screen_from} holds no decided screen_gate; a reused "
+                "screen must already have selected a candidate")
+        screen["_reused_from"] = {"file": str(src), "sha256": digest}
+        _say(f"stage 3/7: REUSING the measured screen from {src.name} "
+             f"({digest[:16]}…)")
+    else:
+        screen = run_screen(parent_path, out_dir / "screen", repo=repo,
+                            device=device, deadline=deadline, **screen_kwargs)
     checkpoint("screen", screen)
 
     # --- 4. the screen gate -------------------------------------------------
@@ -332,7 +352,13 @@ def _full_scorer(parent_path, protocol, out_dir, *, repo, device, dtype,
     from aadistill.initialization.operators.base import OperatorContext
 
     profile = get_profile(step.profile_id)
-    items = (pilot_toy_items() if toy else profile.resolve(repo))
+    #: `pilot.resolve_items`, NOT `profile.resolve`. The raw records carry
+    #: `ids`; every operator reads `input_ids`. This line raised
+    #: `item 0 has no input_ids to measure` after twenty minutes of paid GPU
+    #: time, because the identical fix had been applied to the screen alone
+    #: and the toy path supplies its own items.
+    items = (pilot_toy_items() if toy else pilot.resolve_items(repo,
+                                                               step.profile_id))
     model = AutoModelForCausalLM.from_pretrained(
         parent_path, dtype=dtype).to(device).eval()
     parent_spec = QWEN3_ADAPTER.spec_of(model)
@@ -406,6 +432,9 @@ def main(argv=None) -> int:
     ap.add_argument("--parent", default=None,
                     help="a durable verified parent to reuse instead of "
                          "replaying the prefix")
+    ap.add_argument("--screen-from", default=None,
+                    help="a completed screen.json to reuse instead of "
+                         "re-measuring it")
     ap.add_argument("--device", default=None)
     ap.add_argument("--toy", action="store_true")
     ap.add_argument("--required-inputs", action="store_true",
@@ -440,7 +469,7 @@ def main(argv=None) -> int:
     out.mkdir(parents=True, exist_ok=True)
     try:
         run(out, repo=Path(args.repo), toy=args.toy, device=device,
-            parent_dir=args.parent)
+            parent_dir=args.parent, screen_from=args.screen_from)
     except Exception as exc:      # noqa: BLE001 - a paid pod has died in one
         _write(out / "packing_failure.json", {
             "error": f"{type(exc).__name__}: {exc}",

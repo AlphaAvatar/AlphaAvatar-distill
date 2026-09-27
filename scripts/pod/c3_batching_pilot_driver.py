@@ -61,67 +61,11 @@ def load_scope(repo: Path) -> dict:
     return json.loads((repo / PILOT_DIR / "scope.json").read_text())
 
 
-def required_profiles(repo: Path) -> list:
-    """Every calibration mixture the REAL pilot path resolves, derived.
-
-    DERIVED, not listed. Attempt a1 staged one mixture and died 24 minutes in
-    because the prefix uses two — DEPTH and FFN on `domain_balanced@v1`,
-    WIDTH on `reasoning_heavy@v2` — which is the exact non-uniformity a
-    review had already corrected in the pilot module. A hand-written list is
-    a second place for that fact to be wrong; this asks the steps.
-
-    Each entry carries the profile's OWN `items_path` and `items_file_sha256`,
-    so a stager verifies against the profile rather than against a constant
-    copied beside it.
-    """
-    from aadistill.initialization.calibration.profiles import get_profile
-
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c3 import pilot
-
-    register_builtin_profiles()
-    seen, out = set(), []
-    steps = list(pilot.prefix_steps()) + [pilot.causal_step(1)]
-    for step in steps:
-        if step.profile_id in seen:
-            continue
-        seen.add(step.profile_id)
-        profile = get_profile(step.profile_id)
-        out.append({"profile_id": step.profile_id,
-                    "items_path": profile.items_path,
-                    "items_file_sha256": profile.items_file_sha256,
-                    "materialized": bool(profile.materialized)})
-    return out
-
-
-def check_inputs(repo: Path) -> int:
-    """Resolve every required mixture for real, and say what is missing.
-
-    This is the check attempt a1 did not have. The pod-side preflight it DID
-    have runs the driver's `--toy` mode, which supplies `calibration_items`
-    explicitly and therefore never resolves a profile at all — so the one
-    gate standing before 24 minutes of GPU work could not see the one input
-    that was absent.
-    """
-    from aadistill.initialization.calibration.profiles import (
-        CalibrationError, get_profile)
-
-    missing = []
-    for entry in required_profiles(repo):
-        try:
-            items = get_profile(entry["profile_id"]).resolve(repo)
-        except (CalibrationError, OSError) as exc:
-            missing.append(f"{entry['profile_id']}: {exc}")
-            _say(f"  MISSING {entry['profile_id']} -> {entry['items_path']}")
-            continue
-        _say(f"  ok {entry['profile_id']}: {len(items)} items from "
-             f"{entry['items_path']}")
-    if missing:
-        _say("INPUTS UNAVAILABLE; the pilot would fail after the GPU work:")
-        for m in missing:
-            _say(f"  {m}")
-        return 30
-    return 0
+#: `required_profiles` and `check_inputs` lived here until the packing pilot
+#: needed the same answer. They are now `experiments.phase_c3.pilot`'s, which
+#: owns the steps the answer is derived from; `main` delegates. The copies
+#: that used to sit here also resolved a profile WITHOUT preparing its items,
+#: which is the gap that later cost a paid full scorer.
 
 
 # --- toy mode: the same sequence, at a geometry a CPU can finish -----------

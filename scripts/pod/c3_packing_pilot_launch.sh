@@ -345,6 +345,18 @@ while read -r line <&3; do
   PUSHED=$((PUSHED + 1))
   say "  pushed ${REL}"
 done 3< "$INPUTS"
+
+#: An ALREADY-MEASURED screen, pushed so the pod does not re-pay for it.
+#: The screen is a measurement, not a setup step: re-running it would spend
+#: 18 minutes of GPU reproducing numbers already in hand. Its sha256 is
+#: recorded by the driver, so the candidate selection stays auditable.
+if [ -n "${SCREEN_FROM:-}" ]; then
+  [ -f "$SCREEN_FROM" ] || { say "SCREEN_FROM ${SCREEN_FROM} does not exist"; exit 4; }
+  timeout 300 scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+      -P "${SSH_PORT}" "$SCREEN_FROM" "root@${SSH_HOST}:/workspace/screen.json" \
+      >>"$LOG" 2>&1 || { say "FAILED to push the measured screen"; exit 3; }
+  say "  pushed a measured screen ($(wc -c < "$SCREEN_FROM") B, sha256 $(sha256sum "$SCREEN_FROM" | cut -c1-16)…)"
+fi
 #: COUNTED, because "the loop ran" and "the loop ran to the end" are different
 #: claims and a3 could not tell them apart.
 WANT=$(grep -c . "$INPUTS")
@@ -356,7 +368,7 @@ say "pushed ${PUSHED}/${WANT} required mixtures"
 
 # --- run --------------------------------------------------------------------
 say "setup + pilot (bounded at ${MAX_SECONDS}s)"
-timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
+timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} SCREEN_FROM=${SCREEN_FROM:+/workspace/screen.json} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
 RC=$?
 say "remote finished rc=${RC}"
 

@@ -225,13 +225,11 @@ def test_each_entry_carries_the_profiles_own_pinned_hash():
     from experiments.calibration import register_builtin_profiles
 
     register_builtin_profiles()
-    sys.path.insert(0, str(REPO / "scripts/pod"))
-    import importlib.util
+    #: The derivation moved to the pilot module when a second pilot needed
+    #: the same answer; the drivers delegate to it.
+    from experiments.phase_c3 import pilot
 
-    spec = importlib.util.spec_from_file_location("c3drv", DRIVER)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    for entry in mod.required_profiles(REPO):
+    for entry in pilot.required_profiles(REPO):
         profile = get_profile(entry["profile_id"])
         assert entry["items_file_sha256"] == profile.items_file_sha256
         assert entry["items_path"] == profile.items_path
