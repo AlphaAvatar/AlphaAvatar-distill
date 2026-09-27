@@ -1,0 +1,170 @@
+{
+ "schema": "aadistill.phase_c3.packing_screen_result/v1",
+ "_contract": "The committed record of the packing-optimization pilot's MEASURED screen. The full-scorer leg was NOT run: the remaining campaign budget cannot fund it, and §18 says stop rather than silently drop required work.",
+ "status": "SCREEN COMPLETE; FULL SCORER NOT FUNDED",
+ "is_formal_c3": false,
+ "subrun_id": "c3pack_20260927_b2",
+ "pod_id": "p6doyk8jeydg1u",
+ "gpu": "NVIDIA L40S",
+ "executed_source_sha": "fcb42627bfd5167410540e1aa78c90e19d26c398",
+ "parent": {
+  "artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "replays_this_session": 1,
+  "wall_minutes": 21.8,
+  "_reproductions_to_date": 3
+ },
+ "screen": {
+  "layers": [
+   0,
+   13,
+   27
+  ],
+  "protocol_order": [
+   "P0",
+   "P1",
+   "P2",
+   "P3"
+  ],
+  "n_items": 67,
+  "valid_positions": 59830,
+  "_all_heads": true,
+  "results": {
+   "P0": {
+    "calibration_forward_batch_size": 1,
+    "calibration_batch_packing": "original_order_v1",
+    "wall_seconds": 292.5478,
+    "physical_forward_invocations": 6499,
+    "invocations_per_minute": 1332.91,
+    "valid_positions_per_second": 19633.3,
+    "executed_positions": 5803510,
+    "executed_padded_positions": 0,
+    "padding_over_valid_full_corpus": 0.0,
+    "peak_vram_gib": 3.942,
+    "n_groups": 67,
+    "position": 1
+   },
+   "P1": {
+    "calibration_forward_batch_size": 2,
+    "calibration_batch_packing": "original_order_v1",
+    "wall_seconds": 289.324,
+    "physical_forward_invocations": 3298,
+    "invocations_per_minute": 683.94,
+    "valid_positions_per_second": 19852.07,
+    "executed_positions": 6966152,
+    "executed_padded_positions": 1162642,
+    "padding_over_valid_full_corpus": 0.20033428046130702,
+    "peak_vram_gib": 6.548,
+    "n_groups": 34,
+    "position": 2
+   },
+   "P2": {
+    "calibration_forward_batch_size": 2,
+    "calibration_batch_packing": "length_sorted_v1",
+    "wall_seconds": 252.614,
+    "physical_forward_invocations": 3298,
+    "invocations_per_minute": 783.33,
+    "valid_positions_per_second": 22736.98,
+    "executed_positions": 5910501,
+    "executed_padded_positions": 106991,
+    "padding_over_valid_full_corpus": 0.01843556744108307,
+    "peak_vram_gib": 6.526,
+    "n_groups": 34,
+    "position": 3
+   },
+   "P3": {
+    "calibration_forward_batch_size": 4,
+    "calibration_batch_packing": "length_sorted_v1",
+    "wall_seconds": 250.6859,
+    "physical_forward_invocations": 1649,
+    "invocations_per_minute": 394.68,
+    "valid_positions_per_second": 22911.86,
+    "executed_positions": 6064537,
+    "executed_padded_positions": 261027,
+    "padding_over_valid_full_corpus": 0.04497743606886177,
+    "peak_vram_gib": 11.296,
+    "n_groups": 17,
+    "position": 4
+   }
+  },
+  "speedup_vs_P0": {
+   "P0": 1.0,
+   "P1": 1.0111,
+   "P2": 1.1581,
+   "P3": 1.167
+  },
+  "gate": {
+   "_selection": "by measured wall time ALONE; no head-map result is read",
+   "advance_threshold": 1.1,
+   "advances": true,
+   "best": {
+    "protocol": "P3",
+    "screen_speedup": 1.167,
+    "wall_seconds": 250.6859
+   },
+   "ranked": [
+    {
+     "protocol": "P3",
+     "screen_speedup": 1.167,
+     "wall_seconds": 250.6859
+    },
+    {
+     "protocol": "P2",
+     "screen_speedup": 1.1581,
+     "wall_seconds": 252.614
+    },
+    {
+     "protocol": "P1",
+     "screen_speedup": 1.0111,
+     "wall_seconds": 289.324
+    }
+   ],
+   "reference_protocol": "P0",
+   "reference_wall_seconds": 292.5478
+  },
+  "sha256": "a1debbd8de1e1f651a1d3bad134df64b3ac93929829358bf648b52a5c651afda"
+ },
+ "findings": {
+  "packing_not_batch_size": "P1 (B2, consecutive) is 1.011x -- nothing. P2 (B2, length-sorted) is 1.158x at the SAME invocation count. The difference between them is padding alone, so what buys the speed is the packing.",
+  "b4_failed_on_packing": "P3 (B4, length-sorted) is 1.167x FASTER, where B4 consecutive measured 0.6872x on the full scorer. Sorting turns the same batch size from 1.46x slower into 1.17x faster. B4's problem was its packing.",
+  "padding_derived_at_zero_dollars": "the $0 table predicted it: consecutive B4 pads 36.73% of valid positions, sorted B4 pads 4.50%, sorted B2 pads 1.84%.",
+  "screen_is_not_the_adoption_gate": "1.167x clears the 1.10x SCREEN threshold, which only decides what is worth a full scorer. The adoption threshold is 1.25x on the full 28-layer scorer and remains unmeasured."
+ },
+ "comparability": {
+  "_predeclared": true,
+  "tolerance": 0.05,
+  "prior_full_b1_seconds": 2190.1708,
+  "observed_screen_P0_seconds": 292.5478,
+  "ratio_vs_scaled_prior": 1.2467,
+  "comparable": false,
+  "_consequence": "the prior full B1 may NOT serve as the full-run reference, so the remaining chain needs TWO full scorers: a fresh B1 and the candidate."
+ },
+ "why_it_stopped": {
+  "rule": "§18 -- if the permitted chain cannot fit the remaining campaign budget, stop rather than silently dropping required work.",
+  "ceiling_usd": 3.0,
+  "spent_usd": 1.276,
+  "teardown_reserve_usd": 0.1,
+  "remaining_usd": 1.624,
+  "remaining_minutes_at_1_09": 89,
+  "chain_minutes_required": "100.5 to 109 (setup 3 + parent 22 + fresh full B1 36.5-45 + candidate full 39)",
+  "fits": false,
+  "_what_was_NOT_dropped": "the fresh full B1 is required by the predeclared comparability rule; running only the candidate would be dropping it."
+ },
+ "to_resume": {
+  "_needs": "a new or raised engineering ceiling; ~$2.00 at $1.09/h covers the parent replay and both full scorers.",
+  "_reusable": [
+   "the measured screen (sha256 above), pushable with SCREEN_FROM so it is not re-paid for",
+   "the candidate selection: P3, by wall time alone"
+  ],
+  "_repairs_required_first": [
+   "bound the pod-side toy preflight with a timeout -- it hung for 23+ minutes on b3 and consumed $0.4863",
+   "run the preflight on cuda:0, or pin its thread count from the cgroup quota: nproc reports the host's CPUs, not the container's grant",
+   "stream the preflight's output instead of redirecting it to a file, so 23 minutes does not look like 16 seconds"
+  ]
+ },
+ "may_not_be_read_as": [
+  "a full-scorer speedup",
+  "an adoption decision",
+  "a reason to change DEFAULT_MICRO_BATCH_SIZE",
+  "a formal C3 result"
+ ]
+}

@@ -284,7 +284,14 @@ class TestTheSnapshotStatesTheRequiredFacts:
         #: state is that the pilot is not mistaken for formal C3.
         pilot = c3["batching_adoption_pilot"]
         assert any(pilot.startswith(state) for state in
-                   ("AUTHORIZED", "EXECUTED", "NOT AUTHORIZED")), pilot
+                   ("AUTHORIZED", "EXECUTED", "NOT AUTHORIZED", "CLOSED")), pilot
+        #: A SECOND pilot exists now, and it is in a third state: executed in
+        #: part, stopped because its remaining chain did not fit its ceiling.
+        #: The boundary that must hold for BOTH is the same one.
+        for key, entry in c3.items():
+            if key.endswith("_pilot"):
+                assert "ot formal C3" in entry, (
+                    f"{key} does not say it is not formal C3")
         if pilot.startswith("AUTHORIZED"):
             assert "NOT EXECUTED" in pilot
         else:

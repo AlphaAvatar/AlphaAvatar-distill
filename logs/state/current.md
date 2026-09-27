@@ -1708,6 +1708,55 @@ blind spot). Every pod torn down and confirmed.
 `$25.00` envelope is not current permission at this cap. The pilot seed
 `1139220455` is pilot-only.
 
+### The packing-optimization pilot: the screen is measured, the full scorer is not funded
+
+**Measured 2026-09-27, `c3pack_20260927_b2`.** Owner:
+[`screen_result.json`](../stages/stage-1/phase_c3/pilots/packing-optimization/v1/screen_result.json).
+
+The previous pilot's verdict was about ONE protocol. `micro_batches` states
+plainly that it never sorts by length, so consecutive B4 paid 36.73% padding.
+The `$0` table said sorting would fix most of that, and the screen measured
+what it buys — 67 items, 32 heads, layers `[0, 13, 27]`:
+
+|    | B | packing | wall | invocations | valid pos/s | peak VRAM | vs P0 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| P0 | 1 | original | 292.5 s | 6,499 | 19,633 | 3.94 GiB | 1.000 |
+| P1 | 2 | original | 289.3 s | 3,298 | 19,852 | 6.55 GiB | **1.011** |
+| P2 | 2 | sorted | 252.6 s | 3,298 | 22,737 | 6.53 GiB | **1.158** |
+| P3 | 4 | sorted | 250.7 s | 1,649 | 22,912 | 11.30 GiB | **1.167** |
+
+**Packing buys the speed; batch size alone does not.** P1 and P2 issue the
+same 3,298 invocations over the same items and differ only in which items
+share a forward: 1.011× against 1.158×. And **B4 failed on its packing, not
+its batch size** — P3 is 1.167× faster where consecutive B4 measured 0.687×.
+
+P3 advances the 1.10× screen gate, by wall time alone. **That is not the
+adoption gate**: 1.25× on the full 28-layer scorer remains unmeasured.
+
+**The ±5% comparability rule fired.** This session's P0 is 1.2467× the scaled
+prior full B1, so the prior may not serve as the reference and the chain needs
+**two** full scorers, a fresh B1 and the candidate.
+
+**STOPPED under §18.** Ceiling `$3.00`, spent `$1.2760`, `$1.6240` after the
+teardown reserve = 89 min at `$1.09/h`. The chain needs 100–109 min. Running
+only the candidate would be dropping the fresh B1 the comparability rule
+requires, so the pilot stops rather than silently dropping it.
+
+Three subruns: b1 `$0.0000` (the launcher asked its own driver for a mode
+that lived in the other driver; fail-closed, no pod), b2 `$0.7897` (parent
+verified a third time, screen complete, then the full scorer hit the *same*
+unprepared-items line the screen had hit earlier in the session — one fix,
+one call site, and the toy path supplies its own items so the real branch
+never ran), b3 `$0.4863` (the toy preflight hung for 23+ minutes against 16 s
+on the batching pilot's pod, and was unbounded; terminated by removing the
+pod). All torn down, provider confirms **pods 0, volumes 0**.
+
+**To resume**, a new ceiling of about `$2.00` covers the parent replay and
+both full scorers. The measured screen is reusable — pushable with
+`SCREEN_FROM`, sha256 recorded — so it is not re-paid for. Three repairs are
+required first: bound the preflight, run it on `cuda:0` or pin its thread
+count from the cgroup quota, and stream its output.
+
 ## Readiness
 
 <!-- readiness:begin -->
@@ -1830,9 +1879,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$22.8249` of `$45.4425` |
-| GPU engineering | `$1.1306` of `$6.0000` |
-| package | `$23.9555` of `$51.4425` |
-| project cap | `$346.8396` spent of `$370.0000`, leaving `$23.1604` |
+| GPU engineering | `$0.6443` of `$6.0000` |
+| package | `$23.4692` of `$51.4425` |
+| project cap | `$347.3259` spent of `$370.0000`, leaving `$22.6741` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

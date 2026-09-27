@@ -97,6 +97,30 @@
    "repair": "one resolve_items in the pilot module; the screen delegates and the full scorer calls it. A $0 test greps EVERY scripts/pod/c3_*.py for a profile resolve without preparation, which immediately found a third, dead, copy in the batching driver; it was deleted.",
    "teardown": "confirmed by provider query: pods 0, networkVolumes 0",
    "evidence": "out/packing/screen/screen.json is complete and fetched; the screen need not be re-measured"
+  },
+  {
+   "subrun_id": "c3pack_20260927_b3",
+   "pod_id": "25kncjfmakxxul",
+   "gpu": "NVIDIA L40S",
+   "rate_usd_per_hour": 1.09,
+   "container_disk_gb": 120,
+   "elapsed_minutes": 26.383,
+   "cost_usd": 0.4863,
+   "cost_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately",
+   "executed_source_sha": "1a086541",
+   "verdict": "FAIL",
+   "failure_class": "engineering",
+   "stage_reached": "the pod-side toy preflight, before the parent replay",
+   "achieved": "inputs staged and BOTH mixtures resolved; the measured screen was pushed and verified (3188 B, sha256 a1debbd8de1e1f65…)",
+   "failure": "the toy preflight HUNG. It ran for 23+ minutes against 16 seconds for the batching pilot's preflight on the same image, and was terminated by removing the pod.",
+   "_likely_cause": "the preflight runs `--device cpu` under /opt/train's CUDA-built torch. `nproc` reports the HOST's CPUs, not the cgroup grant, so torch sizes its thread pool far above the container's quota and thrashes. This repository has recorded that container CPU count lies; the packing preflight does strictly more CPU work than the batching one (a four-protocol screen plus two full toy scorers) and crossed the threshold where it matters. NOT CONFIRMED -- no diagnosis was run on the pod, because diagnosing it there costs $1.09/h.",
+   "_second_defect": "the preflight was UNBOUNDED. Every other long step in this launcher has a timeout; this one could consume the session, and did. It also redirects to its own file, so its progress was invisible in the launch log -- 23 minutes looked identical to 16 seconds until the clock was read.",
+   "repair_required_before_relaunch": [
+    "bound the preflight with a timeout",
+    "run it on the device the pod has (cuda:0) rather than cpu, or pin the thread count from the cgroup quota",
+    "stream its output"
+   ],
+   "teardown": "pod removed manually to stop billing; provider confirms pods 0, networkVolumes 0. The launcher's own EXIT trap then confirmed the same and booked the cost."
   }
  ]
 }

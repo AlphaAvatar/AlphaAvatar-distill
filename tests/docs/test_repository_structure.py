@@ -240,19 +240,26 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     """It had grown to 33 KB and 28 keys by absorbing per-attempt history that
     already lived in the per-run directories.
 
-    The ceiling moved 12_000 -> 13_000 on 2026-09-27, and the reason is
-    recorded here rather than left as a bare number. The snapshot began
-    carrying a SECOND live authorization — the C3 batching-adoption pilot,
-    with its own ceiling and its own not-formal-C3 boundary — alongside the
-    C1 execution package. That is current state, which this file owns, and
-    not history, which it does not. A raise for history would be the failure
-    this guard exists to catch, so the shape check below now asks that
-    question directly instead of leaving the byte count to imply it.
+    The ceiling moved 12_000 -> 13_000 and then -> 13_500, both on
+    2026-09-27, and the reasons are recorded here rather than left as bare
+    numbers. The snapshot began carrying a SECOND live authorization (the C3
+    batching-adoption pilot) and then a THIRD (the packing-optimization
+    pilot, stopped mid-chain with its screen measured), alongside the C1
+    execution package and the operator's engineering state. All of that is
+    current state, which this file owns, and none of it is history, which it
+    does not.
+
+    TWO RAISES IN ONE DAY IS ITSELF A SIGNAL. Before the next one, reclaim:
+    a pilot that has closed with a verdict owns its figures in its own
+    record and needs only its boundary here, which is what shrank the
+    batching entry to one line. A raise for history would be the failure
+    this guard exists to catch, so the shape check below asks that question
+    directly instead of leaving the byte count to imply it.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 13_000, (
+    assert len(SNAPSHOT.read_bytes()) < 13_500, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")
@@ -265,6 +272,15 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     assert not per_attempt, (
         f"the snapshot has grown per-attempt keys {per_attempt}; those belong "
         "in the per-run directories, not in the live snapshot")
+    #: And no entry may carry a per-subrun cost table: the campaign records
+    #: own those, and copying one here is how 33 KB happened.
+    import json as _json
+
+    text = _json.dumps(snap)
+    for marker in ("cost_usd", "elapsed_minutes", "subruns"):
+        assert marker not in text, (
+            f"the snapshot carries {marker!r}; per-subrun accounting belongs "
+            "to the campaign records, not to the live snapshot")
     for key in ("budget", "frozen", "running", "authorized", "prepared_launch",
                 "next_starting_point"):
         assert key in snap, key
