@@ -1,0 +1,13 @@
+{
+ "schema": "aadistill.autoinit.c1_bundle/v1",
+ "session_commit": "33bd1708359948f57350f1e98f5fe41f3c9250c1",
+ "canonical_bundle_name": "aad_autoinit_33bd1708.bundle",
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "relay_path": "transfer/aad_autoinit_33bd1708.bundle",
+ "sha256": "a420f5ce817ccefe3c1a7118145f5d4b6dc1928e14f9aabb2639e8601c4ec046",
+ "bytes": 19414589,
+ "carries_authorization": "logs/budget/approvals/autoinit_c1_authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_33bd1708.bundle",
+ "verify": "The bundle contains this ref:\n33bd1708359948f57350f1e98f5fe41f3c9250c1 refs/heads/_c1_bundle_33bd17083599\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+ "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies it, checks it out and requires the resulting HEAD, authorization and harness digest to match. This record is the local half; the gate is the remote half."
+}
