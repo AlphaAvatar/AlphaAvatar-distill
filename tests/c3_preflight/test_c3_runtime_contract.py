@@ -185,3 +185,47 @@ def test_a_cuda_device_is_actually_present_and_usable():
     out = (a @ a).float().sum().item()
     assert out == out, "the GEMM produced NaN"
     torch.cuda.synchronize()
+
+
+def test_the_launcher_plan_hash_is_what_the_authorization_bound(registered):
+    """`require_plan` compares these two; a mismatch is exit 98 on a pod.
+
+    The launcher's `_plan_hash()` built a two-arm `C1IsolationPlan` from
+    session constants the rewritten module does not have, on C1's three
+    seeds. It raised at `$0`, which is the gate order working -- but had it
+    merely *run*, it would have produced a hash the authorization does not
+    carry, and the failure would have been `AUTHORIZATION_MISMATCH` after
+    setup had been paid for. One owner now: the session contract hash.
+    """
+    import importlib.util
+
+    auth_path = REPO / "logs/budget/approvals/autoinit_c3_authorization.json"
+    if not auth_path.is_file():
+        pytest.skip("no C3 authorization has been issued in this checkout")
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    spec = importlib.util.spec_from_file_location("c3launch_ph", LAUNCH)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    bound = json.loads(auth_path.read_text())["bound"]["session_contract_hash"]
+    assert mod._plan_hash() == bound, (
+        f"the launcher computes plan hash {mod._plan_hash()[:16]} and the "
+        f"authorization binds {bound[:16]}; the preflight would exit 98")
+
+
+def test_the_launcher_expects_nine_probe_streams_on_c3_s_seeds():
+    """Six streams would let a nine-probe session come home missing three."""
+    import importlib.util
+
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    spec = importlib.util.spec_from_file_location("c3launch_ps", LAUNCH)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    streams = mod.probe_streams(None)
+    assert len(streams) == 9, f"{len(streams)} probe streams, expected 9"
+    for seed in CS.recovery_seeds():
+        assert any(str(seed) in s for s in streams), f"no stream for seed {seed}"
+    for stale in (1635674081, 1656475568, 696460635):
+        assert not any(str(stale) in s for s in streams), (
+            f"a probe stream names C1's seed {stale}")

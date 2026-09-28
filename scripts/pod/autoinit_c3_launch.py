@@ -60,7 +60,8 @@ from experiments.run_layout import (  # noqa: E402
 from experiments.phase_c3 import session as CS
 from experiments.phase_c3.authorization import CURRENT_CLOSURE_SNAPSHOT, C3Authorization, c3_budget_spec, c3_hard_ceiling_usd, c3_harness_digest, c3_billed_rate_usd_per_hour  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
-from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+#: `derive_recovery_seeds` is deliberately NOT imported: it returns C1's
+#: three seeds, and this launcher used them in three places.
 from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
 from experiments.phase_c1.pod_environment import (  # noqa: E402
@@ -813,13 +814,13 @@ def frozen_c3_science_gate(ctx: SessionContext) -> tuple[bool, str]:
     reviewed.
     """
     problems = []
-    seeds = derive_recovery_seeds()
-    if seeds != [1635674081, 1656475568, 696460635]:
-        problems.append(f"derived seeds moved: {seeds}")
-    if CS.EXPECTED_PARENT_DIGEST != (
+    seeds = list(CS.recovery_seeds())
+    if seeds != [217230555, 1151307191, 2045359208]:
+        problems.append(f"C3's derived seeds moved: {seeds}")
+    if CS.expected_parent_digest() != (
             "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722"):
         problems.append("the parent replay digest moved")
-    if CS.EXPECTED_INCUMBENT_DIGEST != (
+    if CS.expected_incumbent_digest() != (
             "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6"):
         problems.append("the incumbent replay digest moved")
     battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())
@@ -1253,9 +1254,12 @@ def driver_command(ctx: SessionContext, plan) -> str:
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     """Every probe's training event stream must come home before teardown."""
-    return tuple(f"artifacts/stage3/c3/{arm}_{seed}/train_log.jsonl"
-                 for arm in ("incumbent", "treatment")
-                 for seed in derive_recovery_seeds())
+    #: `autoinit.v1.phase_c3.<arm>.<seed>` is the probe id the driver writes
+    #: under; the arm list and the seeds both come from the frozen plan, so
+    #: nine streams are required rather than the six a literal pair gives.
+    return tuple(f"artifacts/stage3/c3/autoinit.v1.phase_c3.{arm}.{seed}/train_log.jsonl"
+                 for arm in CS.arm_ids()
+                 for seed in CS.recovery_seeds())
 
 
 def spec(args) -> SessionSpec:
@@ -1388,19 +1392,22 @@ def spec(args) -> SessionSpec:
 
 
 def _plan_hash() -> str:
-    """The frozen C1IsolationPlan's hash, rebuilt rather than transcribed."""
-    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
-    from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
+    """The C3 session contract's hash, rebuilt rather than transcribed.
 
-    attention_activation.register(replace=True)
-    battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())
-    return C1IsolationPlan(
-        plan_id="autoinit.v1.phase_c3",
-        arms=(C1Arm("c1.incumbent", "incumbent", *CS.INCUMBENT_ATTENTION),
-              C1Arm("c1.treatment", "treatment", *CS.TREATMENT_ATTENTION)),
-        seeds=tuple(derive_recovery_seeds()),
-        battery_asset_id=battery["asset_id"],
-        battery_content_sha256=battery["content_sha256"]).plan_hash
+    This built a two-arm `C1IsolationPlan` from `CS.INCUMBENT_ATTENTION` and
+    `CS.TREATMENT_ATTENTION` -- names the rewritten session does not have --
+    on C1's three seeds. It raised at $0 before any pod existed, which is the
+    gate order working, but it would also have produced a hash the
+    authorization does not carry even if it had run.
+
+    The authorization binds `session_contract_hash`, so this returns exactly
+    that: one owner for the value `require_plan` compares. The contract
+    derives its arms, seeds and probe count from the frozen preregistration,
+    so a plan change moves this hash and invalidates the authorization, which
+    is the property wanted.
+    """
+    CS.register_experimental_operators()
+    return CS.C3SessionContract().contract_hash
 
 
 def build_parser():
