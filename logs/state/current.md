@@ -1820,6 +1820,13 @@ nothing has been billed and no scientific measurement has begun.
 | 3 | frozen science | gated on C1's incumbent digest `c313d1b4` (weight_proxy) |
 | 4 | artifact spec | `C3_HARNESS_SOURCE_FILES_V1` survived a rename |
 | 5 | **all gates PASS** | provider capacity refusal — L40S `stockStatus=None` |
+| 6 | pod sweep | post-sweep drift: I edited `current.json` after sweeping |
+| 7 | **a pod ran** | setup OK; driver refused C1's authorization BY TYPE. `$0.15`, torn down, provider confirmed gone |
+| 8, 9 | provider | capacity refusal at `$0` |
+| 10 | **a pod ran** | created, never produced an SSH endpoint in 15 min; abandoned and redrawn, capacity gone. `$0.26` |
+
+**Total C3 spend so far: `$0.41`** of the `$22.1452` derived ceiling. Provider
+state verified clean after every attempt: **pods 0, network volumes 0**.
 
 Attempt 5 cleared: budget, session commit, grant provenance, harness
 (113 files), ceiling, preregistration (3 arms, primary `causal-B1 −
@@ -1829,9 +1836,13 @@ battery), frozen assets, teacher binding, battery staging, artifact spec
 round-trip, renderer parity (7/7 groups, 190 frozen prompts re-rendered byte
 for byte), the pod sweep (17 passed / 0 skipped) and the relay precheck.
 
-**The only thing outstanding is provider capacity**, which §18 of the
-2026-09-28 instruction names as an ordinary transient to back off from
-rather than return for. A `$0` poller watches `stockStatus`.
+**The only thing outstanding is provider capacity.** §18 names it an
+ordinary transient to back off from rather than return for, so a retry
+loop waits for `stockStatus`, builds a fresh one-use chain and relaunches
+unattended. L40S secure capacity is currently intermittent: three outright
+refusals and one pod that never produced an endpoint. **The GPU type is a
+grant boundary** — "secure L40S; no other GPU, no price chasing" — so it
+is not something to change autonomously.
 
 **Each aborted attempt consumed its one-use chain** — P12.1: an invocation
 that ends before measurement produced no measurement to retry, so it is
