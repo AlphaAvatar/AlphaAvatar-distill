@@ -1284,6 +1284,12 @@ def spec(args) -> SessionSpec:
     #: Before anything can be created. A namespace that would permit a second
     #: provider resource never becomes a SessionSpec.
     require_bounded_acquisition(args)
+    #: And a device outside the approved tier never becomes one either. The
+    #: tier is L40S -> RTX 6000 Ada Generation -> L40, chosen by availability;
+    #: anything else needs a maintainer decision, not a flag.
+    from experiments.phase_c3.hardware import require_approved
+
+    require_approved(args.gpu)
     return SessionSpec(
         session_id="autoinit-c3",
         schema="aadistill.autoinit.c3_session/v2",
@@ -1452,7 +1458,13 @@ def build_parser():
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--image",
                     default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
-    ap.add_argument("--gpu", default="NVIDIA L40S")
+    #: An APPROVED type id, validated against the tier rather than trusted.
+    #: The 2026-09-29 amendment replaced "secure L40S only" with a fixed
+    #: ordered availability policy; a type outside the tier is refused here,
+    #: at $0, rather than reaching a create call.
+    ap.add_argument("--gpu", default="NVIDIA L40S",
+                    help="approved GPU type id (L40S, RTX 6000 Ada "
+                         "Generation, or L40) -- selected by availability")
     # Derived from the hash-verified pricing record, not re-declared. The
     # literal 0.99 here survived the reprice to the accepted secure L40S
     # rate of 1.09; it was never a spend risk, because the runner refuses a

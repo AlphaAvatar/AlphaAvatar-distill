@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 113,
- "digest": "67cf0115abe30ebd827b9cc5a346476debb039db82a800541b85009f1f11d548",
+ "n_files": 114,
+ "digest": "6e885ab0fa3f6eb0a9e63914c412b4a9c1be78426fc0514fd2b2bda9ff1b6987",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -169,8 +169,13 @@
   },
   {
    "path": "scripts/experiments/phase_c3/formal_pricing.py",
-   "sha256": "bfb34f900a53a6ba441f5bc2f44e1cf03278a0389a0547e47928f2f61cea3977",
-   "bytes": 13931
+   "sha256": "c54235883a8d819302163b41054b201d007c82918a55d08966fa3536a02330e0",
+   "bytes": 15094
+  },
+  {
+   "path": "scripts/experiments/phase_c3/hardware.py",
+   "sha256": "568931061a24b306c3ed108510646ba9a72f904a2da1eb9b81c7c22f9de85b02",
+   "bytes": 10030
   },
   {
    "path": "scripts/experiments/phase_c3/pod_environment.py",
@@ -209,8 +214,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c3_launch.py",
-   "sha256": "f9e1e7a3dc5317192bc77fe1c120a2abd9b1887203274bd631cadb3aab38fab8",
-   "bytes": 89517
+   "sha256": "7bb7f2cd4e18fe640909b4ce7bc90e0e2a82a3b1a9392623296e155e248eb0ea",
+   "bytes": 90250
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",

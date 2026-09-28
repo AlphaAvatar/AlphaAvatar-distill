@@ -300,18 +300,43 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--rate", type=float, default=None,
                     help="GPU $/h; omit to query the provider live")
-    ap.add_argument("--gpu", default="NVIDIA L40S")
+    ap.add_argument("--gpu", default=None,
+                    help="an approved GPU type id; omit to SELECT the first "
+                         "approved type with usable secure capacity")
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args(argv)
 
-    rate = args.rate if args.rate is not None else query_live_secure_price(args.gpu)
+    #: Selection is by AVAILABILITY over the approved tier, in fixed order.
+    #: An explicit --gpu is still checked against the tier: a type outside it
+    #: is refused rather than priced.
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts"))
+    from experiments.phase_c3.hardware import (
+        C3HardwareError, query_offers, require_approved, select)
+
+    gpu = args.gpu
+    if gpu is not None:
+        require_approved(gpu)
+    if args.rate is not None:
+        rate = args.rate
+        gpu = gpu or "(rate supplied; no device selected)"
+    else:
+        offers = query_offers()
+        chosen = select(offers) if gpu is None else offers.get(gpu)
+        if chosen is None or not chosen.usable:
+            print("no approved GPU has usable secure capacity:", file=sys.stderr)
+            for k, o in offers.items():
+                print(f"  {k}: stock={o.stock_status} "
+                      f"secure={o.secure_price_usd_per_hour}", file=sys.stderr)
+            raise C3HardwareError("the approved tier is dry")
+        gpu, rate = chosen.gpu_type_id, chosen.secure_price_usd_per_hour
     f = assess(rate)
     if args.json:
         print(json.dumps(f.as_dict(), indent=1, sort_keys=True))
         return 0 if f.fundable else 1
 
     p = f.price
-    print(f"live {args.gpu} securePrice  ${p.gpu_rate_usd_per_hour:.4f}/h")
+    print(f"live {gpu} securePrice  ${p.gpu_rate_usd_per_hour:.4f}/h")
     print(f"  + {p.container_disk_gb} GB container disk "
           f"-> billed ${p.billed_rate_usd_per_hour:.6f}/h")
     print(f"  expected  {p.expected_minutes:8.2f} min = "
