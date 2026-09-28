@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 112,
- "digest": "e4249baf7328afe8f820a2ffa313ec6b81d08f166060740d89489c3efcf5cf90",
+ "n_files": 113,
+ "digest": "938606c15aedbe5a8191253c322a8bb0f8991999580910d79fc8f4f07a933a4a",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -173,6 +173,11 @@
    "bytes": 13931
   },
   {
+   "path": "scripts/experiments/phase_c3/pod_environment.py",
+   "sha256": "aaef8e7cc67582556573cd0710211525fe77450bbbfdd390cf4adbee6a5fdd5e",
+   "bytes": 7102
+  },
+  {
    "path": "scripts/experiments/phase_c3/session.py",
    "sha256": "eef40c4fccc1d5e1e336724f1a1224207d2d3cf66849cbd9c10bb36dca1ffd9c",
    "bytes": 23059
@@ -204,8 +209,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c3_launch.py",
-   "sha256": "e854576a28650ffe1235c317c06024d22dff5d3d7ba1f378353dd5d29dd837a7",
-   "bytes": 88298
+   "sha256": "248b509e8765e84210382cb5a393e98a340bbe0c8b9830182c0ab8a252cc9b19",
+   "bytes": 89094
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
