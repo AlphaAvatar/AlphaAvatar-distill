@@ -1,18 +1,18 @@
 {
  "schema": "aadistill.autoinit.c3_outcome/v1",
- "run_id": "attempt7",
+ "run_id": "attempt29",
  "experiment_id": "phase_c3",
  "status": "ABORTED_BEFORE_MEASUREMENT",
  "_what_this_is": "A pre-treatment engineering subrun that created a provider resource and therefore owes a cost record. NO formal recovery training or measurement began, so there is no scientific result and nothing was retried, resumed or pooled (P12.1).",
  "cost": {
-  "actual_usd": 0.1456,
+  "actual_usd": 0.2209,
   "price_per_hour": 1.09,
   "gpu_type_id": "NVIDIA L40S",
   "_derivation": "the session's final cumulative figure, not the sum over its draws"
  },
  "provider_resource_created": true,
  "pod_ids": [
-  "3r1vgzkoa3855r"
+  "8z0iasbo1u9xsj"
  ],
  "final_provider_state": "pods 0, network volumes 0 (verified)"
 }

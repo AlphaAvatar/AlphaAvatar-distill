@@ -23,9 +23,9 @@
   "note": "A complete formal C3 chain exists for the latest attempt: grant, launch-bound readiness, one-use authorization and staged bundle. It is PREPARED, not launched -- no provider resource exists and provider state is verified pods 0, network volumes 0 before every acquisition."
  },
  "budget": {
-  "cumulative_spend_usd": 350.4545,
+  "cumulative_spend_usd": 350.8452,
   "authorized_cap_usd": 400.0,
-  "remaining_usd": 49.5455,
+  "remaining_usd": 49.1548,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 32.3824,
   "engineering_remaining_usd": 1.9395,
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -172,7 +172,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",

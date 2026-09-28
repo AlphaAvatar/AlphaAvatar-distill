@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 59,
-  "runs_unrecorded": 12,
+  "runs_current": 63,
+  "runs_unrecorded": 19,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -357,9 +357,9 @@
     "total": 9
    },
    "phase_c3": {
-    "recorded": 16,
-    "unrecorded": 2,
-    "total": 18
+    "recorded": 20,
+    "unrecorded": 9,
+    "total": 29
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1648,6 +1648,19 @@
   },
   {
    "experiment_id": "phase_c3",
+   "run_id": "attempt19",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt19",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt19/manifest.json"
+   },
+   "manifest_sha256": "9ea65c0a2726d659a674439ddccb1b9b1a6f2976cb6c267e7088ffe01e8df7f8",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
    "run_id": "attempt2",
    "stage": "1",
    "layout": "stage_grouped",
@@ -1658,6 +1671,45 @@
    },
    "manifest_sha256": "6595a8e5e02d8c62617bdc7dd0cef106b0da0e3225c2eb99e9e61448a70f5d30",
    "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt20",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt20",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt20/manifest.json"
+   },
+   "manifest_sha256": "e28b17c8af56673fe237eaa11f72cbf35e3028aa46e696722e9965eec1d9a2fc",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt28",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt28",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt28/manifest.json"
+   },
+   "manifest_sha256": "62fddc499ffc1436b51ce0d2d72b013131f69d4f4cb319483315487657550967",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt29",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt29",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt29/manifest.json"
+   },
+   "manifest_sha256": "b3b95cad8773b9211d901191513d136a6578082cd0b9ab2ff4cf4041accd015c",
+   "n_components": 10
   },
   {
    "experiment_id": "phase_c3",
@@ -1846,6 +1898,62 @@
    "root": "logs/stages/stage-1/phase_c3/runs/attempt18",
    "n_files": 10,
    "digest": "1b4c20a82b45eacf01b347894eb780a6de3656b2d5ee6b6f8bf6f3b6933fe29c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt21",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt21",
+   "n_files": 2,
+   "digest": "33238db8f208c1645ce866c3b846528b9908cc206013d718c49df4ad95303d78",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt22",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt22",
+   "n_files": 2,
+   "digest": "76967b007b54aced0b273308fc0baff9deffede797ddf0465dfa017324a83946",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt23",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt23",
+   "n_files": 2,
+   "digest": "26c26277c458af63f3270d57c699d6477286ca140d1be55aeb5e9f7f488f70a8",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt24",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt24",
+   "n_files": 2,
+   "digest": "fe907b9cf014ed00e4de33a34f09fa5b8598aeba83450d3beecad270025197c3",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt25",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt25",
+   "n_files": 2,
+   "digest": "84577d5fb4f2452c31b856200155bfb38944a51373a2d947ee969285cb2e7280",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt26",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt26",
+   "n_files": 2,
+   "digest": "33b8c364ddbbb0a477265db322256c1590718d3f188388005055a0e88c7499f7",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt27",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt27",
+   "n_files": 10,
+   "digest": "a452e112e21fccc08f6d327bc31d53889810f24d999a260a7f1852cf32b10d23",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],

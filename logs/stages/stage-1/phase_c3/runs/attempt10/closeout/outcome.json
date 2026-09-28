@@ -3,12 +3,12 @@
  "run_id": "attempt10",
  "experiment_id": "phase_c3",
  "status": "ABORTED_BEFORE_MEASUREMENT",
- "_what_this_is": "A pre-treatment engineering subrun that created a provider resource and therefore owes a cost record. NO formal recovery training or measurement began, so there is no scientific result here and nothing was retried, resumed or pooled (P12.1). The closeout exists so derive_budget counts the dollars: money that reached a provider counts against the project cap whichever book authorized it.",
+ "_what_this_is": "A pre-treatment engineering subrun that created a provider resource and therefore owes a cost record. NO formal recovery training or measurement began, so there is no scientific result and nothing was retried, resumed or pooled (P12.1).",
  "cost": {
   "actual_usd": 0.2782,
   "price_per_hour": 1.09,
   "gpu_type_id": "NVIDIA L40S",
-  "_derivation": "the session's final cumulative figure, NOT the sum over its draws: `cumulative_usd_at_release` is cumulative across the session, so summing double-counts a redraw."
+  "_derivation": "the session's final cumulative figure, not the sum over its draws"
  },
  "provider_resource_created": true,
  "pod_ids": [
