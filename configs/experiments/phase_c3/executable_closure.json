@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 112,
- "digest": "a7aa0b6f6a69fd32840babd7ad24311f786e497c20d09307b5fa934315b0bde9",
+ "digest": "e4249baf7328afe8f820a2ffa313ec6b81d08f166060740d89489c3efcf5cf90",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -54,8 +54,8 @@
   },
   {
    "path": "scripts/autoinit/issue_c3_authorization.py",
-   "sha256": "541729df51a85e3c744a19a87da7895502f6e93f3db2d46563b3d9ade4239f6f",
-   "bytes": 6212
+   "sha256": "9f6a241859ef09bf87515866702891ebc6c47ba3d407b384d3c5db941e4ef3ec",
+   "bytes": 6407
   },
   {
    "path": "scripts/autoinit/renderer_parity_gate.py",
@@ -164,8 +164,8 @@
   },
   {
    "path": "scripts/experiments/phase_c3/authorization_payload.py",
-   "sha256": "e8708e21693b2fe39ff71930b6008a42424fc54e5a40eb30d77001b065a8b4af",
-   "bytes": 10532
+   "sha256": "5c42e19d4f2cb42fc343ec5721645ece4659406d0b9372a2ac33e0ce271f8406",
+   "bytes": 11210
   },
   {
    "path": "scripts/experiments/phase_c3/formal_pricing.py",
