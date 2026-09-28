@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 86,
-  "runs_unrecorded": 28,
+  "runs_current": 88,
+  "runs_unrecorded": 29,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -357,9 +357,9 @@
     "total": 9
    },
    "phase_c3": {
-    "recorded": 43,
-    "unrecorded": 18,
-    "total": 61
+    "recorded": 45,
+    "unrecorded": 19,
+    "total": 64
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2064,6 +2064,32 @@
   },
   {
    "experiment_id": "phase_c3",
+   "run_id": "attempt61",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt61",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt61/manifest.json"
+   },
+   "manifest_sha256": "6bd2b4f9c96e240fe800d241f057699b80992a9a9aec4eaf25c1dc8aa7ed2738",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt62",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt62",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt62/manifest.json"
+   },
+   "manifest_sha256": "19233aceb7289c293664510e060606b98caec39ab153054e486e7415a6440a4f",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
    "run_id": "attempt7",
    "stage": "1",
    "layout": "stage_grouped",
@@ -2321,11 +2347,19 @@
   },
   {
    "experiment_id": "phase_c3",
-   "run_id": "attempt61",
-   "root": "logs/stages/stage-1/phase_c3/runs/attempt61",
-   "n_files": 11,
-   "digest": "0653d4253fe6d4a438de74a4c91d1d402cc105e3901c14d4a6c860dc726f9cd9",
+   "run_id": "attempt63",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt63",
+   "n_files": 10,
+   "digest": "9b0ef92a3537fd9beac46b4f7d7a13838312a541b9b2c9039fde3d14439e1e8b",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt64",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt64",
+   "n_files": 3,
+   "digest": "2439345d59946a588ba590f576022a4528d9d4868c5e6dfba3f22bff6dcf807b",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"
