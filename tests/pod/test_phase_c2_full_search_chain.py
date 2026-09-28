@@ -13,6 +13,7 @@ the machinery would refuse everything it should and admit only what it must.
 
 import importlib.util
 import json
+import re
 import sys
 import types
 from pathlib import Path
@@ -279,14 +280,76 @@ def test_an_identity_the_issuer_cannot_derive_is_refused():
                          run_id="attempt1", repo_root=REPO)
 
 
-def test_the_config_names_the_cap_the_project_owns():
-    """One number, two documents, and a test that pins them together."""
+def test_the_historical_c2_cap_matches_the_decision_c2_ran_under():
+    """C2's config is HISTORICAL evidence, not a live mirror of the cap.
+
+    This used to assert that the full-search config's cap equals the
+    project's canonical one. That held only while no later amendment
+    existed. On 2026-09-29 the C3 funding decision raised the project cap
+    $370 -> $400, and the assertion started demanding that a CLOSED phase's
+    records be rewritten to a number its own grant never named.
+
+    C2 is CLOSED WITHOUT PROMOTION. Its config, its issued grant and its
+    proposals all say `$370.00` and are correct: that is the decision C2
+    actually ran under, and AGENTS.md 3.x forbids rewriting historical
+    authorization artifacts. So the invariant is three separate claims, none
+    of which is "the closed phase tracks future amendments":
+
+      1. C2's config agrees with the C2 grant it ran under;
+      2. C2's config is NOT the canonical owner of the current project cap;
+      3. the canonical owner states the CURRENT cap.
+    """
     cfg = FA.load_config(REPO)
-    owner = json.loads(
-        (REPO / "configs/experiments/phase_c1/authorization.json").read_text())
-    assert (cfg["accepted_pricing"]["cumulative_cap_usd"]
-            == owner["accepted_pricing"]["cumulative_cap_usd"]), (
-        "the full-search config's cap and the project's canonical cap differ")
+    owner_path = "configs/experiments/phase_c1/authorization.json"
+    owner = json.loads((REPO / owner_path).read_text())
+
+    c2_cap = cfg["accepted_pricing"]["cumulative_cap_usd"]
+    current_cap = owner["accepted_pricing"]["cumulative_cap_usd"]
+
+    # 1. internally consistent with the decision C2 ran under.
+    #
+    # The sources are enumerated and the check REFUSES to be vacuous: a glob
+    # that matches nothing would pass silently, and the first version of this
+    # test did exactly that -- `logs/budget/approvals/*c2*grant*.json` has no
+    # members, so rewriting C2's history to $400 sailed through.
+    sources = [REPO / "logs/stages/stage-1/phase_c2/plans"
+                    / "phase_c2_full_search_grant_proposal.json"]
+    sources += sorted(
+        (REPO / "logs/stages/stage-1").glob("phase_c2*/runs/*/governance/grant.json"))
+    named: set[float] = set()
+    for src in sources:
+        if not src.is_file():
+            continue
+        blob = json.dumps(json.loads(src.read_text()))
+        for key in ("cumulative_cap_usd", "project_cap_usd",
+                    "authorized_cap_usd"):
+            for m in re.finditer(rf'"{key}"\s*:\s*([0-9.]+)', blob):
+                named.add(float(m.group(1)))
+    assert named, (
+        "no C2 grant or proposal states a project cap, so this check cannot "
+        "tell a preserved history from a rewritten one. Point it at the "
+        "documents that do rather than letting it pass on an empty set.")
+    assert c2_cap in named, (
+        f"C2's config names cap ${c2_cap}, which no C2 grant or proposal "
+        f"({sorted(named)}) ever did -- that is a rewritten history, not a "
+        "stale mirror")
+
+    # 2. it is not the canonical owner, and says so.
+    provenance = " ".join(str(v) for v in cfg["accepted_pricing"].values())
+    provenance += " " + " ".join(str(v) for v in cfg.values() if isinstance(v, str))
+    assert owner_path in provenance, (
+        "C2's config must name the canonical cap owner, so a reader cannot "
+        "mistake this copy for the live figure")
+
+    # 3. the canonical owner states the current cap, which is what any NEW
+    #    session prices against.
+    from consolidate import derive_budget as D
+
+    live = D.load_config(REPO) if hasattr(D, "load_config") else owner
+    assert current_cap == live["accepted_pricing"]["cumulative_cap_usd"]
+    assert current_cap >= c2_cap, (
+        "the project cap moved BACKWARDS relative to a closed phase; that is "
+        "a real inconsistency rather than an expected historical lag")
 
 
 # --- the storage bound ------------------------------------------------------
