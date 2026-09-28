@@ -1466,11 +1466,13 @@ class C3Driver:
         decision["terminal_semantics"] = prereg["terminal_outcomes"]
         decision["b1_vs_b3_is_a_post_c3_maintainer_decision"] = True
         decision["c4_is_not_started"] = True
-        #: One prompt index set for every arm's diagnostics. Deriving it
-        #: from whichever contrast happened to be in scope would make the
-        #: per-arm counts depend on an unrelated pairing.
+        #: One prompt index set for every arm's diagnostics, taken from the
+        #: PRIMARY pairing so the per-arm counts do not depend on which
+        #: contrast happened to be in scope -- and named through
+        #: `primary_operands` rather than by list position, so there is one
+        #: answer to "which two arms is the primary" in this whole file.
         prompt_index = paired_differences(
-            inputs.arm(arms[0]), inputs.arm(arms[1]))
+            inputs.arm(incumbent), inputs.arm(b1))
         decision["diagnostics"] = {
             "per_seed_correct": {
                 arm: {s: sum(1 for j in prompt_index
