@@ -64,7 +64,9 @@ from experiments.phase_c3.authorization import C3Authorization  # noqa: E402
 #: three seeds, and importing it here is how the adapted driver came to be
 #: one line away from running C3's nine probes on the wrong replicates. C3's
 #: seeds come from C3's frozen plan, via `CS.recovery_seeds()`.
-from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, C1Arm, C1IsolationPlan, decide, paired_differences, stratified_cluster_bootstrap  # noqa: E402
+#: `C0_PREREGISTRATION_SHA256` is deliberately NOT imported: it is C1's
+#: science-plan digest, and the C3 authorization binds C3's own.
+from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan, decide, paired_differences, stratified_cluster_bootstrap  # noqa: E402
 from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
 from experiments.phase_c1.probe_results import C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
 from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
@@ -381,7 +383,13 @@ class C3Driver:
         #: for the primary contrast -- and is no longer asked to be an
         #: identity it never had.
         self.auth.require_plan(CS.C3SessionContract().contract_hash)
-        self.auth.require_science_plan(C0_PREREGISTRATION_SHA256)
+        #: C3'S preregistration, not C1's C0 digest. The authorization binds
+        #: `science_plan_hash = prereg.preregistration_sha256`, and the port
+        #: kept C1's constant -- so this raised "a threshold, seed, survivor
+        #: count or selection rule moved after the grant" on a live pod at
+        #: $0.18, one line after the plan-hash check it had just passed.
+        self.auth.require_science_plan(
+            CS.preregistration()["preregistration_sha256"])
 
         self.ev: dict = {
             "schema": "aadistill.autoinit.c3_evidence/v1",

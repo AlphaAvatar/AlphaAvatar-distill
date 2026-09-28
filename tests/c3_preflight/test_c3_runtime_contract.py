@@ -577,3 +577,32 @@ def test_the_driver_validates_the_hash_the_authorization_actually_binds(register
         "the isolation plan and the session contract hash to the same value; "
         "while they coincide, checking either passes and this test proves "
         "nothing")
+
+
+def test_every_identity_the_driver_asserts_is_one_the_authorization_binds(registered):
+    """Both `require_*` arguments, checked against the issued artifact.
+
+    Two ran on live pods before anything caught them, one line apart:
+    `require_plan` was given the isolation plan's hash ($0.22) and
+    `require_science_plan` was given C1's C0 digest ($0.18). Each is a
+    constant that was right for C1, and each aborts AFTER setup.
+
+    So this asks the artifact what it binds and the driver what it asserts,
+    rather than trusting either in isolation.
+    """
+    auth_path = REPO / "logs/budget/approvals/autoinit_c3_authorization.json"
+    src = DRIVER.read_text()
+
+    assert "self.auth.require_plan(CS.C3SessionContract().contract_hash)" in src
+    assert 'require_science_plan(\n            CS.preregistration()["preregistration_sha256"])' in src \
+        or 'require_science_plan(CS.preregistration()["preregistration_sha256"])' in src, (
+        "the driver does not assert C3's own preregistration as its science plan")
+    assert "C0_PREREGISTRATION_SHA256" not in code_without_comments(src), (
+        "C1's C0 science-plan digest is still reachable in the C3 driver")
+
+    if not auth_path.is_file():
+        pytest.skip("no C3 authorization in this checkout")
+    auth = json.loads(auth_path.read_text())
+    assert auth["phase_a_session_plan_hash"] == CS.C3SessionContract().contract_hash
+    assert auth["phase_a_science_plan_hash"] == \
+        CS.preregistration()["preregistration_sha256"]
