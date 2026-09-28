@@ -15,26 +15,26 @@
   "per_session_envelope_usd": 30.0,
   "project_cap_usd": 400.0
  },
- "gpu_display_name": "L40",
- "gpu_type_id": "NVIDIA L40",
+ "gpu_display_name": "L40S",
+ "gpu_type_id": "NVIDIA L40S",
  "price": {
   "_disk_is_billed_separately": "120 GB x $0.1/GB/month = $0.016667/h",
-  "billed_rate_usd_per_hour": 0.836667,
+  "billed_rate_usd_per_hour": 1.106667,
   "container_disk_gb": 120,
   "expected": {
    "hours": 15.4583,
    "minutes": 927.5,
-   "usd": 12.9335
+   "usd": 17.1072
   },
-  "gpu_rate_usd_per_hour": 0.82,
+  "gpu_rate_usd_per_hour": 1.09,
   "hard_ceiling": {
    "hours": 20.0107,
    "minutes": 1200.64,
-   "usd": 16.7423
+   "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T19:11:59Z",
+ "queried_utc": "2026-09-28T19:54:49Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "a9bbafc99fd27d9dc76cbd137a5494a2a3841e7f",
+ "session_commit": "1d7324e12de66f6423fb4ce92ba1df81f2f6bdc1",
  "shortfalls_usd": {}
 }
