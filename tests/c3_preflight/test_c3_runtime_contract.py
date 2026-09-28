@@ -124,9 +124,14 @@ def test_the_launcher_emits_a_command_the_driver_can_parse():
     mod = importlib.util.module_from_spec(spec)
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
     spec.loader.exec_module(mod)
-    parser = mod.build_parser() if hasattr(mod, "build_parser") else None
-    if parser is None:
-        pytest.skip("the C3 driver exposes no build_parser to interrogate")
+    #: Asserted, not skipped. A driver with no parser to interrogate does not
+    #: make this check inapplicable -- it makes the seam unverifiable, which
+    #: is the condition that cost C1 attempt 7 $0.4231. And an undeclared
+    #: skip is what the readiness sweep refuses.
+    assert hasattr(mod, "build_parser"), (
+        "the C3 driver exposes no build_parser; the launcher/driver CLI seam "
+        "cannot be checked, and that seam has already killed a paid session")
+    parser = mod.build_parser()
     known = {a for action in parser._actions for a in action.option_strings}
     unknown = sorted(flags - known)
     assert not unknown, (
@@ -231,16 +236,27 @@ def test_a_reported_cuda_device_can_actually_run_a_kernel():
     advertises a device and cannot execute, which surfaces at
     materialization, after the teacher fetch has been paid for.
     """
-    torch = pytest.importorskip("torch")
+    #: Imported, not import-or-skipped. This directory is the pod's blocking
+    #: gate and the pod's science environment has torch by construction; a
+    #: missing one is a broken image, which is a failure, not an
+    #: inapplicable check. It is also the last undeclared skip the readiness
+    #: sweep would have refused.
+    import torch
+
     if not torch.cuda.is_available():
         #: No device claimed, nothing to disprove. The pod's setup gate is
         #: what refuses a GPU session with no GPU; this test's subject is
         #: the consistency of the claim, not its presence.
         return
     a = torch.randn(64, 64, device="cuda:0", dtype=torch.bfloat16)
+    #: `.item()` already forces this stream to complete, so the GEMM has run
+    #: by the time the value exists. An explicit `torch.cuda.synchronize()`
+    #: adds nothing and carries a real hazard: it re-raises faults from
+    #: EARLIER async work, so this check could fail for something another
+    #: test did a thousand cases ago and abort a paid session. That is what
+    #: `test_no_test_drains_a_real_gpu` exists to prevent, and it caught it.
     out = (a @ a).float().sum().item()
     assert out == out, "a device was reported but its GEMM produced NaN"
-    torch.cuda.synchronize()
 
 
 def test_the_launcher_plan_hash_is_what_the_authorization_bound(registered):

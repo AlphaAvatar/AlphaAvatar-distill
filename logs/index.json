@@ -282,8 +282,8 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 43,
-  "runs_unrecorded": 10,
+  "runs_current": 59,
+  "runs_unrecorded": 12,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -355,6 +355,11 @@
     "recorded": 7,
     "unrecorded": 2,
     "total": 9
+   },
+   "phase_c3": {
+    "recorded": 16,
+    "unrecorded": 2,
+    "total": 18
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -1536,6 +1541,214 @@
    },
    "manifest_sha256": "b7954faa433f9876df32fa76e2e5fc73bc4f51f9b5868ccdea9fbd4387e189e9",
    "n_components": 5
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt10",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt10",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt10/manifest.json"
+   },
+   "manifest_sha256": "24ca5bba739bea49783cb7acd1c8ff457aa1f559ed4b273284be83d4ce689d4f",
+   "n_components": 7
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt11",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt11",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt11/manifest.json"
+   },
+   "manifest_sha256": "ca263766962ae196c732082e69ca3f4961ad408e98c97ac3a5fc7f81991de124",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt12",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt12",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt12/manifest.json"
+   },
+   "manifest_sha256": "7d40871aeff9a6c31633952c8cbca23aeff8fb9daa631ab22ab334995d55015e",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt13",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt13",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt13/manifest.json"
+   },
+   "manifest_sha256": "c2a34d302c4e711147f570b6009b9d5f3a4c7c3fe3085b6c6e595ce27ccb5963",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt14",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt14",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt14/manifest.json"
+   },
+   "manifest_sha256": "c9e8e6afc0d973bc7921bbe36509afd3d9242b98e7f6e10777d4a294826846f6",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt15",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt15",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt15/manifest.json"
+   },
+   "manifest_sha256": "2a14537138e14462a3c3cbbef816363cbac307b45f5d28e6ea869f9ffc8ea92b",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt16",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt16",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt16/manifest.json"
+   },
+   "manifest_sha256": "c53a82f62f37b0ba5c187fba36c1d5351f8fbf66169dd2f8c82dbdd8a4e64e46",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt17",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt17",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt17/manifest.json"
+   },
+   "manifest_sha256": "9562bea5f8edc5239f306e1a3e2b98616c6519dbead1fce0f58438875f3e64ec",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt2",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt2",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt2/manifest.json"
+   },
+   "manifest_sha256": "6595a8e5e02d8c62617bdc7dd0cef106b0da0e3225c2eb99e9e61448a70f5d30",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt3",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt3",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt3/manifest.json"
+   },
+   "manifest_sha256": "bbff73b241d4980356f87056c325f615836cbd178406f3126b7cb983cd4d2934",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt4",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt4",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt4/manifest.json"
+   },
+   "manifest_sha256": "ee8d227062d723a60a093dd7262b66597de46d19f59031bba746b24cd1893865",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt5",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt5",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt5/manifest.json"
+   },
+   "manifest_sha256": "3f798a76e313a81f20c3f51ea80a8aff68cfd48972e7ec8a1f158d7dec6787c4",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt6",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt6",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt6/manifest.json"
+   },
+   "manifest_sha256": "4c625503b2bc1e220feb3d02f2f2000a492da4359e096963261033904e784311",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt7",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt7",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt7/manifest.json"
+   },
+   "manifest_sha256": "52579a7ed7c18d66ea7718378236a3b20dbfa16cb2f8cc50464ac7407251c16f",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt8",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt8",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt8/manifest.json"
+   },
+   "manifest_sha256": "40d75b74f587aadb56937364e5f319ef3fe761fc5b63be35f893240dfabc28fd",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt9",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt9",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt9/manifest.json"
+   },
+   "manifest_sha256": "019680dfdc45ecf169566bf39444ede5bcc65869c0f51972cee9ea1d87b708f0",
+   "n_components": 6
   }
  ],
  "unrecorded": [
@@ -1618,6 +1831,22 @@
    "n_files": 11,
    "digest": "b5a7705af5ec7146ef7e69f33bc99e772d08200814895095f21f8624b7d31b9c",
    "why": "no run manifest; its closeout states: ABORTED BEFORE PROVIDER. The plan hash contained the live HEAD and could not bind; $0."
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt1",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt1",
+   "n_files": 7,
+   "digest": "fcd385d0cabec8b96fdd97cd5a1f81dd7d1236d030d521c63443b9fdb2dd0d0d",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt18",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt18",
+   "n_files": 10,
+   "digest": "1b4c20a82b45eacf01b347894eb780a6de3656b2d5ee6b6f8bf6f3b6933fe29c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
