@@ -1880,20 +1880,32 @@ for the envelope instead of the derived figure — verified.
 
 ## The full suite is not green: 11 failures, one family
 
-**Current measurement, 2026-09-28: 11 failed, 5205 passed, 228 skipped** in
-45m44s — the documented eleven exactly, zero new against `ab53ba14`.
+**Current measurement, 2026-09-28 after the C3 round: 11 failed, 5287
+passed, 228 skipped** in 46m31s. The same COUNT as the documented eleven,
+with one substitution:
 
-That run first reported **12**. The twelfth,
-`pod/test_continuation_b_one_probe_contract.py::test_what_the_route_lands_on_is_actually_current`,
-was mine and is fixed. It is worth recording *why*, because the defect was
-invisible: the stamp-correction note added to this file above began as a
-`> **Stamp corrected 2026-09-28 …**` blockquote, and `current_region` ends
-the "current claims" region at the first **dated** `> **` quote. One dated
-blockquote therefore pushed the budget table, the blocker and every figure
-below it outside the region, and the guard failed for the one reason its own
-docstring says it must never fail for — it could not see the figures it
-exists to check. The note is now an ordinary paragraph. **A dated `> **`
-blockquote in `current.md` is a region terminator, not a formatting choice.**
+* **new** — `pod/test_phase_c2_full_search_chain.py::test_the_config_names_the_cap_the_project_owns`.
+  A direct consequence of the funding amendment: that test pins C2's
+  full-search config's cap to the project's canonical one, which is now
+  `$400.00`. C2's config, grant and proposals all name `$370.00` and are
+  internally consistent with the decision they were made under. §3 says do
+  not rewrite historical authorization artifacts, and C2 is CLOSED WITHOUT
+  PROMOTION, so the mirror was left at its historical value. **A closed
+  phase's mirror cannot match both its own grant and a later amendment made
+  for a different experiment**; which one it should track is a maintainer
+  decision, not a test fix.
+* **fixed** — `autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`,
+  which the raised cap resolved.
+
+`+82` passing tests, all C3: the preregistration, session-contract,
+driver-contract, formal-pricing and pod-preflight suites.
+
+An intermediate run reported 32 failures. Twenty were derived records the C3
+work staled — the C1 closure, the skip-predicate audit and the run index —
+plus three preflight skips the readiness sweep refuses and one real hazard:
+`cuda.synchronize()` in the GPU smoke, which re-raises faults from EARLIER
+async work and could have aborted a paid session for something another test
+did a thousand cases before. `test_no_test_drains_a_real_gpu` caught it.
 
 The preceding measurement, 2026-09-27 at `9d618427` on a clean tree: 11
 failed, 5201 passed, 228 skipped in 46m44s.
