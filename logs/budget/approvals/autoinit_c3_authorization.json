@@ -10,8 +10,8 @@
  "allows_beam_search": false,
  "allows_phase_a": false,
  "authorization_id": "autoinit.v1.phase_c3",
- "authorization_sha256": "646e0bd57c2d8e6b52a5d80df4bbb8211e37a3a823833ded3201af4ec37f5cab",
- "authorized_session_commit": "f65ead43d23cafb7c27dcaf2b8b7fd120f7ff6cc",
+ "authorization_sha256": "eff6040d65de788a026b3398b436b6549597d620ab33e8e374209c451f444385",
+ "authorized_session_commit": "c7ac64e097694e7b45c35b342721ceedab99cacb",
  "authorized_stages": [
   "session_setup",
   "teacher_fetch_verify",
@@ -67,14 +67,14 @@
    "revision": "768f209d9ea81521153ed38c47d515654e938aea"
   }
  },
- "c3_harness_digest": "acb4965579b0300632b74271011b7fb8e122d8e0d12ab2b164e18ec84dd8f789",
+ "c3_harness_digest": "5858669c2bcf562d16f649da4d2b1cc18c790be427586f96966df10810f8c276",
  "c3_harness_n_files": 112,
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
  "expected_usd": 17.1072,
  "granted_by": "maintainer decision 2026-09-28, on review of b937aebb (branch review/c3-operator-batching). The budget stop was judged correct and no scientific work was reduced to fit; funding was declared not to be the limiting factor.",
- "granted_utc": "2026-09-28T06:33:36.231998+00:00",
+ "granted_utc": "2026-09-28T06:39:13.335506+00:00",
  "hard_cap_usd": 22.1452,
- "harness_source_digest": "acb4965579b0300632b74271011b7fb8e122d8e0d12ab2b164e18ec84dd8f789",
+ "harness_source_digest": "5858669c2bcf562d16f649da4d2b1cc18c790be427586f96966df10810f8c276",
  "harness_source_files": [
   "configs/autoinit/c3_artifacts.json",
   "configs/autoinit/c3_artifacts_failed.json",
