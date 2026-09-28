@@ -45,6 +45,9 @@ from experiments.phase_c3.authorization_payload import (  # noqa: E402
     C3AuthorizationRefused, build_c3_authorization_payload,
 )
 
+#: The RUN's grant, not the repository-level one. `grant_provenance_gate`
+#: resolves the recorded path and requires it to be this run's
+#: governance/grant.json: a grant belongs to one attempt.
 DEFAULT_GRANT = "logs/budget/approvals/autoinit_c3_grant.json"
 DEFAULT_OUT = "logs/budget/approvals/autoinit_c3_authorization.json"
 

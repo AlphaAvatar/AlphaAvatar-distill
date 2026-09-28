@@ -192,7 +192,19 @@ def build_c3_authorization_payload(*, grant: Mapping[str, Any],
         version=1,
     )
     payload = auth.as_dict()
+    #: WHICH maintainer decision this was issued from, by path and content
+    #: hash. `grant_provenance_gate` resolves the path against the repo root
+    #: and re-hashes the file: a grant belongs to ONE attempt, and running
+    #: under another attempt's is running under a decision made about a
+    #: different session. Without this the launcher aborts at $0 with "records
+    #: no grant path and hash", which is how it was found.
     payload.update({
+        "grant": {
+            "path": grant_path,
+            "sha256": sha256_json(dict(grant)),
+            "_rule": ("must resolve to THIS run's governance/grant.json and "
+                      "hash to the recorded value"),
+        },
         "c3_harness_digest": harness["digest"],
         "c3_harness_n_files": harness["n_files"],
         "bound": {

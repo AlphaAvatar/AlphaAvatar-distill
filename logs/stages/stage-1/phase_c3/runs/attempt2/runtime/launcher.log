@@ -1,0 +1,4 @@
+[06:46:12] budget: expected 1186 min $21.87 · soft $21.87 · hard $22.15 (authorized $22.15)
+[06:46:13] NVIDIA L40S $1.09/h, stock Low
+[06:46:13] session commit d94216b83a4e verified: harness digests to a7aa0b6f6a69…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt2/governance/authorization.json differs from the authorized base
+[06:46:13] ABORT at $0: logs/stages/stage-1/phase_c3/runs/attempt2/governance/authorization.json records no grant path and hash, so the decision it was issued from cannot be identified
