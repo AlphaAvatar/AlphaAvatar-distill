@@ -445,31 +445,41 @@ class C3Driver:
     def primary_operands(self) -> tuple[str, str]:
         """(control, candidate) arm ids for the PRIMARY contrast.
 
-        Read from the frozen plan's `estimand.primary.contrast`, matched
-        against the declared arms by name, so the verdict's operands come
-        from the document that fixed them rather than from list order.
+        Read from the frozen plan's `estimand.primary.contrast` and matched
+        against the declared arms, so the verdict's operands come from the
+        document that fixed them rather than from list order.
+
+        Resolved by POSITION, not by splitting on a dash. "causal-B1 -
+        incumbent B" contains a hyphen inside the arm name itself, so
+        partitioning on "-" cut "causal" from "B1" and picked the B3 arm as
+        the candidate -- the wrong side of the wrong contrast, silently. The
+        minuend is whichever arm appears first in the string.
         """
         prereg = CS.preregistration()
         contrast = prereg["estimand"]["primary"]["contrast"].lower()
-        arms = list(CS.arm_ids())
 
-        def named(fragment: str) -> str:
-            hits = [a for a in arms if fragment in a.lower()]
-            if len(hits) != 1:
+        #: One distinguishing token per arm, taken from the arm id itself.
+        tokens = {}
+        for arm_id in CS.arm_ids():
+            low = arm_id.lower()
+            if "incumbent" in low:
+                tokens[arm_id] = "incumbent"
+            elif low.endswith("b1"):
+                tokens[arm_id] = "b1"
+            elif low.endswith("b3"):
+                tokens[arm_id] = "b3"
+            else:
                 raise C3DriverError(
-                    f"the primary contrast {contrast!r} names {fragment!r}, "
-                    f"which matches {hits} among {arms}; the verdict's "
-                    "operands must be unambiguous")
-            return hits[0]
+                    f"cannot derive a contrast token for arm {arm_id!r}")
 
-        #: "causal-B1 - incumbent B": candidate first, control after the dash.
-        candidate_part, _, control_part = contrast.partition("-")
-        candidate = named("b1" if "b1" in candidate_part else "b3")
-        control = named("incumbent" if "incumbent" in control_part else "b1")
-        if candidate == control:
+        found = {arm: contrast.index(tok)
+                 for arm, tok in tokens.items() if tok in contrast}
+        if len(found) != 2:
             raise C3DriverError(
-                f"the primary contrast resolves to one arm ({candidate}) on "
-                "both sides")
+                f"the primary contrast {contrast!r} names {len(found)} of the "
+                f"declared arms {list(tokens)}; it must name exactly two")
+        ordered = sorted(found, key=found.get)
+        candidate, control = ordered[0], ordered[1]
         return control, candidate
 
     # -- budget, evidence, subprocesses ------------------------------------
