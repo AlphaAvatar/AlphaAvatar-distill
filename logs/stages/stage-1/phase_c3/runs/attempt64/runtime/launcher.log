@@ -1,0 +1,3 @@
+[19:11:56] budget: expected 1186 min $16.20 · soft $16.20 · hard $16.41 (authorized $16.74)
+[19:11:56] NVIDIA L40 $0.82/h, stock Low
+[19:11:56] ABORT at $0: 2 path(s) other than logs/stages/stage-1/phase_c3/runs/attempt64/governance/authorization.json changed between the authorized base and the session commit: ['configs/experiments/phase_c3/executable_closure.json', 'logs/index.json']
