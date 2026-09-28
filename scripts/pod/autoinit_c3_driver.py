@@ -461,6 +461,24 @@ class C3Driver:
             battery_asset_id=battery["asset_id"],
             battery_content_sha256=battery["content_sha256"])
 
+    def prefix_execution_config(self) -> "ExecutionConfig":
+        """The replay's execution config, built from the frozen plan.
+
+        Runtime knobs are deliberately NOT hashed into any state id, which is
+        why the plan has to pin this one explicitly and the driver has to
+        apply it: an unhashed value that changes the answer is invisible to
+        every digest until the digest itself comes out wrong.
+        """
+        from aadistill.initialization.planning.fixed_path import ExecutionConfig
+
+        pinned = CS.prefix_execution()
+        if "micro_batch_size" not in pinned:
+            raise C3DriverError(
+                "the frozen plan pins no micro_batch_size for the prefix "
+                "replay; the parent digest depends on it and a default would "
+                "decide the experiment silently")
+        return ExecutionConfig(micro_batch_size=int(pinned["micro_batch_size"]))
+
     def primary_operands(self) -> tuple[str, str]:
         """(control, candidate) arm ids for the PRIMARY contrast.
 
@@ -719,7 +737,19 @@ class C3Driver:
                 root_loader=lambda: QWEN3_ADAPTER.load(
                     self.teacher_path, dtype="bfloat16", device=root_device),
                 workdir=WORK / incumbent_id, repo_root=str(REPO), on_step=on_step,
-                deadline=self.operator_deadline("stage D/E replay"))
+                deadline=self.operator_deadline("stage D/E replay"),
+                #: THE PINNED EXECUTION CONFIG, from the frozen plan. Omitting
+                #: it ran DEPTH at DEFAULT_MICRO_BATCH_SIZE and the parent
+                #: digest came back d6d8d7ee instead of eea90c91 -- after 28
+                #: minutes of real GPU search, at $0.65.
+                #:
+                #: It is not a performance knob. L40S GEMMs reduce
+                #: shape-dependently, so the micro-batch changes which layer a
+                #: near-tie picks: that round chose layer 21 over 17 by a
+                #: margin of 1.4e-03. The plan pins it for exactly this
+                #: reason and says so -- "no formal result may depend on
+                #: whatever DEFAULT_MICRO_BATCH_SIZE happens to be".
+                execution=self.prefix_execution_config())
         except FixedPathDigestMismatch as exc:
             self.replay_mismatch(exc, runtime, seen)
             raise C3ReplayMismatch(str(exc)) from exc

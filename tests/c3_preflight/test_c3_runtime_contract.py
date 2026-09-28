@@ -657,3 +657,43 @@ def test_no_stage_indexes_the_arms_by_c1_s_literal_keys():
             f"contain: {list(CS.arm_ids())}")
     #: and the incumbent is reached by the plan's own first arm id.
     assert "CS.arm_ids()[0]" in src
+
+
+def test_the_replay_applies_the_execution_config_the_plan_pins():
+    """An unhashed value that changes the answer is invisible until it isn't.
+
+    `materialize_fixed_path` was called without `execution=`, so DEPTH ran at
+    `DEFAULT_MICRO_BATCH_SIZE` while the frozen plan pins `micro_batch_size:
+    1`. The parent came back `d6d8d7ee` instead of `eea90c91` -- after 28
+    minutes of real GPU search, at $0.65, on the correct GPU under the
+    correct runtime.
+
+    It is not a performance knob. L40S GEMMs reduce shape-dependently, so the
+    micro-batch changes which layer a near-tie picks; that run's round 7 chose
+    layer 21 over 17 by a margin of 1.4e-03. Runtime knobs are deliberately
+    not hashed into any state id, which is exactly why the plan must pin this
+    one and the driver must apply it -- no digest can catch it until the
+    digest itself comes out wrong.
+    """
+    src = source_minus_comment_lines(DRIVER.read_text())
+    assert "execution=self.prefix_execution_config()" in src, (
+        "the prefix replay does not pass the plan's pinned execution config; "
+        "DEPTH would run at whatever the repository default happens to be")
+    assert CS.prefix_execution() == {"micro_batch_size": 1}
+
+    import importlib.util
+
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    spec = importlib.util.spec_from_file_location("c3drv_exec", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    drv = mod.C3Driver.__new__(mod.C3Driver)
+    cfg = mod.C3Driver.prefix_execution_config(drv)
+    assert cfg.micro_batch_size == 1, cfg
+
+    #: And a plan that pinned nothing must be refused, not defaulted.
+    import unittest.mock as _mock
+
+    with _mock.patch.object(mod.CS, "prefix_execution", lambda: {}):
+        with pytest.raises(mod.C3DriverError, match="pins no micro_batch_size"):
+            mod.C3Driver.prefix_execution_config(drv)
