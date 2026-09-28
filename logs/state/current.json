@@ -125,7 +125,7 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT LAUNCHED: the chain is built, every pre-provider gate passes, and it waits on provider capacity. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds. Five launcher invocations, all at $0.00: no pod created, no measurement begun. Attempt 5 cleared every gate and hit an L40S capacity refusal, an ordinary transient. Derived ceiling $22.1452 at the live $1.09/h.",
+   "status": "NOT STARTED and NOT LAUNCHED: the chain is built, every pre-provider gate passes, and it waits on provider capacity. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds. Five launcher invocations, all at $0.00: no pod created, no measurement begun. Attempt 5 cleared every gate and hit an L40S capacity refusal, an ordinary transient. Derived ceiling $22.1452 at the live $1.09/h.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
    "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
    "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded for selection by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
