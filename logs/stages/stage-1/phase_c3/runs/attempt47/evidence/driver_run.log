@@ -1,0 +1,24 @@
+[17:56:35] C3: 9 probes, ceiling $22.1452, soft stop $21.5391
+[17:56:35]   A: session_setup
+[17:56:35]   B: teacher_fetch_verify   [blocks training on failure]
+[17:56:35]   C: register_operator   [blocks training on failure]
+[17:56:35]   D: replay_parent   [blocks training on failure]
+[17:56:35]   E: replay_incumbent   [blocks training on failure]
+[17:56:35]   F: materialize_arms   [blocks training on failure]
+[17:56:35]   G: recovery_probes
+[17:56:35]   H: evaluate
+[17:56:35]   I: decide
+[17:56:35]   J: collect_teardown
+2026-09-28T17:56:35Z MARKER:DRIVER_START
+2026-09-28T17:56:35Z MARKER:STAGE_START:B
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 13 files:   8%|▊         | 1/13 [00:00<00:01,  7.69it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 69.55it/s]
+[17:56:43] teacher Qwen/Qwen3-4B-Thinking-2507@768f209d9ea8 verified, 3 shards
+2026-09-28T17:56:43Z MARKER:STAGE_PASSED:B
+2026-09-28T17:56:43Z MARKER:STAGE_START:C
+[17:56:43] registered ['attention.activation_importance_v1', 'attention.causal_kl_v1']; all 5 named implementations resolve
+2026-09-28T17:56:45Z MARKER:STAGE_PASSED:C
+2026-09-28T17:56:45Z MARKER:STAGE_START:D
+2026-09-28T17:56:45Z MARKER:STAGE_FAILED:D
+[17:56:45] STAGE D FAILED: KeyError: 'incumbent'
+2026-09-28T17:56:45Z MARKER:C1_FAILED
