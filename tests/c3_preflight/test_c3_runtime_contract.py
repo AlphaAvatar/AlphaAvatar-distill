@@ -40,6 +40,24 @@ LAUNCH = REPO / "scripts/pod/autoinit_c3_launch.py"
 PREREG_PATH = REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 
 
+def executable_source(text: str) -> str:
+    """Source with comments and string literals removed.
+
+    A `#`-strip is not enough: the launcher's own docstring NAMES the two
+    deleted session constants while explaining that they are gone, so a
+    naive scan reports the very absence that is the fix.
+    """
+    import io
+    import tokenize
+
+    out = []
+    for tok in tokenize.generate_tokens(io.StringIO(text).readline):
+        if tok.type == tokenize.COMMENT:
+            continue
+        out.append('""' if tok.type == tokenize.STRING else tok.string)
+    return " ".join(out)
+
+
 @pytest.fixture(scope="module")
 def registered():
     from aadistill.initialization.operators.attention.gqa import (
@@ -229,3 +247,33 @@ def test_the_launcher_expects_nine_probe_streams_on_c3_s_seeds():
     for stale in (1635674081, 1656475568, 696460635):
         assert not any(str(stale) in s for s in streams), (
             f"a probe stream names C1's seed {stale}")
+
+
+def test_every_session_attribute_the_launcher_uses_exists():
+    """Enumerated, not spot-checked.
+
+    The launcher referenced four names the rewritten session does not have --
+    EXPECTED_PARENT_DIGEST and EXPECTED_INCUMBENT_DIGEST became functions,
+    INCUMBENT_ATTENTION and TREATMENT_ATTENTION were deleted with the two-arm
+    design. Each raised only when the line ran, and two of them sat inside
+    `spec()`, which the readiness sweep reaches and a spot check does not.
+    Asking the module for every attribute the file names is the cheap
+    version of that discovery.
+    """
+    code = executable_source(LAUNCH.read_text())
+    used = sorted(set(re.findall(r"\bCS\.([A-Za-z_][A-Za-z0-9_]*)", code)))
+    missing = [u for u in used if not hasattr(CS, u)]
+    assert not missing, (
+        f"the C3 launcher references session attributes that do not exist: "
+        f"{missing}. Each would raise when its line ran -- on a pod, if the "
+        f"line is inside a stage rather than a gate.")
+
+
+def test_every_session_attribute_the_driver_uses_exists():
+    """The same question of the driver, where a stale name costs more."""
+    code = executable_source(DRIVER.read_text())
+    used = sorted(set(re.findall(r"\bCS\.([A-Za-z_][A-Za-z0-9_]*)", code)))
+    missing = [u for u in used if not hasattr(CS, u)]
+    assert not missing, (
+        f"the C3 driver references session attributes that do not exist: "
+        f"{missing}. Stage H runs ten hours into a paid session.")
