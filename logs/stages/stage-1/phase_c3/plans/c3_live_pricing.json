@@ -33,8 +33,8 @@
    "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T16:48:08Z",
+ "queried_utc": "2026-09-28T16:48:25Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "ea2ba2bf35f7f46bd8ebd39d3829ae8ce451131e",
+ "session_commit": "3a37e7ba87afecab0e96385bdce5458b497d2235",
  "shortfalls_usd": {}
 }
