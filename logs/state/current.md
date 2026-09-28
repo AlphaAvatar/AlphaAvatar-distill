@@ -2017,7 +2017,7 @@ these by hand; run the deriver.**
 | formal sessions | `$32.3824` of `$55.0000` |
 | GPU engineering | `$1.9395` of `$10.0000` |
 | package | `$34.3219` of `$65.0000` |
-| project cap | `$350.0307` spent of `$400.0000`, leaving `$49.9693` |
+| project cap | `$350.4545` spent of `$400.0000`, leaving `$49.5455` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$60.0000` and the formal allowance has `$32.3824`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -252,7 +252,23 @@ class TestTheSnapshotStatesTheRequiredFacts:
         #: And the two independent "nothing is owed" owners agree numerically.
         assert (s["phase_c"]["c2"]["probes_owed"]
                 == s["c2_closure"]["probes_remaining"] == 0)
-        assert s["prepared_launch"]["any"] is False
+
+        #: No C2 launch may be prepared -- which is NOT the same as "no launch
+        #: is prepared anywhere". This asserted `prepared_launch.any is False`
+        #: and held only while the repository had no chain at all; a formal C3
+        #: chain is legitimately prepared now, and the flat assertion would
+        #: have demanded C3 stay unprepared to keep a statement about C2 true.
+        #: So the question becomes which phase the prepared chain belongs to.
+        prepared = s["prepared_launch"]
+        if prepared.get("any"):
+            note = " ".join(str(v) for v in prepared.values()).lower()
+            assert "c2" not in note.replace("c2_", "").replace("phase_c2", ""), (
+                f"a prepared launch mentions C2, which is CLOSED WITHOUT "
+                f"PROMOTION and may prepare no launch: {prepared}")
+            assert "c3" in note, (
+                "a launch is prepared but the snapshot does not say which "
+                "phase owns it; an unattributed chain cannot be checked "
+                "against any phase's permissions")
 
         #: Structurally, not by prose. A mutation that re-added `phase_c.c2.owed`
         #: with different wording survived every phrase pattern above and the

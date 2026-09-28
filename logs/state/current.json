@@ -18,14 +18,14 @@
   "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": false,
+  "any": true,
   "run": null,
-  "note": "No chain exists. C2 is closed and no C2 launch may be prepared. All three C3 engineering pilots have CLOSED with terminal verdicts. Formal C3 has no chain of any kind and is blocked on budget."
+  "note": "A complete formal C3 chain exists for the latest attempt: grant, launch-bound readiness, one-use authorization and staged bundle. It is PREPARED, not launched -- no provider resource exists and provider state is verified pods 0, network volumes 0 before every acquisition."
  },
  "budget": {
-  "cumulative_spend_usd": 350.0307,
+  "cumulative_spend_usd": 350.4545,
   "authorized_cap_usd": 400.0,
-  "remaining_usd": 49.9693,
+  "remaining_usd": 49.5455,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 32.3824,
   "engineering_remaining_usd": 1.9395,
@@ -125,13 +125,16 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT STARTED and NOT LAUNCHED: the chain is built, every pre-provider gate passes, and it waits on provider capacity. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds. Five launcher invocations, all at $0.00: no pod created, no measurement begun. Attempt 5 cleared every gate and hit an L40S capacity refusal, an ordinary transient. Derived ceiling $22.1452 at the live $1.09/h.",
+   "status": "NOT STARTED and NOT LAUNCHED, but FULLY PREPARED. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds; the formal chain, launcher, driver, preflight and authorization all exist and every pre-provider gate passes. 18 acquisition attempts so far; two created a pod and cost $0.4238 in total, the rest aborted at $0. No recovery training has begun. Blocked only on approved-tier GPU capacity.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
-   "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
-   "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded for selection by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
-   "packing_optimization_v2": "CLOSED 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION, 1.1884x against a 1.25x gate; R3 (B3 length-sorted) fastest. $2.7048 of $4.00. Not formal C3. Owner: .../packing-optimization/v2/result.json.",
-   "preregistration_corrections": "TWO, both pre-launch: a hand-written stamp that bound nothing, then a body that contradicted itself on the primary contrast and on GO. See _correction_history in the plan; superseded stamps fdf1d4c2, 6d1d1121.",
-   "attempts": "1-4 aborted at $0 on C1 constants the port kept (plan hash, grant provenance, incumbent digest, harness constant); each consumed its one-use chain per P12.1 and got a fresh one. 5 = all gates PASS, provider capacity refusal."
+   "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive only. Not formal C3. Owner: .../batching-adoption/v1/result.json.",
+   "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
+   "packing_optimization_v2": "CLOSED 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION, 1.1884x vs a 1.25x gate. $2.7048 of $4.00. Not formal C3. Owner: .../v2/result.json.",
+   "preregistration_corrections": "THREE, all pre-launch: a hand-written stamp that bound nothing, a body contradicting itself on the primary contrast and on GO, and a missing `authorizes: nothing`. See _correction_history in the plan.",
+   "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
+   "latest_attempt": "attempt18",
+   "provider_spend_usd": 0.4238,
+   "gpu_policy": "AMENDED 2026-09-29: fixed ordered availability over three 48GB Ada parts -- L40S, RTX 6000 Ada Generation, L40. Secure, BF16, single-GPU. Selected by AVAILABILITY alone. The tier does not widen."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
@@ -141,7 +144,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "PROVIDER CAPACITY ONLY. The formal C3 chain is built and every pre-provider gate passes; L40S stockStatus is None. Ordinary transient, $0 poller running. Nothing else is blocked.",
+ "blocker": "APPROVED-TIER GPU CAPACITY ONLY. The formal C3 chain is built and every pre-provider gate passes. Selection walks L40S -> RTX 6000 Ada -> L40 and takes the first with usable secure capacity. Nothing else is blocked.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -182,7 +185,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "maintainer decision on two limits: raise the project cap to at least $372.1758 (>= $375 for margin) AND the per-session hard ceiling to at least $22.1451. Then execute formal C3 end to end.",
+ "next": "acquire the first approved GPU with capacity, re-price live on THAT device, issue a fresh one-use chain, and execute the nine probes. C4 is not authorized.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
