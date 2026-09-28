@@ -397,7 +397,7 @@ class C3Driver:
             "session": "autoinit.v1.phase_c3",
             "session_contract_hash": CS.C3_SESSION_CONTRACT.contract_hash,
             "plan_hash": self.plan.plan_hash,
-            "science_plan_hash": C0_PREREGISTRATION_SHA256,
+            "science_plan_hash": CS.preregistration()["preregistration_sha256"],
             "seeds": list(self.seeds),
             "authorization": self.auth.as_dict(),
             "stages_completed": [],
