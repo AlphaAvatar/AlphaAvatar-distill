@@ -30,6 +30,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -134,7 +135,13 @@ def price_c3(gpu_rate_usd_per_hour: float) -> C3Price:
         billed_rate_usd_per_hour=billed,
         container_disk_gb=container_disk_gb(),
         expected_minutes=exp_m, expected_usd=round(exp_m / 60.0 * billed, 4),
-        hard_minutes=hard_m, hard_usd=round(hard_m / 60.0 * billed, 4))
+        hard_minutes=hard_m,
+        #: CEILED, not rounded. `round()` took this DOWN by $0.00003, and the
+        #: budget planner then refused to build a plan that terminated above
+        #: what it was authorized for -- correctly, because a ceiling that is
+        #: even fractionally below the work it bounds is not a ceiling. A
+        #: limit rounds down; a ceiling rounds up.
+        hard_usd=math.ceil(hard_m / 60.0 * billed * 10_000) / 10_000)
 
 
 @dataclass(frozen=True)

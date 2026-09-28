@@ -28,11 +28,11 @@
   "hard_ceiling": {
    "hours": 20.0107,
    "minutes": 1200.64,
-   "usd": 22.1451
+   "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T05:53:03Z",
+ "queried_utc": "2026-09-28T05:57:22Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "b937aebb1c5835085cccf0261dbd0abfb7807cb3",
+ "session_commit": "85186ae5cb5e2db8bdeaafd43396a528df9fc9bf",
  "shortfalls_usd": {}
 }

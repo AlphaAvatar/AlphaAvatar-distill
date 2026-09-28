@@ -156,3 +156,56 @@ def test_the_live_query_sets_the_user_agent_the_edge_requires():
     """RunPod's edge answers Python-urllib with 403 on every query."""
     src = (REPO / "scripts/experiments/phase_c3/formal_pricing.py").read_text()
     assert "USER_AGENT" in src and "User-Agent" in src
+
+
+def test_the_budget_plan_reproduces_the_derived_ceiling_exactly():
+    """Two models of one quantity is how a reserve gets double-counted.
+
+    `formal_pricing` derives the hard bound from the component table;
+    `c3_budget_spec` builds a `BudgetSpec` whose `plan()` re-derives it. They
+    must agree, and getting there took two real corrections:
+
+    * the spec applied `plan_session`'s own contingency ON TOP of the
+      component table's overrun factor -- `$0.37` of double-counted risk,
+      which the planner refused rather than silently absorbed;
+    * the closeout component was passed as BOTH `transfer_minutes` and the
+      artifact-recovery reserve, another `$0.28`. It is one 15-minute
+      allowance; held back as the reserve it also buys a real teardown margin
+      below the ceiling.
+
+    And then the ceiling itself had to be CEILED rather than rounded: `round()`
+    took it down `$0.00003`, leaving a plan that terminated fractionally above
+    what it authorized.
+    """
+    from experiments.phase_c3 import authorization as A
+
+    spec = A.c3_budget_spec(REPO)
+    rate = A.c3_billed_rate_usd_per_hour(REPO)
+    hard = A.c3_hard_ceiling_usd(REPO)
+    plan = spec.plan(price_per_hour=rate, authorized_usd=hard)
+
+    #: The planner's own terminate point is the priced hard bound. Minutes
+    #: are rate-independent, so any valid rate derives the same figure.
+    assert plan.hard_terminate_minutes == pytest.approx(
+        P.price_c3(1.0).hard_minutes, abs=0.01)
+    assert plan.hard_terminate_minutes / 60.0 * rate == pytest.approx(hard, abs=5e-4)
+    #: The reserve is held back, not spent: a real teardown margin.
+    assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+    assert plan.hard_terminate_minutes - plan.soft_stop_minutes == pytest.approx(
+        plan.artifact_recovery_reserve_minutes, abs=1e-6)
+    assert spec.contingency_fraction == 0.0, (
+        "a contingency here would price the component table's overrun factor "
+        "a second time")
+    assert spec.transfer_minutes == 0.0, (
+        "the closeout allowance is the recovery reserve; counting it twice "
+        "put the plan above its own ceiling")
+
+
+def test_the_hard_ceiling_is_ceiled_not_rounded():
+    """A limit rounds down; a ceiling rounds up."""
+    import math
+
+    p = P.price_c3(1.09)
+    exact = p.hard_minutes / 60.0 * p.billed_rate_usd_per_hour
+    assert p.hard_usd >= exact, "the ceiling is below the work it bounds"
+    assert p.hard_usd == math.ceil(exact * 10_000) / 10_000
