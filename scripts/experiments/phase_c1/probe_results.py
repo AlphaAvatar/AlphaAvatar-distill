@@ -40,6 +40,12 @@ PRIMARY_STRATA: tuple[str, ...] = (
 N_PROMPTS = 950
 N_SCORABLE = 850
 ARMS = ("incumbent", "treatment")
+#: C1's two arms, and the DEFAULT for the `arms` parameter that
+#: `decision_inputs` and `build_probe_results` take. They became parameters on
+#: 2026-09-28 so Phase C3 can align THREE arms through the same pairwise
+#: machinery instead of growing a second copy of it; every C1 call omits the
+#: argument and is bit-identical. The functions never needed to know how many
+#: arms there are -- they only ever iterated whatever set they were given.
 
 
 class C1ResultsError(RuntimeError):
@@ -72,9 +78,18 @@ class C1ProbeRecord:
     observed_generation_fingerprint: str = ""
     observed_evaluation_protocol_hash: str = ""
 
+    #: Which arm names this record may carry. C1's two by default; a caller
+    #: running a different design passes its own. It stays a whitelist rather
+    #: than becoming "any string": a typo'd arm name would otherwise sail
+    #: through here and only surface as a coverage failure much later, with
+    #: the probe already trained.
+    allowed_arms: tuple[str, ...] = ARMS
+
     def __post_init__(self) -> None:
-        if self.arm not in ARMS:
-            raise C1ResultsError(f"{self.probe_id}: unknown arm {self.arm!r}")
+        if self.arm not in self.allowed_arms:
+            raise C1ResultsError(
+                f"{self.probe_id}: unknown arm {self.arm!r}; this record "
+                f"allows {list(self.allowed_arms)}")
         for key in ("n", "usable", "correct", "n_scorable", "usable_scorable"):
             if key not in self.counts:
                 raise C1ResultsError(f"{self.probe_id}: missing count {key!r}")
@@ -121,12 +136,14 @@ class C1DecisionInputs:
 
 
 def _rows_by_probe(per_sample: Mapping[tuple[str, int], Sequence[Mapping[str, Any]]],
-                   seeds: Sequence[int]) -> None:
-    expected = {(a, s) for a in ARMS for s in seeds}
+                   seeds: Sequence[int],
+                   arms: Sequence[str] = ARMS) -> None:
+    expected = {(a, s) for a in arms for s in seeds}
     got = set(per_sample)
     if got != expected:
         raise C1ResultsError(
-            f"the design is 2 arms x {len(seeds)} seeds = {len(expected)} probes; "
+            f"the design is {len(arms)} arms x {len(seeds)} seeds = "
+            f"{len(expected)} probes; "
             f"got {sorted(got)}")
 
 
@@ -137,6 +154,7 @@ def decision_inputs(
     catastrophic_control_min: float = 0.40,
     candidate_operand: str = "treatment",
     control_operand: str = "incumbent",
+    arms: Sequence[str] = ARMS,
 ) -> C1DecisionInputs:
     """Align six probes into the paired vectors the frozen rule reads.
 
@@ -144,7 +162,7 @@ def decision_inputs(
     probes, a scorable count that is not 850 or a total that is not 950. Each of
     those would still produce a number.
     """
-    _rows_by_probe(per_sample, seeds)
+    _rows_by_probe(per_sample, seeds, arms)
 
     indexed: dict[tuple[str, int], dict[str, Mapping[str, Any]]] = {}
     strata: dict[str, str] = {}
@@ -174,7 +192,7 @@ def decision_inputs(
                     f"and {s!r} in another")
         indexed[key] = by_id
 
-    reference = {pid for pid, r in indexed[(ARMS[0], seeds[0])].items()
+    reference = {pid for pid, r in indexed[(arms[0], seeds[0])].items()
                  if r["scorable"]}
     for key, by_id in indexed.items():
         got = {pid for pid, r in by_id.items() if r["scorable"]}
@@ -188,10 +206,10 @@ def decision_inputs(
 
     correct = {arm: {s: {pid: bool(indexed[(arm, s)][pid]["correct"])
                          for pid in reference}
-                     for s in seeds} for arm in ARMS}
+                     for s in seeds} for arm in arms}
 
     usable = {arm: {s: sum(1 for r in indexed[(arm, s)].values() if r["usable"])
-                    for s in seeds} for arm in ARMS}
+                    for s in seeds} for arm in arms}
     per_seed = tuple((usable[candidate_operand][s] - usable[control_operand][s])
                      / N_PROMPTS for s in seeds)
     pooled = (sum(usable[candidate_operand].values())
@@ -200,7 +218,7 @@ def decision_inputs(
     violations = []
     for capability in PRIMARY_STRATA:
         rate = {}
-        for arm in ARMS:
+        for arm in arms:
             n = sum(1 for s in seeds for r in indexed[(arm, s)].values()
                     if r["set"] == capability)
             u = sum(1 for s in seeds for r in indexed[(arm, s)].values()
@@ -224,10 +242,10 @@ def decision_inputs(
         catastrophic_violations=tuple(violations),
         audit={
             "n_prompts": N_PROMPTS, "n_scorable": N_SCORABLE,
-            "seeds": list(seeds), "arms": list(ARMS),
+            "seeds": list(seeds), "arms": list(arms),
             "strata_sizes": {s: sum(1 for v in strata.values() if v == s)
                              for s in PRIMARY_STRATA},
-            "usable_counts": {a: dict(usable[a]) for a in ARMS},
+            "usable_counts": {a: dict(usable[a]) for a in arms},
             "usable_denominator": (
                 f"{N_PROMPTS} prompts per probe; behaviour is measurable where "
                 "correctness has no oracle"),
@@ -241,13 +259,14 @@ def decision_inputs(
 def build_probe_results(records: Sequence[C1ProbeRecord], *, plan_hash: str,
                         seeds: Sequence[int], inputs: C1DecisionInputs,
                         attested_evaluation_protocol_hash: str = "",
+                        arms: Sequence[str] = ARMS,
                         ) -> dict[str, Any]:
     """The `c1_probe_results.json` product: all six, bound to what produced them."""
-    if len(records) != len(ARMS) * len(seeds):
+    if len(records) != len(arms) * len(seeds):
         raise C1ResultsError(
-            f"{len(records)} probe records, expected {len(ARMS) * len(seeds)}")
+            f"{len(records)} probe records, expected {len(arms) * len(seeds)}")
     keys = {(r.arm, r.seed) for r in records}
-    if keys != {(a, s) for a in ARMS for s in seeds}:
+    if keys != {(a, s) for a in arms for s in seeds}:
         raise C1ResultsError(f"probe records do not cover the design: {sorted(keys)}")
 
     contracts = {r.scoring_contract.get("digest") for r in records}
@@ -281,7 +300,7 @@ def build_probe_results(records: Sequence[C1ProbeRecord], *, plan_hash: str,
         "schema": SCHEMA,
         "plan_hash": plan_hash,
         "seeds": list(seeds),
-        "arms": list(ARMS),
+        "arms": list(arms),
         "n_probes": len(records),
         "scoring_contract": dict(records[0].scoring_contract),
         "battery": dict(records[0].battery),

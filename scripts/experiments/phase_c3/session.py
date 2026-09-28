@@ -283,7 +283,8 @@ def _stages() -> tuple[C3Stage, ...]:
                 ("session_record", "watchdog_journal")),
         C3Stage("B", "teacher_fetch_verify",
                 f"fetch {TEACHER_REPO}@{TEACHER_REVISION[:12]} and verify every "
-                "file against logs/stages/stage-1/phase_c3/plans/teacher_binding.json",
+                "file against logs/stages/stage-1/phase_c1/plans/teacher_binding.json "
+                "-- a shared frozen identity, referenced not copied",
                 "ANY shard or config file whose hash differs from the binding",
                 ("teacher_verification",), blocks_training=True),
         C3Stage("C", "register_operator",

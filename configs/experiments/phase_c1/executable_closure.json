@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 105,
- "digest": "605b7bd0ece5fa8ebd6fd02b70674879b58ec1ac443d96b7eb2da7ae31e00bd8",
+ "digest": "6691bc5a783ff106742a965282e78126d1616b653990732122eda11d7b995e21",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,8 +39,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "99f2e6e3035a550985dcf56d076a82902526f7684bd08dfeb7fcc66111209140",
-   "bytes": 14544
+   "sha256": "7a00bec1ce008fef4f2fd24ce7d55bd5bbe297ae3f2836a18fb6ef901d534895",
+   "bytes": 16670
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -134,8 +134,8 @@
   },
   {
    "path": "scripts/experiments/phase_c1/probe_results.py",
-   "sha256": "4e0cba89c8ab092cae57c736ddb81146fef99dfa75fac88c217f65efdc092378",
-   "bytes": 14338
+   "sha256": "1a588ed88fa6bd9b0ed859418e4fc9e801d7b94b0297e0cb1cd594ffb46ed133",
+   "bytes": 15423
   },
   {
    "path": "scripts/experiments/phase_c1/scoring.py",
