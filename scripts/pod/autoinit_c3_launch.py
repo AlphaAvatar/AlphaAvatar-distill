@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Phase C3 — three-arm causal-KL ATTENTION isolation, as a session spec.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_c1_launch.py \
+    PYTHONPATH=src tmux new -d python -u scripts/pod/autoinit_c3_launch.py \
         --scr <scratch> --run-id <attemptN> \
         --session-commit <sha> --bundle <name> < /dev/null &
 
 **This session does not search.** It replays one frozen operator sequence, gates
-it against two recorded artifact digests, then runs six fixed probes. There is no
+it against two recorded artifact digests, then runs NINE fixed probes -- three
+arms x three fresh seeds, every arm on every seed. There is no
 beam, no ranking, no successive halving, no tie-breaking and no arm elimination —
 and none of those is a flag to be turned off: `C3Authorization.allows_beam_search`
-is a hard `False`, `C1IsolationPlan` has no `survivors` or `tie_break_seed` field
+is a hard `False`, `allows_arm_elimination` is a hard `False`, `C1IsolationPlan`
+has no `survivors` or `tie_break_seed` field
 to set, and `c3_session.assert_stage_order` refuses a permuted run.
 
 Three properties are declared here rather than assumed.
