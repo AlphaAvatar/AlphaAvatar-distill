@@ -37,13 +37,14 @@
  },
  "accepted_pricing": {
   "_why_restated": "so a mis-priced session is REFUSED rather than mirrored. A ceiling that only echoes its source is not an independent check, and this is the last place a mis-priced session can be stopped before a grant exists. Amended 2026-09-04 for the approved repricing to the secure L40S rate of $1.09/h; every minute assumption is unchanged. The superseded triple at $0.99/h was 13.7578 / 12.2070 / 13.4277.",
-  "hard_ceiling_usd": 15.1475,
+  "hard_ceiling_usd": 30.0,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841,
-  "cumulative_cap_usd": 370.0,
-  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. AMENDED AGAIN 2026-09-17: 320.00 -> 370.00 (+50.00), on the maintainer decision closing the Phase-C2 preparation round. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger.",
+  "cumulative_cap_usd": 400.0,
+  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. AMENDED AGAIN 2026-09-17: 320.00 -> 370.00 (+50.00), on the maintainer decision closing the Phase-C2 preparation round. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger. AMENDED AGAIN 2026-09-28: 370.00 -> 400.00 (+30.00), on the maintainer decision funding the complete 3-arm x 3-seed formal C3. The per-session envelope moved in the same decision, 15.1475 -> 30.00; see execution_package._amendment_2026_09_28.",
   "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
-  "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one."
+  "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
+  "_floor_and_soft_stop_are_c1_instance": "planning_floor_usd 13.4401 and soft_stop_usd 14.7841 were DERIVED for C1's own $15.1475 session at $1.09/h and are retained only because issue_c1_authorization prints them. They are NOT the current envelope's floor and soft stop, and no new session may read them: from 2026-09-28 every formal session derives its own floor, soft stop and hard ceiling from LIVE securePrice at issuance. C1 is COMPLETE/GO, so nothing will re-issue against them."
  },
  "execution_package": {
   "_contract": "The maintainer decision this experiment's attempts run under. INSTANCE POLICY, which is why it is configuration and not core: the core knows nothing about attempts, packages, dollars or retries. AUTHORIZES NOTHING BY ITSELF -- a launch still needs a grant, an authorization, a launch-bound readiness record and a bundle.",
@@ -52,10 +53,10 @@
   "approved_by": "maintainer decision, 2026-09-11, after independent engineering review of 55bb324a..199711af",
   "formal_attempts_max": null,
   "formal_attempts_include_the_first": true,
-  "per_attempt_hard_ceiling_usd": 15.1475,
-  "formal_allowance_usd": 45.4425,
+  "per_attempt_hard_ceiling_usd": 30.0,
+  "formal_allowance_usd": 55.0,
   "gpu_engineering_allowance_usd": 10.0,
-  "package_total_usd": 55.4425,
+  "package_total_usd": 65.0,
   "cumulative_spend_at_approval_usd": 267.8998,
   "reconciliation_margin_usd": 0.6577,
   "limits_do_not_transfer": "the engineering allowance, the per-session ceiling, the package total and the project cap bind SEPARATELY. An unspent engineering allowance does not raise the per-session ceiling, and the $0.6577 margin is for real accounting corrections, not spending. The attempt COUNT is no longer one of these limits -- see _attempts_amendment_2026_09_11b -- but the money is unchanged, and money is what now bounds how many sessions are possible.",
@@ -91,15 +92,15 @@
   "engineering_allowance_does_not_authorize": [
    "complete formal probes",
    "consuming the frozen confirmation battery for an endpoint",
-   "formal execution -- that comes from the $45.4425 C1 formal allowance, and the two do not transfer"
+   "formal execution -- that comes from the $55.0000 formal allowance, and the two do not transfer"
   ],
   "_attempts_amendment_2026_09_11b": "The three-attempt cap and the one-provider-resource-per-invocation rule are WITHDRAWN, prospectively, by a maintainer decision of 2026-09-11 taken after attempt 11. Ordinary infrastructure failures, setup failures and $0 pre-provider refusals -- where it is CONFIRMED that no formal probe training has started -- are now diagnosed, handled and retried autonomously inside the remaining budget, with no package-level cap on the number of launcher invocations. Attempts 10 and 11 keep their records, costs, numbering and the authorization semantics they actually ran under; what is withdrawn is a future constraint, not a record.",
   "what_still_binds": [
-   "the money: $45.4425 C1 formal, $6.0000 engineering, $51.4425 package -- these package allowances are what this document authorizes and they have NOT moved",
+   "the money: $55.0000 formal, $10.0000 engineering, $65.0000 package -- amended 2026-09-28; these package allowances are what this document authorizes and they bind separately",
    "the CURRENT project cumulative cap is deliberately not restated here. It was $320.0000 when this package was approved and has since been amended; its canonical owner is accepted_pricing.cumulative_cap_usd in this same file, which derive_budget reads. Do not read a current cap from this list -- restating it is exactly how one live file came to state two different current caps",
-   "$15.1475 per launcher SESSION, covering every host draw inside it -- draws do not each get a ceiling",
+   "$30.0000 per launcher SESSION as the ENVELOPE, covering every host draw inside it -- draws do not each get a ceiling. The envelope is not the grant: a session receives the ceiling DERIVED from live pricing at issuance, which must be <= this envelope",
    "at most ONE BILLING resource at any instant, now enforced by SessionRunner.release_and_confirm rather than by making the redraw branch unreachable",
-   "secure L40S at no more than $1.09/h; no other GPU, no price chasing",
+   "secure L40S; no other GPU and no price chasing, but securePrice is re-queried LIVE immediately before each authorization and the session's ceiling is derived from it. $1.09/h is a historical observation, not a frozen bound -- a different live price is re-priced, not refused",
    "every cost counts: a failure, a new run_id, a new pod or a new authorization resets nothing",
    "the science: arms, seeds, recipe, battery, statistic and behavioural vetoes are frozen"
   ],
@@ -112,7 +113,8 @@
    "release_rule": "a returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence that a resource stopped billing. Only the provider saying so is. If it cannot be confirmed, no further resource is created and the state is reconciled first."
   },
   "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much.",
-  "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY."
+  "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY.",
+  "_amendment_2026_09_28": "MAINTAINER DECISION 2026-09-28, on the review of b937aebb, which stopped formal C3 for funding rather than reducing the science. Funding is declared not to be the limiting factor. PROSPECTIVE, current-only: project cumulative cap 370.00 -> 400.00; per-session hard ceiling 15.1475 -> 30.00 (an ENVELOPE, not an automatic grant); formal allowance 45.4425 -> 55.00; GPU engineering allowance unchanged at 10.00; package total 55.4425 -> 65.00, which is 55 + 10 by construction. Historical issued authorizations and historical run records are UNCHANGED. C3's own one-use authorization receives the ceiling derived from live securePrice immediately before issuance, and proceeds only if that derived ceiling <= 30.00 AND cumulative spend + derived ceiling <= 400.00 AND remaining formal allowance >= derived ceiling."
  },
  "authorized_stages": [
   0,

@@ -137,8 +137,29 @@
   "scorable_prompts": 850
  },
  "estimand": {
-  "primary": "Delta = causal-KL-B3 treatment - incumbent B, on correct_overall",
+  "_primary_is_the_operator_isolation": "CORRECTED 2026-09-28. This field previously read 'Delta = causal-KL-B3 treatment - incumbent B', contradicting claim_boundary.primary_contrast and decision_rule._applies_to, which both named causal-B1 - B. The canonical primary is the OPERATOR-ISOLATION contrast; B3 is a numerical protocol, not the scientific hypothesis.",
+  "primary": {
+   "symbol": "Delta_primary",
+   "contrast": "causal-B1 - incumbent B",
+   "metric": "correct_overall",
+   "_owns": "the formal GO / NO_GO / INCONCLUSIVE verdict, and nothing else does"
+  },
+  "secondary": {
+   "symbol": "Delta_batch",
+   "contrast": "causal-B3 - causal-B1",
+   "metric": "correct_overall",
+   "_answers": "the downstream impact of B3 + length_sorted_v1 as a numerical protocol, with the operator held fixed",
+   "_does_not_replace_the_primary": true
+  },
+  "practical": {
+   "symbol": "Delta_practical",
+   "contrast": "causal-B3 - incumbent B",
+   "metric": "correct_overall",
+   "_describes": "the practical optimized treatment end to end",
+   "_may_not_replace_the_primary_after_results_are_visible": true
+  },
   "aggregation": "prompt mean of the mean over the three fixed paired seeds",
+  "_all_three_use_the_same_machinery": "identical aggregation and identical paired prompt-level / stratified prompt-cluster bootstrap machinery over the SAME three fixed paired seeds. The three differ only in which two arms are differenced.",
   "_seeds_are_blocks": "three FIXED experimental blocks, not an IID sample from a seed population"
  },
  "inference": {
@@ -174,9 +195,22 @@
   "_no_weighted_scalar": true
  },
  "terminal_outcomes": {
-  "GO": "promote attention.causal_kl_v1 + B3/length_sorted_v1 as the ATTENTION treatment for this path. C4 becomes scientifically eligible but is NOT authorized.",
-  "NO_GO": "B remains incumbent",
-  "INCONCLUSIVE": "B remains incumbent"
+  "_corrected_2026_09_28": "GO previously read 'promote attention.causal_kl_v1 + B3/length_sorted_v1', which contradicted interpretation_matrix case B ('B3 NOT automatically promoted'). No B3-vs-B1 non-inferiority margin was ever preregistered and NONE IS INVENTED NOW -- inventing a tolerance after the data exist is exactly what the claim boundary forbids. The GO verdict therefore settles the operator question and deliberately leaves the protocol question open.",
+  "GO": {
+   "means": "causal-KL operator isolation is SUPPORTED: causal-B1 beats the incumbent B on the primary contrast under the frozen rule",
+   "c4": "C4 becomes scientifically ELIGIBLE. It is NOT authorized and must NOT be started.",
+   "b1_vs_b3": "NOT automatically decided. The numerical-protocol adoption choice between B1 and B3 is a post-C3 MAINTAINER decision, made on the completed secondary (Delta_batch) and practical (Delta_practical) evidence the report returns.",
+   "_no_automatic_promotion_of_b3": true
+  },
+  "NO_GO": {
+   "means": "B remains incumbent",
+   "c4": "do not start C4"
+  },
+  "INCONCLUSIVE": {
+   "means": "B remains incumbent",
+   "c4": "do not start C4"
+  },
+  "_if_b3_looks_strong_while_primary_is_not_GO": "report it EXACTLY as a secondary/practical finding. It must not be relabelled as proof that causal-KL alone won -- see interpretation_matrix case C, which this clause and that one now state identically."
  },
  "pricing": "logs/stages/stage-1/phase_c3/plans/c3_pricing_9probe.json",
  "_initializations_are_seed_independent": "THREE initialization states are constructed and verified ONCE each, then fanned out into three recovery seeds. The causal scorers are NOT rerun per seed.",
@@ -187,14 +221,44 @@
   "D": "neither causal arm improves over B -> B remains incumbent"
  },
  "execution_status": {
-  "state": "NOT LAUNCHED -- the nine-probe chain does not fit the budget",
-  "hard_ceiling_usd": 22.1451,
-  "project_headroom_usd": 19.9693,
-  "project_shortfall_usd": 2.1758,
-  "per_session_ceiling_usd": 15.1475,
-  "session_shortfall_on_expected_usd": 1.9597,
+  "state": "NOT LAUNCHED -- corrected and re-frozen 2026-09-28, pending the formal chain and a live-priced authorization",
+  "_budget_amended": "project cap 400.00, per-session envelope 30.00, formal allowance 55.00 (maintainer decision 2026-09-28)",
+  "_ceiling_is_derived_live": "C3's hard ceiling is recomputed from live L40S securePrice immediately before authorization; the $22.1451 figure priced at $1.09/h is an estimate, not the grant",
   "_stopped_before_provider_acquisition": true
  },
- "preregistration_sha256": "6d1d1121e5fded887385df379ed053cf496d8b254b5273b455bf992b072c056e",
- "_sha256_correction": "2026-09-28: the stamp read fdf1d4c266facd9540b85c3e38f064f91464f4395dacc094946b53bcabc508a2, which no canonicalization of this document reproduces -- it was hand-written, and the file had no producer and no consumer, so nothing checked it. The value below is now sha256_json(document minus preregistration_sha256), the convention autoinit_c1_launch.py verifies. NOTHING IN THE DOCUMENT CHANGED: the body hashes identically to the committed f1cf3e36 version, so the arms, seeds, contrasts and decision rule are exactly as preregistered. Only the stamp became true. Caught before any launch and before any result exists. tests/docs/test_c3_preregistration.py now verifies it."
+ "preregistration_sha256": "1632066081200affcce96d793d899ef74a41d4b9b8a38d2da35cf4ed3eeac05c",
+ "_correction_history": [
+  {
+   "utc": "2026-09-28",
+   "commit_that_exposed_it": "f1cf3e36",
+   "what": "the stamp fdf1d4c266facd95... reproduced under no canonicalization -- hand-written, with no producer and no consumer to check it",
+   "body_changed": false,
+   "fixed_in": "b937aebb",
+   "_note": "at that point the body was byte-identical and only the stamp moved"
+  },
+  {
+   "utc": "2026-09-28",
+   "commit_that_exposed_it": "b937aebb",
+   "what": "MAINTAINER REVIEW found a pre-launch INTERNAL CONTRADICTION: claim_boundary.primary_contrast and decision_rule._applies_to said 'causal-B1 - B' while estimand.primary said 'causal-B3 - B'; and terminal_outcomes.GO auto-promoted B3 while interpretation_matrix case B forbade exactly that.",
+   "body_changed": true,
+   "_what_changed": [
+    "estimand",
+    "terminal_outcomes"
+   ],
+   "_what_did_not_change": [
+    "arms",
+    "seeds",
+    "shared_parent",
+    "recovery",
+    "evaluation",
+    "inference",
+    "decision_rule",
+    "guardrails",
+    "claim_boundary",
+    "interpretation_matrix"
+   ],
+   "_why_this_is_legitimate": "no C3 behavioural result exists, no formal provider resource has ever been created, and execution has not begun. This is the correct and only time to repair a contradictory preregistration. After formal behavioural execution begins there are NO further scientific edits.",
+   "superseded_sha256": "6d1d1121e5fded887385df379ed053cf496d8b254b5273b455bf992b072c056e"
+  }
+ ]
 }

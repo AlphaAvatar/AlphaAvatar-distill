@@ -90,7 +90,7 @@ work, managed internally rather than per category, under a `$42.0000`
 cumulative behavioural campaign ceiling. That window is over: the maintainer
 closed C2 without promotion on 2026-09-24 and **no further C2 scientific spend
 is authorized**. Remaining allowance under either figure is not permission and
-must not be spent. The `$370` project envelope never moved.
+must not be spent. The project envelope did not move during that window; it has been `$400.0000` since the 2026-09-28 amendment.
 
 **C2 owes no probes.** All twelve were trained and scored — six screening, six
 confirmation. What the stage did *not* produce is a promotion verdict: the six
@@ -1259,7 +1259,7 @@ floor. A complete valid verdict ends the round.
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4, baseline completion 5–8, and behavioural 1–14. **No C2 chain may be built:** the stage is closed and no further C2 scientific spend is authorized. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The **C3 batching-adoption pilot is authorized** (`$5.00` all-in) but has no readiness record, authorization document or bundle yet; **formal C3 has no chain of any kind** | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |
 | last attempt | **behavioural attempt14 — COMPLETE, `$2.0670`.** It reconstructed probe 11's evaluation for the P4 repair and reproduced the terminal state with a recorded two-prompt discrepancy, which is preserved rather than resolved. It also left a pod billing ~116 min behind a blocked artifact gate; that defect is repaired and accounted as PHB-HA-026/027 | [`attempt8/closeout/outcome.json`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) |
-| blocker | **NOTHING IS BLOCKED.** C2 is **CLOSED WITHOUT PROMOTION**: no probes owed, no canonical verdict claimed, no new incumbent, **B stands by absence of a valid challenger**, no C2 launch prepared, and **no further C2 scientific spend authorized** — remaining allowance under the `$25.00` stage envelope or the `$42.0000` campaign ceiling is not permission. **The one authorized spend is the C3 batching-adoption pilot, `$5.00` all-in** (2026-09-27), which is engineering-scale and is **not** formal C3. Formal C3 is **NOT STARTED**, has no frozen seed set, and must be **re-priced and separately budget-authorized** before launch: with cumulative spend at `$342.7021` of the `$370.00` cap, a fully spent `$5.00` pilot plus a fully spent `$25.00` C3 would exceed it, so "the `$25` envelope remains untouched" is not evidence that `$25` is fundable | [`phase_c2_full_search_pricing.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json) · [`budget/decisions.md`](../budget/decisions.md) |
+| blocker | **NOTHING IS BLOCKED.** C2 is **CLOSED WITHOUT PROMOTION**: no probes owed, no canonical verdict claimed, no new incumbent, **B stands by absence of a valid challenger**, no C2 launch prepared, and **no further C2 scientific spend authorized** — remaining allowance under the `$25.00` stage envelope or the `$42.0000` campaign ceiling is not permission. **Formal C3 is FUNDED** by the 2026-09-28 amendment (project cap `$400.0000`, per-session envelope `$30.0000`, formal allowance `$55.0000`) and its 3-arm/9-probe design is preregistered and hash-bound; the envelope is not the grant, and C3's one-use authorization takes the ceiling **derived from live `securePrice` at issuance**. All three C3 engineering pilots are closed and are not formal C3 | [`budget/decisions.md`](../budget/decisions.md) · [`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
 ## C3 — the refactor is on review, and C3 has not started
@@ -1703,9 +1703,7 @@ blind spot). Every pod torn down and confirmed.
 **Pilot spend `$3.3478` of the `$5.00` ceiling. Project `$346.0499` of
 `$370.00`.**
 
-**Formal C3 remains NOT STARTED**, has **no frozen seed set**, and must be
-**re-priced and separately budget-authorized** before launch: the old
-`$25.00` envelope is not current permission at this cap. The pilot seed
+**Formal C3 was NOT STARTED and had no frozen seed set when this pilot ran.** Both changed afterwards: the 3-arm design was preregistered with three mechanical seeds, and the 2026-09-28 amendment funded it. The old `$25.00` envelope was never current permission and still is not. The pilot seed
 `1139220455` is pilot-only.
 
 ### The packing-optimization pilot: the screen is measured, the full scorer is not funded
@@ -1809,14 +1807,58 @@ where the repaired preflight caught a toy root on the wrong device in five
 seconds, then this one. All torn down, provider confirms **pods 0,
 volumes 0**.
 
-### Formal C3: priced for nine probes, and it does not fit
+### Formal C3: funded, corrected, and in execution
 
-**NOT LAUNCHED. Nothing was created; no provider resource exists.** Owners:
+**Owners:**
 [`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json)
-(hash-bound `6d1d1121e5fded88`) and
+(hash-bound `1632066081200aff`) and
 [`c3_pricing_9probe.json`](../stages/stage-1/phase_c3/plans/c3_pricing_9probe.json).
 
-**Stamp corrected before any launch.** The preregistration was committed with `fdf1d4c2…`, which no canonicalization of the document reproduces — it was hand-written, and unlike C1, phase B and continuation B the C3 plan had no producer *and no consumer*, so nothing ever checked it. The body is byte-identical to the committed `f1cf3e36` version; only the stamp became true, so the arms, seeds, contrasts and decision rule are exactly as preregistered. `tests/docs/test_c3_preregistration.py` now verifies the stamp, the launcher's convention, the design it binds, and that no document quotes a stale value. Had this survived to a launch, a preregistration whose stamp does not verify would have been a scientific problem rather than a clerical one: nothing afterwards distinguishes "the stamp was wrong" from "the document moved after the science started".
+**Funding amended 2026-09-28** (maintainer decision on `b937aebb`; the budget
+stop was judged correct and nothing scientific was reduced). Project cap
+`$370.00 → $400.00`; per-session hard ceiling `$15.1475 → $30.00`; formal
+allowance `$45.4425 → $55.00`; engineering unchanged at `$10.00`; package
+total `$55.4425 → $65.00 = 55 + 10`. **`$30` is an envelope, not the C3
+grant** — live L40S `securePrice` is re-queried immediately before
+authorization and C3 receives the ceiling *derived* from it, proceeding only
+while derived ≤ `$30`, cumulative + derived ≤ `$400`, and remaining formal ≥
+derived. A price that is no longer `$1.09/h` is re-priced, not refused.
+
+**The preregistration contradicted itself, and was corrected before any
+result.** Two defects, found in two separate reviews:
+
+1. *The stamp bound nothing.* It read `fdf1d4c2…`, which no canonicalization
+   reproduces — hand-written, and the plan had no producer *and no consumer*,
+   so nothing checked it. Restamped `6d1d1121…` over a byte-identical body.
+2. *The corrected stamp was on a self-contradictory document.* Maintainer
+   review of `b937aebb` found `claim_boundary.primary_contrast` and
+   `decision_rule._applies_to` naming **causal-B1 − B** while
+   `estimand.primary` named **causal-B3 − B**; and `terminal_outcomes.GO`
+   auto-promoting `B3/length_sorted_v1` while `interpretation_matrix` case B
+   forbade exactly that. A correctly-stamped document that contradicts itself
+   is worse than an unstamped one, because the stamp makes it look checked.
+
+Both fixed before execution, which is the only time a preregistration may be
+repaired. `estimand` and `terminal_outcomes` changed; **arms, seeds, parent,
+recovery, evaluation, inference, decision rule, guardrails, claim boundary
+and interpretation matrix did not.** Re-frozen at
+`1632066081200affcce96d793d899ef74a41d4b9b8a38d2da35cf4ed3eeac05c`, with the
+superseded stamps recorded in `_correction_history` rather than discarded.
+
+**The canonical hierarchy, frozen before any result:**
+
+| role | contrast | what it owns |
+| --- | --- | --- |
+| **primary** | `Δ_primary = causal-B1 − B` | the **only** GO / NO_GO / INCONCLUSIVE verdict — causal-KL operator isolation |
+| secondary | `Δ_batch = causal-B3 − causal-B1` | the numerical protocol's downstream effect; reported completely |
+| practical | `Δ_practical = causal-B3 − B` | the practical optimized treatment; reported completely |
+
+All three use the same aggregation, the same three fixed paired seeds and the
+same paired bootstrap machinery. **A GO settles the operator question only:**
+C4 becomes scientifically eligible but is not authorized and must not be
+started, and the B1-vs-B3 adoption choice is explicitly *not* decided — it
+returns to the maintainer on the completed secondary and practical evidence.
+No B3-vs-B1 non-inferiority margin was preregistered and none was invented.
 
 The 2026-09-28 supplement makes C3 a **three-arm, nine-probe** experiment:
 incumbent B, causal-KL B1, causal-KL B3/length-sorted, each over the same
@@ -1835,26 +1877,15 @@ three fresh seeds. Priced from measured components:
 | **expected** | **927.5** | **15.46 h = `$17.1072`** |
 | **hard** | **1200.6** | **20.01 h = `$22.1451`** |
 
-**Two independent shortfalls, and closing either alone is not enough:**
-
-1. **Project cap** — hard `$22.1451` against `$19.9693` headroom: **short by
-   `$2.1758`**. A cap of at least `$372.1758` closes it.
-2. **Per-session ceiling** — the *expected* `$17.1072` already exceeds the
-   `$15.1475` per-session hard ceiling by **`$1.9597`**, so the chain does
-   not fit one session even with a higher cap. Holding the hard bound needs
-   a per-session ceiling of at least `$22.1451`.
-
-Splitting across two sessions is not a fix: formal measurement may not be
-retried, resumed or pooled once begun, and no resume contract exists for a
-partially trained nine-probe matrix.
-
-**C3's own allowance is not the problem.** The formal allowance has
-`$22.8249` of `$45.4425` left, which already covers the `$22.1451` hard
-ceiling with `$0.6798` to spare. Both binding limits are outside the
-experiment's book — the project-wide cumulative cap and the per-session
-ceiling — so this is a decision about those two numbers, not about whether
-C3 was funded generously enough. Derived live by
-`scripts/consolidate/derive_budget.py`, not restated from a document.
+**That pricing left the chain short under the OLD limits**, and the
+maintainer's answer was to raise them rather than shrink the experiment.
+For the record, against the superseded `$370` cap and `$15.1475` ceiling:
+hard `$22.1451` exceeded `$19.9693` headroom by `$2.1758`, and expected
+`$17.1072` exceeded the per-session ceiling by `$1.9597`. Under the amended
+envelope both fit with room: `$22.1451` against a `$30.00` envelope,
+`$372.1758` cumulative against `$400.00`, and `$32.3824` formal remaining.
+**The ceiling C3 actually receives is derived from live `securePrice` at
+issuance, not from this estimate.**
 
 **Nothing was reduced to fit** — not the arms, seeds, battery, 860k tokens,
 evaluation or decision rule — and the expected value is not offered as a
@@ -2027,12 +2058,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$22.8249` of `$45.4425` |
+| formal sessions | `$32.3824` of `$55.0000` |
 | GPU engineering | `$1.9395` of `$10.0000` |
-| package | `$24.7644` of `$55.4425` |
-| project cap | `$350.0307` spent of `$370.0000`, leaving `$19.9693` |
+| package | `$34.3219` of `$65.0000` |
+| project cap | `$350.0307` spent of `$400.0000`, leaving `$49.9693` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$30.2950` and the formal allowance has `$22.8249`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$60.0000` and the formal allowance has `$32.3824`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

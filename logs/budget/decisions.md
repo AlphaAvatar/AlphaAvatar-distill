@@ -1,5 +1,54 @@
 # Decision records
 
+## 2026-09-28 — C3 funding amendment: the envelope rises, the experiment does not shrink
+
+- **Maintainer decision**, on review of `b937aebb` (branch
+  `review/c3-operator-batching`). The budget stop was judged correct and no
+  scientific work was reduced to fit. **Funding is declared not to be the
+  limiting factor.** The complete 3-arm x 3-seed = 9-probe C3 design stays
+  intact.
+- **Prospective amendment**, current configuration only. Historical issued
+  authorizations and historical run records are unchanged.
+
+  | | before | after |
+  | --- | --- | --- |
+  | project cumulative cap | `$370.0000` | **`$400.0000`** |
+  | per-session hard ceiling | `$15.1475` | **`$30.0000`** |
+  | formal allowance | `$45.4425` | **`$55.0000`** |
+  | GPU engineering allowance | `$10.0000` | `$10.0000` (unchanged) |
+  | package total | `$55.4425` | **`$65.0000`** |
+
+  The package total is `55 + 10 = 65` by construction, asserted in the config
+  rather than restated.
+- **$30 is an envelope, not the C3 grant.** C3 must NOT be issued with an
+  automatic `$30` ceiling. Immediately before the formal authorization the
+  chain re-queries **live L40S `securePrice`**, recomputes C3's expected cost
+  and hard ceiling, and the one-use authorization receives that **derived**
+  ceiling. It proceeds automatically only while all three hold:
+
+  ```text
+  derived C3 hard ceiling                      <= $30.0000
+  project cumulative spend + derived ceiling   <= $400.0000
+  remaining formal allowance                   >= derived ceiling
+  ```
+
+  A live price that is no longer exactly `$1.09/h` is **re-priced, not
+  refused** — the provider price is a live pricing input now, not a frozen
+  bound. If the derived all-in bound exceeds an amended envelope, stop and
+  report.
+- **Canonical owners are unchanged.** The project cap stays at
+  `configs/experiments/phase_c1/authorization.json ::
+  accepted_pricing.cumulative_cap_usd`, which `derive_budget.py` reads; the
+  per-session envelope stays at `execution_package.per_attempt_hard_ceiling_usd`.
+  **No second project-cap owner was created.** `planning_floor_usd` and
+  `soft_stop_usd` were derived for C1's completed `$15.1475` session and are
+  retained only because `issue_c1_authorization` prints them; they are
+  explicitly marked as not the current envelope's floor and soft stop.
+- **Position after the amendment**, derived live rather than restated:
+  cumulative `$350.0307` of `$400.0000`, leaving `$49.9693`; formal allowance
+  `$32.3824` remaining of `$55.0000`; engineering `$1.9395` of `$10.0000`.
+
+
 ## 2026-09-19 — Launch stays NO-GO for one narrow reason, and three things review settled
 
 - **Maintainer decision**, on review of `245cf17`. The performance direction is

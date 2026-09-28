@@ -24,13 +24,13 @@
  },
  "budget": {
   "cumulative_spend_usd": 350.0307,
-  "authorized_cap_usd": 370.0,
-  "remaining_usd": 19.9693,
+  "authorized_cap_usd": 400.0,
+  "remaining_usd": 49.9693,
   "remaining_is_not_permission": true,
-  "formal_remaining_usd": 22.8249,
+  "formal_remaining_usd": 32.3824,
   "engineering_remaining_usd": 1.9395,
-  "package_remaining_usd": 24.7644,
-  "per_session_ceiling_usd": 15.1475,
+  "package_remaining_usd": 34.3219,
+  "per_session_ceiling_usd": 30.0,
   "full_ceiling_sessions_fundable": 1,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -125,13 +125,13 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT STARTED and NOT LAUNCHED. The 3-arm/9-probe design is preregistered and hash-bound (6d1d1121e5fded88) with three fresh seeds, but the chain does not fit: hard $22.1451 vs $19.9693 project headroom, expected $17.1072 vs the $15.1475 per-session ceiling. Nothing was reduced to fit; no provider resource was created. Needs a maintainer budget decision on BOTH limits; see c3_pricing_9probe.json.",
+   "status": "NOT STARTED and NOT LAUNCHED, but now FUNDED and unblocked. Budget amended 2026-09-28 (cap $400, per-session envelope $30, formal $55). The 3-arm/9-probe design is preregistered and hash-bound (1632066081200aff) with three fresh seeds; it was self-contradictory at b937aebb and was corrected before any result -- estimand and terminal_outcomes only. Primary contrast causal-B1 - B owns the sole verdict. Remaining work is ordinary engineering: the 3-arm executor and the formal chain.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
-   "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, for batch_size=4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
+   "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
    "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded for selection by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
-   "packing_optimization_v2": "COMPLETE 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION at 1.1884x against a 1.25x gate. Counterbalanced screen stable to 0.049%; R3 (B3 length-sorted) fastest at 1.1908x pooled; fresh full B1 2720.66s vs R3 2289.37s. The +/-5% rule changed the SIGN -- the stale 2190.17s B1 would have said 0.957x. No structural comparison, no recovery; seed 1139220455 unconsumed. $2.7048 of $4.00. Not formal C3. Owner: .../packing-optimization/v2/result.json.",
-   "preregistration_stamp_correction": "2026-09-28 before any launch: hand-written stamp bound nothing; body unchanged, now 6d1d1121e5fded88. See the plan's _sha256_correction.",
-   "executor_gap": "build_arm_specs still builds TWO arms and has never run end to end; the 3-arm fan-out is owed before launch."
+   "packing_optimization_v2": "CLOSED 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION, 1.1884x against a 1.25x gate; R3 (B3 length-sorted) fastest. $2.7048 of $4.00. Not formal C3. Owner: .../packing-optimization/v2/result.json.",
+   "executor_gap": "build_arm_specs still builds TWO arms and has never run end to end; the 3-arm fan-out is owed before launch.",
+   "preregistration_corrections": "TWO, both pre-launch: a hand-written stamp that bound nothing, then a body that contradicted itself on the primary contrast and on GO. See _correction_history in the plan; superseded stamps fdf1d4c2, 6d1d1121."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
@@ -141,7 +141,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "FORMAL C3 IS BLOCKED ON BUDGET: the 9-probe chain fits neither the project cap nor one session, and both need a maintainer decision. Figures: phase_c.c3.status and c3_pricing_9probe.json. Nothing else is blocked; no spend is authorized.",
+ "blocker": "NONE for C3: funding amended 2026-09-28 and the preregistration corrected. Remaining work before launch is ordinary engineering (3-arm executor, formal chain).",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -169,7 +169,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",
