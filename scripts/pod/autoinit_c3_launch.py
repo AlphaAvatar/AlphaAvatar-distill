@@ -1170,10 +1170,17 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: survives, so they must be inside the set the authorization measures.
     #: Without this, editing an evidence declaration would not move the harness
     #: digest, and a grant would certify a collection policy it never saw.
-    unmeasured = [p for p in paths if p not in C3_HARNESS_SOURCE_FILES_V1]
+    #: Asked of the DERIVED set, not a declared constant. C3 has no
+    #: hand-written harness list -- the closure walk is the authority on what
+    #: the authorization measures, so that is what must be interrogated.
+    try:
+        measured = {f["path"] for f in c3_harness_digest(REPO_ROOT)["files"]}
+    except Exception as exc:                           # noqa: BLE001
+        return False, f"cannot derive the C3 harness set: {exc}"
+    unmeasured = [p for p in paths if p not in measured]
     if unmeasured:
         return False, (f"{unmeasured} decide what evidence survives teardown but "
-                       "are outside the measured C1 harness set")
+                       "are outside the measured C3 harness set")
     loaded = {}
     for rel in paths:
         p = REPO_ROOT / rel

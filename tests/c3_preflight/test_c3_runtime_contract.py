@@ -21,6 +21,7 @@ The four that have precedent in this project's paid failures:
 
 from __future__ import annotations
 
+import ast
 import json
 import re
 import subprocess
@@ -352,3 +353,47 @@ def test_the_incumbent_the_launcher_gates_on_is_c3_s():
     assert "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342" in code
     assert "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6" not in code
     assert CS.expected_incumbent_digest().startswith("53e30566")
+
+
+@pytest.mark.parametrize("target", ["launcher", "driver"])
+def test_no_module_level_name_is_undefined(target):
+    """A NameError inside a gate is only found by reaching that gate.
+
+    `C3_HARNESS_SOURCE_FILES_V1` survived a rename in one line of
+    `artifact_spec_gate` -- the ninth gate -- so four launcher invocations
+    and four full re-issue cycles ran before anything reached it. Every one
+    cost $0 and an hour.
+
+    A static pass over module-level loads answers the same question without
+    executing anything. Locals and comprehension targets are collected too,
+    so this is deliberately permissive: it reports names nothing in the file
+    could bind, which is the class that raises.
+    """
+    import builtins
+
+    path = LAUNCH if target == "launcher" else DRIVER
+    tree = ast.parse(path.read_text())
+    #: Module globals Python provides, which nothing in the file assigns.
+    bound = set(dir(builtins)) | {
+        "__file__", "__name__", "__doc__", "__package__", "__spec__",
+        "__loader__", "__builtins__", "__debug__"}
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            for alias in node.names:
+                bound.add((alias.asname or alias.name).split(".")[0])
+        elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
+            bound.add(node.id)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+            bound.add(node.name)
+        elif isinstance(node, ast.arg):
+            bound.add(node.arg)
+        elif isinstance(node, ast.ExceptHandler) and node.name:
+            bound.add(node.name)
+        elif isinstance(node, ast.Global):
+            bound.update(node.names)
+    used = {n.id for n in ast.walk(tree)
+            if isinstance(n, ast.Name) and isinstance(n.ctx, ast.Load)}
+    undefined = sorted(used - bound)
+    assert not undefined, (
+        f"the C3 {target} loads names nothing binds: {undefined}. Each raises "
+        f"only when its line runs -- inside a gate, or on a pod.")

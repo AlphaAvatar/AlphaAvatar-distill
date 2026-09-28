@@ -219,7 +219,7 @@ class C3OperatorDeadline:
     about what is affordable. Deliberately NOT a second clock: a monotonic
     countdown snapshotted in minutes would drift from `usd()` the moment either
     is wrong, and there is no existing monotonic session deadline to reuse —
-    `C1Driver.t0` is `time.time()`.
+    `C3Driver.t0` is `time.time()`.
 
     It raises `C3DriverError`, so an expired budget is an ordinary
     infrastructure failure that `run()` reports as `C1_FAILED`. It is emphatically
@@ -1467,7 +1467,7 @@ def main() -> int:
     for s in CS.C3_STAGES:
         say(f"  {s.letter}: {s.stage_id}"
             + ("   [blocks training on failure]" if s.blocks_training else ""))
-    driver = C1Driver(args)
+    driver = C3Driver(args)
     driver.auth.require_within_cap(args.authorized_usd, what="session backstop")
     return driver.run()
 
