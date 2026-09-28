@@ -467,3 +467,69 @@ def test_the_driver_loads_a_c3_authorization_from_this_run():
         "the C3 driver still points at C1's authorization")
     assert "def authorization_path(self)" in src
     assert "governance/authorization.json" in src
+
+
+def test_the_frozen_plan_can_actually_be_constructed(registered):
+    """Constructing it is free, and it only ever ran on a paid pod.
+
+    `C1IsolationPlan` holds EXACTLY two arms and `C1Arm.role` must be
+    `incumbent` or `treatment`. Handing it C3's three arms with ids like
+    `A_incumbent` raised `role must be 'incumbent' or 'treatment'` in
+    `C3Driver.__init__` -- on a live L40S, after setup had completed, at
+    `$0.17`. Nothing about that failure needed a GPU.
+
+    So this builds the plan the way the driver does and asserts what it must
+    contain: the PRIMARY contrast's two arms, in their C1 roles.
+    """
+    import importlib.util
+
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    spec = importlib.util.spec_from_file_location("c3drv_plan", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    class FakeArgs:
+        run_id = "preflight"
+        rate = 1.0
+        spent_usd = 0.0
+        soft_stop_usd = 1.0
+        authorized_usd = 1.0
+        image_digest = ""
+
+    #: `frozen_plan` and `primary_operands` are pure reads of the frozen
+    #: plan plus the battery file -- they need no driver state, so they are
+    #: exercised unbound rather than by constructing a whole C3Driver.
+    drv = mod.C3Driver.__new__(mod.C3Driver)
+    drv.seeds = list(CS.recovery_seeds())
+    control, candidate = mod.C3Driver.primary_operands(drv)
+    assert control == "A_incumbent", f"control arm is {control}"
+    assert candidate == "B_causal_b1", f"candidate arm is {candidate}"
+
+    plan = mod.C3Driver.frozen_plan(drv)
+    assert len(plan.arms) == 2, "C1IsolationPlan holds exactly two arms"
+    roles = [a.role for a in plan.arms]
+    assert roles == ["incumbent", "treatment"], roles
+    assert plan.arms[0].attention_impl_id == "attention.activation_importance_v1"
+    assert plan.arms[1].attention_impl_id == "attention.causal_kl_v1"
+    assert tuple(plan.seeds) == CS.recovery_seeds()
+
+
+def test_the_verdict_operands_come_from_the_plan_not_from_list_order(registered):
+    """A renamed or reordered arm must not silently move the verdict."""
+    import importlib.util
+
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    spec = importlib.util.spec_from_file_location("c3drv_ops", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    src = DRIVER.read_text()
+    assert 'prereg["estimand"]["primary"]["contrast"]' in src, (
+        "the primary operands are not read from the frozen plan's own "
+        "statement of the primary contrast")
+    #: And the third arm is deliberately absent from the decision rule.
+    drv = mod.C3Driver.__new__(mod.C3Driver)
+    drv.seeds = list(CS.recovery_seeds())
+    control, candidate = mod.C3Driver.primary_operands(drv)
+    assert "C_causal_b3" not in (control, candidate), (
+        "the B3 arm is in the decision rule; the preregistration makes it a "
+        "secondary contrast that may not redefine the verdict")
