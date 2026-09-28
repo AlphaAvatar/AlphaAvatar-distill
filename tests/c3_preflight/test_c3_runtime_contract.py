@@ -533,3 +533,47 @@ def test_the_verdict_operands_come_from_the_plan_not_from_list_order(registered)
     assert "C_causal_b3" not in (control, candidate), (
         "the B3 arm is in the decision rule; the preregistration makes it a "
         "secondary contrast that may not redefine the verdict")
+
+
+def test_the_driver_validates_the_hash_the_authorization_actually_binds(registered):
+    """Two quantities are called "plan hash"; only one is bound.
+
+    The authorization records the SESSION CONTRACT hash -- the value the
+    launcher's `_plan_hash()` computes and the preflight's `require_plan`
+    checks. The driver was validating `self.plan.plan_hash`, the ISOLATION
+    plan's, which is a different number for C3 because the isolation plan
+    carries only the primary contrast's two arms. It raised "an
+    authorization does not transfer to a plan that changed" on a live pod,
+    at $0.22, after setup had completed.
+
+    They coincided under C1, where one object produced both. Driving them
+    apart is what made the mistake visible, and this pins the right one.
+    """
+    import importlib.util
+
+    auth_path = REPO / "logs/budget/approvals/autoinit_c3_authorization.json"
+    src = DRIVER.read_text()
+    assert "self.auth.require_plan(CS.C3SessionContract().contract_hash)" in src, (
+        "the driver validates something other than the session contract hash")
+    assert "require_plan(self.plan.plan_hash)" not in src, (
+        "the driver still validates the isolation plan's hash, which the "
+        "authorization does not bind")
+
+    if not auth_path.is_file():
+        pytest.skip("no C3 authorization in this checkout")
+    bound = json.loads(auth_path.read_text())["bound"]["session_contract_hash"]
+    assert CS.C3SessionContract().contract_hash == bound, (
+        "the session contract hash and the authorization's binding differ")
+
+    #: And the isolation plan's hash is DIFFERENT, which is the whole point:
+    #: if they were equal this test would pass for the wrong reason.
+    sys.path.insert(0, str(REPO / "scripts/autoinit"))
+    spec = importlib.util.spec_from_file_location("c3drv_hash", DRIVER)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    drv = mod.C3Driver.__new__(mod.C3Driver)
+    drv.seeds = list(CS.recovery_seeds())
+    assert mod.C3Driver.frozen_plan(drv).plan_hash != bound, (
+        "the isolation plan and the session contract hash to the same value; "
+        "while they coincide, checking either passes and this test proves "
+        "nothing")

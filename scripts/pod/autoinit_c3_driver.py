@@ -369,7 +369,18 @@ class C3Driver:
         #: same artifact rather than two that happen to agree.
         self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.authorization_path())
         self.plan = self.frozen_plan()
-        self.auth.require_plan(self.plan.plan_hash)
+        #: The SESSION CONTRACT hash, which is what the authorization binds
+        #: and what the launcher's preflight already validated. Two different
+        #: quantities are called "plan hash" here: this one, and
+        #: `self.plan.plan_hash`, the isolation plan's. They coincided while
+        #: C1's launcher derived both from the same object; for C3 they do
+        #: not, and checking the isolation plan's raised "an authorization
+        #: does not transfer to a plan that changed" on a live pod at $0.22.
+        #:
+        #: The isolation plan stays what it is -- the decision rule's carrier
+        #: for the primary contrast -- and is no longer asked to be an
+        #: identity it never had.
+        self.auth.require_plan(CS.C3SessionContract().contract_hash)
         self.auth.require_science_plan(C0_PREREGISTRATION_SHA256)
 
         self.ev: dict = {

@@ -1,0 +1,23 @@
+[17:03:30] C3: 9 probes, ceiling $22.1452, soft stop $21.5391
+[17:03:30]   A: session_setup
+[17:03:30]   B: teacher_fetch_verify   [blocks training on failure]
+[17:03:30]   C: register_operator   [blocks training on failure]
+[17:03:30]   D: replay_parent   [blocks training on failure]
+[17:03:30]   E: replay_incumbent   [blocks training on failure]
+[17:03:30]   F: materialize_arms   [blocks training on failure]
+[17:03:30]   G: recovery_probes
+[17:03:30]   H: evaluate
+[17:03:30]   I: decide
+[17:03:30]   J: collect_teardown
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1562, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1556, in main
+    driver = C3Driver(args)
+             ^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 372, in __init__
+    self.auth.require_plan(self.plan.plan_hash)
+  File "/workspace/aad/scripts/experiments/phase_a/plan.py", line 284, in require_plan
+    raise AuthorizationError(
+aadistill.governance.authorization.AuthorizationError: this authorization is bound to Phase-A session plan 5b266a80faabae7c30345e476ca8995d79b0cb91d559924658c980ee3613562a but the plan about to run hashes to 3afe7af7995ab91a5a7e8c94e6dbcc9c751592e120a942746da46bbfeea7932c. An authorization does not transfer to a plan that changed.

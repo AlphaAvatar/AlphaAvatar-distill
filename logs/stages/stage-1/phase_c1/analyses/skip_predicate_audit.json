@@ -3,11 +3,11 @@
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
  "modules_scanned": 251,
  "test_ignores": [],
- "n_predicates": 133,
+ "n_predicates": 134,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 54,
+  "filesystem_premise_onpod": 55,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
@@ -111,7 +111,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 38,
-  "same_on_pod": 76
+  "same_on_pod": 77
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -1029,6 +1029,22 @@
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/c3_preflight/test_c3_runtime_contract.py::test_the_launcher_plan_hash_is_what_the_authorization_bound",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/c3_preflight/test_c3_runtime_contract.py",
+   "line": 563,
+   "kind": "pytest.skip",
+   "function": "test_the_driver_validates_the_hash_the_authorization_actually_binds",
+   "condition": "not auth_path.is_file()",
+   "expanded": "not auth_path.is_file() | auth_path=REPO / \"logs/budget/approvals/autoinit_c3_authorization.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/c3_preflight/test_c3_runtime_contract.py::test_the_driver_validates_the_hash_the_authorization_actually_binds",
    "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
@@ -2366,5 +2382,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "341432fb6adf604a6c6511a5022363760c44973251e3a29ca5cd038fd8a61b34"
+ "digest": "baba0e27f2093fb75b134ee0e1df6bdd1a22007fe68ef9caaafe484ca97472ac"
 }
