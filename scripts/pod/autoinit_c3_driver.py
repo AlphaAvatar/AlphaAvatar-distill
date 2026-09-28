@@ -708,13 +708,17 @@ class C3Driver:
         # The adapter already owns this lifecycle (path, dtype, device); stage F
         # was always using it. `materialize_fixed_path` now refuses a root that
         # is not on `spec.device`, so this cannot drift back silently.
-        root_device = self.arms["incumbent"].device
+        #: The incumbent arm by its PLAN id, not C1's literal key. This read
+        #: `self.arms["incumbent"]` and raised KeyError on a live pod at
+        #: $0.14 -- C3's arms are A_incumbent / B_causal_b1 / C_causal_b3.
+        incumbent_id = CS.arm_ids()[0]
+        root_device = self.arms[incumbent_id].device
         try:
             steps = materialize_fixed_path(
-                self.arms["incumbent"], adapter=QWEN3_ADAPTER,
+                self.arms[incumbent_id], adapter=QWEN3_ADAPTER,
                 root_loader=lambda: QWEN3_ADAPTER.load(
                     self.teacher_path, dtype="bfloat16", device=root_device),
-                workdir=WORK / "incumbent", repo_root=str(REPO), on_step=on_step,
+                workdir=WORK / incumbent_id, repo_root=str(REPO), on_step=on_step,
                 deadline=self.operator_deadline("stage D/E replay"))
         except FixedPathDigestMismatch as exc:
             self.replay_mismatch(exc, runtime, seen)
@@ -730,7 +734,7 @@ class C3Driver:
                 "materialize_fixed_path must raise on a mismatch rather than "
                 "return one, so this is a contract break, not a mismatch")
         path = AUDIT / "c3_replay_record.json"
-        write_replay_record(self.arms["incumbent"], steps, path, runtime=runtime,
+        write_replay_record(self.arms[incumbent_id], steps, path, runtime=runtime,
                             root_binding=json.loads(TEACHER_BINDING.read_text()))
         doc = self.require_replay_record(path)
         say(f"E: incumbent {steps[3].identity.artifact_digest[:12]} matches")
@@ -759,7 +763,7 @@ class C3Driver:
         problems = []
         if doc.get("schema") != "aadistill.autoinit.fixed_path_replay/v1":
             problems.append(f"schema is {doc.get('schema')!r}")
-        if doc.get("path_hash") != self.arms["incumbent"].spec_hash:
+        if doc.get("path_hash") != self.arms[CS.arm_ids()[0]].spec_hash:
             problems.append("path_hash is not this arm's frozen path")
         if doc.get("all_pinned_digests_matched") is not True:
             problems.append("all_pinned_digests_matched is not true")

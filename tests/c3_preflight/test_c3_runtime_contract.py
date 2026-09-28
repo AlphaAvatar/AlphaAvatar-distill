@@ -640,3 +640,20 @@ def test_stage_C_registers_every_implementation_the_arms_name():
     #: rather than assuming the call covered them.
     assert "for impl_id in CS.required_implementations():" in src
     assert "get_implementation(impl_id)" in src
+
+
+def test_no_stage_indexes_the_arms_by_c1_s_literal_keys():
+    """`self.arms["incumbent"]` is a KeyError on C3's arm ids.
+
+    It raised in stage D on a live pod at $0.14, one stage after the
+    registration fix let stage C pass. C3's arms are A_incumbent,
+    B_causal_b1 and C_causal_b3 -- the plan's names, not roles.
+    """
+    src = source_minus_comment_lines(DRIVER.read_text())
+    for bad in ('arms["incumbent"]', 'arms["treatment"]',
+                "arms['incumbent']", "arms['treatment']"):
+        assert bad not in src, (
+            f"a stage indexes the arms with {bad}, which C3's arm ids do not "
+            f"contain: {list(CS.arm_ids())}")
+    #: and the incumbent is reached by the plan's own first arm id.
+    assert "CS.arm_ids()[0]" in src
