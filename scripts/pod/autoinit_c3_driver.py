@@ -313,7 +313,11 @@ class C3Driver:
     """Stages B-I. No search, no rungs, no ranking, no elimination."""
 
     AUTHORIZATION_TYPE = C3Authorization
-    AUTHORIZATION_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
+    #: The RUN's authorization, resolved from the pod's own run id. It named
+    #: C1's repository-level pointer, and C3Authorization.load refused it on
+    #: schema exactly as the type is built to -- which is the refusal working,
+    #: but eight minutes and $0.15 into a session.
+    AUTHORIZATION_PATH = "logs/budget/approvals/autoinit_c3_authorization.json"
 
     def __init__(self, a):
         self.a = a
@@ -352,16 +356,24 @@ class C3Driver:
         for d in (AUDIT, AUDIT / "probes", AUDIT / "configs", TRAIN, EVAL, WORK):
             d.mkdir(parents=True, exist_ok=True)
 
-        #: C1's OWN authorization and C1's OWN plan. A Phase-A grant carries a
-        #: different plan hash and a ceiling derived for a beam search; it is
-        #: refused by type at load and by hash immediately after.
-        self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.AUTHORIZATION_PATH)
+        #: C3's OWN authorization and C3's OWN plan. A C1 grant carries a
+        #: different plan hash, a different harness and a ceiling derived for
+        #: six probes on two arms; it is refused by TYPE at load and by hash
+        #: immediately after.
+        #:
+        #: Resolved from THIS run first. The flat repository pointer named
+        #: C1's file, and `C3Authorization.load` refused it on schema exactly
+        #: as the type is built to -- the refusal working, but eight minutes
+        #: and $0.15 into a session. The run-scoped path is also the one the
+        #: launcher's gates verified, so driver and launcher now read the
+        #: same artifact rather than two that happen to agree.
+        self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.authorization_path())
         self.plan = self.frozen_plan()
         self.auth.require_plan(self.plan.plan_hash)
         self.auth.require_science_plan(C0_PREREGISTRATION_SHA256)
 
         self.ev: dict = {
-            "schema": "aadistill.autoinit.c1_evidence/v1",
+            "schema": "aadistill.autoinit.c3_evidence/v1",
             "started_utc": datetime.now(timezone.utc).isoformat(),
             "session": "autoinit.v1.phase_c3",
             "session_contract_hash": CS.C3_SESSION_CONTRACT.contract_hash,
@@ -384,6 +396,18 @@ class C3Driver:
         self.save()
 
     # -- the frozen plan, rebuilt rather than transcribed -------------------
+    def authorization_path(self) -> str:
+        """This run's authorization, or the pointer when no run is named."""
+        run_id = getattr(self.a, "run_id", None)
+        if run_id and run_id != "unrecorded":
+            from experiments.run_layout import rel_run_dir
+
+            candidate = (f"{rel_run_dir('phase_c3', run_id, '1')}"
+                         "/governance/authorization.json")
+            if (REPO / candidate).is_file():
+                return candidate
+        return self.AUTHORIZATION_PATH
+
     def frozen_plan(self) -> C1IsolationPlan:
         """The isolation plan, rebuilt from the frozen C3 preregistration.
 
@@ -433,7 +457,7 @@ class C3Driver:
         self.ev["elapsed_min"] = round((time.time() - self.t0) / 60, 2)
         self.ev["spend_usd"] = round(self.usd(), 4)
         self.ev["stages_completed"] = list(self.completed)
-        (AUDIT / "c1_evidence.json").write_text(
+        (AUDIT / "c3_evidence.json").write_text(
             json.dumps(self.ev, indent=2, default=str) + "\n")
 
     def gate(self, name: str, argv: list[str], *, timeout: float,
@@ -619,7 +643,7 @@ class C3Driver:
                 "the incumbent step returned without recording a digest match; "
                 "materialize_fixed_path must raise on a mismatch rather than "
                 "return one, so this is a contract break, not a mismatch")
-        path = AUDIT / "c1_replay_record.json"
+        path = AUDIT / "c3_replay_record.json"
         write_replay_record(self.arms["incumbent"], steps, path, runtime=runtime,
                             root_binding=json.loads(TEACHER_BINDING.read_text()))
         doc = self.require_replay_record(path)
@@ -701,7 +725,7 @@ class C3Driver:
                 "retry, and do not substitute a rebuilt parent for the historical "
                 "one without a reviewed amendment."),
         }
-        path = AUDIT / "c1_replay_record.json"
+        path = AUDIT / "c3_replay_record.json"
         path.write_text(json.dumps(record, indent=1) + "\n")
         back = json.loads(path.read_text())
         if back.get("stage") != letter or back.get("training_started") is not False:
@@ -839,7 +863,7 @@ class C3Driver:
         self.incumbent_step = None
         gc.collect()
         handoff = complete_release(before)
-        (AUDIT / "c1_device_handoff.json").write_text(
+        (AUDIT / "c3_device_handoff.json").write_text(
             json.dumps(handoff, indent=2, default=str) + "\n")
         need = _trainer_bytes()
         require_released(handoff, what="the C1 recovery trainer")
@@ -1132,7 +1156,7 @@ class C3Driver:
                 "thresholds materialized by other checkpoints and are not read"),
         }
         attested["report_sha256"] = sha256_json(attested)
-        (AUDIT / "c1_attested_evaluation_protocol.json").write_text(
+        (AUDIT / "c3_attested_evaluation_protocol.json").write_text(
             json.dumps(attested, indent=2) + "\n")
         say(f"attested: protocol {attested['evaluation_protocol_hash'][:12]}…, "
             f"tokenizer {observed['tokenizer_sha256'][:12]}…")

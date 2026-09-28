@@ -1,0 +1,24 @@
+[07:12:34] C3: 9 probes, ceiling $22.1452, soft stop $21.8685
+[07:12:34]   A: session_setup
+[07:12:34]   B: teacher_fetch_verify   [blocks training on failure]
+[07:12:34]   C: register_operator   [blocks training on failure]
+[07:12:34]   D: replay_parent   [blocks training on failure]
+[07:12:34]   E: replay_incumbent   [blocks training on failure]
+[07:12:34]   F: materialize_arms   [blocks training on failure]
+[07:12:34]   G: recovery_probes
+[07:12:34]   H: evaluate
+[07:12:34]   I: decide
+[07:12:34]   J: collect_teardown
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1476, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1470, in main
+    driver = C3Driver(args)
+             ^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 358, in __init__
+    self.auth = self.AUTHORIZATION_TYPE.load(REPO / self.AUTHORIZATION_PATH)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/experiments/phase_c3/authorization.py", line 187, in load
+    raise AuthorizationError(
+aadistill.governance.authorization.AuthorizationError: /workspace/aad/logs/budget/approvals/autoinit_c1_authorization.json declares schema 'aadistill.autoinit.c1_authorization/v1', not 'aadistill.autoinit.c3_authorization/v1'. A Phase-A, Phase-B, C1, C2 or engineering-pilot grant measures a different harness and carries a ceiling derived for different work; it cannot authorize the C3 isolation.

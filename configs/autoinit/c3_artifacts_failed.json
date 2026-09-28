@@ -7,7 +7,7 @@
  "entries": [
   {
    "artifact_class": "session_evidence",
-   "pattern": "audit/autoinit_c3/c1_evidence.json",
+   "pattern": "audit/autoinit_c3/c3_evidence.json",
    "required": true,
    "lifecycle": "final_required",
    "min_matches": 1

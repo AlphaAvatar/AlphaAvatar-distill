@@ -397,3 +397,57 @@ def test_no_module_level_name_is_undefined(target):
     assert not undefined, (
         f"the C3 {target} loads names nothing binds: {undefined}. Each raises "
         f"only when its line runs -- inside a gate, or on a pod.")
+
+
+def test_every_required_audit_artifact_is_one_the_driver_writes():
+    """The spec and the driver must name the same files.
+
+    `c1_evidence.json` survived the rename in the artifact spec while the
+    driver wrote `c3_evidence.json`. The manifest gate then reported
+    `MISSING session_evidence [final_required]` at teardown -- the point at
+    which the evidence is still on the pod and still recoverable, but only if
+    someone is watching. A required artifact nobody writes is a session that
+    completes and comes home incomplete.
+
+    Only literal patterns are checked: globbed ones name probe ids that do
+    not exist until the run does.
+    """
+    spec = json.loads(
+        (REPO / "configs/autoinit/c3_artifacts.json").read_text())
+    driver_src = DRIVER.read_text()
+    missing = []
+    for entry in spec["entries"]:
+        pattern = entry.get("pattern", "")
+        if not entry.get("required") or "*" in pattern:
+            continue
+        if not pattern.startswith("audit/autoinit_c3/"):
+            continue
+        name = pattern.rsplit("/", 1)[-1]
+        if name in driver_src:
+            continue
+        #: The per-arm records are built by f-string from the plan's arm ids,
+        #: so the literal never appears. Reconstruct the same way the driver
+        #: does rather than demanding a literal it has no reason to contain.
+        if any(name == f"c3_{arm}_record.json" for arm in CS.arm_ids()):
+            assert 'AUDIT / f"c3_{arm_id}_record.json"' in driver_src, (
+                "the per-arm record filename is no longer built from arm_id")
+            continue
+        missing.append(pattern)
+    assert not missing, (
+        f"the success spec requires {missing}, which the C3 driver never "
+        f"writes; the manifest gate would report them MISSING at teardown")
+
+
+def test_the_driver_loads_a_c3_authorization_from_this_run():
+    """A repository-level pointer can name another experiment's artifact.
+
+    It named C1's, and C3Authorization.load refused it on schema -- the type
+    working exactly as designed, eight minutes and $0.15 into a session. The
+    run-scoped path is also the one the launcher's gates verified, so driver
+    and launcher read the same artifact rather than two that agree by habit.
+    """
+    src = DRIVER.read_text()
+    assert "autoinit_c1_authorization.json" not in src, (
+        "the C3 driver still points at C1's authorization")
+    assert "def authorization_path(self)" in src
+    assert "governance/authorization.json" in src
