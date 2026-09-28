@@ -1,0 +1,28 @@
+{
+ "schema": "aadistill.phase_c3.grant/v1",
+ "_contract": "The maintainer decision this formal C3 session runs under. AUTHORIZES SPEND; authorizes no launch by itself -- a launch still needs the one-use authorization issued FROM this grant, a launch-bound readiness record and a staged bundle. Every scientific and harness identity is DERIVED by issue_c3_authorization.py and REFUSED if asserted here.",
+ "granted_by": "maintainer decision 2026-09-28, on review of b937aebb (branch review/c3-operator-batching). The budget stop was judged correct and no scientific work was reduced to fit; funding was declared not to be the limiting factor.",
+ "granted_for": "formal C3, complete 3-arm x 3-seed = 9-probe design",
+ "covers": "ONE formal Phase-C3 session: replay the frozen pre-ATTENTION parent under its digest gate, gate the incumbent B, materialize three initializations once each, train 9 recovery probes (3 arms x 3 fresh seeds), evaluate each once on c1_confirmation_v1, compute the three prespecified paired contrasts with a 20,000-iteration stratified prompt-cluster bootstrap, apply the frozen decision rule to the PRIMARY contrast alone, collect evidence and tear down.",
+ "cumulative_cap_usd": 400.0,
+ "_hard_cap_is_derived_not_chosen": "The grant names NO hard ceiling, deliberately. Until the 2026-09-29 hardware amendment it named $22.1452 -- the figure derived on L40S at $1.09/h -- and that became wrong the moment the approved tier gained two more devices: the RTX 6000 Ada attempt was refused because its own correctly derived ceiling was $17.1425, not L40S's $22.1452. A grant that pins one device's price cannot authorize a session whose device is chosen by availability. The issuer derives the ceiling from the LIVE securePrice of the device actually selected and carries that figure; the $30.00 per-session ENVELOPE is the bound it must fit inside, and a session may never be issued AT the envelope. See logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json for the device and price of the session that actually runs.",
+ "_three_conditions_all_hold": {
+  "_checked_at_issuance_against_the_selected_device": true,
+  "derived_ceiling_within_envelope": "derived <= $30.0000",
+  "cumulative_plus_derived_within_cap": "cumulative + derived <= $400.0000",
+  "formal_allowance_covers_derived": "formal remaining >= derived"
+ },
+ "does_not_authorize": [
+  "starting C4, which becomes scientifically ELIGIBLE on a primary GO and is still not authorized",
+  "choosing between the B1 and B3 numerical protocols -- that is a post-C3 maintainer decision on the completed secondary and practical evidence",
+  "a fourth seed, a fourth arm, arm elimination, successive halving or a forced winner",
+  "retrying, resuming or pooling a scientific measurement once formal training or measurement has begun",
+  "re-running a complete valid INCONCLUSIVE result in search of a GO",
+  "any change to the frozen protocol: recovery recipe, teacher, corpus, optimizer, battery, generation protocol, scoring contract, bootstrap iterations, SESOI, guardrails or the decision rule",
+  "consuming the reserved final-promotion battery",
+  "a second concurrent provider resource"
+ ],
+ "autonomous_pre_science_retry": "PERMITTED inside this cumulative ceiling. An invocation that aborts BEFORE formal training or measurement begins is an engineering subrun, not a retried experiment: preserve and close it, diagnose, repair minimally, build a FRESH chain under a new attempt identity, and continue. The budget is cumulative across every subrun; a rerun does not reset it and a replacement resource gets no fresh allocation.",
+ "_authorizes_nothing_by_itself": true,
+ "per_session_envelope_usd": 30.0
+}
