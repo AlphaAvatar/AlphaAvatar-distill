@@ -40,6 +40,26 @@ LAUNCH = REPO / "scripts/pod/autoinit_c3_launch.py"
 PREREG_PATH = REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 
 
+def code_without_comments(text: str) -> str:
+    """Source with COMMENTS removed and string literals kept.
+
+    The right lens for "does this literal value execute anywhere": a frozen
+    digest IS a string literal, so `executable_source` -- which blanks every
+    string -- would strip the very constant the check looks for. Comments are
+    still dropped, so a note explaining why a superseded digest is gone does
+    not read as that digest surviving.
+    """
+    import io
+    import tokenize
+
+    out = []
+    for tok in tokenize.generate_tokens(io.StringIO(text).readline):
+        if tok.type == tokenize.COMMENT:
+            continue
+        out.append(tok.string)
+    return " ".join(out)
+
+
 def executable_source(text: str) -> str:
     """Source with comments and string literals removed.
 
@@ -294,3 +314,41 @@ def test_every_session_attribute_the_driver_uses_exists():
     assert not missing, (
         f"the C3 driver references session attributes that do not exist: "
         f"{missing}. Stage H runs ten hours into a paid session.")
+
+
+def test_the_launcher_uses_c3_s_own_readiness_contract_and_records():
+    """A C3 session verified against C1's expectations proves nothing.
+
+    Found one gate at a time across three $0 launcher aborts: the grant
+    provenance reference, the incumbent digest, the readiness contract, the
+    pricing provenance and the bundle pointer were each C1's. Each abort cost
+    nothing and a full re-issue cycle, which is the expensive part.
+
+    `RecordContract` carries the schema, the harness field, the record path
+    and the permitted-post-sweep paths. Handing C3's session C1's contract
+    would verify C3's readiness against C1's schema, look for the record at
+    C1's path, and permit the wrong file to change after the sweep.
+    """
+    code = executable_source(LAUNCH.read_text())
+    assert "c3_record_contract" in code, (
+        "the launcher does not use C3's readiness contract")
+    assert "c1_record_contract" not in code, (
+        "the launcher still uses C1's readiness contract")
+    #: And every governance path it names belongs to phase_c3.
+    for const, want in (("PRICING", "phase_c3"), ("BUNDLE_POINTER", "phase_c3"),
+                        ("PREREG", "phase_c3"), ("AUTH_POINTER", "c3")):
+        m = re.search(rf"^{const} = .*$", LAUNCH.read_text(), re.M)
+        assert m, f"{const} is no longer a module constant"
+        assert want in m.group(0), f"{const} points outside C3: {m.group(0)}"
+
+
+def test_the_incumbent_the_launcher_gates_on_is_c3_s():
+    """c313d1b4 is weight_proxy_v0 -- the arm C1 already beat.
+
+    Carrying C1's incumbent constant here would have gated C3 against the
+    loser of the previous round while every message read correctly.
+    """
+    code = code_without_comments(LAUNCH.read_text())
+    assert "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342" in code
+    assert "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6" not in code
+    assert CS.expected_incumbent_digest().startswith("53e30566")

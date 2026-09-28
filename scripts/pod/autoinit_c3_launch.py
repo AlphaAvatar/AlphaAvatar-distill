@@ -64,10 +64,15 @@ from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleErr
 #: three seeds, and this launcher used them in three places.
 from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
-from experiments.phase_c1.pod_environment import (  # noqa: E402
-    LAUNCH_BOUND,
+#: C3'S readiness contract, not C1's. `pod_environment_gate` verifies a
+#: record against the contract it is handed: C1's names a different schema, a
+#: different harness field and a different record path, so a C3 session using
+#: it would verify C3's readiness against C1's expectations -- and the
+#: permitted-post-sweep-path rule would name the wrong file.
+from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
+from experiments.phase_c3.pod_environment import (  # noqa: E402
     RECORD_POINTER as POD_ENV_RECORD,
-    c1_record_contract,
+    c3_record_contract,
     record_path_for as pod_env_record_for,
     load_record as load_pod_env_record,
     verify_record as verify_pod_env_record,
@@ -238,7 +243,9 @@ def auth_path_for(run_id: str | None) -> str:
     return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
             f"/{C3_RUN_ROLES['authorization']}")
 
-PRICING = "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
+#: C3 prices from a LIVE securePrice re-query, not from a committed
+#: record. Named here only so the gate can report its provenance.
+PRICING = "logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json"
 PREREG = "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 #: The expectation the frozen-asset gate checks this tree against, on the pod
 #: and — since 2026-09-11 — at $0 before a pod exists.
@@ -258,7 +265,7 @@ TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 #: session staged over -- and it is the one artifact that MUST stay uncommitted
 #: inside a launch window, because committing it adds a third path to the
 #: session lineage diff and `session_commit_gate` refuses.
-BUNDLE_POINTER = "logs/stages/stage-1/phase_c1/analyses/autoinit_c1_bundle.json"
+BUNDLE_POINTER = "logs/stages/stage-1/phase_c3/analyses/autoinit_c3_bundle.json"
 BUNDLE_RECORD = BUNDLE_POINTER
 
 
@@ -820,8 +827,12 @@ def frozen_c3_science_gate(ctx: SessionContext) -> tuple[bool, str]:
     if CS.expected_parent_digest() != (
             "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722"):
         problems.append("the parent replay digest moved")
+    #: C3'S incumbent is B, the frozen C1 TREATMENT -- not the Phase-B winner
+    #: C1 ran against. `c313d1b4` is weight_proxy_v0's digest and was C1's
+    #: incumbent; carrying it here would have gated C3 against the arm C1
+    #: already beat.
     if CS.expected_incumbent_digest() != (
-            "c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6"):
+            "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342"):
         problems.append("the incumbent replay digest moved")
     battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())
     manifest = json.loads((REPO_ROOT / BATTERY_MANIFEST).read_text())
@@ -1051,7 +1062,7 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     ok, reason = verify_pod_env_record(
         record, REPO_ROOT,
-        contract=c1_record_contract(run_id, RUN_STAGE_ID),
+        contract=c3_record_contract(run_id, RUN_STAGE_ID),
         session_commit=getattr(ctx.args, "session_commit", None),
         authorization_path=auth_path_for(run_id),
         required_kind=LAUNCH_BOUND,

@@ -1,0 +1,8 @@
+[06:49:31] budget: expected 1186 min $21.87 · soft $21.87 · hard $22.15 (authorized $22.15)
+[06:49:31] NVIDIA L40S $1.09/h, stock None
+[06:49:32] session commit b8d406e088d3 verified: harness digests to e4249baf7328…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt3/governance/authorization.json differs from the authorized base
+[06:49:32] grant 381efd7eb84c… at logs/stages/stage-1/phase_c3/runs/attempt3/governance/grant.json, as recorded by the authorization
+[06:49:32] C1 harness e4249baf7328… over 112 declared files
+[06:49:32] ceiling $22.1452, derived from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json
+[06:49:33] preregistration ac44662c02d5… (self-hash verified, 3 arms, primary causal-B1 - incumbent B), live closure e4249baf7328…
+[06:49:33] ABORT at $0: the incumbent replay digest moved

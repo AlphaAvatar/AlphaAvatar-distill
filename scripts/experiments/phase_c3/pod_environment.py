@@ -123,6 +123,13 @@ def verify_record(record: dict, repo_root=".", **kwargs) -> tuple[bool, str]:
     return _pe.verify_record(record, repo_root, **kwargs)
 
 
+def load_record(repo_root=".", *, run_id: str | None = None,
+                stage_id: str | None = None, record_path: str | None = None):
+    """THIS run's readiness record, or the pointer's when no run is named."""
+    path = record_path or record_path_for(run_id, stage_id)
+    return _pe.load_record(repo_root, record_path=path)
+
+
 def c3_sweep_contract(run_id: str | None = None,
                       stage_id: str | None = None,
                       kind: str | None = None) -> Any:
