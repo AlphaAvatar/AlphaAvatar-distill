@@ -1,7 +1,8 @@
 {
  "FUNDABLE": true,
- "_contract": "The LIVE re-price required immediately before the formal C3 authorization (maintainer decision 2026-09-28 section 2). The authorization carries hard_ceiling.usd below, NEVER the $30.00 envelope.",
- "_field_read": "securePrice, never communityPrice -- the launcher prices on secure",
+ "_contract": "The LIVE re-price required immediately before the formal C3 authorization, on the device this session will actually use. The authorization carries hard_ceiling.usd, NEVER the $30.00 envelope.",
+ "_field_read": "securePrice, never communityPrice",
+ "_selected_by": "availability over the approved fixed order; not price, not benchmark, not communityPrice",
  "_the_envelope_is_not_the_grant": "the authorization receives hard_ceiling.usd derived above, never the envelope",
  "conditions": {
   "cumulative_plus_derived_within_cap": true,
@@ -9,11 +10,12 @@
   "formal_allowance_covers_derived": true
  },
  "envelopes": {
-  "cumulative_spend_usd": 350.0307,
+  "cumulative_spend_usd": 350.4545,
   "formal_remaining_usd": 32.3824,
   "per_session_envelope_usd": 30.0,
   "project_cap_usd": 400.0
  },
+ "gpu_display_name": "L40S",
  "gpu_type_id": "NVIDIA L40S",
  "price": {
   "_disk_is_billed_separately": "120 GB x $0.1/GB/month = $0.016667/h",
@@ -31,8 +33,8 @@
    "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T05:57:22Z",
+ "queried_utc": "2026-09-28T16:34:35Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "85186ae5cb5e2db8bdeaafd43396a528df9fc9bf",
+ "session_commit": "ed67a6bc2c9456407d24857686a1b4a1d039fe66",
  "shortfalls_usd": {}
 }
