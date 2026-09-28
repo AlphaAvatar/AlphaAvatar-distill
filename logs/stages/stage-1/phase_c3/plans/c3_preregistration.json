@@ -226,7 +226,7 @@
   "_ceiling_is_derived_live": "C3's hard ceiling is recomputed from live L40S securePrice immediately before authorization; the $22.1451 figure priced at $1.09/h is an estimate, not the grant",
   "_stopped_before_provider_acquisition": true
  },
- "preregistration_sha256": "1632066081200affcce96d793d899ef74a41d4b9b8a38d2da35cf4ed3eeac05c",
+ "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
  "_correction_history": [
   {
    "utc": "2026-09-28",
@@ -259,6 +259,33 @@
    ],
    "_why_this_is_legitimate": "no C3 behavioural result exists, no formal provider resource has ever been created, and execution has not begun. This is the correct and only time to repair a contradictory preregistration. After formal behavioural execution begins there are NO further scientific edits.",
    "superseded_sha256": "6d1d1121e5fded887385df379ed053cf496d8b254b5273b455bf992b072c056e"
+  },
+  {
+   "utc": "2026-09-28",
+   "what": "added the `authorizes: nothing` assertion the launcher's preregistration gate requires; the plan had never carried it",
+   "body_changed": true,
+   "_what_changed": [
+    "authorizes",
+    "_authorizes_nothing"
+   ],
+   "_what_did_not_change": [
+    "arms",
+    "seeds",
+    "shared_parent",
+    "recovery",
+    "evaluation",
+    "inference",
+    "decision_rule",
+    "guardrails",
+    "claim_boundary",
+    "estimand",
+    "terminal_outcomes",
+    "interpretation_matrix"
+   ],
+   "_why_this_is_legitimate": "no C3 behavioural result exists and no formal provider resource has ever been created. This adds a statement the document was always true about rather than altering one it made.",
+   "superseded_sha256": "1632066081200affcce96d793d899ef74a41d4b9b8a38d2da35cf4ed3eeac05c"
   }
- ]
+ ],
+ "authorizes": "nothing",
+ "_authorizes_nothing": "A preregistration records what an experiment WILL do; it grants no spend, no provider resource and no permission. The launcher's preregistration gate refuses a document that claims otherwise. Added 2026-09-28 because the gate checks this field and C3's plan did not carry it -- a missing assertion, not a changed one."
 }

@@ -57,7 +57,6 @@ from experiments.run_layout import (  # noqa: E402
 )
 from experiments.phase_c3 import session as CS
 from experiments.phase_c3.authorization import CURRENT_CLOSURE_SNAPSHOT, C3Authorization, c3_budget_spec, c3_hard_ceiling_usd, c3_harness_digest, c3_billed_rate_usd_per_hour  # noqa: E402
-from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
 from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
@@ -762,12 +761,31 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: hash — and it was rewritten four times after C1 closed for exactly that
     #: reason. No science ever drifted in those rewrites; the harness snapshot
     #: did, and that snapshot has an owner built to be regenerated.
-    if stated != ATTEMPT_18_PREREGISTRATION:
-        return False, (
-            f"{PREREG} is not the document attempt 18 executed under "
-            f"({ATTEMPT_18_PREREGISTRATION[:12]}…); it is frozen to that "
-            "binding, and a reopened C1 needs a new preregistration under a new "
-            "identity rather than an edit to this one")
+    #: C3 has no completed attempt to be frozen TO, so there is no historical
+    #: constant to compare against -- and inventing one would pin the plan to
+    #: whatever it happened to say when this line was written. What must hold
+    #: instead is that the document the EXECUTOR will build its arms from is
+    #: byte-identical to the one this gate just verified. The session module
+    #: re-reads and re-verifies it independently; if the two disagree, the
+    #: launcher and the driver are looking at different experiments.
+    try:
+        executor_view = CS.load_preregistration(p)
+    except Exception as exc:                          # noqa: BLE001
+        return False, f"the executor refuses this preregistration: {exc}"
+    if executor_view.get("preregistration_sha256") != stated:
+        return False, ("the launcher and the executor disagree about the "
+                       "preregistration's identity")
+    #: And the corrected freeze is a THREE-arm design. A two-arm plan here
+    #: would be the b937aebb defect arriving from the other direction.
+    arms = [k for k in executor_view.get("arms", {}) if not k.startswith("_")]
+    if len(arms) != 3:
+        return False, (f"the preregistration declares {len(arms)} arms; C3 is "
+                       "a three-arm design and a launcher must not start a "
+                       "session that would run a different one")
+    primary = executor_view["claim_boundary"]["primary_contrast"]
+    if "causal-B1" not in primary or "causal-B3" in primary:
+        return False, (f"the primary contrast is {primary!r}; C3's verdict "
+                       "belongs to the operator-isolation contrast")
     live = c3_harness_digest(REPO_ROOT)["digest"]
     snapshot = REPO_ROOT / CURRENT_CLOSURE_SNAPSHOT
     if not snapshot.is_file():
@@ -780,8 +798,9 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
                        "scripts/architecture/derive_closure.py --write")
     if doc.get("authorizes") != "nothing":
         return False, "the preregistration claims to authorize something"
-    return True, (f"preregistration {stated[:12]}… (self-hash verified, the "
-                  f"attempt-18 binding), live closure {live[:12]}…")
+    return True, (f"preregistration {stated[:12]}… (self-hash verified, "
+                  f"{len(arms)} arms, primary {primary}), live closure "
+                  f"{live[:12]}…")
 
 
 def frozen_c3_science_gate(ctx: SessionContext) -> tuple[bool, str]:

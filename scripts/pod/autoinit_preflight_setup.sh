@@ -762,6 +762,37 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, C1 {a.authorizes_c1_isolation}, '
       f'search {a.allows_beam_search}, phase A {a.allows_phase_a}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c3" ]; then
+  # A TENTH type. Phase-C3's grant measures a harness containing the C3
+  # launcher, driver, session, formal pricing and the causal-KL operator, none
+  # of which appear in any earlier file set, and it carries a ceiling DERIVED
+  # from a live securePrice re-query rather than from a committed pricing
+  # record -- $22.1452 at $1.09/h, against a $30.00 package envelope it may
+  # not simply be issued at.
+  #
+  # `allows_arm_elimination` is False BY TYPE: nine probes, no successive
+  # halving, no forced winner. `authorizes_c1_isolation` is False too, so a
+  # C3 artifact cannot be mistaken for permission to re-open C1.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_c3.authorization import C3Authorization
+a = C3Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c3_isolation is True, 'a C3 session needs a C3 authorization'
+assert a.authorizes_c1_isolation is False, 'this artifact claims C1 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_beam_search is False, 'C3 replays one fixed path and runs no search'
+assert a.allows_arm_elimination is False, 'C3 runs nine probes and eliminates no arm'
+assert a.automatic_followon_start is False, 'nothing chains off C3, and C4 is not started'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C3 {a.authorizes_c3_isolation}, '
+      f'search {a.allows_beam_search}, elimination {a.allows_arm_elimination}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

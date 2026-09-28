@@ -1811,7 +1811,7 @@ volumes 0**.
 
 **Owners:**
 [`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json)
-(hash-bound `1632066081200aff`) and
+(hash-bound `ac44662c02d53359`) and
 [`c3_pricing_9probe.json`](../stages/stage-1/phase_c3/plans/c3_pricing_9probe.json).
 
 **Funding amended 2026-09-28** (maintainer decision on `b937aebb`; the budget
@@ -1842,7 +1842,7 @@ Both fixed before execution, which is the only time a preregistration may be
 repaired. `estimand` and `terminal_outcomes` changed; **arms, seeds, parent,
 recovery, evaluation, inference, decision rule, guardrails, claim boundary
 and interpretation matrix did not.** Re-frozen at
-`1632066081200affcce96d793d899ef74a41d4b9b8a38d2da35cf4ed3eeac05c`, with the
+`ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624`, with the
 superseded stamps recorded in `_correction_history` rather than discarded.
 
 **The canonical hierarchy, frozen before any result:**

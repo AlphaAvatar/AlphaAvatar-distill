@@ -125,7 +125,7 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT STARTED and NOT LAUNCHED, but now FUNDED and unblocked. Budget amended 2026-09-28 (cap $400, per-session envelope $30, formal $55). The 3-arm/9-probe design is preregistered and hash-bound (1632066081200aff) with three fresh seeds; it was self-contradictory at b937aebb and was corrected before any result -- estimand and terminal_outcomes only. Primary contrast causal-B1 - B owns the sole verdict. Remaining work is ordinary engineering: the 3-arm executor and the formal chain.",
+   "status": "NOT STARTED and NOT LAUNCHED, but now FUNDED and unblocked. Budget amended 2026-09-28 (cap $400, per-session envelope $30, formal $55). The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds; it was self-contradictory at b937aebb and was corrected before any result -- estimand and terminal_outcomes only. Primary contrast causal-B1 - B owns the sole verdict. Remaining work is ordinary engineering: the 3-arm executor and the formal chain.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
    "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
    "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded for selection by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",

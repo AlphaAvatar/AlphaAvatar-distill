@@ -61,8 +61,14 @@ C3_ENTRY_POINTS: tuple[str, ...] = (
 #: produced AFTER the harness is fixed, immediately before issuance, and the
 #: authorization binds its figures directly.
 C3_DECLARED_INPUTS: tuple[str, ...] = (
+    #: The setup script the pod ACTUALLY runs. `SessionRunner._launch`
+    #: uploads and executes this one; `SetupManifest` carries no
+    #: setup-script field, so no session can substitute another. There is
+    #: deliberately NO `autoinit_c3_remote.sh`: the formal chain has no
+    #: per-session remote entrypoint, and declaring a file nothing executes
+    #: is precisely the defect C1's harness list carried for months --
+    #: it named a legacy script whose only remaining reference was that list.
     "scripts/pod/autoinit_preflight_setup.sh",
-    "scripts/pod/autoinit_c3_remote.sh",
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c3_artifacts.json",
     "configs/autoinit/c3_artifacts_failed.json",

@@ -1,0 +1,168 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_c3",
+ "note": "Success spec for a Phase-C3 run that reached ALL_DONE. Every pattern is a path the STANDALONE C1 driver writes: audit/autoinit_c3, stage3/c3/<probe_id>, eval/c3/<probe_id>. The previous version of this file named audit/autoinit_phase_a, stage3/phase_a and eval/phase_a, because the driver then inherited PhaseADriver and wrote there; that driver has been replaced and those paths no longer exist for C1. Counts: 9 probes = 3 arms x 3 seeds; 63 = 9 x the 7 sets of c1_confirmation_v1, because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set — requiring 9 would accept a probe that generated one set out of seven. Entries are ArtifactSpec kwargs; the manifest root is artifacts/. FULL SUCCESS NEEDS BOTH ARM RECORDS. c3_replay_record.json is the incumbent arm's replay against two frozen digests; c3_B_causal_b1_record.json is the treatment arm's verified-suffix execution, whose output digest was never pinned and which is therefore NOT a replay. Requiring only the first would let a session that reached ALL_DONE come home without any record of how the treatment arm was built — which arm-identities alone does not supply, because it names the output and not the verified prefix it came from. C3 NOTE: THREE arms, so both causal arms owe a verified-suffix execution record -- c3_B_causal_b1_record.json and c3_C_causal_b3_record.json. Requiring only one would let a session come home with no record of how the other treatment was built, which arm-identities alone does not supply because it names the output and not the verified prefix it came from.",
+ "entries": [
+  {
+   "artifact_class": "probe_event_stream",
+   "pattern": "stage3/c3/autoinit.v1.phase_c3.*/train_log.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "probe_run_manifest",
+   "pattern": "stage3/c3/autoinit.v1.phase_c3.*/run_manifest*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "probe_run_completion",
+   "pattern": "stage3/c3/autoinit.v1.phase_c3.*/run_completion*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "training_completion",
+   "pattern": "audit/autoinit_c3/probes/autoinit.v1.phase_c3.*.training.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "probe_config",
+   "pattern": "audit/autoinit_c3/configs/autoinit.v1.phase_c3.*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "per_sample",
+   "pattern": "audit/autoinit_c3/autoinit.v1.phase_c3.*_per_sample.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "scored_probe_aggregate",
+   "pattern": "audit/autoinit_c3/autoinit.v1.phase_c3.*_c1_confirmation.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 9
+  },
+  {
+   "artifact_class": "generations",
+   "pattern": "eval/c3/autoinit.v1.phase_c3.*/*.generations.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 63
+  },
+  {
+   "artifact_class": "generation_summary",
+   "pattern": "eval/c3/autoinit.v1.phase_c3.*/*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 63
+  },
+  {
+   "artifact_class": "replay_record",
+   "pattern": "audit/autoinit_c3/c3_replay_record.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "treatment_record",
+   "pattern": "audit/autoinit_c3/c3_B_causal_b1_record.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "arm_identities",
+   "pattern": "audit/autoinit_c3/c3_arm_identities.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "probe_results",
+   "pattern": "audit/autoinit_c3/c3_probe_results.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "decision",
+   "pattern": "audit/autoinit_c3/c3_decision.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "attested_protocol",
+   "pattern": "audit/autoinit_c3/c3_attested_evaluation_protocol.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_c3/c1_evidence.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "engine_probe",
+   "pattern": "audit/autoinit_c3/engine_probe.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "device_handoff",
+   "pattern": "audit/autoinit_c3/c3_device_handoff.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "probe_train_tail",
+   "pattern": "audit/autoinit_c3/autoinit.v1.phase_c3.*_train_tail.log",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "gate_log",
+   "pattern": "audit/autoinit_c3/*.log",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "audit_json",
+   "pattern": "audit/autoinit_c3/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_c3/session/*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "treatment_record",
+   "pattern": "audit/autoinit_c3/c3_C_causal_b3_record.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  }
+ ]
+}

@@ -58,6 +58,7 @@ FIELD = "preregistration_sha256"
 SUPERSEDED_STAMPS = (
     "fdf1d4c266facd95",      # hand-written, bound nothing
     "6d1d1121e5fded88",      # correct, but of the self-contradictory body
+    "1632066081200aff",      # corrected contrasts, before `authorizes: nothing`
 )
 
 PRIMARY = "causal-B1 - incumbent B"
