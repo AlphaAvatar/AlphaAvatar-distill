@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt65",
+ "experiment_id": "phase_c3",
+ "status": "HARDWARE_QUALIFICATION_FAILED",
+ "_what_this_is": "A pre-treatment HARDWARE QUALIFICATION result, not a C3 scientific result. Section 5: an approved GPU that cannot reproduce the frozen parent identity is not qualified for this C3 lineage. Stage D ran the full DEPTH search on L40 and the gate refused the output before any recovery training.",
+ "gpu_type_id": "NVIDIA L40",
+ "gate": {
+  "stage": "D",
+  "step_index": 2,
+  "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "observed_artifact_digest": "4cf33ed0d397447ce042dab63d7b634091410e9d0602f193c3886c0809183fe4"
+ },
+ "_carried_the_execution_fix": true,
+ "_what_this_does_and_does_not_establish": "It does NOT yet establish that L40 is the reason. Two variables moved between this run and attempt61: the GPU (L40S -> L40) and the pinned micro_batch_size, which attempt61 lacked. The two runs produced DIFFERENT wrong digests -- d6d8d7ee and 4cf33ed0 -- so the execution config demonstrably matters. The decisive test is L40S WITH the fix: the pre-ATTENTION parent was reproduced four times on L40S during the packing pilots, so that device is known to be able to produce it.",
+ "cost": {
+  "actual_usd": 0.579,
+  "price_per_hour": 0.82,
+  "gpu_type_id": "NVIDIA L40"
+ },
+ "provider_resource_created": true,
+ "pod_ids": [
+  "mnc8vbra2d5kmo"
+ ],
+ "final_provider_state": "torn down, provider confirms gone"
+}

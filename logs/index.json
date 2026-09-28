@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 88,
+  "runs_current": 90,
   "runs_unrecorded": 29,
   "legacy_components": 77,
   "by_experiment": {
@@ -357,9 +357,9 @@
     "total": 9
    },
    "phase_c3": {
-    "recorded": 45,
+    "recorded": 47,
     "unrecorded": 19,
-    "total": 64
+    "total": 66
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2090,6 +2090,32 @@
   },
   {
    "experiment_id": "phase_c3",
+   "run_id": "attempt64",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt64",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt64/manifest.json"
+   },
+   "manifest_sha256": "7c34c78053186172e7997e3f540500744e3f7784a954e1f59eaef73638a2576f",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt65",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt65",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt65/manifest.json"
+   },
+   "manifest_sha256": "92679a5ac00cd306f66b8fbd9b227c6c789e4d0b29d6a6dd710ddcab0d130843",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
    "run_id": "attempt7",
    "stage": "1",
    "layout": "stage_grouped",
@@ -2355,11 +2381,11 @@
   },
   {
    "experiment_id": "phase_c3",
-   "run_id": "attempt64",
-   "root": "logs/stages/stage-1/phase_c3/runs/attempt64",
-   "n_files": 3,
-   "digest": "2439345d59946a588ba590f576022a4528d9d4868c5e6dfba3f22bff6dcf807b",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "run_id": "attempt66",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt66",
+   "n_files": 11,
+   "digest": "2e57f8006b0ddc873f00ddc1a12b7c173ce31f50fa9b182d341963d9bfdeb338",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
