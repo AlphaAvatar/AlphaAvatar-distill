@@ -1378,9 +1378,10 @@ class C3Driver:
                     "observed_evaluation_protocol_hash"]))
 
         arms = list(CS.arm_ids())
+        _control, _candidate = self.primary_operands()
         inputs = decision_inputs(per_sample, seeds=self.seeds, arms=arms,
-                                 candidate_operand=arms[1],
-                                 control_operand=arms[0])
+                                 candidate_operand=_candidate,
+                                 control_operand=_control)
         results = build_probe_results(
             records, plan_hash=self.plan.plan_hash, seeds=self.seeds,
             inputs=inputs, arms=arms,
@@ -1394,7 +1395,12 @@ class C3Driver:
         #: result existed; nothing here chooses a contrast by looking at one.
         prereg = CS.preregistration()
         est = prereg["estimand"]
-        incumbent, b1, b3 = arms[0], arms[1], arms[2]
+        #: ONE resolution of the primary's operands, shared with the frozen
+        #: plan the decision rule is built from. Reading them positionally
+        #: here and from the plan there would be two answers to one question,
+        #: and they would agree only while nobody reordered the arms.
+        incumbent, b1 = self.primary_operands()
+        b3 = next(a for a in arms if a not in (incumbent, b1))
         contrasts = (
             ("primary", est["primary"]["symbol"], b1, incumbent),
             ("secondary", est["secondary"]["symbol"], b3, b1),
