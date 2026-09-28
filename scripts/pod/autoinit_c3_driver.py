@@ -8,8 +8,8 @@
     B  fetch the pinned teacher and verify every shard against the binding
     C  register attention.activation_importance_v1, and pre-flight the scorer
     D  replay DEPTH -> FFN -> RESIDUAL_WIDTH     GATE: parent    == eea90c91...
-    E  apply attention.weight_proxy_v0           GATE: incumbent == c313d1b4...
-    F  materialize both arms from the SAME verified parent, then release the card
+    E  apply attention.activation_importance_v1  GATE: incumbent == 53e30566...
+    F  materialize ALL THREE arms from the SAME verified parent, release the card
     G  six 0.86M recovery trainings. NOTHING is evaluated here
     H  six confirmation evaluations, once each, on the C1 battery only
     I  the frozen paired decision, only after all six results exist
@@ -60,7 +60,11 @@ sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 from experiments.phase_c3 import session as CS
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from experiments.phase_c3.authorization import C3Authorization  # noqa: E402
-from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, C1Arm, C1IsolationPlan, decide, derive_recovery_seeds, paired_differences, stratified_cluster_bootstrap  # noqa: E402
+#: `derive_recovery_seeds` is deliberately NOT imported. It returns C1's
+#: three seeds, and importing it here is how the adapted driver came to be
+#: one line away from running C3's nine probes on the wrong replicates. C3's
+#: seeds come from C3's frozen plan, via `CS.recovery_seeds()`.
+from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, C1Arm, C1IsolationPlan, decide, paired_differences, stratified_cluster_bootstrap  # noqa: E402
 from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
 from experiments.phase_c1.probe_results import C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
 from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
@@ -176,7 +180,7 @@ TOKENIZER_SIDECAR_SHA256 = {
 
 #: The ONLY fields a C1 probe may change relative to the frozen recipe. The seed
 #: is the replicate and the initialization is the treatment; everything else
-#: identical is what makes the two arms comparable at the same seed.
+#: identical is what makes the arms comparable at the same seed.
 C3_PROBE_OVERRIDES = frozenset(
     {"run_name", "_purpose", "out_dir", "data_dir", "seed", "student_path"})
 
@@ -308,7 +312,7 @@ def trained_model_dir(out_dir: Path) -> Path:
 class C3Driver:
     """Stages B-I. No search, no rungs, no ranking, no elimination."""
 
-    AUTHORIZATION_TYPE = C1Authorization
+    AUTHORIZATION_TYPE = C3Authorization
     AUTHORIZATION_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
     def __init__(self, a):
@@ -323,7 +327,14 @@ class C3Driver:
         self.training: dict[tuple[str, int], dict] = {}
         self.scored: dict[tuple[str, int], dict] = {}
         self.evaluation_protocol = None
-        self.seeds = derive_recovery_seeds()
+        #: C3'S OWN seeds, from C3's frozen plan. The port inherited
+        #: `derive_recovery_seeds()`, which returns C1's
+        #: (1635674081, 1656475568, 696460635) -- so this would have run the
+        #: nine probes on the WRONG three seeds while every count, coverage
+        #: check and probe id looked right. The preregistration derives C3's
+        #: mechanically under `phase-c3:recovery-seed:<i>` and records that
+        #: they collide with no historical or pilot seed.
+        self.seeds = list(CS.recovery_seeds())
 
         #: WHICH observable gate is in flight, as explicit state rather than as
         #: something inferred from the loop key or scraped from the status log.
@@ -353,7 +364,7 @@ class C3Driver:
             "schema": "aadistill.autoinit.c1_evidence/v1",
             "started_utc": datetime.now(timezone.utc).isoformat(),
             "session": "autoinit.v1.phase_c3",
-            "session_contract_hash": CS.C1_SESSION_CONTRACT.contract_hash,
+            "session_contract_hash": CS.C3_SESSION_CONTRACT.contract_hash,
             "plan_hash": self.plan.plan_hash,
             "science_plan_hash": C0_PREREGISTRATION_SHA256,
             "seeds": list(self.seeds),
@@ -374,11 +385,21 @@ class C3Driver:
 
     # -- the frozen plan, rebuilt rather than transcribed -------------------
     def frozen_plan(self) -> C1IsolationPlan:
+        """The isolation plan, rebuilt from the frozen C3 preregistration.
+
+        `C1IsolationPlan` is reused as the decision rule's carrier -- it
+        holds the SESOI, the bootstrap policy and the guardrails, none of
+        which are C1-specific -- but every arm, seed and battery value comes
+        from C3's own plan. The arms are built by iterating `CS.arm_ids()`,
+        so a fourth arm would appear here without an edit, and a missing one
+        could not be papered over by a literal.
+        """
         battery = json.loads(BATTERY_IDENTITY.read_text())
         return C1IsolationPlan(
             plan_id="autoinit.v1.phase_c3",
-            arms=(C1Arm("c1.incumbent", "incumbent", *CS.INCUMBENT_ATTENTION),
-                  C1Arm("c1.treatment", "treatment", *CS.TREATMENT_ATTENTION)),
+            arms=tuple(
+                C1Arm(f"c3.{arm_id}", arm_id, *CS.arm(arm_id)["attention"])
+                for arm_id in CS.arm_ids()),
             seeds=tuple(self.seeds),
             battery_asset_id=battery["asset_id"],
             battery_content_sha256=battery["content_sha256"])
@@ -542,8 +563,8 @@ class C3Driver:
 
         self.active_gate = "D"
         self.arms = CS.build_arm_specs(workdir_device="cuda")
-        if not CS.arm_prefix_is_shared(self.arms):
-            raise C3DriverError("the two arms do not share their prefix")
+        if not CS.arms_share_the_prefix(self.arms):
+            raise C3DriverError("the arms do not share their prefix")
         runtime = self.runtime_identity()
         seen: list = []
 
@@ -635,8 +656,8 @@ class C3Driver:
         if doc.get("n_pinned") != 2:
             problems.append(f"n_pinned is {doc.get('n_pinned')!r}, want 2")
         by_index = {s.get("index"): s for s in doc.get("steps", [])}
-        for idx, expected in ((2, CS.EXPECTED_PARENT_DIGEST),
-                              (3, CS.EXPECTED_INCUMBENT_DIGEST)):
+        for idx, expected in ((2, CS.expected_parent_digest()),
+                              (3, CS.expected_incumbent_digest())):
             s = by_index.get(idx)
             if s is None:
                 problems.append(f"step {idx} is absent")
@@ -695,79 +716,114 @@ class C3Driver:
 
     # -- F: the treatment arm, from the SAME verified parent ----------------
     def stage_f(self) -> None:
+        """Materialize EVERY causal arm from the one verified parent.
+
+        Three arms, but only two are built here: `A_incumbent` was already
+        produced and digest-gated by stage DE, and rebuilding it would be a
+        second, ungated construction of a state that already has an identity.
+        The causal arms are built as SUFFIXES from that same parent object,
+        so all three provably share it.
+
+        **Each initialization is constructed ONCE.** The three are fanned out
+        across the three recovery seeds in stage G; the causal scorers are
+        expensive (45.3 and 38.2 minutes) and running them per seed would
+        cost over two hours for nothing -- the initialization is
+        seed-independent by construction, which the preregistration records
+        and `_initializations_are_seed_independent` names.
+        """
         mark("STAGE_START:F")
         from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
 
-        # Derived from the arm, not a second literal `"cuda"`: the two agreed,
-        # but only because somebody kept them agreeing. Same rule as stage D.
-        root_device = self.arms["treatment"].device
-        treatment_spec = self.arms["treatment"]
-        start = CS.TREATMENT_SUFFIX_START_INDEX
-
-        #: The treatment arm's tail, from the parent stage D already produced and
-        #: GATED. Not `materialize_fixed_path`: that starts at step 0, and step 0
-        #: is DEPTH, which is not applicable to a parent already at the target
-        #: depth — so passing the full spec and the step-2 parent does not merely
-        #: recompute the shared prefix, it raises
-        #: `num_hidden_layers already at target`. And not a synthesized one-step
-        #: spec either: the arm's identity IS the full frozen four-step path, so a
-        #: result bound to a one-step path would be a result for another
-        #: experiment. The full spec is passed unchanged and only the executed
-        #: index range narrows.
-        verified = VerifiedSuffix(
-            start_index=start,
-            parent=self.parent,
-            expected_parent_artifact_digest=CS.EXPECTED_PARENT_DIGEST,
-            expected_path_hash=treatment_spec.spec_hash,
-            prefix_reference_steps=tuple(self.arms["incumbent"].steps[:start]),
-            expected_suffix_steps=(CS.TREATMENT_ATTENTION,),
-        )
-        treatment, suffix_evidence = materialize_fixed_path_suffix(
-            treatment_spec, adapter=QWEN3_ADAPTER,
-            root_loader=lambda: QWEN3_ADAPTER.load(self.parent.checkpoint_path,
-                                                   device=root_device),
-            workdir=WORK / "treatment", repo_root=str(REPO), verified=verified,
-            deadline=self.operator_deadline("stage F treatment ATTENTION"))
-        if [r.index for r in treatment] != [start]:
-            raise C3DriverError(
-                f"stage F executed steps {[r.index for r in treatment]}; the "
-                f"treatment suffix is exactly step {start}")
-
-        runtime = self.runtime_identity()
-        record = write_suffix_execution_record(
-            treatment_spec, treatment, AUDIT / "c3_arm_record.json",
-            runtime=runtime, suffix_evidence=suffix_evidence,
-            calibration={"profile_id": CS.TREATMENT_ATTENTION[1],
-                         "profile_hash": get_profile(
-                             CS.TREATMENT_ATTENTION[1]).profile_hash})
-        say(f"F: treatment {treatment[-1].identity.artifact_digest[:12]} "
-            f"from verified parent {CS.EXPECTED_PARENT_DIGEST[:12]} "
-            f"(step {start} only)")
+        start = len(CS.prefix_steps())
+        incumbent_id = CS.arm_ids()[0]
+        causal_arms = [a for a in CS.arm_ids() if a != incumbent_id]
 
         identities = {
-            "schema": "aadistill.autoinit.c1_arm_identities/v1",
+            "schema": "aadistill.autoinit.c3_arm_identities/v1",
             "parent": self.parent.as_dict(),
-            "incumbent": self.incumbent_step.as_dict(),
-            "treatment": treatment[-1].as_dict(),
+            incumbent_id: self.incumbent_step.as_dict(),
             "shared_parent": True,
-            "treatment_executed_step_indices": [r.index for r in treatment],
-            "treatment_record": _rel(record),
-            "treatment_record_sha256": sha256_file(record),
-            "treatment_output_digest_was_pre_pinned": False,
-            "runtime": runtime,
+            "arm_ids": list(CS.arm_ids()),
+            "_each_initialization_built_once": True,
         }
-        (AUDIT / "c1_arm_identities.json").write_text(
-            json.dumps(identities, indent=1) + "\n")
         self.arm_init = {
-            "incumbent": (self.incumbent_step.checkpoint_path,
-                          self.incumbent_step.identity.artifact_digest),
-            "treatment": (treatment[-1].checkpoint_path,
-                          treatment[-1].identity.artifact_digest),
+            incumbent_id: (self.incumbent_step.checkpoint_path,
+                           self.incumbent_step.identity.artifact_digest),
         }
-        self.complete("F", **{a: d for a, (_, d) in self.arm_init.items()},
-                      treatment_record=_rel(record),
-                      treatment_executed_step_indices=[r.index for r in treatment],
-                      treatment_is_a_replay=False)
+        records: dict[str, str] = {}
+
+        for arm_id in causal_arms:
+            spec = self.arms[arm_id]
+            # Derived from the arm, not a second literal `"cuda"`: the two
+            # agreed, but only because somebody kept them agreeing.
+            root_device = spec.device
+            planned = CS.arm(arm_id)["attention"]
+
+            #: The arm's tail, from the parent stage DE produced and GATED.
+            #: Not `materialize_fixed_path`: that starts at step 0, which is
+            #: DEPTH, not applicable to a parent already at the target depth
+            #: -- so passing the full spec and the step-2 parent does not
+            #: recompute the prefix, it raises `num_hidden_layers already at
+            #: target`. And not a synthesized one-step spec either: the arm's
+            #: identity IS the full frozen four-step path, so a result bound
+            #: to a one-step path would be a result for another experiment.
+            #: The full spec is passed unchanged and only the executed index
+            #: range narrows.
+            verified = VerifiedSuffix(
+                start_index=start,
+                parent=self.parent,
+                expected_parent_artifact_digest=CS.expected_parent_digest(),
+                expected_path_hash=spec.spec_hash,
+                prefix_reference_steps=tuple(
+                    self.arms[incumbent_id].steps[:start]),
+                expected_suffix_steps=(tuple(planned),),
+            )
+            built, suffix_evidence = materialize_fixed_path_suffix(
+                spec, adapter=QWEN3_ADAPTER,
+                root_loader=lambda: QWEN3_ADAPTER.load(
+                    self.parent.checkpoint_path, device=root_device),
+                workdir=WORK / arm_id, repo_root=str(REPO), verified=verified,
+                deadline=self.operator_deadline(f"stage F {arm_id} ATTENTION"))
+            if [r.index for r in built] != [start]:
+                raise C3DriverError(
+                    f"stage F executed steps {[r.index for r in built]} for "
+                    f"{arm_id}; its suffix is exactly step {start}")
+
+            runtime = self.runtime_identity()
+            record = write_suffix_execution_record(
+                spec, built, AUDIT / f"c3_{arm_id}_record.json",
+                runtime=runtime, suffix_evidence=suffix_evidence,
+                calibration={"profile_id": planned[1],
+                             "profile_hash": get_profile(planned[1]).profile_hash})
+            records[arm_id] = _rel(record)
+            digest = built[-1].identity.artifact_digest
+            say(f"F: {arm_id} {digest[:12]} from verified parent "
+                f"{CS.expected_parent_digest()[:12]} (step {start} only) "
+                f"· config {dict(spec.steps[-1].config or {})}")
+
+            identities[arm_id] = built[-1].as_dict()
+            identities[f"{arm_id}_executed_step_indices"] = [r.index for r in built]
+            identities[f"{arm_id}_record"] = _rel(record)
+            identities[f"{arm_id}_record_sha256"] = sha256_file(record)
+            identities[f"{arm_id}_output_digest_was_pre_pinned"] = False
+            self.arm_init[arm_id] = (built[-1].checkpoint_path, digest)
+
+        #: B1 and B3 share an implementation and differ only in a hashed
+        #: config. If that stopped being identity-bearing they would
+        #: materialize to the SAME digest and the experiment would silently
+        #: run one treatment twice while reporting two.
+        digests = {a: d for a, (_, d) in self.arm_init.items()}
+        if len(set(digests.values())) != len(digests):
+            raise C3DriverError(
+                f"two arms materialized to the same artifact digest: "
+                f"{digests}. The calibration protocol has stopped being "
+                "identity-bearing; these are not distinct treatments.")
+
+        identities["runtime"] = self.runtime_identity()
+        (AUDIT / "c3_arm_identities.json").write_text(
+            json.dumps(identities, indent=1) + "\n")
+        self.complete("F", **digests, arm_records=records,
+                      arms_built=len(causal_arms) + 1)
 
     def release_device(self) -> dict:
         """Hand the card to the trainer, and prove the handoff before training.
@@ -794,9 +850,15 @@ class C3Driver:
 
     # -- G: six trainings. NOTHING is evaluated here ------------------------
     def descriptors(self) -> list[dict]:
-        """Every arm on every seed. No rung, no control, no elimination."""
+        """Every arm on every seed. No rung, no control, no elimination.
+
+        Three arms x three seeds = nine, and the count is DERIVED from the
+        frozen plan rather than asserted against a literal. The two-arm
+        version asserted `len(out) == 6`, which is the assertion that would
+        have passed quietly while running the wrong experiment.
+        """
         out = []
-        for arm in ARMS:
+        for arm in CS.arm_ids():
             path, digest = self.arm_init[arm]
             for seed in self.seeds:
                 out.append({
@@ -805,7 +867,11 @@ class C3Driver:
                     "student_path": path,
                     "initialization_artifact_digest": digest,
                 })
-        assert len(out) == 6, "C1 is exactly six probes"
+        expected = len(CS.arm_ids()) * len(self.seeds)
+        if len(out) != expected:
+            raise C3DriverError(
+                f"{len(out)} probe descriptors, expected {expected} "
+                f"({len(CS.arm_ids())} arms x {len(self.seeds)} seeds)")
         return out
 
     def probe_config(self, d: dict) -> Path:
@@ -856,9 +922,10 @@ class C3Driver:
 
     def require_all_trained(self) -> None:
         """Stage H's precondition, in one place the driver and its harness share."""
-        if len(self.training) != 6:
+        expected = len(CS.arm_ids()) * len(self.seeds)
+        if len(self.training) != expected:
             raise C3DriverError(
-                f"stage H requires six training completions, found "
+                f"stage H requires {expected} training completions, found "
                 f"{len(self.training)}; the confirmation battery is evaluated "
                 "once per fully trained probe and never before")
 
@@ -1200,10 +1267,11 @@ class C3Driver:
     # -- I: the frozen paired decision --------------------------------------
     def stage_i(self) -> None:
         mark("STAGE_START:I")
-        if len(self.scored) != 6:
+        expected_probes = len(CS.arm_ids()) * len(self.seeds)
+        if len(self.scored) != expected_probes:
             raise C3DriverError(
-                f"{len(self.scored)} probe results, not 6; the decision rule may "
-                "not run on a partial design")
+                f"{len(self.scored)} probe results, not {expected_probes}; the "
+                "decision rule may not run on a partial design")
         per_sample = {}
         records = []
         for (arm, seed), s in self.scored.items():
@@ -1231,52 +1299,109 @@ class C3Driver:
                 observed_evaluation_protocol_hash=s[
                     "observed_evaluation_protocol_hash"]))
 
-        inputs = decision_inputs(per_sample, seeds=self.seeds)
+        arms = list(CS.arm_ids())
+        inputs = decision_inputs(per_sample, seeds=self.seeds, arms=arms,
+                                 candidate_operand=arms[1],
+                                 control_operand=arms[0])
         results = build_probe_results(
             records, plan_hash=self.plan.plan_hash, seeds=self.seeds,
-            inputs=inputs,
+            inputs=inputs, arms=arms,
             attested_evaluation_protocol_hash=(
                 self.evaluation_protocol.evaluation_protocol_hash))
         (AUDIT / "c3_probe_results.json").write_text(
             json.dumps(results, indent=2) + "\n")
 
-        d = paired_differences(inputs.arm("incumbent"), inputs.arm("treatment"))
-        boot = stratified_cluster_bootstrap(d, inputs.strata)
-        per_seed = [
-            sum(bool(inputs.correct["treatment"][s][j])
-                - bool(inputs.correct["incumbent"][s][j]) for j in d) / len(d)
-            for s in self.seeds]
+        #: THE THREE PRESPECIFIED CONTRASTS, in the roles the frozen plan
+        #: assigns them. Their order and their roles were fixed BEFORE any
+        #: result existed; nothing here chooses a contrast by looking at one.
+        prereg = CS.preregistration()
+        est = prereg["estimand"]
+        incumbent, b1, b3 = arms[0], arms[1], arms[2]
+        contrasts = (
+            ("primary", est["primary"]["symbol"], b1, incumbent),
+            ("secondary", est["secondary"]["symbol"], b3, b1),
+            ("practical", est["practical"]["symbol"], b3, incumbent),
+        )
+
+        def paired(candidate: str, control: str) -> dict:
+            """Complete paired statistics for one contrast. Same machinery."""
+            d = paired_differences(inputs.arm(control), inputs.arm(candidate))
+            boot = stratified_cluster_bootstrap(d, inputs.strata)
+            per_seed = [
+                sum(bool(inputs.correct[candidate][s][j])
+                    - bool(inputs.correct[control][s][j]) for j in d) / len(d)
+                for s in self.seeds]
+            return {
+                "candidate": candidate, "control": control,
+                "delta": boot["delta"],
+                "lcb_one_sided": boot["lcb_one_sided"],
+                "ucb_one_sided": boot.get("ucb_one_sided"),
+                "per_seed_delta": per_seed,
+                "bootstrap": boot,
+                "mcnemar": {
+                    "_note": ("per-seed discordant pairs over the 850 "
+                              "scorable prompts; counts, not rates"),
+                    "per_seed": [
+                        {"seed": s,
+                         "candidate_only": sum(
+                             1 for j in d if inputs.correct[candidate][s][j]
+                             and not inputs.correct[control][s][j]),
+                         "control_only": sum(
+                             1 for j in d if inputs.correct[control][s][j]
+                             and not inputs.correct[candidate][s][j])}
+                        for s in self.seeds]},
+            }
+
+        reported = {}
+        for role, symbol, candidate, control in contrasts:
+            reported[role] = {"symbol": symbol, **paired(candidate, control)}
+            r = reported[role]
+            say(f"  {role:9} {symbol:16} {candidate} - {control}: "
+                f"delta {r['delta']:+.4f} LCB {r['lcb_one_sided']:+.4f}")
+
+        #: THE VERDICT IS THE PRIMARY'S ALONE. The secondary and practical
+        #: contrasts are reported completely and may not redefine it -- a GO
+        #: settles the OPERATOR question and deliberately leaves the B1/B3
+        #: protocol choice to the post-C3 maintainer decision.
+        primary = reported["primary"]
         decision = decide(
-            self.plan, boot=boot, per_seed_delta=per_seed,
+            self.plan, boot=primary["bootstrap"],
+            per_seed_delta=primary["per_seed_delta"],
             usable_pooled_delta=inputs.usable_pooled_delta,
             usable_per_seed_delta=list(inputs.usable_per_seed_delta),
             catastrophic_violations=inputs.catastrophic_violations)
         decision["plan_hash"] = self.plan.plan_hash
         decision["probe_results_sha256"] = results["results_sha256"]
-        decision["mcnemar"] = {
-            "note": ("per-seed discordant pairs over the 850 scorable prompts; "
-                     "counts, not rates"),
-            "per_seed": [
-                {"seed": s,
-                 "treatment_only": sum(
-                     1 for j in d if inputs.correct["treatment"][s][j]
-                     and not inputs.correct["incumbent"][s][j]),
-                 "incumbent_only": sum(
-                     1 for j in d if inputs.correct["incumbent"][s][j]
-                     and not inputs.correct["treatment"][s][j])}
-                for s in self.seeds],
-        }
+        decision["preregistration_sha256"] = prereg["preregistration_sha256"]
+        decision["primary_contrast"] = prereg["claim_boundary"]["primary_contrast"]
+        decision["_verdict_owner"] = (
+            "the PRIMARY contrast alone. The secondary and practical "
+            "contrasts below are reported completely and do not redefine it.")
+        decision["contrasts"] = reported
+        decision["mcnemar"] = primary["mcnemar"]
+        decision["terminal_semantics"] = prereg["terminal_outcomes"]
+        decision["b1_vs_b3_is_a_post_c3_maintainer_decision"] = True
+        decision["c4_is_not_started"] = True
+        #: One prompt index set for every arm's diagnostics. Deriving it
+        #: from whichever contrast happened to be in scope would make the
+        #: per-arm counts depend on an unrelated pairing.
+        prompt_index = paired_differences(
+            inputs.arm(arms[0]), inputs.arm(arms[1]))
         decision["diagnostics"] = {
             "per_seed_correct": {
-                arm: {s: sum(1 for j in d if inputs.correct[arm][s][j])
-                      for s in self.seeds} for arm in ARMS},
+                arm: {s: sum(1 for j in prompt_index
+                             if inputs.correct[arm][s][j])
+                      for s in self.seeds} for arm in arms},
             "usable_counts": inputs.audit["usable_counts"],
             "strata_sizes": inputs.audit["strata_sizes"],
         }
         (AUDIT / "c3_decision.json").write_text(json.dumps(decision, indent=2) + "\n")
         self.ev["decision_ran"] = True
-        say(f"DECISION: {decision['verdict']} · delta {decision['delta']:+.4f} "
-            f"· LCB {decision['lcb_one_sided']:+.4f}")
+        say(f"PRIMARY ({decision['primary_contrast']}): {decision['verdict']} "
+            f"· delta {decision['delta']:+.4f} · LCB "
+            f"{decision['lcb_one_sided']:+.4f}")
+        say("  a GO settles the OPERATOR question only; B1-vs-B3 adoption and "
+            "C4 remain maintainer decisions")
         self.complete("I", verdict=decision["verdict"], delta=decision["delta"],
                       probe_results_sha256=results["results_sha256"])
 
@@ -1337,9 +1462,9 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main() -> int:
     args = build_parser().parse_args()
-    say(f"C1: {CS.C1_SESSION_CONTRACT.n_probes} probes, ceiling "
+    say(f"C3: {CS.C3_SESSION_CONTRACT.n_probes} probes, ceiling "
         f"${args.authorized_usd:.4f}, soft stop ${args.soft_stop_usd:.4f}")
-    for s in CS.C1_STAGES:
+    for s in CS.C3_STAGES:
         say(f"  {s.letter}: {s.stage_id}"
             + ("   [blocks training on failure]" if s.blocks_training else ""))
     driver = C1Driver(args)
