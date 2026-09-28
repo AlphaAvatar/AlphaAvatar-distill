@@ -15,26 +15,26 @@
   "per_session_envelope_usd": 30.0,
   "project_cap_usd": 400.0
  },
- "gpu_display_name": "RTX 6000 Ada",
- "gpu_type_id": "NVIDIA RTX 6000 Ada Generation",
+ "gpu_display_name": "L40S",
+ "gpu_type_id": "NVIDIA L40S",
  "price": {
   "_disk_is_billed_separately": "120 GB x $0.1/GB/month = $0.016667/h",
-  "billed_rate_usd_per_hour": 0.856667,
+  "billed_rate_usd_per_hour": 1.106667,
   "container_disk_gb": 120,
   "expected": {
    "hours": 15.4583,
    "minutes": 927.5,
-   "usd": 13.2426
+   "usd": 17.1072
   },
-  "gpu_rate_usd_per_hour": 0.84,
+  "gpu_rate_usd_per_hour": 1.09,
   "hard_ceiling": {
    "hours": 20.0107,
    "minutes": 1200.64,
-   "usd": 17.1425
+   "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T18:28:54Z",
+ "queried_utc": "2026-09-28T18:30:12Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "3bfdfe37be4490b8d09b2b78e9cb32a97d0aecb9",
+ "session_commit": "a3ece9af5230ed9be5f5dabc890360c2a12eca6c",
  "shortfalls_usd": {}
 }
