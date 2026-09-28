@@ -1,0 +1,16 @@
+[16:47:52] budget: expected 1186 min $21.54 · soft $21.54 · hard $21.81 (authorized $22.15)
+[16:47:52] NVIDIA L40S $1.09/h, stock Low
+[16:47:52] session commit 68cb1d5a8001 verified: harness digests to 6e885ab0fa3f…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt20/governance/authorization.json differs from the authorized base
+[16:47:52] grant 381efd7eb84c… at logs/stages/stage-1/phase_c3/runs/attempt20/governance/grant.json, as recorded by the authorization
+[16:47:53] C1 harness 6e885ab0fa3f… over 114 declared files
+[16:47:53] ceiling $22.1452, derived from logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json
+[16:47:54] preregistration ac44662c02d5… (self-hash verified, 3 arms, primary causal-B1 - incumbent B), live closure 6e885ab0fa3f…
+[16:47:54] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[16:47:54] frozen assets verified against configs/experiments/phase_c3/frozen_assets.json
+[16:47:54] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[16:47:54] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[16:47:55] success spec covers the contract (9 probes x 7 sets = 63 generation files); failure spec presupposes no training
+[16:47:57] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[16:48:01] aad_autoinit_68cb1d5a.bundle (18481717 bytes, 6a4f389728ab…) round-trips to 68cb1d5a8001… carrying this authorization and harness 6e885ab0fa3f…
+[16:48:05] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[16:48:06] ABORT at $0: the record was made against C3 harness 6e885ab0fa3f…, the live tree is 50dfb16599c8… — the pod sweep is owed again

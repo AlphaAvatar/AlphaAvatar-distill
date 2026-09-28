@@ -409,24 +409,68 @@ class C3Driver:
         return self.AUTHORIZATION_PATH
 
     def frozen_plan(self) -> C1IsolationPlan:
-        """The isolation plan, rebuilt from the frozen C3 preregistration.
+        """The decision rule's carrier: the PRIMARY contrast's two arms.
 
-        `C1IsolationPlan` is reused as the decision rule's carrier -- it
-        holds the SESOI, the bootstrap policy and the guardrails, none of
-        which are C1-specific -- but every arm, seed and battery value comes
-        from C3's own plan. The arms are built by iterating `CS.arm_ids()`,
-        so a fourth arm would appear here without an edit, and a missing one
-        could not be papered over by a literal.
+        `C1IsolationPlan` holds EXACTLY two arms and `C1Arm.role` must be
+        `incumbent` or `treatment` -- an inherited contract, not a
+        preference. Handing it C3's three arms with ids like `A_incumbent`
+        raised `role must be 'incumbent' or 'treatment'` on a live pod at
+        `$0.17`, after setup had completed.
+
+        Two arms is the right shape anyway, and not a workaround. `decide`
+        applies the frozen GO/NO_GO/INCONCLUSIVE rule to ONE contrast, and
+        the preregistration says which: the primary, `causal-B1 - incumbent
+        B`. So the plan carries exactly that pair. The third arm exists, is
+        materialized, is trained on all three seeds and is reported in both
+        secondary contrasts -- it is simply not what the decision rule reads,
+        which is the claim boundary the preregistration draws.
+
+        The pair is DERIVED from the plan's own primary contrast rather than
+        taken positionally, so a preregistration that renamed its arms or
+        reordered them could not silently change which comparison the verdict
+        is computed over.
         """
         battery = json.loads(BATTERY_IDENTITY.read_text())
+        control, candidate = self.primary_operands()
         return C1IsolationPlan(
             plan_id="autoinit.v1.phase_c3",
-            arms=tuple(
-                C1Arm(f"c3.{arm_id}", arm_id, *CS.arm(arm_id)["attention"])
-                for arm_id in CS.arm_ids()),
+            arms=(C1Arm(f"c3.{control}", "incumbent",
+                        *CS.arm(control)["attention"]),
+                  C1Arm(f"c3.{candidate}", "treatment",
+                        *CS.arm(candidate)["attention"])),
             seeds=tuple(self.seeds),
             battery_asset_id=battery["asset_id"],
             battery_content_sha256=battery["content_sha256"])
+
+    def primary_operands(self) -> tuple[str, str]:
+        """(control, candidate) arm ids for the PRIMARY contrast.
+
+        Read from the frozen plan's `estimand.primary.contrast`, matched
+        against the declared arms by name, so the verdict's operands come
+        from the document that fixed them rather than from list order.
+        """
+        prereg = CS.preregistration()
+        contrast = prereg["estimand"]["primary"]["contrast"].lower()
+        arms = list(CS.arm_ids())
+
+        def named(fragment: str) -> str:
+            hits = [a for a in arms if fragment in a.lower()]
+            if len(hits) != 1:
+                raise C3DriverError(
+                    f"the primary contrast {contrast!r} names {fragment!r}, "
+                    f"which matches {hits} among {arms}; the verdict's "
+                    "operands must be unambiguous")
+            return hits[0]
+
+        #: "causal-B1 - incumbent B": candidate first, control after the dash.
+        candidate_part, _, control_part = contrast.partition("-")
+        candidate = named("b1" if "b1" in candidate_part else "b3")
+        control = named("incumbent" if "incumbent" in control_part else "b1")
+        if candidate == control:
+            raise C3DriverError(
+                f"the primary contrast resolves to one arm ({candidate}) on "
+                "both sides")
+        return control, candidate
 
     # -- budget, evidence, subprocesses ------------------------------------
     def usd(self) -> float:

@@ -1,0 +1,41 @@
+{
+ "schema": "aadistill.runtime.run_manifest/v3",
+ "layout_version": 3,
+ "_contract": "The index of ONE run, for any stage. Roles are the experiment's vocabulary; this schema does not interpret them. Every path is relative to this run's own directory. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c3",
+ "run_id": "attempt20",
+ "root": "phase_c3/runs/attempt20",
+ "artifact_spec": "phase_c3_session_v1",
+ "plan": {
+  "session_id": "autoinit-c3",
+  "plan_hash": "5b266a80faabae7c30345e476ca8995d79b0cb91d559924658c980ee3613562a",
+  "session_commit": "68cb1d5a8001f7bd8858459cb25c36f66c52ee4d",
+  "bundle": "aad_autoinit_68cb1d5a.bundle",
+  "preregistration": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+  "scratch_root": "/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/8947c14c-ec2f-404d-b4cb-f424b0899168/scratchpad/c3_attempt20",
+  "scratch_note": "the artifact archive and the extracted tree stay here; artifacts/manifest.json carries their hashes. Large artifacts are not moved into git"
+ },
+ "implementation": {
+  "launcher": "scripts/pod/autoinit_c1_launch.py",
+  "harness_source_digest": "6e885ab0fa3f6eb0a9e63914c412b4a9c1be78426fc0514fd2b2bda9ff1b6987",
+  "authorization": "logs/stages/stage-1/phase_c3/runs/attempt20/governance/authorization.json"
+ },
+ "status": {
+  "passed": false,
+  "terminal": null,
+  "pod_id": null,
+  "cost": null,
+  "provider_confirms_gone": null,
+  "authorizes": "nothing"
+ },
+ "roles": {
+  "authorization": "governance/authorization.json",
+  "bundle_record": "governance/bundle.json",
+  "grant": "governance/grant.json",
+  "launcher_log": "runtime/launcher.log",
+  "readiness_record": "governance/readiness.json",
+  "session_record": "runtime/session.json"
+ },
+ "authorizes": "nothing",
+ "self_sha256": "e28b17c8af56673fe237eaa11f72cbf35e3028aa46e696722e9965eec1d9a2fc"
+}
