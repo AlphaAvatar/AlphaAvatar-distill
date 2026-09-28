@@ -1,0 +1,20 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt49",
+ "experiment_id": "phase_c3",
+ "status": "ORPHANED_THEN_RECONCILED",
+ "_what_this_is": "A pod that outlived its launcher. I killed the acquisition loop's tmux session to restart it after a code fix while attempt49's launcher was mid-flight; the kill took the launcher's whole process tree and its pod kept billing with no orchestrator. Found by a routine provider poll showing TWO live pods against a one-billing-resource contract, attributed by pod_id to the attempt whose launcher was gone, terminated directly, and confirmed absent by polling rather than by trusting the terminate call.",
+ "cost": {
+  "actual_usd": 0.8617,
+  "price_per_hour": 1.09,
+  "gpu_type_id": "NVIDIA L40S",
+  "_derivation": "the watchdog journal's final accrued_usd"
+ },
+ "provider_resource_created": true,
+ "pod_ids": [
+  "13yjoyyhabnud3"
+ ],
+ "final_provider_state": "terminated and confirmed gone; pods returned to 1",
+ "_no_measurement": "no recovery training or measurement began; wasted engineering spend, not a scientific result",
+ "_lesson": "never kill the acquisition loop while a launcher is mid-flight -- the loop already retries on its own"
+}
