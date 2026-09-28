@@ -1807,117 +1807,50 @@ where the repaired preflight caught a toy root on the wrong device in five
 seconds, then this one. All torn down, provider confirms **pods 0,
 volumes 0**.
 
-### Formal C3: funded, corrected, and in execution
+### Formal C3: the chain is built and every gate passes; waiting on capacity
 
-**Owners:**
-[`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json)
-(hash-bound `ac44662c02d53359`) and
-[`c3_pricing_9probe.json`](../stages/stage-1/phase_c3/plans/c3_pricing_9probe.json).
+**Where it stands.** Every pre-provider gate passes. Five launcher
+invocations have run, all at **`$0.00`** — no pod has ever been created, so
+nothing has been billed and no scientific measurement has begun.
 
-**Funding amended 2026-09-28** (maintainer decision on `b937aebb`; the budget
-stop was judged correct and nothing scientific was reduced). Project cap
-`$370.00 → $400.00`; per-session hard ceiling `$15.1475 → $30.00`; formal
-allowance `$45.4425 → $55.00`; engineering unchanged at `$10.00`; package
-total `$55.4425 → $65.00 = 55 + 10`. **`$30` is an envelope, not the C3
-grant** — live L40S `securePrice` is re-queried immediately before
-authorization and C3 receives the ceiling *derived* from it, proceeding only
-while derived ≤ `$30`, cumulative + derived ≤ `$400`, and remaining formal ≥
-derived. A price that is no longer `$1.09/h` is re-priced, not refused.
-
-**The preregistration contradicted itself, and was corrected before any
-result.** Two defects, found in two separate reviews:
-
-1. *The stamp bound nothing.* It read `fdf1d4c2…`, which no canonicalization
-   reproduces — hand-written, and the plan had no producer *and no consumer*,
-   so nothing checked it. Restamped `6d1d1121…` over a byte-identical body.
-2. *The corrected stamp was on a self-contradictory document.* Maintainer
-   review of `b937aebb` found `claim_boundary.primary_contrast` and
-   `decision_rule._applies_to` naming **causal-B1 − B** while
-   `estimand.primary` named **causal-B3 − B**; and `terminal_outcomes.GO`
-   auto-promoting `B3/length_sorted_v1` while `interpretation_matrix` case B
-   forbade exactly that. A correctly-stamped document that contradicts itself
-   is worse than an unstamped one, because the stamp makes it look checked.
-
-Both fixed before execution, which is the only time a preregistration may be
-repaired. `estimand` and `terminal_outcomes` changed; **arms, seeds, parent,
-recovery, evaluation, inference, decision rule, guardrails, claim boundary
-and interpretation matrix did not.** Re-frozen at
-`ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624`, with the
-superseded stamps recorded in `_correction_history` rather than discarded.
-
-**The canonical hierarchy, frozen before any result:**
-
-| role | contrast | what it owns |
+| attempt | reached | outcome |
 | --- | --- | --- |
-| **primary** | `Δ_primary = causal-B1 − B` | the **only** GO / NO_GO / INCONCLUSIVE verdict — causal-KL operator isolation |
-| secondary | `Δ_batch = causal-B3 − causal-B1` | the numerical protocol's downstream effect; reported completely |
-| practical | `Δ_practical = causal-B3 − B` | the practical optimized treatment; reported completely |
+| 1 | `spec()` | `_plan_hash` built C1's two arms from names the rewritten session lacks |
+| 2 | grant provenance | the authorization recorded no grant path/hash |
+| 3 | frozen science | gated on C1's incumbent digest `c313d1b4` (weight_proxy) |
+| 4 | artifact spec | `C3_HARNESS_SOURCE_FILES_V1` survived a rename |
+| 5 | **all gates PASS** | provider capacity refusal — L40S `stockStatus=None` |
 
-All three use the same aggregation, the same three fixed paired seeds and the
-same paired bootstrap machinery. **A GO settles the operator question only:**
-C4 becomes scientifically eligible but is not authorized and must not be
-started, and the B1-vs-B3 adoption choice is explicitly *not* decided — it
-returns to the maintainer on the completed secondary and practical evidence.
-No B3-vs-B1 non-inferiority margin was preregistered and none was invented.
+Attempt 5 cleared: budget, session commit, grant provenance, harness
+(113 files), ceiling, preregistration (3 arms, primary `causal-B1 −
+incumbent B`), frozen science (seeds + both replay digests + the 950/850
+battery), frozen assets, teacher binding, battery staging, artifact spec
+(**9 probes × 7 sets = 63** generation files), RoPE input, bundle
+round-trip, renderer parity (7/7 groups, 190 frozen prompts re-rendered byte
+for byte), the pod sweep (17 passed / 0 skipped) and the relay precheck.
 
-The 2026-09-28 supplement makes C3 a **three-arm, nine-probe** experiment:
-incumbent B, causal-KL B1, causal-KL B3/length-sorted, each over the same
-three fresh seeds. Priced from measured components:
+**The only thing outstanding is provider capacity**, which §18 of the
+2026-09-28 instruction names as an ordinary transient to back off from
+rather than return for. A `$0` poller watches `stockStatus`.
 
-| | minutes | source |
-| --- | --- | --- |
-| setup + gates | 13.0 | attempt 18 |
-| parent replay | 22.0 | measured 21.5 / 21.8 / 21.9 |
-| arm A ATTENTION | 0.2 | measured 11.2732 s |
-| arm B causal-B1 | 45.3 | **measured** 2720.6646 s |
-| arm C causal-B3 | 38.2 | **measured** 2289.3682 s |
-| recovery ×9 | 556.2 | 61.8 min/probe measured |
-| evaluation ×9 | 237.6 | 26.4 min/probe measured |
-| decide + close | 15.0 | attempt 18 |
-| **expected** | **927.5** | **15.46 h = `$17.1072`** |
-| **hard** | **1200.6** | **20.01 h = `$22.1451`** |
+**Each aborted attempt consumed its one-use chain** — P12.1: an invocation
+that ends before measurement produced no measurement to retry, so it is
+preserved and closed and the next attempt gets a fresh authorization,
+readiness sweep and bundle. That is why there are five.
 
-**That pricing left the chain short under the OLD limits**, and the
-maintainer's answer was to raise them rather than shrink the experiment.
-For the record, against the superseded `$370` cap and `$15.1475` ceiling:
-hard `$22.1451` exceeded `$19.9693` headroom by `$2.1758`, and expected
-`$17.1072` exceeded the per-session ceiling by `$1.9597`. Under the amended
-envelope both fit with room: `$22.1451` against a `$30.00` envelope,
-`$372.1758` cumulative against `$400.00`, and `$32.3824` formal remaining.
-**The ceiling C3 actually receives is derived from live `securePrice` at
-issuance, not from this estimate.**
+**What the aborts bought.** Each defect was a C1 constant that was *right
+for C1* and would have produced a complete, plausible, wrong C3 result or a
+crash on a billing pod. They are covered as a class now by 17 pod-preflight
+checks, including two static passes: every `CS.<attr>` the launcher and
+driver name must exist, and no module-level load may be unbound. The second
+immediately found `C1Driver` in the driver's `main()` — a `NameError` that
+would have fired *after* the teacher fetch and the parent replay.
 
-**Nothing was reduced to fit** — not the arms, seeds, battery, 860k tokens,
-evaluation or decision rule — and the expected value is not offered as a
-bound.
-
-**What is ready.** The preregistration is frozen before any result: three
-arms with both protocol fields identity-bearing; seeds
-`[217230555, 1151307191, 2045359208]` and bootstrap `654678655`, derived
-mechanically from the C0 digest and colliding with no historical or pilot
-seed; the primary contrast fixed as **causal-B1 − B** with the two secondary
-contrasts named; the four-case interpretation matrix frozen so no post-hoc
-relabelling is possible. Three initializations are built once each and fanned
-out across seeds — the causal scorers are not rerun per seed.
-
-Also established at `$0`: **incumbent B's bytes are not durable** (the C2
-record naming its digest is a probe trained *from* B and holds no weights),
-so B is rebuilt through the frozen path under its digest gate, ~11 s once the
-shared parent exists.
-
-**What is NOT ready, and must be finished before any funded launch.** The
-*plan* is three-arm; the *executor* is not.
-`scripts/experiments/phase_c3/session.py::build_arm_specs` still builds **two**
-arms (`{"incumbent", "treatment"}`) — it was written against the earlier
-two-arm design, takes no arm argument, and has never been exercised end to
-end. `TREATMENT_CONFIG` hardcodes B3 + `length_sorted_v1`, so the
-causal-B1 + `original_order_v1` arm **does not exist in code at all**, and
-`arm_prefix_is_shared` unpacks those two keys by name so it needs the same
-change. Also owed: the three-seed fan-out over three built-once
-initializations, and a `$0` toy run before any of it is trusted. This is
-ordinary engineering inside the existing envelope and needs no new decision —
-but it is **not** done, and the frozen preregistration must not be read as
-implying the launcher matches it.
+**Money.** Nothing spent. The derived ceiling is **`$22.1452`** at the live
+`securePrice` of `$1.09/h` (billed `$1.106667/h` with container disk): inside
+the `$30.00` envelope, leaving `$372.18` against the `$400.00` cap, and
+within the `$32.3824` formal remainder. The issuer refuses a grant that asks
+for the envelope instead of the derived figure — verified.
 
 ## Readiness
 

@@ -125,13 +125,13 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT STARTED and NOT LAUNCHED, but now FUNDED and unblocked. Budget amended 2026-09-28 (cap $400, per-session envelope $30, formal $55). The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds; it was self-contradictory at b937aebb and was corrected before any result -- estimand and terminal_outcomes only. Primary contrast causal-B1 - B owns the sole verdict. Remaining work is ordinary engineering: the 3-arm executor and the formal chain.",
+   "status": "NOT LAUNCHED: the chain is built, every pre-provider gate passes, and it waits on provider capacity. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds. Five launcher invocations, all at $0.00: no pod created, no measurement begun. Attempt 5 cleared every gate and hit an L40S capacity refusal, an ordinary transient. Derived ceiling $22.1452 at the live $1.09/h.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
    "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive AND NO OTHER PROTOCOL. Not formal C3. Owner: .../pilots/batching-adoption/v1/result.json.",
    "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded for selection by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
    "packing_optimization_v2": "CLOSED 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION, 1.1884x against a 1.25x gate; R3 (B3 length-sorted) fastest. $2.7048 of $4.00. Not formal C3. Owner: .../packing-optimization/v2/result.json.",
-   "executor_gap": "build_arm_specs still builds TWO arms and has never run end to end; the 3-arm fan-out is owed before launch.",
-   "preregistration_corrections": "TWO, both pre-launch: a hand-written stamp that bound nothing, then a body that contradicted itself on the primary contrast and on GO. See _correction_history in the plan; superseded stamps fdf1d4c2, 6d1d1121."
+   "preregistration_corrections": "TWO, both pre-launch: a hand-written stamp that bound nothing, then a body that contradicted itself on the primary contrast and on GO. See _correction_history in the plan; superseded stamps fdf1d4c2, 6d1d1121.",
+   "attempts": "1-4 aborted at $0 on C1 constants the port kept (plan hash, grant provenance, incumbent digest, harness constant); each consumed its one-use chain per P12.1 and got a fresh one. 5 = all gates PASS, provider capacity refusal."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
@@ -141,7 +141,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "NONE for C3: funding amended 2026-09-28 and the preregistration corrected. Remaining work before launch is ordinary engineering (3-arm executor, formal chain).",
+ "blocker": "PROVIDER CAPACITY ONLY. The formal C3 chain is built and every pre-provider gate passes; L40S stockStatus is None. Ordinary transient, $0 poller running. Nothing else is blocked.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
