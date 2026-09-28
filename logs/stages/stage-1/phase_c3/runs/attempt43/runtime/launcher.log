@@ -1,0 +1,24 @@
+[17:49:15] budget: expected 1186 min $21.54 · soft $21.54 · hard $21.81 (authorized $22.15)
+[17:49:15] NVIDIA L40S $1.09/h, stock Low
+[17:49:15] session commit c023ba382b8b verified: harness digests to 268dd4981230…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt43/governance/authorization.json differs from the authorized base
+[17:49:15] grant d79fa5d08090… at logs/stages/stage-1/phase_c3/runs/attempt43/governance/grant.json, as recorded by the authorization
+[17:49:16] C1 harness 268dd4981230… over 114 declared files
+[17:49:16] ceiling $22.1452, derived from logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json
+[17:49:17] preregistration ac44662c02d5… (self-hash verified, 3 arms, primary causal-B1 - incumbent B), live closure 268dd4981230…
+[17:49:17] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[17:49:18] frozen assets verified against configs/experiments/phase_c3/frozen_assets.json
+[17:49:18] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[17:49:18] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[17:49:19] success spec covers the contract (9 probes x 7 sets = 63 generation files); failure spec presupposes no training
+[17:49:20] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[17:49:25] aad_autoinit_c023ba38.bundle (18507756 bytes, a560c4794c93…) round-trips to c023ba382b8b… carrying this authorization and harness 268dd4981230…
+[17:49:28] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[17:49:29] pod sweep 24 passed / 0 skipped / 0 failed, no declared groups, binds C3 harness 268dd4981230… and environment 5e8c27c3e2ca…, staging contract 0aa9acc6903f…, swept at 67c27c7c with only ['logs/stages/stage-1/phase_c3/runs/attempt43/governance/authorization.json', 'logs/stages/stage-1/phase_c3/runs/attempt43/governance/readiness.json'] differs from the swept base
+[17:49:29] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[17:49:30] attempt 1: create failed — {"error":"There are no longer any instances available with the requested specifications. Please refresh and try again."}
+Usage:
+  runpodctl pod create [flags]
+
+Flags:
+      --cloud-type string        
+[17:49:30] ABORT: could not create a pod
