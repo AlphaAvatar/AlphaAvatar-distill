@@ -1,0 +1,23 @@
+[17:29:19] C3: 9 probes, ceiling $22.1452, soft stop $21.5391
+[17:29:19]   A: session_setup
+[17:29:19]   B: teacher_fetch_verify   [blocks training on failure]
+[17:29:19]   C: register_operator   [blocks training on failure]
+[17:29:19]   D: replay_parent   [blocks training on failure]
+[17:29:19]   E: replay_incumbent   [blocks training on failure]
+[17:29:19]   F: materialize_arms   [blocks training on failure]
+[17:29:19]   G: recovery_probes
+[17:29:19]   H: evaluate
+[17:29:19]   I: decide
+[17:29:19]   J: collect_teardown
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1573, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1567, in main
+    driver = C3Driver(args)
+             ^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 384, in __init__
+    self.auth.require_science_plan(C0_PREREGISTRATION_SHA256)
+  File "/workspace/aad/scripts/experiments/phase_a/plan.py", line 293, in require_science_plan
+    raise AuthorizationError(
+aadistill.governance.authorization.AuthorizationError: this authorization is bound to science plan ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624 but the successive-halving plan about to run hashes to fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280. A threshold, seed, survivor count or selection rule moved after the grant.
