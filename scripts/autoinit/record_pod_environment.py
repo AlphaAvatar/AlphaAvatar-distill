@@ -83,6 +83,7 @@ SIMULATOR = "scripts/pod/simulate_pod_env.sh"
 #: next failure would land in one of them.
 EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_c1": ("experiments.phase_c1.pod_environment", "c1_sweep_contract"),
+    "phase_c3": ("experiments.phase_c3.pod_environment", "c3_sweep_contract"),
     "phase_c2": ("experiments.phase_c2.pod_environment", "c2_sweep_contract"),
     #: Baseline completion is a THIRD entry rather than a mode of the second.
     #: It binds a different launcher, a different session id, a different
