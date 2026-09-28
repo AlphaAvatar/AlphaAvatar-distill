@@ -24,17 +24,17 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 113,
- "digest": "cecfc4868939ebb13c9cc6070200dd0b0acc3f757c93d2e0d77d45385eef46df",
+ "digest": "67cf0115abe30ebd827b9cc5a346476debb039db82a800541b85009f1f11d548",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
    "path": "configs/autoinit/c3_artifacts.json",
-   "sha256": "83af97f3f61e0a63b1448e42632d6472c894b9ffa01546e80f86a9038ab16978",
+   "sha256": "9ac2c5172dec74b874a57bbcd8af27be914c375530950bc83901b328e28ec2fe",
    "bytes": 5943
   },
   {
    "path": "configs/autoinit/c3_artifacts_failed.json",
-   "sha256": "ef34493071a42b67312aff3c42867705cc96c379e752de2a8fa87012504c94d3",
+   "sha256": "a65ae6e4a14416a2d037aaf66143f18ef4e52043db9f88a0a6ca28bd6bf2ab1f",
    "bytes": 7360
   },
   {
@@ -204,8 +204,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c3_driver.py",
-   "sha256": "4ce3806d1e87252b796edda04322764c478c2430c4831dda4af31d8bb1cdc6b5",
-   "bytes": 74919
+   "sha256": "799a80af8d11ef46ce6c6707cc13bec33b755c6ea942f288ea40bf342a240c7d",
+   "bytes": 76213
   },
   {
    "path": "scripts/pod/autoinit_c3_launch.py",
