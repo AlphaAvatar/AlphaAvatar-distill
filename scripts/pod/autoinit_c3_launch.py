@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Phase C1 — fixed-path ATTENTION isolation, as a session specification.
+"""Phase C3 — three-arm causal-KL ATTENTION isolation, as a session spec.
 
     PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_c1_launch.py \
         --scr <scratch> --run-id <attemptN> \
@@ -8,18 +8,18 @@
 **This session does not search.** It replays one frozen operator sequence, gates
 it against two recorded artifact digests, then runs six fixed probes. There is no
 beam, no ranking, no successive halving, no tie-breaking and no arm elimination —
-and none of those is a flag to be turned off: `C1Authorization.allows_beam_search`
+and none of those is a flag to be turned off: `C3Authorization.allows_beam_search`
 is a hard `False`, `C1IsolationPlan` has no `survivors` or `tie_break_seed` field
-to set, and `c1_session.assert_stage_order` refuses a permuted run.
+to set, and `c3_session.assert_stage_order` refuses a permuted run.
 
 Three properties are declared here rather than assumed.
 
 *The science lives elsewhere.* This launcher builds a `SessionSpec` and nothing
 else. The stage order, the two replay gates, the arm construction and the
-decision rule are `aadistill.autoinit.c1_session` and `c1_isolation`; duplicating
+decision rule are `aadistill.autoinit.c3_session` and `c1_isolation`; duplicating
 any of them here would create a second copy to keep in step.
 
-*The ceiling is derived, once.* `c1_budget_spec()` reads
+*The ceiling is derived, once.* `c3_budget_spec()` reads
 `logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json` and back-derives the step time from its measured
 per-probe minutes, so the enforceable ceiling exists in exactly one place. A
 second hand-maintained figure is how a session comes to be authorized for one
@@ -55,8 +55,8 @@ from experiments.run_layout import (  # noqa: E402
     rel_run_dir,
     open_run, present_roles, record_run, require_output_claim, write_run_readmes,
 )
-from experiments.phase_c1 import session as CS
-from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
+from experiments.phase_c3 import session as CS
+from experiments.phase_c3.authorization import CURRENT_CLOSURE_SNAPSHOT, C3Authorization, c3_budget_spec, c3_hard_ceiling_usd, c3_harness_digest, c3_billed_rate_usd_per_hour  # noqa: E402
 from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
 from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
 from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
@@ -78,6 +78,7 @@ from aadistill.infrastructure.session import (
     ArtifactPolicy, LocalAsset, MarkerPolicy, SessionContext, SessionSpec,
     SetupManifest, TeardownPolicy,
 )
+from aadistill.runtime.staging_contract import ignores_for_selection  # noqa: E402
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate,
 )
@@ -107,7 +108,7 @@ from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E40
 #: `tokenizer.json` is 11,422,654 bytes at `aeb13307…` against `be756060…` here,
 #: `tokenizer_config.json` is 10,834 bytes against 694, and the teacher ships no
 #: `chat_template.jinja` at all.
-C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
+C3_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
                dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint", sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
@@ -134,19 +135,19 @@ C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 #: The hash is INDEPENDENTLY VERIFIED, not transcribed: the relay object was
 #: downloaded read-only and hashed, and `rope_input_gate` re-derives it before
 #: every launch.
-C1_ROPE_INPUT: tuple[RelayInput, ...] = (
+C3_ROPE_INPUT: tuple[RelayInput, ...] = (
     RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
                dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
                sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054", repo=MAIN_RELAY),
 )
 #: What `stored_rope_base` must report for the staged config, in both venvs.
-C1_ROPE_BASE = 5_000_000
+C3_ROPE_BASE = 5_000_000
 #: The directory the shared setup globs. Named once so the gate and the
 #: RelayInput cannot drift apart.
-C1_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+C3_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 
 #: C1's own, not Phase A's. The Phase-A launcher was imported for three things:
-#: the teacher revision (which `c1_session` already declares), a two-entry test
+#: the teacher revision (which `c3_session` already declares), a two-entry test
 #: ignore list, and its `build_parser` -- whose flags are `--rung1-probes`,
 #: `--rung2-probes`, `--tie-break-probes`, `--search-minutes`,
 #: `--stage-leaves-to-relay` and `--fetch-finalists`. Inheriting that parser gave
@@ -198,25 +199,16 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: come true four times, which is the argument for deriving — and the reason
 #: not to is unchanged and stated above, so the entries are added by hand and
 #: the guard stays the thing that catches the next one.
-#: A FIFTH: `tests/c3_preflight`, added here in the same commit that
-#: created it. C3 itself uses `ignores_for_selection` and needs no such
-#: entry; this line exists only so C1's guard stays green.
-TEST_IGNORES = ("tests/architecture", "tests/autoinit",
-                "tests/c3_preflight",
-                "tests/c2_baseline_completion_preflight",
-                "tests/c2_behavioural_preflight",
-                "tests/c2_full_search_preflight", "tests/c2_preflight",
-                "tests/c2_replay_preflight",
-                "tests/data", "tests/docs", "tests/evaluation",
-                "tests/infrastructure", "tests/init", "tests/initialization",
-                "tests/models",
-                "tests/pod", "tests/rollout", "tests/runtime", "tests/support",
-                "tests/training", "tests/validation",
-                "tests/test_usable_rollout.py")
-
-#: The directory that survives those ignores. Named so the contract is greppable
-#: from the launcher rather than only inferable from what is missing.
-POD_TEST_SELECTION = "tests/c1_preflight"
+#: DERIVED, not hand-written. C1's list is hand-written because C1 is frozen
+#: and re-deriving it would move the digest a closed attempt's evidence
+#: describes -- and its own comment records the consequence: four new test
+#: directories arrived and were not added, leaving C1's guard red four times,
+#: each one a directory a C1 pod would have collected on its own meter to
+#: prove another experiment passes. C3 is new, so it uses the mechanism built
+#: for that: anything added tomorrow is excluded by DEFAULT, which is the
+#: safe direction for a GPU that charges by the minute.
+POD_TEST_SELECTION = "tests/c3_preflight"
+TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
@@ -225,7 +217,7 @@ RUN_LOG = f"{WS}/autoinit_c1_run.log"
 #: repository-root file, and each closeout copied it into the run afterwards to
 #: keep a copy. The authorization a session ran under therefore lived at a path
 #: the next issuance would replace.
-AUTH_POINTER = "logs/budget/approvals/autoinit_c1_authorization.json"
+AUTH_POINTER = "logs/budget/approvals/autoinit_c3_authorization.json"
 
 #: Back-compatible name. Every authorization issued before 2026-09-12 is here,
 #: and a session with no run id still reads it.
@@ -242,18 +234,18 @@ def auth_path_for(run_id: str | None) -> str:
     if not run_id:
         return AUTH_POINTER
     return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
-            f"/{C1_RUN_ROLES['authorization']}")
+            f"/{C3_RUN_ROLES['authorization']}")
 
 PRICING = "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
-PREREG = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
+PREREG = "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 #: The expectation the frozen-asset gate checks this tree against, on the pod
 #: and — since 2026-09-11 — at $0 before a pod exists.
-FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
+FROZEN_EXPECT = "configs/experiments/phase_c3/frozen_assets.json"
 #: Declared once. `artifact_spec_gate` reads these and `ArtifactPolicy` books
 #: them, so the gate cannot end up validating a different file than the one the
 #: pod is handed.
-SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
-SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
+SPEC_SUCCESS = "configs/autoinit/c3_artifacts.json"
+SPEC_FAILED = "configs/autoinit/c3_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
 BATTERY_IDENTITY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
@@ -273,13 +265,13 @@ def bundle_record_for(run_id: str | None) -> str:
     if not run_id:
         return BUNDLE_POINTER
     return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
-            f"/{C1_RUN_ROLES['bundle_record']}")
+            f"/{C3_RUN_ROLES['bundle_record']}")
 
 # ---------------------------------------------------------------------------
 # where this run's files go
 #
 # Every C1 attempt so far wrote its session record to ONE flat path,
-# `logs/stages/stage-1/phase_c1/analyses/autoinit_c1_session.json`, which the next attempt overwrote; the evidence
+# `logs/stages/stage-1/phase_c1/analyses/autoinit_c3_session.json`, which the next attempt overwrote; the evidence
 # directory `logs/stages/stage-1/phase_c1/runs/attempt9/` was then assembled by hand afterwards,
 # and the run index found it by matching the directory's NAME. Three
 # consequences, all of them real: the live record and the preserved copy are
@@ -296,7 +288,7 @@ def bundle_record_for(run_id: str | None) -> str:
 #: This experiment's key in `logs/runs/` and in the run index. `phase_c1` is
 #: already the index's experiment id for attempts 1-9, so a tenth attempt joins
 #: the same series instead of starting a parallel one.
-RUN_EXPERIMENT_ID = "phase_c1"
+RUN_EXPERIMENT_ID = "phase_c3"
 
 #: The pipeline stage this experiment's runs EXECUTE, read from the experiment's
 #: own configuration rather than decided here. C1 trains and evaluates Stage-3
@@ -308,7 +300,7 @@ RUN_STAGE_ID = load_config(REPO_ROOT)["stage_id"]
 #: TARBALL and the extracted tree stay in the scratch directory, and
 #: `artifacts/manifest.json` carries their hashes. A run manifest holds a
 #: verifiable reference to a large artifact; it never holds the artifact.
-C1_RUN_ROLES: dict[str, str] = {
+C3_RUN_ROLES: dict[str, str] = {
     #: Written by `SessionRunner.save()` on every path, including a launcher
     #: error, so it is the one role that is always present.
     "session_record": "runtime/session.json",
@@ -336,7 +328,7 @@ C1_RUN_ROLES: dict[str, str] = {
     "authorization": "governance/authorization.json",
     "bundle_record": "governance/bundle.json",
     "readiness_record": "governance/readiness.json",
-    "driver_evidence": "evidence/c1_evidence.json",
+    "driver_evidence": "evidence/c3_evidence.json",
     "driver_log": "evidence/driver_run.log",
     #: The COMPLETE marker sequence. The session record echoes only the last
     #: status it saw into its timeline, so the stream is the one place the whole
@@ -350,10 +342,10 @@ C1_RUN_ROLES: dict[str, str] = {
     "outcome": "closeout/outcome.json",
 }
 
-C1_RUN_SPEC = RunArtifactSpec(
-    spec_id="phase_c1_session_v1",
+C3_RUN_SPEC = RunArtifactSpec(
+    spec_id="phase_c3_session_v1",
     required=("session_record",),
-    optional=tuple(r for r in C1_RUN_ROLES if r != "session_record"))
+    optional=tuple(r for r in C3_RUN_ROLES if r != "session_record"))
 
 #: Scratch-relative source -> role, for the small text files the runner leaves
 #: beside the pod. Copied into the run after the session, because the scratch
@@ -370,7 +362,7 @@ _RUN_COLLECT: tuple[tuple[str, str], ...] = (
     ("launch.log", "launcher_log"),
     (f"relay/{Path(RUN_LOG).name}", "driver_log"),
     (f"relay/{Path(STATUS).name}", "driver_status"),
-    ("relay/c1_evidence.json", "driver_evidence"),
+    ("relay/c3_evidence.json", "driver_evidence"),
     ("store/manifest.json", "artifact_manifest"),
 )
 
@@ -436,7 +428,7 @@ def session_record_path(run_id: str) -> str:
     """
     return str(layout_for(REPO_ROOT, RUN_EXPERIMENT_ID, run_id,
                           stage_id=RUN_STAGE_ID).root.relative_to(REPO_ROOT)
-               / C1_RUN_ROLES["session_record"])
+               / C3_RUN_ROLES["session_record"])
 
 
 class _RunIdSetsOut(argparse.Action):
@@ -505,8 +497,8 @@ class _RunIdSetsOut(argparse.Action):
 #: is still not authorized. The per-session ceiling is unchanged and covers ALL
 #: draws together: `start_epoch` is set once, so `elapsed()` and `usd()` span the
 #: session and three draws do not buy three ceilings.
-C1_CREATE_ATTEMPTS = 1
-C1_MAX_HOST_DRAWS = 3
+C3_CREATE_ATTEMPTS = 1
+C3_MAX_HOST_DRAWS = 3
 
 
 def _bounded(flag: str, lo: int, hi: int):
@@ -534,17 +526,17 @@ def require_bounded_acquisition(args) -> None:
     `run_session` and therefore before anything can be created.
     """
     attempts = getattr(args, "create_attempts", None)
-    if attempts != C1_CREATE_ATTEMPTS:
+    if attempts != C3_CREATE_ATTEMPTS:
         raise SystemExit(
             f"refusing to build the C1 session: create_attempts={attempts!r}. "
             "A create-attempt sleeps and asks the same market again, which is "
-            f"stock chasing; --create-attempts is fixed at {C1_CREATE_ATTEMPTS}.")
+            f"stock chasing; --create-attempts is fixed at {C3_CREATE_ATTEMPTS}.")
     draws = getattr(args, "host_draws", None)
-    if not isinstance(draws, int) or not 1 <= draws <= C1_MAX_HOST_DRAWS:
+    if not isinstance(draws, int) or not 1 <= draws <= C3_MAX_HOST_DRAWS:
         raise SystemExit(
             f"refusing to build the C1 session: host_draws={draws!r}. A draw "
             "replaces a host that never became usable, inside one session and "
-            f"inside its one ceiling; the batch is capped at {C1_MAX_HOST_DRAWS}.")
+            f"inside its one ceiling; the batch is capped at {C3_MAX_HOST_DRAWS}.")
 
 #: Dev-box-only assets the launcher scp's. The battery is 3.26 MiB and the
 #: reasoning-heavy mixture 0.76 MiB, so both fit the observed 0.44-0.72 MB/s
@@ -571,7 +563,7 @@ LOCAL_ASSETS = (
 # prechecks — everything that can refuse before a pod exists
 # ---------------------------------------------------------------------------
 
-def c1_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
+def c3_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Recompute the C1 harness set here, independently of the artifact.
 
     `require_harness()` digests whatever file list the authorization *stores*.
@@ -582,23 +574,17 @@ def c1_harness_gate(ctx: SessionContext) -> tuple[bool, str]:
     operator went unmeasured.
     """
     try:
-        current = c1_harness_digest(REPO_ROOT)
+        current = c3_harness_digest(REPO_ROOT)
     except Exception as exc:                       # noqa: BLE001
         return False, f"cannot compute the C1 harness digest: {exc}"
     live = current["digest"]
     expected = tuple(f["path"] for f in current["files"])
     declared = tuple(getattr(ctx.auth, "harness_source_files", ()) or ())
     if declared != expected:
-        #: Named separately, because it is the failure an authorization issued
-        #: after the initialization cutover actually lands on, and "a different
-        #: file set" would send the reader looking for another phase's grant.
-        if declared == C1_HARNESS_SOURCE_FILES_V1:
-            return False, (
-                "the authorization declares the PRE-MIGRATION harness set: "
-                f"{len(declared)} paths under src/aadistill/autoinit/, which the "
-                "initialization cutover moved. Its digest was computed over the "
-                f"{len(expected)} current paths, so the two describe different "
-                "sets and session_commit_gate can never pass. Re-issue.")
+        #: C3 has no pre-migration branch: it has never had a hand-written
+        #: harness list, so the only way to be here is a genuinely different
+        #: set -- an authorization issued against another tree, or one issued
+        #: before a file joined or left the C3 closure.
         return False, ("the authorization declares a different harness file set "
                        f"({len(declared)} paths) than this session executes "
                        f"({len(expected)})")
@@ -638,7 +624,7 @@ def grant_provenance_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: where the run is. They did: this line named the pre-stage location while
     #: the run moved under its declared stage.
     rel = (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id, RUN_STAGE_ID)}"
-           f"/{C1_RUN_ROLES['grant']}")
+           f"/{C3_RUN_ROLES['grant']}")
     want = (REPO_ROOT / rel).resolve()
     auth_rel = auth_path_for(run_id)
     try:
@@ -728,7 +714,7 @@ def pricing_identity_gate(ctx: SessionContext) -> tuple[bool, str]:
     cheaper session — it is an unpriced one.
     """
     try:
-        ceiling = c1_hard_ceiling_usd(REPO_ROOT)
+        ceiling = c3_hard_ceiling_usd(REPO_ROOT)
     except Exception as exc:                       # noqa: BLE001
         return False, f"cannot read {PRICING}: {exc}"
     granted = float(getattr(ctx.auth, "hard_cap_usd", 0.0) or 0.0)
@@ -782,7 +768,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
             f"({ATTEMPT_18_PREREGISTRATION[:12]}…); it is frozen to that "
             "binding, and a reopened C1 needs a new preregistration under a new "
             "identity rather than an edit to this one")
-    live = c1_harness_digest(REPO_ROOT)["digest"]
+    live = c3_harness_digest(REPO_ROOT)["digest"]
     snapshot = REPO_ROOT / CURRENT_CLOSURE_SNAPSHOT
     if not snapshot.is_file():
         return False, (f"{CURRENT_CLOSURE_SNAPSHOT} is missing; the live "
@@ -798,7 +784,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"attempt-18 binding), live closure {live[:12]}…")
 
 
-def frozen_c1_science_gate(ctx: SessionContext) -> tuple[bool, str]:
+def frozen_c3_science_gate(ctx: SessionContext) -> tuple[bool, str]:
     """The scientific constants this session must not have drifted from.
 
     Cheap, and it has an exact precedent: Phase A's frozen-plan gate exists
@@ -900,12 +886,12 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     import tempfile
 
-    if not C1_ROPE_INPUT:
+    if not C3_ROPE_INPUT:
         return False, "the session declares no RoPE config input"
-    entry = C1_ROPE_INPUT[0]
-    if entry.dest != C1_ROPE_CHECKPOINT_DIR:
+    entry = C3_ROPE_INPUT[0]
+    if entry.dest != C3_ROPE_CHECKPOINT_DIR:
         return False, (f"the RoPE config stages to {entry.dest!r}, not the "
-                       f"{C1_ROPE_CHECKPOINT_DIR!r} the shared setup globs")
+                       f"{C3_ROPE_CHECKPOINT_DIR!r} the shared setup globs")
     if not (entry.sha256 or "").strip():
         return False, "the RoPE config input carries no pinned sha256"
     try:
@@ -925,9 +911,9 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
     except Exception as exc:                                   # noqa: BLE001
         return False, f"the RoPE config input is not usable: {exc}"
 
-    if abs(base - C1_ROPE_BASE) > 1:
+    if abs(base - C3_ROPE_BASE) > 1:
         return False, (f"the staged config records RoPE base {base:,.0f}, not "
-                       f"{C1_ROPE_BASE:,.0f}; the pod's ROPE_OK step would refuse it")
+                       f"{C3_ROPE_BASE:,.0f}; the pod's ROPE_OK step would refuse it")
     ctx.evidence["rope_input_check"] = {
         "relay_path": entry.path, "dest": entry.dest, "bytes": len(data),
         "sha256": digest, "stored_rope_base": base,
@@ -1037,7 +1023,7 @@ def pod_environment_gate(ctx: SessionContext) -> tuple[bool, str]:
     # machine 55 tests more generous than the pod.
     try:
         live_staging = derive_contract(spec(ctx.args).setup,
-                                       session_id="autoinit-c1")["digest"]
+                                       session_id="autoinit-c3")["digest"]
     except Exception as exc:                                   # noqa: BLE001
         return False, f"cannot derive this session's staging contract: {exc}"
 
@@ -1151,7 +1137,7 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: survives, so they must be inside the set the authorization measures.
     #: Without this, editing an evidence declaration would not move the harness
     #: digest, and a grant would certify a collection policy it never saw.
-    unmeasured = [p for p in paths if p not in C1_HARNESS_SOURCE_FILES_V1]
+    unmeasured = [p for p in paths if p not in C3_HARNESS_SOURCE_FILES_V1]
     if unmeasured:
         return False, (f"{unmeasured} decide what evidence survives teardown but "
                        "are outside the measured C1 harness set")
@@ -1175,7 +1161,7 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
                                f"artifact roots {ARTIFACT_ROOTS}")
         loaded[rel] = specs
 
-    n_probes = CS.C1_SESSION_CONTRACT.n_probes
+    n_probes = CS.C3_SESSION_CONTRACT.n_probes
     n_sets = len(json.loads((REPO_ROOT / BATTERY_MANIFEST).read_text())["sets"])
     #: The frozen `evidence_manifest_contract`, as enforceable minimums.
     required_minimums = {
@@ -1235,7 +1221,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
     `test_the_launcher_driver_cli_seam.py` now parses this exact string with the
     driver's OWN parser, which is the authority on what it accepts.
     """
-    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c1_driver.py "
+    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c3_driver.py "
             f"--image-digest '{ctx.image_digest}' "
             f"--run-id '{getattr(ctx.args, 'run_id', None) or 'unrecorded'}' "
             f"--rate {ctx.price or ctx.args.max_price} "
@@ -1246,7 +1232,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     """Every probe's training event stream must come home before teardown."""
-    return tuple(f"artifacts/stage3/c1/{arm}_{seed}/train_log.jsonl"
+    return tuple(f"artifacts/stage3/c3/{arm}_{seed}/train_log.jsonl"
                  for arm in ("incumbent", "treatment")
                  for seed in derive_recovery_seeds())
 
@@ -1256,8 +1242,8 @@ def spec(args) -> SessionSpec:
     #: provider resource never becomes a SessionSpec.
     require_bounded_acquisition(args)
     return SessionSpec(
-        session_id="autoinit-c1",
-        schema="aadistill.autoinit.c1_session/v1",
+        session_id="autoinit-c3",
+        schema="aadistill.autoinit.c3_session/v2",
         description=("Phase C1: fixed-path ATTENTION isolation. Replays the frozen "
                      "fe9683 path under two digest gates, then runs 2 arms x 3 "
                      "fresh seeds. Runs no search"),
@@ -1265,21 +1251,21 @@ def spec(args) -> SessionSpec:
         #: The C1 type. A Phase-A, Phase-B or continuation artifact is refused by
         #: schema at load: each measures a different harness and carries a
         #: ceiling derived for different work.
-        authorization_loader=C1Authorization.load,
+        authorization_loader=C3Authorization.load,
         commands=ExecutionCommands(
             watchdog="scripts/pod/watchdog.py",
             setup_script="scripts/pod/autoinit_preflight_setup.sh",
             artifact_collector="scripts/pod/collect_artifacts.py",
             **deployment_commands()),
-        plan_id="autoinit.v1.phase_c1",
+        plan_id="autoinit.v1.phase_c3",
         #: The isolation plan's own hash, not Phase A's. C1 is different science,
         #: not a different operational identity for the same science.
         plan_hash=_plan_hash(),
         #: DERIVED from logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json. Never written here.
-        budget=c1_budget_spec(REPO_ROOT),
+        budget=c3_budget_spec(REPO_ROOT),
         setup=SetupManifest(
             relay_inputs=(*RECOVERY_LADDER, *CALIBRATION_V1,
-                           *C1_EVAL_TOKENIZER, *C1_ROPE_INPUT),
+                           *C3_EVAL_TOKENIZER, *C3_ROPE_INPUT),
             local_assets=LOCAL_ASSETS,
             #: Declared. Without it setup falls to SESSION_KIND=spend and loads a
             #: SpendAuthorization, which refuses this artifact — the session
@@ -1293,7 +1279,7 @@ def spec(args) -> SessionSpec:
             #: two of its six declared files. Attempt 10 died on exactly that
             #: for `$0.1177` — `SETUP_RC=91`, no driver stage, no probe trained
             #: — because the `--expect` mechanism existed and nothing passed it.
-            env={"SESSION_KIND": "c1",
+            env={"SESSION_KIND": "c3",
                  "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
@@ -1310,8 +1296,8 @@ def spec(args) -> SessionSpec:
         status_path=STATUS, run_log_path=RUN_LOG,
         markers=MarkerPolicy(
             success="ALL_DONE",
-            failure=("C1_FAILED", "C1_REPLAY_MISMATCH", "C1_INCOMPLETE"),
-            incomplete=("C1_INCOMPLETE",),
+            failure=("C3_FAILED", "C3_REPLAY_MISMATCH", "C3_INCOMPLETE"),
+            incomplete=("C3_INCOMPLETE",),
             #: NEUTRAL, deliberately. `SessionRunner` prints this for ANY marker
             #: in `failure`, so the previous text described a replay mismatch
             #: whatever had actually happened — and on attempt 8 it did: stage D
@@ -1321,9 +1307,9 @@ def spec(args) -> SessionSpec:
             #: for exactly the property C1 exists to test.
             #:
             #: A replay mismatch is asserted in ONE place, by the code that
-            #: observed one: `C1Driver.replay_mismatch` writes
-            #: `c1_replay_record.json` with the expected and actual digests, reads
-            #: it back, and only then emits `MARKER:C1_REPLAY_MISMATCH`. That path
+            #: observed one: `C3Driver.replay_mismatch` writes
+            #: `c3_replay_record.json` with the expected and actual digests, reads
+            #: it back, and only then emits `MARKER:C3_REPLAY_MISMATCH`. That path
             #: is unchanged. This line must never anticipate it.
             failure_note=(
                 "a blocking C1 stage failed — collecting evidence, then tearing "
@@ -1332,14 +1318,14 @@ def spec(args) -> SessionSpec:
                 "which stage failed or why.")),
         artifacts=ArtifactPolicy(
             audit_dirname="autoinit_c1",
-            evidence_filename="c1_evidence.json",
-            archive_basename="c1_artifacts.tar.gz",
+            evidence_filename="c3_evidence.json",
+            archive_basename="c3_artifacts.tar.gz",
             spec_success=SPEC_SUCCESS,
             spec_failed=SPEC_FAILED,
-            report_names=("c1_evidence.json",
-                          "c1_attested_evaluation_protocol.json",
-                          "c1_replay_record.json", "c1_arm_identities.json",
-                          "c1_probe_results.json", "c1_decision.json"),
+            report_names=("c3_evidence.json",
+                          "c3_attested_evaluation_protocol.json",
+                          "c3_replay_record.json", "c3_arm_identities.json",
+                          "c3_probe_results.json", "c3_decision.json"),
             event_streams=probe_streams),
         teardown=TeardownPolicy(note="nothing chains off C1"),
         # A setup abort deletes the pod before artifact collection and shows only
@@ -1354,10 +1340,10 @@ def spec(args) -> SessionSpec:
                                 auth_path_for(getattr(args, "run_id", None)),
                                 check_lineage=True),
             grant_provenance_gate,
-            c1_harness_gate,
+            c3_harness_gate,
             pricing_identity_gate,
             preregistration_gate,
-            frozen_c1_science_gate,
+            frozen_c3_science_gate,
             frozen_assets_gate,
             teacher_binding_gate,
             battery_staged_gate,
@@ -1368,7 +1354,7 @@ def spec(args) -> SessionSpec:
             pod_environment_gate,
         ),
         evidence_fields={
-            "c1_session_contract_hash": CS.C1_SESSION_CONTRACT.contract_hash,
+            "c3_session_contract_hash": CS.C3_SESSION_CONTRACT.contract_hash,
             "runs_a_search": False,
             "eliminates_arms": False,
             "arms": 2, "seeds": 3, "probes": 6,
@@ -1388,7 +1374,7 @@ def _plan_hash() -> str:
     attention_activation.register(replace=True)
     battery = json.loads((REPO_ROOT / BATTERY_IDENTITY).read_text())
     return C1IsolationPlan(
-        plan_id="autoinit.v1.phase_c1",
+        plan_id="autoinit.v1.phase_c3",
         arms=(C1Arm("c1.incumbent", "incumbent", *CS.INCUMBENT_ATTENTION),
               C1Arm("c1.treatment", "treatment", *CS.TREATMENT_ATTENTION)),
         seeds=tuple(derive_recovery_seeds()),
@@ -1430,7 +1416,7 @@ def build_parser():
     # two places. A quote above the accepted rate still aborts at $0 and
     # returns for review: this default does not chase the market upward.
     ap.add_argument("--max-price", type=float,
-                    default=c1_price_per_hour_usd(REPO_ROOT))
+                    default=c3_billed_rate_usd_per_hour(REPO_ROOT))
     #: Two arm materializations plus six probe checkpoints and their generations.
     ap.add_argument("--disk-gb", type=int, default=200)
     ap.add_argument("--probe-train-minutes", type=float, default=70.0)
@@ -1447,16 +1433,16 @@ def build_parser():
     ap.add_argument("--tests-max-s", type=int, default=600)
     ap.add_argument("--startup-limit-min", type=float, default=15.0)
     #: ONE. Not a default a launch command has to remember to pass — the type
-    #: itself refuses anything else. See `C1_CREATE_ATTEMPTS` / `C1_MAX_HOST_DRAWS`.
+    #: itself refuses anything else. See `C3_CREATE_ATTEMPTS` / `C3_MAX_HOST_DRAWS`.
     ap.add_argument("--create-attempts",
-                    type=_bounded("--create-attempts", 1, C1_CREATE_ATTEMPTS),
-                    default=C1_CREATE_ATTEMPTS)
+                    type=_bounded("--create-attempts", 1, C3_CREATE_ATTEMPTS),
+                    default=C3_CREATE_ATTEMPTS)
     #: Defaults to the batch cap. A cold host is common enough on this provider
     #: that defaulting to 1 is what made attempt 11 cost an attempt rather than
     #: a draw; all draws share this session's single ceiling.
     ap.add_argument("--host-draws",
-                    type=_bounded("--host-draws", 1, C1_MAX_HOST_DRAWS),
-                    default=C1_MAX_HOST_DRAWS)
+                    type=_bounded("--host-draws", 1, C3_MAX_HOST_DRAWS),
+                    default=C3_MAX_HOST_DRAWS)
     #: Unreachable with one attempt (`if attempt < create_attempts` is never
     #: true), and kept only because the runner argument contract requires the
     #: field. C1 never sleeps against changing stock.
@@ -1470,7 +1456,7 @@ def build_parser():
     ap.add_argument("--runpod-config",
                     default=os.path.expanduser("~/.runpod/config.toml"))
     #: No `--out`. It is `run_id` and the layout, or it is nothing: see
-    #: `C1_RUN_ROLES`. `SessionRunner` reads `args.out`, so `open_c1_run` sets it
+    #: `C3_RUN_ROLES`. `SessionRunner` reads `args.out`, so `open_c1_run` sets it
     #: to the run's own session-record path before the runner is constructed.
     return ap
 
@@ -1509,17 +1495,17 @@ def open_c1_run(args, repo_root: Path | None = None):
     claim_output_root(args.scr, RUN_EXPERIMENT_ID, args.run_id,
                       outputs=RUN_OUTPUTS)
     layout = open_run(repo_root, RUN_EXPERIMENT_ID, args.run_id,
-                      roles=C1_RUN_ROLES, prepared=_RUN_PREPARED,
+                      roles=C3_RUN_ROLES, prepared=_RUN_PREPARED,
                       stage_id=RUN_STAGE_ID)
     for source, role in _RUN_GOVERNANCE:
         src = repo_root / source
         if src.is_file():
-            shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+            shutil.copy2(src, layout.path(C3_RUN_ROLES[role]))
     #: Describe the directories as they are created. Documentation only: the
     #: manifest stays the canonical index, and a README neither counts as a
     #: produced role nor makes an unexecuted run look like a failed one.
     write_run_readmes(layout, experiment_id=RUN_EXPERIMENT_ID, run_id=args.run_id,
-                      stage_id=RUN_STAGE_ID, roles=C1_RUN_ROLES)
+                      stage_id=RUN_STAGE_ID, roles=C3_RUN_ROLES)
     #: Idempotent for a parser-built namespace, and the whole answer for a
     #: hand-built one. Same rule either way -- see `session_record_path`.
     args.out = session_record_path(args.run_id)
@@ -1545,17 +1531,17 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
     for source, role in _RUN_COLLECT:
         src = scr / source
         if src.is_file():
-            shutil.copy2(src, layout.path(C1_RUN_ROLES[role]))
+            shutil.copy2(src, layout.path(C3_RUN_ROLES[role]))
     #: Every resource's watchdog evidence, by the pod id in its name. Resolved
     #: by glob rather than listed, because how many resources a session held is
     #: only known once it has ended.
-    wd = layout.path(C1_RUN_ROLES["watchdog_journal"])
+    wd = layout.path(C3_RUN_ROLES["watchdog_journal"])
     wd.mkdir(parents=True, exist_ok=True)
     for src in sorted(scr.glob("watchdog_*.jsonl")) + sorted(scr.glob("watchdog_*.out")):
         shutil.copy2(src, wd / src.name)
     session = json.loads((repo_root / args.out).read_text())
     return record_run(
-        layout, spec=C1_RUN_SPEC,
+        layout, spec=C3_RUN_SPEC,
         plan={"session_id": session.get("session_id"),
               "plan_hash": session.get("session_plan_hash"),
               "session_commit": args.session_commit,
@@ -1579,7 +1565,7 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
                 "cost": session.get("cost"),
                 "provider_confirms_gone": session.get("provider_confirms_gone"),
                 "authorizes": "nothing"},
-        roles=present_roles(layout, C1_RUN_ROLES))
+        roles=present_roles(layout, C3_RUN_ROLES))
 
 
 #: Exit code for "the session finished, the run did not get recorded".
