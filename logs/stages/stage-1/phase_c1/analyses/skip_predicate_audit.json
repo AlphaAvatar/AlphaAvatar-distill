@@ -1020,7 +1020,7 @@
   },
   {
    "file": "tests/c3_preflight/test_c3_runtime_contract.py",
-   "line": 276,
+   "line": 289,
    "kind": "pytest.skip",
    "function": "test_the_launcher_plan_hash_is_what_the_authorization_bound",
    "condition": "not auth_path.is_file()",
@@ -1036,7 +1036,7 @@
   },
   {
    "file": "tests/c3_preflight/test_c3_runtime_contract.py",
-   "line": 563,
+   "line": 576,
    "kind": "pytest.skip",
    "function": "test_the_driver_validates_the_hash_the_authorization_actually_binds",
    "condition": "not auth_path.is_file()",
@@ -1052,7 +1052,7 @@
   },
   {
    "file": "tests/c3_preflight/test_c3_runtime_contract.py",
-   "line": 604,
+   "line": 617,
    "kind": "pytest.skip",
    "function": "test_every_identity_the_driver_asserts_is_one_the_authorization_binds",
    "condition": "not auth_path.is_file()",
@@ -2398,5 +2398,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "b7032ce3b99ca06b62c48405fae8f8b71f0c09331cbe1504abbefe5e07189e7d"
+ "digest": "7905411c3a5db3d9f692cc789d6e8bdc436586260e5cbe094b948acecd02b090"
 }

@@ -616,8 +616,21 @@ class C3Driver:
         six trainings. It costs seconds and touches no GPU.
         """
         mark("STAGE_START:C")
-        impl = attention_activation.register(replace=True)
-        say(f"registered {impl.impl_id} ({impl.signature_hash[:12]})")
+        #: EVERY non-builtin implementation the arms name, derived from the
+        #: arms. This registered `activation_importance_v1` alone -- C1 has
+        #: one experimental operator, C3 has two -- so stage D died with
+        #: "attention.causal_kl_v1 is not registered" on a live pod, after
+        #: the teacher fetch, at $0.13. Registering a list would fail the
+        #: same way on a fourth arm; registering what the ARMS name cannot.
+        registered = CS.register_experimental_operators()
+        from aadistill.initialization.operators.base import get_implementation
+
+        resolved = {}
+        for impl_id in CS.required_implementations():
+            impl = get_implementation(impl_id)
+            resolved[impl_id] = getattr(impl, "signature_hash", "")[:12]
+        say(f"registered {list(registered)}; all {len(resolved)} named "
+            f"implementations resolve")
 
         contract = c1_scoring_contract(REPO)
         probe = self.gate(
@@ -646,8 +659,8 @@ class C3Driver:
         if manifest["content_sha256"] != C1_BATTERY_CONTENT_SHA256:
             raise C3DriverError("the staged battery is not the frozen one")
 
-        self.complete("C", impl_id=impl.impl_id,
-                      signature_hash=impl.signature_hash,
+        self.complete("C", impl_id=sorted(resolved),
+                      signature_hash=resolved,
                       scoring_contract=contract["contract"],
                       scoring_digest=contract["digest"],
                       tokenizer_sidecars=sorted(TOKENIZER_SIDECAR_SHA256),

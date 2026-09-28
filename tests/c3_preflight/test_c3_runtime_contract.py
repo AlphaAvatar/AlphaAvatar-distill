@@ -41,6 +41,19 @@ LAUNCH = REPO / "scripts/pod/autoinit_c3_launch.py"
 PREREG_PATH = REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 
 
+def source_minus_comment_lines(text: str) -> str:
+    """Source with whole-line `#` comments dropped, SPACING PRESERVED.
+
+    The tokenizer-based lenses join tokens with spaces, so
+    `CS.register_experimental_operators()` becomes
+    `CS . register_experimental_operators ( )` and a literal search for the
+    call fails. When the check is about a call SITE rather than a bare name,
+    this is the lens that works.
+    """
+    return "\n".join(l for l in text.splitlines()
+                      if not l.lstrip().startswith("#"))
+
+
 def code_without_comments(text: str) -> str:
     """Source with COMMENTS removed and string literals kept.
 
@@ -606,3 +619,24 @@ def test_every_identity_the_driver_asserts_is_one_the_authorization_binds(regist
     assert auth["phase_a_session_plan_hash"] == CS.C3SessionContract().contract_hash
     assert auth["phase_a_science_plan_hash"] == \
         CS.preregistration()["preregistration_sha256"]
+
+
+def test_stage_C_registers_every_implementation_the_arms_name():
+    """The DRIVER's stage C, not the session helper it should call.
+
+    I tested `CS.register_experimental_operators()` and it passed, while the
+    driver's stage C called `attention_activation.register()` alone -- C1 has
+    one experimental operator, C3 has two. Stage D then died with
+    "attention.causal_kl_v1 is not registered" on a live pod, after the
+    teacher fetch, at $0.13. Testing the helper proved nothing about the
+    caller: the seam is exactly where the blind spot was.
+    """
+    src = source_minus_comment_lines(DRIVER.read_text())
+    assert "CS.register_experimental_operators()" in src, (
+        "stage C does not register the set the arms name")
+    assert "attention_activation.register(replace=True)" not in src, (
+        "stage C still registers a single hard-coded operator")
+    #: And it must PROVE every named implementation resolves afterwards,
+    #: rather than assuming the call covered them.
+    assert "for impl_id in CS.required_implementations():" in src
+    assert "get_implementation(impl_id)" in src

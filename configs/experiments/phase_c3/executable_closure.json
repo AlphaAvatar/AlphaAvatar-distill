@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 114,
- "digest": "8f1a3418cae36ba088c809e5b7677cdf433a367fb73f4474b199526e8d3900eb",
+ "digest": "268dd4981230e7f676994212718897dd81e27ae53b3b52b956fa54e7ac8a1238",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -209,8 +209,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c3_driver.py",
-   "sha256": "7b6ba97a4fcc0733b2a7108243a623950c2c4303dc705b3ed83944c3e895fab3",
-   "bytes": 80668
+   "sha256": "bc37af10a77fa6c8f93126819c930a1d6f23511bd94cce0ffd44a61b00c91227",
+   "bytes": 81428
   },
   {
    "path": "scripts/pod/autoinit_c3_launch.py",
