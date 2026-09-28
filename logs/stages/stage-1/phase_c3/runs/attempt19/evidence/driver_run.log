@@ -1,0 +1,30 @@
+[16:41:57] C3: 9 probes, ceiling $22.1452, soft stop $21.5391
+[16:41:57]   A: session_setup
+[16:41:57]   B: teacher_fetch_verify   [blocks training on failure]
+[16:41:57]   C: register_operator   [blocks training on failure]
+[16:41:57]   D: replay_parent   [blocks training on failure]
+[16:41:57]   E: replay_incumbent   [blocks training on failure]
+[16:41:57]   F: materialize_arms   [blocks training on failure]
+[16:41:57]   G: recovery_probes
+[16:41:57]   H: evaluate
+[16:41:57]   I: decide
+[16:41:57]   J: collect_teardown
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1500, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 1494, in main
+    driver = C3Driver(args)
+             ^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 371, in __init__
+    self.plan = self.frozen_plan()
+                ^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 424, in frozen_plan
+    arms=tuple(
+         ^^^^^^
+  File "/workspace/aad/scripts/pod/autoinit_c3_driver.py", line 425, in <genexpr>
+    C1Arm(f"c3.{arm_id}", arm_id, *CS.arm(arm_id)["attention"])
+  File "<string>", line 7, in __init__
+  File "/workspace/aad/scripts/experiments/phase_c1/isolation.py", line 99, in __post_init__
+    raise C1PlanError(
+experiments.phase_c1.isolation.C1PlanError: c3.A_incumbent: role must be 'incumbent' or 'treatment', got 'A_incumbent'
