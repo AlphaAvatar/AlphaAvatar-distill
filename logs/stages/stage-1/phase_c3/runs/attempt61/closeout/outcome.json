@@ -1,0 +1,32 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt61",
+ "experiment_id": "phase_c3",
+ "status": "STOPPED_AT_THE_PARENT_DIGEST_GATE",
+ "_what_this_is": "The first attempt to reach real GPU science. Stages B and C passed, stage D ran the full depth.causal_kl_greedy_v1 search -- 7 rounds, 260 evaluations, 28 minutes -- and then the FROZEN PARENT GATE refused the result. That is the gate doing its job: it stopped the session before any recovery training, which is what section 5 requires of a replay that does not reproduce the frozen identity.",
+ "gate": {
+  "stage": "D",
+  "step_index": 2,
+  "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "observed_artifact_digest": "d6d8d7eeecbe55481e20ef2b9e973c2171e09ab35bc30db9bfa943ca1666749b"
+ },
+ "runtime": {
+  "gpu": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda_runtime": "12.8",
+  "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+ },
+ "_root_cause": "NOT a hardware qualification failure: the GPU and the runtime were both the ones that originally produced the frozen parent. The driver called materialize_fixed_path WITHOUT the execution config the plan pins (micro_batch_size: 1), so DEPTH ran at the repository default. L40S GEMMs reduce shape-dependently, so the micro-batch changes which layer a near-tie selects -- round 7 chose layer 21 over 17 by a margin of 1.403e-03. The plan pins the value for exactly this reason and says so.",
+ "_therefore": "An ordinary pre-treatment engineering defect, repaired under P12.1: the driver now applies the pinned config and refuses a plan that pins none. No recovery training began, so no measurement was retried, resumed or pooled.",
+ "cost": {
+  "actual_usd": 0.6981,
+  "price_per_hour": 1.09,
+  "gpu_type_id": "NVIDIA L40S"
+ },
+ "provider_resource_created": true,
+ "pod_ids": [
+  "k0i94vj4652smj"
+ ],
+ "final_provider_state": "torn down, provider confirms gone"
+}
