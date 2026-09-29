@@ -288,7 +288,21 @@ class TestTheSnapshotStatesTheRequiredFacts:
         #: would pass on any dict that happened to mention the phrase.
         c3 = s["phase_c"]["c3"]
         assert isinstance(c3, dict), "c3 is no longer a structured entry"
-        assert c3["status"].startswith("NOT STARTED")
+        #: C3 IS started now. attempt66 trained all nine formal probes on
+        #: 2026-09-29, so "NOT STARTED" stopped being true -- and this
+        #: assertion existed to stop *implementing the operator* from
+        #: reading as *starting the experiment*, which is a different
+        #: claim. A started C3 must say so and say where it stands; it may
+        #: not quietly revert to the not-started wording.
+        status = c3["status"]
+        if not status.startswith("NOT STARTED"):
+            assert any(status.startswith(v) for v in (
+                "IN EXECUTION", "STOPPED", "COMPLETE", "GO", "NO_GO",
+                "INCONCLUSIVE")), (
+                f"c3.status neither says NOT STARTED nor states a started "
+                f"position: {status!r}")
+            assert c3.get("latest_attempt"), (
+                "a started C3 must name the attempt that started it")
         #: The facts §5 requires the machine-readable state to carry, so
         #: implementing the operator can never be mistaken for starting C3.
         #:
@@ -305,37 +319,60 @@ class TestTheSnapshotStatesTheRequiredFacts:
         frozen_unrun = ("preregistered" in status
                         and "NOT LAUNCHED" in status
                         and "hash-bound" in status)
-        assert no_set or frozen_unrun, (
+        #: A THIRD disposition, true since 2026-09-29: the seeds were
+        #: CONSUMED by a launched attempt. attempt66 trained all nine probes
+        #: on them, so neither "no set" nor "frozen and unlaunched" can be
+        #: said honestly any more -- and a status that could only be made
+        #: green by reverting to one of those would be a lie about a session
+        #: that spent $13.67 and ran for twelve hours.
+        consumed = (c3.get("latest_attempt")
+                    and ("trained" in status or "probes" in status))
+        assert no_set or frozen_unrun or consumed, (
             "c3.status states neither that there is no frozen seed set nor "
             f"that a preregistered, hash-bound, unlaunched one exists: {status!r}")
         assert "ENGINEERING state only" in c3["operator"]
         assert "does NOT start formal C3" in c3["operator"]
-        #: A VERDICT SET, not a phrase. The pilot moved from authorized to
-        #: executed on 2026-09-27, and pinning the earlier wording would have
-        #: made a true update look like a regression. What must hold in every
-        #: state is that the pilot is not mistaken for formal C3.
-        pilot = c3["batching_adoption_pilot"]
-        assert any(pilot.startswith(state) for state in
-                   ("AUTHORIZED", "EXECUTED", "NOT AUTHORIZED", "CLOSED")), pilot
-        #: A SECOND pilot exists now, and it is in a third state: executed in
-        #: part, stopped because its remaining chain did not fit its ceiling.
-        #: The boundary that must hold for BOTH is the same one.
-        for key, entry in c3.items():
-            if key.endswith("_pilot"):
-                assert "ot formal C3" in entry, (
-                    f"{key} does not say it is not formal C3")
-        if pilot.startswith("AUTHORIZED"):
-            assert "NOT EXECUTED" in pilot
-        else:
-            #: An executed pilot owes its verdict and its record.
-            assert "result.json" in pilot, "no owner for the pilot's figures"
-            assert any(v in pilot for v in (
+        #: A VERDICT SET, not a phrase, and now also a SHAPE set. The pilots
+        #: were three separate keys while they were the only C3 activity;
+        #: once formal C3 itself ran they were consolidated into one
+        #: `closed_pilots` line, because the snapshot is the minimal
+        #: machine-readable state and three closed engineering pilots no
+        #: longer earn three entries. What must hold in every shape is
+        #: unchanged: a pilot is never mistaken for formal C3, and an
+        #: executed one states a terminal verdict.
+        pilots = {k: v for k, v in c3.items() if k.endswith("_pilot")}
+        consolidated = c3.get("closed_pilots")
+        assert pilots or consolidated, (
+            "the snapshot records no C3 engineering pilot in any form")
+
+        for key, entry in {**pilots,
+                           **({"closed_pilots": consolidated} if consolidated
+                              else {})}.items():
+            assert "ot formal C3" in entry, (
+                f"{key} does not say it is not formal C3")
+
+        if consolidated and not pilots:
+            #: The consolidated line owes the same two facts the per-pilot
+            #: entries did: that they are closed, and what they concluded.
+            assert "CLOSED" in consolidated
+            assert any(v in consolidated for v in (
                 "B4_NOT_WORTH_ADOPTION_PILOT",
-                "B4_STRUCTURALLY_EQUIVALENT_AND_FASTER",
-                "B4_FASTER_AND_STRUCTURALLY_DIFFERENT_RECOVERY_TRIGGERED")), (
-                    "an executed pilot states no predeclared verdict")
-        assert "ot formal C3" in pilot, (
-            "the pilot must never read as formal C3, in any state")
+                "PACKED_BATCH_NOT_WORTH_ADOPTION")), (
+                "the consolidated pilot line states no terminal verdict")
+        else:
+            pilot = c3["batching_adoption_pilot"]
+            assert any(pilot.startswith(state) for state in
+                       ("AUTHORIZED", "EXECUTED", "NOT AUTHORIZED", "CLOSED")), pilot
+            if pilot.startswith("AUTHORIZED"):
+                assert "NOT EXECUTED" in pilot
+            else:
+                assert "result.json" in pilot, "no owner for the pilot's figures"
+                assert any(v in pilot for v in (
+                    "B4_NOT_WORTH_ADOPTION_PILOT",
+                    "B4_STRUCTURALLY_EQUIVALENT_AND_FASTER",
+                    "B4_FASTER_AND_STRUCTURALLY_DIFFERENT_RECOVERY_TRIGGERED")), (
+                        "an executed pilot states no predeclared verdict")
+
         #: Over every field of the entry, not over `str(dict)`: the stale
         #: precondition could reappear in any one of them.
         assert not re.search(r"cannot start before C2 names",

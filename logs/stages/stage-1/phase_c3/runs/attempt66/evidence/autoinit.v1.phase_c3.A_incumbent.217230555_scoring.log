@@ -1,0 +1,14 @@
+$ /workspace/aad/scripts/autoinit/score_c1_confirmation.py --generations /workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555 --label autoinit.v1.phase_c3.A_incumbent.217230555 --seed 217230555 --out /workspace/aad/artifacts/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_c1_confirmation.json --per-sample /workspace/aad/artifacts/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_per_sample.jsonl --arm A_incumbent --init-digest 53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342 --trained-run /workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.A_incumbent.217230555/run_completion.json --generation-fingerprint e9d8da97ec5c0f7b331a30783e7f0f3692f3119c9d4d98de6f686693a7d45258
+rc=2
+--- stdout ---
+
+--- stderr ---
+usage: score_c1_confirmation.py [-h] --generations GENERATIONS
+                                [--battery BATTERY] --label LABEL --seed SEED
+                                --out OUT [--per-sample PER_SAMPLE]
+                                [--arm {incumbent,treatment}]
+                                [--init-digest INIT_DIGEST]
+                                [--trained-run TRAINED_RUN]
+                                [--generation-fingerprint GENERATION_FINGERPRINT]
+score_c1_confirmation.py: error: argument --arm: invalid choice: 'A_incumbent' (choose from 'incumbent', 'treatment')
+

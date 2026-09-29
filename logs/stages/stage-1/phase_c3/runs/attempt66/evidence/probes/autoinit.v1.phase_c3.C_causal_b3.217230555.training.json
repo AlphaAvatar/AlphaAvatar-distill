@@ -1,0 +1,32 @@
+{
+  "schema": "aadistill.autoinit.c1_training_completion/v1",
+  "probe_id": "autoinit.v1.phase_c3.C_causal_b3.217230555",
+  "arm": "C_causal_b3",
+  "seed": 217230555,
+  "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+  "config": "artifacts/audit/autoinit_c3/configs/autoinit.v1.phase_c3.C_causal_b3.217230555.json",
+  "config_sha256": "b47a007c19a14037836a5b231761691ad9e4377db8ecb471a95dee41c6d23e4f",
+  "out_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.217230555",
+  "model_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/checkpoints/step_001023/model",
+  "train_minutes": 60.78,
+  "run_completion": "artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/run_completion.json",
+  "evaluated": false,
+  "complete": true,
+  "preserved": {
+    "probe_id": "autoinit.v1.phase_c3.C_causal_b3.217230555",
+    "arm": "C_causal_b3",
+    "seed": 217230555,
+    "config_sha256": "b47a007c19a14037836a5b231761691ad9e4377db8ecb471a95dee41c6d23e4f",
+    "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+    "authorizes": "nothing. Preservation and reuse are separate decisions: this checkpoint may not be pooled, resumed or reused across formal attempts.",
+    "files": {
+      "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+      "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "model.safetensors": "935ad715e779cab5626cd9cf25b9cb3c0ba23ce59583befc65682bc6cf3ffb83"
+    },
+    "bytes": 2384236592,
+    "content_sha256": "beebe2596cca9288cc903ce2faf7f0b2a9ab2073c48142ce77cdc77963fc4f50",
+    "preserved": false,
+    "why_not": "BadRequestError: (Request ID: Root=1-6abb5168-6b199edc635602331b4ecbe7;4764a7eb-b3eb-4890-917d-056d70c0f964)\n\nBad request for commit endpoint:\nPrivate repository storage limit reached, please upgrade your plan to increase your private storage limit"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "probe_id": "autoinit.v1.phase_c3.A_incumbent.217230555",
+  "generation_fingerprint": "e9d8da97ec5c0f7b331a30783e7f0f3692f3119c9d4d98de6f686693a7d45258",
+  "evaluation_protocol_hash": "8c1f71ba161e01bc3ffd438cc48dde84aa88764bce17ae8469436660fcf01c3e",
+  "attested_evaluation_protocol_hash": "8c1f71ba161e01bc3ffd438cc48dde84aa88764bce17ae8469436660fcf01c3e",
+  "n_summaries": 7,
+  "comparable": true
+}

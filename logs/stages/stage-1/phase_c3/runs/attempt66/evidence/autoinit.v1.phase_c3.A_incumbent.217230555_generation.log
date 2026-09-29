@@ -1,0 +1,84 @@
+$ /workspace/aad/scripts/evaluation/uncapped_eval.py --model /workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/package --label autoinit.v1.phase_c3.A_incumbent.217230555 --prompts /workspace/aad/artifacts/stage3/c1_confirmation_v1/gsm8k.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/math_verified.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/multihop.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/rag.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/knowledge.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/tool.jsonl /workspace/aad/artifacts/stage3/c1_confirmation_v1/code.jsonl --out-dir /workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555 --diagnostics
+rc=0
+--- stdout ---
+[autoinit.v1.phase_c3.A_incumbent.217230555] effective context 8192 (source trained_block_len, architectural 262144); stop ids [151645]
+INFO 09-29 08:00:07 [api_utils.py:273] non-default args: {'dtype': 'bfloat16', 'max_model_len': 8192, 'gpu_memory_utilization': 0.9, 'disable_log_stats': True, 'model': '/workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/package'}
+INFO 09-29 08:00:07 [model.py:645] Resolved architecture: Qwen3ForCausalLM
+INFO 09-29 08:00:07 [model.py:2214] Downcasting torch.float32 to torch.bfloat16.
+INFO 09-29 08:00:07 [model.py:1883] Using max model len 8192
+INFO 09-29 08:00:07 [scheduler.py:242] Chunked prefill is enabled with max_num_batched_tokens=8192.
+INFO 09-29 08:00:07 [kernel.py:306] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+(EngineCore pid=30639) INFO 09-29 08:00:09 [core.py:121] Initializing a V1 LLM engine (v0.27.1) with config: model='/workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/package', speculative_config=None, tokenizer='/workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/package', skip_tokenizer_init=False, tokenizer_mode=auto, revision=None, tokenizer_revision=None, trust_remote_code=False, dtype=torch.bfloat16, max_seq_len=8192, download_dir=None, load_format=auto, tensor_parallel_size=1, pipeline_parallel_size=1, data_parallel_size=1, decode_context_parallel_size=1, dcp_comm_backend=ag_rs, disable_custom_all_reduce=False, quantization=None, quantization_config=None, enforce_eager=False, enable_return_routed_experts=False, kv_cache_dtype=auto, device_config=cuda, structured_outputs_config=StructuredOutputsConfig(backend='auto', disable_any_whitespace=False, disable_additional_properties=False, reasoning_parser='', reasoning_parser_plugin='', enable_in_reasoning=False), observability_config=ObservabilityConfig(show_hidden_metrics_for_version=None, otlp_traces_endpoint=None, collect_detailed_traces=None, kv_cache_metrics=False, kv_cache_metrics_sample=0.01, cudagraph_metrics=False, enable_layerwise_nvtx_tracing=False, enable_mfu_metrics=False, enable_mm_processor_stats=False, enable_logging_iteration_details=False, jit_monitor_mode='warn', jit_monitor_verbose=False), seed=0, served_model_name=/workspace/aad/artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/package, enable_prefix_caching=True, enable_chunked_prefill=True, pooler_config=None, compilation_config={'mode': <CompilationMode.VLLM_COMPILE: 3>, 'debug_dump_path': None, 'cache_dir': '', 'compile_cache_save_format': 'binary', 'backend': 'inductor', 'custom_ops': ['none'], 'ir_enable_torch_wrap': True, 'splitting_ops': ['vllm::unified_attention_with_output', 'vllm::unified_mla_attention_with_output', 'vllm::mamba_mixer2', 'vllm::mamba_mixer', 'vllm::short_conv', 'vllm::linear_attention', 'vllm::qwen_gdn_attention_core', 'vllm::gdn_attention_core_xpu', 'vllm::olmo_hybrid_gdn_full_forward', 'vllm::sparse_attn_indexer', 'vllm::rocm_aiter_sparse_attn_indexer', 'vllm::deepseek_v4_attention', 'vllm::hpc_rope_norm_forward', 'vllm::unified_kv_cache_update', 'vllm::unified_mla_kv_cache_update'], 'compile_mm_encoder': False, 'cudagraph_mm_encoder': False, 'encoder_cudagraph_token_budgets': [], 'encoder_cudagraph_max_vision_items_per_batch': 0, 'encoder_cudagraph_max_frames_per_batch': None, 'compile_sizes': [], 'compile_ranges_endpoints': [8192], 'inductor_compile_config': {'enable_auto_functionalized_v2': False, 'combo_kernels': True, 'benchmark_combo_kernel': True}, 'inductor_passes': {}, 'cudagraph_mode': <CUDAGraphMode.FULL_AND_PIECEWISE: (2, 1)>, 'cudagraph_num_of_warmups': 1, 'cudagraph_capture_sizes': [1, 2, 4, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120, 128, 136, 144, 152, 160, 168, 176, 184, 192, 200, 208, 216, 224, 232, 240, 248, 256, 272, 288, 304, 320, 336, 352, 368, 384, 400, 416, 432, 448, 464, 480, 496, 512], 'cudagraph_copy_inputs': False, 'cudagraph_specialize_lora': True, 'use_inductor_graph_partition': False, 'pass_config': {'fuse_norm_quant': False, 'fuse_act_quant': False, 'fuse_attn_quant': False, 'enable_sp': False, 'fuse_gemm_comms': False, 'fuse_allreduce_rms': False, 'enable_qk_norm_rope_fusion': False, 'fuse_rope_kvcache_cat_mla': False, 'fuse_act_padding': False, 'fuse_qk_norm_rope_kvcache': False}, 'max_cudagraph_capture_size': 512, 'dynamic_shapes_config': {'type': <DynamicShapesType.BACKED: 'backed'>, 'evaluate_guards': False, 'assume_32_bit_indexing': False}, 'local_cache_dir': None, 'fast_moe_cold_start': False, 'static_all_moe_layers': []}, kernel_config=KernelConfig(ir_op_priority=IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native']), enable_flashinfer_autotune=True, enable_cutedsl_warmup=True, enable_jit_warmup=True, enable_bf16x3_router_gemm=False, moe_backend='auto', linear_backend='auto')
+(EngineCore pid=30639) INFO 09-29 08:00:10 [parallel_state.py:1640] world_size=1 rank=0 local_rank=0 distributed_init_method=tcp://172.21.0.2:33717 backend=nccl
+(EngineCore pid=30639) INFO 09-29 08:00:10 [parallel_state.py:1977] rank 0 in world size 1 is assigned as DP rank 0, PP rank 0, PCP rank 0, TP rank 0, EP rank N/A, EPLB rank N/A
+(EngineCore pid=30639) INFO 09-29 08:00:10 [gpu_worker.py:385] Using V2 Model Runner
+(EngineCore pid=30639) INFO 09-29 08:00:11 [model_runner.py:308] Loading model from scratch...
+(EngineCore pid=30639) INFO 09-29 08:00:11 [cuda.py:482] Using FLASH_ATTN attention backend out of potential backends: ['FLASH_ATTN', 'FLASHINFER', 'TRITON_ATTN', 'FLEX_ATTENTION'].
+(EngineCore pid=30639) INFO 09-29 08:00:11 [flash_attn.py:789] Using FlashAttention version 2
+(EngineCore pid=30639) INFO 09-29 08:00:12 [weight_utils.py:867] Filesystem type for checkpoints: OVERLAY. Checkpoint size: 2.22 GiB. Available RAM: 65.42 GiB.
+(EngineCore pid=30639) INFO 09-29 08:00:12 [weight_utils.py:890] Auto-prefetch is disabled because the filesystem (OVERLAY) is not a recognized network FS (NFS/Lustre). If you want to force prefetching, start vLLM with --safetensors-load-strategy=prefetch.
+(EngineCore pid=30639) INFO 09-29 08:00:13 [default_loader.py:430] Loading weights took 0.94 seconds
+(EngineCore pid=30639) INFO 09-29 08:00:13 [model_runner.py:329] Model loading took 1.17 GiB and 2.620073 seconds
+(EngineCore pid=30639) INFO 09-29 08:00:13 [topk_topp_sampler.py:62] Using FlashInfer for top-p & top-k sampling.
+(EngineCore pid=30639) INFO 09-29 08:00:19 [backends.py:1094] Using cache directory: /root/.cache/vllm/torch_compile_cache/eb042a3a1c/rank_0_0/backbone for vLLM's torch.compile
+(EngineCore pid=30639) INFO 09-29 08:00:19 [backends.py:1155] Dynamo bytecode transform time: 5.07 s
+(EngineCore pid=30639) INFO 09-29 08:00:36 [backends.py:393] Compiling a graph for compile range (1, 8192) takes 17.03 s
+(EngineCore pid=30639) INFO 09-29 08:00:38 [backends.py:920] collected artifacts: 29 entries, 3 artifacts, 6201673 bytes total
+(EngineCore pid=30639) INFO 09-29 08:00:38 [decorators.py:708] saved AOT compiled function to /root/.cache/vllm/torch_compile_cache/torch_aot_compile/21972b1c56f091e0e19e7e9bb679255ad890f5bed47be7fe81f836de934ff707/rank_0_0/model
+(EngineCore pid=30639) INFO 09-29 08:00:38 [monitor.py:53] torch.compile took 24.55 s in total
+(EngineCore pid=30639) INFO 09-29 08:00:39 [monitor.py:81] Initial profiling/warmup run took 0.11 s
+(EngineCore pid=30639) INFO 09-29 08:00:40 [gpu_worker.py:563] Available KV cache memory: 38.14 GiB
+(EngineCore pid=30639) INFO 09-29 08:00:40 [kv_cache_utils.py:2235] GPU KV cache size: 357,056 tokens
+(EngineCore pid=30639) INFO 09-29 08:00:40 [kv_cache_utils.py:2236] Maximum concurrency for 8,192 tokens per request: 43.59x
+(EngineCore pid=30639) INFO 09-29 08:00:43 [model_runner.py:791] Graph capturing finished in 3 secs, took 0.44 GiB
+(EngineCore pid=30639) INFO 09-29 08:00:43 [gpu_worker.py:789] Free memory on device (43.41/44.39 GiB) on startup. Desired GPU memory utilization is (0.9, 39.95 GiB). Actual usage is 1.5 GiB for consumed memory (weights + non-torch), 0.31 GiB for peak activation, and 0.44 GiB for CUDAGraph memory. Replace gpu_memory_utilization config with `--kv-cache-memory=40318946407` (37.55 GiB) to fit into requested memory, or `--kv-cache-memory=44026979840` (41.0 GiB) to fully utilize gpu memory. Current kv cache memory in use is 38.14 GiB.
+(EngineCore pid=30639) INFO 09-29 08:00:45 [jit_monitor.py:79] Kernel JIT monitor activated; monitored JIT compilations during inference will use mode=warn.
+(EngineCore pid=30639) INFO 09-29 08:00:45 [core.py:348] init engine (profile, create kv cache, warmup model) took 31.89 s (compilation: 24.55 s)
+(EngineCore pid=30639) INFO 09-29 08:00:45 [kernel.py:306] Final IR op priority after setting platform defaults: IrOpPriorityConfig(rms_norm=['native'], fused_add_rms_norm=['native'])
+INFO 09-29 08:00:46 [hf.py:540] Detected the chat template content format to be 'string'. You can set `--chat-template-content-format` to override this.
+[autoinit.v1.phase_c3.A_incumbent.217230555] engine ready in 39.1s: {'max_model_len': 8192, 'gpu_memory_utilization': 0.9, 'dtype': 'bfloat16', 'dtype_engine': 'torch.bfloat16', 'max_num_seqs': 256, 'max_num_batched_tokens': 8192, 'vllm_version': '0.27.1', 'enforce_eager': False}
+WARNING 09-29 08:00:46 [input_processor.py:291] Passing raw prompts to InputProcessor is deprecated and will be removed in v0.18. You should instead pass the outputs of Renderer.render_cmpl() or Renderer.render_chat().
+[autoinit.v1.phase_c3.A_incumbent.217230555] gsm8k: 150 prompts, 87,920 out-tok in 139.2s = 631.6 tok/s, 1.0776 prompts/s, eff.batch 29.4, 0.0171s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] math_verified: 150 prompts, 98,880 out-tok in 294.9s = 335.3 tok/s, 0.5086 prompts/s, eff.batch 49.95, 0.0324s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] multihop: 150 prompts, 73,164 out-tok in 94.9s = 771.0 tok/s, 1.5806 prompts/s, eff.batch 18.64, 0.0133s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] rag: 150 prompts, 58,630 out-tok in 61.2s = 958.0 tok/s, 2.451 prompts/s, eff.batch 12.9, 0.0076s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] knowledge: 150 prompts, 48,963 out-tok in 118.8s = 412.1 tok/s, 1.2626 prompts/s, eff.batch 21.77, 0.0146s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] tool: 100 prompts, 29,727 out-tok in 52.0s = 571.7 tok/s, 1.9231 prompts/s, eff.batch 8.02, 0.0066s/step
+[autoinit.v1.phase_c3.A_incumbent.217230555] code: 100 prompts, 121,262 out-tok in 365.7s = 331.6 tok/s, 0.2734 prompts/s, eff.batch 50.65, 0.0346s/step
+INFO 09-29 08:19:34 [utils.py:612] [shutdown] Process manager: send sigterm to process EngineCore
+(EngineCore pid=30639) INFO 09-29 08:19:34 [core.py:1332] [shutdown] EngineCore: trigger received signal=SIGTERM
+(EngineCore pid=30639) INFO 09-29 08:19:34 [core.py:1468] [shutdown] EngineCore: start mode=abort timeout=0s
+(EngineCore pid=30639) INFO 09-29 08:19:34 [core.py:1499] [shutdown] EngineCore: request processing complete; starting resource teardown
+(EngineCore pid=30639) INFO 09-29 08:19:34 [core.py:1345] [shutdown] EngineCore: exiting busy loop
+
+--- stderr ---
+(EngineCore pid=30639) 
+Loading safetensors checkpoint shards:   0% Completed | 0/1 [00:00<?, ?it/s]
+(EngineCore pid=30639) 
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  1.24it/s]
+(EngineCore pid=30639) 
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  1.24it/s]
+(EngineCore pid=30639) 
+(EngineCore pid=30639) 
+Capturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+Capturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:00<00:01, 32.36it/s]
+Capturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:00<00:01, 32.02it/s]
+Capturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:00<00:00, 38.39it/s]
+Capturing CUDA graphs (PIECEWISE):  35%|███▌      | 18/51 [00:00<00:00, 38.59it/s]
+Capturing CUDA graphs (PIECEWISE):  43%|████▎     | 22/51 [00:00<00:00, 36.84it/s]
+Capturing CUDA graphs (PIECEWISE):  51%|█████     | 26/51 [00:00<00:00, 31.51it/s]
+Capturing CUDA graphs (PIECEWISE):  59%|█████▉    | 30/51 [00:00<00:00, 25.57it/s]
+Capturing CUDA graphs (PIECEWISE):  65%|██████▍   | 33/51 [00:01<00:00, 26.23it/s]
+Capturing CUDA graphs (PIECEWISE):  75%|███████▍  | 38/51 [00:01<00:00, 31.16it/s]
+Capturing CUDA graphs (PIECEWISE):  84%|████████▍ | 43/51 [00:01<00:00, 35.12it/s]
+Capturing CUDA graphs (PIECEWISE):  94%|█████████▍| 48/51 [00:01<00:00, 37.23it/s]
+Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:01<00:00, 33.75it/s]
+(EngineCore pid=30639) 
+Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00<?, ?it/s]
+Capturing CUDA graphs (FULL):  17%|█▋        | 6/35 [00:00<00:00, 54.61it/s]
+Capturing CUDA graphs (FULL):  34%|███▍      | 12/35 [00:00<00:00, 56.76it/s]
+Capturing CUDA graphs (FULL):  51%|█████▏    | 18/35 [00:00<00:00, 58.13it/s]
+Capturing CUDA graphs (FULL):  71%|███████▏  | 25/35 [00:00<00:00, 59.17it/s]
+Capturing CUDA graphs (FULL):  89%|████████▊ | 31/35 [00:00<00:00, 58.50it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:00<00:00, 58.58it/s]
+

@@ -18,14 +18,14 @@
   "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
  },
  "prepared_launch": {
-  "any": true,
+  "any": false,
   "run": null,
-  "note": "A complete formal C3 chain exists for the latest attempt: grant, launch-bound readiness, one-use authorization and staged bundle. It is PREPARED, not launched -- no provider resource exists and provider state is verified pods 0, network volumes 0 before every acquisition."
+  "note": "No chain is prepared. attempt66's one-use chain was CONSUMED by a session that trained nine probes, and formal C3 is stopped for a maintainer decision on durable storage. A new chain must not be built until that decision is made: section 13 freezes the session once formal measurement has begun."
  },
  "budget": {
-  "cumulative_spend_usd": 350.8452,
+  "cumulative_spend_usd": 366.654,
   "authorized_cap_usd": 400.0,
-  "remaining_usd": 49.1548,
+  "remaining_usd": 33.346,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 32.3824,
   "engineering_remaining_usd": 1.9395,
@@ -113,7 +113,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -125,16 +125,14 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "NOT STARTED and NOT LAUNCHED, but FULLY PREPARED. The 3-arm/9-probe design is preregistered and hash-bound (ac44662c02d53359) with three fresh seeds; the formal chain, launcher, driver, preflight and authorization all exist and every pre-provider gate passes. 18 acquisition attempts so far; two created a pod and cost $0.4238 in total, the rest aborted at $0. No recovery training has begun. Blocked only on approved-tier GPU capacity.",
+   "status": "STOPPED FOR A MAINTAINER DECISION. attempt66 trained all NINE formal probes on L40S and passed BOTH frozen digest gates; stage H then failed on a scorer CLI argument (--arm A_incumbent vs choices {incumbent,treatment}) and all nine checkpoints were LOST because every durability upload was refused for private-storage quota. Formal measurement has begun, so section 13 freezes the session: no retry, no resume, no pooling. $13.67 for that run; phase_c3 total $16.6233.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
-   "batching_adoption_pilot": "CLOSED 2026-09-27: B4_NOT_WORTH_ADOPTION_PILOT, 0.6872x, for B4 + original_order_consecutive only. Not formal C3. Owner: .../batching-adoption/v1/result.json.",
-   "packing_optimization_pilot": "CLOSED 2026-09-27: screen measured, full scorer unfunded; superseded by v2. Not formal C3. Owner: .../packing-optimization/v1/screen_result.json.",
-   "packing_optimization_v2": "CLOSED 2026-09-27: PACKED_BATCH_NOT_WORTH_ADOPTION, 1.1884x vs a 1.25x gate. $2.7048 of $4.00. Not formal C3. Owner: .../v2/result.json.",
-   "preregistration_corrections": "THREE, all pre-launch: a hand-written stamp that bound nothing, a body contradicting itself on the primary contrast and on GO, and a missing `authorizes: nothing`. See _correction_history in the plan.",
    "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
-   "latest_attempt": "attempt18",
-   "provider_spend_usd": 0.4238,
-   "gpu_policy": "AMENDED 2026-09-29: fixed ordered availability over three 48GB Ada parts -- L40S, RTX 6000 Ada Generation, L40. Secure, BF16, single-GPU. Selected by AVAILABILITY alone. The tier does not widen."
+   "provider_spend_usd": 16.6233,
+   "blocker": "DURABLE STORAGE. The HF private-repo quota refused all nine 2.22 GiB checkpoints. Buying storage or permanently deleting historical LFS objects is a maintainer decision, never an autonomous repair.",
+   "latest_attempt": "attempt66",
+   "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
+   "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
@@ -144,7 +142,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "APPROVED-TIER GPU CAPACITY ONLY. The formal C3 chain is built and every pre-provider gate passes. Selection walks L40S -> RTX 6000 Ada -> L40 and takes the first with usable secure capacity. Nothing else is blocked.",
+ "blocker": "FORMAL C3 STOPPED FOR A MAINTAINER DECISION: nine probes trained, evaluation failed on a one-line CLI defect, and the trained checkpoints were not preserved because durable storage is full. Section 13 forbids retrying a measurement that has begun.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -172,7 +170,7 @@
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
+  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c…)",
   "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "campaign": "CLOSED; remaining allowance not to be spent",
@@ -185,7 +183,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "acquire the first approved GPU with capacity, re-price live on THAT device, issue a fresh one-use chain, and execute the nine probes. C4 is not authorized.",
+ "next": "maintainer decision on durable storage, and on whether a fresh nine-probe attempt is authorized given the training has already been paid for once. C4 is not authorized.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",

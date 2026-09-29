@@ -1,0 +1,7 @@
+$ /workspace/aad/scripts/autoinit/score_c1_confirmation.py --generations /workspace/aad/artifacts/audit/autoinit_c3/_preflight_absent --label preflight --seed 0 --out /workspace/aad/artifacts/audit/autoinit_c3/_preflight.json
+rc=1
+--- stdout ---
+
+--- stderr ---
+no generations for ['code', 'gsm8k', 'knowledge', 'math_verified', 'multihop', 'rag', 'tool']; refusing to report a rate over a subset of the battery as if it were the battery
+

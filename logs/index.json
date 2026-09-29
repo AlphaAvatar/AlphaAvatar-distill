@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 90,
+  "runs_current": 94,
   "runs_unrecorded": 29,
   "legacy_components": 77,
   "by_experiment": {
@@ -357,9 +357,9 @@
     "total": 9
    },
    "phase_c3": {
-    "recorded": 47,
+    "recorded": 51,
     "unrecorded": 19,
-    "total": 66
+    "total": 70
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2116,6 +2116,58 @@
   },
   {
    "experiment_id": "phase_c3",
+   "run_id": "attempt66",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt66",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt66/manifest.json"
+   },
+   "manifest_sha256": "a61ddcff6c15fbe8f9e0547fc9d358ec51f4262873c247258063c75e45b22856",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt67",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt67",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt67/manifest.json"
+   },
+   "manifest_sha256": "f559499f3ca80d04ccf547b66ae039d17f3ed647b9ccce45f39eb51f38a818c3",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt68",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt68",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt68/manifest.json"
+   },
+   "manifest_sha256": "f30fe22f30d1b1fc793b448d516d2b8cbcaeb156f7827d5f9a784c8255c411e5",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt69",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt69",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt69/manifest.json"
+   },
+   "manifest_sha256": "5af189393100f1258e33c741f70b2b0daf76ec38d8808eafa5ededd0247c01e8",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
    "run_id": "attempt7",
    "stage": "1",
    "layout": "stage_grouped",
@@ -2381,11 +2433,11 @@
   },
   {
    "experiment_id": "phase_c3",
-   "run_id": "attempt66",
-   "root": "logs/stages/stage-1/phase_c3/runs/attempt66",
-   "n_files": 11,
-   "digest": "2e57f8006b0ddc873f00ddc1a12b7c173ce31f50fa9b182d341963d9bfdeb338",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "run_id": "attempt70",
+   "root": "logs/stages/stage-1/phase_c3/runs/attempt70",
+   "n_files": 1,
+   "digest": "c27a61a4983dcc7cd2f8450c4de45e7426ce6fbee5d42074041836824deda1c0",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

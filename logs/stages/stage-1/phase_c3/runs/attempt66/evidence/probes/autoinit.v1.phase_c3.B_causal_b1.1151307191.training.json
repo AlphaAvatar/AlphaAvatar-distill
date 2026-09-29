@@ -1,0 +1,32 @@
+{
+  "schema": "aadistill.autoinit.c1_training_completion/v1",
+  "probe_id": "autoinit.v1.phase_c3.B_causal_b1.1151307191",
+  "arm": "B_causal_b1",
+  "seed": 1151307191,
+  "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+  "config": "artifacts/audit/autoinit_c3/configs/autoinit.v1.phase_c3.B_causal_b1.1151307191.json",
+  "config_sha256": "666ea34e5155cc1eb9fbc4d77c9bdbc2cea065d568ec3fdef1b5cd40ca4bec25",
+  "out_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191",
+  "model_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/checkpoints/step_001023/model",
+  "train_minutes": 60.6,
+  "run_completion": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/run_completion.json",
+  "evaluated": false,
+  "complete": true,
+  "preserved": {
+    "probe_id": "autoinit.v1.phase_c3.B_causal_b1.1151307191",
+    "arm": "B_causal_b1",
+    "seed": 1151307191,
+    "config_sha256": "666ea34e5155cc1eb9fbc4d77c9bdbc2cea065d568ec3fdef1b5cd40ca4bec25",
+    "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+    "authorizes": "nothing. Preservation and reuse are separate decisions: this checkpoint may not be pooled, resumed or reused across formal attempts.",
+    "files": {
+      "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+      "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "model.safetensors": "2fa9b29d287e7475a33574b57150244ee8cf07b808c4cd9a92c143e7b17f74c8"
+    },
+    "bytes": 2384236592,
+    "content_sha256": "948389e3acc7ce05ec4f90148518e279343db92ca1178d3ca00ce80d675606bb",
+    "preserved": false,
+    "why_not": "BadRequestError: (Request ID: Root=1-6abb330f-5afae6a803fcd07738b5ffbe;11306f5b-cb3b-48c2-a0ac-606b6eb5116f)\n\nBad request for commit endpoint:\nPrivate repository storage limit reached, please upgrade your plan to increase your private storage limit"
+  }
+}

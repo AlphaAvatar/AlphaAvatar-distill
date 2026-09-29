@@ -1,0 +1,50 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt66",
+ "experiment_id": "phase_c3",
+ "status": "TRAINING_COMPLETE_EVALUATION_FAILED_CHECKPOINTS_LOST",
+ "_headline": "All NINE formal recovery probes trained. Stages B, C, D, E, F and G all passed -- including BOTH frozen digest gates, on L40S, with the pinned execution config. Stage H then failed on a scorer CLI argument, and the nine trained checkpoints were lost because every durability upload was refused for private-storage quota.",
+ "gpu_type_id": "NVIDIA L40S",
+ "runtime": {
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1",
+  "cuda_runtime": "12.8",
+  "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+ },
+ "stages": {
+  "B": "PASS teacher_fetch_verify (3 shards)",
+  "C": "PASS register_operator (both experimental implementations)",
+  "D": "PASS replay_parent -- reproduced eea90c91...",
+  "E": "PASS replay_incumbent -- reproduced 53e30566...",
+  "F": "PASS materialize_arms (three initializations, built once each)",
+  "G": "PASS recovery_probes -- 9 of 9 trained",
+  "H": "FAIL evaluate"
+ },
+ "probes_trained": 9,
+ "probes_evaluated": 0,
+ "decision_ran": false,
+ "stage_h_failure": {
+  "exit_code": 2,
+  "cause": "score_c1_confirmation.py: error: argument --arm: invalid choice: 'A_incumbent' (choose from 'incumbent', 'treatment')",
+  "_class": "the same C1-constant class as every earlier defect, in the one place the static checks could not see: an argparse `choices` constraint inside a SEPARATE script the driver shells out to. The driver passes C3's arm ID; the scorer accepts C1's roles."
+ },
+ "checkpoints": {
+  "preserved": 0,
+  "of": 9,
+  "bytes_each": 2384236592,
+  "why_not": "BadRequestError: Private repository storage limit reached. Every one of the nine uploads was refused. The durability mechanism behaved exactly as designed -- it never raised, it disturbed no stage, and it recorded each unit's identity, inputs and content hash together with the exact reason -- but nothing was preserved.",
+  "_this_is_the_documented_failure": "AGENTS.md records it twice: C1 attempt 17 lost six probes the same way, and C1 attempt 18 exercised the durability mechanism on six 2.22 GiB probes and preserved none for the same quota reason. The standing instruction is to confirm a durable large-artifact backend has ROOM before a long experiment that will produce large completed artifacts. I did not check the quota before launching. That is my failure."
+ },
+ "_why_this_stops_here": "Formal measurement HAS begun: nine probes trained. Section 13 freezes the session at that point and forbids restarting the matrix, splicing probes, substituting seeds or pooling attempts unless an existing resume contract supports it. No resume contract covers 're-evaluate checkpoints that no longer exist', and inventing one is explicitly forbidden. Buying storage or deleting historical objects is a maintainer decision, never an autonomous repair.",
+ "cost": {
+  "actual_usd": 13.67,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 752.6,
+  "gpu_type_id": "NVIDIA L40S"
+ },
+ "provider_resource_created": true,
+ "pod_ids": [
+  "10rzsbqq4fm0oe"
+ ],
+ "final_provider_state": "torn down, provider confirms gone; pods 0, volumes 0"
+}

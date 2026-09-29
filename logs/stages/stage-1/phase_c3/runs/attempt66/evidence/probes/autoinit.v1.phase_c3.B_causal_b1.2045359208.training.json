@@ -1,0 +1,32 @@
+{
+  "schema": "aadistill.autoinit.c1_training_completion/v1",
+  "probe_id": "autoinit.v1.phase_c3.B_causal_b1.2045359208",
+  "arm": "B_causal_b1",
+  "seed": 2045359208,
+  "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+  "config": "artifacts/audit/autoinit_c3/configs/autoinit.v1.phase_c3.B_causal_b1.2045359208.json",
+  "config_sha256": "7bdac65a10f87bad1e6212172f330e74f203bbb56fc5fbe2c731a649ad65346a",
+  "out_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208",
+  "model_dir": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/checkpoints/step_001023/model",
+  "train_minutes": 60.63,
+  "run_completion": "artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/run_completion.json",
+  "evaluated": false,
+  "complete": true,
+  "preserved": {
+    "probe_id": "autoinit.v1.phase_c3.B_causal_b1.2045359208",
+    "arm": "B_causal_b1",
+    "seed": 2045359208,
+    "config_sha256": "7bdac65a10f87bad1e6212172f330e74f203bbb56fc5fbe2c731a649ad65346a",
+    "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+    "authorizes": "nothing. Preservation and reuse are separate decisions: this checkpoint may not be pooled, resumed or reused across formal attempts.",
+    "files": {
+      "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+      "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "model.safetensors": "0c417c721be8f4763d9e3c16ff3d82d1ad17a47321e8e0b4e724ace886719796"
+    },
+    "bytes": 2384236592,
+    "content_sha256": "c054a0b5eeaf9b5d12f12585aca8a6660277a98cceade2fff3d98d2a49f50879",
+    "preserved": false,
+    "why_not": "BadRequestError: (Request ID: Root=1-6abb4276-52e01fbd4e29109131552dd7;e560c9cd-5f7f-48e2-a8d1-e5fe2b95b9d7)\n\nBad request for commit endpoint:\nPrivate repository storage limit reached, please upgrade your plan to increase your private storage limit"
+  }
+}
