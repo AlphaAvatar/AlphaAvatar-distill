@@ -1992,63 +1992,26 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 11 failures, one family
+## The full suite is not green: 10 failures, one family
 
-**Current measurement, 2026-09-28 after the C3 round: 11 failed, 5287
-passed, 228 skipped** in 46m31s. The same COUNT as the documented eleven,
-with one substitution:
+**Closeout measurement, 2026-09-29 at `31ee6b5d`: 10 failed, 5322 passed,
+228 skipped** in 46m59s.
 
-* **new** — `pod/test_phase_c2_full_search_chain.py::test_the_config_names_the_cap_the_project_owns`.
-  A direct consequence of the funding amendment: that test pins C2's
-  full-search config's cap to the project's canonical one, which is now
-  `$400.00`. C2's config, grant and proposals all name `$370.00` and are
-  internally consistent with the decision they were made under. §3 says do
-  not rewrite historical authorization artifacts, and C2 is CLOSED WITHOUT
-  PROMOTION, so the mirror was left at its historical value. **A closed
-  phase's mirror cannot match both its own grant and a later amendment made
-  for a different experiment**; which one it should track is a maintainer
-  decision, not a test fix.
-* **fixed** — `autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`,
-  which the raised cap resolved.
+**Zero new failures against `ab53ba14`, and one fixed.** The fixed one is
+`autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`,
+and it passes legitimately rather than being skipped: it asserts that the
+pricing record's derived verdict and `derive_budget`'s behaviour agree, and
+the `$400.00` amendment plus attempt66's booked `$13.67` made the two sides
+agree again. So the closeout set is exactly the documented eleven minus that
+one.
 
-`+82` passing tests, all C3: the preregistration, session-contract,
-driver-contract, formal-pricing and pod-preflight suites.
-
-An intermediate run reported 32 failures. Twenty were derived records the C3
-work staled — the C1 closure, the skip-predicate audit and the run index —
-plus three preflight skips the readiness sweep refuses and one real hazard:
-`cuda.synchronize()` in the GPU smoke, which re-raises faults from EARLIER
-async work and could have aborted a paid session for something another test
-did a thousand cases before. `test_no_test_drains_a_real_gpu` caught it.
-
-The preceding measurement, 2026-09-27 at `9d618427` on a clean tree: 11
-failed, 5201 passed, 228 skipped in 46m44s.
-
-The previous measurement, 2026-09-26 at `679f0113`: 12 failed,
-4988 passed, 228 skipped over all of `tests/`, in 46m33s. Eleven are the
-documented set below. The twelfth,
-`test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one`,
-was the audit record going stale *again* between the suite starting and the
-round's last commit: that record pins a **line number**, so inserting tests
-above an existing skip in the same file is enough to move it. Regenerated at
-`679f0113`; it is a derived record with an owner, not a defect.
-
-The previous measurement, at `5c287faf`: 11 failed, 4881 passed, 228 skipped
-in 45m50s — the identical set to `50056199` and `a76cce7f`, and the same set
-that is red at `ab53ba14`. Zero new and zero fixed across the split-K
-continuation and the parallel-item round. Those eleven are
-**exactly** the set that is red at `ab53ba14`, the pre-refactor base — checked
-by running the same nodeids in a detached worktree at that commit. **Zero new
-failures** from the batching/topology refactor or from this investigation.
-
-<details><summary>the 11, by nodeid</summary>
+<details><summary>the 10, by nodeid</summary>
 
 ```text
 autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
 autoinit/test_c2_behavioural_proposal.py::test_the_ceiling_fits_the_project_cap_with_headroom
 autoinit/test_phase_c2_full_search.py::test_the_budget_position_is_derived_not_restated
 autoinit/test_phase_c2_full_search.py::test_the_documents_are_deterministic_and_regenerating_verifies_them
-autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does
 pod/test_c1_one_provider_resource.py::test_M_the_live_grant_and_the_launcher_agree_on_acquisition
 pod/test_c1_session_contract.py::test_the_writer_refuses_to_rewrite_the_frozen_preregistration
 pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest
@@ -2059,64 +2022,28 @@ pod/test_phase_c2_full_search_chain.py::test_the_proposal_states_the_figures_a_l
 
 </details>
 
-**Three were mine and are fixed**, not carried: `test_every_pod_script_is_classified`
-(two uncatalogued `scripts/pod` entries) and two budget-snapshot tests left
-stale when the C3 engineering campaign booked its first `$0.0822`. A previous
-report claimed zero new failures when there were three; see the C3 section.
+**The C2 cap test was repaired, not the C2 records.** The funding amendment
+made `test_the_config_names_the_cap_the_project_owns` fail, because it pinned
+C2's full-search config to the project's canonical cap — now `$400.00` —
+while C2's config, grant and proposals all name `$370.00` and are internally
+consistent with the decision they ran under. A closed phase's mirror cannot
+match both its own grant and a later amendment. The test now asserts the
+invariant that actually matters — the historical config matches the C2
+authorization it ran under, is **not** the current canonical project-cap
+owner, and the current owner says `$400.00` — and it enumerates the real
+grant sources rather than passing on an empty glob, which the first rewrite
+did.
 
-The historical measurement below is kept because the family analysis is still
-the right reading of why these stay red.
+**An earlier run of this same suite read 23 failures.** Thirteen were mine,
+from repairing the stage-H defect inside a file named by C1's frozen
+executable closure and preregistration. The scorer was restored and the
+repair moved to the caller; all thirteen went with it. That measurement is
+recorded here because a suite result that was wrong for a knowable reason is
+worth more than one quietly replaced.
 
-Measured on the settled tree, 2026-09-19: **14 failed, 3207 passed, 15
-skipped** over `tests/{docs,pod,architecture,autoinit,validation}`, with
-`tests/{initialization,runtime,init}` clean in the same round. Every one fails
-in the direction that **refuses** rather than permits, and all fourteen are one
-family.
-
-| family | tests | why it stays red |
-| --- | --- | --- |
-| **A committed digest no longer describes the live tree.** Phase B's amendments ledger accounts to `c20e3a80b6c0` while the tree digests to `c9121aadff77`; C1's preregistration, readiness record, skip-predicate audit and preflight selection are in the same position | 14 | The gates return `ok = False`, so a paid Phase-B or C1 launch is **refused** — correct. The remedy each message names is *"re-freeze it"*, which edits a frozen scientific record, and no C1 or Phase-B launch exists to justify a `launch_bound` sweep (AGENTS.md P8.3). Review confirmed these stay red as fail-closed guards and are not a blocker to the C2 full search |
-
-<details><summary>the 14, by nodeid</summary>
-
-```text
-autoinit/test_phase_b_historical_amendments.py::test_the_ledger_verifies_against_the_live_tree
-autoinit/test_phase_b_historical_amendments.py::test_an_incorrect_source_commit_is_refused
-autoinit/test_phase_b_historical_amendments.py::test_a_missing_changed_file_is_refused
-autoinit/test_phase_b_historical_amendments.py::test_a_false_numstat_is_refused
-autoinit/test_phase_b_historical_amendments.py::test_a_false_after_file_hash_is_refused
-autoinit/test_phase_b_historical_amendments.py::test_a_false_patch_hash_is_refused
-autoinit/test_phase_b_plan.py::test_completed_phase_b_drift_is_historically_accounted_for
-autoinit/test_skip_predicate_audit.py::test_the_committed_audit_record_matches_the_live_one
-autoinit/test_staging_contract.py::test_c1_runs_only_its_own_preflight_on_a_paid_pod
-autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
-autoinit/test_c1_readiness_gates.py::test_the_pod_selection_is_exactly_the_preflight_directory
-pod/test_c1_session_contract.py::test_the_writer_refuses_to_rewrite_the_frozen_preregistration
-pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest
-pod/test_phase_b_driver_and_launcher.py::test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe
-```
-
-</details>
-
-**The evaluator-drift family is closed.** Six tests were red because adopting
-the device-resident reduction moved `planning/metrics.py`, which C2's frozen
-baseline-completion contract binds by content. Review's decision was to keep
-that protocol and its historical hash **frozen exactly as they are** — the
-contract is doing the correct thing by refusing a future measurement joining
-the old B↔C series under a different evaluator. So the tests now assert the
-**refusal**, and the position is recorded prospectively in
-[`phase_c2_evaluator_lineage.json`](../stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json):
-baseline completion is COMPLETE/CLOSED; its B and frozen C measurements remain
-valid because both sides used the historical evaluator; the optimized evaluator
-is the current Full Search implementation and is **not** eligible to append to
-that series; reopening it needs a new explicit scientific decision.
-
-**Attribute against the commit the session started from, not `HEAD`.** Eleven
-architecture-guard cases once read as pre-existing in both the working tree and
-a detached worktree at `HEAD` — they were mine, from a commit two back in the
-same session. And a worktree has no untracked files, so four failures looked
-pre-existing there for an unrelated reason (`artifacts/stage1/state_eval_v1` is
-simply absent).
+**Two docs-only commits followed the suite** (`3400bbdf`, `1bce946b`),
+correcting the repair narrative in these documents and the snapshot's size.
+Both were verified by `tests/docs`, which owns every assertion over them.
 
 ## Budget — four limits that do not transfer
 
