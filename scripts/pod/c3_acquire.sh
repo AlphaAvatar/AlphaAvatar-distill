@@ -31,7 +31,9 @@ export PYTHONHASHSEED=7
 # to a session that had ended. A hardcoded session name has already cost this
 # project two paid runs; the fix is to make the caller state it, and to refuse
 # rather than guess.
-BASE="${C3_SCRATCH_BASE:?set C3_SCRATCH_BASE to THIS session's scratchpad directory}"
+# No apostrophe in the message: inside ${VAR:?word} a single quote OPENS a
+# quoted string, and `session's` left the whole file unparseable.
+BASE="${C3_SCRATCH_BASE:?set C3_SCRATCH_BASE to the CURRENT session scratchpad directory}"
 mkdir -p "$BASE" || { echo "cannot create $BASE" >&2; exit 2; }
 LOG="$BASE/c3_acquire.log"
 say() { echo "[$(date -u +%H:%M:%S)] $*" >> "$LOG"; }
