@@ -1886,6 +1886,23 @@ durable backend has **room** before a long experiment that will produce large
 artifacts. That check was not run before launching. Nine trained probes at
 2.22 GiB each are the cost.
 
+**One thing of scientific value survived.** Stage F built all three
+initializations from the same verified frozen pre-ATTENTION parent, once
+each, and they are distinct:
+
+```text
+A_incumbent    attention.activation_importance_v1   53e30566…  (= frozen B)
+B_causal_b1    attention.causal_kl_v1   b=1, original_order_v1  6eb231ca…
+C_causal_b3    attention.causal_kl_v1   b=3, length_sorted_v1   dec88683…
+```
+
+`B_causal_b1 ≠ C_causal_b3` at full scale on the real operator: the
+calibration batch shape and packing order really do change which heads
+`causal_kl_v1` selects, so the secondary contrast is **not** degenerate and
+B3 cannot be assumed to stand in for B1. This is a **structural** fact about
+the initializations — it is not a behavioural result and decides nothing
+about the operator, which is what the nine lost evaluations were for.
+
 **The blocker is live, not historical.** Re-asked at `$0` on 2026-09-29 via
 the LFS batch endpoint against `AlphaAvatar/aadistill-artifacts`, with **fresh
 random oids** — an oid that already exists dedups and returns success
