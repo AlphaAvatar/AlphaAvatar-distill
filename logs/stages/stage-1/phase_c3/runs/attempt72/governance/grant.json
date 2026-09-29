@@ -1,0 +1,53 @@
+{
+ "schema": "aadistill.phase_c3.grant/v1",
+ "_contract": "The maintainer decision this formal C3 session runs under. AUTHORIZES SPEND; authorizes no launch by itself -- a launch still needs the one-use authorization issued FROM this grant, a launch-bound readiness record and a staged bundle. Every scientific and harness identity is DERIVED by issue_c3_authorization.py and REFUSED if asserted here.",
+ "granted_by": "maintainer decision 2026-09-30, on independent review of the remote state after attempt66. The maintainer accepted that attempt66 is a completed formal attempt with NO behavioural result, no preserved probe weights and no C3 verdict, and authorized ONE fresh complete formal C3 nine-probe attempt as a NEW measurement -- explicitly not a resume of attempt66, and with no pooling of attempt66's probes. Conditioned on a storage cleanup and a fresh-oid capacity verification that both completed before this grant was written; see logs/maintenance/inventories/archival_retirement_20260930.json.",
+ "granted_for": "formal C3, complete 3-arm x 3-seed = 9-probe design",
+ "covers": "ONE formal Phase-C3 session: replay the frozen pre-ATTENTION parent under its digest gate, gate the incumbent B, materialize three initializations once each, train 9 recovery probes (3 arms x 3 fresh seeds), evaluate each once on c1_confirmation_v1, compute the three prespecified paired contrasts with a 20,000-iteration stratified prompt-cluster bootstrap, apply the frozen decision rule to the PRIMARY contrast alone, collect evidence and tear down.",
+ "cumulative_cap_usd": 400.0,
+
+ "_this_is_a_new_measurement_not_a_resume": "attempt66 trained all nine probes and then lost both its evaluations and its checkpoints. There is no resume contract for re-evaluating checkpoints that no longer exist, and inventing one is forbidden. This attempt therefore retrains all nine from the same frozen inputs. attempt66's probe results, of which there are none, are not pooled, spliced or referenced; its authorization and closeout are historical evidence and are not mutated.",
+
+ "_the_frozen_science_is_unchanged": {
+  "arms": "the same three -- A_incumbent, B_causal_b1, C_causal_b3",
+  "seeds": "the same three preregistered recovery seeds; no fourth seed",
+  "digest_gates": "the same frozen parent and incumbent digest gates",
+  "recovery": "the same recovery recipe",
+  "battery": "the same c1_confirmation_v1",
+  "scoring": "the same scoring contract",
+  "inference": "the same estimands, the same 20,000-iteration bootstrap, the same decision rule",
+  "_owner": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json, whose stamp binds its own body. Nothing in this grant restates a scientific identity; the issuer derives every one and refuses a grant that asserts any."
+ },
+
+ "_what_changed_since_attempt66_is_engineering_only": [
+  "the stage-H defect is repaired ON C3'S CALLER SIDE: the driver no longer passes --arm, whose vocabulary is C1's two roles rather than C3's three arms. scripts/autoinit/score_c1_confirmation.py is byte-identical to the attempt66 authorized base 31e17ffa and to its session commit f3a783a8 -- verified by hash, not asserted -- so the frozen C1 scorer that a completed GO experiment binds is untouched",
+  "scorer_preflight now sends every flag the real stage-H call sends, and fails loudly on argparse exit 2. It previously sent four of eight, and a flag a preflight never sends is a flag it cannot prove the scorer accepts",
+  "a durable_capacity_gate was added to the pre-provider prechecks: it asks the LFS batch endpoint, with fresh random oids, whether the relay would accept one probe AND all nine. attempt66's nine uploads were all refused for quota, and nothing had asked",
+  "the launcher's evidence_fields now DERIVE arms/seeds/probes from the preregistration. They read 2/3/6, so attempt66's session.json states two arms and six probes for a run that trained nine across three"
+ ],
+
+ "_hard_cap_is_derived_not_chosen": "The grant names NO hard ceiling, deliberately. The issuer derives the ceiling from the LIVE securePrice of the device actually selected and carries that figure; the $30.00 per-session ENVELOPE is the bound it must fit inside, and a session may never be issued AT the envelope. See logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json for the device and price of the session that actually runs.",
+ "_three_conditions_all_hold": {
+  "_checked_at_issuance_against_the_selected_device": true,
+  "derived_ceiling_within_envelope": "derived <= $30.0000",
+  "cumulative_plus_derived_within_cap": "cumulative + derived <= $400.0000",
+  "formal_allowance_covers_derived": "formal remaining >= derived"
+ },
+ "_budget_position_at_grant": "Stated by the maintainer and independently re-derived by scripts/consolidate/derive_budget.py: project remaining $33.3460 of the $400.0000 cap, formal remaining $32.3824 of $55.00, per-session envelope $30.00. NO BUDGET INCREASE IS AUTHORIZED by this decision. These figures are the position as it stood when the grant was written; the live figures are derived on every render and are what the gates read.",
+
+ "does_not_authorize": [
+  "starting C4, which remains NOT AUTHORIZED and becomes scientifically ELIGIBLE only on a primary GO",
+  "choosing between the B1 and B3 numerical protocols -- that is a post-C3 maintainer decision on the completed secondary and practical evidence",
+  "a fourth seed, a fourth arm, arm elimination, successive halving or a forced winner",
+  "retrying, resuming or pooling a scientific measurement once formal training or measurement has begun",
+  "pooling, splicing or reusing anything from attempt66",
+  "re-running a complete valid INCONCLUSIVE result in search of a GO",
+  "any change to the frozen protocol: recovery recipe, teacher, corpus, optimizer, battery, generation protocol, scoring contract, bootstrap iterations, SESOI, guardrails or the decision rule",
+  "consuming the reserved final-promotion battery",
+  "a second concurrent provider resource",
+  "any further storage deletion beyond the retirement already executed under the 2026-09-30 decision"
+ ],
+ "autonomous_pre_science_retry": "PERMITTED inside this cumulative ceiling. An invocation that aborts BEFORE formal training or measurement begins is an engineering subrun, not a retried experiment: preserve and close it, diagnose, repair minimally, build a FRESH chain under a new attempt identity, and continue. The budget is cumulative across every subrun; a rerun does not reset it and a replacement resource gets no fresh allocation.",
+ "_authorizes_nothing_by_itself": true,
+ "per_session_envelope_usd": 30.0
+}
