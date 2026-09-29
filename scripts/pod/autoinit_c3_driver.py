@@ -653,15 +653,31 @@ class C3Driver:
         contract = c1_scoring_contract(REPO)
         probe = self.gate(
             "scorer_preflight",
+            #: EVERY flag the real stage-H call passes, not a subset. This
+            #: gate passed on attempt66 and stage H then exited 2 on `--arm`,
+            #: forty minutes and nine trained probes later -- because the
+            #: gate sent four flags where the real call sent eight, and a
+            #: flag the preflight never sends is a flag it cannot prove the
+            #: scorer accepts. The paths are deliberately absent: the scorer
+            #: must reach its generation check, which is what proves the
+            #: command line itself parsed.
             [str(C1_SCORER), "--generations", str(AUDIT / "_preflight_absent"),
              "--label", "preflight", "--seed", "0",
-             "--out", str(AUDIT / "_preflight.json")],
+             "--out", str(AUDIT / "_preflight.json"),
+             "--per-sample", str(AUDIT / "_preflight_per_sample.jsonl"),
+             "--init-digest", "0" * 64,
+             "--trained-run", str(AUDIT / "_preflight_absent.json"),
+             "--generation-fingerprint", "preflight"],
             timeout=300, python=sys.executable)
         text = probe.stdout + probe.stderr
+        if probe.returncode == 2:
+            raise C3DriverError(
+                "the C1 scorer rejected the command line stage H will build "
+                f"(argparse exit 2). tail: ...{text[-800:]}")
         if "no generations for" not in text:
             raise C3DriverError(
                 "the C1 scorer did not reach its generation check on the frozen "
-                f"battery; it would fail after six trainings. tail: ...{text[-800:]}")
+                f"battery; it would fail after nine trainings. tail: ...{text[-800:]}")
 
         for name, want in TOKENIZER_SIDECAR_SHA256.items():
             p = TOKENIZER_SOURCE / name
@@ -1379,7 +1395,17 @@ class C3Driver:
                 f"{name}_scoring",
                 [str(C1_SCORER), "--generations", str(gen_dir), "--label", name,
                  "--seed", str(seed), "--out", str(scored),
-                 "--per-sample", str(per_sample), "--arm", arm,
+                 "--per-sample", str(per_sample),
+                 #: NO `--arm`. That flag's vocabulary is C1's two ROLES
+                 #: (`incumbent`, `treatment`), enforced by an argparse
+                 #: `choices`; C3 has three ARMS, so passing `A_incumbent`
+                 #: made the scorer exit 2 -- after all nine probes had
+                 #: trained. The scorer is named by C1's frozen executable
+                 #: closure and preregistration, so widening it there would
+                 #: move a digest that a COMPLETED experiment binds. C3 has
+                 #: no need of the field anyway: `--label` is the probe id,
+                 #: which carries the arm, and the driver keys (arm, seed)
+                 #: off the TRAINING record, never off the scorer's output.
                  "--init-digest", record["initialization_artifact_digest"],
                  "--trained-run", str(REPO / record["run_completion"]),
                  #: The OBSERVED fingerprint, not the attested one. They are equal

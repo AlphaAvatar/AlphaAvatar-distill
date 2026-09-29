@@ -702,51 +702,48 @@ def test_the_replay_applies_the_execution_config_the_plan_pins():
 def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
     """The seam one level down: the scripts the driver SHELLS OUT to.
 
-    attempt66 trained all nine probes, then stage H exited 2 on
+    attempt66 trained all nine probes, then stage H exited 2:
 
         score_c1_confirmation.py: error: argument --arm: invalid choice:
         'A_incumbent' (choose from 'incumbent', 'treatment')
 
-    The existing CLI-seam check covers launcher -> driver. This one covers
-    driver -> scorer, which is where a C1 constant could still hide: the
-    scorer is a SEPARATE process, so nothing in the driver's own imports,
-    names or digests can reach an argparse `choices` constraint inside it.
-    $13.67 and ten hours of training bought this check.
+    The existing CLI-seam check covers launcher -> driver. This covers
+    driver -> scorer, which is where a C1 constant can still hide: the
+    scorer is a SEPARATE process, so nothing in the driver's imports, names
+    or digests can reach an argparse constraint inside it.
 
-    It exercises the REAL parser -- not a re-derivation of it -- against the
-    real arm identities, which is why `build_parser` exists apart from
-    `main`.
+    It runs the REAL scorer as a subprocess with the REAL argv. `--out` is
+    under tmp_path and the paths do not exist, so the run fails -- that is
+    fine and deliberate. What is asserted is that it does not fail with
+    **exit 2**, which is argparse's own code for a malformed command line.
+    A missing input fails later and differently.
+
+    The scorer is NOT importable-and-patchable here on purpose: it is named
+    by C1's frozen executable closure and preregistration, so this check
+    must observe it, never adapt it.
     """
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "c1_scorer_cli", REPO / "scripts/autoinit/score_c1_confirmation.py")
-    scorer = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(scorer)
-    parser = scorer.build_parser()
+    import tempfile
 
     seeds = CS.recovery_seeds()
-    for arm in CS.arm_ids():
-        argv = ["--generations", "/tmp/g", "--label", f"{arm}_{seeds[0]}",
-                "--seed", str(seeds[0]), "--out", "/tmp/o.json",
-                "--per-sample", "/tmp/p.jsonl", "--arm", arm,
-                "--init-digest", "0" * 64, "--trained-run", "/tmp/rc.json",
-                "--generation-fingerprint", "f" * 16]
-        try:
-            ns = parser.parse_args(argv)
-        except SystemExit as exc:                      # argparse exits 2
-            raise AssertionError(
-                f"the C1 scorer refuses C3 arm {arm!r} (exit {exc.code}); "
-                "stage H would fail AFTER every probe has trained") from None
-        assert ns.arm == arm, "the scorer did not record the arm it was given"
+    scorer = REPO / "scripts/autoinit/score_c1_confirmation.py"
+    with tempfile.TemporaryDirectory() as tmp:
+        for arm in CS.arm_ids():
+            name = f"autoinit.v1.phase_c3.{arm}.{seeds[0]}"
+            argv = [sys.executable, str(scorer),
+                    "--generations", f"{tmp}/gen", "--label", name,
+                    "--seed", str(seeds[0]), "--out", f"{tmp}/out.json",
+                    "--per-sample", f"{tmp}/per.jsonl",
+                    "--init-digest", "0" * 64,
+                    "--trained-run", f"{tmp}/rc.json",
+                    "--generation-fingerprint", "f" * 16]
+            r = subprocess.run(argv, capture_output=True, text=True, timeout=120)
+            assert r.returncode != 2, (
+                f"the C1 scorer rejects the argv the C3 driver builds for "
+                f"{arm}:\n{r.stderr[-600:]}")
 
-    #: The flags the driver passes must all be ones the scorer defines. Read
-    #: from the driver's own argv list rather than retyped, so the two cannot
-    #: drift apart silently.
-    #:
-    #: By AST, not by slicing between two strings: `C1_SCORER` appears in more
-    #: than one gate, and an index-based slice silently swallowed the NEXT
-    #: call's flags and reported them as undefined.
+    #: And the flags themselves must be ones the scorer defines. Read the
+    #: driver's argv BY AST -- `C1_SCORER` appears in more than one gate, and
+    #: an index-based slice silently swallowed the next call's flags.
     argv_lists = []
     for node in ast.walk(ast.parse(DRIVER.read_text())):
         if not isinstance(node, ast.List) or not node.elts:
@@ -759,7 +756,9 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
             argv_lists.append(node)
     assert argv_lists, "no argv list starting with the C1 scorer was found"
 
-    defined = {a for act in parser._actions for a in act.option_strings}
+    defined = set(re.findall(r'add_argument\(\s*"(--[a-z-]+)"',
+                             scorer.read_text()))
+    assert defined, "no options were found in the scorer's source"
     passed = {e.value for node in argv_lists for e in node.elts
               if isinstance(e, ast.Constant) and isinstance(e.value, str)
               and e.value.startswith("--")}
@@ -769,20 +768,74 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
         f"{sorted(passed - defined)}")
 
 
-def test_the_arm_label_still_refuses_what_is_not_a_label():
-    """Widening the arm vocabulary must not mean accepting anything."""
-    import importlib.util
+def test_the_driver_does_not_pass_c1s_arm_vocabulary():
+    """C3 must not send an arm id through a field whose values are C1's.
 
-    spec = importlib.util.spec_from_file_location(
-        "c1_scorer_lbl", REPO / "scripts/autoinit/score_c1_confirmation.py")
-    scorer = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(scorer)
+    `--arm` is `choices=("incumbent", "treatment")`: C1's two ROLES. C3 has
+    three ARMS. The scorer cannot be widened -- it is inside C1's frozen
+    executable closure and preregistration, and a COMPLETED GO experiment
+    binds that digest -- so the fix belongs on this side of the seam. C3
+    loses nothing: `--label` is the probe id, which carries the arm, and the
+    driver keys (arm, seed) off the TRAINING record, never off the scorer's
+    output.
 
-    import argparse as _ap
+    Checked over EVERY call site by AST. The driver invokes the scorer more
+    than once, and the first occurrence is a preflight that passes
+    `--label preflight` -- which is exactly how the defect survived: the
+    driver already had a scorer preflight gate, and it passed on attempt66
+    because it omitted the one argument that mattered.
+    """
+    sites = []
+    for node in ast.walk(ast.parse(DRIVER.read_text())):
+        if not isinstance(node, ast.List) or not node.elts:
+            continue
+        head = node.elts[0]
+        if (isinstance(head, ast.Call) and isinstance(head.func, ast.Name)
+                and head.func.id == "str" and head.args
+                and isinstance(head.args[0], ast.Name)
+                and head.args[0].id == "C1_SCORER"):
+            sites.append([e.value for e in node.elts
+                          if isinstance(e, ast.Constant)
+                          and isinstance(e.value, str)])
+    assert len(sites) >= 2, (
+        f"expected the preflight AND the real scoring call, found {len(sites)}")
+    for flags in sites:
+        assert "--arm" not in flags, (
+            "the C3 driver still passes --arm to the C1 scorer; that flag "
+            "only accepts C1's two role names and exits 2 on a C3 arm id")
 
-    for bad in ["", "   ", "A incumbent", " A_incumbent", "A_incumbent\t"]:
-        with pytest.raises(_ap.ArgumentTypeError):
-            scorer.arm_label(bad)
-    #: and C1's and C2's own vocabularies still pass, unchanged.
-    for good in ["incumbent", "treatment", "A_incumbent", "B_causal_b1"]:
-        assert scorer.arm_label(good) == good
+    #: the arm is still recoverable from what IS passed, at the real call.
+    src = source_minus_comment_lines(DRIVER.read_text())
+    assert '"--label", name' in src
+    assert 'name = record["probe_id"]' in src
+
+
+def test_the_scorer_preflight_sends_what_the_real_call_sends():
+    """A gate that supplies its own inputs cannot detect a wrong input.
+
+    The driver's scorer preflight passed on attempt66 and the real call
+    exited 2 forty minutes later. The difference was the argument set: the
+    preflight sent a subset. So the preflight's flags must be a SUPERSET of
+    the real call's, or it is not exercising the command that matters.
+    """
+    sites = []
+    for node in ast.walk(ast.parse(DRIVER.read_text())):
+        if not isinstance(node, ast.List) or not node.elts:
+            continue
+        head = node.elts[0]
+        if (isinstance(head, ast.Call) and isinstance(head.func, ast.Name)
+                and head.func.id == "str" and head.args
+                and isinstance(head.args[0], ast.Name)
+                and head.args[0].id == "C1_SCORER"):
+            sites.append({e.value for e in node.elts
+                          if isinstance(e, ast.Constant)
+                          and isinstance(e.value, str)
+                          and e.value.startswith("--")})
+    preflight, *rest = sites
+    real = set().union(*rest) if rest else set()
+    missing = sorted(real - preflight)
+    assert not missing, (
+        f"the driver's scorer preflight omits {missing}, which the real "
+        f"scoring call passes. A flag the preflight never sends is a flag "
+        f"the preflight cannot prove the scorer accepts -- which is exactly "
+        f"how --arm survived to stage H.")

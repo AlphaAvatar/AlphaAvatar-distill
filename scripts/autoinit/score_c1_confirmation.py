@@ -169,31 +169,6 @@ def score_battery(*, battery: Path, gen_dir: Path, label: str, seed: int,
     }
 
 
-def arm_label(value: str) -> str:
-    """An arm identity to RECORD, validated by shape rather than membership.
-
-    This argument used to be `choices=("incumbent", "treatment")` -- C1's two
-    roles, frozen into a scorer three experiments share. C3 passes arm IDs
-    (`A_incumbent`, `B_causal_b1`, `C_causal_b3`) and argparse refused them
-    with exit 2, AFTER all nine probes had trained. C2 already had a third
-    vocabulary. The closed set was C1's, not this script's.
-
-    Nothing downstream needs membership: `arm` is written into the result and
-    read back only as an opaque key (C3's driver indexes `(arm, seed)` with
-    it, which is precisely why it must be the CALLER's identity). So validate
-    what a label must be -- present, single-token, recordable -- and let the
-    experiment own its vocabulary.
-    """
-    v = value.strip()
-    if not v:
-        raise argparse.ArgumentTypeError("--arm was empty")
-    if v != value or any(c.isspace() for c in v):
-        raise argparse.ArgumentTypeError(
-            f"--arm {value!r} has surrounding or internal whitespace; an arm "
-            "identity is a single token used as a record key")
-    return v
-
-
 def build_result(*, scored: dict, label: str, seed: int, battery_identity: dict,
                  arm: str | None, initialization_artifact_digest: str | None,
                  trained_run: dict | None, generation_protocol_fingerprint: str | None,
@@ -251,14 +226,7 @@ def build_result(*, scored: dict, label: str, seed: int, battery_identity: dict,
     return result
 
 
-def build_parser() -> argparse.ArgumentParser:
-    """The scorer's CLI, separately constructible.
-
-    Split out of `main` so a preflight can exercise the REAL parser against
-    the argv a driver will actually build. When it lived inline, the only way
-    to discover that it rejected an arm id was to run it -- which happens at
-    stage H, after ten hours of training.
-    """
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--generations", required=True, type=Path,
                     help="uncapped_eval.py --out-dir for this probe")
@@ -269,19 +237,13 @@ def build_parser() -> argparse.ArgumentParser:
                     help="the TRAINING seed of the scored checkpoint")
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--per-sample", type=Path, default=None)
-    ap.add_argument("--arm", default=None, type=arm_label,
-                    help="the arm identity to record, in the CALLER's "
-                         "vocabulary; see arm_label")
+    ap.add_argument("--arm", default=None, choices=("incumbent", "treatment"))
     ap.add_argument("--init-digest", default=None,
                     help="the arm initialization's artifact_digest")
     ap.add_argument("--trained-run", type=Path, default=None,
                     help="the probe's run_completion.json, bound as run identity")
     ap.add_argument("--generation-fingerprint", default=None)
-    return ap
-
-
-def main() -> None:
-    args = build_parser().parse_args()
+    args = ap.parse_args()
 
     battery = (REPO_ROOT / args.battery) if not args.battery.is_absolute() \
         else args.battery
