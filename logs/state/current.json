@@ -133,7 +133,7 @@
    "latest_attempt": "attempt66",
    "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
    "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S.",
-   "stage_h_defect": "REPAIRED at $0 after the run (--arm validated C1's role names; it now validates a label's shape, and build_parser() is separable so a preflight exercises the real parser). Repairing it authorizes no rerun.",
+   "stage_h_defect": "REPAIRED at $0 on the CALLER's side: the driver no longer passes --arm, whose vocabulary is C1's two roles. Widening the scorer instead moved a digest C1's completed preregistration binds (11 -> 23 suite failures); it is restored byte for byte. The driver's scorer_preflight sent four of the real call's eight flags and now sends all of them. Authorizes no rerun.",
    "probes_trained": 9,
    "probes_evaluated": 0,
    "checkpoints_preserved": 0,

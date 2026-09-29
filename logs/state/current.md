@@ -1863,14 +1863,36 @@ static checks could not reach: an argparse `choices` constraint inside a
 the scorer accepted C1's two role names. Nothing in the driver's imports,
 names or digests can see another process's parser.
 
-**Repaired, with the check that would have caught it.** `--arm` records a
-label and no consumer keys off its value, so it now validates *shape* rather
-than membership in C1's pair, and `build_parser()` is separable from `main()`
-so a preflight can exercise the real parser against the real argv. Both
-mutations — the original `choices` restored, and a driver flag the scorer
-does not define — are caught at `$0` in milliseconds. This does **not**
-authorize a rerun; it means the next authorized attempt does not buy this
-defect again.
+**Repaired — on the caller's side, after I first repaired the wrong file.**
+My first fix widened the scorer's `--arm` to accept any label. That was
+wrong: `score_c1_confirmation.py` is named by **C1's frozen executable
+closure and its execution preregistration**, and by C3's closure and
+C2-behavioural's grant proposal. Editing it moved a digest a **completed GO
+experiment** binds, and the closeout suite went from 11 failures to 23 —
+thirteen new ones, the whole candidate/closure/preregistration family,
+every one caused by that edit. The scorer is restored byte for byte.
+
+The repair now lives where C3 owns it: **the driver no longer passes
+`--arm` at all.** That flag's vocabulary is C1's two *roles*; C3 has three
+*arms*. C3 needs nothing from it — `--label` is the probe id, which carries
+the arm, and the driver keys `(arm, seed)` off the **training** record,
+never off the scorer's output.
+
+**The gate that should have caught it already existed.** The driver has a
+`scorer_preflight` stage. It passed on attempt66. It sent **four** flags
+where the real stage-H call sent **eight** — and a flag the preflight never
+sends is a flag it cannot prove the scorer accepts. That is the actual
+defect: not a missing gate, a gate supplying its own inputs. It now sends
+every flag the real call sends and fails loudly on argparse exit 2
+specifically. Verified by running the repaired command for real against the
+frozen battery: exit 1, reaches `no generations for [...]`, zero argparse
+errors.
+
+Two `$0` checks added: no call site may pass `--arm`, and the preflight's
+flag set must be a **superset** of the real call's. Both by AST over every
+call site — the driver invokes the scorer twice, and an index-based slice
+grabbed the preflight one. This does **not** authorize a rerun; it means the
+next authorized attempt does not buy this defect again.
 
 **The checkpoints.** All nine durability uploads were refused:
 
