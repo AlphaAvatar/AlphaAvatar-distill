@@ -9,8 +9,29 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** Zero pods and zero network
-volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
+**FORMAL C3 IS RUNNING AND BILLING: `attempt75`, pod `ib1q01gn8xuecn`, secure
+L40S at `$1.09/h`.** Launched 2026-09-29T17:58:58Z. Watchdog bound at 1201
+minutes = `$21.81`; authorized ceiling `$22.1452` derived from the live
+securePrice, expected `$17.1072`, per-session envelope `$30.00`. Every setup
+marker passed — `TESTS_OK:9s`, `AUTHORIZATION_OK`, `SETUP_DONE` — and the
+driver is detached. **Do not kill the acquisition loop**: it owns the launcher,
+which owns the watchdog and the pod. Poll `myself { pods }` at every check-in
+and tear the pod down when the session reaches a terminal state.
+
+**Four chains were consumed at `$0` before it.** attempts **71–74** each passed
+every pre-provider gate — including the new `durable_capacity_gate` — and were
+then refused at the create call with *"no longer any instances available"*.
+That is the ordinary behaviour of `Low` stock on this account, already seen at
+attempts 67–69. Each is a consumed one-use chain under P12.1, not a retried
+experiment: no provider resource existed and nothing billed.
+
+**One operational defect is recorded and NOT yet repaired**, because the fix
+must not touch a running script: `c3_acquire.sh`'s `$0` capacity watch sleeps
+only when the approved tier is *dry*, and `Low` stock that never converts reads
+as usable. So the loop rebuilt a chain roughly every 66 seconds and would have
+spent all forty of its rounds in about 44 minutes rather than pacing them over
+hours. attempt75 acquired on round 5, so it cost nothing this time. A backoff
+after a capacity refusal is owed before the next acquisition run.
 
 **attempt66 stands closed with no result, and ONE FRESH FORMAL C3 ATTEMPT IS
 AUTHORIZED.** attempt66 trained all **nine** formal probes on L40S over 12.5
