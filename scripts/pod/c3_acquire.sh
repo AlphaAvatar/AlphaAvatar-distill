@@ -25,7 +25,14 @@ cd /home/ecs-user/AlphaAvatar-distill
 export PYTHONPATH=src:scripts:scripts/pod:scripts/autoinit
 export PYTHONHASHSEED=7
 
-BASE=/tmp/claude-1000/-home-ecs-user-AlphaAvatar-distill/8947c14c-ec2f-404d-b4cb-f424b0899168/scratchpad
+# Session-scoped, and REQUIRED rather than defaulted. This line held one
+# session's literal scratchpad uuid, so a later session running the same script
+# wrote its launcher logs and its per-attempt scratch into a directory belonging
+# to a session that had ended. A hardcoded session name has already cost this
+# project two paid runs; the fix is to make the caller state it, and to refuse
+# rather than guess.
+BASE="${C3_SCRATCH_BASE:?set C3_SCRATCH_BASE to THIS session's scratchpad directory}"
+mkdir -p "$BASE" || { echo "cannot create $BASE" >&2; exit 2; }
 LOG="$BASE/c3_acquire.log"
 say() { echo "[$(date -u +%H:%M:%S)] $*" >> "$LOG"; }
 

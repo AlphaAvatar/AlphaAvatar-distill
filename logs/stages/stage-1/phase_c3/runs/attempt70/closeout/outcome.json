@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt70",
+ "experiment_id": "phase_c3",
+ "status": "PREPARED_NEVER_AUTHORIZED_RETIRED_AT_ZERO",
+ "_what_this_is": "A chain that got no further than its grant. The acquisition loop was stopped after attempt66 reached a terminal scientific state, so attempt70 never received a launch-bound readiness record, never had an authorization issued, never had a bundle staged and never contacted the provider. It is retired here rather than continued.",
+ "_why_not_continued": "Its grant is a verbatim copy of attempt69's and cites the maintainer decision of 2026-09-28. The 2026-09-30 decision that authorizes the next attempt is a DIFFERENT decision with different terms -- it is a new measurement after a completed formal attempt, conditioned on a storage cleanup and a capacity verification that did not exist on 2026-09-28. The executable closure has also moved since, for the stage-H repair and the new durable-capacity gate. A fresh chain is built under attempt71; this one is not amended to look like it.",
+ "gpu_type_id": null,
+ "launcher_exit": null,
+ "launcher_message": "never invoked",
+ "stages_run": [],
+ "measurement_began": false,
+ "provider_resource_created": false,
+ "pod_ids": [],
+ "cost": {
+  "actual_usd": 0.0,
+  "_why_zero": "no pod was ever created, so nothing billed"
+ },
+ "final_provider_state": "nothing to tear down; no resource was created",
+ "_chain_disposition": "CONSUMED and closed, at $0. The chain is one-use and must not be reused or revived; the incrementing attempt number is bookkeeping, not a scope expansion.",
+ "_closed_by": "the 2026-09-30 session, as part of building attempt71's chain. Closing it is bookkeeping, not a new attempt."
+}

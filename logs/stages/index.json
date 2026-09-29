@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 25,
-  "single_stage": 25,
+  "experiment_total": 26,
+  "single_stage": 26,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -149,10 +149,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 10,
-    "experiments_with_logs": 10,
-    "runs": 92,
-    "canonical_configs": 12,
+    "experiments": 11,
+    "experiments_with_logs": 11,
+    "runs": 162,
+    "canonical_configs": 13,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -168,7 +168,8 @@
     "configs/validation/c2_full_search_cuda.json",
     "configs/validation/c2_full_search_performance.json",
     "configs/validation/c2_state_eval_certification.json",
-    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json"
+    "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+    "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
    ],
    "canonical_data_manifests": [
     "data/warmup/holdout_v1.manifest.json"
@@ -644,6 +645,39 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 because it selects a Stage-1 initialization, even though its instrument is a Stage-3 recovery probe. It is separate from `phase_c2_full_search` because the search ranks on frozen cheap metrics and explicitly cannot promote, and separate from `phase_c2_replay` because that reconstructed artifacts and decided nothing. This is the only experiment that may name a C2 incumbent."
+  },
+  {
+   "experiment_id": "phase_c3",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "EXECUTED, NO RESULT \u2014 nine probes trained, none evaluated, none preserved",
+   "title": "Phase C3 \u2014 ATTENTION causal-KL isolation, 3 arms x 3 seeds",
+   "question": "Does initializing ATTENTION with `attention.causal_kl_v1` beat the incumbent `attention.activation_importance_v1` after the same frozen 0.86M recovery? Three arms -- the incumbent A, and causal-KL at two calibration protocols B1 and B3 -- over three fresh paired seeds, each evaluated once on `c1_confirmation_v1`. The primary contrast is A vs B1; the B1/B3 comparison is secondary and names no winner.",
+   "canonical_path": "logs/stages/stage-1/phase_c3",
+   "canonical_config": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+     "says": "the frozen three-arm design: arms, seeds, recovery recipe, battery, estimands, bootstrap and decision rule",
+     "field": "stage",
+     "equals": "C3"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json",
+     "says": "the formal attempt: all nine probes trained on L40S over 12.5 hours, stage H failed before evaluating any, and all nine checkpoints were refused by the durable backend for quota"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c3/runs/attempt66/evidence/c3_arm_identities.json",
+     "says": "the one scientific fact attempt66 established: the three initializations are distinct at full scale, so B3 cannot stand in for B1"
+    },
+    {
+     "path": "logs/maintenance/inventories/archival_retirement_20260930.json",
+     "says": "the storage retirement that made a fresh attempt possible, and the fresh-oid capacity measurement that proves it"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 because it decides a Stage-1 ATTENTION initialization, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c2_behavioural` is Stage 1. It was declared a stage AREA rather than an experiment while it held only engineering validations and no runs; that stopped being true once it acquired a frozen preregistration and a formal attempt, and the area declaration was why its README said `Runs: none recorded` beside seventy registered runs. The engineering validations filed beneath it keep their own rows and remain `engineering`: they train nothing and decide nothing."
   },
   {
    "experiment_id": "batching_refactor_cuda",

@@ -702,6 +702,54 @@ STAGE_1 = [
             "incumbent."),
     ),
     dict(
+        id="phase_c3",
+        kind="experiment",
+        stage_id="1",
+        status="EXECUTED, NO RESULT — nine probes trained, none evaluated, none preserved",
+        title="Phase C3 — ATTENTION causal-KL isolation, 3 arms x 3 seeds",
+        question=("Does initializing ATTENTION with `attention.causal_kl_v1` "
+                  "beat the incumbent `attention.activation_importance_v1` "
+                  "after the same frozen 0.86M recovery? Three arms -- the "
+                  "incumbent A, and causal-KL at two calibration protocols B1 "
+                  "and B3 -- over three fresh paired seeds, each evaluated "
+                  "once on `c1_confirmation_v1`. The primary contrast is A vs "
+                  "B1; the B1/B3 comparison is secondary and names no winner."),
+        canonical_config=("logs/stages/stage-1/phase_c3/plans/"
+                          "c3_preregistration.json"),
+        evidence=[
+            E("logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+              "the frozen three-arm design: arms, seeds, recovery recipe, "
+              "battery, estimands, bootstrap and decision rule",
+              field="stage", equals="C3"),
+            E("logs/stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json",
+              "the formal attempt: all nine probes trained on L40S over 12.5 "
+              "hours, stage H failed before evaluating any, and all nine "
+              "checkpoints were refused by the durable backend for quota"),
+            E("logs/stages/stage-1/phase_c3/runs/attempt66/evidence/"
+              "c3_arm_identities.json",
+              "the one scientific fact attempt66 established: the three "
+              "initializations are distinct at full scale, so B3 cannot stand "
+              "in for B1"),
+            E("logs/maintenance/inventories/archival_retirement_20260930.json",
+              "the storage retirement that made a fresh attempt possible, and "
+              "the fresh-oid capacity measurement that proves it"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_c3",
+        classification_reason=(
+            "Stage 1 because it decides a Stage-1 ATTENTION initialization, "
+            "even though its instrument is a Stage-3 recovery probe -- the "
+            "same reason `phase_c2_behavioural` is Stage 1. It was declared a "
+            "stage AREA rather than an experiment while it held only "
+            "engineering validations and no runs; that stopped being true once "
+            "it acquired a frozen preregistration and a formal attempt, and "
+            "the area declaration was why its README said `Runs: none "
+            "recorded` beside seventy registered runs. The engineering "
+            "validations filed beneath it keep their own rows and remain "
+            "`engineering`: they train nothing and decide nothing."),
+    ),
+    dict(
         id="batching_refactor_cuda",
         kind="engineering",
         stage_id="1",

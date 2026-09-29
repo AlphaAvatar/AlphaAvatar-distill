@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-29. The human view. Every number here has an owner named
+**Updated:** 2026-09-30. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -12,16 +12,46 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running and nothing is billing.** Zero pods and zero network
 volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
 
-**Formal C3 ran, and is STOPPED FOR A MAINTAINER DECISION on durable
-storage.** attempt66 trained all **nine** formal probes on L40S over 12.5
+**attempt66 stands closed with no result, and ONE FRESH FORMAL C3 ATTEMPT IS
+AUTHORIZED.** attempt66 trained all **nine** formal probes on L40S over 12.5
 hours for `$13.67` and passed **both** frozen digest gates. Then two things
 happened: stage H exited 2 on a scorer CLI argument, and every one of the nine
 2.22 GiB checkpoints was refused by Hugging Face for private-storage quota. So
 there is a trained nine-probe matrix with **zero** evaluations and **zero**
-surviving weights. Formal measurement has begun, so §13 freezes the session —
-no retry, no resume, no pooling, and no inventing a resume contract for
-"re-evaluate checkpoints that no longer exist". See
+surviving weights, and **no C3 verdict**. It is not resumed, not pooled and not
+reinterpreted as a partial measurement. See
 [C3 — nine probes trained, no result](#c3--nine-probes-trained-no-result).
+
+**The maintainer decision of 2026-09-30 authorizes a NEW measurement**, not a
+retry: the same three arms, the same three preregistered seeds, the same digest
+gates, recipe, battery, scoring contract, estimands, bootstrap and decision
+rule. No fourth seed, no protocol change, no reuse of attempt66. **C4 remains
+NOT AUTHORIZED** and no budget increase was granted.
+
+**Storage was the blocker and it is cleared — measured, not estimated.**
+Fourteen E1 scaling arms were permanently retired from the relay under the
+consumer rule (AGENTS.md P8.4): `31.0869 GiB`, every one a completed and validly
+scored arm of an experiment that closed on 2026-08-02, with its config, run
+manifest, holdout, behaviour and GSM8K evaluations all git-tracked and its
+content hash recorded in a tombstone. The five arms any record names as a
+checkpoint source or behavioural anchor were **kept**. Headroom went `1.4374
+GiB` → `32.5244 GiB`, and the LFS batch endpoint was then asked with **fresh
+random oids** — an oid that already exists dedups and returns a false PASS:
+
+```text
+ 2.22 GiB  (one C3 probe)    -> 200, 1/1 granted an upload action
+19.98 GiB  (nine C3 probes)  -> 200, 9/9 granted an upload action
+```
+
+Owner:
+[`archival_retirement_20260930.json`](../maintenance/inventories/archival_retirement_20260930.json).
+
+**That check is now a pre-provider gate, not a fact someone remembers.**
+`durable_capacity_gate` asks the same question at launch, at the measured
+per-probe size (`2,384,236,592` bytes, from attempt66's own preservation
+payload) and at the true nine-probe total, and refuses at `$0`. AGENTS.md names
+this failure twice — C1 attempt 18 lost six probes to it, C3 attempt66 lost
+nine — and nothing had ever asked.
 
 **Padded tensor batching is not invariant; parallel B=1 item forwards ARE.**
 Bitwise identical to sequential B=1 on both objects, repeatable, independent of
@@ -31,10 +61,18 @@ into `main`**. In one line: a batched forward is not the same computation as a
 solo one because a GEMM whose reduction is deep relative to its output width
 reduces in a shape-dependent order, and in bf16 that moves an FFN top-k in most
 layers. See
-[C3 — the refactor is on review](#c3--the-refactor-is-on-review-and-c3-has-not-started)
+[C3 — the operator, the pilots, and the formal run](#c3--the-operator-the-pilots-and-the-formal-run)
 below. **Nothing was changed in response** — no default, no identity semantics,
-no operator definition. **C3 itself remains NOT STARTED and its `$25.00` stage
-envelope is untouched.**
+no operator definition.
+
+*This paragraph used to end "C3 itself remains NOT STARTED and its `$25.00`
+stage envelope is untouched", which contradicted this file's own stage ladder
+two screens down. Both halves were stale: C3 executed on 2026-09-28, and the
+`$25.00` envelope was superseded by the 2026-09-28 amendment — the live bound
+is a `$30.00` per-session envelope with the ceiling derived from the selected
+device's live price. C3's state is the ladder's row and
+[Nine probes trained, no result](#nine-probes-trained-no-result); its money is
+the summary table's `project cap` row. Neither is restated here.*
 
 ## Stage ladder
 
@@ -1272,7 +1310,7 @@ floor. A complete valid verdict ends the round.
 
 | | | owner |
 | --- | --- | --- |
-| phase | C0 **COMPLETE**. C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 — **CLOSED WITHOUT PROMOTION** (maintainer decision 2026-09-24): Search-1 DONE and FROZEN, the local Search-2 refinement WITHDRAWN, the full joint re-search COMPLETE with an accepted frozen Top-5, screening complete, and all twelve behavioural probes trained and scored — but the confirmation field mixed evaluation-protocol identities, so **no canonical promotion verdict is claimed and no new incumbent is named**. **B, the frozen C1 treatment, remains the accepted incumbent.** C3 (causal-KL isolation) is **NOT STARTED** and is the next scientific stage | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
+| phase | C0 **COMPLETE**. C1 — fixed-path ATTENTION isolation, **CLOSED by a `GO` verdict**. C2 — **CLOSED WITHOUT PROMOTION** (maintainer decision 2026-09-24): Search-1 DONE and FROZEN, the local Search-2 refinement WITHDRAWN, the full joint re-search COMPLETE with an accepted frozen Top-5, screening complete, and all twelve behavioural probes trained and scored — but the confirmation field mixed evaluation-protocol identities, so **no canonical promotion verdict is claimed and no new incumbent is named**. **B, the frozen C1 treatment, remains the accepted incumbent.** C3 (causal-KL isolation) **EXECUTED and returned no result** — nine probes trained, none evaluated, none preserved; the row in the stage ladder owns its state | [`phase_c2/plans/phase_c2_full_search_protocol.json`](../stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json) · [`phase_c1/plans/phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md) |
 | replay | **MEASURED — 2/2 PASS**, for the third time (attempts 9, 17, 18). Passing replay is not a result: 9 and 17 are **NO DECISION**, pre-treatment aborts that measured no endpoint. Attempt 18 is the only attempt that decided anything | [`attempt18/closeout/outcome.json`](../stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json) |
 | treatment, endpoint | **MEASURED** — six probes trained and six evaluated on the frozen battery; the frozen Stage-I rule returned **`GO`**. Figures in the block below | [`attempt18/evidence/c1_decision.json`](../stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json) |
 | launch chain | **every C2 chain is consumed and nothing is prepared** — Search-1 attempts 1–4, baseline completion 5–8, and behavioural 1–14. **No C2 chain may be built:** the stage is closed and no further C2 scientific spend is authorized. No further C1 attempt is authorized or prepared either; a complete verdict ended that round. The **C3 batching-adoption pilot is authorized** (`$5.00` all-in) but has no readiness record, authorization document or bundle yet; **formal C3 has no chain of any kind** | [`phase_c2_baseline_completion/runs/attempt8/governance/`](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/governance/) |

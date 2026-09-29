@@ -726,6 +726,8 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
 
     seeds = CS.recovery_seeds()
     scorer = REPO / "scripts/autoinit/score_c1_confirmation.py"
+    #: Bound, not incidental: the superset assertion at the end reads this.
+    exercised: set[str] = set()
     with tempfile.TemporaryDirectory() as tmp:
         for arm in CS.arm_ids():
             name = f"autoinit.v1.phase_c3.{arm}.{seeds[0]}"
@@ -736,6 +738,7 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
                     "--init-digest", "0" * 64,
                     "--trained-run", f"{tmp}/rc.json",
                     "--generation-fingerprint", "f" * 16]
+            exercised |= {a for a in argv if a.startswith("--")}
             r = subprocess.run(argv, capture_output=True, text=True, timeout=120)
             assert r.returncode != 2, (
                 f"the C1 scorer rejects the argv the C3 driver builds for "
@@ -766,6 +769,18 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
     assert passed <= defined, (
         f"the driver passes flags the C1 scorer does not define: "
         f"{sorted(passed - defined)}")
+
+    #: And the subprocess above must EXERCISE every flag the driver sends.
+    #: Its argv is written out here rather than synthesized from the driver's
+    #: (most of the driver's elements are runtime values, not constants), and
+    #: a transcription that drifts is a check that stops covering what it
+    #: claims to: reintroducing `--arm` in the driver left this test green,
+    #: because this test was still sending its own older argv. So the
+    #: transcription is now BOUND to the driver rather than trusted.
+    assert passed <= exercised, (
+        f"the driver sends {sorted(passed - exercised)} to the C1 scorer and "
+        "this check never does, so it cannot prove the scorer accepts them. "
+        "Add them to the argv above — that is the whole subject of this test.")
 
 
 def test_the_driver_does_not_pass_c1s_arm_vocabulary():

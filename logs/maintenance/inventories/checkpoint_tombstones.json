@@ -34,10 +34,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 23,
-  "active": 21,
-  "active_retired_bytes": 55918973445,
-  "active_retired_human": "52.079 GiB",
+  "tombstones_total": 37,
+  "active": 35,
+  "active_retired_bytes": 89298262997,
+  "active_retired_human": "83.165 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -45,7 +45,7 @@
   ],
   "withdrawn_bytes": 20361115,
   "physical_vs_active": "The 2026-08-18 cleanup physically removed SEVEN storage units totalling 3.660 GiB, and logs/storage_measurements.json measures that on disk. Two of those tombstones were later WITHDRAWN as a class error -- podsim_quarantine_residue and stage3_ladder_uniform_local_cache -- because each names a destination a routine command recreates by design. The deletions still happened and the bytes were still freed; what is no longer asserted is that those paths are retired. So the physical count (7 units, 3.660 GiB) and the ACTIVE-tombstone count (16 units, 3.6406 GiB) legitimately differ, and neither figure is a correction of the other.",
-  "_size_coverage": "10 of 21 active entries carry a size; the older ones predate the field and are not back-filled, so the byte total is a LOWER BOUND on what has been retired."
+  "_size_coverage": "24 of 35 active entries carry a size; the older ones predate the field and are not back-filled, so the byte total is a LOWER BOUND on what has been retired."
  },
  "tombstones": [
   {
@@ -2291,6 +2291,706 @@
    "reconstruction_recipe": "configs/stage3/e2/e2_d1_s{a,b}_pca.json from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint, the recorded seed and the frozen ladder corpus.",
    "expected_reconstruction_cost": "a paid GPU session per arm; not planned and not needed",
    "capability_lost": "BOTH the weights and the resume state of these intermediate steps are gone. E2 phase 1 is a closed diagnostic outside the current lineage; its accepted result is the recorded finding, not these tensors. Re-running the config from the Stage-1 init would produce a NEW trajectory, not this one."
+  },
+  {
+   "canonical_id": "e1_r0250k_sa_pca",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0250k_sa_pca/step_000324/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r0250k rung, seed sa, PCA (qwen3_0p6b_init_v0) init",
+   "weights_sha256": "649aba67e5967ca6c53d704c19de5dc8d6671a12be5eead864c58978c69901a1",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0250k_sa_pca/step_000324/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "649aba67e5967ca6c53d704c19de5dc8d6671a12be5eead864c58978c69901a1"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0250k_sa_pca.json",
+    "artifacts/eval/e1/e1_r0250k_sa_pca_holdout.json",
+    "artifacts/eval/e1/e1_r0250k_sa_pca_behavior.json",
+    "artifacts/eval/e1/e1_r0250k_sa_pca_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0250k_sa_pca_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0250k_sa_pca.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0250k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0250k_sa_rand/step_000324/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r0250k rung, seed sa, random_baseline init",
+   "weights_sha256": "ec92bcb9e9e2a9cee5b31a305cf120bb9c32591e0a84534cdb7aaaacf4829b49",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0250k_sa_rand/step_000324/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "ec92bcb9e9e2a9cee5b31a305cf120bb9c32591e0a84534cdb7aaaacf4829b49"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0250k_sa_rand.json",
+    "artifacts/eval/e1/e1_r0250k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0250k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0250k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0250k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0250k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0250k_sb_pca",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0250k_sb_pca/step_000324/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r0250k rung, seed sb, PCA (qwen3_0p6b_init_v0) init",
+   "weights_sha256": "76a528c91108098ca0da29a653ce16a67785885465de32bc6835621d57dd9511",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0250k_sb_pca/step_000324/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "76a528c91108098ca0da29a653ce16a67785885465de32bc6835621d57dd9511"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0250k_sb_pca.json",
+    "artifacts/eval/e1/e1_r0250k_sb_pca_holdout.json",
+    "artifacts/eval/e1/e1_r0250k_sb_pca_behavior.json",
+    "artifacts/eval/e1/e1_r0250k_sb_pca_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0250k_sb_pca_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0250k_sb_pca.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0250k_sb_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0250k_sb_rand/step_000324/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r0250k rung, seed sb, random_baseline init",
+   "weights_sha256": "f37aa66ca0e9685faa41eae9790f28f8637de525769593926e56806e51e57010",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0250k_sb_rand/step_000324/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "f37aa66ca0e9685faa41eae9790f28f8637de525769593926e56806e51e57010"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0250k_sb_rand.json",
+    "artifacts/eval/e1/e1_r0250k_sb_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0250k_sb_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0250k_sb_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0250k_sb_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0250k_sb_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0460k_sa_pca",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0460k_sa_pca/step_000570/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r0460k rung, seed sa, PCA (qwen3_0p6b_init_v0) init",
+   "weights_sha256": "99323654e72ce40e34edd6dedf5f8ae99932429d09698678ff8763f754a0a77b",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0460k_sa_pca/step_000570/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "99323654e72ce40e34edd6dedf5f8ae99932429d09698678ff8763f754a0a77b"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0460k_sa_pca.json",
+    "artifacts/eval/e1/e1_r0460k_sa_pca_holdout.json",
+    "artifacts/eval/e1/e1_r0460k_sa_pca_behavior.json",
+    "artifacts/eval/e1/e1_r0460k_sa_pca_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0460k_sa_pca_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0460k_sa_pca.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0460k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0460k_sa_rand/step_000570/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r0460k rung, seed sa, random_baseline init",
+   "weights_sha256": "8647f9e53a1a0b584ca2219a63aca0009a34de34b5063fee10a7b5d8db37b4fa",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0460k_sa_rand/step_000570/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "8647f9e53a1a0b584ca2219a63aca0009a34de34b5063fee10a7b5d8db37b4fa"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0460k_sa_rand.json",
+    "artifacts/eval/e1/e1_r0460k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0460k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0460k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0460k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0460k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0460k_sb_pca",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0460k_sb_pca/step_000570/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r0460k rung, seed sb, PCA (qwen3_0p6b_init_v0) init",
+   "weights_sha256": "36033128bd75a39c4548c9aca45fef7a4dd28887123ec4aa276c90db26626427",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0460k_sb_pca/step_000570/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "36033128bd75a39c4548c9aca45fef7a4dd28887123ec4aa276c90db26626427"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0460k_sb_pca.json",
+    "artifacts/eval/e1/e1_r0460k_sb_pca_holdout.json",
+    "artifacts/eval/e1/e1_r0460k_sb_pca_behavior.json",
+    "artifacts/eval/e1/e1_r0460k_sb_pca_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0460k_sb_pca_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0460k_sb_pca.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0460k_sb_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0460k_sb_rand/step_000570/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r0460k rung, seed sb, random_baseline init",
+   "weights_sha256": "e03adf8e8d5a7a9685e8dfa42eec840f5cc0b5a689ec9ab89b6e0cb7c8354801",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0460k_sb_rand/step_000570/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "e03adf8e8d5a7a9685e8dfa42eec840f5cc0b5a689ec9ab89b6e0cb7c8354801"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0460k_sb_rand.json",
+    "artifacts/eval/e1/e1_r0460k_sb_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0460k_sb_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0460k_sb_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0460k_sb_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0460k_sb_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0860k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0860k_sa_rand/step_001023/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r0860k rung, seed sa, random_baseline init",
+   "weights_sha256": "a847cef47adcc4230d184d95407322e7df3da8a1151e1a98d286ccc24f3fc6bd",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0860k_sa_rand/step_001023/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "a847cef47adcc4230d184d95407322e7df3da8a1151e1a98d286ccc24f3fc6bd"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0860k_sa_rand.json",
+    "artifacts/eval/e1/e1_r0860k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0860k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0860k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0860k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0860k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r0860k_sb_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r0860k_sb_rand/step_001023/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r0860k rung, seed sb, random_baseline init",
+   "weights_sha256": "11cd2ff75bdae2d1dbee7339da7457acaac9f36c4f10e6dc4f0a0c59a41e02e2",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r0860k_sb_rand/step_001023/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "11cd2ff75bdae2d1dbee7339da7457acaac9f36c4f10e6dc4f0a0c59a41e02e2"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r0860k_sb_rand.json",
+    "artifacts/eval/e1/e1_r0860k_sb_rand_holdout.json",
+    "artifacts/eval/e1/e1_r0860k_sb_rand_behavior.json",
+    "artifacts/eval/e1/e1_r0860k_sb_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r0860k_sb_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r0860k_sb_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r1600k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r1600k_sa_rand/step_001761/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r1600k rung, seed sa, random_baseline init",
+   "weights_sha256": "2e8be4b3289fe9b5c9c8475c543ff8fa83abc582fdc0d349da8aa0262d0436a1",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sa_rand/step_001761/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "2e8be4b3289fe9b5c9c8475c543ff8fa83abc582fdc0d349da8aa0262d0436a1"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r1600k_sa_rand.json",
+    "artifacts/eval/e1/e1_r1600k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r1600k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r1600k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r1600k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r1600k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r1600k_sb_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r1600k_sb_rand/step_001761/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260801,
+   "scientific_role": "E1 data-scaling arm: r1600k rung, seed sb, random_baseline init",
+   "weights_sha256": "9d0b499831689bd1403a8a115ab605fea18c3b7f62ebbec9ed4c049dd7bbd10d",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r1600k_sb_rand/step_001761/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "9d0b499831689bd1403a8a115ab605fea18c3b7f62ebbec9ed4c049dd7bbd10d"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r1600k_sb_rand.json",
+    "artifacts/eval/e1/e1_r1600k_sb_rand_holdout.json",
+    "artifacts/eval/e1/e1_r1600k_sb_rand_behavior.json",
+    "artifacts/eval/e1/e1_r1600k_sb_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r1600k_sb_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r1600k_sb_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r2960k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r2960k_sa_rand/step_002916/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r2960k rung, seed sa, random_baseline init",
+   "weights_sha256": "22374d62c8ae1d65c42d2a968688d9b556e7f14ac6e1640f211c4afb89c8a03f",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r2960k_sa_rand/step_002916/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "22374d62c8ae1d65c42d2a968688d9b556e7f14ac6e1640f211c4afb89c8a03f"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r2960k_sa_rand.json",
+    "artifacts/eval/e1/e1_r2960k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r2960k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r2960k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r2960k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r2960k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "canonical_id": "e1_r5500k_sa_rand",
+   "historical_paths": [],
+   "store": "relay",
+   "relay_path": "e1_scaling_20260801/e1_r5500k_sa_rand/step_004412/model/model.safetensors",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "E1",
+   "seed": 20260726,
+   "scientific_role": "E1 data-scaling arm: r5500k rung, seed sa, random_baseline init",
+   "weights_sha256": "3b823299729a3244939091573c896d7c7b5b018996f300d4fb258eb451979fbd",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.2205 GiB",
+   "n_files": 1,
+   "members": [
+    {
+     "path": "e1_scaling_20260801/e1_r5500k_sa_rand/step_004412/model/model.safetensors",
+     "size_bytes": 2384234968,
+     "sha256": "3b823299729a3244939091573c896d7c7b5b018996f300d4fb258eb451979fbd"
+    }
+   ],
+   "references_at_deletion": [
+    "configs/stage3/e1/e1_r5500k_sa_rand.json",
+    "artifacts/eval/e1/e1_r5500k_sa_rand_holdout.json",
+    "artifacts/eval/e1/e1_r5500k_sa_rand_behavior.json",
+    "artifacts/eval/e1/e1_r5500k_sa_rand_gsm8k.json",
+    "artifacts/stage3/e1_results.json",
+    "artifacts/stage3/e1_consolidated.json",
+    "artifacts/stage3/checkpoint_inventory.json",
+    "logs/maintenance/inventories/archival_retirement_20260930.json"
+   ],
+   "deletion_criterion": "archival_no_authorized_consumer",
+   "deletion_criterion_meaning": "AGENTS.md P8.4: the experiment is complete and validly scored, its evidence is durable and git-tracked, and no currently authorized computation reads these weights. NOT a byte-identical duplicate -- no copy survives anywhere.",
+   "reason_physical_weights_deleted": "E1 completed 2026-08-02. This arm's accepted contribution is its SCORE on the holdout, behaviour and GSM8K evaluations, all of which are git-tracked; the weights themselves have no remaining consumer. Retired on the maintainer decision of 2026-09-30 to free Hugging Face private capacity for formal C3's nine probes. No record names this arm as a checkpoint source or behavioural anchor -- the arms that are so named were kept, and are listed under kept_and_why in the authorization.",
+   "canonical_surviving_evidence": "artifacts/eval/e1/e1_r5500k_sa_rand_*.json and artifacts/stage3/e1_results.json",
+   "relay_hash_verified": true,
+   "deterministic_reconstruction_possible": true,
+   "reconstruction_recipe": "retrain from artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with configs/stage3/e1/e1_r5500k_sa_rand.json; verify against weights_sha256 above",
+   "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
+   "frozen_results_location": "artifacts/stage3/e1_results.json",
+   "deleted_utc": "2026-09-30T00:00:00+00:00"
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."

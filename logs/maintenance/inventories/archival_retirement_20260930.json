@@ -1,0 +1,82 @@
+{
+ "schema": "aadistill.archival_retirement/v1",
+ "date": "2026-09-30",
+ "what_this_is": "A REMOTE ARCHIVAL RETIREMENT. Unlike logs/shared/analyses/autoinit_relay_retention_20260822.json, the objects below have NO byte-identical local copy: after this runs, no copy of these weights exists anywhere. What survives is the binding record -- identity, content hash, training config, run manifest and every scored evaluation -- all git-tracked. The maintainer authorized exactly this trade on 2026-09-30.",
+ "authorised_by": "Maintainer decision, 2026-09-30. Verbatim scope: delete historical large checkpoints where (a) the experiment/probe is completed and validly scored, (b) its measurements, per-sample evidence, descriptors, identities, hashes, configs, manifests and closeout records are already durable, (c) no currently authorized downstream consumer requires the checkpoint WEIGHTS, and (d) deletion removes no canonical release artifact, no irreplaceable lineage/input artifact, and no checkpoint still required for an unscored or resumable measurement. Decided under AGENTS.md P8.4 (artifacts follow consumers, not campaigns). Purpose: reclaim enough Hugging Face private capacity for formal C3's nine 2.22 GiB probes.",
+ "supersedes_rule": "The 2026-08-22 retirement refused every object without a byte-identical local copy, which is why e1_scaling_20260801 was recorded then as 'the largest and most obviously obsolete group, and untouchable for exactly this reason'. That rule was stricter than the maintainer's: it protected bytes by copy-count rather than by consumer. This retirement applies the consumer rule instead. The sole-copy rule is NOT repealed for anything outside the set below.",
+ "method": "HfApi.permanently_delete_lfs_files(rewrite_history=True), selected by exact file_oid identity, executed by scripts/autoinit/retire_relay_copies.py --archival-authorization. Ordinary deletion reclaims nothing on this account -- measured twice -- because LFS is billed including history.",
+
+ "selection_rule": "Within e1_scaling_20260801, retire every arm that NO record names as a checkpoint source or behavioural anchor. Keep every arm that any record does name.",
+ "kept_and_why": {
+  "e1_r0860k_sb_pca": "behavioural anchor of the 0.86M probe rung and the provenance of the current recovery recipe (scripts/experiments/phase_c2/behavioural_governance.py:157). Its seed-sa twin was already deleted on maintainer instruction 2026-08-15; this is the last copy of the pair and it stays.",
+  "e1_r1600k_sa_pca": "named as the checkpoint source by scripts/training/register_e4.py, scripts/evaluation/register_e6.py, scripts/training/build_e8b_configs.py and scripts/pod/e7_setup.sh",
+  "e1_r1600k_sb_pca": "same four consumers as its seed-sa twin",
+  "e1_r2960k_sa_pca": "named as the checkpoint source by scripts/evaluation/register_e6.py",
+  "e1_r5500k_sa_pca": "named as the checkpoint source by scripts/evaluation/register_e6.py"
+ },
+
+ "conditions_checked_per_object": [
+  "the experiment is COMPLETE and the arm was validly scored -- E1 completed 2026-08-02 (logs/state/experiment_index.md), and every retired arm carries a holdout, a behaviour and a GSM8K evaluation in artifacts/eval/e1/",
+  "its evidence is durable and git-tracked -- training config under configs/stage3/e1/, run manifest under artifacts/stage3/rescued/, consolidated results in artifacts/stage3/e1_results.json and e1_consolidated.json, identity and content hash in artifacts/stage3/checkpoint_inventory.json",
+  "no currently authorized downstream consumer reads the WEIGHTS -- no session specification declares the path (checked against every enumerable scripts/pod/autoinit_*_launch.py, not a curated subset), and no scripts/pod/*_setup.sh fetches it",
+  "it is none of: a registry protected class (canonical, control, behavioral_anchor, reproducibility_required), a checkpoint source named by a registration record, or a checkpoint required for an unscored or resumable measurement",
+  "deterministic reconstruction remains possible from the tracked config, and the recorded content hash lets a reconstruction be verified as the same artifact"
+ ],
+
+ "not_touched": {
+  "rule": "Nothing outside e1_scaling_20260801 was considered, because the E1 surplus alone clears the requirement with margin. Over-deleting to a byte target is not authorized and was not done.",
+  "stage3": "26.66 GiB, untouched",
+  "transport/phase_a_attempt12/selected_leaves": "5.55 GiB, untouched AND protected -- autoinit_recovery_continuation_launch declares this path",
+  "transfer/wheelhouse_cu128_cp312 + transfer/wheelhouse_vllm_cp312": "7.42 GiB, untouched -- the offline install path for every paid pod",
+  "permanent_controls": "4.44 GiB, untouched -- protected class",
+  "stage1/qwen3_0p6b_init_v0": "2.22 GiB, untouched -- canonical initialization and a declared C3 relay input",
+  "stage3_recovery_corpus_v2/ladder_uniform + e8_inputs_20260810/calibration_v1": "untouched -- declared C3 relay inputs"
+ },
+
+ "unreadable_launchers_reviewed": {
+  "_how_reviewed": "Neither launcher can build its spec, so its declared relay inputs were read from the source: both lines read `relay_inputs=CALIBRATION_V1`, and autoinit_science_inputs.py:84 defines CALIBRATION_V1 as the single path e8_inputs_20260810/calibration_v1/items.jsonl. That path is kept and is not in the retirement set below.",
+  "autoinit_c2_replay_launch": "ReplaySourceError at spec build: refuses to pin a replay whose deciding files moved (autoinit_c2_replay_launch.py:719). Declares CALIBRATION_V1 only. Phase C2 is CLOSED WITHOUT PROMOTION and authorizes no further spend.",
+  "autoinit_phase_c2_full_search_launch": "CostModelError at spec build: no measured cost for attention.causal_kl_v1 (autoinit_phase_c2_full_search_launch.py:685). Declares CALIBRATION_V1 only. The full joint search is COMPLETE and frozen."
+ },
+
+ "retired": [
+  {"arm": "e1_r0250k_sa_pca",  "path": "e1_scaling_20260801/e1_r0250k_sa_pca/step_000324/model/model.safetensors"},
+  {"arm": "e1_r0250k_sa_rand", "path": "e1_scaling_20260801/e1_r0250k_sa_rand/step_000324/model/model.safetensors"},
+  {"arm": "e1_r0250k_sb_pca",  "path": "e1_scaling_20260801/e1_r0250k_sb_pca/step_000324/model/model.safetensors"},
+  {"arm": "e1_r0250k_sb_rand", "path": "e1_scaling_20260801/e1_r0250k_sb_rand/step_000324/model/model.safetensors"},
+  {"arm": "e1_r0460k_sa_pca",  "path": "e1_scaling_20260801/e1_r0460k_sa_pca/step_000570/model/model.safetensors"},
+  {"arm": "e1_r0460k_sa_rand", "path": "e1_scaling_20260801/e1_r0460k_sa_rand/step_000570/model/model.safetensors"},
+  {"arm": "e1_r0460k_sb_pca",  "path": "e1_scaling_20260801/e1_r0460k_sb_pca/step_000570/model/model.safetensors"},
+  {"arm": "e1_r0460k_sb_rand", "path": "e1_scaling_20260801/e1_r0460k_sb_rand/step_000570/model/model.safetensors"},
+  {"arm": "e1_r0860k_sa_rand", "path": "e1_scaling_20260801/e1_r0860k_sa_rand/step_001023/model/model.safetensors"},
+  {"arm": "e1_r0860k_sb_rand", "path": "e1_scaling_20260801/e1_r0860k_sb_rand/step_001023/model/model.safetensors"},
+  {"arm": "e1_r1600k_sa_rand", "path": "e1_scaling_20260801/e1_r1600k_sa_rand/step_001761/model/model.safetensors"},
+  {"arm": "e1_r1600k_sb_rand", "path": "e1_scaling_20260801/e1_r1600k_sb_rand/step_001761/model/model.safetensors"},
+  {"arm": "e1_r2960k_sa_rand", "path": "e1_scaling_20260801/e1_r2960k_sa_rand/step_002916/model/model.safetensors"},
+  {"arm": "e1_r5500k_sa_rand", "path": "e1_scaling_20260801/e1_r5500k_sa_rand/step_004412/model/model.safetensors"}
+ ],
+ "_retired_is_a_request_not_a_result": "This list names WHAT to retire. Every safety property is re-derived per object by the executing script against the live relay; a path here that fails any check is refused, not deleted. The measured outcome -- oids, bytes, before/after headroom -- is written to quota_measured below by the run itself.",
+
+ "expected": {
+  "n_objects": 14,
+  "gib": 31.0870,
+  "headroom_before_gib": 1.4374,
+  "headroom_after_gib_expected": 32.5244,
+  "requirement_gib": 19.9845,
+  "requirement": "nine C3 probes at 2,383,697,920 bytes each"
+ },
+ "quota_measured": {
+  "_method": "The LFS batch endpoint performs the quota check BEFORE any bytes move, so this costs $0 and stores nothing. Every request used FRESH RANDOM oids: an oid that already exists dedups and returns success regardless of quota, which is a false PASS. Occupancy is the summed LFS inventory across BOTH private repos, which is the billing basis (repo_info.usedStorage lags).",
+  "occupied_before_gib": 91.6946,
+  "occupied_after_gib": 60.6077,
+  "reclaimed_gib": 31.0869,
+  "headroom_before_gib": 1.4374,
+  "headroom_after_gib": 32.5244,
+  "one_probe_2_22_gib": "PASS — 200, 1/1 objects granted an upload action",
+  "nine_probes_19_98_gib": "PASS — 200, 9/9 objects granted an upload action",
+  "largest_single_object_admitted_gib": 32.363,
+  "verdict": "BOTH PASS. Capacity verified for formal C3's nine 2.22 GiB probes, with 12.54 GiB of margin beyond the nine.",
+  "_the_check_that_was_missing": "attempt66 trained nine probes over 12.5 hours for $13.67 and preserved none: every upload was refused for private-storage quota. This call costs seconds and is now a launch precondition rather than a fact someone remembers."
+ },
+ "preserved_metadata": "The small config/tokenizer/run_manifest sidecars of the retired arms remain on the relay as reconstruction and accountability metadata; only the large weight objects are removed."
+}

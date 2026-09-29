@@ -887,6 +887,63 @@ def battery_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     return True, f"battery staged from bytes identical to {canonical}"
 
 
+#: One probe's DURABLE footprint, in bytes. MEASURED, not estimated: this is
+#: `bytes` from attempt66's own preservation payload, which is the size of the
+#: folder `preserve_probe` uploads (weights plus the sidecars), not the size of
+#: model.safetensors alone. All nine of attempt66's probes reported it exactly.
+#: Owner: logs/stages/stage-1/phase_c3/runs/attempt66/evidence/probes/*.training.json
+PROBE_DURABLE_BYTES = 2_384_236_592
+
+
+def durable_capacity_gate(ctx: SessionContext) -> tuple[bool, str]:
+    """Will the relay actually hold the probes this session is about to train?
+
+    **attempt66 is why.** It trained all nine formal probes on L40S over 12.5
+    hours for `$13.67`, and every one of the nine durability uploads was refused
+    with `Private repository storage limit reached`. The mechanism was not at
+    fault — it never raised, disturbed no stage, and recorded each unit's
+    identity, inputs and content hash with the exact reason. It had nowhere to
+    write. AGENTS.md P8.2.1 names this failure twice and says to confirm the
+    backend has room BEFORE a long run that will produce large artifacts; that
+    check had never been wired to anything, so it was not run.
+
+    It costs seconds, moves no bytes and stores nothing: the LFS batch endpoint
+    performs its quota check before any transfer. Asked at the true PER-OBJECT
+    size *and* at the true TOTAL, because the limit is account-wide and nine
+    objects that each fit individually can still not fit together.
+    """
+    from huggingface_hub import get_token
+
+    from aadistill.runtime.hub_capacity import would_accept
+
+    n = len(CS.arm_ids()) * len(CS.recovery_seeds())
+    #: The same resolution `hf_hub_download` uses in `bundle_staged_gate` —
+    #: `HF_TOKEN` first, then the cached token — so this gate cannot pass
+    #: against one identity while the upload runs as another.
+    token = get_token()
+    if not token:
+        return False, ("no Hugging Face token resolved, so the quota endpoint "
+                       "cannot be asked; set HF_TOKEN or log in")
+
+    try:
+        one = would_accept(RELAY_REPO_ID, [PROBE_DURABLE_BYTES], token)
+        allp = would_accept(RELAY_REPO_ID, [PROBE_DURABLE_BYTES] * n, token)
+    except Exception as exc:                                   # noqa: BLE001
+        #: "Could not ask" is not "was refused", and neither is a reason to
+        #: spend twelve hours training artifacts with nowhere to go.
+        return False, f"could not ask the LFS batch endpoint: {exc}"
+
+    if not one.accepted:
+        return False, (f"the relay would refuse ONE probe "
+                       f"({PROBE_DURABLE_BYTES / 2**30:.2f} GiB): {one.detail}")
+    if not allp.accepted:
+        return False, (f"the relay would take one probe but refuse all {n} "
+                       f"({allp.total_gib:.2f} GiB): {allp.detail}. Every probe "
+                       "after the quota runs out would be trained and lost.")
+    return True, (f"the relay would accept all {n} probes "
+                  f"({allp.total_gib:.2f} GiB), asked with fresh oids")
+
+
 #: Manifest-root-relative first path components a C1 artifact pattern may name.
 #: The manifest root is `{REPO}/artifacts`, so anything outside these is either a
 #: typo or an attempt to archive something this session does not own.
@@ -1401,12 +1458,26 @@ def spec(args) -> SessionSpec:
             bundle_staged_gate,
             renderer_parity_gate,
             pod_environment_gate,
+            #: Added 2026-09-30. attempt66 trained nine probes for $13.67 and
+            #: preserved none: the relay was full. Last in the list because it
+            #: is the only gate that talks to a network service, so a cheap
+            #: local refusal still costs nothing.
+            durable_capacity_gate,
         ),
         evidence_fields={
             "c3_session_contract_hash": CS.C3_SESSION_CONTRACT.contract_hash,
             "runs_a_search": False,
             "eliminates_arms": False,
-            "arms": 2, "seeds": 3, "probes": 6,
+            #: DERIVED from the preregistration, never transcribed. These read
+            #: `2 / 3 / 6` until 2026-09-30, so attempt66's session.json states
+            #: two arms and six probes for a session that trained NINE across
+            #: three — a record contradicting its own measurement. The science
+            #: module already derives its stage descriptions this way, for the
+            #: same reason: "plan said three arms while this module built two,
+            #: and nothing compared them".
+            "arms": len(CS.arm_ids()),
+            "seeds": len(CS.recovery_seeds()),
+            "probes": len(CS.arm_ids()) * len(CS.recovery_seeds()),
             "expected_parent_digest": CS.expected_parent_digest(),
             "expected_incumbent_digest": CS.expected_incumbent_digest(),
             "formal_recovery_evidence": "OUT OF SCOPE",

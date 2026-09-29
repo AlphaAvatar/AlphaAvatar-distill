@@ -286,3 +286,122 @@ def test_a_plan_whose_stamp_does_not_bind_is_refused(tmp_path):
     p.write_text(json.dumps(doc))
     with pytest.raises(S.C3SessionError, match="does not bind itself"):
         S.load_preregistration(p)
+
+
+# ---------------------------------------------------------------------------
+# The LAUNCHER's statement of the same experiment
+#
+# The tests above bind the plan to the EXECUTOR. The launcher makes its own
+# statement, into the session record, and nothing bound that: its
+# `evidence_fields` read a literal `arms: 2, seeds: 3, probes: 6` until
+# 2026-09-30, so attempt66's session.json says it ran two arms and six probes
+# for a session that trained NINE across three. Same defect, one file over.
+# ---------------------------------------------------------------------------
+
+
+def _launcher():
+    import importlib.util
+
+    for p in ("scripts/pod", "scripts/autoinit"):
+        if str(REPO / p) not in sys.path:
+            sys.path.insert(0, str(REPO / p))
+    spec = importlib.util.spec_from_file_location(
+        "c3launch_evidence", REPO / "scripts/pod/autoinit_c3_launch.py")
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules["c3launch_evidence"] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _real_args(mod):
+    """The namespace the launcher's REAL parser produces.
+
+    Never a hand-written stub: device-canary attempt 1 died at `$0.0603` on an
+    attribute a hand-written namespace happened to have and the real parser did
+    not, and a stub here would hide exactly that class of defect again.
+    """
+    parser = mod.build_parser()
+    return parser.parse_args(["--scr", "/tmp/c3-spec-check",
+                              "--session-commit", "0" * 40,
+                              "--bundle", "aad_test.bundle",
+                              "--run-id", "spec_check"])
+
+
+def test_the_launcher_reports_the_probe_count_the_plan_declares():
+    """A run record that contradicts its own measurement is not evidence."""
+    mod = _launcher()
+    fields = mod.spec(_real_args(mod)).evidence_fields
+    assert fields["arms"] == len(S.arm_ids()) == 3
+    assert fields["seeds"] == len(S.recovery_seeds()) == 3
+    assert fields["probes"] == 9, (
+        "the launcher states a probe count the plan does not; attempt66's "
+        "session.json says 6 for a run that trained 9")
+
+
+def test_the_capacity_gate_refuses_when_the_backend_would_refuse(monkeypatch):
+    """attempt66 trained nine probes for $13.67 and preserved none.
+
+    Three outcomes must be distinguishable, because they need different
+    responses: room, no room, and could-not-ask. Only the first may launch.
+    """
+    mod = _launcher()
+    from aadistill.runtime.hub_capacity import CapacityVerdict
+
+    def verdicts(*outcomes):
+        seq = list(outcomes)
+
+        def fake(repo, sizes, token, **kw):
+            ok = seq.pop(0)
+            return CapacityVerdict(ok, 200 if ok else 403,
+                                   "fits" if ok else "Private repository "
+                                   "storage limit reached",
+                                   len(sizes), sum(sizes))
+        return fake
+
+    import aadistill.runtime.hub_capacity as HC
+
+    monkeypatch.setattr(HC, "would_accept", verdicts(True, True))
+    assert mod.durable_capacity_gate(None)[0] is True
+
+    #: One probe fits, nine do not — the exact shape that would train every
+    #: probe and lose the ones after the quota ran out.
+    monkeypatch.setattr(HC, "would_accept", verdicts(True, False))
+    ok, why = mod.durable_capacity_gate(None)
+    assert ok is False and "refuse all 9" in why
+
+    monkeypatch.setattr(HC, "would_accept", verdicts(False, True))
+    ok, why = mod.durable_capacity_gate(None)
+    assert ok is False and "ONE probe" in why
+
+    #: Could not ask is NOT permission to spend.
+    def boom(*a, **k):
+        raise RuntimeError("network down")
+
+    monkeypatch.setattr(HC, "would_accept", boom)
+    ok, why = mod.durable_capacity_gate(None)
+    assert ok is False and "could not ask" in why
+
+
+def test_the_capacity_gate_asks_at_the_real_per_probe_size():
+    """A gate threshold that is a guess is a gate that passes by luck.
+
+    2,384,236,592 bytes is `bytes` from attempt66's own preservation payload,
+    reported identically by all nine probes.
+    """
+    mod = _launcher()
+    measured = json.loads((
+        REPO / "logs/stages/stage-1/phase_c3/runs/attempt66/evidence/probes"
+        / "autoinit.v1.phase_c3.A_incumbent.217230555.training.json").read_text())
+    assert mod.PROBE_DURABLE_BYTES == measured["preserved"]["bytes"]
+    #: And that record is the one that FAILED, which is the point: the bytes
+    #: were measured, the upload was refused, and nothing asked beforehand.
+    assert measured["preserved"]["preserved"] is False
+    assert "storage limit reached" in measured["preserved"]["why_not"]
+
+
+def test_the_capacity_gate_is_wired_into_the_prechecks():
+    """A gate nothing calls is a gate that did not run. attempt66's lesson was
+    not a missing check; it was a check that existed and was never asked."""
+    mod = _launcher()
+    names = {getattr(g, "__name__", "") for g in mod.spec(_real_args(mod)).precheck}
+    assert "durable_capacity_gate" in names
