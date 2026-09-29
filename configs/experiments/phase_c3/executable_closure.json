@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 114,
- "digest": "eed8a33295da0b6863b3e566f588e654d492b2483eabecba1f658d1a76042d97",
+ "n_files": 115,
+ "digest": "5f0b64e6d38487f2f14c43e5270094183625516debd63d8c53502c12ee72f52e",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -209,13 +209,13 @@
   },
   {
    "path": "scripts/pod/autoinit_c3_driver.py",
-   "sha256": "aabbf16fb4a43ec5b1e6c5f533480f5ccc3925ce4497a754cb0b8c8391a7160f",
-   "bytes": 83417
+   "sha256": "09a51bd1914dc4b144bb39cda00848ac34466aa1a9096f45643999ee82314771",
+   "bytes": 85163
   },
   {
    "path": "scripts/pod/autoinit_c3_launch.py",
-   "sha256": "7bb7f2cd4e18fe640909b4ce7bc90e0e2a82a3b1a9392623296e155e248eb0ea",
-   "bytes": 90250
+   "sha256": "02112287f8e2278dbc33c72d67203938ca05cecdae3b981cde61d7c1988ae589",
+   "bytes": 94280
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
@@ -571,6 +571,11 @@
    "path": "src/aadistill/runtime/device_handoff.py",
    "sha256": "39ad7cc03c7f7e02f8ef3b36ed440370e3afd61e0627e32132fe20807fdb0fd0",
    "bytes": 9995
+  },
+  {
+   "path": "src/aadistill/runtime/hub_capacity.py",
+   "sha256": "d65dc5af06dbf29fc497be92fc77e93b92b2288463c2edc0e7f5e94afe4da608",
+   "bytes": 5134
   },
   {
    "path": "src/aadistill/runtime/pod_environment.py",

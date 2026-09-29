@@ -56,6 +56,17 @@ sys.path.insert(0, str(REPO / "scripts"))
 #: stage index picked it up only on the NEXT pass, and the fixed-point check
 #: reported drift that a third pass would have settled. Which is the check
 #: working: the same lag would have reached a sweep as a stale committed index.
+def _closure_experiments() -> tuple[str, ...]:
+    """Every experiment `derive_closure` can snapshot, from its own registry."""
+    import importlib.util
+
+    path = REPO / "scripts/architecture/derive_closure.py"
+    spec = importlib.util.spec_from_file_location("_derive_closure", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return tuple(sorted(mod.EXPERIMENTS))
+
+
 GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("skip-predicate audit",
      ("scripts/autoinit/audit_skip_predicates.py", "--write")),
@@ -66,8 +77,16 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: That is exactly the failure this tool's docstring describes — a derived
     #: record nobody regenerated — and it was not covered by the tool that
     #: exists to cover it.
-    ("closure snapshot",
-     ("scripts/architecture/derive_closure.py", "--write")),
+    #: ONE PER EXPERIMENT, and the list is ASKED of `derive_closure` rather
+    #: than transcribed here. `--experiment` defaults to `phase_c1`, so this
+    #: entry regenerated C1's snapshot and left C3's describing an older
+    #: tree — and the C3 issuer refuses on exactly that mismatch, which is
+    #: the same "derived record nobody regenerated" failure one experiment
+    #: over. A second copy of the experiment list is how the next one comes
+    #: to be missing too, so adding an experiment THERE adds it here.
+    *(("closure snapshot: " + exp,
+       ("scripts/architecture/derive_closure.py", "--experiment", exp, "--write"))
+      for exp in _closure_experiments()),
     ("run index",
      ("scripts/architecture/record_run_index.py", "--write")),
     ("stage index",

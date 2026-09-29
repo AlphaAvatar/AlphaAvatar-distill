@@ -2435,9 +2435,9 @@
    "experiment_id": "phase_c3",
    "run_id": "attempt70",
    "root": "logs/stages/stage-1/phase_c3/runs/attempt70",
-   "n_files": 1,
-   "digest": "c27a61a4983dcc7cd2f8450c4de45e7426ce6fbee5d42074041836824deda1c0",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 2,
+   "digest": "4958eba6ec7035f97ee22093324671e516acc2b62156482d04a4ceba67d95977",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"
