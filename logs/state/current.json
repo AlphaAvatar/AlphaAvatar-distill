@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-23T05:30:00Z",
+ "generated_utc": "2026-09-29T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -132,7 +132,8 @@
    "blocker": "DURABLE STORAGE. The HF private-repo quota refused all nine 2.22 GiB checkpoints. Buying storage or permanently deleting historical LFS objects is a maintainer decision, never an autonomous repair.",
    "latest_attempt": "attempt66",
    "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
-   "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S."
+   "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S.",
+   "stage_h_defect": "REPAIRED at $0 after the run: score_c1_confirmation.py's --arm validated membership in C1's two role names. It now validates the SHAPE of a label (no consumer keys off its value) and build_parser() is separable from main(), so a preflight exercises the real parser against the real argv. Repairing it authorizes no rerun."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },

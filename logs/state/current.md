@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-23. The human view. Every number here has an owner named
+**Updated:** 2026-09-29. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -11,6 +11,17 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 **Nothing is running and nothing is billing.** Zero pods and zero network
 volumes; both `59qt99zeg5` and `a0zqgxsm7p` are deleted.
+
+**Formal C3 ran, and is STOPPED FOR A MAINTAINER DECISION on durable
+storage.** attempt66 trained all **nine** formal probes on L40S over 12.5
+hours for `$13.67` and passed **both** frozen digest gates. Then two things
+happened: stage H exited 2 on a scorer CLI argument, and every one of the nine
+2.22 GiB checkpoints was refused by Hugging Face for private-storage quota. So
+there is a trained nine-probe matrix with **zero** evaluations and **zero**
+surviving weights. Formal measurement has begun, so §13 freezes the session —
+no retry, no resume, no pooling, and no inventing a resume contract for
+"re-evaluate checkpoints that no longer exist". See
+[C3 — nine probes trained, no result](#c3--nine-probes-trained-no-result).
 
 **Padded tensor batching is not invariant; parallel B=1 item forwards ARE.**
 Bitwise identical to sequential B=1 on both objects, repeatable, independent of
@@ -39,7 +50,14 @@ C2  CLOSED WITHOUT PROMOTION            <- maintainer decision, 2026-09-24
       canonical C2 promotion verdict    NOT claimed
       new incumbent named by C2         NONE
       accepted incumbent after C2       B = frozen C1 treatment
-C3  NOT STARTED                         <- next scientific stage
+C3  EXECUTED, NO RESULT                 <- stopped for a maintainer decision
+      three-arm preregistration         corrected and re-frozen
+      hardware qualification            L40S PASSED both digest gates
+      nine formal probes                ALL TRAINED
+      nine evaluations                  NONE RAN  (stage H, CLI defect)
+      nine checkpoints                  NONE PRESERVED  (storage quota)
+      C3 verdict                        NOT claimed
+C4  NOT AUTHORIZED
 ```
 
 **B stands because no valid C2 challenger displaced it** — not because a clean
@@ -1262,11 +1280,17 @@ floor. A complete valid verdict ends the round.
 | blocker | **NOTHING IS BLOCKED.** C2 is **CLOSED WITHOUT PROMOTION**: no probes owed, no canonical verdict claimed, no new incumbent, **B stands by absence of a valid challenger**, no C2 launch prepared, and **no further C2 scientific spend authorized** — remaining allowance under the `$25.00` stage envelope or the `$42.0000` campaign ceiling is not permission. **Formal C3 is FUNDED** by the 2026-09-28 amendment (project cap `$400.0000`, per-session envelope `$30.0000`, formal allowance `$55.0000`) and its 3-arm/9-probe design is preregistered and hash-bound; the envelope is not the grant, and C3's one-use authorization takes the ceiling **derived from live `securePrice` at issuance**. All three C3 engineering pilots are closed and are not formal C3 | [`budget/decisions.md`](../budget/decisions.md) · [`c3_preregistration.json`](../stages/stage-1/phase_c3/plans/c3_preregistration.json) |
 | spend | owned by the budget block below | [`budget/ledger.md`](../budget/ledger.md) |
 
-## C3 — the refactor is on review, and C3 has not started
+## C3 — the operator, the pilots, and the formal run
 
-**Branch `review/c3-operator-batching`. NOT merged into `main`.** `main` is
-still `ab53ba14`. Everything in this section is engineering; no C3 science has
-run and the C3 `$25.00` stage envelope is untouched.
+**Formal C3 has now executed and is stopped without a result** — see
+[Nine probes trained, no result](#nine-probes-trained-no-result) at the end
+of this section, which is the part a reader wants first. Everything before
+it is the engineering that got there: the operator-topology refactor, the
+batch-invariance investigation and the three adoption pilots. Those were
+written while C3 had not yet started and are kept as they were measured.
+
+**Branch `review/c3-operator-batching`.** `main` was `ab53ba14` when this
+section was written.
 
 **What the branch contains.** The operator-topology migration
 (`operators/{attention/gqa,ffn/dense,width/residual,depth,composite}`) and
@@ -1807,61 +1831,98 @@ where the repaired preflight caught a toy root on the wrong device in five
 seconds, then this one. All torn down, provider confirms **pods 0,
 volumes 0**.
 
-### Formal C3: the chain is built and every gate passes; waiting on capacity
+### Nine probes trained, no result
 
-**Where it stands.** Every pre-provider gate passes. Five launcher
-invocations have run, all at **`$0.00`** — no pod has ever been created, so
-nothing has been billed and no scientific measurement has begun.
+**The headline.** `attempt66`, on secure **L40S**, 12.5 hours, **`$13.67`**.
+Stages B, C, D, E, F and G all passed — including **both** frozen digest
+gates — and **all nine formal recovery probes trained**. Then stage H exited
+2 before evaluating any of them, and the nine trained checkpoints were lost.
+So C3 has a complete trained matrix, **zero** evaluations and **zero**
+surviving weights, and **no C3 verdict is claimed**.
+
+```text
+B  teacher fetch + verify      PASS   3 shards
+C  register operator           PASS   both experimental implementations
+D  replay parent               PASS   reproduced eea90c91…
+E  replay incumbent B          PASS   reproduced 53e30566…
+F  materialize arms            PASS   three initializations, built once each
+G  recovery probes             PASS   9 of 9 trained
+H  evaluate                    FAIL   argparse exit 2, nothing evaluated
+```
+
+**Stage H, in full:**
+
+```text
+score_c1_confirmation.py: error: argument --arm: invalid choice:
+'A_incumbent' (choose from 'incumbent', 'treatment')
+```
+
+The same C1-constant class as every earlier defect, in the one place the
+static checks could not reach: an argparse `choices` constraint inside a
+**separate script** the driver shells out to. The driver passed C3's arm id;
+the scorer accepted C1's two role names. Nothing in the driver's imports,
+names or digests can see another process's parser.
+
+**Repaired, with the check that would have caught it.** `--arm` records a
+label and no consumer keys off its value, so it now validates *shape* rather
+than membership in C1's pair, and `build_parser()` is separable from `main()`
+so a preflight can exercise the real parser against the real argv. Both
+mutations — the original `choices` restored, and a driver flag the scorer
+does not define — are caught at `$0` in milliseconds. This does **not**
+authorize a rerun; it means the next authorized attempt does not buy this
+defect again.
+
+**The checkpoints.** All nine durability uploads were refused:
+
+```text
+BadRequestError: Private repository storage limit reached
+```
+
+The mechanism behaved exactly as designed — it never raised, it disturbed no
+stage, and it recorded each unit's identity, its inputs' hashes and a content
+hash together with the exact reason. It preserved nothing, because the
+backend is full. AGENTS.md documents this failure twice and says to confirm a
+durable backend has **room** before a long experiment that will produce large
+artifacts. That check was not run before launching. Nine trained probes at
+2.22 GiB each are the cost.
+
+**Why this stops here rather than retrying.** Formal measurement has begun:
+nine probes trained. §13 freezes the session at that point and forbids
+restarting the matrix, splicing probes, substituting seeds or pooling
+attempts unless an existing resume contract supports it. No resume contract
+covers *re-evaluate checkpoints that no longer exist*, and inventing one is
+explicitly forbidden. Buying storage or permanently deleting historical LFS
+objects is a maintainer decision, never an autonomous repair.
+
+**The acquisition history.** Seventy attempt identities; **three** ever
+created a pod.
 
 | attempt | reached | outcome |
 | --- | --- | --- |
-| 1 | `spec()` | `_plan_hash` built C1's two arms from names the rewritten session lacks |
-| 2 | grant provenance | the authorization recorded no grant path/hash |
-| 3 | frozen science | gated on C1's incumbent digest `c313d1b4` (weight_proxy) |
-| 4 | artifact spec | `C3_HARNESS_SOURCE_FILES_V1` survived a rename |
-| 5 | **all gates PASS** | provider capacity refusal — L40S `stockStatus=None` |
-| 6 | pod sweep | post-sweep drift: I edited `current.json` after sweeping |
-| 7 | **a pod ran** | setup OK; driver refused C1's authorization BY TYPE. `$0.15`, torn down, provider confirmed gone |
-| 8, 9 | provider | capacity refusal at `$0` |
-| 10 | **a pod ran** | created, never produced an SSH endpoint in 15 min; abandoned and redrawn, capacity gone. `$0.26` |
+| 1–6 | pre-provider gates | six distinct C1 constants in the ported chain, each fixed and covered by a `$0` preflight check |
+| 7 | **a pod ran** | driver refused C1's authorization by type. `$0.15`, torn down |
+| 10 | **a pod ran** | never produced an SSH endpoint in 15 min. `$0.26` |
+| 49 | *orphaned* | I killed the loop's tmux session mid-launch; its pod billed 46 min unattended before a routine poll found it. **`$0.8617`** |
+| 61, 65 | stage D gate | parent came back `d6d8d7ee` / `4cf33ed0`, not `eea90c91` — the missing execution config |
+| **66** | **stage H** | **nine probes trained**, evaluation failed, checkpoints lost. **`$13.67`** |
+| 67–69 | provider | capacity refusal at `$0`; chains consumed and closed |
+| 70 | grant only | the loop was stopped here; PREPARED, never authorized |
 
-**Total C3 spend so far: `$0.41`** of the `$22.1452` derived ceiling. Provider
-state verified clean after every attempt: **pods 0, network volumes 0**.
+**The defect that cost attempts 61 and 65** was the material one:
+`materialize_fixed_path` was called without `execution=`, so DEPTH ran at the
+repository default micro-batch instead of the plan's pinned `micro_batch_size:
+1`. L40S GEMMs reduce shape-dependently, so round 7 chose layer 21 over 17 by
+a margin of `1.403e-03` and the parent digest came out wrong. Runtime knobs
+are deliberately not hashed into any state id — which is exactly why the plan
+must pin this one and the driver must apply it. No digest catches it until
+the digest itself is wrong.
 
-Attempt 5 cleared: budget, session commit, grant provenance, harness
-(113 files), ceiling, preregistration (3 arms, primary `causal-B1 −
-incumbent B`), frozen science (seeds + both replay digests + the 950/850
-battery), frozen assets, teacher binding, battery staging, artifact spec
-(**9 probes × 7 sets = 63** generation files), RoPE input, bundle
-round-trip, renderer parity (7/7 groups, 190 frozen prompts re-rendered byte
-for byte), the pod sweep (17 passed / 0 skipped) and the relay precheck.
-
-**The only thing outstanding is provider capacity.** §18 names it an
-ordinary transient to back off from rather than return for, so a retry
-loop waits for `stockStatus`, builds a fresh one-use chain and relaunches
-unattended. L40S secure capacity is currently intermittent: three outright
-refusals and one pod that never produced an endpoint. **The GPU type is a
-grant boundary** — "secure L40S; no other GPU, no price chasing" — so it
-is not something to change autonomously.
-
-**Each aborted attempt consumed its one-use chain** — P12.1: an invocation
-that ends before measurement produced no measurement to retry, so it is
-preserved and closed and the next attempt gets a fresh authorization,
-readiness sweep and bundle. That is why there are five.
-
-**What the aborts bought.** Each defect was a C1 constant that was *right
-for C1* and would have produced a complete, plausible, wrong C3 result or a
-crash on a billing pod. They are covered as a class now by 17 pod-preflight
-checks, including two static passes: every `CS.<attr>` the launcher and
-driver name must exist, and no module-level load may be unbound. The second
-immediately found `C1Driver` in the driver's `main()` — a `NameError` that
-would have fired *after* the teacher fetch and the parent replay.
-
-**Money.** Nothing spent. The derived ceiling is **`$22.1452`** at the live
-`securePrice` of `$1.09/h` (billed `$1.106667/h` with container disk): inside
-the `$30.00` envelope, leaving `$372.18` against the `$400.00` cap, and
-within the `$32.3824` formal remainder. The issuer refuses a grant that asks
-for the envelope instead of the derived figure — verified.
+**Money.** `$13.67` for attempt66; **phase_c3 total `$16.6233`**. Cumulative
+project spend **`$366.654`**, remaining **`$33.346`** of the amended
+**`$400.00`** cap; formal allowance **`$32.3824`** of `$55.00` remaining.
+Provider state verified clean: **pods 0, network volumes 0**. Owners:
+[`derive_budget.py`](../../scripts/consolidate/derive_budget.py) and
+[attempt66's closeout](../stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json).
 
 ## Readiness
 

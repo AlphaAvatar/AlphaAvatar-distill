@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt68",
+ "experiment_id": "phase_c3",
+ "status": "CAPACITY_REFUSED_NO_RESOURCE_CREATED",
+ "_what_this_is": "A one-use chain that was built, launched, and refused at pod creation. The provider had usable secure L40S capacity at the moment of the $0 watch and none by the moment of the create call, which is the ordinary behaviour of `Low` stock on this account. No provider resource existed at any point.",
+ "gpu_type_id": "NVIDIA L40S",
+ "session_commit": "4d7f75988c685d00e81fb5e8630f9e693c09cc87",
+ "launcher_exit": 11,
+ "launcher_message": "ABORT: could not create a pod",
+ "stages_run": [],
+ "measurement_began": false,
+ "provider_resource_created": false,
+ "pod_ids": [],
+ "cost": {
+  "actual_usd": 0.0,
+  "_why_zero": "no pod was ever created, so nothing billed"
+ },
+ "final_provider_state": "nothing to tear down; no resource was created",
+ "_chain_disposition": "The chain is CONSUMED even at $0 (P12.1): its authorization is one-use and must not be reused. A later attempt builds a fresh one under a new identity. The incrementing attempt number is not a scope expansion.",
+ "_closed_retrospectively": "Written at C3 closeout. The acquisition loop was stopped after attempt66 reached a terminal scientific state, so these chains were left with directory scaffolding and no outcome record. Closing them is bookkeeping, not a new attempt."
+}

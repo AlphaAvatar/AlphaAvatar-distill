@@ -697,3 +697,92 @@ def test_the_replay_applies_the_execution_config_the_plan_pins():
     with _mock.patch.object(mod.CS, "prefix_execution", lambda: {}):
         with pytest.raises(mod.C3DriverError, match="pins no micro_batch_size"):
             mod.C3Driver.prefix_execution_config(drv)
+
+
+def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
+    """The seam one level down: the scripts the driver SHELLS OUT to.
+
+    attempt66 trained all nine probes, then stage H exited 2 on
+
+        score_c1_confirmation.py: error: argument --arm: invalid choice:
+        'A_incumbent' (choose from 'incumbent', 'treatment')
+
+    The existing CLI-seam check covers launcher -> driver. This one covers
+    driver -> scorer, which is where a C1 constant could still hide: the
+    scorer is a SEPARATE process, so nothing in the driver's own imports,
+    names or digests can reach an argparse `choices` constraint inside it.
+    $13.67 and ten hours of training bought this check.
+
+    It exercises the REAL parser -- not a re-derivation of it -- against the
+    real arm identities, which is why `build_parser` exists apart from
+    `main`.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "c1_scorer_cli", REPO / "scripts/autoinit/score_c1_confirmation.py")
+    scorer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(scorer)
+    parser = scorer.build_parser()
+
+    seeds = CS.recovery_seeds()
+    for arm in CS.arm_ids():
+        argv = ["--generations", "/tmp/g", "--label", f"{arm}_{seeds[0]}",
+                "--seed", str(seeds[0]), "--out", "/tmp/o.json",
+                "--per-sample", "/tmp/p.jsonl", "--arm", arm,
+                "--init-digest", "0" * 64, "--trained-run", "/tmp/rc.json",
+                "--generation-fingerprint", "f" * 16]
+        try:
+            ns = parser.parse_args(argv)
+        except SystemExit as exc:                      # argparse exits 2
+            raise AssertionError(
+                f"the C1 scorer refuses C3 arm {arm!r} (exit {exc.code}); "
+                "stage H would fail AFTER every probe has trained") from None
+        assert ns.arm == arm, "the scorer did not record the arm it was given"
+
+    #: The flags the driver passes must all be ones the scorer defines. Read
+    #: from the driver's own argv list rather than retyped, so the two cannot
+    #: drift apart silently.
+    #:
+    #: By AST, not by slicing between two strings: `C1_SCORER` appears in more
+    #: than one gate, and an index-based slice silently swallowed the NEXT
+    #: call's flags and reported them as undefined.
+    argv_lists = []
+    for node in ast.walk(ast.parse(DRIVER.read_text())):
+        if not isinstance(node, ast.List) or not node.elts:
+            continue
+        head = node.elts[0]
+        if (isinstance(head, ast.Call) and isinstance(head.func, ast.Name)
+                and head.func.id == "str" and head.args
+                and isinstance(head.args[0], ast.Name)
+                and head.args[0].id == "C1_SCORER"):
+            argv_lists.append(node)
+    assert argv_lists, "no argv list starting with the C1 scorer was found"
+
+    defined = {a for act in parser._actions for a in act.option_strings}
+    passed = {e.value for node in argv_lists for e in node.elts
+              if isinstance(e, ast.Constant) and isinstance(e.value, str)
+              and e.value.startswith("--")}
+    assert passed, "no scorer flags were found in the driver's argv"
+    assert passed <= defined, (
+        f"the driver passes flags the C1 scorer does not define: "
+        f"{sorted(passed - defined)}")
+
+
+def test_the_arm_label_still_refuses_what_is_not_a_label():
+    """Widening the arm vocabulary must not mean accepting anything."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "c1_scorer_lbl", REPO / "scripts/autoinit/score_c1_confirmation.py")
+    scorer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(scorer)
+
+    import argparse as _ap
+
+    for bad in ["", "   ", "A incumbent", " A_incumbent", "A_incumbent\t"]:
+        with pytest.raises(_ap.ArgumentTypeError):
+            scorer.arm_label(bad)
+    #: and C1's and C2's own vocabularies still pass, unchanged.
+    for good in ["incumbent", "treatment", "A_incumbent", "B_causal_b1"]:
+        assert scorer.arm_label(good) == good
