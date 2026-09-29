@@ -1,0 +1,53 @@
+[19:55:28] budget: expected 1186 min $21.54 · soft $21.54 · hard $21.81 (authorized $22.15)
+[19:55:28] NVIDIA L40S $1.09/h, stock Low
+[19:55:28] session commit f3a783a8fa08 verified: harness digests to eed8a33295da…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt66/governance/authorization.json differs from the authorized base
+[19:55:28] grant d79fa5d08090… at logs/stages/stage-1/phase_c3/runs/attempt66/governance/grant.json, as recorded by the authorization
+[19:55:29] C1 harness eed8a33295da… over 114 declared files
+[19:55:29] ceiling $22.1452, derived from logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json
+[19:55:30] preregistration ac44662c02d5… (self-hash verified, 3 arms, primary causal-B1 - incumbent B), live closure eed8a33295da…
+[19:55:30] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[19:55:31] frozen assets verified against configs/experiments/phase_c3/frozen_assets.json
+[19:55:31] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[19:55:31] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[19:55:31] success spec covers the contract (9 probes x 7 sets = 63 generation files); failure spec presupposes no training
+[19:55:33] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[19:55:37] aad_autoinit_f3a783a8.bundle (19508682 bytes, ff255210efde…) round-trips to f3a783a8fa08… carrying this authorization and harness eed8a33295da…
+[19:55:41] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[19:55:42] pod sweep 26 passed / 0 skipped / 0 failed, no declared groups, binds C3 harness eed8a33295da… and environment be3f40f77902…, staging contract 0aa9acc6903f…, swept at e1ab99d3 with only ['logs/stages/stage-1/phase_c3/runs/attempt66/governance/authorization.json', 'logs/stages/stage-1/phase_c3/runs/attempt66/governance/readiness.json'] differs from the swept base
+[19:55:42] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[19:55:43] watchdog detached — hard 1201 min = $21.81
+[19:55:43] created yqbv1hp9t5xhnx at $1.09/h
+[19:56:40]   starting (60s) — $0.02
+[19:57:44]   starting (120s) — $0.04
+[19:58:48]   starting (180s) — $0.06
+[19:59:52]   starting (240s) — $0.08
+[20:00:57]   starting (300s) — $0.10
+[20:02:02]   starting (360s) — $0.11
+[20:03:06]   starting (420s) — $0.13
+[20:04:10]   starting (480s) — $0.15
+[20:05:15]   starting (540s) — $0.17
+[20:06:21]   starting (600s) — $0.19
+[20:07:25]   starting (660s) — $0.21
+[20:08:29]   starting (720s) — $0.23
+[20:09:34]   starting (780s) — $0.25
+[20:10:38]   starting (840s) — $0.27
+[20:10:48] NO_ENDPOINT on draw 1 — abandoning yqbv1hp9t5xhnx and redrawing
+[20:11:00] watchdog detached — hard 1201 min = $21.81
+[20:11:00] created 10rzsbqq4fm0oe at $1.09/h
+[20:11:54]   starting (60s) — $0.29
+[20:12:59]   starting (120s) — $0.31
+[20:13:52] TCP 22 at 202.181.159.238:13708 after 18.2 min
+[20:13:55] draw 2: ssh reachable — $0.33
+[20:14:38] draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[20:14:38] draw 2: running setup
+[20:45:58] draw 2: setup complete — $0.91
+[20:46:03] driver detached, pid 3640, confirmed by descriptor_probe — $0.91
+[20:48:14]   2026-09-28T20:45:55Z MARKER:SETUP_DONE — $0.95
+[08:20:59] driver no longer running: EXITED:40
+[08:20:59] polling ended: DRIVER_EXITED:40 — $13.54
+[08:27:18]   manifest rc=0
+81 file(s) across 17 class(es) -> /workspace/manifest.json
+  final_required: 81 · mutable_snapshot: 0 · final_streams_quiescent: True
+[08:28:09] teardown gate: allowed=True failed=training_complete
+[08:28:09] deleting pod (gate passed after DRIVER_EXITED:40)
+[08:28:20] pod deleted — 752.6 min, $13.67; provider confirms gone: True

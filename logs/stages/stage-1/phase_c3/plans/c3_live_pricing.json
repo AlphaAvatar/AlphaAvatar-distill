@@ -10,7 +10,7 @@
   "formal_allowance_covers_derived": true
  },
  "envelopes": {
-  "cumulative_spend_usd": 352.405,
+  "cumulative_spend_usd": 352.984,
   "formal_remaining_usd": 32.3824,
   "per_session_envelope_usd": 30.0,
   "project_cap_usd": 400.0
@@ -33,8 +33,8 @@
    "usd": 22.1452
   }
  },
- "queried_utc": "2026-09-28T19:54:49Z",
+ "queried_utc": "2026-09-29T08:28:22Z",
  "schema": "aadistill.phase_c3.live_pricing/v1",
- "session_commit": "1d7324e12de66f6423fb4ce92ba1df81f2f6bdc1",
+ "session_commit": "46bf3757ce31a14206ffe678964b250495f204a1",
  "shortfalls_usd": {}
 }
