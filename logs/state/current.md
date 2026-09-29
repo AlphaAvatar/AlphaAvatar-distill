@@ -1886,6 +1886,20 @@ durable backend has **room** before a long experiment that will produce large
 artifacts. That check was not run before launching. Nine trained probes at
 2.22 GiB each are the cost.
 
+**The blocker is live, not historical.** Re-asked at `$0` on 2026-09-29 via
+the LFS batch endpoint against `AlphaAvatar/aadistill-artifacts`, with **fresh
+random oids** — an oid that already exists dedups and returns success
+regardless of quota, which is a false pass:
+
+```text
+2.22 GiB  (one probe)    -> 403 Private repository storage limit reached
+19.98 GiB (nine probes)  -> 403 Private repository storage limit reached
+```
+
+A fresh nine-probe attempt launched today would lose its checkpoints the same
+way. This is the call that should have run *before* attempt66; it costs
+seconds and moves no bytes.
+
 **Why this stops here rather than retrying.** Formal measurement has begun:
 nine probes trained. §13 freezes the session at that point and forbids
 restarting the matrix, splicing probes, substituting seeds or pooling

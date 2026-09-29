@@ -133,7 +133,8 @@
    "latest_attempt": "attempt66",
    "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
    "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S.",
-   "stage_h_defect": "REPAIRED at $0 after the run: score_c1_confirmation.py's --arm validated membership in C1's two role names. It now validates the SHAPE of a label (no consumer keys off its value) and build_parser() is separable from main(), so a preflight exercises the real parser against the real argv. Repairing it authorizes no rerun."
+   "stage_h_defect": "REPAIRED at $0 after the run: score_c1_confirmation.py's --arm validated membership in C1's two role names. It now validates the SHAPE of a label (no consumer keys off its value) and build_parser() is separable from main(), so a preflight exercises the real parser against the real argv. Repairing it authorizes no rerun.",
+   "blocker_verified_2026_09_29": "Re-asked at $0 on 2026-09-29 via the HF LFS batch endpoint against AlphaAvatar/aadistill-artifacts with fresh random oids (an existing oid dedups and gives a false pass): 2.22 GiB REFUSED 403 and 19.98 GiB REFUSED 403, both 'Private repository storage limit reached'. So the blocker is live, not merely historical -- a fresh nine-probe attempt launched today would lose its checkpoints the same way."
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
