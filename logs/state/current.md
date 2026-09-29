@@ -25,13 +25,44 @@ That is the ordinary behaviour of `Low` stock on this account, already seen at
 attempts 67–69. Each is a consumed one-use chain under P12.1, not a retried
 experiment: no provider resource existed and nothing billed.
 
-**One operational defect is recorded and NOT yet repaired**, because the fix
-must not touch a running script: `c3_acquire.sh`'s `$0` capacity watch sleeps
-only when the approved tier is *dry*, and `Low` stock that never converts reads
-as usable. So the loop rebuilt a chain roughly every 66 seconds and would have
-spent all forty of its rounds in about 44 minutes rather than pacing them over
-hours. attempt75 acquired on round 5, so it cost nothing this time. A backoff
-after a capacity refusal is owed before the next acquisition run.
+**Two operational defects are recorded. Neither is scientific.**
+
+**1. The driver's markers went to a file the launcher does not read.** The C3
+driver writes `mark()` to `/workspace/autoinit_c3.status`; the C3 launcher
+declares `status_path = /workspace/autoinit_c1.status` and polls it with
+`tail -1`. So **every** driver marker — `STAGE_PASSED:D`, `STAGE_START:G`,
+and `ALL_DONE` itself — was invisible to the launcher, which saw only the
+setup script's markers and stopped at `SETUP_DONE`. This is not new: it is why
+attempt66's session record says `terminal = DRIVER_EXITED:40` rather than
+naming a marker, and it is the same defect the C2 replay driver hit on its
+attempt 9 — *"the label is wrong; the result is not"*.
+
+Two consequences, one harmless and one not:
+
+* **harmless** — a successful run would be classified by exit code, so
+  `collect_and_teardown` would use the FAILED artifact spec. The two C3 specs
+  carry **identical patterns** and differ only in `min_matches`/`required`, so
+  everything still comes home; what is lost is the completeness *assertion*,
+  not the evidence.
+* **not harmless** — `c3_acquire.sh` decides whether to launch ANOTHER paid
+  attempt by grepping the launcher log for `ALL_DONE` or `STAGE_START:G`. With
+  the markers invisible, a completed formal run reads as *"no measurement
+  began"* and the loop builds the next chain and launches a **second formal
+  attempt**. That is a scientific and budget violation, not a labelling one.
+
+Repaired mid-run, at the supervision channel and nowhere near the science: a
+detached `tail -F /workspace/autoinit_c3.status >> /workspace/autoinit_c1.status`
+on the pod. The launcher resumed echoing markers immediately
+(`MARKER:STAGE_START:F` at `$1.44`). **The source fix — one status path, named
+once — is owed after this run, because editing the tree a live session is
+bound to is not a repair.**
+
+**2. The `$0` capacity watch does not back off.** `c3_acquire.sh` sleeps only
+when the approved tier is *dry*, and `Low` stock that never converts reads as
+usable. The loop rebuilt a chain roughly every 66 seconds and would have spent
+all forty of its rounds in about 44 minutes rather than pacing them over hours.
+attempt75 acquired on round 5, so it cost nothing this time. A backoff after a
+capacity refusal is owed before the next acquisition run.
 
 **attempt66 stands closed with no result, and ONE FRESH FORMAL C3 ATTEMPT IS
 AUTHORIZED.** attempt66 trained all **nine** formal probes on L40S over 12.5
