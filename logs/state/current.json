@@ -125,16 +125,20 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "STOPPED FOR A MAINTAINER DECISION. attempt66 trained all NINE formal probes on L40S and passed BOTH frozen digest gates; stage H then failed on a scorer CLI argument (--arm A_incumbent vs choices {incumbent,treatment}) and all nine checkpoints were LOST because every durability upload was refused for private-storage quota. Formal measurement has begun, so section 13 freezes the session: no retry, no resume, no pooling. $13.67 for that run; phase_c3 total $16.6233.",
+   "status": "STOPPED FOR A MAINTAINER DECISION. attempt66 trained all NINE formal probes on L40S and passed BOTH digest gates; stage H then failed and all nine checkpoints were lost to private-storage quota. Section 13 freezes the session: no retry, no resume, no pooling. Owner: the closeout.",
    "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
    "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
    "provider_spend_usd": 16.6233,
-   "blocker": "DURABLE STORAGE. The HF private-repo quota refused all nine 2.22 GiB checkpoints. Buying storage or permanently deleting historical LFS objects is a maintainer decision, never an autonomous repair.",
+   "blocker": "DURABLE STORAGE, re-verified live at $0 on 2026-09-29: the LFS batch endpoint refuses 2.22 GiB and 19.98 GiB alike, 403 storage limit. A fresh attempt today would lose its checkpoints the same way. Freeing or buying storage is a maintainer decision, never an autonomous repair.",
    "latest_attempt": "attempt66",
    "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
    "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S.",
-   "stage_h_defect": "REPAIRED at $0 after the run: score_c1_confirmation.py's --arm validated membership in C1's two role names. It now validates the SHAPE of a label (no consumer keys off its value) and build_parser() is separable from main(), so a preflight exercises the real parser against the real argv. Repairing it authorizes no rerun.",
-   "blocker_verified_2026_09_29": "Re-asked at $0 on 2026-09-29 via the HF LFS batch endpoint against AlphaAvatar/aadistill-artifacts with fresh random oids (an existing oid dedups and gives a false pass): 2.22 GiB REFUSED 403 and 19.98 GiB REFUSED 403, both 'Private repository storage limit reached'. So the blocker is live, not merely historical -- a fresh nine-probe attempt launched today would lose its checkpoints the same way."
+   "stage_h_defect": "REPAIRED at $0 after the run (--arm validated C1's role names; it now validates a label's shape, and build_parser() is separable so a preflight exercises the real parser). Repairing it authorizes no rerun.",
+   "probes_trained": 9,
+   "probes_evaluated": 0,
+   "checkpoints_preserved": 0,
+   "verdict": "NOT claimed",
+   "closeout": "logs/stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json"
   },
   "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
  },
