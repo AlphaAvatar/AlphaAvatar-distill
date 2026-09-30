@@ -2136,20 +2136,46 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 10 failures, one family
+## The full suite is not green: 11 real failures, and a count you must not read
 
-**Closeout measurement, 2026-09-29 at `31ee6b5d`: 10 failed, 5322 passed,
-228 skipped** in 46m59s.
+**Closeout measurement, 2026-09-30: 22 failed, 5300 passed, 228 skipped,
+15 errors** in 53m26s.
 
-**Zero new failures against `ab53ba14`, and one fixed.** The fixed one is
-`autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`,
-and it passes legitimately rather than being skipped: it asserts that the
-pricing record's derived verdict and `derive_budget`'s behaviour agree, and
-the `$400.00` amendment plus attempt66's booked `$13.67` made the two sides
-agree again. So the closeout set is exactly the documented eleven minus that
-one.
+**That headline number is not the failure count, and this is the important
+part.** Eleven of those are real. The rest are **pre-existing cross-test
+registry pollution**: a C3 test registers the two experimental ATTENTION
+implementations into the process-global operator registry, and C2's joint-space
+enumeration then meets `attention.causal_kl_v1`, which its cost model has never
+measured. Measured both ways rather than argued:
 
-<details><summary>the 10, by nodeid</summary>
+```text
+tests/validation/test_c2_full_search_cuda_check.py alone      17 passed
+the same file after a C3 test file                            2 failed
+the same pairing at the base commit dead7004        3 failed, 4 errors
+```
+
+So it is **order-dependent, pre-dates this session, and is slightly better on
+this tree than at the base**. It is exactly what the `registered` fixture's own
+docstring warns about — *"a leaked registration silently adds a branch to an
+unrelated search"*. **Read the per-file isolated counts, not the whole-suite
+total**, until a fixture leak is closed.
+
+**Eleven real failures: the documented ten, plus one that went red for a
+legitimate reason.** The new one is
+`autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`.
+It had turned green at the last closeout because the `$400.00` amendment plus
+attempt66's `$13.67` made the two sides agree; attempt75's `$16.71` moved the
+balance again, so C2's pricing record still says a beam-6 search session
+`fits_remaining_headroom=True` while `plan_session` now says it does not.
+
+**It is not repaired, deliberately.** C2 is CLOSED WITHOUT PROMOTION and
+authorizes no further spend, so nothing will ever launch from that record.
+Rewriting a closed phase's consumed proposal so that it tracks a balance it can
+never spend would be editing history to make a test green, and the failure
+points in the refusing direction — it says a launch would not fit, which is
+true.
+
+<details><summary>the 10 long-standing ones, by nodeid</summary>
 
 ```text
 autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
