@@ -1,0 +1,212 @@
+{
+ "schema": "aadistill.phase_c3.probe_inventory/v1",
+ "_what_this_is": "One row per formal probe: what it was built from, that it trained, where its checkpoint was preserved and under which content hash, and what it scored. Derived from the run's own training records and scored aggregates; nothing here is typed.",
+ "run_id": "attempt75",
+ "n_probes": 9,
+ "probes": {
+  "autoinit.v1.phase_c3.A_incumbent.217230555": {
+   "arm": "A_incumbent",
+   "seed": 217230555,
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "config_sha256": "98fee396088271a2933a19e9aacb1ad7d8cabe6c0de940f618bdab4d20064556",
+   "trained": true,
+   "train_minutes": 61.9,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "dde0fab1b37a04df564458a8946421a359a6f59f682f6caf791f9eeb30fa8824",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.217230555",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 557,
+    "correct": 29,
+    "n_scorable": 850,
+    "usable_scorable": 538
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.A_incumbent.1151307191": {
+   "arm": "A_incumbent",
+   "seed": 1151307191,
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "config_sha256": "8eaa17ec85ebb20991d16c5d4d31b2fb9e274bacaeacf8d0f0c6694bc44b2b1a",
+   "trained": true,
+   "train_minutes": 61.58,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "310e46a94954c7ec7e74cf79f45720e0c70fde1ed8e2d9927ef492689e438783",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.1151307191",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 565,
+    "correct": 37,
+    "n_scorable": 850,
+    "usable_scorable": 529
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.A_incumbent.2045359208": {
+   "arm": "A_incumbent",
+   "seed": 2045359208,
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "config_sha256": "11976d68470eccafc7707e9b9fecbafe1f26c3c846ba78fce4857328dc01d43b",
+   "trained": true,
+   "train_minutes": 61.35,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "05dede8c9384c6e490ad09c68c3988318279be4378f9ae99a1a5b38ff68ba58b",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.2045359208",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 504,
+    "correct": 37,
+    "n_scorable": 850,
+    "usable_scorable": 504
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.B_causal_b1.217230555": {
+   "arm": "B_causal_b1",
+   "seed": 217230555,
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "config_sha256": "a6d9e1982798e61517c1f74397ccda174745a8553970f7cd37150eefc5676eb0",
+   "trained": true,
+   "train_minutes": 61.26,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "a0eedc5baf90275de2a0a6658c624abd80412e909c491e49137685bbbf8f19ac",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.217230555",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 585,
+    "correct": 33,
+    "n_scorable": 850,
+    "usable_scorable": 578
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.B_causal_b1.1151307191": {
+   "arm": "B_causal_b1",
+   "seed": 1151307191,
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "config_sha256": "666ea34e5155cc1eb9fbc4d77c9bdbc2cea065d568ec3fdef1b5cd40ca4bec25",
+   "trained": true,
+   "train_minutes": 61.24,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "e617c0839fa6b792b3adff964a80357bf75b4f89c4f3d2b18029af5cc8e8336f",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.1151307191",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 538,
+    "correct": 23,
+    "n_scorable": 850,
+    "usable_scorable": 530
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.B_causal_b1.2045359208": {
+   "arm": "B_causal_b1",
+   "seed": 2045359208,
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "config_sha256": "7bdac65a10f87bad1e6212172f330e74f203bbb56fc5fbe2c731a649ad65346a",
+   "trained": true,
+   "train_minutes": 61.15,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "8cafac5237cc71b9c3e16149a6307c26bcbdb307c11458df1d8c46d381c7da96",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.2045359208",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 575,
+    "correct": 42,
+    "n_scorable": 850,
+    "usable_scorable": 571
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.C_causal_b3.217230555": {
+   "arm": "C_causal_b3",
+   "seed": 217230555,
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "config_sha256": "b47a007c19a14037836a5b231761691ad9e4377db8ecb471a95dee41c6d23e4f",
+   "trained": true,
+   "train_minutes": 61.1,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "7ffb2b4adf18bd0230bed952770d7870f1b7ec62ef16aa623d4747b1fc2efeba",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.217230555",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 546,
+    "correct": 27,
+    "n_scorable": 850,
+    "usable_scorable": 544
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.C_causal_b3.1151307191": {
+   "arm": "C_causal_b3",
+   "seed": 1151307191,
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "config_sha256": "1f15527052164267bcf4f073cf097144d8a091460c43e7fda99db4da2802c50b",
+   "trained": true,
+   "train_minutes": 61.17,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "6fbfb0461f0213cbb49b873807bb3e70dc35b9a745d6950e13968c995dc456d4",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.1151307191",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 618,
+    "correct": 42,
+    "n_scorable": 850,
+    "usable_scorable": 562
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  },
+  "autoinit.v1.phase_c3.C_causal_b3.2045359208": {
+   "arm": "C_causal_b3",
+   "seed": 2045359208,
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "config_sha256": "7828f353e6ad1705f880a97be2b19b3cbcfedf73b489f8625fea472899b16157",
+   "trained": true,
+   "train_minutes": 60.99,
+   "preserved": true,
+   "preserved_bytes": 2384236592,
+   "preserved_content_sha256": "fd620b34b2b0f42ed592d4895b51c49cc4b525e43161f84be52777111bcecef4",
+   "preserved_relay_repo": "AlphaAvatar/aadistill-artifacts",
+   "preserved_relay_prefix": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.2045359208",
+   "scored": true,
+   "counts": {
+    "n": 950,
+    "usable": 525,
+    "correct": 34,
+    "n_scorable": 850,
+    "usable_scorable": 524
+   },
+   "generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b"
+  }
+ },
+ "totals": {
+  "trained": 9,
+  "preserved": 9,
+  "scored": 9,
+  "preserved_bytes_total": 21458129328
+ }
+}

@@ -494,10 +494,10 @@
   "consumed_inputs_sha256": "bc2ee60708d3955864f6bd372a89f5f377eea2efb495a87d9ebc42040941cf96",
   "evidence_root": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
   "implementation": {
-    "commit": "2775efc9e4f0c0105a735c8252d8eb8b147f258c",
+    "commit": "3556790eedb820a0a5778018c1ffc1a781e42a33",
     "tree_is_dirty": false,
     "aggregator_path": "scripts/autoinit/aggregate_c3_stage_i.py",
-    "aggregator_sha256": "b134d5f99551cb07272b074c34a9966ffdefacb38f53f5834cc0b457ea48426a",
+    "aggregator_sha256": "bcc10cd11aa923be3a310ca46adc4f6a26f196037e398ec24cce3f25997c8c26",
     "session_module_sha256": "5d6aacf6f8fbe210f1702d4f27f3248f29611b77ab20dcf87e527e4fadcfa111",
     "isolation_module_sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
     "probe_results_module_sha256": "1a588ed88fa6bd9b0ed859418e4fc9e801d7b94b0297e0cb1cd594ffb46ed133"
