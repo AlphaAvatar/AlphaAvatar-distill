@@ -2280,30 +2280,29 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 11 real failures, and a count you must not read
+## The full suite is not green: 11 failures, and the count is trustworthy again
 
-**Closeout measurement, 2026-10-01: 23 failed, 5307 passed, 228 skipped,
-15 errors** in 52m01s, plus a targeted revalidation of everything this round
-touched (574 passed) after two derived records were regenerated.
+**Closeout measurement, 2026-10-01 at `ad8fabf1`: 11 failed, 5349 passed,
+228 skipped, ZERO errors** in 42m03s. Exactly the eleven documented failures —
+no new ones, and none of the eleven fixed.
 
-**That headline number is not the failure count, and this is the important
-part.** Eleven of those are real. The rest are **pre-existing cross-test
-registry pollution**: a C3 test registers the two experimental ATTENTION
-implementations into the process-global operator registry, and C2's joint-space
-enumeration then meets `attention.causal_kl_v1`, which its cost model has never
-measured. Measured both ways rather than argued:
+**The order-dependent inflation is gone.** It used to report 22–29 failed with
+15–20 errors, of which only eleven were real, and the surplus appeared and
+disappeared by collection order. The cause was process-global operator
+registry pollution: the C3 launcher's `spec()` registers the experimental
+ATTENTION implementations, the launcher-loading tests never unregistered, and
+C2's joint-space enumeration then met `attention.causal_kl_v1` — which its
+cost model has never measured — and raised `CostModelError`.
+`BeamSearch._allowed_impl_ids` falls back to *every* registered implementation
+when `allowed_impls` is None, so a leaked registration silently adds a branch
+to an unrelated search, exactly as `register.py` warns.
 
-```text
-tests/validation/test_c2_full_search_cuda_check.py alone      17 passed
-the same file after a C3 test file                            2 failed
-the same pairing at the base commit dead7004        3 failed, 4 errors
-```
-
-So it is **order-dependent, pre-dates this session, and is slightly better on
-this tree than at the base**. It is exactly what the `registered` fixture's own
-docstring warns about — *"a leaked registration silently adds a branch to an
-unrelated search"*. **Read the per-file isolated counts, not the whole-suite
-total**, until a fixture leak is closed.
+A module-scoped `conftest` fixture now removes whatever a test module added.
+**The first version of it made things worse** — it snapshotted the whole
+mapping and restored it, so a module that legitimately *unregistered* a leaked
+implementation had it put back, carrying the leak forward instead of clearing
+it, and the suite went 23 → 29 failures. It removes additions and nothing else
+now, then calls the builtin registrar, which is documented idempotent.
 
 **Eleven real failures, and they are the same eleven.** The closeout run
 showed a twelfth,
