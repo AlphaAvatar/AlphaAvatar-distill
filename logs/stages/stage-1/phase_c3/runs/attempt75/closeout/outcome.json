@@ -4,18 +4,27 @@
  "experiment_id": "phase_c3",
  "status": "MEASURED_COMPLETE_AGGREGATION_FAILED",
  "_what_this_is": "The formal C3 nine-probe measurement authorized by the maintainer decision of 2026-09-30. All nine probes were trained, preserved AND scored; both frozen digest gates passed; the evaluation field is protocol-uniform. Stage I -- the aggregation that applies the frozen decision rule -- then raised before writing c3_decision.json. The MEASUREMENT is complete and durable; what the session did not produce on the pod is the decision artifact.",
-
  "gpu_type_id": "NVIDIA L40S",
- "pod_ids": ["ib1q01gn8xuecn"],
+ "pod_ids": [
+  "ib1q01gn8xuecn"
+ ],
  "session_commit": "1d6af5336f8b879e6b33c6b4469e0a52370dd006",
  "harness_source_digest": "5f0b64e6d38487f2f14c43e5270094183625516debd63d8c53502c12ee72f52e",
  "launcher_exit": null,
  "terminal": "DRIVER_EXITED:40",
  "_terminal_label_is_wrong_and_why": "The driver writes its markers to /workspace/autoinit_c3.status while the launcher polls /workspace/autoinit_c1.status, so no driver marker -- including a terminal one -- can reach the launcher's detector and the session is classified by exit code. attempt66 carries the same artefact (DRIVER_EXITED:40). A mid-run mirror made the markers visible for supervision, which is how the acquisition loop correctly stopped instead of launching a second formal attempt; the source fix is owed.",
-
  "measurement_began": true,
  "provider_resource_created": true,
- "stages_run": ["B", "C", "D", "E", "F", "G", "H", "I"],
+ "stages_run": [
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H",
+  "I"
+ ],
  "stages": {
   "B_teacher_fetch_verify": "PASS - 3 shards bound at 768f209d9ea8",
   "C_register_operator": "PASS - both experimental implementations",
@@ -26,21 +35,18 @@
   "H_evaluate": "PASS - 9 of 9 scored, zero argparse errors",
   "I_decide": "FAILED - C1ResultsError before c3_decision.json was written"
  },
-
  "arm_identities": {
   "A_incumbent": "53e30566c5f7",
   "B_causal_b1": "6eb231caa50d",
   "C_causal_b3": "dec8868336e7",
   "_all_three_reproduce_attempt66": "Independently rebuilt on fresh hardware from the same verified parent; every digest matches the identity attempt66 recorded. B1 != B3 again, so the secondary contrast is not degenerate."
  },
-
  "stage_i_failure": {
   "error": "C1ResultsError: autoinit.v1.phase_c3.A_incumbent.217230555: unknown arm 'A_incumbent'; this record allows ['incumbent', 'treatment']",
   "root_cause": "C1ProbeRecord.allowed_arms defaults to C1's two ROLES and the C3 driver passed C3's three ARM IDS without overriding it. The field exists for exactly this and its own docstring says 'a caller running a different design passes its own'.",
   "class": "The same C1-constant family as the --arm defect that ended attempt66 one stage earlier: a C3 value meeting a C1 vocabulary. Repaired on the CALLER side again, because probe_results.py is named by C1's frozen executable closure and widening its default would move a digest a completed GO experiment binds.",
   "_what_it_did_not_destroy": "Nothing. All nine per-sample row files, nine scored aggregates, nine generation-admission records, 63 generation files and nine training records were collected (235 files across 19 classes) and are durable off-pod."
  },
-
  "preservation": {
   "probes_trained": 9,
   "probes_preserved": 9,
@@ -50,7 +56,6 @@
   "relay_prefix": "AlphaAvatar/aadistill-artifacts:c1_preserved_probes/attempt75/",
   "_this_is_the_attempt66_repair_working": "attempt66 preserved 0 of 9 -- every upload refused for private-storage quota. attempt75 preserved 9 of 9, at exactly the 19.98 GiB the new durable_capacity_gate predicted before the pod was created."
  },
-
  "evidence": {
   "collected": "235 files across 19 classes; manifest ok=true, missing=[], still_being_written=[]",
   "durable_location": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
@@ -58,7 +63,6 @@
   "generation_protocol_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
   "_uniformity_matters": "C2's confirmation field carried THREE distinct generation protocol fingerprints, which is why it produced no canonical promotion verdict. All nine C3 probes share one fingerprint, one scoring contract and one battery, and every generation-admission record reports comparable=true against the attestation."
  },
-
  "cost": {
   "actual_usd": 16.7083,
   "authorized_usd": 22.1452,
@@ -68,7 +72,6 @@
   "per_session_envelope_usd": 30.0
  },
  "final_provider_state": "pod ib1q01gn8xuecn deleted after 919.7 min; provider confirms gone: true. Account-wide inventory re-queried independently: 0 pods, 0 network volumes.",
-
  "consumed_chains_at_zero": {
   "attempt71": "all pre-provider gates passed; create refused for capacity",
   "attempt72": "all pre-provider gates passed; create refused for capacity",
@@ -76,7 +79,7 @@
   "attempt74": "all pre-provider gates passed; create refused for capacity",
   "_rule": "P12.1 -- a one-use chain is consumed even at $0. No provider resource existed and nothing billed."
  },
-
- "_no_verdict_is_claimed_here": "Stage I never wrote c3_decision.json, so this run produced no on-pod decision artifact. scripts/autoinit/replay_c3_stage_i.py recomputes stage I off-pod from this run's frozen evidence -- deterministic, byte-reproducible, re-measuring nothing -- and writes c3_decision_replay.json, explicitly marked a recomputation. Whether that recomputation may stand as the CANONICAL C3 verdict is a post-measurement scientific decision for the maintainer and is NOT asserted.",
- "_retry_is_not_authorized": "Formal measurement began and completed. AGENTS.md and this run's grant forbid retrying, resuming or pooling a scientific measurement once formal training or measurement has begun. No attempt76 was built; the acquisition loop stopped itself on STAGE_START:G."
+ "_retry_is_not_authorized": "Formal measurement began and completed. AGENTS.md and this run's grant forbid retrying, resuming or pooling a scientific measurement once formal training or measurement has begun. No attempt76 was built; the acquisition loop stopped itself on STAGE_START:G.",
+ "_the_verdict_was_computed_OFF_POD": "This run produced no on-pod decision artifact: its stage I raised before writing one, and that failure is recorded above as historical fact rather than rewritten. The maintainer decision of 2026-10-01 authorized the deterministic stage-I aggregation to be run off pod from this run's immutable evidence, and the result of that run is the CANONICAL C3 verdict: NO_GO on the primary contrast, Delta -0.001961, UCB +0.005490 against SESOI +0.010. It re-measured nothing. Owner: logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json, produced by scripts/autoinit/aggregate_c3_stage_i.py.",
+ "_formal_allowance_position": "This session's $16.7083 was issued against a corrected formal remaining of $15.7591 and a derived ceiling of $22.1452, so it should have been refused by the formal-allowance gate, short $6.3861. The gate could not see it: derive_budget attributed the formal allowance to phase_c1 alone. Repaired, and the defect is recorded rather than hidden -- see logs/stages/stage-1/phase_c3/analyses/formal_allowance_audit.json. The maintainer accepted this run's evidence retrospectively on 2026-10-01 because the defect affected the accounting gate and not the science. That is not a budget increase."
 }

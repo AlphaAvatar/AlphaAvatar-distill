@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-09-30. The human view. Every number here has an owner named
+**Updated:** 2026-10-01. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -35,21 +35,98 @@ and live at `/home/ecs-user/aad-artifacts/phase_c3/attempt75`. Owner:
 generation fingerprint `c318d1c62197…` across all nine, one scoring contract,
 one battery, `comparable=true` on every admission record.
 
-**A RECOMPUTATION EXISTS AND IS NOT A CLAIMED VERDICT.**
-`scripts/autoinit/replay_c3_stage_i.py` reruns stage I off-pod from the frozen
-evidence — deterministic, byte-reproducible across two runs, re-measuring
-nothing. It returns **NO-GO** on the primary contrast, `delta −0.001961`,
-`LCB −0.009412`, `UCB 0.005490` against a `SESOI` of `0.010`: the NO-GO branch
-is *UCB below SESOI*, so the effect is bounded below the smallest effect worth
-having rather than merely unresolved. The verdict is identical under both
-bootstrap seeds. **Whether an off-pod recomputation may stand as the canonical
-C3 verdict is a post-measurement scientific decision and is NOT asserted.**
+## C3 IS COMPLETE. THE VERDICT IS `NO_GO`.
 
-**No further C3 session is fundable.** Project cumulative is `$383.3623` of
-`$400.0000`, leaving `$16.6377`. `formal_pricing.assess` returns
-`FUNDABLE=False` on both approved devices — short `$5.5075` on L40S and
-`$0.1046` on L40 — so the issuer would refuse. A retry is in any case not
-authorized: formal measurement began and completed.
+**Authorized by the maintainer decision of 2026-10-01**, which accepted that
+attempt75 completed the measurement the preregistered design needs and that
+stage I is deterministic post-measurement analysis whose failure justifies no
+retraining. The aggregation ran **off pod, at `$0`**, from attempt75's
+immutable evidence alone.
+
+```text
+Delta_primary   -0.001961      B_causal_b1 - A_incumbent
+LCB one-sided   -0.009412
+UCB one-sided   +0.005490
+SESOI           +0.010         -> UCB < SESOI, so NO-GO
+```
+
+**Nothing failed to produce this verdict.** No behavioural veto fired, and seed
+robustness *passed* 2 of 3. The result rests on the effect being bounded below
+the smallest effect worth having — an informative NO_GO, not an unresolved one.
+
+* **B remains the incumbent.** causal-KL does not promote on the primary C3
+  operator-isolation claim.
+* **C4 remains NOT AUTHORIZED and must not start.**
+* The B1-vs-B3 protocol choice stays a post-C3 maintainer decision.
+
+**Both secondary contrasts and the usable-rollout result are reported
+completely, and do not redefine the primary verdict.** `Delta_batch`
+(B3 − B1) `+0.001961`; `Delta_practical` (B3 − incumbent) `+0.000000`. On the
+secondary axis causal-KL was **better**: pooled usable-rollout delta
+`+0.025263`. It produced more usable rollouts, just not more correct answers.
+
+**It is reproducible from the committed record.** Byte-identical across two
+runs except the commit field, which necessarily moves when the artifact is
+committed. The artifact binds all 27 consumed input files by `sha256`, the
+preregistration hash `ac44662c…`, the isolation plan hash, and the
+implementation's commit and module hashes — and it refuses to run on a dirty
+tree, because a commit recorded beside uncommitted edits names bytes that did
+not execute. Owner:
+[`attempt75_stage_i/c3_decision.json`](../stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json),
+produced by `scripts/autoinit/aggregate_c3_stage_i.py`.
+
+**attempt75's stage-I failure remains historical fact** and is not rewritten as
+though the live session had reached stage I successfully.
+
+## The formal allowance is OVERSPENT by `$0.9492`
+
+**`derive_budget` attributed the formal allowance to one hardcoded
+experiment**, `FORMAL_EXPERIMENT = "phase_c1"`, so every formal C3 session
+reached the project cumulative and spent nothing from the `$55.00` allowance
+the 2026-09-28 amendment funds it from — the same amendment that makes
+*remaining formal allowance ≥ derived session ceiling* a C3 issuance condition.
+A session that must pass a formal-allowance gate is a session that spends it.
+
+Repaired: the funding scope is package **configuration** now, and a run stating
+its own `package_id` is attributed by that instead. The exact derivation is
+worse than the estimate that prompted the repair, because **seven earlier C3
+formal sessions also spend the allowance** — every one created a provider
+resource under a formal launcher invocation, which the package's own
+`attempt_counting` rule makes a formal session:
+
+```text
+phase_c1   $22.6176
+phase_c3   $33.3316   = $2.9533 pre-science + $13.6700 attempt66 + $16.7083 attempt75
+           --------
+total      $55.9492   of $55.0000   ->   OVER by $0.9492
+```
+
+**One stated ground for accepting attempt75 does not hold.** The 2026-10-01
+decision accepted it partly because *"total actual formal spend remains below
+`$55.00`"*; under the exact derivation it does not. The project cap is still
+respected — `$383.3623` of `$400.0000`.
+
+**The authorization-gate defect is larger than estimated, and it is
+attempt75's alone.** Reconstructed chronologically by
+`scripts/consolidate/audit_formal_allowance.py`:
+
+| session | formal remaining before | derived ceiling | gate |
+| --- | --- | --- | --- |
+| attempt66 | `$29.4291` | `$22.1452` | **would have PASSED** |
+| attempt67–74 | `$15.7591` | `$22.1452` | would have been refused — all `$0` |
+| **attempt75** | **`$15.7591`** | **`$22.1452`** | **refused, short `$6.3861`** |
+
+attempt66 was correctly authorized. attempt75 should not have been issued. The
+defect affected the risk ceiling and the accounting gate, not arms, seeds,
+training, evaluation, scoring or the estimand — which is the ground on which
+the maintainer accepted its evidence retrospectively. That acceptance is **not
+a budget increase and not permission to spend further.** Owner:
+[`formal_allowance_audit.json`](../stages/stage-1/phase_c3/analyses/formal_allowance_audit.json).
+
+**No further C3 session is issuable, on either book.** `formal_pricing.assess`
+returns `FUNDABLE=False` on both approved devices and now fails **two**
+conditions rather than one — project cap short `$5.5075` (L40S) / `$0.1046`
+(L40), and formal allowance short `$23.0944` / `$17.6915`.
 
 **Four chains were consumed at `$0` before it.** attempts **71–74** each passed
 every pre-provider gate — including the new `durable_capacity_gate` — and were
@@ -187,7 +264,7 @@ C2  CLOSED WITHOUT PROMOTION            <- maintainer decision, 2026-09-24
       canonical C2 promotion verdict    NOT claimed
       new incumbent named by C2         NONE
       accepted incumbent after C2       B = frozen C1 treatment
-C3  MEASURED, AGGREGATION FAILED        <- stopped for a maintainer decision
+C3  COMPLETE / NO_GO                    <- canonical verdict, 2026-10-01
       three-arm preregistration         corrected and re-frozen
       attempt66 (2026-09-28)            9 trained, 0 scored, 0 preserved
       attempt75 (2026-09-29/30)         the authorized fresh measurement
@@ -196,11 +273,11 @@ C3  MEASURED, AGGREGATION FAILED        <- stopped for a maintainer decision
         nine formal probes              ALL TRAINED
         nine checkpoints                ALL PRESERVED   19.9844 GiB
         nine evaluations                ALL SCORED      protocol-uniform
-        stage I aggregation             FAILED  (C1 arm vocabulary)
-      C3 verdict                        NOT claimed
-      off-pod recomputation             NO-GO, UCB 0.00549 < SESOI 0.010
-                                        deterministic, seed-robust,
-                                        awaiting maintainer ratification
+        stage I aggregation             FAILED on the pod (C1 arm vocabulary)
+      stage-I aggregation, off pod      AUTHORIZED and RUN at $0
+      PRIMARY verdict                   NO_GO   UCB +0.005490 < SESOI +0.010
+      incumbent after C3                B, unchanged; causal-KL does not promote
+      B1 vs B3 protocol choice          a post-C3 maintainer decision, open
 C4  NOT AUTHORIZED
 ```
 
