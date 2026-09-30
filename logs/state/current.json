@@ -23,9 +23,9 @@
   "note": "No chain is prepared. attempt66's one-use chain was CONSUMED by a session that trained nine probes, and formal C3 is stopped for a maintainer decision on durable storage. A new chain must not be built until that decision is made: section 13 freezes the session once formal measurement has begun."
  },
  "budget": {
-  "cumulative_spend_usd": 366.654,
+  "cumulative_spend_usd": 383.3623,
   "authorized_cap_usd": 400.0,
-  "remaining_usd": 33.346,
+  "remaining_usd": 16.6377,
   "remaining_is_not_permission": true,
   "formal_remaining_usd": 32.3824,
   "engineering_remaining_usd": 1.9395,

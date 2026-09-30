@@ -82,6 +82,11 @@ Everything this experiment produced, in one place.
 * [`attempt69`](runs/attempt69/)
 * [`attempt7`](runs/attempt7/)
 * [`attempt70`](runs/attempt70/)
+* [`attempt71`](runs/attempt71/)
+* [`attempt72`](runs/attempt72/)
+* [`attempt73`](runs/attempt73/)
+* [`attempt74`](runs/attempt74/)
+* [`attempt75`](runs/attempt75/)
 * [`attempt8`](runs/attempt8/)
 * [`attempt9`](runs/attempt9/)
 

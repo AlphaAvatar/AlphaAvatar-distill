@@ -535,11 +535,30 @@ def test_the_verdict_operands_come_from_the_plan_not_from_list_order(registered)
     spec = importlib.util.spec_from_file_location("c3drv_ops", DRIVER)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    src = DRIVER.read_text()
-    assert 'prereg["estimand"]["primary"]["contrast"]' in src, (
-        "the primary operands are not read from the frozen plan's own "
-        "statement of the primary contrast")
-    #: And the third arm is deliberately absent from the decision rule.
+    #: BEHAVIOURAL, not a grep. This used to search the driver's source for
+    #: `prereg["estimand"]["primary"]["contrast"]`, which asserted where the
+    #: string appears rather than that the operands follow the plan -- and it
+    #: broke the moment the resolution moved to its owner in `session.py`
+    #: without the property changing at all. So the plan's own statement is
+    #: rewritten and the operands are required to follow it.
+    import copy as _copy
+
+    real = CS.preregistration()
+    flipped = _copy.deepcopy(real)
+    flipped["estimand"]["primary"]["contrast"] = "causal-B3 - causal-B1"
+    saved = CS._PREREG
+    try:
+        CS._PREREG = flipped
+        assert CS.primary_operands() == ("B_causal_b1", "C_causal_b3"), (
+            "the primary operands did not follow a rewritten contrast; they "
+            "are coming from list order, not from the frozen plan")
+    finally:
+        CS._PREREG = saved
+    assert CS.primary_operands() == ("A_incumbent", "B_causal_b1"), (
+        "the real contrast no longer resolves to the incumbent/B1 pair")
+
+    #: And the third arm is deliberately absent from the decision rule. Asked
+    #: of the DRIVER, so the delegation to the owner is exercised too.
     drv = mod.C3Driver.__new__(mod.C3Driver)
     drv.seeds = list(CS.recovery_seeds())
     control, candidate = mod.C3Driver.primary_operands(drv)

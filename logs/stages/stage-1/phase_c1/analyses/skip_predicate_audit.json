@@ -1036,7 +1036,7 @@
   },
   {
    "file": "tests/c3_preflight/test_c3_runtime_contract.py",
-   "line": 576,
+   "line": 595,
    "kind": "pytest.skip",
    "function": "test_the_driver_validates_the_hash_the_authorization_actually_binds",
    "condition": "not auth_path.is_file()",
@@ -1052,7 +1052,7 @@
   },
   {
    "file": "tests/c3_preflight/test_c3_runtime_contract.py",
-   "line": 617,
+   "line": 636,
    "kind": "pytest.skip",
    "function": "test_every_identity_the_driver_asserts_is_one_the_authorization_binds",
    "condition": "not auth_path.is_file()",
@@ -2398,5 +2398,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "7905411c3a5db3d9f692cc789d6e8bdc436586260e5cbe094b948acecd02b090"
+ "digest": "f4ce2796cc31f5c30057147f091ce2b237a7052ac363f4f7ea7dc00ad1f5272b"
 }

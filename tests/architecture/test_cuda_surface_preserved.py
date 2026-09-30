@@ -796,7 +796,30 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "mixture, so it joins `CURRENT_CUDA_SURFACE` and owes the new "
             "validation rather than claiming cover from the 2026-09-10 one.",
      }),
+    ("dead70043922ae668965af78f13a1fbfcf023529",
+     "asking the durable backend whether it has room, before spending",
+     {
+        "src/aadistill/runtime/hub_capacity.py":
+            "NEW FILE, and additive: nothing imported it before. It asks the "
+            "git-LFS batch endpoint whether an upload of given sizes would be "
+            "accepted, which the endpoint answers from quota BEFORE any bytes "
+            "move -- so it costs seconds, transfers nothing and stores "
+            "nothing. It exists because AGENTS.md P8.2.1 requires confirming "
+            "a durable large-artifact backend has ROOM before a long run, and "
+            "twice it was not confirmed: C1 attempt 18 lost six 2.22 GiB "
+            "probes and C3 attempt66 lost nine, both to "
+            "`Private repository storage limit reached`, with the durability "
+            "mechanism behaving perfectly and having nowhere to write. NO "
+            "CUDA SURFACE IS TOUCHED: it imports `requests` and `secrets`, "
+            "runs on the launcher host before a pod exists, and is never "
+            "imported by any initialization, operator, training or evaluation "
+            "path. It names no experiment, no artifact count and no "
+            "threshold -- the caller owns the sizes and the decision, which "
+            "is why the C3-specific gate and its measured per-probe byte "
+            "count live in the launcher instead.",
+     }),
 )
+
 
 #: The tip the CURRENT round was reviewed at.
 REVIEWED_TIP = ROUNDS[-1][0]

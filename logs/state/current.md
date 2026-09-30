@@ -9,14 +9,47 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**FORMAL C3 IS RUNNING AND BILLING: `attempt75`, pod `ib1q01gn8xuecn`, secure
-L40S at `$1.09/h`.** Launched 2026-09-29T17:58:58Z. Watchdog bound at 1201
-minutes = `$21.81`; authorized ceiling `$22.1452` derived from the live
-securePrice, expected `$17.1072`, per-session envelope `$30.00`. Every setup
-marker passed — `TESTS_OK:9s`, `AUTHORIZATION_OK`, `SETUP_DONE` — and the
-driver is detached. **Do not kill the acquisition loop**: it owns the launcher,
-which owns the watchdog and the pod. Poll `myself { pods }` at every check-in
-and tear the pod down when the session reaches a terminal state.
+**Nothing is running and nothing is billing.** Pod `ib1q01gn8xuecn` was deleted
+after 919.7 min and is provider-confirmed gone; an account-wide re-query
+returns 0 pods and 0 network volumes.
+
+**FORMAL C3 MEASURED ALL NINE PROBES AND THEN FAILED TO AGGREGATE THEM.**
+`attempt75`, secure L40S at `$1.09/h`, **`$16.7083`** of a `$22.1452` derived
+ceiling. Both frozen digest gates passed. All three arms rebuilt to the exact
+identities attempt66 recorded. **9 of 9 trained, 9 of 9 preserved, 9 of 9
+scored**, zero argparse errors. Then stage I raised before writing the decision:
+
+```text
+C1ResultsError: autoinit.v1.phase_c3.A_incumbent.217230555:
+                unknown arm 'A_incumbent';
+                this record allows ['incumbent', 'treatment']
+```
+
+**The measurement is complete and durable; the on-pod decision artifact is
+not.** 235 files across 19 classes came home — nine per-sample row files, nine
+scored aggregates, nine generation-admission records, 63 generation files —
+and live at `/home/ecs-user/aad-artifacts/phase_c3/attempt75`. Owner:
+[`attempt75/closeout/outcome.json`](../stages/stage-1/phase_c3/runs/attempt75/closeout/outcome.json).
+
+**The field is protocol-uniform, which is the property C2's was not.** One
+generation fingerprint `c318d1c62197…` across all nine, one scoring contract,
+one battery, `comparable=true` on every admission record.
+
+**A RECOMPUTATION EXISTS AND IS NOT A CLAIMED VERDICT.**
+`scripts/autoinit/replay_c3_stage_i.py` reruns stage I off-pod from the frozen
+evidence — deterministic, byte-reproducible across two runs, re-measuring
+nothing. It returns **NO-GO** on the primary contrast, `delta −0.001961`,
+`LCB −0.009412`, `UCB 0.005490` against a `SESOI` of `0.010`: the NO-GO branch
+is *UCB below SESOI*, so the effect is bounded below the smallest effect worth
+having rather than merely unresolved. The verdict is identical under both
+bootstrap seeds. **Whether an off-pod recomputation may stand as the canonical
+C3 verdict is a post-measurement scientific decision and is NOT asserted.**
+
+**No further C3 session is fundable.** Project cumulative is `$383.3623` of
+`$400.0000`, leaving `$16.6377`. `formal_pricing.assess` returns
+`FUNDABLE=False` on both approved devices — short `$5.5075` on L40S and
+`$0.1046` on L40 — so the issuer would refuse. A retry is in any case not
+authorized: formal measurement began and completed.
 
 **Four chains were consumed at `$0` before it.** attempts **71–74** each passed
 every pre-provider gate — including the new `durable_capacity_gate` — and were
@@ -25,7 +58,21 @@ That is the ordinary behaviour of `Low` stock on this account, already seen at
 attempts 67–69. Each is a consumed one-use chain under P12.1, not a retried
 experiment: no provider resource existed and nothing billed.
 
-**Two operational defects are recorded. Neither is scientific.**
+**Three more defects were found, and the third IS scientific.**
+
+**0. The bootstrap seed was C1's.** `stratified_cluster_bootstrap` defaults to
+`isolation.bootstrap_seed()`, domain-separated as `phase-c1:bootstrap` =
+**816109261**. C3's preregistration declares **654678655** under
+`phase-c3:bootstrap`, the authorization certifies that figure and the session
+contract reports it — and nothing passed it to the resampler. So every C3
+record asserted a seed the computation did not use. It moves the *interval*,
+not the point estimate, and a verdict reads the LCB, so it is a scientific
+defect rather than a cosmetic one. Repaired: the driver now passes
+`CS.bootstrap_seed()` explicitly. **On this data it changed nothing** — the
+replay reports both seeds side by side and the LCB and the verdict are
+identical, which is a measured fact rather than an assumption.
+
+**Two operational defects. Neither is scientific.**
 
 **1. The driver's markers went to a file the launcher does not read.** The C3
 driver writes `mark()` to `/workspace/autoinit_c3.status`; the C3 launcher
@@ -140,13 +187,20 @@ C2  CLOSED WITHOUT PROMOTION            <- maintainer decision, 2026-09-24
       canonical C2 promotion verdict    NOT claimed
       new incumbent named by C2         NONE
       accepted incumbent after C2       B = frozen C1 treatment
-C3  EXECUTED, NO RESULT                 <- stopped for a maintainer decision
+C3  MEASURED, AGGREGATION FAILED        <- stopped for a maintainer decision
       three-arm preregistration         corrected and re-frozen
-      hardware qualification            L40S PASSED both digest gates
-      nine formal probes                ALL TRAINED
-      nine evaluations                  NONE RAN  (stage H, CLI defect)
-      nine checkpoints                  NONE PRESERVED  (storage quota)
+      attempt66 (2026-09-28)            9 trained, 0 scored, 0 preserved
+      attempt75 (2026-09-29/30)         the authorized fresh measurement
+        hardware qualification          L40S PASSED both digest gates
+        three arm identities            all reproduce attempt66's
+        nine formal probes              ALL TRAINED
+        nine checkpoints                ALL PRESERVED   19.9844 GiB
+        nine evaluations                ALL SCORED      protocol-uniform
+        stage I aggregation             FAILED  (C1 arm vocabulary)
       C3 verdict                        NOT claimed
+      off-pod recomputation             NO-GO, UCB 0.00549 < SESOI 0.010
+                                        deterministic, seed-robust,
+                                        awaiting maintainer ratification
 C4  NOT AUTHORIZED
 ```
 
@@ -2148,7 +2202,7 @@ these by hand; run the deriver.**
 | formal sessions | `$32.3824` of `$55.0000` |
 | GPU engineering | `$1.9395` of `$10.0000` |
 | package | `$34.3219` of `$65.0000` |
-| project cap | `$366.6540` spent of `$400.0000`, leaving `$33.3460` |
+| project cap | `$383.3623` spent of `$400.0000`, leaving `$16.6377` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 1.** 2 ceilings cost `$60.0000` and the formal allowance has `$32.3824`. Dividing the PACKAGE balance instead gives 1, which is the error: the engineering allowance cannot pay for a formal probe.
 

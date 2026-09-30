@@ -282,7 +282,7 @@
  },
  "counts": {
   "runs_legacy_v1": 41,
-  "runs_current": 94,
+  "runs_current": 99,
   "runs_unrecorded": 29,
   "legacy_components": 77,
   "by_experiment": {
@@ -357,9 +357,9 @@
     "total": 9
    },
    "phase_c3": {
-    "recorded": 51,
+    "recorded": 56,
     "unrecorded": 19,
-    "total": 70
+    "total": 75
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2177,6 +2177,71 @@
     "manifest": "logs/stages/stage-1/phase_c3/runs/attempt7/manifest.json"
    },
    "manifest_sha256": "52579a7ed7c18d66ea7718378236a3b20dbfa16cb2f8cc50464ac7407251c16f",
+   "n_components": 10
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt71",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt71",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt71/manifest.json"
+   },
+   "manifest_sha256": "39dd4b44449eeb26521235b57f2963f334697daf0c42d09210594c9c8739e375",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt72",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt72",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt72/manifest.json"
+   },
+   "manifest_sha256": "3ef62f0dcc33cf333a83a79fba892bd7e4feaa7f1765424d8e4476307800d062",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt73",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt73",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt73/manifest.json"
+   },
+   "manifest_sha256": "041ccad677adda168f4ab08e18f4e01a86b82524e9b6822a3631d364adc17700",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt74",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt74",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt74/manifest.json"
+   },
+   "manifest_sha256": "6bfa962c970531510b8d259eb21fc877dcec1411caa4bec23dc126cf2b9f72a3",
+   "n_components": 6
+  },
+  {
+   "experiment_id": "phase_c3",
+   "run_id": "attempt75",
+   "stage": "1",
+   "layout": "stage_grouped",
+   "layout_version": 3,
+   "components": {
+    "root": "logs/stages/stage-1/phase_c3/runs/attempt75",
+    "manifest": "logs/stages/stage-1/phase_c3/runs/attempt75/manifest.json"
+   },
+   "manifest_sha256": "163d05192a9ef40f061b751b428a9625fb7aa75c31387f37239df56b65a36e35",
    "n_components": 10
   },
   {

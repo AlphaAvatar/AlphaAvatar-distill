@@ -175,8 +175,35 @@ def test_each_initialization_is_built_once_and_fanned_out():
 
 
 def test_the_frozen_plan_is_built_by_iterating_the_plan_s_arms():
-    """A literal arm tuple is how the executor drifted from the plan before."""
-    assert "for arm_id in CS.arm_ids()" in SRC
+    """A literal arm tuple is how the executor drifted from the plan before.
+
+    BEHAVIOURAL. This used to grep the driver for `for arm_id in CS.arm_ids()`,
+    which asserted where a loop is written rather than that the arms come from
+    the plan -- and it failed the moment the resolution moved to its owner in
+    `session.py`, with the property completely unchanged. What matters is that
+    an arm the plan does not declare cannot be resolved, and that is asked of
+    the real resolver.
+    """
+    import copy
+
+    from experiments.phase_c3 import session as CS
+
+    real = CS.preregistration()
+    assert CS.primary_operands() == ("A_incumbent", "B_causal_b1")
+
+    #: An arm the resolver cannot tokenize must RAISE, not be skipped: a
+    #: silently dropped arm is how a two-arm executor ran a three-arm plan.
+    renamed = copy.deepcopy(real)
+    renamed["arms"]["D_unrecognised"] = renamed["arms"]["C_causal_b3"]
+    saved = CS._PREREG
+    try:
+        CS._PREREG = renamed
+        with pytest.raises(CS.C3SessionError, match="contrast token"):
+            CS.primary_operands()
+    finally:
+        CS._PREREG = saved
+
+    #: And no C1 two-arm literal survives in the driver.
     assert 'C1Arm("c1.incumbent"' not in SRC
     assert "CS.INCUMBENT_ATTENTION" not in SRC and "CS.TREATMENT_ATTENTION" not in SRC
 
