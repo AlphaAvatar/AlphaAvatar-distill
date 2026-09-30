@@ -402,7 +402,55 @@ def main() -> int:
     decision["evidence_root"] = str(a.evidence)
     decision["implementation"] = impl
 
+    #: THE PROBE INVENTORY, as a by-product of the same walk. It is what
+    #: establishes 9/9 trained, 9/9 preserved and 9/9 scored FROM THE COMMITTED
+    #: RECORD: the heavy bytes live outside git by policy, so without this the
+    #: only evidence that nine checkpoints exist is prose in a closeout and a
+    #: line in a driver log. Small enough to commit, and each entry names the
+    #: durable location and the content hash that identifies what is there.
+    inventory = {
+        "schema": "aadistill.phase_c3.probe_inventory/v1",
+        "_what_this_is": (
+            "One row per formal probe: what it was built from, that it "
+            "trained, where its checkpoint was preserved and under which "
+            "content hash, and what it scored. Derived from the run's own "
+            "training records and scored aggregates; nothing here is typed."),
+        "run_id": a.run_id,
+        "n_probes": len(scored),
+        "probes": {},
+    }
+    for (arm_id, seed), sc in sorted(scored.items()):
+        tr, res = sc["training"], sc["result"]
+        pres = tr.get("preserved") or {}
+        inventory["probes"][tr["probe_id"]] = {
+            "arm": arm_id, "seed": seed,
+            "initialization_artifact_digest":
+                tr["initialization_artifact_digest"],
+            "config_sha256": tr["config_sha256"],
+            "trained": bool(tr.get("complete")),
+            "train_minutes": tr.get("train_minutes"),
+            "preserved": bool(pres.get("preserved")),
+            "preserved_bytes": pres.get("bytes"),
+            "preserved_content_sha256": pres.get("content_sha256"),
+            "preserved_relay_repo": pres.get("relay_repo"),
+            "preserved_relay_prefix": pres.get("relay_prefix"),
+            "scored": True,
+            "counts": {k: res[k] for k in ("n", "usable", "correct",
+                                           "n_scorable", "usable_scorable")},
+            "generation_fingerprint": sc["admission"]["generation_fingerprint"],
+        }
+    trained = sum(1 for v in inventory["probes"].values() if v["trained"])
+    preserved = sum(1 for v in inventory["probes"].values() if v["preserved"])
+    inventory["totals"] = {
+        "trained": trained, "preserved": preserved,
+        "scored": len(inventory["probes"]),
+        "preserved_bytes_total": sum(
+            v["preserved_bytes"] or 0 for v in inventory["probes"].values()),
+    }
+
     a.out.mkdir(parents=True, exist_ok=True)
+    (a.out / "probe_inventory.json").write_text(
+        json.dumps(inventory, indent=1) + "\n")
     (a.out / "c3_probe_results.json").write_text(
         json.dumps(results, indent=2) + "\n")
     (a.out / "c3_decision.json").write_text(
