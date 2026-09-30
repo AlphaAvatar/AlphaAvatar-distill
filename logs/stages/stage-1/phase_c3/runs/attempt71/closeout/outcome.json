@@ -1,0 +1,22 @@
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt71",
+ "experiment_id": "phase_c3",
+ "status": "CAPACITY_REFUSED_NO_RESOURCE_CREATED",
+ "_what_this_is": "A one-use chain built, launched, and refused at pod creation. Every pre-provider gate passed -- including the new durable_capacity_gate, which reported that the relay would accept all 9 probes (19.98 GiB) -- and the provider then had no usable secure capacity at the create call. That is the ordinary behaviour of 'Low' stock on this account, already seen at attempts 67-69.",
+ "gpu_type_id": "NVIDIA L40S",
+ "launcher_exit": 11,
+ "launcher_message": "ABORT: could not create a pod",
+ "stages_run": [],
+ "measurement_began": false,
+ "provider_resource_created": false,
+ "pod_ids": [],
+ "cost": {
+  "actual_usd": 0.0,
+  "_why_zero": "no pod was ever created, so nothing billed"
+ },
+ "final_provider_state": "nothing to tear down; no resource was created",
+ "_chain_disposition": "CONSUMED even at $0 (P12.1): the authorization is one-use and must not be reused. The incrementing attempt number is not a scope expansion.",
+ "_succeeded_by": "attempt75, which acquired a secure L40S on the next round and ran the formal measurement.",
+ "_quoted_price_per_hour": 1.09
+}

@@ -1,0 +1,57 @@
+[17:58:39] budget: expected 1186 min $21.54 · soft $21.54 · hard $21.81 (authorized $22.15)
+[17:58:39] NVIDIA L40S $1.09/h, stock None
+[17:58:39] session commit 1d6af5336f8b verified: harness digests to 5f0b64e6d384…, carries the authorization and only logs/stages/stage-1/phase_c3/runs/attempt75/governance/authorization.json differs from the authorized base
+[17:58:39] grant cebfd2049bf2… at logs/stages/stage-1/phase_c3/runs/attempt75/governance/grant.json, as recorded by the authorization
+[17:58:40] C1 harness 5f0b64e6d384… over 115 declared files
+[17:58:40] ceiling $22.1452, derived from logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json
+[17:58:41] preregistration ac44662c02d5… (self-hash verified, 3 arms, primary causal-B1 - incumbent B), live closure 5f0b64e6d384…
+[17:58:41] seeds, both replay digests and the 950/850 battery a285d61f88de… are unchanged
+[17:58:42] frozen assets verified against configs/experiments/phase_c3/frozen_assets.json
+[17:58:42] 3 teacher shards bound at 768f209d9ea8…, none fetched
+[17:58:42] battery staged from bytes identical to /home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1
+[17:58:42] success spec covers the contract (9 probes x 7 sets = 63 generation files); failure spec presupposes no training
+[17:58:44] stage1/qwen3_0p6b_init_v0/checkpoint/config.json (1418 bytes, a7131bb092b3…) stages to artifacts/stage1/qwen3_0p6b_init_v0/checkpoint with stored RoPE base 5,000,000
+[17:58:48] aad_autoinit_1d6af533.bundle (23052870 bytes, e9ae762a2d41…) round-trips to 1d6af5336f8b… carrying this authorization and harness 5f0b64e6d384…
+[17:58:51] 7/7 groups PASS, 0 skipped, 190 frozen prompts re-rendered byte for byte
+[17:58:52] pod sweep 29 passed / 0 skipped / 0 failed, no declared groups, binds C3 harness 5f0b64e6d384… and environment f99e0c8deb4e…, staging contract 0aa9acc6903f…, swept at 5dfe72dc with only ['logs/stages/stage-1/phase_c3/runs/attempt75/governance/authorization.json', 'logs/stages/stage-1/phase_c3/runs/attempt75/governance/readiness.json'] differs from the swept base
+[17:58:56] the relay would accept all 9 probes (19.98 GiB), asked with fresh oids
+[17:58:57] precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets
+[17:58:58] watchdog detached — hard 1201 min = $21.81
+[17:58:58] created ib1q01gn8xuecn at $1.09/h
+[17:59:51]   starting (60s) — $0.02
+[18:00:57]   starting (120s) — $0.04
+[18:01:39] TCP 22 at 81.27.69.178:27977 after 2.7 min
+[18:01:42] draw 1: ssh reachable — $0.05
+[18:02:25] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03
+[18:02:25] draw 1: running setup
+[18:06:17] draw 1: setup complete — $0.13
+[18:06:23] driver detached, pid 3042, confirmed by descriptor_probe — $0.13
+[18:08:33]   2026-09-29T18:06:14Z MARKER:SETUP_DONE — $0.17
+[19:17:58]   2026-09-29T18:28:38Z MARKER:STAGE_START:F — $1.44
+[19:53:49]   2026-09-29T19:52:47Z MARKER:STAGE_START:G — $2.09
+[20:56:28]   2026-09-29T20:55:15Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.A_incumbent.217230555 — $3.22
+[21:59:09]   2026-09-29T21:57:17Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.A_incumbent.1151307191 — $4.36
+[22:59:36]   2026-09-29T22:59:04Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.A_incumbent.2045359208 — $5.46
+[00:02:18]   2026-09-30T00:00:45Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.B_causal_b1.217230555 — $6.60
+[01:02:47]   2026-09-30T01:02:27Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.B_causal_b1.1151307191 — $7.70
+[02:05:26]   2026-09-30T02:04:04Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.B_causal_b1.2045359208 — $8.84
+[03:05:53]   2026-09-30T03:05:36Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.C_causal_b3.217230555 — $9.94
+[04:08:35]   2026-09-30T04:07:12Z MARKER:PROBE_TRAINED:autoinit.v1.phase_c3.C_causal_b3.1151307191 — $11.07
+[05:09:01]   2026-09-30T05:08:38Z MARKER:STAGE_START:H — $12.17
+[05:38:06]   2026-09-30T05:36:44Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.A_incumbent.217230555 — $12.70
+[06:00:30]   2026-09-30T05:59:20Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.A_incumbent.1151307191 — $13.11
+[06:36:26]   2026-09-30T06:34:25Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.A_incumbent.2045359208 — $13.76
+[07:01:05]   2026-09-30T06:59:54Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.B_causal_b1.217230555 — $14.21
+[07:21:15]   2026-09-30T07:21:03Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.B_causal_b1.1151307191 — $14.58
+[07:48:12]   2026-09-30T07:46:20Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.B_causal_b1.2045359208 — $15.06
+[08:15:03]   2026-09-30T08:14:45Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.C_causal_b3.217230555 — $15.55
+[08:37:26]   2026-09-30T08:35:37Z MARKER:PROBE_SCORED:autoinit.v1.phase_c3.C_causal_b3.1151307191 — $15.96
+[09:10:59]   2026-09-30T09:10:16Z MARKER:C1_INCOMPLETE — $16.57
+[09:11:03] driver no longer running: EXITED:40
+[09:11:03] polling ended: DRIVER_EXITED:40 — $16.57
+[09:17:57]   manifest rc=0
+235 file(s) across 19 class(es) -> /workspace/manifest.json
+  final_required: 235 · mutable_snapshot: 0 · final_streams_quiescent: True
+[09:18:30] teardown gate: allowed=True failed=training_complete
+[09:18:30] deleting pod (gate passed after DRIVER_EXITED:40)
+[09:18:41] pod deleted — 919.7 min, $16.71; provider confirms gone: True

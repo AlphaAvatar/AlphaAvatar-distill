@@ -166,6 +166,50 @@ def bootstrap_seed() -> int:
     return int(preregistration()["seeds"]["bootstrap"])
 
 
+def primary_operands() -> tuple[str, str]:
+    """(control, candidate) arm ids for the PRIMARY contrast.
+
+    Read from the frozen plan's `estimand.primary.contrast` and matched against
+    the declared arms, so the verdict's operands come from the document that
+    fixed them rather than from list order.
+
+    Resolved by POSITION, not by splitting on a dash. "causal-B1 - incumbent B"
+    contains a hyphen inside the arm name itself, so partitioning on "-" cut
+    "causal" from "B1" and picked the B3 arm as the candidate — the wrong side
+    of the wrong contrast, silently.
+
+    It lives HERE rather than on the driver because it is a property of the
+    frozen plan, and because a second reader appeared: the off-pod stage-I
+    replay. Two copies of "which two arms is the primary" would agree only
+    until somebody reordered the arms, which is precisely the failure the
+    positional resolution above exists to prevent.
+    """
+    contrast = preregistration()["estimand"]["primary"]["contrast"].lower()
+
+    #: One distinguishing token per arm, taken from the arm id itself.
+    tokens = {}
+    for arm_id in arm_ids():
+        low = arm_id.lower()
+        if "incumbent" in low:
+            tokens[arm_id] = "incumbent"
+        elif low.endswith("b1"):
+            tokens[arm_id] = "b1"
+        elif low.endswith("b3"):
+            tokens[arm_id] = "b3"
+        else:
+            raise C3SessionError(
+                f"cannot derive a contrast token for arm {arm_id!r}")
+
+    found = {a: contrast.index(tok) for a, tok in tokens.items()
+             if tok in contrast}
+    if len(found) != 2:
+        raise C3SessionError(
+            f"the primary contrast {contrast!r} names {len(found)} of the "
+            f"declared arms {list(tokens)}; it must name exactly two")
+    ordered = sorted(found, key=found.get)
+    return ordered[1], ordered[0]                     # (control, candidate)
+
+
 def prefix_steps() -> tuple[tuple[str, str], ...]:
     """The shared prefix, from the plan. (impl_id, calibration_profile) pairs."""
     return tuple((impl, prof)

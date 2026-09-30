@@ -482,42 +482,17 @@ class C3Driver:
     def primary_operands(self) -> tuple[str, str]:
         """(control, candidate) arm ids for the PRIMARY contrast.
 
-        Read from the frozen plan's `estimand.primary.contrast` and matched
-        against the declared arms, so the verdict's operands come from the
-        document that fixed them rather than from list order.
-
-        Resolved by POSITION, not by splitting on a dash. "causal-B1 -
-        incumbent B" contains a hyphen inside the arm name itself, so
-        partitioning on "-" cut "causal" from "B1" and picked the B3 arm as
-        the candidate -- the wrong side of the wrong contrast, silently. The
-        minuend is whichever arm appears first in the string.
+        DELEGATED to the frozen plan's own module. The resolution used to live
+        here in full; a second reader then appeared -- the off-pod stage-I
+        replay -- and two copies of "which two arms is the primary" agree only
+        until somebody reorders the arms, which is the exact failure the
+        positional resolution exists to prevent. One owner:
+        `experiments.phase_c3.session.primary_operands`.
         """
-        prereg = CS.preregistration()
-        contrast = prereg["estimand"]["primary"]["contrast"].lower()
-
-        #: One distinguishing token per arm, taken from the arm id itself.
-        tokens = {}
-        for arm_id in CS.arm_ids():
-            low = arm_id.lower()
-            if "incumbent" in low:
-                tokens[arm_id] = "incumbent"
-            elif low.endswith("b1"):
-                tokens[arm_id] = "b1"
-            elif low.endswith("b3"):
-                tokens[arm_id] = "b3"
-            else:
-                raise C3DriverError(
-                    f"cannot derive a contrast token for arm {arm_id!r}")
-
-        found = {arm: contrast.index(tok)
-                 for arm, tok in tokens.items() if tok in contrast}
-        if len(found) != 2:
-            raise C3DriverError(
-                f"the primary contrast {contrast!r} names {len(found)} of the "
-                f"declared arms {list(tokens)}; it must name exactly two")
-        ordered = sorted(found, key=found.get)
-        candidate, control = ordered[0], ordered[1]
-        return control, candidate
+        try:
+            return CS.primary_operands()
+        except CS.C3SessionError as exc:
+            raise C3DriverError(str(exc)) from exc
 
     # -- budget, evidence, subprocesses ------------------------------------
     def usd(self) -> float:
@@ -1451,6 +1426,27 @@ class C3Driver:
             r = s["result"]
             records.append(C1ProbeRecord(
                 probe_id=s["record"]["probe_id"], arm=arm, seed=seed,
+                #: C3'S THREE ARMS, not C1's two roles. `allowed_arms` defaults
+                #: to `ARMS` — `('incumbent', 'treatment')` — and C3 passes arm
+                #: IDS, so every record raised
+                #: `unknown arm 'A_incumbent'; this record allows
+                #: ['incumbent', 'treatment']`. attempt75 hit it in stage I,
+                #: after all nine probes had trained, been preserved AND been
+                #: scored: the entire measurement existed and could not be
+                #: aggregated.
+                #:
+                #: The same C1-constant class as the `--arm` defect that killed
+                #: attempt66 one stage earlier, and the same repair: the
+                #: mechanism to do it right already existed here — the field's
+                #: own docstring says "a caller running a different design
+                #: passes its own" — and C3's caller did not use it. Fixed on
+                #: the CALLER side, because `probe_results.py` is named by C1's
+                #: frozen executable closure and widening its default would move
+                #: a digest a completed GO experiment binds.
+                #:
+                #: DERIVED from the plan, never listed: a fourth arm must not
+                #: need an edit here.
+                allowed_arms=tuple(CS.arm_ids()),
                 initialization_artifact_digest=s["record"][
                     "initialization_artifact_digest"],
                 trained_run=r.get("trained_run") or {},
@@ -1502,7 +1498,21 @@ class C3Driver:
         def paired(candidate: str, control: str) -> dict:
             """Complete paired statistics for one contrast. Same machinery."""
             d = paired_differences(inputs.arm(control), inputs.arm(candidate))
-            boot = stratified_cluster_bootstrap(d, inputs.strata)
+            #: C3'S PREREGISTERED BOOTSTRAP SEED, passed explicitly. Omitting
+            #: it falls back to `isolation.bootstrap_seed()`, which is
+            #: domain-separated as `phase-c1:bootstrap` and returns
+            #: **816109261** — C1's seed. C3's plan declares **654678655**
+            #: under `phase-c3:bootstrap`, the authorization certifies that
+            #: figure and the session contract reports it, and until
+            #: 2026-09-30 nothing passed it to the resampler. So every C3
+            #: record asserted a seed the computation did not use.
+            #:
+            #: It moves the interval, not the point estimate: the delta is a
+            #: mean over fixed per-prompt differences, while the LCB and UCB
+            #: are functions of the draws. A verdict reads the LCB, so this is
+            #: a scientific defect and not a cosmetic one.
+            boot = stratified_cluster_bootstrap(d, inputs.strata,
+                                                seed=CS.bootstrap_seed())
             per_seed = [
                 sum(bool(inputs.correct[candidate][s][j])
                     - bool(inputs.correct[control][s][j]) for j in d) / len(d)
