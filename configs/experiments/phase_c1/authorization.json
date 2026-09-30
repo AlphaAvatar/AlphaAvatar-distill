@@ -114,7 +114,17 @@
   },
   "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much.",
   "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY.",
-  "_amendment_2026_09_28": "MAINTAINER DECISION 2026-09-28, on the review of b937aebb, which stopped formal C3 for funding rather than reducing the science. Funding is declared not to be the limiting factor. PROSPECTIVE, current-only: project cumulative cap 370.00 -> 400.00; per-session hard ceiling 15.1475 -> 30.00 (an ENVELOPE, not an automatic grant); formal allowance 45.4425 -> 55.00; GPU engineering allowance unchanged at 10.00; package total 55.4425 -> 65.00, which is 55 + 10 by construction. Historical issued authorizations and historical run records are UNCHANGED. C3's own one-use authorization receives the ceiling derived from live securePrice immediately before issuance, and proceeds only if that derived ceiling <= 30.00 AND cumulative spend + derived ceiling <= 400.00 AND remaining formal allowance >= derived ceiling."
+  "_amendment_2026_09_28": "MAINTAINER DECISION 2026-09-28, on the review of b937aebb, which stopped formal C3 for funding rather than reducing the science. Funding is declared not to be the limiting factor. PROSPECTIVE, current-only: project cumulative cap 370.00 -> 400.00; per-session hard ceiling 15.1475 -> 30.00 (an ENVELOPE, not an automatic grant); formal allowance 45.4425 -> 55.00; GPU engineering allowance unchanged at 10.00; package total 55.4425 -> 65.00, which is 55 + 10 by construction. Historical issued authorizations and historical run records are UNCHANGED. C3's own one-use authorization receives the ceiling derived from live securePrice immediately before issuance, and proceeds only if that derived ceiling <= 30.00 AND cumulative spend + derived ceiling <= 400.00 AND remaining formal allowance >= derived ceiling.",
+  "funds_formal_sessions_of": {
+   "_contract": "Which experiments' formal sessions spend THIS package's formal allowance. Instance policy, which is why it is configuration: the deriver must not carry a hardcoded phase name, and it did -- `FORMAL_EXPERIMENT = \"phase_c1\"` -- so formal C3 sessions reached the project cumulative and never touched the $55.00 formal allowance they are funded from. A run whose own records state a `package_id` is attributed by that instead; this list is what covers runs predating that field, and historical authorizations are NOT rewritten to add one.",
+   "experiment_ids": [
+    "phase_c1",
+    "phase_c3"
+   ],
+   "phase_c1": "the package was approved for it on 2026-09-11",
+   "phase_c3": "the 2026-09-28 amendment funds formal C3 from this allowance and makes `remaining formal allowance >= derived session ceiling` one of the three conditions a C3 authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends the formal allowance.",
+   "_authority": "_amendment_2026_09_28, in this same block"
+  }
  },
  "authorized_stages": [
   0,

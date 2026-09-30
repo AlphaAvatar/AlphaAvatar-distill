@@ -1,39 +1,59 @@
 #!/usr/bin/env python3
-"""Recompute C3 stage I from a completed run's collected evidence. $0, CPU.
+"""The canonical C3 stage-I aggregation, run off pod. $0, CPU, deterministic.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/replay_c3_stage_i.py \
+    PYTHONPATH=src:scripts python scripts/autoinit/aggregate_c3_stage_i.py \
         --evidence /home/ecs-user/aad-artifacts/phase_c3/attempt75 \
-        --out /home/ecs-user/aad-artifacts/phase_c3/attempt75/stage_i_replay
+        --out logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i
 
-**This re-measures NOTHING.** Every input is a frozen artifact the run already
-produced and shipped off-pod: nine `*_c1_confirmation.json` aggregates, nine
-`*_per_sample.jsonl` row files, the attested evaluation protocol, and the
-preregistration. Stage I is a deterministic function of those plus the frozen
-bootstrap seed, so running it here reproduces what the pod would have written
-had it not raised.
+**AUTHORIZED by the maintainer decision of 2026-10-01**, which accepted that
+attempt75 completed the measurement the preregistered design needs -- nine
+probes trained, nine checkpoints preserved, nine evaluations scored under one
+admitted protocol, scoring contract and battery -- and that stage I is
+deterministic post-measurement analysis whose failure does not justify
+retraining or re-measuring anything.
 
-**Why it is needed.** attempt75 trained, preserved and scored all nine probes
-and then failed in stage I with
+**It re-measures NOTHING.** Every input is an immutable artifact attempt75
+already produced and shipped off pod. The permitted set is exactly: read the
+nine scored results and their per-sample evidence, verify their hashes,
+identities, seeds, protocol fingerprint, scoring contract and battery, build
+the complete 3-arm x 3-seed field, run the three preregistered contrasts and
+the preregistered bootstrap, and apply the frozen decision rule. It does not
+retrain, regenerate, rescore, substitute a seed, exclude an observation, pool
+attempt66, or change the bootstrap or the thresholds.
 
-    C1ResultsError: autoinit.v1.phase_c3.A_incumbent.217230555:
-                    unknown arm 'A_incumbent';
-                    this record allows ['incumbent', 'treatment']
+**The two stage-I defects it repairs, both caller-side.**
 
-`C1ProbeRecord.allowed_arms` defaults to C1's two ROLES and the C3 driver never
-passed C3's three ARM IDS, although the field exists for exactly that and says
-so. The driver is fixed; this script proves the fix against the real inputs
-that broke it, which no synthetic fixture can do.
+1. `C1ProbeRecord.allowed_arms` defaults to C1's two ROLES
+   (`incumbent`, `treatment`); the C3 caller constructed records carrying
+   `A_incumbent`, `B_causal_b1`, `C_causal_b3` without passing C3's arm set,
+   so every record raised `unknown arm 'A_incumbent'`. C3 supplies its own
+   vocabulary now. C1's default is untouched.
+2. `stratified_cluster_bootstrap` was called without a seed, so it fell back
+   to `isolation.bootstrap_seed()` -- `phase-c1:bootstrap` = 816109261 --
+   while C3's plan freezes 654678655, 20,000 iterations, the stratified
+   prompt-cluster method and SESOI 0.010. All four are derived from the C3
+   preregistration and PASSED now, and so are the usable-rollout guardrails
+   that `decide` reads off the plan.
 
-**What it does NOT do.** It does not claim a C3 verdict. It writes
-`c3_decision_replay.json`, which is a *recomputation*, explicitly marked as
-such. Whether an off-pod recomputation may stand as the canonical C3 result is
-a post-measurement scientific decision and belongs to the maintainer.
+Neither repair changes the scientific protocol; both restore the
+implementation to the protocol that was already frozen.
+
+**The artifact binds what it consumed.** Every one of the twenty-seven input
+files by sha256, the preregistration hash, the plan hash, and the commit plus
+module hashes of the implementation that ran -- and it refuses a dirty tree,
+because a commit recorded beside uncommitted edits names bytes that did not
+execute.
+
+**attempt75's stage-I failure stays historical fact.** Nothing here rewrites
+the live session as though it had reached stage I successfully.
 """
 from __future__ import annotations
 
 import argparse
 import json
 import re
+import hashlib
+import subprocess
 import sys
 from pathlib import Path
 
@@ -58,6 +78,33 @@ from experiments.phase_c3 import session as CS  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 LABEL = re.compile(r"^autoinit\.v1\.phase_c3\.(?P<arm>[A-Za-z0-9_]+?)\.(?P<seed>\d+)$")
+
+
+def implementation_identity() -> dict:
+    """What performed this aggregation, so the result can be re-derived.
+
+    The commit alone is not enough: a dirty tree would let the artifact name a
+    commit whose content did not run. So the tree state is recorded too, and a
+    dirty tree is refused at the call site below.
+    """
+    def git(*a: str) -> str:
+        return subprocess.run(["git", "-C", str(REPO_ROOT), *a],
+                              capture_output=True, text=True,
+                              check=True).stdout.strip()
+
+    dirty = bool(git("status", "--porcelain"))
+    return {
+        "commit": git("rev-parse", "HEAD"),
+        "tree_is_dirty": dirty,
+        "aggregator_path": "scripts/autoinit/aggregate_c3_stage_i.py",
+        "aggregator_sha256": sha256_file(Path(__file__).resolve()),
+        "session_module_sha256": sha256_file(
+            REPO_ROOT / "scripts/experiments/phase_c3/session.py"),
+        "isolation_module_sha256": sha256_file(
+            REPO_ROOT / "scripts/experiments/phase_c1/isolation.py"),
+        "probe_results_module_sha256": sha256_file(
+            REPO_ROOT / "scripts/experiments/phase_c1/probe_results.py"),
+    }
 
 
 def load(evidence: Path):
@@ -87,6 +134,8 @@ def load(evidence: Path):
         scored[(arm, seed)] = {
             "result": result, "training": training, "admission": admission,
             "result_path": path, "per_sample_path": rows_path,
+            "admission_path":
+                audit / f"{result['label']}_generation_admission.json",
         }
     return scored, per_sample
 
@@ -96,7 +145,21 @@ def main() -> int:
     ap.add_argument("--evidence", required=True, type=Path)
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--run-id", default="attempt75")
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="produce a NON-canonical draft from an uncommitted tree")
     a = ap.parse_args()
+
+    #: A DIRTY TREE CANNOT PRODUCE A CANONICAL ARTIFACT. The maintainer
+    #: requires this result to bind the implementation that computed it; a
+    #: commit hash recorded beside uncommitted edits names bytes that did not
+    #: run. `--allow-dirty` exists for iterating, and stamps the artifact
+    #: `canonical: false` so a draft can never be mistaken for the record.
+    impl = implementation_identity()
+    if impl["tree_is_dirty"] and not a.allow_dirty:
+        raise SystemExit(
+            "the working tree is dirty, so the commit this artifact would "
+            "name does not describe the code that ran. Commit first, or pass "
+            "--allow-dirty to produce a NON-canonical draft.")
 
     arms = list(CS.arm_ids())
     seeds = list(CS.recovery_seeds())
@@ -157,19 +220,13 @@ def main() -> int:
     ]
 
     control, candidate = CS.primary_operands()
-    #: EXACTLY the primary contrast's two arms, rebuilt as the driver builds
-    #: it: `C1IsolationPlan` holds two and `C1Arm.role` must be
-    #: incumbent/treatment, so the third arm is reported in both secondary
-    #: contrasts and is simply not what the decision rule reads.
-    battery = json.loads(BATTERY_IDENTITY.read_text())
-    plan = C1IsolationPlan(
-        plan_id="autoinit.v1.phase_c3",
-        arms=(C1Arm(f"c3.{control}", "incumbent", *CS.arm(control)["attention"]),
-              C1Arm(f"c3.{candidate}", "treatment",
-                    *CS.arm(candidate)["attention"])),
-        seeds=tuple(seeds),
-        battery_asset_id=battery["asset_id"],
-        battery_content_sha256=battery["content_sha256"])
+    #: THE ONE OWNER. This file used to rebuild `C1IsolationPlan` itself, as
+    #: the driver did -- two constructions of the object `decide` reads its
+    #: thresholds from. Both omitted C3's SESOI and guardrails and inherited
+    #: C1's, which happen to be identical; the seed, which is not, is what
+    #: exposed the pattern.
+    plan = CS.frozen_isolation_plan()
+
     inputs = decision_inputs(per_sample, seeds=seeds, arms=arms,
                              candidate_operand=candidate,
                              control_operand=control)
@@ -194,7 +251,8 @@ def main() -> int:
 
     def paired(cand: str, ctl: str, *, seed: int) -> dict:
         d = paired_differences(inputs.arm(ctl), inputs.arm(cand))
-        boot = stratified_cluster_bootstrap(d, inputs.strata, seed=seed)
+        boot = stratified_cluster_bootstrap(
+            d, inputs.strata, seed=seed, iterations=iterations)
         return {
             "candidate": cand, "control": ctl,
             "delta": boot["delta"], "lcb_one_sided": boot["lcb_one_sided"],
@@ -213,7 +271,9 @@ def main() -> int:
     #: carries; the fallback is computed too, so a reader can see whether the
     #: defect would have changed the verdict rather than being asked to trust
     #: that it did not.
-    prereg_seed = CS.bootstrap_seed()
+    inf = CS.inference()
+    prereg_seed = int(inf["seed"])
+    iterations = int(inf["iterations"])
     fallback_seed = c1_bootstrap_seed()
 
     reported, as_run = {}, {}
@@ -241,20 +301,23 @@ def main() -> int:
         catastrophic_violations=inputs.catastrophic_violations)
 
     decision.update({
-        "_schema": "aadistill.phase_c3.decision_replay/v1",
-        "_this_is_a_RECOMPUTATION_not_a_claimed_verdict": (
-            "Stage I of " + a.run_id + " raised C1ResultsError before writing "
-            "c3_decision.json. This recomputes it off-pod from that run's "
-            "frozen, collected evidence -- the same nine per-sample row files, "
-            "the same nine aggregates, the same preregistration and the same "
-            "bootstrap seed -- so it is deterministic and re-measures nothing. "
-            "Whether it may stand as the CANONICAL C3 verdict is a "
-            "post-measurement scientific decision for the maintainer, and is "
-            "NOT asserted here."),
+        "_schema": "aadistill.phase_c3.decision/v1",
+        "_what_this_is": (
+            "The CANONICAL C3 stage-I aggregation, computed off pod from "
+            "attempt75's immutable evidence under the maintainer decision of "
+            "2026-10-01. attempt75's own stage I raised C1ResultsError before "
+            "writing a decision; that failure is historical fact and is NOT "
+            "rewritten as though the live session had reached stage I "
+            "successfully. This artifact re-measures nothing: it reads the "
+            "nine scored results and their per-sample evidence, verifies "
+            "their identities, and applies the frozen contrasts, bootstrap "
+            "and decision rule. It binds every input it consumed by sha256, "
+            "the preregistration hash, and the implementation that ran."),
         "run_id": a.run_id,
         "plan_hash": plan.plan_hash,
         "probe_results_sha256": results["results_sha256"],
         "preregistration_sha256": prereg["preregistration_sha256"],
+        "canonical": not impl["tree_is_dirty"],
         "primary_contrast": prereg["claim_boundary"]["primary_contrast"],
         "_verdict_owner": ("the PRIMARY contrast alone. The secondary and "
                            "practical contrasts are reported completely and "
@@ -262,6 +325,38 @@ def main() -> int:
         "contrasts": reported,
         "terminal_semantics": prereg["terminal_outcomes"],
         "generation_protocol_fingerprint": next(iter(fingerprints)),
+        "inference": {
+            "method": inf["method"],
+            "iterations": iterations,
+            "seed": prereg_seed,
+            "sesoi": float(inf["sesoi"]),
+            "_all_four_are_PASSED_not_inherited": (
+                "Every parameter here is read from the C3 preregistration and "
+                "passed explicitly. `isolation.py` carries C1's values as "
+                "defaults and four of the five coincide exactly, which is why "
+                "the one that does not -- the bootstrap seed, domain-separated "
+                "per phase -- was invisible until it was looked for."),
+        },
+        "_parameters_the_preregistration_does_NOT_freeze": {
+            "alpha": {
+                "value_used": 0.05,
+                "source": "stratified_cluster_bootstrap's own default",
+                "note": ("C3's preregistration names one-sided LCB and UCB and "
+                         "never states a confidence level; `decide`'s contract "
+                         "reads 'one-sided 95%'. 0.05 is therefore the only "
+                         "available value and is consistent with the rule, but "
+                         "it is NOT frozen by the C3 plan and is recorded here "
+                         "rather than left implicit."),
+            },
+            "design_alternative": {
+                "value_used": 0.015,
+                "source": "C1IsolationPlan's default",
+                "note": ("Not declared by C3 and not read by `decide`. It "
+                         "constrains plan construction only -- the plan "
+                         "refuses a SESOI above it -- so it cannot move a "
+                         "verdict; it is disclosed for completeness."),
+            },
+        },
         "bootstrap_seed_used": prereg_seed,
         "_bootstrap_seed": (
             "C3's PREREGISTERED seed, from `phase-c3:bootstrap`. The driver "
@@ -277,10 +372,40 @@ def main() -> int:
         "_verdict_is_seed_robust": decision["verdict"] == decision_as_run["verdict"],
     })
 
+    #: EVERY CONSUMED INPUT, BY HASH. The artifact must be re-derivable from
+    #: the committed record, which means naming exactly which bytes it read --
+    #: not "attempt75's evidence" but these nine scored aggregates, these nine
+    #: per-sample row files and these nine admission records, each by sha256.
+    consumed = {}
+    for (arm_id, seed), sc in sorted(scored.items()):
+        label = sc["result"]["label"]
+        consumed[label] = {
+            "arm": arm_id, "seed": seed,
+            "scored_result": {
+                "path": str(sc["result_path"].relative_to(a.evidence)),
+                "sha256": sha256_file(sc["result_path"])},
+            "per_sample": {
+                "path": str(sc["per_sample_path"].relative_to(a.evidence)),
+                "sha256": sha256_file(sc["per_sample_path"])},
+            "generation_admission": {
+                "path": str(sc["admission_path"].relative_to(a.evidence)),
+                "sha256": sha256_file(sc["admission_path"])},
+            "initialization_artifact_digest":
+                sc["training"]["initialization_artifact_digest"],
+            "counts": {k: sc["result"][k] for k in
+                       ("n", "usable", "correct", "n_scorable",
+                        "usable_scorable")},
+        }
+    decision["consumed_inputs"] = consumed
+    decision["consumed_inputs_sha256"] = hashlib.sha256(
+        json.dumps(consumed, sort_keys=True).encode()).hexdigest()
+    decision["evidence_root"] = str(a.evidence)
+    decision["implementation"] = impl
+
     a.out.mkdir(parents=True, exist_ok=True)
-    (a.out / "c3_probe_results_replay.json").write_text(
+    (a.out / "c3_probe_results.json").write_text(
         json.dumps(results, indent=2) + "\n")
-    (a.out / "c3_decision_replay.json").write_text(
+    (a.out / "c3_decision.json").write_text(
         json.dumps(decision, indent=2) + "\n")
     print(f"\nPRIMARY ({decision['primary_contrast']}): {decision['verdict']}"
           f"  delta {decision['delta']:+.6f}  "

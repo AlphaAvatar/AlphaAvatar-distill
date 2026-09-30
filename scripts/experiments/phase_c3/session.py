@@ -166,6 +166,110 @@ def bootstrap_seed() -> int:
     return int(preregistration()["seeds"]["bootstrap"])
 
 
+#: The battery identity the isolation plan binds. C1's file, because C3
+#: evaluates on C1's frozen confirmation battery by design.
+BATTERY_IDENTITY_PATH = REPO / "logs/stages/stage-1/phase_c1/plans/battery.json"
+
+#: The plan id C3 executes under. Named once; `C3SessionContract.session_id`
+#: defaults to the same string and is checked against it below.
+PLAN_ID = "autoinit.v1.phase_c3"
+
+#: Every inference parameter the frozen plan fixes, and the ONLY place C3
+#: reads them. Each is PASSED to the machinery, never inherited from it.
+#:
+#: The distinction is not pedantry. `isolation.py` carries C1's values as
+#: defaults, and every one of C3's coincides with them — except the bootstrap
+#: SEED, which is domain-separated per phase: `phase-c1:bootstrap` gives
+#: 816109261 and `phase-c3:bootstrap` gives 654678655. So the aggregation
+#: silently resampled under C1's seed while every C3 record asserted C3's,
+#: and the five coinciding values are exactly what made that invisible.
+#: Coinciding numbers hide which one is read.
+_REQUIRED_INFERENCE = ("method", "iterations", "seed", "sesoi")
+_REQUIRED_GUARDRAILS = ("pooled_usable_delta_min", "per_seed_usable_delta_min")
+
+
+def inference() -> dict[str, Any]:
+    """C3's frozen inference parameters, validated. Raises on a missing one."""
+    inf = preregistration().get("inference") or {}
+    missing = [k for k in _REQUIRED_INFERENCE if k not in inf]
+    if missing:
+        raise C3SessionError(
+            f"the preregistration's inference block is missing {missing}; C3 "
+            "may not fall back to another phase's defaults for these")
+    if inf["method"] != "stratified prompt-cluster bootstrap":
+        raise C3SessionError(
+            f"the frozen inference method is {inf['method']!r}; the aggregation "
+            "implements the stratified prompt-cluster bootstrap and nothing else")
+    #: The plan states the bootstrap seed TWICE -- `seeds.bootstrap` and
+    #: `inference.seed`. Both are frozen, so neither can be removed; what the
+    #: code must not do is pick one and leave the other unread, because then a
+    #: reader checking the wrong field would be satisfied by a document that
+    #: disagrees with itself. Ask both.
+    if int(inf["seed"]) != bootstrap_seed():
+        raise C3SessionError(
+            f"the preregistration disagrees with itself about the bootstrap "
+            f"seed: inference.seed={inf['seed']}, "
+            f"seeds.bootstrap={bootstrap_seed()}")
+    if int(inf["iterations"]) <= 0:
+        raise C3SessionError(f"bootstrap iterations {inf['iterations']!r}")
+    return dict(inf)
+
+
+def guardrails() -> dict[str, Any]:
+    """C3's frozen behavioural guardrails, validated."""
+    g = preregistration().get("guardrails") or {}
+    missing = [k for k in _REQUIRED_GUARDRAILS if k not in g]
+    if missing:
+        raise C3SessionError(
+            f"the preregistration's guardrails block is missing {missing}")
+    return dict(g)
+
+
+def frozen_isolation_plan():
+    """The decision rule's carrier: the PRIMARY contrast's two arms.
+
+    ONE OWNER. `C1IsolationPlan` holds exactly two arms and `C1Arm.role` must
+    be `incumbent` or `treatment` — an inherited contract, not a preference —
+    and two arms is the right shape anyway, because `decide` applies the frozen
+    rule to ONE contrast and the preregistration says which. The third arm is
+    materialized, trained on all three seeds and reported in both secondary
+    contrasts; it is simply not what the decision rule reads.
+
+    **Every threshold `decide` will read is passed here from the C3 plan.**
+    They were defaulted before, and all of them happened to match C1's — which
+    is precisely why nobody noticed that the seed did not.
+    """
+    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
+
+    control, candidate = primary_operands()
+    battery = json.loads(BATTERY_IDENTITY_PATH.read_text())
+    inf, guard = inference(), guardrails()
+    plan = C1IsolationPlan(
+        plan_id=PLAN_ID,
+        arms=(C1Arm(f"c3.{control}", "incumbent", *arm(control)["attention"]),
+              C1Arm(f"c3.{candidate}", "treatment", *arm(candidate)["attention"])),
+        seeds=tuple(recovery_seeds()),
+        battery_asset_id=battery["asset_id"],
+        battery_content_sha256=battery["content_sha256"],
+        sesoi=float(inf["sesoi"]),
+        usable_pooled_min_delta=float(guard["pooled_usable_delta_min"]),
+        usable_per_seed_min_delta=float(guard["per_seed_usable_delta_min"]),
+    )
+    #: And asked back, because what `decide` reads is the PLAN, not the
+    #: preregistration. A constructor that silently dropped one of these would
+    #: leave the plan carrying C1's value and this check is what catches it.
+    if plan.sesoi != float(inf["sesoi"]):
+        raise C3SessionError(
+            f"the plan carries sesoi {plan.sesoi}, the preregistration froze "
+            f"{inf['sesoi']}")
+    if (plan.usable_pooled_min_delta != float(guard["pooled_usable_delta_min"])
+            or plan.usable_per_seed_min_delta
+            != float(guard["per_seed_usable_delta_min"])):
+        raise C3SessionError(
+            "the plan's usable-rollout guardrails are not the frozen ones")
+    return plan
+
+
 def primary_operands() -> tuple[str, str]:
     """(control, candidate) arm ids for the PRIMARY contrast.
 

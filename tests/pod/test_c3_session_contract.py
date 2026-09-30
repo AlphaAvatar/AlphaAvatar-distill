@@ -405,3 +405,113 @@ def test_the_capacity_gate_is_wired_into_the_prechecks():
     mod = _launcher()
     names = {getattr(g, "__name__", "") for g in mod.spec(_real_args(mod)).precheck}
     assert "durable_capacity_gate" in names
+
+
+# ---------------------------------------------------------------------------
+# Inference parameters are PASSED, never inherited
+#
+# `isolation.py` carries C1's values as defaults. Four of C3's five coincide
+# exactly -- sesoi 0.010, 20,000 iterations, 2-of-3 seed robustness, the two
+# usable-rollout guardrails -- and the fifth, the bootstrap seed, does not:
+# `phase-c1:bootstrap` is 816109261 and `phase-c3:bootstrap` is 654678655.
+# The coinciding four are what made the fifth invisible, so these tests assert
+# the values are CARRIED rather than merely equal.
+# ---------------------------------------------------------------------------
+
+
+def test_the_frozen_plan_carries_c3s_thresholds_not_c1s_defaults():
+    """What `decide` reads is the PLAN, so the plan must carry C3's numbers.
+
+    EQUALITY IS NOT ENOUGH and asserting it is the trap. C1's defaults equal
+    C3's values for every one of these, so a plan that stopped passing them
+    would still satisfy `plan.sesoi == 0.01`. Verified: deleting `sesoi=`
+    from the constructor left an equality-only version of this test green.
+    So each threshold is MOVED in the preregistration and the plan is
+    required to follow it.
+    """
+    plan = S.frozen_isolation_plan()
+    inf, guard = S.inference(), S.guardrails()
+    assert plan.sesoi == inf["sesoi"] == 0.01
+    assert plan.usable_pooled_min_delta == guard["pooled_usable_delta_min"]
+    assert plan.usable_per_seed_min_delta == guard["per_seed_usable_delta_min"]
+    assert tuple(plan.seeds) == S.recovery_seeds()
+    assert [a.role for a in plan.arms] == ["incumbent", "treatment"]
+
+    moved = json.loads(json.dumps(PREREG))
+    moved["inference"]["sesoi"] = 0.012
+    moved["guardrails"]["pooled_usable_delta_min"] = -0.011
+    moved["guardrails"]["per_seed_usable_delta_min"] = -0.022
+    saved = S._PREREG
+    try:
+        S._PREREG = moved
+        followed = S.frozen_isolation_plan()
+        assert followed.sesoi == 0.012, (
+            "the plan did not follow a moved SESOI, so it is inheriting "
+            "phase-C1's default and only looked right because the two agree")
+        assert followed.usable_pooled_min_delta == -0.011
+        assert followed.usable_per_seed_min_delta == -0.022
+    finally:
+        S._PREREG = saved
+
+
+def test_the_bootstrap_seed_is_c3s_and_differs_from_c1s():
+    """The one parameter that does NOT coincide, asserted as not coinciding."""
+    from experiments.phase_c1.isolation import bootstrap_seed as c1_seed
+
+    assert S.inference()["seed"] == S.bootstrap_seed() == 654678655
+    assert c1_seed() == 816109261
+    assert S.inference()["seed"] != c1_seed(), (
+        "the two phases' bootstrap seeds now coincide, so this test can no "
+        "longer show that C3's is passed rather than inherited; assert the "
+        "call site instead")
+
+
+def test_the_plan_refuses_to_disagree_with_itself_about_the_seed():
+    """The preregistration states the seed twice. Both must be read."""
+    doc = json.loads(json.dumps(PREREG))
+    doc["inference"]["seed"] = doc["seeds"]["bootstrap"] + 1
+    saved = S._PREREG
+    try:
+        S._PREREG = doc
+        with pytest.raises(S.C3SessionError, match="disagrees with itself"):
+            S.inference()
+    finally:
+        S._PREREG = saved
+
+
+@pytest.mark.parametrize("missing", ["method", "iterations", "seed", "sesoi"])
+def test_a_missing_inference_parameter_refuses_rather_than_defaulting(missing):
+    """Falling back to another phase's default is the defect, not the fix."""
+    doc = json.loads(json.dumps(PREREG))
+    doc["inference"].pop(missing)
+    saved = S._PREREG
+    try:
+        S._PREREG = doc
+        with pytest.raises(S.C3SessionError, match="missing"):
+            S.inference()
+    finally:
+        S._PREREG = saved
+
+
+def test_the_aggregation_passes_both_seed_and_iterations():
+    """A defaulted argument is invisible to every digest and import check.
+
+    Asked by AST of both call sites -- the pod driver and the off-pod
+    aggregation -- because this is exactly the class of defect that reached a
+    paid pod twice.
+    """
+    import ast as _ast
+
+    for rel in ("scripts/pod/autoinit_c3_driver.py",
+                "scripts/autoinit/aggregate_c3_stage_i.py"):
+        tree = _ast.parse((REPO / rel).read_text())
+        calls = [n for n in _ast.walk(tree)
+                 if isinstance(n, _ast.Call)
+                 and getattr(n.func, "id", "") == "stratified_cluster_bootstrap"]
+        assert calls, f"{rel} never calls the bootstrap"
+        for call in calls:
+            kw = {k.arg for k in call.keywords}
+            assert {"seed", "iterations"} <= kw, (
+                f"{rel} calls stratified_cluster_bootstrap without "
+                f"{sorted({'seed', 'iterations'} - kw)}; it would inherit "
+                "phase-C1's default")

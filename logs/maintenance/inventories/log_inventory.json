@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-30T10:57:32+00:00",
+  "created_utc": "2026-09-30T16:31:14+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 2810,
-    "bytes": 83799957,
+    "files": 2811,
+    "bytes": 83806996,
     "by_disposition": {
       "keep_canonical": 192,
       "keep_immutable": 2409,
-      "keep_referenced": 194,
+      "keep_referenced": 195,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1152,
+      "immutable_record": 1153,
       "index": 8,
       "narrative": 901,
       "raw_execution_artifact": 728,
@@ -17765,9 +17765,10 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/runs/attempt14/closeout/outcome.json",
-        "scripts/autoinit/replay_c3_stage_i.py",
+        "scripts/autoinit/aggregate_c3_stage_i.py",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/experiments/phase_c3/authorization_payload.py",
+        "scripts/experiments/phase_c3/session.py",
         "scripts/pod/autoinit_c1_driver.py",
         "scripts/pod/autoinit_c1_launch.py",
         "scripts/pod/autoinit_c3_driver.py",
@@ -17775,9 +17776,10 @@
         "tests/c1_preflight/test_c1_runtime_contract.py"
       ],
       "referenced_by_executable": [
-        "scripts/autoinit/replay_c3_stage_i.py",
+        "scripts/autoinit/aggregate_c3_stage_i.py",
         "scripts/autoinit/write_c1_execution_preregistration.py",
         "scripts/experiments/phase_c3/authorization_payload.py",
+        "scripts/experiments/phase_c3/session.py",
         "scripts/pod/autoinit_c1_driver.py",
         "scripts/pod/autoinit_c1_launch.py",
         "scripts/pod/autoinit_c3_driver.py",
@@ -17786,7 +17788,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/replay_c3_stage_i.py, scripts/autoinit/write_c1_execution_preregistration.py, scripts/experiments/phase_c3/authorization_payload.py"
+      "disposition_reason": "named by scripts/autoinit/aggregate_c3_stage_i.py, scripts/autoinit/write_c1_execution_preregistration.py, scripts/experiments/phase_c3/authorization_payload.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
@@ -31398,6 +31400,23 @@
       "duplicate_of": null,
       "disposition": "keep_canonical",
       "disposition_reason": "sole copy, no superseding owner"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c3/analyses/formal_allowance_audit.json",
+      "size_bytes": 7041,
+      "sha256": "f5b83ebd306aee96791c38673b774b4aa80a2c9c1878f7a336377488466449b3",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "scripts/consolidate/audit_formal_allowance.py"
+      ],
+      "referenced_by_executable": [
+        "scripts/consolidate/audit_formal_allowance.py"
+      ],
+      "duplicate_of": null,
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/consolidate/audit_formal_allowance.py"
     },
     {
       "path": "logs/stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json",
@@ -48920,8 +48939,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 13348,
-      "sha256": "7e7fbd1aaaa9239ff7ff9d95ead5aeb044812d72be0d8325e75e1de8f69b2549",
+      "size_bytes": 13347,
+      "sha256": "9ededfe8b145d29bab4884ddfb71b305b5fbf53e1a427d309b6dd73196607442",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -48968,8 +48987,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 150654,
-      "sha256": "bde5c1ab22a51dcdff92d4145414975209fd36b24ac5c04e4613ca25ccfde511",
+      "size_bytes": 150653,
+      "sha256": "afeb07f42d7c6db194860237d69e84bfe353253eb26f7bce339c5a7018b594e5",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

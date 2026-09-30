@@ -43,7 +43,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -55,27 +57,58 @@ CAMPAIGN = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.js
 #: rather than on where the file sits — see `_campaign_records`.
 ENGINEERING_CAMPAIGN_SCHEMA = "aadistill.engineering_campaign/v1"
 
-#: The experiment whose sessions spend the formal allowance. An instance fact,
-#: which is why it is here in the application layer and not in the core.
-FORMAL_EXPERIMENT = "phase_c1"
+def funded_experiment_ids(pkg: Mapping[str, Any]) -> tuple[str, ...]:
+    """Whose formal sessions spend THIS package's formal allowance.
+
+    Read from the package's own configuration, never hardcoded here. It WAS
+    hardcoded -- `FORMAL_EXPERIMENT = "phase_c1"` -- and the consequence was
+    not cosmetic: the 2026-09-28 amendment funds formal C3 from this same
+    $55.00 allowance and makes `remaining formal allowance >= derived session
+    ceiling` one of the three conditions a C3 authorization must satisfy, so
+    two C3 sessions costing $30.3807 reached the project cumulative while the
+    formal book reported them as never having happened. A session that must
+    pass a formal-allowance gate is a session that spends it.
+
+    A run whose own records state a `package_id` is attributed by that, in
+    `formal_sessions`; this list covers runs that predate the field, because
+    historical authorizations are preserved rather than rewritten.
+    """
+    block = pkg.get("funds_formal_sessions_of") or {}
+    ids = tuple(block.get("experiment_ids") or ())
+    if not ids:
+        raise SystemExit(
+            "the execution package declares no `funds_formal_sessions_of."
+            "experiment_ids`, so which sessions spend the formal allowance is "
+            "unknown. Refusing to guess -- a formal balance computed over an "
+            "unestablished set is not a balance a launch may rest on.")
+    return ids
 
 
 def load(rel: str, root: Path) -> dict:
     return json.loads((root / rel).read_text())
 
 
-def formal_sessions(root: Path) -> list[dict]:
+def formal_sessions(root: Path, funded: Sequence[str],
+                    package_id: str | None = None) -> list[dict]:
     """Every formal session, with what it cost, discovered through the index.
 
     Through the index rather than by globbing a directory, because sessions
     exist in two layouts and a glob written for one silently omits the other —
     the same defect that made `by_experiment` count only legacy runs.
+
+    `funded` is the package's declared set. A run that states its own
+    `package_id` is attributed by that instead, so the declared set only ever
+    has to cover records written before that field existed.
     """
     index = load(RUN_INDEX, root)
     out: list[dict] = []
     seen: set[tuple[str, str]] = set()
     for entry in [*index.get("runs", []), *index.get("unrecorded", [])]:
-        if entry.get("experiment_id") != FORMAL_EXPERIMENT:
+        stated = entry.get("package_id")
+        if stated is not None:
+            if package_id is not None and stated != package_id:
+                continue
+        elif entry.get("experiment_id") not in funded:
             continue
         key = (entry["experiment_id"], entry["run_id"])
         if key in seen:
@@ -315,7 +348,8 @@ def derive(root: Path = REPO_ROOT) -> dict:
     ceiling = float(pkg["per_attempt_hard_ceiling_usd"])
     cap = float(pkg["cumulative_cap_usd"]) if "cumulative_cap_usd" in pkg else None
 
-    sessions = formal_sessions(root)
+    funded = funded_experiment_ids(pkg)
+    sessions = formal_sessions(root, funded, pkg.get("package_id"))
     #: Only sessions run UNDER this package spend its formal allowance. Earlier
     #: attempts were funded by earlier decisions and are in the project
     #: cumulative, not in this package's book.
@@ -323,9 +357,14 @@ def derive(root: Path = REPO_ROOT) -> dict:
     priced = [s for s in sessions if s["cost_usd"] is not None]
     unknown = [s["run_id"] for s in sessions if s["cost_usd"] is None]
 
-    #: The package's own book is authoritative for what it has spent; the
-    #: per-session costs are what that book is checked against.
-    formal_spent = _package_booked(root, sessions)
+    #: THE SESSIONS ARE THE AUTHORITY, and the booking ledger is the check.
+    #: It was the other way round, which was sound only while every funded
+    #: session wrote a `package_booked_after` -- and C3's sessions do not.
+    #: With the ledger authoritative, widening the funded set would have
+    #: added C3's costs to `priced` and left `formal_spent` describing C1
+    #: alone: a package book that silently omits two sessions it funded.
+    formal_spent = round(sum(s["cost_usd"] for s in sessions
+                             if s["cost_usd"] is not None), 4)
     approved = str(pkg.get("approved_utc") or "")
     campaigns = [_attribute(c, pkg.get("package_id"), approved)
                  for c in engineering_campaigns(root)]
@@ -339,11 +378,18 @@ def derive(root: Path = REPO_ROOT) -> dict:
     #: cross-checked against the sessions, and a disagreement is raised rather
     #: than reported. A deriver that silently under-reports spend is worse than
     #: no deriver.
-    summed = round(sum(s["cost_usd"] for s in priced), 4)
-    if priced and abs(summed - formal_spent) > 0.0001:
+    #: A zero here is a claim, and it was wrong once. The booking ledger is
+    #: still cross-checked -- but against the sessions that actually STATE a
+    #: booking, which is the only set it describes. Checking it against every
+    #: funded session would fail for a session that simply never wrote one.
+    booking_stating = [s for s in priced if _states_booking(root, s)]
+    ledger = _package_booked(root, booking_stating)
+    ledger_sum = round(sum(s["cost_usd"] for s in booking_stating), 4)
+    if booking_stating and abs(ledger_sum - ledger) > 0.0001:
         raise SystemExit(
-            f"the package book says {formal_spent:.4f} booked but the priced "
-            f"sessions sum to {summed:.4f}: {[(s['run_id'], s['cost_usd']) for s in priced]}")
+            f"the package book says {ledger:.4f} booked but the sessions that "
+            f"state a booking sum to {ledger_sum:.4f}: "
+            f"{[(s['run_id'], s['cost_usd']) for s in booking_stating]}")
     if formal_spent == 0.0 and booked == 0.0 and not priced:
         raise SystemExit(
             "no session cost could be read at all, so spend would be reported "
@@ -376,8 +422,20 @@ def derive(root: Path = REPO_ROOT) -> dict:
         #: `None` when anything is unreconciled: an arithmetic summary computed
         #: over an unknown is not a number a launch may be planned against. It
         #: is also NOT a permission when it is a number -- see below.
+        #: CLAMPED AT ZERO. `floor(-0.9492 / 30)` is -1, and a negative count
+        #: of fundable sessions is not a smaller number of sessions -- it is a
+        #: category error that reads like one. The overspend is not hidden by
+        #: the clamp: `formal.remaining_usd` stays negative and
+        #: `formal_allowance_exceeded_by_usd` names it outright.
         "full_ceiling_sessions_fundable": (
-            None if unattributed else int(formal_left // ceiling)),
+            None if unattributed else max(0, int(formal_left // ceiling))),
+        "formal_allowance_exceeded_by_usd": (
+            round(-formal_left, 4) if formal_left < 0 else 0.0),
+        "_formal_overspend_rule": (
+            "a NEGATIVE formal remaining means the allowance is already "
+            "exceeded, and no further formal session may be issued from it at "
+            "any ceiling. It is reported rather than clamped, because the "
+            "number a maintainer needs is how far over it is."),
         "_fundable_is_arithmetic_not_permission": (
             "how many complete sessions the remaining FORMAL allowance would "
             "cover. It restores no cap and grants nothing: a session still needs "
@@ -396,6 +454,20 @@ def derive(root: Path = REPO_ROOT) -> dict:
             "free. Reading an unknown as zero understates spend."),
         "authorizes": "nothing",
     }
+
+
+def _states_booking(root: Path, session: Mapping[str, Any]) -> bool:
+    """Does this session's closeout state a package booking at all?
+
+    Sessions that do not are not evidence against the ledger; they are simply
+    outside what it describes.
+    """
+    if not session.get("source"):
+        return False
+    doc = json.loads((root / session["source"]).read_text())
+    return ((doc.get("budget") or {}).get("package_booked_after") is not None
+            or (doc.get("cost") or {}).get("package_booked_unchanged_usd")
+            is not None)
 
 
 def _package_booked(root: Path, sessions: list[dict]) -> float:

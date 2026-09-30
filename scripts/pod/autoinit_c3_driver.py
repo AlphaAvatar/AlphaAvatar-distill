@@ -428,38 +428,18 @@ class C3Driver:
         return self.AUTHORIZATION_PATH
 
     def frozen_plan(self) -> C1IsolationPlan:
-        """The decision rule's carrier: the PRIMARY contrast's two arms.
+        """The decision rule's carrier. DELEGATED to the frozen plan's module.
 
-        `C1IsolationPlan` holds EXACTLY two arms and `C1Arm.role` must be
-        `incumbent` or `treatment` -- an inherited contract, not a
-        preference. Handing it C3's three arms with ids like `A_incumbent`
-        raised `role must be 'incumbent' or 'treatment'` on a live pod at
-        `$0.17`, after setup had completed.
-
-        Two arms is the right shape anyway, and not a workaround. `decide`
-        applies the frozen GO/NO_GO/INCONCLUSIVE rule to ONE contrast, and
-        the preregistration says which: the primary, `causal-B1 - incumbent
-        B`. So the plan carries exactly that pair. The third arm exists, is
-        materialized, is trained on all three seeds and is reported in both
-        secondary contrasts -- it is simply not what the decision rule reads,
-        which is the claim boundary the preregistration draws.
-
-        The pair is DERIVED from the plan's own primary contrast rather than
-        taken positionally, so a preregistration that renamed its arms or
-        reordered them could not silently change which comparison the verdict
-        is computed over.
+        It was built here, and built without passing C3's SESOI or its
+        usable-rollout guardrails -- so `decide` read `C1IsolationPlan`'s
+        defaults. Every one of them happens to equal C3's frozen value, which
+        is exactly why the one that does NOT coincide -- the bootstrap seed --
+        went unnoticed. One owner: `experiments.phase_c3.session`.
         """
-        battery = json.loads(BATTERY_IDENTITY.read_text())
-        control, candidate = self.primary_operands()
-        return C1IsolationPlan(
-            plan_id="autoinit.v1.phase_c3",
-            arms=(C1Arm(f"c3.{control}", "incumbent",
-                        *CS.arm(control)["attention"]),
-                  C1Arm(f"c3.{candidate}", "treatment",
-                        *CS.arm(candidate)["attention"])),
-            seeds=tuple(self.seeds),
-            battery_asset_id=battery["asset_id"],
-            battery_content_sha256=battery["content_sha256"])
+        try:
+            return CS.frozen_isolation_plan()
+        except CS.C3SessionError as exc:
+            raise C3DriverError(str(exc)) from exc
 
     def prefix_execution_config(self) -> "ExecutionConfig":
         """The replay's execution config, built from the frozen plan.
@@ -1482,6 +1462,10 @@ class C3Driver:
         #: assigns them. Their order and their roles were fixed BEFORE any
         #: result existed; nothing here chooses a contrast by looking at one.
         prereg = CS.preregistration()
+        #: Resolved ONCE, and validated: `inference()` refuses a plan missing
+        #: a parameter and refuses one whose two statements of the bootstrap
+        #: seed disagree. Nothing below may fall back to a phase-C1 default.
+        _inference = CS.inference()
         est = prereg["estimand"]
         #: ONE resolution of the primary's operands, shared with the frozen
         #: plan the decision rule is built from. Reading them positionally
@@ -1511,8 +1495,9 @@ class C3Driver:
             #: mean over fixed per-prompt differences, while the LCB and UCB
             #: are functions of the draws. A verdict reads the LCB, so this is
             #: a scientific defect and not a cosmetic one.
-            boot = stratified_cluster_bootstrap(d, inputs.strata,
-                                                seed=CS.bootstrap_seed())
+            boot = stratified_cluster_bootstrap(
+                d, inputs.strata, seed=int(_inference["seed"]),
+                iterations=int(_inference["iterations"]))
             per_seed = [
                 sum(bool(inputs.correct[candidate][s][j])
                     - bool(inputs.correct[control][s][j]) for j in d) / len(d)

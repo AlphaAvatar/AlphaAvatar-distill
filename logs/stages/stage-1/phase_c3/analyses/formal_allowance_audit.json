@@ -1,0 +1,260 @@
+{
+ "schema": "aadistill.formal_allowance_audit/v1",
+ "_what_this_is": "What the formal-allowance gate would have answered for each funded session, reconstructed in chronological order from the package's declared funding scope. Derived on every run; no figure here is maintained by hand.",
+ "_the_condition": "remaining formal allowance >= derived session ceiling",
+ "_authority": "configs/experiments/phase_c1/authorization.json :: execution_package._amendment_2026_09_28",
+ "allowance_usd": 55.0,
+ "derived_session_ceiling_usd": 22.1452,
+ "_ceiling_note": "the ceiling C3 derived from the live L40S securePrice at both issuances. C1's sessions were issued under earlier, smaller ceilings, so their rows answer the question 'would TODAY's C3 ceiling have fitted then' and are context rather than a finding.",
+ "total_spent_usd": 55.9492,
+ "remaining_usd": -0.9492,
+ "allowance_exceeded_by_usd": 0.9492,
+ "sessions": [
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt10",
+   "cost_usd": 0.1177,
+   "formal_spent_before_usd": 0.0,
+   "formal_remaining_before_usd": 55.0,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt11",
+   "cost_usd": 0.2783,
+   "formal_spent_before_usd": 0.1177,
+   "formal_remaining_before_usd": 54.8823,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt12",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 0.396,
+   "formal_remaining_before_usd": 54.604,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt13",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 0.396,
+   "formal_remaining_before_usd": 54.604,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt14",
+   "cost_usd": 0.3999,
+   "formal_spent_before_usd": 0.396,
+   "formal_remaining_before_usd": 54.604,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt15",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 0.7959,
+   "formal_remaining_before_usd": 54.2041,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt16",
+   "cost_usd": 0.4333,
+   "formal_spent_before_usd": 0.7959,
+   "formal_remaining_before_usd": 54.2041,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt17",
+   "cost_usd": 11.1866,
+   "formal_spent_before_usd": 1.2292,
+   "formal_remaining_before_usd": 53.7708,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c1",
+   "run_id": "attempt18",
+   "cost_usd": 10.2018,
+   "formal_spent_before_usd": 12.4158,
+   "formal_remaining_before_usd": 42.5842,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt7",
+   "cost_usd": 0.1456,
+   "formal_spent_before_usd": 22.6176,
+   "formal_remaining_before_usd": 32.3824,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt10",
+   "cost_usd": 0.2782,
+   "formal_spent_before_usd": 22.7632,
+   "formal_remaining_before_usd": 32.2368,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt19",
+   "cost_usd": 0.1698,
+   "formal_spent_before_usd": 23.0414,
+   "formal_remaining_before_usd": 31.9586,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt29",
+   "cost_usd": 0.2209,
+   "formal_spent_before_usd": 23.2112,
+   "formal_remaining_before_usd": 31.7888,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt49",
+   "cost_usd": 0.8617,
+   "formal_spent_before_usd": 23.4321,
+   "formal_remaining_before_usd": 31.5679,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt61",
+   "cost_usd": 0.6981,
+   "formal_spent_before_usd": 24.2938,
+   "formal_remaining_before_usd": 30.7062,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt65",
+   "cost_usd": 0.579,
+   "formal_spent_before_usd": 24.9919,
+   "formal_remaining_before_usd": 30.0081,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt66",
+   "cost_usd": 13.67,
+   "formal_spent_before_usd": 25.5709,
+   "formal_remaining_before_usd": 29.4291,
+   "gate_would_have_passed": true,
+   "shortfall_usd": 0.0
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt67",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt68",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt69",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt70",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt71",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt72",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt73",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt74",
+   "cost_usd": 0.0,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  },
+  {
+   "experiment": "phase_c3",
+   "run_id": "attempt75",
+   "cost_usd": 16.7083,
+   "formal_spent_before_usd": 39.2409,
+   "formal_remaining_before_usd": 15.7591,
+   "gate_would_have_passed": false,
+   "shortfall_usd": 6.3861
+  }
+ ],
+ "sessions_that_would_have_been_refused": [
+  "attempt67",
+  "attempt68",
+  "attempt69",
+  "attempt70",
+  "attempt71",
+  "attempt72",
+  "attempt73",
+  "attempt74",
+  "attempt75"
+ ],
+ "authorizes": "nothing"
+}
