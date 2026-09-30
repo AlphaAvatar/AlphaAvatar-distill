@@ -81,14 +81,27 @@ def _operator_registry_is_module_local():
     exactly at that boundary.
     """
     from aadistill.initialization.operators import base as _ops
+    from aadistill.initialization.operators.register import (
+        register_builtin_operators,
+    )
 
-    before = dict(_ops._IMPLEMENTATIONS)
+    before = set(_ops._IMPLEMENTATIONS)
     try:
         yield
     finally:
-        leaked = sorted(set(_ops._IMPLEMENTATIONS) - set(before))
-        for impl_id in leaked:
+        #: REMOVE WHAT THIS MODULE ADDED. Nothing more.
+        #:
+        #: The first version of this fixture snapshotted the whole mapping and
+        #: restored it, which looked safer and was worse: a module that
+        #: legitimately UNREGISTERED an implementation leaked in from earlier
+        #: had it put back, so the fixture propagated leaks forward instead of
+        #: clearing them. The full suite went from 23 failures to 29.
+        #:
+        #: Removals are not restored either -- except the builtins, whose
+        #: registrar is documented idempotent. A module that drops an
+        #: experimental implementation and does not put it back is cleaning up
+        #: after itself, which is the behaviour this fixture wants; re-adding it
+        #: would be re-creating the leak.
+        for impl_id in sorted(set(_ops._IMPLEMENTATIONS) - before):
             _ops.unregister_implementation(impl_id)
-        for impl_id, impl in before.items():
-            if impl_id not in _ops._IMPLEMENTATIONS:
-                _ops.register_implementation(impl, replace=True)
+        register_builtin_operators()
