@@ -818,7 +818,51 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "is why the C3-specific gate and its measured per-probe byte "
             "count live in the launcher instead.",
      }),
+    ("b0bd14929892391152375de309a1741dfdfc5f4a",
+     "A-bsz3: the batching protocol as an execution knob, not an operator",
+     {
+        "src/aadistill/initialization/execution.py":
+            "ADDITIVE: `ExecutionConfig` gains `calibration_batch_packing`, "
+            "defaulting to `original_order_v1`, plus validation against "
+            "`PACKING_POLICIES` and the field in `as_trace()`. This is the "
+            "second knob the module's own docstring promised -- 'a field here "
+            "and nothing at all in the hashing path' -- and the boundary is "
+            "unchanged: nothing about identity moves, and a test asserts the "
+            "packing reaches neither `ctx.config` nor `OperatorStep.identity()`. "
+            "NO CUDA SURFACE: the dataclass holds two scalars and imports only "
+            "the packing policy names.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "SEMANTIC, and deliberately narrow. The operator now routes through "
+            "`packed_batches` and honours the packing policy; the REFERENCE "
+            "PATH is guarded by an explicit `batch_size <= 1 and packing == "
+            "ORIGINAL_ORDER_V1`, which is exactly the loop this operator has "
+            "always run, so the frozen C1 selection is reproduced by "
+            "construction rather than by tolerance. `bsz>1 + original_order` is "
+            "also unchanged, because `packed_batches` yields what "
+            "`micro_batches` yields row for row at that policy. A non-default "
+            "packing is therefore never silently ignored. Also traces "
+            "`calibration_batch_packing`, `reference_path`, "
+            "`kept_q_heads_per_layer` and `selection_margin_per_layer` -- all "
+            "evidence, none of it read by `OperatorStep.identity()`. ON THE "
+            "CURRENT CUDA SURFACE: it runs calibration forwards, so it owes the "
+            "new validation and claims no cover from the 2026-09-10 one.",
+        "src/aadistill/initialization/operators/attention/gqa/_common.py":
+            "ADDITIVE: `selection_margins` returns, per GQA group, the gap "
+            "between the last kept head and the first dropped one. A pure "
+            "function of a score vector -- no tensors created, no device, no "
+            "model -- and no existing function is touched. It exists because "
+            "scores alone cannot say whether two protocols that disagree about "
+            "a selection tipped a near-tie or genuinely rank heads differently.",
+        "src/aadistill/governance/grant.py":
+            "ADDITIVE: `refuse_a_future_dated_grant` refuses a grant dated "
+            "after today UTC. C2-behavioural's attempt3 carried a "
+            "local-timezone date in a UTC field and nothing detected it because "
+            "nothing read it; that issuer gained an inline check and C3's never "
+            "did. Experiment-agnostic here so later phases share one owner. "
+            "NO CUDA SURFACE: one date comparison.",
+     }),
 )
+
 
 
 #: The tip the CURRENT round was reviewed at.

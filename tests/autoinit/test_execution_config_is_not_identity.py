@@ -82,14 +82,15 @@ def registered():
     attention_activation.unregister()
 
 
-def context(model, items, batch_size, target):
+def context(model, items, batch_size, target, packing="original_order_v1"):
     """The SAME science every time; only `execution` moves."""
     return OperatorContext(
         adapter=QWEN3_ADAPTER, model=model,
         parent_spec=ArchSpec.of("qwen3", TEACHER_GEOMETRY), target_spec=target,
         profile=NO_CALIBRATION, calibration_items=items, seed=0, device="cpu",
         config={"n_calibration_items": len(items)},
-        execution=ExecutionConfig(micro_batch_size=batch_size))
+        execution=ExecutionConfig(micro_batch_size=batch_size,
+                                  calibration_batch_packing=packing))
 
 
 # --- the structural guarantee ----------------------------------------------
@@ -146,6 +147,31 @@ class TestTheBoundaryIsStructural:
             config_hash=sha256_json({}), seed=0, result_spec_hash="spec"),))
         assert got == expected
 
+    @pytest.mark.parametrize("packing",
+                             ["original_order_v1", "length_sorted_v1"])
+    def test_the_packing_policy_never_reaches_the_hashed_config(
+            self, model, items, packing):
+        """A-bsz3 is A. The grouping must not fork a state id.
+
+        This is the whole premise of treating the batching protocol as an
+        EXECUTION optimization: A-bsz3 and canonical A must be the same
+        scientific state, so that whether they agree is a question about
+        arithmetic rather than about identity. If the packing reached
+        `config`, the two would be different states by construction and the
+        comparison would be meaningless.
+        """
+        ctx = context(model, items, 3,
+                      ArchSpec.of("qwen3", TEACHER_GEOMETRY), packing=packing)
+        assert ctx.execution.calibration_batch_packing == packing
+        assert "calibration_batch_packing" not in ctx.config
+        assert not any("pack" in k for k in ctx.config), (
+            "the packing policy reached the mapping that is hashed into "
+            "OperatorStep.config_hash")
+        config_hash = sha256_json(
+            {k: v for k, v in ctx.config.items() if k != "n_calibration_items"})
+        assert config_hash == sha256_json({}), (
+            "the hashed config moved with the packing policy")
+
     def test_execution_settings_are_absent_from_the_identity_tuple(self):
         """Whatever else `identity()` grows, it must not grow this."""
         step = OperatorStep(
@@ -154,7 +180,10 @@ class TestTheBoundaryIsStructural:
             result_spec_hash="rs")
         identity = step.identity()
         assert "micro_batch_size" not in identity
+        assert "calibration_batch_packing" not in identity
         assert not any("batch" in k or "batch" in str(v)
+                       for k, v in identity.items())
+        assert not any("pack" in k or "pack" in str(v)
                        for k, v in identity.items())
 
 
@@ -213,4 +242,24 @@ class TestTheExecutionConfig:
 
     def test_as_trace_is_what_an_operator_records(self):
         assert ExecutionConfig(micro_batch_size=7).as_trace() == {
-            "micro_batch_size": 7}
+            "micro_batch_size": 7,
+            "calibration_batch_packing": "original_order_v1"}
+        assert ExecutionConfig(micro_batch_size=3,
+                              calibration_batch_packing="length_sorted_v1"
+                              ).as_trace() == {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"}
+
+    def test_the_packing_policy_is_execution_and_is_validated(self):
+        """The second execution knob, and it refuses an unknown name.
+
+        A grouping cannot change the estimand, the aggregation or the
+        selection RULE -- so it is execution. It can change the selection
+        RESULT, because a different grouping pads to different widths and this
+        project has measured bf16 GEMMs reducing shape-dependently. Execution,
+        therefore, but not numerically free: exactly the distinction that makes
+        its equivalence an empirical question.
+        """
+        for bad in ("", "sorted", "length_sorted", None, 3):
+            with pytest.raises(ExecutionError):
+                ExecutionConfig(calibration_batch_packing=bad)

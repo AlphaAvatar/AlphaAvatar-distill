@@ -87,6 +87,41 @@ def validate_grant(grant: Mapping[str, Any], contract: GrantContract, *,
     return dict(grant)
 
 
+def refuse_a_future_dated_grant(granted_utc: str, *,
+                                now: "date | None" = None) -> str:
+    """A grant cannot be issued from the future. Returns the date it states.
+
+    A grant is written BY HAND and its date field says `utc`. C2-behavioural's
+    attempt3 said `2026-09-21` while the session ran on `2026-09-20` UTC — a
+    local-timezone date in a UTC field, which nothing detected because nothing
+    read it. It distorted no money there, because run costs are attributed from
+    closeouts through the run index, but a grant dated after the work it
+    authorizes is not a record anyone can reason from.
+
+    Experiment-agnostic on purpose: the check is one comparison against the
+    clock, and every launchable phase needs it. `issue_c2_behavioural_
+    authorization.py` keeps its own inline copy, deliberately unedited — that
+    phase is closed, and rewriting a closed phase's issuer to remove a
+    duplication is a worse trade than the duplication.
+
+    An empty or absent date is NOT refused here: whether a grant must carry one
+    is the phase's contract, not this function's.
+    """
+    from datetime import datetime, timezone
+
+    stated = str(granted_utc or "")[:10]
+    if not stated:
+        return stated
+    today = (now or datetime.now(timezone.utc).date()).isoformat()
+    if stated > today:
+        raise GrantRefused(
+            f"the grant is dated {stated} and today is {today} UTC. A grant "
+            "cannot be issued from the future: either the date was written "
+            "from a local timezone -- which is what happened to C2's attempt3 "
+            "-- or the clock is wrong. Fix the grant before issuing against it.")
+    return stated
+
+
 def budget_headroom(*, cumulative_usd: float, cap_usd: float,
                     ceiling_usd: float) -> dict[str, Any]:
     """Derive whether one more ceiling-sized run fits. Never restate it.

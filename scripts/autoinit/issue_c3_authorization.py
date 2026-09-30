@@ -40,6 +40,9 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 #: distribution and breaks the next transformers import in the process.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
+from aadistill.governance.grant import (  # noqa: E402
+    GrantRefused, refuse_a_future_dated_grant,
+)
 from experiments.phase_c3.authorization import C3Authorization  # noqa: E402
 from experiments.phase_c3.authorization_payload import (  # noqa: E402
     C3AuthorizationRefused, build_c3_authorization_payload,
@@ -81,6 +84,17 @@ def main(argv=None) -> int:
               file=sys.stderr)
         return 2
     commit = args.session_commit or git("rev-parse", "HEAD").strip()
+
+    #: A GRANT CANNOT BE ISSUED FROM THE FUTURE. C2-behavioural's attempt3
+    #: carried `granted_utc = 2026-09-21` for a session that ran on 2026-09-20
+    #: UTC -- a local-timezone date in a UTC field -- and nothing detected it
+    #: because nothing read it. That issuer gained the check; this one did not,
+    #: so a C3 grant could carry the same defect. Shared owner in core now.
+    try:
+        refuse_a_future_dated_grant(grant.get("granted_utc", ""))
+    except GrantRefused as exc:
+        print(f"REFUSED: {exc}", file=sys.stderr)
+        return 1
 
     try:
         payload = build_c3_authorization_payload(

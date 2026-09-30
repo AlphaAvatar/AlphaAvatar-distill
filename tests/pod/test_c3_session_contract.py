@@ -515,3 +515,43 @@ def test_the_aggregation_passes_both_seed_and_iterations():
                 f"{rel} calls stratified_cluster_bootstrap without "
                 f"{sorted({'seed', 'iterations'} - kw)}; it would inherit "
                 "phase-C1's default")
+
+
+def test_the_driver_and_the_launcher_name_the_same_status_file():
+    """The marker channel, and it was broken for two formal attempts.
+
+    The driver wrote `/workspace/autoinit_c3.status`; the launcher polled
+    `/workspace/autoinit_c1.status` with `tail -1`. So every driver marker --
+    `STAGE_PASSED:D`, `STAGE_START:G`, and `ALL_DONE` itself -- was invisible
+    to the process supervising it.
+
+    The labelling consequence was cosmetic: the two C3 artifact specs carry
+    identical patterns and differ only in `min_matches`, so a misclassified
+    success still collected everything. The other consequence was not.
+    `c3_acquire.sh` decides whether to build and launch ANOTHER PAID CHAIN by
+    grepping the launcher's log for exactly those markers, so a COMPLETED
+    formal run read as "no measurement began" and the loop would have launched
+    a second formal attempt.
+
+    Asserted against the modules rather than the source text, because the
+    defect was two literals agreeing with nothing.
+    """
+    mod = _launcher()
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "c3drv_status", REPO / "scripts/pod/autoinit_c3_driver.py")
+    driver = importlib.util.module_from_spec(spec)
+    sys.modules["c3drv_status"] = driver
+    spec.loader.exec_module(driver)
+
+    assert str(driver.STATUS) == str(mod.STATUS), (
+        f"the driver writes markers to {driver.STATUS} and the launcher polls "
+        f"{mod.STATUS}; no marker the driver emits can reach it")
+    assert str(mod.STATUS) == S.STATUS_PATH
+    assert str(mod.RUN_LOG) == S.RUN_LOG_PATH
+    #: And C3 owns its own roots -- the `autoinit_c1.*` names were a leftover
+    #: from the port, and are what made the mismatch easy to miss.
+    assert "autoinit_c3" in str(mod.STATUS)
+    assert "autoinit_c1" not in str(mod.STATUS)
+    assert "autoinit_c1" not in str(mod.RUN_LOG)

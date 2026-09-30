@@ -217,8 +217,11 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 POD_TEST_SELECTION = "tests/c3_preflight"
 TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
-STATUS = f"{WS}/autoinit_c1.status"
-RUN_LOG = f"{WS}/autoinit_c1_run.log"
+#: From the one owner, and NOT `autoinit_c1.*`. See `CS.STATUS_PATH`: these
+#: two constants disagreeing with the driver's is what made every driver
+#: marker invisible to this launcher.
+STATUS = CS.STATUS_PATH
+RUN_LOG = CS.RUN_LOG_PATH
 #: The GLOBAL entry point for the issued authorization. Like the readiness
 #: record, this was the canonical artifact: every issuance overwrote one
 #: repository-root file, and each closeout copied it into the run afterwards to

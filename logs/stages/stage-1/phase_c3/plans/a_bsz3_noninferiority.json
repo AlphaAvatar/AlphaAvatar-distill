@@ -1,0 +1,132 @@
+{
+ "schema": "aadistill.a_bsz3.noninferiority/v1",
+ "stage": "A-bsz3",
+ "preregistered_utc": "2026-10-01",
+ "_contract": "The design that decides whether A-bsz3 may be ADOPTED as the execution protocol for the incumbent ATTENTION initialization. Frozen BEFORE any A-bsz3 behavioural result exists. It authorizes no spend.",
+ "_what_is_being_asked": "A-bsz3 is canonical A -- attention.activation_importance_v1, same operator composition, same scientific identities, same frozen shared parent -- run with calibration_forward_batch_size=3 and calibration_batch_packing=length_sorted_v1. Both are ExecutionConfig fields and neither enters a hash, so A-bsz1 and A-bsz3 are the SAME scientific state. The question is whether the execution optimization is acceptably NON-WORSE, not whether a new operator is better.",
+ "_this_is_not_c3s_rule": {
+  "c3_promotion_rule": "GO iff one-sided LCB > 0 AND delta >= +0.010 AND >=2/3 seed deltas > 0",
+  "a_bsz3_adoption_rule": "ADOPT iff one-sided LCB > -0.010",
+  "why_they_are_different": "C3's rule requires DEMONSTRATING A GAIN: a candidate that is merely equal fails it, correctly, because equality is no reason to replace an incumbent operator. A-bsz3's rule requires EXCLUDING A MEANINGFUL LOSS: a protocol that is merely equal passes it, correctly, because equality plus a runtime win is the whole case for an execution change. Same magnitude, opposite direction, different logical form -- and the magnitude is justified independently below rather than inherited.",
+  "_the_magnitude_is_not_borrowed": "0.010 is the smallest effect this programme has ever called meaningful. A loss smaller than it is, by the programme's own standard, not a meaningful loss. That is an independent argument for the same number, not a reuse of the rule it appears in."
+ },
+ "_why_the_margin_cannot_be_smaller": {
+  "_derivation": "From C3's own measured precision on the identical instrument -- 3 preregistered seeds, 850 scorable prompts, the same stratified prompt-cluster bootstrap. The worst one-sided 95% half-width across its three contrasts was 0.008627, implying SE = 0.005244 at 3 seeds.",
+  "observed_one_sided_half_widths": {
+   "primary": 0.007451,
+   "secondary": 0.007843,
+   "practical": 0.008627
+  },
+  "implied_se_at_3_seeds": 0.005244,
+  "margins_considered": {
+   "0.0050": "REJECTED -- below the half-width, so a PERFECTLY EQUIVALENT protocol still fails. A criterion no true negative can clear is not a criterion.",
+   "0.0075": "REJECTED -- same defect, 0.0075 < 0.008627.",
+   "0.0100": "ACCEPTED -- clearable, and equal to the programme's SESOI.",
+   "0.0150": "REJECTED -- would tolerate a loss 1.5x the smallest effect the programme calls meaningful."
+  },
+  "_the_point": "The margin is bounded BELOW by the instrument's precision and ABOVE by what the programme is willing to lose. Those two constraints leave 0.010, and they were both settled before any A-bsz3 number existed."
+ },
+ "margin": {
+  "delta": 0.01,
+  "direction": "one-sided",
+  "metric": "correct_overall",
+  "rule": "ADOPT iff LCB_one_sided(bsz3 - bsz1) > -0.010"
+ },
+ "_power_is_why_this_design_is_bigger_than_c3s": {
+  "_finding": "Non-inferiority at a given margin needs MORE data than superiority at the same margin, because the null and the alternative swap places. Reusing C3's 3-seed design here would be underpowered -- and that is a separate error from reusing its decision rule.",
+  "power_at_true_equivalence": {
+   "3_seeds": 0.603,
+   "4_seeds": 0.711,
+   "6_seeds": 0.854,
+   "8_seeds": 0.929,
+   "12_seeds": 0.985
+  },
+  "_read_this_as": "at 3 seeds there would be a ~40% chance of failing to adopt a protocol that is genuinely equivalent",
+  "chosen": 8,
+  "_why_8": "the smallest seed count reaching >=90% power at delta=0.010"
+ },
+ "design": {
+  "arms": [
+   "A_bsz1",
+   "A_bsz3"
+  ],
+  "_arms_note": "the SAME operator and the same frozen parent; the arms differ only in ExecutionConfig",
+  "seeds": {
+   "recovery": [
+    974826772,
+    619135164,
+    567222419,
+    546741036,
+    1928233555,
+    1996838344,
+    1704891508,
+    4888280
+   ],
+   "bootstrap": 41366560,
+   "namespace_rule": "uint32_be(SHA256(base + ':' + namespace)[0:4]) mod 2**31",
+   "base_digest": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
+   "_base_is": "the frozen C3 preregistration_sha256",
+   "namespaces": [
+    "a-bsz3:recovery-seed:0",
+    "a-bsz3:recovery-seed:1",
+    "a-bsz3:recovery-seed:2",
+    "a-bsz3:recovery-seed:3",
+    "a-bsz3:recovery-seed:4",
+    "a-bsz3:recovery-seed:5",
+    "a-bsz3:recovery-seed:6",
+    "a-bsz3:recovery-seed:7",
+    "a-bsz3:bootstrap"
+   ],
+   "_mechanical": "no human choice; reproducible from the base digest alone",
+   "_disjoint": "checked against every C1, C3 and pilot seed recorded in the C3 preregistration: no collision"
+  },
+  "probes": 16,
+  "recovery": "the frozen 0.86M recipe, unchanged",
+  "battery": "c1_confirmation_v1, unchanged",
+  "scoring": "the frozen c1_confirmation scoring contract, unchanged",
+  "inference": {
+   "method": "stratified prompt-cluster bootstrap",
+   "iterations": 20000,
+   "seed": 41366560,
+   "margin": 0.01
+  }
+ },
+ "_gates_in_cost_order": [
+  {
+   "step": 0,
+   "cost": "$0",
+   "status": "DONE",
+   "what": "padding and forward-count analysis from the frozen mixture's lengths",
+   "result": "forwards 67 -> 23 (0.3433x) for +4.01% executed positions",
+   "decides": "nothing on its own; it establishes that the protocol is worth measuring"
+  },
+  {
+   "step": 1,
+   "cost": "one short GPU session, both protocols on one pod",
+   "what": "the structural/numerical comparison: artifact digest, kept heads, selection margins, runtime, peak VRAM",
+   "decides": "(a) digests IDENTICAL -> PURE EXECUTION OPTIMIZATION. No behavioural study is owed at all; adoption turns on runtime alone. (b) runtime win BELOW the bar -> STOP. There is no reason to adopt a protocol that is not faster, whatever its equivalence. This kills the study for the price of one short session rather than sixteen probes. (c) digests DIFFER and the runtime win clears the bar -> step 2."
+  },
+  {
+   "step": 2,
+   "cost": "16 probes",
+   "what": "the behavioural non-inferiority study defined above",
+   "decides": "ADOPT iff LCB > -0.010; otherwise A-bsz1 stands"
+  }
+ ],
+ "runtime_adoption_bar": {
+  "ratio": 1.25,
+  "_precedent": "the bar the causal-KL packing study used, where length-sorted B3 measured 1.1884x and was NOT adopted. Reused deliberately: it is a COST bar, not an equivalence criterion, and applying a different one to this operator would make the two studies incomparable.",
+  "_must_be_same_session": "the bsz1 reference must be measured in the SAME session as bsz3. A cross-session timing reference already changed the SIGN of a result once: a prior card's B1 was 2190.2s against 2720.7s on the measuring card, which would have reported a 1.19x win as a 0.957x loss."
+ },
+ "_what_this_does_not_authorize": [
+  "any paid GPU resource -- no spend is authorized by this document",
+  "starting C4",
+  "any causal-KL experiment",
+  "changing the shared parent's pinned micro_batch_size: 1",
+  "adopting A-bsz3 on the structural result alone when the digests differ",
+  "re-running a completed non-inferiority result in search of a pass"
+ ],
+ "_funding_status": "NOT FUNDED. Step 2 is ~16 probes; at attempt75's measured rate (9 probes, 919.7 min, $16.71 on a $1.09/h L40S) that is roughly $30 before setup, against a project remaining of $16.6377 and a formal allowance already exceeded by $0.9492. Step 1 is short and cheap but is also unfunded. Both need a maintainer budget decision.",
+ "authorizes": "nothing",
+ "preregistration_sha256": "5db8563c2b1590f1fd618f77696c629e93584cfd3153fb0a3a8de493627bb350"
+}

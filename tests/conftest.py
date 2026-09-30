@@ -53,3 +53,42 @@ def repo_root() -> Path:
     only describes whatever it contains today.
     """
     return REPO
+
+
+@pytest.fixture(autouse=True, scope="module")
+def _operator_registry_is_module_local():
+    """No test module may leave an implementation registered for the next one.
+
+    `BeamSearch._allowed_impl_ids` falls back to **every registered
+    implementation** when `allowed_impls` is None, so a registration that
+    outlives its module silently adds a branch to an unrelated search. That is
+    not hypothetical: `tests/pod/test_c3_session_contract.py` loads the C3
+    launcher, whose `spec()` calls `register_experimental_operators()`, and
+    nothing unregistered it. C2's joint-space enumeration then met
+    `attention.causal_kl_v1`, which its cost model has never measured, and
+    raised `CostModelError`.
+
+    The visible damage was a suite total nobody could trust: 23 failed / 15
+    errors where 11 were real, with the rest appearing and disappearing by
+    collection order. Measured: the affected file passed 17/17 alone and failed
+    2 when a C3 module ran first.
+
+    **Module scope, not function scope.** Many modules register once for the
+    whole file through a module-scoped fixture, and restoring after every test
+    would undo that registration before the second test in the module ran.
+    Leaks *within* a module are that module's own business; leaks *across*
+    modules are what broke an unrelated experiment's cost model. This restores
+    exactly at that boundary.
+    """
+    from aadistill.initialization.operators import base as _ops
+
+    before = dict(_ops._IMPLEMENTATIONS)
+    try:
+        yield
+    finally:
+        leaked = sorted(set(_ops._IMPLEMENTATIONS) - set(before))
+        for impl_id in leaked:
+            _ops.unregister_implementation(impl_id)
+        for impl_id, impl in before.items():
+            if impl_id not in _ops._IMPLEMENTATIONS:
+                _ops.register_implementation(impl, replace=True)

@@ -911,6 +911,14 @@ def main() -> int:
                 prior["last_executed"] = (
                     last.get("root")
                     or (last.get("components") or {}).get("root"))
+            #: SAYS SO. The sibling blocks both carry `_derived_by` and this
+            #: one did not, which is the difference between a figure a reader
+            #: knows not to edit and one that looks hand-maintained. Every
+            #: field above is computed from the run index and the run's own
+            #: closeout; an edit here is overwritten on the next render.
+            prior["_derived_by"] = (
+                "scripts/consolidate/render_log_navigation.py, from "
+                "logs/index.json and the run's own closeout")
             new_snapshot["latest_run"] = prior
 
     #: And the budget block, for the third time in the same file: it declares

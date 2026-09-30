@@ -70,11 +70,12 @@ from aadistill.initialization.operators.attention.gqa._common import (
     query_projection,
     refuse_unless_reducible_within_groups,
     select_q_heads_by_score,
+    selection_margins,
 )
-from aadistill.initialization.calibration.batching import (
-    micro_batches,
-    resolve_pad_id,
+from aadistill.initialization.calibration.packing import (
+    ORIGINAL_ORDER_V1, packed_batches,
 )
+from aadistill.initialization.calibration.batching import resolve_pad_id
 from aadistill.initialization.calibration.profiles import CalibrationNeed
 from aadistill.initialization.operators.base import (
     OperatorContext,
@@ -173,15 +174,36 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         #: pad groups together and the collector's mask keeps padded positions
         #: out of `M_h` and out of `attn_token_count`.
         batch_size = ctx.execution.micro_batch_size
+        packing = ctx.execution.calibration_batch_packing
+        #: THE REFERENCE PATH IS `bsz1 + original_order`, and it is exactly the
+        #: loop this operator has always run: one item per `process` call, in
+        #: the mixture's own order. Keeping that condition explicit is what
+        #: reproduces the frozen C1 selection by construction rather than by
+        #: tolerance.
+        #:
+        #: Any other combination goes through `packed_batches`, which yields
+        #: what `micro_batches` yields row for row at `original_order_v1` — so
+        #: `bsz>1 + original_order` is unchanged too, and a NON-default packing
+        #: is never silently ignored. At `bsz1 + length_sorted` there is no
+        #: padding to save; what changes is the order the float64 accumulator
+        #: sees, which is a real protocol difference and is traced as one.
+        reference_path = batch_size <= 1 and packing == ORIGINAL_ORDER_V1
         try:
-            if batch_size <= 1:
+            if reference_path:
                 for item in ctx.calibration_items:
                     collector.process(item["input_ids"].to(compute))
             else:
-                for batch in micro_batches(ctx.calibration_items, batch_size,
-                                           pad_id=resolve_pad_id(parent),
-                                           device=compute):
-                    collector.process_batch(batch)
+                for packed in packed_batches(ctx.calibration_items, batch_size,
+                                             packing=packing,
+                                             pad_id=resolve_pad_id(parent),
+                                             device=compute):
+                    #: `original_indices` is deliberately unused: this collector
+                    #: accumulates ONE global per-layer/per-head second moment
+                    #: over all valid token positions, so there is no per-item
+                    #: value to attribute back. A consumer that did aggregate
+                    #: per item would have to read it, which is why
+                    #: `PackedBatch` carries it.
+                    collector.process_batch(packed.batch)
         finally:
             collector.close()
         #: THE TRANSFER BOUNDARY, and a defect this project has already paid
@@ -205,7 +227,7 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         new_spec = ctx.parent_spec.replace(**{HEADS_FIELD: keep_q})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)
 
-        retained, kept_per_layer = [], []
+        retained, kept_per_layer, margins = [], [], []
         for idx, (src, dst) in enumerate(zip(adapter.blocks(parent),
                                              adapter.blocks(builder.model))):
             s_out, d_out = (attention_out_projection(adapter, src),
@@ -217,7 +239,14 @@ class AttentionActivationImportanceV1(OperatorImplementation):
 
             total = float(scores.sum())
             retained.append(float(scores[kept].sum() / total) if total > 0 else 0.0)
-            kept_per_layer.append(list(kept))
+            kept_per_layer.append([int(h) for h in kept])
+            #: EVIDENCE, never identity. What the A-bsz1/A-bsz3 comparison
+            #: needs and scores alone cannot give: two protocols can differ in
+            #: every score and agree on every selection, or agree closely and
+            #: still flip a near-tie. The margin is the quantity that tells
+            #: those apart.
+            margins.append([float(m) for m in
+                            selection_margins(scores, n_q, n_kv, keep_q)])
 
             transformed = {id(d_q.weight), id(d_out.weight)}
             builder.assign(d_q.weight, s_q.weight[rows])
@@ -244,9 +273,16 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    # does not read `trace`, and the batch size changes no
                    # estimand. Recorded so a run's evidence states how it ran.
                    "micro_batch_size": batch_size,
+                   #: Execution evidence too, and recorded even at the default
+                   #: so a run's trace always states which grouping produced
+                   #: its statistics rather than leaving it inferable.
+                   "calibration_batch_packing": packing,
+                   "reference_path": reference_path,
                    "score": "mean_t ||W_o,h a_h(t)||^2",
                    "stats_spec": ATTENTION_STATS_SPEC.spec_hash,
                    "calibration_tokens": int(stats["attn_token_count"]),
+                   "kept_q_heads_per_layer": kept_per_layer,
+                   "selection_margin_per_layer": margins,
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},
             artifacts={"kept_heads": kept_per_layer},
         )

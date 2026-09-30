@@ -109,6 +109,32 @@ def select_q_heads_by_score(scores: Sequence[float] | torch.Tensor, n_q_heads: i
     return kept
 
 
+def selection_margins(scores: "Sequence[float] | torch.Tensor", n_q_heads: int,
+                      n_kv_heads: int, keep_q: int) -> list[float]:
+    """Per GQA group: the gap between the last KEPT head and the first DROPPED.
+
+    Evidence about how close a selection was, not part of it. A top-k flips
+    when a perturbation exceeds this gap, so when two execution protocols
+    disagree about which heads to keep, the margin is what separates "the
+    arithmetic moved a near-tie" from "the two protocols genuinely rank these
+    heads differently". Scores alone cannot say that: two runs can differ in
+    every score and agree on every selection.
+
+    `inf` where a group drops nothing, because there is no boundary to measure.
+    """
+    per_g_t, per_g_s = n_q_heads // n_kv_heads, keep_q // n_kv_heads
+    out: list[float] = []
+    for g in range(n_kv_heads):
+        group = range(g * per_g_t, (g + 1) * per_g_t)
+        ranked = sorted(group, key=lambda h: (-float(scores[h]), h))
+        if per_g_s >= per_g_t:
+            out.append(float("inf"))
+            continue
+        out.append(float(scores[ranked[per_g_s - 1]])
+                   - float(scores[ranked[per_g_s]]))
+    return out
+
+
 def refuse_unless_reducible_within_groups(n_q: int, n_kv: int,
                                           keep_q: int) -> tuple[bool, str]:
     """The applicability rule every grouped-head reduction shares.

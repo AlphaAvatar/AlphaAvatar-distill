@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 105,
- "digest": "7c59586766c9c7e422cf454b8c4f4121e92908bd70f77115273a55765f5b7803",
+ "n_files": 106,
+ "digest": "185d91e5934e56f9a0bf82c27d6e7589263db8d43a124b8a4c4b6173fc16401a",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -269,8 +269,8 @@
   },
   {
    "path": "src/aadistill/governance/grant.py",
-   "sha256": "cb7aa9458cc51aa5683c610a244f7329559d6aaa1d395f6702ae44f4073a6a94",
-   "bytes": 4782
+   "sha256": "853130c8ccb6e8763aea1a2b4454683f3b178df2d9cbeeb69eaba7c826129f3a",
+   "bytes": 6500
   },
   {
    "path": "src/aadistill/infrastructure/artifact_gate.py",
@@ -353,6 +353,11 @@
    "bytes": 7533
   },
   {
+   "path": "src/aadistill/initialization/calibration/packing.py",
+   "sha256": "b348e4ce5f0a883137fba5c446bd21548c99534848676b3c54080259f84a640b",
+   "bytes": 6352
+  },
+  {
    "path": "src/aadistill/initialization/calibration/profiles.py",
    "sha256": "7334063b781a213c720f62cffa56e0676a3481f3690a1b62ca2e7dc2936f870e",
    "bytes": 15604
@@ -364,8 +369,8 @@
   },
   {
    "path": "src/aadistill/initialization/execution.py",
-   "sha256": "1ee85335af47fe0b499461e2209f2e6ec6d8038095cb904c155e725317096f68",
-   "bytes": 3151
+   "sha256": "1ab8d4134de6df2716ded65f850f0237efe2d8016dbfe6751010ecb83b6d0749",
+   "bytes": 4710
   },
   {
    "path": "src/aadistill/initialization/operators/_common.py",
@@ -379,8 +384,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/_common.py",
-   "sha256": "cbfef8dfb124ca938c5744d2bf708475f470e46ebc174f77785a8bf555fc89d1",
-   "bytes": 6463
+   "sha256": "ac79c926358fe256c44aee3bf8524cfba52f40ef955603cb4df26598ca5b816c",
+   "bytes": 7669
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
@@ -389,8 +394,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
-   "sha256": "c612ef0a7cfd675a9199465bf35c7577db1c4eac0a7937137fd092c3f9102aee",
-   "bytes": 13008
+   "sha256": "202fd7006c0c044d8f4275d029b92b20059a03759a3489c44d34879e624702d0",
+   "bytes": 15492
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",

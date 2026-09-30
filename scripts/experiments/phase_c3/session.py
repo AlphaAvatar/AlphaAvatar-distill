@@ -166,6 +166,24 @@ def bootstrap_seed() -> int:
     return int(preregistration()["seeds"]["bootstrap"])
 
 
+#: WHERE THE SESSION WRITES ITS MARKERS AND ITS LOG, named once.
+#:
+#: The driver wrote `/workspace/autoinit_c3.status` while the launcher polled
+#: `/workspace/autoinit_c1.status` with `tail -1`, so EVERY driver marker --
+#: including the terminal `ALL_DONE` -- was invisible to the process
+#: supervising it. Two consequences, and only one was cosmetic: a successful
+#: run was classified by exit code (attempt66 and attempt75 both record
+#: `terminal = DRIVER_EXITED:40` rather than naming a marker), and
+#: `c3_acquire.sh` decides whether to launch ANOTHER PAID ATTEMPT by grepping
+#: the launcher's log for those markers -- so a completed formal run read as
+#: "no measurement began".
+#:
+#: `autoinit_c3`, not `autoinit_c1`, because C3 owns its own roots. The names
+#: were a leftover from the port.
+POD_WORKSPACE = "/workspace"
+STATUS_PATH = f"{POD_WORKSPACE}/autoinit_c3.status"
+RUN_LOG_PATH = f"{POD_WORKSPACE}/autoinit_c3_run.log"
+
 #: The battery identity the isolation plan binds. C1's file, because C3
 #: evaluates on C1's frozen confirmation battery by design.
 BATTERY_IDENTITY_PATH = REPO / "logs/stages/stage-1/phase_c1/plans/battery.json"

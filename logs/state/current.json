@@ -158,7 +158,8 @@
   "index": "logs/index.json",
   "state": "recorded: the run wrote its own manifest",
   "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
-  "_c2_state": "CLOSED WITHOUT PROMOTION; no probes owed"
+  "_c2_state": "CLOSED WITHOUT PROMOTION; no probes owed",
+  "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout"
  },
  "architecture_migration": {
   "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",

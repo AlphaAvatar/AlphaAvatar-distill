@@ -13,6 +13,73 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 after 919.7 min and is provider-confirmed gone; an account-wide re-query
 returns 0 pods and 0 network volumes.
 
+## A-bsz3 — IMPLEMENTED, `$0` half MEASURED, awaiting review
+
+**A-bsz3 is canonical A under B3's batching protocol.** Same operator
+(`attention.activation_importance_v1`), same composition, same scientific
+identities, same frozen shared parent — executed at
+`calibration_forward_batch_size = 3` and
+`calibration_batch_packing = length_sorted_v1`. It is **not** a new operator,
+imports nothing from causal-KL, and has **no implementation id of its own**:
+both knobs are `ExecutionConfig` fields and neither enters a hash, so A-bsz1
+and A-bsz3 are **the same scientific state**. That is the point — giving the
+knob an impl id would have answered the equivalence question by definition.
+
+**The shared parent is untouched.** `micro_batch_size: 1` on the prefix stays
+pinned; the comparison drives `materialize_fixed_path_suffix`, which starts
+from the already-verified parent and applies the override to the ATTENTION tail
+alone.
+
+**The `$0` half is measured, on the real 67-item frozen mixture:**
+
+| protocol | forwards | padded | executed | pad/valid |
+| --- | --- | --- | --- | --- |
+| A_bsz1 | 67 | 0 | 59,830 | 0.0000 |
+| A_bsz3 | **23** (`0.343×`) | 2,398 | 62,228 | **+4.01%** |
+
+**That is the case for measuring, and it is a specific one.** The prior
+negative result for this workload — `bsz=4` at `0.946×` of `bsz=1` for the
+statistics collector — was measured at *original-order* packing, which costs
+**36.73%** padding. Length-sorting at bsz3 costs **4.01%**. The old number does
+not transfer. Neither does causal-KL's `1.1884×`: that is a different workload
+with a different forward count.
+
+**Equivalence is NOT assumed, and a prediction is recorded before any GPU
+run.** This operator scores heads by `mean_t ||W_o,h a_h(t)||^2`, built from
+`attn_out` — which is in the group *measured* to reduce shape-dependently on an
+L40S (`K/N ≥ 1.6`), and the only exactly reproducible shape is `bsz=1` with
+zero padding. The registered prediction is that the artifact digest will
+**not** match. On CPU float32 all four groupings agree, which establishes the
+*algorithm* is grouping-invariant and nothing more.
+
+**The structural half is unrun and needs a GPU.** Artifact digest, kept heads,
+selection-boundary margins, runtime and peak VRAM all require the real teacher
+in bf16 — a CPU rehearsal cannot reach the behaviour under test. The driver
+`structural_half` is written and **runs end to end at toy scale** through the
+production suffix API, so what is untested is the numerics, not the plumbing.
+
+**The adoption design is frozen before any behavioural result**, and it is
+*not* C3's rule: [`a_bsz3_noninferiority.json`](../stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json).
+C3 asks whether a new operator is **better** (`LCB > 0` and `Δ ≥ +0.010`);
+A-bsz3 asks whether an execution change is **not worse** (`LCB > −0.010`). Same
+magnitude, opposite direction, different logical form — and the magnitude is
+justified independently, from C3's own measured precision: the worst one-sided
+half-width was `0.008627`, so a margin of `0.005` or `0.0075` **could not be
+cleared even by a perfectly equivalent protocol**. A criterion no true negative
+can pass is not a criterion.
+
+**The design is bigger than C3's, and that is the finding.** Non-inferiority at
+a given margin needs more data than superiority at the same margin. At 3 seeds
+the power at true equivalence is only `0.603` — a ~40% chance of failing to
+adopt a genuinely equivalent protocol. **8 seeds × 2 arms = 16 probes** reaches
+`0.929`.
+
+**NOT FUNDED and NOT AUTHORIZED.** Step 2 is ~`$30` against a project remaining
+of `$16.6377` and a formal allowance already exceeded by `$0.9492`. The cheap
+gate comes first: if the digests match, no behavioural study is owed at all;
+if the runtime win misses the `1.25×` bar, the study stops for the price of one
+short session rather than sixteen probes.
+
 **FORMAL C3 MEASURED ALL NINE PROBES AND THEN FAILED TO AGGREGATE THEM.**
 `attempt75`, secure L40S at `$1.09/h`, **`$16.7083`** of a `$22.1452` derived
 ceiling. Both frozen digest gates passed. All three arms rebuilt to the exact

@@ -134,8 +134,10 @@ def relay_token() -> str:
                        "absent or empty")
 
 
-WS = Path("/workspace")
-STATUS = WS / "autoinit_c3.status"
+WS = Path(CS.POD_WORKSPACE)
+#: From the one owner. Hardcoding it here is how the launcher came to poll a
+#: different file.
+STATUS = Path(CS.STATUS_PATH)
 
 #: C3 owns its own roots. Nothing scientific is written under another phase's
 #: tree: the launcher's ArtifactPolicy collects `audit/autoinit_c3`, and

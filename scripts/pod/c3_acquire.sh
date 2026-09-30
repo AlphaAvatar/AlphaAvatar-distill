@@ -38,6 +38,37 @@ mkdir -p "$BASE" || { echo "cannot create $BASE" >&2; exit 2; }
 LOG="$BASE/c3_acquire.log"
 say() { echo "[$(date -u +%H:%M:%S)] $*" >> "$LOG"; }
 
+# A chain that launched and never created a resource is CONSUMED (P12.1) and
+# owes a closeout. Attempts 67-70 were left with directory scaffolding and no
+# outcome record, and had to be closed retrospectively as bookkeeping; writing
+# it here means the record exists at the moment the chain is spent.
+retire_chain() {
+  local n="$1" gpu="$2" price="$3"
+  local d="logs/stages/stage-1/phase_c3/runs/attempt${n}/closeout"
+  mkdir -p "$d"
+  cat > "$d/outcome.json" <<EOF
+{
+ "schema": "aadistill.autoinit.c3_outcome/v1",
+ "run_id": "attempt${n}",
+ "experiment_id": "phase_c3",
+ "status": "CAPACITY_REFUSED_NO_RESOURCE_CREATED",
+ "_what_this_is": "A one-use chain built, launched, and refused at pod creation. Every pre-provider gate passed; the provider had no usable approved capacity at the moment of the create call, which is the ordinary behaviour of 'Low' stock on this account.",
+ "gpu_type_id": "${gpu}",
+ "_quoted_price_per_hour": ${price},
+ "launcher_exit": 11,
+ "stages_run": [],
+ "measurement_began": false,
+ "provider_resource_created": false,
+ "pod_ids": [],
+ "cost": {"actual_usd": 0.0, "_why_zero": "no pod was ever created, so nothing billed"},
+ "final_provider_state": "nothing to tear down; no resource was created",
+ "_chain_disposition": "CONSUMED even at \$0 (P12.1): the authorization is one-use and must not be reused. The incrementing attempt number is not a scope expansion.",
+ "_written_by": "scripts/pod/c3_acquire.sh at the moment the chain was spent"
+}
+EOF
+  say "attempt${n}: chain retired at \$0 (${gpu})"
+}
+
 next_free() {
   local n=1
   while [ -d "logs/stages/stage-1/phase_c3/runs/attempt$n" ]; do n=$((n+1)); done
@@ -59,7 +90,19 @@ if chosen:
 PY
 }
 
+# Backoff after a capacity refusal, in seconds, capped. The $0 watch sleeps
+# only while the tier is DRY, and `Low` stock that never converts reads as
+# USABLE -- so on 2026-09-29 the loop rebuilt a chain roughly every 66 seconds
+# and would have spent all forty rounds in about 44 minutes instead of pacing
+# them over hours. attempt75 acquired on round 5, so it cost nothing that time.
+BACKOFF=0
+BACKOFF_MAX=900
+
 for ROUND in $(seq 1 40); do
+  if [ "$BACKOFF" -gt 0 ]; then
+    say "round $ROUND: backing off ${BACKOFF}s after a capacity refusal"
+    sleep "$BACKOFF"
+  fi
   # ---- $0 capacity watch. Creates nothing. --------------------------------
   PICK=""
   for _ in $(seq 1 120); do
@@ -69,6 +112,7 @@ for ROUND in $(seq 1 40); do
   done
   if [ -z "$PICK" ]; then
     say "round $ROUND: the approved tier stayed dry for 2h; continuing the watch"
+    BACKOFF=0        # a dry tier already waited; it is not a refusal
     continue
   fi
   GPU="${PICK%%|*}"; PRICE="${PICK##*|}"
@@ -148,6 +192,12 @@ PY
     say "attempt$N: recovery training began — stopping the loop, the session is frozen"
     break
   fi
-  say "attempt$N: no measurement began; re-entering the \$0 watch"
+  # A create refusal is the ordinary `Low`-stock transient. Close the chain --
+  # it is CONSUMED even at $0 (P12.1) -- and back off before asking again, so
+  # a dry spell does not burn the round budget in under an hour.
+  retire_chain "$N" "$GPU" "$PRICE"
+  BACKOFF=$(( BACKOFF == 0 ? 60 : BACKOFF * 2 ))
+  [ "$BACKOFF" -gt "$BACKOFF_MAX" ] && BACKOFF=$BACKOFF_MAX
+  say "attempt$N: no measurement began; retired at \$0, re-entering the watch"
 done
 say "acquisition loop finished"
