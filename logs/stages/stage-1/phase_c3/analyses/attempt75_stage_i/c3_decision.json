@@ -1,0 +1,505 @@
+{
+  "verdict": "NO-GO",
+  "delta": -0.00196078431372549,
+  "lcb_one_sided": -0.009411764705882352,
+  "ucb_one_sided": 0.005490196078431372,
+  "ci_two_sided": [
+    -0.010980392156862744,
+    0.007058823529411765
+  ],
+  "sesoi": 0.01,
+  "criteria": {
+    "lcb_above_zero": false,
+    "point_at_or_above_sesoi": false,
+    "seed_robustness": {
+      "n_positive": 2,
+      "required": 2,
+      "passed": true
+    },
+    "guardrails_passed": true,
+    "ucb_below_sesoi": true
+  },
+  "per_seed_delta": [
+    0.004705882352941176,
+    -0.01647058823529412,
+    0.0058823529411764705
+  ],
+  "usable": {
+    "pooled_delta": 0.02526315789473684,
+    "per_seed_delta": [
+      0.029473684210526315,
+      -0.028421052631578948,
+      0.07473684210526316
+    ]
+  },
+  "vetoes": [],
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds",
+  "no_forced_winner": true,
+  "_schema": "aadistill.phase_c3.decision/v1",
+  "_what_this_is": "The CANONICAL C3 stage-I aggregation, computed off pod from attempt75's immutable evidence under the maintainer decision of 2026-10-01. attempt75's own stage I raised C1ResultsError before writing a decision; that failure is historical fact and is NOT rewritten as though the live session had reached stage I successfully. This artifact re-measures nothing: it reads the nine scored results and their per-sample evidence, verifies their identities, and applies the frozen contrasts, bootstrap and decision rule. It binds every input it consumed by sha256, the preregistration hash, and the implementation that ran.",
+  "run_id": "attempt75",
+  "plan_hash": "3afe7af7995ab91a5a7e8c94e6dbcc9c751592e120a942746da46bbfeea7932c",
+  "probe_results_sha256": "495328c75a3948c0f799596d8163c7a22c724b7248ba6307f29576477e0a6830",
+  "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
+  "canonical": true,
+  "primary_contrast": "causal-B1 - incumbent B",
+  "_verdict_owner": "the PRIMARY contrast alone. The secondary and practical contrasts are reported completely and do not redefine it.",
+  "contrasts": {
+    "primary": {
+      "symbol": "Delta_primary",
+      "candidate": "B_causal_b1",
+      "control": "A_incumbent",
+      "delta": -0.00196078431372549,
+      "lcb_one_sided": -0.009411764705882352,
+      "ucb_one_sided": 0.005490196078431372,
+      "per_seed_delta": [
+        0.004705882352941176,
+        -0.01647058823529412,
+        0.0058823529411764705
+      ],
+      "bootstrap": {
+        "delta": -0.00196078431372549,
+        "lcb_one_sided": -0.009411764705882352,
+        "ucb_one_sided": 0.005490196078431372,
+        "ci_two_sided_low": -0.010980392156862744,
+        "ci_two_sided_high": 0.007058823529411765,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 654678655,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    },
+    "secondary": {
+      "symbol": "Delta_batch",
+      "candidate": "C_causal_b3",
+      "control": "B_causal_b1",
+      "delta": 0.00196078431372549,
+      "lcb_one_sided": -0.0058823529411764705,
+      "ucb_one_sided": 0.00980392156862745,
+      "per_seed_delta": [
+        -0.007058823529411765,
+        0.02235294117647059,
+        -0.009411764705882352
+      ],
+      "bootstrap": {
+        "delta": 0.00196078431372549,
+        "lcb_one_sided": -0.0058823529411764705,
+        "ucb_one_sided": 0.00980392156862745,
+        "ci_two_sided_low": -0.007450980392156864,
+        "ci_two_sided_high": 0.011372549019607842,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 654678655,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    },
+    "practical": {
+      "symbol": "Delta_practical",
+      "candidate": "C_causal_b3",
+      "control": "A_incumbent",
+      "delta": 1.3061447348531252e-19,
+      "lcb_one_sided": -0.008627450980392156,
+      "ucb_one_sided": 0.008627450980392155,
+      "per_seed_delta": [
+        -0.002352941176470588,
+        0.0058823529411764705,
+        -0.0035294117647058825
+      ],
+      "bootstrap": {
+        "delta": 1.3061447348531252e-19,
+        "lcb_one_sided": -0.008627450980392156,
+        "ucb_one_sided": 0.008627450980392155,
+        "ci_two_sided_low": -0.010196078431372548,
+        "ci_two_sided_high": 0.010196078431372548,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 654678655,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    }
+  },
+  "terminal_semantics": {
+    "_corrected_2026_09_28": "GO previously read 'promote attention.causal_kl_v1 + B3/length_sorted_v1', which contradicted interpretation_matrix case B ('B3 NOT automatically promoted'). No B3-vs-B1 non-inferiority margin was ever preregistered and NONE IS INVENTED NOW -- inventing a tolerance after the data exist is exactly what the claim boundary forbids. The GO verdict therefore settles the operator question and deliberately leaves the protocol question open.",
+    "GO": {
+      "means": "causal-KL operator isolation is SUPPORTED: causal-B1 beats the incumbent B on the primary contrast under the frozen rule",
+      "c4": "C4 becomes scientifically ELIGIBLE. It is NOT authorized and must NOT be started.",
+      "b1_vs_b3": "NOT automatically decided. The numerical-protocol adoption choice between B1 and B3 is a post-C3 MAINTAINER decision, made on the completed secondary (Delta_batch) and practical (Delta_practical) evidence the report returns.",
+      "_no_automatic_promotion_of_b3": true
+    },
+    "NO_GO": {
+      "means": "B remains incumbent",
+      "c4": "do not start C4"
+    },
+    "INCONCLUSIVE": {
+      "means": "B remains incumbent",
+      "c4": "do not start C4"
+    },
+    "_if_b3_looks_strong_while_primary_is_not_GO": "report it EXACTLY as a secondary/practical finding. It must not be relabelled as proof that causal-KL alone won -- see interpretation_matrix case C, which this clause and that one now state identically."
+  },
+  "generation_protocol_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+  "inference": {
+    "method": "stratified prompt-cluster bootstrap",
+    "iterations": 20000,
+    "seed": 654678655,
+    "sesoi": 0.01,
+    "_all_four_are_PASSED_not_inherited": "Every parameter here is read from the C3 preregistration and passed explicitly. `isolation.py` carries C1's values as defaults and four of the five coincide exactly, which is why the one that does not -- the bootstrap seed, domain-separated per phase -- was invisible until it was looked for."
+  },
+  "_parameters_the_preregistration_does_NOT_freeze": {
+    "alpha": {
+      "value_used": 0.05,
+      "source": "stratified_cluster_bootstrap's own default",
+      "note": "C3's preregistration names one-sided LCB and UCB and never states a confidence level; `decide`'s contract reads 'one-sided 95%'. 0.05 is therefore the only available value and is consistent with the rule, but it is NOT frozen by the C3 plan and is recorded here rather than left implicit."
+    },
+    "design_alternative": {
+      "value_used": 0.015,
+      "source": "C1IsolationPlan's default",
+      "note": "Not declared by C3 and not read by `decide`. It constrains plan construction only -- the plan refuses a SESOI above it -- so it cannot move a verdict; it is disclosed for completeness."
+    }
+  },
+  "bootstrap_seed_used": 654678655,
+  "_bootstrap_seed": "C3's PREREGISTERED seed, from `phase-c3:bootstrap`. The driver omitted it until 2026-09-30, so the resampler fell back to `phase-c1:bootstrap` = 816109261. `contrasts_as_the_pod_would_have_run_them` below is that fallback, for comparison; it is NOT the plan's seed.",
+  "contrasts_as_the_pod_would_have_run_them": {
+    "primary": {
+      "symbol": "Delta_primary",
+      "candidate": "B_causal_b1",
+      "control": "A_incumbent",
+      "delta": -0.00196078431372549,
+      "lcb_one_sided": -0.009411764705882352,
+      "ucb_one_sided": 0.005490196078431372,
+      "per_seed_delta": [
+        0.004705882352941176,
+        -0.01647058823529412,
+        0.0058823529411764705
+      ],
+      "bootstrap": {
+        "delta": -0.00196078431372549,
+        "lcb_one_sided": -0.009411764705882352,
+        "ucb_one_sided": 0.005490196078431372,
+        "ci_two_sided_low": -0.010980392156862744,
+        "ci_two_sided_high": 0.006666666666666667,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 816109261,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    },
+    "secondary": {
+      "symbol": "Delta_batch",
+      "candidate": "C_causal_b3",
+      "control": "B_causal_b1",
+      "delta": 0.00196078431372549,
+      "lcb_one_sided": -0.0058823529411764705,
+      "ucb_one_sided": 0.00980392156862745,
+      "per_seed_delta": [
+        -0.007058823529411765,
+        0.02235294117647059,
+        -0.009411764705882352
+      ],
+      "bootstrap": {
+        "delta": 0.00196078431372549,
+        "lcb_one_sided": -0.0058823529411764705,
+        "ucb_one_sided": 0.00980392156862745,
+        "ci_two_sided_low": -0.007450980392156863,
+        "ci_two_sided_high": 0.011372549019607842,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 816109261,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    },
+    "practical": {
+      "symbol": "Delta_practical",
+      "candidate": "C_causal_b3",
+      "control": "A_incumbent",
+      "delta": 1.3061447348531252e-19,
+      "lcb_one_sided": -0.008627450980392156,
+      "ucb_one_sided": 0.008627450980392155,
+      "per_seed_delta": [
+        -0.002352941176470588,
+        0.0058823529411764705,
+        -0.0035294117647058825
+      ],
+      "bootstrap": {
+        "delta": 1.3061447348531252e-19,
+        "lcb_one_sided": -0.008627450980392156,
+        "ucb_one_sided": 0.008627450980392155,
+        "ci_two_sided_low": -0.010196078431372548,
+        "ci_two_sided_high": 0.010196078431372548,
+        "level": 0.95,
+        "iterations": 20000,
+        "seed": 816109261,
+        "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+        "quantile_convention": "sorted ascending; lower bound = stats[floor(alpha * B)], upper bound = stats[min(B - 1, floor((1 - alpha) * B))]; two-sided uses alpha/2 each side",
+        "stratum_convention": "resample n_h prompts with replacement WITHIN each stratum, independently across strata; the overall statistic is the size-weighted mean of the stratum means, which equals the unstratified mean when strata sizes are held at their observed values",
+        "n_prompts": 850,
+        "n_strata": 6,
+        "resamples": "prompts within strata; seeds are FIXED BLOCKS, not resampled",
+        "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered fresh recovery-seed checkpoint pairs; NOT a CI over hypothetical future recovery seeds"
+      }
+    }
+  },
+  "field_is_protocol_uniform": true,
+  "b1_vs_b3_is_a_post_c3_maintainer_decision": true,
+  "c4_is_not_started": true,
+  "verdict_under_the_c1_seed_fallback": "NO-GO",
+  "_verdict_is_seed_robust": true,
+  "consumed_inputs": {
+    "autoinit.v1.phase_c3.A_incumbent.217230555": {
+      "arm": "A_incumbent",
+      "seed": 217230555,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_c1_confirmation.json",
+        "sha256": "427067d587ab693fa2c4ef800c3c9a8252d6895d2af032cbc1c8222224bff7e1"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_per_sample.jsonl",
+        "sha256": "dbe917cfa75ed46f01621e4a4363f161f41d0ce64b8cf92df3a2b6c4ee3d7db9"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_generation_admission.json",
+        "sha256": "4a512faf3c0692ad2bd44dc4e7775011db3c8ec7afac61cf559a2f0b8b9de8fb"
+      },
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "counts": {
+        "n": 950,
+        "usable": 557,
+        "correct": 29,
+        "n_scorable": 850,
+        "usable_scorable": 538
+      }
+    },
+    "autoinit.v1.phase_c3.A_incumbent.1151307191": {
+      "arm": "A_incumbent",
+      "seed": 1151307191,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.1151307191_c1_confirmation.json",
+        "sha256": "9c83b8aa4b22ad322f321c422ae5e92c5eabb51d53c65e3f18159397bdb02e40"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.1151307191_per_sample.jsonl",
+        "sha256": "58383b3e778e21fe6eff12eea5677a808d1abb24926927a86a008abd82143eea"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.1151307191_generation_admission.json",
+        "sha256": "b75f2fb22d39e16cf21df1d14b509f63d1901f534378191cff490b87d253c626"
+      },
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "counts": {
+        "n": 950,
+        "usable": 565,
+        "correct": 37,
+        "n_scorable": 850,
+        "usable_scorable": 529
+      }
+    },
+    "autoinit.v1.phase_c3.A_incumbent.2045359208": {
+      "arm": "A_incumbent",
+      "seed": 2045359208,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.2045359208_c1_confirmation.json",
+        "sha256": "1e745d57f22ad5c9e39d6c44937b5d5e7744e0f276c4a6dd943a4e99f132c9e4"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.2045359208_per_sample.jsonl",
+        "sha256": "fb2e95351085362ba485fbfd4412216abae75697cb65613ae295c8c4d5603798"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.2045359208_generation_admission.json",
+        "sha256": "a851b20f80a2377399d3ab19262006cdbd129a32988c15b856844492d14b4045"
+      },
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "counts": {
+        "n": 950,
+        "usable": 504,
+        "correct": 37,
+        "n_scorable": 850,
+        "usable_scorable": 504
+      }
+    },
+    "autoinit.v1.phase_c3.B_causal_b1.217230555": {
+      "arm": "B_causal_b1",
+      "seed": 217230555,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.217230555_c1_confirmation.json",
+        "sha256": "69e2e41e49b8abea4afa3c8675707f292741e2f1c6c6d7d03768465bd6e8bd1d"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.217230555_per_sample.jsonl",
+        "sha256": "51b59c1f320c13d2aa66878a01f389008a9a7157cdc2afbe359e1d8f420993da"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.217230555_generation_admission.json",
+        "sha256": "0d974291c924ee96bf0da12d54ec53e56398347f8d1c858ce067bb76c1531cd8"
+      },
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "counts": {
+        "n": 950,
+        "usable": 585,
+        "correct": 33,
+        "n_scorable": 850,
+        "usable_scorable": 578
+      }
+    },
+    "autoinit.v1.phase_c3.B_causal_b1.1151307191": {
+      "arm": "B_causal_b1",
+      "seed": 1151307191,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.1151307191_c1_confirmation.json",
+        "sha256": "ef061f3a6c5b826f135561beae7d6b3e80b52d708621fe8e836a9acbcf5cce0c"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.1151307191_per_sample.jsonl",
+        "sha256": "40e0a4467aa86a0be4806dab787ccc25179da928c68efbce54785ac7037001f9"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.1151307191_generation_admission.json",
+        "sha256": "aa204f54ade5fdf350845377560f5467718bbe0e628e162d8516a11edfc8fe2c"
+      },
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "counts": {
+        "n": 950,
+        "usable": 538,
+        "correct": 23,
+        "n_scorable": 850,
+        "usable_scorable": 530
+      }
+    },
+    "autoinit.v1.phase_c3.B_causal_b1.2045359208": {
+      "arm": "B_causal_b1",
+      "seed": 2045359208,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.2045359208_c1_confirmation.json",
+        "sha256": "1fd577a6d9e6909e20ff11c5349e9bb4308ff366c0e201640f66825648fd3be9"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.2045359208_per_sample.jsonl",
+        "sha256": "d3543ccec59da8eda68a14f37c2b766208a2b87ac718b1edf9dba2425d06118e"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.2045359208_generation_admission.json",
+        "sha256": "2c7439df8be6405dbdc64011e3e9dd225e41d1b4c8a8460163258e6aaf67da95"
+      },
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "counts": {
+        "n": 950,
+        "usable": 575,
+        "correct": 42,
+        "n_scorable": 850,
+        "usable_scorable": 571
+      }
+    },
+    "autoinit.v1.phase_c3.C_causal_b3.217230555": {
+      "arm": "C_causal_b3",
+      "seed": 217230555,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.217230555_c1_confirmation.json",
+        "sha256": "2e0f537b274b997060013b4af7a9245a8818a336f29a72837907e74abe24147e"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.217230555_per_sample.jsonl",
+        "sha256": "b7bc29a9ababb0d78d55a64e747908aaff85b8ee1a89f920b941233e27d97351"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.217230555_generation_admission.json",
+        "sha256": "ea9415fc732e3dc7910a208245599797a7c04d0142bf8cf8e7eeeb5bd1e62c1c"
+      },
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "counts": {
+        "n": 950,
+        "usable": 546,
+        "correct": 27,
+        "n_scorable": 850,
+        "usable_scorable": 544
+      }
+    },
+    "autoinit.v1.phase_c3.C_causal_b3.1151307191": {
+      "arm": "C_causal_b3",
+      "seed": 1151307191,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.1151307191_c1_confirmation.json",
+        "sha256": "eb0ce415a4c5a0f72ff33131be1b417fd1a959a474a7a405bc568fed1ce37798"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.1151307191_per_sample.jsonl",
+        "sha256": "9769105033044c45de2a63d29b85d7f27dd4970e7df37ce32fc4ea16c9b9d329"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.1151307191_generation_admission.json",
+        "sha256": "84293005a80dc017a1743f292e611f302fb17cf1b0e2f7703ce80e4d1bb9a5f8"
+      },
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "counts": {
+        "n": 950,
+        "usable": 618,
+        "correct": 42,
+        "n_scorable": 850,
+        "usable_scorable": 562
+      }
+    },
+    "autoinit.v1.phase_c3.C_causal_b3.2045359208": {
+      "arm": "C_causal_b3",
+      "seed": 2045359208,
+      "scored_result": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.2045359208_c1_confirmation.json",
+        "sha256": "3aa95853a411e8f6db79cf1d2e214fe167f2e4f74d42b83f75260980a242ce93"
+      },
+      "per_sample": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.2045359208_per_sample.jsonl",
+        "sha256": "ad1a95285cd5128845e68e99da2c83ad7508ef83f5b6603f2594ca3a6649ab23"
+      },
+      "generation_admission": {
+        "path": "audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.2045359208_generation_admission.json",
+        "sha256": "cd0a3ce1c2dfb43010adf240d1acb060930473df6ba67dd1e7e09539a0f6ec3b"
+      },
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "counts": {
+        "n": 950,
+        "usable": 525,
+        "correct": 34,
+        "n_scorable": 850,
+        "usable_scorable": 524
+      }
+    }
+  },
+  "consumed_inputs_sha256": "bc2ee60708d3955864f6bd372a89f5f377eea2efb495a87d9ebc42040941cf96",
+  "evidence_root": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
+  "implementation": {
+    "commit": "2775efc9e4f0c0105a735c8252d8eb8b147f258c",
+    "tree_is_dirty": false,
+    "aggregator_path": "scripts/autoinit/aggregate_c3_stage_i.py",
+    "aggregator_sha256": "b134d5f99551cb07272b074c34a9966ffdefacb38f53f5834cc0b457ea48426a",
+    "session_module_sha256": "5d6aacf6f8fbe210f1702d4f27f3248f29611b77ab20dcf87e527e4fadcfa111",
+    "isolation_module_sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
+    "probe_results_module_sha256": "1a588ed88fa6bd9b0ed859418e4fc9e801d7b94b0297e0cb1cd594ffb46ed133"
+  }
+}

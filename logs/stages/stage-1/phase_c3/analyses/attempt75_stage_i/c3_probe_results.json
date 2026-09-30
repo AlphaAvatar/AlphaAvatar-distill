@@ -1,0 +1,2715 @@
+{
+  "schema": "aadistill.autoinit.c1_probe_results/v1",
+  "plan_hash": "3afe7af7995ab91a5a7e8c94e6dbcc9c751592e120a942746da46bbfeea7932c",
+  "seeds": [
+    217230555,
+    1151307191,
+    2045359208
+  ],
+  "arms": [
+    "A_incumbent",
+    "B_causal_b1",
+    "C_causal_b3"
+  ],
+  "n_probes": 9,
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "contract_id": "c1_confirmation_scoring",
+    "version": 1,
+    "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+    "files": [
+      {
+        "path": "scripts/autoinit/audit_tool_scoring.py",
+        "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+        "bytes": 10268
+      },
+      {
+        "path": "scripts/autoinit/score_c1_confirmation.py",
+        "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+        "bytes": 14964
+      },
+      {
+        "path": "scripts/autoinit/score_recovery_search.py",
+        "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+        "bytes": 22149
+      },
+      {
+        "path": "scripts/experiments/phase_c1/scoring.py",
+        "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+        "bytes": 12056
+      },
+      {
+        "path": "src/aadistill/data/tools.py",
+        "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+        "bytes": 6043
+      },
+      {
+        "path": "src/aadistill/data/verify.py",
+        "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+        "bytes": 7594
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      },
+      {
+        "path": "src/aadistill/initialization/planning/recovery.py",
+        "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+        "bytes": 110776
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+    "semantic_parent": "recovery_search_scoring@v2",
+    "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+    "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+  },
+  "battery": {
+    "artifact": "c1_confirmation_v1",
+    "role": "C1_CONFIRMATION",
+    "version": 1,
+    "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+    "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+    "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+    "n_prompts": 950,
+    "n_scorable_prompts": 850,
+    "has_metrics_key": false,
+    "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+    "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+  },
+  "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df",
+  "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+  "attested_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df",
+  "admission_rule": "no probe result is admitted unless the generation protocol observed from that probe's raw summaries is comparable to the preregistered C1 evaluation protocol; scoring runs only after that passes",
+  "probes": [
+    {
+      "probe_id": "autoinit.v1.phase_c3.A_incumbent.217230555",
+      "arm": "A_incumbent",
+      "seed": 217230555,
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.A_incumbent.217230555/run_completion.json",
+        "run_completion_sha256": "f4582bba946c57a8825e6c65c72f364e605b08ecf8166fdfb00e742900a22370",
+        "final_step": 1023,
+        "config_sha256": "27e923d54767275654c52a0256acacae40becda80c5cf0379d3ddf45eea8655f"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_c1_confirmation.json",
+      "result_sha256": "427067d587ab693fa2c4ef800c3c9a8252d6895d2af032cbc1c8222224bff7e1",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.217230555_per_sample.jsonl",
+      "per_sample_sha256": "dbe917cfa75ed46f01621e4a4363f161f41d0ce64b8cf92df3a2b6c4ee3d7db9",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/gsm8k.generations.jsonl",
+          "sha256": "b01afbe083a0560e2bbfe2751d4cd4b0fb08efae47fb9c7a6108ff1a86ee93f0",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/math_verified.generations.jsonl",
+          "sha256": "3034ac01db122be9744797ac2b0ad6d37bd8d24e6f4a3443519a3e3dea103d98",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/multihop.generations.jsonl",
+          "sha256": "a60bb525ad2ccc66e3bfa6d9595e0519ef00f04d3696e96c82c402458d83cbba",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/rag.generations.jsonl",
+          "sha256": "5601c39cea233396cf9e727d5f25e396e083eca6aa8cf82509f19c917b02c69d",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/knowledge.generations.jsonl",
+          "sha256": "fbc969781b66e29c968ebe8e2fbf46b1ee63191c9de26705f78338b1885afecb",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/tool.generations.jsonl",
+          "sha256": "348a17fd6374e50b40d393e51b25406be47f1f80300c5b71cfd6845247dd8c5f",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.217230555/code.generations.jsonl",
+          "sha256": "b3709daedb1654c0c92cf3c090d719ce5e3e6e9bf92294bbb04fe19c866c49a7",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 557,
+        "correct": 29,
+        "n_scorable": 850,
+        "usable_scorable": 538
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5863,
+        "correct_overall": 0.0341,
+        "correct_given_usable": 0.0539
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 107,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 107,
+          "usable_rollout_rate": 0.7133,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0093,
+          "scorable": true,
+          "non_empty": 0.7933,
+          "natural_termination": 0.7267,
+          "no_severe_repetition": 0.7267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7133,
+          "first_failure": {
+            "non_empty": 31,
+            "natural_termination": 10,
+            "protocol_valid": 2
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 72,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 72,
+          "usable_rollout_rate": 0.48,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.66,
+          "natural_termination": 0.62,
+          "no_severe_repetition": 0.62,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.48,
+          "first_failure": {
+            "non_empty": 51,
+            "protocol_valid": 21,
+            "natural_termination": 6
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 113,
+          "correct": 11,
+          "n_scorable": 150,
+          "usable_scorable": 113,
+          "usable_rollout_rate": 0.7533,
+          "correct_overall": 0.0733,
+          "correct_given_usable": 0.0973,
+          "scorable": true,
+          "non_empty": 0.7733,
+          "natural_termination": 0.7533,
+          "no_severe_repetition": 0.7533,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7533,
+          "first_failure": {
+            "non_empty": 34,
+            "natural_termination": 3
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 140,
+          "correct": 10,
+          "n_scorable": 150,
+          "usable_scorable": 140,
+          "usable_rollout_rate": 0.9333,
+          "correct_overall": 0.0667,
+          "correct_given_usable": 0.0714,
+          "scorable": true,
+          "non_empty": 0.9333,
+          "natural_termination": 0.94,
+          "no_severe_repetition": 0.94,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.9333,
+          "first_failure": {
+            "non_empty": 10
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 39,
+          "correct": 4,
+          "n_scorable": 150,
+          "usable_scorable": 39,
+          "usable_rollout_rate": 0.26,
+          "correct_overall": 0.0267,
+          "correct_given_usable": 0.1026,
+          "scorable": true,
+          "non_empty": 0.88,
+          "natural_termination": 0.8467,
+          "no_severe_repetition": 0.8467,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.26,
+          "first_failure": {
+            "protocol_valid": 88,
+            "non_empty": 18,
+            "natural_termination": 5
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 67,
+          "correct": 3,
+          "n_scorable": 100,
+          "usable_scorable": 67,
+          "usable_rollout_rate": 0.67,
+          "correct_overall": 0.03,
+          "correct_given_usable": 0.0448,
+          "scorable": true,
+          "non_empty": 0.92,
+          "natural_termination": 0.88,
+          "no_severe_repetition": 0.88,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.88,
+          "first_failure": {
+            "tool_not_structurally_executable": 21,
+            "non_empty": 8,
+            "natural_termination": 4
+          },
+          "tool_structurally_executable": 0.67,
+          "tool_call_emitted": 0.82,
+          "tool_call_parsed": 0.79,
+          "tool_name_valid": 0.67,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.A_incumbent.1151307191",
+      "arm": "A_incumbent",
+      "seed": 1151307191,
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/run_completion.json",
+        "run_completion_sha256": "faf0d001d990edb776b6c6957168dccb0a0837aba38e14ae20846009794eae0f",
+        "final_step": 1023,
+        "config_sha256": "9f34f1e9ca5edd9fa4f5fb70a5e5b428e0edb88698079fed7f630bf8985330b5"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.1151307191_c1_confirmation.json",
+      "result_sha256": "9c83b8aa4b22ad322f321c422ae5e92c5eabb51d53c65e3f18159397bdb02e40",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.1151307191_per_sample.jsonl",
+      "per_sample_sha256": "58383b3e778e21fe6eff12eea5677a808d1abb24926927a86a008abd82143eea",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/gsm8k.generations.jsonl",
+          "sha256": "0bfdf7417cd1e5b73300923fb16ea55d7bbb6ebcc76be8e5b96ba613426f6375",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/math_verified.generations.jsonl",
+          "sha256": "180ee3de43aea2f4deb4c1deb2bf9db117d8b7a5b44f3e2298100557ed08b139",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/multihop.generations.jsonl",
+          "sha256": "ec2e585b552ed613140eb01bfc59f914791c907b5db77abb6f28c7dc8c9996b4",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/rag.generations.jsonl",
+          "sha256": "f5a9730bab647c22708b17422bcc4fde957e253f8db7b43113ba9bad7e13e3f4",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/knowledge.generations.jsonl",
+          "sha256": "dc3f4779c102f0d0e759e8b82dfab93e673749913f0dad53784e2fcd8076a73b",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/tool.generations.jsonl",
+          "sha256": "379803cc60d10f50c8e2a98dfee0059ce321bf18c4bfa82cdc266546e4151590",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.1151307191/code.generations.jsonl",
+          "sha256": "a6208e3a4b748ab016fc35298d55ea68893ada2cd6bdeffd01e2719c66c85775",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 565,
+        "correct": 37,
+        "n_scorable": 850,
+        "usable_scorable": 529
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5947,
+        "correct_overall": 0.0435,
+        "correct_given_usable": 0.0699
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 111,
+          "correct": 2,
+          "n_scorable": 150,
+          "usable_scorable": 111,
+          "usable_rollout_rate": 0.74,
+          "correct_overall": 0.0133,
+          "correct_given_usable": 0.018,
+          "scorable": true,
+          "non_empty": 0.7933,
+          "natural_termination": 0.7467,
+          "no_severe_repetition": 0.7467,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.74,
+          "first_failure": {
+            "non_empty": 31,
+            "natural_termination": 7,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 69,
+          "correct": 3,
+          "n_scorable": 150,
+          "usable_scorable": 69,
+          "usable_rollout_rate": 0.46,
+          "correct_overall": 0.02,
+          "correct_given_usable": 0.0435,
+          "scorable": true,
+          "non_empty": 0.6333,
+          "natural_termination": 0.5667,
+          "no_severe_repetition": 0.5667,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.46,
+          "first_failure": {
+            "non_empty": 55,
+            "protocol_valid": 16,
+            "natural_termination": 10
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 121,
+          "correct": 13,
+          "n_scorable": 150,
+          "usable_scorable": 121,
+          "usable_rollout_rate": 0.8067,
+          "correct_overall": 0.0867,
+          "correct_given_usable": 0.1074,
+          "scorable": true,
+          "non_empty": 0.8133,
+          "natural_termination": 0.8133,
+          "no_severe_repetition": 0.8133,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.8067,
+          "first_failure": {
+            "non_empty": 28,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 138,
+          "correct": 10,
+          "n_scorable": 150,
+          "usable_scorable": 138,
+          "usable_rollout_rate": 0.92,
+          "correct_overall": 0.0667,
+          "correct_given_usable": 0.0725,
+          "scorable": true,
+          "non_empty": 0.92,
+          "natural_termination": 0.92,
+          "no_severe_repetition": 0.92,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.92,
+          "first_failure": {
+            "non_empty": 12
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 22,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 22,
+          "usable_rollout_rate": 0.1467,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0455,
+          "scorable": true,
+          "non_empty": 0.9267,
+          "natural_termination": 0.92,
+          "no_severe_repetition": 0.92,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.1467,
+          "first_failure": {
+            "protocol_valid": 116,
+            "non_empty": 11,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 68,
+          "correct": 8,
+          "n_scorable": 100,
+          "usable_scorable": 68,
+          "usable_rollout_rate": 0.68,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.1176,
+          "scorable": true,
+          "non_empty": 0.97,
+          "natural_termination": 0.95,
+          "no_severe_repetition": 0.95,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.95,
+          "first_failure": {
+            "tool_not_structurally_executable": 27,
+            "non_empty": 3,
+            "natural_termination": 2
+          },
+          "tool_structurally_executable": 0.68,
+          "tool_call_emitted": 0.93,
+          "tool_call_parsed": 0.83,
+          "tool_name_valid": 0.68,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.A_incumbent.2045359208",
+      "arm": "A_incumbent",
+      "seed": 2045359208,
+      "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/run_completion.json",
+        "run_completion_sha256": "1d5ae5b69f54f0a06567866f661916b40d7d90fbe1476899c21b5b728b13b460",
+        "final_step": 1023,
+        "config_sha256": "62209118900ccff1119b3fcf35659e1fa31ad534e0327732d3f6591c0951f6eb"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.2045359208_c1_confirmation.json",
+      "result_sha256": "1e745d57f22ad5c9e39d6c44937b5d5e7744e0f276c4a6dd943a4e99f132c9e4",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.A_incumbent.2045359208_per_sample.jsonl",
+      "per_sample_sha256": "fb2e95351085362ba485fbfd4412216abae75697cb65613ae295c8c4d5603798",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/gsm8k.generations.jsonl",
+          "sha256": "dd2704ddc55284633753703558d8df5af4f2f6c8c5ca990492356d095d772ed1",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/math_verified.generations.jsonl",
+          "sha256": "bfe337c5bada1659e87df9c03f61cc87cf13b1ac88b684aaa2aad639e6e9db07",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/multihop.generations.jsonl",
+          "sha256": "1fe9d04bda4c14f3e8aafa25b7be84f940babd5cd7473ed69ab4caffa73c1b75",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/rag.generations.jsonl",
+          "sha256": "20e863e5c876c5242b3109f5d30c5f50b15ed515f6e3741d676e92ae802afd5c",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/knowledge.generations.jsonl",
+          "sha256": "f66ea3dfb4028189f811d7d86db4ad18098f16b72483fc9b30a1e0e6f4f3b00e",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/tool.generations.jsonl",
+          "sha256": "892c5f29c80543f2a9605822a51db22d48b52629398db7d325c86be786267ff0",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.A_incumbent.2045359208/code.generations.jsonl",
+          "sha256": "5c691c713c350f40d9894d1cc9d2fe10ff3fdb3f37b64cef64582962074bfe89",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 504,
+        "correct": 37,
+        "n_scorable": 850,
+        "usable_scorable": 504
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5305,
+        "correct_overall": 0.0435,
+        "correct_given_usable": 0.0734
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 80,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 80,
+          "usable_rollout_rate": 0.5333,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.6467,
+          "natural_termination": 0.5333,
+          "no_severe_repetition": 0.5333,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.5333,
+          "first_failure": {
+            "non_empty": 53,
+            "natural_termination": 17
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 69,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 69,
+          "usable_rollout_rate": 0.46,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0145,
+          "scorable": true,
+          "non_empty": 0.6,
+          "natural_termination": 0.5267,
+          "no_severe_repetition": 0.5267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.46,
+          "first_failure": {
+            "non_empty": 60,
+            "natural_termination": 11,
+            "protocol_valid": 10
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 106,
+          "correct": 13,
+          "n_scorable": 150,
+          "usable_scorable": 106,
+          "usable_rollout_rate": 0.7067,
+          "correct_overall": 0.0867,
+          "correct_given_usable": 0.1226,
+          "scorable": true,
+          "non_empty": 0.72,
+          "natural_termination": 0.72,
+          "no_severe_repetition": 0.72,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7067,
+          "first_failure": {
+            "non_empty": 42,
+            "natural_termination": 1,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 137,
+          "correct": 13,
+          "n_scorable": 150,
+          "usable_scorable": 137,
+          "usable_rollout_rate": 0.9133,
+          "correct_overall": 0.0867,
+          "correct_given_usable": 0.0949,
+          "scorable": true,
+          "non_empty": 0.92,
+          "natural_termination": 0.92,
+          "no_severe_repetition": 0.92,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.9133,
+          "first_failure": {
+            "non_empty": 12,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 41,
+          "correct": 3,
+          "n_scorable": 150,
+          "usable_scorable": 41,
+          "usable_rollout_rate": 0.2733,
+          "correct_overall": 0.02,
+          "correct_given_usable": 0.0732,
+          "scorable": true,
+          "non_empty": 0.7933,
+          "natural_termination": 0.7267,
+          "no_severe_repetition": 0.7267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.2733,
+          "first_failure": {
+            "protocol_valid": 68,
+            "non_empty": 31,
+            "natural_termination": 10
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 71,
+          "correct": 7,
+          "n_scorable": 100,
+          "usable_scorable": 71,
+          "usable_rollout_rate": 0.71,
+          "correct_overall": 0.07,
+          "correct_given_usable": 0.0986,
+          "scorable": true,
+          "non_empty": 0.94,
+          "natural_termination": 0.93,
+          "no_severe_repetition": 0.93,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.93,
+          "first_failure": {
+            "tool_not_structurally_executable": 22,
+            "non_empty": 6,
+            "natural_termination": 1
+          },
+          "tool_structurally_executable": 0.71,
+          "tool_call_emitted": 0.92,
+          "tool_call_parsed": 0.84,
+          "tool_name_valid": 0.71,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.B_causal_b1.217230555",
+      "arm": "B_causal_b1",
+      "seed": 217230555,
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/run_completion.json",
+        "run_completion_sha256": "a45f13bc7fe15840f78162e816aea4f901d63b63a8286b6c8a62fd273ba02841",
+        "final_step": 1023,
+        "config_sha256": "61cd7f52fa7abb5c5f4f22f7f6a09d27a287f277edadf952ac7a0114204fe231"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.217230555_c1_confirmation.json",
+      "result_sha256": "69e2e41e49b8abea4afa3c8675707f292741e2f1c6c6d7d03768465bd6e8bd1d",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.217230555_per_sample.jsonl",
+      "per_sample_sha256": "51b59c1f320c13d2aa66878a01f389008a9a7157cdc2afbe359e1d8f420993da",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/gsm8k.generations.jsonl",
+          "sha256": "dce4b99a08f189e39ec3e7def582f562b164424142a53cbe0fc72bd9f69181f8",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/math_verified.generations.jsonl",
+          "sha256": "6e57883af67f7ea708d95c9756b7ed7e844f319113ed4f852246aac4ff0bfad2",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/multihop.generations.jsonl",
+          "sha256": "5cb96cd10e003528afe815c13eec893072b02d9c5b6ff5381643d8e9509f1bac",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/rag.generations.jsonl",
+          "sha256": "7f2a36096106b241374272fab0d8a148b6bcea54802d1207b0a36fb8f4e3120c",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/knowledge.generations.jsonl",
+          "sha256": "0b056ad3002860c1cf7d6c965ec2a64ee789e54b5d66f8504a0c912eb0843c72",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/tool.generations.jsonl",
+          "sha256": "bd2d80cb4ef6f9d8121bd1622dd3d76c07f74d6d53fcaf2edf1993f2357cc074",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.217230555/code.generations.jsonl",
+          "sha256": "e61a7f92df4bdd94c77776116c55b5144875f926602e93e598824544dbf92cf5",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 585,
+        "correct": 33,
+        "n_scorable": 850,
+        "usable_scorable": 578
+      },
+      "rates": {
+        "usable_rollout_rate": 0.6158,
+        "correct_overall": 0.0388,
+        "correct_given_usable": 0.0571
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 110,
+          "correct": 4,
+          "n_scorable": 150,
+          "usable_scorable": 110,
+          "usable_rollout_rate": 0.7333,
+          "correct_overall": 0.0267,
+          "correct_given_usable": 0.0364,
+          "scorable": true,
+          "non_empty": 0.7933,
+          "natural_termination": 0.7333,
+          "no_severe_repetition": 0.7333,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7333,
+          "first_failure": {
+            "non_empty": 31,
+            "natural_termination": 9
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 63,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 63,
+          "usable_rollout_rate": 0.42,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.5867,
+          "natural_termination": 0.5133,
+          "no_severe_repetition": 0.5133,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.42,
+          "first_failure": {
+            "non_empty": 62,
+            "protocol_valid": 14,
+            "natural_termination": 11
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 122,
+          "correct": 9,
+          "n_scorable": 150,
+          "usable_scorable": 122,
+          "usable_rollout_rate": 0.8133,
+          "correct_overall": 0.06,
+          "correct_given_usable": 0.0738,
+          "scorable": true,
+          "non_empty": 0.8267,
+          "natural_termination": 0.82,
+          "no_severe_repetition": 0.82,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.8133,
+          "first_failure": {
+            "non_empty": 26,
+            "natural_termination": 1,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 139,
+          "correct": 8,
+          "n_scorable": 150,
+          "usable_scorable": 139,
+          "usable_rollout_rate": 0.9267,
+          "correct_overall": 0.0533,
+          "correct_given_usable": 0.0576,
+          "scorable": true,
+          "non_empty": 0.9267,
+          "natural_termination": 0.9267,
+          "no_severe_repetition": 0.9267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.9267,
+          "first_failure": {
+            "non_empty": 11
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 95,
+          "correct": 6,
+          "n_scorable": 150,
+          "usable_scorable": 95,
+          "usable_rollout_rate": 0.6333,
+          "correct_overall": 0.04,
+          "correct_given_usable": 0.0632,
+          "scorable": true,
+          "non_empty": 0.82,
+          "natural_termination": 0.78,
+          "no_severe_repetition": 0.78,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.6333,
+          "first_failure": {
+            "non_empty": 27,
+            "protocol_valid": 22,
+            "natural_termination": 6
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 49,
+          "correct": 6,
+          "n_scorable": 100,
+          "usable_scorable": 49,
+          "usable_rollout_rate": 0.49,
+          "correct_overall": 0.06,
+          "correct_given_usable": 0.1224,
+          "scorable": true,
+          "non_empty": 0.84,
+          "natural_termination": 0.83,
+          "no_severe_repetition": 0.83,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.83,
+          "first_failure": {
+            "tool_not_structurally_executable": 34,
+            "non_empty": 16,
+            "natural_termination": 1
+          },
+          "tool_structurally_executable": 0.49,
+          "tool_call_emitted": 0.73,
+          "tool_call_parsed": 0.63,
+          "tool_name_valid": 0.49,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.B_causal_b1.1151307191",
+      "arm": "B_causal_b1",
+      "seed": 1151307191,
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/run_completion.json",
+        "run_completion_sha256": "b3db215e809099c2f0d5a4b462a33d179477fdb09841c903aea0eecb8ff4d2d8",
+        "final_step": 1023,
+        "config_sha256": "56b6593dfc6d377030b92de20f8a329f56bc369e5e2860081e06ca6812f235f1"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.1151307191_c1_confirmation.json",
+      "result_sha256": "ef061f3a6c5b826f135561beae7d6b3e80b52d708621fe8e836a9acbcf5cce0c",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.1151307191_per_sample.jsonl",
+      "per_sample_sha256": "40e0a4467aa86a0be4806dab787ccc25179da928c68efbce54785ac7037001f9",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/gsm8k.generations.jsonl",
+          "sha256": "e57c5c6d4f4fa15292425c3fbe86300eebcd544ba20f88d6dc5e6eb250fa3c08",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/math_verified.generations.jsonl",
+          "sha256": "cfef2c931e9f4cca5d10e1bff6a5e22078ec8b8de0551bd69048627763b58657",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/multihop.generations.jsonl",
+          "sha256": "802347c46be06f08a73558eab06d531dc32310becad9c4b6f3139022931ded10",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/rag.generations.jsonl",
+          "sha256": "9ca6f775c2daa3945e0986e8e61ee7d8b2e35bb41000d25aedd53a953a62c9a1",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/knowledge.generations.jsonl",
+          "sha256": "a8ba72cb4aa29162d5076016eca73cf2b993496f0eb06269e5a25c53316d884e",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/tool.generations.jsonl",
+          "sha256": "5bf7c800a66dd700f5ddc2050a15dfa9395bb55947e4a41e7f4c11c36c3b27d5",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.1151307191/code.generations.jsonl",
+          "sha256": "df3390d697e5ddc3b977d85fc0ffdec9474f8b6c31a6349a446be866d031a4ff",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 538,
+        "correct": 23,
+        "n_scorable": 850,
+        "usable_scorable": 530
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5663,
+        "correct_overall": 0.0271,
+        "correct_given_usable": 0.0434
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 104,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 104,
+          "usable_rollout_rate": 0.6933,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0096,
+          "scorable": true,
+          "non_empty": 0.7267,
+          "natural_termination": 0.7,
+          "no_severe_repetition": 0.7,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.6933,
+          "first_failure": {
+            "non_empty": 41,
+            "natural_termination": 4,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 52,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 52,
+          "usable_rollout_rate": 0.3467,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.6533,
+          "natural_termination": 0.58,
+          "no_severe_repetition": 0.58,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.3467,
+          "first_failure": {
+            "non_empty": 52,
+            "protocol_valid": 35,
+            "natural_termination": 11
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 117,
+          "correct": 8,
+          "n_scorable": 150,
+          "usable_scorable": 117,
+          "usable_rollout_rate": 0.78,
+          "correct_overall": 0.0533,
+          "correct_given_usable": 0.0684,
+          "scorable": true,
+          "non_empty": 0.8,
+          "natural_termination": 0.7867,
+          "no_severe_repetition": 0.7867,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.78,
+          "first_failure": {
+            "non_empty": 30,
+            "natural_termination": 2,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 132,
+          "correct": 6,
+          "n_scorable": 150,
+          "usable_scorable": 132,
+          "usable_rollout_rate": 0.88,
+          "correct_overall": 0.04,
+          "correct_given_usable": 0.0455,
+          "scorable": true,
+          "non_empty": 0.9267,
+          "natural_termination": 0.9267,
+          "no_severe_repetition": 0.9267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.88,
+          "first_failure": {
+            "non_empty": 11,
+            "protocol_valid": 6,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 53,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 53,
+          "usable_rollout_rate": 0.3533,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0189,
+          "scorable": true,
+          "non_empty": 0.88,
+          "natural_termination": 0.8667,
+          "no_severe_repetition": 0.8667,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.3533,
+          "first_failure": {
+            "protocol_valid": 77,
+            "non_empty": 18,
+            "natural_termination": 2
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 72,
+          "correct": 7,
+          "n_scorable": 100,
+          "usable_scorable": 72,
+          "usable_rollout_rate": 0.72,
+          "correct_overall": 0.07,
+          "correct_given_usable": 0.0972,
+          "scorable": true,
+          "non_empty": 0.99,
+          "natural_termination": 0.97,
+          "no_severe_repetition": 0.97,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.97,
+          "first_failure": {
+            "tool_not_structurally_executable": 25,
+            "natural_termination": 2,
+            "non_empty": 1
+          },
+          "tool_structurally_executable": 0.72,
+          "tool_call_emitted": 0.97,
+          "tool_call_parsed": 0.86,
+          "tool_name_valid": 0.72,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.B_causal_b1.2045359208",
+      "arm": "B_causal_b1",
+      "seed": 2045359208,
+      "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/run_completion.json",
+        "run_completion_sha256": "30075d6eef28c36e00cdcde3b456717dfb4213cfdfbac2f37944cf07632f248d",
+        "final_step": 1023,
+        "config_sha256": "473503011931549a991e9cde118cc3333263ef9eadeeaea352aa74489c582c3c"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.2045359208_c1_confirmation.json",
+      "result_sha256": "1fd577a6d9e6909e20ff11c5349e9bb4308ff366c0e201640f66825648fd3be9",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.B_causal_b1.2045359208_per_sample.jsonl",
+      "per_sample_sha256": "d3543ccec59da8eda68a14f37c2b766208a2b87ac718b1edf9dba2425d06118e",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/gsm8k.generations.jsonl",
+          "sha256": "e83178c39961158263111b00b717464447e31be7ecd04415221bb2dedd6e6f63",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/math_verified.generations.jsonl",
+          "sha256": "8f00ef7cfc9b4f7b6dd4afe8365890270c4202948efe0586e50bcf13da1cda39",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/multihop.generations.jsonl",
+          "sha256": "4117904d310cc9310bddc24f2636b1a2a88bc0ad47bf50097bfbed5ceee72a8d",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/rag.generations.jsonl",
+          "sha256": "e8dbd0fb35c7d76199643890ccca7e6334678cb71028efa0c385ae5c07e3eca6",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/knowledge.generations.jsonl",
+          "sha256": "ffcf643c75ba82afec54bb711bc549f74a95f6f34ed42442d1b0ccc8bfb5e2b5",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/tool.generations.jsonl",
+          "sha256": "a3775d30925fe74bc0d64dbc7ac9a7578cbc90b60b881197958bc32a9962cc18",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.B_causal_b1.2045359208/code.generations.jsonl",
+          "sha256": "099346cb21a8fade569e1e1fcada7e3b821c2750f89422eb813a64ae0dc23ce2",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 575,
+        "correct": 42,
+        "n_scorable": 850,
+        "usable_scorable": 571
+      },
+      "rates": {
+        "usable_rollout_rate": 0.6053,
+        "correct_overall": 0.0494,
+        "correct_given_usable": 0.0736
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 102,
+          "correct": 4,
+          "n_scorable": 150,
+          "usable_scorable": 102,
+          "usable_rollout_rate": 0.68,
+          "correct_overall": 0.0267,
+          "correct_given_usable": 0.0392,
+          "scorable": true,
+          "non_empty": 0.7867,
+          "natural_termination": 0.6933,
+          "no_severe_repetition": 0.6933,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.68,
+          "first_failure": {
+            "non_empty": 32,
+            "natural_termination": 14,
+            "protocol_valid": 2
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 56,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 56,
+          "usable_rollout_rate": 0.3733,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.5667,
+          "natural_termination": 0.5,
+          "no_severe_repetition": 0.5,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.3733,
+          "first_failure": {
+            "non_empty": 65,
+            "protocol_valid": 18,
+            "natural_termination": 11
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 103,
+          "correct": 11,
+          "n_scorable": 150,
+          "usable_scorable": 103,
+          "usable_rollout_rate": 0.6867,
+          "correct_overall": 0.0733,
+          "correct_given_usable": 0.1068,
+          "scorable": true,
+          "non_empty": 0.7133,
+          "natural_termination": 0.7,
+          "no_severe_repetition": 0.7,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.6867,
+          "first_failure": {
+            "non_empty": 43,
+            "natural_termination": 3,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 146,
+          "correct": 13,
+          "n_scorable": 150,
+          "usable_scorable": 146,
+          "usable_rollout_rate": 0.9733,
+          "correct_overall": 0.0867,
+          "correct_given_usable": 0.089,
+          "scorable": true,
+          "non_empty": 0.9733,
+          "natural_termination": 0.98,
+          "no_severe_repetition": 0.98,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.9733,
+          "first_failure": {
+            "non_empty": 4
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 96,
+          "correct": 6,
+          "n_scorable": 150,
+          "usable_scorable": 96,
+          "usable_rollout_rate": 0.64,
+          "correct_overall": 0.04,
+          "correct_given_usable": 0.0625,
+          "scorable": true,
+          "non_empty": 0.9533,
+          "natural_termination": 0.9533,
+          "no_severe_repetition": 0.9533,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.64,
+          "first_failure": {
+            "protocol_valid": 47,
+            "non_empty": 7
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 68,
+          "correct": 8,
+          "n_scorable": 100,
+          "usable_scorable": 68,
+          "usable_rollout_rate": 0.68,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.1176,
+          "scorable": true,
+          "non_empty": 0.96,
+          "natural_termination": 0.96,
+          "no_severe_repetition": 0.96,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.96,
+          "first_failure": {
+            "tool_not_structurally_executable": 28,
+            "non_empty": 4
+          },
+          "tool_structurally_executable": 0.68,
+          "tool_call_emitted": 0.95,
+          "tool_call_parsed": 0.83,
+          "tool_name_valid": 0.68,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.C_causal_b3.217230555",
+      "arm": "C_causal_b3",
+      "seed": 217230555,
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/run_completion.json",
+        "run_completion_sha256": "75e33584a07311f3bf4cf4ed970aa9baf25f1fa3fa75c3c08d7cf9e2a97ea148",
+        "final_step": 1023,
+        "config_sha256": "a11e9ae7e8a0951d53cbccff0c77ef2da149c128a8b30cedc88d1a9fe86e0505"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.217230555_c1_confirmation.json",
+      "result_sha256": "2e0f537b274b997060013b4af7a9245a8818a336f29a72837907e74abe24147e",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.217230555_per_sample.jsonl",
+      "per_sample_sha256": "b7bc29a9ababb0d78d55a64e747908aaff85b8ee1a89f920b941233e27d97351",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/gsm8k.generations.jsonl",
+          "sha256": "0ac34b63ce3c293069fe7d31694474f46bc51ab526d7534e1ea93deba92e64d8",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/math_verified.generations.jsonl",
+          "sha256": "72dc2bf3b4f3738212d4ac768acb40725ce1c39dc1387f44d4ed76f69854104e",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/multihop.generations.jsonl",
+          "sha256": "3cec49f60dd4d793b0b27e16dbfc374647cc540ccf0fbc57230dfb93eacaaf8b",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/rag.generations.jsonl",
+          "sha256": "c4f3dec972d3729e95b36591caad4271b7ce033d1212a49fda25d7a2bad28ee9",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/knowledge.generations.jsonl",
+          "sha256": "cf4093fccfa38e6d92d89983af7a9fa0288a4985519f35e064f04f2dbaee0d0e",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/tool.generations.jsonl",
+          "sha256": "4c5eade70f902c3e12e7c273b73dfba977a7b982bb4bedd32ecada9f3c3ce2f4",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.217230555/code.generations.jsonl",
+          "sha256": "39779f7488f288c94d834f833a60a2e7e8f7c3de24cadd789f055cf25fd4e310",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 546,
+        "correct": 27,
+        "n_scorable": 850,
+        "usable_scorable": 544
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5747,
+        "correct_overall": 0.0318,
+        "correct_given_usable": 0.0496
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 99,
+          "correct": 3,
+          "n_scorable": 150,
+          "usable_scorable": 99,
+          "usable_rollout_rate": 0.66,
+          "correct_overall": 0.02,
+          "correct_given_usable": 0.0303,
+          "scorable": true,
+          "non_empty": 0.7333,
+          "natural_termination": 0.66,
+          "no_severe_repetition": 0.66,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.66,
+          "first_failure": {
+            "non_empty": 40,
+            "natural_termination": 11
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 53,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 53,
+          "usable_rollout_rate": 0.3533,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0189,
+          "scorable": true,
+          "non_empty": 0.4667,
+          "natural_termination": 0.4267,
+          "no_severe_repetition": 0.4267,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.3533,
+          "first_failure": {
+            "non_empty": 80,
+            "protocol_valid": 11,
+            "natural_termination": 6
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 121,
+          "correct": 9,
+          "n_scorable": 150,
+          "usable_scorable": 121,
+          "usable_rollout_rate": 0.8067,
+          "correct_overall": 0.06,
+          "correct_given_usable": 0.0744,
+          "scorable": true,
+          "non_empty": 0.84,
+          "natural_termination": 0.8333,
+          "no_severe_repetition": 0.8333,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.8067,
+          "first_failure": {
+            "non_empty": 24,
+            "protocol_valid": 4,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 131,
+          "correct": 8,
+          "n_scorable": 150,
+          "usable_scorable": 131,
+          "usable_rollout_rate": 0.8733,
+          "correct_overall": 0.0533,
+          "correct_given_usable": 0.0611,
+          "scorable": true,
+          "non_empty": 0.8867,
+          "natural_termination": 0.88,
+          "no_severe_repetition": 0.88,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.8733,
+          "first_failure": {
+            "non_empty": 17,
+            "protocol_valid": 1,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 80,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 80,
+          "usable_rollout_rate": 0.5333,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0125,
+          "scorable": true,
+          "non_empty": 0.7,
+          "natural_termination": 0.6667,
+          "no_severe_repetition": 0.6667,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.5333,
+          "first_failure": {
+            "non_empty": 45,
+            "protocol_valid": 20,
+            "natural_termination": 5
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 60,
+          "correct": 5,
+          "n_scorable": 100,
+          "usable_scorable": 60,
+          "usable_rollout_rate": 0.6,
+          "correct_overall": 0.05,
+          "correct_given_usable": 0.0833,
+          "scorable": true,
+          "non_empty": 0.88,
+          "natural_termination": 0.87,
+          "no_severe_repetition": 0.87,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.86,
+          "first_failure": {
+            "tool_not_structurally_executable": 26,
+            "non_empty": 12,
+            "protocol_valid": 1,
+            "natural_termination": 1
+          },
+          "tool_structurally_executable": 0.6,
+          "tool_call_emitted": 0.84,
+          "tool_call_parsed": 0.69,
+          "tool_name_valid": 0.6,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.C_causal_b3.1151307191",
+      "arm": "C_causal_b3",
+      "seed": 1151307191,
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/run_completion.json",
+        "run_completion_sha256": "065c4b6ff6fea23f93f9743f3e51e753d30232995a16b39961aa78796c013967",
+        "final_step": 1023,
+        "config_sha256": "2362c272b812463a456d2b92c989c1ed4bad69e9f78d298d1e509f1171ceee02"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.1151307191_c1_confirmation.json",
+      "result_sha256": "eb0ce415a4c5a0f72ff33131be1b417fd1a959a474a7a405bc568fed1ce37798",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.1151307191_per_sample.jsonl",
+      "per_sample_sha256": "9769105033044c45de2a63d29b85d7f27dd4970e7df37ce32fc4ea16c9b9d329",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/gsm8k.generations.jsonl",
+          "sha256": "ce955ac36988c1bca0438d072a32d8b707c981a42a1bcfe07d10b7715d0a42d2",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/math_verified.generations.jsonl",
+          "sha256": "a8b1b535b549a48522c677e7f2339957a048e4db63b942cf010807f2d2de3e26",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/multihop.generations.jsonl",
+          "sha256": "df7775bf950c6306f4f3efd5be42994181bf2e9349e162dd49d14c3111319822",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/rag.generations.jsonl",
+          "sha256": "3f16fd7faefc3a0056784d9380bc15269327f246292f351960d98c0abb1c1c2f",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/knowledge.generations.jsonl",
+          "sha256": "a1c0dc8b5c44b40d98ab5414fdfe3c5b0305d56d8b0361aab6fed990fd81b4af",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/tool.generations.jsonl",
+          "sha256": "1ba22c90dab22dd44fd43c76ceb97c5eec51e5d9bea9aec7e01257403bdc4bca",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.1151307191/code.generations.jsonl",
+          "sha256": "34a9f4ef15e76f1f37600372bc6f87e352d4061f4f0d00289f84731d891ba2ea",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 618,
+        "correct": 42,
+        "n_scorable": 850,
+        "usable_scorable": 562
+      },
+      "rates": {
+        "usable_rollout_rate": 0.6505,
+        "correct_overall": 0.0494,
+        "correct_given_usable": 0.0747
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 106,
+          "correct": 7,
+          "n_scorable": 150,
+          "usable_scorable": 106,
+          "usable_rollout_rate": 0.7067,
+          "correct_overall": 0.0467,
+          "correct_given_usable": 0.066,
+          "scorable": true,
+          "non_empty": 0.7733,
+          "natural_termination": 0.7133,
+          "no_severe_repetition": 0.7133,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7067,
+          "first_failure": {
+            "non_empty": 34,
+            "natural_termination": 9,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 79,
+          "correct": 0,
+          "n_scorable": 150,
+          "usable_scorable": 79,
+          "usable_rollout_rate": 0.5267,
+          "correct_overall": 0.0,
+          "correct_given_usable": 0.0,
+          "scorable": true,
+          "non_empty": 0.7533,
+          "natural_termination": 0.7,
+          "no_severe_repetition": 0.7,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.5267,
+          "first_failure": {
+            "non_empty": 37,
+            "protocol_valid": 26,
+            "natural_termination": 8
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 117,
+          "correct": 12,
+          "n_scorable": 150,
+          "usable_scorable": 117,
+          "usable_rollout_rate": 0.78,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.1026,
+          "scorable": true,
+          "non_empty": 0.8,
+          "natural_termination": 0.7933,
+          "no_severe_repetition": 0.7933,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.78,
+          "first_failure": {
+            "non_empty": 30,
+            "protocol_valid": 2,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 134,
+          "correct": 12,
+          "n_scorable": 150,
+          "usable_scorable": 134,
+          "usable_rollout_rate": 0.8933,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.0896,
+          "scorable": true,
+          "non_empty": 0.9067,
+          "natural_termination": 0.9067,
+          "no_severe_repetition": 0.9067,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.8933,
+          "first_failure": {
+            "non_empty": 14,
+            "protocol_valid": 1,
+            "natural_termination": 1
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 60,
+          "correct": 3,
+          "n_scorable": 150,
+          "usable_scorable": 60,
+          "usable_rollout_rate": 0.4,
+          "correct_overall": 0.02,
+          "correct_given_usable": 0.05,
+          "scorable": true,
+          "non_empty": 0.8533,
+          "natural_termination": 0.78,
+          "no_severe_repetition": 0.78,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.4,
+          "first_failure": {
+            "protocol_valid": 56,
+            "non_empty": 22,
+            "natural_termination": 12
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 66,
+          "correct": 8,
+          "n_scorable": 100,
+          "usable_scorable": 66,
+          "usable_rollout_rate": 0.66,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.1212,
+          "scorable": true,
+          "non_empty": 0.97,
+          "natural_termination": 0.91,
+          "no_severe_repetition": 0.91,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.91,
+          "first_failure": {
+            "tool_not_structurally_executable": 25,
+            "natural_termination": 6,
+            "non_empty": 3
+          },
+          "tool_structurally_executable": 0.66,
+          "tool_call_emitted": 0.91,
+          "tool_call_parsed": 0.79,
+          "tool_name_valid": 0.66,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    },
+    {
+      "probe_id": "autoinit.v1.phase_c3.C_causal_b3.2045359208",
+      "arm": "C_causal_b3",
+      "seed": 2045359208,
+      "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+      "trained_run": {
+        "run_completion": "/workspace/aad/artifacts/stage3/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/run_completion.json",
+        "run_completion_sha256": "19ca1ac104acefb6b23b5a8b0a145828610ac950ac9cfd4545d8ed0d653a727e",
+        "final_step": 1023,
+        "config_sha256": "1160f2afeb7dcf0faa35c1d6f458ce740fc91ea6cb1ccffd6f741797f7d4660a"
+      },
+      "result_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.2045359208_c1_confirmation.json",
+      "result_sha256": "3aa95853a411e8f6db79cf1d2e214fe167f2e4f74d42b83f75260980a242ce93",
+      "per_sample_path": "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/autoinit.v1.phase_c3.C_causal_b3.2045359208_per_sample.jsonl",
+      "per_sample_sha256": "ad1a95285cd5128845e68e99da2c83ad7508ef83f5b6603f2594ca3a6649ab23",
+      "generations": {
+        "gsm8k": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/gsm8k.generations.jsonl",
+          "sha256": "f7114385685e26e3bad181078f68de3699cb09331e9ff83e91f212a3b3f16958",
+          "n": 150
+        },
+        "math_verified": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/math_verified.generations.jsonl",
+          "sha256": "e062091d346ab7b237ef947e902f02ab297f187b164bd88ff5c762b85d358ffd",
+          "n": 150
+        },
+        "multihop": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/multihop.generations.jsonl",
+          "sha256": "ee89acbcaaaf6974793ab2a97de3182e235ec2880fa0585f4c596eed60ef5451",
+          "n": 150
+        },
+        "rag": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/rag.generations.jsonl",
+          "sha256": "5ac760e1375c6eeace5226648beb24cac591162fa89e313661b1f85ca49cddad",
+          "n": 150
+        },
+        "knowledge": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/knowledge.generations.jsonl",
+          "sha256": "1db3f003c4d5772e4c280e6e2585b4d9dca7989fd3bf6018313b9c6d97b8311c",
+          "n": 150
+        },
+        "tool": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/tool.generations.jsonl",
+          "sha256": "ad46c36a4a8751247680d1ee4852ba4d802c3d41807f472bed5dcbe6e443c85a",
+          "n": 100
+        },
+        "code": {
+          "path": "artifacts/eval/c3/autoinit.v1.phase_c3.C_causal_b3.2045359208/code.generations.jsonl",
+          "sha256": "26658f41e7a07518f7ab293eecc0cd31fd9bdf01eed984506a59f6a7cf0f639f",
+          "n": 100
+        }
+      },
+      "counts": {
+        "n": 950,
+        "usable": 525,
+        "correct": 34,
+        "n_scorable": 850,
+        "usable_scorable": 524
+      },
+      "rates": {
+        "usable_rollout_rate": 0.5526,
+        "correct_overall": 0.04,
+        "correct_given_usable": 0.0649
+      },
+      "per_capability": {
+        "gsm8k": {
+          "n": 150,
+          "usable": 85,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 85,
+          "usable_rollout_rate": 0.5667,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0118,
+          "scorable": true,
+          "non_empty": 0.62,
+          "natural_termination": 0.5867,
+          "no_severe_repetition": 0.5867,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.5667,
+          "first_failure": {
+            "non_empty": 57,
+            "natural_termination": 5,
+            "protocol_valid": 3
+          },
+          "missing_generations": 0
+        },
+        "math_verified": {
+          "n": 150,
+          "usable": 52,
+          "correct": 1,
+          "n_scorable": 150,
+          "usable_scorable": 52,
+          "usable_rollout_rate": 0.3467,
+          "correct_overall": 0.0067,
+          "correct_given_usable": 0.0192,
+          "scorable": true,
+          "non_empty": 0.5667,
+          "natural_termination": 0.48,
+          "no_severe_repetition": 0.48,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.3467,
+          "first_failure": {
+            "non_empty": 65,
+            "protocol_valid": 19,
+            "natural_termination": 14
+          },
+          "missing_generations": 0
+        },
+        "multihop": {
+          "n": 150,
+          "usable": 115,
+          "correct": 11,
+          "n_scorable": 150,
+          "usable_scorable": 115,
+          "usable_rollout_rate": 0.7667,
+          "correct_overall": 0.0733,
+          "correct_given_usable": 0.0957,
+          "scorable": true,
+          "non_empty": 0.82,
+          "natural_termination": 0.7867,
+          "no_severe_repetition": 0.7867,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.7667,
+          "first_failure": {
+            "non_empty": 27,
+            "natural_termination": 5,
+            "protocol_valid": 3
+          },
+          "missing_generations": 0
+        },
+        "rag": {
+          "n": 150,
+          "usable": 117,
+          "correct": 12,
+          "n_scorable": 150,
+          "usable_scorable": 117,
+          "usable_rollout_rate": 0.78,
+          "correct_overall": 0.08,
+          "correct_given_usable": 0.1026,
+          "scorable": true,
+          "non_empty": 0.8333,
+          "natural_termination": 0.7867,
+          "no_severe_repetition": 0.7867,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.78,
+          "first_failure": {
+            "non_empty": 25,
+            "natural_termination": 7,
+            "protocol_valid": 1
+          },
+          "missing_generations": 0
+        },
+        "knowledge": {
+          "n": 150,
+          "usable": 95,
+          "correct": 3,
+          "n_scorable": 150,
+          "usable_scorable": 95,
+          "usable_rollout_rate": 0.6333,
+          "correct_overall": 0.02,
+          "correct_given_usable": 0.0316,
+          "scorable": true,
+          "non_empty": 0.7933,
+          "natural_termination": 0.7667,
+          "no_severe_repetition": 0.7667,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.6333,
+          "first_failure": {
+            "non_empty": 31,
+            "protocol_valid": 17,
+            "natural_termination": 7
+          },
+          "missing_generations": 0
+        },
+        "tool": {
+          "n": 100,
+          "usable": 60,
+          "correct": 6,
+          "n_scorable": 100,
+          "usable_scorable": 60,
+          "usable_rollout_rate": 0.6,
+          "correct_overall": 0.06,
+          "correct_given_usable": 0.1,
+          "scorable": true,
+          "non_empty": 0.96,
+          "natural_termination": 0.95,
+          "no_severe_repetition": 0.95,
+          "no_context_limit": 1.0,
+          "protocol_valid": 0.95,
+          "first_failure": {
+            "tool_not_structurally_executable": 35,
+            "non_empty": 4,
+            "natural_termination": 1
+          },
+          "tool_structurally_executable": 0.6,
+          "tool_call_emitted": 0.92,
+          "tool_call_parsed": 0.79,
+          "tool_name_valid": 0.6,
+          "missing_generations": 0
+        }
+      },
+      "scoring_contract": {
+        "contract": "c1_confirmation_scoring@v1",
+        "contract_id": "c1_confirmation_scoring",
+        "version": 1,
+        "digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+        "files": [
+          {
+            "path": "scripts/autoinit/audit_tool_scoring.py",
+            "sha256": "3ebfd0fb317c9aa808e150d3fff0f94aa43e65b743e1eae46b07d4e2f5f05de9",
+            "bytes": 10268
+          },
+          {
+            "path": "scripts/autoinit/score_c1_confirmation.py",
+            "sha256": "f7f6a5a9273f67990421f76865dbd5746e6d36f2bc38f2662ce9047d3de2436c",
+            "bytes": 14964
+          },
+          {
+            "path": "scripts/autoinit/score_recovery_search.py",
+            "sha256": "847f88e00cee6f17a37f1e4faa0bf37148722a9d557981084dde64eae281bd22",
+            "bytes": 22149
+          },
+          {
+            "path": "scripts/experiments/phase_c1/scoring.py",
+            "sha256": "8aea1b1e7c772123611f0a00a858b5c43016fc2df95bea421d4c4ed9cfcb47bd",
+            "bytes": 12056
+          },
+          {
+            "path": "src/aadistill/data/tools.py",
+            "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+            "bytes": 6043
+          },
+          {
+            "path": "src/aadistill/data/verify.py",
+            "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+            "bytes": 7594
+          },
+          {
+            "path": "src/aadistill/evaluation/behavior.py",
+            "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+            "bytes": 19983
+          },
+          {
+            "path": "src/aadistill/evaluation/capability.py",
+            "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+            "bytes": 19568
+          },
+          {
+            "path": "src/aadistill/evaluation/strict_answer.py",
+            "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+            "bytes": 7628
+          },
+          {
+            "path": "src/aadistill/evaluation/usable_rollout.py",
+            "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+            "bytes": 6155
+          },
+          {
+            "path": "src/aadistill/initialization/planning/recovery.py",
+            "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
+            "bytes": 110776
+          }
+        ],
+        "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+        "semantic_parent": "recovery_search_scoring@v2",
+        "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+        "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+        "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+      },
+      "battery": {
+        "artifact": "c1_confirmation_v1",
+        "role": "C1_CONFIRMATION",
+        "version": 1,
+        "manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+        "manifest_sha256_convention": "sha256_json over the manifest with manifest_sha256 removed; NOT sha256_file of the raw bytes",
+        "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+        "n_prompts": 950,
+        "n_scorable_prompts": 850,
+        "has_metrics_key": false,
+        "metrics_source": "C1_METRIC_CONTRACT in aadistill.autoinit.c1_scoring; the C1 battery manifest carries no metrics block and is not asked for one",
+        "manifest_file_sha256": "8db6765153116438e0fb0c13a5870258d4369104adf9b30fa07b0e80d98e7204"
+      },
+      "observed_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+      "observed_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df"
+    }
+  ],
+  "decision_inputs_audit": {
+    "n_prompts": 950,
+    "n_scorable": 850,
+    "seeds": [
+      217230555,
+      1151307191,
+      2045359208
+    ],
+    "arms": [
+      "A_incumbent",
+      "B_causal_b1",
+      "C_causal_b3"
+    ],
+    "strata_sizes": {
+      "gsm8k": 150,
+      "math_verified": 150,
+      "multihop": 150,
+      "rag": 150,
+      "knowledge": 150,
+      "tool": 100
+    },
+    "usable_counts": {
+      "A_incumbent": {
+        "217230555": 557,
+        "1151307191": 565,
+        "2045359208": 504
+      },
+      "B_causal_b1": {
+        "217230555": 585,
+        "1151307191": 538,
+        "2045359208": 575
+      },
+      "C_causal_b3": {
+        "217230555": 546,
+        "1151307191": 618,
+        "2045359208": 525
+      }
+    },
+    "usable_denominator": "950 prompts per probe; behaviour is measurable where correctness has no oracle",
+    "correct_denominator": "850 scorable prompts; code is behaviour-only",
+    "catastrophic_operands": {
+      "candidate": "B_causal_b1",
+      "control": "A_incumbent"
+    }
+  },
+  "usable_pooled_delta": 0.02526315789473684,
+  "usable_per_seed_delta": [
+    0.029473684210526315,
+    -0.028421052631578948,
+    0.07473684210526316
+  ],
+  "catastrophic_violations": [],
+  "reads": "counts and per-sample booleans; the decision layer never consumes a rounded rate as primary data",
+  "results_sha256": "495328c75a3948c0f799596d8163c7a22c724b7248ba6307f29576477e0a6830"
+}
