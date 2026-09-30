@@ -2215,8 +2215,9 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 ## The full suite is not green: 11 real failures, and a count you must not read
 
-**Closeout measurement, 2026-09-30: 22 failed, 5300 passed, 228 skipped,
-15 errors** in 53m26s.
+**Closeout measurement, 2026-10-01: 23 failed, 5307 passed, 228 skipped,
+15 errors** in 52m01s, plus a targeted revalidation of everything this round
+touched (574 passed) after two derived records were regenerated.
 
 **That headline number is not the failure count, and this is the important
 part.** Eleven of those are real. The rest are **pre-existing cross-test
@@ -2237,8 +2238,20 @@ docstring warns about — *"a leaked registration silently adds a branch to an
 unrelated search"*. **Read the per-file isolated counts, not the whole-suite
 total**, until a fixture leak is closed.
 
-**Eleven real failures: the documented ten, plus one that went red for a
-legitimate reason.** The new one is
+**Eleven real failures, and they are the same eleven.** The closeout run
+showed a twelfth,
+`tests/docs/test_log_organisation.py::TestTheBudgetIsDerivedNotRestated::test_the_fundable_count_divides_the_formal_allowance`,
+which was **mine and is fixed**: it asserted the bare
+`int(formal_remaining // ceiling)` and went red the moment the formal allowance
+first went negative, because `floor(-0.9492 / 30)` is `-1`. The deriver clamps
+the count at zero and names the overspend in its own field; the test now
+asserts both, and — because formal `-0.9492` and package `+0.9903` *both* floor
+to zero, so no value-level check can tell which numerator was used — it also
+asks the deriver's own expression which balance it reads. Both mutations are
+caught; the numeric one alone was not.
+
+**The eleventh is the documented ten plus one that went red for a legitimate
+reason.** That one is
 `autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`.
 It had turned green at the last closeout because the `$400.00` amendment plus
 attempt66's `$13.67` made the two sides agree; attempt75's `$16.71` moved the

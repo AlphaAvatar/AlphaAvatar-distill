@@ -84,15 +84,77 @@ class TestTheBudgetIsDerivedNotRestated:
     def test_the_fundable_count_divides_the_formal_allowance(self, derived):
         """Not the package balance. The engineering allowance cannot pay for a
         formal probe, and dividing the package total by the ceiling is what
-        produced a count one too high in four documents at once."""
+        produced a count one too high in four documents at once.
+
+        The count is CLAMPED at zero. This test asserted the bare
+        `int(formal // ceiling)` and went red when the formal allowance first
+        went negative, which made `floor(-0.9492 / 30)` = -1: not a smaller
+        number of fundable sessions but a category error that reads like one.
+        The clamp hides nothing -- the overspend is asserted below, from the
+        field that names it -- and the property this test exists for, that the
+        NUMERATOR is the formal remaining and never the package balance, is
+        checked against a positive numerator too.
+        """
         formal = derived["formal"]["remaining_usd"]
         ceiling = derived["per_session_ceiling_usd"]
-        assert derived["full_ceiling_sessions_fundable"] == int(formal // ceiling)
+        assert derived["full_ceiling_sessions_fundable"] == max(
+            0, int(formal // ceiling))
 
+        #: A negative balance must be REPORTED, not merely clamped away.
+        over = derived["formal_allowance_exceeded_by_usd"]
+        if formal < 0:
+            assert over == round(-formal, 4), (
+                "the formal allowance is exceeded and the deriver does not say "
+                f"by how much: remaining {formal}, exceeded_by {over}")
+            assert derived["full_ceiling_sessions_fundable"] == 0
+        else:
+            assert over == 0.0
+
+        #: AND THE NUMERATOR IS THE FORMAL BALANCE, NOT THE PACKAGE ONE.
+        #: This was `if the two counts differ: assert fundable < package_count`,
+        #: which only bites while the package balance is at least one ceiling
+        #: larger. Both balances are now near zero, so that comparison became
+        #: `0 < 0` and failed for a reason unrelated to the substitution it
+        #: guards. Asserted directly instead: whatever the balances happen to
+        #: be, the count must be the FORMAL one.
         package = derived["package"]["remaining_usd"]
-        if int(package // ceiling) != int(formal // ceiling):
-            #: The two really do disagree right now, which is why this matters.
-            assert derived["full_ceiling_sessions_fundable"] < int(package // ceiling)
+        assert derived["full_ceiling_sessions_fundable"] == max(
+            0, int(formal // ceiling)), "the count is not the formal quotient"
+        if int(package // ceiling) > max(0, int(formal // ceiling)):
+            assert derived["full_ceiling_sessions_fundable"] < int(
+                package // ceiling), (
+                    "the fundable count matches what the PACKAGE balance would "
+                    "give; that substitution is the defect this test exists for")
+        else:
+            #: STRUCTURAL, and only because the numeric check provably cannot
+            #: discriminate here. Both balances now floor to the same count --
+            #: formal -0.9492 and package 0.9903 both give 0 -- so substituting
+            #: one for the other produces an identical output and every
+            #: value-level assertion passes. Verified by mutation: swapping the
+            #: numerator in the deriver left the checks above green. When two
+            #: numbers cannot be driven apart, the only honest guard is to ask
+            #: which one the code reads.
+            import ast as _ast
+
+            src = (REPO / "scripts/consolidate/derive_budget.py").read_text()
+            tree = _ast.parse(src)
+            expr = None
+            for node in _ast.walk(tree):
+                if (isinstance(node, _ast.keyword)
+                        or not isinstance(node, _ast.Dict)):
+                    continue
+                for key, value in zip(node.keys, node.values):
+                    if (isinstance(key, _ast.Constant)
+                            and key.value == "full_ceiling_sessions_fundable"):
+                        expr = _ast.unparse(value)
+            assert expr is not None, (
+                "no `full_ceiling_sessions_fundable` entry found in the "
+                "deriver; this guard can no longer see what it checks")
+            assert "formal_left" in expr, (
+                "the fundable count is not computed from `formal_left`: "
+                f"{expr!r}. The engineering allowance cannot pay for a formal "
+                "probe, and dividing the PACKAGE balance is what produced a "
+                "count one too high in four documents at once.")
 
     def test_the_limits_do_not_add_up_to_each_other_by_accident(self, derived):
         assert (derived["formal"]["allowance_usd"]

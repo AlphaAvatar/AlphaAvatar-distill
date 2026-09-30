@@ -1228,7 +1228,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 526,
+   "line": 588,
    "kind": "pytest.skip",
    "function": "test_every_cited_path_including_untracked_really_exists",
    "condition": "not (REPO / \"artifacts/stage0/qwen3_4b_thinking_v1\").is_dir()",
@@ -1244,7 +1244,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 801,
+   "line": 863,
    "kind": "pytest.skip",
    "function": "test_a_committed_record_still_names_its_own_raw_output",
    "condition": "not (REPO / named).is_file()",
@@ -1260,7 +1260,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1054,
+   "line": 1116,
    "kind": "pytest.skip",
    "function": "test_state_md_agrees_with_the_record_it_links_to",
    "condition": "named and not (REPO / named).is_file()",
@@ -1276,7 +1276,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1226,
+   "line": 1288,
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
@@ -1292,7 +1292,7 @@
   },
   {
    "file": "tests/docs/test_log_organisation.py",
-   "line": 1239,
+   "line": 1301,
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
@@ -2398,5 +2398,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "f4ce2796cc31f5c30057147f091ce2b237a7052ac363f4f7ea7dc00ad1f5272b"
+ "digest": "af597bd5533f74270c92bb3aebbbc587b4662ad6f8674dc2e1999bb55582f62a"
 }

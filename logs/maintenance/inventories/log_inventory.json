@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-09-30T16:35:56+00:00",
+  "created_utc": "2026-09-30T17:39:53+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 2813,
-    "bytes": 83947461,
+    "files": 2814,
+    "bytes": 83956074,
     "by_disposition": {
       "keep_canonical": 192,
-      "keep_immutable": 2411,
+      "keep_immutable": 2412,
       "keep_referenced": 195,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1155,
+      "immutable_record": 1156,
       "index": 8,
       "narrative": 901,
       "raw_execution_artifact": 728,
@@ -17674,7 +17674,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 131024,
-      "sha256": "76728fd9c51213404d8ea5335e331d1af48c6d77ac1fa8b80e901e412d4cca9c",
+      "sha256": "3d51f43a6436fdbe804dad7125136ffd3a92182a961f20c7e6c3b4d0e3e4828f",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -31404,7 +31404,7 @@
     {
       "path": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json",
       "size_bytes": 25205,
-      "sha256": "e6974370d568b818dfd9afa1a6fbd46d1299b4e80e4ec30309278ca1ada09560",
+      "sha256": "d643177289f4739757c843e06394ee59bf49327b19b094d9dff4b0dc3dc60fb6",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
@@ -31420,6 +31420,20 @@
       "path": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_probe_results.json",
       "size_bytes": 110633,
       "sha256": "9672758515a8f015e8e0436d35888779fdc767fed02ea72bdf11cd4052ccf410",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": true,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/probe_inventory.json",
+      "size_bytes": 8613,
+      "sha256": "4f0e6b5293a5504999b10553a5b8454d64ee6aa2b47944ee866814774fd4e04d",
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
