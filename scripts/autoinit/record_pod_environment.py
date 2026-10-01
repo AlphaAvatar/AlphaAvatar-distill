@@ -131,6 +131,21 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_c2_behavioural": (
         "experiments.phase_c2.behavioural_pod_environment",
         "sweep_contract"),
+    #: A SEVENTH, and the warning four entries above came true again: without
+    #: this line A3's chain is unusable at exactly the step a launch rests on.
+    #: The acquisition loop's second step is
+    #: `--experiment phase_a3 --kind launch_bound`, which was refused as an
+    #: unknown experiment, and `readiness_gate` would then have refused
+    #: forever with a message about a missing record rather than a missing
+    #: registration.
+    #:
+    #: It binds its own launcher, its own session id, its own executable
+    #: closure and its own pod selection -- `tests/a3_preflight`, which none
+    #: of the other six would run -- and its record declares its own schema,
+    #: so no other record can satisfy its verifier or it theirs.
+    "phase_a3": (
+        "experiments.phase_c3.a3_pod_environment",
+        "sweep_contract"),
 }
 
 
