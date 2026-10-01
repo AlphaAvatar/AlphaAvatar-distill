@@ -3,10 +3,10 @@
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
  "modules_scanned": 257,
  "test_ignores": [],
- "n_predicates": 141,
+ "n_predicates": 140,
  "by_signal": {
   "cpu_test_scope": 1,
-  "filesystem_premise_offpod": 7,
+  "filesystem_premise_offpod": 6,
   "filesystem_premise_onpod": 57,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
@@ -16,9 +16,9 @@
   "unrecognised": 34,
   "unstaged_artifact": 12
  },
- "n_differs_on_pod": 30,
+ "n_differs_on_pod": 29,
  "n_unrecognised": 41,
- "n_registered": 51,
+ "n_registered": 50,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
@@ -60,7 +60,6 @@
    "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so"
   ],
   "manifest_derived": [
-   "tests/a3_preflight/test_a3_runtime_contract.py::test_the_launcher_plan_hash_is_what_an_issued_authorization_bound",
    "tests/autoinit/test_c2_replay_specs.py",
    "tests/c2_replay_preflight/test_replay_execution_preflight.py",
    "tests/pod/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
@@ -116,7 +115,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 42,
-  "same_on_pod": 80
+  "same_on_pod": 79
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -196,7 +195,7 @@
  "predicates": [
   {
    "file": "tests/a3_preflight/test_a3_launch_contract.py",
-   "line": 299,
+   "line": 306,
    "kind": "pytest.skip",
    "function": "test_the_controls_evidence_gate_passes_on_the_real_evidence",
    "condition": "not ok and \"absent\" in why",
@@ -212,7 +211,7 @@
   },
   {
    "file": "tests/a3_preflight/test_a3_launch_contract.py",
-   "line": 312,
+   "line": 319,
    "kind": "pytest.skip",
    "function": "test_the_battery_gate_requires_the_controls_own_battery",
    "condition": "not ok and \"not staged\" in why",
@@ -257,22 +256,6 @@
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
-  },
-  {
-   "file": "tests/a3_preflight/test_a3_runtime_contract.py",
-   "line": 397,
-   "kind": "pytest.skip",
-   "function": "test_the_launcher_plan_hash_is_what_an_issued_authorization_bound",
-   "condition": "not runs",
-   "expanded": "not runs | runs=sorted((REPO / \"logs/stages/stage-1/phase_a3/runs\").glob(\n        \"*/governance/authorization.json\")) if (\n        REPO / \"logs/stages/stage-1/phase_a3/runs\").is_dir() else [] | REPO=Path(__file__).resolve().parents[2]",
-   "signal": "filesystem_premise_offpod",
-   "verdict": "differs_on_pod",
-   "why": "inspects logs/stages/stage-1/phase_a3/runs \u2014 neither tracked nor staged, so absent on a pod",
-   "nodeid": "tests/a3_preflight/test_a3_runtime_contract.py::test_the_launcher_plan_hash_is_what_an_issued_authorization_bound",
-   "readiness_group": null,
-   "registered_as": "manifest_derived",
-   "parity": "same_on_pod",
-   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/architecture/test_core_ownership.py",
@@ -2502,5 +2485,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "dded701244cea1d0acf7947a0976044e7b657192f4a2161d8464a405b7ea131c"
+ "digest": "378c67bec5894e6b2e2dad776b0f36d241f0efdab35f607d0979c236c64437a8"
 }

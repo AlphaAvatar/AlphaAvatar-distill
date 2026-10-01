@@ -692,7 +692,34 @@ def spec(args) -> SessionSpec:
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """A3's session command line.
+
+    The first five flags are the ones `run_session` and `SessionRunner`
+    actually read — `args.scr`, `args.out`, `args.runpod_config`,
+    `args.session_commit`, `args.bundle` — and **they were missing.** Every
+    launch-contract test built its own namespace and called `spec(args)`
+    directly, so the real parser never ran: the acquisition loop's own
+    invocation passes `--scr`, `--session-commit` and `--bundle`, and argparse
+    would have exited 2 on all three before a gate ran. The readiness sweep
+    could not build a session spec either, because `session_args` hands every
+    launcher exactly those flags.
+
+    Enumerated from the runner's reads rather than copied from C1's launcher,
+    since a copy keeps the flags C1 needs and misses the ones A3's runner does.
+    """
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    ap.add_argument("--scr", required=True,
+                    help="the session's local scratch directory; "
+                         "`SessionRunner` writes its working files there")
+    ap.add_argument("--session-commit", required=True,
+                    help="the commit the pod checks out. The authorization "
+                         "binds it and the lineage gate verifies it")
+    ap.add_argument("--bundle", required=True,
+                    help="must be the canonical name derived from "
+                         "--session-commit; an alias fails at $0")
+    ap.add_argument("--runpod-config",
+                    default=str(Path("~/.runpod/config.toml").expanduser()))
+    ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--gpu", default="NVIDIA L40S")
     ap.add_argument("--max-price", type=float, required=True)

@@ -26,6 +26,10 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("autoinit_measurement_launch", ()),
     ("autoinit_recovery_continuation_launch", ()),
     ("autoinit_c1_launch", ()),
+    #: A3. Added WITH the launcher, which is what the comment above asks for:
+    #: it needs no `extra` any more, because `session_args` now fills every
+    #: required option from the parser itself -- `--max-price` included.
+    ("autoinit_a3_launch", ()),
 )
 
 
@@ -36,6 +40,23 @@ def load_session_launcher(name: str):
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
     return mod
+
+
+def _placeholder(action) -> str:
+    """A value the action's OWN type and choices accept.
+
+    Typed from the parser, not guessed: a required `type=float` flag answered
+    with `"spec_check"` is exit 2 inside the conversion instead of exit 2 at
+    the missing-argument check, which looks like a different bug.
+    """
+    if action.choices:
+        return str(next(iter(action.choices)))
+    conv = getattr(action, "type", None)
+    if conv is float:
+        return "1.0"
+    if conv is int:
+        return "1"
+    return "spec_check"
 
 
 def session_args(mod, extra: tuple[str, ...] = (), **overrides):
@@ -49,6 +70,18 @@ def session_args(mod, extra: tuple[str, ...] = (), **overrides):
     own. Asked of the REAL parser rather than of a list kept here, so a second
     session adopting the run layout needs no edit — and so this helper cannot
     quietly satisfy a required argument that the parser dropped.
+
+    **Every OTHER required option is filled the same way, from the parser's own
+    metadata.** It used to be `--run-id` and nothing else, with anything new
+    arriving through the caller's `extra` — so a launcher that declared a
+    required flag this helper did not know about did not merely lose one check:
+    `argparse` exits 2 during `parse_args`, which takes the whole launcher out
+    of `derive_session`, out of `all_specs()` and out of every structural check
+    that iterates sessions. A3's `--max-price` is `type=float` and required, so
+    the readiness sweep it is the second step of could not build a session spec
+    at all. Filling from `action.required` keeps that impossible for the next
+    one, and the value is typed from the action rather than passed as a string,
+    because `float("spec_check")` is the same exit 2 one line later.
     """
     argv = ["--scr", "/tmp/session-spec-test",
             "--session-commit", "0" * 40,
@@ -58,6 +91,16 @@ def session_args(mod, extra: tuple[str, ...] = (), **overrides):
                          for a in parser._actions)
     if accepts_run_id and "--run-id" not in argv:
         argv += ["--run-id", "spec_check"]
+    for action in parser._actions:
+        if not (action.required and action.option_strings):
+            continue
+        flag = action.option_strings[0]
+        if flag in argv or any(a in argv for a in action.option_strings):
+            continue
+        if action.nargs == 0:                 # a required store_true, rare
+            argv.append(flag)
+            continue
+        argv += [flag, _placeholder(action)]
     args = parser.parse_args(argv)
     for k, v in overrides.items():
         setattr(args, k, v)

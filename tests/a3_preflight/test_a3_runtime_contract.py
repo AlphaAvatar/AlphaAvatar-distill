@@ -28,6 +28,7 @@ from __future__ import annotations
 import ast
 import dataclasses
 import importlib.util
+import inspect
 import io
 import json
 import re
@@ -388,18 +389,51 @@ def test_the_pod_computes_no_decision():
             f"the driver names {forbidden}; the decision belongs off pod")
 
 
-def test_the_launcher_plan_hash_is_what_an_issued_authorization_bound():
-    """`require_plan` compares these two; a mismatch is exit 98 on a pod."""
-    runs = sorted((REPO / "logs/stages/stage-1/phase_a3/runs").glob(
-        "*/governance/authorization.json")) if (
-        REPO / "logs/stages/stage-1/phase_a3/runs").is_dir() else []
-    if not runs:
-        pytest.skip("no A3 authorization has been issued in this checkout")
-    bound = json.loads(runs[-1].read_text())["bound"]["session_contract_hash"]
-    assert A3S.A3_SESSION_CONTRACT.contract_hash == bound, (
-        f"the session contract hashes to "
-        f"{A3S.A3_SESSION_CONTRACT.contract_hash[:16]} and the authorization "
-        f"binds {bound[:16]}; the preflight would exit 98")
+def test_the_launcher_plan_hash_is_what_an_authorization_would_bind():
+    """`require_plan` compares these two; a mismatch is exit 98 on a pod.
+
+    **It does not skip when no authorization exists**, and that matters more
+    than it looks. Written as "skip unless an issued artifact is on disk" it
+    skipped in the launch-bound readiness sweep -- because the chain is
+    grant → sweep → authorization → bundle, so at sweep time the artifact is
+    one step in the future -- and the sweep reported
+    `unexpected environment skips`, failing the record a funded launch rests
+    on. The chain would have consumed a round per attempt, forever, for a
+    test asking for something the order of operations guarantees is absent.
+
+    So the DERIVATION is what gets asserted: the launcher's plan hash and the
+    hash an authorization would carry come from the same owner, which is the
+    C3 defect this exists to catch -- its launcher computed a hash from
+    session constants the rewritten module no longer had, and the failure
+    would have been `AUTHORIZATION_MISMATCH` after setup was paid for. An
+    issued artifact, when one happens to exist, is compared as well.
+    """
+    from experiments.phase_c3.a3_authorization_payload import (
+        build_a3_authorization_payload,
+    )
+
+    contract = A3S.A3_SESSION_CONTRACT
+    #: What the payload builder puts in `plan_hash`, asked of the builder.
+    src = inspect.getsource(build_a3_authorization_payload)
+    assert "plan_hash=contract.contract_hash" in src, (
+        "the authorization's plan hash no longer comes from the session "
+        "contract; the launcher and the artifact now have separate owners")
+    sys.path.insert(0, str(REPO / "scripts/pod"))
+    launcher = load(LAUNCH, "a3lau_plan")
+    assert launcher.A3S.A3_SESSION_CONTRACT.contract_hash == (
+        contract.contract_hash), (
+        "the launcher resolves a different session contract than this test")
+
+    runs = (REPO / "logs/stages/stage-1/phase_a3/runs")
+    issued = sorted(runs.glob("*/governance/authorization.json")) if (
+        runs.is_dir()) else []
+    for path in issued:
+        bound = json.loads(path.read_text())["bound"][
+            "session_contract_hash"]
+        assert contract.contract_hash == bound, (
+            f"{path.parent.parent.name}: the session contract hashes to "
+            f"{contract.contract_hash[:16]} and that authorization binds "
+            f"{bound[:16]}; the preflight would exit 98")
 
 
 def test_every_required_audit_artifact_is_one_the_driver_writes():

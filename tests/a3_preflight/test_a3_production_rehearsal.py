@@ -550,8 +550,13 @@ def test_the_launcher_command_parses_with_the_drivers_own_parser():
     sys.modules["a3lau_seam"] = launcher
     spec.loader.exec_module(launcher)
 
+    #: The ACQUISITION LOOP's flags, not a subset. A subset is what let the
+    #: launcher go without declaring `--scr`, `--session-commit` and
+    #: `--bundle` -- three flags the loop sends and `SessionRunner` reads.
     args = launcher.build_parser().parse_args(
-        ["--run-id", "a3-attempt1", "--max-price", "1.09"])
+        ["--scr", "/tmp/a3-rehearsal", "--run-id", "a3-attempt1",
+         "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
+         "--gpu", "NVIDIA L40S", "--max-price", "1.09"])
     args.disk_gb = 60
     session = launcher.spec(args)
     plan = session.budget.plan(price_per_hour=1.098333, authorized_usd=8.2525)

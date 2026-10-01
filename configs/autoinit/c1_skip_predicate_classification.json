@@ -206,10 +206,6 @@
   "tests/a3_preflight/test_a3_production_rehearsal.py::_summary_template": {
    "class": "devbox_only_artifact",
    "why": "the rehearsal models its fake per-set summary on a REAL retained generation summary under artifacts/, because observe_generation_protocol fails closed on any missing declared field and a plausible subset would make the production path fail. Retained generations are gitignored artifacts a pod never receives, so the rehearsal skips there rather than certifying a protocol comparison it could not run."
-  },
-  "tests/a3_preflight/test_a3_runtime_contract.py::test_the_launcher_plan_hash_is_what_an_issued_authorization_bound": {
-   "class": "manifest_derived",
-   "why": "the premise is a TRACKED artifact -- the run's own governance/authorization.json, committed by the acquisition loop before the launch -- so the pod receives it in the bundle checkout and decides exactly as the dev box does. It skips on both before any chain is issued and runs on both after, which is why the launch-bound sweep (which runs AFTER issuance) sees it run."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import sys
 import types
 from pathlib import Path
@@ -39,8 +40,14 @@ def launcher():
 @pytest.fixture(scope="module")
 def session():
     L = launcher()
+    #: Through the launcher's own parser with the flags the ACQUISITION LOOP
+    #: sends, not a convenient subset. The subset is what hid the missing
+    #: `--scr`/`--session-commit`/`--bundle` declarations: every test here
+    #: built a namespace the real command line could not have produced.
     args = L.build_parser().parse_args(
-        ["--run-id", "a3-attempt1", "--max-price", "1.09"])
+        ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+         "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
+         "--gpu", "NVIDIA L40S", "--max-price", "1.09"])
     args.disk_gb = 60
     return L, args, L.spec(args)
 
@@ -337,7 +344,9 @@ def test_the_pricing_gate_refuses_a_ceiling_the_grant_does_not_carry(session):
 def test_the_pricing_gate_refuses_a_rate_above_what_was_priced(session):
     L, _, _ = session
     args = L.build_parser().parse_args(
-        ["--run-id", "a3-attempt1", "--max-price", "2.50"])
+        ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+         "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
+         "--max-price", "2.50"])
     args.disk_gb = 60
     ok, why = L.pricing_identity_gate(_ctx(args))
     assert ok is False and "exceeds the priced rate" in why
@@ -352,3 +361,61 @@ def test_the_gates_are_ordered_so_the_network_ones_are_last(session):
     assert "controls_evidence_gate" in names
     assert "readiness_gate" in names
     assert "bundle_staged_gate" in names
+
+
+# --- the shell caller is a consumer of the parser too ----------------------
+
+
+def test_the_acquisition_loop_s_launcher_call_parses(session):
+    """The CALLER, parsed by the callee's own parser.
+
+    This is the defect that was here: the launcher declared `--run-id`,
+    `--gpu` and `--max-price` and nothing else, while `a3_acquire.sh` sends
+    `--scr`, `--session-commit` and `--bundle` as well -- and `run_session`
+    reads all three off the namespace. Every test in this file built its own
+    namespace and called `spec(args)`, so the real command line never ran and
+    argparse would have exited 2 on the loop's FIRST launcher invocation,
+    after the capacity watch, the live re-price, the grant, a full launch-bound
+    readiness sweep and the bundle had all completed.
+
+    Read out of the shell source rather than restated, so editing the loop
+    cannot leave this agreeing with a call nobody makes.
+    """
+    L, _, _ = session
+    src = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    m = re.search(r"autoinit_a3_launch\.py(.*?)>\s*\"\$SCR/launcher\.log\"",
+                  src, re.S)
+    assert m, "the acquisition loop no longer invokes the A3 launcher"
+    sent = re.findall(r"--[a-z][a-z0-9-]*", m.group(1))
+    assert {"--scr", "--run-id", "--session-commit", "--bundle",
+            "--gpu", "--max-price"} <= set(sent), sent
+
+    parser = L.build_parser()
+    known = {o for a in parser._actions for o in a.option_strings}
+    unknown = sorted(set(sent) - known)
+    assert not unknown, (
+        f"a3_acquire.sh sends {unknown}, which the launcher's parser does not "
+        f"define; argparse would exit 2 before any gate ran")
+
+    #: And every REQUIRED flag is one the loop sends, which is the same exit 2
+    #: from the other direction.
+    required = {a.option_strings[0] for a in parser._actions
+                if a.required and a.option_strings}
+    assert not sorted(required - set(sent)), (
+        f"the launcher requires {sorted(required - set(sent))}, which the "
+        f"acquisition loop does not send")
+
+    #: The namespace the loop's own argv produces must satisfy what
+    #: `SessionRunner` reads off it. Enumerated from the runner's source so a
+    #: new read cannot be missed here.
+    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    reads = {m.group(1) for m in re.finditer(r"\ba(?:rgs)?\.([a-z_]+)", runner)}
+    argv = ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+            "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
+            "--gpu", "NVIDIA L40S", "--max-price", "1.09"]
+    ns = parser.parse_args(argv)
+    for attr in ("scr", "out", "runpod_config", "session_commit", "bundle"):
+        assert attr in reads, (
+            f"{attr} is no longer read by SessionRunner; this list is stale")
+        assert hasattr(ns, attr), (
+            f"the loop's argv produces no `{attr}`, which SessionRunner reads")

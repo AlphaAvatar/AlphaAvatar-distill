@@ -131,7 +131,18 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
     def harness(repo_root):
         from experiments.phase_c3.a3_authorization import a3_harness_digest
 
-        return a3_harness_digest(repo_root)
+        #: The recorder records a COUNT beside the digest, under the field
+        #: named below. C3's harness comes from `closure.derive`, which
+        #: returns `n_files`; A3's comes from `harness_source_digest` over an
+        #: explicitly DECLARED file set, which returns `{digest, files,
+        #: set_version}` and no count -- and the recorder raised `KeyError:
+        #: 'n_files'` after running the whole sweep. Counted here rather than
+        #: switching A3 to `derive`, because the declared set is the thing
+        #: the frozen-set declarations and the grant both bind, and changing
+        #: how it is digested to obtain one integer would move that digest.
+        h = dict(a3_harness_digest(repo_root))
+        h["n_files"] = len(h["files"])
+        return h
 
     return SweepContract(
         experiment_id="phase_a3",
