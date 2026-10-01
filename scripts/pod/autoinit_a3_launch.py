@@ -44,7 +44,7 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
 )
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
-    ignores_for_selection,
+    derive_contract, ignores_for_selection,
 )
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, RECOVERY_LADDER,
@@ -137,6 +137,62 @@ A3_LOCAL_ASSETS = (
     LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
                "artifacts/stage3"),
 )
+
+
+#: role -> path inside this run. Small reviewable text only: the artifact
+#: tarball and the extracted tree stay under `--scr`, and the manifest carries
+#: their hashes.
+A3_RUN_ROLES: dict[str, str] = {
+    #: Written by `SessionRunner.save()` on EVERY path, including a launcher
+    #: error, so it is the one role always present -- and `save()` writes
+    #: `args.out` **without creating its parent**, which is why the run has to
+    #: be opened before the runner is constructed. A3's first real launcher
+    #: invocation died exactly there, after every `$0` gate had run.
+    "session_record": "runtime/session.json",
+    "launcher_log": "runtime/launcher.log",
+    "watchdog_journal": "runtime/watchdog/",
+    #: PREPARED, not produced: the grant is authored and committed while the
+    #: tree is still clean, because the launch-bound sweep and the
+    #: authorization issued from it both require it to be there already.
+    "grant": "governance/grant.json",
+    "authorization": "governance/authorization.json",
+    "readiness": "governance/readiness.json",
+    "bundle_record": "governance/bundle.json",
+}
+
+#: The roles someone else writes before the run opens. An exemption from the
+#: OCCUPANCY rule only: a prepared role must still be a declared role, so it
+#: lands in the manifest and has an owner.
+A3_RUN_PREPARED: tuple[str, ...] = (
+    "grant", "authorization", "readiness", "bundle_record")
+
+
+def session_record_path(run_id: str | None) -> str:
+    """Where THIS run's session record goes, repository-relative.
+
+    ONE rule, called by `main` and by `open_a3_run`, so the path the runner
+    writes to and the directory the run was created in cannot disagree.
+    """
+    return (f"{rel_run_dir(RUN_EXPERIMENT_ID, run_id or '_', RUN_STAGE_ID)}"
+            f"/{A3_RUN_ROLES['session_record']}")
+
+
+def open_a3_run(args, repo_root: Path | None = None):
+    """Claim this attempt's outputs and create its run directory.
+
+    BEFORE `SessionSpec` construction and therefore before any provider call,
+    so a colliding run id or a scratch root belonging to another attempt costs
+    `$0`. The occupancy rule refuses both a recorded run and an UNRECORDED one
+    that already holds files -- the second is a launcher that died before
+    writing its manifest, and overwriting it destroys the only evidence of
+    what happened.
+    """
+    from experiments.run_layout import open_run
+
+    root = REPO_ROOT if repo_root is None else Path(repo_root)
+    return open_run(root, RUN_EXPERIMENT_ID, args.run_id,
+                    roles=A3_RUN_ROLES, prepared=A3_RUN_PREPARED,
+                    stage_id=RUN_STAGE_ID)
 
 
 def auth_path_for(run_id: str | None) -> str:
@@ -404,33 +460,73 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
-    """A launch-bound readiness record exists for the commit about to run."""
-    p = REPO_ROOT / readiness_path_for(getattr(ctx.args, "run_id", None))
-    if not p.is_file():
-        return False, (f"no readiness record at {p.relative_to(REPO_ROOT)}; "
-                       "the chain is grant -> launch-bound readiness -> "
-                       "authorization -> bundle -> gates -> provider")
-    doc = json.loads(p.read_text())
-    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
-                          capture_output=True, text=True,
-                          check=True).stdout.strip()
+    """A launch-bound readiness record still describes the code that will run.
+
+    Through `verify_record`, which is the owner of this invariant, rather than
+    a comparison written here. The hand-rolled version asked whether the
+    sweep's base commit EQUALLED HEAD, and that is unsatisfiable by
+    construction: the chain is grant -> sweep -> authorization -> bundle, so
+    two governance commits always land after the sweep and HEAD always moved.
+    It aborted at `$0` on the first real invocation with the sweep at
+    `826e80d4` and HEAD at `a52ac77e`, consuming a chain to say so.
+
+    The real rule is the session-lineage rule: the SESSION COMMIT -- what the
+    pod checks out, not this working tree -- must descend from
+    `swept_base_commit`, and the only tracked paths permitted to differ are
+    the readiness record itself and this run's authorization, which an issued
+    session commits after the sweep by construction. It also checks the record
+    is `launch_bound` rather than `diagnostic`, that its harness and pod
+    test-environment digests still match, and that the STAGING CONTRACT the
+    sweep ran under is the one this session stages -- C2 attempt 4's sweep
+    used the simulator's generic default and modelled a machine 55 tests more
+    generous than the pod.
+    """
+    from aadistill.runtime.pod_environment import LAUNCH_BOUND
+    from experiments.phase_c3.a3_pod_environment import (
+        a3_record_contract, load_record,
+    )
+    from experiments.phase_c3.a3_pod_environment import (
+        verify_record as verify_a3_record,
+    )
+
+    run_id = getattr(ctx.args, "run_id", None)
+    record_rel = readiness_path_for(run_id)
+    try:
+        record = load_record(REPO_ROOT, run_id=run_id, stage_id=RUN_STAGE_ID)
+    except FileNotFoundError:
+        return False, (f"no readiness record at {record_rel}; the chain is "
+                       "grant -> launch-bound readiness -> authorization -> "
+                       "bundle -> gates -> provider")
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot read {record_rel}: {exc}"
+
+    try:
+        live_staging = derive_contract(spec(ctx.args).setup,
+                                       session_id="autoinit-a3")["digest"]
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"cannot derive this session's staging contract: {exc}"
+
+    ok, reason = verify_a3_record(
+        record, REPO_ROOT,
+        contract=a3_record_contract(run_id, RUN_STAGE_ID),
+        session_commit=getattr(ctx.args, "session_commit", None),
+        authorization_path=auth_path_for(run_id),
+        required_kind=LAUNCH_BOUND,
+        staging_contract_digest=live_staging)
     ctx.evidence["readiness"] = {
-        "record_kind": doc.get("record_kind"), "verdict": doc.get("verdict"),
-        "swept_base_commit": doc.get("swept_base_commit"), "head": head}
-    #: `record_kind`, not `kind`. A gate asked for `kind` once, no record this
-    #: repository writes carries that field, and it could not have passed for
-    #: any record.
-    if doc.get("record_kind") != "launch_bound":
-        return False, (f"the readiness record is "
-                       f"{doc.get('record_kind')!r}, not launch_bound")
-    if doc.get("verdict") != "PASS":
-        return False, (f"the readiness verdict is {doc.get('verdict')!r}; a "
-                       "FAILED sweep does not satisfy this gate")
-    if doc.get("swept_base_commit") != head:
-        return False, (f"the sweep describes {str(doc.get('swept_base_commit'))[:12]} "
-                       f"and HEAD is {head[:12]}; a launch-bound record "
-                       "describes the tree a launch will use")
-    return True, f"launch-bound readiness PASS at {head[:12]}"
+        "verdict": "PASS" if ok else "FAIL",
+        "record": record_rel,
+        "record_kind": record.get("record_kind"),
+        "required_record_kind": LAUNCH_BOUND,
+        "swept_base_commit": record.get("swept_base_commit"),
+        "session_commit": getattr(ctx.args, "session_commit", None),
+        "permitted_post_sweep_paths": [record_rel, auth_path_for(run_id)],
+        "live_staging_contract_digest": live_staging,
+        "recorded_staging_contract_digest": record.get(
+            "staging_contract_digest"),
+        "counts": record.get("counts"),
+        "reason": reason}
+    return ok, reason
 
 
 def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
@@ -800,8 +896,9 @@ def main() -> int:
         args.max_price = float(
             load_live_pricing(REPO_ROOT)["queried_rate_usd_per_hour"])
     if args.out is None:
-        args.out = (f"{rel_run_dir(RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}"
-                    "/runtime/session.json")
+        args.out = session_record_path(args.run_id)
+    #: Creates `runtime/` so `save()` can write, and refuses an occupied run.
+    open_a3_run(args)
     return run_session(
         spec(args), args, REPO_ROOT,
         summary=("STOP for review. A3 ran one experiment end to end and "

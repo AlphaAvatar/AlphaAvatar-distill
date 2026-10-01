@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 29,
+  "runs_unrecorded": 30,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -320,6 +320,11 @@
     "recorded": 8,
     "unrecorded": 0,
     "total": 8
+   },
+   "phase_a3": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "phase_b": {
     "recorded": 5,
@@ -2272,6 +2277,14 @@
   }
  ],
  "unrecorded": [
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3-attempt1",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3-attempt1",
+   "n_files": 4,
+   "digest": "c8e007f1702730c329c946326ee45ad16f6da27e6a6525e076d514c67cb0e563",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
   {
    "experiment_id": "phase_c1",
    "run_id": "attempt13",

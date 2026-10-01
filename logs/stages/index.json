@@ -11,8 +11,8 @@
  "verified": true,
  "problems": [],
  "totals": {
-  "experiment_total": 26,
-  "single_stage": 26,
+  "experiment_total": 27,
+  "single_stage": 27,
   "true_cross_stage": 0,
   "stage_neutral": 2,
   "unresolved": 0,
@@ -149,10 +149,10 @@
    "groups": [],
    "activity": {
     "pipeline_activity": 3,
-    "experiments": 11,
-    "experiments_with_logs": 11,
-    "runs": 167,
-    "canonical_configs": 13,
+    "experiments": 12,
+    "experiments_with_logs": 12,
+    "runs": 168,
+    "canonical_configs": 14,
     "canonical_data_manifests": 1,
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
@@ -169,6 +169,7 @@
     "configs/validation/c2_full_search_performance.json",
     "configs/validation/c2_state_eval_certification.json",
     "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
+    "logs/stages/stage-1/phase_c3/plans/a3_design.json",
     "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
    ],
    "canonical_data_manifests": [
@@ -678,6 +679,31 @@
    "external_material": [],
    "decisions": [],
    "classification_reason": "Stage 1 because it decides a Stage-1 ATTENTION initialization, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c2_behavioural` is Stage 1. It was declared a stage AREA rather than an experiment while it held only engineering validations and no runs; that stopped being true once it acquired a frozen preregistration and a formal attempt, and the area declaration was why its README said `Runs: none recorded` beside seventy registered runs. The engineering validations filed beneath it keep their own rows and remain `engineering`: they train nothing and decide nothing."
+  },
+  {
+   "experiment_id": "phase_a3",
+   "stage_id": "1",
+   "classification": "experiment",
+   "status": "EXECUTING \u2014 one chain, no result yet",
+   "title": "A3 \u2014 the ATTENTION calibration batching protocol, end to end",
+   "question": "Does running the incumbent `attention.activation_importance_v1` at `calibration_forward_batch_size=3` with `calibration_batch_packing=length_sorted_v1` build the same artifact as the bsz=1 incumbent, and if it does not, does the artifact it DOES build recover to the same behaviour? One treatment arm over attempt75's three control seeds, each evaluated once on `c1_confirmation_v1`. An engineering adoption study: it names no population-level non-inferiority claim and inherits no runtime threshold.",
+   "canonical_path": "logs/stages/stage-1/phase_a3",
+   "canonical_config": "logs/stages/stage-1/phase_c3/plans/a3_design.json",
+   "evidence": [
+    {
+     "path": "logs/stages/stage-1/phase_c3/plans/a3_design.json",
+     "says": "the frozen design: one arm, three reused control seeds, the asymmetric digest gate, the six integrity stops and the seven things that are explicitly not stops. Its `design_sha256` is checked by the document's own self-hash and by the authorization that binds it, so it is not restated here",
+     "field": "stage",
+     "equals": "A3"
+    },
+    {
+     "path": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
+     "says": "the chain priced as ONE shape, against four limits"
+    }
+   ],
+   "external_material": [],
+   "decisions": [],
+   "classification_reason": "Stage 1 because it decides how a Stage-1 ATTENTION initialization is MATERIALIZED, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c3` and `phase_c2_behavioural` are Stage 1. It is a separate experiment from `phase_c3` rather than one of its attempts: C3 is complete with a canonical NO_GO on a different question (which operator), and this asks about an execution protocol for the operator C3 left standing. It reuses C3 attempt75's three controls as evidence and retrains none of them."
   },
   {
    "experiment_id": "batching_refactor_cuda",

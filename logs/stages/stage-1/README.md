@@ -78,12 +78,13 @@ What each one asked of this stage.
 | `phase_c2_replay` — Phase C2 replay-only artifact reconstruction — attempt 3's Top-5 checkpoints | Can the five checkpoints behind the frozen Top-5 be rebuilt byte-for-byte from the committed evidence? The full joint re-search committed its selection and then lost the weights when the pod was torn down, so the ranking survives and the artifacts it ranked do not. This session replays each selected path with EVERY step pinned to the artifact digest attempt 3 recorded, and either reproduces each leaf's exact identity or stops. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison and no behavioural work. A digest mismatch would be a scientific finding, not a retryable engineering failure. | [`phase_c2_replay/`](phase_c2_replay/) | built and gated — $4.77 all-in derived, inside the original $5.00; chain not yet consumed |
 | `phase_c2_behavioural` — Phase C2 behavioural selection — 12 probes over the frozen Top-5 | Does any of the five reconstructed Full-Search candidates beat the behavioural incumbent B, and by enough to take its place? Cheap-metric order is not behavioural order, so the search's own ranking cannot promote anything. Six screening probes rank the five candidates against B on one preregistered seed; exactly one advances; six confirmation probes test that one against B on three disjoint paired seeds under C1's frozen decision rule. Only the confirmation rung may name a C2 incumbent, and NO_GO and INCONCLUSIVE are results. | [`phase_c2_behavioural/`](phase_c2_behavioural/) | PROPOSED — not authorized; no grant, readiness, authorization or bundle |
 | `phase_c3` — Phase C3 — ATTENTION causal-KL isolation, 3 arms x 3 seeds | Does initializing ATTENTION with `attention.causal_kl_v1` beat the incumbent `attention.activation_importance_v1` after the same frozen 0.86M recovery? Three arms -- the incumbent A, and causal-KL at two calibration protocols B1 and B3 -- over three fresh paired seeds, each evaluated once on `c1_confirmation_v1`. The primary contrast is A vs B1; the B1/B3 comparison is secondary and names no winner. | [`phase_c3/`](phase_c3/) | EXECUTED, NO RESULT — nine probes trained, none evaluated, none preserved |
+| `phase_a3` — A3 — the ATTENTION calibration batching protocol, end to end | Does running the incumbent `attention.activation_importance_v1` at `calibration_forward_batch_size=3` with `calibration_batch_packing=length_sorted_v1` build the same artifact as the bsz=1 incumbent, and if it does not, does the artifact it DOES build recover to the same behaviour? One treatment arm over attempt75's three control seeds, each evaluated once on `c1_confirmation_v1`. An engineering adoption study: it names no population-level non-inferiority claim and inherits no runtime threshold. | [`phase_a3/`](phase_a3/) | EXECUTING — one chain, no result yet |
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 
 ## Runs
 
-**167** run(s) are registered for this stage's
+**168** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -106,6 +107,7 @@ the config path and hash it ran under.
 * `configs/validation/c2_full_search_performance.json`
 * `configs/validation/c2_state_eval_certification.json`
 * `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
+* `logs/stages/stage-1/phase_c3/plans/a3_design.json`
 * `logs/stages/stage-1/phase_c3/plans/c3_preregistration.json`
 
 ## Canonical data and artifact manifests

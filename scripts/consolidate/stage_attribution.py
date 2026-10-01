@@ -750,6 +750,48 @@ STAGE_1 = [
             "`engineering`: they train nothing and decide nothing."),
     ),
     dict(
+        id="phase_a3",
+        kind="experiment",
+        stage_id="1",
+        status="EXECUTING — one chain, no result yet",
+        title="A3 — the ATTENTION calibration batching protocol, end to end",
+        question=("Does running the incumbent "
+                  "`attention.activation_importance_v1` at "
+                  "`calibration_forward_batch_size=3` with "
+                  "`calibration_batch_packing=length_sorted_v1` build the same "
+                  "artifact as the bsz=1 incumbent, and if it does not, does "
+                  "the artifact it DOES build recover to the same behaviour? "
+                  "One treatment arm over attempt75's three control seeds, "
+                  "each evaluated once on `c1_confirmation_v1`. An engineering "
+                  "adoption study: it names no population-level "
+                  "non-inferiority claim and inherits no runtime threshold."),
+        canonical_config="logs/stages/stage-1/phase_c3/plans/a3_design.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_c3/plans/a3_design.json",
+              "the frozen design: one arm, three reused control seeds, the "
+              "asymmetric digest gate, the six integrity stops and the seven "
+              "things that are explicitly not stops. Its `design_sha256` is "
+              "checked by the document's own self-hash and by the "
+              "authorization that binds it, so it is not restated here",
+              field="stage", equals="A3"),
+            E("logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
+              "the chain priced as ONE shape, against four limits"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_a3",
+        classification_reason=(
+            "Stage 1 because it decides how a Stage-1 ATTENTION "
+            "initialization is MATERIALIZED, even though its instrument is a "
+            "Stage-3 recovery probe -- the same reason `phase_c3` and "
+            "`phase_c2_behavioural` are Stage 1. It is a separate experiment "
+            "from `phase_c3` rather than one of its attempts: C3 is complete "
+            "with a canonical NO_GO on a different question (which operator), "
+            "and this asks about an execution protocol for the operator C3 "
+            "left standing. It reuses C3 attempt75's three controls as "
+            "evidence and retrains none of them."),
+    ),
+    dict(
         id="batching_refactor_cuda",
         kind="engineering",
         stage_id="1",
