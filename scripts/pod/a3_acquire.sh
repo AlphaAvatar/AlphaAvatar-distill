@@ -34,7 +34,14 @@ set -uo pipefail
 cd "$(dirname "$0")/../.." || exit 2
 
 LOG=/tmp/a3_acquire.log
-BASE=/tmp/claude-1000/a3
+#: DURABLE, not session scratch. `SessionRunner` fetches the manifest and the
+#: artifact archive into `<scr>/store` and extracts them into
+#: `<scr>/store/extracted` -- so `--scr` is where A3's only scientific output
+#: comes home to, and pointing it at a session-scoped temp directory would put
+#: three trained-and-scored probes' evidence somewhere a cleanup removes. The
+#: comparison then runs off this, off pod, at $0.
+ART=/home/ecs-user/aad-artifacts/phase_a3
+BASE="$ART/_sessions"
 mkdir -p "$BASE"
 
 say() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG"; }
@@ -168,7 +175,30 @@ PY
   RC=$?
   say "$RUN: launcher exit $RC"
 
-  # ---- the terminal check reads BOTH the log and the driver's own file ----
+  # ---- WHENEVER evidence exists, give it a durable home of its own ------
+  #
+  # Gated on the ARTIFACT existing, not on the session succeeding: a run that
+  # aborted after stage G still came home with everything stage G produced,
+  # and "I found no probes" and "no probes were trained" are different
+  # findings. The extracted tree is what `aggregate_a3.py` reads -- its
+  # `audit/autoinit_a3/` is the archive's own top level.
+  EV="$ART/$RUN"
+  if [ -d "$SCR/store/extracted" ]; then
+    mkdir -p "$EV"
+    cp -a "$SCR/store/extracted/." "$EV/" 2>/dev/null
+    cp -a "$SCR/launcher.log" "$EV/launcher.log" 2>/dev/null
+    say "$RUN: evidence -> $EV ($(find "$EV" -type f 2>/dev/null | wc -l) files)"
+  else
+    say "$RUN: no extracted artifact tree; nothing came home to preserve"
+  fi
+
+  # ---- the terminal check, from the launcher log ------------------------
+  #
+  # The DRIVER's markers reach this log because `run_session` polls the pod's
+  # status file and echoes what it finds -- and that file is
+  # `A3S.STATUS_PATH`, the same owner the driver writes to. C3's pair
+  # hardcoded two different paths, so `ALL_DONE` was invisible here and a
+  # COMPLETED formal run would have read as "no measurement began".
   TERMINAL=""
   for M in ALL_DONE A3_FAILED A3_INTEGRITY_FAILURE A3_REPLAY_MISMATCH; do
     if grep -q "$M" "$SCR/launcher.log" 2>/dev/null; then TERMINAL="$M"; break; fi
@@ -178,7 +208,7 @@ PY
     if [ "$TERMINAL" = "ALL_DONE" ]; then
       say "$RUN: A3 reached ALL_DONE. Next: aggregate OFF POD at \$0 with"
       say "  PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/aggregate_a3.py \\"
-      say "    --evidence /home/ecs-user/aad-artifacts/phase_a3/$RUN --write"
+      say "    --evidence $EV --write"
     else
       say "$RUN: NOT a retry. An integrity failure is repaired, not rerun."
     fi

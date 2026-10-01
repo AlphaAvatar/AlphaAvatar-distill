@@ -419,3 +419,42 @@ def test_the_acquisition_loop_s_launcher_call_parses(session):
             f"{attr} is no longer read by SessionRunner; this list is stale")
         assert hasattr(ns, attr), (
             f"the loop's argv produces no `{attr}`, which SessionRunner reads")
+
+
+def test_the_evidence_path_the_loop_writes_is_the_one_the_aggregator_reads():
+    """The handoff between the paid session and the `$0` comparison.
+
+    `SessionRunner` fetches the archive into `<scr>/store` and extracts it
+    into `<scr>/store/extracted`, so `--scr` decides where A3's only
+    scientific output comes home to. The loop pointed `--scr` at a
+    session-scoped temp directory and then printed an aggregation command
+    naming `~/aad-artifacts/phase_a3/<run>` -- a path nothing wrote, one
+    level off from the one that would have existed. Three trained and scored
+    probes' evidence would have been in `/tmp`.
+
+    Checked as a chain of three agreements, each read from its own owner:
+    the loop's durable root, the archive's own top-level prefix, and the
+    directory `aggregate_a3` opens.
+    """
+    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    assert "ART=/home/ecs-user/aad-artifacts/phase_a3" in loop, (
+        "the loop no longer declares a durable artifact root")
+    assert 'BASE="$ART/_sessions"' in loop, (
+        "the session scratch is not under the durable root, so "
+        "<scr>/store/extracted is not durable")
+    assert 'cp -a "$SCR/store/extracted/." "$EV/"' in loop, (
+        "the loop does not place the EXTRACTED tree at the evidence root")
+    assert "--evidence $EV" in loop, (
+        "the printed aggregation command does not name the path the loop "
+        "actually wrote")
+
+    #: The extracted tree's top level is the artifact spec's prefix, and the
+    #: aggregator opens `<evidence>/audit/autoinit_a3`.
+    spec = json.loads(
+        (REPO / "configs/autoinit/a3_artifacts.json").read_text())
+    prefixes = {e["pattern"].split("/", 1)[0] for e in spec["entries"]}
+    assert "audit" in prefixes, prefixes
+    agg = (REPO / "scripts/autoinit/aggregate_a3.py").read_text()
+    assert 'evidence / "audit" / "autoinit_a3"' in agg, (
+        "the aggregator no longer reads <evidence>/audit/autoinit_a3; the "
+        "loop's copy would land somewhere it does not look")
