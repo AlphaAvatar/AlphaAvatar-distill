@@ -45,7 +45,7 @@ def session():
     #: `--scr`/`--session-commit`/`--bundle` declarations: every test here
     #: built a namespace the real command line could not have produced.
     args = L.build_parser().parse_args(
-        ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+        ["--scr", "/tmp/a3-contract", "--run-id", "a3_attempt1",
          "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
          "--gpu", "NVIDIA L40S", "--max-price", "1.09"])
     args.disk_gb = 60
@@ -344,7 +344,7 @@ def test_the_pricing_gate_refuses_a_ceiling_the_grant_does_not_carry(session):
 def test_the_pricing_gate_refuses_a_rate_above_what_was_priced(session):
     L, _, _ = session
     args = L.build_parser().parse_args(
-        ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+        ["--scr", "/tmp/a3-contract", "--run-id", "a3_attempt1",
          "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
          "--max-price", "2.50"])
     args.disk_gb = 60
@@ -410,7 +410,7 @@ def test_the_acquisition_loop_s_launcher_call_parses(session):
     #: new read cannot be missed here.
     runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
     reads = {m.group(1) for m in re.finditer(r"\ba(?:rgs)?\.([a-z_]+)", runner)}
-    argv = ["--scr", "/tmp/a3-contract", "--run-id", "a3-attempt1",
+    argv = ["--scr", "/tmp/a3-contract", "--run-id", "a3_attempt1",
             "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
             "--gpu", "NVIDIA L40S", "--max-price", "1.09"]
     ns = parser.parse_args(argv)
@@ -458,3 +458,45 @@ def test_the_evidence_path_the_loop_writes_is_the_one_the_aggregator_reads():
     assert 'evidence / "audit" / "autoinit_a3"' in agg, (
         "the aggregator no longer reads <evidence>/audit/autoinit_a3; the "
         "loop's copy would land somewhere it does not look")
+
+
+def test_the_run_ids_the_loop_mints_are_run_ids_the_layout_accepts(session):
+    """The shell names the run; the layout decides what a run may be called.
+
+    `a3_attempt1` and `a3-attempt2` produced correct-looking paths through
+    `rel_run_dir`, every `$0` gate, four governance artifacts and a staged
+    22.8 MB bundle -- and `open_run` refused the hyphen at the last step of
+    the chain, twice, because `RunLayout` accepts only `[a-z0-9][a-z0-9_]*`
+    and `rel_run_dir` interpolates without checking. Two owners of one string
+    and only the later one looks.
+
+    So the spelling the loop mints is checked against the owner's rule, and
+    the launcher's parser refuses a bad one before the grant is written.
+    """
+    L, _, _ = session
+    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    m = re.search(r'^\s*RUN="([^"]+)"', loop, re.M)
+    assert m, "the loop no longer mints a run name"
+    minted = m.group(1).replace("$N", "7")
+    from aadistill.runtime.run_layout import _ID
+
+    assert _ID.match(minted), (
+        f"the loop mints {minted!r}, which RunLayout refuses; open_run would "
+        f"abort after the whole one-use chain had been built")
+
+    #: And the parser refuses the shape that was actually used, at parse time.
+    for bad in ("a3_bad-attempt7", "A3attempt7", "../escape"):
+        with pytest.raises(SystemExit):
+            L.build_parser().parse_args(
+                ["--scr", "/tmp/a3-contract", "--run-id", bad,
+                 "--session-commit", "0" * 40, "--bundle", "b.bundle"])
+    ok = L.build_parser().parse_args(
+        ["--scr", "/tmp/a3-contract", "--run-id", minted,
+         "--session-commit", "0" * 40, "--bundle", "b.bundle"])
+    assert ok.run_id == minted
+
+    #: The loop must also count BOTH spellings when picking the next number,
+    #: or it would reuse an attempt number that already has evidence on disk.
+    assert 'a3-attempt$N' in loop and 'a3_attempt$N' in loop, (
+        "next_free does not consider both spellings; an attempt number with "
+        "a consumed chain under the old name would be reused")

@@ -554,7 +554,7 @@ def test_the_launcher_command_parses_with_the_drivers_own_parser():
     #: launcher go without declaring `--scr`, `--session-commit` and
     #: `--bundle` -- three flags the loop sends and `SessionRunner` reads.
     args = launcher.build_parser().parse_args(
-        ["--scr", "/tmp/a3-rehearsal", "--run-id", "a3-attempt1",
+        ["--scr", "/tmp/a3-rehearsal", "--run-id", "a3_attempt1",
          "--session-commit", "0" * 40, "--bundle", "aad_test.bundle",
          "--gpu", "NVIDIA L40S", "--max-price", "1.09"])
     args.disk_gb = 60
@@ -568,7 +568,7 @@ def test_the_launcher_command_parses_with_the_drivers_own_parser():
     parsed = D.build_parser().parse_args(argv)
     assert parsed.authorized_usd == pytest.approx(8.2525)
     assert parsed.soft_stop_usd < parsed.authorized_usd
-    assert parsed.run_id == "a3-attempt1"
+    assert parsed.run_id == "a3_attempt1"
     #: No stage-selection surface exists to emit.
     assert "--stage" not in cmd
     assert not any(a == "--stage" for a in argv)

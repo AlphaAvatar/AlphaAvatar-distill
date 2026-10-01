@@ -1076,7 +1076,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--spent-usd", type=float, default=0.0)
     ap.add_argument("--soft-stop-usd", type=float, required=True)
     ap.add_argument("--authorized-usd", type=float, required=True)
-    ap.add_argument("--run-id", default="a3-attempt1")
+    ap.add_argument("--run-id", default="a3_attempt1")
     ap.add_argument("--probe-train-minutes", type=float, default=61.76)
     ap.add_argument("--probe-eval-minutes", type=float, default=26.85)
     return ap

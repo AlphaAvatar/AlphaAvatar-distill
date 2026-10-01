@@ -70,8 +70,16 @@ PY
 }
 
 next_free() {
+  #: BOTH spellings, and the number keeps increasing across the change.
+  #: `a3-attempt1` and `a3-attempt2` are consumed chains preserved as
+  #: unrecorded runs; the HYPHEN is why they were consumed -- `RunLayout`
+  #: accepts only [a-z0-9_], so `open_run` refused them at the last step of
+  #: the chain while every earlier step had produced correct-looking paths.
+  #: Counting both means no attempt number is ever reused and no two
+  #: directories differ only by a hyphen.
   N=1
-  while [ -d "logs/stages/stage-1/phase_a3/runs/a3-attempt$N" ]; do
+  while [ -d "logs/stages/stage-1/phase_a3/runs/a3-attempt$N" ] \
+     || [ -d "logs/stages/stage-1/phase_a3/runs/a3_attempt$N" ]; do
     N=$((N + 1))
   done
   echo "$N"
@@ -101,7 +109,7 @@ for ROUND in $(seq 1 "$ROUNDS"); do
   fi
   GPU="${PICK%%|*}"; PRICE="${PICK##*|}"
   N=$(next_free)
-  RUN="a3-attempt$N"
+  RUN="a3_attempt$N"
   GOV="logs/stages/stage-1/phase_a3/runs/$RUN/governance"
   say "round $ROUND: $GPU usable at \$$PRICE/h -> building $RUN"
 

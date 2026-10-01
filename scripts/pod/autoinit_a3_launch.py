@@ -2,7 +2,7 @@
 """Launch the complete A3 chain. Every refusal it can make costs `$0`.
 
     PYTHONPATH=src:scripts python scripts/pod/autoinit_a3_launch.py \
-        --run-id a3-attempt1 --gpu "NVIDIA L40S" --max-price 1.09
+        --run-id a3_attempt3 --gpu "NVIDIA L40S" --max-price 1.09
 
 One session, one experiment: the frozen parent under its digest gate, the
 A-bsz1 incumbent gate, interleaved A-bsz1/A-bsz3 diagnostics, three A-bsz3
@@ -165,6 +165,40 @@ A3_RUN_ROLES: dict[str, str] = {
 #: lands in the manifest and has an owner.
 A3_RUN_PREPARED: tuple[str, ...] = (
     "grant", "authorization", "readiness", "bundle_record")
+
+
+def _run_id(value: str) -> str:
+    """A run id the LAYOUT accepts, checked at parse time.
+
+    Two owners disagree about this string and only the later one checks:
+    `rel_run_dir` interpolates it into a path with no validation, while
+    `RunLayout.__post_init__` refuses anything outside
+    `[a-z0-9][a-z0-9_]*` -- no hyphens. So `a3-attempt2` produced correct-
+    looking paths through every gate, every governance artifact and a staged
+    22.8 MB bundle, and was refused by `open_run` at the very last step, after
+    the one-use chain had been consumed.
+
+    Asked of the owner's own rule rather than a copy of it, and asked HERE so
+    the refusal lands before the grant is written.
+    """
+    from aadistill.runtime.run_layout import RunLayoutError, _ID
+
+    if not _ID.match(value or ""):
+        raise argparse.ArgumentTypeError(
+            f"run id {value!r} is not valid in the run layout: lowercase "
+            "letters, digits and underscores, starting with a letter or "
+            "digit. `open_run` refuses it, and it would do so only after the "
+            "whole one-use chain had been built.")
+    #: And prove the LAYOUT accepts it, so this check cannot drift from the
+    #: rule it is standing in for.
+    try:
+        rel_run_dir(RUN_EXPERIMENT_ID, value, RUN_STAGE_ID)
+        from experiments.run_layout import layout_for
+
+        layout_for(REPO_ROOT, RUN_EXPERIMENT_ID, value, RUN_STAGE_ID)
+    except RunLayoutError as exc:
+        raise argparse.ArgumentTypeError(str(exc)) from exc
+    return value
 
 
 def session_record_path(run_id: str | None) -> str:
@@ -816,7 +850,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--runpod-config",
                     default=str(Path("~/.runpod/config.toml").expanduser()))
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
-    ap.add_argument("--run-id", required=True)
+    ap.add_argument("--run-id", required=True, type=_run_id)
     ap.add_argument("--gpu", default="NVIDIA L40S")
     #: NOT `required`, and the reason is mechanical rather than stylistic.
     #: `tests/pod/test_session_kind_dispatch.py` enumerates launchers by
