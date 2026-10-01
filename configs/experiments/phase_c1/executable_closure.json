@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 106,
- "digest": "13cf5e4d7c411947182125548ffffa0584cd2c1b972a855939001bc94e2a358e",
+ "digest": "1db8762f1c1d15f156afdbcf85637da3ce4a722686f4a6882f0d631a4a045cec",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,7 +39,7 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "daf2aee21407bad5b1f630e3ef84a4a39f06d89c7be934409bf94e1f197548e8",
+   "sha256": "fe6d34a461e848e6ced6ed47fa0a6c18692573cc4d6c929c32bb18ef01a822b3",
    "bytes": 20846
   },
   {
@@ -169,8 +169,8 @@
   },
   {
    "path": "scripts/pod/autoinit_c1_launch.py",
-   "sha256": "ac6f6a4d23671aedd98d5b973810d41d0dffb6f0b0738f96de07cfe255c86619",
-   "bytes": 87285
+   "sha256": "c65e983c789722658bfff352f048120aed6752152b7539048c7f1377c831d94d",
+   "bytes": 87503
   },
   {
    "path": "scripts/pod/autoinit_engine_probe.py",
@@ -179,8 +179,8 @@
   },
   {
    "path": "scripts/pod/autoinit_preflight_setup.sh",
-   "sha256": "760f16f36c6ecc996ed9d5318cebca7711cc359f42ee216bc7638ff47bb7cf53",
-   "bytes": 56185
+   "sha256": "37c66b33d9c1398210fe1d8824e581adeefdde3a2a9a25f3c0fdd2dac23d0c64",
+   "bytes": 58735
   },
   {
    "path": "scripts/pod/autoinit_science_inputs.py",

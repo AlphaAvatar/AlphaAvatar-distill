@@ -43,6 +43,9 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     local_files_gate, session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
+from aadistill.runtime.staging_contract import (  # noqa: E402
+    ignores_for_selection,
+)
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, RECOVERY_LADDER,
 )
@@ -68,6 +71,21 @@ RUN_EXPERIMENT_ID = "phase_a3"
 RUN_STAGE_ID = load_config(REPO_ROOT)["stage_id"]
 SPEC_SUCCESS = "configs/autoinit/a3_artifacts.json"
 SPEC_FAILED = "configs/autoinit/a3_artifacts_failed.json"
+
+#: The pod's blocking test gate, as a POSITIVE selection. The shared setup
+#: script runs `pytest tests/ $SESSION_TEST_IGNORES` and a session may only add
+#: flags, so "run only my own preflight" has to be expressed as a complement —
+#: and the complement is DERIVED, never hand-written, so a test directory added
+#: tomorrow is excluded by default rather than discovered on a billing GPU.
+#:
+#: This was MISSING. `SetupManifest.test_ignores` defaults to empty, so the
+#: pod would have run the entire repository suite: ~40 minutes of L40S time to
+#: prove AlphaAvatar-distill passes on that machine, and then a non-zero exit
+#: from the five documented development-only failures, killing the session
+#: during setup with 11 of 11 markers unset. C1 paid 16 billed minutes to learn
+#: the first half of that; A3 would have paid for both halves.
+POD_TEST_SELECTION = "tests/a3_preflight"
+TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
 
 #: attempt75's control evidence, which the OFF-POD comparison reads. Checked
 #: here at $0 because a session that trains three probes and then cannot be
@@ -588,6 +606,7 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
+            test_ignores=TEST_IGNORES,
             teacher_revision=CS.TEACHER_REVISION),
         driver_command=driver_command,
         #: FROM THE ONE OWNER, both of them. The C3 pair hardcoded a driver

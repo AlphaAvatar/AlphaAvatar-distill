@@ -201,7 +201,11 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: A FIFTH: `tests/c3_preflight`, added here in the same commit that
 #: created it. C3 itself uses `ignores_for_selection` and needs no such
 #: entry; this line exists only so C1's guard stays green.
-TEST_IGNORES = ("tests/architecture", "tests/autoinit",
+#: A SIXTH: `tests/a3_preflight`, same shape and same reason. A3 derives its
+#: own complement, so its pod is not at risk; this entry keeps C1's from
+#: collecting A3's preflight.
+TEST_IGNORES = ("tests/a3_preflight",
+                "tests/architecture", "tests/autoinit",
                 "tests/c3_preflight",
                 "tests/c2_baseline_completion_preflight",
                 "tests/c2_behavioural_preflight",
