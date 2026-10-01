@@ -2,13 +2,26 @@
  "schema": "aadistill.phase_c3.a_bsz3_comparison/v1",
  "_what_this_is": "A-bsz1 vs A-bsz3: the incumbent ATTENTION operator under its own execution protocol and under B3's. Same operator, same scientific state -- the batching knobs are ExecutionConfig fields and never enter a hash -- so any difference here is arithmetic, not identity.",
  "attention_impl_id": "attention.activation_importance_v1",
+ "frozen_identities": {
+  "shared_parent_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "incumbent_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "recovery_seeds": [
+   217230555,
+   1151307191,
+   2045359208
+  ],
+  "c3_preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
+  "_source": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+  "_the_incumbent_is": "what A_bsz1 must reproduce. A-bsz3 is the same operator under a different execution knob, so a reference protocol that does not rebuild this digest has not reproduced the incumbent."
+ },
  "prediction": {
   "_registered_before_any_gpu_run": true,
   "artifact_digest_will_match": false,
   "confidence": "high",
   "why": "This operator scores heads by mean_t ||W_o,h a_h(t)||^2 -- built from the attention output projection. `attn_out` is in the group measured to reduce shape-dependently on an L40S (K/N >= 1.6), and the only exactly reproducible shape is batch_size=1 with zero padding, which is precisely what A-bsz1 is and A-bsz3 is not. For the causal-KL scorer, B1 vs B4 already disagreed on 16 of 448 retained head slots (3.57%) across 5 of 28 layers at rank correlation 0.981.",
   "expected_magnitude": "small: a few percent of retained head slots, concentrated where the selection-boundary margin is smallest, with high rank correlation",
-  "runtime_is_the_open_question": "The prior negative result for this workload -- bsz=4 at 0.946x of bsz=1 for the statistics collector -- was measured at ORIGINAL-ORDER packing, which costs 36.73% padding. A-bsz3 costs 4.01%. That is the scientific case for measuring rather than assuming the old number transfers. Separately, length-sorted packing was worth 1.1884x on the causal-KL scorer, below its 1.25x bar -- but that is a different workload with a different forward count and does not transfer either."
+  "runtime_is_the_open_question": "The prior negative result for this workload -- bsz=4 at 0.946x of bsz=1 for the statistics collector -- was measured at ORIGINAL-ORDER packing, which costs 36.73% padding. A-bsz3 costs 4.01%. That is the scientific case for measuring rather than assuming the old number transfers. Separately, length-sorted packing was worth 1.1884x on the causal-KL scorer -- but that is a different workload with a different forward count and does not transfer either. NO ADOPTION THRESHOLD IS ATTACHED to either figure: the causal-KL pilot's 1.25x bar was withdrawn for this study by the maintainer decision of 2026-10-01, and the measured speedup is reported for judgement against the D-series attention-calibration workload.",
+  "the_saving_is_small_in_absolute_terms_and_that_is_known_in_advance": "attention.activation_importance_v1 was measured at 11.2732 s on this exact parent geometry in C1 attempt 18. Even an unattainable 3x would save about 7.5 s per attention calibration. That is the reason this study is scoped as an execution-optimization validation and not as a population-level claim, and the reason the runtime is measured over repeated interleaved rounds rather than once."
  },
  "zero_cost": {
   "n_items": 67,
@@ -354,7 +367,9 @@
   "initialization artifact digest",
   "selected attention structure / kept heads",
   "operator scores and ordering around the selection boundary",
-  "runtime",
+  "per-head rank correlation and score drift",
+  "observed forward / padded / executed position counters",
+  "runtime, over repeated interleaved rounds",
   "peak VRAM"
  ],
  "_why_a_gpu": "attn_out reduces shape-dependently on the L40S (K/N >= 1.6) and this operator's score is built from it. A CPU float32 rehearsal cannot reach that behaviour, so it would answer a different question.",

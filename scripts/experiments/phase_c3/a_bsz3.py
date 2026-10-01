@@ -32,8 +32,13 @@ downstream quality? Two outcomes, and they are handled differently:
   selection -> evidence that bsz3 is a pure execution optimization for this
   operator, adoptable on the runtime evidence alone.
 * **A-bsz3 changes the initialization** -> it is a DISTINCT NUMERICAL PROTOCOL,
-  is not promoted automatically, and needs the frozen non-inferiority design in
-  `logs/stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json`.
+  is not promoted automatically, and goes to the shortened engineering
+  behavioural sanity check in
+  `logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json` — at most three
+  newly trained treatment probes against attempt75's existing A controls. The
+  16-probe non-inferiority design that used to be named here was withdrawn on
+  2026-10-01 for scope: this is an execution-optimization validation, not a
+  population-level equivalence claim.
 
 **The shared parent is untouched.** `micro_batch_size: 1` on the prefix is
 identity-sensitive and has already changed a structural decision once — DEPTH
@@ -56,6 +61,12 @@ REPO = Path(__file__).resolve().parents[3]
 #: The frozen calibration mixture A calibrates on, as staged for a session.
 CALIBRATION_ITEMS = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
 
+#: Where the identities A-bsz3 must reproduce actually live. READ, never
+#: restated: the shared parent digest, the incumbent digest and the three
+#: recovery seeds all belong to the C3 preregistration, and a second copy here
+#: would be a second thing to keep in step with it.
+C3_PREREGISTRATION = REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
+
 #: The incumbent. Named once, and deliberately NOT parameterised: A-bsz3 is a
 #: statement about this operator, and a variant that swept implementations
 #: would be a different study.
@@ -73,6 +84,47 @@ PROTOCOLS: dict[str, ExecutionConfig] = {"A_bsz1": A_BSZ1, "A_bsz3": A_BSZ3}
 
 class ABsz3Error(RuntimeError):
     """The A-bsz3 comparison cannot be set up as declared."""
+
+
+def frozen_identities(path: Path | None = None) -> dict[str, Any]:
+    """The C3 identities A-bsz3 is bound to, read from the preregistration.
+
+    A-bsz1 **is** canonical A, so the reference protocol must rebuild the
+    frozen incumbent digest from the frozen shared parent. If it does not, the
+    session measured something that is not the incumbent, and the shortened
+    adoption study's reuse of attempt75's A controls -- which rests entirely on
+    that identity -- is void rather than approximate.
+
+    The recovery seeds come back in the preregistration's own order, which is
+    also the fail-fast order the adoption plan uses.
+    """
+    p = Path(path or C3_PREREGISTRATION)
+    if not p.is_file():
+        raise ABsz3Error(
+            f"the C3 preregistration is not at {p}; A-bsz3 binds its parent, "
+            "incumbent and seeds to that document and will not invent them")
+    doc = json.loads(p.read_text())
+    try:
+        parent = doc["shared_parent"]["artifact_digest"]
+        incumbent = doc["arms"]["A_incumbent"]["artifact_digest"]
+        seeds = [int(s) for s in doc["seeds"]["recovery"]]
+        prereg = doc["preregistration_sha256"]
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ABsz3Error(
+            f"{p} does not carry the fields A-bsz3 binds to: {exc}") from exc
+    if not seeds:
+        raise ABsz3Error(f"{p} declares no recovery seeds")
+    return {
+        "shared_parent_artifact_digest": parent,
+        "incumbent_artifact_digest": incumbent,
+        "recovery_seeds": seeds,
+        "c3_preregistration_sha256": prereg,
+        "_source": str(p.relative_to(REPO)),
+        "_the_incumbent_is": (
+            "what A_bsz1 must reproduce. A-bsz3 is the same operator under a "
+            "different execution knob, so a reference protocol that does not "
+            "rebuild this digest has not reproduced the incumbent."),
+    }
 
 
 def item_token_counts(path: Path | None = None) -> list[int]:

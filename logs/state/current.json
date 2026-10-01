@@ -20,7 +20,7 @@
  "prepared_launch": {
   "any": false,
   "run": null,
-  "note": "No chain is prepared. attempt66's one-use chain was CONSUMED by a session that trained nine probes, and formal C3 is stopped for a maintainer decision on durable storage. A new chain must not be built until that decision is made: section 13 freezes the session once formal measurement has begun."
+  "note": "No chain is prepared and none may be built for C3: the measurement completed and returned NO_GO, which ends formal execution for this round."
  },
  "budget": {
   "cumulative_spend_usd": 383.3623,
@@ -71,10 +71,10 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION -- the full joint re-search completed, its Top-5 ACCEPTED and FROZEN, screening completed, behavioural confirmation executed, observations pointed NO_GO, but the final confirmation evidence mixed evaluation-protocol identities, so no canonical promotion verdict is claimed and no new incumbent is named.",
+  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION, its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED.",
   "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "design and authorize C3 from this remote HEAD, starting from B unless the next-stage design review decides otherwise.",
-  "not_next": "no C2 re-evaluation, no uniform six-probe replay, no new seeds, no attempt15, no C2 spend of any kind."
+  "then": "A-bsz3 step 1 as designed in a_bsz3_adoption.json, once granted. Then the FFN experiment. Then D1/D2/D3 design and independent review.",
+  "not_next": "no C3 retry, resume or pooling; no C4; no C2 spend; no 16-probe A-bsz3 study; no D-series execution."
  },
  "read_order": [
   "logs/README.md -- START HERE, the index"
@@ -125,21 +125,16 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "STOPPED FOR A MAINTAINER DECISION. attempt66 trained all NINE formal probes on L40S and passed BOTH digest gates; stage H then failed and all nine checkpoints were lost to private-storage quota. Section 13 freezes the session: no retry, no resume, no pooling. Owner: the closeout.",
-   "operator": "attention.causal_kl_v1 IS implemented, on review/c3-operator-batching, as ENGINEERING state only: unregistered, inert on import, outside the C1 closure. Implementing it does NOT start formal C3.",
+   "status": "COMPLETE / NO_GO on the primary operator-isolation contrast, 2026-10-01. attempt75 trained, preserved and scored all nine probes; stage I failed on the pod and the verdict was computed off pod at $0 from immutable evidence. causal-KL does not promote; B remains the incumbent.",
+   "latest_attempt": "attempt75",
+   "operator": "attention.causal_kl_v1 was implemented on review/c3-operator-batching as ENGINEERING state only -- unregistered, inert on import, outside the C1 closure -- and implementing it does NOT start formal C3. Formal C3 then ran it: attempt66 and attempt75 built the B and C arms from it, and the verdict is NO_GO, so it does not promote.",
+   "owner": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json owns every figure and its claim boundary",
    "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
-   "provider_spend_usd": 16.6233,
-   "blocker": "DURABLE STORAGE, re-verified live at $0 on 2026-09-29: the LFS batch endpoint refuses 2.22 GiB and 19.98 GiB alike, 403 storage limit. A fresh attempt today would lose its checkpoints the same way. Freeing or buying storage is a maintainer decision, never an autonomous repair.",
-   "latest_attempt": "attempt66",
    "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
-   "gpu_policy": "ordered availability over L40S / RTX 6000 Ada Generation / L40, by availability alone. attempt66 ran on L40S.",
-   "stage_h_defect": "REPAIRED at $0 on the CALLER's side: the driver no longer passes --arm (C1 role vocabulary), and its scorer preflight now sends the real call's full flag set. Authorizes no rerun. Owner: current.md.",
-   "probes_trained": 9,
-   "probes_evaluated": 0,
-   "checkpoints_preserved": 0,
-   "verdict": "NOT claimed"
+   "open": "the B1-vs-B3 protocol choice, a post-C3 maintainer decision. A-bsz3 is the separate execution-knob study; see `a_bsz3`.",
+   "not_next": "no retry, resume or pooling; C4 is not authorized."
   },
-  "c4": "CONDITIONAL on C3 promoting. Same cycle as C1->C2; pattern owned by docs/OPERATOR_PROMOTION_CYCLE.md."
+  "c4": "NOT AUTHORIZED. C3 returned NO_GO, so the promotion it was conditional on did not happen."
  },
  "storage": {
   "roots": {
@@ -147,7 +142,7 @@
    "artifacts": "/home/ecs-user/aad-artifacts"
   }
  },
- "blocker": "FORMAL C3 STOPPED FOR A MAINTAINER DECISION: nine probes trained, evaluation failed on a one-line CLI defect, and the trained checkpoints were not preserved because durable storage is full. Section 13 forbids retrying a measurement that has begun.",
+ "blocker": "NOTHING IS BLOCKED ON A MEASUREMENT. C3 is complete with a canonical NO_GO; its stage-I aggregation ran off pod at $0 from attempt75's immutable evidence. What is blocked is MONEY: the formal allowance is overspent by $0.9492, so no session that trains a probe is issuable on either book.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -169,18 +164,15 @@
   "_what": "engineering evidence only -- none is a scientific result and none authorizes anything.",
   "authorizes": "nothing",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/",
-  "c2_full_search": "PASS 2026-09-17 on an L40S; the real 596M student reloaded canonically intact. $0.1453, CLOSED. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
-  "c2_full_search_performance": "COMPLETE and CLOSED 2026-09-18: two optimizations adopted on measured equivalence, one refused, one refuted. NOT a PASS. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
-  "c2_state_eval_certification": "COMPLETE and CLOSED 2026-09-19 on the complete frozen suite; ranked absolute drift 9.032e-06, inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/"
+  "c2_full_search": "PASS, CLOSED. $0.1453. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
+  "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
+  "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked absolute drift 9.032e-06 inside the predeclared 1e-5 -- the live constraint on perturbing state_eval. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/"
  },
  "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
-  "search": "attempt 3 COMPLETE; Top-5 ACCEPTED and FROZEN (7271091c\u2026)",
-  "reconstruction": "attempt 9 COMPLETE; 5/5 exact and durable",
+  "status": "search attempt 3 COMPLETE, Top-5 ACCEPTED and FROZEN; reconstruction attempt 9 COMPLETE, 5/5 exact and durable. Campaign CLOSED; remaining allowance not to be spent.",
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
-  "campaign": "CLOSED; remaining allowance not to be spent",
-  "acceptance_rule": "artifact_digest, unchanged",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
  "behavioural_session": {
@@ -189,7 +181,7 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "maintainer decision on durable storage, and on whether a fresh nine-probe attempt is authorized given the training has already been paid for once. C4 is not authorized.",
+ "next": "A-bsz3 step 1 needs a grant -- a short structural/runtime session on the GPU engineering allowance. Step 2 is conditional on step 1 and not fundable on the formal book. Then FFN, then the D-series design and review. C4 is not authorized.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -211,5 +203,19 @@
   "further_scientific_spend": "NOT AUTHORIZED",
   "probes_remaining": 0,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
+ },
+ "a_bsz3": {
+  "state": "DESIGNED, $0 half MEASURED, NOT FUNDED, NOT AUTHORIZED",
+  "design": "logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json",
+  "pricing": "logs/stages/stage-1/phase_c3/plans/a_bsz3_pricing.json",
+  "withdrawn": "the 16-probe non-inferiority design, 2026-10-01, for scope",
+  "is_not": "a population-level non-inferiority study; no 95% conclusion.",
+  "identity": "scientific != materialization. If step 1's digests DIFFER, A-bsz3 may not enter D1/D2/D3 until the execution fingerprint is bound to resume identity. Owner: identity_semantics in the design.",
+  "fail_fast_stop": "-0.030 is a catastrophic-regression stop, not an equivalence margin."
+ },
+ "d_series": {
+  "state": "DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED.",
+  "owner": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
+  "order": "after A-bsz3 and FFN; reviewed before any paid execution."
  }
 }

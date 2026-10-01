@@ -170,6 +170,73 @@ def test_the_operator_reports_kept_heads_and_selection_margins():
         "a margin is kept-minus-dropped and cannot be negative")
 
 
+def test_the_operator_counts_what_it_executed_rather_than_predicting_it():
+    """The counters must be an OBSERVATION, not a second copy of the model.
+
+    `padding_profile` already predicts forwards, padded and executed positions
+    from the item lengths, and the $0 analysis prints that prediction before
+    any pod exists. A trace that re-derived the same function of the same
+    inputs could never disagree with it, which is exactly the property a
+    cross-check must not have. So these are counted in the loop, and the test
+    drives both branches -- the reference path and the packed path -- because
+    they are separate pieces of counting code.
+    """
+    items = _items()
+    valid = sum(int(i["input_ids"].shape[-1]) for i in items)
+
+    ref = _run(A_BSZ1, items).trace
+    assert ref["physical_forward_invocations"] == len(items), (
+        "one item per forward on the reference path")
+    assert ref["padded_positions"] == 0, "the reference path pads nothing"
+    assert ref["executed_positions"] == ref["valid_positions"] == valid
+
+    packed = _run(A_BSZ3, items).trace
+    assert packed["physical_forward_invocations"] == -(-len(items) // 3)
+    assert packed["valid_positions"] == valid
+    assert packed["padded_positions"] > 0, (
+        "ragged items grouped three at a time must pad")
+    assert (packed["executed_positions"]
+            == packed["valid_positions"] + packed["padded_positions"])
+
+
+@pytest.mark.parametrize("execution", [A_BSZ1, A_BSZ3],
+                         ids=["bsz1", "bsz3"])
+def test_the_masking_invariant_has_two_independent_counters(execution):
+    """`executed - padded == calibration_tokens`, and the two sides disagree
+    on a masking defect rather than agreeing by construction.
+
+    The left side is counted by the operator's own loop; the right side comes
+    from the collector's mask, which is the thing that keeps padded positions
+    out of `M_h`. If one implementation were derived from the other this
+    assertion would be a tautology.
+    """
+    trace = _run(execution, _items()).trace
+    assert (trace["executed_positions"] - trace["padded_positions"]
+            == trace["calibration_tokens"])
+
+
+def test_per_head_scores_are_traced_and_line_up_with_the_selection():
+    """The quantity a rank correlation needs, and the margins cannot give."""
+    out = _run(A_BSZ1, _items())
+    scores = out.trace["head_scores_per_layer"]
+    kept = out.trace["kept_q_heads_per_layer"]
+    n_q = TEACHER_GEOMETRY["num_attention_heads"]
+    assert len(scores) == len(kept)
+    assert all(len(row) == n_q for row in scores), (
+        "a score is per QUERY head; a margin is per GQA group, and conflating "
+        "them is how a rank correlation silently correlates the wrong vectors")
+    assert all(s >= 0 for row in scores for s in row), (
+        "the score is a mean squared norm")
+
+
+def test_the_scorer_clock_times_the_statistics_pass_and_nothing_else():
+    """A timer that covered the child build and the checkpoint write would
+    report a ratio diluted by work both protocols do identically."""
+    trace = _run(A_BSZ1, _items()).trace
+    assert isinstance(trace["scorer_seconds"], float)
+    assert trace["scorer_seconds"] >= 0.0
+
+
 def test_on_cpu_float32_every_grouping_agrees_which_is_the_algorithmic_claim():
     """The ALGORITHM is grouping-invariant. That is all this shows.
 
@@ -243,7 +310,8 @@ def test_the_structural_comparison_driver_runs_end_to_end(tmp_path):
     sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
     from compare_a_bsz3 import structural_half
 
-    profile, _ = write_tiny_mixture(tmp_path)
+    profile, raw_items = write_tiny_mixture(tmp_path)
+    cmp_dir = tmp_path / "cmp"
     register_profile(profile, replace=True)
     try:
         pid = profile.qualified_id
@@ -283,12 +351,18 @@ def test_the_structural_comparison_driver_runs_end_to_end(tmp_path):
             prefix_reference_steps=tuple(spec.steps[:START]),
             expected_suffix_steps=((ATTENTION_IMPL_ID, pid),))
 
+        #: The $0 prediction, over the SAME mixture the operator will read.
+        #: Built from the raw items' own token counts, so the prediction and
+        #: the observation come from different code over the same inputs.
+        lengths = [len(i["ids"]) for i in raw_items]
         out = structural_half(
             spec, adapter=QWEN3_ADAPTER,
             root_loader=lambda: QWEN3_ADAPTER.load(
                 inc[2].checkpoint_path, device="cpu"),
-            verified=verified, workdir=tmp_path / "cmp", repo_root=tmp_path,
-            device="cpu")
+            verified=verified, workdir=cmp_dir, repo_root=tmp_path,
+            device="cpu", repeats=2,
+            expected_incumbent_digest=inc[-1].identity.artifact_digest,
+            zero_cost=execution_comparison(lengths))
     finally:
         unregister_profile(profile.qualified_id)
 
@@ -296,8 +370,14 @@ def test_the_structural_comparison_driver_runs_end_to_end(tmp_path):
     c = out["_comparison"]
     assert "INVALID" not in c, c.get("INVALID")
     assert c["calibration_tokens_identical"] is True
-    assert c["classification"] in {"PURE_EXECUTION_OPTIMIZATION",
-                                   "DISTINCT_NUMERICAL_PROTOCOL"}
+    #: The two names the driver can produce, and they are deliberately about
+    #: MATERIALIZATION rather than only about numerics: identical bytes mean
+    #: the state may keep one materialization identity, differing bytes mean
+    #: it may not. Renamed with the producer, which is the half a field
+    #: contract most often loses.
+    assert c["classification"] in {"TRANSPARENT_EXECUTION_OPTIMIZATION",
+                                   "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL"}
+    assert "_what_a_differing_digest_implies" in c
     #: The protocols were really applied, not defaulted.
     assert out["A_bsz1"]["traced_execution"]["micro_batch_size"] == 1
     assert out["A_bsz3"]["traced_execution"]["micro_batch_size"] == 3
@@ -307,6 +387,46 @@ def test_the_structural_comparison_driver_runs_end_to_end(tmp_path):
     assert out["A_bsz3"]["traced_execution"]["reference_path"] is False
     #: And the comparison actually computed a selection diff.
     assert "kept_head_selection" in c
+
+    #: BOTH ROUNDS RAN, INTERLEAVED, and the warm-up is excluded by name
+    #: rather than by happening to be first.
+    assert c["rounds_completed"] == 2
+    for name in ("A_bsz1", "A_bsz3"):
+        rounds = out[name]["rounds"]
+        assert [r["warm_up"] for r in rounds] == [True, False]
+        assert out[name]["timing"]["warm_up_rounds_excluded"] == 1
+        assert out[name]["timing"]["n_timed_rounds"] == 1
+        assert out[name]["digest_repeatable_within_session"] is True
+
+    #: Every round after the first released its tree. A repeated 1.19 GB
+    #: write is the kind of residency this project has run out of disk on.
+    assert (cmp_dir / "A_bsz1" / "rep0").is_dir()
+    assert not (cmp_dir / "A_bsz1" / "rep1").exists()
+    assert not (cmp_dir / "A_bsz3" / "rep1").exists()
+
+    #: The reference protocol reproduced the incumbent it was gated on.
+    assert c["incumbent_digest_gate"]["checked"] is True
+    assert c["incumbent_digest_gate"]["matches"] is True
+
+    #: Observation agrees with the $0 prediction, and the two were computed
+    #: by different code from different inputs.
+    counters = c["execution_counters"]
+    assert counters["masking_invariant_holds"] is True
+    assert counters["prediction_held"] is True
+
+    #: And the score comparison produced a real rank correlation over a
+    #: score matrix whose shape matches the selection it explains: one row
+    #: per layer, every row WIDER than the kept set, because ATTENTION drops
+    #: heads and a per-head score vector is over the parent's heads.
+    scores = c["head_scores"]
+    kept = out["A_bsz1"]["kept_q_heads_per_layer"]
+    rows = out["A_bsz1"]["head_scores_per_layer"]
+    assert len(rows) == len(kept)
+    assert len({len(r) for r in rows}) == 1
+    assert all(len(r) > len(k) for r, k in zip(rows, kept))
+    assert scores["n_heads"] == sum(len(r) for r in rows)
+    assert scores["rank_correlation"]["overall"] is not None
+    assert c["runtime"]["scorer_speedup_bsz1_over_bsz3"] is not None
 
 
 def _target():

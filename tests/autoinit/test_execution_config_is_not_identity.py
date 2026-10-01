@@ -219,6 +219,76 @@ class TestItIsRecordedAsEvidence:
                 == compute_state_id("r", "t", (loud,)))
 
 
+# --- and it is a SEMANTIC id, which is not a materialization id ------------
+
+
+class TestSemanticIdentityIsNotMaterializationIdentity:
+    """The other half of the guarantee above, and it is a limitation.
+
+    Everything in this file so far establishes that the batching knobs cannot
+    move the state id. That is what makes A-bsz1 and A-bsz3 the same
+    SCIENTIFIC state, and it is correct. It also means the state id cannot
+    distinguish two executions that produced different BYTES -- so it is not
+    sufficient on its own to own, resume or deduplicate a checkpoint.
+
+    Stated here as a tested property rather than a paragraph, because the
+    consequence is a live adoption precondition: see
+    `logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json ::
+    identity_semantics`, and the resume refusal in
+    `test_corrections.py :: test_resume_refuses_a_record_from_a_different_numerical_protocol`.
+    """
+
+    def test_the_identity_carries_nothing_that_could_name_an_artifact(self):
+        """Not just "no batch size" -- no bytes at all.
+
+        A state id derived without any reference to what was produced cannot
+        be the authority for which artifact a resume may adopt.
+        """
+        step = OperatorStep(
+            index=0, kind="ATTENTION", impl_id="x", impl_signature_hash="s",
+            profile_id="p", profile_hash="ph", config_hash="ch", seed=0,
+            result_spec_hash="rs")
+        identity = step.identity()
+        assert set(identity) == {"impl_id", "impl_signature_hash",
+                                 "profile_hash", "config_hash", "seed"}, (
+            "the identity tuple changed shape; the claim that it names no "
+            "artifact has to be rechecked")
+        assert not any("digest" in k or "artifact" in k for k in identity)
+
+    def test_two_executions_that_differ_in_bytes_would_collide_on_one_id(self):
+        """The hazard, in one assertion, with the fix it points at.
+
+        Two steps identical in every identity-bearing field, whose executions
+        differed and whose artifacts therefore might differ, are ONE state id.
+        Asserted as a disjunction so that it stays true after the mechanism is
+        built: if `compute_state_id` ever binds the execution fingerprint, the
+        ids will differ and the adoption precondition can be lifted.
+        """
+        common = dict(index=0, kind="ATTENTION",
+                      impl_id="attention.activation_importance_v1",
+                      impl_signature_hash="sig", profile_id="p",
+                      profile_hash="ph", config_hash="ch", seed=0,
+                      result_spec_hash="rs")
+        bsz1 = OperatorStep(
+            **common, trace={"micro_batch_size": 1,
+                             "calibration_batch_packing": "original_order_v1"})
+        bsz3 = OperatorStep(
+            **common, trace={"micro_batch_size": 3,
+                             "calibration_batch_packing": "length_sorted_v1"})
+        a = compute_state_id("root", "target", (bsz1,))
+        b = compute_state_id("root", "target", (bsz3,))
+        if a != b:
+            pytest.fail(
+                "compute_state_id now distinguishes two execution protocols. "
+                "That is the mechanism the A-bsz3 design names as a "
+                "precondition for adopting a differing artifact into "
+                "D1/D2/D3 -- update `identity_semantics` in "
+                "plans/a_bsz3_adoption.json and remove this branch.")
+        #: They collide. The resume path must therefore refuse on the BYTES,
+        #: which is what the companion test in `test_corrections.py` drives.
+        assert a == b
+
+
 # --- the config object itself ----------------------------------------------
 
 

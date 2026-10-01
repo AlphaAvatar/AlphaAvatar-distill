@@ -13,7 +13,101 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 after 919.7 min and is provider-confirmed gone; an account-wide re-query
 returns 0 pods and 0 network volumes.
 
-## A-bsz3 — IMPLEMENTED, `$0` half MEASURED, awaiting review
+## A-bsz3 — REDESIGNED SHORTER, `$0` half MEASURED, step 1 NOT FUNDED
+
+**The maintainer accepted the implementation and refused the design on
+2026-10-01**, reviewing `review/c3-operator-batching@ab4f32ed`. The reason was
+**scope**: A-bsz3 is an execution-optimization validation, and the programme
+does not need a `>=90%`-power population-level non-inferiority claim to decide
+whether a batching knob is worth switching on. The 16-probe design is
+[WITHDRAWN](../stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json); the
+live design is
+[`a_bsz3_adoption.json`](../stages/stage-1/phase_c3/plans/a_bsz3_adoption.json),
+derived by `scripts/autoinit/write_a_bsz3_adoption.py`.
+
+**Nothing produced by the new design may be reported as a 95% non-inferiority
+conclusion.** The power finding that produced 16 probes survives the
+withdrawal precisely because it is the reason three seeds cannot support that
+claim.
+
+**Step 1 is one same-device session** and now records what it was missing:
+per-head scores with Spearman rank correlation and score drift, the forward /
+padded / executed counters the operator **observed** rather than the `$0`
+model's prediction of them, and a runtime measured over **interleaved
+repeated rounds** with each protocol's first round a declared warm-up. That
+last part is not ceremony — this operator was measured at **11.2732 s** on
+this exact parent geometry, and a single sample of an 11-second workload run
+after the other protocol reports the arms' order as much as the protocols.
+
+**Four ways step 1 can be void rather than informative**, each checked: A-bsz1
+failing to reproduce the frozen incumbent digest `53e30566c5f7…`; the two
+protocols seeing different `calibration_tokens`; `executed − padded ≠
+calibration_tokens` for either protocol; or either protocol failing to
+reproduce its *own* digest across rounds. The incumbent gate is free and
+doubles as a third independent reproduction of that identity.
+
+**The `1.25×` runtime bar is gone.** It came from the causal-KL packing pilot
+— a different workload with a different forward count — and the maintainer
+withdrew it here. The measured speedup is reported; what it is worth is judged
+against the attention-calibration volume D1/D2/D3 will need.
+
+**Step 2 trains at most THREE probes, treatment only**, and reuses attempt75's
+three valid, protocol-uniform, fully scored `A_incumbent` controls at the
+frozen C3 recovery seeds `217230555`, `1151307191`, `2045359208`. Fail-fast
+from the first seed, with a stop threshold **derived** rather than written:
+across all three C3 contrasts — arms whose *pooled* differences were within
+`±0.002` — per-seed deltas still ranged over `±0.0224`, so the stop sits at
+`−0.030`, three times the SESOI and above anything this instrument has
+produced between protocols behaving identically. A seed-1 delta between
+`−0.030` and `0` deliberately does **not** stop the study.
+
+**The price of the shortened design is stated, not implied.** Treatment and
+control would be measured in *different sessions on different hardware*; C3
+trained all nine of its probes in one session precisely to avoid that. Session
+is therefore an unquantified alternative explanation, and it is a stronger
+reason than power for refusing a formal equivalence claim. Step 1's incumbent
+digest gate confines the unverified part to training and evaluation.
+
+**Priced from measured components**, mostly attempt75's own stage markers:
+
+| shape | expected | hard ceiling | book | fundable |
+| --- | --- | --- | --- | --- |
+| step 1, structural | `$0.7328` | `$1.5815` | engineering | **yes**, `$1.9395` left |
+| step 2, 1 probe | `$2.5193` | `$3.9039` | formal | no, short `$4.8531` |
+| step 2, 3 probes | `$5.7881` | `$8.1533` | formal | no, short `$9.1025` |
+
+**The books do not transfer, and the study straddles them.** Step 1 trains no
+probe and consumes no battery, so it is GPU engineering validation. Step 2
+trains recovery probes and scores them on `c1_confirmation_v1`, and the
+execution package states that the engineering allowance authorizes neither —
+so calling the study "engineering" in its *scientific* claim does not move it
+between books. Owner:
+[`a_bsz3_pricing.json`](../stages/stage-1/phase_c3/plans/a_bsz3_pricing.json).
+
+## The D-series directive is recorded and NOT started
+
+**Received 2026-10-01.** D1 (target-aware search), D2 (target-aware +
+reference-confidence weighting) and D3 (target-aware + KL + pure student
+confidence) are **global** scoring/search experiments — not attention-only —
+applied consistently to DEPTH, FFN, RESIDUAL_WIDTH, ATTENTION, every other
+calibration-consuming structural operator, global state evaluation and beam
+ranking/pruning. Operator set, beam width, beam schedule, target geometry,
+calibration data and search breadth stay identical across the three; the
+scoring semantics are the variable. A search-stage metric does not name the
+winner: the best candidates from each, plus the incumbent anchor, enter ONE
+common behavioural-selection design.
+
+Then **Stage-0 teacher-native v2**, with data scale as a first-class variable
+on a deterministic *nested* ladder of ~60k → ~240k → ~960k → ~3.84M target
+positions.
+
+**Order, and it is the maintainer's:** finish A-bsz3, then the FFN
+experiment, then freeze the current-best implementation for every structural
+kind, then design and price D1/D2/D3 and push the protocol for independent
+review *before* any paid execution. Owner:
+[`phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md).
+
+## A-bsz3 — what the implementation is
 
 **A-bsz3 is canonical A under B3's batching protocol.** Same operator
 (`attention.activation_importance_v1`), same composition, same scientific
@@ -53,32 +147,73 @@ zero padding. The registered prediction is that the artifact digest will
 *algorithm* is grouping-invariant and nothing more.
 
 **The structural half is unrun and needs a GPU.** Artifact digest, kept heads,
-selection-boundary margins, runtime and peak VRAM all require the real teacher
-in bf16 — a CPU rehearsal cannot reach the behaviour under test. The driver
-`structural_half` is written and **runs end to end at toy scale** through the
-production suffix API, so what is untested is the numerics, not the plumbing.
+per-head scores, selection-boundary margins, runtime and peak VRAM all require
+the real teacher in bf16 — a CPU rehearsal cannot reach the behaviour under
+test. The driver `structural_half` is written and **runs end to end at toy
+scale** through the production suffix API, so what is untested is the
+numerics, not the plumbing.
 
-**The adoption design is frozen before any behavioural result**, and it is
-*not* C3's rule: [`a_bsz3_noninferiority.json`](../stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json).
-C3 asks whether a new operator is **better** (`LCB > 0` and `Δ ≥ +0.010`);
-A-bsz3 asks whether an execution change is **not worse** (`LCB > −0.010`). Same
-magnitude, opposite direction, different logical form — and the magnitude is
-justified independently, from C3's own measured precision: the worst one-sided
-half-width was `0.008627`, so a margin of `0.005` or `0.0075` **could not be
-cleared even by a perfectly equivalent protocol**. A criterion no true negative
-can pass is not a criterion.
+**The operator now emits the evidence the comparison reads**, and none of it
+is identity: `OperatorStep.identity()` does not look at `trace`, and the
+artifact digest comes from the written bytes. Added are the per-head score
+vectors, the forward / executed / valid / padded counters **counted by the
+loop as it ran**, and a CUDA-synchronized `scorer_seconds` around the
+statistics pass alone. The counters matter because `padding_profile` already
+predicts the same three from item lengths — a trace that restated that
+prediction could never contradict it, and these can. The loop's
+`valid_positions` and the collector's independent `calibration_tokens` give a
+masking invariant a consumer checks rather than trusts.
 
-**The design is bigger than C3's, and that is the finding.** Non-inferiority at
-a given margin needs more data than superiority at the same margin. At 3 seeds
-the power at true equivalence is only `0.603` — a ~40% chance of failing to
-adopt a genuinely equivalent protocol. **8 seeds × 2 arms = 16 probes** reaches
-`0.929`.
+**NOT FUNDED and NOT AUTHORIZED**, and the cheap gate still comes first: if
+the digests match, no behavioural study is owed at all. The numbers are in the
+table above; the `~$30` sixteen-probe figure this paragraph used to carry
+belonged to the withdrawn design.
 
-**NOT FUNDED and NOT AUTHORIZED.** Step 2 is ~`$30` against a project remaining
-of `$16.6377` and a formal allowance already exceeded by `$0.9492`. The cheap
-gate comes first: if the digests match, no behavioural study is owed at all;
-if the runtime win misses the `1.25×` bar, the study stops for the price of one
-short session rather than sixteen probes.
+## Scientific identity is not materialization identity
+
+**The design settled the scientific question and left the materialization one
+open; that gap is now stated and tested.** `compute_state_id` binds the root
+teacher, the target spec, each step's implementation id and signature, the
+calibration profile hash, the operator config hash and the seed. It binds
+**neither the `ExecutionConfig` nor the artifact digest** — correctly, because
+otherwise two runs of the same science at different batch sizes would be
+different *scientific* states, a resume would not find its own journal, and
+whether A-bsz1 and A-bsz3 agree would be settled by definition instead of
+measured.
+
+But a semantic id cannot own bytes, and today it is the only id the beam has.
+So:
+
+* **digests identical** → A-bsz3 is a **transparent execution optimization**.
+  It may keep one scientific *and* one materialization identity, and adoption
+  turns on runtime alone. Nothing further is owed and **no mechanism may be
+  built speculatively**.
+* **digests differ** → A-bsz3 is a **distinct numerical materialization
+  protocol**. The shortened sanity study may still be proposed, **and A-bsz3
+  may not enter D1/D2/D3 execution** until the repository binds the numerical
+  execution fingerprint to materialization/resume identity. Two artifacts that
+  differ in bytes must never share a resumable, deduplicable state id. A
+  passing behavioural result does **not** clear this — it is an engineering
+  correctness property, not a behavioural one.
+
+**A second implementation id is forbidden as the fix.**
+`attention.activation_importance_bsz3` would fork the *scientific* identity to
+repair a *materialization* problem, and would answer the equivalence question
+by definition — the exact error this study exists to avoid.
+
+**The hazard is where the resume reads.** `BeamSearch._restore` looks a state
+up by `state_id`, then re-identifies the checkpoint on disk and refuses if the
+bytes disagree with the record. That catches a stale or tampered checkpoint; it
+cannot catch a record that is internally consistent and was written by a
+different numerical protocol. The guard that *does* hold is now locked by
+`test_resume_refuses_a_record_from_a_different_numerical_protocol`, which
+appends such a record to the real journal — same state id, another protocol's
+digest — and requires the refusal. It was mutation-checked: disabling the
+digest comparison in `_restore` turns it red.
+
+**The `−0.030` seed-1 stop is an engineering catastrophic-regression stop.** It
+is **not** an equivalence margin and must never be reported as one: clearing it
+means the protocol is not visibly broken at one seed, and bounds nothing.
 
 **FORMAL C3 MEASURED ALL NINE PROBES AND THEN FAILED TO AGGREGATE THEM.**
 `attempt75`, secure L40S at `$1.09/h`, **`$16.7083`** of a `$22.1452` derived
@@ -345,6 +480,15 @@ C3  COMPLETE / NO_GO                    <- canonical verdict, 2026-10-01
       PRIMARY verdict                   NO_GO   UCB +0.005490 < SESOI +0.010
       incumbent after C3                B, unchanged; causal-KL does not promote
       B1 vs B3 protocol choice          a post-C3 maintainer decision, open
+A-bsz3  DESIGNED, NOT FUNDED           <- the shortened design, 2026-10-01
+      $0 padding/forward analysis       MEASURED  67 forwards -> 23
+      implementation + driver           complete, toy-scale executed
+      16-probe non-inferiority design   WITHDRAWN for scope
+      step 1, structural/runtime        unrun; fits the engineering allowance
+      step 2, <=3 treatment probes      conditional on step 1; formal book, overspent
+FFN     NOT STARTED                     <- next after A-bsz3
+D1/D2/D3  DIRECTIVE RECEIVED            <- global scoring/search; not designed
+Stage-0 v2  DIRECTIVE RECEIVED          <- after the best D-method is established
 C4  NOT AUTHORIZED
 ```
 
@@ -2282,9 +2426,24 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 ## The full suite is not green: 11 failures, and the count is trustworthy again
 
-**Closeout measurement, 2026-10-01 at `ad8fabf1`: 11 failed, 5349 passed,
-228 skipped, ZERO errors** in 42m03s. Exactly the eleven documented failures —
-no new ones, and none of the eleven fixed.
+**Closeout measurement, A-bsz3 redesign round: 11 failed, 5392 passed, 228
+skipped, ZERO errors** in 41m44s, on the working tree described by this file.
+Exactly the eleven documented failures, as an **identical node-id set** to the
+previous run — no new ones, and none of the eleven fixed. `5349 → 5392` passed
+is the 43 tests the round added.
+
+*The previous closeout measured the same eleven at `ad8fabf1` with 5349
+passed. It is not restated beyond that, because a count belongs to the tree it
+was taken on.*
+
+**Two derived records went stale during the round and were regenerated, not
+waived.** The new test file staled `skip_predicate_audit.json`, and editing a
+core operator moved the executable closure — `derive_closure` reports
+`+0 / −0 / 1 edited` for both phase_c1 and phase_c3, which is the one declared
+module and confirms no core file was added or removed. A third failure was a
+real omission: compacting the snapshot dropped the word the
+attempt-4 consistency gate requires, that C2's Top-5 ruling is recorded as
+**accepted** rather than owed.
 
 **The order-dependent inflation is gone.** It used to report 22–29 failed with
 15–20 errors, of which only eleven were real, and the surplus appeared and

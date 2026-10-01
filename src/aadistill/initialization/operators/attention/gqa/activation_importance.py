@@ -41,6 +41,7 @@ import anywhere in the process.
 
 from __future__ import annotations
 
+import time
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -100,6 +101,20 @@ ATTENTION_STATS_SPEC = StatsSpec(
     quantities=("attn_head_sqsum", "attn_token_count"),
 )
 
+
+def _cuda_sync(device: Any) -> None:
+    """Block until the device is idle, or do nothing off CUDA.
+
+    Two lines, and deliberately NOT imported from `causal_kl`, which has an
+    identical one. This module's whole claim is that A-bsz3 is the incumbent
+    operator under a different execution knob and shares no code with the C3
+    candidate; an import here would make that claim false for the sake of two
+    lines. The right third home would be `device.py`, which is on the
+    historical CUDA-validated surface — editing it to host a helper is a worse
+    trade than this duplication.
+    """
+    if torch.device(device).type == "cuda":
+        torch.cuda.synchronize(device)
 
 
 class AttentionActivationImportanceV1(OperatorImplementation):
@@ -188,15 +203,40 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         #: padding to save; what changes is the order the float64 accumulator
         #: sees, which is a real protocol difference and is traced as one.
         reference_path = batch_size <= 1 and packing == ORIGINAL_ORDER_V1
+        #: TIMED HONESTLY, and for one reason: the A-bsz1/A-bsz3 comparison
+        #: reports a ratio of two wall clocks. CUDA kernels are asynchronous,
+        #: so a timer that does not synchronize at BOTH ends attributes the
+        #: tail of this loop to whatever runs next. Measured here rather than
+        #: around `materialize_fixed_path_suffix` because the checkpoint write
+        #: that surrounds it is identical under either protocol and would
+        #: dilute the ratio toward 1 by exactly the time it takes.
+        #:
+        #: `monotonic`, not `perf_counter`: the same clock `causal_kl` reports
+        #: its `scorer_seconds` on, so two operators' timings are comparable.
+        physical_invocations = executed_positions = valid_positions = 0
+        _cuda_sync(compute)
+        started = time.monotonic()
         try:
             if reference_path:
                 for item in ctx.calibration_items:
                     collector.process(item["input_ids"].to(compute))
+                    #: One item per forward and no padding by construction, so
+                    #: executed and valid advance together on this path. They
+                    #: are still counted separately: a path on which they
+                    #: diverge is a defect, and a counter that assumed they
+                    #: could not would be unable to say so.
+                    physical_invocations += 1
+                    executed_positions += int(item["input_ids"].shape[-1])
+                    valid_positions += int(item["input_ids"].shape[-1])
             else:
                 for packed in packed_batches(ctx.calibration_items, batch_size,
                                              packing=packing,
                                              pad_id=resolve_pad_id(parent),
                                              device=compute):
+                    physical_invocations += 1
+                    executed_positions += (packed.batch.size
+                                           * int(packed.batch.input_ids.shape[1]))
+                    valid_positions += int(packed.batch.n_valid_tokens)
                     #: `original_indices` is deliberately unused: this collector
                     #: accumulates ONE global per-layer/per-head second moment
                     #: over all valid token positions, so there is no per-item
@@ -206,6 +246,8 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                     collector.process_batch(packed.batch)
         finally:
             collector.close()
+        _cuda_sync(compute)
+        scorer_seconds = time.monotonic() - started
         #: THE TRANSFER BOUNDARY, and a defect this project has already paid
         #: for once (`docs/core-provenance.md`).
         #:
@@ -227,7 +269,7 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         new_spec = ctx.parent_spec.replace(**{HEADS_FIELD: keep_q})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)
 
-        retained, kept_per_layer, margins = [], [], []
+        retained, kept_per_layer, margins, head_scores = [], [], [], []
         for idx, (src, dst) in enumerate(zip(adapter.blocks(parent),
                                              adapter.blocks(builder.model))):
             s_out, d_out = (attention_out_projection(adapter, src),
@@ -240,6 +282,15 @@ class AttentionActivationImportanceV1(OperatorImplementation):
             total = float(scores.sum())
             retained.append(float(scores[kept].sum() / total) if total > 0 else 0.0)
             kept_per_layer.append([int(h) for h in kept])
+            #: EVIDENCE, never identity -- and the quantity the margins cannot
+            #: give. A margin says how close a GQA group's call was; the score
+            #: vector says whether two protocols agree about the ORDERING of
+            #: every head, including the ones no selection depends on. The
+            #: causal-KL comparison reported exactly this (rank correlation
+            #: 0.981 while 3.57% of retained slots moved), and without it the
+            #: same comparison for this operator could report only how many
+            #: slots differ, not how differently the operator scored.
+            head_scores.append([float(s) for s in scores.tolist()])
             #: EVIDENCE, never identity. What the A-bsz1/A-bsz3 comparison
             #: needs and scores alone cannot give: two protocols can differ in
             #: every score and agree on every selection, or agree closely and
@@ -283,6 +334,26 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    "calibration_tokens": int(stats["attn_token_count"]),
                    "kept_q_heads_per_layer": kept_per_layer,
                    "selection_margin_per_layer": margins,
+                   "head_scores_per_layer": head_scores,
+                   #: Execution evidence, counted AS IT RAN rather than
+                   #: re-derived from the item lengths afterwards. The
+                   #: difference matters: `padding_profile` predicts these
+                   #: three from lengths alone and the A-bsz3 analysis prints
+                   #: that prediction before any pod exists, so a trace that
+                   #: restated the same function could never contradict it.
+                   #: These can.
+                   #:
+                   #: `valid_positions` is counted by this loop; the collector
+                   #: counts `calibration_tokens` independently through its own
+                   #: mask. The two must agree, and a consumer that checks
+                   #: `executed - padded == calibration_tokens` is checking the
+                   #: masking rather than trusting it.
+                   "physical_forward_invocations": physical_invocations,
+                   "executed_positions": executed_positions,
+                   "valid_positions": valid_positions,
+                   "padded_positions": executed_positions - valid_positions,
+                   #: The statistics pass alone, synchronized at both ends.
+                   "scorer_seconds": round(scorer_seconds, 4),
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},
             artifacts={"kept_heads": kept_per_layer},
         )

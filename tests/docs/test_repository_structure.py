@@ -255,11 +255,28 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     batching entry to one line. A raise for history would be the failure
     this guard exists to catch, so the shape check below asks that question
     directly instead of leaving the byte count to imply it.
+
+    13_500 -> 14_000 on 2026-10-01, and the reclamation came FIRST, which is
+    what this docstring asks for. Reclaimed in the same round: `phase_c.c3`
+    went from attempt66's lost-checkpoint narrative to a closed phase's
+    boundary once C3 returned its verdict (~1.1 KB), `phase_c2_replay` to
+    three keys, `prepared_launch` to a note that no chain may be built, and
+    three of the four CUDA validations to verdict + CLOSED + cost + owner.
+    Two squeezes went TOO far and this file's own gates caught both: the
+    attempt-4 consistency check requires the snapshot to record C2's Top-5
+    ruling as ACCEPTED, and `test_the_fact_appears` requires stage F to keep
+    `CONFIRMED ON REAL CUDA` and SHA `7027a8f4`. Both were restored.
+
+    What the remaining growth buys is THREE new live subjects, none of them
+    history: the A-bsz3 adoption study, the scientific-vs-materialization
+    identity precondition that decides whether a differing artifact may enter
+    a later search, and the D-series directive. Each is a decision a reader
+    acts on now.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 13_500, (
+    assert len(SNAPSHOT.read_bytes()) < 14_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

@@ -11,10 +11,16 @@
 > [`current.md`](../../../../state/current.md); for what any phase actually
 > measured, read that phase's own records.
 
-**Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 PREPARATION
-CLOSED AND ACCEPTED — the full joint re-search is designed, derived and priced,
-it FITS the raised accounting envelope, and it is NOT AUTHORIZED · C3 NOT
-STARTED · C4 CONDITIONAL ON C3.**
+**Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 CLOSED
+WITHOUT PROMOTION, by maintainer decision of 2026-09-24 · C3 COMPLETE, verdict
+`NO_GO` on the primary operator-isolation contrast, 2026-10-01 · C4 NOT
+AUTHORIZED · A-bsz3 designed and not funded · the D-series directive received
+and not yet designed.**
+
+*This line used to read "C2 PREPARATION CLOSED AND ACCEPTED … C3 NOT STARTED ·
+C4 CONDITIONAL ON C3", which was true when it was written and stopped being
+true on 2026-09-28. The paragraphs below it describe the C2 preparation round
+as it stood then and are historical.*
 
 The Phase-C0 protocol is frozen in
 [`phase_c0_preregistration.json`](phase_c0_preregistration.json), with its sizing
@@ -422,6 +428,165 @@ Then, in order:
 4. **canonical Stage-1 NLL** — only after the final initialization is uniquely
    selected. Diagnostic, never a promotion criterion;
 5. **formal Stage-2/Stage-3 recovery training** — last.
+
+**The D-series below changes what comes between 2 and 3.** It is not a
+per-operator isolation at all; it varies the scoring semantics the whole search
+uses. The ordering the maintainer set on 2026-10-01 is: finish A-bsz3, then the
+FFN work, then design and review D1/D2/D3.
+
+---
+
+## The D-series — global scoring/search experiments
+
+> **DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED, NOT
+> AUTHORIZED.** This section records what the maintainer specified so the
+> specification is not carried in chat history. The protocol itself is owed
+> *after* the FFN work, and must be pushed for independent review before any
+> paid execution.
+
+**Preconditions.** After A-bsz3 and the FFN experiment are complete, freeze the
+current-best implementation for **every structural kind**.
+
+**And one more, which A-bsz3 may impose.** If step 1 finds the A-bsz1 and
+A-bsz3 artifact digests **differ**, A-bsz3 is a distinct numerical
+*materialization* protocol — the operator semantics, the hypothesis and the
+estimand are unchanged, and the bytes are not. `compute_state_id` binds
+neither the `ExecutionConfig` nor the artifact digest, so two differing
+artifacts would collide on one resumable, deduplicable state id. **A-bsz3 may
+not enter D1/D2/D3 execution in that case until the repository binds the
+numerical execution fingerprint to materialization/resume identity**, and a
+passing behavioural sanity check does not clear it — that is an engineering
+correctness property, not a behavioural one. If the digests match, nothing is
+owed and no such mechanism may be built speculatively. Owner:
+[`a_bsz3_adoption.json`](../../phase_c3/plans/a_bsz3_adoption.json)
+`:: identity_semantics`.
+
+**They are not attention-only experiments.** D1, D2 and D3 are GLOBAL
+scoring/search experiments. All three apply their scoring semantics
+consistently to DEPTH selection, FFN selection, RESIDUAL_WIDTH selection,
+ATTENTION selection, every other calibration-consuming structural operator,
+global state evaluation, and beam ranking/pruning.
+
+**One variable.** Operator set, beam width, beam schedule, target geometry,
+calibration data and search breadth stay identical across D1/D2/D3. The
+scoring/evaluation semantics are the experimental variable. Weight-only /
+no-calibration operators are unchanged.
+
+### D1 — target-aware search
+
+A first-class, **hash-bound position/objective policy**, rather than
+target-mask logic embedded independently into each operator.
+
+* teacher-native / chat items: the active positions are the actual assistant
+  supervised prediction positions;
+* untemplated / raw-LM items in the current frozen calibration suite: all real
+  next-token positions stay active. This keeps D1's DATA identical to the
+  existing search and changes only the scoring semantics. The Stage-0
+  teacher-native-v2 experiment later removes this historical raw-LM exception.
+
+The resulting target mask applies to every relevant statistic: attention
+residual-write energy, FFN activation importance, residual-width second
+moments/PCA, depth / causal distortion, and any other calibration-derived
+operator objective.
+
+**Global state evaluation becomes target-aware too.** A candidate selected by
+target-aware operators must not then be pruned by a full-sequence beam metric.
+The existing multi-objective Pareto machinery and beam schedule are preserved;
+what changes is the state metrics, not the beam algorithm.
+
+### D2 — target-aware + reference-confidence weighting
+
+From D1, add confidence weighting based on the **reference** distribution. For
+an active target position,
+
+```text
+c_ref(t) = 1 - H(p_ref(t)) / log(|V|)
+w(t)     = target_mask(t) * c_ref(t)
+```
+
+applied consistently to all calibration-derived operator statistics and to
+global beam evaluation. For an operator-local comparison the reference is the
+intact parent state the operator was handed; for global state evaluation it is
+the frozen teacher.
+
+The question: do positions on which the relevant reference model is already
+confident deserve more structural protection?
+
+The entropy idea is inspired by Confident Decoding. This is a **new
+compression-selection objective**, not a claim that the paper proposes pruning.
+
+### D3 — target-aware + KL + pure student confidence
+
+A distinct experiment, and the maintainer's original hypothesis: student
+confidence itself becomes part of the evaluation rather than merely weighting
+another reference-derived distortion. For a candidate student distribution
+`q_t` over target positions,
+
+```text
+C_student(t) = 1 - H_student(t) / log(|V|)
+```
+
+D3 evaluates **both** retained target-aware teacher/reference KL **and** pure
+candidate-student confidence, the second as a **separately visible component**
+rather than only as a weight on the first, under a **preregistered combined
+objective**.
+
+* the KL + student-confidence weighted objective is **defined and frozen before
+  D3 search results exist**;
+* raw KL and raw entropy are not added directly — their scales differ. The
+  normalization and mixing coefficient are derived and frozen from the
+  incumbent/reference calibration ONLY, before candidate search outcomes are
+  visible;
+* the individual KL and student-confidence components are retained in evidence,
+  so a weighted score cannot hide which signal moved;
+* for activation/PCA-style local operators, student/reference confidence enters
+  through the common position-weighting policy — not through
+  experiment-specific branches inside each operator;
+* for beam/global evaluation, student confidence is recorded explicitly
+  alongside the combined D3 objective.
+
+### Comparing D1 / D2 / D3
+
+**A search-stage metric does not name the final winner, and these searches do
+not self-promote.** Each D search nominates its candidate set under a
+prospectively frozen rule. The best candidates from D1/D2/D3, together with the
+incumbent anchor, then enter ONE common behavioural-selection design, so the
+scoring methods are compared on downstream recovered behaviour rather than on
+the metric each was designed to optimize.
+
+That behavioural experiment does not start yet. First design and price D1/D2/D3
+and their common comparison.
+
+---
+
+## Stage-0 teacher-native v2
+
+> **DIRECTIVE RECEIVED 2026-10-01. NOT STARTED.** After the best D-method /
+> composition is established.
+
+**Data scale is a first-class experimental variable.** The primary scale unit
+is **target prediction positions**, with the teacher-native domain mixture held
+fixed across sizes. The deterministic nested ladder is approximately:
+
+```text
+~60k  ->  ~240k  ->  ~960k  ->  ~3.84M      target positions
+```
+
+Exact reachable counts may differ, because complete sessions are not truncated;
+the ladder stays approximately geometric and **nested**. Smaller rungs are
+deterministic subsets/prefixes of larger ones under the same domain
+proportions — rungs are never independently redrawn.
+
+Two questions must remain distinguishable:
+
+1. **composition effect** — current public/pretraining-heavy Stage-0 vs
+   teacher-native Stage-0 at approximately matched ~1M scale;
+2. **scale effect within teacher-native data** — ~60k → ~240k → ~960k → ~3.84M.
+
+The teacher-native corpus preserves the teacher's real tokenizer, chat
+template, reasoning/tool format, assistant targets and termination structure,
+with explicit **target-position masks carried into the Stage-0 statistics
+contract**.
 
 ---
 

@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 106,
- "digest": "185d91e5934e56f9a0bf82c27d6e7589263db8d43a124b8a4c4b6173fc16401a",
+ "digest": "0f5dd2b11a22157b217f8ce34513d71991230e5a231dab09a2adcca38a882a8b",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -394,8 +394,8 @@
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
-   "sha256": "202fd7006c0c044d8f4275d029b92b20059a03759a3489c44d34879e624702d0",
-   "bytes": 15492
+   "sha256": "1407a457e3990a05f01c8a0d219cf19508005c57070fa2b58b29fffb1fcf751d",
+   "bytes": 19952
   },
   {
    "path": "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",

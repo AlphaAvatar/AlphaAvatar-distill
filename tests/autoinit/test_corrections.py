@@ -549,6 +549,65 @@ def test_resume_refuses_a_journal_measured_under_a_different_suite(
             assert state.evaluation.suite_hash == suite_b.suite_hash
 
 
+def test_resume_refuses_a_record_from_a_different_numerical_protocol(
+        tmp_path, teacher, target_spec, eval_suite, suite_items, profile):
+    """A MATCHING SEMANTIC STATE ID IS NOT SUFFICIENT TO REUSE A CHECKPOINT.
+
+    `compute_state_id` reads the root teacher, the target spec, each step's
+    `impl_id`, implementation signature, profile hash, `config_hash` and seed.
+    `ExecutionConfig` reaches none of them and neither does the artifact
+    digest. That exclusion is deliberate and correct -- otherwise two runs of
+    the same science at different batch sizes would be different scientific
+    states, a resume would not find its own journal, and whether A-bsz1 and
+    A-bsz3 agree would be settled by definition instead of measured.
+
+    Its consequence is this: two executions that produce DIFFERENT artifact
+    bytes collide on one resumable, deduplicable id. So the resume decision
+    must be a function of the BYTES and not only of the id. This drives the
+    real path -- a journal whose current record for a state names another
+    protocol's digest, with this protocol's checkpoint on disk underneath it --
+    and requires the refusal.
+
+    Distinct from `..._whose_artifact_no_longer_matches`, which edits the
+    BYTES. This edits the RECORD, which is the direction a differing execution
+    protocol would arrive from.
+    """
+    import json as _json
+
+    from test_search import make_search
+
+    first, _ = make_search(tmp_path, teacher, target_spec, eval_suite,
+                           suite_items, [profile], run_id="protocol")
+    result = first.run()
+    victim = next(s for s in result.states.values()
+                  if s.checkpoint_path and s.evaluation)
+
+    #: The journal is append-only and `latest_by_state_id` takes the LAST
+    #: record per id, so appending is how a later execution's record arrives.
+    record = first.store.latest_by_state_id()[victim.state_id]
+    assert record["artifact"]["artifact_digest"] == \
+        victim.artifact.artifact_digest, "fixture precondition"
+    other_protocol = dict(record)
+    other_protocol["artifact"] = {**record["artifact"],
+                                  "artifact_digest": "f" * 64}
+    with first.store.path.open("a") as fh:
+        fh.write(_json.dumps(other_protocol, sort_keys=True) + "\n")
+
+    journal = first.store.latest_by_state_id()
+    #: THE ID STILL MATCHES. That is the whole point: the refusal must not come
+    #: from the state being absent from the journal.
+    assert victim.state_id in journal
+    assert journal[victim.state_id]["artifact"]["artifact_digest"] == "f" * 64
+
+    again, _ = make_search(tmp_path, teacher, target_spec, eval_suite,
+                           suite_items, [profile], run_id="protocol")
+    second = again.run()
+    assert victim.state_id not in second.resumed, (
+        "a checkpoint was resumed on a record that names a different "
+        "artifact digest -- scientific identity is not materialization "
+        "identity, and the state id cannot tell them apart")
+
+
 def test_resume_refuses_a_journal_whose_artifact_no_longer_matches(
         tmp_path, teacher, target_spec, eval_suite, suite_items, profile):
     """Weights edited on disk must not be adopted along with their old metrics."""

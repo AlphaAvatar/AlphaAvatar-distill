@@ -861,6 +861,39 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "did. Experiment-agnostic here so later phases share one owner. "
             "NO CUDA SURFACE: one date comparison.",
      }),
+    ("ab4f32ed4d8cb77014f1e1fd0acde83ee73d8d8a",
+     "the structural record the shortened A-bsz3 study reads",
+     {
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "ADDITIVE EVIDENCE, and a timer. THIS IS A DECLARED SEMANTIC "
+            "CHANGE because the executable shape moves, but nothing it adds "
+            "is read by `OperatorStep.identity()` -- the artifact digest is "
+            "taken from the written bytes, so no selection, no score and no "
+            "identity can move. Four additions, each because the shortened "
+            "A-bsz3 design asks for a quantity the operator did not emit. "
+            "(a) `head_scores_per_layer`: the per-head score vector, which is "
+            "what a rank correlation needs and what the kept-head counts "
+            "cannot reach -- two protocols can differ in every score and "
+            "agree on every selection. (b) `physical_forward_invocations`, "
+            "`executed_positions`, `valid_positions` and `padded_positions`, "
+            "COUNTED BY THE LOOP AS IT RAN rather than re-derived from the "
+            "item lengths: `padding_profile` predicts the same three before "
+            "any pod exists, and a trace that restated that prediction could "
+            "never contradict it. The loop's `valid_positions` and the "
+            "collector's independent `calibration_tokens` give a masking "
+            "invariant a consumer can check instead of trusting. (c) "
+            "`scorer_seconds`: the statistics pass alone, CUDA-synchronized "
+            "at both ends, on the same `time.monotonic` clock `causal_kl` "
+            "reports. The comparison is a ratio of wall clocks and the "
+            "checkpoint write that surrounds the pass is identical under "
+            "either protocol, so timing the suffix instead would dilute the "
+            "ratio toward 1 by exactly the write. (d) a module-local "
+            "`_cuda_sync`, deliberately NOT imported from `causal_kl`: this "
+            "module's claim is that A-bsz3 shares no code with the C3 "
+            "candidate, and two lines are not worth falsifying it. ON THE "
+            "CURRENT CUDA SURFACE already; it owes the same pending "
+            "validation and claims no new cover.",
+     }),
 )
 
 
