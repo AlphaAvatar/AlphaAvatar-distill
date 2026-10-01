@@ -27,9 +27,9 @@
   "authorized_cap_usd": 400.0,
   "remaining_usd": 16.6377,
   "remaining_is_not_permission": true,
-  "formal_remaining_usd": -0.9492,
+  "formal_remaining_usd": 9.7031,
   "engineering_remaining_usd": 1.9395,
-  "package_remaining_usd": 0.9903,
+  "package_remaining_usd": 11.6426,
   "per_session_ceiling_usd": 30.0,
   "full_ceiling_sessions_fundable": 0,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
@@ -38,7 +38,8 @@
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
   "_package_spent_usd": 64.0097,
   "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "planning_floor_usd": 13.4401
+  "planning_floor_usd": 13.4401,
+  "_amendment_2026_10_02": "formal 55.0000 -> 65.6523, package 65.0000 -> 75.6523; prospective and minimal. Owner: logs/budget/decisions.md."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -140,7 +141,9 @@
   "roots": {
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
-  }
+  },
+  "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-02",
+  "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261002.json"
  },
  "blocker": "NOTHING IS BLOCKED ON A MEASUREMENT. C3 is complete with a canonical NO_GO; its stage-I aggregation ran off pod at $0 from attempt75's immutable evidence. What is blocked is MONEY: the formal allowance is overspent by $0.9492, so no session that trains a probe is issuable on either book.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
@@ -205,13 +208,13 @@
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
  "a_bsz3": {
-  "state": "DESIGNED, $0 half MEASURED, NOT FUNDED, NOT AUTHORIZED",
-  "design": "logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json",
-  "pricing": "logs/stages/stage-1/phase_c3/plans/a_bsz3_pricing.json",
-  "withdrawn": "the 16-probe non-inferiority design, 2026-10-01, for scope",
-  "is_not": "a population-level non-inferiority study; no 95% conclusion.",
-  "identity": "scientific != materialization. If step 1's digests DIFFER, A-bsz3 may not enter D1/D2/D3 until the execution fingerprint is bound to resume identity. Owner: identity_semantics in the design.",
-  "fail_fast_stop": "-0.030 is a catastrophic-regression stop, not an equivalence margin."
+  "state": "A3 DESIGNED and FUNDED; chain not built, nothing launched",
+  "shape": "ONE chain: initialization -> recovery -> evaluation -> aggregation -> closeout. Diagnostics gate nothing; a differing artifact digest is a finding.",
+  "design": "logs/stages/stage-1/phase_c3/plans/a3_design.json",
+  "pricing": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
+  "superseded": "a_bsz3_adoption.json and a_bsz3_noninferiority.json",
+  "probes": "3 new treatment; attempt75's 3 controls reused, not retrained",
+  "identity": "a differing digest does NOT stop A3; the binding is required only before a resumable beam search in D1/D2/D3"
  },
  "d_series": {
   "state": "DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED.",

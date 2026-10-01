@@ -9,8 +9,10 @@ existed, and none of them authorizes spend.
 | `c3_pricing_9probe.json` | **CANONICAL C3 pricing.** Nine probes, every component measured. Carries the fit verdict and the two shortfalls as they stood when C3 was priced. |
 | `c3_live_pricing.json` | The live re-price taken immediately before attempt75's authorization, on the device it used. |
 | `c3_pricing.json` | **SUPERSEDED.** The six-probe pricing, obsolete once the design became three arms. Kept because it is what the six-probe fit decision was made from, not because it is current. |
-| `a_bsz3_adoption.json` | **CANONICAL A-bsz3 design.** The shortened engineering adoption study: one same-device structural/runtime comparison, then at most three newly trained treatment probes against attempt75's existing A controls, with a derived fail-fast stop. Derived by `scripts/autoinit/write_a_bsz3_adoption.py`; hash-bound by `design_sha256`. |
-| `a_bsz3_pricing.json` | **CANONICAL A-bsz3 pricing.** Three session shapes priced from measured components, each judged against the book that actually binds it. Derived by `scripts/experiments/phase_c3/a_bsz3_pricing.py`. |
+| `a3_design.json` | **CANONICAL A3 design.** ONE end-to-end experiment: initialization → recovery training → evaluation → aggregation → closeout. The structural/runtime diagnostics are collected inside it and gate nothing; a differing A-bsz3 artifact digest is a FINDING. Six integrity stops, seven explicit non-stops. Derived by `scripts/autoinit/write_a3_design.py`; hash-bound by `design_sha256`. |
+| `a3_pricing.json` | **CANONICAL A3 pricing.** The complete chain at a live rate, with a derived container provision and every applicable limit checked — including the package total. Derived by `scripts/experiments/phase_c3/a3_pricing.py`. |
+| `a_bsz3_adoption.json` | **SUPERSEDED**, 2026-10-02. The cost-ordered step-1/step-2 split. It required an intermediate approval and could end on a diagnostic. |
+| `a_bsz3_pricing.json` | **SUPERSEDED**, 2026-10-02. Three session shapes; its producer was deleted. |
 | `a_bsz3_noninferiority.json` | **WITHDRAWN**, 2026-10-01, before any A-bsz3 result existed. The 16-probe design. Kept for the two findings that survive it — why non-inferiority needs more data than superiority, and why a margin below the instrument's half-width is not a criterion. |
 
 ## Current state
@@ -25,9 +27,11 @@ run's own evidence under [`../runs/attempt75/`](../runs/attempt75/).
 *This section used to say `NOT LAUNCHED` and `there are none` of the runs. Both
 were true when C3 was priced and neither has been true since 2026-09-28.*
 
-**A-bsz3 is DESIGNED and NOT FUNDED.** Step 1 fits the GPU engineering
-allowance; step 2 trains probes and consumes the frozen confirmation battery,
-so its book is the formal allowance, which is overspent. The pricing record
-carries both figures and the shortfalls.
+**A3 is DESIGNED and FUNDED.** One chain, `$5.8680` expected and `$8.2525`
+hard at a live `$1.09/h` L40S, on a derived 60 GB disk. The 2026-10-02
+amendment raised the formal allowance to `$65.6523` and the package total to
+`$75.6523` — funding that ceiling plus one pre-science restart, `$9.7031` on
+the formal book, and nothing more. All four limits pass, the package total
+among them for the first time.
 
 Executed-run evidence belongs under `../runs/attemptN/`, never here.

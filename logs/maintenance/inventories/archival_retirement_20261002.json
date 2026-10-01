@@ -1,0 +1,172 @@
+{
+ "schema": "aadistill.archival_retirement/v1",
+ "date": "2026-10-02",
+ "what_this_is": "A REMOTE ARCHIVAL RETIREMENT of attempt75's nine C3 probe WEIGHTS. They have no byte-identical local copy -- the durable evidence directory holds 51 MiB of records and no safetensors -- so after this runs no copy of these weights exists anywhere. What survives is the binding record: every probe's identity, content hash, training config, run manifest, per-sample rows, scored aggregate and the canonical C3 verdict derived from them.",
+ "authorised_by": "Maintainer decision, 2026-10-02, standing artifact/storage-lifecycle policy: do not preserve large historical checkpoints merely because they once existed. Retire the weights where the measurement/evaluation is valid and preserved, the artifact identity/hash is recorded, no downstream consumer needs the weight bytes, and reconstruction is unnecessary or adequately described -- preserving measurement, evaluation, manifests, hashes, configs, closeout, provenance and a tombstone. Decided under AGENTS.md P8.4.",
+ "why_now": "NOT housekeeping: it is on A3's critical path. Account-wide private headroom was BISECTED at $0 with fresh random oids and sits between 12 and 13 GiB. A3's three probes need 6.664 GiB and fit; A3 plus one authorized retry needs 13.33 GiB and is REFUSED. The 2026-10-02 decision requires autonomous rerun of failed stages, and AGENTS.md P8.2.1 requires confirming a durable backend has room BEFORE a long experiment -- C1 attempt 18 lost six probes to exactly this and C3 attempt66 lost nine.",
+ "supersedes_rule": "The sole-copy rule still stands for everything outside the set below. These nine objects are cleared by the consumer rule, not by copy count.",
+ "selection_rule": "Exactly the nine attempt75 probe weight objects. Their small sidecars -- config.json and generation_config.json -- are NOT retired: they remain as reconstruction and accountability metadata. Nothing else was considered; the nine alone clear the requirement with margin, and over-deleting to a byte target is not authorized.",
+ "conditions_checked_per_object": [
+  "COMPLETE AND VALIDLY SCORED -- attempt75 trained 9 of 9, preserved 9 of 9 and scored 9 of 9 on one protocol-uniform field (generation fingerprint c318d1c62197 across all nine), and the canonical C3 verdict NO_GO was derived from them on 2026-10-01",
+  "EVIDENCE DURABLE AND RECORDED -- per-sample rows, scored aggregates, generation files and training descriptors at /home/ecs-user/aad-artifacts/phase_c3/attempt75 (235 files, 19 classes), with c3_probe_results.json and c3_decision.json git-tracked under logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/, and each probe's result_sha256 and per_sample_sha256 recorded in this document",
+  "NO AUTHORIZED CONSUMER READS THE WEIGHTS -- audited 2026-10-02: no scripts/pod/autoinit_*_launch.py declares the prefix, no scripts/pod/*.sh fetches it, the checkpoint registry does not name it, and every code reference to attempt75 reads its committed EVIDENCE json. A3's own control loader (write_a_bsz3_adoption.controls_from_attempt75) reads c3_probe_results.json and consumes no bytes",
+  "NO UNSCORED OR RESUMABLE MEASUREMENT DEPENDS ON THEM -- all nine are scored, the C3 verdict is complete and terminal, and retrying, resuming or pooling that measurement is forbidden, so no authorized computation could consume these weights",
+  "RECONSTRUCTION IS ADEQUATELY DESCRIBED -- each arm rebuilds from the frozen shared parent eea90c91346a under its digest gate and each probe trains from the frozen recipe at its frozen seed; attempt75 reproduced attempt66's three arm identities exactly on fresh hardware, which is the evidence that the path is deterministic rather than the hope",
+  "NOT A PROTECTED CLASS, not a canonical release artifact, and not an irreplaceable lineage or input artifact"
+ ],
+ "not_touched": {
+  "rule": "Only the nine weight objects. The sidecars stay, and nothing outside c1_preserved_probes/attempt75/ was considered.",
+  "attempt75_evidence": "51 MiB of records, untouched -- it is what survives",
+  "attempt66": "preserved 0 of 9; there is nothing to retire",
+  "permanent_controls": "protected class, untouched",
+  "stage1/qwen3_0p6b_init_v0": "canonical initialization, protected, untouched",
+  "transfer/wheelhouse_*": "the offline install path for every paid pod, untouched"
+ },
+ "expected": {
+  "n_objects": 9,
+  "bytes_each": 2384236592,
+  "gib": 19.9844,
+  "headroom_before_gib": "bisected between 12 and 13",
+  "a3_durable_requirement_gib": 6.664,
+  "a3_plus_one_retry_gib": 13.328,
+  "_the_point": "A3 fits today and A3-plus-a-retry does not. This retirement is what makes the authorized retry path executable rather than theoretical."
+ },
+ "preserved_metadata": "config.json and generation_config.json for every probe remain on the relay. Only the model.safetensors objects are removed.",
+ "_retired_is_a_request_not_a_result": "This document AUTHORIZES the deletions below and records why each is admissible. What was actually removed is whatever scripts/autoinit/retire_relay_copies.py reports, which re-derives every safety property independently rather than trusting this list.",
+ "retired": [
+  {
+   "arm": "A_incumbent",
+   "seed": 217230555,
+   "probe_id": "autoinit.v1.phase_c3.A_incumbent.217230555",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.217230555/model.safetensors",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "result_sha256": "427067d587ab693fa2c4ef800c3c9a8252d6895d2af032cbc1c8222224bff7e1",
+   "per_sample_sha256": "dbe917cfa75ed46f01621e4a4363f161f41d0ce64b8cf92df3a2b6c4ee3d7db9",
+   "correct_overall": 0.0341,
+   "usable_rollout_rate": 0.5863
+  },
+  {
+   "arm": "A_incumbent",
+   "seed": 1151307191,
+   "probe_id": "autoinit.v1.phase_c3.A_incumbent.1151307191",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.1151307191/model.safetensors",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "result_sha256": "9c83b8aa4b22ad322f321c422ae5e92c5eabb51d53c65e3f18159397bdb02e40",
+   "per_sample_sha256": "58383b3e778e21fe6eff12eea5677a808d1abb24926927a86a008abd82143eea",
+   "correct_overall": 0.0435,
+   "usable_rollout_rate": 0.5947
+  },
+  {
+   "arm": "A_incumbent",
+   "seed": 2045359208,
+   "probe_id": "autoinit.v1.phase_c3.A_incumbent.2045359208",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.A_incumbent.2045359208/model.safetensors",
+   "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "result_sha256": "1e745d57f22ad5c9e39d6c44937b5d5e7744e0f276c4a6dd943a4e99f132c9e4",
+   "per_sample_sha256": "fb2e95351085362ba485fbfd4412216abae75697cb65613ae295c8c4d5603798",
+   "correct_overall": 0.0435,
+   "usable_rollout_rate": 0.5305
+  },
+  {
+   "arm": "B_causal_b1",
+   "seed": 217230555,
+   "probe_id": "autoinit.v1.phase_c3.B_causal_b1.217230555",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.217230555/model.safetensors",
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "result_sha256": "69e2e41e49b8abea4afa3c8675707f292741e2f1c6c6d7d03768465bd6e8bd1d",
+   "per_sample_sha256": "51b59c1f320c13d2aa66878a01f389008a9a7157cdc2afbe359e1d8f420993da",
+   "correct_overall": 0.0388,
+   "usable_rollout_rate": 0.6158
+  },
+  {
+   "arm": "B_causal_b1",
+   "seed": 1151307191,
+   "probe_id": "autoinit.v1.phase_c3.B_causal_b1.1151307191",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.1151307191/model.safetensors",
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "result_sha256": "ef061f3a6c5b826f135561beae7d6b3e80b52d708621fe8e836a9acbcf5cce0c",
+   "per_sample_sha256": "40e0a4467aa86a0be4806dab787ccc25179da928c68efbce54785ac7037001f9",
+   "correct_overall": 0.0271,
+   "usable_rollout_rate": 0.5663
+  },
+  {
+   "arm": "B_causal_b1",
+   "seed": 2045359208,
+   "probe_id": "autoinit.v1.phase_c3.B_causal_b1.2045359208",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.B_causal_b1.2045359208/model.safetensors",
+   "initialization_artifact_digest": "6eb231caa50dc2155f1de8c27e0f9425f9e61bd718f154f2fe5c30b8c31ce59b",
+   "result_sha256": "1fd577a6d9e6909e20ff11c5349e9bb4308ff366c0e201640f66825648fd3be9",
+   "per_sample_sha256": "d3543ccec59da8eda68a14f37c2b766208a2b87ac718b1edf9dba2425d06118e",
+   "correct_overall": 0.0494,
+   "usable_rollout_rate": 0.6053
+  },
+  {
+   "arm": "C_causal_b3",
+   "seed": 217230555,
+   "probe_id": "autoinit.v1.phase_c3.C_causal_b3.217230555",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.217230555/model.safetensors",
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "result_sha256": "2e0f537b274b997060013b4af7a9245a8818a336f29a72837907e74abe24147e",
+   "per_sample_sha256": "b7bc29a9ababb0d78d55a64e747908aaff85b8ee1a89f920b941233e27d97351",
+   "correct_overall": 0.0318,
+   "usable_rollout_rate": 0.5747
+  },
+  {
+   "arm": "C_causal_b3",
+   "seed": 1151307191,
+   "probe_id": "autoinit.v1.phase_c3.C_causal_b3.1151307191",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.1151307191/model.safetensors",
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "result_sha256": "eb0ce415a4c5a0f72ff33131be1b417fd1a959a474a7a405bc568fed1ce37798",
+   "per_sample_sha256": "9769105033044c45de2a63d29b85d7f27dd4970e7df37ce32fc4ea16c9b9d329",
+   "correct_overall": 0.0494,
+   "usable_rollout_rate": 0.6505
+  },
+  {
+   "arm": "C_causal_b3",
+   "seed": 2045359208,
+   "probe_id": "autoinit.v1.phase_c3.C_causal_b3.2045359208",
+   "path": "c1_preserved_probes/attempt75/autoinit.v1.phase_c3.C_causal_b3.2045359208/model.safetensors",
+   "initialization_artifact_digest": "dec8868336e7eb63e37190ae9156c9320d27283f6f8feed9cb4cfc44384deea6",
+   "result_sha256": "3aa95853a411e8f6db79cf1d2e214fe167f2e4f74d42b83f75260980a242ce93",
+   "per_sample_sha256": "ad1a95285cd5128845e68e99da2c83ad7508ef83f5b6603f2594ca3a6649ab23",
+   "correct_overall": 0.04,
+   "usable_rollout_rate": 0.5526
+  }
+ ],
+ "unreadable_launchers_reviewed": {
+  "_how_reviewed": "RE-VERIFIED FROM SOURCE on 2026-10-02, not inherited from the 2026-09-30 record: the tree has moved since, so a previous review is evidence that the check was done once, not that its answer still holds. Both launchers declare `relay_inputs=CALIBRATION_V1` and nothing else -- autoinit_c2_replay_launch.py:719 and autoinit_phase_c2_full_search_launch.py:685 -- and autoinit_science_inputs.py:84 defines CALIBRATION_V1 as the single path e8_inputs_20260810/calibration_v1/items.jsonl. That path is a PROTECTED prefix in the retirement tool and appears nowhere in the set below.",
+  "autoinit_c2_replay_launch": "ReplaySourceError at spec build: refuses to pin a replay whose deciding files moved. Declares CALIBRATION_V1 only. Phase C2 is CLOSED WITHOUT PROMOTION and authorizes no further spend, so the unbuildable spec blocks nothing that is allowed to run.",
+  "autoinit_phase_c2_full_search_launch": "CostModelError at spec build: no measured cost for attention.causal_kl_v1. Declares CALIBRATION_V1 only. The full joint search is COMPLETE and frozen."
+ },
+ "executed": {
+  "utc": "2026-10-02",
+  "method": "HfApi.permanently_delete_lfs_files(rewrite_history=True), selected by exact file_oid identity, executed by scripts/autoinit/retire_relay_copies.py --archival-authorization ... --execute. Ordinary deletion reclaims nothing on this account -- measured twice -- because LFS is billed including history.",
+  "objects_retired": 9,
+  "gib_retired": 19.984,
+  "plan_matched_authorization": true,
+  "_the_tool_re_derived_everything": "it refused the first invocation because two launchers could not build their specs, so their declared relay inputs were unknown. Both were then re-verified FROM SOURCE -- not inherited from the 2026-09-30 review -- and named in unreadable_launchers_reviewed. The dry run then reported 'plan == authorization (9 objects), nothing extra'."
+ },
+ "quota_measured": {
+  "method": "bisected against the LFS batch endpoint with FRESH RANDOM oids. An oid that already exists dedups and returns a false PASS, so reusing a known oid would measure nothing.",
+  "headroom_before_gib": "between 12 and 13",
+  "headroom_after_gib": "between 32 and 33",
+  "reclaim_gib_measured": "~20, consistent with the 19.984 retired",
+  "a3_three_probes_accepted": true,
+  "a3_plus_full_retry_six_probes_accepted": true,
+  "_why_this_is_measured_and_not_assumed": "this repository has twice deleted objects and reclaimed nothing. The reclaim is a measurement, and the authorized retry path is executable because the endpoint says six probes fit, not because nine were deleted."
+ },
+ "tombstone": {
+  "_this_document_is_the_tombstone": "There is no local artifact to tombstone in checkpoint_tombstones.json: these objects were remote-only. This record is what outlives the bytes, and it carries per probe the arm, the seed, the probe id, the initialization artifact digest, the scored result sha256, the per-sample sha256 and the two headline rates.",
+  "what_survives": [
+   "every probe's measurement and scored aggregate",
+   "every probe's per-sample rows",
+   "the generation files and generation protocol fingerprint",
+   "the training configs and run manifests",
+   "the arm identities and the frozen shared parent digest",
+   "the canonical C3 verdict derived from all of it",
+   "config.json and generation_config.json for each probe, left on the relay"
+  ],
+  "what_is_gone": "nine model.safetensors objects, 2.220 GiB each"
+ }
+}

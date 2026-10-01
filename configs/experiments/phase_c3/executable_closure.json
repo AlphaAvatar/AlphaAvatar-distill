@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 116,
- "digest": "24e6748a1e00a90920649e487e952b168668d82cb0e9a69136db5cc05d831bb2",
+ "digest": "098eb1be241517fed873ea1c98bbf151fa18c44f4cd2e850be8edec5fc4a2d4f",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,8 +39,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "8c086c7b93e7d61ed854397c0c191860d69632309a01835f8c905eb97d75b7e5",
-   "bytes": 17750
+   "sha256": "daf2aee21407bad5b1f630e3ef84a4a39f06d89c7be934409bf94e1f197548e8",
+   "bytes": 20846
   },
   {
    "path": "scripts/architecture/record_run_index.py",
@@ -169,8 +169,8 @@
   },
   {
    "path": "scripts/experiments/phase_c3/formal_pricing.py",
-   "sha256": "c54235883a8d819302163b41054b201d007c82918a55d08966fa3536a02330e0",
-   "bytes": 15094
+   "sha256": "85758e4d2c86f5718612d34210c68cc068426c99fea43490b32d602846296f5b",
+   "bytes": 18238
   },
   {
    "path": "scripts/experiments/phase_c3/hardware.py",

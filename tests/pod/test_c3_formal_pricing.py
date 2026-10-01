@@ -33,7 +33,15 @@ from experiments.phase_c3 import formal_pricing as P  # noqa: E402
 #: The amended envelopes, as parameters rather than as live reads, so these
 #: tests describe the decision rule and not today's ledger position.
 ENV = {"per_session_envelope_usd": 30.0, "project_cap_usd": 400.0,
-       "cumulative_spend_usd": 350.0307, "formal_remaining_usd": 32.3824}
+       "cumulative_spend_usd": 350.0307, "formal_remaining_usd": 32.3824,
+       "engineering_remaining_usd": 1.9395,
+       #: THE LIMIT THAT WENT UNCHECKED. `formal + engineering = package`
+       #: exactly, so it looked implied -- and raising the formal allowance
+       #: alone leaves a session that fits its own book and breaks the
+       #: package. Supplied here because `evaluate_limits` RAISES on a
+       #: missing envelope rather than treating an absent limit as a passing
+       #: one.
+       "package_remaining_usd": 32.3824}
 
 
 def test_the_rate_is_an_input_and_nothing_hardcodes_1_09():
@@ -97,12 +105,18 @@ def test_an_unfundable_price_names_which_condition_and_by_how_much():
     assert "per_session_envelope" in short
     assert short["per_session_envelope"] == pytest.approx(
         f.price.hard_usd - 30.0, abs=1e-4)
-    #: The other two still hold at this rate, so only one is named.
+    #: The others still hold at this rate, so only one is named.
     assert "project_cap" not in short and "formal_allowance" not in short
+    assert "package_total" not in short
 
 
-def test_each_of_the_three_conditions_can_fail_independently():
-    """All three bind. A test that only ever exercises one proves one."""
+def test_each_of_the_four_conditions_can_fail_independently():
+    """All FOUR bind. A test that only ever exercises one proves one.
+
+    This said "three" and checked three while a fourth limit existed and was
+    never evaluated -- the package total. The count in the name is part of the
+    claim, so it moves with the conditions.
+    """
     #: cap binds: plenty of envelope and allowance, no headroom
     f = P.assess(1.09, {**ENV, "cumulative_spend_usd": 395.0,
                         "formal_remaining_usd": 50.0,
@@ -121,12 +135,42 @@ def test_each_of_the_three_conditions_can_fail_independently():
                         "cumulative_spend_usd": 0.0})
     assert f.fundable is False and "per_session_envelope" in f.shortfalls()
 
+    #: package total binds, with every OTHER limit deliberately wide open --
+    #: which is exactly the state the old three-condition check called
+    #: fundable.
+    f = P.assess(1.09, {**ENV, "package_remaining_usd": 0.9903,
+                        "formal_remaining_usd": 999.0,
+                        "per_session_envelope_usd": 100.0,
+                        "cumulative_spend_usd": 0.0})
+    assert f.fundable is False and "package_total" in f.shortfalls()
+
+
+def test_a_missing_envelope_raises_rather_than_passing_silently():
+    """An absent limit is not a passing limit."""
+    for drop in P.REQUIRED_ENVELOPE_KEYS:
+        partial = {k: v for k, v in ENV.items() if k != drop}
+        with pytest.raises(P.C3PricingError, match="missing"):
+            P.assess(1.09, partial)
+
+
+def test_the_book_decides_which_allowance_is_charged():
+    """A session that trains no probe is charged to engineering, not formal."""
+    env = {**ENV, "formal_remaining_usd": 999.0,
+           "engineering_remaining_usd": 0.10,
+           "per_session_envelope_usd": 100.0, "cumulative_spend_usd": 0.0}
+    assert P.assess(1.09, env, book="formal_allowance").fundable
+    engineering = P.assess(1.09, env, book="gpu_engineering_allowance")
+    assert engineering.fundable is False
+    assert "gpu_engineering_allowance" in engineering.shortfalls()
+    with pytest.raises(P.C3PricingError, match="unknown book"):
+        P.assess(1.09, env, book="petty_cash")
+
 
 def test_the_derived_ceiling_is_what_an_authorization_would_carry():
     """The envelope is not the grant -- the whole point of section 2."""
     f = P.assess(1.09, ENV)
     assert f.fundable
-    assert f.price.hard_usd < f.per_session_envelope_usd, (
+    assert f.price.hard_usd < f.envelopes["per_session_envelope_usd"], (
         "this assertion is only meaningful while the derived ceiling is "
         "strictly below the envelope, which is the situation that makes "
         "issuing at the envelope a real mistake rather than a hypothetical")

@@ -1,236 +1,29 @@
 {
- "schema": "aadistill.phase_c3.a_bsz3_pricing/v1",
- "_contract": "The shortened A-bsz3 validation, priced from measured components. Supersedes the `~$30` 16-probe estimate the withdrawn non-inferiority design carried. AUTHORIZES NOTHING.",
- "gpu": "NVIDIA L40S",
- "gpu_rate_usd_per_hour": 1.09,
- "billed_rate_usd_per_hour": 1.106667,
- "container_disk_gb": 120,
- "_disk_is_billed_separately": "120 GB x $0.1/GB/month",
- "components": {
-  "setup": {
-   "minutes": 7.7,
-   "measured": "attempt75: session start 17:58:39Z to STAGE_START:B at 18:06:21Z. THE SAME IMAGE HAS TAKEN 5, 8.5 AND 150+ MINUTES, which is why the hard ceiling uses a worst case instead of this figure."
-  },
-  "pre_provider_gates": {
-   "minutes": 3.0,
-   "measured": "c3_pricing_9probe.json: attempt18 ran 14 gates in-window"
-  },
-  "teacher_fetch_verify": {
-   "minutes": 0.22,
-   "measured": "attempt75 stage B: 18:06:21Z to 18:06:34Z, 3 shards bound at 768f209d9ea8"
-  },
-  "register_operator": {
-   "minutes": 0.03,
-   "measured": "attempt75 stage C: 18:06:34Z to 18:06:36Z"
-  },
-  "parent_replay": {
-   "minutes": 21.78,
-   "measured": "attempt75 stage D: 18:06:36Z to 18:28:23Z, parent eea90c91346a reproduced. THE DOMINANT TERM of a step-1 session, which is why the overrun factor reaches it."
-  },
-  "attention_round": {
-   "minutes": 0.25,
-   "measured": "attempt75 stage E: 18:28:23Z to 18:28:38Z -- one ATTENTION suffix end to end, including the checkpoint write. The operator's own statistics pass is 11.2732 s (C1 attempt18, same parent geometry)."
-  },
-  "recovery_probe": {
-   "minutes": 61.76,
-   "measured": "attempt75 stage G: 555.85 min over 9 probes"
-  },
-  "evaluation_probe": {
-   "minutes": 26.85,
-   "measured": "attempt75 stage H: 241.63 min over 9 probes"
-  },
-  "collect_and_closeout": {
-   "minutes": 5.0,
-   "measured": "attempt75 collected 235 files across 19 classes inside its closeout window"
-  },
-  "decide_and_closeout": {
-   "minutes": 15.0,
-   "measured": "c3_pricing_9probe.json, for a session that also runs the paired bootstrap on the pod"
-  }
+ "schema": "aadistill.phase_c3.a_bsz3_pricing/v1-superseded",
+ "status": "SUPERSEDED",
+ "priced_utc": "2026-10-01",
+ "superseded_utc": "2026-10-02",
+ "superseded_by": "a3_pricing.json",
+ "_contract": "The THREE-SHAPE pricing of the step-1/step-2 split. Superseded when A3 became one end-to-end experiment: one chain has one price, and keeping a second pricer beside it is the complexity ratchet AGENTS.md P8.2.1 forbids. Its producer, scripts/experiments/phase_c3/a_bsz3_pricing.py, was deleted rather than left importable.",
+
+ "what_it_priced": {
+  "step1_structural": "expected $0.7328, hard $1.5815, booked to the GPU engineering allowance",
+  "step2_fail_fast": "expected $2.5193, hard $3.9039, formal book",
+  "step2_three_seeds": "expected $5.7881, hard $8.1533, formal book",
+  "worst_case_both_steps_usd": 9.7348
  },
- "allowances": {
-  "setup_worst_case_minutes": 45.0,
-  "overrun_factor": 1.3,
-  "_overrun_reaches": "every measured GPU component except setup, which has its own worst case, and the pre-provider gates, which run before the meter. C3 applied it to training and evaluation only; on a step-1 session the parent replay is the dominant term and a ceiling that excluded it would not bound the work."
- },
- "shapes": {
-  "step1_structural": {
-   "price": {
-    "_what": "both protocols from the same verified frozen parent, in one session: digests, kept heads, per-head scores and rank correlation, selection margins, observed position counters, runtime over interleaved rounds, peak VRAM",
-    "probes": 0,
-    "book": "gpu_engineering_allowance",
-    "_book_because": "trains no probe, consumes no battery, produces no endpoint -- it is GPU engineering validation",
-    "expected": {
-     "minutes": 39.73,
-     "hours": 0.6622,
-     "usd": 0.7328,
-     "components_minutes": {
-      "setup": 7.7,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.22,
-      "register_operator": 0.03,
-      "parent_replay": 21.78,
-      "attention_round": 2.0,
-      "collect_and_closeout": 5.0
-     }
-    },
-    "hard_ceiling": {
-     "minutes": 85.74,
-     "hours": 1.429,
-     "usd": 1.5815,
-     "components_minutes": {
-      "setup": 45.0,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.286,
-      "register_operator": 0.039,
-      "parent_replay": 28.314,
-      "attention_round": 2.6,
-      "collect_and_closeout": 6.5
-     }
-    }
-   },
-   "book": "gpu_engineering_allowance",
-   "book_remaining_usd": 1.9395,
-   "envelopes": {
-    "per_session_envelope_usd": 30.0,
-    "project_cap_usd": 400.0,
-    "cumulative_spend_usd": 383.3623,
-    "formal_remaining_usd": -0.9492,
-    "engineering_remaining_usd": 1.9395
-   },
-   "conditions": {
-    "derived_ceiling_within_session_envelope": true,
-    "cumulative_plus_derived_within_project_cap": true,
-    "booked_allowance_covers_derived": true
-   },
-   "FUNDABLE": true,
-   "shortfalls_usd": {},
-   "_fitting_is_not_permission": "a shape that fits every book is still unfunded until a maintainer grants it"
-  },
-  "step2_fail_fast": {
-   "price": {
-    "_what": "step 1's prefix, plus the A-bsz3 initialization and ONE recovery probe at seed 217230555, trained and scored",
-    "probes": 1,
-    "book": "formal_allowance",
-    "_book_because": "trains a recovery probe and scores it on c1_confirmation_v1; the package's terms place both outside the engineering allowance",
-    "expected": {
-     "minutes": 136.59,
-     "hours": 2.2765,
-     "usd": 2.5193,
-     "components_minutes": {
-      "setup": 7.7,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.22,
-      "register_operator": 0.03,
-      "parent_replay": 21.78,
-      "attention_round": 0.25,
-      "recovery_probe": 61.76,
-      "evaluation_probe": 26.85,
-      "decide_and_closeout": 15.0
-     }
-    },
-    "hard_ceiling": {
-     "minutes": 211.66,
-     "hours": 3.5276,
-     "usd": 3.9039,
-     "components_minutes": {
-      "setup": 45.0,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.286,
-      "register_operator": 0.039,
-      "parent_replay": 28.314,
-      "attention_round": 0.325,
-      "recovery_probe": 80.288,
-      "evaluation_probe": 34.905,
-      "decide_and_closeout": 19.5
-     }
-    }
-   },
-   "book": "formal_allowance",
-   "book_remaining_usd": -0.9492,
-   "envelopes": {
-    "per_session_envelope_usd": 30.0,
-    "project_cap_usd": 400.0,
-    "cumulative_spend_usd": 383.3623,
-    "formal_remaining_usd": -0.9492,
-    "engineering_remaining_usd": 1.9395
-   },
-   "conditions": {
-    "derived_ceiling_within_session_envelope": true,
-    "cumulative_plus_derived_within_project_cap": true,
-    "booked_allowance_covers_derived": false
-   },
-   "FUNDABLE": false,
-   "shortfalls_usd": {
-    "formal_allowance": 4.8531
-   },
-   "_fitting_is_not_permission": "a shape that fits every book is still unfunded until a maintainer grants it"
-  },
-  "step2_three_seeds": {
-   "price": {
-    "_what": "the same session carried to all three frozen C3 recovery seeds, if seed 1 shows no material regression",
-    "probes": 3,
-    "book": "formal_allowance",
-    "_book_because": "as above",
-    "expected": {
-     "minutes": 313.81,
-     "hours": 5.2302,
-     "usd": 5.7881,
-     "components_minutes": {
-      "setup": 7.7,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.22,
-      "register_operator": 0.03,
-      "parent_replay": 21.78,
-      "attention_round": 0.25,
-      "recovery_probe": 185.28,
-      "evaluation_probe": 80.55,
-      "decide_and_closeout": 15.0
-     }
-    },
-    "hard_ceiling": {
-     "minutes": 442.04,
-     "hours": 7.3674,
-     "usd": 8.1533,
-     "components_minutes": {
-      "setup": 45.0,
-      "pre_provider_gates": 3.0,
-      "teacher_fetch_verify": 0.286,
-      "register_operator": 0.039,
-      "parent_replay": 28.314,
-      "attention_round": 0.325,
-      "recovery_probe": 240.864,
-      "evaluation_probe": 104.715,
-      "decide_and_closeout": 19.5
-     }
-    }
-   },
-   "book": "formal_allowance",
-   "book_remaining_usd": -0.9492,
-   "envelopes": {
-    "per_session_envelope_usd": 30.0,
-    "project_cap_usd": 400.0,
-    "cumulative_spend_usd": 383.3623,
-    "formal_remaining_usd": -0.9492,
-    "engineering_remaining_usd": 1.9395
-   },
-   "conditions": {
-    "derived_ceiling_within_session_envelope": true,
-    "cumulative_plus_derived_within_project_cap": true,
-    "booked_allowance_covers_derived": false
-   },
-   "FUNDABLE": false,
-   "shortfalls_usd": {
-    "formal_allowance": 9.1025
-   },
-   "_fitting_is_not_permission": "a shape that fits every book is still unfunded until a maintainer grants it"
-  }
- },
- "worst_case_both_steps": {
-  "usd": 9.7348,
-  "_is_not_one_authorization": "two sessions, each authorized separately, and step 2 only exists if step 1's digests differ. The sum is what the programme could spend, not what anything is authorized for.",
-  "project_headroom_after_usd": 6.9029
- },
- "_rate_must_be_requoted": "securePrice, live, immediately before any authorization. The launcher prices on securePrice and a communityPrice figure is one it cannot act on.",
- "authorizes": "nothing"
+
+ "why_it_was_superseded": "the split it priced no longer exists. A3 runs initialization, recovery, evaluation, aggregation and closeout in ONE session, so there is one ceiling to authorize rather than two and the engineering-allowance booking of a first half does not apply: the single session trains probes and consumes the frozen confirmation battery, which the package places on the formal book.",
+
+ "what_the_successor_changed": [
+  "one shape, `a3_full_chain`, instead of three",
+  "aggregation and evidence collection priced inside the chain",
+  "container disk DERIVED -- 60 GB from a 36.06 GiB peak local residency -- instead of C3's 120 GB carried forward",
+  "the durable requirement stated separately: 6.664 GiB for three probes, bounded against the backend rather than against container storage",
+  "EVERY applicable limit checked, including the package total, through formal_pricing.evaluate_limits"
+ ],
+
+ "_the_numbers_are_close_and_that_is_a_coincidence": "the superseded worst case across both steps was $9.7348 and the funded A3 figure is $9.7031. They are not the same quantity: the first was two sessions' ceilings summed, the second is one session's ceiling plus one pre-science restart.",
+
+ "authorizes": "nothing, and never did"
 }

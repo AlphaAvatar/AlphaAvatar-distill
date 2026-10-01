@@ -1,5 +1,96 @@
 # Decision records
 
+## 2026-10-02 — A3 becomes one experiment, and the fourth limit starts being checked
+
+- **Maintainer decision**, superseding the step-1/step-2 split of A-bsz3.
+  A3 runs as ONE end-to-end experiment — initialization, recovery training,
+  evaluation, aggregation, closeout — so the practical question is answered
+  once rather than across two approvals. The structural/runtime diagnostics
+  stay, as diagnostics: **a differing A-bsz3 artifact digest is a finding,
+  not a stop.** The `−0.030` seed-1 fail-fast is withdrawn as a normal
+  experimental stop; only a genuine integrity failure halts the chain.
+
+- **A bug was repaired before any number was derived.** `Fundability`
+  checked three limits — session envelope, project cap, booked allowance —
+  and not the **package total**. It looked implied, because the package total
+  equals `formal + engineering`; that identity is exactly why nothing
+  evaluated it. An identity is not a check, and an amendment that moved one
+  side would have broken it in silence. There are four conditions now, in
+  `formal_pricing.evaluate_limits`, which **raises** on a missing envelope
+  rather than treating an absent limit as a satisfied one. The display is
+  derived from the condition set, so a future fifth limit cannot be checked
+  and left unprinted.
+
+  The repair changed the amendment. At the derived ceiling the formal book
+  was short `$9.2017` and the package total short `$7.2622` — a smaller
+  number — so sizing the amendment from the formal shortfall alone would
+  have raised the wrong book by the wrong amount.
+
+- **Prospective amendment**, current configuration only.
+
+  | | before | after |
+  | --- | --- | --- |
+  | formal allowance | `$55.0000` | **`$65.6523`** |
+  | GPU engineering allowance | `$10.0000` | `$10.0000` (unchanged) |
+  | package total | `$65.0000` | **`$75.6523`** |
+  | per-session envelope | `$30.0000` | `$30.0000` (unchanged) |
+  | project cumulative cap | `$400.0000` | `$400.0000` (unchanged) |
+
+  The package total **remains `formal + engineering`**. Making it an
+  independent, tighter cap was tried and rejected: `package.spent` is derived
+  as that same sum, and a cap computed on a different basis from its own
+  spend is one nobody can reconcile.
+
+- **Derived, not chosen.** `scripts/experiments/phase_c3/a3_pricing.py` at a
+  live L40S `securePrice` of `$1.09/h`:
+
+  ```text
+  expected       320.56 min   $5.8680
+  HARD ceiling   450.82 min   $8.2525
+  container disk 60 GB        peak local residency 36.06 GiB at parent_replay
+  durable        6.664 GiB    three probes
+  ```
+
+  The amendment funds that ceiling **plus one pre-science restart of
+  `$1.4506`** — the chain up to the first scientific probe, at hard rates,
+  from the same component table. That addition is not padding: this decision
+  also requires autonomous rerun of failed engineering and setup stages, and
+  an allowance sized to exactly one flawless run cannot execute that
+  instruction. **Total funded on the formal book: `$9.7031`.** Nothing else.
+
+- **Storage was derived rather than inherited.** C3 provisioned 120 GB for
+  nine probes. A3 holds the teacher, one four-step path's intermediates, two
+  initialization leaves and **one** training working set at a time, because a
+  probe is released once its bytes are durable off-pod. 60 GB, with 19.8 GiB
+  of headroom over the derived peak — and the difference from 120 GB is a few
+  cents, which is the reason to derive it rather than round it up.
+
+- **The historical overspend stands as fact.** attempt75 was issued against a
+  formal allowance it exceeded by `$0.9492`; the gate defect that permitted
+  it is recorded in `formal_allowance_audit.json`; nothing here rewrites
+  attempt75, its grant, its authorization or its closeout into compliance.
+  Raising a forward-looking allowance is not retroactive permission, and the
+  `$55.9492` already spent is still `$55.9492`.
+
+- **Alternatives considered:** raising the project cap — rejected, the
+  derived chain fits `$400.00` with `$6.9346` to spare, and moving a cap that
+  is not binding puts a second pressure on one number. Charging A3 to the
+  engineering allowance, which has money left — rejected: the package states
+  that allowance authorizes neither complete formal probes nor consuming the
+  frozen confirmation battery, and A3 does both. What decides the book is
+  what the session does, not what its scientific claim is called.
+
+- **Risks:** a formal allowance raised twice in five days. Mitigations are
+  structural rather than promissory — the project cap did not move, the
+  per-session envelope did not move, the amendment is sized to a derived
+  ceiling plus one named restart, and a mid-run failure that leaves too
+  little to fund a corrected attempt plus teardown remains a **stop**
+  condition rather than something to amend away.
+
+- **Revisit when:** A3 reaches a complete valid result and its closeout is
+  written. The D-series needs its own decision, and this amendment transfers
+  nothing to it.
+
 ## 2026-09-28 — C3 funding amendment: the envelope rises, the experiment does not shrink
 
 - **Maintainer decision**, on review of `b937aebb` (branch

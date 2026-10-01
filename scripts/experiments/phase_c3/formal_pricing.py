@@ -31,6 +31,7 @@ import os
 import urllib.error
 import urllib.request
 import math
+from collections.abc import Mapping
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -144,61 +145,116 @@ def price_c3(gpu_rate_usd_per_hour: float) -> C3Price:
         hard_usd=math.ceil(hard_m / 60.0 * billed * 10_000) / 10_000)
 
 
+#: EVERY LIMIT THAT BINDS A SESSION, in one place, because this check used to
+#: be written twice and both copies were missing the same one.
+#:
+#: **The package total was not checked.** `formal + engineering = package`
+#: exactly today, so it looked implied -- and it is not: raising the FORMAL
+#: allowance without raising the package total leaves a session that fits its
+#: own book and breaks the package. `load_live_pricing` refuses on `FUNDABLE`,
+#: so a condition missing here is a condition no gate applies.
+#:
+#: Each entry is (condition name, shortfall name, predicate, shortfall). The
+#: BOOK is a parameter: a session that trains probes and consumes the frozen
+#: confirmation battery is charged to the formal allowance, and one that does
+#: neither to the engineering allowance. The package total and the project cap
+#: bind either way.
+REQUIRED_ENVELOPE_KEYS = (
+    "per_session_envelope_usd", "project_cap_usd", "cumulative_spend_usd",
+    "formal_remaining_usd", "engineering_remaining_usd",
+    "package_remaining_usd",
+)
+
+BOOKS = {"formal_allowance": "formal_remaining_usd",
+         "gpu_engineering_allowance": "engineering_remaining_usd"}
+
+
+def evaluate_limits(hard_usd: float, envelopes: Mapping[str, float], *,
+                    book: str = "formal_allowance"
+                    ) -> tuple[dict[str, bool], dict[str, float], float]:
+    """Every applicable limit, its verdict, and how far short each failure is.
+
+    Raises on a missing envelope rather than defaulting one. A gate that
+    supplies its own inputs cannot detect a missing one, and the whole defect
+    this function exists to close was a limit nobody evaluated.
+    """
+    if book not in BOOKS:
+        raise C3PricingError(
+            f"unknown book {book!r}; expected one of {sorted(BOOKS)}")
+    missing = [k for k in REQUIRED_ENVELOPE_KEYS if k not in envelopes]
+    if missing:
+        raise C3PricingError(
+            f"cannot judge fundability: envelopes are missing {missing}. "
+            "Every applicable limit must be checked, and an absent one is not "
+            "a passing one.")
+    book_remaining = float(envelopes[BOOKS[book]])
+    cumulative = float(envelopes["cumulative_spend_usd"])
+    conditions = {
+        "derived_ceiling_within_session_envelope":
+            hard_usd <= float(envelopes["per_session_envelope_usd"]),
+        "cumulative_plus_derived_within_project_cap":
+            round(cumulative + hard_usd, 4)
+            <= float(envelopes["project_cap_usd"]),
+        "booked_allowance_covers_derived": book_remaining >= hard_usd,
+        "package_total_covers_derived":
+            float(envelopes["package_remaining_usd"]) >= hard_usd,
+    }
+    shortfalls: dict[str, float] = {}
+    if not conditions["derived_ceiling_within_session_envelope"]:
+        shortfalls["per_session_envelope"] = round(
+            hard_usd - float(envelopes["per_session_envelope_usd"]), 4)
+    if not conditions["cumulative_plus_derived_within_project_cap"]:
+        shortfalls["project_cap"] = round(
+            cumulative + hard_usd - float(envelopes["project_cap_usd"]), 4)
+    if not conditions["booked_allowance_covers_derived"]:
+        shortfalls[book] = round(hard_usd - book_remaining, 4)
+    if not conditions["package_total_covers_derived"]:
+        shortfalls["package_total"] = round(
+            hard_usd - float(envelopes["package_remaining_usd"]), 4)
+    return conditions, shortfalls, book_remaining
+
+
 @dataclass(frozen=True)
 class Fundability:
     price: C3Price
-    per_session_envelope_usd: float
-    project_cap_usd: float
-    cumulative_spend_usd: float
-    formal_remaining_usd: float
+    envelopes: dict[str, float]
+    book: str = "formal_allowance"
+
+    def __post_init__(self) -> None:
+        #: VALIDATED ON CONSTRUCTION, not on first read. A refusal that only
+        #: fires when a caller happens to look at a property is one a caller
+        #: can skip by not looking -- and the inputs are wrong at construction
+        #: time either way, so that is when to say so.
+        self._evaluated()
+
+    def _evaluated(self) -> tuple[dict[str, bool], dict[str, float], float]:
+        return evaluate_limits(self.price.hard_usd, self.envelopes,
+                               book=self.book)
 
     @property
-    def fits_envelope(self) -> bool:
-        return self.price.hard_usd <= self.per_session_envelope_usd
-
-    @property
-    def fits_project_cap(self) -> bool:
-        return round(self.cumulative_spend_usd + self.price.hard_usd, 4) \
-            <= self.project_cap_usd
-
-    @property
-    def fits_formal_allowance(self) -> bool:
-        return self.formal_remaining_usd >= self.price.hard_usd
+    def conditions(self) -> dict[str, bool]:
+        return self._evaluated()[0]
 
     @property
     def fundable(self) -> bool:
-        return (self.fits_envelope and self.fits_project_cap
-                and self.fits_formal_allowance)
+        return all(self._evaluated()[0].values())
 
     def shortfalls(self) -> dict[str, float]:
         """Exactly how far short each failing condition is. Empty when fundable."""
-        out: dict[str, float] = {}
-        if not self.fits_envelope:
-            out["per_session_envelope"] = round(
-                self.price.hard_usd - self.per_session_envelope_usd, 4)
-        if not self.fits_project_cap:
-            out["project_cap"] = round(
-                self.cumulative_spend_usd + self.price.hard_usd
-                - self.project_cap_usd, 4)
-        if not self.fits_formal_allowance:
-            out["formal_allowance"] = round(
-                self.price.hard_usd - self.formal_remaining_usd, 4)
-        return out
+        return self._evaluated()[1]
 
     def as_dict(self) -> dict[str, Any]:
+        conditions, shortfalls, book_remaining = self._evaluated()
         return {
             "price": self.price.as_dict(),
-            "envelopes": {
-                "per_session_envelope_usd": self.per_session_envelope_usd,
-                "project_cap_usd": self.project_cap_usd,
-                "cumulative_spend_usd": self.cumulative_spend_usd,
-                "formal_remaining_usd": self.formal_remaining_usd},
-            "conditions": {
-                "derived_ceiling_within_envelope": self.fits_envelope,
-                "cumulative_plus_derived_within_cap": self.fits_project_cap,
-                "formal_allowance_covers_derived": self.fits_formal_allowance},
-            "FUNDABLE": self.fundable,
-            "shortfalls_usd": self.shortfalls(),
+            "book": self.book,
+            "book_remaining_usd": round(book_remaining, 4),
+            "envelopes": {k: round(float(v), 4)
+                          for k, v in self.envelopes.items()},
+            "conditions": conditions,
+            "FUNDABLE": all(conditions.values()),
+            "shortfalls_usd": shortfalls,
+            "_every_applicable_limit_is_checked": sorted(conditions),
             "_the_envelope_is_not_the_grant": (
                 "the authorization receives hard_ceiling.usd derived above, "
                 "never the envelope"),
@@ -206,7 +262,12 @@ class Fundability:
 
 
 def live_envelopes() -> dict[str, float]:
-    """The amended envelopes and the live spend, from their canonical owners."""
+    """Every envelope that binds a session, from its canonical owner.
+
+    ONE reader for all six. The A3 pricer used to shell out to
+    `derive_budget` a second time for the engineering balance alone, which is
+    two processes answering one question from one source.
+    """
     import subprocess
     import sys
 
@@ -221,13 +282,17 @@ def live_envelopes() -> dict[str, float]:
         "project_cap_usd": float(d["project"]["cap_usd"]),
         "cumulative_spend_usd": float(d["project"]["cumulative_spend_usd"]),
         "formal_remaining_usd": float(d["formal"]["remaining_usd"]),
+        "engineering_remaining_usd": float(d["engineering"]["remaining_usd"]),
+        "package_remaining_usd": float(d["package"]["remaining_usd"]),
     }
 
 
 def assess(gpu_rate_usd_per_hour: float,
-           envelopes: dict[str, float] | None = None) -> Fundability:
-    env = envelopes if envelopes is not None else live_envelopes()
-    return Fundability(price=price_c3(gpu_rate_usd_per_hour), **env)
+           envelopes: dict[str, float] | None = None,
+           book: str = "formal_allowance") -> Fundability:
+    env = dict(envelopes if envelopes is not None else live_envelopes())
+    return Fundability(price=price_c3(gpu_rate_usd_per_hour), envelopes=env,
+                       book=book)
 
 
 # ---------------------------------------------------------------------------
@@ -344,14 +409,11 @@ def main(argv=None) -> int:
     print(f"  HARD      {p.hard_minutes:8.2f} min = "
           f"{p.hard_minutes/60:6.2f} h  ${p.hard_usd:8.4f}")
     print()
-    for label, ok in (("derived <= envelope "
-                       f"(${f.per_session_envelope_usd:.4f})", f.fits_envelope),
-                      (f"cumulative + derived <= cap (${f.project_cap_usd:.2f})",
-                       f.fits_project_cap),
-                      (f"formal remaining >= derived "
-                       f"(${f.formal_remaining_usd:.4f})",
-                       f.fits_formal_allowance)):
-        print(f"  [{'OK ' if ok else 'NO '}] {label}")
+    #: EVERY condition, derived rather than listed here. A hand-written
+    #: display that omitted one is how the package total went unprinted for as
+    #: long as it went unchecked.
+    for name, ok in f.conditions.items():
+        print(f"  [{'OK ' if ok else 'NO '}] {name}")
     print(f"\n  FUNDABLE: {f.fundable}")
     if not f.fundable:
         for k, v in f.shortfalls().items():

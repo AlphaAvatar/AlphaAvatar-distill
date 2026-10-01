@@ -13,76 +13,125 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 after 919.7 min and is provider-confirmed gone; an account-wide re-query
 returns 0 pods and 0 network volumes.
 
-## A-bsz3 — REDESIGNED SHORTER, `$0` half MEASURED, step 1 NOT FUNDED
+## A3 — ONE experiment, DESIGNED and FUNDED, not yet launched
 
-**The maintainer accepted the implementation and refused the design on
-2026-10-01**, reviewing `review/c3-operator-batching@ab4f32ed`. The reason was
-**scope**: A-bsz3 is an execution-optimization validation, and the programme
-does not need a `>=90%`-power population-level non-inferiority claim to decide
-whether a batching knob is worth switching on. The 16-probe design is
-[WITHDRAWN](../stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json); the
-live design is
-[`a_bsz3_adoption.json`](../stages/stage-1/phase_c3/plans/a_bsz3_adoption.json),
-derived by `scripts/autoinit/write_a_bsz3_adoption.py`.
+**The maintainer merged the step-1/step-2 split on 2026-10-02.** A3 runs end
+to end as one chain — initialization → recovery training → evaluation →
+aggregation → closeout — so the practical question is answered once rather
+than across two approvals. Owner:
+[`a3_design.json`](../stages/stage-1/phase_c3/plans/a3_design.json), derived by
+`scripts/autoinit/write_a3_design.py`.
 
-**Nothing produced by the new design may be reported as a 95% non-inferiority
-conclusion.** The power finding that produced 16 probes survives the
-withdrawal precisely because it is the reason three seeds cannot support that
-claim.
+**The diagnostics still all get collected, and none of them is a gate.**
+Digests, kept-head maps, per-head scores, rank correlation, score drift,
+selection margins, observed position counters, scorer and end-to-end runtime
+with spread, peak VRAM. **A differing A-bsz3 artifact digest is a FINDING, not
+a stop** — the chain proceeds into recovery.
 
-**Step 1 is one same-device session** and now records what it was missing:
-per-head scores with Spearman rank correlation and score drift, the forward /
-padded / executed counters the operator **observed** rather than the `$0`
-model's prediction of them, and a runtime measured over **interleaved
-repeated rounds** with each protocol's first round a declared warm-up. That
-last part is not ceremony — this operator was measured at **11.2732 s** on
-this exact parent geometry, and a single sample of an 11-second workload run
-after the other protocol reports the arms' order as much as the protocols.
+**Six integrity stops, and seven things that are explicitly not stops.** The
+distinction that matters: A-bsz1 and A-bsz3 *differing from each other* is the
+finding; a protocol that cannot reproduce *its own* digest across rounds in one
+session is a stop. Also stops: a parent that does not reproduce, A-bsz1 failing
+to rebuild the incumbent, a masking defect, a protocol-identity mismatch
+against the controls, corrupt input. Each one is repaired, never interpreted as
+a result. No point estimate at any seed ends the chain.
 
-**Four ways step 1 can be void rather than informative**, each checked: A-bsz1
-failing to reproduce the frozen incumbent digest `53e30566c5f7…`; the two
-protocols seeing different `calibration_tokens`; `executed − padded ≠
-calibration_tokens` for either protocol; or either protocol failing to
-reproduce its *own* digest across rounds. The incumbent gate is free and
-doubles as a third independent reproduction of that identity.
+**The `−0.030` fail-fast is withdrawn as a normal stop.** A3 trains all three
+seeds. The number survives as the measured seed-level noise band: across all
+three C3 contrasts — arms whose *pooled* differences were within `0.001961` of
+zero — per-seed deltas still spanned `±0.022353`. A single seed moving that far
+is the instrument, not the protocol.
 
-**The `1.25×` runtime bar is gone.** It came from the causal-KL packing pilot
-— a different workload with a different forward count — and the maintainer
-withdrew it here. The measured speedup is reported; what it is worth is judged
-against the attention-calibration volume D1/D2/D3 will need.
+**Three new treatment probes; the controls are not retrained.** attempt75's
+three `A_incumbent` probes are valid, protocol-uniform and fully scored at the
+same frozen seeds `217230555`, `1151307191`, `2045359208`. Protocol identity —
+battery, scoring contract, generation fingerprint `c318d1c62197…`, recipe,
+prompt field — is verified *before the first scientific probe*, then all three
+train.
 
-**Step 2 trains at most THREE probes, treatment only**, and reuses attempt75's
-three valid, protocol-uniform, fully scored `A_incumbent` controls at the
-frozen C3 recovery seeds `217230555`, `1151307191`, `2045359208`. Fail-fast
-from the first seed, with a stop threshold **derived** rather than written:
-across all three C3 contrasts — arms whose *pooled* differences were within
-`±0.002` — per-seed deltas still ranged over `±0.0224`, so the stop sits at
-`−0.030`, three times the SESOI and above anything this instrument has
-produced between protocols behaving identically. A seed-1 delta between
-`−0.030` and `0` deliberately does **not** stop the study.
+**Priced as one chain, funded by the minimum amendment.**
 
-**The price of the shortened design is stated, not implied.** Treatment and
-control would be measured in *different sessions on different hardware*; C3
-trained all nine of its probes in one session precisely to avoid that. Session
-is therefore an unquantified alternative explanation, and it is a stronger
-reason than power for refusing a formal equivalence claim. Step 1's incumbent
-digest gate confines the unverified part to training and evaluation.
+| | |
+| --- | --- |
+| expected | `$5.8680` · 320.56 min |
+| hard ceiling | `$8.2525` · 450.82 min |
+| container disk | **60 GB derived** — 36.06 GiB peak at the parent replay |
+| durable | 6.664 GiB, three probes |
+| book | formal allowance |
+| fundable | **yes, on all four limits** |
 
-**Priced from measured components**, mostly attempt75's own stage markers:
+**A limit that was never checked is now checked.** `Fundability` evaluated
+three conditions and not the **package total** — it looked implied, because the
+package total equals `formal + engineering`, and that identity is exactly why
+nothing evaluated it. At the derived ceiling the formal book was short
+`$9.2017` and the package short `$7.2622`; sizing the amendment from the formal
+shortfall alone would have raised the wrong book by the wrong amount. There are
+four conditions now, in `formal_pricing.evaluate_limits`, which **raises** on a
+missing envelope rather than treating an absent limit as satisfied.
 
-| shape | expected | hard ceiling | book | fundable |
-| --- | --- | --- | --- | --- |
-| step 1, structural | `$0.7328` | `$1.5815` | engineering | **yes**, `$1.9395` left |
-| step 2, 1 probe | `$2.5193` | `$3.9039` | formal | no, short `$4.8531` |
-| step 2, 3 probes | `$5.7881` | `$8.1533` | formal | no, short `$9.1025` |
+**The amendment is prospective and minimal:** formal `$55.0000` → `$65.6523`,
+package `$65.0000` → `$75.6523`, engineering and the per-session envelope and
+the project cap all unchanged. It funds the derived ceiling plus **one
+pre-science restart** of `$1.4506` — the chain up to the first scientific
+probe, at hard rates — because the same decision requires autonomous rerun of
+failed setup stages, and an allowance sized to exactly one flawless run cannot
+execute that. `$9.7031` on the formal book, nothing else. **attempt75's
+`$0.9492` overspend stands as historical fact** and nothing rewrites it into
+compliance. Owner: [`decisions.md`](../budget/decisions.md), 2026-10-02.
 
-**The books do not transfer, and the study straddles them.** Step 1 trains no
-probe and consumes no battery, so it is GPU engineering validation. Step 2
-trains recovery probes and scores them on `c1_confirmation_v1`, and the
-execution package states that the engineering allowance authorizes neither —
-so calling the study "engineering" in its *scientific* claim does not move it
-between books. Owner:
-[`a_bsz3_pricing.json`](../stages/stage-1/phase_c3/plans/a_bsz3_pricing.json).
+**Durable room was measured, not assumed, and it was blocking.** Account-wide
+private headroom bisected at **12–13 GiB** — A3's three probes fit, A3 plus one
+authorized retry (13.33 GiB) did **not**. attempt75's nine probe weights were
+retired under the consumer rule after an audit found no launcher declaring
+them, no setup fetching them, no registry protecting them, and every code
+reference reading its committed *evidence*. Measured reclaim: **12–13 → 32–33
+GiB**, and six probes now fit. The evidence, hashes, configs, scores and the
+verdict all survive; nine `model.safetensors` do not. Owner:
+[`archival_retirement_20261002.json`](../maintenance/inventories/archival_retirement_20261002.json).
+
+## The A3 chain — scientific core BUILT, operational chain NOT built
+
+**Two pieces exist and are tested; the rest of the chain does not.**
+
+**`a3_session.py` — A3's frozen identity.** ONE `FixedPathSpec`, because
+A-bsz1 and A-bsz3 are the same operator at the same step with the same hashed
+config; the difference is the `ExecutionConfig` each run is given. So the gate
+is **asymmetric and that is the experiment**: A-bsz1 must rebuild the incumbent
+`53e30566c5f7…`, and A-bsz3 carries **no digest pin at all**, because pinning
+it would answer the question by assertion. Seven stages, B through H, and the
+status path is named once — a driver writing markers to a path its launcher
+does not poll made every marker invisible on attempt75, including `ALL_DONE`.
+
+**`aggregate_a3.py` — the comparison, OFF POD, at `$0`.** attempt75 trained,
+preserved and scored nine probes over 919 minutes and `$16.71`, then lost its
+decision artifact to a crash in the on-pod aggregation. A3's driver therefore
+**ends at preservation** and the comparison never runs on the meter. That
+removes the failure class instead of guarding against it, and it is why the
+stage ladder has no stage I.
+
+**It is tested on a replica of a finished run, which is the part attempt75
+never had.** Twelve tests build the *shape* of three completed treatment
+probes from the controls' own real evidence and drive the real `build()`: an
+identical field reports exactly `0.0` with zero discordant McNemar pairs; a
+planted `+17/850` improvement comes back at `+0.02` with the right sign and
+`treatment_only_correct == 17, control_only_correct == 0`; and all four
+integrity refusals fire — a generation-fingerprint mismatch, a scoring-contract
+mismatch, a battery mismatch, and two seeds not being the estimand. The
+bootstrap moves with its seed, which is the C3 defect checked directly: every
+C3 record asserted `654678655` while the resampler used C1's `816109261`.
+
+**One real defect was found by asking what the consumer reads.** The committed
+`c3_probe_results.json` carries counts, rates and per-capability figures and
+does **not** carry the usable-rollout component rates or the per-domain and
+per-set axes — all of which A3 must report. The comparison now reads each
+control's own scored record from the durable evidence and verifies it against
+the `result_sha256` the committed record names.
+
+**What is NOT built:** the pod driver (stages B–H), the launcher and its
+pre-provider gates, the acquisition loop with capacity backoff, the governance
+chain (grant → launch-bound readiness → one-use authorization → bundle), and
+the `$0` production-path rehearsal that must drive the real driver before any
+pod exists. **Nothing is launched and no provider resource exists.**
 
 ## The D-series directive is recorded and NOT started
 
@@ -171,8 +220,14 @@ belonged to the withdrawn design.
 
 ## Scientific identity is not materialization identity
 
-**The design settled the scientific question and left the materialization one
-open; that gap is now stated and tested.** `compute_state_id` binds the root
+**It does not stop A3.** A differing digest is recorded as a finding, the chain
+continues, and no materialization-identity framework is built during the
+experiment. The obligation is forward-only: if A-bsz3 produces a different
+artifact and its behaviour is acceptable, the closeout records it as a distinct
+numerical materialization protocol, and the binding below is required before
+A-bsz3 enters a **resumable beam search** in D1/D2/D3 — not before A3 finishes.
+
+**The gap is stated and tested.** `compute_state_id` binds the root
 teacher, the target spec, each step's implementation id and signature, the
 calibration profile hash, the operator config hash and the seed. It binds
 **neither the `ExecutionConfig` nor the artifact digest** — correctly, because
@@ -280,7 +335,15 @@ produced by `scripts/autoinit/aggregate_c3_stage_i.py`.
 **attempt75's stage-I failure remains historical fact** and is not rewritten as
 though the live session had reached stage I successfully.
 
-## The formal allowance is OVERSPENT by `$0.9492`
+## The `$0.9492` formal overspend — HISTORICAL, against the old `$55.00`
+
+**It is a fact about attempt75, not the current balance.** The 2026-10-02
+amendment raised the formal allowance to `$65.6523`, so the live remaining is
+`$9.7031` — read the summary table, not this heading. What follows is why
+attempt75 was issued against a book it exceeded, and it is **not** rewritten
+into compliance: the authorization-gate defect, the seven earlier sessions that
+also spend the allowance, and the `$55.9492` already spent all stand exactly as
+recorded. A forward-looking raise is not retroactive permission.
 
 **`derive_budget` attributed the formal allowance to one hardcoded
 experiment**, `FORMAL_EXPERIMENT = "phase_c1"`, so every formal C3 session
@@ -2540,12 +2603,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$-0.9492` of `$55.0000` |
+| formal sessions | `$9.7031` of `$65.6523` |
 | GPU engineering | `$1.9395` of `$10.0000` |
-| package | `$0.9903` of `$65.0000` |
+| package | `$11.6426` of `$75.6523` |
 | project cap | `$383.3623` spent of `$400.0000`, leaving `$16.6377` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$-0.9492`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$9.7031`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

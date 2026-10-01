@@ -1,0 +1,335 @@
+{
+ "schema": "aadistill.a3.design/v1",
+ "stage": "A3",
+ "designed_utc": "2026-10-02",
+ "_contract": "The COMPLETE A3 experiment: the incumbent ATTENTION operator under calibration_forward_batch_size=3 and length_sorted_v1 packing, run end to end as ONE chain. Frozen before any A3 structural or behavioural result exists. AUTHORIZES NO SPEND BY ITSELF -- the money is the 2026-10-02 amendment's.",
+ "supersedes": [
+  {
+   "plan": "logs/stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json",
+   "design": "8 seeds x 2 arms = 16 probes, ADOPT iff one-sided LCB > -0.010",
+   "withdrawn_utc": "2026-10-01",
+   "reason": "SCOPE. A-bsz3 is an execution-optimization validation and the programme never needed a population-level non-inferiority claim about a batching knob."
+  },
+  {
+   "plan": "logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json",
+   "design": "a cost-ordered split: one structural/runtime session, then a CONDITIONAL behavioural study of at most three probes with a -0.030 seed-1 fail-fast",
+   "withdrawn_utc": "2026-10-02",
+   "reason": "the split required an intermediate approval between the two halves and could terminate on a diagnostic. The maintainer wants the complete three-seed result from one chain, so the digest comparison became a finding and the fail-fast stopped being a normal experimental stop."
+  }
+ ],
+ "_the_question": "Does bsz3 + length_sorted_v1 materially reduce the execution cost of this operator's calibration without producing a material downstream regression? Answered ONCE, over three seeds, without intermediate approvals.",
+ "_what_may_not_be_claimed_FROM_it": [
+  "a formal population-level non-inferiority proof",
+  "that A-bsz3 and A-bsz1 are statistically equivalent",
+  "an operator promotion -- A-bsz3 is not a new operator",
+  "anything about causal-KL, C4, or the B1-vs-B3 protocol choice",
+  "that a differing artifact may be reused under the same state id"
+ ],
+ "_what_it_IS": "the complete A3 engineering/scientific comparison, conditional on three frozen seeds and one frozen battery.",
+ "chain": [
+  "initialization",
+  "recovery_training",
+  "evaluation",
+  "aggregation",
+  "closeout"
+ ],
+ "operator": "attention.activation_importance_v1",
+ "execution": {
+  "calibration_forward_batch_size": 3,
+  "calibration_batch_packing": "length_sorted_v1"
+ },
+ "_not_a_new_operator": "both knobs are ExecutionConfig fields; neither enters a hash, a state id or a manifest identity. No bsz3-specific operator id exists or may be created, and nothing is imported from causal_kl.",
+ "identities": {
+  "shared_parent_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "incumbent_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "recovery_seeds": [
+   217230555,
+   1151307191,
+   2045359208
+  ],
+  "c3_preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
+  "_source": "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
+  "_the_incumbent_is": "what A_bsz1 must reproduce. A-bsz3 is the same operator under a different execution knob, so a reference protocol that does not rebuild this digest has not reproduced the incumbent."
+ },
+ "identity_semantics": {
+  "_the_distinction": "scientific/semantic identity asks whether two executions pose the same operator-level question. Materialization/numerical identity asks whether two executions may be treated as the same resumable, deduplicable checkpoint. A-bsz1 and A-bsz3 share the first by construction; whether they share the second is a thing A3 MEASURES.",
+  "what_compute_state_id_binds": [
+   "root teacher",
+   "target spec",
+   "operator implementation id and signature hash",
+   "calibration profile hash",
+   "operator config hash",
+   "seed"
+  ],
+  "what_it_does_NOT_bind": [
+   "ExecutionConfig",
+   "the resulting artifact digest"
+  ],
+  "_why_that_exclusion_is_correct": "otherwise two runs of the same science at different batch sizes would be different SCIENTIFIC states, a resume would not find its own journal, and whether A-bsz1 and A-bsz3 agree would be settled by definition instead of measured.",
+  "where_the_hazard_lives": "BeamSearch._restore looks a state up in StateStore.latest_by_state_id by state_id, then re-identifies the checkpoint on disk and refuses if the bytes disagree with the record. That guard catches a stale or tampered checkpoint; it cannot catch a record that is internally consistent and was produced by a different numerical protocol.",
+  "what_a_differing_digest_means_for_A3": "NOTHING PROCEDURAL. It is recorded as a finding and the chain continues into recovery. A3 is not stopped to build a materialization-identity framework, and none may be built speculatively.",
+  "what_it_means_afterwards": "if A-bsz3 produces a different artifact and its downstream behaviour is acceptable, the closeout records it as a DISTINCT NUMERICAL MATERIALIZATION PROTOCOL. That label carries exactly one forward obligation: before A-bsz3 is used in D1/D2/D3 -- that is, before it enters a RESUMABLE BEAM SEARCH -- the repository must bind the numerical execution fingerprint to materialization/resume identity, so two artifacts differing in bytes cannot share one resume key. A3's behavioural result does not discharge that obligation, because it is an engineering correctness property rather than a behavioural one.",
+  "_forbidden_resolution": "do NOT invent `attention.activation_importance_bsz3`. The operator semantics are unchanged, a second impl id would fork the scientific identity to repair a materialization problem, and it would answer the equivalence question by definition.",
+  "_required_shape_if_it_is_ever_needed": "the SMALLEST generic separation between semantic/scientific path identity and the numerical/materialization identity used for artifact ownership, resume and deduplication. Generic, not A-bsz3 specific: any execution knob that can move bytes has this property. NOT BUILT, and if A3 finds the digests identical it is never needed.",
+  "regression_that_holds_today": "tests/autoinit/test_corrections.py :: test_resume_refuses_a_record_from_a_different_numerical_protocol -- a matching semantic state id is not sufficient to reuse a checkpoint, driven through the real resume path and mutation-checked."
+ },
+ "initialization": {
+  "parent": "the exact frozen shared parent eea90c91346a, replayed under its digest gate",
+  "protocols": [
+   "A_bsz1 (the incumbent reproduction)",
+   "A_bsz3"
+  ],
+  "rounds_per_protocol": 4,
+  "interleaved": true,
+  "warm_up_rounds_excluded": 1,
+  "_why_interleaved_with_a_warm_up": "the operator measures 11.2732 s on this parent geometry. A single sample of an 11-second workload run after the other protocol reports the arms' ORDER as much as the protocols, because the first pays for allocator growth, autotuning and kernel selection.",
+  "diagnostics_collected": [
+   "A-bsz1 incumbent reproduction and its digest gate",
+   "A-bsz3 artifact digest",
+   "kept-head map, per protocol, and the diff",
+   "per-head scores",
+   "Spearman rank correlation, overall and per layer",
+   "score drift and relative score drift distributions",
+   "selection-boundary margins, and the margin at each flipped group",
+   "valid / padded / executed positions, observed as the operator ran",
+   "scorer runtime and end-to-end suffix runtime, with spread",
+   "peak VRAM"
+  ],
+  "_these_are_diagnostics_not_gates": "they are recorded INSIDE the experiment. A differing A-bsz3 artifact digest is an experimental FINDING and the chain proceeds directly into recovery. Only an integrity failure stops it.",
+  "driver": "scripts/autoinit/compare_a_bsz3.py :: structural_half"
+ },
+ "recovery": {
+  "treatment_arm": "A_bsz3",
+  "probes": 3,
+  "seeds": [
+   217230555,
+   1151307191,
+   2045359208
+  ],
+  "_seeds_are": "the frozen C3 recovery seeds, unchanged",
+  "initialization_source": "round 0 of the A_bsz3 protocol IS the initialization the probes train from, so nothing is materialized twice",
+  "recipe": "e1_p1_kd_heavy@0.86M",
+  "tokens": 860000,
+  "controls_are_not_retrained": true,
+  "_why_not": "attempt75's three A_incumbent probes are valid, protocol-uniform and fully scored at these same seeds. Retraining them would spend three probes to reproduce evidence that already exists.",
+  "all_three_complete": "verify the protocol identities BEFORE the first scientific probe, then train all three. No point estimate interrupts the sequence."
+ },
+ "control": {
+  "arm": "A_incumbent",
+  "source_run": "attempt75",
+  "probes": [
+   {
+    "probe_id": "autoinit.v1.phase_c3.A_incumbent.217230555",
+    "seed": 217230555,
+    "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "correct": 29,
+    "n_scorable": 850,
+    "correct_overall": 0.0341,
+    "usable": 557,
+    "usable_rollout_rate": 0.5863,
+    "result_sha256": "427067d587ab693fa2c4ef800c3c9a8252d6895d2af032cbc1c8222224bff7e1",
+    "per_sample_sha256": "dbe917cfa75ed46f01621e4a4363f161f41d0ce64b8cf92df3a2b6c4ee3d7db9",
+    "train_config_sha256": "27e923d54767275654c52a0256acacae40becda80c5cf0379d3ddf45eea8655f"
+   },
+   {
+    "probe_id": "autoinit.v1.phase_c3.A_incumbent.1151307191",
+    "seed": 1151307191,
+    "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "correct": 37,
+    "n_scorable": 850,
+    "correct_overall": 0.0435,
+    "usable": 565,
+    "usable_rollout_rate": 0.5947,
+    "result_sha256": "9c83b8aa4b22ad322f321c422ae5e92c5eabb51d53c65e3f18159397bdb02e40",
+    "per_sample_sha256": "58383b3e778e21fe6eff12eea5677a808d1abb24926927a86a008abd82143eea",
+    "train_config_sha256": "9f34f1e9ca5edd9fa4f5fb70a5e5b428e0edb88698079fed7f630bf8985330b5"
+   },
+   {
+    "probe_id": "autoinit.v1.phase_c3.A_incumbent.2045359208",
+    "seed": 2045359208,
+    "initialization_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "correct": 37,
+    "n_scorable": 850,
+    "correct_overall": 0.0435,
+    "usable": 504,
+    "usable_rollout_rate": 0.5305,
+    "result_sha256": "1e745d57f22ad5c9e39d6c44937b5d5e7744e0f276c4a6dd943a4e99f132c9e4",
+    "per_sample_sha256": "fb2e95351085362ba485fbfd4412216abae75697cb65613ae295c8c4d5603798",
+    "train_config_sha256": "62209118900ccff1119b3fcf35659e1fa31ad534e0327732d3f6591c0951f6eb"
+   }
+  ],
+  "evidence_root": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
+  "retrained": false,
+  "_weights_were_retired": "logs/maintenance/inventories/archival_retirement_20261002.json -- nine objects, 19.984 GiB, measured reclaim 12-13 GiB -> 32-33 GiB. A3 consumes these controls' per-sample rows and scores, not their weights, so the retirement removes nothing this comparison reads.",
+  "_what_they_are_not": "a control arm measured in the same session as the treatment. See claim_boundary."
+ },
+ "protocol_identity_requirements": {
+  "_why_this_is_strict": "reusing controls measured in another session is the whole saving, and it is sound only while the two fields are ONE field.",
+  "verified_before_the_first_scientific_probe": true,
+  "must_equal_attempt75": {
+   "battery": "c1_confirmation_v1",
+   "battery_manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+   "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+   "scoring_contract": "c1_confirmation_scoring@v1",
+   "scoring_contract_digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+   "generation_protocol_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+   "evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df",
+   "recovery_recipe": "e1_p1_kd_heavy@0.86M",
+   "recovery_tokens": 860000,
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "scorable_prompt_set": "identical prompt ids and strata; `decision_inputs` refuses a field that differs"
+  },
+  "if_any_differs": "an integrity stop: repair, do not interpret"
+ },
+ "integrity_stops": [
+  {
+   "condition": "the frozen shared parent does not reproduce its digest",
+   "why": "every arm is defined relative to that parent; a different parent is a different experiment",
+   "action": "repair and re-run; never interpret as a result"
+  },
+  {
+   "condition": "A_bsz1 does not reproduce the frozen incumbent digest 53e30566c5f7",
+   "why": "A-bsz1 IS canonical A. If it does not rebuild the incumbent then the controls A3 reuses do not describe what this session built, and the reuse rests on exactly that identity",
+   "action": "repair and re-run"
+  },
+  {
+   "condition": "an initialization is not reproducible WITHIN its own declared numerical protocol -- the same protocol producing two different digests across rounds in one session",
+   "why": "a protocol that is not repeatable against itself cannot be compared with another one. This is NOT the same as A-bsz1 and A-bsz3 differing from each other, which is the finding",
+   "action": "repair and re-run"
+  },
+  {
+   "condition": "the two protocols accumulate different valid token counts, or executed - padded != calibration_tokens",
+   "why": "padded positions are masked out of the accumulator, so this is a masking defect and not a numerical effect",
+   "action": "repair and re-run"
+  },
+  {
+   "condition": "the recovery recipe, battery, scoring contract or generation protocol does not match the attempt75 controls",
+   "why": "the comparison pools two fields as one. C2's confirmation set carried THREE generation fingerprints and produced no canonical verdict for exactly this reason",
+   "action": "repair before the first scientific probe trains -- the fingerprint is a property of the generation configuration and is knowable at session start"
+  },
+  {
+   "condition": "corrupt or unreadable calibration, corpus or battery data",
+   "why": "a measurement over corrupt input is not a measurement",
+   "action": "repair and re-run"
+  }
+ ],
+ "not_stops": [
+  "the A-bsz3 artifact digest differing from A-bsz1's -- that is the finding",
+  "a kept-head map that differs, however widely",
+  "a low rank correlation or a large score drift",
+  "a measured speedup smaller than hoped, or below 1.0",
+  "a seed-1 correctness delta that looks bad -- see seed_level_noise",
+  "any point estimate at any seed",
+  "a usable-rollout component rate moving"
+ ],
+ "seed_level_noise": {
+  "observed_max_abs_per_seed_delta": 0.022353,
+  "observed_abs_pooled_deltas": [
+   0.001961,
+   0.001961,
+   0.0
+  ],
+  "_what_this_says": "across all three C3 contrasts -- arms whose POOLED differences were within 0.001961 of zero -- per-seed deltas still ranged over 0.022353. A single seed moving by that much is the instrument, not the protocol.",
+  "reporting_reference_only": true,
+  "_not_a_stop": "A3 trains all three seeds. No point estimate at any seed ends the chain; only the integrity stops do.",
+  "_not_an_equivalence_margin": "it bounds nothing and no interval, power or equivalence statement follows from it.",
+  "_source": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json, all three contrasts"
+ },
+ "aggregation_and_reporting": {
+  "_one_comparison": "the three new A-bsz3 probes against the three matched attempt75 A controls, paired at prompt level by seed",
+  "report_at_minimum": [
+   "pooled and per-seed correct_overall, both arms",
+   "paired prompt-level deltas",
+   "descriptive stratified prompt-cluster bootstrap interval",
+   "McNemar counts, per seed",
+   "usable_rollout_rate and ALL component rates -- non_empty, natural_termination, no_severe_repetition, no_context_limit, protocol_valid",
+   "capability, domain and set breakdowns",
+   "structural head-map differences",
+   "initialization score drift and rank correlation",
+   "initialization/runtime speedup and its spread",
+   "peak VRAM",
+   "artifact identities, every arm and probe",
+   "exact consumed input hashes",
+   "total GPU time and actual cost"
+  ],
+  "interval_is_descriptive": "the same bootstrap machinery C3 used, reported as a DESCRIPTIVE interval. It is not a non-inferiority test and must not be written as one.",
+  "sesoi_role": "the programme's 0.01 correctness SESOI is reported as the SCALE of a material loss, not as a decision rule.",
+  "safety_checks_reused_from_c3": {
+   "pooled_usable_delta_min": -0.05,
+   "per_seed_usable_delta_min": -0.1,
+   "catastrophic_capability_veto": {
+    "rule": "per primary stratum: candidate usable rate < 0.10 while control usable rate > 0.40",
+    "candidate_max": 0.1,
+    "control_min": 0.4,
+    "implementation": "scripts/experiments/phase_c1/probe_results.py :: decision_inputs"
+   },
+   "_role": "reported as safety observations. They do not gate the chain's completion."
+  }
+ },
+ "closeout_states": {
+  "digests_identical": "A-bsz3 is a TRANSPARENT EXECUTION OPTIMIZATION for this case: one scientific and one materialization identity, and adoption turns on the measured runtime.",
+  "digests_differ_behaviour_acceptable": "record A-bsz3 as a DISTINCT NUMERICAL MATERIALIZATION PROTOCOL. Adoptable for standalone initialization on the runtime evidence; NOT adoptable into D1/D2/D3 resumable beam search until the identity binding exists.",
+  "digests_differ_behaviour_materially_worse": "A-bsz3 is not adopted. The runtime saving does not buy a correctness regression, and the measured delta is the record.",
+  "_the_closeout_states_the_adoption_question": "A3 ends with one complete closeout naming the incumbent and the adoption question as it then stands. The FFN experiment and the D-series wait for independent review."
+ },
+ "claim_boundary": {
+  "what_this_evidence_is": "the complete A3 engineering/scientific comparison, conditional on the three frozen C3 recovery seeds and the frozen confirmation battery.",
+  "the_cross_session_limitation": "treatment and control are measured in DIFFERENT SESSIONS on different physical hardware. C3 trained all nine of its probes in one session precisely to avoid that. Session is an unquantified alternative explanation for any difference A3 finds, and it must remain explicit in every report.",
+  "what_partly_bounds_it": "A3 re-derives the incumbent INITIALIZATION on the new hardware and gates it against 53e30566c5f7. If that passes, the unverified session effect is confined to training and evaluation.",
+  "not_a_formal_proof": "three seeds cannot support a population-level non-inferiority conclusion and A3 does not claim one."
+ },
+ "pricing": {
+  "_owner": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
+  "_derived_by": "scripts/experiments/phase_c3/a3_pricing.py",
+  "gpu_rate_usd_per_hour": 1.09,
+  "_rate_note": "the live L40S securePrice at pricing time. Re-quote immediately before authorization.",
+  "expected_usd": 5.868,
+  "hard_ceiling_usd": 8.2525,
+  "hard_ceiling_minutes": 450.82,
+  "container_disk_gb": 60,
+  "durable_requirement_gib": 6.664,
+  "book": "formal_allowance",
+  "FUNDABLE": true,
+  "limits_checked": [
+   "booked_allowance_covers_derived",
+   "cumulative_plus_derived_within_project_cap",
+   "derived_ceiling_within_session_envelope",
+   "package_total_covers_derived"
+  ]
+ },
+ "funding": {
+  "amended_utc": "2026-10-02",
+  "amendment": "formal allowance 55.0000 -> 65.6523; package total 65.0000 -> 75.6523; engineering, per-session envelope and project cap unchanged",
+  "funds": "the derived hard ceiling plus ONE pre-science restart of $1.4506, total $9.7031 on the formal book",
+  "owner": "logs/budget/decisions.md, 2026-10-02",
+  "_historical_overspend_preserved": "attempt75's $0.9492 formal overspend stands as fact and is not rewritten into compliance.",
+  "_a_mid_run_failure_that_cannot_be_funded_is_a_stop": "if the remaining balance cannot fund a corrected attempt plus teardown, A3 stops and reports rather than amending again."
+ },
+ "step_0_zero_cost": {
+  "status": "DONE",
+  "cost": "$0",
+  "n_items": 67,
+  "valid_tokens": 59830,
+  "forwards": {
+   "A_bsz1": 67,
+   "A_bsz3": 23,
+   "ratio": 0.343284
+  },
+  "padding_over_valid": {
+   "A_bsz1": 0.0,
+   "A_bsz3": 0.04008
+  },
+  "_role": "the PREDICTION the observed position counters are checked against; it decides nothing"
+ },
+ "authorizes": "nothing by itself",
+ "_what_is_forbidden": [
+  "changing arms, seeds, data, the recovery recipe, the battery or the metric/decision semantics -- any of those is a stop for maintainer review",
+  "retraining the attempt75 controls",
+  "creating a bsz3-specific operator id",
+  "building a materialization-identity framework during A3",
+  "starting D1/D2/D3, the FFN experiment or Stage-0 v2",
+  "increasing the approved budget"
+ ],
+ "design_sha256": "6a236d6231588effb4c65eb112a28ab81db21cc9b98b94af6f4c2cdebc05ee2d"
+}

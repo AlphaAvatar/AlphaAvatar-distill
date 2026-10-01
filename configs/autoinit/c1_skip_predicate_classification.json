@@ -190,6 +190,10 @@
   "tests/c2_replay_preflight/test_replay_execution_preflight.py": {
    "class": "manifest_derived",
    "_why": "`digest_pinned_replay_is_buildable()` compares the current bytes of tracked operator sources against the commit attempt 3's artifact digests were produced by. Both sides are tracked source text carried by the bundle checkout, so a pod reaches the same verdict as this host -- it is not a machine capability and not a simulator marker."
+  },
+  "tests/autoinit/test_a3_aggregation.py": {
+   "class": "devbox_only_artifact",
+   "why": "A3's comparison reads attempt75's durable control evidence -- per-sample rows and scored records under ~/aad-artifacts -- which no SetupManifest stages onto a pod. The module derives its root from Path.home() rather than a literal, so the declared HOME isolation reaches it and both machines decide absent. These tests belong where the evidence is: A3's aggregation runs OFF POD by design, precisely because attempt75 lost its on-pod decision artifact after a complete measurement."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",

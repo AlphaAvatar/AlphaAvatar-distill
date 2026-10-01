@@ -1,0 +1,159 @@
+{
+ "schema": "aadistill.phase_c3.a3_pricing/v1",
+ "_contract": "The COMPLETE A3 chain, priced from measured components at a live rate, with every applicable limit checked. Supersedes the three-shape step-1/step-2 pricing. AUTHORIZES NOTHING.",
+ "gpu": "(rate supplied)",
+ "queried_rate_usd_per_hour": 1.09,
+ "components": {
+  "setup": {
+   "minutes": 7.7,
+   "measured": "attempt75: session start 17:58:39Z to STAGE_START:B at 18:06:21Z. THE SAME IMAGE HAS TAKEN 5, 8.5 AND 150+ MINUTES, which is why the hard ceiling substitutes a worst case rather than scaling this."
+  },
+  "pre_provider_gates": {
+   "minutes": 3.0,
+   "measured": "c3_pricing_9probe.json: attempt18 ran 14 gates in-window"
+  },
+  "teacher_fetch_verify": {
+   "minutes": 0.22,
+   "measured": "attempt75 stage B: 18:06:21Z to 18:06:34Z"
+  },
+  "register_operator": {
+   "minutes": 0.03,
+   "measured": "attempt75 stage C: 18:06:34Z to 18:06:36Z"
+  },
+  "parent_replay": {
+   "minutes": 21.78,
+   "measured": "attempt75 stage D: 18:06:36Z to 18:28:23Z, parent eea90c91346a reproduced under its frozen digest gate"
+  },
+  "initialization_rounds": {
+   "minutes": 2.0,
+   "measured": "8 suffix materializations at 0.25 min each -- 4 interleaved rounds per protocol, attempt75 stage E 18:28:23Z to 18:28:38Z for one. The operator's own statistics pass is 11.2732 s (C1 attempt18, same parent geometry). Round 0 of A_bsz3 IS the initialization the probes train from, so no separate materialization is priced."
+  },
+  "recovery_probes": {
+   "minutes": 185.28,
+   "measured": "attempt75 stage G: 555.85 min over 9 probes -> 61.76 x 3"
+  },
+  "evaluations": {
+   "minutes": 80.55,
+   "measured": "attempt75 stage H: 241.63 min over 9 probes -> 26.85 x 3"
+  },
+  "aggregation": {
+   "minutes": 15.0,
+   "measured": "c3_pricing_9probe.json `decide_bootstrap_closeout`, for a session that runs the paired bootstrap on the pod. A3 computes one contrast rather than three and more breakdowns, so the figure is carried rather than scaled down."
+  },
+  "collect_and_teardown": {
+   "minutes": 5.0,
+   "measured": "attempt75 collected 235 files across 19 classes inside its closeout window"
+  }
+ },
+ "price": {
+  "gpu_rate_usd_per_hour": 1.09,
+  "billed_rate_usd_per_hour": 1.098333,
+  "container_disk_gb": 60,
+  "expected": {
+   "minutes": 320.56,
+   "hours": 5.3427,
+   "usd": 5.868,
+   "components_minutes": {
+    "setup": 7.7,
+    "pre_provider_gates": 3.0,
+    "teacher_fetch_verify": 0.22,
+    "register_operator": 0.03,
+    "parent_replay": 21.78,
+    "initialization_rounds": 2.0,
+    "recovery_probes": 185.28,
+    "evaluations": 80.55,
+    "aggregation": 15.0,
+    "collect_and_teardown": 5.0
+   }
+  },
+  "hard_ceiling": {
+   "minutes": 450.82,
+   "hours": 7.5136,
+   "usd": 8.2525,
+   "components_minutes": {
+    "setup": 45.0,
+    "pre_provider_gates": 3.0,
+    "teacher_fetch_verify": 0.286,
+    "register_operator": 0.039,
+    "parent_replay": 28.314,
+    "initialization_rounds": 2.6,
+    "recovery_probes": 240.864,
+    "evaluations": 104.715,
+    "aggregation": 19.5,
+    "collect_and_teardown": 6.5
+   },
+   "_allowances": {
+    "setup_worst_case_minutes": 45.0,
+    "overrun_factor": 1.3,
+    "_overrun_reaches": "every measured GPU component except setup, which has its own worst case, and the pre-provider gates, which run before the meter"
+   }
+  },
+  "storage": {
+   "footprints_gib": {
+    "initialization_leaf_bf16": 1.111,
+    "shared_parent_bf16": 1.33,
+    "trained_probe": 2.221,
+    "one_training_working_set": 8.882
+   },
+   "training_dtypes": {
+    "save_dtype": "float32",
+    "weight_dtype": "float32",
+    "grad_dtype": "float32",
+    "moment_dtype": "float32",
+    "n_moments": 2,
+    "_source": "configs/stage3/e1/e1_r0860k_sa_pca.json"
+   },
+   "fixed_floor_gib": 18.61,
+   "fixed_floor_components_gib": {
+    "container_image_and_python": 8.0,
+    "venv_and_wheel_cache": 2.0,
+    "staged_batteries_and_mixtures": 0.1,
+    "recovery_corpus": 1.0,
+    "_basis": "the staged assets are measured locally at 3.3M, 992K, 776K, 904K and 728K; the corpus is bounded at 1 GiB against local blocks.npz files of 2.6M-41M. The image and venv terms are the generous side of what a runpod/pytorch image plus this repository's install occupies."
+   },
+   "container_residency": {
+    "peak_gib": 36.06,
+    "peak_at_unit": "parent_replay",
+    "n_units": 6
+   },
+   "durable_requirement": {
+    "gib": 6.664,
+    "n_probes": 3,
+    "_bounded_against": "the durable backend, never container storage"
+   },
+   "provision": {
+    "margin": 1.5,
+    "container_disk_gb": 60,
+    "available_gib": 55.879,
+    "headroom_gib": 19.819,
+    "_why_not_c3s_120_gb": "C3 provisioned for nine probes. A3 holds one training working set at a time and three probes' worth of retained bytes at most, and the difference between this provision and 120 GB is a few cents over the whole chain -- which is the reason to derive it rather than to round it up."
+   }
+  }
+ },
+ "book": "formal_allowance",
+ "_book_because": "A3 trains recovery probes and scores them on c1_confirmation_v1; the execution package states that the GPU engineering allowance authorizes neither. What decides the book is what the session does.",
+ "book_remaining_usd": 9.7031,
+ "envelopes": {
+  "per_session_envelope_usd": 30.0,
+  "project_cap_usd": 400.0,
+  "cumulative_spend_usd": 383.3623,
+  "formal_remaining_usd": 9.7031,
+  "engineering_remaining_usd": 1.9395,
+  "package_remaining_usd": 9.7031
+ },
+ "conditions": {
+  "derived_ceiling_within_session_envelope": true,
+  "cumulative_plus_derived_within_project_cap": true,
+  "booked_allowance_covers_derived": true,
+  "package_total_covers_derived": true
+ },
+ "FUNDABLE": true,
+ "shortfalls_usd": {},
+ "_every_applicable_limit_is_checked": [
+  "booked_allowance_covers_derived",
+  "cumulative_plus_derived_within_project_cap",
+  "derived_ceiling_within_session_envelope",
+  "package_total_covers_derived"
+ ],
+ "_the_envelope_is_not_the_grant": "the authorization receives hard_ceiling.usd, never an envelope"
+}
