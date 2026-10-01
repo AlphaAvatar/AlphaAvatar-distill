@@ -500,3 +500,54 @@ def test_the_run_ids_the_loop_mints_are_run_ids_the_layout_accepts(session):
     assert 'a3-attempt$N' in loop and 'a3_attempt$N' in loop, (
         "next_free does not consider both spellings; an attempt number with "
         "a consumed chain under the old name would be reused")
+
+
+def test_the_card_is_part_of_the_measurement_not_only_of_the_price(session):
+    """A3 may not run on an approved-but-different architecture.
+
+    The approved tier holds three types and `require_approved` accepts any of
+    them, which is correct for a session whose success is a measurement and
+    wrong for one whose success is a DIGEST: stage E compares A-bsz1's
+    artifact byte-exactly against an incumbent built on an L40S, and a GEMM
+    reduces in an architecture-dependent order. A different card can fail
+    that gate for a reason that has nothing to do with the batching protocol
+    -- an integrity stop on hardware, reported as a protocol failure, after a
+    paid session.
+
+    This was reachable: RTX 6000 Ada was `usable` at $0.84 while the L40S
+    was refusing on capacity, so the acquisition loop's watch would have
+    handed the launcher a cheaper, approved, scientifically void card.
+    """
+    L, args, _ = session
+    import json as _json
+
+    priced = _json.loads((REPO / "logs/stages/stage-1/phase_c3/plans/"
+                          "a3_live_pricing.json").read_text())["gpu"]
+    auth = types.SimpleNamespace(hard_cap_usd=L.a3_hard_ceiling_usd(REPO),
+                                 harness_source_digest="x" * 64,
+                                 harness_source_files=())
+
+    def _gate(gpu, rate):
+        a = L.build_parser().parse_args(
+            ["--scr", "/tmp/a3-contract", "--run-id", "a3_attempt1",
+             "--session-commit", "0" * 40, "--bundle", "b.bundle",
+             "--gpu", gpu, "--max-price", str(rate)])
+        a.disk_gb = 60
+        return L.pricing_identity_gate(_ctx(a, auth=auth))
+
+    ok, why = _gate(priced, 1.09)
+    assert ok, why
+    for other in ("NVIDIA RTX 6000 Ada Generation", "NVIDIA L40"):
+        if other == priced:
+            continue
+        ok, why = _gate(other, 0.84)
+        assert not ok, f"{other} was accepted; the digest gate is architecture-bound"
+        assert "byte-exact digest" in why
+
+    #: And the acquisition loop's capacity watch offers only that card, so a
+    #: chain is not consumed to discover the refusal.
+    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    assert 'want = priced["gpu"]' in loop, (
+        "the watch no longer filters to the priced card")
+    assert "select(query_offers())" not in loop, (
+        "the watch still takes the best AVAILABLE approved type")

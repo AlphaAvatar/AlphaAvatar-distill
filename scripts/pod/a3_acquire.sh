@@ -55,18 +55,37 @@ PY
 )
 say "status path $STATUS_PATH, driver job $DRIVER_JOB"
 
+#: THE PRICED CARD ONLY. The approved tier holds three types, and `select`
+#: returns the best AVAILABLE one -- right for a session whose success is a
+#: measurement, wrong for A3. Stage E compares A-bsz1's artifact digest
+#: byte-exactly against an incumbent built on an L40S, and a GEMM reduces in
+#: an architecture-dependent order, so another card can fail that gate for a
+#: reason that is not the experiment. RTX 6000 Ada was `usable` at $0.84 while
+#: the L40S refused on capacity, so this watch would have handed the launcher
+#: a cheaper, approved, scientifically void card. The launcher's
+#: `pricing_identity_gate` refuses it too; this stops the loop from consuming
+#: a chain to find that out.
 usable_now() {
-  PYTHONPATH=src:scripts .venv/bin/python - <<'PY' 2>/dev/null
+  PYTHONPATH=src:scripts .venv/bin/python - <<'PYEOF' 2>/dev/null
+import json
+import pathlib
 import sys
 sys.path[:0] = ["src", "scripts"]
 try:
-    from experiments.phase_c3.hardware import query_offers, select
-    chosen = select(query_offers())
+    from experiments.phase_c3.hardware import query_offers
+    priced = json.loads(pathlib.Path(
+        "logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json").read_text())
+    want = priced["gpu"]
+    offers = query_offers()
+    keys = offers if isinstance(offers, list) else list(offers)
+    for key in keys:
+        offer = key if isinstance(offers, list) else offers[key]
+        if getattr(offer, "gpu_type_id", None) == want and offer.usable:
+            print(f"{offer.gpu_type_id}|{offer.secure_price_usd_per_hour}")
+            break
 except Exception:
-    chosen = None
-if chosen and chosen.usable:
-    print(f"{chosen.gpu_type_id}|{chosen.secure_price_usd_per_hour}")
-PY
+    pass
+PYEOF
 }
 
 next_free() {

@@ -326,6 +326,28 @@ def pricing_identity_gate(ctx: SessionContext) -> tuple[bool, str]:
         return False, (f"--max-price {rate} exceeds the priced rate {quoted}; "
                        "a session may not be authorized at one rate and run "
                        "at a higher one")
+    #: THE CARD IS PART OF THE MEASUREMENT, not just of the price. Stage E
+    #: compares A-bsz1's artifact digest BYTE-EXACTLY against the incumbent
+    #: `53e30566`, which was built on an L40S -- and a GEMM reduces in a
+    #: shape- and architecture-dependent order, so a different card can make
+    #: A-bsz1 fail to rebuild the incumbent for a reason that has nothing to
+    #: do with the batching protocol. That is an INTEGRITY STOP on a hardware
+    #: difference: a voided paid session reporting a protocol failure.
+    #:
+    #: The approved tier holds three types and `require_approved` accepts any
+    #: of them, which is right for a session whose success is a measurement
+    #: and wrong for one whose success is a digest. RTX 6000 Ada was `usable`
+    #: at $0.84 while the L40S was refusing on capacity, so the acquisition
+    #: loop could have taken it -- cheaper, approved, and scientifically void.
+    priced_gpu = str(doc.get("gpu") or "")
+    asked_gpu = str(getattr(ctx.args, "gpu", "") or "")
+    if priced_gpu and asked_gpu and asked_gpu != priced_gpu:
+        return False, (
+            f"--gpu {asked_gpu!r} is not the {priced_gpu!r} this session was "
+            "priced and designed for. A3's stage E is a byte-exact digest "
+            "comparison against an artifact built on that card; a different "
+            "architecture can fail it for a reason that is not the "
+            "experiment. Re-price and re-issue for the card, or wait for it.")
     return True, (f"live ${quoted}/h -> hard ${ceiling:.4f}, "
                   f"{len(doc['_every_applicable_limit_is_checked'])} limits "
                   "checked including the package total")
