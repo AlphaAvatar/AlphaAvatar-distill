@@ -722,7 +722,17 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--gpu", default="NVIDIA L40S")
-    ap.add_argument("--max-price", type=float, required=True)
+    #: NOT `required`, and the reason is mechanical rather than stylistic.
+    #: `tests/pod/test_session_kind_dispatch.py` enumerates launchers by
+    #: filling every required option with the STRING `"kind_probe"`, so a
+    #: required `type=float` flag raises during conversion, puts the launcher
+    #: in `UNPARSEABLE`, and **removes it from every check in that module** --
+    #: fewer tests, all green. A3 was dropped from all of them. The default is
+    #: the rate the ceiling was actually derived at, which is also the better
+    #: governance: a launch cannot be priced at a rate nothing authorized.
+    ap.add_argument("--max-price", type=float, default=None,
+                    help="omit to use the rate the live pricing record was "
+                         "derived at")
     ap.add_argument("--disk-gb", type=int, default=None,
                     help="omit to use the DERIVED provision")
     ap.add_argument("--uv-max-s", type=int, default=2700)
@@ -739,6 +749,12 @@ def main() -> int:
     if args.disk_gb is None:
         args.disk_gb = int(
             load_live_pricing(REPO_ROOT)["price"]["container_disk_gb"])
+    if args.max_price is None:
+        #: The rate the ceiling was DERIVED at. `pricing_identity_gate` then
+        #: refuses anything above it, so an omitted flag cannot widen the
+        #: price and an explicit one cannot exceed what was authorized.
+        args.max_price = float(
+            load_live_pricing(REPO_ROOT)["queried_rate_usd_per_hour"])
     if args.out is None:
         args.out = (f"{rel_run_dir(RUN_EXPERIMENT_ID, args.run_id, RUN_STAGE_ID)}"
                     "/runtime/session.json")
