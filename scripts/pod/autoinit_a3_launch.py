@@ -736,11 +736,55 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--disk-gb", type=int, default=None,
                     help="omit to use the DERIVED provision")
     ap.add_argument("--uv-max-s", type=int, default=2700)
-    ap.add_argument("--tests-max-s", type=int, default=2700)
+    #: A3's preflight is 53 tests in ~15 s on this box. 600 rather than 300
+    #: because too large costs nothing when the suite exits in seconds, while
+    #: too small exits 124, which the gate turns into `exit 90` and the
+    #: launcher reads as a COLD HOST -- that has killed a paid session.
+    ap.add_argument("--tests-max-s", type=int, default=600)
     ap.add_argument("--max-draws", type=int, default=3)
     ap.add_argument("--out", default=None)
     ap.add_argument("--dry-run", action="store_true",
                     help="run every $0 gate and create nothing")
+
+    #: THE REST OF `RUNNER_ARGUMENT_CONTRACT`, and this is not boilerplate.
+    #: `SessionRunner` READS each of these, and A3's parser declared none of
+    #: them: `missing_arguments` reported `image, token_src,
+    #: startup_limit_min, create_attempts, create_retry_seconds, host_draws,
+    #: setup_timeout_s, poll_seconds, poll_limit_min, settle_seconds`. The
+    #: session would have been created and BILLING before the first
+    #: `args.image` read, which is how the device canary's attempt 1 died.
+    #:
+    #: It was invisible until A3 joined `SESSION_LAUNCHERS` and became
+    #: parseable: the contract check is parametrized over that table, so a
+    #: launcher missing from it owes nothing and a launcher that will not
+    #: parse is skipped.
+    #: The same container every C1/C3 session ran. `pod_image.json` declares
+    #: the image's LAYOUT -- workspace, checkout, interpreter, CUDA floor --
+    #: and deliberately not its tag, so the tag is named here with the
+    #: launchers that pin it.
+    ap.add_argument("--image",
+                    default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
+    ap.add_argument("--token-src",
+                    default=str(Path("~/.cache/huggingface/token").expanduser()))
+    #: 15 minutes: a pod whose runtime is still null at 15 is not starting.
+    ap.add_argument("--startup-limit-min", type=float, default=15.0)
+    #: ONE create call per acquisition invocation. A corrected attempt is an
+    #: explicit new subrun, never an invisible provider retry -- so the retry
+    #: interval below is unreachable and kept only because the contract
+    #: requires the field.
+    ap.add_argument("--create-attempts", type=int, default=1)
+    ap.add_argument("--create-retry-seconds", type=float, default=300.0)
+    #: Draws replace an unusable HOST without consuming an attempt; a cold
+    #: host is common enough on this provider that defaulting to 1 is what
+    #: made a C3 attempt cost an attempt rather than a draw.
+    ap.add_argument("--host-draws", type=int, default=3)
+    ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
+    ap.add_argument("--poll-seconds", type=float, default=120.0)
+    #: DERIVED from A3's own hard ceiling, with margin. The poll limit must
+    #: outlast the hard threshold or the launcher stops watching a pod that
+    #: is still billing.
+    ap.add_argument("--poll-limit-min", type=float, default=600.0)
+    ap.add_argument("--settle-seconds", type=float, default=20.0)
     return ap
 
 
