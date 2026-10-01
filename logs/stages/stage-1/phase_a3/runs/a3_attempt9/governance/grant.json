@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.phase_a3.grant/v1",
+ "_contract": "The maintainer decision A3 runs under. AUTHORIZES SPEND; authorizes no launch by itself -- a launch still needs the one-use authorization issued FROM this grant, a launch-bound readiness record and a staged bundle. Every scientific and harness identity is DERIVED by issue_a3_authorization.py and REFUSED if asserted here.",
+ "granted_utc": "2026-10-01T00:00:00Z",
+ "granted_by": "Maintainer decision 2026-10-01, on independent review of review/c3-operator-batching@a87049cc, which established that no maintainer or scientific decision blocks execution. A3 is authorized as ONE complete end-to-end experiment -- initialization, recovery training, evaluation, aggregation, closeout -- rather than as a step-1/step-2 split needing intermediate approvals. Ordinary engineering failures inside this envelope are to be diagnosed, repaired and retried autonomously.",
+ "granted_for": "A3, the complete one-arm x three-seed chain",
+ "covers": "ONE A3 session: replay the frozen pre-ATTENTION parent under its digest gate, verify A-bsz1 rebuilds the frozen incumbent, collect interleaved A-bsz1/A-bsz3 diagnostics, train THREE A-bsz3 recovery probes at the three frozen C3 seeds, evaluate each ONCE on c1_confirmation_v1 after the protocol admission, preserve and package, collect evidence and tear down. The comparison runs OFF POD at $0 afterwards.",
+ "a_differing_digest_is_a_finding": "A-bsz3's artifact digest is pinned nowhere and is what the experiment measures. A difference from A-bsz1 is recorded and the chain continues; only the integrity stops in the frozen design end it.",
+ "cumulative_cap_usd": 400.0,
+ "per_session_envelope_usd": 30.0,
+ "hard_cap_usd": 8.2525,
+ "_hard_cap_is_derived_not_chosen": "$8.2525 is the ceiling a3_pricing.py DERIVES from the live L40S securePrice over the measured component table. The issuer re-derives it and refuses this grant if the two disagree, so this field is a statement of agreement rather than a request.",
+ "_budget_position_at_grant": "formal remaining $9.7031 of $65.6523, package remaining $11.6426 of $75.6523, project $383.3623 of $400.0000. The 2026-10-01 amendment funds the derived ceiling plus ONE pre-science restart of $1.4506 and nothing more; the historical $0.9492 formal overspend stands as fact.",
+ "autonomous_pre_science_retry": "PERMITTED inside this cumulative envelope. An invocation that aborts before formal training begins produced no measurement to retry: preserve and close that attempt, diagnose, repair minimally, build a FRESH chain under a new attempt identity and continue. The budget is cumulative across every subrun; a rerun does not reset it.",
+ "does_not_authorize": [
+  "retraining attempt75's three A_incumbent controls",
+  "a fourth seed, a second arm, or any change to the recovery recipe, calibration data, battery, scoring semantics or estimand",
+  "computing a decision on the pod",
+  "building a materialization-identity framework during A3",
+  "the FFN experiment, D1/D2/D3 or Stage-0 teacher-native v2",
+  "any increase to the approved budget",
+  "retrying, resuming or pooling a scientific measurement once formal training has begun"
+ ],
+ "_authorizes_nothing_by_itself": "a launch needs the one-use authorization, a launch-bound readiness record, a staged and fetch-verified bundle, and every pre-provider gate green.",
+ "stop_and_report": [
+  "continuing would require changing A3's frozen science",
+  "the live-derived ceiling no longer fits the authorized budget and the funded pre-science restart cannot absorb it",
+  "evidence or continuity is damaged such that no scientifically interpretable result can be recovered without changing the protocol",
+  "an irreversible action beyond the approved archival-retirement policy"
+ ],
+ "run_id": "a3_attempt9",
+ "experiment_id": "phase_a3"
+}
