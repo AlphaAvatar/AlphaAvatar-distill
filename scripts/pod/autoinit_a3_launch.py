@@ -568,28 +568,63 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     Eight gates once verified the commit and none verified that a bundle could
     be FETCHED; contents are not obtainability.
+
+    It OPERATES ON THE RELAY OBJECT. The first version read the local bundle
+    record and asked whether it carried `bundle_name` and `fetch_verified` --
+    two fields `stage_c1_bundle.py` does not write, so it refused at `$0` on
+    the first dry run. Worse than the field names: inspecting a local JSON
+    file is exactly the failure this gate exists to prevent. The record is the
+    local half; obtainability is a question only a download can answer, and
+    `roundtrip` downloads the exact object, verifies it, checks it out and
+    requires the resulting HEAD, authorization bytes and harness digest to
+    match. Read-only: it uploads nothing.
     """
-    p = REPO_ROOT / bundle_record_for(getattr(ctx.args, "run_id", None))
-    if not p.is_file():
-        return False, f"no bundle record at {p.relative_to(REPO_ROOT)}"
-    doc = json.loads(p.read_text())
-    ctx.evidence["bundle"] = doc
-    for key in ("bundle_name", "relay_repo", "relay_path", "sha256",
-                "session_commit"):
-        if not doc.get(key):
-            return False, f"the bundle record names no {key}"
-    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
-                          capture_output=True, text=True,
-                          check=True).stdout.strip()
-    if doc["session_commit"] != head:
-        return False, (f"the bundle was staged for {doc['session_commit'][:12]} "
-                       f"and HEAD is {head[:12]}")
-    if not doc.get("fetch_verified"):
-        return False, ("the bundle record does not assert that the object was "
-                       "fetched back and re-identified; a staged-but-"
-                       "unfetchable bundle fails on the pod at full price")
-    return True, (f"bundle {doc['bundle_name']} staged and fetch-verified at "
-                  f"{head[:12]}")
+    import tempfile
+
+    from experiments.phase_c1.bundle import (
+        C1BundleError, hf_download, require_canonical_bundle_arg, roundtrip,
+    )
+
+    commit = ctx.args.session_commit
+    try:
+        require_canonical_bundle_arg(ctx.args.bundle, commit)
+    except C1BundleError as exc:
+        return False, str(exc)
+
+    bundle_rel = bundle_record_for(getattr(ctx.args, "run_id", None))
+    staged = REPO_ROOT / bundle_rel
+    if not staged.is_file():
+        return False, (f"{bundle_rel} is missing; run "
+                       "scripts/autoinit/stage_c1_bundle.py --session-commit "
+                       f"{commit} first")
+    record = json.loads(staged.read_text())
+    if record.get("session_commit") != commit:
+        return False, (f"{bundle_rel} describes a bundle for "
+                       f"{str(record.get('session_commit'))[:12]}, not the "
+                       f"session commit {commit[:12]}")
+
+    auth_rel = auth_path_for(getattr(ctx.args, "run_id", None))
+    auth_bytes = (REPO_ROOT / auth_rel).read_bytes()
+    try:
+        with tempfile.TemporaryDirectory() as tmp:
+            evidence = roundtrip(
+                session_commit=commit,
+                local_bundle_sha256=record["sha256"],
+                authorization_bytes=auth_bytes,
+                authorization_path=auth_rel,
+                expected_harness_digest=ctx.auth.harness_source_digest,
+                harness_files=tuple(ctx.auth.harness_source_files),
+                download=hf_download, workdir=Path(tmp))
+    except Exception as exc:                                   # noqa: BLE001
+        return False, f"the pod could not obtain the authorized commit: {exc}"
+
+    ctx.evidence["bundle_staged_check"] = evidence
+    return True, (f"{evidence['canonical_bundle_name']} "
+                  f"({evidence['bytes']} bytes, "
+                  f"{evidence['remote_sha256'][:12]}) round-trips to "
+                  f"{evidence['roundtrip_head'][:12]} carrying this "
+                  f"authorization and harness "
+                  f"{evidence['roundtrip_harness_digest'][:12]}")
 
 
 def durable_capacity_gate(ctx: SessionContext) -> tuple[bool, str]:
