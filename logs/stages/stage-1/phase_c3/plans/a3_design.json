@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.a3.design/v1",
  "stage": "A3",
- "designed_utc": "2026-10-02",
- "_contract": "The COMPLETE A3 experiment: the incumbent ATTENTION operator under calibration_forward_batch_size=3 and length_sorted_v1 packing, run end to end as ONE chain. Frozen before any A3 structural or behavioural result exists. AUTHORIZES NO SPEND BY ITSELF -- the money is the 2026-10-02 amendment's.",
+ "designed_utc": "2026-10-01",
+ "_contract": "The COMPLETE A3 experiment: the incumbent ATTENTION operator under calibration_forward_batch_size=3 and length_sorted_v1 packing, run end to end as ONE chain. Frozen before any A3 structural or behavioural result exists. AUTHORIZES NO SPEND BY ITSELF -- the money is the 2026-10-01 amendment's.",
  "supersedes": [
   {
    "plan": "logs/stages/stage-1/phase_c3/plans/a_bsz3_noninferiority.json",
@@ -13,7 +13,7 @@
   {
    "plan": "logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json",
    "design": "a cost-ordered split: one structural/runtime session, then a CONDITIONAL behavioural study of at most three probes with a -0.030 seed-1 fail-fast",
-   "withdrawn_utc": "2026-10-02",
+   "withdrawn_utc": "2026-10-01",
    "reason": "the split required an intermediate approval between the two halves and could terminate on a diagnostic. The maintainer wants the complete three-seed result from one chain, so the digest comparison became a finding and the fail-fast stopped being a normal experimental stop."
   }
  ],
@@ -160,7 +160,7 @@
   ],
   "evidence_root": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
   "retrained": false,
-  "_weights_were_retired": "logs/maintenance/inventories/archival_retirement_20261002.json -- nine objects, 19.984 GiB, measured reclaim 12-13 GiB -> 32-33 GiB. A3 consumes these controls' per-sample rows and scores, not their weights, so the retirement removes nothing this comparison reads.",
+  "_weights_were_retired": "logs/maintenance/inventories/archival_retirement_20261001.json -- nine objects, 19.984 GiB, measured reclaim 12-13 GiB -> 32-33 GiB. A3 consumes these controls' per-sample rows and scores, not their weights, so the retirement removes nothing this comparison reads.",
   "_what_they_are_not": "a control arm measured in the same session as the treatment. See claim_boundary."
  },
  "protocol_identity_requirements": {
@@ -299,10 +299,10 @@
   ]
  },
  "funding": {
-  "amended_utc": "2026-10-02",
+  "amended_utc": "2026-10-01",
   "amendment": "formal allowance 55.0000 -> 65.6523; package total 65.0000 -> 75.6523; engineering, per-session envelope and project cap unchanged",
   "funds": "the derived hard ceiling plus ONE pre-science restart of $1.4506, total $9.7031 on the formal book",
-  "owner": "logs/budget/decisions.md, 2026-10-02",
+  "owner": "logs/budget/decisions.md, 2026-10-01",
   "_historical_overspend_preserved": "attempt75's $0.9492 formal overspend stands as fact and is not rewritten into compliance.",
   "_a_mid_run_failure_that_cannot_be_funded_is_a_stop": "if the remaining balance cannot fund a corrected attempt plus teardown, A3 stops and reports rather than amending again."
  },
@@ -331,5 +331,5 @@
   "starting D1/D2/D3, the FFN experiment or Stage-0 v2",
   "increasing the approved budget"
  ],
- "design_sha256": "6a236d6231588effb4c65eb112a28ab81db21cc9b98b94af6f4c2cdebc05ee2d"
+ "design_sha256": "4c5420f0cb45b92118749be0427a95db1f4a2a8b6705e0d1ea3fe8976736877a"
 }

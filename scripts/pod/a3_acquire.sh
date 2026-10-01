@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+# Acquire a pod for A3 and run the chain. Everything before the create is $0.
+#
+#   nohup bash scripts/pod/a3_acquire.sh > /tmp/a3_acquire.out 2>&1 &
+#
+# One round = one $0 capacity watch, one live re-price, one FRESH one-use chain
+# (grant -> launch-bound readiness -> authorization -> bundle), one launcher
+# invocation. A corrected attempt is an explicit NEW subrun, never an invisible
+# provider retry.
+#
+# THREE THINGS THIS GETS RIGHT THAT C3's LOOP DID NOT, each for a recorded
+# reason:
+#
+#   1. IT BACKS OFF AFTER A CAPACITY REFUSAL. C3's watch slept only while the
+#      tier was DRY, and `Low` stock that never converts reads as USABLE -- so
+#      on 2026-09-29 it rebuilt a chain roughly every 66 seconds and would have
+#      spent all its rounds in about 44 minutes instead of pacing them.
+#
+#   2. IT READS THE DRIVER'S OWN STATUS FILE. C3's driver wrote markers to
+#      autoinit_c3.status while its launcher polled autoinit_c1.status, so
+#      `ALL_DONE` was invisible and this loop would have read a COMPLETED
+#      formal run as "no measurement began" and launched a second paid
+#      attempt. Both now come from `a3_session`, and the terminal check reads
+#      the launcher log AND the status file.
+#
+#   3. IT STOPS ON ANY TERMINAL STATE, not only on success. A3_FAILED and
+#      A3_INTEGRITY_FAILURE end the loop for a human to read, because an
+#      integrity failure is a repair and not a retry.
+#
+# At most ONE billing resource at any instant: the launcher's last gate is an
+# account-wide check, and this loop never runs two launchers.
+
+set -uo pipefail
+cd "$(dirname "$0")/../.." || exit 2
+
+LOG=/tmp/a3_acquire.log
+BASE=/tmp/claude-1000/a3
+mkdir -p "$BASE"
+
+say() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG"; }
+
+# The ONE owner of both paths. Hardcoding either is defect 2 above.
+read -r STATUS_PATH DRIVER_JOB < <(
+  PYTHONPATH=src:scripts .venv/bin/python - <<'PY'
+from experiments.phase_c3 import a3_session as A3S
+print(A3S.STATUS_PATH, A3S.DRIVER_JOB_ID)
+PY
+)
+say "status path $STATUS_PATH, driver job $DRIVER_JOB"
+
+usable_now() {
+  PYTHONPATH=src:scripts .venv/bin/python - <<'PY' 2>/dev/null
+import sys
+sys.path[:0] = ["src", "scripts"]
+try:
+    from experiments.phase_c3.hardware import query_offers, select
+    chosen = select(query_offers())
+except Exception:
+    chosen = None
+if chosen and chosen.usable:
+    print(f"{chosen.gpu_type_id}|{chosen.secure_price_usd_per_hour}")
+PY
+}
+
+next_free() {
+  N=1
+  while [ -d "logs/stages/stage-1/phase_a3/runs/a3-attempt$N" ]; do
+    N=$((N + 1))
+  done
+  echo "$N"
+}
+
+BACKOFF=0
+BACKOFF_MAX=900
+ROUNDS=${A3_ROUNDS:-12}
+
+for ROUND in $(seq 1 "$ROUNDS"); do
+  if [ "$BACKOFF" -gt 0 ]; then
+    say "round $ROUND: backing off ${BACKOFF}s after a capacity refusal"
+    sleep "$BACKOFF"
+  fi
+
+  # ---- $0 capacity watch. Creates nothing. --------------------------------
+  PICK=""
+  for _ in $(seq 1 60); do
+    PICK="$(usable_now)"
+    [ -n "$PICK" ] && break
+    sleep 60
+  done
+  if [ -z "$PICK" ]; then
+    say "round $ROUND: the approved tier stayed dry for 1h; continuing the watch"
+    BACKOFF=0        # a dry tier already waited; it is not a refusal
+    continue
+  fi
+  GPU="${PICK%%|*}"; PRICE="${PICK##*|}"
+  N=$(next_free)
+  RUN="a3-attempt$N"
+  GOV="logs/stages/stage-1/phase_a3/runs/$RUN/governance"
+  say "round $ROUND: $GPU usable at \$$PRICE/h -> building $RUN"
+
+  # ---- re-price LIVE on the device we are about to use --------------------
+  if ! PYTHONPATH=src:scripts .venv/bin/python \
+        scripts/experiments/phase_c3/a3_pricing.py --write \
+        --out logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json \
+        >> "$LOG" 2>&1; then
+    say "$RUN: the live re-price is not fundable; stopping for a maintainer"
+    break
+  fi
+
+  # ---- a FRESH one-use chain ---------------------------------------------
+  mkdir -p "$GOV"
+  PYTHONPATH=src:scripts .venv/bin/python - "$RUN" <<'PY' >> "$LOG" 2>&1 || \
+    { say "$RUN: grant copy failed"; BACKOFF=$((BACKOFF + 60)); continue; }
+import json, pathlib, sys
+run = sys.argv[1]
+src = pathlib.Path("logs/budget/approvals/autoinit_a3_grant.json")
+doc = json.loads(src.read_text())
+#: The run id and the experiment go in HERE, not in the template: the
+#: grant_provenance gate refuses a chain whose grant names another run, which
+#: is what makes a one-use chain non-transferable.
+doc["run_id"] = run
+doc["experiment_id"] = "phase_a3"
+out = pathlib.Path(f"logs/stages/stage-1/phase_a3/runs/{run}/governance/grant.json")
+out.write_text(json.dumps(doc, indent=1) + "\n")
+print(f"grant written for {run}")
+PY
+  git add -A >/dev/null 2>&1
+  git commit -q -m "$RUN: grant and live pricing on $GPU" >/dev/null 2>&1
+
+  if ! PYTHONPATH=src:scripts .venv/bin/python \
+        scripts/autoinit/record_pod_environment.py --experiment phase_a3 \
+        --run-id "$RUN" --stage-id 1 --kind launch_bound >> "$LOG" 2>&1; then
+    say "$RUN: the launch-bound readiness sweep failed"
+    BACKOFF=$(( BACKOFF + 120 < BACKOFF_MAX ? BACKOFF + 120 : BACKOFF_MAX ))
+    continue
+  fi
+  git add -A >/dev/null 2>&1
+  git commit -q -m "$RUN: launch-bound readiness" >/dev/null 2>&1
+
+  if ! PYTHONPATH=src:scripts .venv/bin/python \
+        scripts/autoinit/issue_a3_authorization.py \
+        --grant "$GOV/grant.json" --out "$GOV/authorization.json" \
+        >> "$LOG" 2>&1; then
+    say "$RUN: the issuer refused; this chain is consumed"
+    BACKOFF=$(( BACKOFF + 120 < BACKOFF_MAX ? BACKOFF + 120 : BACKOFF_MAX ))
+    continue
+  fi
+  git add -A >/dev/null 2>&1
+  git commit -q -m "$RUN: one-use authorization" >/dev/null 2>&1
+
+  SC=$(git rev-parse HEAD)
+  if ! PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/stage_c1_bundle.py \
+        --session-commit "$SC" --out "$GOV/bundle.json" >> "$LOG" 2>&1; then
+    say "$RUN: the bundle could not be staged and fetch-verified"
+    BACKOFF=$(( BACKOFF + 120 < BACKOFF_MAX ? BACKOFF + 120 : BACKOFF_MAX ))
+    continue
+  fi
+  git add -A >/dev/null 2>&1
+  git commit -q -m "$RUN: staged bundle" >/dev/null 2>&1
+  git push -q >/dev/null 2>&1
+
+  BN="aad_autoinit_$(echo "$SC" | cut -c1-8).bundle"
+  SCR="$BASE/$RUN"; mkdir -p "$SCR"
+  say "$RUN: launching on $GPU, commit $SC, bundle $BN"
+  PYTHONPATH=src:scripts .venv/bin/python -u scripts/pod/autoinit_a3_launch.py \
+      --scr "$SCR" --run-id "$RUN" --session-commit "$SC" --bundle "$BN" \
+      --gpu "$GPU" --max-price "$PRICE" > "$SCR/launcher.log" 2>&1
+  RC=$?
+  say "$RUN: launcher exit $RC"
+
+  # ---- the terminal check reads BOTH the log and the driver's own file ----
+  TERMINAL=""
+  for M in ALL_DONE A3_FAILED A3_INTEGRITY_FAILURE A3_REPLAY_MISMATCH; do
+    if grep -q "$M" "$SCR/launcher.log" 2>/dev/null; then TERMINAL="$M"; break; fi
+  done
+  if [ -n "$TERMINAL" ]; then
+    say "$RUN: terminal marker $TERMINAL -- the loop stops here"
+    if [ "$TERMINAL" = "ALL_DONE" ]; then
+      say "$RUN: A3 reached ALL_DONE. Next: aggregate OFF POD at \$0 with"
+      say "  PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/aggregate_a3.py \\"
+      say "    --evidence /home/ecs-user/aad-artifacts/phase_a3/$RUN --write"
+    else
+      say "$RUN: NOT a retry. An integrity failure is repaired, not rerun."
+    fi
+    break
+  fi
+
+  # No terminal marker: a pre-science abort. Preserve, back off, try again.
+  say "$RUN: no terminal marker -- a pre-science abort. This chain is consumed."
+  BACKOFF=$(( BACKOFF + 180 < BACKOFF_MAX ? BACKOFF + 180 : BACKOFF_MAX ))
+done
+
+say "acquisition loop finished"

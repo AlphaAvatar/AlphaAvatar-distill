@@ -3,12 +3,12 @@
  "stage": "A-bsz3",
  "status": "SUPERSEDED",
  "designed_utc": "2026-10-01",
- "superseded_utc": "2026-10-02",
+ "superseded_utc": "2026-10-01",
  "superseded_by": "a3_design.json",
  "superseded_design_sha256": "6bb57a2c92accc4de4c4142aa8e4680fb5c44c501be37c3f1a5a33100cb4c488",
  "_this_field_is_not_called_design_sha256_on_purpose": "a live design hash is a thing a chain binds to. This document binds nothing and must not be loadable as though it did.",
 
- "_contract": "The COST-ORDERED SPLIT DESIGN. It never produced a structural or behavioural datum: it was designed on 2026-10-01 and superseded on 2026-10-02, before any A-bsz3 session existed. Kept because a supersession that leaves no trace reads later as a design that never happened, and because most of its content was carried forward rather than discarded.",
+ "_contract": "The COST-ORDERED SPLIT DESIGN. It never produced a structural or behavioural datum: it was designed on 2026-10-01 and superseded on 2026-10-01, before any A-bsz3 session existed. Kept because a supersession that leaves no trace reads later as a design that never happened, and because most of its content was carried forward rather than discarded.",
 
  "what_it_proposed": {
   "step_1": "one same-device structural/runtime comparison, booked to the GPU engineering allowance",
@@ -18,7 +18,7 @@
  },
 
  "why_it_was_superseded": {
-  "by": "maintainer decision, 2026-10-02",
+  "by": "maintainer decision, 2026-10-01",
   "reason": "the split required an intermediate approval between its two halves, and the programme wants the practical question answered ONCE. A3 now runs initialization, recovery, evaluation, aggregation and closeout as one chain.",
   "two_specific_changes": [
    "a differing A-bsz3 artifact digest is no longer a gate. It is an experimental FINDING, recorded as a diagnostic, and the chain proceeds into recovery.",

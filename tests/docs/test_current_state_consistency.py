@@ -203,14 +203,31 @@ class TestTheSnapshotStatesTheRequiredFacts:
         every negative pattern while telling a reader nothing. The ladder is
         the one field a next-stage agent reads first, so it is checked
         structurally rather than by prose search.
+
+        **It used to pin the literal dict, and that is why `C3: NOT STARTED`
+        outlived a completed C3.** A frozen literal makes the TEST the thing
+        that must be edited whenever reality moves, so the stale value was
+        protected by the very check meant to keep the ladder honest — and the
+        snapshot carried `NOT STARTED` beside a `COMPLETE / NO_GO` phase block
+        for two rounds. What is pinned now is the SHAPE and the AGREEMENT:
+        every phase that exists has a row, every row is a non-empty string,
+        the pointer names a row, and the companion checks in
+        `TestTheNarrativeAgreesWithTheDerivedBudget` require the C3 row and
+        the C3 phase block to say the same thing.
         """
-        assert snapshot()["stage_ladder"] == {
-            "C0": "COMPLETE",
-            "C1": "COMPLETE / GO",
-            "C2": "CLOSED WITHOUT PROMOTION",
-            "C3": "NOT STARTED",
-            "next_scientific_stage": "C3",
-        }
+        ladder = snapshot()["stage_ladder"]
+        assert "next_scientific_stage" in ladder
+        rows = {k: v for k, v in ladder.items()
+                if k != "next_scientific_stage"}
+        #: Every C-phase the snapshot knows about has a row. Derived from the
+        #: phase block rather than listed, so a new phase cannot be added to
+        #: one and forgotten in the other.
+        phases = {k.upper() for k in snapshot()["phase_c"]}
+        missing = sorted(phases - set(rows) - {"C4"})
+        assert not missing, (
+            f"the ladder has no row for {missing}, which phase_c describes")
+        assert all(isinstance(v, str) and v.strip() for v in rows.values()), (
+            f"a ladder row is empty: {rows}")
 
     @pytest.mark.parametrize("key,value,fact", [
         ("decision", "CLOSED WITHOUT PROMOTION", "the stage's disposition"),
@@ -654,3 +671,71 @@ class TestStateMdAgrees:
         monkeypatch.setattr(mod, "STATE", plain)
         with pytest.raises(AssertionError):
             self.test_it_does_not_say_c1_was_never_measured()
+
+
+# --- the narrative must not contradict the derived balances -----------------
+
+
+class TestTheNarrativeAgreesWithTheDerivedBudget:
+    """The drift that actually happened, and a check that would have caught it.
+
+    At `a87049cc` the snapshot said, in the same file: formal remaining
+    `$9.7031`, package remaining `$11.6426`, A3 `DESIGNED and FUNDED` — and
+    also `blocker`: the formal allowance is overspent and no probe is
+    issuable, `next`: A-bsz3 Step 1 needs a grant, and
+    `stage_ladder.C3`: `NOT STARTED`. Three prose fields describing a world
+    the derived numbers in the same document had left behind.
+
+    The budget block is DERIVED and cannot drift. The prose is
+    hand-maintained, which is correct — it says what to do next, and nothing
+    derives that. So the guard is not "derive the prose", it is "the prose may
+    not assert a money state the derivation contradicts".
+    """
+
+    def test_no_field_claims_an_overspend_the_balances_do_not_show(self):
+        b = snapshot()["budget"]
+        narrative = " ".join(
+            str(snapshot().get(k) or "") for k in ("blocker", "next")).lower()
+        overspent_claims = ("allowance is overspent", "overspent by",
+                            "no probe is issuable", "not fundable",
+                            "not issuable")
+        claimed = [p for p in overspent_claims if p in narrative]
+        if b["formal_remaining_usd"] > 0 and b["package_remaining_usd"] > 0:
+            assert not claimed, (
+                f"blocker/next claim {claimed} while the derived balances are "
+                f"formal {b['formal_remaining_usd']} and package "
+                f"{b['package_remaining_usd']}. A prose field may not assert a "
+                "money state its own document's derivation contradicts.")
+
+    def test_the_live_experiment_is_not_described_by_a_superseded_shape(self):
+        """`step 1` / `step 2` language outlived the split design."""
+        narrative = " ".join(
+            str(snapshot().get(k) or "") for k in ("blocker", "next")).lower()
+        for gone in ("step 1 needs", "step 2 is conditional",
+                     "16-probe", "fail-fast"):
+            assert gone not in narrative, (
+                f"{gone!r} describes a design that was superseded; the live "
+                "shape is one end-to-end chain")
+
+    def test_the_ladder_agrees_with_the_phase_block_about_c3(self):
+        """Two owners of one fact, which is how `NOT STARTED` survived a
+        completed experiment."""
+        s = snapshot()
+        ladder = s["stage_ladder"]["C3"]
+        status = s["phase_c"]["c3"]["status"]
+        if status.startswith("COMPLETE"):
+            assert "COMPLETE" in ladder, (
+                f"phase_c.c3 says {status[:40]!r} and the ladder says "
+                f"{ladder!r}")
+            assert "NOT STARTED" not in ladder
+
+    def test_the_ladder_names_the_live_experiment_and_what_follows_it(self):
+        s = snapshot()
+        ladder = s["stage_ladder"]
+        nxt = ladder.get("next_scientific_stage")
+        assert nxt, "the ladder names no next scientific stage"
+        assert nxt in ladder, (
+            f"the ladder points at {nxt!r} and carries no row for it")
+        assert "COMPLETE" not in ladder[nxt], (
+            f"the ladder points at {nxt!r} as next while describing it as "
+            "complete")

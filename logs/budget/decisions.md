@@ -1,6 +1,6 @@
 # Decision records
 
-## 2026-10-02 — A3 becomes one experiment, and the fourth limit starts being checked
+## 2026-10-01 — A3 becomes one experiment, and the fourth limit starts being checked
 
 - **Maintainer decision**, superseding the step-1/step-2 split of A-bsz3.
   A3 runs as ONE end-to-end experiment — initialization, recovery training,

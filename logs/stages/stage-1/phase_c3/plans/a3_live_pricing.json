@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.phase_c3.a3_pricing/v1",
  "_contract": "The COMPLETE A3 chain, priced from measured components at a live rate, with every applicable limit checked. Supersedes the three-shape step-1/step-2 pricing. AUTHORIZES NOTHING.",
- "gpu": "(rate supplied)",
+ "gpu": "NVIDIA L40S",
  "queried_rate_usd_per_hour": 1.09,
  "components": {
   "setup": {

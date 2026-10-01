@@ -15,7 +15,7 @@ the pod surviving one more stage.
 **What it compares.** Three newly trained A-bsz3 probes against attempt75's
 three matched-seed `A_incumbent` controls, paired at prompt level within each
 seed. The controls are READ from the committed stage-I record; their weights
-were retired on 2026-10-02 and are not needed, because a control contributes
+were retired on 2026-10-01 and are not needed, because a control contributes
 its per-sample evidence to this comparison and never its bytes.
 
 **What it refuses.** A field that is not one field. The battery, the scoring
@@ -368,7 +368,7 @@ def guardrails(behaviour_block: dict[str, Any],
                design_doc: dict[str, Any]) -> dict[str, Any]:
     """C3's behavioural guardrails, REPORTED as safety observations.
 
-    They do not gate A3's completion: the 2026-10-02 decision wants the
+    They do not gate A3's completion: the 2026-10-01 decision wants the
     complete three-seed result, and a guardrail that ended the chain would be
     the fail-fast under another name. A firing guardrail is a finding the
     closeout must state prominently.

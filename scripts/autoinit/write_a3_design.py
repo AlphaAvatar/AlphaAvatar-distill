@@ -8,7 +8,7 @@ run as a single chain:
 
     initialization -> recovery training -> evaluation -> aggregation -> closeout
 
-**What changed on 2026-10-02.** The maintainer merged the step-1/step-2 split.
+**What changed on 2026-10-01.** The maintainer merged the step-1/step-2 split.
 A3 answers the practical question once, without stopping for intermediate
 approvals. The structural and runtime diagnostics are still collected — all of
 them — but they are DIAGNOSTICS INSIDE the experiment, not gates in front of
@@ -65,7 +65,7 @@ SUPERSEDED = [
      "design": ("a cost-ordered split: one structural/runtime session, then a "
                 "CONDITIONAL behavioural study of at most three probes with a "
                 "-0.030 seed-1 fail-fast"),
-     "withdrawn_utc": "2026-10-02",
+     "withdrawn_utc": "2026-10-01",
      "reason": ("the split required an intermediate approval between the two "
                 "halves and could terminate on a diagnostic. The maintainer "
                 "wants the complete three-seed result from one chain, so the "
@@ -198,7 +198,7 @@ def controls_from_attempt75(probe_results: dict[str, Any],
 
     Reused rather than retrained, on the maintainer's instruction: they are
     valid, protocol-uniform and fully scored at the same frozen seeds. Their
-    WEIGHTS were retired on 2026-10-02 and that is deliberate and sufficient --
+    WEIGHTS were retired on 2026-10-01 and that is deliberate and sufficient --
     a control contributes its per-sample evidence to this comparison, never its
     bytes.
     """
@@ -228,7 +228,7 @@ def controls_from_attempt75(probe_results: dict[str, Any],
         "evidence_root": "/home/ecs-user/aad-artifacts/phase_c3/attempt75",
         "retrained": False,
         "_weights_were_retired": (
-            "logs/maintenance/inventories/archival_retirement_20261002.json -- "
+            "logs/maintenance/inventories/archival_retirement_20261001.json -- "
             "nine objects, 19.984 GiB, measured reclaim 12-13 GiB -> 32-33 "
             "GiB. A3 consumes these controls' per-sample rows and scores, not "
             "their weights, so the retirement removes nothing this comparison "
@@ -243,7 +243,7 @@ def seed_level_noise(decision: dict[str, Any]) -> dict[str, Any]:
     """How far a single seed moves on this instrument when nothing differs.
 
     DERIVED, and no longer a stop. The 2026-10-01 design used this to set a
-    -0.030 seed-1 fail-fast; the 2026-10-02 decision withdrew that, because A3
+    -0.030 seed-1 fail-fast; the 2026-10-01 decision withdrew that, because A3
     wants the complete three-seed result and a point estimate at one seed is
     not evidence that anything is wrong. The number survives as the band a
     reader should hold a per-seed delta against.
@@ -292,13 +292,13 @@ def build(*, rate_note: str) -> dict[str, Any]:
     return {
         "schema": "aadistill.a3.design/v1",
         "stage": "A3",
-        "designed_utc": "2026-10-02",
+        "designed_utc": "2026-10-01",
         "_contract": (
             "The COMPLETE A3 experiment: the incumbent ATTENTION operator "
             "under calibration_forward_batch_size=3 and length_sorted_v1 "
             "packing, run end to end as ONE chain. Frozen before any A3 "
             "structural or behavioural result exists. AUTHORIZES NO SPEND BY "
-            "ITSELF -- the money is the 2026-10-02 amendment's."),
+            "ITSELF -- the money is the 2026-10-01 amendment's."),
         "supersedes": SUPERSEDED,
 
         "_the_question": (
@@ -521,13 +521,13 @@ def build(*, rate_note: str) -> dict[str, Any]:
             "limits_checked": pricing["_every_applicable_limit_is_checked"],
         },
         "funding": {
-            "amended_utc": "2026-10-02",
+            "amended_utc": "2026-10-01",
             "amendment": ("formal allowance 55.0000 -> 65.6523; package total "
                           "65.0000 -> 75.6523; engineering, per-session "
                           "envelope and project cap unchanged"),
             "funds": ("the derived hard ceiling plus ONE pre-science restart "
                       "of $1.4506, total $9.7031 on the formal book"),
-            "owner": "logs/budget/decisions.md, 2026-10-02",
+            "owner": "logs/budget/decisions.md, 2026-10-01",
             "_historical_overspend_preserved": (
                 "attempt75's $0.9492 formal overspend stands as fact and is "
                 "not rewritten into compliance."),

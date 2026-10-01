@@ -2,7 +2,7 @@
  "schema": "aadistill.phase_c3.a_bsz3_pricing/v1-superseded",
  "status": "SUPERSEDED",
  "priced_utc": "2026-10-01",
- "superseded_utc": "2026-10-02",
+ "superseded_utc": "2026-10-01",
  "superseded_by": "a3_pricing.json",
  "_contract": "The THREE-SHAPE pricing of the step-1/step-2 split. Superseded when A3 became one end-to-end experiment: one chain has one price, and keeping a second pricer beside it is the complexity ratchet AGENTS.md P8.2.1 forbids. Its producer, scripts/experiments/phase_c3/a_bsz3_pricing.py, was deleted rather than left importable.",
 

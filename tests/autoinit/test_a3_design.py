@@ -261,7 +261,7 @@ def test_the_frozen_identities_are_read_and_refuse_to_be_invented(tmp_path):
 
 
 def test_the_design_is_one_chain_and_not_two_steps():
-    """The shape the 2026-10-02 decision asked for, asserted structurally."""
+    """The shape the 2026-10-01 decision asked for, asserted structurally."""
     d = json.loads(DESIGN.read_text())
     assert d["chain"] == ["initialization", "recovery_training", "evaluation",
                           "aggregation", "closeout"]
@@ -349,7 +349,7 @@ def test_the_controls_evidence_outlived_their_retired_weights():
     """
     retire = json.loads(
         (REPO / "logs/maintenance/inventories/"
-                "archival_retirement_20261002.json").read_text())
+                "archival_retirement_20261001.json").read_text())
     assert retire["schema"] == "aadistill.archival_retirement/v1"
     assert all(r["path"].endswith("/model.safetensors")
                for r in retire["retired"])

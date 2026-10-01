@@ -1,0 +1,161 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_a3",
+ "note": "Success spec for an A3 run that reached ALL_DONE. Derived from the proven C3 spec with every count scaled to A3's shape: ONE arm and THREE probes, so 9 becomes 3, and 21 generation files because uncapped_eval writes one <set>.generations.jsonl and one <set>.json per set and c1_confirmation_v1 has seven sets -- requiring 3 would accept a probe that generated one set out of seven. Every pattern is a path the STANDALONE A3 driver writes: audit/autoinit_a3, stage3/a3/<probe_id>, eval/a3/<probe_id>. THERE IS NO DECISION ENTRY, deliberately: A3's comparison runs OFF POD at $0 from this evidence, so requiring an on-pod decision artifact would demand a product the design does not produce -- which is how attempt75's complete measurement came home classified as a failure. a3_replay.json is the one replay against BOTH frozen digests, the parent and the A-bsz1 incumbent; a3_diagnostics.json is the interleaved A-bsz1/A-bsz3 comparison including the measured A-bsz3 artifact digest, which is the experiment's finding and is pinned nowhere. Entries are ArtifactSpec kwargs; the manifest root is artifacts/.",
+ "entries": [
+  {
+   "artifact_class": "probe_event_stream",
+   "pattern": "stage3/a3/autoinit.v1.phase_a3.A_bsz3.*/train_log.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "probe_run_manifest",
+   "pattern": "stage3/a3/autoinit.v1.phase_a3.A_bsz3.*/run_manifest*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "probe_run_completion",
+   "pattern": "stage3/a3/autoinit.v1.phase_a3.A_bsz3.*/run_completion*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "training_completion",
+   "pattern": "audit/autoinit_a3/probes/autoinit.v1.phase_a3.A_bsz3.*.training.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "probe_config",
+   "pattern": "audit/autoinit_a3/configs/autoinit.v1.phase_a3.A_bsz3.*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "per_sample",
+   "pattern": "audit/autoinit_a3/autoinit.v1.phase_a3.A_bsz3.*_per_sample.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "scored_probe_aggregate",
+   "pattern": "audit/autoinit_a3/autoinit.v1.phase_a3.A_bsz3.*_c1_confirmation.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  },
+  {
+   "artifact_class": "generations",
+   "pattern": "eval/a3/autoinit.v1.phase_a3.A_bsz3.*/*.generations.jsonl",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 21
+  },
+  {
+   "artifact_class": "generation_summary",
+   "pattern": "eval/a3/autoinit.v1.phase_a3.A_bsz3.*/*.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 21
+  },
+  {
+   "artifact_class": "arm_identities",
+   "pattern": "audit/autoinit_a3/a3_arm_identities.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "attested_protocol",
+   "pattern": "audit/autoinit_a3/a3_attested_evaluation_protocol.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "session_evidence",
+   "pattern": "audit/autoinit_a3/a3_evidence.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "engine_probe",
+   "pattern": "audit/autoinit_a3/engine_probe.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "device_handoff",
+   "pattern": "audit/autoinit_a3/a3_device_handoff.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "probe_train_tail",
+   "pattern": "audit/autoinit_a3/autoinit.v1.phase_a3.A_bsz3.*_train_tail.log",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "gate_log",
+   "pattern": "audit/autoinit_a3/*.log",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "audit_json",
+   "pattern": "audit/autoinit_a3/*.json",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "session_logs",
+   "pattern": "audit/autoinit_a3/session/*",
+   "required": false,
+   "lifecycle": "final_required",
+   "min_matches": 0
+  },
+  {
+   "artifact_class": "a3_diagnostics",
+   "pattern": "audit/autoinit_a3/a3_diagnostics.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "a3_probe_inventory",
+   "pattern": "audit/autoinit_a3/a3_probe_inventory.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "a3_replay_record",
+   "pattern": "audit/autoinit_a3/a3_replay.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 1
+  },
+  {
+   "artifact_class": "generation_admission",
+   "pattern": "audit/autoinit_a3/*_generation_admission.json",
+   "required": true,
+   "lifecycle": "final_required",
+   "min_matches": 3
+  }
+ ]
+}

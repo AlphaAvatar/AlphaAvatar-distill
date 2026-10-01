@@ -142,10 +142,10 @@
    "git": "/home/ecs-user/AlphaAvatar-distill",
    "artifacts": "/home/ecs-user/aad-artifacts"
   },
-  "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-02",
-  "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261002.json"
+  "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
+  "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS BLOCKED ON A MEASUREMENT. C3 is complete with a canonical NO_GO; its stage-I aggregation ran off pod at $0 from attempt75's immutable evidence. What is blocked is MONEY: the formal allowance is overspent by $0.9492, so no session that trains a probe is issuable on either book.",
+ "blocker": "NOTHING IS BLOCKED. C3 is complete with a canonical NO_GO, and the 2026-10-01 amendment funds the complete A3 chain: the derived 8.2525 hard ceiling fits every applicable limit, the package total included. What remains is engineering, not a decision.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -184,13 +184,14 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "A-bsz3 step 1 needs a grant -- a short structural/runtime session on the GPU engineering allowance. Step 2 is conditional on step 1 and not fundable on the formal book. Then FFN, then the D-series design and review. C4 is not authorized.",
+ "next": "A3 end to end as ONE chain: driver, launcher, gates, governance, a $0 rehearsal, execute on the approved L40S, aggregate off pod, close out. Then stop for review. No FFN, no D-series, no Stage-0 v2.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
-  "C3": "NOT STARTED",
-  "next_scientific_stage": "C3"
+  "C3": "COMPLETE / NO_GO",
+  "A3": "DESIGNED and FUNDED; operational chain in build",
+  "next_scientific_stage": "A3"
  },
  "c2_closure": {
   "decision": "CLOSED WITHOUT PROMOTION",

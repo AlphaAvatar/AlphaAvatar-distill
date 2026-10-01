@@ -7,7 +7,7 @@ ONE experiment, one session, one price:
           -> evidence collection -> teardown
 
 **This replaces the step-1 / step-2 split.** The maintainer merged them on
-2026-10-02: A3 answers the practical question once, without stopping for
+2026-10-01: A3 answers the practical question once, without stopping for
 intermediate approvals, so there is one ceiling to authorize rather than two.
 The three-shape pricer that preceded this is deleted rather than kept beside
 it — a redundant mechanism left in place is the complexity ratchet AGENTS.md

@@ -15,7 +15,7 @@ returns 0 pods and 0 network volumes.
 
 ## A3 — ONE experiment, DESIGNED and FUNDED, not yet launched
 
-**The maintainer merged the step-1/step-2 split on 2026-10-02.** A3 runs end
+**The maintainer merged the step-1/step-2 split on 2026-10-01.** A3 runs end
 to end as one chain — initialization → recovery training → evaluation →
 aggregation → closeout — so the practical question is answered once rather
 than across two approvals. Owner:
@@ -77,7 +77,7 @@ probe, at hard rates — because the same decision requires autonomous rerun of
 failed setup stages, and an allowance sized to exactly one flawless run cannot
 execute that. `$9.7031` on the formal book, nothing else. **attempt75's
 `$0.9492` overspend stands as historical fact** and nothing rewrites it into
-compliance. Owner: [`decisions.md`](../budget/decisions.md), 2026-10-02.
+compliance. Owner: [`decisions.md`](../budget/decisions.md), 2026-10-01.
 
 **Durable room was measured, not assumed, and it was blocking.** Account-wide
 private headroom bisected at **12–13 GiB** — A3's three probes fit, A3 plus one
@@ -87,7 +87,7 @@ them, no setup fetching them, no registry protecting them, and every code
 reference reading its committed *evidence*. Measured reclaim: **12–13 → 32–33
 GiB**, and six probes now fit. The evidence, hashes, configs, scores and the
 verdict all survive; nine `model.safetensors` do not. Owner:
-[`archival_retirement_20261002.json`](../maintenance/inventories/archival_retirement_20261002.json).
+[`archival_retirement_20261001.json`](../maintenance/inventories/archival_retirement_20261001.json).
 
 ## The A3 chain — scientific core BUILT, operational chain NOT built
 
@@ -337,7 +337,7 @@ though the live session had reached stage I successfully.
 
 ## The `$0.9492` formal overspend — HISTORICAL, against the old `$55.00`
 
-**It is a fact about attempt75, not the current balance.** The 2026-10-02
+**It is a fact about attempt75, not the current balance.** The 2026-10-01
 amendment raised the formal allowance to `$65.6523`, so the live remaining is
 `$9.7031` — read the summary table, not this heading. What follows is why
 attempt75 was issued against a book it exceeded, and it is **not** rewritten
