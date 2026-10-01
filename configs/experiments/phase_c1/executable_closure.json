@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 106,
- "digest": "1db8762f1c1d15f156afdbcf85637da3ce4a722686f4a6882f0d631a4a045cec",
+ "digest": "bc714e599c09e7d6539e1201a586889ecbb876e23767325e7597fc38dcb9eeab",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,7 +39,7 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "fe6d34a461e848e6ced6ed47fa0a6c18692573cc4d6c929c32bb18ef01a822b3",
+   "sha256": "edb182d2c8d3a97fe1887588008eace1eb4defbce45be0ecea84597e5bdd4c94",
    "bytes": 20846
   },
   {

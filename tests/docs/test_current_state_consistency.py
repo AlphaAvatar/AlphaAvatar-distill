@@ -347,8 +347,36 @@ class TestTheSnapshotStatesTheRequiredFacts:
         assert no_set or frozen_unrun or consumed, (
             "c3.status states neither that there is no frozen seed set nor "
             f"that a preregistered, hash-bound, unlaunched one exists: {status!r}")
-        assert "ENGINEERING state only" in c3["operator"]
-        assert "does NOT start formal C3" in c3["operator"]
+        #: A VERDICT SET for the operator too, and for the same reason the
+        #: seed check above is one. These two lines pinned the phrases
+        #: `ENGINEERING state only` and `does NOT start formal C3`, which
+        #: were the right content while the operator had been WRITTEN and not
+        #: run: the fact they protected was that implementing it authorized
+        #: nothing. Formal C3 then ran it across attempt66 and attempt75 and
+        #: closed with NO_GO, so a snapshot of a CLOSED phase stating that
+        #: implementing the operator does not start the experiment is
+        #: describing a question nobody can still ask -- and the minimal
+        #: machine-readable state owes a closed phase its boundary, not its
+        #: pre-execution disclaimer. Pinning the phrase would make obeying
+        #: that rule look like a regression, which is exactly what the
+        #: comment above says about the seeds.
+        #:
+        #: What must hold in EVERY state is unchanged: the operator's entry
+        #: must say where it stands, and must never read as promoted. So
+        #: either the pre-execution standing or a terminal formal outcome,
+        #: and in both cases no promotion.
+        operator = c3["operator"]
+        unrun = ("ENGINEERING state only" in operator
+                 and "does NOT start formal C3" in operator)
+        closed = ("formal C3" in operator
+                  and any(v in operator for v in ("NO_GO", "GO",
+                                                  "INCONCLUSIVE")))
+        assert unrun or closed, (
+            "c3.operator states neither the pre-execution standing "
+            "(ENGINEERING state only / does NOT start formal C3) nor a "
+            f"terminal formal outcome: {operator!r}")
+        assert "does not promote" in operator or "promoted" not in operator, (
+            f"c3.operator reads as promoted: {operator!r}")
         #: A VERDICT SET, not a phrase, and now also a SHAPE set. The pilots
         #: were three separate keys while they were the only C3 activity;
         #: once formal C3 itself ran they were consolidated into one

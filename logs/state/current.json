@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-09-29T00:00:00Z",
+ "generated_utc": "2026-10-02T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -39,7 +39,7 @@
   "_package_spent_usd": 64.0097,
   "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "planning_floor_usd": 13.4401,
-  "_amendment_2026_10_02": "formal 55.0000 -> 65.6523, package 65.0000 -> 75.6523; prospective and minimal. Owner: logs/budget/decisions.md."
+  "_amendment_2026_10_01": "formal 55.0000 -> 65.6523, package 65.0000 -> 75.6523; prospective and minimal. Owner: logs/budget/decisions.md."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -74,7 +74,7 @@
  "next_starting_point": {
   "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION, its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED.",
   "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "A-bsz3 step 1 as designed in a_bsz3_adoption.json, once granted. Then the FFN experiment. Then D1/D2/D3 design and independent review.",
+  "then": "A3 end to end as ONE chain -- owner logs/stages/stage-1/phase_c3/plans/a3_design.json. Then the FFN experiment. Then D1/D2/D3 design review. The step-1/step-2 split and a_bsz3_adoption.json are SUPERSEDED.",
   "not_next": "no C3 retry, resume or pooling; no C4; no C2 spend; no 16-probe A-bsz3 study; no D-series execution."
  },
  "read_order": [
@@ -114,7 +114,7 @@
    "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
-   "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
+   "owners": "logs/stages/stage-1/phase_c1/ — plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
    "blocker": "none; see the top-level blocker."
   },
   "c2": {
@@ -126,13 +126,13 @@
    "closure": "see the top-level `c2_closure`"
   },
   "c3": {
-   "status": "COMPLETE / NO_GO on the primary operator-isolation contrast, 2026-10-01. attempt75 trained, preserved and scored all nine probes; stage I failed on the pod and the verdict was computed off pod at $0 from immutable evidence. causal-KL does not promote; B remains the incumbent.",
+   "status": "COMPLETE / NO_GO on the primary operator-isolation contrast, 2026-10-01. All nine probes trained, preserved and scored; the verdict was computed OFF POD at $0 after stage I failed on the pod. B remains the incumbent.",
    "latest_attempt": "attempt75",
-   "operator": "attention.causal_kl_v1 was implemented on review/c3-operator-batching as ENGINEERING state only -- unregistered, inert on import, outside the C1 closure -- and implementing it does NOT start formal C3. Formal C3 then ran it: attempt66 and attempt75 built the B and C arms from it, and the verdict is NO_GO, so it does not promote.",
+   "operator": "attention.causal_kl_v1 ran in formal C3 and returned NO_GO; it does not promote.",
    "owner": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json owns every figure and its claim boundary",
    "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
-   "closed_pilots": "three, all CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION (1.1884x vs a 1.25x gate).",
-   "open": "the B1-vs-B3 protocol choice, a post-C3 maintainer decision. A-bsz3 is the separate execution-knob study; see `a_bsz3`.",
+   "closed_pilots": "three, CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION. Each owns its figures.",
+   "open": "the B1-vs-B3 protocol choice, a post-C3 maintainer decision. See `a_bsz3`.",
    "not_next": "no retry, resume or pooling; C4 is not authorized."
   },
   "c4": "NOT AUTHORIZED. C3 returned NO_GO, so the promotion it was conditional on did not happen."
@@ -184,13 +184,13 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "A3 end to end as ONE chain: driver, launcher, gates, governance, a $0 rehearsal, execute on the approved L40S, aggregate off pod, close out. Then stop for review. No FFN, no D-series, no Stage-0 v2.",
+ "next": "A3 is executing: acquire the approved L40S, replay the frozen parent, diagnose A-bsz1/A-bsz3, train three treatment probes at attempt75's seeds, evaluate each once, preserve, tear down, aggregate OFF POD at $0, close out. A differing A-bsz3 digest is a FINDING, not a stop.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
-  "A3": "DESIGNED and FUNDED; operational chain in build",
+  "A3": "DESIGNED, FUNDED, chain BUILT and $0-REHEARSED; executing",
   "next_scientific_stage": "A3"
  },
  "c2_closure": {
@@ -209,13 +209,13 @@
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
  "a_bsz3": {
-  "state": "A3 DESIGNED and FUNDED; chain not built, nothing launched",
+  "state": "A3 EXECUTING as one chain. Driver (B-H, no stage I), launcher (14 $0 gates), acquisition loop, one-use governance chain and the $0 production rehearsal all BUILT and green.",
   "shape": "ONE chain: initialization -> recovery -> evaluation -> aggregation -> closeout. Diagnostics gate nothing; a differing artifact digest is a finding.",
   "design": "logs/stages/stage-1/phase_c3/plans/a3_design.json",
   "pricing": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-  "superseded": "a_bsz3_adoption.json and a_bsz3_noninferiority.json",
   "probes": "3 new treatment; attempt75's 3 controls reused, not retrained",
-  "identity": "a differing digest does NOT stop A3; the binding is required only before a resumable beam search in D1/D2/D3"
+  "identity": "a differing digest does NOT stop A3; the binding is required only before a resumable beam search in D1/D2/D3",
+  "pod_gate": "tests/a3_preflight by DERIVED complement; the launcher declared no test_ignores, which defaults to the whole suite on a billing GPU."
  },
  "d_series": {
   "state": "DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED.",

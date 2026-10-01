@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-01. The human view. Every number here has an owner named
+**Updated:** 2026-10-02. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -13,7 +13,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 after 919.7 min and is provider-confirmed gone; an account-wide re-query
 returns 0 pods and 0 network volumes.
 
-## A3 — ONE experiment, DESIGNED and FUNDED, not yet launched
+## A3 — ONE experiment, built and rehearsed, EXECUTING
 
 **The maintainer merged the step-1/step-2 split on 2026-10-01.** A3 runs end
 to end as one chain — initialization → recovery training → evaluation →
@@ -89,9 +89,9 @@ GiB**, and six probes now fit. The evidence, hashes, configs, scores and the
 verdict all survive; nine `model.safetensors` do not. Owner:
 [`archival_retirement_20261001.json`](../maintenance/inventories/archival_retirement_20261001.json).
 
-## The A3 chain — scientific core BUILT, operational chain NOT built
+## The A3 chain — BUILT, REHEARSED at `$0`, EXECUTING
 
-**Two pieces exist and are tested; the rest of the chain does not.**
+**Every piece exists and is green.**
 
 **`a3_session.py` — A3's frozen identity.** ONE `FixedPathSpec`, because
 A-bsz1 and A-bsz3 are the same operator at the same step with the same hashed
@@ -127,11 +127,32 @@ per-set axes — all of which A3 must report. The comparison now reads each
 control's own scored record from the durable evidence and verifies it against
 the `result_sha256` the committed record names.
 
-**What is NOT built:** the pod driver (stages B–H), the launcher and its
-pre-provider gates, the acquisition loop with capacity backoff, the governance
-chain (grant → launch-bound readiness → one-use authorization → bundle), and
-the `$0` production-path rehearsal that must drive the real driver before any
-pod exists. **Nothing is launched and no provider resource exists.**
+**The operational chain is built and rehearsed.** The pod driver owns stages
+B–H and has no stage I. The launcher runs **fourteen** `$0` gates in cost
+order, ending with the durable-capacity question asked at the real per-probe
+size with fresh random oids, and an account-wide billing check immediately
+before the create call. The acquisition loop backs off after a capacity
+refusal rather than rebuilding a chain every 66 seconds, and reads terminal
+state from the launcher log **and** the driver's own status file. The
+governance chain — grant → launch-bound readiness → one-use authorization →
+bundle — derives everything and refuses a grant that states its own ceiling,
+stages, design or identities.
+
+**The rehearsal found a pod-fatal defect before a pod existed.** It drives the
+**real** `A3Driver.run` with only hardware-bound calls replaced by fakes that
+emit the real filesystem layout, and stage H was handing `C1ProbeRecord`
+empty `counts` and `rates`, which that type refuses by construction — three
+trainings and three evaluations into a paid session. Five API/CLI mismatches
+were found the same way, all at `$0`.
+
+**The pod's blocking test gate is `tests/a3_preflight` by derived
+complement**, which the launcher did not declare at all. `test_ignores`
+defaults to empty, so the shared setup script would have run the entire
+repository suite on a billing L40S — roughly forty minutes to prove
+AlphaAvatar-distill passes on that machine, and then a non-zero exit from the
+five documented development-only failures, killing the session during setup
+with every marker unset. C1 paid 16 billed minutes for the first half of that
+lesson.
 
 ## The D-series directive is recorded and NOT started
 
