@@ -783,7 +783,23 @@ def spec(args) -> SessionSpec:
             #: DECLARED. Without it setup falls through to SESSION_KIND=spend,
             #: loads a SpendAuthorization and refuses this artifact at exit 98
             #: before any work. A missing dispatch entry is not a type error.
-            env={"SESSION_KIND": "a3"},
+            #:
+            #: `SESSION_FROZEN_EXPECT` NAMES THE FROZEN-ASSET EXPECTATION, and
+            #: its absence is what twenty-one paid pods died on for `$2.74`
+            #: total. The shell's `ASSETS_READY` branch opens with
+            #: `: "${SESSION_FROZEN_EXPECT:?...}"` -- explicit or refused,
+            #: never inherited, because the verifier's compiled-in constants
+            #: are the pre-cutover set and falling back to them makes a
+            #: session inherit a requirement for assets it does not stage.
+            #:
+            #: It points at C3's document rather than a third copy: A3 stages
+            #: the SAME four local assets, replays the SAME frozen path from
+            #: the SAME teacher and evaluates on the SAME battery, and that
+            #: file's own contract says a re-typed hash would be a second
+            #: source for a value that already has one.
+            env={"SESSION_KIND": "a3",
+                 "SESSION_FROZEN_EXPECT":
+                     "configs/experiments/phase_c3/frozen_assets.json"},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "SESSION_RELAY_INPUTS",

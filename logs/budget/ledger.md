@@ -2755,3 +2755,53 @@ typo would enter unreviewed.
 
 **This authorizes no launch.** attempt4 has no grant, no readiness record, no
 authorization and no bundle. Remaining money is not permission.
+
+## 2026-10-02 — SPENT: A3 burned `$2.7400` on twenty-two pods and one missing variable
+
+Twenty-two L40S pods were created and torn down between 20:53 on 2026-10-01
+and 05:04 on 2026-10-02. Every one is provider-confirmed deleted and the
+account-wide query returns 0 pods and 0 network volumes. **No probe was
+trained, no measurement was taken, and no scientific result exists.**
+
+```text
+21 pods, teardown-confirmed, summed from each launcher's own figure   $ 2.6600
+a3_attempt28                                                         $ 0.0800
+                                                                     --------
+                                                                     $ 2.7400
+```
+
+Twenty of them died on ONE line of the shared setup script:
+
+```text
+autoinit_preflight_setup.sh: SESSION_FROZEN_EXPECT: a session declaring
+ASSETS_READY must name its frozen-asset expectation document
+```
+
+A3's `SetupManifest` declared `ASSETS_READY` and did not set
+`SESSION_FROZEN_EXPECT`. The shell states that requirement in the only form
+that cannot drift — `: "${VAR:?message}"` — and **every `$0` check in this
+repository looked at the MARKERS a session declares and none looked at the
+VARIABLES the script needs in order to reach them.** The failure is one
+missing dictionary entry; the cost is that the acquisition loop discovered it
+twenty-one times without being stopped.
+
+Two attempts cost more than the others because a cold host consumed draws:
+`a3_attempt20` at 45.8 min / `$0.8300` and `a3_attempt24` at 20.9 min /
+`$0.3800`. The rest were 2.3–7.2 min and `$0.04`–`$0.13` each.
+
+**Position after this spend, derived:**
+
+```text
+formal allowance remaining    $9.7031 -> $6.9631
+package total remaining      $11.6426 -> $8.9026
+project cap remaining        $16.6377 -> $13.8977
+A3 one complete chain         expected $5.8680 · HARD $8.2525
+```
+
+**The hard ceiling no longer fits the formal book.** The expected cost still
+does, but a session whose worst case cannot be funded can be stopped by the
+budget in the middle of formal training — which is the one thing the
+cumulative envelope exists to prevent. A3 is therefore held pending a
+maintainer decision, with the defect fixed and a regression in place.
+
+This authorizes nothing. Remaining money is not permission.
