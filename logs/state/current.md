@@ -2525,37 +2525,58 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 11 failures, and the count is trustworthy again
+## The full suite is not green: 11 failures, and the count is trustworthy
 
-**Closeout measurement, A-bsz3 redesign round: 11 failed, 5392 passed, 228
-skipped, ZERO errors** in 41m44s, on the working tree described by this file.
-Exactly the eleven documented failures, as an **identical node-id set** to the
-previous run — no new ones, and none of the eleven fixed. `5349 → 5392` passed
-is the 43 tests the round added.
+**Closeout measurement, A3 terminal round: 11 failed, 5555 passed, 229
+skipped, ZERO errors** in 43m10s, on the clean tree at `6a901cae`. Exactly the
+eleven documented failures, as an **identical node-id set** to the previous
+run — no new ones, and none of the eleven fixed. `5392 → 5555` passed is the
+163 tests the round added.
 
-*The previous closeout measured the same eleven at `ad8fabf1` with 5349
-passed. It is not restated beyond that, because a count belongs to the tree it
-was taken on.*
+*The previous closeout measured the same eleven with 5392 passed. It is not
+restated beyond that, because a count belongs to the tree it was taken on.*
 
-**Two derived records went stale during the round and were regenerated, not
-waived.** The new test file staled `skip_predicate_audit.json`, and editing a
-core operator moved the executable closure — `derive_closure` reports
-`+0 / −0 / 1 edited` for both phase_c1 and phase_c3, which is the one declared
-module and confirms no core file was added or removed. A third failure was a
-real omission: compacting the snapshot dropped the word the
-attempt-4 consistency gate requires, that C2's Top-5 ruling is recorded as
-**accepted** rather than owed.
+**An earlier full suite in this round read 15, and four were mine.** Each was
+one mistake: a producer changed and its consumers not enumerated. Adding
+`host_not_admitted` to the runner's redrawable set broke a test that pinned
+the set as the exact literal `('cold', 'no_endpoint')`; pointing `latest_run`
+at `phase_a3` broke two tests under `tests/pod` and one under `tests/runtime`.
+All four are repaired by asserting the property rather than the coincidence,
+and the redrawable one is mutation-checked in both directions.
 
-**The order-dependent inflation is gone.** It used to report 22–29 failed with
-15–20 errors, of which only eleven were real, and the surplus appeared and
-disappeared by collection order. The cause was process-global operator
-registry pollution: the C3 launcher's `spec()` registers the experimental
-ATTENTION implementations, the launcher-loading tests never unregistered, and
-C2's joint-space enumeration then met `attention.causal_kl_v1` — which its
-cost model has never measured — and raised `CostModelError`.
-`BeamSearch._allowed_impl_ids` falls back to *every* registered implementation
-when `allowed_impls` is None, so a leaked registration silently adds a branch
-to an unrelated search, exactly as `register.py` warns.
+**Repairing them found the same blind spot a THIRD time, in a second
+producer.** `record_run_index` also read only `classification`, so all 38
+`phase_a3` and 17 `phase_c3` runs were filed under "predates the run-manifest
+convention" while every one of them states a `status` — the index said nothing
+about why a run that *finished* had no manifest. The tables now live in
+`scripts/consolidate/closeout_reader.py` and both producers import them, so a
+fourth family needs one edit in one place.
+
+**Two derived records went stale twice each and were regenerated, not
+waived** — `skip_predicate_audit.json` after each batch of test edits, and
+`logs/stages/index.json` after the new analyses appeared. A third failure was
+a real omission, and the same one as last round: trimming the snapshot under
+its 14 KB contract dropped the word the attempt-4 consistency gate requires,
+that C2's Top-5 ruling is recorded as **accepted** rather than owed.
+
+**A partial selection's total is not comparable to the full suite's.** A
+convergence run over five test directories read 22 failed with 15 errors, of
+which the bulk were `phase_c2_full_search_chain` collection errors — the
+documented order-dependent inflation from process-global operator registry
+pollution, which appears and disappears by collection order. Per-file isolated
+counts are the trustworthy reading mid-round; only a full run is comparable to
+a previous full run.
+
+**The order-dependent inflation is gone from the full suite.** It used to
+report 22–29 failed with 15–20 errors, of which only eleven were real. The
+cause was process-global operator registry pollution: the C3 launcher's
+`spec()` registers the experimental ATTENTION implementations, the
+launcher-loading tests never unregistered, and C2's joint-space enumeration
+then met `attention.causal_kl_v1` — which its cost model has never measured —
+and raised `CostModelError`. `BeamSearch._allowed_impl_ids` falls back to
+*every* registered implementation when `allowed_impls` is None, so a leaked
+registration silently adds a branch to an unrelated search, exactly as
+`register.py` warns.
 
 A module-scoped `conftest` fixture now removes whatever a test module added.
 **The first version of it made things worse** — it snapshotted the whole
@@ -2564,32 +2585,14 @@ implementation had it put back, carrying the leak forward instead of clearing
 it, and the suite went 23 → 29 failures. It removes additions and nothing else
 now, then calls the builtin registrar, which is documented idempotent.
 
-**Eleven real failures, and they are the same eleven.** The closeout run
-showed a twelfth,
-`tests/docs/test_log_organisation.py::TestTheBudgetIsDerivedNotRestated::test_the_fundable_count_divides_the_formal_allowance`,
-which was **mine and is fixed**: it asserted the bare
-`int(formal_remaining // ceiling)` and went red the moment the formal allowance
-first went negative, because `floor(-0.9492 / 30)` is `-1`. The deriver clamps
-the count at zero and names the overspend in its own field; the test now
-asserts both, and — because formal `-0.9492` and package `+0.9903` *both* floor
-to zero, so no value-level check can tell which numerator was used — it also
-asks the deriver's own expression which balance it reads. Both mutations are
-caught; the numeric one alone was not.
-
-**The eleventh is the documented ten plus one that went red for a legitimate
-reason.** That one is
-`autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does`.
-It had turned green at the last closeout because the `$400.00` amendment plus
-attempt66's `$13.67` made the two sides agree; attempt75's `$16.71` moved the
-balance again, so C2's pricing record still says a beam-6 search session
-`fits_remaining_headroom=True` while `plan_session` now says it does not.
-
-**It is not repaired, deliberately.** C2 is CLOSED WITHOUT PROMOTION and
-authorizes no further spend, so nothing will ever launch from that record.
-Rewriting a closed phase's consumed proposal so that it tracks a balance it can
-never spend would be editing history to make a test green, and the failure
-points in the refusing direction — it says a launch would not fit, which is
-true.
+**Eleven real failures, and they are the same eleven.** Five are committed
+records that no longer bind the live tree — C1/C2 executable-closure and
+preregistration gates — and six are a closed phase's consumed proposal
+tracking a balance it can never spend. None is repaired deliberately: C2 is
+CLOSED WITHOUT PROMOTION and authorizes no further spend, so nothing will ever
+launch from those records, and rewriting a closed phase's history to make a
+test green would be editing the past. Each failure points in the refusing
+direction.
 
 <details><summary>the 10 long-standing ones, by nodeid</summary>
 
@@ -2608,17 +2611,17 @@ pod/test_phase_c2_full_search_chain.py::test_the_proposal_states_the_figures_a_l
 
 </details>
 
-**The C2 cap test was repaired, not the C2 records.** The funding amendment
-made `test_the_config_names_the_cap_the_project_owns` fail, because it pinned
-C2's full-search config to the project's canonical cap — now `$400.00` —
-while C2's config, grant and proposals all name `$370.00` and are internally
-consistent with the decision they ran under. A closed phase's mirror cannot
-match both its own grant and a later amendment. The test now asserts the
-invariant that actually matters — the historical config matches the C2
-authorization it ran under, is **not** the current canonical project-cap
-owner, and the current owner says `$400.00` — and it enumerates the real
-grant sources rather than passing on an empty glob, which the first rewrite
-did.
+**The C2 cap test was repaired, not the C2 records** (2026-09-28 round, kept
+as history). A funding amendment made it fail because it pinned C2's
+full-search config to the project's canonical cap, while C2's config, grant
+and proposals all name `$370.00` and are internally consistent with the
+decision they ran under. A closed phase's mirror cannot match both its own
+grant and a later amendment — and this has now happened twice, because the cap
+moved again to `$410.00` on 2026-10-02. The repair was to assert the invariant
+that actually matters: the historical config matches the C2 authorization it
+ran under and is **not** the current canonical project-cap owner, whose figure
+is read from the authorization rather than pinned here. That is why a second
+cap amendment did not break it a second time.
 
 **An earlier run of this same suite read 23 failures.** Thirteen were mine,
 from repairing the stage-H defect inside a file named by C1's frozen
@@ -2626,10 +2629,6 @@ executable closure and preregistration. The scorer was restored and the
 repair moved to the caller; all thirteen went with it. That measurement is
 recorded here because a suite result that was wrong for a knowable reason is
 worth more than one quietly replaced.
-
-**Two docs-only commits followed the suite** (`3400bbdf`, `1bce946b`),
-correcting the repair narrative in these documents and the snapshot's size.
-Both were verified by `tests/docs`, which owns every assertion over them.
 
 ## Budget — four limits that do not transfer
 
