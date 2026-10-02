@@ -897,6 +897,21 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
     ("fe2db4c8ffed3713b857a8cbdc7e3a9218fefa7d",
      "the same-failure rule, enforced where a resource is created",
      {
+        "src/aadistill/infrastructure/failure_signature.py":
+            "NEW MODULE, and NO CUDA SURFACE: it compiles regular "
+            "expressions and compares strings. It normalizes a paid attempt's "
+            "failure to `CLASS:token` so that two attempts can be asked "
+            "whether they failed the SAME way -- the question A3 answered "
+            "twenty-one times with twenty-one pods. The token is kept "
+            "deliberately: collapsing every `${VAR:?}` refusal into one class "
+            "would make fixing `SESSION_FROZEN_EXPECT` look like it addressed "
+            "a later, different missing variable, and the gate would then "
+            "refuse a legitimate retry. Provider capacity, a cold host and an "
+            "unreachable endpoint return None, which is what preserves the "
+            "backoff policy for transients. It names no experiment, no stage, "
+            "no session kind and no repository path; the patterns are failure "
+            "classes of the shared setup/launch path, which is "
+            "deployment-level infrastructure.",
         "src/aadistill/infrastructure/session_prechecks.py":
             "ADDITIVE: one new gate factory, `same_failure_gate`. NO CUDA "
             "SURFACE -- it reads text, compares two strings and runs `git "

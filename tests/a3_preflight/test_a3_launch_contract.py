@@ -295,20 +295,14 @@ def test_the_harness_gate_refuses_a_digest_that_does_not_match(session):
     assert ok is False and "names no harness digest" in why
 
 
-def test_the_controls_evidence_gate_passes_on_the_real_evidence(session):
-    """A3's whole saving is that it does not retrain the controls, so a
-    session that trains three probes and then finds nothing to compare against
-    has produced half an experiment at full price."""
-    L, args, _ = session
-    ctx = _ctx(args)
-    ok, why = L.controls_evidence_gate(ctx)
-    if not ok and "absent" in why:
-        pytest.skip("attempt75's durable control evidence is not mounted here")
-    assert ok, why
-    ev = ctx.evidence["controls_evidence"]
-    assert len(ev["seeds"]) == 3
-    assert ev["files_verified"] == 6, ev
-    assert ev["problems"] == []
+#: `test_the_controls_evidence_gate_passes_on_the_real_evidence` MOVED to
+#: tests/autoinit/test_a3_controls_evidence.py. This directory is A3's pod
+#: test selection, and that test's premise -- attempt75's durable evidence
+#: being mounted -- is a dev-box fact at an absolute path outside the
+#: repository, so the simulator cannot hide it: it RAN in the launch-bound
+#: sweep and SKIPPED on the pod, the skip sets differed by one nodeid, and
+#: the shared setup refused with `50 passed, 5 skipped, 0 failed`. The gate
+#: is unaffected and still runs on the pod; only the test moved.
 
 
 def test_the_battery_gate_requires_the_controls_own_battery(session):

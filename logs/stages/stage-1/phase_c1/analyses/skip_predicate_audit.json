@@ -1,7 +1,7 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 259,
+ "modules_scanned": 260,
  "test_ignores": [],
  "n_predicates": 140,
  "by_signal": {
@@ -22,9 +22,9 @@
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
-   "tests/a3_preflight/test_a3_launch_contract.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
    "tests/a3_preflight/test_a3_production_rehearsal.py::_summary_template",
    "tests/autoinit/test_a3_aggregation.py",
+   "tests/autoinit/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
    "tests/autoinit/test_c1_confirmation_scoring.py",
    "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
    "tests/autoinit/test_frozen_records.py",
@@ -157,8 +157,8 @@
  "unaccounted": [],
  "unrecognised": [
   "tests/a3_preflight/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery",
-  "tests/a3_preflight/test_a3_launch_contract.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
   "tests/a3_preflight/test_a3_production_rehearsal.py::_summary_template",
+  "tests/autoinit/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
   "tests/autoinit/test_c1_confirmation_scoring.py",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
   "tests/autoinit/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
@@ -195,23 +195,7 @@
  "predicates": [
   {
    "file": "tests/a3_preflight/test_a3_launch_contract.py",
-   "line": 306,
-   "kind": "pytest.skip",
-   "function": "test_the_controls_evidence_gate_passes_on_the_real_evidence",
-   "condition": "not ok and \"absent\" in why",
-   "expanded": "not ok and \"absent\" in why",
-   "signal": "unrecognised",
-   "verdict": "unknown",
-   "why": "no known signal matched; a human must say whether a pod sees the same premise",
-   "nodeid": "tests/a3_preflight/test_a3_launch_contract.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
-   "readiness_group": null,
-   "registered_as": "devbox_only_artifact",
-   "parity": "normalized_by_contract",
-   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
-  },
-  {
-   "file": "tests/a3_preflight/test_a3_launch_contract.py",
-   "line": 319,
+   "line": 313,
    "kind": "pytest.skip",
    "function": "test_the_battery_gate_requires_the_controls_own_battery",
    "condition": "not ok and \"not staged\" in why",
@@ -304,6 +288,22 @@
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "located through $HOME, which the CPU-test contract points at a fresh empty directory on both machines"
+  },
+  {
+   "file": "tests/autoinit/test_a3_controls_evidence.py",
+   "line": 64,
+   "kind": "pytest.skip",
+   "function": "test_the_controls_evidence_gate_passes_on_the_real_evidence",
+   "condition": "not ok and \"absent\" in why",
+   "expanded": "not ok and \"absent\" in why",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/autoinit/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
+   "readiness_group": null,
+   "registered_as": "devbox_only_artifact",
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/autoinit/test_attention_causal_kl.py",
@@ -2485,5 +2485,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "0c33b0ec9af2c4dba0190a773c89ac90f8d865bee76e14302b5f5757ad3981aa"
+ "digest": "13d760c7bd0e9d31984d2ba78e0e19fda329d161f08dd356acfee17be4c36548"
 }

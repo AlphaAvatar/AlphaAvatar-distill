@@ -195,10 +195,6 @@
    "class": "devbox_only_artifact",
    "why": "A3's comparison reads attempt75's durable control evidence -- per-sample rows and scored records under ~/aad-artifacts -- which no SetupManifest stages onto a pod. The module derives its root from Path.home() rather than a literal, so the declared HOME isolation reaches it and both machines decide absent. These tests belong where the evidence is: A3's aggregation runs OFF POD by design, precisely because attempt75 lost its on-pod decision artifact after a complete measurement."
   },
-  "tests/a3_preflight/test_a3_launch_contract.py::test_the_controls_evidence_gate_passes_on_the_real_evidence": {
-   "class": "devbox_only_artifact",
-   "why": "the A3 launcher's controls gate verifies attempt75's per-sample rows and scored records under ~/aad-artifacts, which no SetupManifest stages onto a pod. The gate runs either way; this TEST skips where the evidence is absent, which is correct because A3's comparison is an off-pod step and the evidence belongs where it runs."
-  },
   "tests/a3_preflight/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery": {
    "class": "staging_premise_property",
    "why": "the battery gate asks the FILESYSTEM whether artifacts/stage3/c1_confirmation_v1/manifest.json is staged -- a gitignored repo artifact. The dev box runs the assertion and the simulation and the pod skip it for the same observed reason, which is the repaired attempt-5 shape: ask for the property, never for a simulator marker."
@@ -206,6 +202,10 @@
   "tests/a3_preflight/test_a3_production_rehearsal.py::_summary_template": {
    "class": "devbox_only_artifact",
    "why": "the rehearsal models its fake per-set summary on a REAL retained generation summary under artifacts/, because observe_generation_protocol fails closed on any missing declared field and a plausible subset would make the production path fail. Retained generations are gitignored artifacts a pod never receives, so the rehearsal skips there rather than certifying a protocol comparison it could not run."
+  },
+  "tests/autoinit/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence": {
+   "class": "devbox_only_artifact",
+   "why": "the A3 launcher's controls gate verifies attempt75's per-sample rows and scored records under an ABSOLUTE path outside the repository, which no SetupManifest stages onto a pod and the pod simulator cannot hide. It was in A3's pod selection, so it RAN in the sweep and SKIPPED on the pod; the skip sets differed by one nodeid and the shared setup refused at SETUP_RC=1 with nothing failing. Now a dev-box test, where its premise is true, and A3's comparison is an off-pod step anyway."
   }
  },
  "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",
