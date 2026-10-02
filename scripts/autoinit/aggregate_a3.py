@@ -59,6 +59,48 @@ class A3AggregationError(RuntimeError):
     """The A3 comparison cannot be computed from the evidence as it stands."""
 
 
+def implementation_identity() -> dict[str, Any]:
+    """WHAT COMPUTED THIS, so the result can be re-derived (AGENTS.md P4).
+
+    The artifact already bound every file it READ by `sha256` and bound nothing
+    about the code that read them — so two aggregators disagreeing about, say,
+    which balance a bootstrap resamples would produce two artifacts that look
+    equally authoritative. C3's `aggregate_c3_stage_i.py` has recorded this
+    since its first canonical run; A3's did not, and this closes that gap
+    rather than inventing a new mechanism.
+
+    The commit alone is not enough: a dirty tree lets an artifact name a commit
+    whose content did not run, so the tree state is recorded and a dirty tree
+    is refused at the call site. The recorded commit is the tree the
+    aggregation RAN on, which necessarily differs from the commit that then
+    carries the artifact — that is correct and is why `canonical` is about the
+    tree being clean, not about HEAD still matching afterwards.
+    """
+    import subprocess
+
+    def git(*a: str) -> str:
+        return subprocess.run(["git", "-C", str(REPO), *a], check=True,
+                              capture_output=True, text=True).stdout.strip()
+
+    def sha(rel: str) -> str:
+        return hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
+
+    me = "scripts/autoinit/aggregate_a3.py"
+    return {
+        "commit": git("rev-parse", "HEAD"),
+        "tree_is_dirty": bool(git("status", "--porcelain")),
+        "aggregator_path": me,
+        "aggregator_sha256": sha(me),
+        #: The two modules whose contents decide the numbers: the strata and
+        #: prompt counts the estimand is defined over, and the comparability
+        #: rule whose id the admission records are checked against.
+        "probe_results_module_sha256": sha(
+            "scripts/experiments/phase_c1/probe_results.py"),
+        "generation_compat_module_sha256": sha(
+            "src/aadistill/initialization/planning/generation_compat.py"),
+    }
+
+
 # --- inputs ---------------------------------------------------------------
 
 
@@ -563,8 +605,14 @@ def _control_rows() -> dict[int, Path]:
 
 
 def build(evidence: Path, *, bootstrap_seed: int,
-          iterations: int = 20000) -> dict[str, Any]:
-    """The whole comparison, from evidence to one artifact."""
+          iterations: int = 20000,
+          implementation: dict[str, Any] | None = None) -> dict[str, Any]:
+    """The whole comparison, from evidence to one artifact.
+
+    `implementation` is passed in by `main` so the tests can drive `build`
+    without a git call per case; omitted, the artifact records that it was
+    built outside the canonical path rather than silently omitting the field.
+    """
     design_doc = json.loads(DESIGN.read_text())
     controls = load_controls()
     expected = control_field()
@@ -647,6 +695,13 @@ def build(evidence: Path, *, bootstrap_seed: int,
         "_aggregation_ran_off_pod": (
             "attempt75 lost its on-pod decision artifact after a complete "
             "measurement. A3's comparison never runs on the meter."),
+        "implementation": implementation or {
+            "_not_recorded": (
+                "built outside the canonical CLI path, so no commit or module "
+                "hash describes what computed this. NOT a canonical artifact."),
+        },
+        "canonical": bool(implementation
+                          and not implementation.get("tree_is_dirty")),
     }
     doc["comparison_sha256"] = hashlib.sha256(
         json.dumps(doc, sort_keys=True, separators=(",", ":")).encode()
@@ -663,6 +718,8 @@ def main(argv=None) -> int:
     ap.add_argument("--iterations", type=int, default=20000)
     ap.add_argument("--write", action="store_true")
     ap.add_argument("--out", default=None)
+    ap.add_argument("--allow-dirty", action="store_true",
+                    help="produce a NON-canonical draft from an uncommitted tree")
     args = ap.parse_args(argv)
 
     seed = args.bootstrap_seed
@@ -675,8 +732,19 @@ def main(argv=None) -> int:
             (REPO / "logs/stages/stage-1/phase_c3/plans/"
                     "c3_preregistration.json").read_text())["seeds"]["bootstrap"])
 
+    #: AGENTS.md P4: a result must bind the implementation that produced it,
+    #: and a commit recorded beside uncommitted edits names bytes that did not
+    #: run. `--allow-dirty` exists for iterating and stamps the artifact
+    #: `canonical: false`.
+    impl = implementation_identity()
+    if impl["tree_is_dirty"] and not args.allow_dirty:
+        raise A3AggregationError(
+            "the working tree is dirty, so the commit this artifact would "
+            "name does not describe the code that ran. Commit, or pass "
+            "--allow-dirty to produce a NON-canonical draft.")
+
     doc = build(Path(args.evidence), bootstrap_seed=seed,
-                iterations=args.iterations)
+                iterations=args.iterations, implementation=impl)
     c = doc["correctness"]
     print("A3 comparison  (A_bsz3 - A_incumbent, paired)")
     print(f"  bootstrap seed      {seed}")
@@ -693,6 +761,8 @@ def main(argv=None) -> int:
     print(f"  pooled usable delta {doc['behaviour']['pooled_usable_delta']:+.6f}")
     print(f"  guardrails fired    {doc['guardrails']['fired'] or 'none'}")
     print(f"  comparison_sha256   {doc['comparison_sha256']}")
+    print(f"  canonical           {doc['canonical']}  "
+          f"(commit {doc['implementation'].get('commit', '?')[:12]})")
 
     if args.write:
         out = Path(args.out) if args.out else (REPO / OUT / "a3_comparison.json")

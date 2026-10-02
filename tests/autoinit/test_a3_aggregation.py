@@ -319,6 +319,60 @@ def test_an_admission_whose_own_block_contradicts_it_is_refused(
         AG.build(tmp_path, bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
 
 
+def test_the_artifact_binds_what_computed_it_and_not_only_what_it_read():
+    """AGENTS.md P4. The first version bound 20+ input files by `sha256` and
+    nothing about the code that read them, so two aggregators disagreeing about
+    (say) which balance a bootstrap resamples would produce two artifacts that
+    looked equally authoritative. That is not hypothetical: C3's records
+    asserted bootstrap seed `654678655` while the resampler used C1's
+    `816109261`, and no artifact field could have revealed it.
+    """
+    impl = AG.implementation_identity()
+    assert len(impl["commit"]) == 40
+    assert impl["aggregator_path"] == "scripts/autoinit/aggregate_a3.py"
+    #: Named modules, not a glob: these two DECIDE the numbers, and a self-hash
+    #: alone would not move when the strata or the comparability rule changed.
+    for key in ("aggregator_sha256", "probe_results_module_sha256",
+                "generation_compat_module_sha256"):
+        assert len(impl[key]) == 64, key
+    assert len({impl[k] for k in
+                ("aggregator_sha256", "probe_results_module_sha256",
+                 "generation_compat_module_sha256")}) == 3, (
+        "two of the hashed modules are the same file")
+
+    #: And the committed artifact carries it. A field that exists only in a
+    #: function's return value binds nothing.
+    doc = json.loads((REPO / "logs/stages/stage-1/phase_a3/analyses"
+                      / "a3_comparison.json").read_text())
+    assert doc["canonical"] is True, (
+        "the committed comparison is not canonical; it was built from a dirty "
+        "tree and names a commit whose content did not run")
+    assert doc["implementation"]["aggregator_sha256"] == impl[
+        "aggregator_sha256"], (
+        "the committed comparison was produced by a different aggregator than "
+        "the one in this tree; re-run it")
+
+
+def test_a_build_with_no_implementation_says_so_rather_than_omitting_it(
+        tmp_path):
+    """The absence must be LOUD. A missing key reads as an older schema; a
+    `canonical: false` with a reason reads as what it is."""
+    doc = AG.build(_write_treatment(tmp_path), bootstrap_seed=BOOTSTRAP_SEED,
+                   iterations=50)
+    assert doc["canonical"] is False
+    assert "_not_recorded" in doc["implementation"]
+
+
+def test_the_cli_refuses_a_dirty_tree_unless_told_otherwise():
+    """Read from the source, because the alternative is to dirty the tree."""
+    src = (REPO / "scripts/autoinit/aggregate_a3.py").read_text()
+    block = src[src.index("impl = implementation_identity()"):]
+    block = block[:block.index("doc = build(")]
+    assert 'if impl["tree_is_dirty"] and not args.allow_dirty' in block
+    assert "A3AggregationError" in block
+    assert "--allow-dirty" in src
+
+
 def test_the_real_committed_admission_records_satisfy_the_verifier():
     """Not the fixture — the three records `a3_attempt38` actually wrote.
 
