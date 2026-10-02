@@ -239,6 +239,37 @@ class TestTheSpace:
         assert cost["hard_ceiling_minutes"] > cost["expected_minutes"] > 0
         assert cost["gpu_usd"] > 0 and cost["container_disk_usd"] > 0
 
+    def test_the_coverage_is_stated_and_the_warmup_protects_every_hypothesis(self):
+        """A reviewer should not have to derive that a 384-leaf space is searched
+        by visiting about a dozen leaves.
+
+        The number that makes the pruning defensible is not the fraction: it is
+        that the warm-up level keeps every root child, so each structural
+        kind / mixture pair is measured once before anything is eliminated.
+        """
+        from experiments.phase_d1.search_space import coverage
+
+        cov = coverage()
+        assert cov["complete_leaves_visited"] > 0
+        assert cov["reachable_leaves"] == 384
+        assert 0 < cov["fraction_of_leaves_visited"] < 0.1
+        levels = cov["levels"]
+        #: Level 0 produces 4 kinds x 2 mixtures and level 1 expands all eight,
+        #: which is what "no hypothesis is pruned unmeasured" means in numbers.
+        assert levels[0]["generated"] == 8
+        assert levels[1]["parents"] == 8
+        #: And pruning does bite after that, or the beam width would be doing
+        #: nothing and the cost would be the full enumeration's.
+        assert levels[2]["parents"] < levels[1]["generated"]
+
+    def test_the_coverage_and_the_price_walk_the_same_beam(self):
+        """Two numbers from one walk. A coverage figure derived from a different
+        beam than the price would describe a search nobody is paying for."""
+        from experiments.phase_d1.search_space import coverage, search_cost
+
+        assert coverage()["states_produced"] == \
+            search_cost()["expected_trajectory_expansions"]
+
     def test_a_behavioural_session_needs_probes(self):
         from experiments.phase_d1.search_space import D1SpaceError, behavioural_cost
 

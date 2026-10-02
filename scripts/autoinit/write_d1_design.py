@@ -276,6 +276,7 @@ def search_stage() -> dict[str, Any]:
     size = d1.size_report()
     cost = d1.search_cost()
     return {
+        "coverage": d1.coverage(),
         "frozen_implementations": size["frozen_implementations"],
         "exclusions": size["exclusions"],
         "profiles": size["profiles"],
@@ -355,6 +356,34 @@ def behavioural_design() -> dict[str, Any]:
             "has a lower bias AND a higher advance probability than K=3 at two "
             "seeds, at fewer probes. More behavioural breadth is actively worse "
             "unless the seeds grow with it."),
+        "_what_the_derivation_does_NOT_cover": (
+            "WHETHER A GOOD CANDIDATE IS IN THE TOP-K AT ALL. Both figures "
+            "above condition on the better candidate being inside the screened "
+            "field; neither says how often the search's own cheap metric puts "
+            "it there. C2's evidence is that the cheap metric predicts "
+            "behaviour poorly — four of its five committed candidates sat in a "
+            "better eps-Pareto front than the incumbent and two dominated it on "
+            "all three ranked objectives, and the behavioural confirmation came "
+            "back negative — so for D1 the probability that the top 2 of the "
+            "~12 leaves the beam visits contains the behaviourally best one is "
+            "UNKNOWN and is not claimed to be high.\n\n"
+            "That is a real limitation and it is not repairable by widening K. "
+            "Widening it worsens both the bias and the discrimination, so the "
+            "screening rung cannot be made simultaneously broad and reliable at "
+            "this noise level. The levers that would actually address it are "
+            "reducing the noise (more seeds per screened candidate, which costs "
+            "probes linearly) or improving the search metric's correlation with "
+            "recovered behaviour (which is a research question, not a design "
+            "parameter). D1 takes neither: it screens narrowly and reliably, "
+            "and the claim boundary records that a candidate the cheap metric "
+            "ranked third is never behaviourally tested."),
+        "_claim_boundary": (
+            "a GO confirms THE ADVANCING CANDIDATE against B, conditional on "
+            "the three confirmation seeds, having been selected on disjoint "
+            "screening prompts and disjoint seeds. It is not a statement about "
+            "the other Top-K candidate, about the leaves the beam did not "
+            "visit, about a population of recovery seeds, or about target-aware "
+            "scoring in general — only about this path under this policy."),
         "_what_this_replaces": {
             "c2_design": "K=5 at ONE screening seed",
             "c2_selection_bias": expected_max_bias(5, 1),
@@ -717,9 +746,14 @@ def main(argv=None) -> int:
 
     design = doc["behavioural_design"]
     print(f"\ndesign_hash {doc['design_hash'][:16]}")
+    cov = doc["search_stage"]["coverage"]
     print(f"  search         : {doc['search_stage']['reachable_leaves']} leaves, "
           f"{doc['search_stage']['cost']['expansions_max']} expansions, "
           f"${doc['search_stage']['cost']['hard_ceiling_usd']:.4f}")
+    print(f"  coverage       : {cov['complete_leaves_visited']} of "
+          f"{cov['reachable_leaves']} leaves visited "
+          f"({cov['fraction_of_leaves_visited'] * 100:.1f}%); every root child "
+          f"survives level 0")
     print(f"  behavioural    : Top-{design['top_k']}, "
           f"{design['screening_seeds']} screening seed(s), "
           f"{design['confirmation_seeds']} confirmation seeds, "
