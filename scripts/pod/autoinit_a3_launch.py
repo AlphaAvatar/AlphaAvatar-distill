@@ -202,6 +202,17 @@ def _run_id(value: str) -> str:
     return value
 
 
+def _run_id_or_none(value: str) -> str | None:
+    """`--resume-scoring-from`, validated the same way `--run-id` is.
+
+    An attempt id reaches `rel_run_dir` on the pod, so a value the layout
+    refuses would be discovered there rather than here.
+    """
+    if value in (None, "", "none", "None"):
+        return None
+    return _run_id(value)
+
+
 def session_record_path(run_id: str | None) -> str:
     """Where THIS run's session record goes, repository-relative.
 
@@ -829,7 +840,9 @@ def driver_command(ctx: SessionContext, plan: Any) -> str:
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.4f} "
-            f"--authorized-usd {ctx.auth.hard_cap_usd:.4f}")
+            f"--authorized-usd {ctx.auth.hard_cap_usd:.4f}"
+            + (f" --resume-scoring-from '{ctx.args.resume_scoring_from}'"
+               if getattr(ctx.args, "resume_scoring_from", None) else ""))
 
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
@@ -1025,6 +1038,15 @@ def build_parser() -> argparse.ArgumentParser:
                     default=str(Path("~/.runpod/config.toml").expanduser()))
     ap.add_argument("--relay-repo", default="AlphaAvatar/aadistill-artifacts")
     ap.add_argument("--run-id", required=True, type=_run_id)
+    #: RESUME AT SCORING from a preserving attempt. Passed straight through to
+    #: the driver, which restores that attempt's three preserved probes and
+    #: skips stages D, E and F's training -- the stages whose only consumer
+    #: was the training. See AGENTS.md P8.4 state 2. Not a stage selector: the
+    #: driver still runs a FIXED sequence, just the shorter one, and refuses
+    #: anything but one complete three-seed set from one attempt.
+    ap.add_argument("--resume-scoring-from", default=None, type=_run_id_or_none,
+                    help="an attempt id whose preserved probes this session "
+                         "restores and scores instead of training its own")
     ap.add_argument("--gpu", default="NVIDIA L40S")
     #: NOT `required`, and the reason is mechanical rather than stylistic.
     #: `tests/pod/test_session_kind_dispatch.py` enumerates launchers by

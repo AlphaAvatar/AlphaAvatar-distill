@@ -251,9 +251,36 @@ def stage(letter: str) -> A3Stage:
     raise A3SessionError(f"no A3 stage {letter!r}; have {STAGE_LETTERS}")
 
 
-def assert_stage_order(completed: list[str]) -> None:
-    """Stages run in order and none is skipped."""
-    want = [s.letter for s in STAGES][:len(completed)]
+#: The ladder a RESUME-AT-SCORING session executes. DECLARED, not derived by
+#: subtraction, so the shorter sequence is as reviewable as the full one and
+#: an arbitrary reordering is still refused.
+#:
+#: D replays the parent and E rebuilds both initialization protocols. Their
+#: only consumer is the training in F, so a session that restores three
+#: already-trained, already-durable probes reads neither -- which is what
+#: AGENTS.md P8.4 state 2 prescribes and what `a3_attempt36` spent $3.39 not
+#: doing. B, C, G and H are unchanged: the teacher and battery are still
+#: verified, the operator still registered, the probes still attested,
+#: admitted, scored and packaged.
+RESUME_STAGE_LETTERS: tuple[str, ...] = ("B", "C", "F", "G", "H")
+
+
+def assert_stage_order(completed: list[str],
+                       ladder: tuple[str, ...] | None = None) -> None:
+    """Stages run in order and none is skipped, within the DECLARED ladder.
+
+    `ladder` names which of the two declared sequences is executing. It is a
+    parameter rather than an inference because "which stages may be absent"
+    is a scientific statement: the full chain owes a parent replay and both
+    initializations, and the resume chain cites them from the attempt whose
+    probes it restores.
+    """
+    letters = tuple(ladder) if ladder is not None else STAGE_LETTERS
+    if letters not in (STAGE_LETTERS, RESUME_STAGE_LETTERS):
+        raise A3SessionError(
+            f"{letters} is not a declared A3 ladder; the declared ones are "
+            f"{STAGE_LETTERS} and {RESUME_STAGE_LETTERS}")
+    want = list(letters)[:len(completed)]
     if completed != want:
         raise A3SessionError(
             f"stages ran out of order: completed {completed}, expected {want}")

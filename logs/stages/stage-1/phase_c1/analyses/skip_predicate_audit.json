@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 261,
+ "modules_scanned": 262,
  "test_ignores": [],
- "n_predicates": 140,
+ "n_predicates": 141,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 57,
+  "filesystem_premise_onpod": 58,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
@@ -115,7 +115,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 42,
-  "same_on_pod": 79
+  "same_on_pod": 80
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -240,6 +240,22 @@
    "registered_as": "devbox_only_artifact",
    "parity": "normalized_by_contract",
    "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
+  },
+  {
+   "file": "tests/a3_preflight/test_a3_resume_scoring.py",
+   "line": 46,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not RECORDS.is_dir()",
+   "expanded": "not RECORDS.is_dir() | RECORDS=REPO / \"logs/stages/stage-1/phase_a3/runs\" / SOURCE\n           / \"evidence\" / \"probes\" | REPO=Path(__file__).resolve().parents[2] | SOURCE=\"a3_attempt35\"",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/a3_preflight/test_a3_resume_scoring.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/architecture/test_core_ownership.py",
@@ -2485,5 +2501,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "f3bd6be2de86a6dd8f96a05133f41dc87b103e1c312c86af69bb29aa1594c635"
+ "digest": "2131085a03ba39ad82ccaa0891892e7f8969e73321d6460d04c645323408e71d"
 }

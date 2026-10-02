@@ -196,9 +196,26 @@ PY
   BN="aad_autoinit_$(echo "$SC" | cut -c1-8).bundle"
   SCR="$BASE/$RUN"; mkdir -p "$SCR"
   say "$RUN: launching on $GPU, commit $SC, bundle $BN"
+  #: RESUME AT SCORING when a preserving attempt is named. The probes are
+  #: restored instead of retrained, which is AGENTS.md P8.4 state 2, and the
+  #: chain's hard model drops from 450.8 min / $8.3047 to 179.0 / $3.2982.
+  #:
+  #: `--poll-limit-min` follows the WORK rather than the authorization: a
+  #: resume run still going at 240 minutes is hung, and bounding it at the
+  #: full chain's 600 would burn $8.25 of a $9.61 balance to learn that. The
+  #: authorization's ceiling is unchanged and remains a legitimate upper
+  #: bound; this is the backstop that fires first.
+  RESUME_ARGS=()
+  POLL_LIMIT=600
+  if [ -n "${A3_RESUME_FROM:-}" ]; then
+    RESUME_ARGS=(--resume-scoring-from "$A3_RESUME_FROM")
+    POLL_LIMIT=240
+    say "$RUN: RESUME AT SCORING from $A3_RESUME_FROM (poll limit ${POLL_LIMIT}m)"
+  fi
   PYTHONPATH=src:scripts .venv/bin/python -u scripts/pod/autoinit_a3_launch.py \
       --scr "$SCR" --run-id "$RUN" --session-commit "$SC" --bundle "$BN" \
-      --gpu "$GPU" --max-price "$PRICE" > "$SCR/launcher.log" 2>&1
+      --gpu "$GPU" --max-price "$PRICE" --poll-limit-min "$POLL_LIMIT" \
+      "${RESUME_ARGS[@]}" > "$SCR/launcher.log" 2>&1
   RC=$?
   say "$RUN: launcher exit $RC"
 

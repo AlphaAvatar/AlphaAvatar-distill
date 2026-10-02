@@ -145,7 +145,7 @@ def _args(**over):
     a = D.build_parser().parse_args(
         ["--image-digest", "img@test", "--rate", "1.098333",
          "--soft-stop-usd", "8.1335", "--authorized-usd", "8.2525",
-         "--run-id", "a3-rehearsal"])
+         "--run-id", "a3_rehearsal"])
     for k, v in over.items():
         setattr(a, k, v)
     return a
@@ -617,3 +617,91 @@ def test_the_launcher_command_parses_with_the_drivers_own_parser():
     #: No stage-selection surface exists to emit.
     assert "--stage" not in cmd
     assert not any(a == "--stage" for a in argv)
+
+
+# --- the resume-at-scoring path, through the real run() -------------------
+
+
+def test_the_resume_path_scores_restored_probes_without_training(
+        harness, monkeypatch):
+    """The whole chain in resume mode: B, C, F-as-restore, G, H.
+
+    No parent replay, no initialization, NO TRAINING -- and three scored
+    endpoints at the end. This is AGENTS.md P8.4 state 2 made executable, and
+    it exists because `a3_attempt36` spent `$3.39` retraining three probes
+    that were already durable.
+
+    The restore is faked at the DOWNLOAD only: `restore_one`'s digest
+    verification, the five admission refusals in `preserved_records`, the
+    descriptor rewrite and everything downstream are production code.
+    """
+    rec = _fake_hardware(monkeypatch, harness)
+
+    #: A preserving attempt's records, in the shape the real ones have, with
+    #: weights whose digests match what the record claims.
+    source = "a3_attempt_source"
+    records = (harness.tmp / "logs/stages/stage-1/phase_a3/runs" / source
+               / "evidence" / "probes")
+    records.mkdir(parents=True)
+    blobs = harness.tmp / "relay"
+    blobs.mkdir()
+    init_digest = "7dd" + "0" * 61
+    for seed in SEEDS:
+        name = A3S.probe_id(seed)
+        files = {}
+        for filename, body in (("config.json", json.dumps({"model_type": "qwen3"})),
+                               ("generation_config.json", "{}"),
+                               ("model.safetensors", f"weights-{seed}")):
+            b = blobs / f"{name}.{filename}"
+            b.write_text(body)
+            files[filename] = _sha256_text(body)
+        (records / f"{name}.training.json").write_text(json.dumps({
+            "probe_id": name, "arm": A3S.TREATMENT_ARM, "seed": seed,
+            "initialization_artifact_digest": init_digest,
+            "complete": True, "evaluated": False,
+            "run_completion": "artifacts/stage3/a3/run_completion.json",
+            "config_sha256": "c" * 64,
+            "model_dir": f"artifacts/stage3/a3/{name}/checkpoints/step_001023/model",
+            "preserved": {"preserved": True, "relay_repo": "r",
+                          "relay_prefix": f"a3_preserved_probes/{source}/{name}",
+                          "files": files},
+        }) + "\n")
+    monkeypatch.setattr(
+        D, "RUNS_ROOT",
+        harness.tmp / "logs/stages/stage-1/phase_a3/runs")
+    import huggingface_hub
+
+    def fake_download(*, repo_id, filename, **kw):
+        name, leaf = filename.rsplit("/", 1)[-1], filename.rsplit("/", 1)[-1]
+        probe = filename.split("/")[-2]
+        return str(blobs / f"{probe}.{leaf}")
+    monkeypatch.setattr(huggingface_hub, "hf_hub_download", fake_download)
+
+    rc = D.A3Driver(_args(resume_scoring_from=source)).run()
+    status = (harness.tmp / "a3.status").read_text()
+
+    assert rc == 0, status
+    assert "ALL_DONE" in status, status
+    #: The stages whose only consumer was the training did NOT run.
+    assert "STAGE_START:D" not in status, "the parent was replayed anyway"
+    assert "STAGE_START:E" not in status, "the initializations were rebuilt anyway"
+    assert "engine_probe" in rec.calls, "stage G did not attest"
+    assert not any("train:" in c for c in rec.calls), (
+        f"a probe was TRAINED in resume mode: {rec.calls}")
+    #: And three probes were scored. The recorder names a gated subprocess
+    #: `gate:<name>`, so the prefix is the gate's.
+    scored = [c for c in rec.calls if "score:" in c]
+    assert len(scored) == 3, f"{len(scored)} probes scored, expected 3: {rec.calls}"
+    for seed in SEEDS:
+        journal = json.loads(
+            (harness.audit / "probes" / f"{A3S.probe_id(seed)}.training.json"
+             ).read_text())
+        assert journal["restored_from"]["attempt"] == source
+        assert journal["restored_from"]["_weights_were_not_retrained"] is True
+        assert journal["evaluated"] is True
+
+
+def _sha256_text(s: str) -> str:
+    import hashlib
+
+    return hashlib.sha256(s.encode()).hexdigest()

@@ -50,6 +50,7 @@ import argparse
 import gc
 import json
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -141,6 +142,12 @@ TOKENIZER_SIDECAR_SHA256 = {
 #: It lived only under ~/aad-artifacts, which no pod receives, so it is now in
 #: the tree beside attempt75's other stage-I evidence: 10 KB of reviewable
 #: text whose consumer runs on the pod.
+#: Where this experiment's runs keep their committed evidence. Its own
+#: constant rather than `REPO / ...` inline, so a caller can point the
+#: preserved-probe lookup at another tree without repointing `REPO` -- which
+#: also feeds the scoring contract, the frozen recipe and the harness digest.
+RUNS_ROOT = REPO / "logs/stages/stage-1/phase_a3/runs"
+
 CONTROL_ATTESTATION = (REPO / "logs/stages/stage-1/phase_c3/analyses"
                        / "attempt75_stage_i"
                        / "c3_attested_evaluation_protocol.json")
@@ -258,6 +265,11 @@ class A3Driver:
         self.a3_init_dir: Path | None = None
         self.a3_init_digest: str | None = None
         self.observed_runtime: dict[str, Any] | None = None
+        #: WHICH declared ladder this session executes. Set in
+        #: `run`, read by the stage-order guard, so a resume
+        #: session is checked against the resume sequence and a
+        #: full one against the full sequence.
+        self.ladder: tuple[str, ...] = A3S.STAGE_LETTERS
         for d in (AUDIT, TRAIN, EVAL, WORK, AUDIT / "probes", AUDIT / "configs"):
             d.mkdir(parents=True, exist_ok=True)
 
@@ -285,7 +297,8 @@ class A3Driver:
 
     def complete(self, letter: str, **payload: Any) -> None:
         stage = A3S.stage(letter)
-        A3S.assert_stage_order([*self.completed, letter])
+        A3S.assert_stage_order([*self.completed, letter],
+                               self.ladder)
         self.completed.append(letter)
         self.ev["stages"][stage.stage_id] = {
             "letter": letter, "stage_id": stage.stage_id, "passed": True,
@@ -626,6 +639,122 @@ class A3Driver:
             "student_path": _rel(self.a3_init_dir),
         } for seed in self.seeds]
 
+    def preserved_records(self) -> list[dict[str, Any]]:
+        """The preserving attempt's three probe records, or a refusal.
+
+        Read from the repository, because that is where the producing session
+        committed them -- the weights are on the relay and the DESCRIPTORS are
+        in the tree, which is the split AGENTS.md P8.4 asks for: evidence and
+        model bytes are different things.
+        """
+        attempt = self.a.resume_scoring_from
+        root = RUNS_ROOT / attempt / "evidence" / "probes"
+        if not root.is_dir():
+            raise A3DriverError(
+                f"--resume-scoring-from {attempt!r} names no probe records at "
+                f"{root}; there is nothing to restore")
+        records = [json.loads(p.read_text())
+                   for p in sorted(root.glob("*.training.json"))]
+        by_seed = {int(r["seed"]): r for r in records}
+        missing = [s for s in self.seeds if s not in by_seed]
+        if missing:
+            raise A3DriverError(
+                f"{attempt} preserved no probe for seed(s) {missing}; the "
+                "estimand is a paired difference over three seeds and two is "
+                "not that quantity")
+        chosen = [by_seed[s] for s in self.seeds]
+        incomplete = [r["probe_id"] for r in chosen if not r.get("complete")]
+        if incomplete:
+            raise A3DriverError(
+                f"{attempt} preserved {incomplete} as INCOMPLETE training; a "
+                "partial probe is not a probe")
+        digests = {r["initialization_artifact_digest"] for r in chosen}
+        if len(digests) != 1:
+            raise A3DriverError(
+                f"the three preserved probes name {len(digests)} different "
+                f"initialization digests {sorted(d[:12] for d in digests)}; "
+                "they are not one arm and must not be scored as one")
+        arms = {r.get("arm") for r in chosen}
+        if arms != {A3S.TREATMENT_ARM}:
+            raise A3DriverError(
+                f"the preserved probes carry arm(s) {sorted(arms)}, not "
+                f"{A3S.TREATMENT_ARM!r}")
+        #: THE FIELDS STAGE H READS off a training record. A preserving
+        #: attempt whose record lacks one would be discovered at stage H --
+        #: after three generations and three scorings -- and `C1ProbeRecord`
+        #: refuses a partial record, so the session would die holding a
+        #: complete measurement it could not package. Asked here instead, for
+        #: nothing. `evaluated` is checked separately below.
+        needed = ("probe_id", "arm", "seed", "initialization_artifact_digest",
+                  "run_completion", "config_sha256", "model_dir")
+        for r in chosen:
+            absent = [k for k in needed if not r.get(k)]
+            if absent:
+                raise A3DriverError(
+                    f"{r.get('probe_id', '?')}: its preserved record carries "
+                    f"no {absent}, which stage H reads to build the probe "
+                    "record. A restore that cannot be packaged is not a "
+                    "restore.")
+        already = [r["probe_id"] for r in chosen if r.get("evaluated")]
+        if already:
+            raise A3DriverError(
+                f"{already} are already recorded as evaluated. A complete "
+                "valid measurement is not rerun looking for another result.")
+        self.a3_init_digest = digests.pop()
+        return chosen
+
+    def restore_one(self, record: dict[str, Any]) -> Path:
+        """Pull ONE preserved probe down and re-identify it file by file.
+
+        AGENTS.md P8.4 state 2: a probe that is trained and durable and was
+        never validly scored is RESTORED and resumed at scoring, not
+        retrained -- "because scoring genuinely consumes the model". This is
+        the path that makes that rule executable; without it the only way to
+        score a preserved probe was to spend three hours reproducing it.
+
+        Every file is verified against the sha256 the producing session
+        recorded at the moment it preserved the probe. A mismatch is an
+        INTEGRITY STOP: the one thing worse than retraining is scoring
+        something that is not the probe the record describes.
+        """
+        from huggingface_hub import hf_hub_download
+
+        name = record["probe_id"]
+        preserved = record.get("preserved") or {}
+        if not preserved.get("preserved"):
+            raise A3DriverError(
+                f"{name}: its record does not assert preservation, so there "
+                "is nothing to restore and nothing to verify against")
+        files = preserved.get("files") or {}
+        if not files:
+            raise A3DriverError(
+                f"{name}: preserved with no per-file digests; a restore that "
+                "cannot be re-identified is not a restore")
+        dest = TRAIN / name / "restored"
+        dest.mkdir(parents=True, exist_ok=True)
+        token = TOKEN_FILE.read_text().strip() if TOKEN_FILE.is_file() else None
+        verified = {}
+        for filename, expected in sorted(files.items()):
+            got = hf_hub_download(
+                repo_id=preserved.get("relay_repo") or RELAY,
+                filename=f"{preserved['relay_prefix']}/{filename}",
+                repo_type="model", token=token,
+                local_dir=str(dest))
+            actual = sha256_file(Path(got))
+            if actual != expected:
+                raise A3DriverError(
+                    f"{name}: restored {filename} hashes to {actual[:12]} and "
+                    f"the preserving session recorded {expected[:12]}. This is "
+                    "an integrity stop: scoring a checkpoint that is not the "
+                    "one the record describes would attribute its result to "
+                    "the wrong probe.")
+            verified[filename] = actual
+            target = dest / filename
+            if Path(got) != target:
+                shutil.copy2(got, target)
+        say(f"  {name}: restored {len(verified)} file(s), all re-identified")
+        return dest
+
     def probe_config(self, d: dict[str, Any]) -> Path:
         frozen = json.loads(FROZEN_RECIPE.read_text())
         name = d["probe_id"]
@@ -704,6 +833,86 @@ class A3Driver:
             say(f"  {name}: preservation FAILED and is recorded: {exc}")
             return {"preserved": False, "reason": f"{type(exc).__name__}: {exc}",
                     "files": files}
+
+    def stage_f_resume(self) -> None:
+        """Restore the preserving attempt's three probes. No training.
+
+        The scientific claim this session can make is narrower than a full
+        chain's and the record says so: it did NOT rebuild the
+        initialization, so the A-bsz1/A-bsz3 diagnostics belong to the
+        preserving attempt and are cited, not reproduced. What it DOES
+        produce is the three endpoints that attempt's probes never got.
+        """
+        mark("STAGE_START:F")
+        self.release_device()
+        self.ev["training_started"] = False
+        self.ev["resumed_scoring_from"] = self.a.resume_scoring_from
+        self.ev["_what_this_session_did_not_do"] = (
+            "it did not replay the parent, did not rebuild either "
+            "initialization protocol and did not train: stages D, E and F's "
+            "training were skipped because the probes already existed, were "
+            "durable, and had never been validly scored. The digest finding "
+            "and the diagnostics are cited from "
+            f"{self.a.resume_scoring_from} rather than reproduced here.")
+        #: THE EVIDENCE THIS SESSION CITES, carried into its own package.
+        #: The success spec requires `a3_diagnostics.json`, `a3_replay.json`
+        #: and `a3_arm_identities.json` -- all written by stages D and E,
+        #: which a resume session does not run. Copying them from the
+        #: preserving attempt makes the package self-contained AND keeps the
+        #: attribution honest: each arrives with a sidecar saying it was
+        #: produced elsewhere. Leaving them absent would instead make the
+        #: manifest gate report them MISSING at teardown, which is where C3
+        #: learned that a required artifact nobody writes is a session that
+        #: completes and comes home incomplete.
+        cited_root = RUNS_ROOT / self.a.resume_scoring_from / "evidence"
+        cited = {}
+        for name in ("a3_diagnostics.json", "a3_arm_identities.json",
+                     "a3_replay.json", "engine_probe.json",
+                     "a3_attested_evaluation_protocol.json"):
+            src = cited_root / name
+            if not src.is_file():
+                continue
+            shutil.copy2(src, AUDIT / name)
+            cited[name] = sha256_file(src)
+        (AUDIT / "a3_cited_evidence.json").write_text(json.dumps({
+            "schema": "aadistill.autoinit.a3_cited_evidence/v1",
+            "cited_from": self.a.resume_scoring_from,
+            "_what_this_is": (
+                "evidence this session did NOT produce. It restored that "
+                "attempt's probes and resumed at scoring, so the parent "
+                "replay, both initialization protocols and the digest "
+                "finding belong to it. The files are carried here so the "
+                "package is self-contained; the attribution is this record."),
+            "files": cited,
+        }, indent=2) + "\n")
+        say(f"  cited {len(cited)} evidence file(s) from "
+            f"{self.a.resume_scoring_from}")
+
+        for record in self.preserved_records():
+            name = record["probe_id"]
+            restored = self.restore_one(record)
+            local = dict(record)
+            local["model_dir"] = _rel(restored)
+            local["restored_from"] = {
+                "attempt": self.a.resume_scoring_from,
+                "relay_prefix": (record.get("preserved") or {}).get(
+                    "relay_prefix"),
+                "_weights_were_not_retrained": True,
+            }
+            self.training[int(record["seed"])] = local
+            (AUDIT / "probes" / f"{name}.training.json").write_text(
+                json.dumps(local, indent=2) + "\n")
+            mark(f"PROBE_RESTORED:{name}")
+
+        #: THE SAME bookkeeping every other stage uses. It wrote
+        #: `mark("STAGE_PASSED:F")` directly and bypassed `complete`, so F
+        #: never entered `self.completed` and the stage-order guard saw
+        #: ['B','C','G'] -- a gap it is built to refuse.
+        self.require_all_trained()
+        self.complete("F", probes_restored=len(self.training),
+                      restored_from=self.a.resume_scoring_from,
+                      completions=sorted(r["probe_id"]
+                                         for r in self.training.values()))
 
     def stage_f(self) -> None:
         mark("STAGE_START:F")
@@ -1133,8 +1342,25 @@ class A3Driver:
         stages = {"B": self.stage_b, "C": self.stage_c, "D": self.stage_d,
                   "E": self.stage_e, "F": self.stage_f, "G": self.stage_g,
                   "H": self.stage_h}
+        letters = list(A3S.STAGE_LETTERS)
+        if self.a.resume_scoring_from:
+            #: D replays the parent and E rebuilds both initializations --
+            #: work whose only consumer is the training this session is not
+            #: doing. The probes already exist and carry the initialization
+            #: digest in their records. Skipping them is the whole saving:
+            #: 21 + 2.5 + 185 minutes, about $3.4 of a $1.098333/h pod.
+            #:
+            #: `stage_f` is REPLACED rather than made conditional, so a
+            #: reader of either path sees one behaviour and the training
+            #: path cannot be reached with a restored probe in `self.training`.
+            stages["F"] = self.stage_f_resume
+            letters = list(A3S.RESUME_STAGE_LETTERS)
+            self.ladder = A3S.RESUME_STAGE_LETTERS
+            say(f"RESUME AT SCORING from {self.a.resume_scoring_from}: "
+                f"stages {letters} (D and E skipped; their consumer was the "
+                "training this session does not do)")
         try:
-            for letter in A3S.STAGE_LETTERS:
+            for letter in letters:
                 stages[letter]()
             mark("ALL_DONE")
             say("A3 complete on pod. The comparison runs off pod at $0.")
@@ -1161,6 +1387,19 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--soft-stop-usd", type=float, required=True)
     ap.add_argument("--authorized-usd", type=float, required=True)
     ap.add_argument("--run-id", default="a3_attempt1")
+    #: RESUME AT SCORING. Names the attempt whose preserved probes this
+    #: session scores instead of training its own. AGENTS.md P8.4 state 2
+    #: prescribes exactly this for a probe that is trained and durable and
+    #: was never validly scored, and a3_attempt36 spent $3.39 retraining
+    #: three such probes because the path did not exist.
+    #:
+    #: It is NOT a way to pool sessions: the three probes must come from ONE
+    #: preserving attempt, carry ONE initialization digest, and be the three
+    #: frozen seeds. Anything else is refused.
+    ap.add_argument("--resume-scoring-from", default=None,
+                    help="an attempt id whose preserved probes this session "
+                         "restores and scores; stages D, E and F's training "
+                         "are then skipped")
     ap.add_argument("--probe-train-minutes", type=float, default=61.76)
     ap.add_argument("--probe-eval-minutes", type=float, default=26.85)
     return ap
