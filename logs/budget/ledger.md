@@ -2841,3 +2841,43 @@ disk costs about six cents over the chain.
 **Position:** formal `$17.3431` remaining, package `$19.2826`, project
 `$22.5377`. The phase envelope still covers one full chain at the hard
 ceiling plus six corrected restarts (`8.3047 + 6 x 1.4506 = 17.0083`).
+
+## 2026-10-02 — SPENT: `$4.4600` reached stage G, and bought the structural result
+
+`a3_attempt35` ran 245.8 min on an L40S and completed stages B through F:
+the frozen parent reproduced, A-bsz1 rebuilt the incumbent, both protocols'
+diagnostics were collected, and **all three recovery probes trained** at
+61.5–62.0 min each. The protocol admission then refused probe 1's generations
+and the chain stopped before scoring. A3 cumulative: `$9.1500` over 30 pods,
+every one provider-confirmed deleted.
+
+**THE STRUCTURAL RESULT IS IN, and it reproduced on three pods:**
+
+```text
+A_bsz1  53e30566c5f7  == the frozen incumbent, on fresh hardware, repeatable
+A_bsz3  7dd2f6f6980b  DIFFERENT, repeatable within each session
+                      -> DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL
+result_spec_hash identical: same semantics, different bytes
+masking invariant holds; predicted == observed for both protocols
+head-score rank correlation 0.9999997, max relative drift 0.0034
+kept heads: 1 slot of 448 differs (0.22%), layer 7, margin 0.00047
+scorer: bsz1 2.8073 s vs bsz3 3.0807 s -- bsz3 is 9.7% SLOWER
+peak VRAM 3.1737 GiB
+```
+
+**The three trained probes are DURABLE** under
+`a3_preserved_probes/a3_attempt35/`, pushed at the moment each finished with
+per-file hashes, so three hours of training survived the later failure. That
+is the AGENTS.md durability rule doing exactly what it was written for.
+
+**Why the admission refused, and why it was right.** All twenty material
+generation fields matched attempt75's controls; the host NVIDIA driver BRANCH
+had moved `580.159.03` -> `595.91.07`, and `generation_compat` declares a
+branch change a real runtime event rather than provenance. The repair asks
+that question before setup instead of after three trainings, and the admission
+now compares against the CONTROLS under the v2 rule rather than against the
+session's own attestation under the v1 exact-hash rule.
+
+**Position:** formal `$11.5531`, package `$13.4926`, project `$20.1477`. The
+envelope funds one full chain at the `$8.3047` hard ceiling plus two corrected
+restarts at `$1.4597`.

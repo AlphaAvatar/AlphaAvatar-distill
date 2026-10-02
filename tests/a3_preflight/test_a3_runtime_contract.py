@@ -223,6 +223,51 @@ def test_the_evaluator_seam_sends_flags_the_evaluator_defines():
             f"which declares {sorted(declared)}")
 
 
+def test_the_scorer_seam_sends_flags_the_scorer_defines():
+    """The THIRD shelled-out seam, reached after a probe has generated.
+
+    `/opt/train/bin/python scripts/autoinit/score_c1_confirmation.py` is a
+    separate interpreter with its own parser, first reached ~4.5 hours into
+    the chain. `--arm` is deliberately NOT sent: its choices are C1's two
+    ROLES, and passing an experiment's arm id there is what ended C3's
+    attempt66 one stage from a verdict.
+    """
+    tree = ast.parse(DRIVER.read_text())
+    fn = next((n for n in ast.walk(tree)
+               if isinstance(n, ast.FunctionDef) and n.name == "stage_g"), None)
+    assert fn is not None, "the driver has no stage_g"
+    sent = flags_in_argv(ast.unparse(fn))
+    assert "--generations" in sent, (
+        f"stage_g does not invoke the scorer; flags seen: {sorted(sent)}")
+    assert "--arm" not in sent, (
+        "stage_g passes --arm to the C1 scorer, whose choices are C1's two "
+        "roles; that ended C3 attempt66 one stage from its verdict")
+
+    drv = load(DRIVER, "a3drv_score_seam")
+    scorer = Path(str(drv.C1_SCORER))
+    assert scorer.is_file(), f"C1_SCORER -> {scorer} does not exist"
+    declared = argparse_flags(scorer)
+    assert not sorted(sent - declared - {"--help"}), (
+        f"stage_g sends {sorted(sent - declared - {'--help'})} to "
+        f"{scorer.name}, which declares {sorted(declared)}")
+
+    #: And every flag the scorer REQUIRES is one stage_g sends.
+    required = set()
+    for node in ast.walk(ast.parse(scorer.read_text())):
+        if (isinstance(node, ast.Call)
+                and getattr(node.func, "attr", "") == "add_argument"):
+            names = [a.value for a in node.args
+                     if isinstance(a, ast.Constant)
+                     and str(a.value).startswith("-")]
+            kw = {k.arg: getattr(k.value, "value", None) for k in node.keywords}
+            if kw.get("required") and names:
+                required.add(names[0])
+    assert required, "the scorer declares nothing required; the check is vacuous"
+    assert not sorted(required - sent), (
+        f"the scorer requires {sorted(required - sent)}, which stage_g does "
+        "not send")
+
+
 def test_the_driver_imports_everything_it_needs_after_training():
     """A stage-H import error surfaces three probes and ~4.5 hours in."""
     mod = load(DRIVER, "a3drv_full")
