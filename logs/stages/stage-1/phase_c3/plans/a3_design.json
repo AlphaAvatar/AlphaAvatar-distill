@@ -284,10 +284,10 @@
   "_derived_by": "scripts/experiments/phase_c3/a3_pricing.py",
   "gpu_rate_usd_per_hour": 1.09,
   "_rate_note": "the live L40S securePrice at pricing time. Re-quote immediately before authorization.",
-  "expected_usd": 5.868,
-  "hard_ceiling_usd": 8.2525,
+  "expected_usd": 5.9051,
+  "hard_ceiling_usd": 8.3047,
   "hard_ceiling_minutes": 450.82,
-  "container_disk_gb": 60,
+  "container_disk_gb": 110,
   "durable_requirement_gib": 6.664,
   "book": "formal_allowance",
   "FUNDABLE": true,
@@ -299,10 +299,12 @@
   ]
  },
  "funding": {
-  "amended_utc": "2026-10-01",
-  "amendment": "formal allowance 55.0000 -> 65.6523; package total 65.0000 -> 75.6523; engineering, per-session envelope and project cap unchanged",
-  "funds": "the derived hard ceiling plus ONE pre-science restart of $1.4506, total $9.7031 on the formal book",
-  "owner": "logs/budget/decisions.md, 2026-10-01",
+  "amended_utc": "2026-10-02",
+  "amendment": "A PHASE envelope, superseding the 2026-10-01 minimal one: formal allowance 65.6523 -> 76.6523; package total 75.6523 -> 86.6523; project cumulative cap 400.0000 -> 410.0000; engineering and the per-session envelope unchanged. Sized to finish the STAGE rather than the next flawless run.",
+  "funds": "the derived hard ceiling $8.3047 plus about six corrected pre-science restarts of $1.4597 = $17.0629 on the formal book",
+  "pre_science_restart_usd": 1.4597,
+  "_restart_is_derived": "from the same component table the chain is, over the components a chain traverses before the first scientific probe: setup, the pre-provider gates, the teacher fetch, the operator registration, the parent replay and the initialization rounds. An attempt that aborts anywhere in there produced no measurement to retry.",
+  "owner": "logs/budget/decisions.md, 2026-10-02",
   "_historical_overspend_preserved": "attempt75's $0.9492 formal overspend stands as fact and is not rewritten into compliance.",
   "_a_mid_run_failure_that_cannot_be_funded_is_a_stop": "if the remaining balance cannot fund a corrected attempt plus teardown, A3 stops and reports rather than amending again."
  },
@@ -331,5 +333,5 @@
   "starting D1/D2/D3, the FFN experiment or Stage-0 v2",
   "increasing the approved budget"
  ],
- "design_sha256": "4c5420f0cb45b92118749be0427a95db1f4a2a8b6705e0d1ea3fe8976736877a"
+ "design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6"
 }

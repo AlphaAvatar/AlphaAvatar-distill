@@ -417,6 +417,38 @@ def price_a3(gpu_rate_usd_per_hour: float, n_probes: int = 3) -> A3Price:
         expected_components=exp, hard_components=hard, storage=storage)
 
 
+#: The components a chain traverses BEFORE the first scientific probe. An
+#: attempt that aborts anywhere in here produced no measurement, so its cost
+#: is what a corrected retry costs -- the figure the phase envelope is sized
+#: in multiples of.
+PRE_SCIENCE_COMPONENTS = ("setup", "pre_provider_gates",
+                          "teacher_fetch_verify", "register_operator",
+                          "parent_replay", "initialization_rounds")
+
+
+def pre_science_restart_usd(gpu_rate_usd_per_hour: float,
+                            n_probes: int = 3) -> float:
+    """What ONE corrected pre-science restart costs, at hard rates.
+
+    DERIVED from the same component table the chain is, because it was a
+    prose literal -- `$1.4506`, written into the design document and the
+    budget amendment by hand. The container-disk repair moved the billed rate
+    and the literal did not, which is the ordinary fate of a second owner of
+    a derived number: the phase envelope's own arithmetic would have been
+    stated against a rate nothing charges.
+
+    `n_probes` reaches only the storage derivation, which sets the disk term
+    in the billed rate; no probe runs in a pre-science restart by definition.
+    """
+    rate = float(gpu_rate_usd_per_hour)
+    disk_gb = int(storage_requirement(n_probes)["provision"]["container_disk_gb"])
+    billed = billed_rate(rate, disk_gb)
+    hard = component_minutes(True)
+    minutes = sum(v for k, v in hard.items() if k in PRE_SCIENCE_COMPONENTS)
+    #: Ceiled, for the reason `price_a3.hard_usd` is: a ceiling rounds up.
+    return math.ceil(minutes / 60.0 * billed * 10_000) / 10_000
+
+
 def assess(gpu_rate_usd_per_hour: float,
            envelopes: dict[str, float] | None = None,
            n_probes: int = 3) -> dict[str, Any]:

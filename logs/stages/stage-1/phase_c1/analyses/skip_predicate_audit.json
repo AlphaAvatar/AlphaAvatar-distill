@@ -195,7 +195,7 @@
  "predicates": [
   {
    "file": "tests/a3_preflight/test_a3_launch_contract.py",
-   "line": 313,
+   "line": 320,
    "kind": "pytest.skip",
    "function": "test_the_battery_gate_requires_the_controls_own_battery",
    "condition": "not ok and \"not staged\" in why",
@@ -2485,5 +2485,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "13d760c7bd0e9d31984d2ba78e0e19fda329d161f08dd356acfee17be4c36548"
+ "digest": "6b04fb4d723de8fb898482e7cc3ede8fe46a7f71cd0238fe7b451e781d8e8974"
 }

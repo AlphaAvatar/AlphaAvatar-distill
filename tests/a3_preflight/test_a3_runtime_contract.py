@@ -424,16 +424,38 @@ def test_the_launcher_plan_hash_is_what_an_authorization_would_bind():
         contract.contract_hash), (
         "the launcher resolves a different session contract than this test")
 
+    #: Only authorizations issued against the CURRENT tree. A consumed
+    #: historical chain bound the contract hash of the tree it ran on, and
+    #: that is a fact about history rather than a defect: comparing today's
+    #: contract to a closed attempt's authorization asserts that the contract
+    #: may never change, which would make any repair to the design document
+    #: look like a protocol violation. The container-disk repair moved the
+    #: design hash -- and with it the contract hash -- while every science
+    #: field stayed byte-identical.
+    import subprocess
+
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
+                          capture_output=True, text=True,
+                          check=True).stdout.strip()
     runs = (REPO / "logs/stages/stage-1/phase_a3/runs")
     issued = sorted(runs.glob("*/governance/authorization.json")) if (
         runs.is_dir()) else []
+    checked = 0
     for path in issued:
-        bound = json.loads(path.read_text())["bound"][
-            "session_contract_hash"]
+        doc = json.loads(path.read_text())
+        if doc.get("authorized_session_commit") != head:
+            continue                      # a closed chain, bound to its tree
+        bound = doc["bound"]["session_contract_hash"]
+        checked += 1
         assert contract.contract_hash == bound, (
             f"{path.parent.parent.name}: the session contract hashes to "
             f"{contract.contract_hash[:16]} and that authorization binds "
             f"{bound[:16]}; the preflight would exit 98")
+    #: On a pod there is exactly one, because the pod checks out the commit
+    #: its own authorization was issued against.
+    assert checked <= 1, (
+        f"{checked} authorizations claim the current commit; a one-use chain "
+        "is one authorization per attempt")
 
 
 def test_every_required_audit_artifact_is_one_the_driver_writes():

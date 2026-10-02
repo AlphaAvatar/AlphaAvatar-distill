@@ -277,6 +277,15 @@ def build(*, rate_note: str) -> dict[str, Any]:
     decision = _load(DECISION, "attempt75's stage-I decision")
     probe_results = _load(PROBES, "attempt75's probe results")
     pricing = _load(PRICING, "the A3 pricing")
+    #: Both DERIVED from the pricing module, never restated. The hard ceiling
+    #: comes out of the record the module wrote; the restart cost comes from
+    #: the same component table, over the components preceding the first
+    #: scientific probe.
+    from experiments.phase_c3.a3_pricing import pre_science_restart_usd
+
+    hard_ceiling = float(pricing["price"]["hard_ceiling"]["usd"])
+    restart = pre_science_restart_usd(
+        float(pricing["price"]["gpu_rate_usd_per_hour"]))
     identities = frozen_identities()
     zero_cost = execution_comparison(item_token_counts())
 
@@ -521,13 +530,30 @@ def build(*, rate_note: str) -> dict[str, Any]:
             "limits_checked": pricing["_every_applicable_limit_is_checked"],
         },
         "funding": {
-            "amended_utc": "2026-10-01",
-            "amendment": ("formal allowance 55.0000 -> 65.6523; package total "
-                          "65.0000 -> 75.6523; engineering, per-session "
-                          "envelope and project cap unchanged"),
-            "funds": ("the derived hard ceiling plus ONE pre-science restart "
-                      "of $1.4506, total $9.7031 on the formal book"),
-            "owner": "logs/budget/decisions.md, 2026-10-01",
+            "amended_utc": "2026-10-02",
+            "amendment": ("A PHASE envelope, superseding the 2026-10-01 "
+                          "minimal one: formal allowance 65.6523 -> 76.6523; "
+                          "package total 75.6523 -> 86.6523; project "
+                          "cumulative cap 400.0000 -> 410.0000; engineering "
+                          "and the per-session envelope unchanged. Sized to "
+                          "finish the STAGE rather than the next flawless "
+                          "run."),
+            #: DERIVED, both of them. `$1.4506` was a prose literal here and
+            #: in the amendment, and the container-disk repair moved the
+            #: billed rate while the literal did not.
+            "funds": (f"the derived hard ceiling ${hard_ceiling:.4f} plus "
+                      f"about six corrected pre-science restarts of "
+                      f"${restart:.4f} = ${hard_ceiling + 6 * restart:.4f} on "
+                      "the formal book"),
+            "pre_science_restart_usd": restart,
+            "_restart_is_derived": (
+                "from the same component table the chain is, over the "
+                "components a chain traverses before the first scientific "
+                "probe: setup, the pre-provider gates, the teacher fetch, the "
+                "operator registration, the parent replay and the "
+                "initialization rounds. An attempt that aborts anywhere in "
+                "there produced no measurement to retry."),
+            "owner": "logs/budget/decisions.md, 2026-10-02",
             "_historical_overspend_preserved": (
                 "attempt75's $0.9492 formal overspend stands as fact and is "
                 "not rewritten into compliance."),

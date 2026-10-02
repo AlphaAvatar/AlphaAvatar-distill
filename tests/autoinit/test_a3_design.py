@@ -551,8 +551,27 @@ def test_the_committed_pricing_record_says_the_chain_is_funded():
     assert len(doc["_every_applicable_limit_is_checked"]) == 4
 
 
-def test_the_amendment_funds_the_chain_plus_one_restart_and_no_more():
-    """Minimality, asserted rather than asserted-about."""
+def test_the_phase_envelope_funds_the_chain_and_its_corrected_restarts():
+    """The PHASE envelope, asserted rather than asserted-about.
+
+    This asserted `formal_left < 2 * hard` -- the minimality property of the
+    2026-10-01 amendment, which the maintainer explicitly replaced on
+    2026-10-02 with the instruction "do not size another amendment merely to
+    the next flawless run". The phase envelope deliberately funds a full
+    chain at the hard ceiling PLUS about six corrected pre-science restarts,
+    and that total happens to exceed two full chains.
+
+    So the old assertion is not a weakened version of the new rule, it is the
+    OPPOSITE of it, and keeping it would mean the budget has to be too small
+    to obey the instruction that sized it.
+
+    **What stops a second full scientific run is governance, not arithmetic.**
+    A one-use chain per attempt, `same_failure_gate` before any create call,
+    and "if a complete valid measurement already exists, do not rerun it
+    looking for another result". Those are asserted where they live --
+    `tests/infrastructure/test_same_failure_rule.py` and the launcher's own
+    gate order -- so what is asserted HERE is the sizing.
+    """
     import subprocess
     out = subprocess.run(
         [sys.executable, str(REPO / "scripts/consolidate/derive_budget.py"),
@@ -562,11 +581,17 @@ def test_the_amendment_funds_the_chain_plus_one_restart_and_no_more():
     hard = pricing.price_a3(1.09).hard_usd
     formal_left = b["formal"]["remaining_usd"]
     assert formal_left >= hard, "the chain is not funded"
-    #: One pre-science restart, and not two: the remainder after a full-ceiling
-    #: run must not fund another full-ceiling run.
-    assert formal_left < 2 * hard, (
-        f"formal remaining {formal_left} funds two full attempts; the "
-        "amendment was supposed to be minimal")
+
+    #: The restart figure is DERIVED from the same component table the chain
+    #: is, so it cannot drift from the thing it is a fraction of.
+    restart = pricing.pre_science_restart_usd(1.09)
+    covered = int((formal_left - hard) // restart)
+    assert covered >= 4, (
+        f"the envelope funds the chain plus only {covered} corrected "
+        f"restart(s) at ${restart:.4f}; the phase decision sized it for "
+        "about six, and a phase that cannot absorb its own ordinary "
+        "engineering failures is the micro-approval loop the decision ended")
+
     #: The identity the books are derived under still holds.
     assert (b["formal"]["allowance_usd"] + b["engineering"]["allowance_usd"]
             == pytest.approx(b["package"]["allowance_usd"]))
