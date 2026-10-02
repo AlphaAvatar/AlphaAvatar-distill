@@ -535,3 +535,51 @@ def test_a_reported_cuda_device_can_actually_run_a_kernel():
     a = torch.randn(64, 64, device="cuda:0", dtype=torch.bfloat16)
     out = (a @ a).float().sum().item()
     assert out == out, "a device was reported but its GEMM produced NaN"
+
+
+def test_the_path_is_the_frozen_incumbents_path_step_for_step(registered):
+    """The defect that cost `$0.65` and would have cost the experiment.
+
+    A3's reference protocol must rebuild the frozen incumbent, so its path has
+    to BE the incumbent's path. It was not: the ATTENTION step took its
+    profile from `steps[-1][1]` -- the profile of the step BEFORE it,
+    `width.global_pca_v0`'s `calib.reasoning_heavy@v2` -- while the incumbent
+    uses `calib.domain_balanced@v1`. A different calibration mixture gives
+    different activation statistics, a different head map and different
+    weights, so A-bsz1 built `7fbfadd0f0f6` against the frozen
+    `53e30566c5f7`.
+
+    Stage D's asymmetric gate caught it on a paid pod, which is what that gate
+    is for. This check asks the same question for nothing, by comparing A3's
+    spec to the arm C3 actually froze, step for step -- not by restating the
+    profile, which is how two owners of one fact drift in the first place.
+    """
+    from experiments.phase_c3 import session as CS
+
+    CS.register_experimental_operators()
+    try:
+        incumbent = CS.build_arm_specs(workdir_device="cpu")["A_incumbent"]
+    finally:
+        pass
+
+    a3 = A3S.path_spec(workdir_device="cpu")
+    assert len(a3.steps) == len(incumbent.steps), (
+        f"A3's path has {len(a3.steps)} steps and the frozen incumbent's has "
+        f"{len(incumbent.steps)}")
+    for i, (mine, theirs) in enumerate(zip(a3.steps, incumbent.steps)):
+        assert (mine.impl_id, mine.profile_id) == (
+            theirs.impl_id, theirs.profile_id), (
+            f"step {i}: A3 runs {mine.impl_id}/{mine.profile_id} and the "
+            f"frozen incumbent runs {theirs.impl_id}/{theirs.profile_id}. "
+            "A-bsz1 cannot rebuild an artifact it does not build the same way.")
+
+    #: And the frozen preregistration is what A3 reads it from, so the two
+    #: cannot be made to agree by editing A3 alone.
+    assert A3S.incumbent_attention_step() == (
+        incumbent.steps[-1].impl_id, incumbent.steps[-1].profile_id)
+
+    #: The tail carries NO digest in the SPEC -- the gate belongs to the run,
+    #: because one path produces both protocols' artifacts.
+    assert a3.steps[-1].expected_artifact_digest is None
+    #: ...while the parent step does, and it is the frozen one.
+    assert a3.steps[-2].expected_artifact_digest == A3S.expected_parent_digest()

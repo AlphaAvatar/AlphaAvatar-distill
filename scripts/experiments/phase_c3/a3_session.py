@@ -133,6 +133,24 @@ def expected_parent_digest() -> str:
 # --- the one path, and the two executions ---------------------------------
 
 
+def incumbent_attention_step() -> tuple[str, str]:
+    """`(impl_id, profile_id)` of the FROZEN incumbent's ATTENTION step.
+
+    From `arms.A_incumbent.attention` in C3's preregistration, which is the
+    document that froze what the incumbent IS. A3 reuses attempt75's controls
+    as evidence, so the initialization its reference protocol rebuilds has to
+    be the one those controls were trained from -- and the only safe way to
+    say that is to read it from the same place attempt75 did.
+    """
+    arm = (CS.preregistration().get("arms") or {}).get("A_incumbent") or {}
+    pair = arm.get("attention")
+    if not (isinstance(pair, (list, tuple)) and len(pair) == 2):
+        raise A3SessionError(
+            "the frozen C3 preregistration's A_incumbent arm does not name an "
+            f"(impl_id, profile_id) ATTENTION pair; got {pair!r}")
+    return str(pair[0]), str(pair[1])
+
+
 def path_spec(*, workdir_device: str = "cuda") -> FixedPathSpec:
     """A3's single fixed path: the frozen prefix, then ATTENTION.
 
@@ -147,11 +165,33 @@ def path_spec(*, workdir_device: str = "cuda") -> FixedPathSpec:
     prefix[-1] = FixedPathStep(
         steps[-1][0], steps[-1][1], expected_artifact_digest=parent,
         label=f"pre-ATTENTION parent {parent[:12]}")
+    #: THE ATTENTION STEP'S PROFILE COMES FROM THE FROZEN ARM, not from the
+    #: prefix. It was `steps[-1][1]` -- the profile of the step BEFORE it,
+    #: `width.global_pca_v0`'s `calib.reasoning_heavy@v2` -- while the
+    #: incumbent's ATTENTION step uses `calib.domain_balanced@v1`. A different
+    #: calibration mixture gives different activation statistics, a different
+    #: head map and different weights, so A-bsz1 built `7fbfadd0f0f6` instead
+    #: of the frozen `53e30566c5f7` and stage D stopped the chain at `$0.65`.
+    #:
+    #: The asymmetric digest gate caught it, which is exactly what it is for:
+    #: without it this session would have trained three probes against an
+    #: initialization the attempt75 controls do not describe, evaluated them,
+    #: and reported a clean paired comparison of two things that were never
+    #: comparable.
+    #:
+    #: Derived from `arms.A_incumbent.attention` in the frozen C3
+    #: preregistration -- one fact, one owner -- so it cannot drift from the
+    #: thing it has to equal.
+    attention_impl, attention_profile = incumbent_attention_step()
+    if attention_impl != ATTENTION_IMPL_ID:
+        raise A3SessionError(
+            f"the frozen incumbent arm names {attention_impl!r} and this "
+            f"session is built on {ATTENTION_IMPL_ID!r}")
     return FixedPathSpec(
         path_id=f"autoinit.v1.{EXPERIMENT_ID}.{TREATMENT_ARM}",
         steps=(*prefix, FixedPathStep(
-            ATTENTION_IMPL_ID, steps[-1][1],
-            label=f"ATTENTION {ATTENTION_IMPL_ID}")),
+            attention_impl, attention_profile,
+            label=f"ATTENTION {attention_impl}")),
         family="qwen3", target_spec=CS._target_spec(),
         root_repo_id=CS.TEACHER_REPO, root_revision=CS.TEACHER_REVISION,
         device=workdir_device, seed=CS.SEARCH_SEED)
