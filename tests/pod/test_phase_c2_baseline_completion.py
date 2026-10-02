@@ -1591,29 +1591,40 @@ def test_the_latest_run_outcome_is_derived_from_that_runs_own_closeout():
     assert latest["run_id"] in latest["root"]
     if path.is_file():
         closeout = json.loads(path.read_text())
-        #: TWO CLOSEOUT FAMILIES, and `latest_run` can name a run from either:
-        #: `attempt`/`classification`/`budget.this_attempt` for phase_c2,
-        #: baseline completion, full search and replay, and
-        #: `run_id`/`terminal`/`money.*` for the behavioural campaign. This read
-        #: the first spelling unconditionally, so it passed only while the
-        #: newest run happened to belong to that family — and the producer had
-        #: the same blind spot, silently rendering "no classification stated"
-        #: with no cost for the other eight. The alternatives are spelled out
-        #: here rather than imported from the generator: a test that asks its
-        #: subject what to expect cannot catch the subject being wrong.
+        #: FOUR CLOSEOUT FAMILIES now, and `latest_run` can name a run from
+        #: any of them: `attempt`/`classification`/`budget.this_attempt` for
+        #: phase_c2, baseline completion, full search and replay;
+        #: `run_id`/`terminal`/`money.*` for the behavioural campaign;
+        #: `run_id`/`status`/`cost.actual_usd` for phase_a3 and phase_c3; and
+        #: `run_id`/`verdict`/`budget.this_attempt` for the nine
+        #: engineering-validation closeouts. Each time a family appeared, this
+        #: read the older spellings and passed only while the newest run
+        #: happened to belong to one of them — and the producer had the same
+        #: blind spot, rendering "no classification stated" with no cost for
+        #: eight behavioural runs and then the raw `DRIVER_EXITED:0` with
+        #: `$1.43` dropped for A3's finished run. The alternatives are spelled
+        #: out here rather than imported from the generator: a test that asks
+        #: its subject what to expect cannot catch the subject being wrong.
+        #:
+        #: `terminal` stays LAST because it is a driver exit descriptor, not a
+        #: classification — reaching it while the record also states a status
+        #: is the defect, not the fallback.
         ident = closeout.get("attempt") or closeout.get("run_id")
         assert ident == latest["run_id"], (
             "the closeout read is not the named run's")
 
-        verdict = closeout.get("classification") or closeout.get("terminal")
-        assert verdict, f"{path} states neither a classification nor a terminal"
+        verdict = (closeout.get("classification") or closeout.get("status")
+                   or closeout.get("verdict") or closeout.get("terminal"))
+        assert verdict, (
+            f"{path} states no classification, status, verdict or terminal")
         assert verdict.rstrip(". ") in latest["outcome"], (
             f"the snapshot says {latest['outcome']!r} while the closeout says "
             f"{verdict!r}")
 
         cost = None
         for a, b in (("budget", "this_attempt"), ("cost", "this_attempt"),
-                     ("money", "all_in_usd"), ("money", "spent_usd")):
+                     ("money", "all_in_usd"), ("money", "spent_usd"),
+                     ("cost", "actual_usd")):
             value = (closeout.get(a) or {}).get(b)
             if isinstance(value, (int, float)) and not isinstance(value, bool):
                 cost = float(value)

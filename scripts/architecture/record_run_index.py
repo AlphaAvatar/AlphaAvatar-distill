@@ -265,11 +265,22 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
         #: one thing that is certainly false. Attempt 13 aborted inside
         #: `open_run`, so no manifest exists and none is invented -- but its
         #: closeout says why, and this reports what the closeout says.
+        #: READ THROUGH THE SHARED READER. This asked for `classification`
+        #: only, so all 38 phase_a3 runs and 17 phase_c3 runs fell into the
+        #: "predates the run-manifest convention" bucket while every one of
+        #: them states a `status` -- and the index therefore said nothing about
+        #: why a run that FINISHED had no manifest. Same blind spot as the
+        #: snapshot renderer had, in a second copy; `closeout_reader` is now
+        #: the one owner of where a closeout keeps its verdict.
         closeout = run_dir / "closeout/outcome.json"
         stated = None
         if closeout.is_file():
+            import sys as _sys
+            _sys.path.insert(
+                0, str(Path(__file__).resolve().parents[1] / "consolidate"))
+            from closeout_reader import closeout_verdict
             try:
-                stated = json.loads(closeout.read_text()).get("classification")
+                stated = closeout_verdict(json.loads(closeout.read_text()))
             except (json.JSONDecodeError, OSError):
                 stated = None
         out.append({

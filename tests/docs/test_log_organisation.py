@@ -264,7 +264,24 @@ class TestTheIndexAccountsForBothLayouts:
             assert k in index["kinds"], k
 
     def test_a_prepared_run_is_not_reported_as_a_dead_launcher(self, index):
-        prepared = [r for r in index["unrecorded"] if "PREPARED" in r.get("why", "")]
+        """The index's OWN prepared reason, not any `why` containing the word.
+
+        This matched the substring `PREPARED`, which was unambiguous only
+        because the index read `classification` alone. Once it read the status
+        families too, `phase_c3/attempt70` arrived with
+        `PREPARED_NEVER_AUTHORIZED_RETIRED_AT_ZERO` — a closeout stating that a
+        chain was prepared and then retired, which is a run that HAS a closeout
+        and legitimately holds one. Matching the word made a correct record
+        look like a contradiction.
+
+        The reason the index emits for a genuinely prepared-and-unexecuted run
+        is a fixed sentence, so that is what this keys on.
+        """
+        prepared = [r for r in index["unrecorded"]
+                    if "only governance inputs are present" in r.get("why", "")]
+        assert prepared, (
+            "no run is reported as prepared-but-not-executed; if the index "
+            "stopped emitting that reason, this test is checking nothing")
         for r in prepared:
             root = REPO / r["root"]
             areas = {p.relative_to(root).parts[0] for p in root.rglob("*")

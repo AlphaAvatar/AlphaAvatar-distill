@@ -319,12 +319,34 @@ def test_latest_run_resolves_to_exactly_one_entry(index):
         roots.add(entry["root"])
     assert latest["root"] in roots, (
         f"latest_run root {latest['root']} is not a path of its own entry")
-    #: And a prepared run must say so, rather than reading as an executed one.
+    #: UNRECORDED HAS TWO REASONS, and this knew only one.
+    #:
+    #: It required a `PREPARED` reason for any unrecorded latest run, which
+    #: held while the only way to lack a manifest was to be a grant committed
+    #: before its launch-bound sweep. `a3_attempt38` is the other way: it ran
+    #: the whole chain, scored three probes and exited cleanly, and its
+    #: launcher simply never calls `record_run`. Demanding `PREPARED` would
+    #: have forced the snapshot to describe a completed measurement as an
+    #: unexecuted one -- the inversion this assertion exists to prevent.
+    #:
+    #: So what is asserted is AGREEMENT between the index's reason and the
+    #: snapshot's state, in whichever of the two the run is in. A prepared run
+    #: must not read as an execution, and an executed one must not read as
+    #: prepared.
     if entry in index["unrecorded"]:
-        assert "PREPARED" in entry.get("why", "") , entry
-        assert "PREPARED" in latest.get("state", ""), (
-            "the snapshot names a prepared run as latest without saying it is "
-            "prepared, which reads as an execution that happened")
+        why = entry.get("why", "")
+        state = latest.get("state", "")
+        assert why, f"{entry['run_id']} is unrecorded and says no reason"
+        assert state == why, (
+            f"the snapshot says {state!r} and the index says {why!r}; one of "
+            "them is describing a different run's state")
+        if "PREPARED" in why:
+            assert "$" not in latest.get("outcome", ""), (
+                "a prepared run that never executed is carrying a cost")
+        else:
+            assert "PREPARED" not in state, (
+                "the snapshot calls this run prepared while the index says it "
+                "has a closeout, so it executed")
 
 
 def test_the_index_authorizes_nothing(index):

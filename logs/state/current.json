@@ -72,7 +72,7 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE.",
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE.",
   "accepted_incumbent": "B = frozen C1 treatment",
   "then": "NOTHING. The maintainer's 2026-10-01 order: do not start FFN and do not start D1/D2/D3 after A3. The next action is a maintainer decision.",
   "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN; no D-series."
@@ -154,7 +154,7 @@
   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt38",
   "outcome": "not recorded; MEASUREMENT_COMPLETE_3_PROBES_SCORED, $1.4300",
   "index": "logs/index.json",
-  "state": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout",
+  "state": "no run manifest; its closeout states: MEASUREMENT_COMPLETE_3_PROBES_SCORED",
   "last_executed": null,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout"
  },

@@ -33,6 +33,10 @@ import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+#: This module is run as a script and also imported by tests as
+#: `consolidate.render_log_navigation`, so a sibling import needs its own
+#: directory on the path either way.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 CATALOG = "logs/state/ownership.md"
 READREC = "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
@@ -108,58 +112,16 @@ def _run_outcome(root: Path, run_root: str | None, *, recorded: bool) -> str:
     return f"{prefix}{classification}{money}"
 
 
-#: WHERE A CLOSEOUT KEEPS ITS VERDICT AND ITS COST, across the experiments that
-#: write one. There are two families and this read only the first, so for the
-#: eight `phase_c2_behavioural` closeouts it silently produced "no
-#: classification stated" and dropped the money — a snapshot describing a run
-#: whose own closeout plainly said `RETIRED_AT_ZERO_NO_RESOURCE_ACQUIRED` and
-#: `$0.0000`. It went unnoticed because the newest run had never been one of
-#: them at a moment when a snapshot was regenerated.
-#:
-#: Ordered alternatives rather than a schema registry: the point is to read
-#: what is there, and a silent degradation is worse than either a loud refusal
-#: or a second key name.
-#: A THIRD FAMILY APPEARED and the same degradation happened again, which is
-#: why this comment is now two incidents long. A3's 38 closeouts and C3's 17
-#: keep their classification under `status` and their money under
-#: `cost.actual_usd`, so the newest A3 run rendered as `DRIVER_EXITED:0` with
-#: no dollars — the raw driver exit string in place of
-#: `MEASUREMENT_COMPLETE_3_PROBES_SCORED`, and `$1.43` dropped. `terminal` stays
-#: last because it is an exit code, not a classification; `cost.actual_usd`
-#: goes last so every closeout that already renders keeps the figure it renders.
-#: And asking the question of EVERY closeout rather than the current one found
-#: a fourth family the same minute: the nine engineering-validation closeouts
-#: under `c2_full_search_cuda`, `c2_full_search_perf` and `c2_state_eval_cert`
-#: keep theirs under `verdict`. None had ever been the newest run of the
-#: experiment a snapshot named, so the blindness had never once been visible.
-VERDICT_KEYS: tuple[str, ...] = ("classification", "status", "verdict",
-                                 "terminal")
-COST_PATHS: tuple[tuple[str, ...], ...] = (
-    ("budget", "this_attempt"),      # phase_c2, baseline_completion, full_search, replay
-    ("cost", "this_attempt"),        # replay
-    ("money", "all_in_usd"),         # behavioural
-    ("money", "spent_usd"),          # behavioural, before all_in_usd existed
-    ("cost", "actual_usd"),          # phase_a3, phase_c3
+#: WHERE A CLOSEOUT KEEPS ITS VERDICT AND ITS COST: `closeout_reader`, which
+#: both this and `record_run_index.py` import. The tables lived here, and
+#: `record_run_index` had its own one-key copy — so the same blind spot had to
+#: be fixed twice and was found three times. See that module for the incidents.
+from closeout_reader import (  # noqa: E402
+    COST_PATHS, VERDICT_KEYS, closeout_cost as _closeout_cost,
+    closeout_verdict as _closeout_verdict,
 )
 
-
-def _closeout_verdict(doc: dict) -> str | None:
-    for key in VERDICT_KEYS:
-        value = doc.get(key)
-        if isinstance(value, str) and value.strip():
-            return value
-    return None
-
-
-def _closeout_cost(doc: dict) -> float | None:
-    for path in COST_PATHS:
-        value: object = doc
-        for key in path:
-            value = value.get(key) if isinstance(value, dict) else None
-        #: `bool` is an `int`; a flag must never be rendered as a dollar figure.
-        if isinstance(value, (int, float)) and not isinstance(value, bool):
-            return float(value)
-    return None
+__all_closeout_tables__ = (VERDICT_KEYS, COST_PATHS)
 
 
 def load(rel: str, root: Path) -> dict:

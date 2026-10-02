@@ -371,10 +371,39 @@ def test_a_failed_image_identity_stops_the_draw_before_setup_runs():
 
 
 def test_no_image_identity_is_not_a_redrawable_outcome():
+    """The property, not the literal tuple.
+
+    This pinned the redrawable set as the exact text `('cold', 'no_endpoint')`
+    and went red when `host_not_admitted` was legitimately added to it — a
+    host whose NVIDIA driver branch makes the result incomparable is precisely
+    something to redraw away from, and refusing it before setup is what stops
+    paying for three trainings and then refusing the generations. The exact
+    literal was never the contract.
+
+    What IS the contract is asymmetric and still asserted below: `cold` and
+    `no_endpoint` are redrawable, and `no_image_identity` is not, because an
+    unconfirmable image must tear down rather than redraw onto another host.
+    """
     fn = next(n for n in ast.walk(ast.parse(RUNNER_SRC.read_text()))
               if isinstance(n, ast.FunctionDef) and n.name == "run")
     body = ast.unparse(fn)
-    assert "('cold', 'no_endpoint')" in body or '"cold", "no_endpoint"' in body
+    #: Read the set out of the real condition rather than matching prose, so a
+    #: renamed outcome fails here instead of passing on a substring.
+    redrawable = next(
+        (tuple(e.value for e in cmp.comparators[0].elts)
+         for cmp in ast.walk(ast.parse(body))
+         if isinstance(cmp, ast.Compare)
+         and isinstance(cmp.ops[0], ast.In)
+         and getattr(cmp.left, "id", None) == "outcome"
+         and isinstance(cmp.comparators[0], ast.Tuple)),
+        None)
+    assert redrawable is not None, (
+        "`run` no longer decides redrawability by membership of a literal "
+        "tuple; find the new decision and assert the same property of it")
+    for must in ("cold", "no_endpoint"):
+        assert must in redrawable, f"{must!r} stopped being redrawable"
+    assert "no_image_identity" not in redrawable, (
+        "an unconfirmable image must tear down, not redraw onto another host")
     assert "no_image_identity" not in body, (
         "an unconfirmable image must tear down, not redraw onto another host")
 

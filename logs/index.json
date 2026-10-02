@@ -2282,304 +2282,304 @@
    "run_id": "a3-attempt1",
    "root": "logs/stages/stage-1/phase_a3/runs/a3-attempt1",
    "n_files": 5,
-   "digest": "d96d4f392a495c21f42c3feac49815a5bb1c1993778bd675b750f4c0e84f0b0e",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "b6e79ba2e297409466a31ce3055995014a7ebebfb19a9e65e2816697f77abdca",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3-attempt2",
    "root": "logs/stages/stage-1/phase_a3/runs/a3-attempt2",
    "n_files": 5,
-   "digest": "97d2a5a0e6cfb86e3b4f407d6fd20cda10c4cca5a3d1762e8f24f0338a52b922",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "b06d6ffd5cd536f6519b11d8c147c29cfabee3283b20b3dad9866088fd3d87df",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt10",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt10",
    "n_files": 6,
-   "digest": "c73ab9918544550abd07bd52e3b4ef6179e78f2cfa879ed38a8e9bce7bfe3ec6",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "00a6944db4e8eac72e52f7824cb7c7e16bc427e240d824ea867e1694aa15ceb1",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt11",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt11",
    "n_files": 6,
-   "digest": "837fa504d83ca577f22d74152af140139dc1f6392b5ef3177487da06c837395d",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "978f688925053d1a25af3378ef512e4155fdb17fc87fad6a52fc84d91c0a1357",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt12",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt12",
    "n_files": 6,
-   "digest": "68d0a7bc6696989680c7c808fc6cc6351178167867b5b9d412560cf314bdef88",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "1e9c9708b86b8449e5f7bb22b21e82f28349bf6e30593fddf03258d28f1cbef8",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt13",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt13",
    "n_files": 6,
-   "digest": "bbecd28ffd03544138dc1f65357f8029a6856ba2ed4b4f8065e81b53be709952",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "3313b07177302d8ea8c4f8d12032d71439a7a52485fb29090fc8448107b80a74",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt14",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt14",
    "n_files": 6,
-   "digest": "301f494e95546c089aa7d284ce25cdd14f6adf053df1783c029adafd80fcb075",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "f8bf8792b91b869b07f20d2d53f290ff1aa0b0b6402ba9d9860b42aa5b6819aa",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt15",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt15",
    "n_files": 6,
-   "digest": "5497ed173e29c6905da353a67a65eb5762d83e2e7ca6abaeb79825d5e56e3d92",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "cfc33ed9caa5c10bfe05d9599976bb0f5967dd103de4a6bde128f71f520460f1",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt16",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt16",
    "n_files": 6,
-   "digest": "bac7d52f0e5af0a4587054c6e732b5df33b60e4169778cad14d8af88eed9e04d",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "1cea504b8332d8f45d8caa79f83ea54987c4cdc71c5f84727455b8ea175d8878",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt17",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt17",
    "n_files": 6,
-   "digest": "23bb72da8206bf9febd6005f4409ec7477d1ce9dafd4f944375f9f702066ad38",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "e10525c2b2dd7fedb3e15f731e3fa214bfddf57f7797b825c125b44dfd1cd373",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt18",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt18",
    "n_files": 6,
-   "digest": "6c7dd6f307289dbff68b8248a54955b6f62310bce779fd1c8e1eb221c92e1912",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "6cf42f6ad1df313107ba39364a89c68dff24e5d632b8866b8ff93f3d6fc8b74f",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt19",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt19",
    "n_files": 6,
-   "digest": "61b9f1e80846c86966f3064be87c5b622be69ebe2e93aae7dff076bd091acae6",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "a9d0f929ec573dd2cc55c80e75374d287bc30c803f760e889300e7db0ff15184",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt20",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt20",
    "n_files": 6,
-   "digest": "cc88bc4b109f53c5b150079685717dcd939a550df8ff52001ebeedad7c9a3b29",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "579902028fca24c691c9c96dfb4063dff9f48487e668c70f3b062f0a9b0451c1",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt21",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt21",
    "n_files": 6,
-   "digest": "195e0db89c1a7ba13170d23ea895f012f29031e2e6192e6cd0164c6c0156f2d5",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "1813f1d40bf502eee40b63d90ee53f78c04ddcec55fc34ef42857fde339ecc71",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt22",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt22",
    "n_files": 6,
-   "digest": "3aab0973c561420202ede43af98d7a0d174565bccfa2fbeb6e805b717ce4f2ed",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "9891721af9c5086047f9bb4ee8a1e8169636f1c9e6c17a2bd876784fde5d84c5",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt23",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt23",
    "n_files": 6,
-   "digest": "7f237a503c6c61ed43a33ec54a0b4dc383efce64617bb56a239406f709e3c7d1",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "b90b6357c81bfe1ac5cecd52faf73c0f30ecaa4754af99939f4738051bd7d64f",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt24",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt24",
    "n_files": 6,
-   "digest": "5ac3ee6f5e5a8e9842ed5815e98b4fc8eebc0669c9d751cd16a6bc1a12b7f4dd",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "9c303c606df7cdcb8f5566d5164faed32d06152aab4b21137f496cad1dbdf768",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt25",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt25",
    "n_files": 6,
-   "digest": "dfb8bec4ba7aa074736ba037efc6f49ef794d06d13a800ae4d5510a2c188a691",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "b1dc1c6b0fca2cc71301af5a2235ea90452b6065454e9c33d61b7117f90e0026",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt26",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt26",
    "n_files": 6,
-   "digest": "a4f7dc4bb024a062e520298fe5f42fc55b8b139b4a57275e29a8e9ff00d5bd7c",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "0cf5c1fd30a489b237be3932cca24cb497587d8a52f91deb8b291ee048335b66",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt27",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt27",
    "n_files": 6,
-   "digest": "78ddf776e731c58a91157457705ad795705694a6711c7baf76b29dbd5372f946",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "bf8154b66776c5b2af3e2d048a4ef4a6b33ddb2c63689137510ee4233f117b3a",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt28",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt28",
    "n_files": 6,
-   "digest": "2a1cc7d4b85d29b5afc35307c8e3072af4c2fc8c45cb90f8b3d7bd3f870aff79",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "f298ccb01735d0c240b584a96fc3b74a6926b4ea519607c3b9e0653d2b19c8df",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt29",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt29",
    "n_files": 3,
-   "digest": "0815404fae7b6f92781511ead08d78cd7c165555f9cc82f8a41267b1c51ac713",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "1112c1c09c2a3f26e8596cd43a9bb5400eda56a8f0a07bc71592acda7932824e",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt3",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt3",
    "n_files": 5,
-   "digest": "f85e15fcfb0c40489d6b139664f25b444834e02cbdbe6e7946f313c5ea73c0e3",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "556aa5c3ab31b40da5e7417cfa2ec8754375213932dda782089eeba27bbc835c",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt30",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt30",
    "n_files": 6,
-   "digest": "fc5149175d1cf95221dd0dd2b6af8af006bc4122c9d720e4790574c522444381",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "e94b8c739e17721a414f1f6b55fd0de09f40de72c13a123f27c3399298bd9440",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt31",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt31",
    "n_files": 7,
-   "digest": "113fac4e5904ac3757d7b0d184c8ac3a7d04ec7123f8a793b51497732337c6b0",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "556bdab3c128591460c8bdf96dc39edb22793912225d9b7b9c1706ee65757024",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt32",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt32",
    "n_files": 3,
-   "digest": "67bf243cb60428327d1151bec61825b72340e57c1c330e098c1773b7b0c43177",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "f49c7a8eac41b1d6bed3fa4d2938cc08c17d5083b385d015e9c6f41f987153ed",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt33",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt33",
    "n_files": 6,
-   "digest": "6a3f65ecef4fde3f95d5cfa701646ff750ab7ba990c75827c98e7244c87e5a05",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "2216ac5d955d4b20b5aa4c919e305e173638a50e1a661e21ff2185a27ee1523b",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt34",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt34",
    "n_files": 10,
-   "digest": "8f67c26c7a910de1462b57572049e97f97c4bbe030e7f97956d8ae12f0997c30",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "92a4f90f56bcbc1d0348c7868fa5159e21ea083721a94ea5189ba48b30705242",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt35",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt35",
    "n_files": 23,
-   "digest": "9d46b100dc24a913ab3ab7e676c9cf0607526b4a600e387b5b54991008358a98",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "e94c5fb59fce9b72df3369d3b79bd2e298327849a5068b4b0f90d8a1bb5a626b",
+   "why": "no run manifest; its closeout states: TRAINED_PRESERVED_NOT_VALIDLY_SCORED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt36",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt36",
    "n_files": 7,
-   "digest": "e4d3b0cf5fcbc27c223f60b37f842c0fa08213114ae716183460107bd482aea6",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "2665650f0c8e617b173d440eb4c58e27ca43f0b4e1439ab27eb9f482912999ac",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt37",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt37",
    "n_files": 7,
-   "digest": "b388390c8ff8e1f321825d2d72da624ba8d528859d02b22cf52e1a3a20a02749",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "def89a7ad91992e1edae32f0b0518d35e4315c3ec36af827e63a7196a0504290",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt38",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt38",
    "n_files": 21,
-   "digest": "339a7aa7ba642a2ddadb1c0b9e2a24ff1fbe7a0f2df36ecc166cdf5d0f8fcce5",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "cd0844f99488967d0959b8281a4f1fd9e3a326f3ff23dc43d1d97f2949313635",
+   "why": "no run manifest; its closeout states: MEASUREMENT_COMPLETE_3_PROBES_SCORED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt4",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt4",
    "n_files": 6,
-   "digest": "7cfd49cda171abadd3ac476f0e7c41814b1bc01fdd03afd1b7a974495f055984",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "84eca56855d7b30df31741781356041e296943c8fd34177be8ab6f994aefe7fe",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt5",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt5",
    "n_files": 6,
-   "digest": "93304274ca0c571050ef9bc1bc2bed01930f09aa67069c9626b004c647db4777",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "c41221e20769cb6a854dffa821029dc57a05927938434958710cee0eef1e0c07",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt6",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt6",
    "n_files": 6,
-   "digest": "48458acf6586c78b80e72d73a41f152f9dedc2be1e52330d4e5c22fd2fca36a6",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "468591cfa1b722029e068795df14fb5afd40d3a215a1e24508d6ab3dcc46dee8",
+   "why": "no run manifest; its closeout states: PRE_PROVIDER_ABORT_NOTHING_CREATED"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt7",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt7",
    "n_files": 6,
-   "digest": "cb0ab61a938474a3445525a0bd1da13b40d2017c94ec374ac1260c93da66bc5c",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "51a735678c2ceb2f8263c370e2ba207161a07a0f862b2cf726371b75acfe908c",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt8",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt8",
    "n_files": 6,
-   "digest": "a85dc93a0d727498121ba0b19cad9f45e0fa23b6a8782d97f8237997a8a2e49c",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "5048cbd207d4db514aa7f265eca1fd63f708f0fe3d04bb90a439eecfaa80b406",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3_attempt9",
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt9",
    "n_files": 6,
-   "digest": "b62cbcd3788a79de6ef10d5a31c0e236127789f466f5d07f35d7c7907db9bee0",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "digest": "8d6ef2a6bdc49f83ecea1cc32ef4547c8050fa10add53bc8b6fa405dbcda1db4",
+   "why": "no run manifest; its closeout states: PRE_SCIENCE_ABORT_NO_MEASUREMENT"
   },
   {
    "experiment_id": "phase_c1",
@@ -2619,7 +2619,7 @@
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt1",
    "n_files": 5,
    "digest": "bf1e6127ec8a72de71df641322876a633e80ddb79d06ab5ef9e3093275c2570f",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT"
   },
   {
    "experiment_id": "phase_c2_behavioural",
@@ -2627,7 +2627,7 @@
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt2",
    "n_files": 5,
    "digest": "9d13ac07d9a0fe063f45b38482c27bced0dc519262b7d478efdfefab241d26d2",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: CHAIN_RETIRED_BEFORE_PROVIDER_CONTACT"
   },
   {
    "experiment_id": "phase_c2_behavioural",
@@ -2635,7 +2635,7 @@
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt6",
    "n_files": 5,
    "digest": "cdcda5592049504f53b733e1891fc99de6b48f2bdaaa6f7d80a92bb1da58ec46",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: RETIRED_AT_ZERO_BEFORE_PROVIDER_CONTACT"
   },
   {
    "experiment_id": "phase_c2_behavioural",
@@ -2643,7 +2643,7 @@
    "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt7",
    "n_files": 5,
    "digest": "de587ebc1ea63529fa76fcc97ea89429f54eb645899526e3b347f9ca8a0f2a69",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: RETIRED_AT_ZERO_BEFORE_PROVIDER_CONTACT"
   },
   {
    "experiment_id": "phase_c2_replay",
@@ -2795,7 +2795,7 @@
    "root": "logs/stages/stage-1/phase_c3/runs/attempt49",
    "n_files": 12,
    "digest": "37376d301c1252cab4cfaec80ad46d2b1d3355a97b2b2f8492c603df898b036d",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: ORPHANED_THEN_RECONCILED"
   },
   {
    "experiment_id": "phase_c3",
@@ -2811,7 +2811,7 @@
    "root": "logs/stages/stage-1/phase_c3/runs/attempt70",
    "n_files": 2,
    "digest": "4958eba6ec7035f97ee22093324671e516acc2b62156482d04a4ceba67d95977",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "why": "no run manifest; its closeout states: PREPARED_NEVER_AUTHORIZED_RETIRED_AT_ZERO"
   }
  ],
  "authorizes": "nothing"
