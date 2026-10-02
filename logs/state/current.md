@@ -25,7 +25,7 @@ practical question once. Owner:
 [`a3_closeout.md`](../stages/stage-1/phase_a3/analyses/a3_closeout.md), every
 figure derived by `scripts/autoinit/aggregate_a3.py` into
 [`a3_comparison.json`](../stages/stage-1/phase_a3/analyses/a3_comparison.json)
-(`488f9dd2c81b1107…`), computed **off pod at `$0`**.
+(`75f2641041a66882…`), computed **off pod at `$0`**.
 
 ```text
 A_bsz1   53e30566c5f7   == the frozen C3 incumbent, rebuilt on fresh hardware

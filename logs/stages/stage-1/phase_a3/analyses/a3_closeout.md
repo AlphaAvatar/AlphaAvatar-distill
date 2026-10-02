@@ -1,7 +1,7 @@
 # A3 closeout — the ATTENTION calibration batching protocol, end to end
 
 **Terminal 2026-10-03.** Run `a3_attempt38`, comparison
-`488f9dd2c81b1107`, design `8d390eed92c5`.
+`75f2641041a66882`, design `8d390eed92c5`.
 
 Two owners, and this document restates rather than derives:
 [`a3_comparison.json`](a3_comparison.json) owns the behavioural figures and

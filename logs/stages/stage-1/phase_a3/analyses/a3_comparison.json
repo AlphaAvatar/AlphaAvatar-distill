@@ -406,5 +406,14 @@
   "treatment_per_sample_2045359208": "493dd96a7f6efdc36bc1be0f00c2ddf34870a2d89dadd529c2a6cab9bb50ca1d"
  },
  "_aggregation_ran_off_pod": "attempt75 lost its on-pod decision artifact after a complete measurement. A3's comparison never runs on the meter.",
- "comparison_sha256": "488f9dd2c81b11072f1da150916f87ef19cf7d07e0a713446b2a1e07697db2b8"
+ "implementation": {
+  "commit": "4e50caead8c2c1a61e90d6bb90c83cc62006202e",
+  "tree_is_dirty": false,
+  "aggregator_path": "scripts/autoinit/aggregate_a3.py",
+  "aggregator_sha256": "57336894a4630a237cf63cde3d83d7fcb131659d1c3fb55e5cfa591a75b48ad2",
+  "probe_results_module_sha256": "1a588ed88fa6bd9b0ed859418e4fc9e801d7b94b0297e0cb1cd594ffb46ed133",
+  "generation_compat_module_sha256": "5326437e42b16622470cda9a50a3a8bfb06e829f8ba06b430a7e854792b2d218"
+ },
+ "canonical": true,
+ "comparison_sha256": "75f2641041a668820f54f47edfc019fde6633408d46960365d1fe373e847073d"
 }
