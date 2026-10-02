@@ -10,7 +10,7 @@
   "6mhoepslb8c6gu",
   "cdfxbfm10rs5i5"
  ],
- "all_pods_confirmed_gone": false,
+ "all_pods_confirmed_gone": true,
  "terminal": "DRIVER_EXITED:40",
  "launcher_exit": null,
  "measurement_began": false,
@@ -18,8 +18,8 @@
  "deterministic_failure_signature": null,
  "setup_refusal": null,
  "cost": {
-  "actual_usd": null,
-  "elapsed_minutes": 0.0,
+  "actual_usd": 0.94,
+  "elapsed_minutes": 51.9,
   "price_per_hour": 1.09,
   "_source": "summed from this attempt's own launcher-log teardown lines, each of which states provider confirmation",
   "_null_means": "a pod existed and no teardown cost could be read from the log; it is NOT zero"
