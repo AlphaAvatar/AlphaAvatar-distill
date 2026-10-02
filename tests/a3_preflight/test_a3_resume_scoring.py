@@ -243,3 +243,102 @@ def test_the_cited_evidence_the_resume_run_carries_exists():
     assert not missing, (
         f"{SOURCE} carries no {missing}; a resume run from it would come "
         "home without evidence its own spec requires")
+
+
+A75 = REPO / "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i"
+GEN35 = (REPO / "logs/stages/stage-1/phase_a3/runs/a3_attempt35"
+         / "evidence" / "gen_summaries")
+
+needs_dry_run = pytest.mark.skipif(
+    not (GEN35.is_dir() and (A75 / "c3_engine_probe.json").is_file()),
+    reason=("needs a real generation summary set and attempt75's engine "
+            "probe; both are committed evidence, absent only in a partial "
+            "checkout"))
+
+
+@needs_dry_run
+def test_the_admission_is_satisfiable_on_the_host_class_admission_guarantees():
+    """The `$0` proof that stage G can pass, before a pod is paid for.
+
+    Two wrong historical sources cost two paid sessions. The first compared
+    against this session's own attestation under the v1 exact rule and
+    refused on `runtime_digest`. The second compared against attempt75's
+    ATTESTATION runtime block -- which is the TRAIN environment, `cuda_runtime
+    12.8`, torch 2.11+cu128 -- while generation runs under the vLLM venv at
+    `cuda_runtime 13.0`, torch 2.13+cu130, and refused on `runtime_stack`
+    with all five material fields "differing", three of them only because the
+    older block does not record them.
+
+    The historical side is attempt75's ENGINE PROBE: same kind of
+    environment as the live one. With it, a real generation summary set and a
+    580-branch host, the admission ADMITS.
+    """
+    import glob
+    import json as _json
+
+    from aadistill.initialization.planning.generation import (
+        RecoveryEvaluationProtocol, observe_generation_protocol,
+    )
+    from aadistill.initialization.planning.generation_compat import (
+        comparable_generation_identity, require_comparable,
+    )
+    from experiments.phase_c1.scoring import c1_scoring_contract
+
+    summaries = [_json.loads(Path(f).read_text())
+                 for f in sorted(glob.glob(str(GEN35 / "*.json")))]
+    assert summaries, "no generation summaries to observe a protocol from"
+    manifest = _json.loads(
+        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+    contract = c1_scoring_contract(REPO)
+    observed = RecoveryEvaluationProtocol(
+        generation=observe_generation_protocol(summaries).protocol,
+        scoring_contract=contract["contract"],
+        scoring_digest=contract["digest"],
+        battery_artifact=manifest["artifact"],
+        battery_manifest_sha256=manifest["manifest_sha256"],
+        battery_content_sha256=manifest["content_sha256"])
+
+    att = _json.loads((A75 / "c3_attested_evaluation_protocol.json").read_text())
+    probe75 = _json.loads((A75 / "c3_engine_probe.json").read_text())
+    hist = comparable_generation_identity(
+        protocol=att["evaluation_protocol"],
+        runtime=probe75.get("runtime") or probe75)
+
+    #: A 580-branch host, which is what `host_admission` admits.
+    live_runtime = dict(probe75.get("runtime") or probe75)
+    live = comparable_generation_identity(
+        protocol=observed.as_dict(), runtime=live_runtime,
+        host_provenance={"image_digest_arg": "x"})
+    cmp = require_comparable(live, hist, context="dry run")
+    assert cmp["identities_equal"] is True
+    assert cmp["driver_branch_equal"] is True
+
+    #: And the driver reads the engine probe, not the attestation's runtime.
+    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    fn = src[src.index("def admit_generation"):src.index("def stage_h")]
+    assert "CONTROL_ENGINE_PROBE" in fn, (
+        "the historical runtime no longer comes from attempt75's engine "
+        "probe; the attestation's block is the TRAIN environment")
+    assert 'runtime=control_att["runtime"]' not in fn, (
+        "the driver is back to comparing against the train runtime")
+
+
+@needs_dry_run
+def test_the_controls_two_runtime_blocks_really_do_differ():
+    """The premise of the fix above, asserted rather than asserted-about.
+
+    If attempt75's attestation runtime and its engine probe ever agreed, the
+    check above would pass for the wrong reason and the comment explaining it
+    would be wrong.
+    """
+    import json as _json
+
+    att = _json.loads(
+        (A75 / "c3_attested_evaluation_protocol.json").read_text())["runtime"]
+    probe = _json.loads((A75 / "c3_engine_probe.json").read_text())
+    probe = probe.get("runtime") or probe
+    assert att.get("cuda_runtime") != probe.get("cuda_runtime"), (
+        "the two runtime blocks agree on cuda_runtime; the train/vLLM "
+        "distinction this fix rests on would no longer exist")
+    assert att.get("cuda_runtime") == "12.8" and probe.get("cuda_runtime") == "13.0", (
+        f"train {att.get('cuda_runtime')} / vLLM {probe.get('cuda_runtime')}")

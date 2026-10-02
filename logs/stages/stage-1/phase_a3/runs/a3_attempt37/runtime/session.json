@@ -1,0 +1,925 @@
+{
+  "schema": "aadistill.autoinit.a3_session/v1",
+  "session_id": "autoinit-a3",
+  "session_spec": {
+    "session_id": "autoinit-a3",
+    "schema": "aadistill.autoinit.a3_session/v1",
+    "description": "A3: the incumbent ATTENTION operator under bsz3 + length_sorted_v1, end to end. Replays the frozen parent under its digest gate, verifies A-bsz1 rebuilds the incumbent, collects interleaved diagnostics, trains THREE A-bsz3 probes at the frozen seeds and evaluates each once. Computes no decision: the comparison runs off pod at $0. Runs no search.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json",
+    "authorization_type": "A3Authorization.load",
+    "plan_id": "autoinit.v1.phase_a3",
+    "plan_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+    "status_path": "/workspace/autoinit_a3.status",
+    "run_log_path": "/workspace/autoinit_a3_run.log",
+    "driver_job_id": "autoinit_a3",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "A3_FAILED",
+        "A3_REPLAY_MISMATCH",
+        "A3_INTEGRITY_FAILURE"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_a3",
+      "evidence_filename": "a3_evidence.json",
+      "archive_basename": "a3_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/a3_artifacts.json",
+      "spec_failed": "configs/autoinit/a3_artifacts_failed.json",
+      "report_names": [
+        "a3_evidence.json",
+        "a3_diagnostics.json",
+        "a3_arm_identities.json",
+        "a3_replay.json",
+        "a3_probe_inventory.json",
+        "a3_attested_evaluation_protocol.json"
+      ]
+    },
+    "setup": {
+      "env": {
+        "SESSION_KIND": "a3",
+        "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c3/frozen_assets.json"
+      },
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "SESSION_RELAY_INPUTS",
+        "SESSION_KIND",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+          "dest": "artifacts/stage3/ladder_uniform_probe",
+          "sha256": null,
+          "also_stage_to": "artifacts/stage3/ladder_uniform"
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "e8_inputs_20260810/calibration_v1/items.jsonl",
+          "dest": "artifacts/stage1/e8_calibration_v1",
+          "sha256": "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+          "also_stage_to": null
+        },
+        {
+          "repo": "AlphaAvatar/aadistill-artifacts",
+          "path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
+          "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+          "sha256": "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
+          "also_stage_to": null
+        }
+      ],
+      "local_assets": [
+        "c1_confirmation_v1:artifacts/stage3",
+        "reasoning_heavy_v2:artifacts/stage1",
+        "state_eval_v1:artifacts/stage1",
+        "recovery_search_v2:artifacts/stage3"
+      ],
+      "uv_max_seconds": 2700,
+      "tests_max_seconds": 600,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [
+        "tests/architecture",
+        "tests/autoinit",
+        "tests/c1_preflight",
+        "tests/c2_baseline_completion_preflight",
+        "tests/c2_behavioural_preflight",
+        "tests/c2_full_search_preflight",
+        "tests/c2_preflight",
+        "tests/c2_replay_preflight",
+        "tests/c3_preflight",
+        "tests/data",
+        "tests/docs",
+        "tests/evaluation",
+        "tests/historical_declarations.py",
+        "tests/infrastructure",
+        "tests/init",
+        "tests/initialization",
+        "tests/models",
+        "tests/pod",
+        "tests/rollout",
+        "tests/runtime",
+        "tests/support",
+        "tests/test_usable_rollout.py",
+        "tests/training",
+        "tests/validation"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "ASSETS_READY",
+        "VLLM_READY",
+        "TEACHER_READY",
+        "ROPE_OK",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 15,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-02T14:34:49+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 444 min $8.07 \u00b7 soft $8.07 \u00b7 hard $8.19 (authorized $8.30)"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "session commit 7424ceb963cc verified: harness digests to 7dff43b22cc9\u2026, carries the authorization and only logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "grant 0937cf550aed recorded for this run"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "harness 7dff43b22cc9 matches the grant"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "design 8d390eed92c5, 1 arm x 3 seeds"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "live $1.09/h -> hard $8.3047, 4 limits checked including the package total"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "teacher 768f209d9ea8 bound over 3 shards"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "battery c1_confirmation_v1 staged, content a285d61f88de matches the controls"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "three controls verified, 6 files by content hash"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "both specs load ({'success': 22, 'failed': 22}); per-probe counts are multiples of 3; the failed spec requires nothing"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the A3 executable: 3 present"
+    },
+    {
+      "utc": "2026-10-02T14:34:50+00:00",
+      "elapsed_min": 0.0,
+      "msg": "pod sweep 65 passed / 5 skipped / 0 failed, no declared groups, binds A3 harness 7dff43b22cc9\u2026 and environment ebbcd76de0a1\u2026, staging contract 5d56a2de08c5\u2026, swept at b78902c3 with only ['logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json', 'logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/readiness.json'] differs from the swept base"
+    },
+    {
+      "utc": "2026-10-02T14:34:55+00:00",
+      "elapsed_min": 0.0,
+      "msg": "aad_autoinit_7424ceb9.bundle (23334413 bytes, 754ae124ae8e) round-trips to 7424ceb963cc carrying this authorization and harness 7dff43b22cc9"
+    },
+    {
+      "utc": "2026-10-02T14:34:56+00:00",
+      "elapsed_min": 0.0,
+      "msg": "the relay accepts 3 probes (6.66 GiB)"
+    },
+    {
+      "utc": "2026-10-02T14:34:56+00:00",
+      "elapsed_min": 0.0,
+      "msg": "previous deterministic failure SETUP_EXIT:1 (a3_attempt30) is addressed: 6 tracked path(s) changed since 765521d58f9c, including scripts/experiments/phase_c3/a3_session.py"
+    },
+    {
+      "utc": "2026-10-02T14:34:56+00:00",
+      "elapsed_min": 0.0,
+      "msg": "no provider resource exists; nothing is billing"
+    },
+    {
+      "utc": "2026-10-02T14:34:57+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 8 relay inputs (8 from AlphaAvatar/aadistill-artifacts), 4 local assets"
+    },
+    {
+      "utc": "2026-10-02T14:34:58+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 451 min = $8.19"
+    },
+    {
+      "utc": "2026-10-02T14:34:58+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 6mhoepslb8c6gu at $1.09/h"
+    },
+    {
+      "utc": "2026-10-02T14:35:51+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-02T14:36:54+00:00",
+      "elapsed_min": 1.94,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-02T14:37:57+00:00",
+      "elapsed_min": 2.99,
+      "msg": "  starting (180s) \u2014 $0.05"
+    },
+    {
+      "utc": "2026-10-02T14:39:00+00:00",
+      "elapsed_min": 4.04,
+      "msg": "  starting (240s) \u2014 $0.07"
+    },
+    {
+      "utc": "2026-10-02T14:40:03+00:00",
+      "elapsed_min": 5.09,
+      "msg": "  starting (300s) \u2014 $0.09"
+    },
+    {
+      "utc": "2026-10-02T14:41:06+00:00",
+      "elapsed_min": 6.14,
+      "msg": "  starting (360s) \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-02T14:42:10+00:00",
+      "elapsed_min": 7.2,
+      "msg": "  starting (420s) \u2014 $0.13"
+    },
+    {
+      "utc": "2026-10-02T14:43:13+00:00",
+      "elapsed_min": 8.25,
+      "msg": "  starting (480s) \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-02T14:44:16+00:00",
+      "elapsed_min": 9.3,
+      "msg": "  starting (540s) \u2014 $0.17"
+    },
+    {
+      "utc": "2026-10-02T14:45:19+00:00",
+      "elapsed_min": 10.35,
+      "msg": "  starting (600s) \u2014 $0.19"
+    },
+    {
+      "utc": "2026-10-02T14:46:22+00:00",
+      "elapsed_min": 11.41,
+      "msg": "  starting (660s) \u2014 $0.21"
+    },
+    {
+      "utc": "2026-10-02T14:47:26+00:00",
+      "elapsed_min": 12.46,
+      "msg": "  starting (720s) \u2014 $0.23"
+    },
+    {
+      "utc": "2026-10-02T14:48:29+00:00",
+      "elapsed_min": 13.51,
+      "msg": "  starting (780s) \u2014 $0.25"
+    },
+    {
+      "utc": "2026-10-02T14:49:32+00:00",
+      "elapsed_min": 14.57,
+      "msg": "  starting (840s) \u2014 $0.26"
+    },
+    {
+      "utc": "2026-10-02T14:50:03+00:00",
+      "elapsed_min": 15.08,
+      "msg": "NO_ENDPOINT on draw 1 \u2014 abandoning 6mhoepslb8c6gu and redrawing"
+    },
+    {
+      "utc": "2026-10-02T14:50:15+00:00",
+      "elapsed_min": 15.28,
+      "msg": "watchdog detached \u2014 hard 451 min = $8.19"
+    },
+    {
+      "utc": "2026-10-02T14:50:15+00:00",
+      "elapsed_min": 15.28,
+      "msg": "created cdfxbfm10rs5i5 at $1.09/h"
+    },
+    {
+      "utc": "2026-10-02T14:51:08+00:00",
+      "elapsed_min": 16.17,
+      "msg": "  starting (60s) \u2014 $0.29"
+    },
+    {
+      "utc": "2026-10-02T14:51:50+00:00",
+      "elapsed_min": 16.86,
+      "msg": "TCP 22 at 64.247.206.221:11937 after 16.9 min"
+    },
+    {
+      "utc": "2026-10-02T14:51:54+00:00",
+      "elapsed_min": 16.93,
+      "msg": "draw 2: ssh reachable \u2014 $0.31"
+    },
+    {
+      "utc": "2026-10-02T14:53:36+00:00",
+      "elapsed_min": 18.64,
+      "msg": "draw 2: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+    },
+    {
+      "utc": "2026-10-02T14:53:36+00:00",
+      "elapsed_min": 18.64,
+      "msg": "draw 2: host admitted \u2014 driver branch 580 (580.159.03) matches the controls'; a patch within the branch is provenance"
+    },
+    {
+      "utc": "2026-10-02T14:53:36+00:00",
+      "elapsed_min": 18.64,
+      "msg": "draw 2: running setup"
+    },
+    {
+      "utc": "2026-10-02T14:56:07+00:00",
+      "elapsed_min": 21.15,
+      "msg": "draw 2: setup complete \u2014 $0.38"
+    },
+    {
+      "utc": "2026-10-02T14:56:14+00:00",
+      "elapsed_min": 21.27,
+      "msg": "driver detached, pid 2636, confirmed by descriptor_probe \u2014 $0.39"
+    },
+    {
+      "utc": "2026-10-02T14:58:35+00:00",
+      "elapsed_min": 23.62,
+      "msg": "  STAGE_START:G \u2014 $0.43"
+    },
+    {
+      "utc": "2026-10-02T15:20:14+00:00",
+      "elapsed_min": 45.26,
+      "msg": "  A3_FAILED \u2014 $0.82"
+    },
+    {
+      "utc": "2026-10-02T15:20:22+00:00",
+      "elapsed_min": 45.41,
+      "msg": "driver no longer running: EXITED:40"
+    },
+    {
+      "utc": "2026-10-02T15:20:22+00:00",
+      "elapsed_min": 45.41,
+      "msg": "polling ended: DRIVER_EXITED:40 \u2014 $0.82"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 2,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.a3_authorization/v1",
+    "authorization_id": "autoinit.v1.phase_a3",
+    "version": 1,
+    "granted_utc": "2026-10-02T14:34:23.669740+00:00",
+    "granted_by": "Maintainer decision 2026-10-01, on independent review of review/c3-operator-batching@a87049cc, which established that no maintainer or scientific decision blocks execution. A3 is authorized as ONE complete end-to-end experiment -- initialization, recovery training, evaluation, aggregation, closeout -- rather than as a step-1/step-2 split needing intermediate approvals. Ordinary engineering failures inside this envelope are to be diagnosed, repaired and retried autonomously.",
+    "plan_id": "autoinit.v1.phase_a3",
+    "phase_a_session_plan_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+    "phase_a_science_plan_hash": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+    "expected_usd": 5.9051,
+    "hard_cap_usd": 8.3047,
+    "authorized_stages": [
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H"
+    ],
+    "stage_conditions": {
+      "D": "the frozen parent must reproduce eea90c91346a",
+      "E": "A_bsz1 must reproduce the incumbent 53e30566c5f7; A_bsz3 is pinned NOWHERE because what it builds is the finding",
+      "F": "three probes at the frozen seeds; no probe may be skipped",
+      "G": "each probe evaluated ONCE on c1_confirmation_v1, after the protocol admission and never before all three trained",
+      "H": "preserve and package; NO decision is computed on the pod"
+    },
+    "scope_note": "ONE A3 session end to end. A differing A-bsz3 artifact digest is a FINDING and does not stop the chain. No search, no ranking, no arm elimination, no fourth seed, no retraining of attempt75's controls, no on-pod decision, and no authorization for the FFN experiment, D1/D2/D3 or Stage-0 v2.",
+    "phase_a_authorized": false,
+    "automatic_followon_start": false,
+    "authorized_session_commit": "28fff9495d528b3bdfa38d3cc74fd53b0607847a",
+    "harness_source_digest": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "harness_source_files": [
+      "configs/autoinit/a3_artifacts.json",
+      "configs/autoinit/a3_artifacts_failed.json",
+      "configs/experiments/phase_c1/authorization.json",
+      "scripts/autoinit/aggregate_a3.py",
+      "scripts/autoinit/compare_a_bsz3.py",
+      "scripts/autoinit/write_a3_design.py",
+      "scripts/experiments/phase_c3/a3_authorization.py",
+      "scripts/experiments/phase_c3/a3_pricing.py",
+      "scripts/experiments/phase_c3/a3_session.py",
+      "scripts/experiments/phase_c3/a_bsz3.py",
+      "scripts/experiments/phase_c3/formal_pricing.py",
+      "scripts/experiments/phase_c3/hardware.py",
+      "scripts/pod/autoinit_a3_driver.py",
+      "scripts/pod/autoinit_a3_launch.py",
+      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py"
+    ],
+    "per_launch_hard_usd": 8.3047,
+    "provenance_commit": "28fff9495d528b3bdfa38d3cc74fd53b0607847a",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+    "allows_phase_a": false,
+    "allows_beam_search": false,
+    "authorizes_c1_isolation": false,
+    "authorizes_c3_isolation": false,
+    "authorizes_a3": true,
+    "allows_arm_elimination": false,
+    "allows_control_retraining": false,
+    "allows_on_pod_decision": false,
+    "scope": "ONE experiment end to end: replay the frozen parent eea90c91346a under its digest gate, verify A-bsz1 rebuilds the incumbent 53e30566c5f7, collect interleaved A-bsz1/A-bsz3 diagnostics, then train THREE A-bsz3 recovery probes at the three frozen C3 seeds and evaluate each once on c1_confirmation_v1. A differing A-bsz3 artifact digest is a FINDING and does not stop the chain. No search, no ranking, no arm elimination, no fourth seed, no retraining of attempt75's controls, no on-pod decision, and no authorization to start the FFN experiment, D1/D2/D3 or Stage-0 v2.",
+    "authorization_sha256": "4ff3034ec75f71e1a7a832911b9bf08e532f255a1f78d83c579563d790c0c310"
+  },
+  "session_plan_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+  "harness_source_digest": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+  "harness_source_files": [
+    "configs/autoinit/a3_artifacts.json",
+    "configs/autoinit/a3_artifacts_failed.json",
+    "configs/experiments/phase_c1/authorization.json",
+    "scripts/autoinit/aggregate_a3.py",
+    "scripts/autoinit/compare_a_bsz3.py",
+    "scripts/autoinit/write_a3_design.py",
+    "scripts/experiments/phase_c3/a3_authorization.py",
+    "scripts/experiments/phase_c3/a3_pricing.py",
+    "scripts/experiments/phase_c3/a3_session.py",
+    "scripts/experiments/phase_c3/a_bsz3.py",
+    "scripts/experiments/phase_c3/formal_pricing.py",
+    "scripts/experiments/phase_c3/hardware.py",
+    "scripts/pod/autoinit_a3_driver.py",
+    "scripts/pod/autoinit_a3_launch.py",
+    "src/aadistill/initialization/operators/attention/gqa/activation_importance.py"
+  ],
+  "a3_session_contract_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+  "a3_design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+  "runs_a_search": false,
+  "eliminates_arms": false,
+  "retrains_controls": false,
+  "computes_a_decision_on_pod": false,
+  "arms": 1,
+  "seeds": 3,
+  "probes": 3,
+  "diagnostic_rounds": 4,
+  "expected_parent_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+  "expected_incumbent_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+  "measured_protocol": "A_bsz3",
+  "gated_protocol": "A_bsz1",
+  "followon_started": false,
+  "followon_reachable_from_this_launcher": false,
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 8.3047,
+    "expected_minutes": 444.318,
+    "soft_stop_minutes": 444.318,
+    "artifact_recovery_reserve_minutes": 6.5,
+    "hard_terminate_minutes": 450.818,
+    "step_time": {
+      "seconds": 4.708973607038123,
+      "source": "measured 61.76 min/probe over attempt75's nine 0.86M probes of this exact 1023-step recipe, scaled by the declared 1.3x hard-ceiling overrun factor",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 45.0
+      },
+      {
+        "name": "train",
+        "minutes": 240.864
+      },
+      {
+        "name": "evaluate",
+        "minutes": 104.715
+      },
+      {
+        "name": "transfer",
+        "minutes": 0.0
+      },
+      {
+        "name": "prelaunch_gates",
+        "minutes": 3.0
+      },
+      {
+        "name": "teacher_fetch_verify",
+        "minutes": 0.286
+      },
+      {
+        "name": "register_operator",
+        "minutes": 0.039
+      },
+      {
+        "name": "fixed_parent_replay",
+        "minutes": 28.314
+      },
+      {
+        "name": "initialization_diagnostics",
+        "minutes": 2.6
+      },
+      {
+        "name": "package",
+        "minutes": 19.5
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 8.0718,
+    "soft_stop_usd": 8.0718,
+    "artifact_recovery_reserve_usd": 0.1181,
+    "hard_terminate_usd": 8.1899
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "session_commit_check": {
+    "session_commit": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+    "authorized_session_commit": "28fff9495d528b3bdfa38d3cc74fd53b0607847a",
+    "harness_digest_at_commit": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "authorized_harness_digest": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "harness_matches": true,
+    "commit_carries_this_authorization": true,
+    "rule": "the pod checks out this commit from a bundle; its harness must digest to the authorized value and it must carry the authorization the driver will load",
+    "lineage": {
+      "authorized_base": "28fff9495d528b3bdfa38d3cc74fd53b0607847a",
+      "session_commit": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+      "descends_from_base": true,
+      "changed_paths": [
+        "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json"
+      ],
+      "unexpected_paths": [],
+      "ok": true,
+      "reason": "only logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json differs from the authorized base"
+    }
+  },
+  "prechecks": [
+    {
+      "check": "session_commit_and_lineage",
+      "ok": true,
+      "message": "session commit 7424ceb963cc verified: harness digests to 7dff43b22cc9\u2026, carries the authorization and only logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json differs from the authorized base"
+    },
+    {
+      "check": "grant_provenance_gate",
+      "ok": true,
+      "message": "grant 0937cf550aed recorded for this run"
+    },
+    {
+      "check": "a3_harness_gate",
+      "ok": true,
+      "message": "harness 7dff43b22cc9 matches the grant"
+    },
+    {
+      "check": "a3_design_gate",
+      "ok": true,
+      "message": "design 8d390eed92c5, 1 arm x 3 seeds"
+    },
+    {
+      "check": "pricing_identity_gate",
+      "ok": true,
+      "message": "live $1.09/h -> hard $8.3047, 4 limits checked including the package total"
+    },
+    {
+      "check": "teacher_binding_gate",
+      "ok": true,
+      "message": "teacher 768f209d9ea8 bound over 3 shards"
+    },
+    {
+      "check": "battery_staged_gate",
+      "ok": true,
+      "message": "battery c1_confirmation_v1 staged, content a285d61f88de matches the controls"
+    },
+    {
+      "check": "controls_evidence_gate",
+      "ok": true,
+      "message": "three controls verified, 6 files by content hash"
+    },
+    {
+      "check": "artifact_spec_gate",
+      "ok": true,
+      "message": "both specs load ({'success': 22, 'failed': 22}); per-probe counts are multiples of 3; the failed spec requires nothing"
+    },
+    {
+      "check": "the A3 executable",
+      "ok": true,
+      "message": "the A3 executable: 3 present"
+    },
+    {
+      "check": "readiness_gate",
+      "ok": true,
+      "message": "pod sweep 65 passed / 5 skipped / 0 failed, no declared groups, binds A3 harness 7dff43b22cc9\u2026 and environment ebbcd76de0a1\u2026, staging contract 5d56a2de08c5\u2026, swept at b78902c3 with only ['logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json', 'logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/readiness.json'] differs from the swept base"
+    },
+    {
+      "check": "bundle_staged_gate",
+      "ok": true,
+      "message": "aad_autoinit_7424ceb9.bundle (23334413 bytes, 754ae124ae8e) round-trips to 7424ceb963cc carrying this authorization and harness 7dff43b22cc9"
+    },
+    {
+      "check": "durable_capacity_gate",
+      "ok": true,
+      "message": "the relay accepts 3 probes (6.66 GiB)"
+    },
+    {
+      "check": "same_failure_gate",
+      "ok": true,
+      "message": "previous deterministic failure SETUP_EXIT:1 (a3_attempt30) is addressed: 6 tracked path(s) changed since 765521d58f9c, including scripts/experiments/phase_c3/a3_session.py"
+    },
+    {
+      "check": "no_billing_resource_gate",
+      "ok": true,
+      "message": "no provider resource exists; nothing is billing"
+    }
+  ],
+  "grant_provenance": {
+    "path": "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/grant.json",
+    "sha256": "0937cf550aede48004b9ebaf21158c06ee9d86e652768cfd93e34922bb05c51d",
+    "granted_utc": "2026-10-01T00:00:00Z",
+    "run_id": "a3_attempt37"
+  },
+  "a3_harness": {
+    "expected": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "observed": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "n_files": 15
+  },
+  "a3_design": {
+    "design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+    "session_contract_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+    "probes": 3,
+    "arms": 1,
+    "seeds": [
+      217230555,
+      1151307191,
+      2045359208
+    ],
+    "aggregation_off_pod": true
+  },
+  "pricing": {
+    "gpu": "NVIDIA L40S",
+    "rate_usd_per_hour": 1.09,
+    "hard_ceiling_usd": 8.3047,
+    "expected_usd": 5.9051,
+    "container_disk_gb": 110,
+    "conditions": {
+      "derived_ceiling_within_session_envelope": true,
+      "cumulative_plus_derived_within_project_cap": true,
+      "booked_allowance_covers_derived": true,
+      "package_total_covers_derived": true
+    },
+    "limits_checked": [
+      "booked_allowance_covers_derived",
+      "cumulative_plus_derived_within_project_cap",
+      "derived_ceiling_within_session_envelope",
+      "package_total_covers_derived"
+    ]
+  },
+  "teacher_binding": {
+    "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+    "shards": 3
+  },
+  "battery": {
+    "artifact": "c1_confirmation_v1",
+    "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+    "expected_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c"
+  },
+  "controls_evidence": {
+    "seeds": [
+      217230555,
+      1151307191,
+      2045359208
+    ],
+    "files_verified": 6,
+    "problems": [],
+    "_weights_are_not_checked": "retired 2026-10-01 under the consumer rule; the comparison reads evidence, never bytes"
+  },
+  "artifact_specs": {
+    "entries": {
+      "success": 22,
+      "failed": 22
+    },
+    "problems": []
+  },
+  "precheck": {
+    "relay_needed": [
+      "stage3_recovery_corpus_v2/ladder_uniform/blocks.npz",
+      "stage3_recovery_corpus_v2/ladder_uniform/ladder.json",
+      "stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl",
+      "e8_inputs_20260810/calibration_v1/items.jsonl",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja",
+      "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    ],
+    "relay_missing": [],
+    "relay_repos": {
+      "AlphaAvatar/aadistill-artifacts": 8
+    },
+    "relay_repo_files_listed": {
+      "AlphaAvatar/aadistill-artifacts": 1346
+    },
+    "local_assets": [
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage3/recovery_search_v2"
+    ],
+    "local_missing": []
+  },
+  "readiness": {
+    "verdict": "PASS",
+    "record": "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/readiness.json",
+    "record_kind": "launch_bound",
+    "required_record_kind": "launch_bound",
+    "swept_base_commit": "b78902c39a63811ad785e7badef4d8de21338c03",
+    "session_commit": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+    "permitted_post_sweep_paths": [
+      "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/readiness.json",
+      "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json"
+    ],
+    "live_staging_contract_digest": "5d56a2de08c52987eb7039f32d8560df9dfa39a439759a7d523f2fdfa810a9bb",
+    "recorded_staging_contract_digest": "5d56a2de08c52987eb7039f32d8560df9dfa39a439759a7d523f2fdfa810a9bb",
+    "counts": {
+      "error": 0,
+      "failed": 0,
+      "passed": 65,
+      "skipped": 5
+    },
+    "reason": "pod sweep 65 passed / 5 skipped / 0 failed, no declared groups, binds A3 harness 7dff43b22cc9\u2026 and environment ebbcd76de0a1\u2026, staging contract 5d56a2de08c5\u2026, swept at b78902c3 with only ['logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json', 'logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/readiness.json'] differs from the swept base"
+  },
+  "bundle_staged_check": {
+    "session_commit": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+    "canonical_bundle_name": "aad_autoinit_7424ceb9.bundle",
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_path": "transfer/aad_autoinit_7424ceb9.bundle",
+    "bytes": 23334413,
+    "remote_sha256": "754ae124ae8e4ce42dc2e00505d367daeb687de89b5c2d8ec084113a8113b1fd",
+    "local_sha256": "754ae124ae8e4ce42dc2e00505d367daeb687de89b5c2d8ec084113a8113b1fd",
+    "bundle_verify_rc": 0,
+    "roundtrip_head": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+    "authorization_sha256": "eed30e9a797f5e27771cb4a4fee90e44c3e3c99c107aaaa0b4c1fab197d70539",
+    "authorization_matches": true,
+    "roundtrip_harness_digest": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "expected_harness_digest": "7dff43b22cc970678f1cfcdff43d2c16d7ab25aa9f04bae07a614257f79b4fef",
+    "ok": true,
+    "answers": "a pod can obtain the exact authorized code from the relay right now, not merely that a local file once existed"
+  },
+  "durable_capacity": {
+    "n_probes": 3,
+    "bytes_each": 2384236592,
+    "gib_total": 6.6615,
+    "accepted": true
+  },
+  "same_failure_rule": {
+    "prior_attempts_read": 34,
+    "previous_deterministic_signature": "SETUP_EXIT:1",
+    "corrective_change": true,
+    "corrective_change_basis": "6 tracked path(s) changed since 765521d58f9c, including scripts/experiments/phase_c3/a3_session.py"
+  },
+  "pre_create_billing_check": {
+    "pods": []
+  },
+  "pod_id": "cdfxbfm10rs5i5",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-02T22:21:03Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-artifacts/phase_a3/_sessions/a3_attempt37/watchdog_6mhoepslb8c6gu.jsonl",
+    "/home/ecs-user/aad-artifacts/phase_a3/_sessions/a3_attempt37/watchdog_cdfxbfm10rs5i5.jsonl"
+  ],
+  "watchdog_owns_pod": "cdfxbfm10rs5i5",
+  "draws": [
+    {
+      "draw": 1,
+      "pod_id": "6mhoepslb8c6gu",
+      "outcome": "no_endpoint",
+      "price_per_hour": 1.09,
+      "elapsed_minutes_at_release": 15.27,
+      "cumulative_usd_at_release": 0.2773,
+      "watchdog_journal": "watchdog_6mhoepslb8c6gu.jsonl",
+      "release": {
+        "pod_id": "6mhoepslb8c6gu",
+        "why": "no_endpoint",
+        "remove_returncode": 0,
+        "exists": false,
+        "desired_status": "TERMINATED",
+        "billing": false,
+        "confirmed_not_billing": true,
+        "confirmation_required": true,
+        "rule": "a zero returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence of release; only the provider reporting this resource not billing is"
+      }
+    }
+  ],
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.159.03"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03"
+  },
+  "host_admission": [
+    {
+      "draw": 2,
+      "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+      "admitted": true,
+      "reason": "driver branch 580 (580.159.03) matches the controls'; a patch within the branch is provenance"
+    }
+  ],
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_7424ceb9.bundle",
+    "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_a3/runs/a3_attempt37/governance/authorization.json",
+    "SESSION_COMMIT": "7424ceb963ccefae02ea3321993e9784b88ccb9d",
+    "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c3/frozen_assets.json",
+    "SESSION_KIND": "a3",
+    "SESSION_PLAN_HASH": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+    "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV ASSETS_READY VLLM_READY TEACHER_READY ROPE_OK TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_a3.status",
+    "SESSION_TEST_IGNORES": "--ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_baseline_completion_preflight --ignore=tests/c2_behavioural_preflight --ignore=tests/c2_full_search_preflight --ignore=tests/c2_preflight --ignore=tests/c2_replay_preflight --ignore=tests/c3_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/historical_declarations.py --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/initialization --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "600",
+    "UV_MAX_S": "2700"
+  },
+  "driver_job": {
+    "job_id": "autoinit_a3",
+    "pid": 2636,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_a3_driver.py --image-digest 'runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03' --run-id 'a3_attempt37' --rate 1.09 --spent-usd 0.3842 --soft-stop-usd 8.0718 --authorized-usd 8.3047 --resume-scoring-from 'a3_attempt35'",
+    "log_path": "/workspace/autoinit_a3_run.log",
+    "status_path": "/workspace/autoinit_a3.status",
+    "pid_path": "/workspace/jobs/autoinit_a3.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_a3.job.json",
+    "exit_path": "/workspace/jobs/autoinit_a3.exit",
+    "started_utc": "2026-10-02T14:56:11Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "DRIVER_EXITED:40"
+}

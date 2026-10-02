@@ -148,6 +148,18 @@ TOKENIZER_SIDECAR_SHA256 = {
 #: also feeds the scoring contract, the frozen recipe and the harness digest.
 RUNS_ROOT = REPO / "logs/stages/stage-1/phase_a3/runs"
 
+#: attempt75's ENGINE PROBE, which is where its vLLM-side runtime lives. Its
+#: attestation also carries a `runtime` block and that block is the TRAIN
+#: environment -- `cuda_runtime 12.8`, torch 2.11+cu128 -- while generation
+#: ran under the vLLM venv at `cuda_runtime 13.0`, torch 2.13+cu130. Using
+#: the attestation's block compared A3's vLLM runtime against attempt75's
+#: TRAIN runtime and refused on `runtime_stack` with all five material fields
+#: "differing", three of them only because the older block does not record
+#: them at all. Four runtimes, one repository: the historical side has to come
+#: from the same kind of environment as the live one.
+CONTROL_ENGINE_PROBE = (REPO / "logs/stages/stage-1/phase_c3/analyses"
+                        / "attempt75_stage_i" / "c3_engine_probe.json")
+
 CONTROL_ATTESTATION = (REPO / "logs/stages/stage-1/phase_c3/analyses"
                        / "attempt75_stage_i"
                        / "c3_attested_evaluation_protocol.json")
@@ -1224,9 +1236,17 @@ class A3Driver:
                 f"{CONTROL_ATTESTATION}, so comparability to the evidence A3 "
                 "reuses cannot be established. This is an integrity stop.")
         try:
+            if not CONTROL_ENGINE_PROBE.is_file():
+                raise A3DriverError(
+                    f"{name}: attempt75's engine probe is not available at "
+                    f"{CONTROL_ENGINE_PROBE}, so the controls' GENERATION "
+                    "runtime cannot be read. Their attestation's runtime "
+                    "block is the TRAIN environment and comparing against it "
+                    "refuses on fields neither side disagrees about.")
+            control_probe = json.loads(CONTROL_ENGINE_PROBE.read_text())
             historical = comparable_generation_identity(
                 protocol=control_att["evaluation_protocol"],
-                runtime=control_att["runtime"])
+                runtime=control_probe.get("runtime") or control_probe)
             live = comparable_generation_identity(
                 protocol=observed.as_dict(),
                 runtime=self.observed_runtime,

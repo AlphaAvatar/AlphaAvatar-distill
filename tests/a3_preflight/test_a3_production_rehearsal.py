@@ -339,7 +339,15 @@ def _fake_hardware(monkeypatch, h, *, parent_digest=None, incumbent_digest=None,
         #: died because the real controls' branch (580) and the host's (595)
         #: differed, and `host_admission` now rejects such a host before setup.
         control = json.loads(D.CONTROL_ATTESTATION.read_text())
-        live_runtime = dict(control["runtime"])
+        #: FROM THE ENGINE PROBE, because that is what the driver compares
+        #: against now: attempt75's attestation carries a TRAIN runtime
+        #: (`cuda_runtime 12.8`) and generation runs under the vLLM venv
+        #: (`13.0`), so taking the live side from the attestation made the
+        #: runtime stacks differ for a reason neither side disagrees about.
+        probe75 = json.loads(D.CONTROL_ENGINE_PROBE.read_text())
+        live_runtime = dict(probe75.get("runtime") or probe75)
+        #: A DIFFERENT PATCH inside the same branch, which is the property
+        #: worth rehearsing: v2 demotes the patch and refuses a branch change.
         live_runtime["image_digest"] = (
             "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09")
         self.observed_runtime = live_runtime

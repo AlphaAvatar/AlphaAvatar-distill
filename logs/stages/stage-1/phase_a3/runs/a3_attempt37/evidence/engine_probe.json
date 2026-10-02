@@ -1,0 +1,52 @@
+{
+  "runtime": {
+    "version": 1,
+    "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.03",
+    "python_version": "3.12.3",
+    "torch_version": "2.13.0+cu130",
+    "transformers_version": "5.15.0",
+    "cuda_runtime": "13.0",
+    "attention_backend": "vllm:default"
+  },
+  "runtime_digest": "2db007528a37f4d02113265d225531aec441a483e03e626556e0e6049a7af101",
+  "torch_version": "2.13.0+cu130",
+  "transformers_version": "5.15.0",
+  "dtype": "bfloat16",
+  "vllm_version": "0.27.1",
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 8192,
+  "enforce_eager": false,
+  "gpu_memory_utilization": 0.9,
+  "resolved_context": 8192,
+  "context_source": "trained_block_len",
+  "context_resolution": {
+    "resolved_context": 8192,
+    "context_source": "trained_block_len",
+    "config_max_position_embeddings": 262144,
+    "rope_scaling_factor": null,
+    "architectural_context": 262144,
+    "trained_context": 8192,
+    "context_len_override": null,
+    "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+    "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+  },
+  "stop_token_ids": [
+    151645
+  ],
+  "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+  "tokenizer_files": [
+    "tokenizer.json",
+    "tokenizer_config.json"
+  ],
+  "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+  "engine": {
+    "max_model_len": 8192,
+    "gpu_memory_utilization": 0.9,
+    "dtype": "bfloat16",
+    "dtype_engine": "torch.bfloat16",
+    "max_num_seqs": 256,
+    "max_num_batched_tokens": 8192,
+    "vllm_version": "0.27.1",
+    "enforce_eager": false
+  }
+}

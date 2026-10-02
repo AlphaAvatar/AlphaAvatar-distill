@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 65,
+  "runs_unrecorded": 66,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -323,8 +323,8 @@
    },
    "phase_a3": {
     "recorded": 0,
-    "unrecorded": 36,
-    "total": 36
+    "unrecorded": 37,
+    "total": 37
    },
    "phase_b": {
     "recorded": 5,
@@ -2515,6 +2515,14 @@
    "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt36",
    "n_files": 7,
    "digest": "e4d3b0cf5fcbc27c223f60b37f842c0fa08213114ae716183460107bd482aea6",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt37",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt37",
+   "n_files": 7,
+   "digest": "4130248ebc1870c6cf6a2f1d78ec77b0d49ffb26325454a3bcbf94b97b913bec",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   },
   {
