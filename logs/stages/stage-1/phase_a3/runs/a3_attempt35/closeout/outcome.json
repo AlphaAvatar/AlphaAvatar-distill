@@ -3,8 +3,8 @@
  "run_id": "a3_attempt35",
  "experiment_id": "phase_a3",
  "package_id": "phase_c1.execution_package.2026-09-11",
- "status": "PRE_SCIENCE_ABORT_NO_MEASUREMENT",
- "_what_this_is": "one consumed one-use A3 chain. No probe was trained, no generation was produced and no measurement was taken, so this record carries cost and cause and no scientific field.",
+ "status": "TRAINED_PRESERVED_NOT_VALIDLY_SCORED",
+ "_what_this_is": "probes were trained and preserved and no valid endpoint was produced -- AGENTS.md P8.4 state 2. The checkpoints are a resume input, not a result, and nothing here authorizes pooling or reusing them.",
  "provider_resource_created": true,
  "pod_ids": [
   "sp9cv5m3sizknn"
@@ -12,7 +12,10 @@
  "all_pods_confirmed_gone": true,
  "terminal": "DRIVER_EXITED:40",
  "launcher_exit": null,
- "measurement_began": false,
+ "measurement_began": true,
+ "probe_records_scored": [],
+ "generations_admitted": 1,
+ "probe_checkpoints_preserved": true,
  "session_commit": null,
  "deterministic_failure_signature": null,
  "setup_refusal": null,

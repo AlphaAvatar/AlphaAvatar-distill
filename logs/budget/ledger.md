@@ -2881,3 +2881,90 @@ session's own attestation under the v1 exact-hash rule.
 **Position:** formal `$11.5531`, package `$13.4926`, project `$20.1477`. The
 envelope funds one full chain at the `$8.3047` hard ceiling plus two corrected
 restarts at `$1.4597`.
+
+## 2026-10-02 — SPENT: `$1.9400`, and the operator stopped a run that was retraining durable work
+
+`a3_attempt36` acquired cleanly, passed the new host admission on branch
+`580.126.09`, and ran stages D, E and F. At 14:06 it emitted
+`PROBE_TRAINED:...A_bsz3.217230555` — and that was the defect: attempt35 had
+already trained all three probes and pushed them durably, and this run was
+training them again from scratch. The maintainer caught it and the run was
+stopped at `MARKER:A3_STOPPED_BY_OPERATOR`, `DRIVER_EXITED:143`, 106.8 min,
+`$1.9400`.
+
+**That was an AGENTS.md P8.4 violation, not a mere inefficiency.** State 2 —
+trained, durable, not validly scored — says restore the checkpoint and resume
+at scoring. The repair is `stage_f_resume()` in the driver and
+`--resume-scoring-from`: it cites five evidence files from the preserving
+attempt, restores each probe with a per-file `sha256` verify, and refuses on
+seven distinct grounds. A `$0` dry run proved the restore and the admission
+satisfiable before anything was created.
+
+**A3 cumulative: `$11.0900` over 31 pods.**
+
+## 2026-10-02 — SPENT: `$0.9400` on the third wrong historical comparability side
+
+`a3_attempt37` resumed at scoring, restored the three preserved probes, reached
+stage G, and was refused:
+
+```text
+generation_runtime_comparability@v2: material identity f9d5bc543e49 != 99ef60a509cf
+differing ['runtime_stack']
+```
+
+**Four runtimes live in this repository and the admission was reading the
+wrong one.** attempt75's attestation carries its TRAIN environment — CUDA 12.8,
+torch 2.11+cu128 — while its generations were produced by the vLLM engine at
+CUDA 13.0, torch 2.13+cu130. Comparing a rollout runtime against a training
+runtime can only ever refuse. The historical side is now the controls' own
+**engine probe**, committed as
+`attempt75_stage_i/c3_engine_probe.json`, and the off-pod aggregation verifies
+from each pod's admission record that the v2 rule actually ran and asserted
+`comparable`. 51.9 min, `DRIVER_EXITED:40`. **A3 cumulative: `$12.0300` over 33
+pods** — one of them a `NO_ENDPOINT` draw abandoned and redrawn at `$0.29`.
+
+## 2026-10-03 — A3 IS TERMINAL: `$1.4300` bought the complete measurement
+
+`a3_attempt38` ran the resume ladder `B, C, F(restore), G, H` in 78.9 min and
+exited `DRIVER_EXITED:0`: the parent reproduced, A-bsz1 rebuilt the incumbent
+`53e30566c5f7`, the three preserved probes were restored rather than retrained,
+all three were generated and scored under the v2 admission, and the driver
+ended at preservation. The comparison then ran **off pod at `$0`**.
+
+```text
+A_bsz3  7dd2f6f6980b  DIFFERENT from the incumbent; result_spec_hash IDENTICAL
+                      -> DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL
+bsz=3 slower on all 3 pods that measured it: 9.7% / 8.2% / 10.0%, mean 9.3%
+pooled correctness     +0.002745, mixed signs, no guardrail fired
+```
+
+**The structural half ended up a three-session replicate**, which the design
+did not ask for and the failures paid for: attempts 34, 35 and 36 each ran it
+end to end before a later stage failed, and all three produced the SAME two
+digests, the same single differing kept-head slot in the same layer, the same
+rank correlation to seven decimals and the same peak VRAM. Only the timing
+moved between machines, and never in sign. Attempts 37 and 38 resumed at
+scoring and cite attempt35's diagnostics rather than remeasuring.
+
+Every figure and its claim boundary:
+[`a3_closeout.md`](../stages/stage-1/phase_a3/analyses/a3_closeout.md). **A3
+total: `$13.4600` over 34 pods, every one provider-confirmed deleted.** 0 pods
+and 0 network volumes account-wide.
+
+**Position, and it is DERIVED rather than restated:** formal `$7.2431` of
+`$76.6523`, GPU engineering `$1.9395` of `$10.0000`, package `$9.1826` of
+`$86.6523`, project `$13.1777` of `$410.0000`. Owner:
+`scripts/consolidate/derive_budget.py`, which reads each attempt's own
+closeout.
+
+**The position lines in earlier entries of this ledger were computed by hand
+and some of them disagree with the deriver** — the A3 pre-science attempts had
+no closeout at all until `write_a3_attempt_closeouts.py` built one per attempt
+from each launcher log, so the derived balance and the prose balance were
+computed from different bases for several days. The deriver is the owner; the
+prose remains as the narrative of what was spent and why.
+
+**Nothing may launch.** The maintainer's order of 2026-10-01 ends the
+autonomous sequence at A3: the FFN experiment and D1/D2/D3 are not to be
+started, and a complete valid A3 measurement is never re-run looking for
+another result.

@@ -1,0 +1,12 @@
+{
+  "schema": "aadistill.autoinit.a3_cited_evidence/v1",
+  "cited_from": "a3_attempt35",
+  "_what_this_is": "evidence this session did NOT produce. It restored that attempt's probes and resumed at scoring, so the parent replay, both initialization protocols and the digest finding belong to it. The files are carried here so the package is self-contained; the attribution is this record.",
+  "files": {
+    "a3_diagnostics.json": "e8fcc2c64d1e1bad455b85bc242952be8a0be4b7f66e9c79c194f011906182e6",
+    "a3_arm_identities.json": "d3749a3b42ba7d33b867ddb1e79c47b55bdeea3366eb3ebb494d952e47fcf789",
+    "a3_replay.json": "054cc5f221d02c42c799adfe79e0e516997400882b3773e2a96142f95c9b98fc",
+    "engine_probe.json": "e634e4869d1497542eaadb6dbc7a56e62fa9d9f370a94d2766e115f64265ae10",
+    "a3_attested_evaluation_protocol.json": "a564857e348eac34bf49d57ea78d0c598ad8da3cdee2281454fc90b2954f27dc"
+  }
+}

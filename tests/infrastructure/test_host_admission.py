@@ -1,12 +1,12 @@
 """A host whose properties make the result incomparable must be redrawn.
 
 `a3_attempt35` trained three probes, generated the first, and was refused by
-the protocol admission at `$4.33`: every material generation field matched
+the protocol admission: every material generation field matched
 attempt75's controls, and the host NVIDIA driver BRANCH had moved 580 -> 595,
 which `generation_compat` declares a real runtime event rather than
 provenance. The refusal was correct. What was wrong is that the question was
-asked after the money was spent, on a property knowable one ssh round trip
-after the pod answers.
+asked after the money was spent -- that session cost `$4.46`, owned by its
+closeout -- on a property knowable one ssh round trip after the pod answers.
 
 `SessionSpec.host_admission` asks it before setup, and a refusal is
 redrawable exactly like a cold host. Default `None` admits everything, so no

@@ -40,6 +40,7 @@ Everything this experiment produced, in one place.
 * [`a3_attempt35`](runs/a3_attempt35/)
 * [`a3_attempt36`](runs/a3_attempt36/)
 * [`a3_attempt37`](runs/a3_attempt37/)
+* [`a3_attempt38`](runs/a3_attempt38/)
 * [`a3_attempt4`](runs/a3_attempt4/)
 * [`a3_attempt5`](runs/a3_attempt5/)
 * [`a3_attempt6`](runs/a3_attempt6/)

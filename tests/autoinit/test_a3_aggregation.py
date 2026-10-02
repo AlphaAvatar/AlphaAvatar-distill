@@ -67,9 +67,41 @@ needs_controls = pytest.mark.skipif(
             "and scored records and will not fabricate them"))
 
 
+def _admission(label: str, **overrides) -> dict:
+    """The record the DRIVER writes beside each probe, in its real shape.
+
+    The rule id is read from `generation_compat` rather than spelled here, so a
+    renamed or revised rule turns these tests red instead of leaving a fixture
+    asserting a string the production code stopped using.
+    """
+    from aadistill.initialization.planning.generation_compat import (
+        GENERATION_RUNTIME_COMPARABILITY_V2,
+    )
+
+    same = "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020"
+    cmp = {
+        "rule": GENERATION_RUNTIME_COMPARABILITY_V2.as_dict()["qualified_id"],
+        "live_identity": same,
+        "historical_identity": same,
+        "identities_equal": True,
+        #: A PATCH apart within one branch, which is the real attempt38 case
+        #: and the one the v2 rule exists to admit.
+        "live_driver": "580.126.09",
+        "historical_driver": "580.159.03",
+        "driver_branch_equal": True,
+        "driver_patch_differs": True,
+    }
+    cmp.update(overrides.pop("comparability", {}))
+    rec = {"probe_id": label, "comparability": cmp, "comparable": True}
+    rec.update(overrides)
+    return rec
+
+
 def _write_treatment(root: Path, *, flip: int = 0, field: dict | None = None,
                      seeds: list[int] | None = None,
-                     drop_rows_for: int | None = None) -> Path:
+                     drop_rows_for: int | None = None,
+                     admission: dict | None = None,
+                     drop_admission_for: int | None = None) -> Path:
     """Three finished A_bsz3 probes, built from the controls' real evidence.
 
     `flip` turns that many scorable prompts from incorrect to correct in the
@@ -129,6 +161,14 @@ def _write_treatment(root: Path, *, flip: int = 0, field: dict | None = None,
         scored["correct_overall"] = round(correct / n_scorable, 4)
         (audit / f"{label}_c1_confirmation.json").write_text(
             json.dumps(scored, indent=1))
+
+        #: The comparability premise, written where the driver writes it. A
+        #: replica that omits it would exercise a comparison the real path
+        #: cannot reach, which is the whole point of building the shape of a
+        #: finished run.
+        if drop_admission_for != seed:
+            (audit / f"{label}_generation_admission.json").write_text(
+                json.dumps(_admission(label, **(admission or {})), indent=1))
     return root
 
 
@@ -207,13 +247,105 @@ def test_a_known_improvement_shows_up_with_the_right_sign_and_size(tmp_path):
 
 
 @needs_controls
-def test_a_generation_fingerprint_mismatch_is_an_integrity_failure(tmp_path):
-    """C2's confirmation set carried three fingerprints and produced no
-    verdict. A3 raises instead of reporting a pooled number."""
-    _write_treatment(tmp_path,
-                     field={"generation_protocol_fingerprint": "f" * 64})
-    with pytest.raises(AG.A3AggregationError, match="does not share attempt75"):
+def test_a_differing_fingerprint_alone_is_NOT_an_integrity_failure(tmp_path):
+    """THIS TEST WAS INVERTED, deliberately, and the old version encoded a bug.
+
+    It used to require that a treatment fingerprint differing from the
+    controls' refuse the whole comparison. That looked like the C2 lesson —
+    three fingerprints in one confirmation set and no verdict — but it asked
+    the comparability question a FOURTH time and under the rule the repository
+    had already replaced: `generation_protocol_fingerprint` transitively
+    contains `runtime_digest`, which fuses the image tag with the host NVIDIA
+    driver patch, and `generation_compat.NON_MATERIAL_PROTOCOL_FIELDS` names it
+    provenance precisely so the demoted patch cannot be smuggled back into an
+    identity. The pod's own admission had already compared both runtimes under
+    v2 and admitted the probe; this check then refused a complete three-probe
+    measurement over a patch number the provider chose.
+
+    So the fingerprint is RECORDED and no longer compared, and the decision has
+    one owner — the admission record, whose refusals are the four tests below.
+    """
+    doc = AG.build(
+        _write_treatment(tmp_path,
+                         field={"generation_protocol_fingerprint": "f" * 64}),
+        bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
+    assert doc["correctness"]["pooled_delta"] == 0.0
+    #: And the premise it DOES rest on is in the artifact, per seed.
+    assert len(doc["admitted_against_the_controls"]) == 3
+
+
+@needs_controls
+def test_a_probe_with_no_admission_record_is_refused(tmp_path):
+    """Scored outside the gate. "I cannot tell whether it was comparable" is
+    not evidence that it was."""
+    seeds = sorted(AG.load_controls())
+    _write_treatment(tmp_path, drop_admission_for=seeds[1])
+    with pytest.raises(AG.A3AggregationError,
+                       match="no generation-admission record"):
         AG.build(tmp_path, bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
+
+
+@needs_controls
+def test_an_admission_that_says_not_comparable_is_refused(tmp_path):
+    _write_treatment(tmp_path, admission={"comparable": False,
+                                          "reason": "runtime_stack differs"})
+    with pytest.raises(AG.A3AggregationError, match="comparable=False"):
+        AG.build(tmp_path, bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
+
+
+@needs_controls
+def test_an_admission_under_the_SUPERSEDED_v1_rule_is_refused(tmp_path):
+    """attempt34 was refused by v1's exact-hash rule and the repository
+    replaced it. A record admitted under v1 does not answer the v2 question,
+    so accepting it would silently reinstate the rule that was withdrawn."""
+    _write_treatment(tmp_path, admission={
+        "comparability": {"rule": "generation_runtime_comparability@v1"}})
+    with pytest.raises(AG.A3AggregationError, match="expects"):
+        AG.build(tmp_path, bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
+
+
+@needs_controls
+@pytest.mark.parametrize("bad, match", [
+    ({"identities_equal": False,
+      "differing_material_keys": ["attention_backend"]}, "not equal"),
+    #: A patch within a branch is provenance; a BRANCH change is a real
+    #: runtime event, and it is what refused attempt35 after three trainings.
+    ({"driver_branch_equal": False, "live_driver": "595.91.07"}, "branch"),
+])
+def test_an_admission_whose_own_block_contradicts_it_is_refused(
+        tmp_path, bad, match):
+    _write_treatment(tmp_path, admission={"comparability": bad})
+    with pytest.raises(AG.A3AggregationError, match=match):
+        AG.build(tmp_path, bootstrap_seed=BOOTSTRAP_SEED, iterations=ITERATIONS)
+
+
+def test_the_real_committed_admission_records_satisfy_the_verifier():
+    """Not the fixture — the three records `a3_attempt38` actually wrote.
+
+    Checked here because the fixture is built by this file and could agree with
+    the verifier while both disagreed with the pod.
+    """
+    #: NOT SKIPPED IF ABSENT. The first version guarded this with
+    #: `pytest.skip` when the directory was missing, which added an
+    #: unresolvable skip predicate to the audit: the records are TRACKED, so a
+    #: tracked logs/ path travels in the bundle and its absence is a defect in
+    #: the checkout, not a property of the machine. A skip would turn a lost
+    #: artifact into a silent pass.
+    run = REPO / "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence"
+    assert run.is_dir(), (
+        f"{run} is committed evidence and is missing from this checkout")
+    recs = sorted(run.glob("*_generation_admission.json"))
+    assert len(recs) == 3, f"expected three, found {[p.name for p in recs]}"
+    for p in recs:
+        doc = json.loads(p.read_text())
+        cmp = doc["comparability"]
+        assert doc["comparable"] is True
+        assert cmp["identities_equal"] is True
+        assert cmp["live_identity"] == cmp["historical_identity"]
+        assert cmp["driver_branch_equal"] is True
+        from aadistill.initialization.planning.generation_compat import (
+            GENERATION_RUNTIME_COMPARABILITY_V2 as V2)
+        assert cmp["rule"] == V2.as_dict()["qualified_id"]
 
 
 @needs_controls

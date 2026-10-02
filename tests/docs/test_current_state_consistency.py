@@ -250,11 +250,20 @@ class TestTheSnapshotStatesTheRequiredFacts:
     def test_every_field_that_names_c2_s_position_agrees_with_the_ladder(self):
         """The contradiction that actually happened, checked across ALL owners.
 
-        `stage_ladder`, `phase_c.c2`, `c2_closure`, `behavioural_session` and
-        `latest_run` each state something about where C2 stands. Any one of
-        them drifting is the defect; asking only the ladder would not have
-        caught it, because the ladder was already correct while three other
-        fields said C2 was running.
+        `stage_ladder`, `phase_c.c2`, `c2_closure` and `behavioural_session`
+        each state something about where C2 stands. Any one of them drifting is
+        the defect; asking only the ladder would not have caught it, because
+        the ladder was already correct while three other fields said C2 was
+        running.
+
+        **`latest_run._c2_state` was a fifth owner and is no longer one.** It
+        existed while `latest_run` pointed at `phase_c2_behavioural`; the
+        snapshot's newest run is `phase_a3` now, and that block states nothing
+        about C2. Requiring the key would require keeping a vestigial C2
+        sentence inside a record about a different experiment — the duplication
+        this gate exists to prevent, pointing the wrong way. So the gate asks
+        the four owners that are still owners, and the newest-run block is
+        checked by the tests that own IT.
         """
         s = snapshot()
         closed = "CLOSED WITHOUT PROMOTION"
@@ -262,9 +271,14 @@ class TestTheSnapshotStatesTheRequiredFacts:
                 ("stage_ladder.C2", s["stage_ladder"]["C2"]),
                 ("phase_c.c2.status", s["phase_c"]["c2"]["status"]),
                 ("c2_closure.decision", s["c2_closure"]["decision"]),
-                ("behavioural_session.state", s["behavioural_session"]["state"]),
-                ("latest_run._c2_state", s["latest_run"]["_c2_state"])):
+                ("behavioural_session.state", s["behavioural_session"]["state"])):
             assert closed in got, f"{path} does not say {closed}: {got!r}"
+        #: And if a `latest_run` ever speaks about C2 again, it rejoins the set
+        #: rather than drifting outside it.
+        if "_c2_state" in s["latest_run"]:
+            assert closed in s["latest_run"]["_c2_state"], (
+                "latest_run._c2_state is present and disagrees: "
+                f"{s['latest_run']['_c2_state']!r}")
 
         #: And the two independent "nothing is owed" owners agree numerically.
         assert (s["phase_c"]["c2"]["probes_owed"]
@@ -758,10 +772,41 @@ class TestTheNarrativeAgreesWithTheDerivedBudget:
             assert "NOT STARTED" not in ladder
 
     def test_the_ladder_names_the_live_experiment_and_what_follows_it(self):
+        """A ladder with nothing left is a legal state, and it must say so.
+
+        This required `next_scientific_stage` to be truthy and to name an
+        incomplete row. That held while a stage was always queued, and expired
+        when A3 finished and the maintainer's 2026-10-01 order forbade starting
+        FFN or D1/D2/D3: there IS no next stage, and the only way to keep the
+        assertion green would have been to name one that must not start.
+
+        So a null is permitted — and it is checked harder than a name is. A
+        terminal ladder must have no incomplete row, and the snapshot's own
+        "what follows" field must agree that nothing starts. A null that merely
+        meant "nobody filled this in" fails all three.
+        """
         s = snapshot()
         ladder = s["stage_ladder"]
+        rows = {k: v for k, v in ladder.items() if not k.startswith("_")
+                and k != "next_scientific_stage"}
         nxt = ladder.get("next_scientific_stage")
-        assert nxt, "the ladder names no next scientific stage"
+
+        if not nxt:
+            unfinished = {k: v for k, v in rows.items() if not any(
+                t in str(v).upper()
+                for t in ("COMPLETE", "CLOSED", "NO_GO", "NOT AUTHORIZED"))}
+            assert not unfinished, (
+                "the ladder names no next stage while these rows are not "
+                f"finished: {unfinished}")
+            assert ladder.get("_next_is_null_because"), (
+                "a null next stage must say WHY it is null; an unexplained "
+                "null is indistinguishable from an unmaintained field")
+            then = str(s["next_starting_point"]["then"])
+            assert "NOTHING" in then.upper(), (
+                "the ladder says nothing is next and `next_starting_point."
+                f"then` says {then[:60]!r}")
+            return
+
         assert nxt in ladder, (
             f"the ladder points at {nxt!r} and carries no row for it")
         assert "COMPLETE" not in ladder[nxt], (

@@ -89,8 +89,10 @@ def control_field() -> dict[str, Any]:
         "battery_content_sha256": doc["battery"]["content_sha256"],
         "scoring_contract": doc["scoring_contract"]["contract"],
         "scoring_contract_digest": doc["scoring_contract"]["digest"],
-        "generation_protocol_fingerprint": doc["observed_generation_fingerprint"],
-        "evaluation_protocol_hash": doc["observed_evaluation_protocol_hash"],
+        #: RECORDED, not compared exactly: see `assert_one_field`. Both
+        #: contain `runtime_digest` and the v2 rule demotes it.
+        "_controls_generation_fingerprint": doc["observed_generation_fingerprint"],
+        "_controls_evaluation_protocol_hash": doc["observed_evaluation_protocol_hash"],
         "n_prompts": doc["decision_inputs_audit"]["n_prompts"],
         "n_scorable": doc["decision_inputs_audit"]["n_scorable"],
         "strata_sizes": doc["decision_inputs_audit"]["strata_sizes"],
@@ -114,6 +116,71 @@ def _rows(path: Path) -> dict[str, dict[str, Any]]:
     return out
 
 
+def verify_admitted_under_v2(evidence: Path, seeds: list[int]
+                             ) -> dict[int, dict[str, Any]]:
+    """Every probe was ADMITTED against the controls, on the pod, under v2.
+
+    The comparability decision has ONE owner and it is not this module: the
+    driver makes it in `admit_generation`, before the scorer runs, with the
+    live engine probe and the controls' engine probe both in hand. A probe
+    that was not admitted was never scored, so its absence here is not a
+    missing check -- but a probe whose admission record does not SAY it was
+    admitted must not reach a comparison, because "I cannot tell" is not
+    evidence that it was.
+
+    What this refuses, each because it is the shape of a real mistake:
+
+    * a probe with no admission record at all -- scored outside the gate;
+    * `comparable` anything but True;
+    * a comparability block that is absent, or that reports the v1 rule, or
+      that reports unequal identities, or a driver BRANCH change (a patch
+      within a branch is provenance; a branch change is a real runtime event
+      and `require_comparable` refuses it);
+    * a record naming a different rule than the one this module expects.
+    """
+    from aadistill.initialization.planning.generation_compat import (
+        GENERATION_RUNTIME_COMPARABILITY_V2,
+    )
+
+    want_rule = GENERATION_RUNTIME_COMPARABILITY_V2.as_dict()["qualified_id"]
+    audit = evidence / "audit" / "autoinit_a3"
+    out: dict[int, dict[str, Any]] = {}
+    for seed in seeds:
+        matches = sorted(audit.glob(f"*{seed}_generation_admission.json"))
+        if not matches:
+            raise A3AggregationError(
+                f"seed {seed} has no generation-admission record in {audit}; "
+                "its generations were never checked against the controls and "
+                "a probe scored outside that gate is not comparable evidence")
+        rec = json.loads(matches[-1].read_text())
+        if rec.get("comparable") is not True:
+            raise A3AggregationError(
+                f"seed {seed}: its admission record reports "
+                f"comparable={rec.get('comparable')!r}: "
+                f"{str(rec.get('reason'))[:300]}")
+        cmp = rec.get("comparability")
+        if not isinstance(cmp, dict):
+            raise A3AggregationError(
+                f"seed {seed}: admitted with no comparability block, so which "
+                "rule admitted it and against what cannot be established")
+        if cmp.get("rule") != want_rule:
+            raise A3AggregationError(
+                f"seed {seed}: admitted under {cmp.get('rule')!r} and this "
+                f"comparison expects {want_rule!r}")
+        if cmp.get("identities_equal") is not True:
+            raise A3AggregationError(
+                f"seed {seed}: the material identities were not equal: "
+                f"{cmp.get('differing_material_keys')}")
+        if cmp.get("driver_branch_equal") is not True:
+            raise A3AggregationError(
+                f"seed {seed}: the NVIDIA driver branch moved "
+                f"{cmp.get('historical_driver')} -> {cmp.get('live_driver')}; "
+                "a patch within a branch is provenance, a branch change is a "
+                "real runtime event")
+        out[seed] = cmp
+    return out
+
+
 def assert_one_field(treatment_results: dict[int, dict[str, Any]],
                      expected: dict[str, Any]) -> dict[str, Any]:
     """The treatment field must be the control field. Raises, never reports.
@@ -123,14 +190,31 @@ def assert_one_field(treatment_results: dict[int, dict[str, Any]],
     """
     observed: dict[str, set[str]] = {}
     for seed, res in sorted(treatment_results.items()):
+        #: `generation_protocol_fingerprint` and `evaluation_protocol_hash`
+        #: are DELIBERATELY ABSENT from this exact-equality set. Both
+        #: transitively contain `runtime_digest`, which fuses the image tag
+        #: with the host NVIDIA driver patch, and
+        #: `generation_compat.NON_MATERIAL_PROTOCOL_FIELDS` names all three
+        #: as provenance rather than generation semantics -- the fingerprint
+        #: specifically because it would otherwise "smuggle the demoted
+        #: driver patch back into the identity".
+        #:
+        #: Comparing them exactly here asked the comparability question a
+        #: FOURTH time, under the v1 rule the repository had already replaced,
+        #: and refused a complete three-probe measurement over a driver patch
+        #: the provider chose. What replaces it is not a weaker check but a
+        #: different owner: `verify_admitted_under_v2` below requires each
+        #: probe's own admission record to assert comparability against the
+        #: controls under v2, which is the comparison made ON THE POD with
+        #: both sides' runtimes in hand. The fields that carry generation
+        #: SEMANTICS -- battery, scoring contract, prompt counts, strata --
+        #: are still compared exactly.
         got = {
             "battery": res["battery"]["artifact"],
             "battery_manifest_sha256": res["battery"]["manifest_sha256"],
             "battery_content_sha256": res["battery"]["content_sha256"],
             "scoring_contract": res["scoring_contract"]["contract"],
             "scoring_contract_digest": res["scoring_contract"]["digest"],
-            "generation_protocol_fingerprint":
-                res["generation_protocol_fingerprint"],
         }
         for key, value in got.items():
             observed.setdefault(key, set()).add(str(value))
@@ -493,6 +577,8 @@ def build(evidence: Path, *, bootstrap_seed: int,
             "paired difference over three seeds and fewer than three is not "
             "that quantity")
 
+    #: The comparability decision, verified from the records the POD wrote.
+    admissions = verify_admitted_under_v2(evidence, sorted(controls))
     observed_field = assert_one_field(treatment_results, expected)
 
     control_row_paths = _control_rows()
@@ -537,6 +623,15 @@ def build(evidence: Path, *, bootstrap_seed: int,
         "control_source_run": "attempt75",
         "controls_retrained": False,
         "field_is_one_field": observed_field,
+        #: SERIALIZED, because it is the comparison's premise. The first
+        #: version of this ran `verify_admitted_under_v2`, refused on every
+        #: failing shape, and then let the verdict die in a local variable --
+        #: so a reader of the artifact could see which battery and scoring
+        #: contract matched and had no way to see that the generations had been
+        #: admitted against the controls at all, or under which rule. A check
+        #: whose result is not written down is not evidence that it ran.
+        "admitted_against_the_controls": {str(s): v
+                                          for s, v in sorted(admissions.items())},
         "protocol_identity_matched": expected,
         "correctness": deltas | {"_strata": "omitted", "_ids": "omitted"},
         "interval": interval,

@@ -1,0 +1,410 @@
+{
+ "schema": "aadistill.phase_a3.comparison/v1",
+ "_what_this_is": "The complete A3 engineering/scientific comparison: three newly trained A-bsz3 probes against attempt75's three matched-seed A_incumbent controls, computed OFF POD at $0 from preserved evidence.",
+ "_what_it_is_not": "a formal population-level non-inferiority proof. The interval is descriptive and the SESOI is the scale of a material loss, not a decision rule.",
+ "experiment_id": "phase_a3",
+ "treatment_arm": "A_bsz3",
+ "control_arm": "A_incumbent",
+ "control_source_run": "attempt75",
+ "controls_retrained": false,
+ "field_is_one_field": {
+  "battery": "c1_confirmation_v1",
+  "battery_manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+  "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+  "scoring_contract": "c1_confirmation_scoring@v1",
+  "scoring_contract_digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd"
+ },
+ "admitted_against_the_controls": {
+  "217230555": {
+   "rule": "generation_runtime_comparability@v2",
+   "live_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "historical_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "identities_equal": true,
+   "live_driver": "580.126.09",
+   "historical_driver": "580.159.03",
+   "driver_branch_equal": true,
+   "driver_patch_differs": true
+  },
+  "1151307191": {
+   "rule": "generation_runtime_comparability@v2",
+   "live_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "historical_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "identities_equal": true,
+   "live_driver": "580.126.09",
+   "historical_driver": "580.159.03",
+   "driver_branch_equal": true,
+   "driver_patch_differs": true
+  },
+  "2045359208": {
+   "rule": "generation_runtime_comparability@v2",
+   "live_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "historical_identity": "f9d5bc543e49c4513f1bc700d914801ad3c8a6417ad0c75522b27622211ec020",
+   "identities_equal": true,
+   "live_driver": "580.126.09",
+   "historical_driver": "580.159.03",
+   "driver_branch_equal": true,
+   "driver_patch_differs": true
+  }
+ },
+ "protocol_identity_matched": {
+  "battery": "c1_confirmation_v1",
+  "battery_manifest_sha256": "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42",
+  "battery_content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c",
+  "scoring_contract": "c1_confirmation_scoring@v1",
+  "scoring_contract_digest": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd",
+  "_controls_generation_fingerprint": "c318d1c62197f316e4bbe158c9e20dd71c51410b9a25fb3d127bc0611a06695b",
+  "_controls_evaluation_protocol_hash": "3d0c9ce66208aabf4dcef60b105773337d780e6b16081d822cab060a3af7f0df",
+  "n_prompts": 950,
+  "n_scorable": 850,
+  "strata_sizes": {
+   "gsm8k": 150,
+   "math_verified": 150,
+   "multihop": 150,
+   "rag": 150,
+   "knowledge": 150,
+   "tool": 100
+  }
+ },
+ "correctness": {
+  "n_scorable": 850,
+  "seeds": [
+   217230555,
+   1151307191,
+   2045359208
+  ],
+  "per_seed": [
+   {
+    "seed": 217230555,
+    "control_correct": 29,
+    "treatment_correct": 40,
+    "control_correct_overall": 0.034118,
+    "treatment_correct_overall": 0.047059,
+    "delta": 0.012941
+   },
+   {
+    "seed": 1151307191,
+    "control_correct": 37,
+    "treatment_correct": 27,
+    "control_correct_overall": 0.043529,
+    "treatment_correct_overall": 0.031765,
+    "delta": -0.011765
+   },
+   {
+    "seed": 2045359208,
+    "control_correct": 37,
+    "treatment_correct": 43,
+    "control_correct_overall": 0.043529,
+    "treatment_correct_overall": 0.050588,
+    "delta": 0.007059
+   }
+  ],
+  "mcnemar": [
+   {
+    "seed": 217230555,
+    "treatment_only_correct": 29,
+    "control_only_correct": 18,
+    "discordant": 47,
+    "_convention": "b = gained by treatment, d = lost"
+   },
+   {
+    "seed": 1151307191,
+    "treatment_only_correct": 16,
+    "control_only_correct": 26,
+    "discordant": 42,
+    "_convention": "b = gained by treatment, d = lost"
+   },
+   {
+    "seed": 2045359208,
+    "treatment_only_correct": 29,
+    "control_only_correct": 23,
+    "discordant": 52,
+    "_convention": "b = gained by treatment, d = lost"
+   }
+  ],
+  "pooled_delta": 0.002745,
+  "_aggregation": "the mean over the three fixed paired seeds of the prompt-mean difference, which is C3's own aggregation",
+  "_strata": "omitted",
+  "_ids": "omitted"
+ },
+ "interval": {
+  "method": "stratified prompt-cluster bootstrap",
+  "iterations": 20000,
+  "seed": 654678655,
+  "level": 0.95,
+  "n_prompts": 850,
+  "n_strata": 6,
+  "lcb_one_sided": -0.005098,
+  "ucb_one_sided": 0.010588,
+  "ci_two_sided_low": -0.006275,
+  "ci_two_sided_high": 0.012157,
+  "algorithm": "python.random.Random(seed).randrange, Mersenne Twister",
+  "resamples": "prompts within strata; seeds are FIXED BLOCKS",
+  "_descriptive_only": "this is NOT a non-inferiority test. It describes prompt-level uncertainty conditional on these three checkpoint pairs.",
+  "claim_boundary": "prompt-distribution uncertainty CONDITIONAL ON the three preregistered recovery seeds; NOT an interval over hypothetical future seeds, and NOT a population-level statement"
+ },
+ "behaviour": {
+  "per_seed": [
+   {
+    "seed": 217230555,
+    "control_usable_rollout_rate": 0.5863,
+    "treatment_usable_rollout_rate": 0.6674,
+    "usable_delta": 0.0811,
+    "control_non_empty": 0.7863,
+    "treatment_non_empty": 0.8526,
+    "non_empty_delta": 0.0663,
+    "control_natural_termination": 0.7579,
+    "treatment_natural_termination": 0.8284,
+    "natural_termination_delta": 0.0705,
+    "control_no_severe_repetition": 0.7579,
+    "treatment_no_severe_repetition": 0.8284,
+    "no_severe_repetition_delta": 0.0705,
+    "control_no_context_limit": 1.0,
+    "treatment_no_context_limit": 1.0,
+    "no_context_limit_delta": 0.0,
+    "control_protocol_valid": 0.6084,
+    "treatment_protocol_valid": 0.6916,
+    "protocol_valid_delta": 0.0832
+   },
+   {
+    "seed": 1151307191,
+    "control_usable_rollout_rate": 0.5947,
+    "treatment_usable_rollout_rate": 0.5853,
+    "usable_delta": -0.0094,
+    "control_non_empty": 0.8116,
+    "treatment_non_empty": 0.7726,
+    "non_empty_delta": -0.039,
+    "control_natural_termination": 0.7884,
+    "treatment_natural_termination": 0.7495,
+    "natural_termination_delta": -0.0389,
+    "control_no_severe_repetition": 0.7884,
+    "treatment_no_severe_repetition": 0.7495,
+    "no_severe_repetition_delta": -0.0389,
+    "control_no_context_limit": 1.0,
+    "treatment_no_context_limit": 1.0,
+    "no_context_limit_delta": 0.0,
+    "control_protocol_valid": 0.6232,
+    "treatment_protocol_valid": 0.6105,
+    "protocol_valid_delta": -0.0127
+   },
+   {
+    "seed": 2045359208,
+    "control_usable_rollout_rate": 0.5305,
+    "treatment_usable_rollout_rate": 0.5979,
+    "usable_delta": 0.0674,
+    "control_non_empty": 0.6821,
+    "treatment_non_empty": 0.8463,
+    "non_empty_delta": 0.1642,
+    "control_natural_termination": 0.6421,
+    "treatment_natural_termination": 0.8147,
+    "natural_termination_delta": 0.1726,
+    "control_no_severe_repetition": 0.6421,
+    "treatment_no_severe_repetition": 0.8147,
+    "no_severe_repetition_delta": 0.1726,
+    "control_no_context_limit": 1.0,
+    "treatment_no_context_limit": 1.0,
+    "no_context_limit_delta": 0.0,
+    "control_protocol_valid": 0.5537,
+    "treatment_protocol_valid": 0.6326,
+    "protocol_valid_delta": 0.0789
+   }
+  ],
+  "pooled_usable_delta": 0.046367,
+  "components_reported": [
+   "non_empty",
+   "natural_termination",
+   "no_severe_repetition",
+   "no_context_limit",
+   "protocol_valid"
+  ],
+  "_no_weighted_scalar": "usable_rollout_rate and correct_overall are reported separately and never combined; usable_rollout is blind to correctness by construction",
+  "_components_are_not_independent": "protocol_valid subsumes two of them, so the conjunction is not five agreeing checks"
+ },
+ "breakdowns": {
+  "per_capability": {
+   "gsm8k": {
+    "control_correct_overall": 0.006667,
+    "treatment_correct_overall": 0.017767,
+    "correct_delta": 0.0111,
+    "control_usable_rollout_rate": 0.6622,
+    "treatment_usable_rollout_rate": 0.7978,
+    "usable_delta": 0.1356
+   },
+   "knowledge": {
+    "control_correct_overall": 0.0178,
+    "treatment_correct_overall": 0.026667,
+    "correct_delta": 0.008867,
+    "control_usable_rollout_rate": 0.226667,
+    "treatment_usable_rollout_rate": 0.2378,
+    "usable_delta": 0.011133
+   },
+   "math_verified": {
+    "control_correct_overall": 0.0089,
+    "treatment_correct_overall": 0.0,
+    "correct_delta": -0.0089,
+    "control_usable_rollout_rate": 0.466667,
+    "treatment_usable_rollout_rate": 0.4822,
+    "usable_delta": 0.015533
+   },
+   "multihop": {
+    "control_correct_overall": 0.082233,
+    "treatment_correct_overall": 0.082233,
+    "correct_delta": 0.0,
+    "control_usable_rollout_rate": 0.755567,
+    "treatment_usable_rollout_rate": 0.842233,
+    "usable_delta": 0.086666
+   },
+   "rag": {
+    "control_correct_overall": 0.073367,
+    "treatment_correct_overall": 0.077767,
+    "correct_delta": 0.0044,
+    "control_usable_rollout_rate": 0.9222,
+    "treatment_usable_rollout_rate": 0.9422,
+    "usable_delta": 0.02
+   },
+   "tool": {
+    "control_correct_overall": 0.06,
+    "treatment_correct_overall": 0.06,
+    "correct_delta": 0.0,
+    "control_usable_rollout_rate": 0.686667,
+    "treatment_usable_rollout_rate": 0.663333,
+    "usable_delta": -0.023334
+   }
+  },
+  "per_domain": {
+   "code": {
+    "control_correct_overall": null,
+    "treatment_correct_overall": null,
+    "correct_delta": null,
+    "control_usable_rollout_rate": 0.183333,
+    "treatment_usable_rollout_rate": 0.243333,
+    "usable_delta": 0.06
+   },
+   "general": {
+    "control_correct_overall": 0.0178,
+    "treatment_correct_overall": 0.026667,
+    "correct_delta": 0.008867,
+    "control_usable_rollout_rate": 0.226667,
+    "treatment_usable_rollout_rate": 0.2378,
+    "usable_delta": 0.011133
+   },
+   "rag_multihop": {
+    "control_correct_overall": 0.0778,
+    "treatment_correct_overall": 0.08,
+    "correct_delta": 0.0022,
+    "control_usable_rollout_rate": 0.838867,
+    "treatment_usable_rollout_rate": 0.8922,
+    "usable_delta": 0.053333
+   },
+   "reasoning_math": {
+    "control_correct_overall": 0.007767,
+    "treatment_correct_overall": 0.0089,
+    "correct_delta": 0.001133,
+    "control_usable_rollout_rate": 0.564467,
+    "treatment_usable_rollout_rate": 0.64,
+    "usable_delta": 0.075533
+   },
+   "tool": {
+    "control_correct_overall": 0.06,
+    "treatment_correct_overall": 0.06,
+    "correct_delta": 0.0,
+    "control_usable_rollout_rate": 0.686667,
+    "treatment_usable_rollout_rate": 0.663333,
+    "usable_delta": -0.023334
+   }
+  },
+  "per_set": {
+   "code": {
+    "control_correct_overall": null,
+    "treatment_correct_overall": null,
+    "correct_delta": null,
+    "control_usable_rollout_rate": 0.183333,
+    "treatment_usable_rollout_rate": 0.243333,
+    "usable_delta": 0.06
+   },
+   "gsm8k": {
+    "control_correct_overall": 0.006667,
+    "treatment_correct_overall": 0.017767,
+    "correct_delta": 0.0111,
+    "control_usable_rollout_rate": 0.6622,
+    "treatment_usable_rollout_rate": 0.7978,
+    "usable_delta": 0.1356
+   },
+   "knowledge": {
+    "control_correct_overall": 0.0178,
+    "treatment_correct_overall": 0.026667,
+    "correct_delta": 0.008867,
+    "control_usable_rollout_rate": 0.226667,
+    "treatment_usable_rollout_rate": 0.2378,
+    "usable_delta": 0.011133
+   },
+   "math_verified": {
+    "control_correct_overall": 0.0089,
+    "treatment_correct_overall": 0.0,
+    "correct_delta": -0.0089,
+    "control_usable_rollout_rate": 0.466667,
+    "treatment_usable_rollout_rate": 0.4822,
+    "usable_delta": 0.015533
+   },
+   "multihop": {
+    "control_correct_overall": 0.082233,
+    "treatment_correct_overall": 0.082233,
+    "correct_delta": 0.0,
+    "control_usable_rollout_rate": 0.755567,
+    "treatment_usable_rollout_rate": 0.842233,
+    "usable_delta": 0.086666
+   },
+   "rag": {
+    "control_correct_overall": 0.073367,
+    "treatment_correct_overall": 0.077767,
+    "correct_delta": 0.0044,
+    "control_usable_rollout_rate": 0.9222,
+    "treatment_usable_rollout_rate": 0.9422,
+    "usable_delta": 0.02
+   },
+   "tool": {
+    "control_correct_overall": 0.06,
+    "treatment_correct_overall": 0.06,
+    "correct_delta": 0.0,
+    "control_usable_rollout_rate": 0.686667,
+    "treatment_usable_rollout_rate": 0.663333,
+    "usable_delta": -0.023334
+   }
+  }
+ },
+ "guardrails": {
+  "pooled_usable_delta_min": -0.05,
+  "per_seed_usable_delta_min": -0.1,
+  "observed_pooled": 0.046367,
+  "observed_per_seed": [
+   0.0811,
+   -0.0094,
+   0.0674
+  ],
+  "fired": [],
+  "any_fired": false,
+  "_role": "reported, not gating. A3 completes all three seeds and the closeout states a firing guardrail prominently."
+ },
+ "sesoi": 0.01,
+ "_sesoi_role": "reported as the SCALE of a material loss. No threshold here decides anything.",
+ "claim_boundary": {
+  "what_this_evidence_is": "the complete A3 engineering/scientific comparison, conditional on the three frozen C3 recovery seeds and the frozen confirmation battery.",
+  "the_cross_session_limitation": "treatment and control are measured in DIFFERENT SESSIONS on different physical hardware. C3 trained all nine of its probes in one session precisely to avoid that. Session is an unquantified alternative explanation for any difference A3 finds, and it must remain explicit in every report.",
+  "what_partly_bounds_it": "A3 re-derives the incumbent INITIALIZATION on the new hardware and gates it against 53e30566c5f7. If that passes, the unverified session effect is confined to training and evaluation.",
+  "not_a_formal_proof": "three seeds cannot support a population-level non-inferiority conclusion and A3 does not claim one."
+ },
+ "consumed_inputs_sha256": {
+  "a3_design.json": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+  "c3_probe_results.json": "9672758515a8f015e8e0436d35888779fdc767fed02ea72bdf11cd4052ccf410",
+  "control_scored_217230555": "427067d587ab693fa2c4ef800c3c9a8252d6895d2af032cbc1c8222224bff7e1",
+  "control_scored_1151307191": "9c83b8aa4b22ad322f321c422ae5e92c5eabb51d53c65e3f18159397bdb02e40",
+  "control_scored_2045359208": "1e745d57f22ad5c9e39d6c44937b5d5e7744e0f276c4a6dd943a4e99f132c9e4",
+  "control_per_sample_217230555": "dbe917cfa75ed46f01621e4a4363f161f41d0ce64b8cf92df3a2b6c4ee3d7db9",
+  "control_per_sample_1151307191": "58383b3e778e21fe6eff12eea5677a808d1abb24926927a86a008abd82143eea",
+  "control_per_sample_2045359208": "fb2e95351085362ba485fbfd4412216abae75697cb65613ae295c8c4d5603798",
+  "treatment_per_sample_217230555": "35ec14e1a4b0b091e90edbb19bd62bfc8b94cde279044c7a6601e7b5f9515297",
+  "treatment_per_sample_1151307191": "7367d3052657d69bbc00fab40e4af498b9a0a82d8a5f54fb68b3d00d0069bb93",
+  "treatment_per_sample_2045359208": "493dd96a7f6efdc36bc1be0f00c2ddf34870a2d89dadd529c2a6cab9bb50ca1d"
+ },
+ "_aggregation_ran_off_pod": "attempt75 lost its on-pod decision artifact after a complete measurement. A3's comparison never runs on the meter.",
+ "comparison_sha256": "488f9dd2c81b11072f1da150916f87ef19cf7d07e0a713446b2a1e07697db2b8"
+}

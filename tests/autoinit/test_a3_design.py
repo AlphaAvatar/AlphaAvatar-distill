@@ -551,47 +551,64 @@ def test_the_committed_pricing_record_says_the_chain_is_funded():
     assert len(doc["_every_applicable_limit_is_checked"]) == 4
 
 
-def test_the_phase_envelope_funds_the_chain_and_its_corrected_restarts():
-    """The PHASE envelope, asserted rather than asserted-about.
+def test_the_phase_envelope_is_the_amount_the_maintainer_granted():
+    """What the PHASE envelope IS, which does not move while it is spent.
 
-    This asserted `formal_left < 2 * hard` -- the minimality property of the
-    2026-10-01 amendment, which the maintainer explicitly replaced on
-    2026-10-02 with the instruction "do not size another amendment merely to
-    the next flawless run". The phase envelope deliberately funds a full
-    chain at the hard ceiling PLUS about six corrected pre-science restarts,
-    and that total happens to exceed two full chains.
+    Two earlier versions of this test asserted the balance REMAINING, and
+    both expired the moment the phase executed. The first required
+    `formal_left < 2 * hard` -- the minimality property of the 2026-10-01
+    amendment, which the 2026-10-02 phase decision explicitly replaced ("do
+    not size another amendment merely to the next flawless run"), so it was
+    the opposite of the rule that superseded it. The second required
+    `formal_left >= hard`, a launch-time fundability precondition; A3 then
+    spent the envelope to a terminal result and the test read as a budget
+    shortfall rather than as a finished phase.
 
-    So the old assertion is not a weakened version of the new rule, it is the
-    OPPOSITE of it, and keeping it would mean the budget has to be too small
-    to obey the instruction that sized it.
+    A test on a balance that the phase is designed to consume cannot hold
+    across the phase. So this asserts the GRANT -- the amounts the maintainer
+    stated -- and the identity the books are derived under. **Fundability at
+    launch is not duplicated here**: it is the launcher's own gate, over all
+    four limits, evaluated against the live balance before any create call,
+    and asserted in `tests/pod/test_c3_formal_pricing.py`. One fact, one
+    owner.
 
     **What stops a second full scientific run is governance, not arithmetic.**
     A one-use chain per attempt, `same_failure_gate` before any create call,
     and "if a complete valid measurement already exists, do not rerun it
-    looking for another result". Those are asserted where they live --
-    `tests/infrastructure/test_same_failure_rule.py` and the launcher's own
-    gate order -- so what is asserted HERE is the sizing.
+    looking for another result" -- asserted in
+    `tests/infrastructure/test_same_failure_rule.py` and in the launcher's
+    gate order.
     """
-    import subprocess
-    out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/consolidate/derive_budget.py"),
-         "--json"], capture_output=True, text=True, cwd=str(REPO))
-    assert out.returncode == 0, out.stderr[-400:]
-    b = json.loads(out.stdout)
-    hard = pricing.price_a3(1.09).hard_usd
-    formal_left = b["formal"]["remaining_usd"]
-    assert formal_left >= hard, "the chain is not funded"
+    auth = json.loads((REPO / "configs/experiments/phase_c1/authorization.json")
+                      .read_text())
+    pkg = auth["execution_package"]
+    assert pkg["formal_allowance_usd"] == 76.6523
+    assert pkg["gpu_engineering_allowance_usd"] == 10.0
+    assert pkg["package_total_usd"] == 86.6523
+    #: The project cap and the per-attempt ceiling live in `accepted_pricing`,
+    #: a sibling of the package rather than a member of it.
+    assert auth["accepted_pricing"]["cumulative_cap_usd"] == 410.0
+    assert pkg["per_attempt_hard_ceiling_usd"] == 30.0
+    #: The identity the four-limit check exists BECAUSE of: it holds, which is
+    #: exactly why nothing evaluated the package total until it was added as a
+    #: fourth condition rather than inferred from the other three.
+    assert (pkg["formal_allowance_usd"] + pkg["gpu_engineering_allowance_usd"]
+            == pytest.approx(pkg["package_total_usd"]))
 
-    #: The restart figure is DERIVED from the same component table the chain
-    #: is, so it cannot drift from the thing it is a fraction of.
-    restart = pricing.pre_science_restart_usd(1.09)
-    covered = int((formal_left - hard) // restart)
-    assert covered >= 4, (
-        f"the envelope funds the chain plus only {covered} corrected "
-        f"restart(s) at ${restart:.4f}; the phase decision sized it for "
-        "about six, and a phase that cannot absorb its own ordinary "
-        "engineering failures is the micro-approval loop the decision ended")
+    #: The AMENDMENT, which is the thing the maintainer actually decided, and
+    #: it is recorded in the artifact rather than inferred from a difference.
+    assert "65.6523 -> 76.6523" in pkg["_amendment_2026_10_02"]
+    assert "75.6523 -> 86.6523" in pkg["_amendment_2026_10_02"]
 
-    #: The identity the books are derived under still holds.
-    assert (b["formal"]["allowance_usd"] + b["engineering"]["allowance_usd"]
-            == pytest.approx(b["package"]["allowance_usd"]))
+    #: NO SIZING ASSERTION BELONGS HERE EITHER. "One full chain plus about six
+    #: corrected restarts" was a claim about the balance AT ISSUANCE
+    #: (`$17.3431`), not about the `+$11.0000` delta -- `8.3047 + 6 x 1.4506 =
+    #: 17.0083` exceeds the delta and is a fraction of the cumulative
+    #: allowance, so re-deriving it against either number asserts something
+    #: the decision did not say. Comparing it to the whole formal allowance
+    #: would pass for any plausible chain price, which is a test that cannot
+    #: fail. It is history; `logs/budget/ledger.md` narrates it.
+    #:
+    #: A3 is TERMINAL, so no balance assertion belongs here at all.
+    assert (REPO / "logs/stages/stage-1/phase_a3/analyses/a3_closeout.md"
+            ).is_file(), "the phase closed; its closeout owns the outturn"

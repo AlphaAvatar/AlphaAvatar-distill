@@ -534,6 +534,53 @@ class TestTheNavigationIsDerivedFromTheTree:
         assert text[i:j].strip() == render_stages_index(
             REPO, base="stages/").strip(), "logs/README.md's stage table is stale"
 
+    @needs_whole_tree
+    def test_every_closeout_in_the_tree_yields_a_verdict_and_its_money(self):
+        """The snapshot's `latest_run` block reads the newest run's own
+        closeout. Twice now a new family of closeouts appeared with its
+        classification and its cost under different keys, and the reader
+        DEGRADED rather than refused: eight `phase_c2_behavioural` records
+        rendered as "no classification stated" with no dollars, and then A3's
+        finished run rendered as the raw driver exit string `DRIVER_EXITED:0`
+        with `$1.43` dropped.
+
+        Both went unnoticed because the newest run of that family happened not
+        to be the one being rendered at the time. So this asks the readers
+        about EVERY closeout in the tree, not just whichever is current: a
+        record that states a classification and a cost must have both read
+        back. A closeout that genuinely records no cost — a chain consumed at
+        `$0` before any resource existed — still states `0.0`, so there is no
+        legitimate `None` here to exempt.
+        """
+        from consolidate.render_log_navigation import (
+            _closeout_cost, _closeout_verdict)
+        blind = []
+        for p in sorted((REPO / "logs").rglob("closeout/outcome.json")):
+            doc = json.loads(p.read_text())
+            rel = p.relative_to(REPO)
+            got = _closeout_verdict(doc)
+            if got is None:
+                blind.append(f"{rel}: no key of VERDICT_KEYS")
+            #: PRECEDENCE, which absence alone does not cover. `terminal` is a
+            #: driver exit descriptor; falling back to it while the record also
+            #: states a classification is how `a3_attempt38` rendered as
+            #: `DRIVER_EXITED:0`. Reaching it is correct only when nothing else
+            #: classifies the run.
+            elif got == doc.get("terminal") and any(
+                    isinstance(doc.get(k), str) and doc[k].strip()
+                    for k in ("classification", "status", "verdict")):
+                blind.append(f"{rel}: fell back to `terminal` past a stated "
+                             "classification")
+            #: Its own `_null_means` says an unreadable cost is NOT zero, so a
+            #: stated null is a fact about that run and not a reader defect.
+            stated = (doc.get("cost") or {}).get("actual_usd", "absent")
+            if _closeout_cost(doc) is None and stated != None:  # noqa: E711
+                blind.append(f"{rel}: no path of COST_PATHS")
+        assert not blind, (
+            "the closeout readers are blind to a family of closeouts and will "
+            "silently render an incomplete `latest_run`:\n  "
+            + "\n  ".join(blind))
+
     def test_a_generated_readme_states_no_cost_or_status(self):
         """A generated document restating an owned fact is the duplication the
         cleanup removes; it would also go stale silently."""

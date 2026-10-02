@@ -1,0 +1,68 @@
+{
+  "schema": "aadistill.autoinit.a3_evidence/v1",
+  "experiment_id": "phase_a3",
+  "started_utc": "2026-10-02T15:33:59.353071+00:00",
+  "image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
+  "design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+  "session_contract_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+  "stages": {
+    "teacher_fetch_verify": {
+      "letter": "B",
+      "stage_id": "teacher_fetch_verify",
+      "passed": true,
+      "completed_utc": "2026-10-02T15:34:07.606098+00:00",
+      "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+      "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "local_path": "/root/.cache/huggingface/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+      "shards_verified": 3
+    },
+    "register_operator": {
+      "letter": "C",
+      "stage_id": "register_operator",
+      "passed": true,
+      "completed_utc": "2026-10-02T15:34:08.815461+00:00",
+      "impl_id": "attention.activation_importance_v1",
+      "profile_id": "calib.reasoning_heavy@v2",
+      "battery": null,
+      "scoring_contract": "c9d07bed2c8fd9945973ca5abc887202819843c8021e0095f8ec8c409b2103fd"
+    },
+    "recovery_probes": {
+      "letter": "F",
+      "stage_id": "recovery_probes",
+      "passed": true,
+      "completed_utc": "2026-10-02T15:34:46.731114+00:00",
+      "probes_restored": 3,
+      "restored_from": "a3_attempt35",
+      "completions": [
+        "autoinit.v1.phase_a3.A_bsz3.1151307191",
+        "autoinit.v1.phase_a3.A_bsz3.2045359208",
+        "autoinit.v1.phase_a3.A_bsz3.217230555"
+      ]
+    },
+    "evaluations": {
+      "letter": "G",
+      "stage_id": "evaluations",
+      "passed": true,
+      "completed_utc": "2026-10-02T16:39:35.476976+00:00",
+      "probes_scored": 3,
+      "attested_evaluation_protocol_hash": "8c1f71ba161e01bc3ffd438cc48dde84aa88764bce17ae8469436660fcf01c3e",
+      "generation_protocol_fingerprint": "e9d8da97ec5c0f7b331a30783e7f0f3692f3119c9d4d98de6f686693a7d45258"
+    },
+    "preserve_and_package": {
+      "letter": "H",
+      "stage_id": "preserve_and_package",
+      "passed": true,
+      "completed_utc": "2026-10-02T16:39:35.482927+00:00",
+      "probes": 3,
+      "preserved": 3,
+      "inventory": "artifacts/audit/autoinit_a3/a3_probe_inventory.json"
+    }
+  },
+  "updated_utc": "2026-10-02T16:39:35.482936+00:00",
+  "spent_usd": 1.2911,
+  "training_started": false,
+  "resumed_scoring_from": "a3_attempt35",
+  "_what_this_session_did_not_do": "it did not replay the parent, did not rebuild either initialization protocol and did not train: stages D, E and F's training were skipped because the probes already existed, were durable, and had never been validly scored. The digest finding and the diagnostics are cited from a3_attempt35 rather than reproduced here.",
+  "attested_evaluation_protocol_hash": "8c1f71ba161e01bc3ffd438cc48dde84aa88764bce17ae8469436660fcf01c3e",
+  "probes_scored": 3
+}

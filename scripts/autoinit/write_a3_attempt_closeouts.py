@@ -61,6 +61,45 @@ def normalized_signature(log: str) -> str | None:
     return signature_of(log)
 
 
+#: WHAT AN ATTEMPT'S OWN EVIDENCE SAYS IT REACHED. The first version of this
+#: writer asserted `PRE_SCIENCE_ABORT_NO_MEASUREMENT` and
+#: `measurement_began: False` for every attempt, which was true of the 37 that
+#: aborted and false of `a3_attempt38`, the one that finished: it produced three
+#: scored probe records and the closeout said no probe was trained. A derived
+#: record that cannot describe the successful path is not derived, it is a
+#: default. So the classification is read from the files the attempt wrote.
+def reached(run_dir: Path) -> dict:
+    ev = run_dir / "evidence"
+    scored = sorted(p.name for p in ev.glob("*_c1_confirmation.json"))
+    admitted = sorted(p.name for p in ev.glob("*_generation_admission.json"))
+    #: `evidence/probes` is written by the preservation stage, so it is the
+    #: trained-and-durable fact `a3_attempt35` owns and the resume consumed.
+    preserved = (ev / "probes").is_dir()
+    return {"scored": scored, "admitted": admitted, "preserved": preserved}
+
+
+def classify(pods: list[str], ev: dict) -> tuple[str, str]:
+    if not pods:
+        return ("PRE_PROVIDER_ABORT_NOTHING_CREATED",
+                "one consumed one-use A3 chain that created no provider "
+                "resource. No probe was trained and no measurement was taken.")
+    if ev["scored"]:
+        return (f"MEASUREMENT_COMPLETE_{len(ev['scored'])}_PROBES_SCORED",
+                "a complete A3 measurement. The scientific figures belong to "
+                "the comparison artifact, which is computed off pod from this "
+                "attempt's evidence; this record carries cost and cause.")
+    if ev["preserved"] or ev["admitted"]:
+        return ("TRAINED_PRESERVED_NOT_VALIDLY_SCORED",
+                "probes were trained and preserved and no valid endpoint was "
+                "produced -- AGENTS.md P8.4 state 2. The checkpoints are a "
+                "resume input, not a result, and nothing here authorizes "
+                "pooling or reusing them.")
+    return ("PRE_SCIENCE_ABORT_NO_MEASUREMENT",
+            "one consumed one-use A3 chain. No probe was trained, no "
+            "generation was produced and no measurement was taken, so this "
+            "record carries cost and cause and no scientific field.")
+
+
 def attempt_record(run_dir: Path) -> dict:
     name = run_dir.name
     log_path = SESSIONS / name / "launcher.log"
@@ -79,6 +118,9 @@ def attempt_record(run_dir: Path) -> dict:
     sess = json.loads(session.read_text()) if session.is_file() else {}
     setup_fail = _SETUP_FAIL.search(log)
 
+    ev = reached(run_dir)
+    status, what = classify(pods, ev)
+
     return {
         "schema": SCHEMA,
         "run_id": name,
@@ -86,18 +128,20 @@ def attempt_record(run_dir: Path) -> dict:
         #: STATED, so `formal_sessions` attributes this run to the package
         #: that funds it rather than to the declared-id fallback.
         "package_id": "phase_c1.execution_package.2026-09-11",
-        "status": ("PRE_SCIENCE_ABORT_NO_MEASUREMENT" if pods else
-                   "PRE_PROVIDER_ABORT_NOTHING_CREATED"),
-        "_what_this_is": (
-            "one consumed one-use A3 chain. No probe was trained, no "
-            "generation was produced and no measurement was taken, so this "
-            "record carries cost and cause and no scientific field."),
+        "status": status,
+        "_what_this_is": what,
         "provider_resource_created": bool(pods),
         "pod_ids": pods,
         "all_pods_confirmed_gone": bool(teardowns) and all(t[2] for t in teardowns),
         "terminal": sess.get("terminal"),
         "launcher_exit": sess.get("launcher_exit"),
-        "measurement_began": False,
+        #: DERIVED, not asserted. Training, an admitted generation or a scored
+        #: record all mean formal work began, and the retry rules turn on that.
+        "measurement_began": bool(ev["scored"] or ev["admitted"]
+                                  or ev["preserved"]),
+        "probe_records_scored": ev["scored"],
+        "generations_admitted": len(ev["admitted"]),
+        "probe_checkpoints_preserved": ev["preserved"],
         "session_commit": sess.get("session_commit"),
         "deterministic_failure_signature": normalized_signature(log),
         "setup_refusal": (f"{setup_fail.group(1)}: {setup_fail.group(2)}"

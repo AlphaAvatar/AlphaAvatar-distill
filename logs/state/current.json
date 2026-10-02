@@ -1,6 +1,6 @@
 {
  "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-10-02T00:00:00Z",
+ "generated_utc": "2026-10-03T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "running": {
@@ -11,7 +11,7 @@
  },
  "authorized": {
   "any": true,
-  "note": "The C1 execution package (approved 2026-09-11, amended 2026-09-11b and 2026-09-27: GPU engineering allowance $6.00 -> $10.00, engineering only). All three C3 engineering authorizations are SPENT AND CLOSED. An approval is not a launch. NOTHING may launch now. Owner: logs/budget/decisions.md.",
+  "note": "The C1 execution package (approved 2026-09-11, amended 2026-09-11b, 2026-09-27, 2026-10-01 and 2026-10-02). It funds formal sessions of phase_c1, phase_c3 and phase_a3; A3 is COMPLETE and its spend is settled. An approval is not a launch. NOTHING may launch now. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
   "formal_sessions_used": 9,
   "formal_sessions_max": null,
@@ -23,23 +23,23 @@
   "note": "No chain is prepared and none may be built for C3: the measurement completed and returned NO_GO, which ends formal execution for this round."
  },
  "budget": {
-  "cumulative_spend_usd": 394.4523,
+  "cumulative_spend_usd": 396.8223,
   "authorized_cap_usd": 410.0,
-  "remaining_usd": 15.5477,
+  "remaining_usd": 13.1777,
   "remaining_is_not_permission": true,
-  "formal_remaining_usd": 9.6131,
+  "formal_remaining_usd": 7.2431,
   "engineering_remaining_usd": 1.9395,
-  "package_remaining_usd": 11.5526,
+  "package_remaining_usd": 9.1826,
   "per_session_ceiling_usd": 30.0,
   "full_ceiling_sessions_fundable": 0,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_project_spend_before_this_package_usd": 267.8998,
   "ledger": "logs/budget/ledger.md",
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
-  "_package_spent_usd": 75.0997,
+  "_package_spent_usd": 77.4697,
   "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "planning_floor_usd": 13.4401,
-  "_amendment_2026_10_01": "formal 55.0000 -> 65.6523, package 65.0000 -> 75.6523; prospective and minimal. Owner: logs/budget/decisions.md."
+  "_amendments": "formal 55.0000 -> 65.6523 -> 76.6523 and package 65.0000 -> 75.6523 -> 86.6523, with the project cap 400 -> 410 on 2026-10-02. Prospective; nothing was rewritten. Owner: logs/budget/decisions.md."
  },
  "frozen": {
   "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
@@ -72,10 +72,10 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "next_starting_point": {
-  "status": "C0 COMPLETE. C1 COMPLETE/GO. C2 CLOSED WITHOUT PROMOTION, its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED.",
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE.",
   "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "A3 end to end as ONE chain -- owner logs/stages/stage-1/phase_c3/plans/a3_design.json. Then the FFN experiment. Then D1/D2/D3 design review. The step-1/step-2 split and a_bsz3_adoption.json are SUPERSEDED.",
-  "not_next": "no C3 retry, resume or pooling; no C4; no C2 spend; no 16-probe A-bsz3 study; no D-series execution."
+  "then": "NOTHING. The maintainer's 2026-10-01 order: do not start FFN and do not start D1/D2/D3 after A3. The next action is a maintainer decision.",
+  "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN; no D-series."
  },
  "read_order": [
   "logs/README.md -- START HERE, the index"
@@ -145,18 +145,17 @@
   "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS BLOCKED. C3 is complete with a canonical NO_GO, and the 2026-10-01 amendment funds the complete A3 chain: the derived 8.2525 hard ceiling fits every applicable limit, the package total included. What remains is engineering, not a decision.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. A3 returned a complete terminal result and the maintainer's order ends the autonomous sequence there.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
-  "experiment_id": "phase_c2_behavioural",
-  "run_id": "attempt14",
-  "root": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
-  "outcome": "recorded; REPRODUCTION_COMPLETE_NO_GO_REPRODUCED_WITH_A_RECORDED_DISCREPANCY, $2.0670",
+  "experiment_id": "phase_a3",
+  "run_id": "a3_attempt38",
+  "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt38",
+  "outcome": "not recorded; MEASUREMENT_COMPLETE_3_PROBES_SCORED, $1.4300",
   "index": "logs/index.json",
-  "state": "recorded: the run wrote its own manifest",
-  "last_executed": "logs/stages/stage-1/phase_c2_behavioural/runs/attempt14",
-  "_c2_state": "CLOSED WITHOUT PROMOTION; no probes owed",
+  "state": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout",
+  "last_executed": null,
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout"
  },
  "architecture_migration": {
@@ -184,14 +183,15 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "A3 is executing: acquire the approved L40S, replay the frozen parent, diagnose A-bsz1/A-bsz3, train three treatment probes at attempt75's seeds, evaluate each once, preserve, tear down, aggregate OFF POD at $0, close out. A differing A-bsz3 digest is a FINDING, not a stop.",
+ "next": "Await a maintainer decision. Owner: logs/stages/stage-1/phase_a3/analyses/a3_closeout.md.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
-  "A3": "DESIGNED, FUNDED, chain BUILT and $0-REHEARSED; executing",
-  "next_scientific_stage": "A3"
+  "A3": "COMPLETE 2026-10-03",
+  "next_scientific_stage": null,
+  "_next_is_null_because": "every row above is complete or closed and the maintainer's 2026-10-01 order forbids starting FFN or D1/D2/D3. A null here is the terminal state, not an omission."
  },
  "c2_closure": {
   "decision": "CLOSED WITHOUT PROMOTION",
@@ -209,17 +209,15 @@
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
  "a_bsz3": {
-  "state": "A3 EXECUTING as one chain. Driver (B-H, no stage I), launcher (14 $0 gates), acquisition loop, one-use governance chain and the $0 production rehearsal all BUILT and green.",
-  "shape": "ONE chain: initialization -> recovery -> evaluation -> aggregation -> closeout. Diagnostics gate nothing; a differing artifact digest is a finding.",
-  "design": "logs/stages/stage-1/phase_c3/plans/a3_design.json",
-  "pricing": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-  "probes": "3 new treatment; attempt75's 3 controls reused, not retrained",
-  "identity": "a differing digest does NOT stop A3; the binding is required only before a resumable beam search in D1/D2/D3",
-  "pod_gate": "tests/a3_preflight by DERIVED complement; the launcher declared no test_ignores, which defaults to the whole suite on a billing GPU."
+  "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
+  "verdict": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL: A_bsz1 rebuilt the incumbent 53e30566c5f7, A_bsz3 built 7dd2f6f6980b, result_spec_hash identical. Slower on every pod that measured it; no detectable correctness effect.",
+  "owner": "logs/stages/stage-1/phase_a3/analyses/a3_closeout.md owns every figure, its replicate structure and its claim boundary",
+  "blocks": "A-bsz3 may not enter D1/D2/D3 execution until the numerical execution fingerprint is bound to materialization/resume identity. A passing behavioural result does not clear it.",
+  "authorizes": "nothing"
  },
  "d_series": {
   "state": "DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED.",
   "owner": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-  "order": "after A-bsz3 and FFN; reviewed before any paid execution."
+  "order": "NOT STARTED and NOT TO BE STARTED: the maintainer's 2026-10-01 order stops the autonomous sequence at A3. The recorded sequence, if resumed, is FFN, then freeze the current best per structural kind, then design, price and independently review D1/D2/D3 before any paid execution."
  }
 }

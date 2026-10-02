@@ -119,12 +119,27 @@ def _run_outcome(root: Path, run_root: str | None, *, recorded: bool) -> str:
 #: Ordered alternatives rather than a schema registry: the point is to read
 #: what is there, and a silent degradation is worse than either a loud refusal
 #: or a second key name.
-VERDICT_KEYS: tuple[str, ...] = ("classification", "terminal")
+#: A THIRD FAMILY APPEARED and the same degradation happened again, which is
+#: why this comment is now two incidents long. A3's 38 closeouts and C3's 17
+#: keep their classification under `status` and their money under
+#: `cost.actual_usd`, so the newest A3 run rendered as `DRIVER_EXITED:0` with
+#: no dollars — the raw driver exit string in place of
+#: `MEASUREMENT_COMPLETE_3_PROBES_SCORED`, and `$1.43` dropped. `terminal` stays
+#: last because it is an exit code, not a classification; `cost.actual_usd`
+#: goes last so every closeout that already renders keeps the figure it renders.
+#: And asking the question of EVERY closeout rather than the current one found
+#: a fourth family the same minute: the nine engineering-validation closeouts
+#: under `c2_full_search_cuda`, `c2_full_search_perf` and `c2_state_eval_cert`
+#: keep theirs under `verdict`. None had ever been the newest run of the
+#: experiment a snapshot named, so the blindness had never once been visible.
+VERDICT_KEYS: tuple[str, ...] = ("classification", "status", "verdict",
+                                 "terminal")
 COST_PATHS: tuple[tuple[str, ...], ...] = (
     ("budget", "this_attempt"),      # phase_c2, baseline_completion, full_search, replay
     ("cost", "this_attempt"),        # replay
     ("money", "all_in_usd"),         # behavioural
     ("money", "spent_usd"),          # behavioural, before all_in_usd existed
+    ("cost", "actual_usd"),          # phase_a3, phase_c3
 )
 
 

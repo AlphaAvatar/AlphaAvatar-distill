@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-02. The human view. Every number here has an owner named
+**Updated:** 2026-10-03. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,150 +9,193 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** Pod `ib1q01gn8xuecn` was deleted
-after 919.7 min and is provider-confirmed gone; an account-wide re-query
-returns 0 pods and 0 network volumes.
+**Nothing is running and nothing is billing.** `a3_attempt38`'s pod was deleted
+after 78.9 min and is provider-confirmed gone; an account-wide re-query returns
+**0 pods and 0 network volumes**.
 
-## A3 — ONE experiment, built and rehearsed, EXECUTING
+**A3 is TERMINAL and nothing follows it.** The maintainer's order is explicit:
+do not start the FFN experiment and do not start D1/D2/D3. The next action is a
+maintainer decision, not an agent one.
 
-**The maintainer merged the step-1/step-2 split on 2026-10-01.** A3 runs end
-to end as one chain — initialization → recovery training → evaluation →
-aggregation → closeout — so the practical question is answered once rather
-than across two approvals. Owner:
-[`a3_design.json`](../stages/stage-1/phase_c3/plans/a3_design.json), derived by
-`scripts/autoinit/write_a3_design.py`.
+## A3 IS TERMINAL. A-bsz3 IS A DISTINCT NUMERICAL MATERIALIZATION PROTOCOL.
 
-**The diagnostics still all get collected, and none of them is a gate.**
-Digests, kept-head maps, per-head scores, rank correlation, score drift,
-selection margins, observed position counters, scorer and end-to-end runtime
-with spread, peak VRAM. **A differing A-bsz3 artifact digest is a FINDING, not
-a stop** — the chain proceeds into recovery.
+**Finished 2026-10-03 on `a3_attempt38`.** One chain — initialization →
+recovery training → evaluation → aggregation → closeout — answered the
+practical question once. Owner:
+[`a3_closeout.md`](../stages/stage-1/phase_a3/analyses/a3_closeout.md), every
+figure derived by `scripts/autoinit/aggregate_a3.py` into
+[`a3_comparison.json`](../stages/stage-1/phase_a3/analyses/a3_comparison.json)
+(`488f9dd2c81b1107…`), computed **off pod at `$0`**.
 
-**Six integrity stops, and seven things that are explicitly not stops.** The
-distinction that matters: A-bsz1 and A-bsz3 *differing from each other* is the
-finding; a protocol that cannot reproduce *its own* digest across rounds in one
-session is a stop. Also stops: a parent that does not reproduce, A-bsz1 failing
-to rebuild the incumbent, a masking defect, a protocol-identity mismatch
-against the controls, corrupt input. Each one is repaired, never interpreted as
-a result. No point estimate at any seed ends the chain.
+```text
+A_bsz1   53e30566c5f7   == the frozen C3 incumbent, rebuilt on fresh hardware
+A_bsz3   7dd2f6f6980b   DIFFERENT
+         -> DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL
+result_spec_hash         IDENTICAL
+```
 
-**The `−0.030` fail-fast is withdrawn as a normal stop.** A3 trains all three
-seeds. The number survives as the measured seed-level noise band: across all
-three C3 contrasts — arms whose *pooled* differences were within `0.001961` of
-zero — per-seed deltas still spanned `±0.022353`. A single seed moving that far
-is the instrument, not the protocol.
+**The registered prediction held.** `attn_out` reduces shape-dependently on an
+L40S and only `bsz=1` unpadded is exactly reproducible, so the digest was
+predicted *before* the GPU ran not to match. Each protocol reproduces its
+**own** digest across four interleaved rounds, so this is determinism, not
+noise. One kept-head slot of 448 differs — layer 7, head 13 vs 12, margin
+`0.00047`, a near-tie. Rank correlation `0.9999997`, max score drift `0.0034`,
+peak VRAM `3.1737 GiB`. The masking invariant holds and the `$0` position
+prediction matched observation exactly: 67 forwards / 0 padded for bsz1, 23
+forwards / 2,398 padded for bsz3.
 
-**Three new treatment probes; the controls are not retrained.** attempt75's
-three `A_incumbent` probes are valid, protocol-uniform and fully scored at the
-same frozen seeds `217230555`, `1151307191`, `2045359208`. Protocol identity —
-battery, scoring contract, generation fingerprint `c318d1c62197…`, recipe,
-prompt field — is verified *before the first scientific probe*, then all three
-train.
+**bsz=3 is SLOWER, on every pod that measured it.** Scorer means, 3 timed
+rounds each with the warm-up excluded: `2.8073 / 3.0807` on attempt34 (9.7%),
+`2.8548 / 3.0892` on attempt35 (8.2%), `2.7868 / 3.0647` on attempt36 (10.0%)
+— **mean 9.3%, and the sign never flips**. Peak VRAM `2.4480 → 3.1737 GiB`
+(+29.6%), identical on all three. It is also a modest slowdown in a small part
+of the work: the whole ATTENTION suffix differs by `0.4%`, inside each arm's
+own round-to-round spread.
 
-**Priced as one chain, funded by the minimum amendment.**
+**No runtime threshold was inherited** — the `1.25x` bar belongs to the
+causal-KL packing pilot, which is a different workload. Fitting
+`T = N·F + P·c` to each operator's two batch points explains the sign:
+causal-KL pays `+12.91 ms` per invocation across `60,099` forwards and has
+something to amortize; activation-importance fits a physically impossible
+`−3.45 / −2.57 / −3.56 ms` across **67** forwards and has nothing. The
+per-position term meanwhile clusters at `50.57–50.78 µs` across the three
+fits — the real term is stable and the fixed term is the model being wrong.
+Two batch points per session is an exactly-determined fit, so `F` and `c` are
+not independently identified; drawing the curve needs a third batch size, not
+a third session.
 
-| | |
-| --- | --- |
-| expected | `$5.8680` · 320.56 min |
-| hard ceiling | `$8.2525` · 450.82 min |
-| container disk | **60 GB derived** — 36.06 GiB peak at the parent replay |
-| durable | 6.664 GiB, three probes |
-| book | formal allowance |
-| fundable | **yes, on all four limits** |
+**No detectable correctness effect.** Paired over the three frozen C3 seeds,
+`n_scorable = 850` each, controls **reused from attempt75 and not retrained**:
 
-**A limit that was never checked is now checked.** `Fundability` evaluated
-three conditions and not the **package total** — it looked implied, because the
-package total equals `formal + engineering`, and that identity is exactly why
-nothing evaluated it. At the derived ceiling the formal book was short
-`$9.2017` and the package short `$7.2622`; sizing the amendment from the formal
-shortfall alone would have raised the wrong book by the wrong amount. There are
-four conditions now, in `formal_pricing.evaluate_limits`, which **raises** on a
-missing envelope rather than treating an absent limit as satisfied.
+| seed | Δ correct | McNemar b/d | Δ usable |
+| --- | --- | --- | --- |
+| 217230555 | **+0.012941** | 29 / 18 | +0.0811 |
+| 1151307191 | **−0.011765** | 16 / 26 | −0.0094 |
+| 2045359208 | **+0.007059** | 29 / 23 | +0.0674 |
 
-**The amendment is prospective and minimal:** formal `$55.0000` → `$65.6523`,
-package `$65.0000` → `$75.6523`, engineering and the per-session envelope and
-the project cap all unchanged. It funds the derived ceiling plus **one
-pre-science restart** of `$1.4506` — the chain up to the first scientific
-probe, at hard rates — because the same decision requires autonomous rerun of
-failed setup stages, and an allowance sized to exactly one flawless run cannot
-execute that. `$9.7031` on the formal book, nothing else. **attempt75's
-`$0.9492` overspend stands as historical fact** and nothing rewrites it into
-compliance. Owner: [`decisions.md`](../budget/decisions.md), 2026-10-01.
+Pooled correctness delta `+0.002745`, descriptive 95% CI
+`[−0.006275, +0.012157]`, one-sided LCB `−0.005098`, pooled usable delta
+`+0.046367`, no guardrail fired. Mixed signs with a pooled delta an order of
+magnitude below the `±0.022353` seed-level spread C3 measured is the signature
+of no effect — which one near-tie slot flip is what would predict.
 
-**Durable room was measured, not assumed, and it was blocking.** Account-wide
-private headroom bisected at **12–13 GiB** — A3's three probes fit, A3 plus one
-authorized retry (13.33 GiB) did **not**. attempt75's nine probe weights were
-retired under the consumer rule after an audit found no launcher declaring
-them, no setup fetching them, no registry protecting them, and every code
-reference reading its committed *evidence*. Measured reclaim: **12–13 → 32–33
-GiB**, and six probes now fit. The evidence, hashes, configs, scores and the
-verdict all survive; nine `model.safetensors` do not. Owner:
-[`archival_retirement_20261001.json`](../maintenance/inventories/archival_retirement_20261001.json).
+**The usable-rollout axis moved more, and it is the axis the session caveat
+bites hardest.** Every component is reported in the comparison artifact rather
+than averaged. The three *treatment* non-empty rates cluster at
+`0.8526 / 0.7726 / 0.8463` while the *controls* spread
+`0.7863 / 0.8116 / 0.6821`, and the largest positive delta is the one whose
+control is the outlier — more consistent with between-session variation than
+with a batching-protocol effect, and A3 cannot separate the two. No sample hit
+the context limit on either side.
 
-## The A3 chain — BUILT, REHEARSED at `$0`, EXECUTING
+**Three things this evidence may NOT be used to claim.** It is **not** a
+non-inferiority result: three seeds support no population claim, the interval
+is descriptive (prompt-level, seeds as fixed blocks), the SESOI `0.01` is
+reported as the *scale* of a material loss and decided nothing, and the
+withdrawn `−0.030` is the measured seed-level noise band, never an equivalence
+margin. **Session is an unquantified alternative explanation** — treatment and
+control were measured on different physical hardware, bounded only in part by
+A-bsz1 rebuilding `53e30566c5f7` there. And **A-bsz3 may not enter D1/D2/D3**
+until the byte-identity gap below is bound.
 
-**Every piece exists and is green.**
+**Adoption: nothing to adopt.** The protocol is slower, builds a different
+artifact, and shows no correctness effect. It is not rejected on quality
+grounds; it simply is not an optimization on this operator. The cheap test for
+a future operator is the intercept of per-invocation time against sequence
+length at batch 1.
 
-**`a3_session.py` — A3's frozen identity.** ONE `FixedPathSpec`, because
-A-bsz1 and A-bsz3 are the same operator at the same step with the same hashed
-config; the difference is the `ExecutionConfig` each run is given. So the gate
-is **asymmetric and that is the experiment**: A-bsz1 must rebuild the incumbent
-`53e30566c5f7…`, and A-bsz3 carries **no digest pin at all**, because pinning
-it would answer the question by assertion. Seven stages, B through H, and the
-status path is named once — a driver writing markers to a path its launcher
-does not poll made every marker invisible on attempt75, including `ALL_DONE`.
+**The probes were restored, not retrained.** `a3_attempt35` trained all three
+treatment probes and was then refused by the protocol admission; AGENTS.md
+P8.4 state 2 says a trained, durable, unscored checkpoint is resumed at
+scoring. `a3_attempt38` ran the ladder `B, C, F(restore), G, H` and cited D and
+E from the preserving attempt. The three probes stay durable at
+`a3_preserved_probes/a3_attempt35/` with per-file digests, now P8.4 **state 1**
+— archival evidence, not an execution dependency, eligible for the standing
+retirement policy once no declared consumer reads the bytes. The comparison
+consumed per-sample rows and scored records, never weights.
 
-**`aggregate_a3.py` — the comparison, OFF POD, at `$0`.** attempt75 trained,
-preserved and scored nine probes over 919 minutes and `$16.71`, then lost its
-decision artifact to a crash in the on-pod aggregation. A3's driver therefore
-**ends at preservation** and the comparison never runs on the meter. That
-removes the failure class instead of guarding against it, and it is why the
-stage ladder has no stage I.
+**Cost: `$13.4600` across 34 pods**, every one provider-confirmed deleted.
+Terminal run 78.9 min, `$1.43`, clean `DRIVER_EXITED:0`. Four limits after
+execution: formal `$7.2431` of `$76.6523` · GPU engineering `$1.9395` of
+`$10.0000` · package `$9.1826` of `$86.6523` · project `$23.8977` of
+`$410.0000`. Owner: [`ledger.md`](../budget/ledger.md).
 
-**It is tested on a replica of a finished run, which is the part attempt75
-never had.** Twelve tests build the *shape* of three completed treatment
-probes from the controls' own real evidence and drive the real `build()`: an
-identical field reports exactly `0.0` with zero discordant McNemar pairs; a
-planted `+17/850` improvement comes back at `+0.02` with the right sign and
-`treatment_only_correct == 17, control_only_correct == 0`; and all four
-integrity refusals fire — a generation-fingerprint mismatch, a scoring-contract
-mismatch, a battery mismatch, and two seeds not being the estimand. The
-bootstrap moves with its seed, which is the C3 defect checked directly: every
-C3 record asserted `654678655` while the resampler used C1's `816109261`.
+## The 21 paid rediscoveries of one missing dictionary entry
 
-**One real defect was found by asking what the consumer reads.** The committed
-`c3_probe_results.json` carries counts, rates and per-capability figures and
-does **not** carry the usable-rollout component rates or the per-domain and
-per-set axes — all of which A3 must report. The comparison now reads each
-control's own scored record from the durable evidence and verifies it against
-the `result_sha256` the committed record names.
+**The maintainer's round-4 judgement, and the repair it required.** A3's
+launcher did not put `SESSION_FROZEN_EXPECT` in the pod environment, the shared
+setup script requires it with `${VAR:?}`, and the session therefore died during
+setup — **21 times, for `$2.7400`**, each time on a freshly created provider
+resource. The failure was fully deterministic and knowable at `$0`. The
+maintainer accepted the root-cause fix and the direct contract regression and
+**forbade** building a canary or rehearsal subsystem for it.
 
-**The operational chain is built and rehearsed.** The pod driver owns stages
-B–H and has no stage I. The launcher runs **fourteen** `$0` gates in cost
-order, ending with the durable-capacity question asked at the real per-probe
-size with fresh random oids, and an account-wide billing check immediately
-before the create call. The acquisition loop backs off after a capacity
-refusal rather than rebuilding a chain every 66 seconds, and reads terminal
-state from the launcher log **and** the driver's own status file. The
-governance chain — grant → launch-bound readiness → one-use authorization →
-bundle — derives everything and refuses a grant that states its own ceiling,
-stages, design or identities.
+**Two mechanisms exist now, and both are small.**
+`tests/pod/test_setup_env_requirements.py` parses the shell's own `${VAR:?}`
+requirements and asserts every session launcher supplies them — the contract,
+checked from the side that breaks.
+[`failure_signature.py`](../../src/aadistill/infrastructure/failure_signature.py)
+normalizes a failure to `CLASS:token` and `same_failure_gate` refuses a paid
+retry of an identical deterministic signature **without a corrective change**.
+Transients — provider capacity, cold host, unreachable — return `None` by
+design, so the existing backoff and reacquisition policy still applies to them
+untouched.
 
-**The rehearsal found a pod-fatal defect before a pod existed.** It drives the
-**real** `A3Driver.run` with only hardware-bound calls replaced by fakes that
-emit the real filesystem layout, and stage H was handing `C1ProbeRecord`
-empty `counts` and `rates`, which that type refuses by construction — three
-trainings and three evaluations into a paid session. Five API/CLI mismatches
-were found the same way, all at `$0`.
+**And one host question moved before the money.** `a3_attempt35` trained three
+probes across a `$4.46` session and was then refused, because the host NVIDIA
+driver *branch* had moved `580 → 595` — which `generation_compat@v2` calls a
+real runtime event
+rather than provenance. The property is knowable one ssh round trip after the
+pod answers, so `SessionSpec.host_admission` now asks it between the confirmed
+image identity and setup, and a refusal is **redrawable** exactly like a cold
+host. Default `None`, so no prior session changes behaviour.
 
-**The pod's blocking test gate is `tests/a3_preflight` by derived
-complement**, which the launcher did not declare at all. `test_ignores`
-defaults to empty, so the shared setup script would have run the entire
-repository suite on a billing L40S — roughly forty minutes to prove
-AlphaAvatar-distill passes on that machine, and then a non-zero exit from the
-five documented development-only failures, killing the session during setup
-with every marker unset. C1 paid 16 billed minutes for the first half of that
-lesson.
+## The A3 chain — what it was, and what each gate caught
+
+**Every failure in A3 was found by a gate rather than by reading**, and each
+one produced a durable repair plus a `$0` regression. The ones worth carrying
+forward:
+
+* **The aggregation never ran on the meter.** attempt75 trained, preserved and
+  scored nine probes over 919 min and `$16.71`, then lost its decision artifact
+  to a crash in on-pod stage I. A3's driver **ends at preservation** and the
+  ladder has no stage I. That removes the failure class instead of guarding it.
+* **Three wrong historical comparability sides, in sequence** — A3's own
+  attestation under v1, then the controls' *train* runtime, then the
+  aggregator demanding exact fingerprint equality. All replaced by v2 against
+  the controls' **engine probe**, verified from each pod's own admission
+  record (`comparable is true`, the v2 rule id, `identities_equal`,
+  `driver_branch_equal`). Four runtimes live in this repo and picking the
+  wrong one looks like a science failure.
+* **The wrong ATTENTION calibration profile** (`reasoning_heavy@v2` where the
+  frozen arm says `domain_balanced@v1`). Derived from the frozen arm now; the
+  frozen design document came out byte-identical, which is what proves it was
+  an engineering repair and not a science change.
+* **The pod's blocking test gate was undeclared**, so the shared setup would
+  have run the whole repository suite on a billing L40S and exited non-zero on
+  the documented development-only failures. It is `tests/a3_preflight` by
+  derived complement now.
+* **The disk floor was estimated at 18.61 GiB and measured 50.3 GiB** — the
+  third disk exhaustion in this programme. Container disk is provisioned from
+  the measured floor with a `1.5×` margin: 110 GB.
+* **A driver writing markers to a path its launcher does not poll** made every
+  marker invisible on attempt75, `ALL_DONE` included. The status path is named
+  once.
+
+**The production-path rehearsal is the part attempt75 never had.** It drives
+the **real** `A3Driver.run` with only hardware-bound calls faked, emitting the
+real filesystem layout, and it found a pod-fatal defect before a pod existed:
+stage H handed `C1ProbeRecord` empty `counts` and `rates`, which that type
+refuses by construction — three trainings and three evaluations into a paid
+session. The resume ladder got the same treatment, and a `$0` admission dry run
+proved the host rule satisfiable before anything was created.
+
+**The comparison is tested on a replica of a finished run.** An identical field
+reports exactly `0.0` with zero discordant McNemar pairs; a planted `+17/850`
+improvement comes back at `+0.02` with the right sign; four integrity refusals
+fire (generation fingerprint, scoring contract, battery, wrong estimand). The
+bootstrap moves with its seed — the C3 defect where every record asserted
+`654678655` while the resampler used C1's `816109261`.
 
 ## The D-series directive is recorded and NOT started
 
@@ -171,10 +214,11 @@ Then **Stage-0 teacher-native v2**, with data scale as a first-class variable
 on a deterministic *nested* ladder of ~60k → ~240k → ~960k → ~3.84M target
 positions.
 
-**Order, and it is the maintainer's:** finish A-bsz3, then the FFN
-experiment, then freeze the current-best implementation for every structural
-kind, then design and price D1/D2/D3 and push the protocol for independent
-review *before* any paid execution. Owner:
+**Order, and it is the maintainer's:** A3 is done; **do not start the FFN
+experiment and do not start D1/D2/D3.** When the maintainer resumes the
+programme the recorded sequence is FFN, then freeze the current-best
+implementation for every structural kind, then design and price D1/D2/D3 and
+push the protocol for independent review *before* any paid execution. Owner:
 [`phase_c_roadmap.md`](../stages/stage-1/phase_c1/plans/phase_c_roadmap.md).
 
 ## A-bsz3 — what the implementation is
@@ -194,59 +238,33 @@ pinned; the comparison drives `materialize_fixed_path_suffix`, which starts
 from the already-verified parent and applies the override to the ATTENTION tail
 alone.
 
-**The `$0` half is measured, on the real 67-item frozen mixture:**
+**The old negative result did not transfer, which is why this was measured.**
+`bsz=4` at `0.946×` for the statistics collector was measured at
+*original-order* packing, costing **36.73%** padding; length-sorting at bsz3
+costs **4.01%**. Neither did causal-KL's `1.1884×`. A3 measured the right
+thing and the answer was still no.
 
-| protocol | forwards | padded | executed | pad/valid |
-| --- | --- | --- | --- | --- |
-| A_bsz1 | 67 | 0 | 59,830 | 0.0000 |
-| A_bsz3 | **23** (`0.343×`) | 2,398 | 62,228 | **+4.01%** |
-
-**That is the case for measuring, and it is a specific one.** The prior
-negative result for this workload — `bsz=4` at `0.946×` of `bsz=1` for the
-statistics collector — was measured at *original-order* packing, which costs
-**36.73%** padding. Length-sorting at bsz3 costs **4.01%**. The old number does
-not transfer. Neither does causal-KL's `1.1884×`: that is a different workload
-with a different forward count.
-
-**Equivalence is NOT assumed, and a prediction is recorded before any GPU
-run.** This operator scores heads by `mean_t ||W_o,h a_h(t)||^2`, built from
-`attn_out` — which is in the group *measured* to reduce shape-dependently on an
-L40S (`K/N ≥ 1.6`), and the only exactly reproducible shape is `bsz=1` with
-zero padding. The registered prediction is that the artifact digest will
-**not** match. On CPU float32 all four groupings agree, which establishes the
-*algorithm* is grouping-invariant and nothing more.
-
-**The structural half is unrun and needs a GPU.** Artifact digest, kept heads,
-per-head scores, selection-boundary margins, runtime and peak VRAM all require
-the real teacher in bf16 — a CPU rehearsal cannot reach the behaviour under
-test. The driver `structural_half` is written and **runs end to end at toy
-scale** through the production suffix API, so what is untested is the
-numerics, not the plumbing.
-
-**The operator now emits the evidence the comparison reads**, and none of it
-is identity: `OperatorStep.identity()` does not look at `trace`, and the
-artifact digest comes from the written bytes. Added are the per-head score
-vectors, the forward / executed / valid / padded counters **counted by the
-loop as it ran**, and a CUDA-synchronized `scorer_seconds` around the
-statistics pass alone. The counters matter because `padding_profile` already
-predicts the same three from item lengths — a trace that restated that
-prediction could never contradict it, and these can. The loop's
-`valid_positions` and the collector's independent `calibration_tokens` give a
-masking invariant a consumer checks rather than trusts.
-
-**NOT FUNDED and NOT AUTHORIZED**, and the cheap gate still comes first: if
-the digests match, no behavioural study is owed at all. The numbers are in the
-table above; the `~$30` sixteen-probe figure this paragraph used to carry
-belonged to the withdrawn design.
+**The operator emits the evidence the comparison reads, and none of it is
+identity.** `OperatorStep.identity()` does not look at `trace`, and the
+artifact digest comes from the written bytes. Per-head score vectors, the
+forward / executed / valid / padded counters **counted by the loop as it ran**,
+and a CUDA-synchronized `scorer_seconds` around the statistics pass alone. The
+counters matter because `padding_profile` already predicts the same three from
+item lengths — a trace that restated that prediction could never contradict it,
+and these can. The loop's `valid_positions` and the collector's independent
+`calibration_tokens` give a masking invariant a consumer checks rather than
+trusts.
 
 ## Scientific identity is not materialization identity
 
-**It does not stop A3.** A differing digest is recorded as a finding, the chain
-continues, and no materialization-identity framework is built during the
-experiment. The obligation is forward-only: if A-bsz3 produces a different
-artifact and its behaviour is acceptable, the closeout records it as a distinct
-numerical materialization protocol, and the binding below is required before
-A-bsz3 enters a **resumable beam search** in D1/D2/D3 — not before A3 finishes.
+**The branch below that fired is the second one.** A-bsz3's digest differs, so
+it is a **distinct numerical materialization protocol**, and the obligation is
+now live rather than hypothetical: **A-bsz3 may not enter D1/D2/D3 execution**
+until the repository binds the numerical execution fingerprint to
+materialization/resume identity. It did not stop A3 — the differing digest was
+recorded as a finding and the chain continued to a behavioural result — and no
+materialization-identity framework was built during the experiment, which is
+why this remains an open precondition and not a completed one.
 
 **The gap is stated and tested.** `compute_state_id` binds the root
 teacher, the target spec, each step's implementation id and signature, the
@@ -260,17 +278,16 @@ measured.
 But a semantic id cannot own bytes, and today it is the only id the beam has.
 So:
 
-* **digests identical** → A-bsz3 is a **transparent execution optimization**.
-  It may keep one scientific *and* one materialization identity, and adoption
-  turns on runtime alone. Nothing further is owed and **no mechanism may be
-  built speculatively**.
-* **digests differ** → A-bsz3 is a **distinct numerical materialization
-  protocol**. The shortened sanity study may still be proposed, **and A-bsz3
-  may not enter D1/D2/D3 execution** until the repository binds the numerical
-  execution fingerprint to materialization/resume identity. Two artifacts that
-  differ in bytes must never share a resumable, deduplicable state id. A
-  passing behavioural result does **not** clear this — it is an engineering
-  correctness property, not a behavioural one.
+* **digests identical** → A-bsz3 would be a **transparent execution
+  optimization**, keeping one scientific *and* one materialization identity,
+  with adoption turning on runtime alone. **This branch did not fire.**
+* **digests differ** ← **MEASURED.** A-bsz3 is a **distinct numerical
+  materialization protocol**, and **A-bsz3 may not enter D1/D2/D3 execution**
+  until the repository binds the numerical execution fingerprint to
+  materialization/resume identity. Two artifacts that differ in bytes must
+  never share a resumable, deduplicable state id. A3's behavioural result
+  passed and does **not** clear this — it is an engineering correctness
+  property, not a behavioural one.
 
 **A second implementation id is forbidden as the fix.**
 `attention.activation_importance_bsz3` would fork the *scientific* identity to
@@ -2624,12 +2641,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$9.6131` of `$76.6523` |
+| formal sessions | `$7.2431` of `$76.6523` |
 | GPU engineering | `$1.9395` of `$10.0000` |
-| package | `$11.5526` of `$86.6523` |
-| project cap | `$394.4523` spent of `$410.0000`, leaving `$15.5477` |
+| package | `$9.1826` of `$86.6523` |
+| project cap | `$396.8223` spent of `$410.0000`, leaving `$13.1777` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$9.6131`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 
