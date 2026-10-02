@@ -183,8 +183,20 @@ class TestRefusals:
             materialization_id("", "fingerprint")
 
     def test_no_fingerprint_is_refused_by_naming_the_collision(self):
-        with pytest.raises(MaterializationError, match="collision A3 found"):
+        """And the assertion is on the CONTENT, not on a sentence.
+
+        This matched the phrase "collision A3 found" and broke the moment the
+        module's prose was rewritten to keep a campaign's experiment label out
+        of reusable core — a refusal that still says exactly the right thing,
+        failed by a test that had locked how it said it. What matters is that
+        the message names the missing fingerprint and the collision it prevents;
+        the words are the module's to choose.
+        """
+        with pytest.raises(MaterializationError) as caught:
             materialization_id(SEMANTIC, "")
+        message = str(caught.value)
+        assert "fingerprint" in message
+        assert "collision" in message
 
     def test_the_id_is_deterministic(self):
         assert identity(A_BSZ3).materialization_id == \

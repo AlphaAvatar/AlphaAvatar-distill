@@ -267,16 +267,41 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     ruling as ACCEPTED, and `test_the_fact_appears` requires stage F to keep
     `CONFIRMED ON REAL CUDA` and SHA `7027a8f4`. Both were restored.
 
-    What the remaining growth buys is THREE new live subjects, none of them
-    history: the A-bsz3 adoption study, the scientific-vs-materialization
-    identity precondition that decides whether a differing artifact may enter
-    a later search, and the D-series directive. Each is a decision a reader
-    acts on now.
+    What that growth bought is THREE new live subjects, none of them history:
+    the A-bsz3 adoption study, the scientific-vs-materialization identity
+    precondition that decides whether a differing artifact may enter a later
+    search, and the D-series directive. Each is a decision a reader acts on now.
+
+    14_000 -> 15_500 on 2026-10-03, and the reclamation came first again. A
+    FOURTH live subject arrived: D1 is designed, priced and blocked on two
+    things a maintainer has to rule on, and a reader who does not see both
+    blockers in the snapshot will not find them. Reclaimed in the same round:
+    `a_bsz3` lost its restated verdict, replicate structure and pod count once
+    A3 went terminal and its closeout became the owner (~0.1 KB), and the
+    D-series entry carries pointers rather than the protocol — the design
+    record owns every figure of it.
+
+    THE RECLAMATION DID NOT COVER THE GROWTH, AND THAT IS THE HONEST READING.
+    The file stood at 13_739 of 14_000 before this round, so 261 bytes of
+    headroom had to absorb a fourth subject; it could not. The alternative was
+    deleting live facts, which is precisely what the two squeezes recorded
+    above got wrong. Before the next raise, ask whether Phase A's and Phase B's
+    result blocks are still decisions anyone acts on, or whether the lineage
+    they carry would read better as one line naming the incumbent.
+
+    AND THE SAME SQUEEZE BROKE THE SAME GATE A THIRD TIME. Trimming
+    `next_starting_point.status` dropped "with its Top-5 ACCEPTED and FROZEN",
+    and `test_the_snapshot_does_not_contradict_itself_about_attempt_4` refused
+    — exactly as the 2026-10-01 paragraph above records it refusing. Restored.
+    A squeeze of this file is not a formatting change: two gates read specific
+    words out of it, and they are the attempt-4 ACCEPTED ruling and stage F's
+    `CONFIRMED ON REAL CUDA` with SHA `7027a8f4`. Check both by name before
+    trimming, not after.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 14_000, (
+    assert len(SNAPSHOT.read_bytes()) < 15_500, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

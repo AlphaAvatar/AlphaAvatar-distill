@@ -38,6 +38,7 @@ import torch
 from aadistill.initialization.scoring.positions import (
     FORM_ALL,
     FORM_SELECT,
+    FORM_WEIGHTED,
     PREDICTION_AXIS,
     TOKEN_AXIS,
     PositionWeights,
@@ -207,7 +208,12 @@ def _combined_form(weights: Sequence[PositionWeights]) -> str:
     the corpus.
     """
     forms = {w.form for w in weights}
-    for candidate in ("weighted", FORM_SELECT, FORM_ALL):
+    #: THE CONSTANTS, not their current values. A literal `"weighted"` here
+    #: would keep working only while `FORM_WEIGHTED` happens to equal it, and
+    #: the day it did not this function would silently stop recognising the one
+    #: form the collectors must refuse — reporting `select` for a continuous
+    #: policy and rounding a confidence weight to a mask.
+    for candidate in (FORM_WEIGHTED, FORM_SELECT, FORM_ALL):
         if candidate in forms:
             return candidate
     return FORM_ALL

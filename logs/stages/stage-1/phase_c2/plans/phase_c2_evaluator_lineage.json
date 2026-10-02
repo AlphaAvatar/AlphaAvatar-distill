@@ -25,11 +25,16 @@
  "moved": {
   "path": "src/aadistill/initialization/planning/metrics.py",
   "historical_sha256": "a6dd5d5641ac158266c379fd604dae2e4ff5f4d70599f9597da014ce212b5add",
-  "optimized_sha256": "d193cc906a3f39ed54cd85a22af11a7c66b9bda778657c2727976188e1078f80",
+  "optimized_sha256": "71294d19ff583bb2d604582f5eabc9ba23849eacceb6e13554ccf2b30d7754a0",
   "historical_sha256_prefix": "a6dd5d5641ac",
-  "optimized_sha256_prefix": "d193cc906a3f",
+  "optimized_sha256_prefix": "71294d19ff58",
   "cause": "the device-resident state-eval reduction, adopted by the 2026-09-18 performance round: `_reference_for` and the candidate forward stopped calling `.float().cpu()`, and the targets and tag masks follow the logits' device.",
-  "measured_difference": "certified on the COMPLETE frozen suite by logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/, against a predeclared absolute target on the ranked objectives. The figure a reader should use is that certification's, not the four-item benchmark's."
+  "measured_difference": "certified on the COMPLETE frozen suite by logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/, against a predeclared absolute target on the ranked objectives. The figure a reader should use is that certification's, not the four-item benchmark's.",
+  "superseded_optimized_sha256": "d193cc906a3f39ed54cd85a22af11a7c66b9bda778657c2727976188e1078f80",
+  "superseded_optimized_sha256_prefix": "d193cc906a3f",
+  "second_cause": "MOVED A SECOND TIME by the 2026-10-03 target-aware round: `StateEvaluator` takes a hash-bound scoring-position policy and an ExecutionConfig. The policy weights every state metric and is stamped into the evaluation's detail; the execution config lets the two FORWARDS batch while the reduction stays the same per-item `distortion` call at the same per-item shape with the same chunk boundaries. The evaluator's DEFAULT is the one-item-per-forward reference path and the default policy is `positions.all_v1`, which the reducers detect and treat as a no-op, so a caller that asks for neither performs the operations this file performed before the round. `batch_plan` and `_ensure_groups` are new and refuse over a derived memory budget rather than discovering an OOM mid-search.",
+  "_why_the_prefix_moved": "it pins the CURRENT digest, so it goes stale on every edit to this file. That is the mechanism: the staleness forces a reader rather than letting a bound evaluator drift unread.",
+  "_boundary": "This does NOT re-open the frozen baseline-completion series and does not change what the historical comparison measured. The protocol and its historical hash stay frozen exactly as they are, which is the point: a future B measurement taken under a target-aware policy is a measurement of a different quantity and must not join the old series. The round that moved this file could not avoid it \u2014 making the global state metric target-aware IS a change to this evaluator \u2014 so the obligation was to record it here, not to avoid it."
  },
  "optimized_evaluator": {
   "role": "the CURRENT Phase-C2 Full Search implementation",
@@ -40,7 +45,6 @@
  "_what_is_NOT_refused": "the Phase-C2 Full Search. Its protocol does not bind the evaluator by hash, and it rescores all 578 leaves with ONE implementation, so it is internally consistent. Nothing about this boundary gates that search.",
  "reopening_the_series_requires": "a new explicit scientific decision. Not an amendment made in passing, not a test edit, and not an autonomous repair: re-measuring B under the optimized evaluator would create a second series, and whether the two may be compared is exactly the question this record refuses to answer by default.",
  "authorizes": "nothing",
- "lineage_sha256": "a64aff18b3555cb6b1786c5fa18e1a13e05ede7c9affdad34ff80a9076e84e01",
  "moved_files": [
   {
    "path": "src/aadistill/initialization/planning/metrics.py",
@@ -51,15 +55,24 @@
    "cause": "the device-resident state-eval reduction, adopted by the 2026-09-18 performance round: `_reference_for` and the candidate forward stopped calling `.float().cpu()`, and the targets and tag masks follow the logits' device.",
    "measured_difference": "certified on the COMPLETE frozen suite by logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/, against a predeclared absolute target on the ranked objectives. The figure a reader should use is that certification's, not the four-item benchmark's.",
    "recorded_utc": "2026-09-18T00:00:00Z",
-   "why": "the measured state-eval reduction"
+   "why": "the measured state-eval reduction",
+   "live_sha256": "71294d19ff583bb2d604582f5eabc9ba23849eacceb6e13554ccf2b30d7754a0",
+   "live_sha256_prefix": "71294d19ff58",
+   "second_cause": "MOVED A SECOND TIME by the 2026-10-03 target-aware round: `StateEvaluator` takes a hash-bound scoring-position policy and an ExecutionConfig. The policy weights every state metric and is stamped into the evaluation's detail; the execution config lets the two FORWARDS batch while the reduction stays the same per-item `distortion` call at the same per-item shape with the same chunk boundaries. The evaluator's DEFAULT is the one-item-per-forward reference path and the default policy is `positions.all_v1`, which the reducers detect and treat as a no-op, so a caller that asks for neither performs the operations this file performed before the round. `batch_plan` and `_ensure_groups` are new and refuse over a derived memory budget rather than discovering an OOM mid-search.",
+   "second_cause_recorded_utc": "2026-10-03T00:00:00Z"
   },
   {
    "path": "src/aadistill/initialization/planning/fixed_path.py",
    "recorded_utc": "2026-09-25T00:00:00Z",
    "why": "the operator package/batching round added an `execution: ExecutionConfig` parameter to `materialize_fixed_path`, its verified-suffix twin and their shared step loop, and threads it into `OperatorContext`. It is additive and defaulted: no operator ordering, applicability check, identity gate, artifact write or numeric path changes, and `micro_batch_size=1` reproduces the pre-round tree bit-for-bit on all six operators. It moves this file's sha256 and therefore appears here, which is the mechanism working: a bound evaluator file that drifts must be read, not absorbed.",
    "does_not_change_measurements": true,
-   "_boundary": "This does NOT re-open the frozen baseline-completion series. That comparison was measured end to end by the historical evaluator; nothing here reaches backwards into it, and the frozen contract still refuses a replay under a drifted evaluator -- which is exactly what it should do."
+   "_boundary": "This does NOT re-open the frozen baseline-completion series. That comparison was measured end to end by the historical evaluator; nothing here reaches backwards into it, and the frozen contract still refuses a replay under a drifted evaluator -- which is exactly what it should do.",
+   "live_sha256": "fe945a22bd174219a87d6bb838ed5f318342d0f92bc691a0ac6a5da79c612581",
+   "live_sha256_prefix": "fe945a22bd17",
+   "second_cause": "MOVED AGAIN by the 2026-10-03 target-aware round: the executor RESOLVES the step's declared scoring-position policy from the registry rather than accepting one, and the statistics-cache key gains the execution fingerprint and the policy hash. Additive and defaulted: a step declaring no policy resolves the incumbent, which is numerically inert.",
+   "second_cause_recorded_utc": "2026-10-03T00:00:00Z"
   }
  ],
- "_moved_files_note": "`moved` is kept for readers bound to the single-mover shape; `moved_files` is the full list and is what the contract tests read. A file that drifts without an entry here still fails."
+ "_moved_files_note": "`moved` is kept for readers bound to the single-mover shape; `moved_files` is the full list and is what the contract tests read. A file that drifts without an entry here still fails.",
+ "lineage_sha256": "18fd7a3189fd829ebebcc2c1579a2399cf75d898dc3e615377687aafdfd7295d"
 }

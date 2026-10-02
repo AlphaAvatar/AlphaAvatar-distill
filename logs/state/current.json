@@ -74,7 +74,7 @@
  "next_starting_point": {
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "A MAINTAINER DECISION ON TWO D1 BLOCKERS. The 2026-10-03 order superseded the 2026-10-01 stop: skip the FFN-specific F1 experiment, carry ffn.activation_importance_v0 forward, and take D1 through design, implementation, validation and pricing WITHOUT launching. That round is complete at $0. Neither blocker is an agent decision: the evidence one needs a data ruling, the funding one needs a grant.",
+  "then": "A MAINTAINER DECISION ON D1's TWO BLOCKERS. Neither is an agent decision: the evidence one needs a data ruling, the funding one a grant. Owner: logs/stages/stage-1/phase_d1/plans/d1_design.json.",
   "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN experiment; and no D1 LAUNCH while either blocker is open."
  },
  "read_order": [
@@ -145,7 +145,7 @@
   "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and is blocked twice: (1) EVIDENCE -- 0 of the 2 fresh disjoint batteries it needs can be drawn under the frozen C1 mixture, math_verified being short by 80 of 150 eligible items; (2) FUNDING -- a $60.7509 chain hard ceiling against $13.1777 of project headroom, and D1 is absent from the package's funds_formal_sessions_of list. Either alone prevents execution.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and blocked twice: 0 of the 2 fresh disjoint batteries it needs exist under the frozen C1 mixture, and its $60.7509 chain exceeds the $13.1777 project headroom. Either alone prevents execution. Owner: phase_d1/plans/d1_design.json.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -183,19 +183,19 @@
   "chains_consumed": 14,
   "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
  },
- "next": "Await a maintainer ruling on the D1 evidence resolution and a D1 phase grant. Owner: logs/stages/stage-1/phase_d1/plans/d1_design.json.",
+ "next": "Await a maintainer ruling on D1's evidence resolution and a D1 phase grant. Owner: logs/stages/stage-1/phase_d1/plans/d1_design.json.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
   "A3": "COMPLETE 2026-10-03",
-  "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward as the current best FFN",
+  "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "D1": "DESIGNED 2026-10-03 / NOT AUTHORIZED / BLOCKED on evidence and funding",
   "D2": "NOT STARTED",
   "D3": "NOT STARTED",
-  "next_scientific_stage": "phase_d1, once both blockers are resolved",
-  "_next_is_not_null_because": "the 2026-10-01 order that made it null was superseded on 2026-10-03. D1 is now the named next stage and is blocked rather than forbidden."
+  "next_scientific_stage": "D1",
+  "_next_is_not_null_because": "the 2026-10-01 order that made it null was superseded on 2026-10-03. D1 is blocked rather than forbidden."
  },
  "c2_closure": {
   "decision": "CLOSED WITHOUT PROMOTION",
@@ -214,22 +214,18 @@
  },
  "a_bsz3": {
   "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
-  "verdict": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL: A_bsz1 rebuilt the incumbent 53e30566c5f7, A_bsz3 built 7dd2f6f6980b, result_spec_hash identical. Slower on every pod that measured it; no detectable correctness effect.",
+  "verdict": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL. Slower on every pod that measured it; no detectable correctness effect.",
+  "blocks": "nothing any more: the numerical execution fingerprint is now bound to materialization/resume identity, so the precondition it imposed on D1/D2/D3 is MET. See `d_series.a3_precondition`.",
   "owner": "logs/stages/stage-1/phase_a3/analyses/a3_closeout.md owns every figure, its replicate structure and its claim boundary",
-  "blocks": "A-bsz3 may not enter D1/D2/D3 execution until the numerical execution fingerprint is bound to materialization/resume identity. A passing behavioural result does not clear it.",
   "authorizes": "nothing"
  },
  "d_series": {
-  "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED and BLOCKED TWICE. D2 and D3 NOT STARTED, NOT DESIGNED, NOT PRICED.",
-  "owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary; logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md owns the series plan.",
+  "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED and BLOCKED TWICE. D2 and D3 NOT STARTED.",
+  "owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary; phase_c_roadmap.md owns the series plan.",
   "order": "MAINTAINER ORDER 2026-10-03, superseding 2026-10-01: skip the FFN-specific F1 experiment and proceed to D1. Design, implement, validate and price it; do not launch.",
-  "a3_precondition": "MET. aadistill.initialization.specs.materialization separates semantic_state_id, numerical_execution_fingerprint, materialization_id and artifact_digest; resume, dedup, the statistics-cache key and the operator/measurer policy check all key on the right one, and every refusal is mutation-tested at $0.",
-  "design": "Top-2 candidates screened on 2 seeds, 1 advancing candidate confirmed against B on the 3 frozen seeds: 12 probes. DERIVED from A3's measured per-seed spread, not copied from C2 -- at the same probe count C2's K=5/1-seed design carried a selection bias of 1.5x the SESOI and a 0.42 advance probability against 0.52x and 0.78.",
-  "blockers": {
-   "evidence": "0 of 2 fresh disjoint batteries. Owner: logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json. D2 and D3 need six between them and the pool supports none.",
-   "funding": "chain hard ceiling $60.7509 against $13.1777 project headroom; short by $47.5732. D1 is not in configs/experiments/phase_c1/authorization.json :: execution_package.funds_formal_sessions_of."
-  },
-  "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy. D2's continuous c_ref(t) needs a weighted denominator in StatsSpec plus three divisor call sites; require_binary_token_weights refuses by name rather than rounding.",
+  "a3_precondition": "MET. aadistill.initialization.specs.materialization separates the semantic state id, the numerical execution fingerprint, the materialization id and the artifact digest; resume, dedup, the statistics-cache key and the operator/measurer policy check each key on the right one.",
+  "blockers": "EVIDENCE: 0 of 2 fresh disjoint batteries, owner phase_d1/analyses/d1_evidence_capacity.json. FUNDING: $60.7509 chain against $13.1777, and phase_d1 is absent from the package's funds_formal_sessions_of.",
+  "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy; D2's continuous c_ref(t) needs a weighted denominator in StatsSpec.",
   "authorizes": "nothing"
  }
 }

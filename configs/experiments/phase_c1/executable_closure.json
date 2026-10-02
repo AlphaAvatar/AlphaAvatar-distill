@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 110,
- "digest": "6cf906e73eb2a6865a8449d42ecc52c057a8e7ade5c764625b7d8ef001dbe279",
+ "digest": "84c419fab58f84f26e24f59c969c23943fc868078f8b2358849fa9ac21fd23c5",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -469,8 +469,8 @@
   },
   {
    "path": "src/aadistill/initialization/scoring/batches.py",
-   "sha256": "4876ac79177b6a5960f8f42ebf1d6c1895e010404a88dec1546e4d5fd4c4ebc1",
-   "bytes": 12169
+   "sha256": "19a8fdc987f872d9b7c9ef3c20ffa0fcb45a6d9a81b26579c538c3fec755d9d8",
+   "bytes": 12562
   },
   {
    "path": "src/aadistill/initialization/scoring/positions.py",

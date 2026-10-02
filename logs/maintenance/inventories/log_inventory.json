@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-02T22:47:25+00:00",
+  "created_utc": "2026-10-02T23:48:10+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3090,
-    "bytes": 90134336,
+    "bytes": 90142124,
     "by_disposition": {
       "keep_canonical": 194,
       "keep_immutable": 2674,
@@ -6860,7 +6860,7 @@
     {
       "path": "logs/README.md",
       "size_bytes": 6401,
-      "sha256": "3dbb568ccee387f43adaa4541e444b9889d75ade1d724b5c3eb0560631bcf527",
+      "sha256": "007d597f9dc127832781d424b07c030403448047a1b4cf285655930d44ce5179",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9158,7 +9158,7 @@
     {
       "path": "logs/stages/README.md",
       "size_bytes": 1495,
-      "sha256": "8dddd22300f3184bf302939fe366521bb5d39a7c77a1a427629437eed8b8106c",
+      "sha256": "2e4604e99f2d073f7cea27e6188f1bf6a33ba07f583f7e4133235e6f3ee05d47",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9176,8 +9176,8 @@
     },
     {
       "path": "logs/stages/index.json",
-      "size_bytes": 78720,
-      "sha256": "b75d39126a9925543c24f15c2e5e360cd517037e84a1f36d5c496c33bc4bdece",
+      "size_bytes": 81010,
+      "sha256": "6670b2f4c043b3a28e2996d9b08787a42e280ea5391e4f4590266ea4b2152423",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9214,8 +9214,8 @@
     },
     {
       "path": "logs/stages/stage-1/README.md",
-      "size_bytes": 11545,
-      "sha256": "12c5b8c705cf11ad528b420b97d8d332b08c6cc3fa59a09e1499b8c430b3a6f4",
+      "size_bytes": 12217,
+      "sha256": "645eecd31490c3d765e9d15a03aef6caae0a41ff385a92303377af798af5c7e3",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21670,7 +21670,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 138974,
-      "sha256": "ad0bee21d34ccdf7dcb38174ce8c9a06db32a28c0bc49ce003209655f4cb035d",
+      "sha256": "6b0f0c2a36afc8e4948a6c55d01266495331f78c9e5c77932fc580e9096928f3",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21965,8 +21965,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
-        "logs/maintenance/inventories/log_inventory.json",
-        "logs/state/current.json"
+        "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -27418,8 +27417,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_evaluator_lineage.json",
-      "size_bytes": 6003,
-      "sha256": "da808d217990577fd7e7eb2bbf474ae6f23616e548bcf223aebff9914cf55372",
+      "size_bytes": 9256,
+      "sha256": "ba20bc764d6db3959e5f2863e81d7d896903fb6a9ca1f08bf3611951c017e51d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -49910,39 +49909,45 @@
       "referenced_by": [
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/index.json",
         "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-        "logs/state/current.json",
         "scripts/autoinit/write_d1_design.py",
+        "scripts/consolidate/stage_attribution.py",
         "tests/autoinit/test_d1_design.py"
       ],
       "referenced_by_executable": [
         "scripts/autoinit/write_d1_design.py",
+        "scripts/consolidate/stage_attribution.py",
         "tests/autoinit/test_d1_design.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, tests/autoinit/test_d1_design.py"
+      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, scripts/consolidate/stage_attribution.py, tests/autoinit/test_d1_design.py"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-      "size_bytes": 35302,
-      "sha256": "ae0394f008f58fea222a514c3ebba2f591112de119c66cda4d659bebe978109f",
+      "size_bytes": 38108,
+      "sha256": "a4bb6c7489756aaf5d4c5f56bdc2cc3d0a8c5d643b73287759ed991a6daa1143",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/index.json",
+        "logs/stages/stage-1/README.md",
         "logs/state/current.json",
         "scripts/autoinit/write_d1_design.py",
+        "scripts/consolidate/stage_attribution.py",
         "tests/autoinit/test_d1_design.py"
       ],
       "referenced_by_executable": [
         "scripts/autoinit/write_d1_design.py",
+        "scripts/consolidate/stage_attribution.py",
         "tests/autoinit/test_d1_design.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, tests/autoinit/test_d1_design.py"
+      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, scripts/consolidate/stage_attribution.py, tests/autoinit/test_d1_design.py"
     },
     {
       "path": "logs/stages/stage-1/recovery_continuation/README.md",
@@ -53233,8 +53238,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 16102,
-      "sha256": "a3c883f57499fe461b1eabb3a3c81299a23ba9be8afadfacd7ec55454a28f482",
+      "size_bytes": 14869,
+      "sha256": "aab937832b4b7df2497559228cc8ccb24c544839063262c6cc715de34cc0c9be",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
