@@ -179,6 +179,41 @@ and no capability-level claim is made from them. Per-domain and per-set axes are
 the comparison artifact; correctness is `null` for the `code` domain, where the
 battery scores no correctness, and the usable axis is reported there instead.
 
+**One field, and these are its identities.** The treatment matched the controls
+exactly on everything that carries generation *semantics*:
+
+```text
+battery                     c1_confirmation_v1
+battery_manifest_sha256     e6ff5cf536d515e6
+battery_content_sha256      a285d61f88de9da8
+scoring_contract            c1_confirmation_scoring@v1
+scoring_contract_digest     c9d07bed2c8fd994
+n_prompts / n_scorable      950 / 850
+strata                      gsm8k 150 · math_verified 150 · multihop 150
+                            rag 150 · knowledge 150 · tool 100
+controls' fingerprint       c318d1c62197f316   (RECORDED, not compared — below)
+controls' protocol hash     3d0c9ce66208aabf   (RECORDED, not compared — below)
+```
+
+The two recorded-not-compared fields are the correction this round made. Both
+transitively contain `runtime_digest`, which fuses the image tag with the host
+driver patch, and `generation_compat.NON_MATERIAL_PROTOCOL_FIELDS` names them
+provenance. Comparing them exactly asked the comparability question a fourth
+time under the rule the repository had already replaced, and refused a complete
+three-probe measurement over a patch number the provider chose.
+
+**Guardrails: declared, reported, and none fired.** Pooled usable delta floor
+`−0.05`, per-seed floor `−0.10`; observed `+0.046367` pooled and
+`+0.0811 / −0.0094 / +0.0674` per seed. They were reported rather than gating,
+because A3 completes all three seeds by design.
+
+**The comparison binds what computed it.** Commit `4e50caead8c2`, clean tree,
+`canonical: true`, plus the aggregator's own hash and the hashes of the two
+modules that decide the numbers — the strata and prompt counts the estimand is
+defined over, and the comparability rule the admission records are checked
+against. A dirty tree is refused: a commit recorded beside uncommitted edits
+names bytes that did not run.
+
 **The comparability premise, verified from the records the pod wrote.** Each
 probe's own admission record is required to assert comparability against
 attempt75's controls under `generation_runtime_comparability@v2`, and all three
