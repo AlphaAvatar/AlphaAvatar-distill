@@ -1,0 +1,618 @@
+{
+ "_authorizes": "nothing",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and two independent blockers are recorded below \u2014 the behavioural evidence cannot be built under the frozen mixture, and the chain is not fundable at the current balance.",
+ "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
+ "behavioural_design": {
+  "_derivation": "the screening rung advances the best of K candidates on m seeds. The maximum of K noisy estimates is biased upward even when every candidate is exactly as good as the anchor, so a design has TWO requirements: the bias must sit under the SESOI, and the probability of advancing a candidate that really is better by the SESOI must be worth the probes. Both are derived from A3's measured per-seed spread of the paired delta.",
+  "_what_this_replaces": {
+   "c2_advance_probability": 0.4201,
+   "c2_bias_over_sesoi": 1.501,
+   "c2_design": "K=5 at ONE screening seed",
+   "c2_selection_bias": 0.015009,
+   "reading": "C2's screening rung inflated whichever candidate it advanced by about 1.5x the effect it was looking for, and was more likely to advance a candidate that was NOT the better one (0.42). At the SAME probe count the design above has a bias of 0.52x the SESOI and an advance probability of 0.78. This is a quantified diagnosis of C2's behavioural stage, derived from the project's own measurements \u2014 it is NOT a re-analysis of C2's result and it changes no C2 figure."
+  },
+  "_why_narrow_and_replicate": "bias and discrimination pull opposite ways in K, and at this noise level the narrow design wins on both: K=2 at two screening seeds has a lower bias AND a higher advance probability than K=3 at two seeds, at fewer probes. More behavioural breadth is actively worse unless the seeds grow with it.",
+  "advance_probability": 0.7808,
+  "confirmation_probes": 6,
+  "confirmation_seeds": 3,
+  "decision_rule": {
+   "_inherited_deliberately": "the endpoint, the estimand, the inference and the SESOI are C0's and are NOT re-derived: D1 must be comparable with C1's GO and C2's and C3's negatives, and a new endpoint would make it a separate programme. What is re-derived is the part C0 left to each round \u2014 how many candidates are screened and on how many seeds.",
+   "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+   "guardrails": "usable_rollout vetoes only, reported with every component and never positive ranking credit",
+   "inference": "stratified PROMPT-cluster bootstrap, seeds as fixed blocks; the interval is conditional on those three seed pairs and is not a seed-population claim",
+   "primary_endpoint": "correct_overall",
+   "rule": "three-way GO / NO-GO / INCONCLUSIVE, no forced winner"
+  },
+  "noise_model": {
+   "independence_assumption": "candidates from one search share prompts and a parent, so their errors are positively correlated and the true spread of the maximum is SMALLER. These figures are upper bounds.",
+   "quadrature_self_check": {
+    "1": 0.0,
+    "2": 0.5641895835476809
+   },
+   "rows": [
+    {
+     "advance_probability": 1.0,
+     "bias_over_sesoi": 0.0,
+     "screening_probes": 2,
+     "screening_seeds": 1,
+     "selection_bias": 0.0,
+     "top_k": 1,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 1.0,
+     "bias_over_sesoi": 0.0,
+     "screening_probes": 4,
+     "screening_seeds": 2,
+     "selection_bias": 0.0,
+     "top_k": 1,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 1.0,
+     "bias_over_sesoi": 0.0,
+     "screening_probes": 6,
+     "screening_seeds": 3,
+     "selection_bias": 0.0,
+     "top_k": 1,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.7069,
+     "bias_over_sesoi": 0.7281,
+     "screening_probes": 3,
+     "screening_seeds": 1,
+     "selection_bias": 0.007281,
+     "top_k": 2,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.7808,
+     "bias_over_sesoi": 0.5149,
+     "screening_probes": 6,
+     "screening_seeds": 2,
+     "selection_bias": 0.005149,
+     "top_k": 2,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.8272,
+     "bias_over_sesoi": 0.4204,
+     "screening_probes": 9,
+     "screening_seeds": 3,
+     "selection_bias": 0.004204,
+     "top_k": 2,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.568,
+     "bias_over_sesoi": 1.0922,
+     "screening_probes": 4,
+     "screening_seeds": 1,
+     "selection_bias": 0.010922,
+     "top_k": 3,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.6616,
+     "bias_over_sesoi": 0.7723,
+     "screening_probes": 8,
+     "screening_seeds": 2,
+     "selection_bias": 0.007723,
+     "top_k": 3,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.727,
+     "bias_over_sesoi": 0.6306,
+     "screening_probes": 12,
+     "screening_seeds": 3,
+     "selection_bias": 0.006306,
+     "top_k": 3,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.4816,
+     "bias_over_sesoi": 1.3285,
+     "screening_probes": 5,
+     "screening_seeds": 1,
+     "selection_bias": 0.013285,
+     "top_k": 4,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.5839,
+     "bias_over_sesoi": 0.9394,
+     "screening_probes": 10,
+     "screening_seeds": 2,
+     "selection_bias": 0.009394,
+     "top_k": 4,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.6568,
+     "bias_over_sesoi": 0.767,
+     "screening_probes": 15,
+     "screening_seeds": 3,
+     "selection_bias": 0.00767,
+     "top_k": 4,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.4201,
+     "bias_over_sesoi": 1.5009,
+     "screening_probes": 6,
+     "screening_seeds": 1,
+     "selection_bias": 0.015009,
+     "top_k": 5,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.5251,
+     "bias_over_sesoi": 1.0613,
+     "screening_probes": 12,
+     "screening_seeds": 2,
+     "selection_bias": 0.010613,
+     "top_k": 5,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.6045,
+     "bias_over_sesoi": 0.8665,
+     "screening_probes": 18,
+     "screening_seeds": 3,
+     "selection_bias": 0.008665,
+     "top_k": 5,
+     "under_sesoi": true
+    },
+    {
+     "advance_probability": 0.3755,
+     "bias_over_sesoi": 1.6354,
+     "screening_probes": 7,
+     "screening_seeds": 1,
+     "selection_bias": 0.016354,
+     "top_k": 6,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.4804,
+     "bias_over_sesoi": 1.1564,
+     "screening_probes": 14,
+     "screening_seeds": 2,
+     "selection_bias": 0.011564,
+     "top_k": 6,
+     "under_sesoi": false
+    },
+    {
+     "advance_probability": 0.5622,
+     "bias_over_sesoi": 0.9442,
+     "screening_probes": 21,
+     "screening_seeds": 3,
+     "selection_bias": 0.009442,
+     "top_k": 6,
+     "under_sesoi": true
+    }
+   ],
+   "schema": "aadistill.autoinit.screening_selection_noise/v1",
+   "seed_sd": 0.012906,
+   "seed_sd_cross_check_range": 0.022353,
+   "seed_sd_source": "A3's three paired per-seed correct_overall deltas on c1_confirmation_v1, logs/stages/stage-1/phase_a3/analyses/a3_closeout.md",
+   "sesoi": 0.01
+  },
+  "priced_grid": [
+   {
+    "_c2_design": false,
+    "advance_probability": 1.0,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 1,
+    "hard_ceiling_usd": 45.9543,
+    "screening_probes": 0,
+    "screening_seeds": 0,
+    "selection_bias": 0.0,
+    "top_k": 1,
+    "total_probes": 6
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.7069,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 54.3119,
+    "screening_probes": 3,
+    "screening_seeds": 1,
+    "selection_bias": 0.007281,
+    "top_k": 2,
+    "total_probes": 9
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.7808,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 60.7509,
+    "screening_probes": 6,
+    "screening_seeds": 2,
+    "selection_bias": 0.005149,
+    "top_k": 2,
+    "total_probes": 12
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.6616,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 65.0438,
+    "screening_probes": 8,
+    "screening_seeds": 2,
+    "selection_bias": 0.007723,
+    "top_k": 3,
+    "total_probes": 14
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.727,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 73.6293,
+    "screening_probes": 12,
+    "screening_seeds": 3,
+    "selection_bias": 0.006306,
+    "top_k": 3,
+    "total_probes": 18
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.5839,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 69.3365,
+    "screening_probes": 10,
+    "screening_seeds": 2,
+    "selection_bias": 0.009394,
+    "top_k": 4,
+    "total_probes": 16
+   },
+   {
+    "_c2_design": true,
+    "advance_probability": 0.4201,
+    "bias_under_sesoi": false,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 60.7509,
+    "screening_probes": 6,
+    "screening_seeds": 1,
+    "selection_bias": 0.015009,
+    "top_k": 5,
+    "total_probes": 12
+   },
+   {
+    "_c2_design": false,
+    "advance_probability": 0.6045,
+    "bias_under_sesoi": true,
+    "confirmation_probes": 6,
+    "fresh_batteries_required": 2,
+    "hard_ceiling_usd": 86.5077,
+    "screening_probes": 18,
+    "screening_seeds": 3,
+    "selection_bias": 0.008665,
+    "top_k": 5,
+    "total_probes": 24
+   }
+  ],
+  "protocol_uniformity": {
+   "_not_a_between_session_comparison": "A3's remaining unquantified alternative explanation is that its treatment and controls were measured in different sessions. D1 does not inherit that: both arms of each rung are measured together.",
+   "how": "all probes of a rung are trained and evaluated in ONE session on one host, under one image digest, one engine version and one scoring contract; the comparison verifies each probe's own admission record asserts comparability under generation_runtime_comparability@v2 and serializes the verdict.",
+   "requirement": "every probe in one comparison field is GENERATED and EVALUATED under one protocol identity. C2's confirmation field mixed them, which is the limitation its closure records."
+  },
+  "screening_probes": 6,
+  "screening_seeds": 2,
+  "seed_sd": 0.012906,
+  "selection_bias": 0.005149,
+  "sesoi": 0.01,
+  "top_k": 2,
+  "total_probes": 12
+ },
+ "budget": {
+  "BLOCKER": "D1 is NOT FUNDABLE. The chain's hard ceiling exceeds the project's entire remaining headroom, and D1 is not in the C1 execution package's `funds_formal_sessions_of` list, so no existing allowance covers it. A maintainer grant is required for the phase, and the cap would have to move with it.",
+  "_why_three_sessions": "the search commits a candidate set and stops; the screening rung cannot be bound until that set exists, and the confirmation rung cannot be bound until screening names the one candidate that advances. Each is separately priced and separately authorized.",
+  "chain": {
+   "expected_usd": 39.7047,
+   "hard_ceiling_usd": 60.7509,
+   "max_session_hard_ceiling_usd": 31.1577,
+   "price_per_hour": 1.09,
+   "sessions": {
+    "confirmation": {
+     "container_disk_gb": 120,
+     "container_disk_usd": 0.2228,
+     "expected_minutes": 641.1,
+     "gpu_usd": 14.5738,
+     "hard_ceiling_minutes": 802.23,
+     "hard_ceiling_usd": 14.7966,
+     "minutes_per_probe_bounding": 89.516,
+     "n_probes": 6,
+     "overrun_factor": 1.3,
+     "price_per_hour": 1.09,
+     "probe_minutes": 537.1,
+     "session_overhead_minutes": 104.0
+    },
+    "screening": {
+     "container_disk_gb": 120,
+     "container_disk_usd": 0.2228,
+     "expected_minutes": 641.1,
+     "gpu_usd": 14.5738,
+     "hard_ceiling_minutes": 802.23,
+     "hard_ceiling_usd": 14.7966,
+     "minutes_per_probe_bounding": 89.516,
+     "n_probes": 6,
+     "overrun_factor": 1.3,
+     "price_per_hour": 1.09,
+     "probe_minutes": 537.1,
+     "session_overhead_minutes": 104.0
+    },
+    "search": {
+     "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead.",
+     "beam_width": 6,
+     "container_disk_gb": 400,
+     "container_disk_usd": 1.511,
+     "expansions_max": 92,
+     "expansions_min": 92,
+     "expected_minutes": 840.92,
+     "expected_trajectory_expansions": 92,
+     "expected_trajectory_minutes": 745.92,
+     "gpu_usd": 29.6467,
+     "hard_ceiling_minutes": 1631.93,
+     "hard_ceiling_usd": 31.1577,
+     "price_per_hour": 1.09,
+     "session_overhead_minutes": 95.0,
+     "structural_minutes_max": 1536.93,
+     "structural_minutes_min": 740.9,
+     "unmeasured_inputs": [],
+     "warmup_levels": 1
+    }
+   },
+   "total_probes": 12
+  },
+  "d_series_extrapolation": {
+   "_caveat": "an extrapolation, not a price. D2 adds a reference forward per operator-local comparison and D3 adds a student-confidence component; neither is measured, so neither is priced here. The figure is the floor of the D-series, not its cost.",
+   "_what": "D2 and D3 repeat this shape by the maintainer's instruction \u2014 each a full search, freeze, recovery, behavioural evaluation and promotion decision.",
+   "three_chains_hard_ceiling_usd": 182.2527
+  },
+  "fits_per_session_envelope": false,
+  "per_session_envelope_usd": 30.0,
+  "position": {
+   "_owner": "scripts/consolidate/derive_budget.py, which reads each attempt's own closeout. Restated here only so the shortfall below is checkable; the deriver is the owner and a reader should re-derive rather than trust this.",
+   "formal_remaining_usd": 7.2431,
+   "package_remaining_usd": 9.1826,
+   "project_cap_usd": 410.0,
+   "project_remaining_usd": 13.1777
+  },
+  "price_basis": {
+   "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
+   "gpu": "NVIDIA L40S securePrice",
+   "usd_per_hour": 1.09
+  },
+  "sessions": 3,
+  "shortfall_usd": 47.5732
+ },
+ "contamination_protection": {
+  "BLOCKER": "ZERO further disjoint batteries can be drawn under the frozen C1 mixture. math_verified holds 70 eligible items of the 150 a battery needs: MATH-500's 500 rows are already committed to the five isolation roles, c1_confirmation_v1 and c2_screening_v1. D1 cannot be executed as designed until this is resolved, and neither can D2 or D3.",
+  "_not_a_resolution": "drawing the screening battery from a different source than the confirmation battery. A screening delta informs a confirmation delta only if both are means over the same distribution, which is exactly why c2_screening_v1 preserves C1's mixture.",
+  "batteries_D1_requires": 2,
+  "batteries_available": 0,
+  "binding_stratum": "math_verified",
+  "owner": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
+  "requirement": "D1/D2/D3 are an adaptive sequence. Each round's confirmation must rest on prompts that round's design has not been tuned against, and D2's and D3's must not reuse D1's.",
+  "resolutions_for_the_maintainer": [
+   {
+    "cost": "a data decision: license, the fact that MATH-500 is a curated subset, and a difficulty distribution that would shift. `correct_overall` would remain a mean over the same stratum BALANCE but over a different population, so the SESOI's transfer needs an explicit argument.",
+    "option": "extend the verified-math source",
+    "unblocks": "D1, D2 and D3 (about 4,500 further eligible items)",
+    "what": "draw the stratum from the full Hendrycks MATH test set rather than its 500-problem verified subset, as a `math_verified_v2` source with the same count and the same sampling discipline"
+   },
+   {
+    "cost": "changes the MIXTURE, and `correct_overall` and its SESOI are DEFINED on the mixture. Every C1/C2/C3/A3 number becomes incomparable; this is a C0-level redesign.",
+    "option": "reduce the math_verified count per battery",
+    "unblocks": "one further battery, then exhausted again",
+    "what": "e.g. 70 instead of 150, with the other strata unchanged"
+   },
+   {
+    "cost": "the contamination the directive forbids. B was PROMOTED on that battery and C2's and C3's negatives were measured on it, so each further round's design is informed by the previous round's numbers on the same prompts. The leak is cumulative across rounds, not within one.",
+    "option": "reuse an existing battery for D1's confirmation",
+    "unblocks": "D1 only, at a recorded and growing selection risk",
+    "what": "confirm on c1_confirmation_v1, as A3 did"
+   }
+  ],
+  "short_by_items": 80,
+  "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
+ },
+ "design_hash": "5bf1e3cb00141ff0c3cb8c55af5cb6ef5f020f4e3ac564f56781ac41ec9c0bd5",
+ "execution_protocol": {
+  "_decision": "maintainer engineering decision after A3: batched execution is adopted across every batchable path from D1 onward, not only ATTENTION. A3 measured that it is NOT an optimization on attention.activation_importance_v1 \u2014 8-10% slower on the scorer with no detectable correctness effect \u2014 so this is a uniformity decision rather than a performance claim, and the search ceiling below is derived from UNBATCHED telemetry and therefore bounds it either way.",
+  "_the_value_is_config_not_core": "`3` is an experiment-policy number carried by ExecutionConfig. The core accepts 2, 4, 8 or a future token-budget batching policy with no edit; `aadistill.initialization.execution` owns the knob and `calibration.packing` owns the policies.",
+  "calibration_batch_packing": "length_sorted_v1",
+  "micro_batch_size": 3,
+  "numerical_invariant": "score = sum_t(w_t * value_t) / sum_t(w_t), with w_t = 0 at a padded position. Padding never enters a denominator; a per-item mean is formed per row so batch composition cannot change domain weighting; and there is no batch-size-specific scientific branch.",
+  "paths_covered": [
+   "DEPTH causal-KL scoring",
+   "FFN activation statistics",
+   "RESIDUAL_WIDTH residual second moments",
+   "ATTENTION residual-write statistics",
+   "global state evaluation (forwards batched; the reduction stays the certified per-item `distortion` call)",
+   "beam candidate evaluation, through the same evaluator"
+  ],
+  "state_eval_bound": {
+   "_why_a_bound_exists": "a batched state evaluation materializes two [B, T_max, V] logit blocks at a 151,936 vocabulary. StateEvaluator refuses before the first forward when the widest group would exceed the budget, because the alternative is discovering the limit as an OOM mid-search \u2014 which is how the causal-depth rehearsal died.",
+   "_why_length_sorted": "2.1% padding against 23.4% at the mixture's own order, derived from the suite's lengths at `$0`.",
+   "budget_bytes": 12884901888,
+   "max_group_width_tokens": 2002,
+   "padding_over_valid": 0.0211,
+   "padding_over_valid_at_original_order": 0.2335,
+   "peak_logit_bytes_both_models_bf16": 3651993600
+  }
+ },
+ "experiment_id": "phase_d1",
+ "hypothesis": {
+  "measured_restriction": "the policy admits 44,746 of 59,763 prediction positions on calib.domain_balanced@v1 (74.9%) and 46,825 of 59,763 on calib.reasoning_heavy@v2 (78.4%), and 54,014 of 74,022 on the state_eval_v1 suite (73.0%). Derived from each asset's own `assistant` tag; see `scoring_policy.verification`.",
+  "question": "Does making structural scoring and global candidate evaluation SUPERVISED-TARGET-AWARE produce a better initialization than the incumbent full-sequence scoring, under the same operator set, the same calibration data, the same beam and the same recovery recipe?",
+  "untemplated_items": "an item with no `assistant` tag is untemplated raw text with no assistant turn, and every one of its real prediction positions stays active. That keeps D1's DATA identical to the incumbent search's and changes only the scoring semantics; removing the raw-LM exception belongs to the later Stage-0 teacher-native-v2 experiment, not here.",
+  "what_D1_changes": [
+   "DEPTH: the causal-KL mean is taken over supervised target positions only",
+   "FFN: E[|a_j|] is an expectation with respect to supervised target positions only",
+   "RESIDUAL_WIDTH: the residual second moments accumulate over the token positions that feed supervised predictions",
+   "ATTENTION: mean_t ||W_o,h a_h(t)||^2 is a mean over the same set",
+   "GLOBAL STATE EVALUATION: teacher KL, worst-domain, critical-token and top-1 agreement are weighted means over the same set",
+   "BEAM RANKING: consumes that state evaluation, so a candidate selected on supervised positions cannot be pruned on all of them"
+  ],
+  "what_D1_does_NOT_change": [
+   "the calibration DATA: the same two frozen mixtures, the same items, the same tokens. Only which of their positions the objectives read.",
+   "the operator set: one frozen implementation per structural kind",
+   "the beam width, the beam schedule and the ranking policy",
+   "the target geometry, the teacher and the tokenizer",
+   "the recovery recipe and the scoring contract"
+  ],
+  "why_it_might": "every calibration-derived objective in the incumbent search is an expectation over EVERY token position of the mixture. For the 51 of 67 templated items in calib.domain_balanced@v1, most of those positions are prompt, system and user text the student is never asked to predict. The structure that survives compression is therefore chosen to protect predictions the objective does not care about, which is a plausible misallocation of a fixed capacity budget \u2014 and it has never been varied, so there is no evidence either way."
+ },
+ "incumbent": {
+  "_not_recovered": "B is an INITIALIZATION. No formal Stage-2/Stage-3 recovery evidence exists for it or for anything else.",
+  "_what_it_is": "B, the frozen C1 treatment. C2 closed without promotion and C3 returned NO_GO, so B still stands.",
+  "artifact_digest": "c313d1b4081b",
+  "state_id": "fe9683e6a9c783bbc6fe276a78c851c6"
+ },
+ "inputs": {
+  "a3_comparison": "logs/stages/stage-1/phase_a3/analyses/a3_comparison.json",
+  "budget_terms": "configs/experiments/phase_c1/authorization.json",
+  "c0_preregistration": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json",
+  "c1_battery": "logs/stages/stage-1/phase_c1/plans/battery.json",
+  "evidence_capacity": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
+ },
+ "materialization_prerequisite": {
+  "not_cleared_by": "a passing behavioural result. It is an engineering correctness property, which is why the A3 closeout refuses to let one stand in for it.",
+  "requirement": "A-bsz3 may not enter D1/D2/D3 execution until the repository binds the numerical execution fingerprint to materialization/resume identity. Owner: logs/stages/stage-1/phase_c3/plans/a_bsz3_adoption.json :: identity_semantics.",
+  "resolution": {
+   "enforcement": [
+    "BeamSearch._restore declines a journal entry whose materialization differs",
+    "BeamSearch._restore declines an evaluation measured under another scoring policy",
+    "BeamSearch._materialize_and_measure refuses a measurer that scored other positions",
+    "stats_cache_key carries the execution fingerprint and the policy hash",
+    "MaterializationIdentity.bind refuses a second, different digest"
+   ],
+   "identities": {
+    "artifact_digest": "the bytes, observed and bound once",
+    "materialization_id": "semantic + fingerprint; what resume, dedup and checkpoint ownership key on",
+    "numerical_execution_fingerprint": "batch size, packing, device class, compute dtype, accumulation dtype",
+    "semantic_state_id": "the scientific/path identity; still deliberately blind to execution"
+   },
+   "mechanism": "aadistill.initialization.specs.materialization",
+   "regression": "tests/autoinit/test_materialization_identity.py and tests/autoinit/test_target_aware_scoring_end_to_end.py::TestResumeRefusals",
+   "status": "IMPLEMENTED AND VERIFIED at `$0` on CPU. The A3 precondition is met."
+  },
+  "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
+ },
+ "recovery_recipe": "E1_KD_HEAVY_0860K",
+ "schema": "aadistill.autoinit.phase_d1_design/v1",
+ "scoring_policy": {
+  "_control_is_the_incumbent": "`positions.all_v1` is not a new object introduced to be the control: it is the semantics every committed operator result was computed under, now named and hashed so a record can state it. It is numerically inert \u2014 the reducers detect it and take their untouched path \u2014 which is what keeps a historical checkpoint reproducible.",
+  "control": {
+   "description": "every real position carries weight one, on both axes; the semantics every committed operator result was computed under",
+   "policy_hash": "f0d6271329edb3c6987df50ec1417b779b95d98210e14481584cf6d43ab9e4fd",
+   "policy_id": "positions.all_v1",
+   "qualified_id": "positions.all_v1@v1",
+   "reads_tags": [],
+   "untagged_behaviour": "irrelevant: no tag is consulted",
+   "version": 1
+  },
+  "treatment": {
+   "description": "prediction positions whose target token is supervised by the item's own objective contract, read from the mixture's `assistant` tag; every real prediction position for an item that carries no such tag; on the token axis, the position that feeds each active prediction",
+   "policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+   "policy_id": "positions.supervised_target_v1",
+   "qualified_id": "positions.supervised_target_v1@v1",
+   "reads_tags": [
+    "assistant"
+   ],
+   "untagged_behaviour": "an item with no `assistant` tag is untemplated raw text with no assistant turn; all of its real prediction positions stay active",
+   "version": 1
+  },
+  "verification": "tests/autoinit/test_scoring_position_policy.py derives the restriction independently from each frozen mixture's own fields and compares; tests/autoinit/test_target_aware_scoring_end_to_end.py asserts the incumbent policy changes no artifact and the treatment moves all four structural decisions.",
+  "where_it_is_bound": {
+   "operator": "OperatorStep.config_hash, via the hashed operator config, so the whole subtree forks",
+   "search": "SearchConfig.config_hash",
+   "state_metric": "StateEvaluation.detail.position_policy_hash",
+   "statistics_cache": "stats_cache_key.numerical_config"
+  }
+ },
+ "search_stage": {
+  "_cost_is_conservative": "every cell of the per-expansion table was measured with an UNBATCHED state evaluation and a one-item-per-forward statistics pass. D1 runs both batched, which can only reduce the time per expansion, so these minutes bound D1 rather than describe it. They are deliberately not adjusted downward: a ceiling derived from a predicted speed-up is a prediction.",
+  "_why_calibration_assignment_stays_free": "the incumbent assignments were chosen by searches that scored over every position. Pinning them would inherit a choice made under the semantics D1 is testing, which is the same mistake C2b records about Search-1's pinned mixtures.",
+  "beam": {
+   "_why_unchanged": "the standing declared schedule. D1/D2/D3 must share a beam width for the scoring semantics to be the only variable, and adopting a different one here would be a new breadth decision taken for no measured reason.",
+   "schedule_id": "beam.delayed_prune",
+   "warmup_levels": 1,
+   "width": 6
+  },
+  "cost": {
+   "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead.",
+   "beam_width": 6,
+   "container_disk_gb": 400,
+   "container_disk_usd": 1.511,
+   "expansions_max": 92,
+   "expansions_min": 92,
+   "expected_minutes": 840.92,
+   "expected_trajectory_expansions": 92,
+   "expected_trajectory_minutes": 745.92,
+   "gpu_usd": 29.6467,
+   "hard_ceiling_minutes": 1631.93,
+   "hard_ceiling_usd": 31.1577,
+   "price_per_hour": 1.09,
+   "session_overhead_minutes": 95.0,
+   "structural_minutes_max": 1536.93,
+   "structural_minutes_min": 740.9,
+   "unmeasured_inputs": [],
+   "warmup_levels": 1
+  },
+  "exclusions": {
+   "attention.causal_kl_v1": "formal C3 measured it and returned NO_GO on the primary operator-isolation contrast; it does not promote.",
+   "attention.weight_proxy_v0": "C1 is the isolation experiment between it and attention.activation_importance_v1 and returned GO. Promotion is what an isolation verdict is for.",
+   "composite.stage1_sandwich_v0": "reaches the target in ONE step, so a leaf containing it has no per-kind operator decisions for a scoring policy to change. D1 varies how the four structural decisions are scored; a path that makes none of them separately is outside the question.",
+   "depth.positional_v0": "a fixed positional heuristic that consumes no calibration, so no position policy can change its output. Admitting it would put a branch in D1 that the experimental variable cannot reach."
+  },
+  "free_variables": [
+   "operator ORDER (4! = 24 orderings)",
+   "calibration PROFILE per operator (2^4 = 16 assignments)"
+  ],
+  "frozen_implementations": {
+   "ATTENTION": "attention.activation_importance_v1",
+   "DEPTH": "depth.causal_kl_greedy_v1",
+   "FFN": "ffn.activation_importance_v0",
+   "RESIDUAL_WIDTH": "width.global_pca_v0"
+  },
+  "leaves_if_nothing_excluded": 866,
+  "profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "ranking_policy": {
+   "hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+   "id": "beam.pareto_multi_objective@v2"
+  },
+  "reachable_leaves": 384,
+  "schedule": {
+   "id": "beam.delayed_prune",
+   "warmup_levels": 1,
+   "width": 6
+  },
+  "stops_at": "commit_top_k. The search trains nothing, measures no behaviour and has no code path into a behavioural stage \u2014 the same boundary C2's driver holds."
+ },
+ "stage_id": "1",
+ "status": "DESIGNED / NOT AUTHORIZED / BLOCKED ON EVIDENCE AND FUNDING",
+ "what_this_may_not_be_used_to_claim": [
+  "that target-aware scoring is better. Nothing has been measured; this is a design.",
+  "that D1 is ready to launch. Two blockers are open and either one alone prevents it.",
+  "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION and no figure of its is restated, re-analysed or revised here."
+ ]
+}

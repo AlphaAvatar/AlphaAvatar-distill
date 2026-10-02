@@ -280,13 +280,43 @@ class TestSemanticIdentityIsNotMaterializationIdentity:
         if a != b:
             pytest.fail(
                 "compute_state_id now distinguishes two execution protocols. "
-                "That is the mechanism the A-bsz3 design names as a "
-                "precondition for adopting a differing artifact into "
-                "D1/D2/D3 -- update `identity_semantics` in "
-                "plans/a_bsz3_adoption.json and remove this branch.")
-        #: They collide. The resume path must therefore refuse on the BYTES,
-        #: which is what the companion test in `test_corrections.py` drives.
+                "That would be a DIFFERENT resolution from the one the "
+                "repository took -- see `specs.materialization`, which adds a "
+                "second coordinate rather than forking the hypothesis -- so "
+                "update `identity_semantics` in plans/a_bsz3_adoption.json and "
+                "decide deliberately which mechanism owns this.")
+        #: They collide, and that is correct: two batching protocols of one path
+        #: are one hypothesis and must keep sharing a semantic id.
         assert a == b
+
+    def test_the_collision_is_resolved_one_level_up(self):
+        """And this is the mechanism that makes it harmless.
+
+        `semantic_state_id` collides by design, so resume and dedup may not key
+        on it alone. `materialization_id` is the semantic id PLUS the
+        byte-affecting execution fingerprint, and it separates exactly the two
+        protocols A3 measured. Asserted here, next to the collision, so a reader
+        who finds the hazard finds its answer in the same file.
+        """
+        from aadistill.initialization.execution import ExecutionConfig
+        from aadistill.initialization.specs.materialization import (
+            MaterializationIdentity, NumericalEnvironment,
+        )
+
+        env = NumericalEnvironment(device_type="cuda", compute_dtype="bfloat16")
+        semantic = compute_state_id("root", "target", ())
+        bsz1 = MaterializationIdentity.build(
+            semantic_state_id=semantic, environment=env,
+            execution=ExecutionConfig(
+                micro_batch_size=1,
+                calibration_batch_packing="original_order_v1"))
+        bsz3 = MaterializationIdentity.build(
+            semantic_state_id=semantic, environment=env,
+            execution=ExecutionConfig(
+                micro_batch_size=3,
+                calibration_batch_packing="length_sorted_v1"))
+        assert bsz1.semantic_state_id == bsz3.semantic_state_id
+        assert bsz1.materialization_id != bsz3.materialization_id
 
 
 # --- the config object itself ----------------------------------------------

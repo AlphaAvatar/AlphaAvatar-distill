@@ -13,9 +13,101 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 after 78.9 min and is provider-confirmed gone; an account-wide re-query returns
 **0 pods and 0 network volumes**.
 
-**A3 is TERMINAL and nothing follows it.** The maintainer's order is explicit:
-do not start the FFN experiment and do not start D1/D2/D3. The next action is a
-maintainer decision, not an agent one.
+**A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
+TWICE.** The maintainer's order of **2026-10-03** supersedes the 2026-10-01
+stop: skip the FFN-specific F1 experiment, carry `ffn.activation_importance_v0`
+forward as the current best FFN, and take D1 through design, implementation,
+validation, pricing and preparation for independent review — without launching.
+That round is complete and spent `$0`. The next action is a **maintainer
+decision on two blockers**, either of which alone prevents D1 from executing:
+
+```text
+EVIDENCE   0 of 2 fresh disjoint batteries can be drawn under the frozen C1
+           mixture. math_verified holds 70 eligible items of the 150 a
+           battery needs; MATH-500's 500 rows are already committed to the
+           five isolation roles, c1_confirmation_v1 and c2_screening_v1.
+           D2 and D3 are blocked by the same arithmetic, three times over.
+FUNDING    chain hard ceiling $60.7509 against $13.1777 of project headroom,
+           short by $47.5732 -- and D1 is not in the C1 package's
+           funds_formal_sessions_of list, so no existing allowance covers it.
+```
+
+Start at [`d1_design.json`](../stages/stage-1/phase_d1/plans/d1_design.json),
+which owns every D1 figure and its claim boundary;
+[`d1_evidence_capacity.json`](../stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json)
+owns the battery arithmetic. The phase `README.md` beside them is generated from
+the index and carries no narrative.
+
+## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
+
+**The A3 precondition is MET.** The A3 closeout refused to let A-bsz3 enter
+D1/D2/D3 until the repository bound the numerical execution fingerprint to
+materialization/resume identity: `compute_state_id` binds neither the
+`ExecutionConfig` nor the artifact digest, so `53e30566c5f7` and `7dd2f6f6980b`
+— two different artifacts from one path, one `result_spec_hash` — would have
+collided on one resumable, deduplicable state id.
+`aadistill.initialization.specs.materialization` adds a second coordinate
+rather than forking the hypothesis:
+
+```text
+semantic_state_id                 scientific/path identity, still blind to execution
+numerical_execution_fingerprint   batch size, packing, device class, dtypes
+materialization_id                semantic + fingerprint -- what resume may key on
+artifact_digest                   the bytes, observed and bound once
+```
+
+Resume, deduplication, the statistics-cache key and the operator/measurer policy
+check all key on the right one, and every refusal is mutation-tested. No fake
+operator identity was created: the registry is asserted clean of ids naming a
+batch size.
+
+**The scoring policy is generic and hash-bound.** One
+`ScoringPositionPolicy`, consumed by all four operators, by the global state
+evaluator and therefore by the beam — a candidate selected on supervised
+positions cannot be pruned on all of them, and a search whose operators and
+measurer disagree is refused with a named error.
+`positions.supervised_target_v1` reads each frozen mixture's **own**
+`assistant` tag rather than re-deriving a chat-template rule, and admits
+`74.9%` of `calib.domain_balanced@v1`'s prediction positions, `78.4%` of
+`calib.reasoning_heavy@v2`'s and `73.0%` of `state_eval_v1`'s. Untemplated
+raw-LM items keep every prediction position, so D1's **data** is identical to
+the incumbent search's.
+
+**The incumbent policy is numerically inert, and that was measured rather than
+argued.** A four-operator toy chain rebuilt against this branch's merge base
+produces the same artifact digest, the same kept layers, the same kept neurons
+and the same kept heads. The treatment moves all four.
+
+**Batched execution is global from D1 onward**, at `batch_size=3` /
+`length_sorted_v1`: DEPTH, FFN, RESIDUAL_WIDTH, ATTENTION, the calibration
+statistics, the causal scoring, the global state evaluation and the beam
+candidate evaluation. A maintainer **uniformity** decision, not a performance
+claim — A3 measured it 8-10% *slower* on the ATTENTION scorer. The value is
+configuration, never a core constant. Every reduction obeys
+`score = sum_t(w_t·v_t)/sum_t(w_t)` with `w_t = 0` at padding.
+
+**The behavioural design was derived, not copied, and the derivation diagnoses
+C2.** At A3's measured per-seed spread of the paired delta (`0.012906`), C2's
+screening rung — five candidates on one seed — inflated whichever candidate it
+advanced by `0.015009`, **1.5× the `0.010` SESOI**, and advanced the genuinely
+better one with probability `0.42`. D1 screens **two** candidates on **two**
+seeds: bias `0.005149`, advance probability `0.78`, at the **same twelve
+probes**. Owner:
+[`selection_noise.py`](../../scripts/experiments/phase_d1/selection_noise.py),
+whose quadrature is self-checked against two closed forms. This is a
+prospective design derivation and re-analyses no C2 figure.
+
+**The search stage:** 384 reachable leaves (24 orderings × 16 calibration
+assignments), 92 expansions at the standing beam width 6 / warmup 1, hard
+ceiling `$31.1577`. The per-expansion minutes come from unbatched telemetry, so
+they **bound** D1 rather than describe it.
+
+**One engineering gap is identified and deferred to D2 on purpose.** The
+activation collectors implement only the binary form of a position policy —
+their divisor is an `int64` token count. D2's continuous `c_ref(t)` needs a
+weighted denominator in `StatsSpec` and three divisor call sites.
+`require_binary_token_weights` refuses by name rather than rounding a confidence
+weight to a mask.
 
 ## A3 IS TERMINAL. A-bsz3 IS A DISTINCT NUMERICAL MATERIALIZATION PROTOCOL.
 

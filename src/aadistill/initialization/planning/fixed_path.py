@@ -56,6 +56,7 @@ from aadistill.initialization.calibration.items import prepare_calibration_items
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.device import model_device
 from aadistill.initialization.operators.base import OperatorContext, get_implementation
+from aadistill.initialization.scoring.positions import resolve_position_policy
 from aadistill.initialization.statistics.spec import (
     DEFAULT_STATS_SPEC,
     StatsCache,
@@ -544,6 +545,14 @@ def _run_steps(
 
         operator_config = step_operator_config(step, len(items))
         plan = impl.plan(parent_spec, spec.target_spec, adapter, operator_config)
+        #: RESOLVED from what the step declared, never handed in. The declared id
+        #: is inside `config_hash` and therefore inside the identity of whatever
+        #: this path rebuilds, so the object that does the arithmetic has to be
+        #: the one the declaration names — an executor parameter would be a
+        #: second source for one fact.
+        position_policy = resolve_position_policy(
+            operator_config,
+            where=f"{spec.path_id} step {i} ({impl.impl_id}): ")
 
         ctx = OperatorContext(
             adapter=adapter, model=model, parent_spec=parent_spec,
@@ -551,6 +560,7 @@ def _run_steps(
             calibration_items=items, seed=spec.seed, device=spec.device,
             workdir=work, config=dict(operator_config),
             execution=execution,
+            position_policy=position_policy,
             stats_cache=cache,
             stats_cache_key=(
                 None if parent_digest is None else stats_cache_key(
@@ -558,9 +568,17 @@ def _run_steps(
                     profile_hash=profile.profile_hash,
                     stats_spec=spec.stats_spec,
                     adapter_version=adapter.adapter_version,
+                    #: Same three additions as `BeamSearch._stats_key`, for the
+                    #: same reasons: the key's docstring promised the batch rule
+                    #: and did not carry it, and a statistics pass taken under
+                    #: one scoring policy is not the pass another would produce.
+                    #: Two cache keys that disagree about what makes a pass
+                    #: reusable is one of them being wrong.
                     numerical_config={
                         "device": spec.device,
-                        "accumulation": spec.stats_spec.accumulation_dtype})),
+                        "accumulation": spec.stats_spec.accumulation_dtype,
+                        **execution.as_fingerprint(),
+                        "position_policy_hash": position_policy.policy_hash})),
             deadline=deadline,
         )
 

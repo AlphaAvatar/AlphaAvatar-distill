@@ -241,6 +241,39 @@ def build_batch(items: Sequence[Mapping[str, Any]], *, pad_id: int,
                      pad_id=int(pad_id))
 
 
+def active_rows(mask: Any, shape: Any, device: Any = None):
+    """A position mask reshaped to ``[B, T]`` on ``device``, or ``None``.
+
+    Both activation-statistics collectors take an optional "which positions may
+    this statistic read" mask from a scoring policy, and both must reconcile it
+    with the ``[B, T_max]`` shape of the tokens actually being processed. That
+    reconciliation is batch knowledge, so it lives here, once — two copies would
+    be two chances to disagree about what a mask of the wrong length means.
+
+    ``[T]`` is accepted for the single-sequence path so a caller with one item
+    does not have to add a leading dimension. Anything else **raises**: a mask of
+    the wrong length would be broadcast by the ``&`` downstream and would
+    silently admit or drop positions, which is the one failure a scoring
+    restriction must not have.
+    """
+    if mask is None:
+        return None
+    rows, width = int(shape[0]), int(shape[1])
+    m = mask if mask.dim() == 2 else mask.reshape(1, -1)
+    if tuple(m.shape) != (rows, width):
+        raise BatchingError(
+            f"active mask has shape {tuple(mask.shape)}, which is not the "
+            f"({rows}, {width}) of the tokens being processed; a mis-shaped "
+            "scoring mask changes which positions are counted instead of failing")
+    if m.dtype != torch.bool:
+        raise BatchingError(
+            f"active mask has dtype {m.dtype}, not torch.bool. The collectors "
+            "support the BINARY form of a position policy; continuous weights "
+            "need a weighted denominator in StatsSpec, which no experiment has "
+            "asked for yet")
+    return m if device is None else m.to(device)
+
+
 def micro_batches(items: Sequence[Mapping[str, Any]], batch_size: int, *,
                   pad_id: int, device: Any = None) -> Iterator[ItemBatch]:
     """Consecutive groups of ``batch_size`` items, in the mixture's own order.

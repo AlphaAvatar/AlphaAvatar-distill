@@ -624,3 +624,90 @@ after the pod answers, long before setup spends anything. The hook asks there
 and a refusal redraws, so the property costs a draw instead of a chain. The
 reusable core carries only the question; which hosts a session accepts is the
 session's own rule, derived in A3's case from the controls' own attestation.
+
+---
+
+## Materialization identity and the scoring-position policy — 2026-10-03
+
+Two new core modules, and both were paid for by measurements that belong here
+rather than in their docstrings.
+
+### `src/aadistill/initialization/specs/materialization.py`
+
+**The measurement.** A3 ran the incumbent
+`attention.activation_importance_v1` at `calibration_forward_batch_size=3`
+with `length_sorted_v1` packing and at the one-item-per-forward reference
+protocol, interleaved four times per session, on three separately rented NVIDIA
+L40S pods:
+
+```text
+A_bsz1   53e30566c5f7   == the frozen C3 incumbent, rebuilt on fresh hardware
+A_bsz3   7dd2f6f6980b   DIFFERENT
+result_spec_hash         IDENTICAL
+```
+
+Each protocol reproduced **its own** digest in every round and on every pod, so
+the difference is deterministic in the strong sense — reproducible within a
+session and across machines — rather than noise. Exactly one kept-head slot of
+448 differs, in layer 7 (head 13 against head 12) at a margin of `0.00047`;
+rank correlation across all 896 heads is `0.9999997`. Owner:
+`logs/stages/stage-1/phase_a3/analyses/a3_closeout.md`.
+
+**Why that needed a mechanism.** `compute_state_id` binds neither the
+`ExecutionConfig` nor the artifact digest, and resume, deduplication and
+checkpoint ownership all keyed on it, so the two artifacts above would have
+collided on one resumable, deduplicable state. The A3 closeout therefore refused
+to let the batched protocol enter D1/D2/D3 execution until the repository bound
+the numerical execution fingerprint to materialization/resume identity, and
+recorded that a passing behavioural result does not clear an engineering
+correctness property.
+
+**What was explicitly forbidden, and why the core says so without naming it.**
+A3 was not permitted to register `attention.activation_importance_bsz3`. The
+operator's semantics did not change, so a second id would have lied about the
+science and multiplied the registry by every execution knob forever. The module
+states the rule; `tests/autoinit/test_materialization_identity.py` asserts the
+registry stays clean of ids naming a batch size.
+
+**Why the device CLASS and not the ordinal.** A-bsz1 rebuilt `53e30566c5f7`
+byte-identically on three different rented L40S pods, so which card is not part
+of the identity. `cpu` against `cuda` is, and a CPU dry run must not be able to
+satisfy a GPU resume.
+
+### `src/aadistill/initialization/scoring/`
+
+**The measured restriction.** `positions.supervised_target_v1` reads each frozen
+mixture's own `assistant` tag and admits `44,746` of `59,763` prediction
+positions on `calib.domain_balanced@v1` (74.9%), `46,825` of `59,763` on
+`calib.reasoning_heavy@v2` (78.4%), and `54,014` of `74,022` on
+`state_eval_v1` (73.0%). The remainder is prompt, system and user text the
+student is never asked to predict. 51 of 67 items in the first mixture are
+templated and 50 of 62 in the second; the untemplated remainder has no assistant
+turn and keeps every prediction position, which is what makes the policy a
+change of scoring rather than of data.
+
+**Why the incumbent policy is a named object rather than an absence.** Every
+committed operator result was computed over all positions, and
+`positions.all_v1` is that semantics, hashed, so a record can state it. It is
+numerically inert: the reducers detect it and perform the operations they
+performed before the abstraction existed. Verified by rebuilding a
+four-operator toy chain against the pre-change tree and obtaining the same
+artifact digest, the same kept layers, the same kept neurons and the same kept
+heads.
+
+**Why the state-eval batching bound exists.** A batched state evaluation
+materializes two `[B, T_max, V]` logit blocks at a `151,936` vocabulary; at
+batch 3 over the frozen suite's widest group (`2002` tokens) that is `3.40 GiB`
+for both models. `StateEvaluator` refuses before the first forward when the
+widest group would exceed its budget, because the alternative is discovering the
+limit as an OOM mid-search — which is how the causal-depth rehearsal died.
+
+**Why `length_sorted_v1` for that suite.** `2.1%` padding against `23.4%` at the
+mixture's own order, derived from the suite's own lengths at `$0`.
+
+**The deferred boundary.** The activation collectors implement only the binary
+form of a position policy, because their divisor is `residual_count`, an
+`int64` token count read by three call sites. A continuous confidence weight
+needs a weighted denominator in `StatsSpec`, which is D2's work;
+`require_binary_token_weights` refuses by name rather than rounding a weight to
+a mask.

@@ -953,6 +953,165 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "580 -> 595, which generation_compat declares a real runtime "
             "event. A raising check refuses rather than admitting.",
      }),
+    ("4ae52e2ed17a14956e0b9044a0ac976d1e81974b",
+     "materialization identity and target-aware scoring positions",
+     {
+        "src/aadistill/initialization/specs/materialization.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE by construction. "
+            "Four identities where there was one: semantic_state_id (unchanged, "
+            "still blind to execution), numerical_execution_fingerprint, "
+            "materialization_id and artifact_digest. It exists because one "
+            "operator, one path and one hashed config were measured producing "
+            "two different checkpoints under an identical result_spec_hash, "
+            "reproducibly and across machines, while resume, dedup and "
+            "checkpoint ownership all keyed on the single id. NO CUDA SURFACE: "
+            "no tensor, no device, no dtype -- it hashes strings. The device "
+            "CLASS is a fingerprint FIELD and an ordinal is refused.",
+        "src/aadistill/initialization/scoring/positions.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE. The hash-bound "
+            "ScoringPositionPolicy: which positions a calibration-derived "
+            "objective may read, on a token axis and a prediction axis. "
+            "`positions.all_v1` is the incumbent semantics, named and hashed, "
+            "and is NUMERICALLY INERT -- the reducers detect its `form == all` "
+            "and take the arithmetic they took before this module existed. "
+            "NO CUDA SURFACE: it builds float64 host weight vectors and reads "
+            "a mixture's own tags. No registration happens at import.",
+        "src/aadistill/initialization/scoring/batches.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE. The one bridge "
+            "from a per-item policy answer to the [B, T_max] shape an operator "
+            "runs, through PackedBatch.original_indices so a reordering packing "
+            "policy cannot attribute one item's supervised positions to "
+            "another's activations. CUDA-ADJACENT but device-neutral: it places "
+            "its masks on the batch's own device and performs no arithmetic on "
+            "activations.",
+        "src/aadistill/initialization/scoring/__init__.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE. Re-exports only.",
+        "src/aadistill/initialization/execution.py":
+            "ADDITIVE: `FINGERPRINT_FIELDS` and `as_fingerprint()`, so the "
+            "class that owns the execution knobs also owns which of them affect "
+            "BYTES -- `specs.materialization` asks rather than enumerating. "
+            "Deliberately separate from `as_trace()`, which is evidence and may "
+            "grow a field that moves no bytes. No existing field, default or "
+            "validation changed. NO CUDA SURFACE.",
+        "src/aadistill/initialization/specs/state.py":
+            "ADDITIVE: an optional `materialization` field, bound to the "
+            "artifact digest in `mark_materialized` and serialized ABSENT (not "
+            "null) when undeclared, so a journal record written before the "
+            "field existed keeps its exact serialization. `compute_state_id` is "
+            "UNCHANGED, which is the point: two batching protocols of one path "
+            "remain one hypothesis. NO CUDA SURFACE.",
+        "src/aadistill/initialization/statistics/contribution.py":
+            "DECLARED SEMANTIC CHANGE to all three reducers. `forward_kl_mean`, "
+            "`forward_kl_mean_batch` and `distortion` take an optional position "
+            "weight vector; `DistortionSums` gains `weight` as the denominator "
+            "beside `positions` as the count, and its tagged entries carry a "
+            "weight and a position count separately. `weights=None` performs "
+            "the operations these functions always performed, character for "
+            "character -- asserted against an inlined copy of the previous "
+            "arithmetic at three chunk sizes, bit-identical. CUDA-ADJACENT: the "
+            "float32-chunk/float64-accumulate contract, the chunk boundaries "
+            "and the device-resident accumulator branch are all unchanged, and "
+            "the weight multiply happens inside the existing chunk loop.",
+        "src/aadistill/initialization/statistics/collect.py":
+            "DECLARED SEMANTIC CHANGE: `process` and `process_batch` take an "
+            "optional `active_mask`, combined with the padding mask by `and` so "
+            "that restricting the statistic and excluding padding are ONE "
+            "mechanism driving the existing `_keep_valid`. All-active is "
+            "byte-for-byte the previous accumulation. CUDA SURFACE: the hooks, "
+            "the device-resident float64 accumulators and the single host "
+            "transfer in `state()` are untouched; only which rows survive "
+            "`_keep_valid` can change, and only when a caller supplies a mask.",
+        "src/aadistill/initialization/calibration/batching.py":
+            "ADDITIVE: `active_rows`, which reconciles a policy's position mask "
+            "with the [B, T] shape of the tokens being processed and RAISES on "
+            "a mis-shaped one rather than broadcasting. Batch knowledge, so it "
+            "lives beside ItemBatch and both collectors import the one copy. "
+            "`build_batch`, `micro_batches`, `resolve_pad_id` and the pad-id "
+            "policy are unchanged. NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/base.py":
+            "DECLARED SEMANTIC CHANGE: `OperatorContext.position_policy`, "
+            "defaulting to the inert incumbent, plus a refusal in `execute()` "
+            "when the hashed config NAMES a policy the context did not supply. "
+            "The declared hash is what the state id derives from, so a mismatch "
+            "would record a scoring rule that did not run. NO CUDA SURFACE.",
+        "src/aadistill/initialization/operators/_common.py":
+            "DECLARED SEMANTIC CHANGE: `collect_activation_stats` takes a "
+            "packing policy and an ActivePositions, and routes non-reference "
+            "execution through `packed_batches` instead of `micro_batches` -- "
+            "equal row for row at the default packing, which is the reference "
+            "path this function preserves explicitly. CUDA SURFACE: the "
+            "collector lifecycle and the per-item `process` call are unchanged "
+            "at batch 1 / default packing.",
+        "src/aadistill/initialization/operators/attention/gqa/_statistics.py":
+            "DECLARED SEMANTIC CHANGE: `process` and `process_batch` take an "
+            "optional `active_mask`, combined with padding exactly as the "
+            "residual/FFN collector combines them. HISTORICAL CUDA SURFACE -- "
+            "see HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION. The hooks, "
+            "the einsum, the device-resident float64 accumulator, `release()` "
+            "and `state()` are untouched.",
+        "src/aadistill/initialization/operators/attention/gqa/activation_importance.py":
+            "DECLARED SEMANTIC CHANGE: the write-energy expectation is taken "
+            "over the policy's admitted positions, and the trace separates "
+            "`admitted_positions` from `valid_positions` because "
+            "`executed - padded == calibration_tokens` held only while every "
+            "valid position was admitted. HISTORICAL CUDA SURFACE -- see "
+            "HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION. The reference "
+            "path, the CUDA synchronisation points, the transfer boundary and "
+            "the per-group top-k selection are unchanged.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "DECLARED SEMANTIC CHANGE: the causal-KL mean is taken over the "
+            "policy's weighted positions, and the micro-batch grouping now "
+            "comes from `packed_batches` with its original indices so a "
+            "reordering policy keeps per-item attribution. CUDA-ADJACENT: the "
+            "reference-cache admission, the per-item/batched branch, the chunk "
+            "size and the greedy rule are unchanged.",
+        "src/aadistill/initialization/operators/ffn/dense/activation_importance.py":
+            "DECLARED SEMANTIC CHANGE: E[|a_j|] becomes an expectation with "
+            "respect to the policy's admitted positions, and the statistics "
+            "pass honours the run's packing. The top-k selection and the weight "
+            "surgery are unchanged. NO new device interaction.",
+        "src/aadistill/initialization/operators/width/residual/global_pca.py":
+            "DECLARED SEMANTIC CHANGE: the residual second moments accumulate "
+            "over the policy's admitted token positions, and the statistics "
+            "pass honours the run's packing. The point set, the 9/8 end "
+            "weights, the projection and the folded-norm arithmetic are "
+            "unchanged.",
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py":
+            "DECLARED SEMANTIC CHANGE: the statistics pass it MAY run honours "
+            "the run's packing and position policy; a SUPPLIED state is "
+            "untouched and its trace reports `None` for both, because the "
+            "restriction describes a pass this invocation ran.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "DECLARED SEMANTIC CHANGE: `StateEvaluator` takes a position policy "
+            "and an ExecutionConfig. The policy weights every state metric and "
+            "is stamped into the evaluation's detail; the execution config lets "
+            "the two FORWARDS batch while the reduction stays the same "
+            "`distortion` call at the same per-item shape with the same chunk "
+            "boundaries -- so the certified arithmetic is not on the diff. The "
+            "evaluator's default is the one-item-per-forward reference path, "
+            "NOT `DEFAULT_EXECUTION`, so no existing caller's behaviour moves. "
+            "`batch_plan` bounds the logit blocks and `_ensure_groups` REFUSES "
+            "over budget rather than discovering an OOM mid-search.",
+        "src/aadistill/initialization/planning/search.py":
+            "DECLARED SEMANTIC CHANGE: `SearchConfig.position_policy` (absent "
+            "from `as_dict` at the incumbent, so every committed config_hash "
+            "stays derivable), `BeamSearch(numerics=...)`, a materialization "
+            "identity per state, and three refusals -- resume declines a "
+            "journal entry from another materialization or another scoring "
+            "policy, and measurement refuses a measurer that scored other "
+            "positions. The stats-cache key gains the execution fingerprint and "
+            "the policy hash, which its own docstring already promised. NO CUDA "
+            "SURFACE: the materialize/reload/validate/measure cycle and its "
+            "device placement are unchanged.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "DECLARED SEMANTIC CHANGE: the executor RESOLVES the position "
+            "policy from what the step declared rather than accepting one, so "
+            "the object doing the arithmetic is the one the state id names, and "
+            "the stats-cache key gains the same two terms as the search's. "
+            "HISTORICAL CUDA SURFACE -- already listed as pending revalidation "
+            "for the `execution` parameter; this round adds to the same "
+            "OperatorContext construction and owes the same new validation.",
+     }),
 )
 
 
@@ -1053,11 +1212,41 @@ CUDA_VALIDATED_SURFACE = HISTORICAL_CUDA_VALIDATED_SURFACE
 #: *what does the tree contain now* (current) — and this table is the join
 #: between them. An entry is only admissible when the round that performed the
 #: move declares the destination, which the assertion below enforces.
+#: **The map must be COMPLETE, not only as complete as git's rename
+#: detection.** Every one of these moves happened in the 2026-09-25 topology
+#: migration, but only `depth.py` was recorded — because git was pairing the
+#: other five as renames and `--name-only` reports a rename as its destination
+#: alone, so nothing ever asked where they went. The moment this round edited
+#: `attention/gqa/activation_importance.py` enough to drop its similarity to
+#: `attention_activation.py` to 4%, git stopped pairing them and reported a
+#: delete, and the omission surfaced across 27 parametrisations at once.
+#:
+#: A heuristic deciding whether a bookkeeping entry is required is not a
+#: contract. All six are listed, so no future edit's similarity score can
+#: change what this file knows.
 MOVED_BY_A_LATER_ROUND: dict[str, tuple[str, ...]] = {
     "src/aadistill/initialization/operators/depth.py": (
         "src/aadistill/initialization/operators/depth/_common.py",
         "src/aadistill/initialization/operators/depth/positional.py",
         "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+    ),
+    "src/aadistill/initialization/operators/attention_activation.py": (
+        "src/aadistill/initialization/operators/attention/gqa/"
+        "activation_importance.py",
+    ),
+    "src/aadistill/initialization/operators/attention.py": (
+        "src/aadistill/initialization/operators/attention/gqa/_common.py",
+        "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+    ),
+    "src/aadistill/initialization/operators/ffn.py": (
+        "src/aadistill/initialization/operators/ffn/dense/"
+        "activation_importance.py",
+    ),
+    "src/aadistill/initialization/operators/width.py": (
+        "src/aadistill/initialization/operators/width/residual/global_pca.py",
+    ),
+    "src/aadistill/initialization/operators/composite.py": (
+        "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
     ),
 }
 
@@ -1129,16 +1318,54 @@ def is_semantic(base: str, path: str) -> bool:
     is a semantic change whatever its contents, and there is no previous shape
     to compare it to.
 
-    This used to call `git show` unchecked, so the first round that ADDED a core
-    module did not report an undeclared change — it raised
-    `CalledProcessError` out of the set comprehension and took every
-    parametrisation of this check down with it. A guard that errors instead of
-    answering is a guard whose answer nobody has.
+    A file absent **now** is a deletion, and a deletion has no shape to compare.
+    It is accounted for by :data:`MOVED_BY_A_LATER_ROUND`, which drops it from
+    the expected set for exactly the rounds whose diff still reports it, and by
+    :func:`test_every_deleted_core_file_is_accounted_for` below, which refuses a
+    disappearance nothing explains. So this answers False rather than raising.
+
+    **Both branches exist because this function used to raise instead of
+    answering, and it has now done so twice.** The first time it called
+    `git show` unchecked, so the round that ADDED a core module took every
+    parametrisation of this check down with a `CalledProcessError`. The second
+    was subtler and is why the deleted-now branch is here: a path git had been
+    reporting as a RENAME reappeared as a separate delete+add the moment the
+    destination file was edited enough to fall under git's similarity
+    threshold. Nothing about the deletion changed — only how `git diff` chose to
+    describe it — and the check died on a `FileNotFoundError` across 27
+    parametrisations. A guard that errors instead of answering is a guard whose
+    answer nobody has.
     """
+    if not (REPO / path).is_file():
+        return False
     before = at_base(base, path)
     if before is None:
         return True
     return shape(before) != shape((REPO / path).read_text())
+
+
+def deleted_core_since(base: str) -> list[str]:
+    """Core files `git diff` reports against `base` that no longer exist."""
+    return sorted(f for f in git("diff", "--name-only", base).split()
+                  if f.startswith("src/aadistill/") and f.endswith(".py")
+                  and not (REPO / f).is_file())
+
+
+def test_every_deleted_core_file_is_accounted_for():
+    """A core module may not simply vanish between rounds.
+
+    `is_semantic` answers False for a path that no longer exists, which is
+    correct — there is no shape to compare — but on its own it would let a
+    silently deleted core module pass unnoticed. This is the other half: every
+    disappearance has to be named in `MOVED_BY_A_LATER_ROUND` together with
+    where its content went.
+    """
+    unexplained = sorted(set(deleted_core_since(ROUNDS[0][0]))
+                         - set(MOVED_BY_A_LATER_ROUND))
+    assert unexplained == [], (
+        f"core files deleted since {ROUNDS[0][0][:8]} with no entry in "
+        f"MOVED_BY_A_LATER_ROUND: {unexplained}. A move is only accounted for "
+        "when the round that performed it says where the content went.")
 
 
 # --- 1. the two CUDA validations, kept apart --------------------------------

@@ -37,9 +37,10 @@ from typing import Any
 
 import torch
 
-from aadistill.initialization.calibration.batching import (
-    micro_batches,
-    resolve_pad_id,
+from aadistill.initialization.calibration.batching import resolve_pad_id
+from aadistill.initialization.calibration.packing import (
+    ORIGINAL_ORDER_V1,
+    packed_batches,
 )
 
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
@@ -123,6 +124,8 @@ def copy_embeddings_and_final_norm(builder: ChildBuilder, adapter: ArchitectureA
 def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
                              token_batches, device: str = "cpu", *,
                              batch_size: int = 1,
+                             packing: str = ORIGINAL_ORDER_V1,
+                             active: Any = None,
                              pad_id: int | None = None) -> dict[str, torch.Tensor]:
     """Streaming sufficient statistics for the model **as it is now**.
 
@@ -133,11 +136,28 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
     the compressed initializer — is what this re-collection is answering.
 
     This is the one forward loop FFN, RESIDUAL_WIDTH and COMPOSITE share, so
-    micro-batching is implemented here once rather than three times.
-    ``batch_size=1`` keeps the original one-item-per-forward path exactly,
-    including calling ``process`` rather than ``process_batch``; anything larger
-    pads groups of items together and the collector reduces over real tokens
-    only.
+    micro-batching, packing and position restriction are implemented here once
+    rather than three times.
+
+    **The reference path is ``batch_size <= 1`` with the default packing and no
+    restriction**, and it is the loop this function has always run: one item per
+    ``process`` call, in the mixture's own order, with no mask. That condition is
+    explicit because it is what reproduces every committed artifact by
+    construction rather than by tolerance — the same argument
+    ``attention.activation_importance_v1`` makes about its own reference path.
+
+    ``packing`` names which items share a forward
+    (:mod:`aadistill.initialization.calibration.packing`). It reaches here
+    because an operator's statistics pass should honour the run's execution
+    protocol rather than three of the four operators quietly ignoring it; the
+    grouping moves the order of a float64 accumulation and nothing else, which is
+    why it is an execution knob and not part of the estimand.
+
+    ``active`` is an
+    :class:`~aadistill.initialization.scoring.batches.ActivePositions` or
+    ``None``: which token positions the scoring policy admits. It restricts
+    *what is accumulated*, which is an estimand change, which is why it arrives
+    from the hashed operator config and not from the execution config.
 
     ``token_batches`` accepts either bare ``[1, T]`` id tensors (what the
     operators have always passed) or full calibration items; batching needs only
@@ -145,22 +165,49 @@ def collect_activation_stats(adapter: ArchitectureAdapter, model: Any,
     """
     items = [it if isinstance(it, Mapping) else {"input_ids": it}
              for it in token_batches]
+    #: `active` indexes BY POSITION IN THIS LIST, so the two have to describe the
+    #: same items in the same order. Checked rather than assumed: a caller that
+    #: evaluated the policy against one list and passed another would attribute
+    #: one item's supervised positions to another item's activations, and the
+    #: result would still look like a statistic.
+    if active is not None and active.n_items != len(items):
+        raise SurgeryError(
+            f"the scoring policy was evaluated against {active.n_items} items "
+            f"but {len(items)} were handed to the statistics pass; a mask built "
+            "from a different list attributes one item's positions to another")
+    reference_path = batch_size <= 1 and packing == ORIGINAL_ORDER_V1
     collector = adapter.stats_collector(model)
     try:
-        if batch_size <= 1:
-            for item in items:
-                collector.process(item["input_ids"].to(device))
+        if reference_path:
+            for index, item in enumerate(items):
+                mask = (None if active is None
+                        else active.token_mask_for_item(index))
+                #: Called WITHOUT the keyword when there is no restriction, so a
+                #: collector that predates `active_mask` still works and the
+                #: unrestricted call is the call this loop always made.
+                if mask is None:
+                    collector.process(item["input_ids"].to(device))
+                else:
+                    collector.process(item["input_ids"].to(device),
+                                      active_mask=mask.to(device))
         else:
             if not hasattr(collector, "process_batch"):
                 raise TypeError(
                     f"{type(collector).__name__} has no `process_batch`, so it "
-                    f"cannot honour batch_size={batch_size}. Pass batch_size=1 "
-                    "for the per-item reference path, or give the collector a "
-                    "batched entry point — do not let it silently pad.")
+                    f"cannot honour batch_size={batch_size} / packing={packing!r}. "
+                    "Pass batch_size=1 at the default packing for the per-item "
+                    "reference path, or give the collector a batched entry "
+                    "point — do not let it silently pad.")
             resolved_pad = (resolve_pad_id(model) if pad_id is None else int(pad_id))
-            for batch in micro_batches(items, batch_size, pad_id=resolved_pad,
-                                       device=device):
-                collector.process_batch(batch)
+            for packed in packed_batches(items, max(int(batch_size), 1),
+                                         packing=packing, pad_id=resolved_pad,
+                                         device=device):
+                mask = (None if active is None else active.token_mask_for(
+                    packed.batch, packed.original_indices))
+                if mask is None:
+                    collector.process_batch(packed.batch)
+                else:
+                    collector.process_batch(packed.batch, active_mask=mask)
     finally:
         collector.close()
     return collector.state()

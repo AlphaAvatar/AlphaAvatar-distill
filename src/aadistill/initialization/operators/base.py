@@ -46,6 +46,10 @@ from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfi
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 from aadistill.initialization.calibration.profiles import CalibrationProfile
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.positions import (
+    ALL_POSITIONS_V1,
+    ScoringPositionPolicy,
+)
 from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 
 
@@ -138,6 +142,20 @@ class OperatorContext:
     #: only here are the same scientific state. See
     #: `aadistill.initialization.execution`.
     execution: ExecutionConfig = field(default_factory=lambda: DEFAULT_EXECUTION)
+    #: WHICH POSITIONS this operator's objective may read. The opposite side of
+    #: the line from `execution`: it changes the estimand, so the caller also
+    #: puts its id and hash into `config`, and `config_hash` therefore forks the
+    #: state. Supplied here as the policy OBJECT because an operator needs to
+    #: evaluate it against its own items, while `config` carries only the
+    #: identity a manifest can be checked against.
+    #:
+    #: One policy per invocation, handed down from the run rather than chosen per
+    #: operator, so an operator and the beam metric that prunes it cannot
+    #: disagree about which predictions matter. The default is the incumbent
+    #: semantics and is numerically a no-op — see
+    #: `aadistill.initialization.scoring.positions`.
+    position_policy: ScoringPositionPolicy = field(
+        default_factory=lambda: ALL_POSITIONS_V1)
     #: The search's wall-clock budget, or None. An operator whose work is
     #: measured in hours is expected to call `deadline.check(...)` inside its own
     #: loop: `depth.causal_kl_greedy_v1` ran 10.78 h against a 3.0 h budget
@@ -280,6 +298,22 @@ class OperatorImplementation(ABC):
             raise OperatorError(
                 f"{self.impl_id} declares calibration={self.calibration.value} and was "
                 "given no calibration items")
+        #: THE POLICY HAS TWO SIDES AND THEY MUST AGREE. `config` carries the
+        #: identity that reaches `config_hash` and therefore the state id;
+        #: `position_policy` is the object this operator will actually evaluate.
+        #: A caller that updated one and not the other would record a state id
+        #: describing a scoring rule the operator never applied — a manifest
+        #: that is wrong rather than merely incomplete. Checked here because
+        #: this wrapper is already where declarations meet reality.
+        declared = (ctx.config or {}).get("position_policy_hash")
+        if declared is not None and declared != ctx.position_policy.policy_hash:
+            raise ContractViolation(
+                f"{self.impl_id}: config declares position policy "
+                f"{str(declared)[:12]} but was handed "
+                f"{ctx.position_policy.qualified_id} "
+                f"({ctx.position_policy.policy_hash[:12]}). The declared hash is "
+                "what the state id is derived from, so a mismatch records a "
+                "scoring rule that did not run")
         outcome = self.apply(ctx)
         if outcome.model is ctx.model:
             raise ContractViolation(

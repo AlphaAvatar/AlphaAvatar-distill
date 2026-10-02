@@ -29,6 +29,17 @@ State ids are content-derived: the sha256 of (root teacher, ordered
 (implementation, signature, calibration profile, operator config)) along the path.
 Two runs of the same path produce the same id, which is what makes resume exact
 and deduplication free.
+
+**A state id is not a checkpoint's bytes, and ``materialization`` is where that
+stops being invisible.** A3 built two different artifacts from one path under one
+``result_spec_hash``, differing only in which calibration items shared a forward.
+``compute_state_id`` is deliberately blind to that — an execution knob must not
+fork a hypothesis — so a state optionally carries a
+:class:`~aadistill.initialization.specs.materialization.MaterializationIdentity`
+beside its id: the same semantic id, plus the byte-affecting execution
+fingerprint, plus the digest actually produced. Resume and deduplication key on
+the materialization; the science keys on the state id. See
+:mod:`aadistill.initialization.specs.materialization`.
 """
 
 from __future__ import annotations
@@ -43,6 +54,7 @@ from typing import Any
 
 from aadistill.initialization.specs.arch import ArchSpec
 from aadistill.initialization.specs.artifact import CheckpointIdentity
+from aadistill.initialization.specs.materialization import MaterializationIdentity
 from aadistill.initialization.specs.metrics import (
     MeasurementError,
     OperatorLocalMetrics,
@@ -150,6 +162,12 @@ class InitializationState:
     prune_reason: str | None = None
     invalid_reason: str | None = None
     notes: dict[str, Any] = field(default_factory=dict)
+    #: Semantic id + byte-affecting execution fingerprint + the digest produced.
+    #: `None` for a caller that has not declared its numerical environment —
+    #: every historical record, and every toy construction. A run that *has*
+    #: declared one gets resume and dedup keyed on it rather than on `state_id`
+    #: alone, which is the A3 collision this field exists to make impossible.
+    materialization: MaterializationIdentity | None = None
 
     # --- identity ----------------------------------------------------------
 
@@ -199,6 +217,13 @@ class InitializationState:
         self.checkpoint_path = artifact.path
         self.artifact = artifact
         self.validity = StateValidity.MATERIALIZED
+        #: The moment the prediction meets the observation. The identity was
+        #: formed before the bytes existed — it is what decided whether to build
+        #: them — and `bind` refuses a second, different digest, so one
+        #: materialization can never come to name two sets of bytes.
+        if self.materialization is not None:
+            self.materialization = self.materialization.bind(
+                artifact.artifact_digest)
 
     def mark_validated(self) -> None:
         if self.validity is not StateValidity.MATERIALIZED:
@@ -303,6 +328,12 @@ class InitializationState:
             "prune_reason": self.prune_reason,
             "invalid_reason": self.invalid_reason,
             "notes": _jsonable(self.notes),
+            #: ABSENT, not null, when undeclared: a record written before this
+            #: field existed must keep hashing and reading exactly as it did,
+            #: and a `null` in the journal would be a new key in every
+            #: historical state's serialization.
+            **({"materialization": self.materialization.as_dict()}
+               if self.materialization is not None else {}),
         }
 
 

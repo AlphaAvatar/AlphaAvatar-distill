@@ -128,47 +128,98 @@ class DistortionSums:
     Sums rather than means: the aggregation weights are a design decision made
     once at the top (`domain_balanced_score`), and a partially-averaged
     intermediate would quietly bake in token weighting.
+
+    **`positions` counts, `weight` divides.** Under the incumbent all-positions
+    policy the two are equal and either would do; under a position-weighted
+    policy they are not, and only one of them is the denominator the estimand is
+    defined with. So they are separate fields with separate jobs: `positions` is
+    evidence about how many predictions were looked at, `weight` is `sum_t w_t`
+    and is what every mean below is formed over.
+
+    `weight = None` means "unweighted: the denominator is the position count".
+    That is a STATED default rather than a coincidence, and it is what lets a
+    hand-built oracle — the host-path copies in the device-equivalence test and
+    the performance check — keep constructing these sums the way they always did.
+    :func:`distortion` itself always sets it.
     """
 
     positions: int = 0
+    #: `sum_t w_t`, or `None` for "the position count". The denominator.
+    weight: float | None = None
     kl: float = 0.0
     reverse_kl: float = 0.0
     ref_ce: float = 0.0
     abl_ce: float = 0.0
-    top1_agree: int = 0
+    #: Weighted when the caller weights: `sum_t w_t * 1[argmax agrees]`. Float
+    #: rather than int for that reason; it is exactly integral when unweighted.
+    top1_agree: float = 0.0
+    #: tag -> [kl_sum, weight, positions]. Three numbers because a weighted
+    #: tagged mean divides by the tagged WEIGHT while a record still wants to
+    #: state how many positions carried the tag.
     tagged: dict[str, list[float]] = field(default_factory=dict)
 
-    def add_tagged(self, tag: str, kl_sum: float, count: int) -> None:
-        cur = self.tagged.setdefault(tag, [0.0, 0.0])
+    @property
+    def denominator(self) -> float:
+        return float(self.positions) if self.weight is None else float(self.weight)
+
+    def add_tagged(self, tag: str, kl_sum: float, weight: float,
+                   positions: float | None = None) -> None:
+        cur = self.tagged.setdefault(tag, [0.0, 0.0, 0.0])
         cur[0] += float(kl_sum)
-        cur[1] += float(count)
+        cur[1] += float(weight)
+        #: Defaults to the weight, which is the unweighted case and is what the
+        #: three-argument callers mean. A weighted caller passes both.
+        cur[2] += float(weight if positions is None else positions)
 
     def merge(self, other: DistortionSums) -> None:
         self.positions += other.positions
+        if other.weight is not None or self.weight is not None:
+            #: Mixing a weighted part into an unweighted accumulator (or the
+            #: reverse) must not silently drop either denominator, so an absent
+            #: weight contributes its own position count — which is exactly what
+            #: `None` means.
+            self.weight = ((0.0 if self.weight is None else self.weight)
+                           + (float(other.positions) if other.weight is None
+                              else other.weight))
         self.kl += other.kl
         self.reverse_kl += other.reverse_kl
         self.ref_ce += other.ref_ce
         self.abl_ce += other.abl_ce
         self.top1_agree += other.top1_agree
-        for tag, (s, c) in other.tagged.items():
-            self.add_tagged(tag, s, c)
+        for tag, entry in other.tagged.items():
+            kl_sum, weight = entry[0], entry[1]
+            count = entry[2] if len(entry) > 2 else weight
+            self.add_tagged(tag, kl_sum, weight, count)
 
     def as_dict(self) -> dict:
         n = self.positions
         if n == 0:
             raise ValueError("no positions accumulated")
+        w = self.denominator
+        if w <= 0:
+            raise ValueError(
+                f"{n} positions accumulated but their weights sum to {w}; a "
+                "position set with no weight has no mean, and dividing by it "
+                "would report one")
         out = {
             "positions": n,
-            "kl": self.kl / n,
-            "reverse_kl": self.reverse_kl / n,
-            "ref_ce": self.ref_ce / n,
-            "abl_ce": self.abl_ce / n,
-            "ce_delta": (self.abl_ce - self.ref_ce) / n,
-            "top1_agreement": self.top1_agree / n,
+            "weight": w,
+            "kl": self.kl / w,
+            "reverse_kl": self.reverse_kl / w,
+            "ref_ce": self.ref_ce / w,
+            "abl_ce": self.abl_ce / w,
+            "ce_delta": (self.abl_ce - self.ref_ce) / w,
+            "top1_agreement": self.top1_agree / w,
         }
         out["tagged"] = {
-            tag: {"positions": int(c), "kl": (s / c) if c else None}
-            for tag, (s, c) in sorted(self.tagged.items())
+            #: Rounded rather than truncated: the count is an exact integer in
+            #: float64 at these magnitudes and `int()` on `3.9999…` would
+            #: silently lose one.
+            tag: {"positions": int(round(entry[2] if len(entry) > 2
+                                        else entry[1])),
+                  "weight": entry[1],
+                  "kl": (entry[0] / entry[1]) if entry[1] else None}
+            for tag, entry in sorted(self.tagged.items())
         }
         return out
 
@@ -178,9 +229,16 @@ def forward_kl_mean(
     ref_logits: torch.Tensor,
     abl_logits: torch.Tensor,
     *,
+    weights: torch.Tensor | None = None,
     chunk: int = 512,
 ) -> float:
     """Mean forward KL(reference || ablated) over positions. Nothing else.
+
+    ``weights`` is an optional ``[T_pred]`` non-negative vector; the result is
+    then ``sum_t w_t k_t / sum_t w_t`` instead of the unweighted mean. ``None``
+    takes the path this function has always taken, operation for operation —
+    not a multiply by ``1.0``, because the frozen DEPTH decisions were produced
+    by these exact lines.
 
     `distortion` computes six quantities for every (candidate, item) pair:
     forward KL, reverse KL, reference CE, ablated CE, top-1 agreement and the
@@ -213,6 +271,13 @@ def forward_kl_mean(
     positions = int(ref_logits.shape[0])
     if positions == 0:
         raise ValueError("no positions to reduce")
+    w = _position_weights(weights, positions, ref_logits.device, "forward_kl_mean")
+    denominator = positions if w is None else float(w.sum())
+    if denominator <= 0:
+        raise ValueError(
+            "every position has weight zero, so these logits have no weighted "
+            "mean KL; an item the scoring policy cannot score must not reach a "
+            "reducer")
     resident = _reduce_on_device(ref_logits.device)
     total = (torch.zeros((), dtype=torch.float64, device=ref_logits.device)
              if resident else 0.0)
@@ -221,11 +286,16 @@ def forward_kl_mean(
         p_log = F.log_softmax(ref_logits[a:b].float(), dim=-1)
         q_log = F.log_softmax(abl_logits[a:b].float(), dim=-1)
         per_pos = (p_log.exp() * (p_log - q_log)).sum(-1)
+        #: Weighted BEFORE the chunk sum, so a zero-weight position contributes
+        #: exactly zero rather than a value scaled afterwards. `w is None` skips
+        #: the multiply entirely — see the docstring.
+        if w is not None:
+            per_pos = per_pos * w[a:b].to(per_pos.dtype)
         if resident:
             total += per_pos.sum().double()
         else:
             total += float(per_pos.sum())
-    return (float(total.item()) if resident else float(total)) / positions
+    return (float(total.item()) if resident else float(total)) / denominator
 
 
 @torch.no_grad()
@@ -234,6 +304,7 @@ def forward_kl_mean_batch(
     abl_logits: torch.Tensor,
     prediction_mask: torch.Tensor,
     *,
+    weights: torch.Tensor | None = None,
     chunk: int = 512,
 ) -> torch.Tensor:
     """Per-item mean forward KL over a padded batch. One scalar per ROW.
@@ -243,6 +314,13 @@ def forward_kl_mean_batch(
     really predicts. Returns ``[B]``, where ``out[i]`` is the mean forward KL of
     item ``i`` over **item i's own** valid positions — the same quantity
     :func:`forward_kl_mean` returns for that item alone.
+
+    ``weights`` is an optional ``[B, T_pred]`` non-negative array of scoring
+    weights. It is multiplied INTO the validity mask rather than replacing it:
+    the mask says which positions exist, the weights say which of them the
+    objective cares about, and a padded position must be zero under both. Each
+    row is then ``sum_t m_t w_t k_t / sum_t m_t w_t`` — per row, so an item's
+    weighting still cannot leak into a neighbour that shared its forward.
 
     **This is a per-item mean, not a pooled one, and the difference is the
     objective.** Reducing as ``(kl * mask).sum() / mask.sum()`` over the whole
@@ -285,12 +363,27 @@ def forward_kl_mean_batch(
     if positions == 0:
         raise ValueError("no positions to reduce")
     mask = prediction_mask.to(ref_logits.device).bool()
-    counts = mask.sum(dim=1)
-    empty = (counts == 0).nonzero().flatten().tolist()
+    w = _position_weights(weights, positions, ref_logits.device,
+                          "forward_kl_mean_batch", rows=rows)
+    if w is None:
+        #: The reference path, and `effective` is the BOOLEAN MASK ITSELF — so
+        #: the per-chunk `effective[:, a:b].to(per_pos.dtype)` below is
+        #: character for character the operation this loop always performed.
+        effective = mask
+        counts = mask.sum(dim=1).double()
+    else:
+        #: Masked AND weighted. The product is formed once here rather than per
+        #: chunk, so the denominator and the numerator are provably the same
+        #: vector — a row whose weights are zeroed by padding cannot end up with
+        #: a count that padding did not zero.
+        effective = (mask.to(w.dtype) * w)
+        counts = effective.sum(dim=1).double()
+    empty = (counts <= 0).nonzero().flatten().tolist()
     if empty:
         raise ValueError(
-            f"rows {empty} have no valid prediction positions; an item that "
-            "predicts nothing has no mean KL and must not reach this reducer")
+            f"rows {empty} carry no scoring weight over any valid prediction "
+            "position; an item that predicts nothing the policy scores has no "
+            "mean KL and must not reach this reducer")
 
     #: Same two accumulation paths the scalar oracle has, and for the same
     #: reason: the device branch is one no CPU-only test would otherwise reach,
@@ -307,11 +400,40 @@ def forward_kl_mean_batch(
         q_log = F.log_softmax(abl_logits[:, a:b].float(), dim=-1)
         per_pos = (p_log.exp() * (p_log - q_log)).sum(-1)          # [B, chunk]
         #: Masked BEFORE the row sum, so a padded position contributes exactly
-        #: zero rather than a garbage KL scaled by a garbage denominator.
-        per_pos = per_pos * mask[:, a:b].to(per_pos.dtype)
+        #: zero rather than a garbage KL scaled by a garbage denominator. At
+        #: `weights=None` `effective` IS the boolean mask cast to the logits'
+        #: float dtype, so this is the multiply this line always performed.
+        per_pos = per_pos * effective[:, a:b].to(per_pos.dtype)
         chunk_sum = per_pos.sum(dim=1).double()                    # [B]
         total += chunk_sum if resident else chunk_sum.cpu()
-    return total / counts.to(total.device).double()
+    return total / counts.to(total.device)
+
+
+def _position_weights(weights: torch.Tensor | None, positions: int,
+                      device: torch.device, where: str,
+                      *, rows: int | None = None) -> torch.Tensor | None:
+    """Validate a position-weight vector, or pass ``None`` straight through.
+
+    One validator for all three reducers, because the failure it catches is the
+    same in each: a weight vector of the wrong length would be broadcast or
+    truncated by the arithmetic below and would silently reweight the objective
+    rather than raise. The expected shape is ``[positions]`` for the scalar
+    reducers and ``[rows, positions]`` for the batched one.
+    """
+    if weights is None:
+        return None
+    expected = (positions,) if rows is None else (rows, positions)
+    if tuple(weights.shape) != expected:
+        raise ValueError(
+            f"{where}: position weights have shape {tuple(weights.shape)}, not "
+            f"{expected}. A mis-shaped weight vector reweights the objective "
+            "instead of failing, which is why this is checked rather than "
+            "broadcast")
+    if bool((weights < 0).any()):
+        raise ValueError(f"{where}: negative position weight")
+    if not bool(torch.isfinite(weights).all()):
+        raise ValueError(f"{where}: non-finite position weight")
+    return weights.to(device)
 
 
 def _reduce_on_device(device: torch.device) -> bool:
@@ -335,6 +457,7 @@ def distortion(
     targets: torch.Tensor,
     *,
     tags: Mapping[str, torch.Tensor] | None = None,
+    weights: torch.Tensor | None = None,
     chunk: int = 512,
 ) -> DistortionSums:
     """Accumulate teacher -> ablated-teacher distortion over prediction positions.
@@ -343,6 +466,18 @@ def distortion(
     positions being scored, and `targets` is `[T_pred]`. `tags` maps a diagnostic
     name to a boolean `[T_pred]` mask; tagged KL is reported alongside but has no
     standing to change a selection (see `greedy_removal`).
+
+    `weights` is an optional `[T_pred]` non-negative scoring-weight vector. Every
+    one of the six quantities is then weighted and the returned sums carry
+    `sum_t w_t` as their denominator, including each tag's own. `None` performs
+    the operations this function has always performed — the state-eval drift
+    certification measured this path to 9.032e-06 of a 1e-5 budget, and a
+    multiply by 1.0 is not something to spend the remainder on.
+
+    **Tags and weights are different things and both apply.** A tag selects a
+    diagnostic subset of positions; the weights say how much each position counts
+    to the objective. A `think_close` position the policy does not supervise
+    contributes to neither, which is why the tag accumulators take the product.
 
     Reduced in float32 chunks: the vocabulary is ~152k, and a full-sequence
     float32 softmax of both models at once is a needless memory spike on the one
@@ -360,6 +495,13 @@ def distortion(
 
     out = DistortionSums()
     device = ref_logits.device
+    w = _position_weights(weights, int(targets.shape[0]), device, "distortion")
+    #: Set unconditionally, so the denominator is never inferred. At
+    #: `weights=None` it equals the position count, which is what the unweighted
+    #: estimand divides by; a weighted call sets the real total. `DistortionSums`
+    #: would fall back to the count on `None`, and that fallback exists only for
+    #: the hand-built host oracles — this function does not rely on it.
+    out.weight = float(targets.shape[0]) if w is None else float(w.sum())
     resident = _reduce_on_device(device)
     #: DEVICE-RESIDENT ACCUMULATORS when the logits are not on the host.
     #:
@@ -377,7 +519,10 @@ def distortion(
     #: replaces, so the dtype follows the behaviour rather than the tensors.
     if resident:
         acc = torch.zeros(5, dtype=torch.float64, device=device)
-        tag_acc = {name: torch.zeros(2, dtype=torch.float64, device=device)
+        #: THREE slots per tag once weights exist: KL sum, weight, position
+        #: count. The third used to be derivable from the second and is not any
+        #: more, which is precisely the distinction a weighted tagged mean needs.
+        tag_acc = {name: torch.zeros(3, dtype=torch.float64, device=device)
                    for name in tags}
     for a in range(0, ref_logits.shape[0], chunk):
         b = min(a + chunk, ref_logits.shape[0])
@@ -387,27 +532,67 @@ def distortion(
         per_pos = (p * (p_log - q_log)).sum(-1)
         tg = targets[a:b]
         out.positions += int(b - a)
+        #: The chunk's weights, cast to the reduction dtype once. `None` leaves
+        #: every expression below exactly as it was written — that is the whole
+        #: reason this is a branch and not a universal multiply.
+        wc = None if w is None else w[a:b].to(per_pos.dtype)
         if resident:
-            acc[0] += per_pos.sum().double()
-            acc[1] += (q_log.exp() * (q_log - p_log)).sum(-1).sum().double()
-            acc[2] += (-p_log.gather(1, tg[:, None]).sum()).double()
-            acc[3] += (-q_log.gather(1, tg[:, None]).sum()).double()
-            acc[4] += (p_log.argmax(-1) == q_log.argmax(-1)).sum().double()
+            if wc is None:
+                acc[0] += per_pos.sum().double()
+                acc[1] += (q_log.exp() * (q_log - p_log)).sum(-1).sum().double()
+                acc[2] += (-p_log.gather(1, tg[:, None]).sum()).double()
+                acc[3] += (-q_log.gather(1, tg[:, None]).sum()).double()
+                acc[4] += (p_log.argmax(-1) == q_log.argmax(-1)).sum().double()
+            else:
+                acc[0] += (per_pos * wc).sum().double()
+                acc[1] += ((q_log.exp() * (q_log - p_log)).sum(-1)
+                           * wc).sum().double()
+                acc[2] += (-(p_log.gather(1, tg[:, None]).squeeze(1)
+                             * wc).sum()).double()
+                acc[3] += (-(q_log.gather(1, tg[:, None]).squeeze(1)
+                             * wc).sum()).double()
+                acc[4] += ((p_log.argmax(-1) == q_log.argmax(-1)).to(wc.dtype)
+                           * wc).sum().double()
             for name, mask in tags.items():
                 m = mask[a:b]
-                tag_acc[name][0] += per_pos[m].sum().double()
-                tag_acc[name][1] += m.sum().double()
+                if wc is None:
+                    tag_acc[name][0] += per_pos[m].sum().double()
+                    tag_acc[name][1] += m.sum().double()
+                    tag_acc[name][2] += m.sum().double()
+                else:
+                    mw = m.to(wc.dtype) * wc
+                    tag_acc[name][0] += (per_pos * mw).sum().double()
+                    tag_acc[name][1] += mw.sum().double()
+                    tag_acc[name][2] += m.sum().double()
         else:
-            out.kl += float(per_pos.sum())
-            out.reverse_kl += float((q_log.exp() * (q_log - p_log)).sum(-1).sum())
-            out.ref_ce += float(-p_log.gather(1, tg[:, None]).sum())
-            out.abl_ce += float(-q_log.gather(1, tg[:, None]).sum())
-            out.top1_agree += int((p_log.argmax(-1) == q_log.argmax(-1)).sum())
+            if wc is None:
+                out.kl += float(per_pos.sum())
+                out.reverse_kl += float((q_log.exp() * (q_log - p_log)).sum(-1).sum())
+                out.ref_ce += float(-p_log.gather(1, tg[:, None]).sum())
+                out.abl_ce += float(-q_log.gather(1, tg[:, None]).sum())
+                out.top1_agree += int((p_log.argmax(-1) == q_log.argmax(-1)).sum())
+            else:
+                out.kl += float((per_pos * wc).sum())
+                out.reverse_kl += float(((q_log.exp() * (q_log - p_log)).sum(-1)
+                                         * wc).sum())
+                out.ref_ce += float(-(p_log.gather(1, tg[:, None]).squeeze(1)
+                                      * wc).sum())
+                out.abl_ce += float(-(q_log.gather(1, tg[:, None]).squeeze(1)
+                                      * wc).sum())
+                out.top1_agree += float(
+                    ((p_log.argmax(-1) == q_log.argmax(-1)).to(wc.dtype)
+                     * wc).sum())
             for name, mask in tags.items():
                 m = mask[a:b]
                 k = int(m.sum())
-                if k:
+                if not k:
+                    continue
+                if wc is None:
                     out.add_tagged(name, float(per_pos[m].sum()), k)
+                else:
+                    mw = m.to(wc.dtype) * wc
+                    out.add_tagged(name, float((per_pos * mw).sum()),
+                                   float(mw.sum()), k)
     if resident:
         #: ONE transfer, at the end. The only values that cross to the host are
         #: these reduced scalars -- never a `[T, V]` logit tensor.
@@ -416,14 +601,21 @@ def distortion(
         out.reverse_kl += rkl
         out.ref_ce += ref_ce
         out.abl_ce += abl_ce
-        out.top1_agree += int(round(top1))
-        for name, pair in tag_acc.items():
-            kl_sum, count = pair.tolist()
+        #: Rounded to an integer ONLY when it is one. Under weights the agreement
+        #: sum is a weighted count and rounding it would quantise the metric.
+        out.top1_agree += int(round(top1)) if w is None else top1
+        for name, triple in tag_acc.items():
+            kl_sum, weight, count = triple.tolist()
             #: A tag with no matching position is OMITTED, exactly as the host
             #: path's `if k:` omits it -- an entry with zero positions would
-            #: make `as_dict` report a tag the suite never saw.
+            #: make `as_dict` report a tag the suite never saw. The test is the
+            #: POSITION count, not the weight: a tag whose every position the
+            #: policy zeroed was still present in the suite, and reporting it
+            #: with `kl: None` says so where silence would not.
             if count:
-                out.add_tagged(name, kl_sum, int(round(count)))
+                out.add_tagged(name, kl_sum,
+                               weight if w is not None else int(round(count)),
+                               int(round(count)))
     return out
 
 

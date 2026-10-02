@@ -34,6 +34,7 @@ from aadistill.initialization.operators._common import (
     copy_module_except,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -85,9 +86,18 @@ class FFNActivationImportanceV0(OperatorImplementation):
         # weights, so both must be where the weights are.
         compute = model_device(parent)
         batch_size = ctx.execution.micro_batch_size
+        packing = ctx.execution.calibration_batch_packing
+        #: WHICH POSITIONS the activation expectation is taken over. `E[|a_j|]` is
+        #: an expectation, and this is what it is an expectation with respect to:
+        #: under the incumbent policy every real token, under a target-aware one
+        #: only the positions whose next-token prediction the item supervises.
+        #: The restriction travels in the HASHED config, so two searches that
+        #: protect different positions are different states.
+        active = active_positions(ctx.calibration_items, ctx.position_policy)
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
-            compute, batch_size=batch_size)), compute)
+            compute, batch_size=batch_size, packing=packing,
+            active=active)), compute)
 
         new_spec = ctx.parent_spec.replace(**{FFN_FIELD: keep})
         builder = ChildBuilder(adapter, parent, new_spec, seed=ctx.seed)
@@ -132,7 +142,17 @@ class FFNActivationImportanceV0(OperatorImplementation):
                 },
                 detail={"per_layer_retained_share": retained_shares}),
             trace={"source": "activation_importance_topk",
+                   #: Execution evidence, not identity -- `OperatorStep.identity()`
+                   #: does not read `trace` and neither knob changes the estimand.
                    "micro_batch_size": batch_size,
+                   "calibration_batch_packing": packing,
+                   #: SCIENCE evidence, and the one trace field here that
+                   #: corresponds to something inside the state id: the policy's
+                   #: id and hash are in the hashed config, and this records what
+                   #: it actually restricted so a reader can check the numbers
+                   #: rather than re-derive them from the mixture.
+                   "scoring_positions": (None if active is None
+                                         else active.report()),
                    "kept_fraction": keep / ctx.parent_spec[FFN_FIELD]},
             artifacts={"kept_neurons": kept_per_layer},
         )

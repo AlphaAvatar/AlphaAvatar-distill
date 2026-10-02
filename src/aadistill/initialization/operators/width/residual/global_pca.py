@@ -40,6 +40,7 @@ from aadistill.initialization.operators._common import (
     collect_activation_stats,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -102,9 +103,16 @@ class WidthGlobalPCAV0(OperatorImplementation):
         # once, and freed when this call returns.
         compute = model_device(parent)
         batch_size = ctx.execution.micro_batch_size
+        packing = ctx.execution.calibration_batch_packing
+        #: WHICH POSITIONS the residual second moments are taken over. The
+        #: projection keeps the directions the stream actually uses, and this is
+        #: what decides "actually uses": every real token under the incumbent
+        #: policy, or only the positions whose prediction the item supervises.
+        active = active_positions(ctx.calibration_items, ctx.position_policy)
         state = stats_to(ctx.cached_stats(lambda: collect_activation_stats(
             adapter, parent, ctx.calibration_items,
-            compute, batch_size=batch_size)), compute)
+            compute, batch_size=batch_size, packing=packing,
+            active=active)), compute)
 
         # Same point set and weights as the incumbent recipe: all pre-norm stream
         # states plus the post-final-norm point, ends upweighted 9/8.
@@ -159,6 +167,9 @@ class WidthGlobalPCAV0(OperatorImplementation):
                 detail={"stats_tokens": int(state["residual_count"][0])}),
             trace={"source": "global_activation_pca", "scale_compensation": scale,
                    "micro_batch_size": batch_size,
+                   "calibration_batch_packing": packing,
+                   "scoring_positions": (None if active is None
+                                         else active.report()),
                    "d_parent": d_p, "d_child": d_c},
             artifacts={"projection_diagnostics": {
                 k: v for k, v in proj_diag.items() if k != "points"}},

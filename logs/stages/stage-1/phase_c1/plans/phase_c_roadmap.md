@@ -14,8 +14,13 @@
 **Status: C0 COMPLETE / FROZEN · C1 COMPLETE (verdict `GO`) · C2 CLOSED
 WITHOUT PROMOTION, by maintainer decision of 2026-09-24 · C3 COMPLETE, verdict
 `NO_GO` on the primary operator-isolation contrast, 2026-10-01 · C4 NOT
-AUTHORIZED · A-bsz3 designed and not funded · the D-series directive received
-and not yet designed.**
+AUTHORIZED · A3 COMPLETE and terminal, 2026-10-03 · the FFN-specific F1
+experiment SKIPPED by maintainer instruction of 2026-10-03 · D1 DESIGNED and
+BLOCKED on evidence and funding · D2 and D3 NOT STARTED.**
+
+*The status line above used to end "A-bsz3 designed and not funded · the
+D-series directive received and not yet designed". Both halves were true when
+written: A3 completed on 2026-10-03 and D1 was designed the same day.*
 
 *This line used to read "C2 PREPARATION CLOSED AND ACCEPTED … C3 NOT STARTED ·
 C4 CONDITIONAL ON C3", which was true when it was written and stopped being
@@ -438,28 +443,74 @@ FFN work, then design and review D1/D2/D3.
 
 ## The D-series — global scoring/search experiments
 
-> **DIRECTIVE RECEIVED 2026-10-01. NOT STARTED, NOT DESIGNED, NOT PRICED, NOT
-> AUTHORIZED.** This section records what the maintainer specified so the
-> specification is not carried in chat history. The protocol itself is owed
-> *after* the FFN work, and must be pushed for independent review before any
-> paid execution.
+> **D1 DESIGNED 2026-10-03, NOT AUTHORIZED, BLOCKED. D2 and D3 NOT STARTED.**
+>
+> The maintainer's order of **2026-10-03** supersedes the 2026-10-01 stop: the
+> FFN-specific F1 experiment is **skipped**, `ffn.activation_importance_v0` is
+> carried forward as the current best FFN, and D1 is designed, implemented,
+> validated and priced without launching.
+>
+> D1's protocol now has an owner —
+> [`phase_d1/plans/d1_design.json`](../../phase_d1/plans/d1_design.json) — and
+> this section is the plan, not the figures. **Two independent blockers are
+> open**, either alone preventing execution: the fresh behavioural evidence
+> cannot be built under the frozen mixture, and the chain is not fundable. The
+> design record's `contamination_protection` and `budget` own both; the battery
+> arithmetic is
+> [`d1_evidence_capacity.json`](../../phase_d1/analyses/d1_evidence_capacity.json).
+>
+> The original 2026-10-01 text said the protocol was owed *after* the FFN work.
+> That ordering was true when it was written and stopped being true on
+> 2026-10-03.
 
-**Preconditions.** After A-bsz3 and the FFN experiment are complete, freeze the
-current-best implementation for **every structural kind**.
+**Preconditions.** Freeze the current-best implementation for **every
+structural kind**. Done: DEPTH `depth.causal_kl_greedy_v1`, FFN
+`ffn.activation_importance_v0`, RESIDUAL_WIDTH `width.global_pca_v0`, ATTENTION
+`attention.activation_importance_v1`. The FFN experiment that would have
+reopened the second of these is skipped by instruction.
 
-**And one more, which A-bsz3 may impose.** If step 1 finds the A-bsz1 and
-A-bsz3 artifact digests **differ**, A-bsz3 is a distinct numerical
-*materialization* protocol — the operator semantics, the hypothesis and the
-estimand are unchanged, and the bytes are not. `compute_state_id` binds
-neither the `ExecutionConfig` nor the artifact digest, so two differing
-artifacts would collide on one resumable, deduplicable state id. **A-bsz3 may
-not enter D1/D2/D3 execution in that case until the repository binds the
-numerical execution fingerprint to materialization/resume identity**, and a
-passing behavioural sanity check does not clear it — that is an engineering
-correctness property, not a behavioural one. If the digests match, nothing is
-owed and no such mechanism may be built speculatively. Owner:
-[`a_bsz3_adoption.json`](../../phase_c3/plans/a_bsz3_adoption.json)
-`:: identity_semantics`.
+**And one more, which A-bsz3 imposed — now SATISFIED.** A3 found the A-bsz1 and
+A-bsz3 artifact digests **differ** (`53e30566c5f7` against `7dd2f6f6980b`,
+reproducibly, on three machines, with an identical `result_spec_hash`), so
+A-bsz3 is a distinct numerical *materialization* protocol: the operator
+semantics, the hypothesis and the estimand are unchanged, and the bytes are
+not. `compute_state_id` binds neither the `ExecutionConfig` nor the artifact
+digest, so two differing artifacts would have collided on one resumable,
+deduplicable state id — and a passing behavioural sanity check does not clear
+that, because it is an engineering correctness property.
+
+`aadistill.initialization.specs.materialization` resolves it by adding a second
+coordinate rather than forking the hypothesis:
+
+```text
+semantic_state_id                 scientific/path identity, still blind to execution
+numerical_execution_fingerprint   batch size, packing, device class, dtypes
+materialization_id                semantic + fingerprint; what resume may key on
+artifact_digest                   the bytes, observed and bound once
+```
+
+Resume, deduplication, the statistics-cache key and the operator/measurer
+policy check all key on the right one, and the refusals are mutation-tested at
+`$0`. The registry stays clean of execution-variant operator ids, which is what
+the prohibition on `attention.activation_importance_bsz3` was protecting.
+Owners: [`a_bsz3_adoption.json`](../../phase_c3/plans/a_bsz3_adoption.json)
+`:: identity_semantics` and
+[`d1_design.json`](../../phase_d1/plans/d1_design.json)
+`:: materialization_prerequisite`.
+
+**Batched execution is global from D1 onward.** A maintainer engineering
+decision, not a performance claim: A3 measured that `batch_size=3` with
+`length_sorted_v1` is **8-10% slower** on the ATTENTION scorer with no
+detectable correctness effect, so this is uniformity. It covers DEPTH, FFN,
+RESIDUAL_WIDTH, ATTENTION, the calibration statistics, the causal scoring, the
+global state evaluation and the beam candidate evaluation. The value is
+experiment policy carried by `ExecutionConfig`; `3` is not a core constant and
+the core accepts 2, 4, 8 or a future token-budget policy with no edit.
+
+Every reduction obeys one invariant — `score = sum_t(w_t·v_t) / sum_t(w_t)` with
+`w_t = 0` at a padded position — so padding never enters a denominator, a
+per-item mean is formed per row, and there is no batch-size-specific scientific
+branch.
 
 **They are not attention-only experiments.** D1, D2 and D3 are GLOBAL
 scoring/search experiments. All three apply their scoring semantics
@@ -494,6 +545,27 @@ target-aware operators must not then be pruned by a full-sequence beam metric.
 The existing multi-objective Pareto machinery and beam schedule are preserved;
 what changes is the state metrics, not the beam algorithm.
 
+**IMPLEMENTED 2026-10-03.** `aadistill.initialization.scoring` owns the policy;
+`positions.supervised_target_v1` is the treatment and `positions.all_v1` is the
+incumbent control, named and hashed so a record can state which it ran under.
+The restriction is read from each frozen mixture's own `assistant` tag rather
+than re-derived from a chat template, and it is a real one: `74.9%` of
+`calib.domain_balanced@v1`'s prediction positions, `78.4%` of
+`calib.reasoning_heavy@v2`'s and `73.0%` of `state_eval_v1`'s. The incumbent
+policy is numerically inert — verified by rebuilding a four-operator toy chain
+against this branch's merge base and getting the same artifact digest — and the
+treatment moves DEPTH's kept layers, FFN's kept neurons, WIDTH's captured energy
+and ATTENTION's kept heads. A search cannot mix them: the operators and the
+measurer must present the same policy hash or the expansion is refused.
+
+**One thing the policy's token axis changes, stated because it is a real
+difference and not an off-by-one.** An activation statistic has always summed
+over all `L` token positions of an item. Under the target-aware policy it sums
+over the positions whose next-token prediction is supervised, which for an
+untagged raw-LM item is `L - 1` — the item's final token feeds no prediction
+inside the item. That follows from defining the statistic over supervised
+*predictions* rather than over *tokens*, which is the hypothesis.
+
 ### D2 — target-aware + reference-confidence weighting
 
 From D1, add confidence weighting based on the **reference** distribution. For
@@ -514,6 +586,20 @@ confident deserve more structural protection?
 
 The entropy idea is inspired by Confident Decoding. This is a **new
 compression-selection objective**, not a claim that the paper proposes pruning.
+
+**One engineering gap is already identified, and it is D2's to close.** The
+position-policy API expresses arbitrary non-negative weights and the KL-side
+reducers implement them — a weighted next-token objective needs no schema
+change, because its denominator is formed per row. The **activation**
+collectors implement only the binary form: their divisor is `residual_count`,
+an `int64` token count read by `uncentered_moment`, `ffn_neuron_importance` and
+`residual_covariance`. A continuous `c_ref(t)` turns every accumulator into
+`sum_t w_t x_t` over `sum_t w_t`, which is a new `StatsSpec` quantity and three
+divisor call sites. `ActivePositions.require_binary_token_weights` **refuses by
+name** rather than rounding a confidence weight to a mask, so the boundary
+fails loudly at `$0` instead of silently running a different experiment. It was
+deliberately not built in D1's round: nothing consumed it, and the experiment
+that does is this one.
 
 ### D3 — target-aware + KL + pure student confidence
 

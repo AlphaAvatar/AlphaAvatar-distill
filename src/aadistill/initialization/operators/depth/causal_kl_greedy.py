@@ -44,10 +44,11 @@ from aadistill.initialization.specs.arch import (
 from aadistill.initialization.specs.metrics import OperatorLocalMetrics
 from aadistill.initialization.calibration.batching import (
     build_batch,
-    micro_batches,
     resolve_pad_id,
 )
+from aadistill.initialization.calibration.packing import packed_batches
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorError,
@@ -134,10 +135,23 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: path is the code that produced every frozen DEPTH decision, not a
         #: batched path that happens to agree with it.
         batch_size = ctx.execution.micro_batch_size
-        groups = list(micro_batches(
-            items, batch_size,
+        packing = ctx.execution.calibration_batch_packing
+        #: `(ItemBatch, original_indices)` pairs. The indices are what map a ROW
+        #: back to its item in the mixture, and under a reordering packing policy
+        #: they are not the identity — the per-item scoring weights below are
+        #: looked up through them, so a row can never be scored on a neighbour's
+        #: supervised positions.
+        groups = [(p.batch, p.original_indices) for p in packed_batches(
+            items, max(int(batch_size), 1), packing=packing,
             pad_id=(resolve_pad_id(model) if batch_size > 1 else 0),
-            device=compute))
+            device=compute)]
+        #: WHICH PREDICTION POSITIONS the causal KL is a mean over. The objective
+        #: is `KL(parent || parent-with-S-bypassed)` averaged over positions, and
+        #: this decides which: every real prediction under the incumbent policy,
+        #: or only the ones the item's own objective contract supervises. It comes
+        #: from the hashed config and therefore forks the state, unlike the batch
+        #: size and packing above it.
+        active = active_positions(items, ctx.position_policy)
 
         # Operational timings, kept OUT of every returned metric and hash.
         #
@@ -163,6 +177,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   "distortion_seconds": 0.0, "item_seconds": 0.0,
                   "candidate_subsets": 0, "ablated_forwards": 0,
                   "ablated_items": 0, "micro_batch_size": batch_size,
+                  "calibration_batch_packing": packing,
                   "distortion_calls": 0, "split_is_attributed": bool(cuda_sync)
                   or torch.device(compute).type != "cuda"}
 
@@ -170,7 +185,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             per_subtype: dict[str, list[float]] = {}
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
-            for group in groups:
+            for group, indices in groups:
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
@@ -210,6 +225,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 if batch_size > 1:
                     values = forward_kl_mean_batch(
                         refs, abls, group.prediction_mask().to(abls.device),
+                        weights=(None if active is None else
+                                 active.prediction_weights_for(group, indices)),
                         chunk=512)
                     #: ONE host transfer for the whole batch.
                     for item, value in zip(group.items, values.tolist()):
@@ -217,7 +234,12 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         timing["distortion_calls"] += 1
                 else:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
-                        forward_kl_mean(refs, abls, chunk=512))
+                        forward_kl_mean(
+                            refs, abls,
+                            weights=(None if active is None else
+                                     active.prediction_weights_for_item(
+                                         indices[0])),
+                            chunk=512))
                     timing["distortion_calls"] += 1
                 timing["distortion_seconds"] += time.perf_counter() - t2
                 del abls
@@ -282,6 +304,13 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 },
                 detail={"removal_order": result["removal_order"]}),
             trace={"micro_batch_size": batch_size,
+                   #: Execution evidence, recorded even at the default so a run's
+                   #: trace states which grouping its forwards used.
+                   "calibration_batch_packing": packing,
+                   #: SCIENCE evidence: what the policy named in the hashed config
+                   #: actually restricted.
+                   "scoring_positions": (None if active is None
+                                         else active.report()),
                    "kept_layers": kept, "removed_layers": result["removed"],
                    "removal_order": result["removal_order"],
                    "source": "causal_kl_greedy"},

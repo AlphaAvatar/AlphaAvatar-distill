@@ -102,10 +102,36 @@ class TestPaddingCannotContribute:
         assert torch.equal(before, after)
 
     def test_a_row_predicting_nothing_is_refused(self):
+        """And the refusal NAMES THE ROW, which is the part that matters.
+
+        This used to match the phrase "no valid prediction positions". The
+        reducer then learned to take scoring weights as well as a validity mask,
+        and the message became the accurate one — a row can now reach zero by
+        padding OR by the policy admitting none of its positions, and the
+        wording covers both. A phrasing lock on the old sentence would have
+        failed on a message that is strictly better, so the assertion is on the
+        content: it refuses, it says which row, and it is this reducer's error.
+        """
         ref, abl, mask = ragged([10, 10])
         mask[1] = False
-        with pytest.raises(ValueError, match="no valid prediction positions"):
+        with pytest.raises(ValueError, match=r"rows \[1\]"):
             forward_kl_mean_batch(ref, abl, mask)
+        with pytest.raises(ValueError, match="must not reach this reducer"):
+            forward_kl_mean_batch(ref, abl, mask)
+
+    def test_a_row_the_WEIGHTS_empty_is_refused_the_same_way(self):
+        """The second route to an empty row, and it must refuse identically.
+
+        A validity mask that keeps a row and scoring weights that zero all of
+        it leave the same undefined mean. Driven here rather than assumed,
+        because the two causes meet in one denominator and only one of them was
+        reachable before.
+        """
+        ref, abl, mask = ragged([10, 10])
+        weights = torch.ones(mask.shape, dtype=torch.float64)
+        weights[0] = 0.0
+        with pytest.raises(ValueError, match=r"rows \[0\]"):
+            forward_kl_mean_batch(ref, abl, mask, weights=weights)
 
     def test_a_mask_that_does_not_describe_the_logits_is_refused(self):
         ref, abl, mask = ragged([10, 10])

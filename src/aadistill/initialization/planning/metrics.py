@@ -4,6 +4,19 @@ The measurement CONTRACTS -- what a metric name means, what a suite is, what a
 result looks like -- live in `aadistill.initialization.specs.metrics`, one layer
 down, because the operators and the state spec need them and must not depend on
 this module to get them.
+
+**The beam reads what this produces, so the scoring positions have to reach
+here.** A candidate chosen by target-aware operators and then pruned by a
+full-sequence beam metric would be an experiment with two different answers to
+one question. `StateEvaluator` therefore takes the same
+`ScoringPositionPolicy` object the operators were handed, applies it to the
+suite's own items, and stamps its id and hash into the evaluation's `detail` so a
+ranked result states which positions it ranked on.
+
+The default policy is the incumbent one and is numerically inert: `distortion`
+receives `weights=None` and performs the operations the state-eval drift
+certification measured to 9.032e-06 of its 1e-5 budget. A multiply by 1.0 is not
+something to spend the remainder on.
 """
 from __future__ import annotations
 
@@ -25,11 +38,46 @@ from aadistill.initialization.specs.metrics import (
     SuiteItem,
     reference_cache_bytes,
 )
+from aadistill.initialization.calibration.batching import resolve_pad_id
+from aadistill.initialization.calibration.packing import (
+    ORIGINAL_ORDER_V1,
+    item_lengths,
+    packed_batches,
+    padding_profile,
+)
+from aadistill.initialization.execution import ExecutionConfig
+from aadistill.initialization.scoring.positions import (
+    ALL_POSITIONS_V1,
+    PREDICTION_AXIS,
+    ScoringPositionPolicy,
+)
 from aadistill.initialization.statistics.contribution import (
     DistortionSums,
     distortion,
     domain_balanced_score,
 )
+
+#: The evaluator's default, and deliberately NOT
+#: `aadistill.initialization.execution.DEFAULT_EXECUTION`. That value is 4, which
+#: is the right default for an operator's statistics pass and would silently
+#: change what every existing caller of this evaluator does. One item per forward
+#: in the suite's own order is the path every committed state measurement was
+#: produced by; a caller that wants the batched one asks for it.
+REFERENCE_EXECUTION = ExecutionConfig(micro_batch_size=1,
+                                      calibration_batch_packing=ORIGINAL_ORDER_V1)
+
+#: Ceiling on the two logit blocks a batched evaluation materializes at once.
+#: Checked BEFORE the first forward, because the alternative is discovering the
+#: limit as an OOM on a paid pod — the same argument `CACHE_IN_MEMORY`'s budget
+#: already makes, and the same failure that killed the causal-depth rehearsal.
+#:
+#: 12 GiB: the frozen 80-item suite at batch 3 and `length_sorted_v1` needs
+#: 3.40 GiB for both models' bf16 logits over its widest group (2002 tokens at a
+#: 151,936 vocabulary), so this leaves room for a wider suite or a larger batch
+#: without leaving room for a mistake. It bounds the LOGIT BLOCKS only; the
+#: reduction's own float32 chunks are bounded by `chunk` and are ~0.87 GiB per
+#: item at that width, which is why they are not in this number.
+DEFAULT_STATE_EVAL_BATCH_BUDGET_BYTES = 12 * 2**30
 
 
 class StateEvaluator:
@@ -51,6 +99,9 @@ class StateEvaluator:
         reference_strategy: ReferenceStrategy = ReferenceStrategy.RECOMPUTE,
         cache_budget_bytes: int = DEFAULT_REFERENCE_CACHE_BUDGET_BYTES,
         vocab_size: int | None = None,
+        position_policy: ScoringPositionPolicy = ALL_POSITIONS_V1,
+        execution: ExecutionConfig = REFERENCE_EXECUTION,
+        batch_budget_bytes: int = DEFAULT_STATE_EVAL_BATCH_BUDGET_BYTES,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -70,6 +121,40 @@ class StateEvaluator:
         self.device = device
         self.chunk = chunk
         self.reference_strategy = reference_strategy
+        self.position_policy = position_policy
+        #: Evaluated ONCE, at construction, against the suite's own items — the
+        #: suite is fixed for the life of the evaluator and a search calls
+        #: `evaluate` once per candidate, so re-deriving the masks per candidate
+        #: would repeat the same tag normalization hundreds of times.
+        #:
+        #: `None` under the incumbent policy, which is what `distortion` reads as
+        #: "take the certified arithmetic". `require_nonempty` has already run, so
+        #: a suite containing an item this policy cannot score is refused here
+        #: rather than producing a zero denominator mid-search.
+        self._weights: dict[str, torch.Tensor] | None = None
+        if position_policy.policy_hash != ALL_POSITIONS_V1.policy_hash:
+            self._weights = {}
+            for item in self.items:
+                w = position_policy.weights(item, axis=PREDICTION_AXIS)
+                w.require_nonempty()
+                self._weights[item.item_id] = w.weights
+        self.execution = execution
+        self.batch_budget_bytes = int(batch_budget_bytes)
+        #: THE REFERENCE PATH, named once. One item per forward in the suite's own
+        #: order with no reassembly — the loop every committed state measurement
+        #: ran, and the one the drift certification measured. Anything else
+        #: batches the two FORWARDS and still reduces per item through the same
+        #: `distortion` call, so the certified arithmetic is not on the diff
+        #: either way.
+        self._reference_path = (int(execution.micro_batch_size) <= 1
+                                and execution.calibration_batch_packing
+                                == ORIGINAL_ORDER_V1)
+        #: Built at the first `evaluate`, because the pad id comes from a model.
+        #: Built ONCE and reused for every candidate: the grouping depends only on
+        #: the suite's lengths, and a grouping that could differ between
+        #: candidates would make comparing them depend on something other than
+        #: the candidate. The same rule `depth.causal_kl_greedy_v1` states.
+        self._groups: list[Any] | None = None
         self._teacher = None
         self._ref_logits: dict[str, torch.Tensor] = {}
         self._ref_ready = False
@@ -130,6 +215,124 @@ class StateEvaluator:
         ids = item.input_ids.to(self.device)
         return self._teacher(ids).logits[0, :-1].float()
 
+    # --- how the two forwards are issued ------------------------------------
+
+    def batch_plan(self, vocab_size: int, bytes_per_logit: int = 2) -> dict[str, Any]:
+        """What the batched path will materialize, derived at `$0` from lengths.
+
+        Separate from the evaluation and callable before any model exists, so a
+        preflight can price and bound the protocol from the frozen suite instead
+        of discovering it as an allocation failure. ``bytes_per_logit`` is the
+        candidate's dtype width — 2 for bf16/fp16, 4 for fp32.
+
+        The figure that matters is ``peak_logit_bytes``: the two blocks alive at
+        once, over the batch's WIDEST group rather than its average, because the
+        allocation that fails is the largest one. Averages are not bounds.
+        """
+        lengths = [int(i.input_ids.shape[1]) for i in self.items]
+        profile = padding_profile(
+            lengths, max(int(self.execution.micro_batch_size), 1),
+            packing=self.execution.calibration_batch_packing)
+        width = int(profile["max_group_width"])
+        rows = max(int(self.execution.micro_batch_size), 1)
+        peak = 2 * rows * max(width - 1, 1) * int(vocab_size) * int(bytes_per_logit)
+        return {**profile, "reference_path": self._reference_path,
+                "peak_logit_bytes": peak,
+                "budget_bytes": self.batch_budget_bytes,
+                "within_budget": peak <= self.batch_budget_bytes,
+                "bytes_per_logit": int(bytes_per_logit),
+                "vocab_size": int(vocab_size)}
+
+    def _ensure_groups(self, model) -> list[Any]:
+        if self._groups is not None:
+            return self._groups
+        vocab = int(getattr(model.config, "vocab_size", 0) or 0)
+        itemsize = next(model.parameters()).dtype.itemsize
+        plan = self.batch_plan(vocab, itemsize)
+        if not plan["within_budget"]:
+            raise MeasurementError(
+                f"a batched state evaluation at batch "
+                f"{self.execution.micro_batch_size} / "
+                f"{self.execution.calibration_batch_packing} would hold "
+                f"{plan['peak_logit_bytes']:,} bytes of logits for both models "
+                f"over its widest group ({plan['max_group_width']} tokens at a "
+                f"{vocab} vocabulary), over the "
+                f"{self.batch_budget_bytes:,}-byte budget. Lower the batch size "
+                "or raise the budget deliberately; discovering this as an OOM "
+                "mid-search is what the budget exists to prevent.")
+        #: Items in the SUITE's order, as mappings `packed_batches` understands.
+        #: `SuiteItem` is a dataclass, not a mapping, so the shim is here rather
+        #: than in the batcher: the batcher's contract is tokens, and teaching it
+        #: about suite items would couple it to the evaluator.
+        shim = [{"input_ids": i.input_ids, "item_id": i.item_id} for i in self.items]
+        self._groups = list(packed_batches(
+            shim, max(int(self.execution.micro_batch_size), 1),
+            packing=self.execution.calibration_batch_packing,
+            pad_id=resolve_pad_id(model), device=self.device))
+        return self._groups
+
+    @torch.no_grad()
+    def _logit_pairs(self, model):
+        """``(item, reference, candidate)`` per item, however the forwards ran.
+
+        **The reduction is identical on both paths and that is the point.** The
+        reference path issues one forward per item; the batched path issues one
+        forward per GROUP and slices each row back to its own ``[L-1, V]`` block.
+        Either way what reaches :func:`distortion` is one item's own logits at
+        one item's own shape, through the same call with the same chunk
+        boundaries — so batching moves the forward and the drift certification's
+        subject is not on the diff.
+
+        What batching does move is the forward's own batch shape, and this
+        project has measured bf16 GEMMs reducing shape-dependently. That is a
+        numerical execution property, recorded in the fingerprint, and not a
+        change of estimand.
+        """
+        if self._reference_path:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                # One item's reference and candidate logits exist at a time. At
+                # the intended suite that is ~0.5 GiB each rather than 33.8 GiB
+                # held for the whole run.
+                yield item, self._reference_for(item), \
+                    model(ids).logits[0, :-1].float()
+            return
+
+        by_id = {i.item_id: i for i in self.items}
+        for packed in self._ensure_groups(model):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            cand_block = model(ids, attention_mask=batch.attention_mask.to(
+                self.device)).logits[:, :-1]
+            cand_rows = batch.split_predictions(cand_block)
+            ref_rows = self._reference_rows(batch, ids)
+            for row, index in enumerate(packed.original_indices):
+                item = by_id[batch.items[row]["item_id"]]
+                if item is not self.items[index]:
+                    raise MeasurementError(
+                        f"row {row} of a packed group claims item "
+                        f"{item.item_id!r} at suite index {index}, which holds "
+                        f"{self.items[index].item_id!r}; a permutation this "
+                        "evaluator cannot trust would score one item's logits "
+                        "under another's tags")
+                yield item, ref_rows[row].float(), cand_rows[row].float()
+            del cand_block, cand_rows, ref_rows
+
+    @torch.no_grad()
+    def _reference_rows(self, batch, ids) -> list[torch.Tensor]:
+        """The intact teacher's per-row logits for one group.
+
+        Under ``CACHE_IN_MEMORY`` the per-item references already exist, so no
+        forward is issued and the cached tensors are returned in row order —
+        reassembling them into a padded block only to slice it again would cost a
+        copy of the whole block for nothing.
+        """
+        if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+            return [self._ref_logits[item["item_id"]] for item in batch.items]
+        block = self._teacher(ids, attention_mask=batch.attention_mask.to(
+            self.device)).logits[:, :-1]
+        return batch.split_predictions(block)
+
     @torch.no_grad()
     def evaluate(self, model, artifact_digest: str, *, reference: str = "root_teacher",
                  runtime: Mapping[str, Any] | None = None) -> StateEvaluation:
@@ -142,13 +345,7 @@ class StateEvaluator:
 
         per_subtype: dict[str, DistortionSums] = {}
         totals = DistortionSums()
-        for item in self.items:
-            ids = item.input_ids.to(self.device)
-            # One item's reference and candidate logits exist at a time. At the
-            # intended suite that is ~0.5 GiB each rather than 33.8 GiB held for
-            # the whole run.
-            ref = self._reference_for(item)
-            cand = model(ids).logits[0, :-1].float()
+        for item, ref, cand in self._logit_pairs(model):
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
@@ -167,7 +364,13 @@ class StateEvaluator:
             #: moving them is the consumer's job and it is cheap (one bool per
             #: position, against ~152k floats per position of logits).
             tags = {name: mask.to(ref.device) for name, mask in item.tags.items()}
-            sums = distortion(ref, cand, targets, tags=tags, chunk=self.chunk)
+            #: On the logits' device for the same reason the tags are: the
+            #: weights multiply a per-position vector inside `distortion`, and a
+            #: host float vector meeting a CUDA tensor raises.
+            weights = (None if self._weights is None
+                       else self._weights[item.item_id].to(ref.device))
+            sums = distortion(ref, cand, targets, tags=tags, weights=weights,
+                              chunk=self.chunk)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand
@@ -224,7 +427,24 @@ class StateEvaluator:
             positions=int(agg["positions"]),
             detail={"per_subtype_kl": subtype_kl, "per_domain_kl": per_domain,
                     "per_domain_nll": per_domain_ce, "tagged": tagged,
-                    "reference_strategy": self.reference_strategy.value},
+                    "reference_strategy": self.reference_strategy.value,
+                    #: WHICH POSITIONS these numbers are means over. Recorded in
+                    #: the evaluation rather than left to the run config, because
+                    #: this object is what the beam ranks on and what a journal
+                    #: restores — a ranked value whose position set is only
+                    #: inferable from elsewhere is a value a reader cannot check.
+                    #: `scored_weight` is the denominator; `positions` above is
+                    #: the count, and under a restriction they differ.
+                    "position_policy": self.position_policy.qualified_id,
+                    "position_policy_hash": self.position_policy.policy_hash,
+                    "scored_weight": float(agg["weight"]),
+                    #: HOW the forwards were issued. Execution evidence, not
+                    #: identity — it changes no estimand — but a state metric
+                    #: whose forwards were batched should say so, because the
+                    #: batch shape is a numerical condition and the fingerprint
+                    #: that binds it lives on the state, not here.
+                    "execution": self.execution.as_trace(),
+                    "reference_path": self._reference_path},
             runtime=dict(runtime or {}),
         )
 

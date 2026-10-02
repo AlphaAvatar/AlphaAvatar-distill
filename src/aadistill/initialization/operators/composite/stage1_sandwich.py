@@ -41,6 +41,7 @@ from aadistill.initialization.operators._common import (
     model_dtype,
 )
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorError,
@@ -137,10 +138,19 @@ class CompositeStage1SandwichV0(OperatorImplementation):
         #: not do.
         stats_supplied = state is not None
         batch_size = ctx.execution.micro_batch_size
+        packing = ctx.execution.calibration_batch_packing
+        #: `None` when the statistics were supplied, for the same reason the
+        #: batch size is: the restriction describes a pass THIS invocation ran,
+        #: and a supplied state was collected elsewhere under whatever policy its
+        #: own collector was given.
+        active = (None if stats_supplied
+                  else active_positions(ctx.calibration_items,
+                                        ctx.position_policy))
         if state is None:
             state = ctx.cached_stats(lambda: collect_activation_stats(
                 adapter, parent, ctx.calibration_items,
-                compute, batch_size=batch_size))
+                compute, batch_size=batch_size, packing=packing,
+                active=active))
         state = stats_to(state, compute)
 
         dtype = model_dtype(adapter, parent)
@@ -177,6 +187,10 @@ class CompositeStage1SandwichV0(OperatorImplementation):
                    #: `None` when nothing was collected, so a reader cannot take
                    #: a batch size as evidence that a statistics pass ran.
                    "micro_batch_size": None if stats_supplied else batch_size,
+                   "calibration_batch_packing": (None if stats_supplied
+                                                 else packing),
+                   "scoring_positions": (None if active is None
+                                         else active.report()),
                    "kept_layers": diag["kept_teacher_layers"],
                    "removed_layers": diag["removed_teacher_layers"],
                    "source": diag["depth_map_source"]},

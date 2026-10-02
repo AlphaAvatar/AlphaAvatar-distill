@@ -1,5 +1,76 @@
 # Budget decisions
 
+## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
+
+- **Context:** the maintainer's order of 2026-10-01 stopped the autonomous
+  sequence at A3 and forbade starting the FFN experiment or D1/D2/D3. A3 is now
+  terminal. On **2026-10-03** the maintainer superseded that order: skip the
+  FFN-specific F1 experiment, carry `ffn.activation_importance_v0` forward as the
+  current best FFN, and proceed to D1 — design, implement, validate, price and
+  prepare for independent review, without stopping at each milestone and without
+  launching.
+
+- **Decision:** implement the D1 prerequisites and the D1 protocol, and report.
+  Nothing was launched, no provider resource was created, and `$0` was spent.
+  What was built:
+
+  * the generic materialization identity the A3 closeout names as a
+    precondition — `semantic_state_id`, `numerical_execution_fingerprint`,
+    `materialization_id`, `artifact_digest` — with resume, deduplication, the
+    statistics cache and the measurer check all keyed on the right one;
+  * a generic, hash-bound `ScoringPositionPolicy`, consumed by all four
+    operators, by the global state evaluator and therefore by the beam;
+  * uniform batched execution across every batchable path, at
+    `batch_size=3` / `length_sorted_v1` as experiment policy carried by
+    configuration rather than as a core constant;
+  * the derived D1 protocol and its price.
+
+- **The two blockers, both derived at `$0`, either one alone preventing
+  execution:**
+
+  ```text
+  EVIDENCE   0 of 2 fresh disjoint batteries can be drawn under the frozen
+             C1 mixture. math_verified holds 70 eligible items of the 150 a
+             battery needs.
+  FUNDING    chain hard ceiling $60.7509 against $13.1777 of project
+             headroom; short by $47.5732, and D1 is not in the package's
+             funds_formal_sessions_of list.
+  ```
+
+  Owners: `logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json` and
+  `logs/stages/stage-1/phase_d1/plans/d1_design.json :: budget`.
+
+- **What the design changed rather than copied.** C2's behavioural stage
+  screened five candidates on one seed. At A3's measured per-seed spread of the
+  paired delta (`0.012906`), the maximum of five noisy estimates is inflated by
+  `0.015009` — **1.5x the `0.010` SESOI** — and the rung advances the genuinely
+  better candidate with probability `0.42`. D1 instead screens **two** candidates
+  on **two** seeds: bias `0.005149` (0.52x the SESOI), advance probability
+  `0.78`, at the **same twelve probes**. The arithmetic says narrow and
+  replicate, and it is in
+  `scripts/experiments/phase_d1/selection_noise.py` with a quadrature self-check
+  against two closed forms. This is a prospective design derivation; it
+  re-analyses no C2 figure and changes nothing about C2's closure.
+
+- **Alternatives considered:** copying C2's `K=5` — refused, the figures above
+  are why; dropping the screening rung to fit the evidence capacity (`K=1`, six
+  probes, one battery) — possible and cheaper at `$45.9543`, but it hands the
+  promotion decision to a cheap metric C2's own result shows predicts behaviour
+  poorly; reducing the `math_verified` count per battery — refused as an
+  autonomous act, because `correct_overall` and its SESOI are *defined on* the
+  mixture and changing it makes every C1/C2/C3/A3 number incomparable.
+
+- **Risks:** the D-series as specified needs six fresh batteries and the pool
+  supports none, so resolving the evidence blocker is a prerequisite for the
+  whole series rather than for D1 alone. Extending the verified-math source is
+  the only resolution that unblocks all three, and it needs a licence and
+  contamination check plus an explicit argument for the SESOI's transfer to a
+  different math population.
+
+- **Revisit when:** the maintainer rules on the evidence resolution and on a D1
+  phase grant. Until both, D1 stays DESIGNED / NOT AUTHORIZED and nothing may
+  launch.
+
 ## 2026-10-02 — APPROVED: an A3 PHASE envelope, sized to finish the stage
 
 The maintainer amended the package **prospectively** on the review of

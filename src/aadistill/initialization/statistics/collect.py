@@ -22,11 +22,33 @@ the reference path and is implemented as a one-row batch, so there is one
 accumulation rule rather than two that could drift apart; when nothing is padded
 the mask is skipped entirely and the arithmetic is the arithmetic this collector
 has always performed.
+
+Both entry points also take an optional ``active_mask``: the token positions a
+:class:`~aadistill.initialization.scoring.positions.ScoringPositionPolicy` says
+this statistic may read. It is combined with the padding mask by ``and``, and the
+combined mask drives the same single ``_keep_valid`` used for padding — so
+"restrict the statistic to supervised positions" and "keep padding out of the
+statistic" are one mechanism rather than two, and the all-active case remains
+byte-for-byte the collector's historical arithmetic.
+
+**Continuous weights are deliberately not supported here.** A general ``w_t`` in
+``[0, 1]`` turns every accumulator into ``sum_t w_t x_t`` and the divisor into
+``sum_t w_t``, which ``residual_count`` — an ``int64`` consumed by
+``uncentered_moment``, ``ffn_neuron_importance`` and ``residual_covariance`` —
+cannot express. That is a ``StatsSpec`` quantity and three divisor call sites,
+and the experiment that needs it is the one that introduces reference-confidence
+weighting. ``collect_activation_stats`` refuses such a policy by name rather than
+quietly rounding it to a mask.
 """
 
 from __future__ import annotations
 
 import torch
+
+#: Reconciling a scoring policy's position mask with the `[B, T_max]` shape of
+#: the tokens being processed is BATCH knowledge, so it lives beside `ItemBatch`
+#: and both collectors import the one implementation.
+from aadistill.initialization.calibration.batching import active_rows
 
 
 class ActivationStatsCollector:
@@ -137,39 +159,62 @@ class ActivationStatsCollector:
         return flat[mask]
 
     @torch.no_grad()
-    def process(self, input_ids: torch.Tensor) -> int:
+    def process(self, input_ids: torch.Tensor, *,
+                active_mask: torch.Tensor | None = None) -> int:
         """Accumulate statistics from one unpadded sequence of shape (1, T).
 
         The reference path. Kept as its own entry point — every existing caller
         uses it — and implemented through the batched one so the two cannot
-        diverge.
+        diverge. ``active_mask`` is an optional ``[1, T]`` or ``[T]`` bool over
+        the token positions the scoring policy admits.
         """
         if input_ids.dim() != 2 or input_ids.shape[0] != 1:
             raise ValueError(f"Expected shape (1, T), got {tuple(input_ids.shape)}")
         return self._accumulate(input_ids.to(self.model.device),
-                                attention_mask=None)
+                                attention_mask=None,
+                                active_mask=active_rows(active_mask, input_ids.shape,
+                                                     self.model.device))
 
     @torch.no_grad()
-    def process_batch(self, batch) -> int:
+    def process_batch(self, batch, *,
+                      active_mask: torch.Tensor | None = None) -> int:
         """Accumulate statistics from a padded :class:`ItemBatch`.
 
         The sufficient statistics are identical in definition to the per-item
         path: `sum_t x`, `sum_t x x^T`, `sum_t |a|`, `sum_t a^2` and the token
         histogram, all over the batch's **real** tokens. Only the order in which
         the accelerator adds them moves.
+
+        ``active_mask`` is an optional ``[B, T_max]`` bool over the token
+        positions the scoring policy admits, in the batch's ROW ORDER — which
+        under a reordering packing policy is not the mixture's order, so the
+        caller builds it from ``PackedBatch.original_indices``.
         """
         return self._accumulate(batch.input_ids.to(self.model.device),
                                 attention_mask=batch.attention_mask.to(
-                                    self.model.device))
+                                    self.model.device),
+                                active_mask=active_rows(active_mask,
+                                                     batch.input_ids.shape,
+                                                     self.model.device))
 
     def _accumulate(self, input_ids: torch.Tensor,
-                    attention_mask: torch.Tensor | None) -> int:
-        padded = (attention_mask is not None
-                  and bool((attention_mask == 0).any()))
+                    attention_mask: torch.Tensor | None,
+                    active_mask: torch.Tensor | None = None) -> int:
+        #: ONE mask, from two sources. Padding says which positions exist; the
+        #: scoring policy says which existing positions this statistic may read.
+        #: Combining them here means every accumulator below — the residual sums,
+        #: the FFN hooks, the token histogram and the token count — is restricted
+        #: by both without any of them knowing there are two reasons.
+        valid = None
+        if attention_mask is not None and bool((attention_mask == 0).any()):
+            valid = attention_mask.reshape(-1).bool()
+        if active_mask is not None and not bool(active_mask.all()):
+            flat = active_mask.reshape(-1).bool()
+            valid = flat if valid is None else (valid & flat)
         #: Read by the FFN hooks during the forward below, and cleared after it.
-        #: `None` means "nothing is padded", which is what keeps the reference
-        #: path free of an indexing op it never had.
-        self._valid_mask = (attention_mask.reshape(-1).bool() if padded else None)
+        #: `None` means "every position counts", which is what keeps the
+        #: reference path free of an indexing op it never had.
+        self._valid_mask = valid
         try:
             out = self.model(
                 input_ids,

@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 262,
+ "modules_scanned": 265,
  "test_ignores": [],
- "n_predicates": 142,
+ "n_predicates": 143,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 59,
+  "filesystem_premise_onpod": 60,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
@@ -115,7 +115,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 42,
-  "same_on_pod": 81
+  "same_on_pod": 82
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -1004,6 +1004,22 @@
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/autoinit/test_recovery_search_scoring.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/autoinit/test_scoring_position_policy.py",
+   "line": 71,
+   "kind": "skipif",
+   "function": "<module>",
+   "condition": "not (REPO / \"artifacts/stage1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stage1/reasoning_heavy_v2/items.jsonl\").is_file()",
+   "expanded": "not (REPO / \"artifacts/stage1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stage1/reasoning_heavy_v2/items.jsonl\").is_file() | REPO=Path(__file__).resolve().parents[2]",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_scoring_position_policy.py",
    "readiness_group": null,
    "registered_as": null,
    "parity": "same_on_pod",
@@ -2517,5 +2533,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "eee0fc32dcb518f5002c4819f3b8b0e097c1e6bf1ab73b5288d9b75dfd7f7957"
+ "digest": "32b5f6cc029de3004bb5d003b828a9f0aa4d5582199a997c2c855dafea878453"
 }

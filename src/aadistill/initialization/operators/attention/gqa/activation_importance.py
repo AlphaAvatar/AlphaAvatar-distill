@@ -78,6 +78,7 @@ from aadistill.initialization.calibration.packing import (
 )
 from aadistill.initialization.calibration.batching import resolve_pad_id
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.batches import active_positions
 from aadistill.initialization.operators.base import (
     OperatorContext,
     OperatorImplementation,
@@ -190,6 +191,13 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         #: out of `M_h` and out of `attn_token_count`.
         batch_size = ctx.execution.micro_batch_size
         packing = ctx.execution.calibration_batch_packing
+        #: WHICH POSITIONS the write-energy expectation is over. `score_h =
+        #: mean_t ||W_o,h a_h(t)||^2` is a mean over `t`, and this is the set `t`
+        #: ranges over: every real token under the incumbent policy, or only the
+        #: positions whose next-token prediction the item supervises. It arrives
+        #: through the hashed config, so it forks the state id — unlike the two
+        #: knobs above it.
+        active = active_positions(ctx.calibration_items, ctx.position_policy)
         #: THE REFERENCE PATH IS `bsz1 + original_order`, and it is exactly the
         #: loop this operator has always run: one item per `process` call, in
         #: the mixture's own order. Keeping that condition explicit is what
@@ -218,8 +226,17 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         started = time.monotonic()
         try:
             if reference_path:
-                for item in ctx.calibration_items:
-                    collector.process(item["input_ids"].to(compute))
+                for index, item in enumerate(ctx.calibration_items):
+                    #: Called WITHOUT the keyword when nothing is restricted, so
+                    #: the unrestricted call is the call this loop always made and
+                    #: the frozen C1 selection is reproduced by construction.
+                    admitted = (None if active is None
+                                else active.token_mask_for_item(index))
+                    if admitted is None:
+                        collector.process(item["input_ids"].to(compute))
+                    else:
+                        collector.process(item["input_ids"].to(compute),
+                                          active_mask=admitted.to(compute))
                     #: One item per forward and no padding by construction, so
                     #: executed and valid advance together on this path. They
                     #: are still counted separately: a path on which they
@@ -243,7 +260,14 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                     #: value to attribute back. A consumer that did aggregate
                     #: per item would have to read it, which is why
                     #: `PackedBatch` carries it.
-                    collector.process_batch(packed.batch)
+                    admitted = (None if active is None else
+                                active.token_mask_for(packed.batch,
+                                                      packed.original_indices))
+                    if admitted is None:
+                        collector.process_batch(packed.batch)
+                    else:
+                        collector.process_batch(packed.batch,
+                                                active_mask=admitted)
         finally:
             collector.close()
         _cuda_sync(compute)
@@ -329,6 +353,11 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    #: its statistics rather than leaving it inferable.
                    "calibration_batch_packing": packing,
                    "reference_path": reference_path,
+                   #: SCIENCE evidence: what the policy named in the hashed
+                   #: config actually restricted, recorded so a reader checks the
+                   #: numbers instead of re-deriving them from the mixture.
+                   "scoring_positions": (None if active is None
+                                         else active.report()),
                    "score": "mean_t ||W_o,h a_h(t)||^2",
                    "stats_spec": ATTENTION_STATS_SPEC.spec_hash,
                    "calibration_tokens": int(stats["attn_token_count"]),
@@ -345,13 +374,27 @@ class AttentionActivationImportanceV1(OperatorImplementation):
                    #:
                    #: `valid_positions` is counted by this loop; the collector
                    #: counts `calibration_tokens` independently through its own
-                   #: mask. The two must agree, and a consumer that checks
-                   #: `executed - padded == calibration_tokens` is checking the
-                   #: masking rather than trusting it.
+                   #: mask. A consumer that checks them against each other is
+                   #: checking the masking rather than trusting it — and the
+                   #: identity to check is now
+                   #:
+                   #:     executed - padded == valid
+                   #:     admitted          == calibration_tokens
+                   #:
+                   #: **not** `executed - padded == calibration_tokens`, which
+                   #: held only while every valid position was also admitted. The
+                   #: collector's count follows the SCORING restriction, so under
+                   #: a target-aware policy it is deliberately smaller than
+                   #: `valid_positions`, and `admitted_positions` is predicted
+                   #: here from the policy so the two can still contradict each
+                   #: other if the mask does not do what it says.
                    "physical_forward_invocations": physical_invocations,
                    "executed_positions": executed_positions,
                    "valid_positions": valid_positions,
                    "padded_positions": executed_positions - valid_positions,
+                   "admitted_positions": (
+                       valid_positions if active is None
+                       else int(round(active.report()["token_axis"]["active"]))),
                    #: The statistics pass alone, synchronized at both ends.
                    "scorer_seconds": round(scorer_seconds, 4),
                    "q_heads": [n_q, keep_q], "kv_heads": n_kv},

@@ -47,6 +47,11 @@ from __future__ import annotations
 
 import torch
 
+#: Imported rather than re-implemented. The two collectors restrict their
+#: accumulation identically and a second copy of the reshape/validate rule is a
+#: second chance for them to disagree about what a mask means.
+from aadistill.initialization.calibration.batching import active_rows
+
 
 class AttentionHeadStatsCollector:
     """Streaming per-head second moments of each block's attention output.
@@ -116,14 +121,17 @@ class AttentionHeadStatsCollector:
         return hook
 
     def _keep_valid(self, flat: torch.Tensor) -> torch.Tensor:
-        """Drop padded rows, or return the tensor untouched when none are padded.
+        """Drop excluded rows, or return the tensor untouched when none are.
 
-        `M_h = sum_t a_h a_h^T` and `token_count` are sums over **calibration**
-        tokens. A padded position contributes a garbage `a_h` and would inflate
-        both, which would change every head's score and therefore the selection.
-        When nothing is padded — every `process` call, and any batch of
-        equal-length items — this is a no-op, so the unbatched path performs the
-        operations it always did.
+        `M_h = sum_t a_h a_h^T` and `token_count` are sums over the **admitted**
+        calibration tokens. A padded position contributes a garbage `a_h` and
+        would inflate both, which would change every head's score and therefore
+        the selection; a position the scoring policy excludes is a real
+        activation that this statistic is not supposed to be about. Both are the
+        same operation — drop the row — so both come through this one mask.
+        When nothing is excluded — every unrestricted `process` call, and any
+        batch of equal-length items — this is a no-op, so the unbatched path
+        performs the operations it always did.
         """
         mask = self._valid_mask
         if mask is None:
@@ -136,24 +144,42 @@ class AttentionHeadStatsCollector:
         return flat[mask]
 
     @torch.no_grad()
-    def process(self, input_ids: torch.Tensor) -> None:
+    def process(self, input_ids: torch.Tensor, *,
+                active_mask: torch.Tensor | None = None) -> None:
         """One unpadded sequence. The reference path, routed through the batched
-        one so a single accumulation rule serves both."""
+        one so a single accumulation rule serves both.
+
+        ``active_mask`` is an optional ``[1, T]`` or ``[T]`` bool over the token
+        positions the scoring policy admits.
+        """
         if input_ids.dim() == 1:
             input_ids = input_ids.unsqueeze(0)
-        self._run(input_ids.to(self.device), attention_mask=None)
+        self._run(input_ids.to(self.device), attention_mask=None,
+                  active_mask=active_rows(active_mask, input_ids.shape, self.device))
 
     @torch.no_grad()
-    def process_batch(self, batch) -> None:
-        """A padded :class:`ItemBatch`. Same sufficient statistic, real tokens only."""
+    def process_batch(self, batch, *,
+                      active_mask: torch.Tensor | None = None) -> None:
+        """A padded :class:`ItemBatch`. Same sufficient statistic, admitted tokens
+        only. ``active_mask`` is ``[B, T_max]`` in the batch's ROW order."""
         self._run(batch.input_ids.to(self.device),
-                  attention_mask=batch.attention_mask.to(self.device))
+                  attention_mask=batch.attention_mask.to(self.device),
+                  active_mask=active_rows(active_mask, batch.input_ids.shape,
+                                       self.device))
 
     def _run(self, input_ids: torch.Tensor,
-             attention_mask: torch.Tensor | None) -> None:
-        padded = (attention_mask is not None
-                  and bool((attention_mask == 0).any()))
-        self._valid_mask = (attention_mask.reshape(-1).bool() if padded else None)
+             attention_mask: torch.Tensor | None,
+             active_mask: torch.Tensor | None = None) -> None:
+        #: ONE mask from two sources, exactly as `ActivationStatsCollector`
+        #: combines them: padding says which positions exist, the policy says
+        #: which existing ones this statistic may read.
+        valid = None
+        if attention_mask is not None and bool((attention_mask == 0).any()):
+            valid = attention_mask.reshape(-1).bool()
+        if active_mask is not None and not bool(active_mask.all()):
+            flat = active_mask.reshape(-1).bool()
+            valid = flat if valid is None else (valid & flat)
+        self._valid_mask = valid
         try:
             self.model(input_ids, **({"attention_mask": attention_mask}
                                      if attention_mask is not None else {}))

@@ -98,6 +98,30 @@ class ExecutionConfig:
         return {"micro_batch_size": int(self.micro_batch_size),
                 "calibration_batch_packing": str(self.calibration_batch_packing)}
 
+    #: Which of this config's fields affect the BYTES a materialization produces.
+    #:
+    #: Both of them do, and it has been measured: batch size and packing
+    #: together moved a checkpoint's bytes under an identical
+    #: `result_spec_hash`. So this currently equals `as_trace()` field for field —
+    #: and it is still a SEPARATE method, because the two answer different
+    #: questions and will diverge. `as_trace` is evidence and may legitimately
+    #: grow a field that moves no bytes (a progress interval, a telemetry flag);
+    #: a fingerprint that inherited it would then fork a materialization identity
+    #: on a log setting. The owner of "does this knob change the output" is this
+    #: class, which is why `specs.materialization` asks rather than enumerates.
+    FINGERPRINT_FIELDS = ("micro_batch_size", "calibration_batch_packing")
+
+    def as_fingerprint(self) -> dict[str, Any]:
+        """The byte-affecting subset, for the numerical execution fingerprint."""
+        trace = self.as_trace()
+        missing = [f for f in self.FINGERPRINT_FIELDS if f not in trace]
+        if missing:
+            raise ExecutionError(
+                f"{missing} are declared byte-affecting but `as_trace` does not "
+                "report them; a fingerprint field with no serialization is a "
+                "field no record can be checked against")
+        return {f: trace[f] for f in self.FINGERPRINT_FIELDS}
+
 
 #: The value every caller gets unless it says otherwise.
 DEFAULT_EXECUTION = ExecutionConfig()
