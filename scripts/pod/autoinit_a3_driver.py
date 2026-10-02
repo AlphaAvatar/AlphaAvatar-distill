@@ -562,7 +562,24 @@ class A3Driver:
         #: Round 0 of A_bsz3 IS the initialization the probes train from.
         a3 = out[A3S.TREATMENT_PROTOCOL]
         self.a3_init_digest = a3["artifact_digest"]
-        self.a3_init_dir = WORK / "diagnostics" / A3S.TREATMENT_PROTOCOL / "rep0"
+        #: THE PATH THE MATERIALIZER REPORTS, never one rebuilt here. This
+        #: was `WORK / "diagnostics" / <protocol> / "rep0"` -- the round's
+        #: WORKDIR, whose checkpoint actually sits one level down under
+        #: `steps/03_attention`. The trainer refused it with "Unrecognized
+        #: model ... should have a `model_type` key" and stage F died with
+        #: the complete structural result already written.
+        reported = a3.get("checkpoint_path")
+        if not reported:
+            raise A3DriverError(
+                "the structural comparison reports no checkpoint_path for "
+                f"{A3S.TREATMENT_PROTOCOL}; the probes have nothing to train "
+                "from and reconstructing the path here is what broke it")
+        self.a3_init_dir = Path(reported)
+        if not (self.a3_init_dir / "config.json").is_file():
+            raise A3DriverError(
+                f"{self.a3_init_dir} carries no config.json, so it is not a "
+                "loadable checkpoint; the trainer would refuse it after the "
+                "diagnostics had already been paid for")
         identical = comparison["artifact_digest_identical"]
         say(f"A_bsz1 {out['A_bsz1']['artifact_digest'][:12]} == frozen "
             f"incumbent; A_bsz3 {self.a3_init_digest[:12]}; "

@@ -1,0 +1,37 @@
+{
+  "schema": "aadistill.autoinit.a3_arm_identities/v1",
+  "experiment_id": "phase_a3",
+  "shared_parent": {
+    "artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+    "gated": true
+  },
+  "protocols": {
+    "A_bsz1": {
+      "execution": {
+        "micro_batch_size": 1,
+        "calibration_batch_packing": "original_order_v1"
+      },
+      "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "result_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "expected_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+      "gated": true,
+      "calibration_tokens": 59830,
+      "peak_vram_gib": 2.448
+    },
+    "A_bsz3": {
+      "execution": {
+        "micro_batch_size": 3,
+        "calibration_batch_packing": "length_sorted_v1"
+      },
+      "artifact_digest": "7dd2f6f6980ba62d26ce8aec45bf12f17006faa3c36eb6b01ad308e0f665d24b",
+      "result_spec_hash": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+      "expected_artifact_digest": null,
+      "gated": false,
+      "calibration_tokens": 59830,
+      "peak_vram_gib": 3.1737
+    }
+  },
+  "artifact_digest_identical": false,
+  "classification": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL",
+  "_the_gate_is_asymmetric": "A_bsz1 must rebuild the frozen incumbent; A_bsz3 is pinned nowhere, because what it builds is the finding."
+}

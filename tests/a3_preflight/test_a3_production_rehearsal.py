@@ -243,11 +243,27 @@ def _fake_hardware(monkeypatch, h, *, parent_digest=None, incumbent_digest=None,
         }
         if diagnostics_invalid:
             comparison["INVALID"] = ["the two protocols saw different tokens"]
-        return {"A_bsz1": {**base, "execution": {"micro_batch_size": 1},
-                           "artifact_digest": incumbent},
-                "A_bsz3": {**base, "execution": {"micro_batch_size": 3},
-                           "artifact_digest": a3_digest},
-                "_comparison": comparison}
+        #: A REAL CHECKPOINT-SHAPED DIRECTORY per protocol, at the depth the
+        #: materializer actually writes: `<workdir>/steps/03_attention`, not
+        #: the round's workdir. The fake used to omit `checkpoint_path`
+        #: entirely and the driver rebuilt the path by hand -- which is how
+        #: stage F came to hand the trainer a directory with no config.json
+        #: and die at `$0.58` with the whole structural result in hand. The
+        #: fake now emits what the producer emits, so the rehearsal exercises
+        #: the handoff instead of assuming it.
+        out = {}
+        for protocol, digest, mbs in (("A_bsz1", incumbent, 1),
+                                      ("A_bsz3", a3_digest, 3)):
+            ckpt = (h.tmp / "diagnostics" / protocol / "rep0" / "steps"
+                    / "03_attention")
+            ckpt.mkdir(parents=True, exist_ok=True)
+            (ckpt / "config.json").write_text(
+                json.dumps({"model_type": "qwen3", "_fake": True}) + "\n")
+            out[protocol] = {**base, "execution": {"micro_batch_size": mbs},
+                             "artifact_digest": digest,
+                             "checkpoint_path": str(ckpt)}
+        out["_comparison"] = comparison
+        return out
     import compare_a_bsz3
     monkeypatch.setattr(compare_a_bsz3, "structural_half", fake_structural)
 

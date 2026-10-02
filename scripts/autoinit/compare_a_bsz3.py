@@ -147,6 +147,14 @@ def _one_round(spec, *, name, execution, adapter, root_loader, verified,
     trace = dict(tail.trace or {})
     out = {
         "execution": execution.as_trace(),
+        #: FROM THE MATERIALIZER, because the consumer needs it and must not
+        #: reconstruct it. The driver built `<workdir>/rep0` by hand and
+        #: handed that to the trainer, which refused with "Unrecognized model
+        #: ... should have a `model_type` key" -- the checkpoint is at
+        #: `<workdir>/steps/03_attention`, and only the step that wrote it
+        #: knows that. Stage F died there at `$0.58` with the whole
+        #: structural result already in hand.
+        "checkpoint_path": str(tail.checkpoint_path),
         "artifact_digest": tail.identity.artifact_digest,
         "result_spec_hash": tail.result_spec_hash,
         "kept_q_heads_per_layer": trace.get("kept_q_heads_per_layer"),
