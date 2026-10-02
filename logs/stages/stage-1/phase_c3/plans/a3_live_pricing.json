@@ -131,14 +131,14 @@
  },
  "book": "formal_allowance",
  "_book_because": "A3 trains recovery probes and scores them on c1_confirmation_v1; the execution package states that the GPU engineering allowance authorizes neither. What decides the book is what the session does.",
- "book_remaining_usd": 9.6131,
+ "book_remaining_usd": 8.6731,
  "envelopes": {
   "per_session_envelope_usd": 30.0,
   "project_cap_usd": 410.0,
-  "cumulative_spend_usd": 394.4523,
-  "formal_remaining_usd": 9.6131,
+  "cumulative_spend_usd": 395.3923,
+  "formal_remaining_usd": 8.6731,
   "engineering_remaining_usd": 1.9395,
-  "package_remaining_usd": 11.5526
+  "package_remaining_usd": 10.6126
  },
  "conditions": {
   "derived_ceiling_within_session_envelope": true,
