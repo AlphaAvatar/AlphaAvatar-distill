@@ -1,0 +1,9 @@
+{
+  "probe_id": "autoinit.v1.phase_a3.A_bsz3.217230555",
+  "generation_fingerprint": "3cc6bdb72c67341ec071bd0e1c7e031391d4389c4ba6354749533132850d6a47",
+  "evaluation_protocol_hash": "5b7571089a33a487cf21646670c25850d2107fa144ec28f804e6dca291d9ad91",
+  "attested_evaluation_protocol_hash": "825a3e0ed882dc06ade71ad9545bbbbe7b57f2df8fd2e054f1dc7fc1355ac3d4",
+  "n_summaries": 7,
+  "comparable": false,
+  "reason": "evaluation protocols are not comparable (autoinit.v1.phase_a3.A_bsz3.217230555): NOT COMPARABLE: generation protocol differs"
+}

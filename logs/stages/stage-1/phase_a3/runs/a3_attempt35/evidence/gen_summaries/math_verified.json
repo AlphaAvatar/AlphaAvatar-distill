@@ -1,0 +1,623 @@
+{
+ "label": "autoinit.v1.phase_a3.A_bsz3.217230555",
+ "model": "/workspace/aad/artifacts/eval/a3/autoinit.v1.phase_a3.A_bsz3.217230555_package",
+ "prompts": "/workspace/aad/artifacts/stage3/c1_confirmation_v1/math_verified.jsonl",
+ "n_samples": 150,
+ "unrestricted_within_effective_context": true,
+ "censored_measurement": false,
+ "context_len": 8192,
+ "context_resolution": {
+  "resolved_context": 8192,
+  "context_source": "trained_block_len",
+  "config_max_position_embeddings": 262144,
+  "rope_scaling_factor": null,
+  "architectural_context": 262144,
+  "trained_context": 8192,
+  "context_len_override": null,
+  "rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+  "note": "effective context is the TRAINED context; this is not a 262K-context evaluation"
+ },
+ "stop_ids": [
+  151645
+ ],
+ "system_message": "You are a helpful Assistant.",
+ "protocol": "project",
+ "chat_template_kwargs": {},
+ "model_revision": null,
+ "tokenizer_source": "/workspace/aad/artifacts/eval/a3/autoinit.v1.phase_a3.A_bsz3.217230555_package",
+ "tokenizer_source_rule": "the evaluated checkpoint",
+ "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+ "identity": {
+  "generation_source_digest": "67a500201a329e83d0fe1c1f100d259fba5edd8172fc8c0f0fa8d6acc00738c4",
+  "generation_source_set_version": 1,
+  "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+  "runtime": {
+   "version": 1,
+   "image_digest": null,
+   "python_version": "3.12.3",
+   "torch_version": "2.13.0+cu130",
+   "transformers_version": "5.15.0",
+   "cuda_runtime": "13.0",
+   "attention_backend": "vllm:default"
+  },
+  "runtime_digest": "2b18483d1018fb9fa0fd3c939e8673bdc8ae57ce21d0ffa28d8562007811ba2a",
+  "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+  "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+  "chat_template_kwargs_json": "{}",
+  "image_digest_source": "ABSENT — runtime is not pinned"
+ },
+ "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+ "thinking_mode": "template-default (not overridden)",
+ "sampling": {
+  "temperature": 0.0,
+  "top_p": 1.0,
+  "top_k": -1,
+  "detokenize": false,
+  "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+  "degeneration_check_every": 256
+ },
+ "libraries": {
+  "transformers": "5.15.0",
+  "tokenizers": "0.22.2",
+  "safetensors": "0.8.0",
+  "numpy": "2.3.5",
+  "datasets": null,
+  "vllm": "0.27.1"
+ },
+ "degeneration_stop": true,
+ "wave_seconds": 328.4,
+ "throughput": {
+  "input_tokens": 13135,
+  "output_tokens": 100289,
+  "output_tokens_p50": 693,
+  "output_tokens_p95": 1351,
+  "output_tokens_max": 2048,
+  "generation_wall_seconds": 328.4,
+  "output_tokens_per_second": 305.4,
+  "prompts_per_second": 0.4568,
+  "scheduler_steps": 9932,
+  "seconds_per_step": 0.0331,
+  "step_seconds_p50": 0.03173,
+  "step_seconds_p95": 0.05856,
+  "step_ms_p50": 31.73,
+  "concurrency_start": 1,
+  "concurrency_max": 150,
+  "effective_batch_size_mean": 50.51,
+  "submission": "all requests added to the engine before the first step; vLLM schedules them with continuous batching — not a serial loop"
+ },
+ "engine": {
+  "max_model_len": 8192,
+  "gpu_memory_utilization": 0.9,
+  "dtype": "bfloat16",
+  "dtype_engine": "torch.bfloat16",
+  "max_num_seqs": 256,
+  "max_num_batched_tokens": 8192,
+  "vllm_version": "0.27.1",
+  "enforce_eager": false,
+  "init_seconds": 55.9,
+  "init_amortised_over_sets": 7
+ },
+ "stop_reasons": {
+  "degeneration": 56,
+  "eos": 94
+ },
+ "natural_termination_rate": 0.6267,
+ "degeneration_rate": 0.3733,
+ "degeneration_kinds": {
+  "cycle": 45,
+  "low_novelty": 10,
+  "rambling": 1
+ },
+ "context_limit_rate": 0.0,
+ "right_censored_rate": 0.3733,
+ "generated_tokens_p50": 693,
+ "generated_tokens_mean": 668.6,
+ "behavior": {
+  "score": 0.5376,
+  "axes": {
+   "format_ok": 0.62,
+   "fluency": 0.4551,
+   "grounding": null,
+   "refusal": null,
+   "tool_call": null,
+   "math": null
+  },
+  "n": {
+   "format_ok": 150,
+   "fluency": 150,
+   "grounding": 0,
+   "refusal": 0,
+   "tool_call": 0,
+   "math": 0
+  }
+ },
+ "aggregate": {
+  "overall": {
+   "n": 150,
+   "terminated": 0.6267,
+   "truncated_at_cap": 0.0,
+   "think_closed": 0.6733,
+   "think_immediate": 0.0,
+   "no_stray_markers": 1.0,
+   "format_ok": 0.62,
+   "empty_answer": 0.32,
+   "answer_is_echo": 0.0667,
+   "echo_4gram": 0.1207,
+   "rep_3gram": 0.1757,
+   "answer_words": 56.38
+  },
+  "by_group": {
+   "math_verified": {
+    "n": 150,
+    "terminated": 0.6267,
+    "truncated_at_cap": 0.0,
+    "think_closed": 0.6733,
+    "think_immediate": 0.0,
+    "no_stray_markers": 1.0,
+    "format_ok": 0.62,
+    "empty_answer": 0.32,
+    "echo_4gram": 0.1207,
+    "rep_3gram": 0.1757,
+    "answer_words": 56.38,
+    "answer_is_echo": 0.0667
+   }
+  },
+  "stray_marker_counts": {}
+ },
+ "gpu": {
+  "final": {
+   "utilization.gpu": "100",
+   "utilization.memory": "95",
+   "memory.used": "42620",
+   "memory.total": "46068",
+   "power.draw": "273.35",
+   "clocks.sm": "2520"
+  },
+  "during_wave": [
+   {
+    "step": 200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "333.17",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "321.36",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.23",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "311.68",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 1000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.00",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 1200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.47",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 1400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.00",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 1600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "314.06",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 1800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "314.52",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 2000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "314.58",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 2200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.10",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 2400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "316.13",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 2600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.91",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 2800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "314.59",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 3000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.35",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 3200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.63",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 3400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "315.49",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 3600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "316.44",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 3800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "316.78",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 4000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "317.48",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 4200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "318.59",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 4400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "318.83",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 4600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "319.53",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 4800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.26",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 5000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.58",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 5200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.61",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 5400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "321.30",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 5600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "321.42",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 5800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "321.08",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 6000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.85",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 6200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.35",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 6400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.59",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 6600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "319.94",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 6800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "319.82",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 7000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "43051",
+    "memory.total": "46068",
+    "power.draw": "319.90",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 7200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "320.17",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 7400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "317.80",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 7600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "316.89",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 7800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "316.80",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 8000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "317.64",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 8200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "301.75",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 8400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "297.80",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 8600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "282.41",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 8800,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "282.39",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 9000,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "294.89",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 9200,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "293.01",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 9400,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "286.06",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 9600,
+    "utilization.gpu": "100",
+    "utilization.memory": "100",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "281.41",
+    "clocks.sm": "2520"
+   },
+   {
+    "step": 9800,
+    "utilization.gpu": "100",
+    "utilization.memory": "98",
+    "memory.used": "42620",
+    "memory.total": "46068",
+    "power.draw": "272.39",
+    "clocks.sm": "2520"
+   }
+  ],
+  "utilization_p50": 100,
+  "utilization_min": 100,
+  "samples": 49
+ }
+}

@@ -674,6 +674,23 @@ class SessionSpec:
     #: A's two identity gates — the session-commit/harness/lineage check and the
     #: frozen science-plan check — are entries here rather than overridden
     #: methods, so a reader can count them.
+    #: May this session run on THIS host? Called once per draw, immediately
+    #: after the provider confirms the image identity and BEFORE setup runs,
+    #: with that identity as its only argument. Returns `(ok, why)`; a refusal
+    #: is a REDRAWABLE outcome, exactly like a cold host.
+    #:
+    #: It exists because a host property can decide whether a session's result
+    #: is comparable to the evidence it reuses, and "the provider assigns
+    #: whatever host is free" is then a lottery on scientific validity. A3
+    #: reuses attempt75's controls, every material generation field matched
+    #: them, and the host NVIDIA driver BRANCH had moved 580 -> 595 -- which
+    #: `generation_compat` declares a real runtime event rather than
+    #: provenance. The protocol admission caught it correctly, at `$4.33`,
+    #: after three probes had trained. Asked here it costs one ssh round trip.
+    #:
+    #: Default None admits every host, so no existing session changes.
+    host_admission: Callable[[str], tuple[bool, str]] | None = None
+
     precheck: tuple[Precheck, ...] = ()
 
     #: Extra fields written into the session record at construction.

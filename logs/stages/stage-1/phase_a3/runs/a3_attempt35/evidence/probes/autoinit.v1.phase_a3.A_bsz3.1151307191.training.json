@@ -1,0 +1,27 @@
+{
+  "schema": "aadistill.autoinit.a3_training_completion/v1",
+  "probe_id": "autoinit.v1.phase_a3.A_bsz3.1151307191",
+  "arm": "A_bsz3",
+  "seed": 1151307191,
+  "initialization_artifact_digest": "7dd2f6f6980ba62d26ce8aec45bf12f17006faa3c36eb6b01ad308e0f665d24b",
+  "config": "artifacts/audit/autoinit_a3/configs/autoinit.v1.phase_a3.A_bsz3.1151307191.json",
+  "config_sha256": "09aa5905458111e64b471f647418cdc70a72024ace6b0c266584507288f31550",
+  "out_dir": "artifacts/stage3/a3/autoinit.v1.phase_a3.A_bsz3.1151307191",
+  "model_dir": "artifacts/stage3/a3/autoinit.v1.phase_a3.A_bsz3.1151307191/checkpoints/step_001023/model",
+  "train_minutes": 61.59,
+  "run_completion": "artifacts/stage3/a3/autoinit.v1.phase_a3.A_bsz3.1151307191/run_completion.json",
+  "evaluated": false,
+  "complete": true,
+  "preserved": {
+    "preserved": true,
+    "relay_repo": "AlphaAvatar/aadistill-artifacts",
+    "relay_prefix": "a3_preserved_probes/a3_attempt35/autoinit.v1.phase_a3.A_bsz3.1151307191",
+    "files": {
+      "config.json": "4a5a3caa4f5f9a153113bd5c7131a60c382bdc4089c8e79bacb3fb31c318a3a9",
+      "generation_config.json": "28fb42f15159b552b9301b3f8f197c1b5ccd68c95ff0e3498d68678f61c1c633",
+      "model.safetensors": "34eeb80e465a717cf9173178895a636bec2afe8a76f68fa8335f8ee0421aeef5"
+    },
+    "bytes": 2384236592,
+    "authorizes": "nothing. Preservation and reuse are separate decisions."
+  }
+}

@@ -136,6 +136,15 @@ TOKENIZER_SIDECAR_SHA256 = {
 #: DURABLE STORAGE for completed probes, pushed the moment a probe exists.
 #: C1 attempt 17 trained six over ten hours and lost all six when a later
 #: stage failed and the pod was deleted.
+#: attempt75's OWN attested evaluation protocol -- the historical side of the
+#: comparability check, and therefore something the POD must be able to read.
+#: It lived only under ~/aad-artifacts, which no pod receives, so it is now in
+#: the tree beside attempt75's other stage-I evidence: 10 KB of reviewable
+#: text whose consumer runs on the pod.
+CONTROL_ATTESTATION = (REPO / "logs/stages/stage-1/phase_c3/analyses"
+                       / "attempt75_stage_i"
+                       / "c3_attested_evaluation_protocol.json")
+
 RELAY = "AlphaAvatar/aadistill-artifacts"
 PRESERVED_PREFIX = "a3_preserved_probes"
 TOKEN_FILE = Path("/workspace/hf/token")
@@ -248,6 +257,7 @@ class A3Driver:
         self._handoffs: list[dict[str, Any]] = []
         self.a3_init_dir: Path | None = None
         self.a3_init_digest: str | None = None
+        self.observed_runtime: dict[str, Any] | None = None
         for d in (AUDIT, TRAIN, EVAL, WORK, AUDIT / "probes", AUDIT / "configs"):
             d.mkdir(parents=True, exist_ok=True)
 
@@ -864,6 +874,10 @@ class A3Driver:
                 f"engine probe rc={engine.returncode}; tail: "
                 f"...{(engine.stdout + engine.stderr)[-1200:]}")
         observed = json.loads((AUDIT / "engine_probe.json").read_text())
+        #: KEPT, because `admit_generation` needs the runtime block to
+        #: build the live comparable identity and the engine probe is
+        #: the only thing that observes it.
+        self.observed_runtime = observed.get("runtime") or observed
 
         gen = declared_generation_protocol().materialized(
             generation_source_digest=generation_source_digest(REPO)["digest"],
@@ -963,17 +977,70 @@ class A3Driver:
                 self.evaluation_protocol.evaluation_protocol_hash,
             "n_summaries": len(summaries),
         }
+        #: AGAINST THE CONTROLS, under the v2 comparability rule. This asked
+        #: `observed.require_comparable(self.evaluation_protocol)` -- a
+        #: within-session check under the v1 EXACT-hash rule -- and it refused
+        #: a3_attempt35 at `$4.33` on `runtime_digest`, the one field
+        #: `generation_compat.NON_MATERIAL_PROTOCOL_FIELDS` demotes, because
+        #: it fuses the image tag with the host driver patch. Twenty material
+        #: fields were identical to attempt75: vLLM, transformers, torch,
+        #: dtype, every engine and sampling setting, stop ids, tokenizer,
+        #: chat template, context, system message, and both source digests.
+        #:
+        #: Two things change. The COMPARISON SUBJECT: what the frozen design
+        #: requires is equality with attempt75's protocol, not with this
+        #: session's own attestation -- `must_equal_attempt75` names their
+        #: fingerprint, so the controls are the historical side. And the RULE:
+        #: v2, which demotes the driver patch to provenance and still refuses
+        #: a BRANCH change. `host_admission` keeps a wrong-branch host from
+        #: being paid for at all; this is the check that would catch one that
+        #: slipped through.
+        from aadistill.initialization.planning.generation_compat import (
+            ComparabilityError, comparable_generation_identity,
+        )
+        from aadistill.initialization.planning.generation_compat import (
+            require_comparable as require_comparable_v2,
+        )
+
+        if not self.observed_runtime:
+            raise A3DriverError(
+                f"{name}: the attestation recorded no runtime block, so the "
+                "live side of the comparability identity cannot be built. "
+                "That is not evidence of comparability.")
+        control_att = (json.loads(CONTROL_ATTESTATION.read_text())
+                       if CONTROL_ATTESTATION.is_file() else None)
+        if control_att is None:
+            raise A3DriverError(
+                f"{name}: the controls' attested protocol is not available at "
+                f"{CONTROL_ATTESTATION}, so comparability to the evidence A3 "
+                "reuses cannot be established. This is an integrity stop.")
         try:
-            observed.require_comparable(self.evaluation_protocol, context=name)
-        except Exception as exc:                            # noqa: BLE001
+            historical = comparable_generation_identity(
+                protocol=control_att["evaluation_protocol"],
+                runtime=control_att["runtime"])
+            live = comparable_generation_identity(
+                protocol=observed.as_dict(),
+                runtime=self.observed_runtime,
+                host_provenance={"image_digest_arg": self.a.image_digest})
+            record["comparability"] = require_comparable_v2(
+                live, historical, context=name)
+        except ComparabilityError as exc:
             record["comparable"] = False
             record["reason"] = str(exc)[-1500:]
             (AUDIT / f"{name}_generation_admission.json").write_text(
                 json.dumps(record, indent=2) + "\n")
             raise A3DriverError(
-                f"{name}: the generations were not produced under the attested "
-                "evaluation protocol, so this probe cannot be scored and no "
-                f"later probe may be evaluated. {exc}") from exc
+                f"{name}: the generations are NOT comparable to attempt75's "
+                "controls, so this probe cannot be scored and no later probe "
+                f"may be evaluated. {exc}") from exc
+        except Exception as exc:                            # noqa: BLE001
+            record["comparable"] = False
+            record["reason"] = f"{type(exc).__name__}: {exc}"
+            (AUDIT / f"{name}_generation_admission.json").write_text(
+                json.dumps(record, indent=2) + "\n")
+            raise A3DriverError(
+                f"{name}: the comparability check could not be completed, "
+                f"which is not evidence that it passed. {exc}") from exc
         record["comparable"] = True
         (AUDIT / f"{name}_generation_admission.json").write_text(
             json.dumps(record, indent=2) + "\n")

@@ -317,3 +317,77 @@ def probe_id(seed: int) -> str:
 
 def probe_ids() -> tuple[str, ...]:
     return tuple(probe_id(s) for s in recovery_seeds())
+
+
+# --- host comparability ---------------------------------------------------
+#
+# A3 reuses attempt75's controls, so a host property that makes this session's
+# generations incomparable to theirs decides the experiment's validity. The
+# repository already declares the rule: `generation_compat` treats an NVIDIA
+# driver PATCH within a branch as provenance and a BRANCH change as a real
+# runtime event. attempt75 ran on 580.159.03; a3_attempt35 landed on 595.91.07
+# and the protocol admission refused it -- correctly, at `$4.33`, after three
+# probes had trained and the first had generated.
+#
+# The required branch is DERIVED from the controls' own attested protocol, not
+# written here, so it cannot drift from the thing it has to match.
+
+CONTROL_ATTESTATION = (
+    "/home/ecs-user/aad-artifacts/phase_c3/attempt75/audit/autoinit_c3/"
+    "c3_attested_evaluation_protocol.json")
+
+
+def control_driver_branch(attestation: str | Path = CONTROL_ATTESTATION
+                          ) -> str | None:
+    """The NVIDIA driver branch attempt75's controls were measured on."""
+    from aadistill.initialization.planning.generation_compat import (
+        driver_branch, split_image_identity,
+    )
+
+    p = Path(attestation)
+    if not p.is_file():
+        return None
+    runtime = json.loads(p.read_text()).get("runtime") or {}
+    return driver_branch(
+        split_image_identity(runtime.get("image_digest")).get(
+            "nvidia_driver_version"))
+
+
+def host_admission(image_digest: str) -> tuple[bool, str]:
+    """May A3 run on the host behind `image_digest`?
+
+    Admits only a host whose driver branch matches the controls'. A patch
+    within the branch is admitted, because that is exactly what
+    `generation_compat` demotes to provenance -- and requiring the exact
+    patch would make this unsatisfiable on nearly every host.
+
+    Fails CLOSED when the controls' branch cannot be read: an unknown
+    comparability premise is not a satisfied one.
+    """
+    from aadistill.initialization.planning.generation_compat import (
+        driver_branch, split_image_identity,
+    )
+
+    want = control_driver_branch()
+    if want is None:
+        return False, (f"{CONTROL_ATTESTATION} is unreadable, so the driver "
+                       "branch attempt75's controls were measured on cannot "
+                       "be established; A3 will not generate against an "
+                       "unknown comparability premise")
+    split = split_image_identity(image_digest)
+    got_version = split.get("nvidia_driver_version")
+    got = driver_branch(got_version)
+    if got is None:
+        return False, (f"the image identity {image_digest!r} carries no "
+                       "NVIDIA driver version, so this host's comparability "
+                       "to the controls cannot be established")
+    if got != want:
+        return False, (
+            f"driver branch {got} ({got_version}); attempt75's controls were "
+            f"measured on branch {want}. `generation_compat` treats a branch "
+            "change as a real runtime event rather than provenance, so this "
+            "host's generations would not be comparable to the controls A3 "
+            "reuses -- and the protocol admission would refuse them after "
+            "three trainings. Redraw.")
+    return True, (f"driver branch {want} ({got_version}) matches the "
+                  "controls'; a patch within the branch is provenance")

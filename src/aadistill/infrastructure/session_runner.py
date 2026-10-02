@@ -733,6 +733,23 @@ class SessionRunner:
             self.say(f"draw {draw}: {exc}")
             return "no_image_identity"
         self.say(f"draw {draw}: image identity {self.image_digest}")
+        #: MAY THIS SESSION RUN ON THIS HOST? Asked before setup, so a host
+        #: whose properties make the result incomparable costs one ssh round
+        #: trip instead of a full chain. A refusal is redrawable.
+        admit = getattr(self.spec, "host_admission", None)
+        if admit is not None:
+            try:
+                ok, why = admit(self.image_digest)
+            except Exception as exc:                          # noqa: BLE001
+                ok, why = False, (f"the host admission check raised "
+                                  f"{type(exc).__name__}: {exc}")
+            self.ev.setdefault("host_admission", []).append(
+                {"draw": draw, "image_digest": self.image_digest,
+                 "admitted": bool(ok), "reason": why})
+            if not ok:
+                self.say(f"draw {draw}: host NOT admitted — {why}")
+                return "host_not_admitted"
+            self.say(f"draw {draw}: host admitted — {why}")
         self.say(f"draw {draw}: running setup")
         env = self.spec.setup_environment(session_commit=self.a.session_commit,
                                           bundle=self.a.bundle)
@@ -846,7 +863,8 @@ class SessionRunner:
             outcome = self.setup_on_draw(draw)
             if outcome == "ok":
                 break
-            if outcome in ("cold", "no_endpoint") and draw < self.a.host_draws:
+            if (outcome in ("cold", "no_endpoint", "host_not_admitted")
+                    and draw < self.a.host_draws):
                 self.say(f"{outcome.upper()} on draw {draw} — abandoning "
                          f"{self.pod_id} and redrawing")
                 #: RELEASE IS CONFIRMED BEFORE THE NEXT RESOURCE EXISTS.

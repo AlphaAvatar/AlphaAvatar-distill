@@ -899,6 +899,14 @@ def spec(args) -> SessionSpec:
             test_ignores=TEST_IGNORES,
             teacher_revision=CS.TEACHER_REVISION),
         driver_command=driver_command,
+        #: A host whose NVIDIA driver BRANCH differs from the one attempt75's
+        #: controls were measured on makes this session's generations
+        #: incomparable to them -- `generation_compat`'s declared rule. Asked
+        #: once per draw, before setup, and a refusal redraws: a3_attempt35
+        #: learned it from the protocol admission instead, at $4.33, with
+        #: three probes trained. The branch is derived from the controls'
+        #: own attestation.
+        host_admission=A3S.host_admission,
         #: FROM THE ONE OWNER, both of them. The C3 pair hardcoded a driver
         #: job id and a status path that disagreed with the driver's, and
         #: every marker was invisible.

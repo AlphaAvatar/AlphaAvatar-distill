@@ -320,6 +320,35 @@ def _fake_hardware(monkeypatch, h, *, parent_digest=None, incumbent_digest=None,
             battery_artifact=manifest["artifact"],
             battery_manifest_sha256=manifest["manifest_sha256"],
             battery_content_sha256=manifest["content_sha256"])
+        #: THE RUNTIME BLOCK the engine probe observes, which
+        #: `admit_generation` needs for the live comparable identity. The fake
+        #: omitted it and the driver crashed inside
+        #: `comparable_generation_identity` on a None -- so the rehearsal now
+        #: emits the production contract, and the driver refuses a missing
+        #: runtime with a diagnosis instead of an AttributeError.
+        #:
+        #: The versions are the CONTROLS' own, read from their attestation, so
+        #: the rehearsed comparison is the real one: material fields equal,
+        #: driver patch within the branch.
+        #: A HISTORICAL SIDE built from these same fake summaries, with a
+        #: driver patch DELIBERATELY different inside the same branch. The
+        #: rehearsal cannot reproduce attempt75's engine stack on a dev box,
+        #: and pretending to would make the check vacuous; what it CAN prove
+        #: is the property that matters -- the v2 rule tolerates a patch
+        #: within a branch and refuses a material difference. a3_attempt35
+        #: died because the real controls' branch (580) and the host's (595)
+        #: differed, and `host_admission` now rejects such a host before setup.
+        control = json.loads(D.CONTROL_ATTESTATION.read_text())
+        live_runtime = dict(control["runtime"])
+        live_runtime["image_digest"] = (
+            "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09")
+        self.observed_runtime = live_runtime
+        fake_control = h.tmp / "fake_control_attestation.json"
+        fake_control.write_text(json.dumps({
+            "runtime": control["runtime"],
+            "evaluation_protocol": self.evaluation_protocol.as_dict(),
+        }) + "\n")
+        monkeypatch.setattr(D, "CONTROL_ATTESTATION", fake_control)
         return {"evaluation_protocol_hash":
                     self.evaluation_protocol.evaluation_protocol_hash,
                 "generation_protocol_fingerprint": gen.fingerprint}
