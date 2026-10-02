@@ -679,14 +679,14 @@ class SessionSpec:
     #: with that identity as its only argument. Returns `(ok, why)`; a refusal
     #: is a REDRAWABLE outcome, exactly like a cold host.
     #:
-    #: It exists because a host property can decide whether a session's result
-    #: is comparable to the evidence it reuses, and "the provider assigns
-    #: whatever host is free" is then a lottery on scientific validity. A3
-    #: reuses attempt75's controls, every material generation field matched
-    #: them, and the host NVIDIA driver BRANCH had moved 580 -> 595 -- which
-    #: `generation_compat` declares a real runtime event rather than
-    #: provenance. The protocol admission caught it correctly, at `$4.33`,
-    #: after three probes had trained. Asked here it costs one ssh round trip.
+    #: It exists because a host property can decide whether a session's
+    #: result is comparable to the evidence that session reuses, and "the
+    #: provider assigns whatever host is free" is then a lottery on
+    #: scientific validity. A session that compares its own measurements
+    #: against measurements taken elsewhere therefore needs a say in which
+    #: host it accepts, and needs it before setup spends anything. The
+    #: alternative is to discover it from a comparability check after the
+    #: science has run; see `docs/core-provenance.md`.
     #:
     #: Default None admits every host, so no existing session changes.
     host_admission: Callable[[str], tuple[bool, str]] | None = None

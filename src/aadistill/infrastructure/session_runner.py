@@ -735,7 +735,8 @@ class SessionRunner:
         self.say(f"draw {draw}: image identity {self.image_digest}")
         #: MAY THIS SESSION RUN ON THIS HOST? Asked before setup, so a host
         #: whose properties make the result incomparable costs one ssh round
-        #: trip instead of a full chain. A refusal is redrawable.
+        #: trip instead of a full chain. A refusal is redrawable, like a cold
+        #: host. See `docs/core-provenance.md` for what prompted it.
         admit = getattr(self.spec, "host_admission", None)
         if admit is not None:
             try:

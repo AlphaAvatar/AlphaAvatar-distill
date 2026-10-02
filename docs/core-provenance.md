@@ -607,3 +607,20 @@ a frozen historical document describing code that did not exist when it ran.
 (The 2026-09-25 topology migration moved those files anyway, prospectively and
 by maintainer instruction; the historical declarations were preserved exactly
 and now refuse, which is the intended behaviour.)
+
+**Why `SessionSpec.host_admission` exists.** A3 reuses attempt75's recovery
+controls as evidence, so its generations have to be comparable to theirs.
+`a3_attempt35` trained all three probes and generated the first, and the
+protocol admission then refused it at `$4.33`: all twenty material generation
+fields were identical to the controls -- vLLM 0.27.1, transformers 5.15.0,
+torch 2.13.0+cu130, dtype, every engine and sampling setting, stop ids,
+tokenizer, chat template, context, system message, and both source digests --
+and the host NVIDIA driver BRANCH had moved `580.159.03` -> `595.91.07`, which
+`generation_compat` declares a real runtime event rather than provenance.
+
+The refusal was correct. What was wrong is when it was asked: the driver
+version is in the image identity the provider confirms one ssh round trip
+after the pod answers, long before setup spends anything. The hook asks there
+and a refusal redraws, so the property costs a draw instead of a chain. The
+reusable core carries only the question; which hosts a session accepts is the
+session's own rule, derived in A3's case from the controls' own attestation.

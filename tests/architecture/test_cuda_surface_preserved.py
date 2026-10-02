@@ -894,7 +894,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "CURRENT CUDA SURFACE already; it owes the same pending "
             "validation and claims no new cover.",
      }),
-    ("PLACEHOLDER_HOST_ADMISSION",
+    ("8394710fecfb6a65546cfdecb4b23eb0fa995e2a",
      "host admission, asked before a dollar of setup",
      {
         "src/aadistill/infrastructure/session.py":
