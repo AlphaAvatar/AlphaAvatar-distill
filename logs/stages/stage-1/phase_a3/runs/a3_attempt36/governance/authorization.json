@@ -1,0 +1,125 @@
+{
+ "allows_arm_elimination": false,
+ "allows_beam_search": false,
+ "allows_control_retraining": false,
+ "allows_on_pod_decision": false,
+ "allows_phase_a": false,
+ "authorization_id": "autoinit.v1.phase_a3",
+ "authorization_sha256": "77e30ef9d267f2eed46f155dab99bc1d24ee211ed87bd8a02f834e5db9c13ba7",
+ "authorized_session_commit": "abdd22fad19952fc5938624edd0e3772b9769c60",
+ "authorized_stages": [
+  "B",
+  "C",
+  "D",
+  "E",
+  "F",
+  "G",
+  "H"
+ ],
+ "authorizes_a3": true,
+ "authorizes_c1_isolation": false,
+ "authorizes_c3_isolation": false,
+ "automatic_followon_start": false,
+ "bound": {
+  "battery": {
+   "artifact": null,
+   "content_sha256": "a285d61f88de9da85e87818786cce8d350f03246365ff946207c61a6464fee3c"
+  },
+  "controls": {
+   "_weights": "retired under the consumer rule; the comparison reads per-sample rows and scored records",
+   "retrained": false,
+   "seeds": [
+    217230555,
+    1151307191,
+    2045359208
+   ],
+   "source_run": "attempt75",
+   "verified_by_content_hash": true
+  },
+  "design": {
+   "aggregation_off_pod": true,
+   "arms": 1,
+   "design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+   "probes": 3,
+   "seeds": [
+    217230555,
+    1151307191,
+    2045359208
+   ]
+  },
+  "grant": {
+   "path": "logs/stages/stage-1/phase_a3/runs/a3_attempt36/governance/grant.json",
+   "sha256": "625f57ec34c603267cf1f32d83c9665eeed04f13312da610c4433bd4e8f2f8d2"
+  },
+  "identities": {
+   "_a_bsz3_is_null_on_purpose": "it is what A3 measures. A pinned value here would decide the experiment in its own authorization.",
+   "a_bsz3": null,
+   "incumbent": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "parent": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722"
+  },
+  "live_pricing": {
+   "conditions": {
+    "booked_allowance_covers_derived": true,
+    "cumulative_plus_derived_within_project_cap": true,
+    "derived_ceiling_within_session_envelope": true,
+    "package_total_covers_derived": true
+   },
+   "container_disk_gb": 110,
+   "expected_usd": 5.9051,
+   "gpu": "NVIDIA L40S",
+   "hard_ceiling_usd": 8.3047,
+   "limits_checked": [
+    "booked_allowance_covers_derived",
+    "cumulative_plus_derived_within_project_cap",
+    "derived_ceiling_within_session_envelope",
+    "package_total_covers_derived"
+   ],
+   "rate_usd_per_hour": 1.09
+  },
+  "session_contract_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+  "teacher": {
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "shards": 3
+  }
+ },
+ "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a stage not in authorized_stages, refuses a harness that does not digest to the authorized value, and has no code path to any experiment after Phase A",
+ "expected_usd": 5.9051,
+ "granted_by": "Maintainer decision 2026-10-01, on independent review of review/c3-operator-batching@a87049cc, which established that no maintainer or scientific decision blocks execution. A3 is authorized as ONE complete end-to-end experiment -- initialization, recovery training, evaluation, aggregation, closeout -- rather than as a step-1/step-2 split needing intermediate approvals. Ordinary engineering failures inside this envelope are to be diagnosed, repaired and retried autonomously.",
+ "granted_utc": "2026-10-02T12:33:57.531793+00:00",
+ "hard_cap_usd": 8.3047,
+ "harness_source_digest": "a1d6123f6eabda8736e506ff050c7b36b69e2880995b6bed1eececc3bc73c4fb",
+ "harness_source_files": [
+  "configs/autoinit/a3_artifacts.json",
+  "configs/autoinit/a3_artifacts_failed.json",
+  "configs/experiments/phase_c1/authorization.json",
+  "scripts/autoinit/aggregate_a3.py",
+  "scripts/autoinit/compare_a_bsz3.py",
+  "scripts/autoinit/write_a3_design.py",
+  "scripts/experiments/phase_c3/a3_authorization.py",
+  "scripts/experiments/phase_c3/a3_pricing.py",
+  "scripts/experiments/phase_c3/a3_session.py",
+  "scripts/experiments/phase_c3/a_bsz3.py",
+  "scripts/experiments/phase_c3/formal_pricing.py",
+  "scripts/experiments/phase_c3/hardware.py",
+  "scripts/pod/autoinit_a3_driver.py",
+  "scripts/pod/autoinit_a3_launch.py",
+  "src/aadistill/initialization/operators/attention/gqa/activation_importance.py"
+ ],
+ "per_launch_hard_usd": 8.3047,
+ "phase_a_authorized": false,
+ "phase_a_science_plan_hash": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6",
+ "phase_a_session_plan_hash": "6dde9700cf7eba98c89d7002a0f0ca51d9f53802e53768cae45f91be001df69b",
+ "plan_id": "autoinit.v1.phase_a3",
+ "provenance_commit": "abdd22fad19952fc5938624edd0e3772b9769c60",
+ "schema": "aadistill.autoinit.a3_authorization/v1",
+ "scope": "ONE experiment end to end: replay the frozen parent eea90c91346a under its digest gate, verify A-bsz1 rebuilds the incumbent 53e30566c5f7, collect interleaved A-bsz1/A-bsz3 diagnostics, then train THREE A-bsz3 recovery probes at the three frozen C3 seeds and evaluate each once on c1_confirmation_v1. A differing A-bsz3 artifact digest is a FINDING and does not stop the chain. No search, no ranking, no arm elimination, no fourth seed, no retraining of attempt75's controls, no on-pod decision, and no authorization to start the FFN experiment, D1/D2/D3 or Stage-0 v2.",
+ "scope_note": "ONE A3 session end to end. A differing A-bsz3 artifact digest is a FINDING and does not stop the chain. No search, no ranking, no arm elimination, no fourth seed, no retraining of attempt75's controls, no on-pod decision, and no authorization for the FFN experiment, D1/D2/D3 or Stage-0 v2.",
+ "stage_conditions": {
+  "D": "the frozen parent must reproduce eea90c91346a",
+  "E": "A_bsz1 must reproduce the incumbent 53e30566c5f7; A_bsz3 is pinned NOWHERE because what it builds is the finding",
+  "F": "three probes at the frozen seeds; no probe may be skipped",
+  "G": "each probe evaluated ONCE on c1_confirmation_v1, after the protocol admission and never before all three trained",
+  "H": "preserve and package; NO decision is computed on the pod"
+ },
+ "version": 1
+}
