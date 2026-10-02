@@ -1,0 +1,26 @@
+{
+ "schema": "aadistill.autoinit.a3_deviation/v1",
+ "_what_this_is": "a RECORDED DEVIATION from a standing rule, written while the session it concerns is still running, because an unrecorded deviation is worse than the deviation.",
+ "rule": {
+  "source": "AGENTS.md P8.4, the probe-state machine, state 2",
+  "text": "Trained + durable + not validly scored. Required: checkpoint weights, descriptor, identity -- because scoring genuinely consumes the model. Restore the existing checkpoint and resume at scoring. Do not retrain it."
+ },
+ "the_probes_are_state_2": {
+  "attempt": "a3_attempt35",
+  "trained": "3/3, 1023 steps each, run_end written, 61.5-62.0 min each",
+  "durable": "a3_preserved_probes/a3_attempt35/<probe_id>, per-file hashes recorded in each probe's training record at the moment it finished",
+  "validly_scored": false,
+  "why_not_scored": "the protocol admission refused probe 1's generations: the host NVIDIA driver branch had moved 580 -> 595 and generation_compat declares that a real runtime event"
+ },
+ "what_was_done_instead": "a3_attempt36 retrains all three probes from scratch",
+ "cost_of_the_deviation_usd": 3.39,
+ "_cost_derivation": "3 probes x 61.7 min = 3.08 h at the billed $1.098333/h, which is 29% of the $11.5531 formal balance at the time",
+ "why": [
+  "the driver's stage ladder executes B through H in order and has no resume-at-scoring mode; using one means adding a FIRST-RUN code path to a paid experiment that has already lost money three times to first-run code -- a missing setup variable, a student path rebuilt by hand, and an admission that compared against the wrong side",
+  "a3_attempt36 had already cleared setup, stage D and stage E -- every point that has previously failed -- when the question was reconsidered, and stage F is the stage that SUCCEEDED on attempt35",
+  "the probes are deterministic in seed, initialization artifact, recipe and data, so the retrain reproduces them rather than producing something new"
+ ],
+ "what_this_costs_if_it_goes_wrong": "if a3_attempt36 fails in stage G, the formal balance falls to about $5.65, which cannot fund another full chain at the $8.3047 hard ceiling. Restoring attempt35's preserved probes and running only stage G would then be the ONLY affordable path, and it would have to be built with less budget than it has now. The resume path may therefore be deferred work rather than avoided work.",
+ "not_a_science_change": "retraining the same frozen seeds from the same reproduced initialization under the same recipe is a replacement endpoint, not a second measurement: no valid measurement of these probes exists. Nothing is pooled and no favourable result is selected.",
+ "authorizes": "nothing"
+}
