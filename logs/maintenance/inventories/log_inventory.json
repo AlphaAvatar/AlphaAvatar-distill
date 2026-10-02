@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-02T22:26:49+00:00",
+  "created_utc": "2026-10-02T22:47:25+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3090,
-    "bytes": 90130388,
+    "bytes": 90134336,
     "by_disposition": {
       "keep_canonical": 194,
       "keep_immutable": 2674,
@@ -6422,6 +6422,7 @@
         "logs/stages/stage-1/phase_c3/plans/a_bsz3_pricing.json",
         "logs/stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json",
         "logs/stages/stage-1/phase_c3/runs/attempt75/closeout/outcome.json",
+        "logs/stages/stage-1/phase_d1/plans/d1_design.json",
         "logs/stages/stage-1/recovery_continuation/history/autoinit_continuation_attempts/README.md",
         "logs/stages/stage-2/README.md",
         "logs/stages/stage-3/README.md",
@@ -6441,6 +6442,7 @@
         "scripts/autoinit/write_a3_attempt_closeouts.py",
         "scripts/autoinit/write_c2_behavioural_proposal.py",
         "scripts/autoinit/write_c2_full_search_grant_proposal.py",
+        "scripts/autoinit/write_d1_design.py",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/build_log_inventory.py",
         "scripts/consolidate/render_log_navigation.py",
@@ -6520,6 +6522,7 @@
         "scripts/autoinit/write_a3_attempt_closeouts.py",
         "scripts/autoinit/write_c2_behavioural_proposal.py",
         "scripts/autoinit/write_c2_full_search_grant_proposal.py",
+        "scripts/autoinit/write_d1_design.py",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/build_log_inventory.py",
         "scripts/consolidate/render_log_navigation.py",
@@ -6609,7 +6612,6 @@
         "logs/stages/stage-1/phase_a3/runs/a3_attempt34/evidence/a3_replay.json",
         "logs/stages/stage-1/phase_a3/runs/a3_attempt35/evidence/a3_replay.json",
         "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/a3_replay.json",
-        "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
         "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
         "logs/stages/stage-1/phase_c1/runs/attempt9/c1_replay_record.json",
         "logs/stages/stage-1/phase_c2_behavioural/runs/attempt4/governance/grant.json",
@@ -21668,7 +21670,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 138974,
-      "sha256": "751648b08e59733f4a6c7c2fb1a124dca7fbfac32ca8cf06d587ce12c01cc63e",
+      "sha256": "ad0bee21d34ccdf7dcb38174ce8c9a06db32a28c0bc49ce003209655f4cb035d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21957,8 +21959,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 36167,
-      "sha256": "cb5d30bd19d52e61294ea06fbc86b481eeed0703339dc7c371ef6fe8c89613a1",
+      "size_bytes": 36295,
+      "sha256": "b3dba83b5fae468e725cb31dc287c58e74ca25bbfdf69ecf08d494acda49c363",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -49910,33 +49912,37 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_d1/plans/d1_design.json",
         "logs/state/current.json",
-        "scripts/autoinit/write_d1_design.py"
+        "scripts/autoinit/write_d1_design.py",
+        "tests/autoinit/test_d1_design.py"
       ],
       "referenced_by_executable": [
-        "scripts/autoinit/write_d1_design.py"
+        "scripts/autoinit/write_d1_design.py",
+        "tests/autoinit/test_d1_design.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/write_d1_design.py"
+      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, tests/autoinit/test_d1_design.py"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-      "size_bytes": 31576,
-      "sha256": "6473f1da284651f6c5b9c8c76c642e2c24a52eba4e1d8ebd32cd33c8a9b29135",
+      "size_bytes": 35302,
+      "sha256": "ae0394f008f58fea222a514c3ebba2f591112de119c66cda4d659bebe978109f",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/state/current.json",
-        "scripts/autoinit/write_d1_design.py"
+        "scripts/autoinit/write_d1_design.py",
+        "tests/autoinit/test_d1_design.py"
       ],
       "referenced_by_executable": [
-        "scripts/autoinit/write_d1_design.py"
+        "scripts/autoinit/write_d1_design.py",
+        "tests/autoinit/test_d1_design.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/autoinit/write_d1_design.py"
+      "disposition_reason": "named by scripts/autoinit/write_d1_design.py, tests/autoinit/test_d1_design.py"
     },
     {
       "path": "logs/stages/stage-1/recovery_continuation/README.md",
@@ -53275,8 +53281,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 180215,
-      "sha256": "c6c425a968e2787cf3160dc021dd48aba45a15b65b1f9bbea12f6632620210e4",
+      "size_bytes": 180309,
+      "sha256": "ad64c16966b9f16105d38d3519509a8044318bd3634616fbc3e597008e9e62e4",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

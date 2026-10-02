@@ -228,6 +228,14 @@ class StateEvaluator:
         The figure that matters is ``peak_logit_bytes``: the two blocks alive at
         once, over the batch's WIDEST group rather than its average, because the
         allocation that fails is the largest one. Averages are not bounds.
+
+        **What it bounds, exactly.** The two logit blocks. It does NOT include
+        the reduction's own transients, which are bounded by ``chunk`` instead —
+        and that separation is only true because the rows are handed to
+        ``distortion`` in the model's own dtype rather than eagerly upcast; an
+        eager ``.float()`` would add two full ``[L-1, V]`` float32 copies per
+        item, ~2.4 GiB at the frozen suite's widest, to a figure that does not
+        count them. See ``_logit_pairs``.
         """
         lengths = [int(i.input_ids.shape[1]) for i in self.items]
         profile = padding_profile(
@@ -315,7 +323,23 @@ class StateEvaluator:
                         f"{self.items[index].item_id!r}; a permutation this "
                         "evaluator cannot trust would score one item's logits "
                         "under another's tags")
-                yield item, ref_rows[row].float(), cand_rows[row].float()
+                #: HANDED OVER IN THE MODEL'S DTYPE, not eagerly upcast, and
+                #: that is a memory decision rather than a numerical one.
+                #: `distortion` already does `[a:b].float()` on each chunk, and
+                #: bfloat16 -> float32 is exact — same exponent width, more
+                #: mantissa — so the reduction receives identical float32 values
+                #: either way. What differs is the peak: a full `[L-1, V]`
+                #: float32 copy of each row is ~1.2 GiB at the frozen suite's
+                #: widest item and a 151,936 vocabulary, times two models, ON
+                #: TOP of the batch's own blocks. Upcasting per chunk instead
+                #: keeps the transient proportional to `chunk`.
+                #:
+                #: The reference path above keeps its eager `.float()`. It is
+                #: the line the drift certification measured, it holds one item
+                #: at a time so the saving does not arise, and touching it to
+                #: tidy a batched path's memory would spend a budget for
+                #: nothing.
+                yield item, ref_rows[row], cand_rows[row]
             del cand_block, cand_rows, ref_rows
 
     @torch.no_grad()

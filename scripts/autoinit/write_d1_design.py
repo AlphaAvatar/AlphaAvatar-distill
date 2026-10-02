@@ -410,6 +410,87 @@ def behavioural_design() -> dict[str, Any]:
     }
 
 
+def gpu_validation_owed() -> dict[str, Any]:
+    """What a GPU must answer before D1 executes, and what it must not re-ask.
+
+    Scoped here rather than run, because D1 cannot execute while either blocker
+    is open and validating code for an experiment that cannot start is spending
+    a paid resource on a question nothing is waiting for. AGENTS.md P8.2 asks a
+    hardware request to state what gate it is intended to pass; this is that
+    statement, for the maintainer to decide alongside the blockers.
+    """
+    return {
+        "status": "OWED, NOT RUN. Nothing was created and $0 was spent.",
+        "why_a_gpu_is_required": (
+            "the questions are CUDA numerical behaviour and real memory, which "
+            "no CPU substitute reaches. AGENTS.md P8.2: a CPU rehearsal that "
+            "cannot reach the behaviour under test is a more expensive way of "
+            "learning nothing."),
+        "what_the_cpu_round_ALREADY_settled": [
+            "the incumbent policy is numerically inert: a four-operator toy "
+            "chain rebuilt against the pre-change tree produces the same "
+            "artifact digest and the same four structural decisions",
+            "`distortion` unweighted is bit-identical to an inlined copy of the "
+            "previous arithmetic at three chunk sizes",
+            "a 0/1 weight equals subsetting the selected rows exactly, and "
+            "`positions` and `weight` were driven apart so neither can stand in "
+            "for the other unnoticed",
+            "the batched state evaluation equals the reference path exactly on "
+            "CPU float32, under both reference strategies and both policies",
+            "handing `distortion` bf16 rows is bit-identical to pre-upcasting, "
+            "which is what the memory bound depends on",
+            "DEVICE PLACEMENT, via the `meta` device: every mask and weight is "
+            "placed from the batch it describes rather than defaulting to the "
+            "host. Meta performs no arithmetic, so it answers placement and "
+            "nothing else — which is the only question it is asked.",
+        ],
+        "what_only_a_GPU_can_answer": [
+            "whether the batched state evaluation's measured peak matches the "
+            "derived `peak_logit_bytes` at the real 151,936 vocabulary, and "
+            "whether `batch_plan`'s budget is the right bound",
+            "whether the bf16 reductions move a SELECTION under the "
+            "target-aware policy, as they were measured to do under the "
+            "batching protocol — the operator decisions are integer choices "
+            "over float scores and a near-tie can flip",
+            "the real per-expansion time under batched statistics and batched "
+            "state evaluation, which the conservative unbatched cost table "
+            "bounds but does not describe",
+        ],
+        "surface_that_owes_it": {
+            "_what": ("files on the historically CUDA-validated surface that "
+                      "this round changed, so the 2026-09-10 evidence does not "
+                      "cover them. Owner: tests/architecture/"
+                      "test_cuda_surface_preserved.py :: "
+                      "HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION."),
+            "files": [
+                "src/aadistill/initialization/planning/fixed_path.py",
+                "src/aadistill/initialization/operators/attention/gqa/"
+                "_statistics.py",
+                "src/aadistill/initialization/operators/attention/gqa/"
+                "activation_importance.py",
+            ],
+        },
+        "cheapest_sufficient_shape": (
+            "ONE short session on the smallest card that holds the teacher at "
+            "the real vocabulary: run the incumbent fixed path once under the "
+            "incumbent policy and gate the artifact digest against the frozen "
+            "incumbent, then once under the target-aware policy at the D1 "
+            "execution protocol, recording the state evaluation's peak against "
+            "`batch_plan` and both runs' per-expansion timings. It needs no "
+            "recovery training, no battery and no behavioural measurement."),
+        "gate_it_is_intended_to_pass": (
+            "that the incumbent policy still rebuilds the frozen incumbent "
+            "digest on CUDA, and that the batched target-aware path runs inside "
+            "its derived memory bound. Neither is a scientific result and "
+            "neither authorizes D1."),
+        "funding": (
+            "the GPU engineering allowance, which is a different book from the "
+            "formal one and does not transfer into it. It is not requested here: "
+            "D1 cannot execute while either blocker is open, so the validation "
+            "is owed at authorization time rather than now."),
+    }
+
+
 def contamination() -> dict[str, Any]:
     capacity = _load(CAPACITY)
     return {
@@ -473,6 +554,23 @@ def contamination() -> dict[str, Any]:
     }
 
 
+def _derived_budget() -> dict[str, Any]:
+    """The live position, from the DERIVER rather than restated.
+
+    `derive_budget.py` reads each attempt's own closeout and is the owner; a
+    hand-copied balance expires the next time anything spends, and this file is
+    generated often enough that it would expire quietly. Loaded by path because
+    it is a script rather than a package module.
+    """
+    import importlib.util
+
+    path = REPO / "scripts/consolidate/derive_budget.py"
+    spec = importlib.util.spec_from_file_location("_derive_budget", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.derive()
+
+
 def budget() -> dict[str, Any]:
     from experiments.phase_d1 import search_space as d1
     from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
@@ -483,6 +581,10 @@ def budget() -> dict[str, Any]:
         confirmation_probes=design["confirmation_probes"])
     terms = _load(BUDGET_TERMS)["execution_package"]
     pricing = _load(BUDGET_TERMS)["accepted_pricing"]
+    live = _derived_budget()
+    project_remaining = float(live["project"]["remaining_usd"])
+    funded = tuple(terms.get("funds_formal_sessions_of", {})
+                   .get("experiment_ids", ()))
     return {
         "price_basis": {
             "usd_per_hour": PRICE_PER_HOUR_LAST_QUOTED,
@@ -503,22 +605,31 @@ def budget() -> dict[str, Any]:
         "fits_per_session_envelope": chain["max_session_hard_ceiling_usd"]
             <= terms["per_attempt_hard_ceiling_usd"],
         "position": {
-            "project_cap_usd": pricing["cumulative_cap_usd"],
-            "project_remaining_usd": 13.1777,
-            "formal_remaining_usd": 7.2431,
-            "package_remaining_usd": 9.1826,
-            "_owner": ("scripts/consolidate/derive_budget.py, which reads each "
-                       "attempt's own closeout. Restated here only so the "
-                       "shortfall below is checkable; the deriver is the owner "
-                       "and a reader should re-derive rather than trust this."),
+            "project_cap_usd": float(live["project"]["cap_usd"]),
+            "project_remaining_usd": project_remaining,
+            "formal_remaining_usd": float(live["formal"]["remaining_usd"]),
+            "engineering_remaining_usd":
+                float(live["engineering"]["remaining_usd"]),
+            "package_remaining_usd": float(live["package"]["remaining_usd"]),
+            "full_ceiling_sessions_fundable":
+                live.get("full_ceiling_sessions_fundable"),
+            "_derived_by": ("scripts/consolidate/derive_budget.py, CALLED by "
+                            "this writer rather than copied from it. A "
+                            "hand-copied balance expires the next time "
+                            "anything spends, and this document is "
+                            "regenerated often enough that it would expire "
+                            "quietly."),
+            "_cap_cross_check": pricing["cumulative_cap_usd"],
         },
-        "shortfall_usd": round(chain["hard_ceiling_usd"] - 13.1777, 4),
+        "shortfall_usd": round(chain["hard_ceiling_usd"] - project_remaining, 4),
+        "funds_formal_sessions_of": list(funded),
+        "d1_is_in_the_funded_list": "phase_d1" in funded,
         "BLOCKER": (
             "D1 is NOT FUNDABLE. The chain's hard ceiling exceeds the project's "
-            "entire remaining headroom, and D1 is not in the C1 execution "
-            "package's `funds_formal_sessions_of` list, so no existing "
-            "allowance covers it. A maintainer grant is required for the phase, "
-            "and the cap would have to move with it."),
+            "entire remaining headroom, and `phase_d1` is not in the C1 "
+            "execution package's `funds_formal_sessions_of` list, so no "
+            "existing allowance covers it. A maintainer grant is required for "
+            "the phase, and the cap would have to move with it."),
         "d_series_extrapolation": {
             "_what": ("D2 and D3 repeat this shape by the maintainer's "
                       "instruction — each a full search, freeze, recovery, "
@@ -563,6 +674,7 @@ def build() -> dict[str, Any]:
         "scoring_policy": scoring_policy(),
         "materialization_prerequisite": materialization_prerequisite(),
         "execution_protocol": execution_protocol(),
+        "gpu_validation_owed": gpu_validation_owed(),
         "search_stage": search_stage(),
         "behavioural_design": behavioural_design(),
         "contamination_protection": contamination(),

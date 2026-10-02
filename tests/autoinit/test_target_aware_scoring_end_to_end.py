@@ -383,6 +383,29 @@ class TestTheStateMetricIsTargetAwareToo:
         with pytest.raises(MeasurementError, match="over the"):
             ev.evaluate(build_tiny_model(TEACHER_GEOMETRY, seed=9), "d")
 
+    def test_handing_distortion_bf16_rows_is_numerically_free(self):
+        """Which is what lets the batched path skip a 2.4 GiB eager upcast.
+
+        `_logit_pairs` yields each row in the model's own dtype instead of
+        calling `.float()` on it, because `distortion` upcasts per chunk and
+        bfloat16 -> float32 is exact: same exponent width, more mantissa. The
+        memory bound in `batch_plan` counts the logit blocks and NOT two full
+        float32 row copies per item, so that claim has to be true rather than
+        plausible.
+        """
+        from aadistill.initialization.statistics.contribution import distortion
+
+        torch.manual_seed(3)
+        positions, vocab = 200, 501
+        ref = torch.randn(positions, vocab).bfloat16()
+        abl = torch.randn(positions, vocab).bfloat16()
+        targets = torch.randint(0, vocab, (positions,))
+        lazy = distortion(ref, abl, targets).as_dict()
+        eager = distortion(ref.float(), abl.float(), targets).as_dict()
+        for key in ("kl", "reverse_kl", "ref_ce", "abl_ce", "ce_delta",
+                    "top1_agreement", "positions", "weight"):
+            assert lazy[key] == eager[key], key
+
     def test_the_plan_is_derivable_before_any_model_exists(self, teacher):
         """So a preflight can bound the protocol from the frozen suite."""
         rows = tagged_items(seed=606)
@@ -425,6 +448,78 @@ def _search(workdir, *, policy, execution, teacher, calib, suite, suite_items):
         calibration_loader=lambda profile: calib,
         measurer=lambda model, digest: evaluator.evaluate(model, digest),
         execution=execution, numerics=CPU_NUMERICS), config
+
+
+class TestDevicePlacementAtZeroCost:
+    """Placement, asserted rather than hoped for, without renting a GPU.
+
+    Four paid pods in this project have died inside a cross-device line that
+    every CPU test passed, because on a CPU-only box every device coincides and
+    a defaulted `torch.zeros(...)` is indistinguishable from a placed one. The
+    `meta` device breaks that coincidence at `$0`: it is not the host, tensors
+    carry it through `.to()` and shape-only ops, and a tensor that silently
+    defaulted to CPU is immediately visible.
+
+    What this does NOT replace is the real-CUDA validation: meta performs no
+    arithmetic, so it says nothing about a kernel, a bf16 reduction or real
+    memory. It is the cheapest step that can answer the placement question,
+    which is the only question it is asked.
+    """
+
+    def _items(self):
+        return [
+            {"item_id": "a", "domain": "general", "subtype": "text",
+             "input_ids": torch.arange(20, dtype=torch.long)[None, :],
+             "tags": {"assistant": list(range(12, 19))}},
+            {"item_id": "b", "domain": "math", "subtype": "arith",
+             "input_ids": torch.arange(16, dtype=torch.long)[None, :],
+             "tags": {"assistant": list(range(8, 15))}},
+        ]
+
+    def test_every_mask_and_weight_is_placed_from_the_batch(self):
+        from aadistill.initialization.calibration.batching import build_batch
+        from aadistill.initialization.scoring.batches import active_positions
+
+        items = self._items()
+        active = active_positions(items, SUPERVISED_TARGET_V1)
+        batch = build_batch(items, pad_id=0, device="meta")
+        assert batch.input_ids.device.type == "meta"
+
+        mask = active.token_mask_for(batch, (0, 1))
+        weights = active.prediction_weights_for(batch, (0, 1))
+        assert mask.device == batch.input_ids.device
+        assert weights.device == batch.input_ids.device
+        #: And the shapes follow the two axes, not one of them twice.
+        assert tuple(mask.shape) == tuple(batch.input_ids.shape)
+        assert tuple(weights.shape) == (batch.size,
+                                        batch.input_ids.shape[1] - 1)
+        assert mask.dtype == torch.bool
+
+    def test_active_rows_does_not_drag_a_mask_back_to_the_host(self):
+        from aadistill.initialization.calibration.batching import (
+            active_rows, build_batch,
+        )
+
+        items = self._items()
+        batch = build_batch(items, pad_id=0, device="meta")
+        host_mask = torch.ones(batch.input_ids.shape, dtype=torch.bool)
+        placed = active_rows(host_mask, batch.input_ids.shape,
+                             batch.input_ids.device)
+        assert placed.device == batch.input_ids.device
+
+    def test_the_reducers_move_the_weights_to_the_logits(self):
+        """A host float vector meeting a device logit tensor raises, so this is
+        not an optimization — it is what makes the weighted path run at all."""
+        from aadistill.initialization.statistics.contribution import (
+            _position_weights,
+        )
+
+        host = torch.ones(8, dtype=torch.float64)
+        moved = _position_weights(host, 8, torch.device("meta"), "probe")
+        assert moved.device.type == "meta"
+        rows = _position_weights(torch.ones(2, 8, dtype=torch.float64), 8,
+                                 torch.device("meta"), "probe", rows=2)
+        assert rows.device.type == "meta"
 
 
 class TestResumeRefusals:
