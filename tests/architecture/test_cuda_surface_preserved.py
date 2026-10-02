@@ -894,6 +894,26 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "CURRENT CUDA SURFACE already; it owes the same pending "
             "validation and claims no new cover.",
      }),
+    ("fe2db4c8ffed3713b857a8cbdc7e3a9218fefa7d",
+     "the same-failure rule, enforced where a resource is created",
+     {
+        "src/aadistill/infrastructure/session_prechecks.py":
+            "ADDITIVE: one new gate factory, `same_failure_gate`. NO CUDA "
+            "SURFACE -- it reads text, compares two strings and runs `git "
+            "diff`; it touches no tensor, no device and no dtype, and it runs "
+            "strictly before any provider resource exists. THIS IS A DECLARED "
+            "SEMANTIC CHANGE because the executable shape of a shared "
+            "pre-provider module moves, and because it can now REFUSE a "
+            "launch that previously proceeded. It exists because A3 created "
+            "twenty-one paid pods discovering one missing setup variable: the "
+            "rule 'repeating an identical failure unchanged is not a repair' "
+            "was written in AGENTS.md and nothing executed it. Both instance "
+            "facts arrive as callables -- where prior attempts' evidence "
+            "lives, and what counts as a corrective change -- so the core "
+            "names no repository path and no experiment. Every existing "
+            "session is unaffected: a precheck is a value in "
+            "`SessionSpec.precheck` and only A3's spec lists this one.",
+     }),
 )
 
 

@@ -1,3 +1,52 @@
+# Budget decisions
+
+## 2026-10-02 — APPROVED: an A3 PHASE envelope, sized to finish the stage
+
+The maintainer amended the package **prospectively** on the review of
+`fe2db4c8`, with an explicit instruction not to size it to the next flawless
+run:
+
+```text
+formal allowance        65.6523 -> 76.6523   (+11.0000)
+GPU engineering         10.0000 -> 10.0000   (unchanged)
+package total           75.6523 -> 86.6523   (+11.0000, formal + engineering)
+project cumulative cap 400.0000 -> 410.0000  (+10.0000)
+per-session envelope    30.0000 -> 30.0000   (unchanged)
+```
+
+**Derived balances, which reproduce the decision's own figures exactly:**
+
+```text
+formal remaining    $17.9631
+package remaining   $19.9026
+project remaining   $23.8977
+```
+
+**What it buys at the measured A3 pricing:** one full chain at the `$8.2525`
+hard ceiling plus about six corrected pre-science restarts at `$1.4506` each
+= `$16.9561`, leaving `$1.0070` of formal headroom.
+
+**It is a PHASE envelope, not permission to repeat a failure six times.** The
+maintainer's words. The enforcement is
+`aadistill.infrastructure.session_prechecks.same_failure_gate`: immediately
+before any create call it compares the normalized deterministic failure
+signature of the previous paid attempt against whether anything corrective has
+been committed since, and refuses a provider resource when a retry would be a
+repetition. Provider capacity, a cold host and an unreachable endpoint are
+classified as TRANSIENT and keep the existing backoff policy, because that is
+the behaviour the decision explicitly preserved.
+
+**It rewrites nothing.** attempt75's historical `$0.9492` formal overspend
+stands. The `$2.7400` A3 has already spent stands, is now carried by
+twenty-eight per-attempt closeouts the budget deriver reads, and is charged to
+the formal book — `phase_a3` is declared in `funds_formal_sessions_of`, which
+is why the formal spend moved `$55.9492 -> $58.6892` rather than reaching the
+project cumulative while the formal book reported it as never having happened.
+No previous grant, authorization or closeout is excused.
+
+Before each paid retry: settled plus outstanding plus active spend and the
+live securePrice are re-derived, and all four limits are checked.
+
 # Decision records
 
 ## 2026-10-01 — A3 becomes one experiment, and the fourth limit starts being checked

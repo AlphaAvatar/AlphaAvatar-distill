@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 31,
+  "runs_unrecorded": 57,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -323,8 +323,8 @@
    },
    "phase_a3": {
     "recorded": 0,
-    "unrecorded": 2,
-    "total": 2
+    "unrecorded": 28,
+    "total": 28
    },
    "phase_b": {
     "recorded": 5,
@@ -2281,17 +2281,225 @@
    "experiment_id": "phase_a3",
    "run_id": "a3-attempt1",
    "root": "logs/stages/stage-1/phase_a3/runs/a3-attempt1",
-   "n_files": 4,
-   "digest": "c8e007f1702730c329c946326ee45ad16f6da27e6a6525e076d514c67cb0e563",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 5,
+   "digest": "d96d4f392a495c21f42c3feac49815a5bb1c1993778bd675b750f4c0e84f0b0e",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   },
   {
    "experiment_id": "phase_a3",
    "run_id": "a3-attempt2",
    "root": "logs/stages/stage-1/phase_a3/runs/a3-attempt2",
-   "n_files": 4,
-   "digest": "fd7633e203bce09e4db687753b9aed8df7cc3a21b67f193d506b8b425a013f45",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+   "n_files": 5,
+   "digest": "97d2a5a0e6cfb86e3b4f407d6fd20cda10c4cca5a3d1762e8f24f0338a52b922",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt10",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt10",
+   "n_files": 6,
+   "digest": "c73ab9918544550abd07bd52e3b4ef6179e78f2cfa879ed38a8e9bce7bfe3ec6",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt11",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt11",
+   "n_files": 6,
+   "digest": "837fa504d83ca577f22d74152af140139dc1f6392b5ef3177487da06c837395d",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt12",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt12",
+   "n_files": 6,
+   "digest": "68d0a7bc6696989680c7c808fc6cc6351178167867b5b9d412560cf314bdef88",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt13",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt13",
+   "n_files": 6,
+   "digest": "bbecd28ffd03544138dc1f65357f8029a6856ba2ed4b4f8065e81b53be709952",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt14",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt14",
+   "n_files": 6,
+   "digest": "301f494e95546c089aa7d284ce25cdd14f6adf053df1783c029adafd80fcb075",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt15",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt15",
+   "n_files": 6,
+   "digest": "5497ed173e29c6905da353a67a65eb5762d83e2e7ca6abaeb79825d5e56e3d92",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt16",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt16",
+   "n_files": 6,
+   "digest": "bac7d52f0e5af0a4587054c6e732b5df33b60e4169778cad14d8af88eed9e04d",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt17",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt17",
+   "n_files": 6,
+   "digest": "23bb72da8206bf9febd6005f4409ec7477d1ce9dafd4f944375f9f702066ad38",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt18",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt18",
+   "n_files": 6,
+   "digest": "6c7dd6f307289dbff68b8248a54955b6f62310bce779fd1c8e1eb221c92e1912",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt19",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt19",
+   "n_files": 6,
+   "digest": "61b9f1e80846c86966f3064be87c5b622be69ebe2e93aae7dff076bd091acae6",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt20",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt20",
+   "n_files": 6,
+   "digest": "cc88bc4b109f53c5b150079685717dcd939a550df8ff52001ebeedad7c9a3b29",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt21",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt21",
+   "n_files": 6,
+   "digest": "195e0db89c1a7ba13170d23ea895f012f29031e2e6192e6cd0164c6c0156f2d5",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt22",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt22",
+   "n_files": 6,
+   "digest": "3aab0973c561420202ede43af98d7a0d174565bccfa2fbeb6e805b717ce4f2ed",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt23",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt23",
+   "n_files": 6,
+   "digest": "7f237a503c6c61ed43a33ec54a0b4dc383efce64617bb56a239406f709e3c7d1",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt24",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt24",
+   "n_files": 6,
+   "digest": "5ac3ee6f5e5a8e9842ed5815e98b4fc8eebc0669c9d751cd16a6bc1a12b7f4dd",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt25",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt25",
+   "n_files": 6,
+   "digest": "dfb8bec4ba7aa074736ba037efc6f49ef794d06d13a800ae4d5510a2c188a691",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt26",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt26",
+   "n_files": 6,
+   "digest": "a4f7dc4bb024a062e520298fe5f42fc55b8b139b4a57275e29a8e9ff00d5bd7c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt27",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt27",
+   "n_files": 6,
+   "digest": "78ddf776e731c58a91157457705ad795705694a6711c7baf76b29dbd5372f946",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt28",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt28",
+   "n_files": 6,
+   "digest": "2a1cc7d4b85d29b5afc35307c8e3072af4c2fc8c45cb90f8b3d7bd3f870aff79",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt3",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt3",
+   "n_files": 5,
+   "digest": "f85e15fcfb0c40489d6b139664f25b444834e02cbdbe6e7946f313c5ea73c0e3",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt4",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt4",
+   "n_files": 6,
+   "digest": "7cfd49cda171abadd3ac476f0e7c41814b1bc01fdd03afd1b7a974495f055984",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt5",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt5",
+   "n_files": 6,
+   "digest": "93304274ca0c571050ef9bc1bc2bed01930f09aa67069c9626b004c647db4777",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt6",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt6",
+   "n_files": 6,
+   "digest": "48458acf6586c78b80e72d73a41f152f9dedc2be1e52330d4e5c22fd2fca36a6",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt7",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt7",
+   "n_files": 6,
+   "digest": "cb0ab61a938474a3445525a0bd1da13b40d2017c94ec374ac1260c93da66bc5c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt8",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt8",
+   "n_files": 6,
+   "digest": "a85dc93a0d727498121ba0b19cad9f45e0fa23b6a8782d97f8237997a8a2e49c",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_a3",
+   "run_id": "a3_attempt9",
+   "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt9",
+   "n_files": 6,
+   "digest": "b62cbcd3788a79de6ef10d5a31c0e236127789f466f5d07f35d7c7907db9bee0",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   },
   {
    "experiment_id": "phase_c1",

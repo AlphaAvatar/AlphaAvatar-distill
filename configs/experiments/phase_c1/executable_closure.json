@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 106,
- "digest": "bc714e599c09e7d6539e1201a586889ecbb876e23767325e7597fc38dcb9eeab",
+ "n_files": 107,
+ "digest": "5cea8c8896cea1c7afb2fb13d37255726c73feb672d5ef67556a69326f37222a",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,8 +39,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "edb182d2c8d3a97fe1887588008eace1eb4defbce45be0ecea84597e5bdd4c94",
-   "bytes": 20846
+   "sha256": "4ce60fdac95f186990adb8fb1022446ec0ab1bc43a8cb63c0d587e4ea494a078",
+   "bytes": 23071
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -288,6 +288,11 @@
    "bytes": 4368
   },
   {
+   "path": "src/aadistill/infrastructure/failure_signature.py",
+   "sha256": "0bbbcc6edfc121719df4cdb11cdb2ad7119a9b5b299cae124c87f4798ba1605f",
+   "bytes": 5724
+  },
+  {
    "path": "src/aadistill/infrastructure/log_relay.py",
    "sha256": "4b6632ddd514d720a13c3b94ad77cc87772181a121ba7b63eb3f925f2c300281",
    "bytes": 9833
@@ -314,8 +319,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_prechecks.py",
-   "sha256": "b32f4401fdb21ecf4ba45fcf8d62e046cdb14fa552b924d73def718cc0b5014d",
-   "bytes": 11022
+   "sha256": "d5f00e4b41f2191de1a7e0837d81cff62108ea636e20e1a616e1b7db0b6e7332",
+   "bytes": 14387
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",

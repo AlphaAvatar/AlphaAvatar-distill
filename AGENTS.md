@@ -43,6 +43,8 @@ The codebase should eventually have two conceptual areas:
 
 The algorithm core must not hard-code one model recipe. Model recipes may depend on the algorithm core, but the core should stay reusable.
 
+**`src/aadistill` must contain no experiment or model-instance hardcode.** That explicitly includes: the current stage or experiment ids; the current model's dimensions or compression ratio; the current recipe or budget; seeds; repository experiment paths; provider-specific resource ids; and CUDA ordinals. Family structural semantics belong in architecture adapters and capabilities; experiment instances belong in configs, scripts and application layers. Where reusable code needs an instance fact, it takes it as a parameter or a callable supplied by the caller — which is why, for example, a shared pre-provider gate receives *where* prior attempts' evidence lives rather than naming a path. The core must continue to support Stage 0–6 and future stages, other model families, geometries, scales, compression ratios and execution topologies.
+
 Semantic task categories such as refusal, uncertainty, tool use, or realtime interaction are data and evaluation concepts, not separate framework-level answer protocols. The algorithm core must not hard-code refusal-specific target text, generic word-count limits, or fallback-to-public-target rules. If a task explicitly requires a constrained form, express that requirement in the model recipe, dataset contract, or evaluation configuration, and validate it without weakening answer correctness or usefulness.
 
 Each model recipe must declare the capability scope it is trying to preserve or improve. AlphaAvatar-distill is a selective distillation framework, not an obligation to clone every capability, style, or alignment behavior of the teacher. For the current dense baseline, the primary objective is to transfer the teacher's strongest reasoning, problem-solving, and agent decision capabilities into the student under the deployment budget. Capabilities outside the declared target scope may be measured, but they must not silently receive equal weight or redefine success.
@@ -170,6 +172,15 @@ The agent should prefer hardware escalation in the following order unless a docu
 3. single inexpensive GPU smoke test;
 4. single suitable production GPU;
 5. multi-GPU or premium accelerator execution.
+
+**The ladder is not mandatory when CPU cannot answer the real question.**
+When the uncertainty is inherently CUDA numerical behaviour, bf16/fp16 kernel
+behaviour, device placement, realistic memory, real-model throughput, or
+training/inference integration, go **directly** to the smallest suitable GPU
+validation. Do not manufacture a CPU substitute for procedural completeness: a
+CPU rehearsal that cannot reach the behaviour under test is not a cheaper
+validation, it is a more expensive way of learning nothing, and it has already
+hidden a device-placement bug that then failed on a paid pod.
 
 Hardware selection must be based on the actual operation, model size, sequence length, batch size, precision, activation memory, optimizer state, and target runtime. Do not request an H100 merely because a task involves model training if a cheaper GPU can validate the same hypothesis under the fixed budget.
 
@@ -480,6 +491,22 @@ suite, launch-bound sweep (if applicable), GPU validation (if applicable).
 
 Tests are evidence for the work. They are not the work.
 
+#### What review effort should prioritize
+
+In this order:
+
+1. scientific validity;
+2. scalability and reusability;
+3. identity and reproducibility;
+4. data/experiment contamination;
+5. real budget and resource safety;
+6. result and evidence completeness.
+
+Process formality, redundant canaries, CPU-only rehearsal and per-patch broad
+test counts are **not quality goals by themselves**. A review that reports a
+test total and misses a hardcoded experiment id in reusable core has inverted
+this list.
+
 ### P8.4. Move artifacts by consumer need, not by existence
 
 Never materialize, restore, upload, download, copy or retain a large artifact
@@ -733,6 +760,45 @@ resuming, pooling, or re-running a scientific measurement once formal training
 or measurement HAS begun, and it never widens the budget: the cumulative
 envelope above still governs every subrun. If it is uncertain whether formal
 measurement started, that uncertainty is itself a stop condition.
+
+**A deterministic paid failure may not be retried unchanged.** If a new paid
+attempt would terminate with the same normalized deterministic failure
+signature as the preceding paid attempt, and nothing in code, config or
+environment has changed that could plausibly address it: **DO NOT CREATE
+ANOTHER PROVIDER RESOURCE.** Diagnose first. A new paid retry requires
+preserved prior failure evidence, an identified cause, an actual corrective
+action, a new implementation/config/environment identity where relevant, the
+smallest regression proving the observed failure is addressed, and sufficient
+remaining phase budget.
+
+Provider capacity, a cold host and a transient acquisition failure are
+different: when the evidence supports a provider transient, the ordinary
+backoff and reacquisition policy applies. The distinction is classified, not
+assumed — `aadistill.infrastructure.failure_signature` returns a signature for
+a deterministic failure and `None` for a transient one, and
+`session_prechecks.same_failure_gate` is the enforcement, immediately before
+the create call. A3 created twenty-one paid pods discovering one missing setup
+variable because this rule was written down and nothing executed it.
+
+**Phase-level authorization does not need intermediate approvals.** Once a
+maintainer explicitly authorizes an entire experimental phase with frozen
+science, a cumulative budget, a hardware boundary and an artifact/evidence
+contract, ordinary engineering implementation, diagnosis, correction and
+retries inside that phase proceed without returning. Do not manufacture
+approval boundaries between driver, launcher, rehearsal, GPU execution,
+evaluation and aggregation — they are one authorized phase, not six.
+
+**Formal-measurement failure handling.** The goal is terminal completion, not
+stopping at every engineering failure. If formal measurement has NOT begun,
+ordinary engineering failures are repaired and retried inside the phase
+envelope. If formal work HAS begun but an engineering failure prevents that
+unit from producing a complete valid endpoint: preserve the failed or
+incomplete attempt, do not pool partial measurements, do not selectively
+retain favourable results, repair the defect, and rerun the SAME frozen
+unit/seed under the same protocol — but only where that produces one
+*replacement* complete endpoint rather than an optional second measurement. If
+a complete valid measurement already exists, do not rerun it looking for
+another result.
 
 Stop and report when the remaining budget cannot fund a corrected test plus
 teardown, when a cumulative boundary is reached, when a resource may still be
@@ -1016,6 +1082,28 @@ Every external artifact should eventually have a manifest containing:
 - creation command;
 - related experiment log.
 
+**Historical checkpoint weight retirement is a STANDING authorization.** A
+completed historical checkpoint's weight bytes SHOULD be retired automatically
+when all of the following hold:
+
+* its experiment or unit is terminal;
+* valid measurement/evaluation evidence is durable;
+* artifact, config and input hashes are preserved;
+* no active or declared downstream consumer requires the bytes;
+* it is not the live incumbent, a release artifact, or another explicitly
+  retained anchor.
+
+Perform a real consumer audit before deletion — launchers that declare the
+prefix, setups that fetch it, registries that protect it, and code that reads
+it. After deletion, preserve the manifest, the artifact digest, the
+config/protocol identity, the measurements and evaluations, the closeout, and
+a **tombstone** stating what was deleted and why.
+
+This standing policy removes the need for a separate maintainer approval for
+each dead historical checkpoint. It authorizes nothing else: it never permits
+deleting logs or evidence, and never permits deleting an artifact with an
+unresolved consumer.
+
 ### 2.6 Local agent instruction files
 
 The root `AGENTS.md` is the only required instruction file at bootstrap.
@@ -1129,6 +1217,17 @@ The log area may eventually contain:
 - artifact manifests.
 
 Create only the logs needed by the current milestone.
+
+**The structured layout is the STANDING rule, not a proposal:**
+
+```text
+logs/stages/stage-<id>/<experiment>/...
+```
+
+with a README or index at the relevant experiment and stage level. Keep
+monitoring it; do **not** redesign the logging system again. A new experiment
+adds a row to the stage attribution and gets its directory from the same
+layout helper every other experiment uses.
 
 ### 3.3 Current state log
 

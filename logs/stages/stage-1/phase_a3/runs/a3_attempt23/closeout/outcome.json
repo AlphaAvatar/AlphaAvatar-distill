@@ -1,0 +1,27 @@
+{
+ "schema": "aadistill.autoinit.a3_attempt_outcome/v1",
+ "run_id": "a3_attempt23",
+ "experiment_id": "phase_a3",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "status": "PRE_SCIENCE_ABORT_NO_MEASUREMENT",
+ "_what_this_is": "one consumed one-use A3 chain. No probe was trained, no generation was produced and no measurement was taken, so this record carries cost and cause and no scientific field.",
+ "provider_resource_created": true,
+ "pod_ids": [
+  "037tlpqnna43h7"
+ ],
+ "all_pods_confirmed_gone": true,
+ "terminal": null,
+ "launcher_exit": null,
+ "measurement_began": false,
+ "session_commit": null,
+ "deterministic_failure_signature": "SETUP_REQUIRED_VAR:SESSION_FROZEN_EXPECT",
+ "setup_refusal": "SESSION_FROZEN_EXPECT: a session declaring ASSETS_READY must name its frozen-asset expectation document",
+ "cost": {
+  "actual_usd": 0.09,
+  "elapsed_minutes": 5.2,
+  "price_per_hour": 1.09,
+  "_source": "summed from this attempt's own launcher-log teardown lines, each of which states provider confirmation",
+  "_null_means": "a pod existed and no teardown cost could be read from the log; it is NOT zero"
+ },
+ "authorizes": "nothing"
+}

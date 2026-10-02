@@ -357,7 +357,11 @@ def test_the_gates_are_ordered_so_the_network_ones_are_last(session):
     _, _, spec = session
     names = [getattr(g, "__name__", type(g).__name__) for g in spec.precheck]
     assert names[-1] == "no_billing_resource_gate", names
-    assert names[-2] == "durable_capacity_gate", names
+    #: The same-failure rule sits immediately before the billing check,
+    #: because both answer "may a provider resource exist at all" and a
+    #: repetition is as wasteful as a second concurrent pod.
+    assert names[-2] == "same_failure_gate", names
+    assert names[-3] == "durable_capacity_gate", names
     assert "controls_evidence_gate" in names
     assert "readiness_gate" in names
     assert "bundle_staged_gate" in names

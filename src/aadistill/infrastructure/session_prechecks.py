@@ -218,3 +218,68 @@ def local_files_gate(repo_root: Path, paths: tuple[str, ...], *, what: str
 
     check.__name__ = what
     return check
+
+
+def same_failure_gate(prior_logs: Callable[[], list[tuple[str, str]]], *,
+                      corrective_change: Callable[[], tuple[bool, str]],
+                      ) -> Callable[[SessionContext], tuple]:
+    """A deterministic paid failure may not be retried unchanged.
+
+    The rule this enforces was already written down -- "repeating an identical
+    failure unchanged is not a repair" -- and nothing executed it. A3's
+    acquisition loop created twenty-one paid pods discovering ONE missing
+    setup variable, because each round rebuilt a fresh chain and no step asked
+    whether the previous round had failed the same way.
+
+    So this asks, immediately before a provider resource is created:
+
+    * what did the LAST attempt that produced a deterministic signature fail
+      on (`prior_logs`, newest last);
+    * has anything corrective changed since (`corrective_change`).
+
+    Same signature and nothing changed -> refuse, with the signature and the
+    previous attempt named, so the message is a diagnosis rather than a stop.
+
+    **Transient acquisition failures are not deterministic signatures.**
+    `signature_of` returns `None` for provider capacity, a cold host and an
+    unreachable endpoint, so a tier that refused for stock still retries under
+    the ordinary backoff policy -- which is the behaviour this must not break.
+
+    Both inputs are callables supplied by the session: WHERE prior attempts'
+    logs live and WHAT counts as a corrective change are instance facts, and
+    the reusable core must not name a repository path or an experiment.
+    """
+    from aadistill.infrastructure.failure_signature import (
+        latest_signature, same_unchanged_failure, signature_of,
+    )
+
+    def check(ctx: SessionContext) -> tuple[bool, str]:
+        attempts = list(prior_logs())
+        texts = [text for _, text in attempts]
+        previous = latest_signature(texts)
+        changed, why = corrective_change()
+        ev = ctx.evidence.setdefault("same_failure_rule", {})
+        ev.update({"prior_attempts_read": len(attempts),
+                   "previous_deterministic_signature": previous,
+                   "corrective_change": changed,
+                   "corrective_change_basis": why})
+        if previous is None:
+            return True, ("no previous attempt failed deterministically; "
+                          f"{len(attempts)} prior log(s) read")
+        #: Which attempt it was, for the message. The newest one carrying the
+        #: signature, which is the one a retry would be repeating.
+        culprit = next((name for name, text in reversed(attempts)
+                        if signature_of(text) == previous), "?")
+        if same_unchanged_failure(previous, previous,
+                                  corrective_change=changed):
+            return False, (
+                f"the previous paid attempt ({culprit}) ended with the "
+                f"deterministic failure {previous} and {why}. A deterministic "
+                "paid failure may not be retried unchanged: diagnose, repair, "
+                "and prove the observed failure is addressed before creating "
+                "another provider resource.")
+        return True, (f"previous deterministic failure {previous} ({culprit}) "
+                      f"is addressed: {why}")
+
+    check.__name__ = "same_failure_gate"
+    return check

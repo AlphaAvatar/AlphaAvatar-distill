@@ -24,6 +24,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -40,7 +41,7 @@ from aadistill.infrastructure.session import (  # noqa: E402
     SessionContext, SessionSpec, SetupManifest, TeardownPolicy,
 )
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
-    local_files_gate, session_commit_gate,
+    local_files_gate, same_failure_gate, session_commit_gate,
 )
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
@@ -649,6 +650,92 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
                   f"{evidence['roundtrip_harness_digest'][:12]}")
 
 
+#: Where A3's prior attempts leave their launcher logs. An INSTANCE fact: the
+#: reusable gate takes it as a callable precisely so the core names no path.
+ATTEMPT_LOGS = Path("/home/ecs-user/aad-artifacts/phase_a3/_sessions")
+
+
+def _prior_attempt_logs() -> list[tuple[str, str]]:
+    """`(attempt, launcher log)` for every prior A3 attempt, oldest first.
+
+    Ordered by attempt NUMBER rather than by mtime or lexically, because
+    `a3_attempt9` sorts after `a3_attempt28` as a string and the rule needs
+    the genuinely previous attempt.
+    """
+    if not ATTEMPT_LOGS.is_dir():
+        return []
+
+    def number(path: Path) -> int:
+        digits = "".join(c for c in path.name if c.isdigit())
+        return int(digits) if digits else 0
+
+    out = []
+    for d in sorted((p for p in ATTEMPT_LOGS.iterdir() if p.is_dir()),
+                    key=number):
+        log = d / "launcher.log"
+        if log.is_file():
+            out.append((d.name, log.read_text(errors="replace")))
+    return out
+
+
+def _corrective_change_since() -> tuple[bool, str]:
+    """Has anything that could plausibly address the last failure changed?
+
+    The commit the PREVIOUS attempt ran, against this launch's HEAD. A3's
+    chain commits its own governance artifacts, so "something changed" has to
+    mean something OTHER than those: a tracked change outside the run
+    directories is a code, config or environment change, and a change inside
+    one is the chain rebuilding itself, which is not a repair.
+    """
+    logs = _prior_attempt_logs()
+    if not logs:
+        return True, "no prior attempt exists"
+    #: From the attempt's OWN session record, which is where the launcher
+    #: states it: `session_commit_check.session_commit`. Reading it out of the
+    #: log with a 40-hex pattern found nothing, because the launcher prints
+    #: the short form -- and the gate then passed for the wrong reason, which
+    #: is exactly as useless as not having it.
+    prior_commit, prior_run = None, None
+    for name, _ in reversed(logs):
+        record = (REPO_ROOT / rel_run_dir(RUN_EXPERIMENT_ID, name,
+                                          RUN_STAGE_ID)
+                  / A3_RUN_ROLES["session_record"])
+        if not record.is_file():
+            continue
+        try:
+            doc = json.loads(record.read_text())
+        except json.JSONDecodeError:
+            continue
+        commit = (doc.get("session_commit_check") or {}).get("session_commit")
+        if commit:
+            prior_commit, prior_run = commit, name
+            break
+    if not prior_commit:
+        #: REFUSE, not allow. "I cannot tell what the last attempt ran"
+        #: is not evidence that something changed, and this gate's whole
+        #: purpose is to stop a repetition it cannot rule out.
+        return False, ("no prior attempt states a session commit, so whether "
+                       "anything corrective changed cannot be established")
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT,
+                          capture_output=True, text=True,
+                          check=True).stdout.strip()
+    if prior_commit == head:
+        return False, (f"nothing is committed beyond {head[:12]}, which is "
+                       f"what {prior_run} ran")
+    diff = subprocess.run(
+        ["git", "diff", "--name-only", prior_commit, head],
+        cwd=REPO_ROOT, capture_output=True, text=True).stdout.split()
+    substantive = [p for p in diff
+                   if "/phase_a3/runs/" not in p and not p.startswith("logs/")]
+    if not substantive:
+        return False, (
+            f"the {len(diff)} path(s) changed since {prior_commit[:12]} are "
+            "all governance or log records this chain writes itself; no code, "
+            "config or environment change could address the failure")
+    return True, (f"{len(substantive)} tracked path(s) changed since "
+                  f"{prior_commit[:12]}, including {substantive[0]}")
+
+
 def durable_capacity_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Would the relay accept this session's probes? Asked before spending.
 
@@ -869,6 +956,12 @@ def spec(args) -> SessionSpec:
             #: refusal still costs nothing. The billing check is the final one
             #: before any create call.
             durable_capacity_gate,
+            #: A deterministic paid failure may not be retried unchanged. It
+            #: sits beside the billing check because both are about whether a
+            #: provider resource may exist at all, and a repetition is as
+            #: wasteful as a second concurrent pod.
+            same_failure_gate(_prior_attempt_logs,
+                              corrective_change=_corrective_change_since),
             no_billing_resource_gate,
         ),
         evidence_fields={
