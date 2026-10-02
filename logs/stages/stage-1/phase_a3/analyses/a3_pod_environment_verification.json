@@ -1,12 +1,12 @@
 {
   "_what_this_is": "one complete pod-like sweep of A3's own preflight selection: the condition a fresh A3 pod is actually in. A3's launcher declared NO pod test selection, so without the derived complement this sweep would have described the whole repository suite running on a billing L40S -- which is also what the pod would have done.",
-  "a3_harness_digest": "2c1d1f1212f02a587eba09123b87a8a48921f13a2c8740a1dd1d96b4a1944979",
+  "a3_harness_digest": "3a78ba11eeabe3d2f04d5c6a1573b4284d46eeca36df4abd9821383693d36498",
   "a3_harness_n_files": 15,
   "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 48,
+    "passed": 50,
     "skipped": 4
   },
   "environment": {
@@ -21,17 +21,14 @@
   },
   "evidence": {
     "executions_of_this_tree": [
-      "exec-001",
-      "exec-002",
-      "exec-003",
-      "exec-004"
+      "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-98605ed090be/exec-004/junit.xml",
-    "junit_sha256": "70f2d5770e680778e8bf0fbf122a5d20664ac86772233f505e58b6a52dc72114",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-98605ed090be/exec-004/pytest.log",
-    "pytest_log_sha256": "ece179d3e847bdfede08dc9b25ffaca83aa47d274e7a7bc5c9040b721ef808bd"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-961192a2b656/exec-001/junit.xml",
+    "junit_sha256": "b362af5cbeddf181c4e00bf94586f635c60e35fdfa3cabf1ed6cc672872e9415",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-961192a2b656/exec-001/pytest.log",
+    "pytest_log_sha256": "1c292d0dde0781b66174b676ec1d2fe3cab91fdf9e909619585a7a9ca6d50766"
   },
-  "execution_id": "sweep-98605ed090be/exec-004",
+  "execution_id": "sweep-961192a2b656/exec-001",
   "expected_environment_skips": [],
   "failed_nodeids": [],
   "findings": {
@@ -46,7 +43,7 @@
     "counts": {
       "error": 0,
       "failed": 0,
-      "passed": 48,
+      "passed": 50,
       "skipped": 4
     },
     "expected_environment_skips": [],
@@ -126,6 +123,7 @@
       "SESSION_ASSETS",
       "SESSION_AUTH_PATH",
       "SESSION_COMMIT",
+      "SESSION_FROZEN_EXPECT",
       "SESSION_KIND",
       "SESSION_PLAN_HASH",
       "SESSION_RELAY_INPUTS",
@@ -137,11 +135,11 @@
       "UV_MAX_S"
     ],
     "setup_environment_realized": true,
-    "staging_contract_digest": "23bec18ba9f6d7d4e56e4f32d6a2544d02671b4146084be6bca4f9f0510bd64f"
+    "staging_contract_digest": "5d56a2de08c52987eb7039f32d8560df9dfa39a439759a7d523f2fdfa810a9bb"
   },
-  "n_tests": 52,
-  "pod_test_environment_digest": "79bbffc644296108befa4c7d8e452a1426d625683c84aca52ec7d44b20ef9cda",
-  "pod_test_environment_n_files": 269,
+  "n_tests": 54,
+  "pod_test_environment_digest": "c279a08e413d9b67f257ebbb120dc025e06dac8007a888042e26a7db92ee7004",
+  "pod_test_environment_n_files": 272,
   "pod_test_environment_named_files": [
     "scripts/pod/simulate_pod_env.sh",
     "tests/conftest.py"
@@ -152,13 +150,14 @@
   "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
   "schema": "aadistill.autoinit.a3_pod_environment_verification/v1",
-  "seconds": 11.9,
-  "self_sha256": "43a6b256cf915b46da4c8d841596c060600a2e43f3209e3e8bc30856d5c26ab4",
+  "seconds": 12.0,
+  "self_sha256": "d6c577d3f7abb4f04ec7b42258bb6bfd2e4553abaa96e2f6e2c6e34732fec3d0",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_98605ed0.bundle",
+    "BUNDLE_NAME": "aad_autoinit_961192a2.bundle",
     "SESSION_ASSETS": "c1_confirmation_v1:artifacts/stage3,reasoning_heavy_v2:artifacts/stage1,state_eval_v1:artifacts/stage1,recovery_search_v2:artifacts/stage3",
     "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_a3/runs/spec_check/governance/authorization.json",
-    "SESSION_COMMIT": "98605ed090beec48767020ee7210156c7e78b34f",
+    "SESSION_COMMIT": "961192a2b656cd0c528a6745ccd46d75601786ba",
+    "SESSION_FROZEN_EXPECT": "configs/experiments/phase_c3/frozen_assets.json",
     "SESSION_KIND": "a3",
     "SESSION_PLAN_HASH": "63b5f6ff4f308cdd9eb4f025602982bc79a41caccb9d6a6dcf4573f40707b650",
     "SESSION_RELAY_INPUTS": "[{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/blocks.npz\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c\"},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/ladder.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":\"artifacts/stage3/ladder_uniform\",\"dest\":\"artifacts/stage3/ladder_uniform_probe\",\"path\":\"stage3_recovery_corpus_v2/ladder_uniform/audit.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":null},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/e8_calibration_v1\",\"path\":\"e8_inputs_20260810/calibration_v1/items.jsonl\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/tokenizer_config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"8fa82a4ba512c8bee7c1c5e82b9a71ddbef362e4665be5c8f7ce0afd78af129a\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7\"},{\"also_stage_to\":null,\"dest\":\"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\",\"path\":\"stage1/qwen3_0p6b_init_v0/checkpoint/config.json\",\"repo\":\"AlphaAvatar/aadistill-artifacts\",\"sha256\":\"a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054\"}]",
@@ -166,15 +165,15 @@
     "SESSION_STATUS": "/workspace/autoinit_a3.status",
     "SESSION_TEST_IGNORES": "--ignore=tests/architecture --ignore=tests/autoinit --ignore=tests/c1_preflight --ignore=tests/c2_baseline_completion_preflight --ignore=tests/c2_behavioural_preflight --ignore=tests/c2_full_search_preflight --ignore=tests/c2_preflight --ignore=tests/c2_replay_preflight --ignore=tests/c3_preflight --ignore=tests/data --ignore=tests/docs --ignore=tests/evaluation --ignore=tests/historical_declarations.py --ignore=tests/infrastructure --ignore=tests/init --ignore=tests/initialization --ignore=tests/models --ignore=tests/pod --ignore=tests/rollout --ignore=tests/runtime --ignore=tests/support --ignore=tests/test_usable_rollout.py --ignore=tests/training --ignore=tests/validation",
     "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
-    "TESTS_MAX_S": "2700",
+    "TESTS_MAX_S": "600",
     "UV_MAX_S": "2700"
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1496 derived paths, contract 23bec18ba9f6> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-98605ed090be/exec-004/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-98605ed090be/exec-004/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 14 keys> HIDDEN_PATHS=<1496 derived paths, contract 5d56a2de08c5> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-961192a2b656/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-961192a2b656/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 0,
   "staging_contract": {
-    "digest": "23bec18ba9f6d7d4e56e4f32d6a2544d02671b4146084be6bca4f9f0510bd64f",
+    "digest": "5d56a2de08c52987eb7039f32d8560df9dfa39a439759a7d523f2fdfa810a9bb",
     "local_asset_destinations": [
       "artifacts/stage1/reasoning_heavy_v2",
       "artifacts/stage1/state_eval_v1",
@@ -221,10 +220,10 @@
       "tests/validation"
     ]
   },
-  "staging_contract_digest": "23bec18ba9f6d7d4e56e4f32d6a2544d02671b4146084be6bca4f9f0510bd64f",
+  "staging_contract_digest": "5d56a2de08c52987eb7039f32d8560df9dfa39a439759a7d523f2fdfa810a9bb",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "98605ed090beec48767020ee7210156c7e78b34f",
-  "tree_clean": false,
+  "swept_base_commit": "961192a2b656cd0c528a6745ccd46d75601786ba",
+  "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
 }
