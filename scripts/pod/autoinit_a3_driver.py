@@ -3,7 +3,7 @@
 
     /opt/train/bin/python scripts/pod/autoinit_a3_driver.py \
         --image-digest <digest> --rate 1.09 --spent-usd 0.20 \
-        --soft-stop-usd 7.90 --authorized-usd 8.2525
+        --soft-stop-usd 7.95 --authorized-usd 8.3047
 
     B  fetch the pinned teacher and verify every shard against the binding
     C  register attention.activation_importance_v1, and pre-flight the scorer

@@ -1,0 +1,36 @@
+{
+ "schema": "aadistill.autoinit.a3_container_disk_measurement/v1",
+ "_what_this_is": "the REAL container-disk occupancy of an A3 pod, measured on axpjsvpzfr5rsb at 2026-10-02T06:16Z, moments after stage D failed with `No space left on device` writing the parent replay's shards and before the pod was deleted. It replaces the guessed floor terms in a3_pricing.FLOOR_SUPPLEMENT_GIB, which understated the floor by roughly 35 GB and which the derivation's own docstring already noted had run a pod out of disk TWICE before this third time.",
+ "anchor": {
+  "_authority": "df on the overlay, which cannot double-count",
+  "filesystem": "overlay",
+  "size_gb": 60,
+  "used_gb": 58,
+  "avail_gb": 2.4,
+  "use_pct": 97
+ },
+ "du_breakdown_gb": {
+  "_caveat": "du over an overlay double-counts hardlinked and bind-mounted paths; these terms sum above the df anchor and are recorded for attribution, not as an independent total",
+  "/usr": 14,
+  "/opt": 16,
+  "/root": 22,
+  "/workspace": 22
+ },
+ "workspace_detail_gb": {
+  "wheelhouse": 3.9,
+  "wh": 3.9,
+  "wheelhouse_vllm": 3.7,
+  "whv": 3.7,
+  "aad": 6.2,
+  "assets": 0.0057,
+  "bundle": 0.022,
+  "_four_wheelhouses": "15.2 GB of wheel archives, a quarter of the disk, needed only while the two venvs are built",
+  "_aad_includes": "the repository plus whatever the replay had written when it failed, roughly 4 GB of partial shards"
+ },
+ "derived_floor_gb": {
+  "value": 54,
+  "_how": "the df anchor of 58 GB used, minus the ~4 GB of partial replay output included in /workspace/aad at that moment. Everything else -- image, both session venvs, four wheelhouses, the HF teacher cache, the staged assets and the checked-out repository -- is present before A3 writes its first byte of science."
+ },
+ "stage_at_failure": "D (parent replay), `adapter.save` -> safetensors serialize",
+ "authorizes": "nothing"
+}

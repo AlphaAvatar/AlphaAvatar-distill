@@ -47,12 +47,12 @@
  },
  "price": {
   "gpu_rate_usd_per_hour": 1.09,
-  "billed_rate_usd_per_hour": 1.098333,
-  "container_disk_gb": 60,
+  "billed_rate_usd_per_hour": 1.105278,
+  "container_disk_gb": 110,
   "expected": {
    "minutes": 320.56,
    "hours": 5.3427,
-   "usd": 5.868,
+   "usd": 5.9051,
    "components_minutes": {
     "setup": 7.7,
     "pre_provider_gates": 3.0,
@@ -69,7 +69,7 @@
   "hard_ceiling": {
    "minutes": 450.82,
    "hours": 7.5136,
-   "usd": 8.2525,
+   "usd": 8.3047,
    "components_minutes": {
     "setup": 45.0,
     "pre_provider_gates": 3.0,
@@ -103,16 +103,15 @@
     "n_moments": 2,
     "_source": "configs/stage3/e1/e1_r0860k_sa_pca.json"
    },
-   "fixed_floor_gib": 18.61,
+   "fixed_floor_gib": 50.3,
    "fixed_floor_components_gib": {
-    "container_image_and_python": 8.0,
-    "venv_and_wheel_cache": 2.0,
-    "staged_batteries_and_mixtures": 0.1,
-    "recovery_corpus": 1.0,
-    "_basis": "the staged assets are measured locally at 3.3M, 992K, 776K, 904K and 728K; the corpus is bounded at 1 GiB against local blocks.npz files of 2.6M-41M. The image and venv terms are the generous side of what a runpod/pytorch image plus this repository's install occupies."
+    "measured_pod_floor": 50.3,
+    "_basis": "df on overlay: 60 GB provisioned, 58 GB used at the moment stage D failed, minus ~4 GB of partial replay output. One MEASURED term rather than four guessed ones, because four terms that sum to a number the filesystem contradicts are worse than one term with a provenance.",
+    "_the_teacher_is_inside_it": "TEACHER_GIB is NOT added on top of this floor any more. The 22 GB HF cache the measurement attributes to /root is the teacher, and adding a separate 7.51 GiB term would charge the same bytes twice -- the mistake this module's own docstring warns about in the other direction, where charging container and durable storage for the same bytes once produced a 140 GB request.",
+    "_what_would_reduce_it": "the four wheelhouses are 15.2 GB of install-time archives, a quarter of the disk, needed only while the two venvs are built. Deleting them after ASSETS_READY would free more than the whole science peak. That is a change to the SHARED setup script every session runs, so it is recorded here as the cheaper fix and not taken under an executing experiment: container disk is $0.10/GB/month, and 60 extra GB over a 7.5-hour chain is about six cents."
    },
    "container_residency": {
-    "peak_gib": 36.06,
+    "peak_gib": 67.75,
     "peak_at_unit": "parent_replay",
     "n_units": 6
    },
@@ -123,9 +122,9 @@
    },
    "provision": {
     "margin": 1.5,
-    "container_disk_gb": 60,
-    "available_gib": 55.879,
-    "headroom_gib": 19.819,
+    "container_disk_gb": 110,
+    "available_gib": 102.445,
+    "headroom_gib": 34.695,
     "_why_not_c3s_120_gb": "C3 provisioned for nine probes. A3 holds one training working set at a time and three probes' worth of retained bytes at most, and the difference between this provision and 120 GB is a few cents over the whole chain -- which is the reason to derive it rather than to round it up."
    }
   }

@@ -277,8 +277,15 @@ def test_the_session_declares_the_shape_the_design_froze(session):
 
 
 def _ctx(args, **over):
+    #: The ceiling is DERIVED, never a literal. It was `8.2525`, and the
+    #: measured container-disk repair moved it to `8.3047` -- so a test about
+    #: the RATE check started failing on the ceiling check instead, with a
+    #: message about something it was not asserting. A literal here is a
+    #: second owner of a derived number.
+    from experiments.phase_c3.a3_authorization import a3_hard_ceiling_usd
+
     base = dict(args=args, auth=types.SimpleNamespace(
-        hard_cap_usd=8.2525, harness_source_digest="x" * 64,
+        hard_cap_usd=a3_hard_ceiling_usd(REPO), harness_source_digest="x" * 64,
         harness_source_files=()), evidence={}, say=lambda *_: None)
     base.update(over)
     return types.SimpleNamespace(**base)

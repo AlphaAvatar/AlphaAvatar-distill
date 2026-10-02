@@ -13,14 +13,16 @@ The three-shape pricer that preceded this is deleted rather than kept beside
 it — a redundant mechanism left in place is the complexity ratchet AGENTS.md
 P8.2.1 forbids.
 
-**Storage is DERIVED, not inherited.** C3 provisioned 120 GB for nine probes.
-A3 holds the teacher, one four-step path's intermediates, two initialization
-leaves and ONE training working set at a time, because a probe is released
-after its bytes are durable off-pod. The derivation says 24.96 GiB at the
-parent replay; the provision below is that plus an itemized floor supplement
-and a stated margin, not a carried-forward constant. The whole disk term is
+**Storage is DERIVED from a MEASUREMENT, not from an estimate.** A3 holds
+one four-step path's intermediates, two initialization leaves and ONE training
+working set at a time, because a probe is released after its bytes are durable
+off-pod -- so the SCIENCE peak is modest. What dominates is the floor, and the
+floor was estimated at 18.61 GiB until a pod reported 58 GB of 60 GB used
+before stage D could write its first shard. `a3_attempt31` died there with
+`No space left on device`, the floor term is now the measured 50.3 GiB, and
+the derivation says 67.75 GiB at the parent replay. The whole disk term is
 cents either way, which is exactly why it should be derived rather than
-guessed upward "to be safe".
+guessed -- in either direction.
 
 **Every applicable limit is checked**, including the package total, through
 `formal_pricing.evaluate_limits`. That function is the single owner of which
@@ -75,27 +77,59 @@ PATH_INTERMEDIATES_GIB = 16.12
 #: weights. Small and not zero.
 CHECKPOINT_EXTRA_BYTES = 800_000
 
-#: The floor the residency model does not otherwise see: the container image
-#: and its python, the session's venv and wheel cache, the staged batteries
-#: and calibration mixtures (measured at a few MB each), and the recovery
-#: corpus. Itemised so a reader can disagree with a term rather than with one
-#: round number.
+#: The floor the residency model does not otherwise see: everything an A3 pod
+#: holds before A3 writes a byte of science -- the container image and its
+#: python, BOTH session venvs, the wheelhouses that built them, the HF teacher
+#: cache, the checked-out repository and the staged assets.
 FLOOR_SUPPLEMENT_GIB = {
-    "container_image_and_python": 8.0,
-    "venv_and_wheel_cache": 2.0,
-    "staged_batteries_and_mixtures": 0.1,
-    "recovery_corpus": 1.0,
-    "_basis": ("the staged assets are measured locally at 3.3M, 992K, 776K, "
-               "904K and 728K; the corpus is bounded at 1 GiB against local "
-               "blocks.npz files of 2.6M-41M. The image and venv terms are "
-               "the generous side of what a runpod/pytorch image plus this "
-               "repository's install occupies."),
+    #: MEASURED ON A POD, not estimated. The previous terms were
+    #: `container_image_and_python: 8.0` and `venv_and_wheel_cache: 2.0`,
+    #: described as "the generous side of what a runpod/pytorch image plus
+    #: this repository's install occupies". They were not generous: an A3 pod
+    #: reports 58 GB of 60 GB used BEFORE stage D can write its shards, and
+    #: a3_attempt31 died there with `No space left on device` -- the third
+    #: time this repository has run a pod out of disk, and the second at
+    #: `Writing model shards` specifically.
+    #:
+    #: The anchor is `df` on the overlay, which cannot double-count: 58 GB
+    #: used, of which roughly 4 GB was the replay's own partial output. The
+    #: floor is therefore ~54 GB = 50.3 GiB, against the 18.61 GiB the
+    #: estimate produced. Attribution from `du`, recorded in
+    #: logs/stages/stage-1/phase_a3/runs/a3_attempt31/evidence/
+    #: container_disk_measurement.json: image 14 GB, both session venvs 16 GB,
+    #: FOUR wheelhouses 15.2 GB, HF teacher cache 22 GB, repository and
+    #: staged assets the remainder. Those terms sum above the anchor because
+    #: `du` double-counts hardlinked and bind-mounted paths, which is exactly
+    #: why the anchor is `df` and the itemisation is commentary.
+    "measured_pod_floor": 50.3,
+    "_basis": ("df on overlay: 60 GB provisioned, 58 GB used at the moment "
+               "stage D failed, minus ~4 GB of partial replay output. One "
+               "MEASURED term rather than four guessed ones, because four "
+               "terms that sum to a number the filesystem contradicts are "
+               "worse than one term with a provenance."),
+    "_the_teacher_is_inside_it": (
+        "TEACHER_GIB is NOT added on top of this floor any more. The 22 GB "
+        "HF cache the measurement attributes to /root is the teacher, and "
+        "adding a separate 7.51 GiB term would charge the same bytes twice -- "
+        "the mistake this module's own docstring warns about in the other "
+        "direction, where charging container and durable storage for the "
+        "same bytes once produced a 140 GB request."),
+    "_what_would_reduce_it": (
+        "the four wheelhouses are 15.2 GB of install-time archives, a quarter "
+        "of the disk, needed only while the two venvs are built. Deleting "
+        "them after ASSETS_READY would free more than the whole science peak. "
+        "That is a change to the SHARED setup script every session runs, so "
+        "it is recorded here as the cheaper fix and not taken under an "
+        "executing experiment: container disk is $0.10/GB/month, and 60 extra "
+        "GB over a 7.5-hour chain is about six cents."),
 }
 
 #: Margin on the derived total. Not "to be safe": this repository has run a
-#: pod out of disk TWICE -- attempt5 lost probe 11 of 12 and the campaign's
-#: verdict, and a replay died at `Writing model shards` -- and the marginal
-#: cost of the margin is under a cent an hour.
+#: pod out of disk THREE times -- attempt5 lost probe 11 of 12 and the
+#: campaign's verdict, a C2 replay died at `Writing model shards`, and
+#: a3_attempt31 died at the same call with a floor that had been estimated at
+#: a third of its measured size. The marginal cost of the margin is under a
+#: cent an hour; the marginal cost of being wrong is the whole chain.
 PROVISION_MARGIN = 1.5
 
 #: --- the measured component table ----------------------------------------
@@ -227,8 +261,11 @@ def storage_requirement(n_probes: int = 3,
         grad_dtype=tr["grad_dtype"], moment_dtype=tr["moment_dtype"],
         n_moments=tr["n_moments"])
 
+    #: The teacher is INSIDE the measured floor; see
+    #: `FLOOR_SUPPLEMENT_GIB._the_teacher_is_inside_it`. Adding `TEACHER_GIB`
+    #: here would charge the HF cache twice.
     floor_gib = sum(v for k, v in FLOOR_SUPPLEMENT_GIB.items()
-                    if not k.startswith("_")) + TEACHER_GIB
+                    if not k.startswith("_"))
 
     U = COST.ResidencyUnit
     units = [

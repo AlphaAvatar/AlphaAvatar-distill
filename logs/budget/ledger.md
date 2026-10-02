@@ -2805,3 +2805,39 @@ cumulative envelope exists to prevent. A3 is therefore held pending a
 maintainer decision, with the defect fixed and a regression in place.
 
 This authorizes nothing. Remaining money is not permission.
+
+## 2026-10-02 — SPENT: two more A3 pre-science pods, `$0.6200`, both diagnostic
+
+Under the phase envelope, both repaired autonomously and neither repeated.
+
+```text
+a3_attempt30   5.6 min  $0.1000   setup refused: skip set differed from the sweep by one nodeid
+a3_attempt31  28.6 min  $0.5200   stage D: No space left on device, writing the parent replay's shards
+                        --------
+                        $0.6200   A3 cumulative: $3.3600 over 27 pods
+```
+
+**attempt30 was a correct refusal.** The pod ran its preflight to
+`50 passed, 5 skipped, 0 failed` and the shared setup still exited 1, because
+a pod that did not run the suite the launch-bound sweep certified must not
+then train three probes under an unnamed difference. The one extra skip was
+`test_the_controls_evidence_gate_passes_on_the_real_evidence`, whose premise
+is a dev-box absolute path the pod simulator cannot hide; it is now a dev-box
+test and the sweep's skip set matches the pod's four.
+
+**attempt31 bought the measurement this chain was missing.** Setup completed,
+stages B and C passed, and stage D died after ~20 minutes at
+`adapter.save -> safetensors serialize`. The pod reported **58 GB of 60 GB
+used before A3 wrote a byte of science**: image 14 GB, both session venvs
+16 GB, FOUR wheelhouses 15.2 GB, HF teacher cache 22 GB. The floor had been
+*estimated* at 18.61 GiB and is *measured* at 50.3 GiB.
+
+That is the THIRD time this repository has run a pod out of disk, and the
+second at `Writing model shards`. The derivation now anchors on `df`, the
+peak derives to 67.75 GiB, the provision to 110 GB, and the chain re-prices
+to `$5.9051` expected / **`$8.3047` hard** — the extra 50 GB of container
+disk costs about six cents over the chain.
+
+**Position:** formal `$17.3431` remaining, package `$19.2826`, project
+`$22.5377`. The phase envelope still covers one full chain at the hard
+ceiling plus six corrected restarts (`8.3047 + 6 x 1.4506 = 17.0083`).
