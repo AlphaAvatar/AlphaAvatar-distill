@@ -894,30 +894,6 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "CURRENT CUDA SURFACE already; it owes the same pending "
             "validation and claims no new cover.",
      }),
-    ("8394710fecfb6a65546cfdecb4b23eb0fa995e2a",
-     "host admission, asked before a dollar of setup",
-     {
-        "src/aadistill/infrastructure/session.py":
-            "ADDITIVE: one optional field, `SessionSpec.host_admission`, "
-            "defaulting to None so every existing session is unaffected. NO "
-            "CUDA SURFACE -- it is a callable the runner invokes with a "
-            "string. DECLARED because the executable shape of the shared "
-            "session declaration moves.",
-        "src/aadistill/infrastructure/session_runner.py":
-            "ADDITIVE: the runner asks that callable once per draw, between "
-            "the provider-confirmed image identity and the setup invocation, "
-            "and treats a refusal as REDRAWABLE beside `cold` and "
-            "`no_endpoint`. NO CUDA SURFACE -- no tensor, no device, no "
-            "dtype; it runs before any science starts. DECLARED because it "
-            "can now abandon a created resource that previously proceeded, "
-            "which is a behaviour change in a shared paid path. It exists "
-            "because a3_attempt35 trained three probes and was refused at "
-            "$4.33 on a host property knowable one ssh round trip after the "
-            "pod answered: every material generation field matched "
-            "attempt75's controls and the NVIDIA driver BRANCH had moved "
-            "580 -> 595, which generation_compat declares a real runtime "
-            "event. A raising check refuses rather than admitting.",
-     }),
     ("fe2db4c8ffed3713b857a8cbdc7e3a9218fefa7d",
      "the same-failure rule, enforced where a resource is created",
      {
@@ -952,6 +928,30 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "names no repository path and no experiment. Every existing "
             "session is unaffected: a precheck is a value in "
             "`SessionSpec.precheck` and only A3's spec lists this one.",
+     }),
+    ("bdc909234f3f984f91570315d154d0f0adf2d47f",
+     "host admission, asked before a dollar of setup",
+     {
+        "src/aadistill/infrastructure/session.py":
+            "ADDITIVE: one optional field, `SessionSpec.host_admission`, "
+            "defaulting to None so every existing session is unaffected. NO "
+            "CUDA SURFACE -- it is a callable the runner invokes with a "
+            "string. DECLARED because the executable shape of the shared "
+            "session declaration moves.",
+        "src/aadistill/infrastructure/session_runner.py":
+            "ADDITIVE: the runner asks that callable once per draw, between "
+            "the provider-confirmed image identity and the setup invocation, "
+            "and treats a refusal as REDRAWABLE beside `cold` and "
+            "`no_endpoint`. NO CUDA SURFACE -- no tensor, no device, no "
+            "dtype; it runs before any science starts. DECLARED because it "
+            "can now abandon a created resource that previously proceeded, "
+            "which is a behaviour change in a shared paid path. It exists "
+            "because a3_attempt35 trained three probes and was refused at "
+            "$4.33 on a host property knowable one ssh round trip after the "
+            "pod answered: every material generation field matched "
+            "attempt75's controls and the NVIDIA driver BRANCH had moved "
+            "580 -> 595, which generation_compat declares a real runtime "
+            "event. A raising check refuses rather than admitting.",
      }),
 )
 
