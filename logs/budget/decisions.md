@@ -48,6 +48,91 @@
   commit-bound evidence stops being how this project establishes
   reproducibility.
 
+## 2026-10-03 — The D-series behavioural battery family, frozen before any outcome
+
+- **Context:** the D-series needs six behavioural batteries — D1/D2/D3 x
+  screening/confirmation — and **zero** can be drawn. `c1_confirmation_v1` must
+  stay held out (B was promoted on it; C2's, C3's and A3's results were measured
+  on it) and the pool under the frozen C1 mixture is exhausted at
+  `math_verified`. The alternative to deciding this now is a one-off workaround
+  per experiment, each chosen after the previous result is known — which is how
+  a held-out battery stops being held out.
+
+- **Decision:** define a **family**, `d_series_behavioural_v1`, and freeze its
+  allocation rule **today, before any D1 outcome exists**. Owner:
+  [`scripts/experiments/phase_d_series/battery_family.py`](../../scripts/experiments/phase_d_series/battery_family.py);
+  record:
+  [`logs/shared/analyses/autoinit_d_series_battery_family.json`](../shared/analyses/autoinit_d_series_battery_family.json).
+
+  * **Six roles in a fixed build order**, each with its own frozen `rank_domain`
+    string. Distinct domains give *independent* samples, not disjoint ones, so
+    disjointness comes from the build order: each role excludes the five
+    baseline isolation roles, both drawn behavioural batteries, and every
+    D-role built before it — by stable id **and** by normalized prompt content,
+    because either kind alone misses a real collision.
+  * **No new selection code.** `battery_render.rank_take` already orders a pool
+    by `SHA256(base_digest : rank_domain : stratum : stable_id)`; it is how
+    `c2_screening_v1` was drawn beside `c1_confirmation_v1`. There is no seed
+    and no date in the rule, so there is nothing an agent could choose after
+    seeing a result.
+  * **Two identities, frozen at different times.** `allocation_rule_id`
+    (`ced017a1f3f155ba5aaf383e61156c12`) covers the roles, order, domains,
+    mixture and exclusion chain and is computable with no pool and no source
+    decision — which is what makes "frozen prospectively" checkable rather than
+    asserted. `family_content_id` binds the source pins and realized item
+    digests and is **null**: a value there today would be invented provenance.
+  * **A new behavioural distribution, declared as such.** Stratum names,
+    domains and counts are inherited unchanged from the C1 mixture (imported,
+    never restated), so the balance and the 950/850 denominators are preserved.
+    The *population* changes, so the family is not the C1 confirmation
+    distribution: B's historical C1 number is not imported, and C0's SESOI is
+    carried forward as a **recorded assumption** about this population rather
+    than an inherited measurement. This is acceptable because every D-series
+    comparison re-measures challenger and incoming incumbent together, on the
+    same fresh battery, under one protocol — no D-series decision reads a
+    historical score.
+
+- **What the derivation found, and it corrects the D1 record above.** Six roles
+  need `6 x` the mixture *at once*, and at that scale **three** strata are
+  short, not one:
+
+  ```text
+  stratum         per role   x6    eligible   short   roles fundable
+  math_verified        150   900         70     830                0
+  code                 100   600        279     321                2
+  gsm8k                150   900        889      11                5
+  knowledge/multihop/rag/tool                      0            36+
+  ```
+
+  The capacity record's "zero batteries remaining, binding on `math_verified`"
+  is the correct answer to a different question, and the resolution it records
+  — extend the math source — unblocks **D1's two batteries and not the family**.
+
+- **Alternatives considered:** a per-experiment battery decided when each
+  experiment needs one — rejected, that is the workaround the directive
+  forbids and its selection risk is cumulative across rounds; deal all six from
+  ONE content-derived ordering instead of six chained domains — workable and
+  rejected as a second mechanism beside `rank_take`, which already does this and
+  is already verified; reduce `math_verified` to 70 per battery — rejected,
+  `correct_overall` and its SESOI are defined **on** the mixture, so this is a
+  C0-level redesign; round-robin dealing instead of per-role draws — no
+  validity difference, and chained draws are what the existing builder does.
+
+- **Risks:** the three short strata need source decisions this round does not
+  take. `gsm8k` (short 11) and `code` (short 321) are answerable from files of
+  repositories **already pinned at frozen revisions**, which inherits licence
+  and renderer; MBPP's remaining splits may not cover 321, and if they do not,
+  either a second code source or a smaller behaviour-only code component is a
+  maintainer decision — and the second moves the 950 denominator of
+  `usable_rollout_rate`. `math_verified` needs the full Hendrycks MATH release:
+  a new dataset, so licence, revision, digests, renderer parity and
+  contamination all have to be recorded before it is pinned. No source is
+  pinned here and nothing was fetched.
+
+- **Revisit when:** the maintainer rules on the three source extensions. Until
+  then the family is DESIGNED / NOT MATERIALIZED / BLOCKED ON SOURCES, zero of
+  six roles are fundable, and D1 cannot execute.
+
 ## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
 
 - **Context:** the maintainer's order of 2026-10-01 stopped the autonomous
@@ -73,6 +158,27 @@
     configuration rather than as a core constant;
   * the derived D1 protocol and its price.
 
+- **A within-round correction, recorded because the first answer was wrong in
+  a way that mattered.** Review asked for the state-eval loader to pass the
+  manifest's `content_sha256` into `StateEvalSuite`, since `suite_hash` accepts
+  it. Doing that moved the frozen asset's `suite_hash` from `6421fa4c…` to
+  `a39df3c0…` — and `suite_hash` is the **structural** identity by this
+  project's own design: `autoinit_phase_a_driver` pins it as
+  "suite_id/version/domains/subtypes/critical_tags" with
+  `STATE_EVAL_CONTENT_SHA256` pinned beside it as a separate field, **45
+  committed records bind the structural value**, and the C2 baseline driver
+  refuses a measurement whose staged suite hash differs from the one its frozen
+  candidates were measured under. It refused, in five tests. Folding content
+  into that hash would have silently reinterpreted every one of those records.
+
+  The repair: the loader still **requires** the manifest to carry a content
+  hash, so no caller can bind `None`; the suite's content is bound in the new
+  `measurement_protocol_id`, which pins nothing historical, beside the
+  structural hash as a separate term. The hole review named — a measurement
+  identity that did not bind the suite's content — is closed; the identity 45
+  records pinned did not move. The third movement of `planning/metrics.py` is
+  recorded in the C2 evaluator lineage with its cause, as the previous two are.
+
 - **The two blockers, both derived at `$0`, either one alone preventing
   execution:**
 
@@ -83,25 +189,69 @@
   FUNDING    chain hard ceiling $60.7509 against $13.1777 of project
              headroom; short by $47.5732, and D1 is not in the package's
              funds_formal_sessions_of list.
+  CEILING    the SEARCH session alone prices at $31.1577 against the
+             package's $30.00 per_attempt_hard_ceiling_usd -- over by
+             $1.1577. This binds SEPARATELY from the cumulative cap: a
+             grant that moved only the cap could still not authorize the
+             search session.
   ```
+
+  **The $60.7509 is a PROVISIONAL conservative planning ceiling, not a price.**
+  The per-expansion minutes were measured on an unbatched state evaluation and a
+  one-item-per-forward statistics pass, and D1 runs both batched -- in an
+  unmeasured direction (see the correction below). It is refreshed by the owed
+  short GPU qualification: real CUDA/bf16 execution, real state-eval memory
+  peak, target-aware batched path correctness, and the actual timing of a
+  representative expansion. It sizes a grant request; it does not price one.
 
   Owners: `logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json` and
   `logs/stages/stage-1/phase_d1/plans/d1_design.json :: budget`.
 
 - **What the design changed rather than copied.** C2's behavioural stage
-  screened five candidates on one seed. At A3's measured per-seed spread of the
-  paired delta (`0.012906`), the maximum of five noisy estimates is inflated by
-  `0.015009` — **1.5x the `0.010` SESOI** — and the rung advances the genuinely
-  better candidate with probability `0.42`. D1 instead screens **two** candidates
-  on **two** seeds: bias `0.005149` (0.52x the SESOI), advance probability
-  `0.78`, at the **same twelve probes**. The arithmetic says narrow and
-  replicate, and it is in
-  `scripts/experiments/phase_d1/selection_noise.py` with a quadrature self-check
-  against two closed forms. This is a prospective design derivation; it
-  re-analyses no C2 figure and changes nothing about C2's closure.
+  screened five candidates on one seed; D1 screens **two** candidates on **two**
+  seeds and confirms on **three**, at the same twelve probes, on a fresh
+  disjoint battery.
 
-- **Alternatives considered:** copying C2's `K=5` — refused, the figures above
-  are why; dropping the screening rung to fit the evidence capacity (`K=1`, six
+  **CORRECTED 2026-10-03, on maintainer review, before anything ran.** The
+  first version of this entry justified those numbers by comparing a screening
+  "selection bias" to the SESOI — `0.005149` (0.52x) for D1 against `0.015009`
+  (1.5x) for C2 — and said "the arithmetic says narrow and replicate". **That
+  was the wrong argument.** The max-of-K inflation is the winner's curse **on
+  the screening estimate**. It does not bias a confirmation estimate taken on
+  genuinely fresh, disjoint prompts and fresh seeds: under the global null that
+  fresh estimate is unbiased however inflated the screening number was. So
+  `screening bias < SESOI` is **not** a validity condition for confirmation, and
+  no design may be admitted or rejected by it.
+
+  What actually governs whether D1 can find something is
+
+  ```text
+  P(a behaviourally good candidate is in the Top-K)
+    x  P(screening advances it | it is in the Top-K)
+  ```
+
+  The second factor is `0.7808` at the point estimate — but the per-seed spread
+  behind it comes from **three** A3 deltas, whose own 95% sampling interval
+  spans `0.006719`–`0.081108` (a factor of 12), across which that probability
+  runs `0.549`–`0.932`. It is planning and sensitivity analysis, not a power
+  calculation. **The first factor is UNKNOWN**, and C2's negative behavioural
+  result is a reason not to assume the state-eval beam ranking is a strong
+  behavioural predictor; the pipeline probability is therefore reported across
+  assumed values (`0.25 -> 0.1952` ... `1.0 -> 0.7808`) and never as one number.
+
+  **K=2 / 2 screening seeds / 3 confirmation seeds are retained**, justified as
+  a pragmatic balance of behavioural breadth over the search's own ranking,
+  two-seed screening stability (C2's specific weakness was a single-draw
+  ordering), fresh independent confirmation, and the chain's cost — **not** as a
+  formally demonstrated optimum. The arithmetic and its claim boundary are in
+  `scripts/experiments/phase_d1/selection_noise.py`, with a quadrature
+  self-check against two closed forms. This remains a prospective design
+  derivation: it re-analyses no C2 figure and changes nothing about C2's
+  closure.
+
+- **Alternatives considered:** copying C2's `K=5` at one seed — refused, for
+  its single-draw screening ordering rather than for any bias-versus-SESOI
+  comparison; dropping the screening rung to fit the evidence capacity (`K=1`, six
   probes, one battery) — possible and cheaper at `$45.9543`, but it hands the
   promotion decision to a cheap metric C2's own result shows predicts behaviour
   poorly; reducing the `math_verified` count per battery — refused as an
@@ -113,7 +263,9 @@
   whole series rather than for D1 alone. Extending the verified-math source is
   the only resolution that unblocks all three, and it needs a licence and
   contamination check plus an explicit argument for the SESOI's transfer to a
-  different math population.
+  different math population. The resolution is designed as the **D-series
+  behavioural battery family v1** (same date, below): a new explicit
+  behavioural-distribution identity rather than a continuation of C1's.
 
 - **Revisit when:** the maintainer rules on the evidence resolution and on a D1
   phase grant. Until both, D1 stays DESIGNED / NOT AUTHORIZED and nothing may

@@ -297,8 +297,22 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     figure, and what is still live is one fact — Phase B's winner is the
     lineage of the incumbent B — carried together with the caution that its
     margin of `0.000070` is ~1.23 SE and must not be quoted as comfortable.
-    Nothing read the two removed keys; `phase_a_result.json` in the run
+    "Nothing read the two removed keys" WAS WRONG, and it cost the next round
+    a suite failure. Eight assertions in
+    `tests/pod/test_continuation_b_one_probe_contract.py` read
+    `phase_b_result` — its status, winner, `winner_is_control`, `tie_break_ran`,
+    `clears_by`, `read_with_care`, `not_capability` and `authorizes` — and the
+    full suite that would have said so ran BEFORE the commit that folded it, so
+    the claim was never tested. `phase_b_result` is restored, and the
+    `phases.phase_b` line that replaced it is now a pointer rather than a
+    restatement, which is the shape that should have been chosen in the first
+    place: one fact, one owner. `phase_a_result` stays folded — grep finds no
+    reader, and this time the grep was run. `phase_a_result.json` in the run
     evidence is a different object and is untouched.
+
+    **The lesson is about ORDER, not about these two keys.** A reclamation is
+    a code change to a file that gates read by name, so it owes the same
+    verification as any other — before the round's last commit, not after it.
 
     The next place to look is `behavioural_session` and `phase_c2_replay`,
     whose subject C2 is CLOSED WITHOUT PROMOTION and whose figures `c2_closure`
@@ -314,11 +328,39 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     words out of it, and they are the attempt-4 ACCEPTED ruling and stage F's
     `CONFIRMED ON REAL CUDA` with SHA `7027a8f4`. Check both by name before
     trimming, not after.
+
+    THAT IS WHERE THE NEXT ROUND LOOKED, AND IT PAID FOR PART OF A RAISE.
+    15_500 -> 16_500 on 2026-10-03, second raise that day, and the reclamation
+    came first: `behavioural_session` said CLOSED WITHOUT PROMOTION under the
+    SAME owner document as `c2_closure`, so it was a second copy of one
+    subject. Its two live facts — the 12-probe protocol and the 14 chains —
+    moved into `c2_closure`, and the consistency gate was narrowed to the three
+    remaining owners with the fold recorded in its docstring, which is the same
+    move that gate had already made for `latest_run._c2_state`.
+    `phase_c2_replay` is the one carrying `ACCEPTED`, exactly as the paragraph
+    above warned, and it was left alone. `d_series.order` also went: a
+    maintainer order is history and `decisions.md` owns it.
+
+    What the raise bought is TWO new live subjects, neither of them history. A
+    THIRD blocker: the `$31.1577` search session exceeds the `$30.00`
+    per-session envelope, which binds SEPARATELY from the cumulative cap, so a
+    grant that moved only the cap still could not authorize the search — and a
+    reader who does not see that in the snapshot will not find it. And the
+    D-series battery FAMILY: six roles under one prospectively frozen rule,
+    zero of them fundable, three strata short, carrying a new
+    behavioural-distribution identity that must not be confused with
+    `c1_confirmation`. Both are decisions a maintainer has to make now.
+
+    `phase_c` is the largest block at ~2.6 KB and it is NOT the next place to
+    look: a dozen gates read `c0.status`, `c1.measured`, `c2.status` and
+    `c3.status` by name, so trimming it is the squeeze-breaks-a-gate failure
+    recorded three times above, at the one block where it would break several
+    at once.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 15_500, (
+    assert len(SNAPSHOT.read_bytes()) < 16_500, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

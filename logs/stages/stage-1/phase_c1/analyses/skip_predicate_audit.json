@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 266,
+ "modules_scanned": 268,
  "test_ignores": [],
- "n_predicates": 143,
+ "n_predicates": 144,
  "by_signal": {
   "cpu_test_scope": 1,
   "filesystem_premise_offpod": 6,
-  "filesystem_premise_onpod": 60,
+  "filesystem_premise_onpod": 61,
   "filesystem_premise_unresolved": 7,
   "gpu": 2,
   "optional_dependency": 9,
@@ -115,7 +115,7 @@
   "absent_on_both": 10,
   "guaranteed_dependency": 9,
   "normalized_by_contract": 42,
-  "same_on_pod": 82
+  "same_on_pod": 83
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -1010,6 +1010,22 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
+   "file": "tests/autoinit/test_scoring_content_identity.py",
+   "line": 542,
+   "kind": "pytest.skip",
+   "function": "test_the_frozen_asset_still_hashes_to_its_pinned_value",
+   "condition": "not (asset / \"manifest.json\").is_file()",
+   "expanded": "not (asset / \"manifest.json\").is_file() | asset=Path(__file__).resolve().parents[2] / \"artifacts/stage1/state_eval_v1\"",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
+   "nodeid": "tests/autoinit/test_scoring_content_identity.py::test_the_frozen_asset_still_hashes_to_its_pinned_value",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
    "file": "tests/autoinit/test_scoring_position_policy.py",
    "line": 71,
    "kind": "skipif",
@@ -1443,7 +1459,7 @@
   },
   {
    "file": "tests/docs/test_repository_structure.py",
-   "line": 429,
+   "line": 457,
    "kind": "skipif",
    "function": "<module>",
    "condition": "_logs_tree_is_partial()",
@@ -2533,5 +2549,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "9cb9863e37233d74c9a8b9b5980c2a0f5d053a27f33e522cfd8fa444b285d729"
+ "digest": "b42ef96536f834305215c53aa1e7a4a72f279d15dc9fccfcfdecd9aaba13523f"
 }

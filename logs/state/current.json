@@ -82,7 +82,7 @@
  ],
  "phases": {
   "phase_a": "COMPLETE / FROZEN 2026-08-24, unresolved_equivalence, no winner. Owner: logs/stages/stage-1/recovery_continuation/runs/attempt7/.",
-  "phase_b": "COMPLETE / RESOLVED / FROZEN. Winner fe9683e6a9c783bbc6fe276a78c851c6 -- the lineage of the incumbent B -- but it clears the equivalence interval by 0.000070, about 1.23 SE at C0-measured noise: protocol-resolved, NOT comfortable, and SELECTION evidence under a fixed 0.86M probe rather than capability. Authorizes nothing. Owner: logs/stages/stage-1/phase_b/.",
+  "phase_b": "COMPLETE / RESOLVED / FROZEN. Figures, caution and scope: `phase_b_result`.",
   "formal_recovery_evidence": "NONE",
   "_c_and_later_phases": "phase_c owns c0..c4 and phase_d1 owns D1; deliberately not restated here."
  },
@@ -128,7 +128,7 @@
   "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and blocked twice: 0 of the 2 fresh disjoint batteries it needs exist under the frozen C1 mixture, and its $60.7509 chain exceeds the $13.1777 project headroom. Either alone prevents execution. Owner: phase_d1/plans/d1_design.json.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and blocked three times: no fresh battery exists (0 of 2 for D1, 0 of 6 for the family), its provisional $60.7509 chain exceeds the $13.1777 headroom, and its $31.1577 search session exceeds the $30.00 per-session envelope. Any one alone prevents execution. Owner: phase_d1/plans/d1_design.json.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -160,13 +160,7 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "behavioural_session": {
-  "state": "CLOSED WITHOUT PROMOTION",
-  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
-  "chains_consumed": 14,
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
- },
- "next": "Await a maintainer ruling on D1's evidence resolution and a D1 phase grant. Owner: logs/stages/stage-1/phase_d1/plans/d1_design.json.",
+ "next": "Await a maintainer ruling on the three D-series source extensions, a D1 phase grant, and the per-session envelope. The owed GPU qualification comes after the review of this $0 round. Owners: phase_d1/plans/d1_design.json and logs/shared/analyses/autoinit_d_series_battery_family.json.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -193,7 +187,9 @@
   "observations_averaged_or_ranked": false,
   "further_scientific_spend": "NOT AUTHORIZED",
   "probes_remaining": 0,
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
+  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
+  "chains_consumed": 14
  },
  "a_bsz3": {
   "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
@@ -203,11 +199,14 @@
   "authorizes": "nothing"
  },
  "d_series": {
-  "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED and BLOCKED TWICE. D2 and D3 NOT STARTED.",
-  "owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary; phase_c_roadmap.md owns the series plan.",
-  "order": "MAINTAINER ORDER 2026-10-03, superseding 2026-10-01: skip the FFN-specific F1 experiment and proceed to D1. Design, implement, validate and price it; do not launch.",
-  "a3_precondition": "MET. aadistill.initialization.specs.materialization separates the semantic state id, the numerical execution fingerprint, the materialization id and the artifact digest; resume, dedup, the statistics-cache key and the operator/measurer policy check each key on the right one.",
-  "blockers": "EVIDENCE: 0 of 2 fresh disjoint batteries, owner phase_d1/analyses/d1_evidence_capacity.json. FUNDING: $60.7509 chain against $13.1777, and phase_d1 is absent from the package's funds_formal_sessions_of.",
+  "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED, BLOCKED THREE TIMES. D2 and D3 NOT STARTED.",
+  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary; phase_c_roadmap.md owns the series plan.",
+  "a3_precondition": "MET, ownership closed. The materialization id binds semantic state + execution fingerprint + PARENT materialization; checkpoints live at states/<semantic>/<materialization>/ and resume keys on it.",
+  "scoring_identity": "A policy's DECLARED position metadata is bound by scoring/content.py; the suite's structural and content identities, the scoring content, the policy, the reduction and the execution are folded into one measurement_protocol_id. Content is bound THERE, never in suite_hash.",
+  "behavioural_design": "Top-K 2 / 2 screening seeds / 3 confirmation seeds, a pragmatic balance and NOT an optimum. Screening inflation is NOT a confirmation validity condition. P(advance | in Top-K) 0.7808, 0.549-0.932 across the n=3 spread's interval; P(good candidate in Top-K) UNKNOWN. Owner: phase_d1/selection_noise.py :: CLAIM_BOUNDARY.",
+  "battery_family": "d_series_behavioural_v1: six roles, rule frozen before any outcome, allocation_rule_id ced017a1f3f155ba5aaf383e61156c12, family_content_id null. A NEW distribution, not c1_confirmation. DESIGNED / NOT MATERIALIZED. Owner: logs/shared/analyses/autoinit_d_series_battery_family.json.",
+  "blockers": "EVIDENCE: 0 of 2 batteries for D1, 0 of 6 for the family; three strata short (math_verified 830, code 321, gsm8k 11). FUNDING: provisional $60.7509 against $13.1777, and phase_d1 is absent from funds_formal_sessions_of. CEILING: the $31.1577 search session exceeds the $30.00 per_attempt_hard_ceiling_usd, which binds separately.",
+  "owed_gpu_qualification": "NOT RUN. Prices come from unbatched telemetry while D1 runs batched, in an unmeasured direction, so every figure sizes a grant request rather than pricing one.",
   "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy; D2's continuous c_ref(t) needs a weighted denominator in StatsSpec.",
   "authorizes": "nothing"
  },
@@ -215,5 +214,16 @@
   "carries": "the C3, A3 and D1-design rounds, fast-forwarded 2026-10-03 from review/c3-operator-batching; previously the 2026-09-24 C2 snapshot repair. `git log main` owns the hashes.",
   "authorizes": "nothing. A merge records work: not a release, not a promotion, not a public claim. README is unchanged by the range.",
   "integration_method": "SQUASH AND MERGE from here on, per AGENTS.md P12.2. The 2026-10-03 fast-forward above was the last of its kind. A squash integration must not delete the source branch: 785 records bind commit hashes that exist only there."
+ },
+ "phase_b_result": {
+  "status": "RESOLVED",
+  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "winner_is_control": false,
+  "tie_break_ran": true,
+  "clears_by": 7e-05,
+  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe.",
+  "authorizes": "nothing",
+  "owner": "logs/stages/stage-1/phase_b/"
  }
 }

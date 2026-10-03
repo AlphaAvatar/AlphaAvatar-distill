@@ -1,0 +1,316 @@
+{
+ "_authorizes": "nothing",
+ "_family_content_id_is_null": "it binds the source pins and the realized item digests, neither of which exists. A non-null value here would be fabricated.",
+ "_materializes": "nothing",
+ "allocation_rule": {
+  "distribution_identity": {
+   "id": "d_series_behavioural_v1",
+   "is_not": "c1_confirmation",
+   "sesoi_transfer": "the C0 SESOI of 0.010 is CARRIED FORWARD AS AN ASSUMPTION, not as an inherited measurement. It was characterized on the C1 population. Every D-series comparison re-measures both arms on this family under one protocol, so the SESOI is used as a decision boundary for a within-family paired difference \u2014 which is the use it can support \u2014 and not as a claim that a difference measured here equals one measured on C1.",
+   "why": "three strata must draw from larger populations, and a different population is a different behavioural distribution. The stratum names, domains and counts are inherited unchanged, so the high-level balance and the 950/850 denominators are preserved \u2014 but a score on this family is NOT comparable with a score on c1_confirmation_v1, and B's historical C1 number is not imported."
+  },
+  "exclusion": {
+   "both_required": "either kind alone is insufficient: ids miss one question entering the pool twice, content hashes miss a paraphrase under one id",
+   "chain": [
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1"
+     ],
+     "rank_domain": "d-series-v1-d1-screening",
+     "role": "d1_screening"
+    },
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "d1_screening"
+     ],
+     "rank_domain": "d-series-v1-d1-confirmation",
+     "role": "d1_confirmation"
+    },
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "d1_screening",
+      "d1_confirmation"
+     ],
+     "rank_domain": "d-series-v1-d2-screening",
+     "role": "d2_screening"
+    },
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "d1_screening",
+      "d1_confirmation",
+      "d2_screening"
+     ],
+     "rank_domain": "d-series-v1-d2-confirmation",
+     "role": "d2_confirmation"
+    },
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "d1_screening",
+      "d1_confirmation",
+      "d2_screening",
+      "d2_confirmation"
+     ],
+     "rank_domain": "d-series-v1-d3-screening",
+     "role": "d3_screening"
+    },
+    {
+     "excludes": [
+      "the five baseline isolation roles",
+      "artifacts/stage3/c1_confirmation_v1",
+      "artifacts/stage3/c2_screening_v1",
+      "d1_screening",
+      "d1_confirmation",
+      "d2_screening",
+      "d2_confirmation",
+      "d3_screening"
+     ],
+     "rank_domain": "d-series-v1-d3-confirmation",
+     "role": "d3_confirmation"
+    }
+   ],
+   "identity_kinds": [
+    "stable id (including source_key)",
+    "normalized prompt content (sha256 of norm(text))"
+   ],
+   "order_is_part_of_the_rule": true
+  },
+  "family_id": "d_series_behavioural_v1",
+  "mixture": {
+   "code": 100,
+   "gsm8k": 150,
+   "knowledge": 150,
+   "math_verified": 150,
+   "multihop": 150,
+   "rag": 150,
+   "tool": 100
+  },
+  "mixture_source": "imported from build_c1_confirmation_battery.SETS; never restated",
+  "n_prompts_per_role": 950,
+  "n_roles": 6,
+  "n_scorable_prompts_per_role": 850,
+  "roles": [
+   {
+    "experiment": "D1",
+    "purpose": "rank the Top-K candidates of the D1 target-aware search",
+    "rank_domain": "d-series-v1-d1-screening",
+    "role": "d1_screening"
+   },
+   {
+    "experiment": "D1",
+    "purpose": "confirm the advanced D1 candidate against the incoming incumbent",
+    "rank_domain": "d-series-v1-d1-confirmation",
+    "role": "d1_confirmation"
+   },
+   {
+    "experiment": "D2",
+    "purpose": "rank the Top-K candidates of the D2 confidence-weighted search",
+    "rank_domain": "d-series-v1-d2-screening",
+    "role": "d2_screening"
+   },
+   {
+    "experiment": "D2",
+    "purpose": "confirm the advanced D2 candidate against the incoming incumbent",
+    "rank_domain": "d-series-v1-d2-confirmation",
+    "role": "d2_confirmation"
+   },
+   {
+    "experiment": "D3",
+    "purpose": "rank the Top-K candidates of the D3 search",
+    "rank_domain": "d-series-v1-d3-screening",
+    "role": "d3_screening"
+   },
+   {
+    "experiment": "D3",
+    "purpose": "confirm the advanced D3 candidate against the incoming incumbent",
+    "rank_domain": "d-series-v1-d3-confirmation",
+    "role": "d3_confirmation"
+   }
+  ],
+  "schema": "aadistill.autoinit.d_series_battery_family/v1",
+  "selection": {
+   "base_digest": "the C0 digest the C1 and C2 batteries were ordered from, so the family's ordering is derived from a constant that predates every D-series result",
+   "deterministic": true,
+   "mechanism": "battery_render.rank_take",
+   "order": "ascending SHA256(base_digest : rank_domain : stratum : stable_id), ties broken by str(id)",
+   "outcome_dependence": "NONE. The order is a function of the pool and the frozen domain strings; there is no seed, no date and no choice available after a result is seen"
+  },
+  "what_is_NOT_in_this_rule": "the source pins and the realized item lists. The sources for the three short strata are an open maintainer decision, and the items do not exist. Binding them here would make the rule unfreezable until materialization, which would defeat the point of freezing it before any D1 outcome. They are bound by `family_content_id` at materialization instead."
+ },
+ "allocation_rule_id": "ced017a1f3f155ba5aaf383e61156c12",
+ "binding_stratum": "math_verified",
+ "blocker": "THREE strata cannot fund six roles from their currently pinned sources: code short by 321, gsm8k short by 11, math_verified short by 830. Extending a source changes the evaluation population, so it is a maintainer decision with a licence and contamination record attached, and it is not taken here.",
+ "capacity_record": {
+  "_why_the_two_disagree": "the record asks how many whole batteries remain and answers zero, binding on math_verified. At six roles the question changes: gsm8k funds five roles and code two, so extending math alone would unblock D1 and still leave the family short.",
+  "batteries_remaining_for_one": 0,
+  "binding_stratum_for_one_battery": "math_verified",
+  "path": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
+ },
+ "family_content_id": null,
+ "family_id": "d_series_behavioural_v1",
+ "requirement": {
+  "code": {
+   "domain": "code",
+   "eligible_today": 279,
+   "needed_for_six_roles": 600,
+   "per_battery": 100,
+   "roles_fundable_today": 2,
+   "scorable": false,
+   "short_by": 321,
+   "source_today": {
+    "file": "full/test-00000-of-00001.parquet",
+    "repo_id": "google-research-datasets/mbpp",
+    "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+   }
+  },
+  "gsm8k": {
+   "domain": "reasoning_math",
+   "eligible_today": 889,
+   "needed_for_six_roles": 900,
+   "per_battery": 150,
+   "roles_fundable_today": 5,
+   "scorable": true,
+   "short_by": 11,
+   "source_today": {
+    "file": "main/test-00000-of-00001.parquet",
+    "repo_id": "openai/gsm8k",
+    "revision": "740312add88f781978c0658806c59bc2815b9866"
+   }
+  },
+  "knowledge": {
+   "domain": "general",
+   "eligible_today": 17082,
+   "needed_for_six_roles": 900,
+   "per_battery": 150,
+   "roles_fundable_today": 113,
+   "scorable": true,
+   "short_by": 0,
+   "source_today": {
+    "file": "rc.nocontext/validation-00000-of-00001.parquet",
+    "repo_id": "mandarjoshi/trivia_qa",
+    "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f"
+   }
+  },
+  "math_verified": {
+   "domain": "reasoning_math",
+   "eligible_today": 70,
+   "needed_for_six_roles": 900,
+   "per_battery": 150,
+   "roles_fundable_today": 0,
+   "scorable": true,
+   "short_by": 830,
+   "source_today": {
+    "file": "test.jsonl",
+    "repo_id": "HuggingFaceH4/MATH-500",
+    "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be"
+   }
+  },
+  "multihop": {
+   "domain": "rag_multihop",
+   "eligible_today": 6975,
+   "needed_for_six_roles": 900,
+   "per_battery": 150,
+   "roles_fundable_today": 46,
+   "scorable": true,
+   "short_by": 0,
+   "source_today": {
+    "file": "distractor/validation-00000-of-00001.parquet",
+    "repo_id": "hotpotqa/hotpot_qa",
+    "revision": "1908d6afbbead072334abe2965f91bd2709910ab"
+   }
+  },
+  "rag": {
+   "domain": "rag_multihop",
+   "eligible_today": 5498,
+   "needed_for_six_roles": 900,
+   "per_battery": 150,
+   "roles_fundable_today": 36,
+   "scorable": true,
+   "short_by": 0,
+   "source_today": {
+    "file": "squad_v2/validation-00000-of-00001.parquet",
+    "repo_id": "rajpurkar/squad_v2",
+    "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412"
+   }
+  },
+  "tool": {
+   "domain": "tool",
+   "eligible_today": 59567,
+   "needed_for_six_roles": 600,
+   "per_battery": 100,
+   "roles_fundable_today": 595,
+   "scorable": true,
+   "short_by": 0,
+   "source_today": {
+    "file": "xlam_function_calling_60k.json",
+    "repo_id": "Salesforce/xlam-function-calling-60k",
+    "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866"
+   }
+  }
+ },
+ "roles_fundable_today": 0,
+ "schema": "aadistill.autoinit.d_series_battery_family/v1",
+ "short_strata": {
+  "code": 321,
+  "gsm8k": 11,
+  "math_verified": 830
+ },
+ "source_options": {
+  "code": [
+   {
+    "candidate": "google-research-datasets/mbpp, splits other than full/test",
+    "licence": "inherited from the existing pin",
+    "must_be_measured": "the eligible count after exclusions. MBPP holds ~974 problems in total against the 500 of `full/test`, so the remainder may NOT cover the shortfall; if it does not, either a second code source or a reduced behaviour-only code component is a maintainer decision, and the second changes the 950 denominator of `usable_rollout_rate`",
+    "option": "the remaining splits of the already-pinned MBPP repository",
+    "same_repo": true
+   },
+   {
+    "candidate": "undecided",
+    "licence": "TO BE VERIFIED",
+    "must_be_measured": "everything a new source needs: licence, revision, digests, renderer, contamination against the training corpus, and an argument that it is the same KIND of task as MBPP",
+    "option": "a second verified code source",
+    "same_repo": false
+   }
+  ],
+  "gsm8k": [
+   {
+    "candidate": "openai/gsm8k, main/train (~7.5k rows)",
+    "licence": "inherited from the existing pin",
+    "must_be_measured": "the eligible count after exclusions \u2014 and this one matters, because the recovery TRAINING corpus may draw from the same split. The exclusion chain removes any overlap automatically, so the risk is not contamination but capacity: the surviving count has to be derived, not assumed from the row count",
+    "note": "the shortfall is 11 items, the smallest of the three, and this option needs no new dataset \u2014 only a second file of a repository already pinned at a frozen revision",
+    "option": "the train split of the already-pinned GSM8K repository",
+    "same_repo": true
+   }
+  ],
+  "math_verified": [
+   {
+    "candidate": "the upstream Hendrycks MATH release (~12.5k problems)",
+    "licence": "MIT per the upstream repository \u2014 TO BE VERIFIED at pinning",
+    "must_be_measured": "a revision pin and per-file digest; the eligible count after the full exclusion chain; renderer parity against the current `make_math_verified` so a D-series math item is rendered exactly as a C1 one was; and whether MATH-500's 500 items are a subset of it, which they are expected to be and which the exclusion chain handles either way",
+    "note": "MATH-500 is a 500-item subset of the MATH test split, so the larger source is the SAME population sampled less sparsely. That is the mildest of the three changes and is still a population change: the subset was itself selected.",
+    "option": "full Hendrycks MATH rather than the MATH-500 subset",
+    "same_repo": false
+   }
+  ]
+ },
+ "status": "DESIGNED / NOT MATERIALIZED / BLOCKED ON SOURCES",
+ "what_this_may_not_be_used_to_claim": [
+  "that the six batteries exist. None is built.",
+  "that a D-series score is comparable with a C1 score. The population differs and the family carries its own identity.",
+  "that the SESOI has been characterized on this population. It is carried forward as a recorded assumption.",
+  "that any source is pinned. The options above are candidates with unverified licences and no revisions."
+ ]
+}

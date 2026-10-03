@@ -262,16 +262,30 @@ class TestTheSnapshotStatesTheRequiredFacts:
         about C2. Requiring the key would require keeping a vestigial C2
         sentence inside a record about a different experiment — the duplication
         this gate exists to prevent, pointing the wrong way. So the gate asks
-        the four owners that are still owners, and the newest-run block is
-        checked by the tests that own IT.
+        the owners that are still owners, and the newest-run block is checked by
+        the tests that own IT.
+
+        **`behavioural_session` went the same way on 2026-10-03.** It said
+        `CLOSED WITHOUT PROMOTION` under the same owner document as
+        `c2_closure`, which already carries the deltas, the limitation and the
+        probes-remaining — so it was a second copy of one subject, reclaimed
+        when the snapshot needed room rather than a ceiling raise (the size
+        guard in `test_repository_structure` asks for exactly that trade). Its
+        two live facts, the 12-probe protocol and the 14 chains, moved into
+        `c2_closure`, and the assertions below follow them. Three owners now,
+        and the gate's point is unchanged: any one of them drifting is the
+        defect, and asking only the ladder would not catch it.
         """
         s = snapshot()
         closed = "CLOSED WITHOUT PROMOTION"
+        #: And the facts that moved are still asserted, so the fold could not
+        #: have quietly dropped them.
+        assert s["c2_closure"]["chains_consumed"] == 14
+        assert "12 probes" in s["c2_closure"]["protocol"]
         for path, got in (
                 ("stage_ladder.C2", s["stage_ladder"]["C2"]),
                 ("phase_c.c2.status", s["phase_c"]["c2"]["status"]),
-                ("c2_closure.decision", s["c2_closure"]["decision"]),
-                ("behavioural_session.state", s["behavioural_session"]["state"])):
+                ("c2_closure.decision", s["c2_closure"]["decision"])):
             assert closed in got, f"{path} does not say {closed}: {got!r}"
         #: And if a `latest_run` ever speaks about C2 again, it rejoins the set
         #: rather than drifting outside it.

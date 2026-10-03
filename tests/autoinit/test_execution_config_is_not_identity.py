@@ -305,13 +305,18 @@ class TestSemanticIdentityIsNotMaterializationIdentity:
 
         env = NumericalEnvironment(device_type="cuda", compute_dtype="bfloat16")
         semantic = compute_state_id("root", "target", ())
+        #: ONE parent for both, so the only thing separating them is the
+        #: execution protocol — which is the claim.
+        parent = "shared-parent-materialization" + "0" * 4
         bsz1 = MaterializationIdentity.build(
             semantic_state_id=semantic, environment=env,
+            parent_materialization_id=parent,
             execution=ExecutionConfig(
                 micro_batch_size=1,
                 calibration_batch_packing="original_order_v1"))
         bsz3 = MaterializationIdentity.build(
             semantic_state_id=semantic, environment=env,
+            parent_materialization_id=parent,
             execution=ExecutionConfig(
                 micro_batch_size=3,
                 calibration_batch_packing="length_sorted_v1"))
