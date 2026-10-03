@@ -114,19 +114,53 @@ invocation with `tee` and `PIPESTATUS[0]`.
 
 ## What `main` carries
 
-Fast-forwarded to this branch on **2026-10-03**, bringing the C3, A3 and
-D1-design rounds. Before that it stood at the 2026-09-24 C2 snapshot repair,
-so nine days and 597 commits of campaign history landed in one integration.
-`git log main` owns the hashes and they are deliberately not restated here.
+**The test-suite boundary refactor, integrated 2026-10-03 by SQUASH AND MERGE
+per AGENTS.md P12.2.** One commit on `main` collapsing six:
 
-**A merge records work. It is not a release, not a promotion and not a public
-claim.** `README.md` is unchanged by the whole range, so nothing public-facing
-moved; the eleven documented suite failures came with it and are the same
-eleven; and the two D1 blockers above are still open. The repository's one
-prior integration went through a GitHub pull request, which is the route to
-prefer when a range is reviewable — this one is 1,491 files and 1.13M inserted
-lines, almost all of it `logs/` evidence, and is a record of completed rounds
-rather than a change to review.
+```text
+source branch : refactor/test-suite-boundary   (NOT deleted -- P12.2)
+merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
+tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
+branch tip    : named by the squash commit on `main`, not here
+```
+
+**Why the tip is not written here.** This record is the last commit on the
+branch, so it would have to contain its own hash. P12.2 puts that obligation on
+the squash commit — which is created after the tip exists and can name it — and
+the range is `4dc579ba..refactor/test-suite-boundary` either way, resolvable by
+name for as long as the branch is kept, which P12.2 requires forever.
+
+`a2dab91c` is the executable tree the core suite ran against and the commit the
+maintainer approved; this record sits on top of it and touches nothing the suite
+executes. Where a later record needs the commit that produced the measurement,
+it is `a2dab91c`.
+
+What changed: `pytest` now means the **core suite** and nothing else;
+experiment-owned tests live with their experiments under
+`scripts/experiments/stage-<n>/<experiment_id>/tests/`, mirroring `logs/stages/`
+row for row; the core suite is **green** rather than carrying eleven standing
+failures; and a static guard refuses a core test that imports a specific
+experiment package, loads a named experiment launcher, or reads a concrete
+historical run. **43m20s → 3m18s.**
+
+**A merge records work. It is not a release, not a promotion, not a grant and not
+a public claim.** `README.md` is unchanged by the whole range. No GPU or paid
+resource is authorized by it, and no scientific result moved.
+
+The validation is the core suite measured on this exact tree —
+`2959 collected, 2945 passed / 14 skipped, 0 failed` — and a squash preserves the
+tree byte for byte, so it stands for `main` without a second run.
+
+**Before `main` carried this, it stood at `4dc579ba`**: the C3, A3 and D1-design
+rounds, fast-forwarded on 2026-10-03 in a 597-commit integration that is the
+reason P12.2 exists. `git log main` owns the hashes.
+
+**The operational consequence, and it bites immediately.** A squash commit does
+not have the branch's commits as ancestors, so `refactor/test-suite-boundary` is
+no longer an ancestor of `main` and `main..refactor/test-suite-boundary` still
+lists all five. **Continuing on it would re-apply the whole range** — cut a fresh
+branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
+it is where this round's commit hashes live.
 
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 

@@ -1,5 +1,87 @@
 # Budget decisions
 
+## 2026-10-03 — The test refactor integrates into `main` by SQUASH AND MERGE
+
+- **Context:** `refactor/test-suite-boundary@a2dab91c` was reviewed on the remote
+  and approved for merge. The maintainer first asked for a fast-forward, then
+  directed that AGENTS.md governs — so **P12.2** applies as written: every
+  integration of a working branch into `main` is a squash and merge, one commit on
+  `main` per integration, whatever the branch's internal commit count.
+
+- **Decision:** squash and merge. Six commits on the branch become one on `main`.
+
+  ```text
+  source branch : refactor/test-suite-boundary
+  merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
+  tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
+  branch tip    : named by the squash commit on `main`
+  collapsing    : 9fb6123c  the boundary: core, experiment, historical
+                  a8aa0a15  a test is not an execution path
+                  fa6149b0  two historical-suite failures that were mine, two not
+                  de3c4dab  one owner per experiment id, and the static guard
+                  a2dab91c  the last two historical-evidence dependencies leave core
+                  <this>    this record, written before the integration
+  ```
+
+  The approved and measured tree is `a2dab91c`; the sixth commit is this record on
+  top of it and changes nothing the suite executes. A later record needing the
+  commit that produced the measurement wants `a2dab91c`, not the branch tip.
+
+  **The tip is named by the squash commit, not here.** This record is the branch's
+  last commit, so writing the tip would mean containing its own hash. P12.2's
+  "names the range it collapses" is an obligation on the squash commit, which is
+  created afterwards and can state it; the range resolves as
+  `4dc579ba..refactor/test-suite-boundary` by name for as long as the branch is
+  kept, which is forever.
+
+- **P12.2's three obligations, all owed and all met.**
+
+  1. **The source branch is NOT deleted**, now or later as tidying. It is what
+     keeps the branch's commit hashes reachable, and this repository binds
+     scientific evidence to specific hashes — `session_commit`,
+     `authorized_session_commit`, `head_commit`, `swept_base_commit`,
+     `declared_at_commit`, and the commit a comparison names as having computed
+     it. A squash commit is none of them.
+  2. **The squash commit names the range it collapses** — the branch, its tip and
+     the merge base — so a reader holding a hash from an experiment log can find
+     which integration carried it without searching every branch.
+  3. **This entry and `logs/state/current.md` say what `main` carries**, recorded
+     on the branch *before* the integration, so `main` lands on a tree that
+     describes itself.
+
+  **The enforcement P12.2 names is not on this branch.** P12.2 says
+  `scripts/consolidate/converge_before_sweep.py` resolves every cited commit hash
+  against the object store; that function was written on `review/d1-target-aware`,
+  so the rule's text reached `main` ahead of its implementation and arrives with
+  the D1 reconciliation. The check was therefore performed inline for this
+  integration — the fields above, swept over `logs/**/*.json`, resolved in one
+  `git cat-file --batch-check`:
+
+  ```text
+  622 distinct commit hashes cited across 1,742 record files · 0 unreachable
+  ```
+
+  A squash keeps all six reachable regardless, because the branch survives. That
+  is the clause doing the work, not the sweep.
+
+- **What this merge is NOT.** Not a release, not a scientific promotion, not a
+  grant, not an authorization change. No GPU or paid resource is authorized by it.
+  `README.md` is unchanged by the whole range, so nothing public-facing moved.
+
+- **Validation evidence.** The core suite was measured on this exact executable
+  tree: `2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s`. A squash
+  preserves the tree byte for byte — the merge commit's tree hash equals the
+  branch tip's — so that measurement is the validation for `main`, and re-running
+  it would measure the same tree twice.
+
+- **The operational consequence, per P12.2.** A squash commit does not have the
+  branch's commits as ancestors, so `refactor/test-suite-boundary` is no longer an
+  ancestor of `main` and `main..refactor/test-suite-boundary` still lists all five.
+  Continuing on it would re-apply the whole range. The next work therefore starts
+  on a **fresh branch cut from `main`** — which is also what the D1 reconciliation
+  needs, since `review/d1-target-aware` must be replayed onto the new test
+  architecture rather than merged as-is.
+
 ## 2026-10-03 — The last two historical dependencies leave the core suite
 
 Final cleanup on the test boundary. `$0`, no pod, no GPU. Two concrete
