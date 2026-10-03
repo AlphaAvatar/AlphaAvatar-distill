@@ -59,13 +59,23 @@ and three full-search chain proposals, C2's full-search budget/determinism/
 headroom, C1's provider-resource agreement, continuation-B's preregistration
 digest. They live with their experiments and still run on request.
 
-**The experiment tree mirrors the evidence tree.**
+**The experiment tree mirrors the evidence tree, row for row.** One owner per
+`logs/stages/index.json` experiment id — the E-series ladder has `e3`…`e8b`, and
+the C2 family's four separate ids (`phase_c2_full_search`, `phase_c2_replay`,
+`phase_c2_behavioural`, `phase_c2_baseline_completion`) plus `continuation_b` own
+their own tests rather than sharing a prefix.
 
 ```text
 scripts/experiments/stage-1/phase_d1/   <->  logs/stages/stage-1/phase_d1/
 scripts/experiments/stage-1/phase_c3/   <->  logs/stages/stage-1/phase_c3/
 scripts/experiments/stage-3/tests/      <->  logs/stages/stage-3/
 ```
+
+**Specific experiment imports from the core suite: ZERO**, enforced by
+`tests/architecture/test_core_suite_boundary.py` — no core file imports an
+experiment package, every `experiments.*` import from core is a shared
+application module, and no core file loads a named experiment launcher. The
+allowed set is derived from the tree, so adding an experiment cannot widen it.
 
 Stage ownership comes from [`index.json`](../stages/index.json), not
 from names: Stage 1 holds `phase_a`, `phase_a3`, `phase_b`, `phase_c1`,

@@ -37,6 +37,16 @@ AUTH = REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authoriz
 #: resolves it too -- naming ONE file cannot select someone else's ledger.
 CAMPAIGN = AUTH.parent / "campaign.json"
 
+#: Those two are read as a TEMPLATE -- the shape of an authorization and a ledger
+#: -- and every test below builds its own campaign under `tmp_path` from them. The
+#: skip keeps the CORE suite from erroring at import if that historical directory
+#: is ever archived: a core test may use an old record as a fixture, but it may
+#: not go red because the record was retired. The one test that asserted the
+#: concrete campaign's booked dollars moved to Phase C1's suite.
+pytestmark = pytest.mark.skipif(
+    not (AUTH.is_file() and CAMPAIGN.is_file()),
+    reason="the cuda-stage-f authorization/ledger template is not staged here")
+
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -469,13 +479,37 @@ class TestPriorSpendReducesTheNextResourcesLimits:
     loop can spend without limit while every individual run looks compliant.
     """
 
-    def test_the_launcher_starts_from_what_earlier_subruns_booked(self, eng):
-        booked = json.loads(
-            (REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json").read_text()
-        )["booked_usd"]
-        assert eng.booked_usd == booked > 0, "no prior spend was carried in"
-        assert eng.remaining_total == pytest.approx(eng.hard_usd - booked)
-        assert eng.remaining_soft == pytest.approx(eng.soft_usd - booked)
+    #: "the launcher starts from what earlier subruns booked" moved to
+    #: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_campaign_booking.py`
+    #: in the 2026-10-03 convergence round: it read the concrete 2026-09-10
+    #: cuda-stage-f campaign's booked dollars out of C1's validation directory.
+    #: The accounting PROPERTY — that a campaign's prior spend is carried in and
+    #: subtracted from both ceilings — is asserted below against a synthetic
+    #: campaign built under `tmp_path`, which is the mechanism and does not go
+    #: stale when an old campaign record is archived.
+
+    def test_prior_spend_is_carried_in_and_subtracted_from_both_ceilings(
+            self, mod, tmp_path, monkeypatch):
+        """The same property, with a campaign this test builds."""
+        home = tmp_path / "validations" / "synthetic" / "v1"
+        home.mkdir(parents=True)
+        (home / "authorization.json").write_text(AUTH.read_text())
+        camp = json.loads(CAMPAIGN.read_text())
+        camp["booked_usd"] = 0.17
+        (home / "campaign.json").write_text(json.dumps(camp))
+        monkeypatch.setattr(mod, "read_api_key", lambda p: "test-key")
+        monkeypatch.setenv("RUNPOD_API_KEY", "test-key")
+        fake_cli = tmp_path / "runpodctl"
+        fake_cli.write_text("#!/bin/sh\nexit 0\n")
+        fake_cli.chmod(0o755)
+        monkeypatch.setattr(mod, "provider_cli_candidates", lambda: (str(fake_cli),))
+        monkeypatch.setattr(mod, "RunPodProvider", lambda key: types.SimpleNamespace(
+            _gql=lambda q: {"data": {}}))
+        e = mod.Engineering(args(scr=str(tmp_path / "scr"),
+                                 authorization=str(home / "authorization.json")))
+        assert e.booked_usd == pytest.approx(0.17)
+        assert e.remaining_total == pytest.approx(e.hard_usd - 0.17)
+        assert e.remaining_soft == pytest.approx(e.soft_usd - 0.17)
 
     def test_the_soft_cap_counts_the_whole_campaign_not_this_subrun(self, eng):
         """A subrun that has spent nothing yet is already `booked` closer to the

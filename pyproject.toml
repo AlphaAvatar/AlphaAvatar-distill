@@ -58,8 +58,12 @@ torch = { index = "pytorch-cpu" }
 # An experiment suite is explicit, because it validates one experiment's wiring
 # rather than the framework:
 #
-#     pytest scripts/experiments/phase_d1/tests        # current experiment
-#     pytest scripts/experiments/phase_c2/tests        # historical verification
+#     pytest scripts/experiments/stage-1/phase_d1/tests   # current experiment
+#     pytest scripts/experiments/stage-1/phase_c2/tests   # historical verification
+#
+# The stage is part of the path: the experiment tree mirrors logs/stages/
+# name for name, so `scripts/experiments/stage-1/phase_d1/` is the code whose
+# evidence is `logs/stages/stage-1/phase_d1/`.
 #
 # Maintainer decision 2026-10-03. Before it, `tests/` held both and the default
 # run spent most of a 43-minute suite re-validating closed experiments' frozen

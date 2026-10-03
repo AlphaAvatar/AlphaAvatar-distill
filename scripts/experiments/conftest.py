@@ -2,8 +2,8 @@
 
 One file rather than ten. pytest loads every `conftest.py` from the rootdir down
 to the collected test, so this applies to each
-`scripts/experiments/<phase>/tests/` suite and to none of `tests/` — which is
-precisely the boundary the 2026-10-03 refactor drew.
+`scripts/experiments/stage-<n>/<experiment>/tests/` suite and to none of
+`tests/` — precisely the boundary the 2026-10-03 refactor drew.
 
 **Why the registry imports live HERE.** `experiments.datasets` and
 `experiments.calibration` are the application bootstrap: importing them

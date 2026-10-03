@@ -142,17 +142,12 @@ def test_preparation_does_not_mutate_the_raw_items():
     assert not [i for i in raw if "input_ids" in i]
 
 
-def test_the_c1_prefix_profiles_are_the_ones_this_covers():
-    """The mixtures above are the mixtures C1's own path names.
+#: `test_the_c1_prefix_profiles_are_the_ones_this_covers` moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_prefix_profiles.py`
+#: in the 2026-10-03 convergence round: it asks whether the mixtures this
+#: module covers are the ones C1's own path names, which is a question about
+#: C1's path. The mixtures themselves, and the conversion, stay here.
 
-    Otherwise this module could pass while the fixed path resolves something
-    nobody prepared.
-    """
-    from experiments.phase_c1.session import INCUMBENT_ATTENTION, PREFIX_STEPS, TREATMENT_ATTENTION
-
-    named = {p for _, p in (*PREFIX_STEPS, INCUMBENT_ATTENTION,
-                            TREATMENT_ATTENTION)}
-    assert named - {"calib.none@v1"} <= set(REAL_IDS)
 
 
 def test_the_frozen_boundary_and_this_one_agree_token_for_token():

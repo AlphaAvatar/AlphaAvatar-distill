@@ -1,5 +1,94 @@
 # Budget decisions
 
+## 2026-10-03 — One owner per experiment id, and a guard that keeps it
+
+Convergence round on the test boundary, accepted in direction and sent back for
+these. `$0`, no pod, no GPU.
+
+- **The experiment tree now mirrors `logs/stages/index.json` row for row.** Stage
+  3 was one flat `tests/` directory while the evidence tree has `e1`..`e8b`; the
+  claim that the trees matched "name for name" was not yet true. 42 files moved
+  into the experiment that owns them, and the index's own rows decided which:
+
+  ```text
+  stage-3/e3  e4  e6  e6b  e7  e8  e8b                 (the E-series ladder)
+  stage-1/phase_c2_behavioural  phase_c2_full_search
+          phase_c2_replay  phase_c2_baseline_completion  continuation_b
+  ```
+
+  Those five Stage-1 ids were collapsed under `phase_c2` and `phase_b` by prefix.
+  They are separate experiments in the index, so they are separate owners here —
+  the same reason A3 was separated from C3 in the previous round. Nothing was left
+  at a stage-level `tests/`: no file turned out to be about a stage as a whole.
+
+- **Specific experiment imports from the core suite: ZERO.** The residual coupling
+  the previous round reported as debt is closed. Nine imports remain and all nine
+  are the shared application layer — `run_layout` (x2), `calibration`,
+  `datasets`, `deployment` (x2), `durable_stores`, `operator_ledger`,
+  `source_sets` — which is a deliberate core-to-application contract:
+  `run_layout`'s convention is checked against `aadistill.runtime.run_layout`'s
+  mechanism precisely because the two must agree.
+
+  What moved, and what replaced it in core:
+
+  | left core | core now proves the mechanism by |
+  | --- | --- |
+  | A3's controls driver branch | synthetic admission callables |
+  | C3's pilot step constructor | the operator's own refusal |
+  | C1's harness measuring the summariser | the summariser's behaviour |
+  | C1's `RecordContract` instance | TWO synthetic contracts |
+  | C1's launcher run identity (30 tests) | synthetic callers under `tmp_path` |
+  | C1's log records (10 tests) | the renderers and the stage index |
+  | C1's cuda-stage-f booked dollars | a campaign built under `tmp_path` |
+  | C1's seam, scratch ownership, rope inputs, prefix profiles | enumeration over every launcher |
+  | the continuation's claim about Phase A's science | the structural spec rules |
+  | Phase A's authorization schema | DISCOVERY of every `*_AUTHORIZATION` constant |
+  | Phase A's driver memory constants | the handoff mechanism |
+
+  The discovery case is the one worth noting: that test named three authorization
+  constants, so a fourth experiment's grant could have carried attempt prose with
+  nothing looking. It now walks the experiments tree, which is both generic and
+  stronger.
+
+- **`tests/support/historical_declarations.py` became
+  `scripts/experiments/historical_declarations.py`.** It knew which completed
+  experiments declared what — Phase B's amendments, the C2 replay's buildability
+  — which three experiments' suites ask about and no core test should need. Test
+  support is for helpers reusable across suites; historical experiment knowledge
+  is application layer.
+
+- **A static guard now holds the line**
+  (`tests/architecture/test_core_suite_boundary.py`, five tests): no core file
+  imports a specific experiment package, every `experiments.*` import from core
+  is a shared module, and no core file loads a named experiment launcher.
+  Enumerating every launcher stays allowed, because "what every session must
+  satisfy" is genuinely generic. The allowed set is DERIVED from the tree — a
+  module directly under `scripts/experiments/` is shared, a module inside a stage
+  directory is an experiment's — so adding an experiment cannot widen the
+  allowance and adding a shared module needs no edit. It is mutation-tested
+  against three synthetic violations, including a deferred import inside a
+  function, which a module-scope-only reader would have missed.
+
+- **Alternatives considered:** a marker or ignore list instead of ownership —
+  refused in the previous round and still wrong, since filtering is not ownership;
+  keeping `phase_c2_*` under `phase_c2` because they share a prefix — refused, the
+  index gives each its own id; moving the C2 sub-experiments' MODULES as well as
+  their tests — deferred, not refused: `session.py` and its siblings are shared
+  across the C2 family and their paths are named by frozen declared source sets,
+  so moving them would move more digests for symmetry alone. Recorded here so the
+  next round can take it deliberately.
+
+- **Risks:** 16 core files still name a historical log path. Three are
+  repository-governance invariants that must read `logs/` (the budget ledger's
+  arithmetic, the snapshot's self-consistency, the log layout); the rest are
+  prose or skip-guarded, so an archived record SKIPS the core suite rather than
+  reddening it. `test_stage1_import.py` still uses Phase-A attempt12's real search
+  result as a fixture under a `skipif`; a synthetic fixture would be better and is
+  not free.
+
+- **Revisit when:** the C2 sub-experiments' modules are worth moving, or a
+  fourth suite is proposed.
+
 ## 2026-10-03 — The test suite has a boundary: core, experiment, historical
 
 - **Context:** the default `pytest` run had become 43 minutes and ~5.6k tests, and

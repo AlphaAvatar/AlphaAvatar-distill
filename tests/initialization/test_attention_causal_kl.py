@@ -654,13 +654,11 @@ def test_the_resolver_does_not_call_int():
     assert "int" not in calls, "the identity-bearing field is being coerced"
 
 
-def test_the_pilot_step_constructor_refuses_the_same_values():
-    """The pilot must not build a step the operator will later refuse."""
-    from experiments.phase_c3.pilot import causal_step
-
-    for bad in ("4", 4.0, True, None):
-        with pytest.raises((TypeError, ValueError)):
-            causal_step(bad)
+#: The C3 pilot's own step constructor — which must refuse the same values the
+#: operator refuses — moved to
+#: `scripts/experiments/stage-1/phase_c3/tests/test_pilot_step_constructor.py`
+#: in the 2026-10-03 convergence round. The operator's refusal is core; which
+#: caller happens to build a step for it is that caller's business.
 
 
 # --- a non-finite score is a FAILED scorer, never a zero ------------------

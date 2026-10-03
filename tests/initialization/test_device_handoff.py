@@ -348,23 +348,13 @@ def test_the_retention_limit_is_the_one_the_verdict_uses():
 
 # --- the trainer requirement is measured, not chosen ------------------------
 
-def test_the_trainer_requirement_matches_its_recorded_basis():
-    """RECOVERY_TRAINER_BYTES was 22 GiB because somebody rounded up attempt
-    12's mid-failure footprint. The trainer's measured peak is 39.79 GiB."""
-    import json
+#: `test_the_trainer_requirement_matches_its_recorded_basis` moved to
+#: `scripts/experiments/stage-1/phase_a/tests/test_phase_a_trainer_memory_basis.py`
+#: in the 2026-10-03 convergence round: it asserts the Phase-A DRIVER's
+#: constants against a measured basis record, which is that experiment's
+#: wiring and its evidence. The handoff mechanism -- what is freed, when, and
+#: what the next stage sees -- stays here.
 
-    sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_phase_a_driver as drv
-
-    basis = json.loads(
-        (REPO / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json").read_text())
-    terms = basis["conversion_to_device_bytes"]["terms_gib"]
-    assert drv.RECOVERY_TRAINER_PEAK_ALLOCATED_GIB == terms["peak_allocated"]
-    assert drv.RECOVERY_TRAINER_RESERVED_SLACK_GIB == terms["allocator_reserved_slack"]
-    assert drv.RECOVERY_TRAINER_NON_TORCH_GIB == terms["non_pytorch_overhead"]
-    assert drv.RECOVERY_TRAINER_BYTES == basis["conversion_to_device_bytes"]["need_bytes"]
-    assert drv.RECOVERY_TRAINER_BYTES > 39 * GIB, (
-        "the requirement is below the trainer's measured peak again")
 
 
 def test_attempt_4s_free_bytes_would_now_be_refused():

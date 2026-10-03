@@ -75,21 +75,11 @@ def test_the_setup_gate_summarizes_on_both_paths():
         '[ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }')
 
 
-def test_the_summary_survives_a_setup_abort():
-    """A setup abort never reaches artifact collection, and the launcher's own
-    window is `tail -40`. The file must be pulled while the pod still exists."""
-    sys.path.insert(0, str(REPO / "tests/pod"))
-    from support.session_specs import load_session_launcher, session_args
-    mod = load_session_launcher("autoinit_c1_launch")
-    spec = mod.spec(session_args(mod))
-    assert "/workspace/pytest_outcomes.json" in spec.setup_failure_files
+#: `test_the_summary_survives_a_setup_abort` and its siblings moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cpu_gate_evidence.py`
+#: in the 2026-10-03 convergence round: they load that experiment's own
+#: launcher by name, which makes them its tests rather than this suite's.
 
-    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
-    assert "_collect_setup_failure_evidence(target, draw)" in runner
-    assert 'return "setup_failed"' in runner
-    # Collected BEFORE the return that leads to teardown.
-    assert runner.index("_collect_setup_failure_evidence(target, draw)") < \
-        runner.index('return "setup_failed"')
 
 
 def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
@@ -297,32 +287,6 @@ def test_an_owned_record_that_matches_passes_and_says_which_file(tmp_path):
     assert written["expected_record"].endswith("attempt99/governance/readiness.json")
 
 
-def test_the_pod_invocation_resolves_this_session_without_being_told():
-    """The wiring, end to end, on the shipped setup script and the real spec.
-
-    Three things have to line up and none of them is asserted by the pieces
-    above: the setup gate passes `--repo` so a repo-relative authorization path
-    resolves; it does NOT override `--session-authorization`, so the environment
-    default applies; and the launcher puts `SESSION_AUTH_PATH` into that
-    environment pointing inside the run's own governance directory.
-    """
-    import sys as _sys
-    _sys.path.insert(0, str(REPO / "scripts/pod"))
-    from support.session_specs import load_session_launcher, session_args
-
-    text = SETUP.read_text()
-    call = text[text.index("summarize_pytest_outcomes.py"):][:600]
-    assert '--repo "$REPO"' in call, call
-    assert "--session-authorization" not in call, (
-        "the gate overrides the session default; if that is deliberate it must "
-        "name the run's own record, not the repository-root pointer")
-
-    launcher = load_session_launcher("autoinit_c1_launch")
-    spec = launcher.spec(session_args(launcher))
-    auth = spec.authorization_path
-    assert auth.endswith("/governance/authorization.json"), auth
-    assert not Path(auth).is_absolute(), (
-        f"{auth} is absolute; --repo would not compose with it")
 
 
 def test_the_launch_bound_record_this_run_will_own_carries_the_skip_set():
@@ -422,10 +386,12 @@ def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
     assert "no corpus_v2 here" in list(parsed["skip_reasons"].values())[0]
 
 
-def test_the_summariser_is_inside_the_measured_harness():
-    """It can refuse a pod whose suite passed, so a grant must measure it."""
-    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
-    assert "scripts/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
+#: Whether a particular experiment's harness MEASURES the summariser is that
+#: experiment's wiring. C1's version of that assertion moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_measures_the_summariser.py`
+#: in the 2026-10-03 convergence round; the generic property — that the
+#: summariser can refuse a pod whose suite passed — is what the tests above
+#: establish, and it holds whoever declares it.
 
 
 @pytest.mark.parametrize("field", ["all_skipped_nodeids", "skip_set_digest",
@@ -511,13 +477,3 @@ def test_mutation_dropping_failure_capture_is_caught(tmp_path, monkeypatch):
         _ = out["failure_details"][out["failed_nodeids"][0]]
 
 
-def test_the_raw_cpu_test_artifacts_are_retrieved_before_teardown():
-    """A parser bug must not again be the only surviving evidence."""
-    sys.path.insert(0, str(REPO / "tests/pod"))
-    from support.session_specs import load_session_launcher, session_args
-    mod = load_session_launcher("autoinit_c1_launch")
-    files = mod.spec(session_args(mod)).setup_failure_files
-    for raw in ("/workspace/pytest_outcomes.json", "/workspace/pytest_junit.xml",
-                "/workspace/pytest.log"):
-        assert raw in files, f"{raw} would not survive a setup abort"
-    assert not any("token" in f.lower() or "credential" in f.lower() for f in files)

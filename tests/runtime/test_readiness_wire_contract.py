@@ -39,7 +39,6 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from aadistill.runtime import pod_environment as PE  # noqa: E402
-from experiments.phase_c1 import pod_environment as C1  # noqa: E402
 
 
 def head() -> str:
@@ -48,6 +47,27 @@ def head() -> str:
 
 
 # --- two callers, deliberately unlike --------------------------------------
+
+#: A FIRST caller, synthetic. This used to be
+#: `experiments.phase_c1.pod_environment.C1_RECORD_CONTRACT`, imported at module
+#: scope -- so collecting the CORE suite required a closed experiment's package
+#: to import. The mechanism under test is "a RecordContract's schema, harness key
+#: and record path drive verification", and that is a statement about arbitrary
+#: contracts; proving it with two synthetic ones proves it for every caller,
+#: including the ones that do not exist yet.
+#:
+#: Phase C1's concrete instance -- that ITS schema string and ITS harness key have
+#: not moved, and that its wrapper supplies the contract -- is asserted in
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_record_contract.py`, where
+#: a reader looking for C1's wiring will look.
+FIRST = PE.RecordContract(
+    schema="example.first_session_readiness/v1",
+    harness_field="first_harness_digest",
+    harness_digest=lambda repo_root: "a" * 64,
+    record_path="logs/first_session_readiness.json",
+    named_files=(),
+    harness_label="first-session harness",
+)
 
 #: A second session's wire format. Nothing about it resembles C1's: its own
 #: schema, its own harness key, its own harness value, its own record path.
@@ -83,19 +103,19 @@ def record_for(contract: PE.RecordContract, *, kind: str = "diagnostic",
     return rec
 
 
-# --- 1. the original C1 contract still works --------------------------------
+# --- 1. a contract's own strings are what verification reads --------------------------------
 
-class TestTheC1ContractIsUnchanged:
-    """Its schema string and its harness key must NOT move: every committed C1
-    record already carries them, and their self-hashes were computed over them.
-    Renaming either would invalidate real evidence."""
+class TestAContractsOwnStringsAreUsedVerbatim:
+    """A contract's schema and harness key are read from the contract, not from
+    a literal. Asserted on a synthetic contract, because that is the property;
+    which strings one experiment chose is that experiment's record.
+    """
 
-    def test_the_schema_string_is_exactly_what_records_carry(self):
-        assert C1.C1_RECORD_CONTRACT.schema == (
-            "aadistill.autoinit.c1_pod_environment_verification/v1")
+    def test_the_schema_string_is_the_contracts_own(self):
+        assert FIRST.schema == "example.first_session_readiness/v1"
 
-    def test_the_harness_field_is_exactly_the_key_records_use(self):
-        assert C1.C1_RECORD_CONTRACT.harness_field == "c1_harness_digest"
+    def test_the_harness_field_is_the_contracts_own(self):
+        assert FIRST.harness_field == "first_harness_digest"
 
     def test_the_writer_sources_both_values_from_the_contract(self):
         """The producer/consumer property, and the reason neither value moved.
@@ -134,24 +154,7 @@ class TestTheC1ContractIsUnchanged:
             assert literal not in code, (
                 f"the literal harness key {literal} survives in the recorder")
 
-    def test_a_c1_shaped_record_verifies_through_the_real_function(self):
-        ok, why = PE.verify_record(record_for(C1.C1_RECORD_CONTRACT), REPO,
-                                   contract=C1.C1_RECORD_CONTRACT)
-        assert ok, why
-
-    def test_the_wrapper_supplies_the_contract_so_the_launcher_needs_no_kwargs(self):
-        """THE DEFECT this closes on C1's own side.
-
-        `pod_environment_gate` calls `C1.verify_record(record, REPO, ...)` and
-        passes no harness digest. Under the previous signature that returned
-        "no harness_digest provider was supplied" — on the real launch path,
-        while every test passed one explicitly and never saw it.
-        """
-        ok, why = C1.verify_record(record_for(C1.C1_RECORD_CONTRACT), REPO)
-        assert ok, why
-
-
-# --- 2. a non-C1 caller works, end to end -----------------------------------
+# --- 2. a SECOND caller works, end to end -----------------------------------
 
 class TestASecondCallerCanHaveARecord:
     def test_its_own_schema_is_accepted(self):
@@ -166,23 +169,23 @@ class TestASecondCallerCanHaveARecord:
         assert rec["other_harness_sha256"] == "b" * 64
         assert PE.verify_record(rec, REPO, contract=OTHER)[0]
 
-    def test_c1s_schema_is_refused_for_this_caller(self):
-        rec = record_for(OTHER, schema=C1.C1_RECORD_CONTRACT.schema)
+    def test_the_other_callers_schema_is_refused_for_this_one(self):
+        rec = record_for(OTHER, schema=FIRST.schema)
         rec["self_sha256"] = PE.self_hash(
             {k: v for k, v in rec.items() if k != "self_sha256"})
         ok, why = PE.verify_record(rec, REPO, contract=OTHER)
         assert not ok and "unexpected schema" in why
 
-    def test_and_its_schema_is_refused_for_C1(self):
+    def test_and_its_schema_is_refused_for_the_first(self):
         """Symmetric. Neither caller may verify the other's record."""
         ok, why = PE.verify_record(record_for(OTHER), REPO,
-                                   contract=C1.C1_RECORD_CONTRACT)
+                                   contract=FIRST)
         assert not ok and "unexpected schema" in why
 
     def test_its_record_path_drives_the_post_sweep_allowance(self):
         assert PE.permitted_post_sweep_paths(OTHER.record_path)[0] == \
             OTHER.record_path
-        assert C1.RECORD_PATH not in PE.permitted_post_sweep_paths(
+        assert FIRST.record_path not in PE.permitted_post_sweep_paths(
             OTHER.record_path)
 
 
@@ -239,7 +242,7 @@ class TestADifferentNumberOfChecks:
 # --- 4. every fail-closed behaviour survives --------------------------------
 
 class TestNothingWasWeakened:
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_wrong_harness_digest_is_refused(self, contract):
         rec = record_for(contract)
@@ -249,7 +252,7 @@ class TestNothingWasWeakened:
         ok, why = PE.verify_record(rec, REPO, contract=contract)
         assert not ok and "the pod sweep is owed again" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_tampered_record_fails_the_self_hash(self, contract):
         """Edited in place WITHOUT recomputing the hash, which is what tampering
@@ -259,7 +262,7 @@ class TestNothingWasWeakened:
         ok, why = PE.verify_record(rec, REPO, contract=contract)
         assert not ok and "self-hash" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_promoting_the_kind_in_place_is_still_tampering(self, contract):
         rec = record_for(contract, kind="diagnostic")
@@ -268,7 +271,7 @@ class TestNothingWasWeakened:
                                    required_kind=PE.LAUNCH_BOUND)
         assert not ok and "self-hash" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_failing_verdict_is_refused(self, contract):
         ok, why = PE.verify_record(
@@ -276,21 +279,21 @@ class TestNothingWasWeakened:
             contract=contract)
         assert not ok and "verdict" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_dirty_sweep_is_refused(self, contract):
         ok, why = PE.verify_record(record_for(contract, tree_clean=False), REPO,
                                    contract=contract)
         assert not ok and "dirty working tree" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_diagnostic_is_still_refused_by_a_launch_bound_caller(self, contract):
         ok, why = PE.verify_record(record_for(contract), REPO, contract=contract,
                                    required_kind=PE.LAUNCH_BOUND)
         assert not ok and "launch_bound" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_missing_swept_base_is_refused(self, contract):
         rec = record_for(contract)
@@ -300,14 +303,14 @@ class TestNothingWasWeakened:
         ok, why = PE.verify_record(rec, REPO, contract=contract)
         assert not ok and "swept_base_commit" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_staging_contract_mismatch_is_refused(self, contract):
         ok, why = PE.verify_record(record_for(contract), REPO, contract=contract,
                                    staging_contract_digest="9" * 64)
         assert not ok and "staging contract" in why
 
-    @pytest.mark.parametrize("contract", [C1.C1_RECORD_CONTRACT, OTHER],
+    @pytest.mark.parametrize("contract", [FIRST, OTHER],
                              ids=["c1", "other"])
     def test_a_launch_bound_record_without_a_staging_contract_is_refused(self, contract):
         rec = record_for(contract, kind=PE.LAUNCH_BOUND)

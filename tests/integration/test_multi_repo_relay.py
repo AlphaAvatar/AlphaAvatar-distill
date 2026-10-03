@@ -192,18 +192,11 @@ def test_an_unreachable_repository_aborts_rather_than_assuming(monkeypatch):
     assert f"cannot list {TRANSPORT}" in " ".join(r.ev["said"])
 
 
-def test_the_ten_main_relay_science_inputs_are_unchanged(monkeypatch):
-    """The whole point of a default: nothing that already worked moved."""
-    sys.path.insert(0, str(REPO / "scripts/pod"))
-    from support.session_specs import load_session_launcher, session_args
+#: `test_the_ten_main_relay_science_inputs_are_unchanged` and its siblings moved to
+#: `scripts/experiments/stage-1/phase_a/tests/test_phase_a_relay_science_inputs.py`
+#: in the 2026-10-03 convergence round: they load that experiment's own
+#: launcher by name, which makes them its tests rather than this suite's.
 
-    mod = load_session_launcher("autoinit_phase_a_launch")
-    spec = mod.spec(session_args(mod))
-    inputs = spec.setup.relay_inputs
-    assert len(inputs) == 10, f"expected the 10 science inputs, got {len(inputs)}"
-    assert {r.repo for r in inputs} == {MAIN_RELAY}
-    env = json.loads(spec.setup.relay_env())
-    assert all(i["repo"] == MAIN_RELAY for i in env)
 
 
 # --- setup and the precheck cannot diverge ----------------------------------

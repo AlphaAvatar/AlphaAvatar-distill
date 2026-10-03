@@ -1197,7 +1197,7 @@ normal state, and the eleven that used to be quoted that way were every one of
 them a closed experiment's historical-state assertion; they now live with their
 experiments.
 
-**2. A current experiment suite — `pytest scripts/experiments/<phase>/tests`.**
+**2. A current experiment suite — `pytest scripts/experiments/stage-<n>/<experiment>/tests`.**
 
 That experiment's wiring, config, preflight and protocol. Explicitly invoked,
 because it validates one experiment rather than the framework. A session may

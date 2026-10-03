@@ -230,7 +230,8 @@
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment = `pytest scripts/experiments/stage-<n>/<exp>/tests`.",
-  "core": "3030 collected, 3016 passed / 14 skipped, AIMS GREEN.",
-  "the_eleven": "retired from the default run. Each was a closed experiment's historical-state assertion that moved with its experiment; none was repaired to achieve it."
+  "core": "AIMS GREEN, ~4 min. A red test means a current core problem.",
+  "boundary_guard": "tests/architecture/test_core_suite_boundary.py: specific experiment imports from core = 0; nine shared-application imports remain as a deliberate contract.",
+  "trees": "scripts/experiments/stage-<n>/<experiment_id>/ mirrors logs/stages/stage-<n>/<experiment_id>/ row for row; ownership from logs/stages/index.json."
  }
 }

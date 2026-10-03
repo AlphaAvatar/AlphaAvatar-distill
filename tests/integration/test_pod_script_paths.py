@@ -695,24 +695,10 @@ def gate_selection(spec) -> set[str]:
     return out
 
 
-def test_c1_runs_no_host_local_module_on_a_paid_pod():
-    """Its premise is a retained byte store that is deliberately host-local, and
-    running it on a pod cost three of attempt 4's six failures.
+#: `test_c1_runs_no_host_local_module_on_a_paid_pod` and its siblings moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_pod_collects_no_host_local_module.py`
+#: in the 2026-10-03 convergence round: they load that experiment's own
+#: launcher by name, which makes them its tests rather than this suite's.
 
-    It was named in a four-module exclusion list, then in a derived complement.
-    Both pinned the mechanism. The property is that the module is NOT COLLECTED,
-    which is stronger, covers every other host-local module at the same time,
-    and survives the next change of declaration shape.
-    """
-    mod = load_session_launcher("autoinit_c1_launch")
-    spec = mod.spec(session_args(mod))
-    collected = gate_selection(spec)
-    for host_local in ("test_phase_b_reuse_hostlocal.py", "test_stage1_import.py",
-                       "test_recovery_continuation_session.py"):
-        hits = [c for c in collected if c.endswith(host_local)]
-        assert not hits, f"a C1 pod would collect {hits}"
-    #: And the selection is C1's own suite, wherever that suite lives.
-    assert mod.POD_TEST_SELECTION.endswith("phase_c1/tests")
-    assert collected, "a gate that collects nothing is not a gate"
 
 

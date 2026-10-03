@@ -197,40 +197,58 @@ def test_the_runner_is_not_subclassed_anywhere():
             f"{path.relative_to(REPO)} subclasses SessionRunner")
 
 
+def authorization_constants():
+    """Every `*_AUTHORIZATION` constant in the experiments tree, DISCOVERED.
+
+    Named imports used to list three — Phase A's, the micro-preflight's and the
+    continuation's — so a fourth experiment's grant could carry attempt prose and
+    no test would look. Discovery also removes the reason a core test had to
+    import specific experiment packages: the invariant is about every grant
+    constant, not about those three.
+    """
+    import importlib
+
+    out = []
+    root = REPO / "scripts/experiments"
+    for path in sorted(root.rglob("*.py")):
+        if path.name.startswith("_") or "/tests/" in str(path):
+            continue
+        rel = path.relative_to(root).with_suffix("")
+        parts = [p for p in rel.parts if not p.startswith("stage-")]
+        module = "experiments." + ".".join(parts)
+        try:
+            mod = importlib.import_module(module)
+        except Exception:                 # a module needing live inputs is not ours to fix
+            continue
+        for name in dir(mod):
+            if name.endswith("_AUTHORIZATION"):
+                constant = getattr(mod, name)
+                if hasattr(constant, "granted_by"):
+                    out.append((f"{module}.{name}", constant))
+    return out
+
+
 def test_no_attempt_specific_grant_prose_in_executable_source():
     """A grant is a one-use decision and goes stale where code does not.
 
-    `scripts/experiments/stage-1/phase_a/plan.py` carried attempt-7's grant — which attempt
-    it covered, the cumulative spend at approval, what it did not authorize —
-    inside the authorization constant, where it still read as current after the
-    attempt was over. The schema stays; the grant arrives at issue time.
+    An authorization constant once carried attempt-7's grant — which attempt it
+    covered, the cumulative spend at approval, what it did not authorize —
+    inside the constant, where it still read as current after the attempt was
+    over. The schema stays; the grant arrives at issue time.
+
+    Checked on `granted_by` rather than on free text: a module docstring listing
+    what past attempts cost is failure history, which AGENTS.md P11 requires to
+    stay, and is not a permission.
     """
-    from experiments.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION
-
-    assert PHASE_A_AUTHORIZATION.granted_by == GRANT_PROSE_REQUIRED, (
-        "the Phase-A authorization schema carries grant prose again")
-    for attr in ("granted_utc", "science_plan_hash"):
-        assert getattr(PHASE_A_AUTHORIZATION, attr) == "PLACEHOLDER", attr
-    assert PHASE_A_AUTHORIZATION.authorized_session_commit is None
-    assert PHASE_A_AUTHORIZATION.harness_source_digest is None
-
-    # And no authorization CONSTANT in the core carries a grant. Checked on the
-    # `granted_by` field rather than on free text: a module docstring listing
-    # what past attempts cost is failure history, which AGENTS.md P11 requires
-    # to stay, and is not a permission.
-    from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
-    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
-
-    for label, constant in (("micro-preflight", MICRO_PREFLIGHT_AUTHORIZATION),
-                            ("continuation", CONTINUATION_AUTHORIZATION),
-                            ("phase A", PHASE_A_AUTHORIZATION)):
-        prose = constant.granted_by
+    constants = authorization_constants()
+    assert constants, "no authorization constant was discovered at all"
+    for label, constant in constants:
         offenders = re.findall(
-            r"attempt \d+[^.\n]{0,80}\$\d|\$\d[^.\n]{0,80}attempt \d+", prose)
+            r"attempt \d+[^.\n]{0,80}\$\d|\$\d[^.\n]{0,80}attempt \d+",
+            constant.granted_by)
         assert not offenders, (
-            f"the {label} authorization constant names an attempt beside a "
-            f"dollar figure: {offenders[:2]}. That is a one-use grant living in "
-            "executable source.")
+            f"{label} names an attempt beside a dollar figure: {offenders[:2]}. "
+            "That is a one-use grant living in executable source.")
 
 
 def test_the_issuer_refuses_to_issue_without_a_grant_document():
@@ -267,54 +285,15 @@ def test_every_session_has_a_distinct_operational_identity():
         assert len(set(values)) == len(values), f"sessions share {field}: {values}"
 
 
-def test_the_recovery_continuation_shares_the_science_and_not_the_session():
-    """The one intentional `plan_hash` collision, asserted rather than allowed.
+#: `test_the_recovery_continuation_shares_the_science_and_not_the_session`
+#: moved to
+#: `scripts/experiments/stage-1/recovery_continuation/tests/test_it_shares_phase_as_science.py`
+#: in the 2026-10-03 convergence round. It compares two named experiments'
+#: plan hashes, authorization types, harness sets and budgets — a claim the
+#: continuation makes about itself. What stays here is the structural rule it
+#: was filed under: every session spec is validated, frozen, and declares its
+#: own operational fields, asserted over the whole launcher enumeration.
 
-    Dropping `plan_hash` from the uniqueness list above removes a check; this
-    replaces it with a stronger and more specific one. The continuation must
-    share the **full Phase-A** plan hash — nothing was rewritten to pretend
-    Phase A always began at Stage 2 — while being a different operational
-    session in every respect that decides what runs, what it costs, and what
-    permits it.
-    """
-    by_name = {name: spec for name, _m, _a, spec in all_specs()}
-    cont = by_name["autoinit_recovery_continuation_launch"]
-    phase_a = by_name["autoinit_phase_a_launch"]
-
-    # Same science, deliberately and exactly.
-    assert cont.plan_hash == phase_a.plan_hash
-    assert cont.plan_id == phase_a.plan_id
-    assert cont.plan_hash == (
-        "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"), (
-        "the frozen Phase-A session plan moved")
-
-    # Different operational session, in every field that names a run.
-    for field in ("session_id", "schema", "status_path", "run_log_path",
-                  "authorization_path", "driver_job_id"):
-        assert getattr(cont, field) != getattr(phase_a, field), field
-
-    # Its own authorization TYPE and harness, not Phase A's.
-    from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization
-    from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization
-    assert cont.authorization_loader == RecoveryContinuationAuthorization.load
-    assert phase_a.authorization_loader == PhaseAAuthorization.load
-    assert (set(RECOVERY_CONTINUATION_HARNESS_FILES_V1)
-            != set(PHASE_A_HARNESS_SOURCE_FILES_V1))
-    assert ("scripts/autoinit/phase_a_search.py"
-            not in RECOVERY_CONTINUATION_HARNESS_FILES_V1)
-
-    # Its own budget: the Stage-1 search phase and both Stage-1 reserves are
-    # gone, so it cannot be priced as if it were running one.
-    plan = cont.budget.plan(price_per_hour=0.99, authorized_usd=16.7456)
-    assert not [p for p in plan.breakdown if p.name == "stage1_beam_search"]
-    assert plan.soft_stop_reserves == ()
-    assert plan.hard_terminate_usd == pytest.approx(16.7456, abs=1e-4)
-    full = phase_a.budget.plan(price_per_hour=0.99, authorized_usd=23.0484)
-    assert plan.hard_terminate_usd < full.hard_terminate_usd
-
-    # And it says so about itself.
-    assert cont.evidence_fields["runs_a_search"] is False
-    assert phase_a.evidence_fields.get("runs_a_search") is not False
 
 
 def test_the_specs_are_frozen():
@@ -496,19 +475,11 @@ def test_a_session_that_asks_for_rope_ok_stages_a_config_for_it(name, extra):
     #: asserted in the C1-specific test below.
 
 
-def test_c1_stages_the_canonical_rope_config_specifically():
-    """C1's own binding, by hash: the object verified against the relay."""
-    mod = load_session_launcher("autoinit_c1_launch")
-    spec = mod.spec(session_args(mod, ()))
-    staged = {r.path: r for r in spec.setup.staged_relay_inputs()}
-    want = "stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
-    assert want in staged, sorted(staged)
-    assert staged[want].sha256 == (
-        "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054")
-    assert staged[want].dest == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-    #: and NOT the weights, which the RoPE gate never reads
-    assert not [p for p in staged if p.endswith("model.safetensors")]
-    assert not [p for p in staged if p.endswith("generation_config.json")]
+#: `test_c1_stages_the_canonical_rope_config_specifically` and its siblings moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_stages_the_rope_config.py`
+#: in the 2026-10-03 convergence round: they load that experiment's own
+#: launcher by name, which makes them its tests rather than this suite's.
+
 
 
 def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
@@ -797,40 +768,14 @@ def run_rope_check(repo_root):
     return out.returncode, (out.stdout + out.stderr).strip()
 
 
-def _c1_relay_inputs():
-    mod = load_session_launcher("autoinit_c1_launch")
-    spec = mod.spec(session_args(mod, ()))
-    return [r for r in spec.setup.staged_relay_inputs()
-            if r.path.startswith("stage1/qwen3_0p6b_init_v0/checkpoint/")]
 
 
-def test_the_c1_checkpoint_inputs_land_where_the_rope_gate_globs(tmp_path,
-                                                                 monkeypatch):
-    """The REAL staging block, driven by C1's REAL declared manifest."""
-    import hashlib
-    import json as _json
+#: C1's checkpoint relay inputs and the rope-gate glob moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_rope_gate_inputs.py`
+#: in the 2026-10-03 convergence round: both load C1's launcher by name.
+#: The rope gate's own behaviour, and every structural property a session
+#: spec must satisfy, stay here and are asserted over every launcher.
 
-    local = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-    inputs, relay = [], {}
-    for r in _c1_relay_inputs():
-        src = local / Path(r.path).name
-        if not src.is_file():
-            pytest.skip(f"{src} is not present on this machine")
-        relay[r.path] = src.read_bytes()
-        inputs.append({"repo": MAIN_RELAY, "path": r.path, "dest": r.dest,
-                       "sha256": r.sha256, "also_stage_to": None})
-    assert len(inputs) == 4, [i["path"] for i in inputs]
-
-    repo, fetched = run_staging(tmp_path, inputs, relay, monkeypatch)
-    dest = repo / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-    landed = {p.name for p in dest.iterdir() if p.is_file()}
-    assert landed == {"config.json", "tokenizer.json", "tokenizer_config.json",
-                      "chat_template.jinja"}, landed
-    #: byte-identical to the pinned relay object
-    got = hashlib.sha256((dest / "config.json").read_bytes()).hexdigest()
-    assert got == "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054"
-    #: and the weights were never asked for
-    assert not [p for p in fetched if p.endswith("model.safetensors")]
 
 
 def test_the_real_rope_check_refuses_a_tree_with_no_config(tmp_path):

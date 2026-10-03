@@ -1,9 +1,10 @@
 """What every suite in this repository needs, and nothing that belongs to one.
 
-There are three suites and they are different things (AGENTS.md §2.9a):
+There are three suites and they are different things (AGENTS.md §2.8a):
 
 * the **core suite** — `pytest` — reusable framework behaviour under `tests/`;
-* a **current experiment suite** — `pytest scripts/experiments/<phase>/tests`;
+* a **current experiment suite** —
+  `pytest scripts/experiments/stage-1/phase_d1/tests`;
 * **historical verification** — an explicit run of a closed experiment's tests.
 
 All three need the same two source roots importable and the same shipped

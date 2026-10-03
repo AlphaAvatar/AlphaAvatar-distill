@@ -20,7 +20,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "tests"))
 
-from support.historical_declarations import (  # noqa: E402
+from experiments.historical_declarations import (  # noqa: E402
     assert_declaration_refuses,
     missing_from_tree,
 )
