@@ -74,8 +74,22 @@ scripts/experiments/stage-3/tests/      <->  logs/stages/stage-3/
 **Specific experiment imports from the core suite: ZERO**, enforced by
 `tests/architecture/test_core_suite_boundary.py` — no core file imports an
 experiment package, every `experiments.*` import from core is a shared
-application module, and no core file loads a named experiment launcher. The
-allowed set is derived from the tree, so adding an experiment cannot widen it.
+application module, no core file loads a named experiment launcher, and no core
+file reads a concrete historical run. The allowed set is derived from the tree,
+so adding an experiment cannot widen it.
+
+**And the core result no longer depends on historical evidence existing.**
+Archiving attempt 12's records, its preserved leaves or C1's cuda-stage-f
+directory changes nothing — not even a skip. The Stage-1 importer's nine
+refusals are proved against a two-leaf search built under `tmp_path`; the CUDA
+launcher's budget accounting against an authorization and ledger the test
+writes. All 14 core skips are live declarations, not absent records.
+
+**NEXT SESSION, BEFORE RESUMING D1.** `review/d1-target-aware` (`161215c9`)
+diverged from this refactor at `4dc579ba` — three commits on its side, four
+behind. Once this refactor is on `main`, **rebase the D1 work onto the new main
+first**; continuing on the old tree would reintroduce `tests/autoinit/` and the
+flat `scripts/experiments/phase_d1/` paths this round removed.
 
 Stage ownership comes from [`index.json`](../stages/index.json), not
 from names: Stage 1 holds `phase_a`, `phase_a3`, `phase_b`, `phase_c1`,

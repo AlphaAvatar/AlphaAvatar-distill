@@ -22,6 +22,7 @@ What is pinned:
 """
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 import sys
@@ -32,20 +33,75 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 ENTRY = REPO / "scripts/validation/cuda_engineering_launch.py"
-AUTH = REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
-#: The ledger is the authorization's sibling, which is how the launcher
-#: resolves it too -- naming ONE file cannot select someone else's ledger.
-CAMPAIGN = AUTH.parent / "campaign.json"
+#: THE DOCUMENTS THE LAUNCHER READS, BUILT HERE.
+#:
+#: These were read out of `logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/`
+#: — a 2026-09-10 campaign's real authorization and ledger, used as a template —
+#: which made the CORE suite depend on an old experiment's files still existing.
+#: A skip was not a fix: archiving that directory then turned "core is green" into
+#: "core is green with skips", which is a different statement.
+#:
+#: The launcher reads four numbers and nothing else: the three in
+#: `resource_contract` and `booked_usd` from the ledger beside it. Everything the
+#: historical document carries besides those is that campaign's record, and the
+#: three tests that asserted its CONTENTS moved to Phase C1's suite.
 
-#: Those two are read as a TEMPLATE -- the shape of an authorization and a ledger
-#: -- and every test below builds its own campaign under `tmp_path` from them. The
-#: skip keeps the CORE suite from erroring at import if that historical directory
-#: is ever archived: a core test may use an old record as a fixture, but it may
-#: not go red because the record was retired. The one test that asserted the
-#: concrete campaign's booked dollars moved to Phase C1's suite.
-pytestmark = pytest.mark.skipif(
-    not (AUTH.is_file() and CAMPAIGN.is_file()),
-    reason="the cuda-stage-f authorization/ledger template is not staged here")
+
+def write_authorization(home: Path, **over) -> Path:
+    """A minimal engineering-validation authorization, at `home`."""
+    rc = dict(engineering_soft_cap_usd=0.25,
+              total_resource_cost_ceiling_usd=0.40,
+              teardown_reserve_usd=0.15)
+    rc.update(over.pop("resource_contract", {}))
+    doc = {
+        "schema": "aadistill.engineering_validation_authorization/v1",
+        "authorization_id": "synthetic_engineering_validation",
+        "subject": "a synthetic engineering validation, for testing the launcher",
+        "authorizes": ["one real-CUDA engineering validation at the stated "
+                       "resource and budget contract"],
+        "does_not_authorize": ["anything formal"],
+        "resource_contract": rc,
+        "capability_requirement": {"compute_capability_min": "8.0",
+                                   "native_bf16": True,
+                                   "free_vram_gib_min": 2},
+    }
+    doc.update(over)
+    #: The launcher records this in its evidence, so the document must carry one.
+    #: Computed over the document rather than invented, exactly as a real
+    #: authorization's is -- a self-hash that does not hash the document is the
+    #: kind of stamp this repository has been bitten by.
+    doc["authorization_sha256"] = hashlib.sha256(
+        json.dumps(doc, sort_keys=True).encode()).hexdigest()
+    home.mkdir(parents=True, exist_ok=True)
+    path = home / "authorization.json"
+    path.write_text(json.dumps(doc, indent=1))
+    return path
+
+
+def write_campaign(home: Path, *, booked_usd: float = 0.04) -> Path:
+    """The ledger the launcher resolves as the authorization's sibling."""
+    path = home / "campaign.json"
+    #: The subrun list and the total must AGREE: `book_subrun` recomputes
+    #: `booked_usd` from the list, so a ledger claiming money with no subruns to
+    #: show for it makes the next booking look like a REFUND. A real ledger is
+    #: consistent, so the synthetic one is too.
+    path.write_text(json.dumps({
+        "schema": "aadistill.engineering_campaign/v1",
+        "campaign_id": "synthetic_campaign",
+        "booked_usd": booked_usd,
+        "subruns": [{"subrun_id": "prior", "verdict": "PASS",
+                     "cost_usd": booked_usd}],
+    }, indent=1))
+    return path
+
+
+@pytest.fixture(scope="module")
+def governance(tmp_path_factory):
+    """One authorization + ledger pair, for the tests that only need a valid one."""
+    home = tmp_path_factory.mktemp("gov") / "validations" / "synthetic" / "v1"
+    auth = write_authorization(home)
+    write_campaign(home)
+    return auth
 
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
@@ -99,8 +155,15 @@ def args(**over):
 
 
 @pytest.fixture
-def eng(mod, tmp_path, monkeypatch):
-    """A launcher with the provider and CLI replaced. Creates nothing."""
+def eng(mod, tmp_path, monkeypatch, governance):
+    """A launcher with the provider and CLI replaced. Creates nothing.
+
+    Pointed at the SYNTHETIC authorization and ledger. `args()` still carries the
+    launcher's own `DEFAULT_AUTHORIZATION` — reading that constant from the source
+    is a legitimate check that the default is declared — but CONSTRUCTING against
+    it would read the 2026-09-10 campaign's files, which is the dependency this
+    file no longer has.
+    """
     monkeypatch.setattr(mod, "read_api_key", lambda p: "test-key")
     monkeypatch.setenv("RUNPOD_API_KEY", "test-key")
     fake_cli = tmp_path / "runpodctl"
@@ -109,43 +172,17 @@ def eng(mod, tmp_path, monkeypatch):
     monkeypatch.setattr(mod, "provider_cli_candidates", lambda: (str(fake_cli),))
     monkeypatch.setattr(mod, "RunPodProvider", lambda key: types.SimpleNamespace(
         _gql=lambda q: {"data": {}}))
-    e = mod.Engineering(args(scr=str(tmp_path / "scr")))
+    e = mod.Engineering(args(scr=str(tmp_path / "scr"),
+                             authorization=str(governance)))
     e.creates_issued = []
     return e
 
 
-# --- the authorization it reads ---------------------------------------------
-
-def test_it_reads_the_engineering_authorization_not_a_c1_grant():
-    doc = json.loads(AUTH.read_text())
-    assert doc["schema"] == "aadistill.engineering_validation_authorization/v1"
-    rc = doc["resource_contract"]
-    #: The count-based clauses are HISTORY: stage F ran under them, and they
-    #: were withdrawn on 2026-09-17 because attempt count is not budget. They
-    #: are asserted here as a fact about a closed record, not as a contract
-    #: the launcher still enforces -- it no longer reads them, and an
-    #: authorization written after the withdrawal omits them.
-    assert rc["provider_resources_max"] == 1
-    assert rc["provider_create_attempts_max"] == 1
-    assert rc["retries_or_replacement_pods"] == 0
-    assert rc["engineering_soft_cap_usd"] == 0.25
-    assert rc["total_resource_cost_ceiling_usd"] == 0.40
-    assert rc["teardown_reserve_usd"] == 0.15
-
-
-def test_the_reserve_sits_inside_the_ceiling():
-    rc = json.loads(AUTH.read_text())["resource_contract"]
-    assert rc["teardown_reserve_usd"] < rc["total_resource_cost_ceiling_usd"]
-
-
-def test_it_authorizes_nothing_formal():
-    doc = json.loads(AUTH.read_text())
-    joined = " ".join(doc["does_not_authorize"]).lower()
-    for forbidden in ("attempt-10", "formal c1 bundle", "confirmation battery",
-                      "formal c1 decision", "merging"):
-        assert forbidden in joined, forbidden
-    assert doc["formal_c1_status_unchanged"]["formal_treatment"] == "UNMEASURED"
-    assert doc["formal_c1_status_unchanged"]["attempt_9"] == "NO DECISION"
+#: The three tests that asserted the 2026-09-10 authorization's CONTENTS — its
+#: withdrawn count-based clauses, its reserve sitting inside its ceiling, what it
+#: declined to authorize — moved to
+#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_stage_f_authorization.py`
+#: in the 2026-10-03 convergence round. They are facts about a closed record.
 
 
 # --- exactly one create -----------------------------------------------------
@@ -492,11 +529,8 @@ class TestPriorSpendReducesTheNextResourcesLimits:
             self, mod, tmp_path, monkeypatch):
         """The same property, with a campaign this test builds."""
         home = tmp_path / "validations" / "synthetic" / "v1"
-        home.mkdir(parents=True)
-        (home / "authorization.json").write_text(AUTH.read_text())
-        camp = json.loads(CAMPAIGN.read_text())
-        camp["booked_usd"] = 0.17
-        (home / "campaign.json").write_text(json.dumps(camp))
+        auth = write_authorization(home)
+        write_campaign(home, booked_usd=0.17)
         monkeypatch.setattr(mod, "read_api_key", lambda p: "test-key")
         monkeypatch.setenv("RUNPOD_API_KEY", "test-key")
         fake_cli = tmp_path / "runpodctl"
@@ -506,7 +540,7 @@ class TestPriorSpendReducesTheNextResourcesLimits:
         monkeypatch.setattr(mod, "RunPodProvider", lambda key: types.SimpleNamespace(
             _gql=lambda q: {"data": {}}))
         e = mod.Engineering(args(scr=str(tmp_path / "scr"),
-                                 authorization=str(home / "authorization.json")))
+                                 authorization=str(auth)))
         assert e.booked_usd == pytest.approx(0.17)
         assert e.remaining_total == pytest.approx(e.hard_usd - 0.17)
         assert e.remaining_soft == pytest.approx(e.soft_usd - 0.17)
@@ -528,16 +562,12 @@ class TestPriorSpendReducesTheNextResourcesLimits:
         its ledger, which is the part that can now go wrong.
         """
         home = tmp_path / "validations" / "exhausted" / "v1"
-        home.mkdir(parents=True)
-        (home / "authorization.json").write_text(AUTH.read_text())
-        camp = json.loads(CAMPAIGN.read_text())
-        camp["booked_usd"] = 0.39          # leaves less than the $0.15 reserve
-        (home / "campaign.json").write_text(json.dumps(camp))
+        auth = write_authorization(home)
+        write_campaign(home, booked_usd=0.39)   # less than the $0.15 reserve left
         monkeypatch.setattr(mod, "read_api_key", lambda p: "k")
         with pytest.raises(mod.Stop, match="teardown reserve"):
             mod.Engineering(args(
-                scr=str(tmp_path / "s"),
-                authorization=str(home / "authorization.json")))
+                scr=str(tmp_path / "s"), authorization=str(auth)))
 
     def test_a_validation_without_a_ledger_refuses_to_start(
             self, mod, tmp_path, monkeypatch):
@@ -549,13 +579,11 @@ class TestPriorSpendReducesTheNextResourcesLimits:
         exists to prevent.
         """
         home = tmp_path / "no-ledger" / "v1"
-        home.mkdir(parents=True)
-        (home / "authorization.json").write_text(AUTH.read_text())
+        auth = write_authorization(home)       # and deliberately NO ledger
         monkeypatch.setattr(mod, "read_api_key", lambda p: "k")
         with pytest.raises(mod.Stop, match="campaign ledger"):
             mod.Engineering(args(
-                scr=str(tmp_path / "s"),
-                authorization=str(home / "authorization.json")))
+                scr=str(tmp_path / "s"), authorization=str(auth)))
 
     def test_the_feasibility_test_uses_remaining_minus_reserve(self, eng,
                                                                monkeypatch):

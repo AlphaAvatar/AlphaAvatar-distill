@@ -219,7 +219,77 @@ def test_the_guard_would_catch_a_violation(tmp_path):
     assert _NAMED_EXPERIMENT_LAUNCHER.search(launcher.read_text()), \
         "rule 3 would not fire"
 
+    concrete = tmp_path / "test_concrete_run.py"
+    concrete.write_text(
+        'D = REPO / "logs/stages/stage-1/phase_a/runs/attempt12"\n')
+    assert any(_CONCRETE_RUN.match(l)
+               for l in _repo_joined_literals(concrete)), "rule 4 would not fire"
+
+    prose = tmp_path / "test_prose.py"
+    prose.write_text(
+        '"""see logs/stages/stage-1/phase_c1/runs/attempt9 for why."""\n'
+        'entry = {"root": "logs/stages/stage-1/phase_c1/runs/attempt10"}\n')
+    assert not [l for l in _repo_joined_literals(prose) if _CONCRETE_RUN.match(l)], (
+        "rule 4 would flag a docstring or synthetic test data, which is the "
+        "false positive that would have made it not worth having")
+
     allowed = tmp_path / "test_allowed.py"
     allowed.write_text("from experiments.run_layout import RunLayout\n")
     assert all(m.split(".")[1] in shared for m in experiment_imports(allowed)), \
         "the guard would refuse a legitimate shared-application contract"
+
+#: A CONCRETE historical run used as core test INPUT.
+#:
+#: `test_stage1_import.py` bypassed both rules above: it imported nothing from
+#: `experiments` and loaded no launcher, yet it read
+#: `logs/stages/stage-1/phase_a/runs/attempt12` and a host-local checkpoint store
+#: under a `skipif`. The core suite's result therefore depended on whether a
+#: closed experiment's bytes were still on this machine.
+#:
+#: The signal is deliberately narrow: a string literal naming a concrete run,
+#: JOINED TO `REPO`. That is what reading the real tree looks like. It does NOT
+#: match the same path in a docstring (`test_run_layout_all_stages` explains
+#: attempt 9's two surviving components), nor in synthetic test data
+#: (`test_log_organisation` builds index entries naming `runs/attempt10` and a
+#: tree under `tmp_path`), nor generic discovery through `logs/index.json`, which
+#: is how a governance test should find runs. Three such files exist today and
+#: all three are legitimate; a pattern that flagged them would have been dropped
+#: rather than grown into an ownership framework.
+_CONCRETE_RUN = re.compile(r"^logs/stages/stage-[0-9]+/[a-z0-9_]+/runs/[a-z0-9_]+")
+
+
+def _repo_joined_literals(path: pathlib.Path) -> set[str]:
+    """String literals this file joins to `REPO` with `/`."""
+    out = set()
+    try:
+        tree = ast.parse(path.read_text())
+    except SyntaxError:                                   # pragma: no cover
+        return out
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.BinOp) or not isinstance(node.op, ast.Div):
+            continue
+        base = node.left
+        #: `REPO / "x"` and `REPO / "x" / "y"` both have REPO at the far left.
+        while isinstance(base, ast.BinOp):
+            base = base.left
+        if isinstance(base, ast.Name) and base.id in ("REPO", "REPO_ROOT"):
+            if isinstance(node.right, ast.Constant) and isinstance(node.right.value, str):
+                out.add(node.right.value)
+    return out
+
+
+def test_no_core_file_reads_a_concrete_historical_run():
+    """A generic mechanism tested against one old run is that run's test."""
+    offenders = []
+    for path in core_test_files():
+        if path.resolve() == SELF:
+            continue
+        for literal in sorted(_repo_joined_literals(path)):
+            if _CONCRETE_RUN.match(literal):
+                offenders.append(f"{path.relative_to(REPO)} -> REPO / {literal!r}")
+    assert not offenders, (
+        "a core test reads a concrete historical run:\n  "
+        + "\n  ".join(offenders)
+        + "\n\nBuild the input under `tmp_path`, or move the verification to the "
+        "experiment that owns the run. Discovering runs through `logs/index.json` "
+        "is still fine. AGENTS.md 2.8a.")

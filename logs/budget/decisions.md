@@ -1,5 +1,76 @@
 # Budget decisions
 
+## 2026-10-03 — The last two historical dependencies leave the core suite
+
+Final cleanup on the test boundary. `$0`, no pod, no GPU. Two concrete
+dependencies, named by review, and one guard.
+
+- **`test_stage1_import.py` was a Phase-A integration test wearing a core name.**
+  It read `logs/stages/stage-1/phase_a/runs/attempt12` and five preserved
+  1.11-GiB checkpoints from `/home/ecs-user/aad-artifacts/autoinit/phase_a`, under
+  a `skipif`. The skip was the problem, not the fix: the CORE suite's result
+  depended on whether a closed experiment's bytes were still on this host, so
+  archiving them turned "core is green" into "core is green with skips", which is
+  a different statement.
+
+  Fourteen tests moved to
+  `scripts/experiments/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
+  where the historical evidence IS the subject and a `skipif` is right. The
+  importer's fail-closed behaviour — nine refusals that decide whether a
+  continuation is safe to start — is reusable core and had no other coverage, so
+  it is now proved against a search built under `tmp_path`: two toy leaves and a
+  toy control, 32-wide and 2-layer, saved and re-read through the real
+  `save`/`identify_checkpoint` path so every digest is recomputed from files. Two
+  leaves rather than five, because the ordering check needs exactly two to swap.
+  Mutation-tested: weakening the digest check, the geometry check and the
+  evaluation-binding check fails exactly the three tests that name them.
+
+- **The core CUDA-launcher test no longer reads the 2026-09-10 campaign.** It used
+  C1's cuda-stage-f authorization and ledger as TEMPLATES. The launcher reads four
+  numbers — three in `resource_contract`, plus `booked_usd` from the ledger beside
+  it — so the test builds both documents itself. The three tests that asserted the
+  historical authorization's CONTENTS (its withdrawn count-based clauses, its
+  reserve inside its ceiling, what it declined to authorize) moved to
+  `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_stage_f_authorization.py`.
+
+  Two details worth keeping: the synthetic authorization computes its own
+  `authorization_sha256` over itself rather than carrying an invented one, and the
+  synthetic ledger's `subruns` list AGREES with its `booked_usd` — a ledger
+  claiming money with no subruns to show for it makes the next booking look like a
+  refund, which is how the first version of it failed.
+
+- **A fourth boundary rule.** `test_stage1_import.py` had bypassed both existing
+  rules: it imported nothing from `experiments` and loaded no launcher, yet it read
+  a concrete run. The new rule flags a string literal naming
+  `logs/stages/stage-*/<experiment>/runs/<id>` **joined to `REPO`** — which is what
+  reading the real tree looks like. It deliberately does not match the same path in
+  a docstring, in synthetic test data, or found through `logs/index.json`; three
+  core files do one of those today and all three are legitimate. A pattern that
+  flagged them would have been dropped rather than grown into machinery. Verified
+  both ways: it refuses the real dependency when reintroduced, and passes the
+  docstring and test-data shapes.
+
+- **The invariant now holds.** Archiving attempt 12's evidence, its preserved
+  leaves, or C1's cuda-stage-f directory changes the core suite's result not at
+  all — it does not gain skips either. All 14 core skips are live declarations:
+  a launcher that asks for no `ROPE_OK`, a script with fewer than two
+  status-file references, a client library present on the host, and a shell-lint
+  allowlist keyed on three E-series launcher FILES rather than on their evidence.
+
+```text
+core full suite : 2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s
+```
+
+- **Alternatives considered:** keep the historical integration in core behind a
+  better skip — refused, a skip changes the result; reproduce five real leaves
+  under `tmp_path` to keep it in core — refused for the obvious reason, and the
+  historical version had already hit ENOSPC copying them; drop the importer's
+  refusal coverage from core entirely — refused, those refusals are what make a
+  continuation safe to start and they are reusable.
+
+- **Revisit when:** the C2 sub-experiments' modules are worth moving (deferred in
+  the previous entry), or a fourth suite is proposed.
+
 ## 2026-10-03 — One owner per experiment id, and a guard that keeps it
 
 Convergence round on the test boundary, accepted in direction and sent back for

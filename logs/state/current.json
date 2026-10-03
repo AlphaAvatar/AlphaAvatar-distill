@@ -222,7 +222,8 @@
   "a3_precondition": "MET. aadistill.initialization.specs.materialization separates the semantic state id, the numerical execution fingerprint, the materialization id and the artifact digest; resume, dedup, the statistics-cache key and the operator/measurer policy check each key on the right one.",
   "blockers": "EVIDENCE: 0 of 2 fresh disjoint batteries, owner phase_d1/analyses/d1_evidence_capacity.json. FUNDING: $60.7509 chain against $13.1777, and phase_d1 is absent from the package's funds_formal_sessions_of.",
   "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy; D2's continuous c_ref(t) needs a weighted denominator in StatsSpec.",
-  "authorizes": "nothing"
+  "authorizes": "nothing",
+  "BEFORE_RESUMING": "review/d1-target-aware (161215c9) diverged at 4dc579ba: 3 ahead, 4 behind the test refactor. REBASE onto the new main first; continuing on the old tree reintroduces tests/autoinit/ and flat scripts/experiments/phase_d1/."
  },
  "main_branch": {
   "carries": "the C3, A3 and D1-design rounds, fast-forwarded 2026-10-03 from review/c3-operator-batching; previously the 2026-09-24 C2 snapshot repair. `git log main` owns the hashes.",
@@ -230,8 +231,8 @@
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment = `pytest scripts/experiments/stage-<n>/<exp>/tests`.",
-  "core": "AIMS GREEN, ~4 min. A red test means a current core problem.",
-  "boundary_guard": "tests/architecture/test_core_suite_boundary.py: specific experiment imports from core = 0; nine shared-application imports remain as a deliberate contract.",
+  "core": "2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s. AIMS GREEN; no skip depends on historical evidence.",
+  "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules: no specific experiment import (0 today), every experiments.* import shared, no named experiment launcher, no concrete historical run read.",
   "trees": "scripts/experiments/stage-<n>/<experiment_id>/ mirrors logs/stages/stage-<n>/<experiment_id>/ row for row; ownership from logs/stages/index.json."
  }
 }
