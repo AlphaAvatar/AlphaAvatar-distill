@@ -48,11 +48,18 @@ so nine days and 597 commits of campaign history landed in one integration.
 **A merge records work. It is not a release, not a promotion and not a public
 claim.** `README.md` is unchanged by the whole range, so nothing public-facing
 moved; the eleven documented suite failures came with it and are the same
-eleven; and the two D1 blockers above are still open. The repository's one
-prior integration went through a GitHub pull request, which is the route to
-prefer when a range is reviewable — this one is 1,491 files and 1.13M inserted
-lines, almost all of it `logs/` evidence, and is a record of completed rounds
-rather than a change to review.
+eleven; and the two D1 blockers above are still open.
+
+**That fast-forward was the last of its kind.** Every future integration into
+`main` is a **squash and merge** — one commit per integration, AGENTS.md
+**P12.2**, decided 2026-10-03 because nine days of working history on `main`
+makes it no easier to read. The clause that makes it safe is the one to
+remember: **a squash integration must not delete the source branch.** 785
+records bind commit hashes — `session_commit`, `authorized_session_commit`,
+`head_commit`, `swept_base_commit`, `declared_at_commit`, and the commit a
+comparison names as having computed it — and a squash commit is none of them,
+so those hashes survive only on the branch. The usual post-squash cleanup, the
+one the host offers by default, would invalidate every one of them.
 
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 

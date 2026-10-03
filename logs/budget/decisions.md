@@ -1,5 +1,53 @@
 # Budget decisions
 
+## 2026-10-03 — Integration to `main` becomes SQUASH AND MERGE
+
+- **Context:** `main` had been left at the 2026-09-24 C2 snapshot repair while
+  nine days of C3, A3 and D1-design work accumulated on
+  `review/c3-operator-batching`. The maintainer authorized the integration and
+  it went in as a fast-forward: **597 commits, 1,491 files, 1,129,146 inserted
+  lines**, 85% of it `logs/` evidence. `main`'s history is now nine days of
+  working material rather than a list of completed rounds, and nothing about it
+  is easier to read for having each repair individually.
+
+- **Decision:** every future integration of a working branch into `main` is a
+  **squash and merge** — one commit on `main` per integration. Recorded as
+  **AGENTS.md P12.2**, next to P12.1's statement that a merge needs a
+  maintainer decision, because the two are one subject. P12.1 is unchanged: the
+  decision is still required, and P12.2 says only what shape the merge takes
+  once it exists.
+
+- **What the decision costs, and why it is a clause rather than a caveat.**
+  This repository binds scientific evidence to specific commit hashes —
+  `session_commit`, `authorized_session_commit`, `head_commit`,
+  `swept_base_commit`, `declared_at_commit`, and the commit a comparison
+  artifact names as having computed it. **785 records did so when this was
+  decided**, and they are reachable today only because the 2026-10-03
+  integration was a fast-forward. A squash commit is not any of those hashes.
+  So P4's requirement that an experiment be reproducible from its logged code
+  state now depends on the working branch surviving, and P12.2 requires three
+  things of every squash integration: the source branch is **not deleted**, the
+  squash commit **names the range it collapses** (branch, tip, merge base), and
+  the state docs say what `main` carries, recorded *before* the integration.
+
+- **Alternatives considered:** keeping fast-forward — rejected by the
+  maintainer, and the 597-commit integration is the evidence; a merge commit
+  per integration — it would keep the hashes on `main` and the integration
+  point visible, but leaves the same working history in `main`'s log, which is
+  the thing being removed; squashing **and** deleting the branch, which is the
+  host's default offer — refused outright, because it is the one combination
+  that silently invalidates 785 records.
+
+- **Risks:** stale working branches accumulate, and the first instinct when
+  they do will be to delete them. P12.2 names that instinct and forbids acting
+  on it for any branch a record cites; re-anchoring commit-bound evidence is a
+  separate maintainer decision with its own record, taken *before* a deletion
+  rather than discovered after one.
+
+- **Revisit when:** branch accumulation becomes a real constraint, or when
+  commit-bound evidence stops being how this project establishes
+  reproducibility.
+
 ## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
 
 - **Context:** the maintainer's order of 2026-10-01 stopped the autonomous
