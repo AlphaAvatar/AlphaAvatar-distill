@@ -209,34 +209,53 @@ it is where this round's commit hashes live.
 ## The D1 identity round, integrated into `main` by SQUASH AND MERGE
 
 **Approved on review 2026-10-03 and integrated per AGENTS.md P12.2.** One commit
-on `main` collapsing seven:
+on `main` collapsing **eight**:
 
 ```text
 source branch : review/d1-identity-correction   (NOT deleted -- P12.2)
 merge base    : 06cab9c8f106ed6f35db4c5cd6bf9d47288da139
-measured tree : 909d1c8bf1794a587002b2b21dfbf8243a7b4561
-squash commit : named by the commit itself on `main`
+branch tip    : ccf1c1c47200a7a3e10a06dc1f31f3e52f3d68c9
+squash commit : aac482d58206987cd37533f1f57a76f6b413ab6d   on `main`
+squash tree   : bbd19a76243157ba98937edd66a9d1c5b9435f7d   == the tip's tree
+commits       : 8
 ```
 
-The branch tip and the measured tree are the **same** commit this time, which is
-the difference from the previous integration: the last commit is a records
-change, and `tests/docs` — which asserts on those records — was run against it.
-The earlier round's correction stands as written: there, the state-record commit
-was never separately validated.
+**What was validated on which tree, as three separate statements:**
 
-Validation on this tree: **core suite 3019 passed / 14 skipped / 0 failed**
-(`b0ca0fec`, the last commit that changed executable code), then D1 + D-series
-86 passed, `tests/docs` 158 passed, CUDA ledger 46 passed and both record
-regenerators at a fixed point for the records-only commit on top. 623 cited
-commit hashes resolve, zero unreachable — checked by
-`converge_before_sweep.py`'s own implementation, which this branch is what
-brought to `main`.
+```text
+core executable validation : b0ca0fec   core suite 3019 passed / 14 skipped / 0 failed
+                                        the last commit that changed executable code
+records/docs validation    : ccf1c1c4   tests/docs 158 passed, on a clean tree at that
+                                        exact tree hash -- re-verified 2026-10-03
+pre-integration state tip  : ccf1c1c4
+squash tree                : bbd19a76   == ccf1c1c4's tree, so the integration carries
+                                        exactly what both statements describe
+```
+
+`909d1c8b` is **not** the tip and never was a tree anything was finally measured
+on. This block previously named it as the "measured tree" and then claimed the
+tip and the measured tree were the same commit — written while `909d1c8b` was
+HEAD, and made stale one commit later by `ccf1c1c4` landing on top of it. **That
+is the third time a record on a branch has tried to pin its own branch's tip**;
+the first two were caught before merging and this one was not. The lesson is not
+"name the tip more carefully": it is that a validated-tree hash written inside a
+commit that will be followed by more commits is wrong by construction, and has
+to be re-derived at the end or left to the squash commit.
+
+Also corrected: this block said "seven". The range is eight, which the squash
+commit itself recorded correctly — so the prose disagreed with the commit message
+beside it.
+
+D1 + D-series 86 passed and the CUDA ledger 46 passed during the round; both
+record regenerators are at a fixed point. 623 cited commit hashes resolve, zero
+unreachable — checked by `converge_before_sweep.py`'s own implementation, which
+this branch is what brought to `main`.
 
 **The source branch is NOT deleted.** `review/d1-target-aware` is kept too: it
 holds `e93b627c 38c46a32 161215c9`, the replayed round's original commits.
 
 **Cut a fresh branch from the new `main`.** A squash commit does not have this
-branch's commits as ancestors, so continuing here re-applies all seven.
+branch's commits as ancestors, so continuing here re-applies all eight.
 
 ### What the round was
 

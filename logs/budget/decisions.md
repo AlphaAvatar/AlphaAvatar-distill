@@ -1,5 +1,61 @@
 # Budget decisions
 
+## 2026-10-03 — Three provenance corrections, and what a GPU measurement cannot settle
+
+Records-only, `$0`, opening the source-preparation round. The D1 identity/design
+integration is GO and CLOSED — `main = aac482d5`, retained source tip
+`ccf1c1c4`, same tree `bbd19a76`, squash base `06cab9c8`. D1 architecture is not
+reopened.
+
+- **The range was eight commits, and the state record said seven.** The squash
+  commit itself recorded `commits: 8` correctly, so the prose in
+  `logs/state/current.md` disagreed with the commit message beside it. Corrected
+  in both places it appeared.
+
+- **The record named `909d1c8b` as the "measured tree" and claimed the branch tip
+  equalled it. Neither was true.** `ccf1c1c4` sits on top of `909d1c8b` and is
+  the tip. What actually happened, now recorded as three separate statements
+  rather than one conflated one:
+
+  ```text
+  core executable validation : b0ca0fec   3019 passed / 14 skipped / 0 failed
+  records/docs validation    : ccf1c1c4   tests/docs 158 passed, at that exact
+                                          tree hash on a clean tree
+  pre-integration state tip  : ccf1c1c4
+  squash tree                : bbd19a76   == ccf1c1c4's tree
+  ```
+
+  The records-validation line was **re-verified** rather than recalled: `main`'s
+  tree is `ccf1c1c4`'s tree, the working tree was clean at it, and `tests/docs`
+  was re-run there — 158 passed. So `ccf1c1c4` is the records-validation tree,
+  and no rerun was needed to make the record truthful.
+
+  **This is the third time a record on a branch has tried to pin its own
+  branch's tip.** The first two were caught before merging; this one was not. The
+  earlier variant was a record naming the tip it would itself become. This
+  variant is subtler and worse: the hash written was the *then-current* HEAD,
+  correct at the moment of writing, and made false one commit later. The rule is
+  not "name the tip more carefully" — a validated-tree hash written inside a
+  commit that will be followed by more commits is wrong by construction. Either
+  re-derive it at the end or leave it to the squash commit, which is created
+  after the range is closed.
+
+- **"The owed GPU qualification settles the last two" was too broad.** It
+  conflated a price with an authorization scope. The qualification settles the
+  real batched timing/cost, the cost-dependent project funding requirement and
+  the per-session envelope compatibility. It CANNOT settle `phase_d1` being
+  absent from `funds_formal_sessions_of`: no measurement puts an experiment
+  inside a package's funded list, and that blocker stands until a maintainer
+  explicitly funds the phase. Corrected at the producer
+  (`write_d1_design.py` — `open_blockers()`'s docstring and the per-session
+  blocker text) as well as in the snapshot, so the generated record carries it.
+  The three-blocker structure is unchanged; the funding blocker is now labelled
+  CATEGORICAL to mark that it is not a cost question.
+
+- **Validation:** `tests/docs` 158 passed, D1 design 43 passed, both record
+  regenerators at a fixed point. No core full suite and no historical suites —
+  the only code change is the D1 producer's prose, and its own suite covers it.
+
 ## 2026-10-03 — Empty supervision fails closed, and the blocker count is derived
 
 A `$0` consistency round on maintainer review, closing the D1 design. Nothing
