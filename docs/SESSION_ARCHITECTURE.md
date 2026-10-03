@@ -210,11 +210,11 @@ in the file. Each injection point needs its own test; that one stubs
 
 | check | where |
 | --- | --- |
-| the declared argument contract is what the runner actually reads | `tests/pod/test_device_canary_argument_contract.py` |
+| the declared argument contract is what the runner actually reads | `scripts/experiments/tests/test_device_canary_argument_contract.py` |
 | every launcher's **real** parser satisfies it, and the runner refuses a namespace that does not | same |
-| every variable the setup script reads is in each session's built environment | `tests/pod/test_launcher_forwards_setup_env.py` |
+| every variable the setup script reads is in each session's built environment | `tests/integration/test_launcher_forwards_setup_env.py` |
 | no session supplies an empty value the setup consumes | same |
-| the setup script installs only what a session declares | `tests/pod/test_session_architecture.py` |
+| the setup script installs only what a session declares | `tests/integration/test_session_architecture.py` |
 | the setup script names no relay path, destination or digest of its own | same |
 | every staged input declares a destination, and the environment carries it | same |
 | a checkpoint is staged with the files it cannot load without | same |
@@ -225,9 +225,9 @@ in the file. Each injection point needs its own test; that one stubs
 | no launcher mutates another module's globals; the runner is subclassed nowhere | same |
 | no attempt-specific grant prose in an authorization constant | same |
 | every session names a distinct status file, run log, authorization, job id and plan | same |
-| the pod gate and the simulator ignore the same tests, for **all four** sessions | `tests/pod/test_pod_script_paths.py` |
-| every session installs every local root the shared setup's frozen-asset verifier requires, derived from the verifier and compared against declarations | `tests/pod/test_session_setup_contract.py` |
-| the measurement driver's whole entrypoint runs on the dev box, and `main()` is parsing plus a call to it | `tests/autoinit/test_causal_depth_measurement_job.py` |
+| the pod gate and the simulator ignore the same tests, for **all four** sessions | `tests/integration/test_pod_script_paths.py` |
+| every session installs every local root the shared setup's frozen-asset verifier requires, derived from the verifier and compared against declarations | `tests/integration/test_session_setup_contract.py` |
+| the measurement driver's whole entrypoint runs on the dev box, and `main()` is parsing plus a call to it | `tests/initialization/test_causal_depth_measurement_job.py` |
 | the injected loader's real body passes the pinned revision and disables `use_cache` | same |
 
 ### The authorization/grant split

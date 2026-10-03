@@ -45,7 +45,7 @@ MEASUREMENT_HARNESS_FILES: tuple[str, ...] = (
     "scripts/pod/watchdog.py",
     "scripts/pod/collect_artifacts.py",
     "src/aadistill/governance/authorization.py",
-    "scripts/experiments/measurement/plan.py",
+    "scripts/experiments/stage-1/measurement/plan.py",
     "src/aadistill/initialization/operators/depth.py",
     "src/aadistill/initialization/statistics/contribution.py",
     "src/aadistill/infrastructure/session.py",

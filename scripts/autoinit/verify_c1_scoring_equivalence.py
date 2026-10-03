@@ -208,7 +208,7 @@ def main() -> int:
             "NOT covered by this gate: correct_but_unusable is 0 on every "
             f"retained probe ({uncovered} of {len(record['cases'])} have any), so "
             "the implication never fires in historical evidence. Covered directly "
-            "in tests/autoinit/test_c1_confirmation_scoring.py against the frozen "
+            "in scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py against the frozen "
             "score_recovery_row, which C1 imports unmodified."),
         "c1_battery_rows": (
             "this gate runs on recovery_search_v2 by construction — it is the only "

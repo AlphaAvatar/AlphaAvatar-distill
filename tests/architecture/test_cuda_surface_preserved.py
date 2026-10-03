@@ -275,7 +275,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "field that described what would happen now decides it. It is "
             "inert for every session that declares the full set -- which every "
             "session but the closed Phase-A launcher does, audited in "
-            "`tests/pod/test_phase_c2_setup_contract.py` -- and it REFUSES a "
+            "`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_setup_contract.py` -- and it REFUSES a "
             "declaration that omits the substrate rather than silently "
             "accepting a setup nobody runs.",
      }),
@@ -299,7 +299,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "than an assumption, and the gate's recorded-loss route applies. "
             "`None` is kept for the only genuinely uninformed case -- streams "
             "declared AND no manifest -- and "
-            "`tests/pod/test_phase_c2_collection_and_profiles.py` holds that "
+            "`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` holds that "
             "mutation. Extracted rather than left inline because a branch "
             "reachable only from a pod whose collector failed is a branch no "
             "`$0` check can execute; as a function it is four unit tests.",
@@ -1112,6 +1112,61 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "for the `execution` parameter; this round adds to the same "
             "OperatorContext construction and owes the same new validation.",
      }),
+    ("4dc579ba4938e1a2bfb05565d0b3594077bb531e",
+     "the test-suite boundary: core, experiment, historical",
+     {
+        "src/aadistill/governance/closure.py":
+            "DECLARED SEMANTIC CHANGE: `_resolve` falls through to "
+            "`_resolve_through_a_grouping_directory`, which searches ONE "
+            "intervening level under a top-level package. A package whose "
+            "`__init__` extends `__path__` resolves `pkg.thing` to "
+            "`pkg/<group>/thing/`, and the direct candidates cannot see that -- "
+            "so every import of a grouped package came back unresolved and the "
+            "deriver correctly refused to describe a smaller set than runs. It "
+            "knows NOTHING about what the grouping means: it does not read a "
+            "directory name, match a pattern or recognise a convention, which "
+            "is what keeps the module reusable while the application groups its "
+            "experiments by stage. NO CUDA SURFACE: it globs and reads files.",
+        "src/aadistill/infrastructure/session.py":
+            "ADDITIVE: `SetupManifest.test_paths`, its `test_paths_env()` and "
+            "`SESSION_TEST_PATHS` in the setup environment and the manifest. A "
+            "session now declares the test suite its pod gate runs POSITIVELY; "
+            "`test_ignores` is kept, defaulted and documented as historical. "
+            "The old shape could only say 'run only mine' as the COMPLEMENT of "
+            "everything under `tests/`, and `autoinit_c1_launch`'s own comment "
+            "records that complement going stale six times, once per experiment "
+            "preflight directory added after C1 closed. Every existing session "
+            "is unaffected: an empty `test_paths` leaves the shell's `tests/` "
+            "default in place. NO CUDA SURFACE.",
+        "src/aadistill/runtime/staging_contract.py":
+            "DECLARED SEMANTIC CHANGE: `ignores_for_selection` raises the new "
+            "`SelectionOutsideCoreSuite` for a selection that is not under "
+            "`tests/`, naming `test_paths` as the replacement instead of "
+            "deriving a complement that cannot express it. Its own subclass so "
+            "a caller can tell 'you asked for the superseded mechanism' apart "
+            "from 'your directory is missing'. A selection inside `tests/` "
+            "behaves exactly as before. NO CUDA SURFACE.",
+        "src/aadistill/runtime/cpu_test_env.py":
+            "ADDITIVE: `SESSION_TEST_PATHS` joins `PRESERVED`, so the pod's "
+            "command-scoped CPU-test environment forwards the new declaration "
+            "the way it already forwards `SESSION_TEST_IGNORES`. A variable the "
+            "gate needs and the scope strips is a gate that runs the wrong "
+            "command. NO CUDA SURFACE.",
+        #: `src/aadistill/initialization/device.py` is deliberately ABSENT. Two
+        #: of its docstring references name the placement helper, which moved to
+        #: the shared test-support package in this round -- and the file is on
+        #: the HISTORICAL CUDA surface, whose bytes are the evidence that the
+        #: 2026-09-10 validation covered this code. Editing a docstring would
+        #: either break that byte comparison or require declaring the surface
+        #: changed and owing a new GPU validation, for a path in a comment. The
+        #: stale reference stays; the evidence is worth more than the pointer.
+        "src/aadistill/runtime/cost.py":
+            "PROSE: an anchor's provenance note named a test file by path, "
+            "which the core-boundary inventory correctly flags as a `logs/ "
+            "configs/ artifacts/` path literal read from core. It names the "
+            "cost model's own anchor tests instead. No value, no arithmetic and "
+            "no behaviour changed.",
+     }),
 )
 
 
@@ -1542,39 +1597,3 @@ HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION = (
     "src/aadistill/initialization/planning/fixed_path.py",
     "src/aadistill/initialization/adapters/qwen3.py",
 )
-
-
-def test_no_declared_change_touches_the_validated_surface():
-    """A declared change may not silently cover a historically pinned file.
-
-    The exception is narrow and named. `fixed_path.py` is on the 2026-09-10
-    surface AND had to gain the `execution` parameter, because that file is
-    where the fixed-path route builds an `OperatorContext`. That does not make
-    the old evidence cover it — it makes a NEW validation owed, which is why
-    every exception must also be on `CURRENT_CUDA_SURFACE`.
-    """
-    touched = set(declared_from(0)) & set(HISTORICAL_CUDA_VALIDATED_SURFACE)
-    unexplained = sorted(touched - set(HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION))
-    assert unexplained == [], (
-        "declared core changes touch the historical CUDA surface without being "
-        f"listed as pending revalidation: {unexplained}")
-    for path in HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION:
-        #: Declared by SOME round on this branch, not necessarily the latest:
-        #: `fixed_path.py` was changed in the package/batching round and not
-        #: touched again since, so demanding the newest round re-declare an
-        #: unchanged file would force a false declaration.
-        assert path in declared_from(0), (
-            f"{path} claims a revalidation exception but no round declares it")
-        assert path in CURRENT_CUDA_SURFACE, (
-            f"{path} changed under a historical CUDA pin and is not on the "
-            "current validation surface, so nothing would ever re-validate it")
-
-
-# --- the geometries the validation ran are unchanged too --------------------
-
-def test_the_two_validation_geometries_are_unchanged():
-    """`suffix_narrow` and `suffix_mid`, from the config the check reads."""
-    cfg = "configs/validation/cuda_engineering.json"
-    assert (REPO / cfg).read_text() == git("show", f"{HISTORICAL_EXECUTION_SHA}:{cfg}"), (
-        "the validation workload changed; the accepted evidence describes a "
-        "different configuration")

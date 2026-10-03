@@ -297,11 +297,30 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     words out of it, and they are the attempt-4 ACCEPTED ruling and stage F's
     `CONFIRMED ON REAL CUDA` with SHA `7027a8f4`. Check both by name before
     trimming, not after.
+
+    15_500 -> 16_000 on 2026-10-03, in the test-boundary round, and the
+    reclamation came first. Reclaimed: `behavioural_session`, which said CLOSED
+    WITHOUT PROMOTION under the SAME owner document as `c2_closure` — a second
+    copy of one subject, whose two live facts (the 12-probe protocol, the 14
+    chains) moved into `c2_closure`, with the consistency gate narrowed to the
+    three remaining owners. The new block was then trimmed twice, from six keys
+    to four.
+
+    What the raise bought is ONE new live subject with two halves a reader must
+    act on: `pytest` now means the CORE suite and not the historical one, and a
+    static guard holds that boundary. Someone who does not know the first will
+    run the wrong suite and misread the result; someone who does not know the
+    second will put an experiment import back into core and be surprised.
+
+    The next place to look is `phase_c` (~2.6 KB) and the answer is still no: a
+    dozen gates read `c0.status`, `c1.measured`, `c2.status` and `c3.status` by
+    name, so trimming it is the squeeze-breaks-a-gate failure recorded three
+    times above, at the one block where it would break several at once.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 15_500, (
+    assert len(SNAPSHOT.read_bytes()) < 16_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

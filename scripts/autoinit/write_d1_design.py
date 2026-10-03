@@ -152,9 +152,9 @@ def scoring_policy() -> dict[str, Any]:
             "statistics_cache": "stats_cache_key.numerical_config",
         },
         "verification": (
-            "tests/autoinit/test_scoring_position_policy.py derives the "
+            "tests/initialization/test_scoring_position_policy.py derives the "
             "restriction independently from each frozen mixture's own fields "
-            "and compares; tests/autoinit/"
+            "and compares; tests/initialization/"
             "test_target_aware_scoring_end_to_end.py asserts the incumbent "
             "policy changes no artifact and the treatment moves all four "
             "structural decisions."),
@@ -199,8 +199,8 @@ def materialization_prerequisite() -> dict[str, Any]:
                 "MaterializationIdentity.bind refuses a second, different "
                 "digest",
             ],
-            "regression": "tests/autoinit/test_materialization_identity.py and "
-                          "tests/autoinit/test_target_aware_scoring_end_to_end.py"
+            "regression": "tests/initialization/test_materialization_identity.py and "
+                          "tests/initialization/test_target_aware_scoring_end_to_end.py"
                           "::TestResumeRefusals",
             "status": "IMPLEMENTED AND VERIFIED at `$0` on CPU. The A3 "
                       "precondition is met.",

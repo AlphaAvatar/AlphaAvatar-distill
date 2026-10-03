@@ -15,7 +15,7 @@ moment in the session at which to discover a typo.
 Why nothing caught it: the removal was verified against the nineteen f-strings
 that build remote commands, and this is a keyword argument. And the tests that
 drive the real acquisition loop
-(`tests/pod/test_c1_one_provider_resource.py`) all stub `setup_on_draw` to a
+(`scripts/experiments/stage-1/phase_c1/tests/test_c1_one_provider_resource.py`) all stub `setup_on_draw` to a
 *failure* outcome, so `run()` returns before reaching this line. The success
 path through `run()` had no execution coverage at all.
 

@@ -53,7 +53,7 @@ from typing import Any
 #: They used to be written here — one experiment's log name, one experiment's
 #: tool list, one experiment's schema and one experiment's `c1_harness_digest`
 #: key — inside a reusable runtime module. They now live in
-#: `scripts/experiments/phase_c1/pod_environment.py`.
+#: `scripts/experiments/stage-1/phase_c1/pod_environment.py`.
 
 
 @dataclass(frozen=True)
@@ -120,7 +120,7 @@ class RecordContract:
 #: refusal messages would still have said "C1".
 #:
 #: So the groups are the CALLER's, and this module holds only what they mean.
-#: `scripts/experiments/phase_c1/pod_environment.py` declares C1's.
+#: `scripts/experiments/stage-1/phase_c1/pod_environment.py` declares C1's.
 @dataclass(frozen=True)
 class ReadinessGroups:
     """Which node ids a session expects to skip, and which must pass.

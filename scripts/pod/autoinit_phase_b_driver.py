@@ -81,7 +81,7 @@ STATUS = WS / "autoinit_phase_b.status"
 #: driver wrote `phase_b_search`, the collector matched nothing, `min_matches: 0`
 #: reported `missing: 0`, and the search journal was deleted with the pod at the
 #: one moment it mattered — a deadline failure with no per-state timings.
-#: `tests/pod/test_phase_b_artifact_paths.py` now holds writer and both
+#: `scripts/experiments/stage-1/phase_b/tests/test_phase_b_artifact_paths.py` now holds writer and both
 #: collectors to this constant.
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_b_search"
 

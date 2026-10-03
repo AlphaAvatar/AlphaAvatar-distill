@@ -20,7 +20,7 @@ type with a distinct schema reporting `authorizes_c2_search1 = False`, and
 `BaselineCompletionAuthorization.load` refuses an artifact that claims
 otherwise. The Search-1 launcher's own loader refuses this schema symmetrically.
 Nothing here imports the beam runner, and
-`tests/pod/test_phase_c2_baseline_completion.py` asserts that over the import
+`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts that over the import
 graph.
 
 **What it stages, and nothing else.** The pinned teacher revision, the two
@@ -56,7 +56,7 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate)
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
-    derive_contract, ignores_for_selection)
+    derive_contract)
 from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
 from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from experiments.phase_c2 import baseline_completion as BC  # noqa: E402
@@ -108,7 +108,15 @@ LOCAL_ASSETS = (
 #: entirely correct about Search-1, and narrowing a consumed experiment's gate
 #: to fit this one would stop it guarding the session it was written for.
 POD_TEST_SELECTION = CPE.POD_TEST_SELECTION
-TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+#: POSITIVE now, not a complement. This was
+#: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
+#: `--ignore` list that left the session's own preflight the only collectable
+#: directory under `tests/`. Since the 2026-10-03 boundary decision the
+#: preflight lives beside its experiment, so there is nothing to take the
+#: complement of: the gate collects `SESSION_TEST_PATHS` and the ignore list is
+#: empty.
+TEST_IGNORES: tuple[str, ...] = ()
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 #: Derived from what this session actually holds at once: the teacher in bf16
 #: (7.5 GiB), the four materialized steps of the B path (the widest is the
@@ -580,7 +588,7 @@ def spec(args) -> SessionSpec:
             env={"SESSION_KIND": "c2_baseline_completion",
                  "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES, test_paths=TEST_PATHS),
         driver_command=driver_command,
         driver_job_id="autoinit_phase_c2_baseline_driver",
         status_path=STATUS, run_log_path=RUN_LOG,

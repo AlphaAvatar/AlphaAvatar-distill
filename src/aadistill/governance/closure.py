@@ -56,6 +56,41 @@ def _resolve(repo: Path, mod: str, roots: tuple[str, ...]) -> str | None:
     for cand in _candidates(mod, roots):
         if (repo / cand).is_file():
             return cand
+    return _resolve_through_a_grouping_directory(repo, mod, roots)
+
+
+def _resolve_through_a_grouping_directory(repo: Path, mod: str,
+                                          roots: tuple[str, ...]) -> str | None:
+    """A package whose `__path__` spans sibling directories under its own root.
+
+    An import name is a sequence of PACKAGE names, and a package may be laid out
+    across grouping directories that are not part of any import name — a package
+    `__init__` that extends `__path__` makes `pkg.thing` resolve to
+    `pkg/<group>/thing/`. The direct candidates above cannot see that, and an
+    import the walk cannot resolve is reported as unresolved, which correctly
+    refuses to derive a closure that would describe a smaller set than runs.
+
+    So one intervening level is searched, under the top-level package only.
+    Deliberately ONE: the point is to follow a package that groups its members,
+    not to search the tree for a matching filename.
+
+    **This function knows nothing about what the grouping means.** It does not
+    read a directory name, match a pattern or recognise a convention — it globs
+    one level. Whatever an application chooses to group its experiment packages
+    by, core stays unaware of it, which is the rule that keeps this module
+    reusable across stages, families and campaigns.
+    """
+    top, _, rest = mod.replace(".", "/").partition("/")
+    if not rest:
+        return None
+    for root in roots:
+        base = repo / root / top
+        if not base.is_dir():
+            continue
+        for suffix in (".py", "/__init__.py"):
+            for hit in sorted(base.glob(f"*/{rest}{suffix}")):
+                if hit.is_file():
+                    return str(hit.relative_to(repo))
     return None
 
 

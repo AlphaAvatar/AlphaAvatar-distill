@@ -90,7 +90,8 @@ UNSET: tuple[str, ...] = (
 #: Deliberately NOT touched: `HF_TOKEN` (presence is the same on both machines,
 #: and the cache — not the credential — is what differs) and the session's own
 #: `SESSION_*` variables, which the manifest sets identically for both.
-PRESERVED: tuple[str, ...] = ("HF_TOKEN", "SESSION_KIND", "SESSION_TEST_IGNORES")
+PRESERVED: tuple[str, ...] = ("HF_TOKEN", "SESSION_KIND",
+                              "SESSION_TEST_IGNORES", "SESSION_TEST_PATHS")
 
 
 def in_cpu_test_scope() -> bool:

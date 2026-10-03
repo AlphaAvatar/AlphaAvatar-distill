@@ -256,6 +256,15 @@ class TestTheSnapshotStatesTheRequiredFacts:
         the ladder was already correct while three other fields said C2 was
         running.
 
+        **`behavioural_session` went the same way on 2026-10-03**, in the
+        test-boundary round. It said `CLOSED WITHOUT PROMOTION` under the same
+        owner document as `c2_closure`, which already carries the deltas, the
+        limitation and the probes-remaining — so it was a second copy of one
+        subject, reclaimed when the snapshot needed room rather than a ceiling
+        raise (the size guard in `test_repository_structure` asks for exactly
+        that trade). Its two live facts, the 12-probe protocol and the 14 chains,
+        moved into `c2_closure`, and the assertions below follow them.
+
         **`latest_run._c2_state` was a fifth owner and is no longer one.** It
         existed while `latest_run` pointed at `phase_c2_behavioural`; the
         snapshot's newest run is `phase_a3` now, and that block states nothing
@@ -267,11 +276,14 @@ class TestTheSnapshotStatesTheRequiredFacts:
         """
         s = snapshot()
         closed = "CLOSED WITHOUT PROMOTION"
+        #: And the facts that moved are still asserted, so the fold could not
+        #: have quietly dropped them.
+        assert s["c2_closure"]["chains_consumed"] == 14
+        assert "12 probes" in s["c2_closure"]["protocol"]
         for path, got in (
                 ("stage_ladder.C2", s["stage_ladder"]["C2"]),
                 ("phase_c.c2.status", s["phase_c"]["c2"]["status"]),
-                ("c2_closure.decision", s["c2_closure"]["decision"]),
-                ("behavioural_session.state", s["behavioural_session"]["state"])):
+                ("c2_closure.decision", s["c2_closure"]["decision"])):
             assert closed in got, f"{path} does not say {closed}: {got!r}"
         #: And if a `latest_run` ever speaks about C2 again, it rejoins the set
         #: rather than drifting outside it.

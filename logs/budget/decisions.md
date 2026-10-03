@@ -1,5 +1,319 @@
 # Budget decisions
 
+## 2026-10-03 — The test refactor integrates into `main` by SQUASH AND MERGE
+
+- **Context:** `refactor/test-suite-boundary@a2dab91c` was reviewed on the remote
+  and approved for merge. The maintainer first asked for a fast-forward, then
+  directed that AGENTS.md governs — so **P12.2** applies as written: every
+  integration of a working branch into `main` is a squash and merge, one commit on
+  `main` per integration, whatever the branch's internal commit count.
+
+- **Decision:** squash and merge. Six commits on the branch become one on `main`.
+
+  ```text
+  source branch : refactor/test-suite-boundary
+  merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
+  tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
+  branch tip    : named by the squash commit on `main`
+  collapsing    : 9fb6123c  the boundary: core, experiment, historical
+                  a8aa0a15  a test is not an execution path
+                  fa6149b0  two historical-suite failures that were mine, two not
+                  de3c4dab  one owner per experiment id, and the static guard
+                  a2dab91c  the last two historical-evidence dependencies leave core
+                  <this>    this record, written before the integration
+  ```
+
+  The approved and measured tree is `a2dab91c`; the sixth commit is this record on
+  top of it and changes nothing the suite executes. A later record needing the
+  commit that produced the measurement wants `a2dab91c`, not the branch tip.
+
+  **The tip is named by the squash commit, not here.** This record is the branch's
+  last commit, so writing the tip would mean containing its own hash. P12.2's
+  "names the range it collapses" is an obligation on the squash commit, which is
+  created afterwards and can state it; the range resolves as
+  `4dc579ba..refactor/test-suite-boundary` by name for as long as the branch is
+  kept, which is forever.
+
+- **P12.2's three obligations, all owed and all met.**
+
+  1. **The source branch is NOT deleted**, now or later as tidying. It is what
+     keeps the branch's commit hashes reachable, and this repository binds
+     scientific evidence to specific hashes — `session_commit`,
+     `authorized_session_commit`, `head_commit`, `swept_base_commit`,
+     `declared_at_commit`, and the commit a comparison names as having computed
+     it. A squash commit is none of them.
+  2. **The squash commit names the range it collapses** — the branch, its tip and
+     the merge base — so a reader holding a hash from an experiment log can find
+     which integration carried it without searching every branch.
+  3. **This entry and `logs/state/current.md` say what `main` carries**, recorded
+     on the branch *before* the integration, so `main` lands on a tree that
+     describes itself.
+
+  **The enforcement P12.2 names is not on this branch.** P12.2 says
+  `scripts/consolidate/converge_before_sweep.py` resolves every cited commit hash
+  against the object store; that function was written on `review/d1-target-aware`,
+  so the rule's text reached `main` ahead of its implementation and arrives with
+  the D1 reconciliation. The check was therefore performed inline for this
+  integration — the fields above, swept over `logs/**/*.json`, resolved in one
+  `git cat-file --batch-check`:
+
+  ```text
+  622 distinct commit hashes cited across 1,742 record files · 0 unreachable
+  ```
+
+  A squash keeps all six reachable regardless, because the branch survives. That
+  is the clause doing the work, not the sweep.
+
+- **What this merge is NOT.** Not a release, not a scientific promotion, not a
+  grant, not an authorization change. No GPU or paid resource is authorized by it.
+  `README.md` is unchanged by the whole range, so nothing public-facing moved.
+
+- **Validation evidence.** The core suite was measured on this exact executable
+  tree: `2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s`. A squash
+  preserves the tree byte for byte — the merge commit's tree hash equals the
+  branch tip's — so that measurement is the validation for `main`, and re-running
+  it would measure the same tree twice.
+
+- **The operational consequence, per P12.2.** A squash commit does not have the
+  branch's commits as ancestors, so `refactor/test-suite-boundary` is no longer an
+  ancestor of `main` and `main..refactor/test-suite-boundary` still lists all five.
+  Continuing on it would re-apply the whole range. The next work therefore starts
+  on a **fresh branch cut from `main`** — which is also what the D1 reconciliation
+  needs, since `review/d1-target-aware` must be replayed onto the new test
+  architecture rather than merged as-is.
+
+## 2026-10-03 — The last two historical dependencies leave the core suite
+
+Final cleanup on the test boundary. `$0`, no pod, no GPU. Two concrete
+dependencies, named by review, and one guard.
+
+- **`test_stage1_import.py` was a Phase-A integration test wearing a core name.**
+  It read `logs/stages/stage-1/phase_a/runs/attempt12` and five preserved
+  1.11-GiB checkpoints from `/home/ecs-user/aad-artifacts/autoinit/phase_a`, under
+  a `skipif`. The skip was the problem, not the fix: the CORE suite's result
+  depended on whether a closed experiment's bytes were still on this host, so
+  archiving them turned "core is green" into "core is green with skips", which is
+  a different statement.
+
+  Fourteen tests moved to
+  `scripts/experiments/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
+  where the historical evidence IS the subject and a `skipif` is right. The
+  importer's fail-closed behaviour — nine refusals that decide whether a
+  continuation is safe to start — is reusable core and had no other coverage, so
+  it is now proved against a search built under `tmp_path`: two toy leaves and a
+  toy control, 32-wide and 2-layer, saved and re-read through the real
+  `save`/`identify_checkpoint` path so every digest is recomputed from files. Two
+  leaves rather than five, because the ordering check needs exactly two to swap.
+  Mutation-tested: weakening the digest check, the geometry check and the
+  evaluation-binding check fails exactly the three tests that name them.
+
+- **The core CUDA-launcher test no longer reads the 2026-09-10 campaign.** It used
+  C1's cuda-stage-f authorization and ledger as TEMPLATES. The launcher reads four
+  numbers — three in `resource_contract`, plus `booked_usd` from the ledger beside
+  it — so the test builds both documents itself. The three tests that asserted the
+  historical authorization's CONTENTS (its withdrawn count-based clauses, its
+  reserve inside its ceiling, what it declined to authorize) moved to
+  `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_stage_f_authorization.py`.
+
+  Two details worth keeping: the synthetic authorization computes its own
+  `authorization_sha256` over itself rather than carrying an invented one, and the
+  synthetic ledger's `subruns` list AGREES with its `booked_usd` — a ledger
+  claiming money with no subruns to show for it makes the next booking look like a
+  refund, which is how the first version of it failed.
+
+- **A fourth boundary rule.** `test_stage1_import.py` had bypassed both existing
+  rules: it imported nothing from `experiments` and loaded no launcher, yet it read
+  a concrete run. The new rule flags a string literal naming
+  `logs/stages/stage-*/<experiment>/runs/<id>` **joined to `REPO`** — which is what
+  reading the real tree looks like. It deliberately does not match the same path in
+  a docstring, in synthetic test data, or found through `logs/index.json`; three
+  core files do one of those today and all three are legitimate. A pattern that
+  flagged them would have been dropped rather than grown into machinery. Verified
+  both ways: it refuses the real dependency when reintroduced, and passes the
+  docstring and test-data shapes.
+
+- **The invariant now holds.** Archiving attempt 12's evidence, its preserved
+  leaves, or C1's cuda-stage-f directory changes the core suite's result not at
+  all — it does not gain skips either. All 14 core skips are live declarations:
+  a launcher that asks for no `ROPE_OK`, a script with fewer than two
+  status-file references, a client library present on the host, and a shell-lint
+  allowlist keyed on three E-series launcher FILES rather than on their evidence.
+
+```text
+core full suite : 2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s
+```
+
+- **Alternatives considered:** keep the historical integration in core behind a
+  better skip — refused, a skip changes the result; reproduce five real leaves
+  under `tmp_path` to keep it in core — refused for the obvious reason, and the
+  historical version had already hit ENOSPC copying them; drop the importer's
+  refusal coverage from core entirely — refused, those refusals are what make a
+  continuation safe to start and they are reusable.
+
+- **Revisit when:** the C2 sub-experiments' modules are worth moving (deferred in
+  the previous entry), or a fourth suite is proposed.
+
+## 2026-10-03 — One owner per experiment id, and a guard that keeps it
+
+Convergence round on the test boundary, accepted in direction and sent back for
+these. `$0`, no pod, no GPU.
+
+- **The experiment tree now mirrors `logs/stages/index.json` row for row.** Stage
+  3 was one flat `tests/` directory while the evidence tree has `e1`..`e8b`; the
+  claim that the trees matched "name for name" was not yet true. 42 files moved
+  into the experiment that owns them, and the index's own rows decided which:
+
+  ```text
+  stage-3/e3  e4  e6  e6b  e7  e8  e8b                 (the E-series ladder)
+  stage-1/phase_c2_behavioural  phase_c2_full_search
+          phase_c2_replay  phase_c2_baseline_completion  continuation_b
+  ```
+
+  Those five Stage-1 ids were collapsed under `phase_c2` and `phase_b` by prefix.
+  They are separate experiments in the index, so they are separate owners here —
+  the same reason A3 was separated from C3 in the previous round. Nothing was left
+  at a stage-level `tests/`: no file turned out to be about a stage as a whole.
+
+- **Specific experiment imports from the core suite: ZERO.** The residual coupling
+  the previous round reported as debt is closed. Nine imports remain and all nine
+  are the shared application layer — `run_layout` (x2), `calibration`,
+  `datasets`, `deployment` (x2), `durable_stores`, `operator_ledger`,
+  `source_sets` — which is a deliberate core-to-application contract:
+  `run_layout`'s convention is checked against `aadistill.runtime.run_layout`'s
+  mechanism precisely because the two must agree.
+
+  What moved, and what replaced it in core:
+
+  | left core | core now proves the mechanism by |
+  | --- | --- |
+  | A3's controls driver branch | synthetic admission callables |
+  | C3's pilot step constructor | the operator's own refusal |
+  | C1's harness measuring the summariser | the summariser's behaviour |
+  | C1's `RecordContract` instance | TWO synthetic contracts |
+  | C1's launcher run identity (30 tests) | synthetic callers under `tmp_path` |
+  | C1's log records (10 tests) | the renderers and the stage index |
+  | C1's cuda-stage-f booked dollars | a campaign built under `tmp_path` |
+  | C1's seam, scratch ownership, rope inputs, prefix profiles | enumeration over every launcher |
+  | the continuation's claim about Phase A's science | the structural spec rules |
+  | Phase A's authorization schema | DISCOVERY of every `*_AUTHORIZATION` constant |
+  | Phase A's driver memory constants | the handoff mechanism |
+
+  The discovery case is the one worth noting: that test named three authorization
+  constants, so a fourth experiment's grant could have carried attempt prose with
+  nothing looking. It now walks the experiments tree, which is both generic and
+  stronger.
+
+- **`tests/support/historical_declarations.py` became
+  `scripts/experiments/historical_declarations.py`.** It knew which completed
+  experiments declared what — Phase B's amendments, the C2 replay's buildability
+  — which three experiments' suites ask about and no core test should need. Test
+  support is for helpers reusable across suites; historical experiment knowledge
+  is application layer.
+
+- **A static guard now holds the line**
+  (`tests/architecture/test_core_suite_boundary.py`, five tests): no core file
+  imports a specific experiment package, every `experiments.*` import from core
+  is a shared module, and no core file loads a named experiment launcher.
+  Enumerating every launcher stays allowed, because "what every session must
+  satisfy" is genuinely generic. The allowed set is DERIVED from the tree — a
+  module directly under `scripts/experiments/` is shared, a module inside a stage
+  directory is an experiment's — so adding an experiment cannot widen the
+  allowance and adding a shared module needs no edit. It is mutation-tested
+  against three synthetic violations, including a deferred import inside a
+  function, which a module-scope-only reader would have missed.
+
+- **Alternatives considered:** a marker or ignore list instead of ownership —
+  refused in the previous round and still wrong, since filtering is not ownership;
+  keeping `phase_c2_*` under `phase_c2` because they share a prefix — refused, the
+  index gives each its own id; moving the C2 sub-experiments' MODULES as well as
+  their tests — deferred, not refused: `session.py` and its siblings are shared
+  across the C2 family and their paths are named by frozen declared source sets,
+  so moving them would move more digests for symmetry alone. Recorded here so the
+  next round can take it deliberately.
+
+- **Risks:** 16 core files still name a historical log path. Three are
+  repository-governance invariants that must read `logs/` (the budget ledger's
+  arithmetic, the snapshot's self-consistency, the log layout); the rest are
+  prose or skip-guarded, so an archived record SKIPS the core suite rather than
+  reddening it. `test_stage1_import.py` still uses Phase-A attempt12's real search
+  result as a fixture under a `skipif`; a synthetic fixture would be better and is
+  not free.
+
+- **Revisit when:** the C2 sub-experiments' modules are worth moving, or a
+  fourth suite is proposed.
+
+## 2026-10-03 — The test suite has a boundary: core, experiment, historical
+
+- **Context:** the default `pytest` run had become 43 minutes and ~5.6k tests, and
+  most of it validated experiments that closed weeks earlier — their grants,
+  budget balances, preregistration bytes, frozen candidate sets and snapshots.
+  The eleven failures quoted as a standing "expected" set were, every one of
+  them, a closed experiment's historical-state assertion. A developer touching
+  reusable core paid 43 minutes to be told about C1's readiness chain.
+
+  The pathology is documented in the repository's own voice. `autoinit_c1_launch`
+  records that a C1 pod once "ran 3892 tests for 16 minutes of billed L40S to
+  prove that AlphaAvatar-distill passes on that machine", and then its
+  ignore-complement going stale **six times** — once per experiment preflight
+  directory created after C1 closed, each one a directory a C1 pod would have
+  collected on its own meter.
+
+- **Decision (MAINTAINER, superseding the assumption that a closing full suite
+  runs every historical experiment test):** three suites, named in AGENTS.md
+  §2.8a.
+
+  ```text
+  pytest                                              -> CORE: framework only
+  pytest scripts/experiments/stage-1/phase_d1/tests   -> a current experiment
+  pytest scripts/experiments/stage-1/phase_c2/tests   -> historical verification
+  ```
+
+  `testpaths = ["tests"]` makes the first the default. **The core suite aims to
+  be GREEN**; a red test in it means a current core problem, and
+  `N passed + 11 expected failures` is no longer an acceptable normal state.
+
+- **And the experiment tree is organised by STAGE, mirroring `logs/stages/`.**
+  `scripts/experiments/stage-1/phase_d1/` is the code whose evidence is
+  `logs/stages/stage-1/phase_d1/`. Stage ownership is taken from
+  `logs/stages/index.json` — the repository's own answer — not from names: it
+  puts `phase_a`, `phase_a3`, `phase_b`, `phase_c1`, `phase_c2`, `phase_c3`,
+  `phase_d1`, `measurement` and `recovery_continuation` in Stage 1, and the
+  E-series ladder (`e1`-`e8b`) in Stage 3. The E-series tests had been filed
+  under a `historical/` name invented for them; the index says Stage 3, so that
+  is where they went.
+
+  `stage-1` is not a Python identifier, so `experiments/__init__.py` extends
+  `__path__` over the stage directories and `experiments.phase_d1` keeps
+  resolving. That is not a compatibility shim for the old flat layout: an import
+  name says WHICH experiment, and the stage is a property of where its evidence
+  lives. No import in the repository had to grow a stage.
+
+- **What it cost and what it bought.**
+
+  ```text
+  before : pytest = 266 files, ~5.6k tests, 43m20s, 11 expected failures
+  after  : pytest = core only, 3030 tests, ~4m50s, aiming green
+           + 2892 experiment tests, invoked per experiment
+  ```
+
+- **Alternatives considered:** keep everything under `tests/` and add markers or
+  an ignore list — refused by the directive and correctly, since the complement
+  mechanism is exactly what drifted six times and filtering is not ownership;
+  delete the historical tests — refused, closed experiments stay auditable and
+  their tests run on request; a `stage1/` or `stage_1/` name Python could import
+  directly — refused, the point is one obvious mapping to `logs/stages/stage-1/`.
+
+- **Risks:** a core test that still reads a historical run's artifacts is a
+  residual coupling, and the refactor report enumerates them rather than
+  claiming zero. `src/aadistill/initialization/device.py` keeps a stale docstring
+  path on purpose — it sits on the historical CUDA surface, whose bytes are the
+  evidence that the 2026-09-10 validation covered that code, and editing a
+  comment would either break that byte comparison or require declaring the
+  surface changed and owing a new GPU validation.
+
+- **Revisit when:** a fourth suite is proposed. Three is the number of questions
+  this repository actually asks; a fourth needs the same argument.
+
 ## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
 
 - **Context:** the maintainer's order of 2026-10-01 stopped the autonomous
@@ -48,7 +362,7 @@
   on **two** seeds: bias `0.005149` (0.52x the SESOI), advance probability
   `0.78`, at the **same twelve probes**. The arithmetic says narrow and
   replicate, and it is in
-  `scripts/experiments/phase_d1/selection_noise.py` with a quadrature self-check
+  `scripts/experiments/stage-1/phase_d1/selection_noise.py` with a quadrature self-check
   against two closed forms. This is a prospective design derivation; it
   re-analyses no C2 figure and changes nothing about C2's closure.
 
@@ -161,7 +475,7 @@ live securePrice are re-derived, and all four limits are checked.
   as that same sum, and a cap computed on a different basis from its own
   spend is one nobody can reconcile.
 
-- **Derived, not chosen.** `scripts/experiments/phase_c3/a3_pricing.py` at a
+- **Derived, not chosen.** `scripts/experiments/stage-1/phase_c3/a3_pricing.py` at a
   live L40S `securePrice` of `$1.09/h`:
 
   ```text
@@ -435,7 +749,7 @@ live securePrice are re-derived, and all four limits are checked.
   the new evaluator (a GPU session, currently barred); or revert candidate 1,
   forfeiting the `76.0×` and the `$7.2748` the ceiling fell by. **Nothing was
   done in any of those directions.** Six tests in
-  `tests/pod/test_phase_c2_baseline_completion.py` are left red and named in
+  `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` are left red and named in
   `logs/state/current.md`, because loosening the guard to green a suite is the
   move the guard exists to prevent.
 - **Revisit when.** A real search produces per-expansion telemetry on the
@@ -843,7 +1157,7 @@ live securePrice are re-derived, and all four limits are checked.
   reported. Phase B's comparable space was **290**; the growth is exactly one
   extra branching factor, because the promoted operator consumes calibration
   where the one it replaced did not. Owner:
-  `scripts/experiments/phase_c2/full_search_space.py`, checked by a test that
+  `scripts/experiments/stage-1/phase_c2/full_search_space.py`, checked by a test that
   refuses these integers as literals.
 - **One exclusion, and it is scientific.** `attention.weight_proxy_v0` is out
   because **C1 is** the isolation experiment between it and the promoted
@@ -1625,8 +1939,8 @@ live securePrice are re-derived, and all four limits are checked.
 
 - **Context:** a narrow `$0` repair pass after attempt 4. No pod, no grant, no authorization, no paid work. Pricing frozen and verified unmoved; P1 and P2 untouched.
 - **The shadowing, fixed by lifecycle rather than by rename.** `phase_a_search.py` bound the `SearchConfig` to a local called `config`; the `for entry in retained_candidates:` loop rebound it with `AutoConfig.from_pretrained`, and the summary then read `run_id` off a `Qwen3Config`. The three bindings are now `search_config`, `control_model_config` and `retained_model_config`, and the summary's two lines carry a comment saying which one may answer them. A one-character rename would have fixed the crash and left the trap.
-- **The test that should have existed for four failures.** `tests/pod/test_phase_b_stage1_executes.py` runs `run_phase_a_search` end to end on CPU with exactly what Phase B passes and Phase A never does: **P=2 over two genuinely distinct real mixtures and two non-empty retained candidates**, built and identified for real so `make_retained_state`'s digest refusal is live. It executes the search, the control measurement, both retained measurements, the ranking, the durability commit and the summary, and asserts on the returned object. **Mutating the fix back to attempt 4's exact defect produces 9 errors** — the same shape, for free, in 7 minutes.
-- **Why it is excluded from the pod gate.** Seven CPU-minutes is `$0` here and about `$0.12` of L40S there, to re-prove something already proven before launch. `tests/pod/test_phase_a_stages1_5_execute.py` is excluded for the same reason; this follows the established pattern rather than inventing one.
+- **The test that should have existed for four failures.** `scripts/experiments/stage-1/phase_b/tests/test_phase_b_stage1_executes.py` runs `run_phase_a_search` end to end on CPU with exactly what Phase B passes and Phase A never does: **P=2 over two genuinely distinct real mixtures and two non-empty retained candidates**, built and identified for real so `make_retained_state`'s digest refusal is live. It executes the search, the control measurement, both retained measurements, the ranking, the durability commit and the summary, and asserts on the returned object. **Mutating the fix back to attempt 4's exact defect produces 9 errors** — the same shape, for free, in 7 minutes.
+- **Why it is excluded from the pod gate.** Seven CPU-minutes is `$0` here and about `$0.12` of L40S there, to re-prove something already proven before launch. `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` is excluded for the same reason; this follows the established pattern rather than inventing one.
 - **The durability boundary.** Attempt 4 completed an eight-hour search, ranked it, and lost the selection because the only place it was ever going to be written was the summary that raised. The ranking is a pure function of `result.leaves`, so it is now computed the instant `search.run()` returns and committed to an atomic, hash-bound `stage1_selection.json` **before** the control, the retained candidates or the summary. `generated_utc` is recorded and excluded from the commitment hash, for the reason the preregistration excludes it.
 - **Deliberately minimal.** It is not a second search-result format and it does not replace the summary. It records what a failed-run collector needs: the search identity, the journal hash, policy/suite/profile identities, and per leaf the state id, artifact digest, checkpoint path and the decision that selected it.
 - **Failed-run retention.** `fetch_phase_b_products` keeps `leaf_retention.json` as the **primary** source — it means the driver persisted and re-verified the bytes on the pod, which is the stronger statement — and falls back to the selection artifact, which is precisely the case attempt 4 landed in. `phase_b_products_secured` blocks teardown when a selection exists and its bytes are not off-pod, and stays non-blocking when there is none, so a search that died before ranking still cannot hold a dead pod open. `fetch_selected_leaves` gained optional `records`/`staged` overrides whose defaults are the previous behaviour exactly.
@@ -1682,7 +1996,7 @@ live securePrice are re-derived, and all four limits are checked.
 ## 2026-08-27 — The journal comes home, the reference caches partially, the price is re-derived
 
 - **Context:** a `$0` pass after attempt 3 ended `EXECUTION_INCOMPLETE / NO_SCIENTIFIC_RESULT`. No pod, no canary, no grant, no launch. Frozen Phase-B science, the P=2 search space, the candidate set, the thresholds and both calibration identities are unchanged and verified unmoved.
-- **The journal-retention fix.** Phase B writes `artifacts/autoinit/phase_b_search/states.jsonl`; both artifact specs collected `autoinit/phase_a_search/...`, so the one artifact a *deadline* failure needs was deleted with the pod. There are now Phase-B-specific specs, `SEARCH_WORKDIR` is a module constant, and `tests/pod/test_phase_b_artifact_paths.py` derives the collector pattern **from the writer** and requires both specs to match it. The failure path stays `required: false` — a search that died before writing a state has no journal, and blocking teardown on it would hold the most expensive pod in the project open.
+- **The journal-retention fix.** Phase B writes `artifacts/autoinit/phase_b_search/states.jsonl`; both artifact specs collected `autoinit/phase_a_search/...`, so the one artifact a *deadline* failure needs was deleted with the pod. There are now Phase-B-specific specs, `SEARCH_WORKDIR` is a module constant, and `scripts/experiments/stage-1/phase_b/tests/test_phase_b_artifact_paths.py` derives the collector pattern **from the writer** and requires both specs to match it. The failure path stays `required: false` — a search that died before writing a state has no journal, and blocking teardown on it would hold the most expensive pod in the project open.
 - **A second defect found while writing that spec:** Phase A requires **9** probes and Phase B can legitimately finish with **7** (5 sa + 2 sb; the sc rung is conditional). Copying Phase A's minimum would have failed a *successful* Phase-B run at teardown, after the science was done and paid for. The Phase-B minimums are derived from `RUNG1_PROBES_P2 + RUNG2_PROBES_P2`, and the journal minimum adds the 8 imported citations stage 0 guarantees.
 - **P=2 branching is unchanged and now pinned.** `depth.positional_v0` and `attention.weight_proxy_v0` consume no calibration and are offered **once**; the other four branch per profile. A test asserts the multiplicities so a future edit cannot quietly duplicate a no-calibration operator into the ceiling.
 - **P1 — partial reference caching.** Attempt 3's 16.9 GiB reference against a 13.4 GiB allowance was refused wholesale, so 79% that fit was not kept and every one of 260 candidates recomputed all of it. The cache now admits **the first k items of the frozen mixture that fit**, under the **unchanged** 0.66 fraction. Admission is by mixture order and explicitly not by size: a size-greedy rule would make the resident set depend on how much memory the host happened to have free. Modelled saving 41.8% of causal-depth forward work; on attempt 3's own 12 expansions that is 388.2 -> ~226.0 min.
@@ -1718,7 +2032,7 @@ live securePrice are re-derived, and all four limits are checked.
 - **Context:** attempt 2 aborted at `AUTHORIZATION_MISMATCH` for `$0.2300` because `autoinit_preflight_setup.sh` had no `SESSION_KIND=phase_b` branch. Reviewer chose **Option A** and was explicit about why: "Do not make `PhaseBAuthorization` masquerade as the generic `SpendAuthorization`. The Phase-B authorization schema is already correct for this experiment; the setup dispatcher is missing an explicit `phase_b` branch." Cumulative cap `$256.99` → `$257.22`, session ceiling unchanged at `$26.8049`.
 - **The branch is symmetric with the other dedicated ones**: load `PhaseBAuthorization`, `require_plan` against `SESSION_PLAN_HASH`, assert `allows_phase_b is True`, `allows_phase_a is False`, `automatic_followon_start is False`, and fail closed to `AUTHORIZATION_MISMATCH` / `exit 98`. `expected_usd` is not reintroduced, and Phase B is not routed through `SpendAuthorization` — whose `harness_source_files` falls back to `HARNESS_SOURCE_FILES_V1`, so that route would have **passed while binding Phase B to Phase A's file list**. The dispatcher itself was not refactored.
 - **The branch body was executed for real before committing**, not merely inspected: the same six lines, against the actual attempt-2 artifact, printing `stages [0..5], hard $26.8049, phase B True, phase A False, followon False`.
-- **The completeness gate proves the mapping, not the string.** `tests/pod/test_session_kind_dispatch.py` builds each launcher's real `SessionSpec`, reads the `SESSION_KIND` it will export **and** the `authorization_loader` it will use, parses the branches out of the shell script, and requires the two to name the same class. A grep for `"phase_b"` would have accepted a branch loading the wrong type — which is the more dangerous failure, because it succeeds. It also asserts the three dedicated branches use three *distinct* types and that none reaches for the generic loader.
+- **The completeness gate proves the mapping, not the string.** `tests/integration/test_session_kind_dispatch.py` builds each launcher's real `SessionSpec`, reads the `SESSION_KIND` it will export **and** the `authorization_loader` it will use, parses the branches out of the shell script, and requires the two to name the same class. A grep for `"phase_b"` would have accepted a branch loading the wrong type — which is the more dangerous failure, because it succeeds. It also asserts the three dedicated branches use three *distinct* types and that none reaches for the generic loader.
 - **Seven mutations, all killed:** deleting the branch; a branch that loads `SpendAuthorization`; dropping `require_plan`; removing the fail-closed handler; dropping the Phase-A refusal; dropping the follow-on assertion; and renaming the launcher's kind to one with no branch — the exact attempt-2 shape.
 - **One self-correction worth keeping:** the first version of the gate asserted `"SpendAuthorization" not in body` against the raw shell, and my own comment *explaining why the branch avoids* `SpendAuthorization` tripped it. The contract is about what executes, so the gate now strips comment lines. A test that cannot tell code from prose is measuring the wrong thing.
 - **Identity movement, as expected:** `autoinit_preflight_setup.sh` is in `PHASE_B_EXECUTABLE_SOURCE_FILES_V1`, so the digest moved `686d43aa…` → `45f6bb8c…` and the preregistration was re-frozen `3e466574…` → `e167feaa…`. A field-by-field diff shows **only** those two plus `generated_utc`: science plan, session plan, both calibration spec and content identities, the reasoning-heavy items identity, the candidate universe, Top-5 admission, imported finalists and control, `sa/sb/sc`, the feasibility floor, the equivalence interval, the historical probe evidence, the `$13.0800` floor and the `$26.8049` ceiling are all unchanged.
@@ -1744,7 +2058,7 @@ live securePrice are re-derived, and all four limits are checked.
 - **What actually failed, and it was mine.** `verify_historical_probe_reuse.CHECKPOINTS` points at `/home/ecs-user/aad-artifacts/autoinit/phase_a`, a dev-box artifact store that is deliberately not transported. Its two tests lived in `test_phase_b_pricing.py`, the pod's gate runs the whole suite, and on a pod all 11 probes fail `artifact_digest_re_derives_from_bytes`. **This is the class my own record already names** — "harness exclusion doesn't exclude tests", written after recovery continuation attempt 3 — and I added those tests anyway without checking them against a pod filesystem.
 - **The second defect is worse in kind: the tree was already red at the launch commit.** `logs/superseded/` was created for the invalidated authorization and never catalogued, so `test_every_log_is_classified_in_the_catalog` failed. My last full-suite run predated both that move and the authorization commit. A suite that was green *earlier* is not evidence about the commit a pod checks out.
 - **The verifier was NOT weakened.** Making a missing checkpoint store into a skip would delete the only proof that the ten-probe price is entitled to cite three probes rather than buy them. Instead the responsibility split is now explicit: **dev box before a pod exists** — historical probe ↔ retained checkpoint bytes; **pod** — staged finalist bytes ↔ canonical digests, runtime comparability, restored probe ↔ imported candidate identity.
-- **Two changes, both narrow.** `tests/autoinit/test_phase_b_reuse_hostlocal.py` holds the five tests that drive `verify()`, excluded from the pod by `PHASE_B_TEST_IGNORES` — built by **extension**, because Phase A's `TEST_IGNORES` is the contract completed sessions ran under and rewriting it would retroactively change what they mean. `historical_reuse_reconstruction_gate` re-runs the strict verifier on the dev box as a pre-provider precheck and refuses on: not 11 probes, any probe whose digest no longer re-derives from bytes, an unverified verdict, an evidence set that has drifted from the record, a missing citation among the eight the budget assumes, or a verifier that admits a different candidate set. It catches a raising verifier as a refusal rather than a crash.
+- **Two changes, both narrow.** `scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py` holds the five tests that drive `verify()`, excluded from the pod by `PHASE_B_TEST_IGNORES` — built by **extension**, because Phase A's `TEST_IGNORES` is the contract completed sessions ran under and rewriting it would retroactively change what they mean. `historical_reuse_reconstruction_gate` re-runs the strict verifier on the dev box as a pre-provider precheck and refuses on: not 11 probes, any probe whose digest no longer re-derives from bytes, an unverified verdict, an evidence set that has drifted from the record, a missing citation among the eight the budget assumes, or a verifier that admits a different candidate set. It catches a raising verifier as a refusal rather than a crash.
 - **Two tests moved for a second reason worth recording:** without the store, `test_a_checkpoint_whose_BYTES_disagree_is_not_reusable` passed **vacuously** on the pod — every probe already fails that check when the store is absent. It was green there and proved nothing.
 - **The pod condition was reproduced at `$0`** with `unshare -r -m` and a tmpfs over the store: the pod-run subset is green, 2249 passed. The full dev-box suite is 2317 passed, 12 skipped.
 - **Nine mutations, all killed**, including reintroducing the original defect — putting the `verify` import back into a pod-run module — which an AST scan over every test file catches by name.
@@ -1928,7 +2242,7 @@ live securePrice are re-derived, and all four limits are checked.
 - **Context:** the maintainer approved option (a) only — fix the wrong consumer — with a driver-local helper permitted for readability, and explicitly **without** a cross-module checkpoint abstraction or harness expansion to guard a hypothetical third consumer. The writer and `train_stage3.py`'s resume consumer already agree; only `PhaseADriver.run_probe` was wrong.
 - **Decision:** `trained_model_dir(out_dir)` in `autoinit_phase_a_driver.py` resolves `out_dir/checkpoints/latest.txt` → `out_dir/checkpoints/<tag>/model`, which is what `Trainer.save_checkpoint` writes. `run_probe` calls it and does no path arithmetic of its own. Both failure modes are named rather than surfacing a bare `FileNotFoundError`: at that point a probe has already been paid for, and "the trainer wrote no checkpoint" and "the index names a tag that does not exist" are different diagnoses.
 - **The regression builds the real layout.** A synthetic tree with `checkpoints/step_1023/model` and `checkpoints/latest.txt`, asserting there is **no root-level `latest.txt`** — the fact that made the old consumer impossible — plus a wiring test that fails if `run_probe` reverts to computing the path itself. **4 mutations**, each turning a passing state into a failing one: the `checkpoints/` component dropped, `run_probe` bypassing the resolver, and each of the two refusals removed.
-- **The repair exposed why no `$0` gate caught this, and the answer is worse than "no gate ran it".** `tests/pod/test_phase_a_stages1_5_execute.py` **does** execute `run_probe` end to end — the full suite went red the moment the driver was corrected. Its fake trainer wrote `out/latest.txt` and `out/step000/model`: **the layout the driver wrongly expected**, not the one `Trainer.save_checkpoint` writes and `tests/training/test_train.py` has always asserted. Two artifacts agreed with each other and both disagreed with the trainer, so an end-to-end harness executed the defective line ~2000 times and certified it. The stub encoded the bug. The fake now writes `checkpoints/<tag>/model`, and a fifth mutation — reintroducing the driver defect against the corrected fake — makes that harness fail **1 + 14**, so it would have caught attempt 5.
+- **The repair exposed why no `$0` gate caught this, and the answer is worse than "no gate ran it".** `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` **does** execute `run_probe` end to end — the full suite went red the moment the driver was corrected. Its fake trainer wrote `out/latest.txt` and `out/step000/model`: **the layout the driver wrongly expected**, not the one `Trainer.save_checkpoint` writes and `tests/training/test_train.py` has always asserted. Two artifacts agreed with each other and both disagreed with the trainer, so an end-to-end harness executed the defective line ~2000 times and certified it. The stub encoded the bug. The fake now writes `checkpoints/<tag>/model`, and a fifth mutation — reintroducing the driver defect against the corrected fake — makes that harness fail **1 + 14**, so it would have caught attempt 5.
 - **One incidental repair.** The helper's first docstring named `scripts/training/train_stage3.py` in prose above the real call site, and `test_phase_a_rehearsal.py` scans this file for the *first* occurrence of each invoked script path to check the flags that follow it. The mention shadowed the invocation and the rehearsal reported `--config` missing. The docstring now says so explicitly instead of naming the path.
 - **Retention was deliberately NOT implemented**, on the maintainer's reasoning: under the current protocol `restore_probe()` resumes only completed *scored* journal entries, so making a trained-only probe reusable would need a new bound journal state, cross-session staging, evaluation-only resume semantics and a large-checkpoint transfer policy. That is disproportionate to this blocker and would enlarge the final paid attempt's change surface. **Attempt 5's trained probe is therefore not resumable scientific work: attempt 6 starts recovery normally from the preserved Stage-1 inputs and retrains it.**
 - **Verified:** full suite, frozen verifier, 4 mutations. The continuation harness digest moves `95cf336d…` → `57bf0944…`, since `autoinit_phase_a_driver.py` is inside the 22-file set.
@@ -1996,7 +2310,7 @@ live securePrice are re-derived, and all four limits are checked.
 - **Context:** the maintainer closed the paid-readiness review and granted exactly one launch. The full one-use chain executed: grant commit `7368568`, authorization `autoinit.recovery_continuation.2026-08-22T1311Z` bound to that base and to continuation harness `162c09ed` over 22 files, authorization-only commit `ad73e05` differing from its base in exactly one path, bundle `aad_autoinit_ad73e05a.bundle` round-tripped by bytes with its harness digest recomputed from the relay checkout, and all `$0` gates re-run unchanged (full suite 2160 passed / 12 skipped, frozen verifier clean).
 - **The result worth keeping: the five-leaf transport works on a paid pod.** The pre-provider gate read *25 relay inputs (10 main + 15 transport), 2 local assets* against attempt 2's *10 relay inputs, 7 local assets*, and the pod reached `ASSETS_STAGED`, `ASSETS_READY` and `VLLM_READY`. Under `set -euo pipefail` with strictly ordered markers, that proves the staging block fetched all 25 declared inputs from their own declared repositories and verified every declared sha256 at every landing site — **5.5513 GiB of Stage-1 leaves pulled at hub speed**. Attempt 2's failure class is closed by observation, not by argument.
 - **Decision: fail closed, do not repair on the live pod, do not relaunch.** The pod was deleted at 12.2 min / **$0.2011** with provider confirmation; the watchdog ended `pod_gone` after 13 ticks; the independent poller's last observation was `RUNNING` and the provider now returns zero pods.
-- **Cause, reproduced rather than inferred.** `scripts/autoinit/publish_selected_leaves.py:199` calls `tempfile.mkdtemp(prefix="leaf-roundtrip-", dir="/home/ecs-user/aad-scratch")`. That directory does not exist on a pod, so the five tests in `tests/autoinit/test_leaf_transport_publish.py` that reach `verify()` raise `FileNotFoundError`. Running the real module in a mount namespace holding the repo and interpreter but **no** `/home/ecs-user/aad-scratch` produced **5 failed**, matching the pod's count exactly and recovering the two failure names the 40-line `setup.log` tail did not transport.
+- **Cause, reproduced rather than inferred.** `scripts/autoinit/publish_selected_leaves.py:199` calls `tempfile.mkdtemp(prefix="leaf-roundtrip-", dir="/home/ecs-user/aad-scratch")`. That directory does not exist on a pod, so the five tests in `scripts/experiments/tests/test_leaf_transport_publish.py` that reach `verify()` raise `FileNotFoundError`. Running the real module in a mount namespace holding the repo and interpreter but **no** `/home/ecs-user/aad-scratch` produced **5 failed**, matching the pod's count exactly and recovering the two failure names the 40-line `setup.log` tail did not transport.
 - **Why four `$0` gates were each true and none sufficient.** The layout test verifies a *declared* host-local storage root where present and **skips it where absent** — correct, and `/home/ecs-user/aad-scratch/` is declared in `REPO_LAYOUT.md`; nothing connects "this path is host-local" to "code requiring it must not execute on a pod". The pod simulator simulates the pod's *repository tree*, not its *host filesystem*, and runs where the directory exists. `publish_selected_leaves.py` is deliberately outside the 22-file harness — it is a dev-box publishing tool the session never runs — so the harness digest never measured it; but its test module is not in `TEST_IGNORES` (two entries), so the pod's gate ran it anyway. The dev-box suite passed 2160/12 twice for the same reason.
 - **This is attempt 8's class one step out.** Attempt 8 ($0.1900) was a `$0` test *asserting* dev-box filesystem state. This is a `$0` test *executing production code that requires* it. The generalisable rule: when a tool is excluded from a session's harness because the session does not run it, its **tests** must be excluded from the session's gate too — or the tool must not hard-code host paths.
 - **Alternatives considered:** (a) fix the one line to derive the scratch parent from the environment with a `tempfile` default fallback; (b) add the test module to `TEST_IGNORES`; (c) both. (a) is the real fix — a publishing tool should not be unrunnable off one host — and (b) alone would leave the tool untested on the machine that runs it. Neither is applied here: this is a maintainer decision, and any change moves the session commit, which the lineage gate constrains.
@@ -2052,7 +2366,7 @@ live securePrice are re-derived, and all four limits are checked.
 
 ## 2026-08-22 — Operational identity and scientific identity are different invariants
 
-- **Context:** `tests/pod/session_specs.py` defines the set of real sessions the shared `SessionSpec`/setup/staging contracts run against, and `autoinit_recovery_continuation_launch` was missing from it. The session about to be paid for was the one session those generic contracts did not cover. Adding it failed `test_every_session_names_a_distinct_status_file_and_authorization`, because that test required `plan_hash` to be globally unique and the continuation **deliberately shares** Phase A's frozen `9377a2dc…`.
+- **Context:** `tests/support/session_specs.py` defines the set of real sessions the shared `SessionSpec`/setup/staging contracts run against, and `autoinit_recovery_continuation_launch` was missing from it. The session about to be paid for was the one session those generic contracts did not cover. Adding it failed `test_every_session_names_a_distinct_status_file_and_authorization`, because that test required `plan_hash` to be globally unique and the continuation **deliberately shares** Phase A's frozen `9377a2dc…`.
 - **Decision:** add the continuation to `SESSION_LAUNCHERS`, and fix the invariant rather than the session. A `plan_hash` names *what science is being run*; a status file, run log, authorization path, job id, session id and schema name *which run is running*. The uniqueness check now covers the six **operational** fields and no longer covers `plan_hash`.
 - **Alternatives considered and rejected:** giving the continuation its own plan hash — that would rewrite a **frozen scientific identity** to satisfy a test about file names, and would misrepresent the session as running a different science than Phase A; leaving the continuation uncovered — that leaves the shared contracts unexercised for the session that is about to run; special-casing the continuation inside the uniqueness test — that hides the conflation instead of naming it.
 - **Dropping a field removes a check, so it was replaced by a stronger one.** `test_the_recovery_continuation_shares_the_science_and_not_the_session` asserts the sharing is deliberate: the **full** Phase-A `plan_hash` and `plan_id`, with `9377a2dc…` written out literally so the frozen value cannot drift; all six operational fields distinct from Phase A's; `RecoveryContinuationAuthorization.load` rather than `PhaseAAuthorization.load`; a harness set that differs from Phase A's and excludes `phase_a_search.py`; a budget with no `stage1_beam_search` phase and no Stage-1 reserves, pricing to a hard `$16.7456` strictly below Phase A's; and `runs_a_search == False`.
@@ -2074,7 +2388,7 @@ live securePrice are re-derived, and all four limits are checked.
 - **Mutation-verified 14 ways.** One initially *passed*: deleting the `continue` after a failed observation still loops and still recovers, so every outcome-level assertion held — but the failure then falls into the port scan with no data, sleeps a second time and advances the progress counter, spending the startup deadline at twice the intended rate. The tests now pin the sleep sequence, not only the outcome.
 - **The class cannot return quietly:** a test walks `session_runner.py`'s syntax tree and fails on any `_gql` attribute access, so a future single-shot in a paid path — precisely attempt 1 — breaks the suite instead of a pod.
 - **Consequence, and it is the mechanism working:** the continuation harness digest moved `f2ea4332…` → `e5a7183a…`, and attempt 1's consumed authorization now refuses it. Attempt 2 needs a new one-use grant.
-- **Not done, and reported rather than forced:** `tests/pod/session_specs.py` still omits `autoinit_recovery_continuation_launch`, so the structural checks do not cover it. Adding it fails `test_every_session_names_a_distinct_status_file_and_authorization`, because the continuation **deliberately shares** Phase A's frozen `plan_hash` `9377a2dc…` — same science, distinct operational identity. Accommodating that means changing a structural invariant around a frozen identity, which is outside this closure.
+- **Not done, and reported rather than forced:** `tests/support/session_specs.py` still omits `autoinit_recovery_continuation_launch`, so the structural checks do not cover it. Adding it fails `test_every_session_names_a_distinct_status_file_and_authorization`, because the continuation **deliberately shares** Phase A's frozen `plan_hash` `9377a2dc…` — same science, distinct operational identity. Accommodating that means changing a structural invariant around a frozen identity, which is outside this closure.
 - **Revisit when:** the maintainer decides on Attempt 2, and separately on whether the distinct-`plan_hash` invariant should admit a session that shares a science plan by design.
 
 ## 2026-08-22 — Recovery continuation attempt 1: fail-closed on an uncaught transport call, $0.01
@@ -2150,7 +2464,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **What happened.** Pod `6ex6mpu1uha1xg`, L40S, 17.4 min. Setup passed every gate including the corrected frozen-asset check. **Stage 0 passed**: runtime attested, trainer digest and both protocol identities materialized and frozen (attested recovery protocol `6b9b3da9…`, evaluation protocol `b90ae5e6…`), vLLM booted and reported its real settings. **Stage 1 raised** in the evaluator-repeatability gate, the session stopped, and the two permanent controls were **not** trained — the staging doing exactly its job. Pod deleted, provider confirmed gone.
 - **The defect.** `measure_state_repeatability.py` read `result.as_dict()["metrics"]`. `StateEvaluation.as_dict()` has never had a `metrics` key; it has `values`. Reproduced on CPU in ~9 minutes for $0: `KeyError: 'metrics'`, after both models load and a full evaluation pass completes.
 - **The real finding is not the typo.** The three Stage-1 measurement scripts — repeatability, statistics split, peak memory — had been reviewed, wired into the driver and rehearsed *around*: every harness test stubbed them out. Their first execution on real objects was on a paid pod. A one-line key error survived a 1,565-test suite because nothing ever called the line.
-- **Decision (1) — every Stage-1 probe is now executed end to end in the suite**, as a subprocess, with its real argument parsing and its real output schema, against a tiny stand-in teacher (`tests/autoinit/test_stage1_probes_execute.py`, 7 tests, ~10 s). To make that possible the two CUDA-only probes take a `--teacher` override and guard `torch.cuda.*` behind the device; the peak-memory probe records nulls on CPU.
+- **Decision (1) — every Stage-1 probe is now executed end to end in the suite**, as a subprocess, with its real argument parsing and its real output schema, against a tiny stand-in teacher (`tests/initialization/test_stage1_probes_execute.py`, 7 tests, ~10 s). To make that possible the two CUDA-only probes take a `--teacher` override and guard `torch.cuda.*` behind the device; the peak-memory probe records nulls on CPU.
 - **Decision (2) — a smoke artifact must never satisfy the gate it informs.** Each probe records `is_real_teacher` / `is_gate_measurement`, and Stage 1 fails closed when either is false or `peak_gib` is null. The ability to run cheaply must not become the ability to pass cheaply.
 - **Decision (3) — the failure must survive the pod.** The gates now write their full stdout and stderr to `audit/autoinit_preflight/<gate>.log`, collected by the failed-session artifact spec, and every truncated reason keeps its **tail** rather than its head. The paid attempt's only account of why it stopped was `Loading weights: 100%` — the exception had been cut off by a 300-character prefix, and the pod was gone.
 - **Also verified for free afterwards:** the real gate command, real teacher, real 80-item suite, on CPU — it completes and writes a valid artifact. And `uncapped_eval.py`'s new identity helpers are unit-tested, since that script cannot run without a GPU and its failure would land after both controls were paid for.
@@ -2200,7 +2514,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Why this is a blocker and not a nuisance.** A constant defect does not bias a candidate-vs-control comparison. But Stage 3 does not compare — it **materializes the frozen thresholds** (feasibility floor, equivalence interval, per-capability catastrophic reference values) from the control's measured rates. Freezing a floor derived from a structurally-zero capability would bake the defect into every later decision, and the catastrophic rule on `tool` would be permanently vacuous. It is exactly the class of thing that must be fixed *before* the measurement, not after.
 - **Decision (1) — `protocol_valid(..., tools_offered=False)`, strictly additive.** When the prompt declared tools, a `<tool_call>` block is valid answer form. The default is `False`, so every historical result and every caller that cannot see the prompt is scored bit-for-bit as before; only a caller holding the frozen sample may relax it. `usable_rollout.components/usable` thread the flag through; the `three_mode` schema carries its own `protocol_valid` and is untouched. The pre-existing assertion that an unprompted tool call is `unexpected_tool_call` still passes.
 - **Decision (2) — a dedicated `scripts/autoinit/score_recovery_search.py`** rather than adding `battery_version` to a frozen manifest to satisfy a consumer. It reuses the frozen scorers unchanged (`capability.SCORERS`, `score_numeric`, `score_tool_call`) and records their source hashes; what it adds is the recovery-search contract — `usable_rollout` with all five components, `score_recovery_row`, `code` behaviour-only so `correct_overall` is over 170, and fail-closed `CAPABILITY_SCHEMA_V1` validation. It emits **counts**, because `pooled_counts@v1` refuses a float.
-- **Decision (3) — validated against known-bad policies on the real 190 prompts before any pod.** `tests/autoinit/test_recovery_search_scoring.py`: a contentless-but-perfect policy (behaviour 1.0, correctness < 0.10 — the proof that `usable_rollout` is blind to correctness); oracle-then-context-limit (the scorer finds the answer, `correct` is still 0, `correct_given_usable` is `None` not 0.0); empty; degenerate; and an oracle upper bound that would have caught a scorer pointing the wrong way. This is the fourth defect this practice has caught.
+- **Decision (3) — validated against known-bad policies on the real 190 prompts before any pod.** `scripts/experiments/tests/test_recovery_search_scoring.py`: a contentless-but-perfect policy (behaviour 1.0, correctness < 0.10 — the proof that `usable_rollout` is blind to correctness); oracle-then-context-limit (the scorer finds the answer, `correct` is still 0, `correct_given_usable` is `None` not 0.0); empty; degenerate; and an oracle upper bound that would have caught a scorer pointing the wrong way. This is the fourth defect this practice has caught.
 - **Consequence:** the **micro-preflight is held**, not launched. The authorization was conditional on no new material blocker; this is one, and it changes what `usable_rollout` means for one of six preregistered capabilities. Nothing was spent. The fix is zero-cost and complete; what needs a decision is whether to proceed with the corrected metric.
 - **Revisit when:** the maintainer confirms the corrected `usable_rollout` definition. Budget unchanged and unspent: expected $4.20 / hard $8.60.
 
@@ -2290,7 +2604,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 ## 2026-08-12 — AutoInitializer v1: what is mechanical, and what the composite operator is for
 
 - **Context:** the 2026-08-12 record below fixed the AutoInitializer's *constraints*; this one records the design decisions taken while implementing them at zero cost, because three of them are not derivable from the constraints and a later reader would otherwise have to reverse-engineer them from code.
-- **Decision (1) — the incumbent Stage-1 recipe enters the search as a single `COMPOSITE_STAGE1` operator, not as a four-step path.** `init_student` decides depth, width, FFN and attention *jointly*, entirely in float64 from the teacher's weights, casting once at assignment. A four-operator decomposition cannot reproduce it even in principle: each intermediate checkpoint is materialized in the working dtype, so rounding enters three extra times, and every operator after the first measures a *checkpoint* rather than the teacher. Those are different algorithms. So the incumbent stays whole under its own immutable id, and `tests/autoinit/test_frozen_records.py` asserts it is bitwise-identical to a direct `init_student` call. It is applicable only from an uncompressed root.
+- **Decision (1) — the incumbent Stage-1 recipe enters the search as a single `COMPOSITE_STAGE1` operator, not as a four-step path.** `init_student` decides depth, width, FFN and attention *jointly*, entirely in float64 from the teacher's weights, casting once at assignment. A four-operator decomposition cannot reproduce it even in principle: each intermediate checkpoint is materialized in the working dtype, so rounding enters three extra times, and every operator after the first measures a *checkpoint* rather than the teacher. Those are different algorithms. So the incumbent stays whole under its own immutable id, and `scripts/experiments/stage-3/tests/test_frozen_records.py` asserts it is bitwise-identical to a direct `init_student` call. It is applicable only from an uncompressed root.
 - **Decision (2) — operator contracts are enforced at execution, not documented.** Each implementation declares the structural fields it modifies and preserves; `OperatorImplementation.execute` diffs the before/after `ArchSpec` and raises on anything undeclared, refuses an outcome whose model *is* the parent, and re-reads the parent spec afterwards to catch in-place mutation. `ChildBuilder` additionally refuses to return a child with an unassigned parameter, which is why random initialization is kept rather than skipped — without it, a forgotten norm ships as a random tensor inside a real checkpoint and the state evaluation faithfully measures and ranks it.
 - **Decision (3) — metric levels are namespaced, and the namespace is enforced.** Operator-local metrics are `op.*`, global state metrics are `state.*`, and `BeamRankingPolicy` refuses any objective outside `state.`. E8a is the worked example: its operator-local objective was 3.11× better for the map that initialized 2.8 nats worse. A single-objective beam additionally requires an explicit acknowledgement flag, because E7 showed a −5.22 nat NLL swing moving behaviour by exactly +0.0000.
 - **Decision (4) — dataset-role identities are typed.** E8a's calibration mixture is pre-tokenized and carries no prompt text; a battery is prompts. Comparing one set of text hashes against a set of token hashes returns "no overlap" for *every* input, including one that leaks — the worst possible failure for a leakage check, because it always passes. `check_role_isolation` therefore compares only within an identity kind and *reports* role pairs that share no kind, failing closed.
@@ -2304,7 +2618,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Context:** every Stage 2/3 family trains all four attention projections full-rank, and every one degenerates in free rollout — 31.1% of 900 rollouts hit the context limit (§19.8), the classic exposure-bias signature. Restricting the attention update is a cheap, narrow test of one candidate mechanism. Two questions had to be settled before launch: which arm is the control, and how the adapter is optimized.
 - **Decision:** (1) **The baseline is P2-ceheavy, not P1.** A1 and A2 are rebuilt from `p2_ceheavy_{sa,sb}` and inherit its `ce 1.0 / kd 0.25` objective. (2) **LoRA tensors share the baseline's single AdamW group** — same learning rate, same schedule, same weight-decay semantics as the FFN and norms. No separate LoRA learning rate, no separate parameter group, no rank or module sweep; the trainer now *rejects* `optim.lora_lr`, `optim.lora_weight_decay` and `optim.no_decay_patterns` rather than accepting them quietly. (3) **The noise floor is the larger of the P1 and P2 two-seed spreads** on every metric. (4) **Held-out NLL runs on the dev-box CPU**, not the pod.
 - **Alternatives considered:** keeping P1 as the control while A1/A2 used P2's objective (rejected — that confounds the attention treatment with the loss-weight change, which §18 measured at −0.0141 teacher-forced reasoning top-1); giving LoRA the conventional higher learning rate and zero weight decay (rejected — it makes A2 differ from A1 in two ways at once, and the maintainer scoped A2 to low-rank *parameterization* rather than adapter tuning); using P2's own tighter spreads as the noise floor (rejected — with n=2 a spread is a single draw, and §18.7 already records P2's as suggestive rather than established, so the smaller number would make an effect too easy to call); running NLL on the pod for same-machine comparability (rejected once CPU was measured to reproduce the GPU value to 0.02% — P2's weights are dev-box-only and the relay's LFS quota is full, so the pod route would have cost an upload it cannot take and ~24 min of paid time).
-- **Expected upside:** each arm differs from its comparator in exactly one field, asserted mechanically by diffing config dictionaries in `tests/training/test_e3_configs.py` rather than by eye. A1's freeze claim is additionally gated *on the pod*: attention-projection movement against the Stage 1 init must be exactly zero before any A2 money is spent.
+- **Expected upside:** each arm differs from its comparator in exactly one field, asserted mechanically by diffing config dictionaries in `scripts/experiments/stage-3/tests/test_e3_configs.py` rather than by eye. A1's freeze claim is additionally gated *on the pod*: attention-projection movement against the Stage 1 init must be exactly zero before any A2 money is spent.
 - **Risks:** rank 8 is a single point, so a null means "r8 on q/k/v/o under the baseline's optimizer settings does not help", not "LoRA does not help" — stated in §20.5 before the run. A0's rollout numbers come from the earlier P2 session and different hardware; only NLL is single-device across all six arms. And `usable_rollout` is blind to correctness by construction, which is why R6 blocks promoting an arm that merely terminates earlier.
 - **Revisit when:** ~~`analyze_e3.py` reports~~ — **REPORTED 2026-08-05, $5.76 (§20).** **None of the four rules fired.** Both arms are worse than the baseline on both seeds and on all five usable-rollout components: A1 −0.0866, A2 −0.0933 against a 0.0800 floor. R1 is *inverted* rather than merely unsupported; R2 fails because A2 loses to A0 on both seeds; R3's guard had nothing to catch because A2's teacher-forced top-1 also fell; and **R4 did not fire either** — it required both arms to improve FineWeb NLL and A1's rose by 0.9546. The move to student-prefix / on-policy recovery therefore stands as an **engineering judgement, not a fired rule**, supported by negative evidence from three probes of the offline family (§17 KD scope, §18 KD magnitude, §20 attention capacity), none of which moved autonomous rollout. Two decisions in this record proved right for reasons visible only afterwards: pinning the baseline to P2 kept the treatment unconfounded, and taking the *larger* of the two seed spreads as the noise floor is what lets a −0.0866 result be called rather than argued about. The maintainer's mid-run resize (r8 → r32, α16 → α64) landed before any A2 checkpoint existed, so A1 was never touched.
 
@@ -4843,8 +5157,8 @@ in assumptions that a later study would have to unpick.
   student artifact digest, the seed and the evaluation protocol hash all still
   match — the same binding rule `BeamSearch._restore` applies to search states.
   Mutation-tested: relaxing the seed check makes the suite fail.
-- **Rehearsed, not inspected.** `tests/pod/test_phase_a_rehearsal.py` (40 tests)
-  drives the driver's full lifecycle, and `tests/pod/test_phase_a_search_executes.py`
+- **Rehearsed, not inspected.** `scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py` (40 tests)
+  drives the driver's full lifecycle, and `scripts/experiments/stage-1/phase_a/tests/test_phase_a_search_executes.py`
   (6 tests) executes the real `run_phase_a_search` at toy scale on CPU —
   real operators, real checkpoints, real reload, real hashing, real measurement,
   real control injection, and a real resume that proves the second pass
@@ -5029,7 +5343,7 @@ should not be reached for by a future session.
   written, the session failed closed, the artifact gate collected under the
   reduced spec, and teardown was provider-confirmed. The defect is mine, in the
   driver.
-- **Why nothing caught it.** `tests/pod/test_phase_a_rehearsal.py` drives the
+- **Why nothing caught it.** `scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py` drives the
   driver's full lifecycle with every stage **scripted** — `stage0()` in the
   rehearsal returns a canned pass and never builds the real argv. So the line
   had never executed anywhere: not locally, not in the simulator, not under
@@ -5081,7 +5395,7 @@ Three attempts, three defects, **all in setup or stage 0, none in the science**:
 | 3 | $0.2103 | `declared_generation_protocol()` called with an argument | in-process call |
 
 Total **$0.7843** for zero stages passed. Every one was found on a paid pod, and
-every one is the same root cause: **`tests/pod/test_phase_a_rehearsal.py` drives
+every one is the same root cause: **`scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py` drives
 the driver's lifecycle with all six stages SCRIPTED.** Its `stage0()` returns a
 canned pass. The real `stage0()` body — the engine probe invocation, the
 protocol construction, the `assert_preregistered` binding, the threshold
@@ -5252,7 +5566,7 @@ CalibrationError: calib.domain_balanced@v1:
   `stage2()`–`stage5()` orchestration with only training/generation stubbed.
 - **Decision:** execute them, and fix what execution found.
 
-  [`tests/pod/test_phase_a_stages1_5_execute.py`](../../tests/pod/test_phase_a_stages1_5_execute.py)
+  [`scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py`](../../scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py)
   runs the real `PhaseADriver` stages **0 → 5** end to end on CPU. Substituted:
   the teacher/target geometry (32-wide/6-layer teacher, 16-wide/4-layer target,
   at the **real** 151,936 vocabulary so production calibration token ids are
@@ -5295,7 +5609,7 @@ CalibrationError: calib.domain_balanced@v1:
   it fits, recompute per candidate when it does not, and say so loudly.
   Recomputing is numerically identical, asserted rather than assumed: identical
   removal order, identical kept layers and identical candidate score tables in
-  [`tests/autoinit/test_depth_reference_cache.py`](../../tests/autoinit/test_depth_reference_cache.py).
+  [`tests/initialization/test_depth_reference_cache.py`](../../tests/initialization/test_depth_reference_cache.py).
   The headroom is read from the **host** (cgroup grant ∩ `/proc/meminfo`), not
   from `torch.cuda.mem_get_info`: E8a's cache lived on the accelerator, this one
   is `.cpu()`, and copying the probe would have compared a host allocation
@@ -5429,7 +5743,7 @@ CalibrationError: calib.domain_balanced@v1:
   ```
 
   Reproduced by `PhaseA.make_plan` at $0 and pinned in
-  `tests/pod/test_phase_a_rehearsal.py`, which also asserts that the worst case
+  `scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py`, which also asserts that the worst case
   — the full 180-minute search allowance plus **both** reserves plus all 12
   probes — lands inside the soft stop with the entire 10% contingency still
   intact. That is the property that keeps seed sc reachable.
@@ -5533,7 +5847,7 @@ cuda:0, different from other tensors on cpu
   Third, `build_student` is shared with Stage-1/Stage-3 code that has its own
   placement expectations.
 - **One regression**,
-  [`test_search_materialize_device_boundary.py`](../../tests/autoinit/test_search_materialize_device_boundary.py):
+  [`test_search_materialize_device_boundary.py`](../../tests/initialization/test_search_materialize_device_boundary.py):
   drives the real `_materialize_and_measure` with the produced model on the host
   and `config.device` elsewhere, asserting the reload is loaded on the produced
   model's device, moved to the search device, and that the save/reload
@@ -5661,7 +5975,7 @@ two devices, cuda:0 and cpu!
   produces an unplaced child — that is category 1, not a defect.
 
 - **The regressions supply the second device the box does not have.**
-  `tests/autoinit/device_split.py` labels a statistics tensor as cache-resident
+  `tests/support/device_split.py` labels a statistics tensor as cache-resident
   and raises when it meets a model-side tensor untransferred. Each cache
   consumer runs its real `execute()` against it; removing any of the three
   `stats_to` calls fails.
@@ -6402,7 +6716,7 @@ two devices, cuda:0 and cpu!
   *freshly allocated* host tensor mixed into the same arithmetic is plain too and
   there is nothing to bite on. The two instruments are duals and neither sees the
   other's class.
-- **Placement is asserted, not arithmetic.** `tests/autoinit/factory_placement.py`
+- **Placement is asserted, not arithmetic.** `tests/support/factory_placement.py`
   (~40 lines, a sibling of `device_split.py`, no dispatch of its own) records
   each factory call and whether it named a device. On one device the fixed and
   broken versions produce identical numbers; they are trivially distinguishable
@@ -6777,7 +7091,7 @@ two devices, cuda:0 and cpu!
   — on a manifest built for the purpose, so no real session's declaration has to
   be wrong for the mechanism to be demonstrated.
 - **The contract, derived rather than transcribed.**
-  `tests/pod/test_session_setup_contract.py` asserts, for every session:
+  `tests/integration/test_session_setup_contract.py` asserts, for every session:
   `verifier_required_local_roots ⊆ session_installed_local_roots`, comparing
   `install_to/dest_name` against the verifier's `root`. Two properties are
   load-bearing:

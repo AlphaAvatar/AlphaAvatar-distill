@@ -35,7 +35,7 @@ import torch  # noqa: E402
 
 SEED = 20260908
 
-#: The same toy teacher `tests/init/test_stage1.py` uses, including the
+#: The same toy teacher `tests/initialization/test_stage1.py` uses, including the
 #: randomized RMSNorm weights -- a fresh model has every norm at 1.0, which
 #: would make norm folding a no-op and hide any mistake in it.
 TEACHER = dict(vocab_size=128, hidden_size=32, num_hidden_layers=4,

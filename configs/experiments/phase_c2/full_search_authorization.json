@@ -46,7 +46,7 @@
  "inputs": {
   "protocol": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
   "pricing": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json",
-  "_non_source_inputs_are_derived": "the telemetry the cost model pools over and the calibration item files the search resolves are NOT listed here. scripts/experiments/phase_c2/full_search.py derives both from the code that reads them -- TELEMETRY_SOURCES and each profile's items_path -- because two paid subruns of the CUDA engineering validation died one per producer when a hand-maintained list named only the producer its author had thought of."
+  "_non_source_inputs_are_derived": "the telemetry the cost model pools over and the calibration item files the search resolves are NOT listed here. scripts/experiments/stage-1/phase_c2/full_search.py derives both from the code that reads them -- TELEMETRY_SOURCES and each profile's items_path -- because two paid subruns of the CUDA engineering validation died one per producer when a hand-maintained list named only the producer its author had thought of."
  },
  "authorizes": "nothing",
  "stage_conditions": {

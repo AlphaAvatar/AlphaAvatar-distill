@@ -219,7 +219,7 @@ Protocol and pricing:
 [`phase_c2_full_search_protocol.json`](../../phase_c2/plans/phase_c2_full_search_protocol.json) ·
 [`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
 The space is **derived from the registry**, never written down:
-[`full_search_space.py`](../../../../../scripts/experiments/phase_c2/full_search_space.py).
+[`full_search_space.py`](../../../../../scripts/experiments/stage-1/phase_c2/full_search_space.py).
 
 > **Question C2.** With the promoted ATTENTION operator in the accepted library,
 > what is the globally preferred initialization composition when

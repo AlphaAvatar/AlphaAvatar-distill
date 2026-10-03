@@ -122,7 +122,7 @@ def main() -> None:
     # used, so every earlier Stage 1 config keeps its exact behaviour; when
     # present it replaces the depth map and nothing else — the projection, the
     # Q-head rule, the FFN neuron rule and the norm treatment below are reached
-    # identically either way (asserted in tests/init/test_contribution.py).
+    # identically either way (asserted in tests/initialization/test_contribution.py).
     kept_layers = None
     depth_map_record = None
     if config.get("depth_map_path"):

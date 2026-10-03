@@ -124,7 +124,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: record rather than a missing registration.
     #:
     #: It binds its own launcher, its own session id, its own executable
-    #: closure and its own pod selection — `tests/c2_behavioural_preflight`,
+    #: closure and its own pod selection — `scripts/experiments/stage-1/phase_c2/tests`,
     #: which the other five would each fail on a correct behavioural tree — and
     #: its record declares its own schema, so no other C2 record can satisfy
     #: its verifier or it theirs.
@@ -140,11 +140,11 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: registration.
     #:
     #: It binds its own launcher, its own session id, its own executable
-    #: closure and its own pod selection -- `tests/a3_preflight`, which none
+    #: closure and its own pod selection -- `scripts/experiments/stage-1/phase_c3/tests`, which none
     #: of the other six would run -- and its record declares its own schema,
     #: so no other record can satisfy its verifier or it theirs.
     "phase_a3": (
-        "experiments.phase_c3.a3_pod_environment",
+        "experiments.phase_a3.a3_pod_environment",
         "sweep_contract"),
 }
 
@@ -193,8 +193,8 @@ def derive_session(sweep):
     """
     import sys as _sys
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
-    _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
-    from session_specs import session_args
+    _sys.path.insert(0, str(REPO_ROOT / "tests"))
+    from support.session_specs import session_args
 
     launcher = launcher_module(sweep.launcher_module)
     spec = launcher.spec(session_args(launcher))
@@ -215,8 +215,8 @@ def launcher_module(name: str):
     """
     import sys as _sys
     _sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
-    _sys.path.insert(0, str(REPO_ROOT / "tests/pod"))
-    from session_specs import load_session_launcher
+    _sys.path.insert(0, str(REPO_ROOT / "tests"))
+    from support.session_specs import load_session_launcher
     return load_session_launcher(name)
 
 

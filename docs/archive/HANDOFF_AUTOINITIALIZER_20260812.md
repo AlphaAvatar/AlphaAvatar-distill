@@ -180,7 +180,7 @@ domain alone and demoted out of the beam objectives, delayed pruning with
 epsilon-dominance and lineage diversity, a constraint-then-objective recovery
 selector, an activation-statistics cache keyed on the parent artifact, and
 recompute-per-candidate reference logits. Nine items, each pinned by a test in
-`tests/autoinit/test_corrections.py`; see [`../logs/budget/decisions.md`](../../logs/budget/decisions.md)
+`tests/initialization/test_corrections.py`; see [`../logs/budget/decisions.md`](../../logs/budget/decisions.md)
 2026-08-12.
 
 **What is still missing, and blocks a paid run:** the initializer-state evaluation
@@ -285,7 +285,7 @@ an offline-install flag, an unpinned `pip install`, a cross-session authorizatio
 binding, and a status filename the launcher did not probe. Each was found by
 paying for the next one.
 
-`tests/pod/test_setup_end_to_end.py` now runs the **real** setup script from entry
+`scripts/experiments/stage-1/recovery_continuation/tests/test_setup_end_to_end.py` now runs the **real** setup script from entry
 to `SETUP_DONE` inside bubblewrap and reads the result back through the launcher's
 own `PROBE_COMMAND` and `parse_setup_probe`, stubbing only the expensive external
 operations. It needs the 196-wheel vLLM wheelhouse at

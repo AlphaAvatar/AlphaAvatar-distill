@@ -8,7 +8,7 @@ comparable to anything the project has measured.
 The renderers therefore live here, once, as module-level functions rather than
 as closures inside a `main()`. The v1 builder is deliberately left untouched, so
 the frozen `recovery_search_v2` artifact keeps the exact build path that produced
-it; `tests/data/test_c1_battery.py` closes the loop by asserting that these
+it; `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` closes the loop by asserting that these
 functions reproduce that artifact's stored `prompt_text` byte for byte.
 
 Rows are read straight from the pinned Hugging Face **snapshot directory**, not
@@ -221,7 +221,7 @@ RENDERERS: dict[str, Callable[[dict], dict | None]] = {
 
 # --- renderer parity with the frozen recovery-search battery ----------------
 #
-# One implementation, two callers: `tests/data/test_c1_battery.py`, which skips a
+# One implementation, two callers: `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py`, which skips a
 # group whose pinned snapshot is absent, and `scripts/autoinit/renderer_parity_gate.py`,
 # which refuses that same absence. Two independent comparison algorithms could
 # disagree about what parity means, which is the one thing this guarantee cannot

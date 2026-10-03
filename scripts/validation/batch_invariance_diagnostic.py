@@ -33,7 +33,7 @@ the run is how a report gets misread):
    11  fp32 control         the dtype hypothesis. A DIAGNOSTIC, never a proposal
 
 The verdict is not written beside the numbers: `derive_conclusion` computes it
-from the stage outputs, and `tests/validation/test_batch_invariance_conclusion`
+from the stage outputs, and `scripts/experiments/stage-1/phase_c3/tests/test_batch_invariance_conclusion`
 tables that function. Nothing here changes an operator. It measures.
 
     PYTHONPATH=src:scripts python scripts/validation/batch_invariance_diagnostic.py \

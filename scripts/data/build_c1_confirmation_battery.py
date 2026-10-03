@@ -258,7 +258,7 @@ def main() -> None:
         "sources": sources,
         "rendering": ("scripts/data/battery_render.py — the same renderers, "
                       "instructions and id conventions as recovery_search, asserted "
-                      "against the frozen artifact in tests/data/test_c1_battery.py"),
+                      "against the frozen artifact in scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py"),
         "content_sha256": content,
         "content_sha256_convention": ("sha256 over newline-joined sorted "
                                       "'id:prompt_sha256' pairs"),

@@ -687,8 +687,8 @@ def main() -> None:
                 ("the Phase-A harness rehearsed end to end at toy scale before "
                  "any pod exists",
                  all((REPO_ROOT / p).is_file() for p in (
-                     "tests/pod/test_phase_a_rehearsal.py",
-                     "tests/pod/test_phase_a_search_executes.py",
+                     "scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py",
+                     "scripts/experiments/stage-1/phase_a/tests/test_phase_a_search_executes.py",
                      "scripts/pod/autoinit_phase_a_launch.py",
                      "scripts/pod/autoinit_phase_a_driver.py"))),
             ) if not satisfied

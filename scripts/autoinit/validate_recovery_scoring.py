@@ -2,7 +2,7 @@
 
     PYTHONPATH=src python scripts/autoinit/validate_recovery_scoring.py
 
-Runs every policy in `tests/autoinit/test_recovery_search_scoring.py` over all
+Runs every policy in `scripts/experiments/tests/test_recovery_search_scoring.py` over all
 190 frozen prompts and emits one reviewable artifact. The tests are the gate; this
 is the record a maintainer reads without running pytest, and the thing the
 preregistration binds its scoring-contract digest to.
@@ -38,7 +38,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from experiments.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-TESTS = REPO_ROOT / "tests/autoinit/test_recovery_search_scoring.py"
+TESTS = REPO_ROOT / "scripts/experiments/tests/test_recovery_search_scoring.py"
 GENERIC = ("gsm8k", "math_verified", "multihop", "rag", "knowledge")
 
 #: What each policy must produce. Written here as data so the artifact states its

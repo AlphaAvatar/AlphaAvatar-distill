@@ -219,7 +219,7 @@ trap restore EXIT INT TERM
 # session stages those from the relay.
 #
 # `recovery_search_v1` joined this list on 2026-08-14: the v2 migration stopped
-# staging it, but `tests/autoinit/test_frozen_assets.py` still pointed at it, so
+# staging it, but `scripts/experiments/tests/test_frozen_assets.py` still pointed at it, so
 # seven tests read an artifact no pod possesses. The dev box had it, the suite
 # passed here, and the pod's blocking test gate failed 7 minutes into a paid
 # setup. **When an asset stops being staged, add it here in the same commit.**
@@ -363,11 +363,14 @@ echo "isolated HOME=$HOME (empty), HF_HOME=$HF_HOME, HF_TOKEN set (${#HF_TOKEN} 
 
 # Must stay byte-identical in its ignore list to the pod gate in
 # `autoinit_preflight_setup.sh`, or this simulates a command the pod does
-# not run. `tests/pod/test_phase_a_stages1_5_execute.py` is a PRE-flight
-# rehearsal: it exists to execute the driver before a pod is created, it
-# takes ~20 minutes, and on the pod it would spend a large share of the
-# 2700 s gate re-proving what the dev box already proved -- against a
-# timeout whose exit 90 kills the session.
+# not run.
+#
+# The second ignore is gone: `test_phase_a_stages1_5_execute.py` is a ~20-minute
+# Phase-A pre-flight rehearsal that would have spent a large share of the 2700 s
+# gate re-proving what the dev box already proved, against a timeout whose exit
+# 90 kills the session -- and since the 2026-10-03 boundary it lives in
+# `scripts/experiments/stage-1/phase_a/tests/`, outside the core suite this command
+# collects. The exclusion became the default.
 #
 # The interpreter is the repo venv directly, not `uv run`. Two reasons, and both
 # are about fidelity: the pod's gate runs `/opt/train/bin/python -m pytest` against
@@ -376,8 +379,7 @@ echo "isolated HOME=$HOME (empty), HF_HOME=$HF_HOME, HF_TOKEN set (${#HF_TOKEN} 
 # isolation above deliberately empties, so it would re-resolve the environment
 # inside a simulation rather than run the suite.
 PODSIM_CMD=${PODSIM_CMD:-".venv/bin/python -m pytest tests/ -q \
-  --ignore=tests/data/test_recovery_corpus_pipeline.py \
-  --ignore=tests/pod/test_phase_a_stages1_5_execute.py"}
+  --ignore=tests/data/test_recovery_corpus_pipeline.py"}
 
 # The pod writes /workspace/pytest.log and the file dies with the pod; here the
 # log survives, which is the whole point of simulating. `tail -12` alone threw
@@ -410,7 +412,7 @@ fi
 
 echo "running: $PODSIM_CMD"
 
-# Capture, then UNSET, before running the suite. `tests/pod/test_simulator_restore.py`
+# Capture, then UNSET, before running the suite. `tests/integration/test_simulator_restore.py`
 # drives this very script as a subprocess, and every PODSIM_* control variable
 # here is exported -- so a nested run inherited THIS invocation's settings. The
 # 2026-09-04 sweep proved what that costs: the nested simulators inherited

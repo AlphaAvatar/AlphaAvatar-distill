@@ -88,7 +88,7 @@ incident justifies.
 
 ```text
     frozen source sets — Phase A's harness, Phase B's executable, the recovery
-    #: Phase-B values now live in `scripts/experiments/phase_b/post_freeze.py`.
+    #: Phase-B values now live in `scripts/experiments/stage-1/phase_b/post_freeze.py`.
     # `accounted_for` above answers one question: may a Phase-B launch run against
     # But "Phase B may not launch against this tree" and "nobody ever explained why
 ```
@@ -466,7 +466,7 @@ experiment's copy into reusable infrastructure. The prose the core may not carry
 
     `--bundle c1` was an alias for nothing, and the launcher accepted it.
 
-    The second copy is `scripts/experiments/phase_c1/bundle.py`. It stays because
+    The second copy is `scripts/experiments/stage-1/phase_c1/bundle.py`. It stays because
     it is a member of C1's frozen executable set: importing the core module from
     it would move C1's harness digest and invalidate records describing completed
     attempts, for no benefit to a phase closed by a verdict.
@@ -666,7 +666,7 @@ correctness property.
 A3 was not permitted to register `attention.activation_importance_bsz3`. The
 operator's semantics did not change, so a second id would have lied about the
 science and multiplied the registry by every execution knob forever. The module
-states the rule; `tests/autoinit/test_materialization_identity.py` asserts the
+states the rule; `tests/initialization/test_materialization_identity.py` asserts the
 registry stays clean of ids naming a batch size.
 
 **Why the device CLASS and not the ordinal.** A-bsz1 rebuilt `53e30566c5f7`

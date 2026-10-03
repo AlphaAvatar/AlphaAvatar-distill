@@ -1,0 +1,1118 @@
+"""Governance for the Phase-C2 behavioural selection. PROPOSES; authorizes nothing.
+
+Twelve probes, exactly: six screening and six confirmation. It is the only
+evidence that may name a C2 incumbent, and only its confirmation rung may do so.
+
+Everything scientific here is READ from the frozen full-search protocol rather
+than restated — the schedule, the seeds, the batteries, the anchor, the ranking
+rule and the tie-break all have one owner, and a second copy is how two
+documents come to disagree about an experiment that has not run yet.
+
+What this module adds is the part the protocol deliberately left open: which
+five candidates, at which exact artifact identities, and what the session costs
+on real hardware. The candidates come from attempt 3's frozen selection joined
+to the destination-verified durable products the replay reconstructed — never
+hand-transcribed, and refusing if a product's identity does not match what the
+selection commits.
+
+The storage provision is DERIVED from what this session actually holds: the
+teacher, six staged initializations, one probe's training working set, and the
+probe outputs it retains. It does not inherit the full search's 400 GB, which
+was sized for a beam holding sixty compressed states at a level boundary and has
+nothing to do with twelve sequential probes.
+"""
+from __future__ import annotations
+
+import json
+import math
+from pathlib import Path
+from typing import Any
+
+from aadistill.runtime import cost as COST
+from aadistill.runtime.cpu_test_env import host_local_store
+
+#: The config every probe's training config is derived from, by the driver's
+#: own `probe_config`. Named here so the storage model reads the SAME
+#: document the trainer runs under instead of restating its dtypes.
+FROZEN_RECIPE_REL = "configs/stage3/e1/e1_r0860k_sa_pca.json"
+
+REPO_ROOT = Path(__file__).resolve().parents[4]
+
+SCHEMA = "aadistill.autoinit.c2_behavioural_proposal/v1"
+
+PLAN_ID = "autoinit.v1.phase_c2.behavioural"
+SESSION_ID = "autoinit-phase-c2-behavioural"
+
+#: The frozen protocol. Its `behavioural_selection` block is the science.
+PROTOCOL = ("logs/stages/stage-1/phase_c2/plans/"
+            "phase_c2_full_search_protocol.json")
+
+#: The measured probe cost, from six real probes on a real L40S.
+PRICING = "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json"
+
+#: Where the replay left the five reconstructed products. LOCATED THROUGH
+#: `$HOME`, by the one helper that owns this derivation, because a hardcoded
+#: absolute path is immune to the simulator's fresh empty HOME — so host-local
+#: cases ran in the launch-bound sweep and failed on the pod, which has the
+#: bytes a session stages and never the store they were frozen in. That blind
+#: spot cost C1 attempt 14 $0.40, and behavioural attempt9 $0.11 in the same
+#: shape: 27 tests passed the sweep and failed the pod's own gate.
+DURABLE_STORE = str(host_local_store() / "phase_c2_full_search"
+                    / "attempt3_replay")
+
+STORAGE_PRICING = "configs/infrastructure/provider_storage_pricing.json"
+
+
+class BehaviouralProposalError(RuntimeError):
+    """The proposal cannot be derived from the committed evidence."""
+
+
+# --------------------------------------------------------------------------
+# the science, read from its owner
+# --------------------------------------------------------------------------
+
+def protocol(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The frozen full-search protocol, verified against its own hash."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    doc = json.loads((Path(repo_root) / PROTOCOL).read_text())
+    stated = doc.get("protocol_sha256")
+    recomputed = sha256_json({k: v for k, v in doc.items()
+                              if k != "protocol_sha256"})
+    if stated != recomputed:
+        raise BehaviouralProposalError(
+            f"{PROTOCOL} does not match its own protocol_sha256; it has been "
+            "edited since it was frozen, and this proposal binds to it.")
+    return doc
+
+
+def schedule(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The 12-probe schedule, exactly as frozen."""
+    block = protocol(repo_root)["behavioural_selection"]
+    sched = block["schedule"]
+    total = int(sched["total_probes"])
+    screening, confirmation = sched["screening"], sched["confirmation"]
+    if int(screening["probes"]) + int(confirmation["probes"]) != total:
+        raise BehaviouralProposalError(
+            f"the frozen schedule's rungs sum to "
+            f"{screening['probes']} + {confirmation['probes']} and it declares "
+            f"{total} probes")
+    if total != 12:
+        raise BehaviouralProposalError(
+            f"the frozen schedule declares {total} probes, not 12. This "
+            "proposal is for the 12-probe protocol and does not reshape it.")
+    return sched
+
+
+# --------------------------------------------------------------------------
+# the inputs, joined rather than transcribed
+# --------------------------------------------------------------------------
+
+def candidate_manifest(repo_root: str | Path = REPO_ROOT,
+                       store: str | Path = DURABLE_STORE) -> list[dict[str, Any]]:
+    """The five candidates: frozen selection JOINED to durable products.
+
+    Each entry carries the identity the selection commits AND the location of
+    the product that was re-identified at the destination. The join is the
+    check: a product whose identity differs from the selection's is refused
+    here, so a behavioural session cannot be pointed at a checkpoint nobody
+    reconstructed.
+    """
+    from experiments.phase_c2 import replay_specs as RS
+
+    selection = RS.load_selection(repo_root)
+    store = Path(store)
+    out: list[dict[str, Any]] = []
+    for rank, entry in enumerate(selection["selected"]):
+        sid = entry["state_id"]
+        d = store / sid
+        ack = d / "durable_ack.json"
+        sidecar = d / "replay_leaf.json"
+        if not ack.is_file() or not sidecar.is_file():
+            raise BehaviouralProposalError(
+                f"candidate {sid} has no destination-verified product at {d}. "
+                "The behavioural session consumes reconstructed checkpoints; "
+                "it does not reconstruct them.")
+        identity = json.loads(sidecar.read_text())["identity"]
+        for field in ("artifact_digest", "weights_digest", "single_shard_sha256",
+                      "arch_signature", "num_parameters"):
+            if identity[field] != entry[field]:
+                raise BehaviouralProposalError(
+                    f"candidate {sid}: the durable product's {field} is "
+                    f"{identity[field]!r} and the frozen selection commits "
+                    f"{entry[field]!r}. These are different artifacts.")
+        shard = d / "model.safetensors"
+        out.append({
+            "rank_in_frozen_selection": rank,
+            "state_id": sid,
+            "path": entry["path"],
+            "lineage": next((x.get("lineage") for x in selection["decisions"]
+                             if x["state_id"] == sid), ""),
+            "artifact_digest": entry["artifact_digest"],
+            "weights_digest": entry["weights_digest"],
+            "single_shard_sha256": entry["single_shard_sha256"],
+            "arch_signature": entry["arch_signature"],
+            "num_parameters": int(entry["num_parameters"]),
+            "durable_path": str(d),
+            "bytes": shard.stat().st_size,
+            "destination_verified_utc": json.loads(ack.read_text())["verified_utc"],
+        })
+    if len(out) != 5:
+        raise BehaviouralProposalError(f"{len(out)} candidates, expected 5")
+    return out
+
+
+# --------------------------------------------------------------------------
+# the sixth arm: incumbent B
+# --------------------------------------------------------------------------
+
+#: Where a prepared B is kept, beside the reconstructed candidates. One
+#: directory, so "is B available" has a single answer and a later infrastructure
+#: failure does not force another rebuild of something already built once.
+B_DURABLE_PATH = ("/home/ecs-user/aad-artifacts/phase_c2_full_search"
+                  "/incumbent_b")
+
+
+def b_binding(repo_root: str | Path = REPO_ROOT, *,
+              durable_path: str | Path = B_DURABLE_PATH,
+              device: str = "cuda") -> dict[str, Any]:
+    """The incumbent arm: its construction, its identity, and whether it exists.
+
+    B is the sixth screening arm and the only anchor, and it is NOT a staged
+    durable input the way the five candidates are. Baseline-completion attempt 8
+    rebuilt it exactly, but that session's artifact manifest preserved evidence
+    and logs rather than checkpoint bytes — so the bytes are gone and the
+    identity is not.
+
+    This binds the CONSTRUCTION from its canonical owner rather than
+    re-declaring it: `baseline.frozen_baseline_spec` builds the path from C1's
+    own `build_arm_specs`, and `assert_frozen_construction` refuses anything
+    whose spec hash is not what C1's preregistration froze. Re-deriving the
+    steps here would be a second construction of the thing whose sameness is the
+    point.
+
+    Preparing B is INITIALIZATION, not a probe. The protocol is twelve probes
+    and stays twelve: B's materialization produces the arm that six of them
+    measure against.
+    """
+    from aadistill.initialization.operators.register import (
+        register_builtin_operators,
+    )
+
+    from experiments.phase_c2 import baseline as BL
+    from experiments.phase_c2.search_space import register_c2_operators
+
+    #: EXPLICIT, and before the spec is built. `build_arm_specs` resolves every
+    #: impl_id against the registry and B's last step is
+    #: `attention.activation_importance_v1`, which is not a shipped default. A
+    #: builder that only worked when some other entry point had registered
+    #: would be a builder that works by luck.
+    register_builtin_operators()
+    register_c2_operators()
+
+    spec = BL.frozen_baseline_spec(device=device)
+    construction = BL.assert_frozen_construction(spec)
+
+    d = Path(durable_path)
+    available, observed = False, None
+    if (d / "model.safetensors").is_file() and (d / "config.json").is_file():
+        ack = d / "durable_ack.json"
+        if ack.is_file():
+            observed = json.loads(ack.read_text())
+            available = bool(observed.get("re_identified_from_delivered_bytes"))
+
+    return {
+        "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
+        "construction": {
+            "owner": "scripts/experiments/stage-1/phase_c2/baseline.py",
+            "built_by": "experiments.phase_c1.session.build_arm_specs",
+            "spec_hash": construction["spec_hash"],
+            "expected_spec_hash": BL.B_SPEC_HASH,
+            "path_label": construction["path_label"],
+            "steps": construction["steps"],
+            "parent_digest": BL.B_PARENT_DIGEST,
+            "_bound_not_redeclared": (
+                "the steps come from C1's own constructor and the spec hash is "
+                "checked against the value C1's preregistration froze. A second "
+                "declaration of this path is how two constructions of one thing "
+                "come to differ."),
+        },
+        "required_identity": {
+            "artifact_digest": BL.B_ARTIFACT_DIGEST,
+            "weights_digest": BL.B_WEIGHTS_DIGEST,
+            "config_sha256": BL.B_CONFIG_SHA256,
+            "arch_signature": BL.B_ARCH_SIGNATURE,
+            "single_shard_sha256": BL.B_SINGLE_SHARD_SHA256,
+            "num_parameters": BL.B_NUM_PARAMETERS,
+            "_observed_not_preregistered": (
+                "these come from c1_arm_identities.json, which recorded what "
+                "attempt 18 actually built. `treatment_output_digest_was_pre_"
+                "pinned` is False there, because that attempt was the "
+                "operator's first execution. It is the strongest available "
+                "content identity of B, and this says which it is."),
+        },
+        "availability": {
+            "durable_path": str(d),
+            "available": available,
+            "must_materialize": not available,
+            "observed_ack": observed,
+            "_why_it_is_not_staged": (
+                "baseline-completion attempt 8 rebuilt B exactly and its "
+                "artifact manifest preserved evidence and logs, not checkpoint "
+                "bytes. The identity survived; the weights did not."),
+        },
+        "gate": (
+            "the materialized B must match every field of required_identity. "
+            "If it does not, NO SCREENING PROBE MAY START: an anchor that is "
+            "not the frozen incumbent makes every delta meaningless."),
+        "_not_a_thirteenth_probe": (
+            "preparing B is initialization. The protocol is twelve probes and "
+            "remains twelve; B's construction produces the arm six of them are "
+            "measured against."),
+    }
+
+
+def b_preparation_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """What materializing B costs, bounded from the replay's own measurements.
+
+    B's path is the same four structural kinds the replay reconstructed, so its
+    cost is bounded the same way: each step at the worst observation of THAT
+    IMPLEMENTATION anywhere in attempt 3's telemetry, plus one teacher load.
+    Bounding by operator kind rather than by implementation is what overpriced
+    a replay path by 25 minutes.
+    """
+    from experiments.phase_c2 import baseline as BL
+    from experiments.phase_c2 import replay_specs as RS
+
+    worst = RS.worst_seconds_by_impl(repo_root)
+    per_step = []
+    total = 1.5          # one teacher load, as the replay charges per path
+    for kind, impl_id, profile in BL.B_PATH:
+        if impl_id not in worst:
+            raise BehaviouralProposalError(
+                f"no measured timing for {impl_id}; B's preparation cannot be "
+                "bounded from evidence and will not be guessed")
+        minutes = worst[impl_id] / 60.0
+        per_step.append({"kind": kind, "impl_id": impl_id,
+                         "profile_id": profile, "bounded_minutes": round(minutes, 2)})
+        total += minutes
+    return {
+        "steps": per_step,
+        "teacher_load_minutes": 1.5,
+        "bounded_minutes": round(total, 2),
+        "_basis": ("the worst observation of each implementation anywhere in "
+                   "attempt 3's telemetry, the same bound the replay spent "
+                   "against and which reproduced all five paths"),
+    }
+
+
+# --------------------------------------------------------------------------
+# storage, derived from what the session holds
+# --------------------------------------------------------------------------
+
+#: Bytes per parameter for the pieces a training step keeps resident. The model
+#: is bf16; AdamW's two moments and the gradient accumulate in fp32.
+_BF16, _FP32 = 2, 4
+
+#: Measured, not assumed: the pinned teacher's snapshot on this machine.
+TEACHER_GIB = 7.51
+
+#: Headroom for the image, the built environment and the HF cache's own
+#: bookkeeping. C1's sessions ran the same stack.
+IMAGE_AND_ENV_GIB = 30.0
+
+
+#: The worst single fixed path's intermediates, measured during the replay: a
+#: four-step construction holds its predecessors while it builds. B's path is
+#: four steps of the same kinds, so this bounds its transient residency.
+B_MATERIALIZATION_TRANSIENT_GIB = 16.12
+
+
+#: Bytes of config/tokenizer/generation-config/evidence a probe's save writes
+#: beside the weights, measured from the ten real attempt5 probes (they agree
+#: to within a few KB). Small beside the weights and not zero.
+#: Owner: logs/stages/stage-1/phase_c2_behavioural/runs/attempt5/closeout/.
+PROBE_CHECKPOINT_EXTRA_BYTES = 800_000
+
+
+def trainable_parameter_count(repo_root: str | Path = REPO_ROOT, *,
+                              checkpoint: str | Path | None = None
+                              ) -> dict[str, Any]:
+    """How many parameters the recipe's `trainable_patterns` actually select.
+
+    DERIVED FROM THE ARTIFACT AND THE RECIPE, not assumed and not measured
+    once and pinned. A safetensors file carries every tensor's name and shape
+    in its header, so the same regexes `select_trainable` applies to
+    `model.named_parameters()` can be applied here without loading a model or
+    touching a GPU.
+
+    It matters because the optimizer state in a trainer checkpoint is
+    `n_moments` tensors per TRAINABLE parameter. This recipe freezes the
+    embeddings and the lm head, so 73.9% of the parameters are trainable and a
+    bound that charged all of them would overstate the tree -- while one that
+    ignored the optimizer entirely understates it by 3.28 GiB, which is most
+    of what overflowed attempt5's disk.
+
+    Generic: any checkpoint, any pattern list, any model family. Nothing about
+    this architecture is encoded.
+    """
+    import re
+    import struct
+    from pathlib import Path as _P
+
+    recipe = json.loads((_P(repo_root) / FROZEN_RECIPE_REL).read_text())
+    patterns = recipe.get("trainable_patterns")
+    if not patterns:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} declares no trainable_patterns, so the "
+            "optimizer state in a checkpoint cannot be bounded")
+
+    src = _P(checkpoint) if checkpoint else _reference_checkpoint(repo_root)
+    with open(src, "rb") as f:
+        n = struct.unpack("<Q", f.read(8))[0]
+        header = json.loads(f.read(n))
+
+    def numel(shape: list[int]) -> int:
+        out = 1
+        for d in shape:
+            out *= int(d)
+        return out
+
+    tensors = {k: v for k, v in header.items() if k != "__metadata__"}
+    total = sum(numel(v["shape"]) for v in tensors.values())
+    if patterns == "all":
+        trainable = total
+        matched = sorted(tensors)
+    else:
+        matched = sorted(k for k in tensors
+                         if any(re.search(pt, k) for pt in patterns))
+        trainable = sum(numel(tensors[k]["shape"]) for k in matched)
+    if not matched:
+        raise BehaviouralProposalError(
+            f"no tensor in {src} matches trainable_patterns {patterns}; the "
+            "recipe and the checkpoint disagree about the architecture")
+    return {"num_parameters": total, "trainable_parameters": trainable,
+            "trainable_fraction": round(trainable / total, 4),
+            "n_tensors": len(tensors), "n_trainable_tensors": len(matched),
+            "source": str(src), "patterns": patterns,
+            "dtypes": sorted({v["dtype"] for v in tensors.values()}),
+            "_derived_how": (
+                "the recipe's own trainable_patterns applied to the tensor "
+                "names in a real checkpoint's safetensors header -- the same "
+                "regexes train.py :: select_trainable applies to "
+                "model.named_parameters(), without loading a model")}
+
+
+def candidate_parameter_count(repo_root: str | Path = REPO_ROOT) -> int:
+    """The candidates' parameter count, FROM THE FROZEN SELECTION ALONE. `$0`.
+
+    `candidate_manifest` answers this too, but it joins the selection to the
+    durable products on the machine that froze them, so it needs bytes a pod
+    never receives. A pod asking only "how big is the model I am about to
+    train" does not need that join: the selection commits `num_parameters` for
+    every candidate, it is committed evidence, and it ships in the bundle.
+
+    The driver's storage bound asked through the manifest, on a fallback branch
+    reached only when no arm has been built this session -- which is every
+    CONTINUATION, because a continuation's screening probes are all already
+    scored and nothing sets the identity the primary branch reads. So the first
+    execution of that line was on a paid pod, in stage C, after fifty-one
+    minutes of arm building: attempt11, $1.20.
+
+    All five candidates share an architecture, so the count is one number and a
+    disagreement is a defect rather than a choice.
+    """
+    from experiments.phase_c2 import replay_specs as RS
+
+    selected = RS.load_selection(repo_root)["selected"]
+    counts = {int(e["num_parameters"]) for e in selected}
+    if len(counts) != 1:
+        raise BehaviouralProposalError(
+            f"the frozen selection commits {sorted(counts)} distinct parameter "
+            "counts across its candidates. They are meant to share an "
+            "architecture, so a storage bound cannot be derived from 'the' "
+            "count until that is explained.")
+    return counts.pop()
+
+
+def _reference_checkpoint(repo_root: str | Path) -> Path:
+    """A real checkpoint whose header can be read, from the frozen manifest.
+
+    The frozen Top-5 candidates are the natural reference: they are the
+    architecture every probe trains, their paths are in the manifest, and one
+    of them exists wherever a proposal is being derived. Raises rather than
+    guessing a shape if none is reachable.
+    """
+    for cand in candidate_manifest(repo_root):
+        for key in ("durable_path", "path"):
+            d = cand.get(key)
+            if not d:
+                continue
+            f = Path(d) / "model.safetensors"
+            if f.is_file():
+                return f
+    raise BehaviouralProposalError(
+        "no frozen candidate checkpoint is reachable, so the trainable "
+        "parameter count cannot be derived from an artifact. It is not "
+        "guessed: the optimizer state it bounds is 3.28 GiB of the 5.50 GiB "
+        "a trainer checkpoint occupies.")
+
+
+def training_dtypes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """The dtypes a probe actually trains and SAVES in, from the frozen recipe.
+
+    READ, never assumed. `storage_requirement` used to charge a trained probe
+    at the bf16 size of the initialization leaf it started from, while the
+    recipe this driver derives every probe config from declares
+    `dtype: "float32"` -- so the model contradicted the config it was running
+    under, by a factor of exactly the two dtypes' ratio.
+
+    * the SAVE dtype is the model's parameter dtype: `save_pretrained` writes
+      the parameters as they are, and under autocast the master weights stay
+      in the declared dtype while only the compute is bf16;
+    * the moment count comes from the optimizer's own betas, so an optimizer
+      with one moment or none gives a different answer without an edit here.
+
+    Nothing about Phase C2, this model family or this parameter count appears
+    in the arithmetic -- that lives in `aadistill.runtime.cost`, which takes
+    every dtype as an argument.
+    """
+    from pathlib import Path as _P
+
+    recipe = json.loads((_P(repo_root) / FROZEN_RECIPE_REL).read_text())
+    declared = str(recipe.get("dtype") or "").lower()
+    if declared not in COST.BYTES_PER_PARAM:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} declares dtype={recipe.get('dtype')!r}, "
+            f"which is not a per-parameter byte count this repository knows "
+            f"({sorted(COST.BYTES_PER_PARAM)}). A storage bound may not guess "
+            "it: the ratio between two dtypes is exactly the factor by which "
+            "the bound would be wrong.")
+    betas = recipe.get("optim", {}).get("betas")
+    if not isinstance(betas, list) or not betas:
+        raise BehaviouralProposalError(
+            f"{FROZEN_RECIPE_REL} states no optim.betas, so the optimizer's "
+            "moment count cannot be derived and the training working set "
+            "cannot be bounded")
+    return {
+        "keep_last": int(recipe.get("checkpoint", {}).get("keep_last", 0)),
+        "save_dtype": declared,
+        "weight_dtype": declared,
+        "grad_dtype": declared,
+        "moment_dtype": declared,
+        "n_moments": len(betas),
+        "autocast_bf16": bool(recipe.get("autocast_bf16")),
+        "checkpoint_extra_bytes": PROBE_CHECKPOINT_EXTRA_BYTES,
+        "_source": FROZEN_RECIPE_REL,
+        "_why_save_equals_weight": (
+            "autocast changes the COMPUTE dtype, not the parameters. The "
+            "master weights, their gradient and AdamW's moments are all the "
+            "declared dtype, and save_pretrained writes the parameters as "
+            "they are -- which is why a probe on disk measures 4.00 bytes per "
+            "parameter while the leaf it started from measures 2.00."),
+    }
+
+
+def storage_requirement(candidates: list[dict[str, Any]],
+                        sched: dict[str, Any],
+                        repo_root: str | Path = REPO_ROOT, *,
+                        b_must_materialize: bool = True) -> dict[str, Any]:
+    """What this session actually needs on disk, component by component.
+
+    Derived from the artifacts rather than inherited. The full search provisions
+    400 GB because a beam generates a whole level before pruning and holds sixty
+    compressed states at once; twelve sequential probes hold one training working
+    set at a time.
+    """
+    params = candidates[0]["num_parameters"]
+    if any(c["num_parameters"] != params for c in candidates):
+        raise BehaviouralProposalError(
+            "the candidates do not share a parameter count; the training "
+            "working set cannot be derived from one of them")
+
+    leaf_gib = candidates[0]["bytes"] / 2**30
+    n_screening_arms = int(sched["screening"]["arms"])
+
+    #: One probe at a time: weights, gradient and the optimizer's moments. Every
+    #: term comes from the recipe rather than from this module, because an
+    #: optimizer that keeps one moment or bf16 moments gives a different answer
+    #: and none of them is a property of Phase C2.
+    tr = training_dtypes(repo_root)
+    working_set = COST.training_working_set_bytes(
+        params, weight_dtype=tr["weight_dtype"], grad_dtype=tr["grad_dtype"],
+        moment_dtype=tr["moment_dtype"], n_moments=tr["n_moments"]) / 2**30
+
+    #: A TRAINED PROBE IS NOT THE SIZE OF THE LEAF IT STARTED FROM. This read
+    #: `total_probes * leaf_gib`, which assumes the training output is as large
+    #: as its input initialization. The frozen leaves are bf16 and the trainer
+    #: saves fp32, so every retained probe was charged at exactly half its real
+    #: size -- 1.110 GiB against a measured 2.220 -- and attempt5's pod ran out
+    #: of disk on probe 11 of 12 with a storage model that said it had room.
+    #:
+    #: Derived from the recipe's SAVE dtype through the generic footprint, so a
+    #: recipe that trains or saves in another precision moves this figure
+    #: without an edit here, and a model family with a different parameter
+    #: count does too.
+    probe_ckpt = COST.CheckpointFootprint(
+        params, tr["save_dtype"], extra_bytes=int(tr["checkpoint_extra_bytes"]))
+    trained = int(sched["total_probes"]) * probe_ckpt.gib
+    generations = 2.0
+
+    components = {
+        "teacher": round(TEACHER_GIB, 3),
+        "staged_initializations": round(n_screening_arms * leaf_gib, 3),
+        "b_materialization_transient": (
+            B_MATERIALIZATION_TRANSIENT_GIB if b_must_materialize else 0.0),
+        "_b_materialization_transient_is": (
+            "ONE arm's construction intermediates, resident while that arm "
+            "builds and released when it is verified. A four-step path holds "
+            "its predecessors as it goes; this is the worst single path's "
+            "intermediates as measured during the replay. Counted once, not "
+            "six times, because the arms are built SEQUENTIALLY -- at the last "
+            "build, five finished arms are resident plus this transient, which "
+            "is what the sum below already charges"
+            if b_must_materialize else
+            "zero: every arm already exists and is staged, not rebuilt"),
+        "_staged_initializations_is": (
+            f"{n_screening_arms} screening arms -- the five reconstructed "
+            "candidates and the incumbent B -- resident before any probe runs. "
+            "They are MATERIALIZED on the pod rather than shipped to it: each "
+            "is a 1.19 GB bf16 initialization leaf, the scp path allows one "
+            "asset 600 s against a dev-box uplink measured at 0.64-0.72 MB/s "
+            "and needing ~1650, and the hub relay has no quota for them. "
+            "Residency is the same either way; only the transient above is "
+            "added by building them here. NOTE that a leaf is the INPUT: a "
+            "trained probe is 2.221 GiB, charged separately below"),
+        "_one_probe_training_memory_gib": round(working_set, 3),
+        "_training_memory_is_not_disk": (
+            f"{params:,} parameters as {tr['weight_dtype']} master weights, a "
+            f"{tr['grad_dtype']} gradient and {tr['n_moments']} "
+            f"{tr['moment_dtype']} optimizer moments -- "
+            f"{round(working_set, 3)} GiB resident in RAM/VRAM while one "
+            "probe trains. It was summed into the disk subtotal, where it "
+            "does not belong: none of it materializes on the filesystem "
+            "except through a checkpoint, which the trainer tree above "
+            "charges. Underscored so it is reported and NOT summed."),
+        "trained_probe_checkpoints": round(trained, 3),
+        "_trained_is": (
+            f"{sched['total_probes']} probes x {probe_ckpt.gib:.3f} GiB, the "
+            f"SAVE footprint of {params:,} parameters in "
+            f"{tr['save_dtype']} plus {tr['checkpoint_extra_bytes']:,} bytes of "
+            "config/tokenizer/evidence. NOT the leaf size: the leaves are "
+            f"{leaf_gib:.3f} GiB in the initialization dtype and charging the "
+            "output at the input's size understated this by their dtype ratio"),
+        "_probe_checkpoint_footprint": probe_ckpt.as_dict(),
+        "saved_generations": generations,
+        "batteries_and_ladder": 1.0,
+        "image_and_environment": IMAGE_AND_ENV_GIB,
+    }
+    #: TWO RESOURCES, NOT ONE. `trained_probe_checkpoints` above is what must
+    #: SURVIVE teardown; charging it to container storage says every completed
+    #: probe stays on every future pod, which is both false after the release
+    #: repair and the arithmetic that overflowed attempt5's disk. The container
+    #: bound and the durable bound are now derived separately, each against the
+    #: resource that actually owns it.
+    #:
+    #: `released_on_completion` is a statement about the CODE: the driver's
+    #: `release_acked_probe_workdirs` frees a probe's workdir once the launcher
+    #: has confirmed its bytes durable off-pod, and fails closed if it cannot.
+    #: A bound derived with this True while nothing freed anything would
+    #: describe a program that does not exist -- which is what the previous
+    #: bound did.
+    n_probes = int(sched["total_probes"])
+    #: THE TRAINER'S OWN PRODUCER, not the deployable model. `save_checkpoint`
+    #: writes `checkpoints/<tag>/model` AND `trainer_state.pt`, and the latter
+    #: holds AdamW's moments for the TRAINABLE parameters -- 73.9% of them
+    #: under this recipe, which freezes the embeddings and the head. A tree is
+    #: 5.50 GiB where the deployable model is 2.22, and charging the tree at
+    #: the model's size is 3.28 GiB per probe of pure understatement.
+    counts = trainable_parameter_count(repo_root)
+    tree = COST.TrainerCheckpointFootprint(
+        num_parameters=counts["num_parameters"],
+        trainable_parameters=counts["trainable_parameters"],
+        save_dtype=tr["save_dtype"], moment_dtype=tr["moment_dtype"],
+        n_moments=tr["n_moments"],
+        extra_bytes=int(tr["checkpoint_extra_bytes"]))
+
+    #: `keep_last` PRUNES AFTER THE WRITE. `save_checkpoint` puts the new tree
+    #: down and only then deletes the stale ones, so at that instant
+    #: `keep_last` trees plus the one being written are all on disk. That
+    #: instant is where attempt5's trainer died, and the old bound did not
+    #: charge it at all.
+    keep = int(tr["keep_last"])
+    retained_per_probe = keep * tree.bytes
+    materializing_per_probe = tree.bytes
+
+    units = [COST.ResidencyUnit(
+        label=f"probe_{i + 1}", durable_bytes=probe_ckpt.bytes,
+        retained_bytes=retained_per_probe,
+        materializing_bytes=materializing_per_probe,
+        #: ZERO. The weights, gradient and moments are RAM/VRAM; they do not
+        #: materialize on disk and a filesystem bound that charges them is
+        #: describing the wrong resource. They are reported separately below.
+        transient_bytes=0,
+        released_on_completion=True) for i in range(n_probes)]
+    fixed = int(sum(
+        components[k] for k in ("teacher", "staged_initializations",
+                                "saved_generations", "batteries_and_ladder",
+                                "image_and_environment")) * 2**30)
+    container = COST.peak_local_residency_bytes(units, fixed_bytes=fixed)
+    durable = COST.durable_backend_bytes(units)
+    container_gib = container["peak_gib"] + components[
+        "b_materialization_transient"]
+
+    subtotal = sum(v for k, v in components.items() if not k.startswith("_"))
+    #: A provision is an integer handed to the provider and it is billed whole,
+    #: so it rounds UP, with a margin that is named rather than folded in.
+    margin = 0.25
+    #: DERIVED FROM CONTAINER RESIDENCY, because a provision provisions
+    #: CONTAINER storage. It was derived from `subtotal`, which adds the
+    #: durable requirement to the local one -- so correcting the probe
+    #: footprint made it ask for 140 GB when the pod's real peak is 72 GiB
+    #: inside a 120 GB disk with 40 GiB to spare. Charging one quantity to two
+    #: resources inflates the bill in one direction and, when the local term
+    #: was the understated one, hid an overflow in the other.
+    with_margin_gib = container_gib * (1 + margin)
+
+    #: GiB -> GB, through the repository's OWN recorded conversion rather than a
+    #: second local convention. The residency above is derived in GiB (2^30) and
+    #: `--container-disk-in-gb` says GB; if the provider means decimal GB, a
+    #: request of N delivers only 0.931*N GiB, so treating the flag as GiB
+    #: UNDER-PROVISIONS by 7%. This file made exactly that error -- it rounded a
+    #: GiB subtotal straight into a GB flag -- which is the unit bug the full
+    #: search had already been repaired for.
+    conv = storage_pricing(repo_root)["gb_versus_gib"]
+    gb_per_gib = float(conv["gb_per_gib"])
+    with_margin_gb = with_margin_gib * gb_per_gib
+    provision = int(math.ceil(with_margin_gb / 10.0) * 10)
+    return {
+        "components_gib": components,
+        "container_residency": {
+            "peak_gib": round(container_gib, 3),
+            "peak_at_unit": container["peak_at_unit"],
+            "retained_bytes_per_probe": retained_per_probe,
+            "materializing_bytes_per_probe": materializing_per_probe,
+            "trainer_checkpoint_tree": tree.as_dict(),
+            "trainable_parameters": counts,
+            "_retained_is": (
+                f"keep_last={keep} x {tree.gib:.3f} GiB of trainer checkpoint "
+                f"TREE -- the deployable model ({tree.model_bytes / 2**30:.3f} "
+                f"GiB) plus trainer_state.pt's optimizer moments "
+                f"({tree.optimizer_bytes / 2**30:.3f} GiB for "
+                f"{counts['trainable_parameters']:,} trainable of "
+                f"{counts['num_parameters']:,} parameters). Derived from the "
+                "recipe's checkpoint policy and its trainable_patterns "
+                "applied to a real checkpoint's tensor names"),
+            "_materializing_is": (
+                f"one more tree, {tree.gib:.3f} GiB, because save_checkpoint "
+                "writes the new one BEFORE keep_last prunes the old. That "
+                "instant is the filesystem peak and the previous bound did "
+                "not charge it"),
+            "_memory_is_not_charged_here": (
+                "the weights, gradient and optimizer moments resident during "
+                "training are RAM/VRAM. They are reported as "
+                "`training_memory_gib` and deliberately excluded from a "
+                "filesystem bound"),
+            "released_on_completion": True,
+            "_release_is_enforced_by": (
+                "autoinit_c2_behavioural_driver.py :: "
+                "release_acked_probe_workdirs, which frees a probe's workdir "
+                "once the launcher has confirmed the bytes durable off-pod and "
+                "re-identified them there, and RAISES if a release fails so no "
+                "further probe is trained under a bound that no longer holds"),
+            "_what_this_bounds": (
+                "peak LOCAL bytes on the provider's container disk. It does "
+                "NOT include the durable requirement below: a completed "
+                "probe's bytes must survive teardown somewhere, which is no "
+                "reason for them to stay on every future machine"),
+        },
+        "durable_backend": {
+            "gib": round(durable["gib"], 3),
+            "n_units": durable["n_units"],
+            "_what_this_bounds": (
+                "the bytes that must outlive the provider resource, checked "
+                "against the DURABLE backend's free capacity. Charging these "
+                "to container storage is what overflowed attempt5's disk"),
+        },
+        "subtotal_gib": round(subtotal, 3),
+        "_subtotal_is_the_legacy_sum": (
+            "every component added together, which double-charges the probe "
+            "checkpoints: they are counted once as container residency and "
+            "once as the durable requirement. Retained because the frozen "
+            "provision was derived from it; `container_residency` and "
+            "`durable_backend` above are the two quantities a gate should read"),
+        "margin_fraction": margin,
+        "with_margin_gib": round(with_margin_gib, 4),
+        "gb_per_gib": gb_per_gib,
+        "with_margin_gb": round(with_margin_gb, 4),
+        "provision_gb": provision,
+        "_units": (
+            "the residency is derived in GiB and the provider's flag is GB. "
+            "The conversion is the one recorded in "
+            "configs/infrastructure/provider_storage_pricing.json, not a local "
+            "convention: rounding a GiB subtotal straight into a GB flag "
+            "under-provisions by 7%."),
+        "_why_not_400": (
+            "the full search's 400 GB was derived for a beam that generates a "
+            "whole level before pruning and holds sixty compressed states at "
+            "the level boundary. This session holds one training working set at "
+            "a time and retains twelve small checkpoints; carrying 400 GB here "
+            "would bill for storage nothing uses."),
+        "_why_it_rounds_up": (
+            "a volume that fills mid-probe loses the probe. The margin is 25% "
+            "over a component sum that is itself derived from measured artifact "
+            "sizes."),
+    }
+
+
+# --------------------------------------------------------------------------
+# money
+# --------------------------------------------------------------------------
+
+def storage_pricing(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    doc = json.loads((Path(repo_root) / STORAGE_PRICING).read_text())
+    if doc["container_disk"].get("provider_api_exposes_this") is not False:
+        raise BehaviouralProposalError(
+            f"{STORAGE_PRICING} claims the provider exposes container-disk "
+            "pricing. It does not, and a stated basis presenting itself as a "
+            "quote is worse than no basis.")
+    return doc
+
+
+#: THE canonical phase decomposition of the complete behavioural session, and
+#: the reason it exists as one function.
+#:
+#: The launcher used to build a SECOND decomposition on top of this module's
+#: FINAL figure. `ceiling()` reported a hard window of 1800.53 min that already
+#: contained the frozen probe model's named reserves, its 10% contingency and
+#: its artifact-recovery reserve; the launcher then subtracted the
+#: materialization term back out, fed the remainder into a fresh `BudgetSpec`
+#: beside `setup`, `transfer` and `materialize` phases, and applied a SECOND
+#: contingency and a SECOND artifact-recovery reserve. `plan_session` answered
+#: 2036.62 hard minutes — about `$36.9987` of GPU at `$1.09/h`, larger than the
+#: whole proposed all-in ceiling. That is not extra conservatism: a correct
+#: authorization derived from the proposal would have REFUSED the launch, at the
+#: gate, for reserves nobody granted twice.
+#:
+#: So both consumers read this one decomposition. The proposal prices it; the
+#: launcher's `BudgetSpec` carries its phases and its reserves verbatim and
+#: applies no contingency of its own, because the contingency is already here as
+#: a named number of minutes.
+def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
+                          materialization_minutes: float,
+                          train_and_score_probes: int = 12,
+                          score_only_probes: int = 0,
+                          restore_minutes: float = 0.0) -> dict[str, Any]:
+    """Expected phases, named reserves and the recovery reserve. ONE owner.
+
+    **It prices REMAINING work, and a fresh campaign's remaining work is all of
+    it.** The defaults — twelve probes to train and score, none to score alone,
+    no restore — reproduce the full session exactly: 1294.87 expected and
+    1800.53 hard minutes, the figures the proposal is authorized against. A
+    continuation passes what its campaign still owes.
+
+    **Two kinds of remaining probe, because the driver executes two kinds.** A
+    probe absent from the campaign is trained and then scored. A probe whose
+    checkpoint was restored but whose scoring failed resumes AT SCORING and is
+    never retrained, so it owes the battery and not the trainer. Pricing both
+    as full probes over-reserved in the safe direction, but it could refuse a
+    continuation that genuinely fitted the campaign ceiling — and R10 is about
+    pricing what the campaign still OWES.
+
+    The split is not invented: the frozen record carries `train_minutes` and
+    `eval_minutes` per probe, as means and as observed maxima, and twelve times
+    each reconstructs its own `bounding_basis` totals. That reconstruction is
+    checked below, so a record whose parts stop summing to its own totals
+    refuses rather than being split on an assumption.
+
+    All of this is here rather than in a second function because a continuation
+    budget derived beside this one would be the same defect the launcher's
+    duplicate budget was.
+
+    A continuation may not re-reserve work it cannot execute. A completed probe
+    is never retrained, so it is not owed; the arms of the probes that DO remain
+    must be rebuilt on a fresh pod, so they are; and restoring verified probes
+    from the durable destination is billed pod time, so it is a phase.
+
+    Every figure is read from the frozen pricing record or from the pricing
+    model that wrote it, and the two are RECONCILED here rather than trusted:
+
+    * the overhead phases must sum to the record's own expected-minus-probe
+      remainder, or the record and the model disagree about what a session does
+      besides train;
+    * the three named reserves plus the recovery reserve must sum to the
+      record's own `hard_ceiling_minutes` minus its `expected_minutes`, or the
+      reserve block has moved since the record was frozen.
+
+    A mismatch raises. A window derived from a decomposition that no longer
+    reconstructs its own source is a window that bounds nothing.
+
+    The 10% contingency is carried as a named RESERVE in minutes rather than as
+    a fraction, for two reasons. It is the frozen model's contingency on the
+    frozen model's expected path, so re-deriving it from a phase sum that also
+    contains the materialization would silently change a frozen figure. And the
+    materialization term is already the worst observation of each operator
+    IMPLEMENTATION anywhere in attempt 3's telemetry — a bound, not a mean — so
+    multiplying it by a contingency built for means would charge a risk margin
+    on a number that is already the risk margin.
+
+    **There is no separate probe-transfer phase, and that is deliberate.** The
+    launcher's old second budget added `12 x 1.7 = 20.4` minutes of probe
+    transfer as a serial phase and then reused the same 20.4 as its recovery
+    reserve. Probes leave the pod from the runner's POLL LOOP, concurrently with
+    the next probe's training, so those minutes are not serial wall clock; the
+    frozen model already carries `artifact_synchronization` for the part that
+    is, and a 30-minute recovery reserve — larger than the 20.4 it replaces —
+    for the collection that happens after the soft stop.
+    """
+    from experiments.phase_c2 import selection_pricing as SP
+
+    beh = json.loads(
+        (Path(repo_root) / PRICING).read_text())["behavioural_selection"]
+    bounding = beh["bounding_basis"]
+    probe_expected = float(beh["expected_minutes"])
+    probe_hard = float(beh["hard_ceiling_minutes"])
+    probe_minutes = float(bounding["probe_minutes_expected"])
+
+    overheads = tuple((name, float(minutes))
+                      for name, minutes in SP.SESSION_PHASE_MINUTES)
+    overhead_total = sum(m for _, m in overheads)
+    if abs(overhead_total - (probe_expected - probe_minutes)) > 0.01:
+        raise BehaviouralProposalError(
+            f"the pricing model's session overheads sum to {overhead_total} min "
+            f"and the frozen record's expected path leaves "
+            f"{probe_expected - probe_minutes} min beside its probes. The record "
+            "and the model that wrote it disagree about what a session does "
+            "besides train, so neither can be decomposed into phases.")
+
+    recovery = float(SP.ARTIFACT_RECOVERY_RESERVE_MINUTES)
+    #: The FULL-session reserve block, reconciled against the frozen record
+    #: before anything is scaled. Reconciling a scaled block against an
+    #: unscaled record would be checking arithmetic against itself.
+    full_reserves = (
+        ("probe_model_contingency",
+         round(probe_expected * SP.CONTINGENCY_FRACTION, 2)),
+        ("probe_duration_risk",
+         round(float(bounding["probe_minutes_observed_max"]) - probe_minutes, 2)),
+        ("generation_length_risk",
+         float(bounding["generation_length_reserve_minutes"])),
+    )
+    full_reserve_total = sum(m for _, m in full_reserves)
+    if abs(probe_hard - (probe_expected + full_reserve_total + recovery)) > 0.01:
+        raise BehaviouralProposalError(
+            f"the named reserves ({full_reserve_total} min) plus the recovery "
+            f"reserve ({recovery} min) do not reconstruct the frozen record's "
+            f"hard ceiling: {probe_expected} + {full_reserve_total} + "
+            f"{recovery} != {probe_hard}. The reserve block has moved since the "
+            "record was frozen and this decomposition would bound the wrong "
+            "window.")
+
+    total_probes = int(beh["n_probes"])
+    n_train, n_score = int(train_and_score_probes), int(score_only_probes)
+    if n_train < 0 or n_score < 0 or n_train + n_score > total_probes:
+        raise BehaviouralProposalError(
+            f"{n_train} probes to train and {n_score} to score is outside "
+            f"0..{total_probes} probes. A continuation owes some subset of the "
+            "frozen protocol's probes, never more of them.")
+
+    #: THE PER-PROBE SPLIT, from the record's own measured fields, RECONCILED
+    #: against the totals it derives from them. A record whose parts stop
+    #: summing to its own `bounding_basis` cannot be split on an assumption.
+    cost = beh["probe_cost"]
+    train_mean = float(cost["train_minutes"]["mean"])
+    train_max = float(cost["train_minutes"]["max"])
+    eval_mean = float(cost["eval_minutes"]["mean"])
+    eval_max = float(cost["eval_minutes"]["max"])
+    for label, parts, whole in (
+            ("expected", total_probes * (train_mean + eval_mean), probe_minutes),
+            ("observed maximum", total_probes * (train_max + eval_max),
+             float(bounding["probe_minutes_observed_max"])),
+            ("generation-length reserve", total_probes * eval_max,
+             float(bounding["generation_length_reserve_minutes"]))):
+        if abs(parts - whole) > 0.01:
+            raise BehaviouralProposalError(
+                f"the record's per-probe train and eval minutes give "
+                f"{parts:.3f} for the {label} and it states {whole}. The parts "
+                "no longer sum to the whole, so train-only and score-only work "
+                "cannot be priced apart from them.")
+
+    #: Training is owed only by probes that will be trained. Evaluation is owed
+    #: by every probe that will generate, which is both kinds. These are the
+    #: PHASE values, and the contingency below is taken from their sum rather
+    #: than from a parallel expression of the same quantity — two computations
+    #: of one number are two things to keep in agreement.
+    train_phase_minutes = round(n_train * (train_mean + eval_mean), 2)
+    score_phase_minutes = round(n_score * eval_mean, 2)
+    probe_minutes_owed = round(train_phase_minutes + score_phase_minutes, 2)
+    duration_risk = round(
+        n_train * ((train_max + eval_max) - (train_mean + eval_mean))
+        + n_score * (eval_max - eval_mean), 2)
+    generation_risk = round(
+        (n_train + n_score) * eval_max * SP.GENERATION_LENGTH_RISK_MULTIPLE, 2)
+
+    #: The contingency follows the work it covers — the session overheads plus
+    #: the probe minutes that remain. At the default it is exactly the frozen
+    #: model's own figure, `1139.04 x 0.10`.
+    reserves = (
+        ("probe_model_contingency",
+         round((overhead_total + probe_minutes_owed) * SP.CONTINGENCY_FRACTION, 2)),
+        ("probe_duration_risk", duration_risk),
+        ("generation_length_risk", generation_risk),
+    )
+    reserve_total = sum(m for _, m in reserves)
+
+    #: Materializing an arm is INITIALIZATION, not a probe. The protocol is
+    #: twelve probes and stays twelve; the pod is alive longer because the arms
+    #: a remaining probe measures against have to exist first.
+    phases: list[tuple[str, float]] = [
+        *overheads,
+        ("materialize_arms", round(float(materialization_minutes), 2)),
+    ]
+    if restore_minutes:
+        #: Billed pod minutes: `local_assets` and any scp to a pod happen AFTER
+        #: it exists. Restoring verified probes from the durable destination is
+        #: real wall clock on a running meter, so it is a phase and not a
+        #: rounding note.
+        phases.append(("restore_verified_probes",
+                       round(float(restore_minutes), 2)))
+    #: Named apart so a reader can see which probes are being trained and
+    #: which are only being scored, rather than a single count that hides it.
+    if n_train or not n_score:
+        phases.append((f"{n_train}_probes_train_and_score",
+                       train_phase_minutes))
+    if n_score:
+        phases.append((f"{n_score}_probes_score_only", score_phase_minutes))
+    expected_phases = tuple(phases)
+    expected = round(sum(m for _, m in expected_phases), 2)
+    soft_stop = round(expected + reserve_total, 2)
+    hard = round(soft_stop + recovery, 2)
+    return {
+        "expected_phases": expected_phases,
+        "soft_stop_reserves": reserves,
+        "probes_remaining": n_train + n_score,
+        "train_and_score_probes": n_train,
+        "score_only_probes": n_score,
+        "probes_in_protocol": total_probes,
+        "per_probe_minutes": {
+            "train_mean": train_mean, "train_max": train_max,
+            "eval_mean": eval_mean, "eval_max": eval_max,
+            "_reconciled": ("twelve times each reconstructs the record's own "
+                            "bounding_basis totals; checked, not assumed"),
+        },
+        "restore_minutes": round(float(restore_minutes), 2),
+        "_remaining_work_only": (
+            "a completed probe is never retrained, so it is not priced again. "
+            "A probe whose checkpoint was restored but whose scoring failed "
+            "owes the BATTERY and not the trainer, because that is what the "
+            "driver will do with it. The arms the UNTRAINED probes measure "
+            "against ARE priced, because a replacement resource has a fresh "
+            "filesystem and must rebuild them; that is a replacement runtime "
+            "necessity, not completed science charged twice."),
+        "full_session_reserves": full_reserves,
+        "artifact_recovery_reserve_minutes": recovery,
+        #: For a `BudgetSpec`. ZERO, deliberately: see the module note above.
+        "contingency_fraction": 0.0,
+        "_contingency_is_a_named_reserve": (
+            "the frozen probe model's 10% contingency is carried in "
+            "soft_stop_reserves as a fixed number of minutes. A consumer that "
+            "also set contingency_fraction=0.10 would apply it twice, which is "
+            "the defect this decomposition exists to remove."),
+        "_overhead_phase_names_are_the_pricing_models": (
+            "the first six phases are selection_pricing.SESSION_PHASE_MINUTES "
+            "verbatim, because that is what the frozen record's 95 non-probe "
+            "minutes ARE and renaming them would break the reconciliation. "
+            "They are a cost model shared with the full search, not a claim "
+            "about this session's stages: `selection_commit_and_artifact_"
+            "manifest` funds the closeout minutes, and this session commits no "
+            "selection — it consumes one that is already frozen. They are NOT "
+            "scaled by the probe count: a replacement resource pays setup, the "
+            "bundle, the teacher fetch and the machine gates in full."),
+        "expected_minutes": expected,
+        "soft_stop_minutes": soft_stop,
+        "hard_minutes": hard,
+        "probe_model": {
+            "record": PRICING,
+            "expected_minutes": probe_expected,
+            "hard_ceiling_minutes": probe_hard,
+            "probe_minutes_expected": probe_minutes,
+            "contingency_fraction": SP.CONTINGENCY_FRACTION,
+        },
+        "_reconciled": (
+            "the overhead phases reconstruct the record's non-probe expected "
+            "minutes and the reserves reconstruct its hard ceiling; both are "
+            "checked here rather than assumed"),
+    }
+
+
+def money(repo_root: str | Path = REPO_ROOT, *,
+          gpu_rate_usd_per_hour: float,
+          provision_gb: int,
+          materialization_minutes: float = 0.0) -> dict[str, Any]:
+    """Expected and hard-ceiling cost, GPU and separately billed storage apart.
+
+    The minutes come from `session_decomposition`, which is the ONE canonical
+    phase decomposition of this session: the frozen probe model's overheads and
+    probe minutes, the six arms' materialization bound, and the frozen model's
+    own named reserves. This module does not re-derive any of them — it prices
+    that decomposition at a live rate and adds the storage the old record never
+    costed for this session.
+    """
+    decomposition = session_decomposition(
+        repo_root, materialization_minutes=materialization_minutes)
+    expected_min = decomposition["expected_minutes"]
+    hard_min = decomposition["hard_minutes"]
+    beh = json.loads(
+        (Path(repo_root) / PRICING).read_text())["behavioural_selection"]
+    probe_expected = float(beh["expected_minutes"])
+    probe_hard = float(beh["hard_ceiling_minutes"])
+
+    disk = storage_pricing(repo_root)
+    per_gb_month = float(disk["container_disk"]["usd_per_gb_month"])
+    hours_per_month = float(disk["proration"]["hours_per_month"])
+    disk_per_hour = per_gb_month / hours_per_month * provision_gb
+
+    def usd(minutes: float) -> float:
+        return math.ceil(minutes / 60.0 * gpu_rate_usd_per_hour * 10_000) / 10_000
+
+    def disk_usd(minutes: float) -> float:
+        return math.ceil(minutes / 60.0 * disk_per_hour * 10_000) / 10_000
+
+    gpu_expected, gpu_hard = usd(expected_min), usd(hard_min)
+    disk_expected, disk_hard = disk_usd(expected_min), disk_usd(hard_min)
+    return {
+        "gpu_rate_usd_per_hour": gpu_rate_usd_per_hour,
+        "_gpu_rate_is_live": ("re-quoted from gpuTypes.securePrice; the "
+                              "authorization must re-quote again at issue"),
+        "probe_minutes_basis": beh["probe_cost"]["source"],
+        "probe_minutes": {"expected": probe_expected, "hard_ceiling": probe_hard},
+        "materialization_minutes": materialization_minutes,
+        "decomposition": decomposition,
+        "_one_decomposition": (
+            "session_decomposition is the single canonical phase decomposition "
+            "of this session. The proposal prices it here and the launcher's "
+            "BudgetSpec carries the same phases and reserves, so the two cannot "
+            "derive different hard windows."),
+        "_materialization_is_initialization": (
+            "added to the session's runtime, not to the probe count. The "
+            "protocol is twelve probes and stays twelve; the pod is alive "
+            "longer because the six arms have to be built before any probe can "
+            "measure against them."),
+        "expected": {"minutes": expected_min, "gpu_usd": gpu_expected,
+                     "disk_usd": disk_expected,
+                     "all_in_usd": round(gpu_expected + disk_expected, 4)},
+        "hard_ceiling": {"minutes": hard_min, "gpu_usd": gpu_hard,
+                         "disk_usd": disk_hard,
+                         "all_in_usd": round(gpu_hard + disk_hard, 4)},
+        "container_disk": {
+            "provisioned_gb": provision_gb,
+            "usd_per_gb_month": per_gb_month,
+            "hours_per_month": hours_per_month,
+            "usd_per_hour": round(disk_per_hour, 6),
+            "_billed_for_the_pods_whole_lifetime": True,
+        },
+        "_ceiling_includes": beh["_ceiling_includes"],
+        "_two_numbers": (
+            "the GPU rate is re-quotable from the provider and the storage "
+            "price is not, so they are derived apart and summed. A live GPU "
+            "quote is not evidence that separately priced storage is free."),
+    }

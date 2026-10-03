@@ -585,7 +585,8 @@ say "CPU-test scope: env $CPU_TEST_ENV"
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
   taskset -c "$CPUS" \
   env $CPU_TEST_ENV \
-  timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest tests/ -q \
+  timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest \
+  ${SESSION_TEST_PATHS:-tests/} -q \
   --junitxml=/workspace/pytest_junit.xml \
   ${SESSION_TEST_IGNORES:-} > /workspace/pytest.log 2>&1
 RC=$?

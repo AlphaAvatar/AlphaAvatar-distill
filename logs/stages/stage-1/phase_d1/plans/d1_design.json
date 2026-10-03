@@ -442,7 +442,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "76bddeec2d8521915bb55fc61e7399ea642b7d6beee77426fa97464f954d79cd",
+ "design_hash": "6db01608f329e8b05b3a3f1588db56d27dd65d68ce1695e876f33b3719e6689a",
  "execution_protocol": {
   "_decision": "maintainer engineering decision after A3: batched execution is adopted across every batchable path from D1 onward, not only ATTENTION. A3 measured that it is NOT an optimization on attention.activation_importance_v1 \u2014 8-10% slower on the scorer with no detectable correctness effect \u2014 so this is a uniformity decision rather than a performance claim, and the search ceiling below is derived from UNBATCHED telemetry and therefore bounds it either way.",
   "_the_value_is_config_not_core": "`3` is an experiment-policy number carried by ExecutionConfig. The core accepts 2, 4, 8 or a future token-budget batching policy with no edit; `aadistill.initialization.execution` owns the knob and `calibration.packing` owns the policies.",
@@ -548,7 +548,7 @@
     "semantic_state_id": "the scientific/path identity; still deliberately blind to execution"
    },
    "mechanism": "aadistill.initialization.specs.materialization",
-   "regression": "tests/autoinit/test_materialization_identity.py and tests/autoinit/test_target_aware_scoring_end_to_end.py::TestResumeRefusals",
+   "regression": "tests/initialization/test_materialization_identity.py and tests/initialization/test_target_aware_scoring_end_to_end.py::TestResumeRefusals",
    "status": "IMPLEMENTED AND VERIFIED at `$0` on CPU. The A3 precondition is met."
   },
   "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
@@ -577,7 +577,7 @@
    "untagged_behaviour": "an item with no `assistant` tag is untemplated raw text with no assistant turn; all of its real prediction positions stay active",
    "version": 1
   },
-  "verification": "tests/autoinit/test_scoring_position_policy.py derives the restriction independently from each frozen mixture's own fields and compares; tests/autoinit/test_target_aware_scoring_end_to_end.py asserts the incumbent policy changes no artifact and the treatment moves all four structural decisions.",
+  "verification": "tests/initialization/test_scoring_position_policy.py derives the restriction independently from each frozen mixture's own fields and compares; tests/initialization/test_target_aware_scoring_end_to_end.py asserts the incumbent policy changes no artifact and the treatment moves all four structural decisions.",
   "where_it_is_bound": {
    "operator": "OperatorStep.config_hash, via the hashed operator config, so the whole subtree forks",
    "search": "SearchConfig.config_hash",

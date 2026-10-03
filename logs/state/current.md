@@ -38,21 +38,129 @@ which owns every D1 figure and its claim boundary;
 owns the battery arithmetic. The phase `README.md` beside them is generated from
 the index and carries no narrative.
 
+## The test suite has a boundary now, and the trees line up
+
+**`pytest` means the CORE suite: 3,030 tests, ~4m50s.** Reusable framework
+behaviour and generic integration contracts, nothing else. It aims to be
+**green** — a red test in it means a current core problem, not a closed
+experiment's record. AGENTS.md **§2.8a** names the three suites and
+`testpaths = ["tests"]` makes the first the default.
+
+```text
+pytest                                              core full suite
+pytest scripts/experiments/stage-1/phase_d1/tests   a current experiment
+pytest scripts/experiments/stage-1/phase_c2/tests   historical verification
+```
+
+**The eleven "expected" failures are gone from the default run, and none was
+repaired to get there.** Every one was a closed experiment's historical-state
+assertion — C1's readiness gates and session contract, C2's behavioural proposal
+and three full-search chain proposals, C2's full-search budget/determinism/
+headroom, C1's provider-resource agreement, continuation-B's preregistration
+digest. They live with their experiments and still run on request.
+
+**The experiment tree mirrors the evidence tree, row for row.** One owner per
+`logs/stages/index.json` experiment id — the E-series ladder has `e3`…`e8b`, and
+the C2 family's four separate ids (`phase_c2_full_search`, `phase_c2_replay`,
+`phase_c2_behavioural`, `phase_c2_baseline_completion`) plus `continuation_b` own
+their own tests rather than sharing a prefix.
+
+```text
+scripts/experiments/stage-1/phase_d1/   <->  logs/stages/stage-1/phase_d1/
+scripts/experiments/stage-1/phase_c3/   <->  logs/stages/stage-1/phase_c3/
+scripts/experiments/stage-3/tests/      <->  logs/stages/stage-3/
+```
+
+**Specific experiment imports from the core suite: ZERO**, enforced by
+`tests/architecture/test_core_suite_boundary.py` — no core file imports an
+experiment package, every `experiments.*` import from core is a shared
+application module, no core file loads a named experiment launcher, and no core
+file reads a concrete historical run. The allowed set is derived from the tree,
+so adding an experiment cannot widen it.
+
+**And the core result no longer depends on historical evidence existing.**
+Archiving attempt 12's records, its preserved leaves or C1's cuda-stage-f
+directory changes nothing — not even a skip. The Stage-1 importer's nine
+refusals are proved against a two-leaf search built under `tmp_path`; the CUDA
+launcher's budget accounting against an authorization and ledger the test
+writes. All 14 core skips are live declarations, not absent records.
+
+**NEXT SESSION, BEFORE RESUMING D1.** `review/d1-target-aware` (`161215c9`)
+diverged from this refactor at `4dc579ba` — three commits on its side, four
+behind. Once this refactor is on `main`, **rebase the D1 work onto the new main
+first**; continuing on the old tree would reintroduce `tests/autoinit/` and the
+flat `scripts/experiments/phase_d1/` paths this round removed.
+
+Stage ownership comes from [`index.json`](../stages/index.json), not
+from names: Stage 1 holds `phase_a`, `phase_a3`, `phase_b`, `phase_c1`,
+`phase_c2`, `phase_c3`, `phase_d1`, `measurement` and `recovery_continuation`;
+Stage 3 holds the E-series ladder. **A3 is its own package now** — the index has
+always called it its own experiment, while its six modules sat inside
+`phase_c3`.
+
+`stage-1` is not a Python identifier, so `scripts/experiments/__init__.py`
+extends `__path__` over the stage directories and `experiments.phase_d1` keeps
+resolving. No import in the repository grew a stage, and core knows nothing about
+stages — the closure deriver follows a grouped package by globbing one level,
+reading no directory name.
+
+**What a session's pod gate runs is now declared POSITIVELY.**
+`SetupManifest.test_paths` names the suite; the ignore-complement is gone.
+`autoinit_c1_launch` recorded that complement going stale six times, once per
+experiment preflight directory created after C1 closed — each one a directory a
+C1 pod would have collected on its own meter. And `scripts/pod/setup.sh` ran the
+whole suite **twice**, once for a `tail -3` and once for an exit status; it is one
+invocation with `tee` and `PIPESTATUS[0]`.
+
 ## What `main` carries
 
-Fast-forwarded to this branch on **2026-10-03**, bringing the C3, A3 and
-D1-design rounds. Before that it stood at the 2026-09-24 C2 snapshot repair,
-so nine days and 597 commits of campaign history landed in one integration.
-`git log main` owns the hashes and they are deliberately not restated here.
+**The test-suite boundary refactor, integrated 2026-10-03 by SQUASH AND MERGE
+per AGENTS.md P12.2.** One commit on `main` collapsing six:
 
-**A merge records work. It is not a release, not a promotion and not a public
-claim.** `README.md` is unchanged by the whole range, so nothing public-facing
-moved; the eleven documented suite failures came with it and are the same
-eleven; and the two D1 blockers above are still open. The repository's one
-prior integration went through a GitHub pull request, which is the route to
-prefer when a range is reviewable — this one is 1,491 files and 1.13M inserted
-lines, almost all of it `logs/` evidence, and is a record of completed rounds
-rather than a change to review.
+```text
+source branch : refactor/test-suite-boundary   (NOT deleted -- P12.2)
+merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
+tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
+branch tip    : named by the squash commit on `main`, not here
+```
+
+**Why the tip is not written here.** This record is the last commit on the
+branch, so it would have to contain its own hash. P12.2 puts that obligation on
+the squash commit — which is created after the tip exists and can name it — and
+the range is `4dc579ba..refactor/test-suite-boundary` either way, resolvable by
+name for as long as the branch is kept, which P12.2 requires forever.
+
+`a2dab91c` is the executable tree the core suite ran against and the commit the
+maintainer approved; this record sits on top of it and touches nothing the suite
+executes. Where a later record needs the commit that produced the measurement,
+it is `a2dab91c`.
+
+What changed: `pytest` now means the **core suite** and nothing else;
+experiment-owned tests live with their experiments under
+`scripts/experiments/stage-<n>/<experiment_id>/tests/`, mirroring `logs/stages/`
+row for row; the core suite is **green** rather than carrying eleven standing
+failures; and a static guard refuses a core test that imports a specific
+experiment package, loads a named experiment launcher, or reads a concrete
+historical run. **43m20s → 3m18s.**
+
+**A merge records work. It is not a release, not a promotion, not a grant and not
+a public claim.** `README.md` is unchanged by the whole range. No GPU or paid
+resource is authorized by it, and no scientific result moved.
+
+The validation is the core suite measured on this exact tree —
+`2959 collected, 2945 passed / 14 skipped, 0 failed` — and a squash preserves the
+tree byte for byte, so it stands for `main` without a second run.
+
+**Before `main` carried this, it stood at `4dc579ba`**: the C3, A3 and D1-design
+rounds, fast-forwarded on 2026-10-03 in a 597-commit integration that is the
+reason P12.2 exists. `git log main` owns the hashes.
+
+**The operational consequence, and it bites immediately.** A squash commit does
+not have the branch's commits as ancestors, so `refactor/test-suite-boundary` is
+no longer an ancestor of `main` and `main..refactor/test-suite-boundary` still
+lists all five. **Continuing on it would re-apply the whole range** — cut a fresh
+branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
+it is where this round's commit hashes live.
 
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 
@@ -109,7 +217,7 @@ advanced by `0.015009`, **1.5× the `0.010` SESOI**, and advanced the genuinely
 better one with probability `0.42`. D1 screens **two** candidates on **two**
 seeds: bias `0.005149`, advance probability `0.78`, at the **same twelve
 probes**. Owner:
-[`selection_noise.py`](../../scripts/experiments/phase_d1/selection_noise.py),
+[`selection_noise.py`](../../scripts/experiments/stage-1/phase_d1/selection_noise.py),
 whose quadrature is self-checked against two closed forms. This is a
 prospective design derivation and re-analyses no C2 figure.
 
@@ -239,7 +347,7 @@ maintainer accepted the root-cause fix and the direct contract regression and
 **forbade** building a canary or rehearsal subsystem for it.
 
 **Two mechanisms exist now, and both are small.**
-`tests/pod/test_setup_env_requirements.py` parses the shell's own `${VAR:?}`
+`tests/integration/test_setup_env_requirements.py` parses the shell's own `${VAR:?}`
 requirements and asserts every session launcher supplies them — the contract,
 checked from the side that breaks.
 [`failure_signature.py`](../../src/aadistill/infrastructure/failure_signature.py)
@@ -918,7 +1026,7 @@ larger campaign ceiling buys another attempt and nothing else — no runtime, no
 disk, no probes, no seeds, no scientific scope. Owners:
 `behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD` and
 `authorization_terms`; the separation is asserted by driving the two apart in
-`tests/c2_behavioural_preflight/test_behavioural_continuation.py`.
+`scripts/experiments/stage-1/phase_c2/tests/test_behavioural_continuation.py`.
 
 **Cleanup failure now fails closed at the caller.** `release_intermediates`
 stays non-raising — a cleanup error must not destroy a verified, announced arm
@@ -1277,7 +1385,7 @@ Three defects were found adjacent to this work and fixed, all `$0`:
   sweep would have been green about a gate that fails at TESTS_OK a minute or
   two into a billing pod. Reproduced at `$0` with `unshare -r -m` and a tmpfs
   over the store: **at `147b2c6` the selection fails; on this tree all 121 pass.**
-  The check moved to `tests/autoinit/test_c2_behavioural_launch_governance.py`
+  The check moved to `scripts/experiments/stage-1/phase_c2/tests/test_c2_behavioural_launch_governance.py`
   with the other three dev-box-only cases, and its real production caller,
   `destination_gate`, now has tests — it had none, and had drifted to reading
   the `DURABLE_STORE` constant while the fetcher honoured `--ckpt-store`.
@@ -1474,7 +1582,7 @@ branching factor: the promoted ATTENTION operator consumes calibration where
 offered once however many mixtures were active. Nothing is pinned — every
 applicable implementation, every applicable profile and every order compete, so
 calibration choices can affect pruning. Owner:
-[`full_search_space.py`](../../scripts/experiments/phase_c2/full_search_space.py),
+[`full_search_space.py`](../../scripts/experiments/stage-1/phase_c2/full_search_space.py),
 with a test that refuses those integers as literals.
 
 **One exclusion, and it is scientific, not economic.**
@@ -1976,7 +2084,7 @@ part of it is C3's envelope. Its executable is
 that every number a conclusion rests on is emitted by that file: the verdict is
 COMPUTED by `derive_conclusion()` from the stage outputs rather than written
 beside them, and that function is tabled and mutation-checked in
-`tests/validation/test_batch_invariance_conclusion.py`. Records:
+`scripts/experiments/stage-1/phase_c3/tests/test_batch_invariance_conclusion.py`. Records:
 [`scope.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/scope.json),
 [`authorization.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json),
 [`campaign.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/campaign.json).
@@ -2279,7 +2387,7 @@ that a call it had just written passed a `1`, which a pilot that forgot the
 argument entirely would also have passed.
 
 **Pricing is conservative and arm-identical**, derived by
-[`phase_c3/pricing.py`](../../scripts/experiments/phase_c3/pricing.py) from the
+[`phase_c3/pricing.py`](../../scripts/experiments/stage-1/phase_c3/pricing.py) from the
 frozen mixture through the real loader and the real grouper:
 
 | | groups | item-forward equiv. | physical invocations | padded positions | pad/valid |

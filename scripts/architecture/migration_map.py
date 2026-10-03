@@ -141,7 +141,7 @@ def module_of(path: str) -> str:
     parts = list(p.parts)
     #: `src` and `scripts` are both roots that callers put on sys.path, so
     #: neither belongs in the importable name: src/aadistill/x.py is
-    #: `aadistill.x`, scripts/experiments/phase_a/plan.py is
+    #: `aadistill.x`, scripts/experiments/stage-1/phase_a/plan.py is
     #: `experiments.phase_a.plan`.
     if parts[0] in ("src", "scripts"):
         parts = parts[1:]

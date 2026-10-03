@@ -848,7 +848,7 @@
      "says": "the Search-1 plan, its predicted size and its price. Authorizes nothing"
     },
     {
-     "path": "scripts/experiments/phase_c2/search_space.py",
+     "path": "scripts/experiments/stage-1/phase_c2/search_space.py",
      "says": "the configured space and the structural cost bound, both derived from committed evidence"
     }
    ],

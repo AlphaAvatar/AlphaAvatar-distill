@@ -36,8 +36,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.governance.grant import (  # noqa: E402
     GrantRefused, refuse_a_future_dated_grant,
 )
-from experiments.phase_c3.a3_authorization import A3Authorization  # noqa: E402
-from experiments.phase_c3.a3_authorization_payload import (  # noqa: E402
+from experiments.phase_a3.a3_authorization import A3Authorization  # noqa: E402
+from experiments.phase_a3.a3_authorization_payload import (  # noqa: E402
     A3AuthorizationRefused, build_a3_authorization_payload,
 )
 

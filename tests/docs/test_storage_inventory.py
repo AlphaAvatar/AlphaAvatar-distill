@@ -196,10 +196,10 @@ def session_staging_destinations() -> dict[str, str]:
     import importlib.util
     import sys
 
-    helper = REPO / "tests/pod/session_specs.py"
-    spec = importlib.util.spec_from_file_location("session_specs", helper)
+    helper = REPO / "tests/support/session_specs.py"
+    spec = importlib.util.spec_from_file_location("support.session_specs", helper)
     mod = importlib.util.module_from_spec(spec)
-    sys.modules["session_specs"] = mod
+    sys.modules["support.session_specs"] = mod
     spec.loader.exec_module(mod)
 
     out: dict[str, str] = {}

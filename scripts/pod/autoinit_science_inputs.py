@@ -20,7 +20,7 @@ group stages nothing.
 **These are frozen identities.** The four digests are the ones the shared setup
 verified before this file existed, unchanged. `CALIBRATION_V1` restates the file
 hash that `aadistill.initialization.calibration.datasets.E8A_CALIBRATION` already carries, and
-`tests/pod/test_session_architecture.py` pins the two equal so they cannot
+`tests/integration/test_session_architecture.py` pins the two equal so they cannot
 drift.
 """
 

@@ -168,7 +168,7 @@ class TestScoringSemanticsInPlanning:
 class TestCoreReadsRepositoryPaths:
     RESTORED = ('from pathlib import Path\n'
                 'def provider_cli_fallbacks():\n'
-                '    config = (Path(__file__).resolve().parents[3]\n'
+                '    config = (Path(__file__).resolve().parents[2]\n'
                 '              / "configs/infrastructure/provider_cli.json")\n'
                 '    return tuple(config.read_text())\n')
 

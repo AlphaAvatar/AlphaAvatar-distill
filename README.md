@@ -315,7 +315,7 @@ Every run records config hash, code state, dataset/tokenizer/teacher hashes, and
 
 ```bash
 uv sync                    # CPU torch by default; see pyproject.toml for a CUDA index
-uv run pytest tests/ -q    # 1,084 CPU tests, no downloads
+uv run pytest -q             # the core suite: CPU only, no downloads
 ```
 
 The implemented pipeline runs end to end on CPU (GPU optional):

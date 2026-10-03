@@ -1,0 +1,251 @@
+"""The C1 harness must measure everything the paid path executes.
+
+An authorization binds a digest over the C1 executable set. If a module the
+launcher or the driver actually reaches is outside that set, the grant certifies
+less code than runs -- and the gap is invisible, because the digest verifies
+perfectly against the smaller list.
+
+**The set is now DERIVED and TRANSITIVE.** This file used to argue for the
+direct set only: that following imports transitively "reaches most of
+`aadistill`", because `autoinit/__init__` pulled in the search and the adapter
+pulled in the student model. That premise is gone -- the initialization package
+`__init__` imports nothing, so the transitive closure is now a description of
+what C1 executes rather than of the repository.
+
+The argument was also wrong in a way that cost coverage. `provider.py`,
+`remote.py` and `log_relay.py` are reached through the session runner, not named
+directly by either entry point, so the direct set omitted the three modules that
+create a pod, reach it and relay its logs. They could have changed under an
+authorization that claimed to pin the executable.
+
+`aadistill.governance.closure` walks imports transitively AND follows in-repo
+scripts a file composes a path to or hands to a call, because a subprocess
+target is part of what runs though no import reaches it. Prose is excluded: a
+docstring naming a script is documentation.
+
+`C1_HARNESS_SOURCE_FILES_V1` remains as the HISTORICAL declaration and is
+checked in `tests/architecture/test_closure.py` to still refuse.
+"""
+
+from __future__ import annotations
+
+import ast
+import json
+import re
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[5]
+sys.path.insert(0, str(REPO / "src"))
+
+from experiments.phase_c1.authorization import (  # noqa: E402
+    C1_DECLARED_INPUTS, C1_ENTRY_POINTS, c1_current_executable)
+from experiments.phase_c1.scoring import C1_SCORING_FILES_V1  # noqa: E402
+
+#: The live executable set, derived. Every assertion below is about THIS.
+C1_EXECUTABLE = tuple(r["path"] for r in c1_current_executable(REPO)["files"])
+
+ENTRY_POINTS = ("scripts/pod/autoinit_c1_launch.py",
+                "scripts/pod/autoinit_c1_driver.py")
+
+#: Search roots for an in-repo module name, in the order Python would resolve
+#: them given each entry point's own `sys.path` inserts.
+SEARCH = ("src", "scripts/pod", "scripts/autoinit", ".")
+
+#: Covered elsewhere, each for a stated reason. Not a pattern — a list, so that
+#: adding one is a decision somebody made rather than a glob that widened.
+COVERED_ELSEWHERE = {
+    # Hashing helpers. They can move `result_sha256`; they cannot move a count,
+    # a rate or a digest gate's verdict.
+    "src/aadistill/infrastructure/manifest.py": "in the harness set already",
+}
+
+
+def _module_file(name: str) -> Path | None:
+    rel = name.replace(".", "/")
+    for root in SEARCH:
+        for candidate in (REPO / root / f"{rel}.py",
+                          REPO / root / rel / "__init__.py"):
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+def _imports(path: Path) -> set[str]:
+    out: set[str] = set()
+    for node in ast.walk(ast.parse(path.read_text())):
+        if isinstance(node, ast.Import):
+            out |= {a.name for a in node.names}
+        elif isinstance(node, ast.ImportFrom):
+            if node.level:                       # relative: resolve against pkg
+                pkg = path.relative_to(REPO / "src").parent
+                parts = list(pkg.parts)
+                if node.level > 1:
+                    parts = parts[:-(node.level - 1)]
+                out.add(".".join([*parts, node.module]) if node.module
+                        else ".".join(parts))
+            elif node.module:
+                out.add(node.module)
+                for a in node.names:             # `from pkg import module`
+                    out.add(f"{node.module}.{a.name}")
+    return out
+
+
+def in_repo_closure() -> dict[str, list[str]]:
+    """Every in-repo module the launcher or driver imports DIRECTLY.
+
+    Depth one, on purpose. Transitive closure from these two files reaches most
+    of `aadistill` — `autoinit/__init__` pulls in the search, the adapters pull in
+    the student model, the session runner pulls in the relay and the remote — and
+    a harness that large stops describing what C1 executes and starts describing
+    the repository. The direct set is what the C1 code names, so a new dependency
+    is a line somebody wrote in one of these two files.
+
+    Function-level imports count: `ast.walk` sees them, and stage B's
+    `huggingface_hub` and stage D's adapter are both imported inside methods.
+    """
+    reached: dict[str, list[str]] = {}
+    for entry in ENTRY_POINTS:
+        for name in sorted(_imports(REPO / entry)):
+            f = _module_file(name)
+            if f is None:
+                continue                          # stdlib or third-party
+            rel = str(f.relative_to(REPO))
+            if rel not in ENTRY_POINTS:
+                reached.setdefault(rel, []).append(entry)
+    for entry in ENTRY_POINTS:
+        reached.setdefault(entry, ["entry point"])
+    return reached
+
+
+def test_every_module_the_paid_path_imports_is_measured():
+    """The direct imports are a SUBSET of the derived set, by construction."""
+    closure = in_repo_closure()
+    missing = sorted(set(closure) - set(C1_EXECUTABLE) - set(COVERED_ELSEWHERE))
+    assert not missing, (
+        "these in-repo modules are reachable from the C1 launcher or driver and "
+        "are outside the measured harness:\n"
+        + "\n".join(f"  {m}  <- {closure[m][0]}" for m in missing))
+
+
+def test_the_measured_set_has_no_file_that_does_not_exist():
+    for rel in C1_EXECUTABLE:
+        assert (REPO / rel).is_file(), rel
+    c1_current_executable(REPO)
+
+
+def test_the_transitive_reach_is_measured_not_just_the_direct_names():
+    """The three modules the direct set missed, named explicitly."""
+    for rel in ("src/aadistill/infrastructure/provider.py",
+                "src/aadistill/infrastructure/remote.py",
+                "src/aadistill/infrastructure/log_relay.py"):
+        assert rel in C1_EXECUTABLE, (
+            f"{rel} creates, reaches or relays a billed pod and is reached "
+            "through the session runner rather than named by an entry point")
+
+
+def test_the_paid_path_does_not_reach_the_phase_a_launcher_or_driver():
+    """Eliminated rather than declared. C1 has its own parser and its own driver."""
+    closure = in_repo_closure()
+    for forbidden in ("scripts/pod/autoinit_phase_a_launch.py",
+                      "scripts/pod/autoinit_phase_a_driver.py",
+                      "scripts/autoinit/phase_a_search.py"):
+        assert forbidden not in closure, f"{forbidden} <- {closure.get(forbidden)}"
+
+
+def test_the_scoring_closure_is_inside_the_harness():
+    """A scorer file measured by the scoring contract but not by the grant would
+    let the code that produces C1's numbers change without moving the digest an
+    authorization binds."""
+    assert set(C1_SCORING_FILES_V1) <= set(C1_EXECUTABLE)
+
+
+def test_the_artifact_specs_are_measured():
+    for rel in ("configs/autoinit/c1_artifacts.json",
+                "configs/autoinit/c1_artifacts_failed.json"):
+        assert rel in C1_EXECUTABLE
+
+
+# --- the setup script the pod actually runs ---------------------------------
+
+def test_the_harness_names_the_setup_script_the_runner_executes():
+    """Derived from the C1 SESSION, not transcribed from a list.
+
+    Until 2026-09-04 the C1 set named `scripts/pod/setup.sh` and the pod ran
+    `scripts/pod/autoinit_preflight_setup.sh`. The grant therefore measured a
+    file that never executes and left the one that does unmeasured — and the
+    digest verified perfectly the whole time, because it was a digest of the
+    wrong thing.
+
+    The derivation moved with the fact. The runner no longer names any
+    repository script: it uploads and executes whatever `ExecutionCommands`
+    carries, so asking the runner what it runs now returns nothing. Asking C1's
+    own spec is the same question at its new owner, and the chain is checked in
+    both directions — the session names it, the runner uploads and executes
+    exactly that, and the harness measures it.
+    """
+    launcher = REPO / "scripts/pod/autoinit_c1_launch.py"
+    commands = [
+        {kw.arg: kw.value.value for kw in node.keywords
+         if isinstance(kw.value, ast.Constant)}
+        for node in ast.walk(ast.parse(launcher.read_text()))
+        if isinstance(node, ast.Call)
+        and getattr(node.func, "id", "") == "ExecutionCommands"]
+    assert len(commands) == 1, (
+        f"{launcher.name} builds {len(commands)} ExecutionCommands; this test "
+        "cannot say which one the session runs")
+    setup = commands[0]["setup_script"]
+    assert setup == "scripts/pod/autoinit_preflight_setup.sh", setup
+    assert (REPO / setup).is_file()
+
+    # The runner uses the SPEC's value for both the upload and the execution.
+    # A runner that uploaded the spec's script and executed a hard-coded one
+    # would be the same defect wearing the fix.
+    runner = (REPO / "src/aadistill/infrastructure/session_runner.py").read_text()
+    assert "self.repo_root / self.spec.commands.setup_script" in runner
+    assert "Path(self.spec.commands.setup_script).name" in runner
+    assert not re.findall(r'"scripts/pod/(\w+\.sh)"', runner), (
+        "the runner names a repository setup script again")
+
+    assert setup in C1_EXECUTABLE, (
+        f"the C1 session executes {setup} and the grant does not measure it")
+
+
+def test_no_session_can_substitute_a_different_setup_script():
+    """The reachability proof only holds because the path is not configurable."""
+    from aadistill.infrastructure.session import SetupManifest
+
+    fields = set(SetupManifest.__dataclass_fields__)
+    assert not {f for f in fields if "script" in f or "setup_path" in f}, (
+        f"SetupManifest gained a setup-script field ({sorted(fields)}); the "
+        "harness can no longer name the executed setup from the runner alone")
+
+
+def test_the_legacy_setup_script_is_executed_by_nothing():
+    """`scripts/pod/setup.sh` may exist as history; it must not be reachable.
+
+    If some path starts executing it again, it needs measuring, and this fails
+    rather than letting it run unmeasured the way it just did in reverse.
+    """
+    hits = []
+    for path in sorted((REPO / "scripts").rglob("*.py")) + \
+            sorted((REPO / "scripts").rglob("*.sh")) + \
+            sorted((REPO / "src").rglob("*.py")):
+        if path.name == "setup.sh":
+            continue
+        #: A TEST IS NOT AN EXECUTION PATH. Since the 2026-10-03 boundary round
+        #: an experiment's tests live beside the experiment, under `scripts/`, so
+        #: a scan that globs `scripts/**/*.py` now reads test files too — and a
+        #: test that NAMES the legacy script, to assert something about it or to
+        #: explain why a token dies with its shell, is exactly what this check
+        #: should not count. The question is whether anything RUNS it.
+        if "/tests/" in str(path.relative_to(REPO)):
+            continue
+        for line in path.read_text(errors="ignore").splitlines():
+            stripped = line.strip()
+            if stripped.startswith("#"):
+                continue
+            if re.search(r"(?<![\w/])setup\.sh", stripped):
+                hits.append(f"{path.relative_to(REPO)}: {stripped[:90]}")
+    assert not hits, ("scripts/pod/setup.sh is referenced by executable code:\n"
+                      + "\n".join(hits))

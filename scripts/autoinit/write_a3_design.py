@@ -38,7 +38,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3.a_bsz3 import (  # noqa: E402
+from experiments.phase_a3.a_bsz3 import (  # noqa: E402
     ATTENTION_IMPL_ID, execution_comparison, frozen_identities,
     item_token_counts,
 )
@@ -130,7 +130,7 @@ IDENTITY_SEMANTICS = {
         "any execution knob that can move bytes has this property. NOT BUILT, "
         "and if A3 finds the digests identical it is never needed."),
     "regression_that_holds_today": (
-        "tests/autoinit/test_corrections.py :: "
+        "tests/initialization/test_corrections.py :: "
         "test_resume_refuses_a_record_from_a_different_numerical_protocol -- a "
         "matching semantic state id is not sufficient to reuse a checkpoint, "
         "driven through the real resume path and mutation-checked."),
@@ -281,7 +281,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
     #: comes out of the record the module wrote; the restart cost comes from
     #: the same component table, over the components preceding the first
     #: scientific probe.
-    from experiments.phase_c3.a3_pricing import pre_science_restart_usd
+    from experiments.phase_a3.a3_pricing import pre_science_restart_usd
 
     hard_ceiling = float(pricing["price"]["hard_ceiling"]["usd"])
     restart = pre_science_restart_usd(
@@ -464,7 +464,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
                     "rule": ("per primary stratum: candidate usable rate < "
                              "0.10 while control usable rate > 0.40"),
                     "candidate_max": 0.10, "control_min": 0.40,
-                    "implementation": ("scripts/experiments/phase_c1/"
+                    "implementation": ("scripts/experiments/stage-1/phase_c1/"
                                        "probe_results.py :: decision_inputs"),
                 },
                 "_role": ("reported as safety observations. They do not gate "
@@ -516,7 +516,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
 
         "pricing": {
             "_owner": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-            "_derived_by": "scripts/experiments/phase_c3/a3_pricing.py",
+            "_derived_by": "scripts/experiments/stage-1/phase_a3/a3_pricing.py",
             "gpu_rate_usd_per_hour": pricing["queried_rate_usd_per_hour"],
             "_rate_note": rate_note,
             "expected_usd": pricing["price"]["expected"]["usd"],

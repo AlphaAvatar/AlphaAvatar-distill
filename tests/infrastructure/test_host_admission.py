@@ -1,5 +1,12 @@
 """A host whose properties make the result incomparable must be redrawn.
 
+THE MECHANISM, with synthetic hooks. The four A3 tests that drove A3's own
+`host_admission` callable and asserted its controls driver branch moved to
+`scripts/experiments/stage-1/phase_a3/tests/test_a3_host_admission.py` in the
+2026-10-03 convergence round: a core test should prove the hook works for an
+arbitrary callable, not that one closed experiment's instance is wired a
+particular way.
+
 `a3_attempt35` trained three probes, generated the first, and was refused by
 the protocol admission: every material generation field matched
 attempt75's controls, and the host NVIDIA driver BRANCH had moved 580 -> 595,
@@ -74,52 +81,10 @@ def test_a_raising_check_refuses_rather_than_admitting():
 
 # --- A3's rule, which is the only caller today ----------------------------
 
-def test_a3_admits_the_controls_driver_branch_and_refuses_another():
-    from experiments.phase_c3 import a3_session as A3S
 
-    want = A3S.control_driver_branch()
-    assert want == "580", (
-        f"attempt75's controls were measured on branch {want!r}; this test "
-        "pins the fact that A3's admission is derived from them")
-
-    for patch in ("580.159.03", "580.126.09", "580.65.06"):
-        ok, why = A3S.host_admission(f"img@{patch}")
-        assert ok, f"{patch} is in the controls' branch and was refused: {why}"
-        assert "provenance" in why
-
-    for other in ("595.91.07", "570.124.06"):
-        ok, why = A3S.host_admission(f"img@{other}")
-        assert not ok, f"{other} is a different branch and was admitted"
-        assert "branch" in why and "Redraw" in why
-
-
-def test_a3_fails_closed_when_the_controls_branch_cannot_be_read(monkeypatch):
-    from experiments.phase_c3 import a3_session as A3S
-
-    monkeypatch.setattr(A3S, "control_driver_branch", lambda *a, **k: None)
-    ok, why = A3S.host_admission("img@580.159.03")
-    assert not ok and "unknown comparability premise" in why
-
-
-def test_a3_refuses_an_image_identity_with_no_driver():
-    """`read_image_digest` appends the driver only when
-    `/etc/podinfo/image_digest` is absent, so a bare tag is a host whose
-    comparability cannot be established."""
-    from experiments.phase_c3 import a3_session as A3S
-
-    ok, why = A3S.host_admission("runpod/pytorch:1.1.0-cu1300")
-    assert not ok and "no" in why.lower() and "driver" in why
-
-
-def test_the_a3_session_wires_it():
-    sys.path.insert(0, str(REPO / "scripts/pod"))
-    sys.path.insert(0, str(REPO / "tests/pod"))
-    from session_specs import load_session_launcher, session_args
-
-    mod = load_session_launcher("autoinit_a3_launch")
-    spec = mod.spec(session_args(mod))
-    assert spec.host_admission is not None, (
-        "A3 declares no host admission, so a wrong-branch host would be paid "
-        "for and refused at the protocol admission instead")
-    ok, _ = spec.host_admission("img@595.91.07")
-    assert ok is False
+#: WHAT IS DELIBERATELY NOT HERE. A3's concrete admission rule — the controls
+#: driver branch, its fail-closed read, and the launcher that wires it — is A3's
+#: and lives in A3's suite. The generic properties above (default-admit, refusal
+#: is redrawable, asked after the image and before setup, a raising check
+#: refuses) are what every future session inherits, and none of them needs an
+#: experiment package to be true.

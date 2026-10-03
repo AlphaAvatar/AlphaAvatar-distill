@@ -67,7 +67,8 @@ L40S_MEASURED = HardwareProfile(
     source=("E8a: 260 subset evaluations over a 67-item / 59,763-position mixture in "
             "1,300 s at 4.02B full width. This module's own accounting puts that "
             "workload at 1.1548e17 FLOPs, hence 88.83 TFLOP/s and ~24.5% of the "
-            "362 TFLOPS bf16 dense peak. Asserted round-trip in tests/autoinit."),
+            "362 TFLOPS bf16 dense peak. Asserted round-trip by the cost "
+            "model's own anchor tests."),
 )
 
 A100_80GB_ESTIMATED = HardwareProfile(

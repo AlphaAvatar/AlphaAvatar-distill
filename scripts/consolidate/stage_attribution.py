@@ -970,7 +970,7 @@ STAGE_1 = [
             E("logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
               "the Search-1 plan, its predicted size and its price. Authorizes "
               "nothing"),
-            E("scripts/experiments/phase_c2/search_space.py",
+            E("scripts/experiments/stage-1/phase_c2/search_space.py",
               "the configured space and the structural cost bound, both "
               "derived from committed evidence"),
         ],

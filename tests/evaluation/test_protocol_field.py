@@ -1,6 +1,6 @@
 """The measurement-field admission rule, tested where it LIVES.
 
-`tests/autoinit/test_measurement_protocol_gate.py` drives this rule through C2,
+`scripts/experiments/stage-1/phase_c2/tests/test_measurement_protocol_gate.py` drives this rule through C2,
 which is the caller that needed it. This module drives it as core: no C2
 battery, no C2 arms, no C2 seeds, no experiment at all — because the claim being
 made about it is that C3 and C4 inherit it, and a rule only tested through one

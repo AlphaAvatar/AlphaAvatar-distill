@@ -218,14 +218,14 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
 
     #: REMOVED 2026-09-13: a check that the whole `logs/` tree is present, so
     #: that `needs_whole_tree` would not skip 23 tests in the sweep that the pod
-    #: then ran. The pod runs `tests/c1_preflight/` now and collects none of
+    #: then ran. The pod runs `scripts/experiments/stage-1/phase_c1/tests/` now and collects none of
     #: them, so the divergence it guarded cannot happen and the guard protected
     #: nothing. Deleted rather than kept for reassurance.
 
     #: The store the gate compares the battery against. Its ABSENCE is the pod's
     #: condition and the sweep now models it; its absence HERE would mean the
     #: launcher's own pre-provider gate cannot pass.
-    sys.path.insert(0, str(REPO / "tests/pod"))
+    sys.path.insert(0, str(REPO / "tests"))
     from test_c1_session_contract import canonical_battery_store
     if not canonical_battery_store().is_dir():
         problems.append(f"the canonical battery store {canonical_battery_store()} "
