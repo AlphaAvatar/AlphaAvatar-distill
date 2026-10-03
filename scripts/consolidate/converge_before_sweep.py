@@ -180,10 +180,18 @@ def generators(write: bool) -> list[str]:
 #: Not every field named `commit` anywhere — these are the ones a record uses to
 #: say "this is the code that ran", which is what P4 requires an experiment to
 #: be reproducible from.
+#: `git_commit` was missing from the first version of this tuple, and it is the
+#: field AGENTS.md 3.6 names for an experiment log -- 20 record files use it. The
+#: hole was found by sweeping a WIDER field set by hand during the 2026-10-03
+#: squash integration and comparing the counts: 622 hashes by hand against 606
+#: here. When this list and a hand sweep disagree, the difference is the answer.
+#: Occurrences as of 2026-10-03: session_commit, authorized_session_commit,
+#: head_commit, swept_base_commit, declared_at_commit, commit and git_commit are
+#: all live; `base_commit` is in 3 records; `binding_commit` in none yet.
 CITED_COMMIT_FIELDS: tuple[str, ...] = (
     "session_commit", "authorized_session_commit", "head_commit",
     "swept_base_commit", "declared_at_commit", "binding_commit",
-    "base_commit", "commit",
+    "base_commit", "git_commit", "commit",
 )
 
 _CITED_COMMIT = re.compile(
