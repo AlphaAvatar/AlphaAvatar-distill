@@ -233,6 +233,14 @@ def test_the_legacy_setup_script_is_executed_by_nothing():
             sorted((REPO / "src").rglob("*.py")):
         if path.name == "setup.sh":
             continue
+        #: A TEST IS NOT AN EXECUTION PATH. Since the 2026-10-03 boundary round
+        #: an experiment's tests live beside the experiment, under `scripts/`, so
+        #: a scan that globs `scripts/**/*.py` now reads test files too — and a
+        #: test that NAMES the legacy script, to assert something about it or to
+        #: explain why a token dies with its shell, is exactly what this check
+        #: should not count. The question is whether anything RUNS it.
+        if "/tests/" in str(path.relative_to(REPO)):
+            continue
         for line in path.read_text(errors="ignore").splitlines():
             stripped = line.strip()
             if stripped.startswith("#"):
