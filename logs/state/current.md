@@ -136,22 +136,27 @@ invocation with `tee` and `PIPESTATUS[0]`.
 per AGENTS.md P12.2.** One commit on `main` collapsing six:
 
 ```text
+squash commit : 06cab9c8f106ed6f35db4c5cd6bf9d47288da139   on `main`
 source branch : refactor/test-suite-boundary   (NOT deleted -- P12.2)
+branch tip    : c7a39f3b070dc0b8fba16e7dff3b0b6c26c0a778
 merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
 tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
-branch tip    : named by the squash commit on `main`, not here
 ```
 
-**Why the tip is not written here.** This record is the last commit on the
-branch, so it would have to contain its own hash. P12.2 puts that obligation on
-the squash commit — which is created after the tip exists and can name it — and
-the range is `4dc579ba..refactor/test-suite-boundary` either way, resolvable by
-name for as long as the branch is kept, which P12.2 requires forever.
-
 `a2dab91c` is the executable tree the core suite ran against and the commit the
-maintainer approved; this record sits on top of it and touches nothing the suite
-executes. Where a later record needs the commit that produced the measurement,
-it is `a2dab91c`.
+maintainer approved. `c7a39f3b` adds the pre-integration state record on top and
+touches nothing the suite executes, which is why no second run was owed: the
+squash commit's tree hash equals the branch tip's, verified before pushing.
+Where a later record needs the commit that produced the measurement, it is
+`a2dab91c`.
+
+**The branch is kept permanently, and it is load-bearing.** 623 distinct commit
+hashes across the records resolve through branches, not through squash commits —
+`session_commit`, `authorized_session_commit`, `head_commit`,
+`swept_base_commit`, `declared_at_commit`, `git_commit` and the commit a
+comparison names as having computed it. Checked before the squash and again
+after: zero unreachable. The usual post-squash branch cleanup would invalidate
+every one of them.
 
 What changed: `pytest` now means the **core suite** and nothing else;
 experiment-owned tests live with their experiments under
@@ -180,13 +185,51 @@ lists all six. **Continuing on it would re-apply the whole range** — cut a fre
 branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
 it is where this round's commit hashes live.
 
-**Why keeping the branch is not tidiness debt.** Records bind evidence to commit
-hashes — `session_commit`, `authorized_session_commit`, `head_commit`,
-`swept_base_commit`, `declared_at_commit`, and the commit a comparison names as
-having computed it. **622 distinct hashes across 1,742 record files**, measured
-before this integration and again after it, zero unreachable. A squash commit is
-none of them, so they survive only on the branch, and the usual post-squash
-cleanup — the one the host offers by default — would invalidate every one.
+## This branch: D1 replayed onto the squashed `main`
+
+**`review/d1-identity-correction`, cut fresh from `06cab9c8`.** The D1 identity
+round was **replayed**, not merged: `review/d1-target-aware` is no longer an
+ancestor of `main`, so merging it would have re-applied its whole range and
+recreated `tests/autoinit/` and the flat `scripts/experiments/phase_d1/` the
+refactor removed. The old branch is kept — P12.2 — and its commits
+`e93b627c 38c46a32 161215c9` are where the round's own hashes live.
+
+Where the files landed, by §2.8a's question — what would change when this
+experiment closes?
+
+```text
+tests/initialization/test_scoring_content_identity.py        CORE
+tests/initialization/test_target_aware_scoring_end_to_end.py CORE
+tests/initialization/test_materialization_identity.py        CORE
+scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py          D1's
+scripts/experiments/stage-1/phase_d_series/{__init__,battery_family}.py
+scripts/experiments/stage-1/phase_d_series/tests/                     the series'
+```
+
+**The battery family's placement was the real judgement.** Flat under
+`scripts/experiments/` would have made the boundary guard read it as SHARED
+APPLICATION LAYER — the guard derives that from tree position — and let any core
+test import one series' arms. It is Stage-1 program material spanning D1, D2 and
+D3, so it sits under `stage-1/`, where `experiments/__init__.py`'s existing
+`stage-*` path extension already resolves it: no new mechanism, and
+`from experiments.phase_d_series import battery_family` is unchanged. Its record
+stays in `logs/shared/analyses/`, covered by that directory's existing
+declaration as Stage-1 material belonging to no single experiment.
+
+**Two defects the reconciliation itself found.** The reachability gate P12.2
+names was blind to `git_commit` — the field AGENTS.md §3.6 names for an
+experiment log, used by 20 records — found by comparing a hand sweep's 622
+hashes against the tool's 606; now 623, zero unreachable. And
+`phase_b_result` was reclaimed a second time on the claim that nothing reads it,
+when eight assertions in a continuation_b test do; one grep had the wrong
+subscript spelling and the other was truncated by `| head`. Restored, and
+because those readers are an *experiment* test the core suite could not have
+caught it, so `test_every_snapshot_key_a_test_reads_still_exists` now scans both
+trees.
+
+**Nothing scientific moved.** No GPU, no pod, no provider resource, `$0`, no
+grant or authorization change, no frozen evidence rewritten, and D1 remains
+blocked on the same three blockers.
 
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 

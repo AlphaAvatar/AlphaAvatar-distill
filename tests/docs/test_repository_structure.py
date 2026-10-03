@@ -335,12 +335,15 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     `CONFIRMED ON REAL CUDA` with SHA `7027a8f4`. Check both by name before
     trimming, not after.
 
-    TWO BRANCHES RAISED THIS CEILING INDEPENDENTLY FROM ONE BASE, AND BOTH
-    RAISES ARE REAL. `refactor/test-suite-boundary` went 15_500 -> 16_000 for
-    the test-suite boundary; `review/d1-target-aware` went 15_500 -> 16_500 for
-    D1's third blocker and the battery family. Neither knew about the other.
-    Reconciled here at 17_000, and the reclamation came first BOTH times and
-    again at the merge.
+    TWO BRANCHES RAISED THIS CEILING INDEPENDENTLY FROM ONE BASE, AND THE
+    RECONCILIATION ADDED NOTHING. `refactor/test-suite-boundary` went
+    15_500 -> 16_000 for the test-suite boundary; `review/d1-target-aware` went
+    15_500 -> 16_500 for D1's third blocker and the battery family. Neither
+    knew about the other. The ceiling here is **16_500** — the higher of two
+    decisions already made, not a fourth raise — and the union of both branches'
+    subjects fits under it at 16_299 because the reclamation came first all
+    three times. 201 bytes of headroom is thin on purpose: the next subject
+    reclaims.
 
     Reclaimed on the two branches: `behavioural_session`, a second copy of
     `c2_closure`'s subject under the same owner document, with its two live
@@ -374,7 +377,7 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 17_000, (
+    assert len(SNAPSHOT.read_bytes()) < 16_500, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

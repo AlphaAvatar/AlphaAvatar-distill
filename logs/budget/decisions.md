@@ -1,5 +1,70 @@
 # Budget decisions
 
+## 2026-10-03 — D1 is replayed onto the squashed `main`, not merged into it
+
+- **Context:** the squash integration above put the test-suite boundary on `main`
+  and, as P12.2 warns, left `review/d1-target-aware` no longer an ancestor of
+  `main`. Merging it would have re-applied the whole range and recreated
+  `tests/autoinit/` and the flat experiment directory the refactor removed. Its
+  three commits were therefore **replayed** onto a fresh branch cut from `main`:
+  `review/d1-identity-correction`.
+
+- **Placement, by §2.8a's question — what would change when this experiment
+  closes?** `test_scoring_content_identity.py` and
+  `test_target_aware_scoring_end_to_end.py` are CORE: they prove
+  `scoring/content.py` and `protocol_identity.py` bind what they claim, for any
+  policy and any suite. `test_d1_design.py` is D1's, and the D-series battery
+  family went to `scripts/experiments/stage-1/phase_d_series/` with its test
+  beside it.
+
+  **The battery family's placement was the one real judgement.** Flat under
+  `scripts/experiments/` would have made the boundary guard treat it as SHARED
+  APPLICATION LAYER — the guard derives that from tree position — and let any core
+  test import one series' arms. It is Stage-1 program material spanning D1, D2 and
+  D3, so it belongs under `stage-1/`, which is also where
+  `experiments/__init__.py`'s existing `stage-*` path extension already resolves
+  it: no new mechanism, and the import line is unchanged. Its record stays in
+  `logs/shared/analyses/`, covered by that directory's existing declaration as
+  Stage-1-owned material belonging to no single experiment.
+
+- **Three conflicts were science, not paths, and the newer side won each.**
+  The behavioural-design rationale: the superseded text justified the design by
+  `screening bias < SESOI`, and the 2026-10-03 review retired exactly that
+  argument — max-of-K inflation is the winner's curse on the SCREENING estimate
+  and is not a validity condition for a fresh disjoint confirmation. The corrected
+  text replaced it in `current.md` and in `decisions.md`. The CUDA-surface ledger
+  took BOTH rounds as separate entries, and the D1 round's base is `main`'s squash
+  commit rather than the old `4dc579ba`: measuring it from the older base would
+  fold the test-boundary round's changes into D1's diff and defeat the
+  undeclared-edit check the ledger exists for.
+
+- **Two defects were found by the reconciliation itself.**
+
+  1. **The reachability gate P12.2 names was blind to `git_commit`.** The rule's
+     text and its implementation were written in one commit on the D1 branch, so
+     `main` had neither; the integration ran a hand sweep instead, and comparing
+     622 hashes by hand against the tool's 606 isolated two missing fields.
+     `git_commit` is the one AGENTS.md §3.6 names for an experiment log and 20
+     records use it. Now 623 covered, zero unreachable.
+  2. **"Nothing reads `phase_b_result`" was asserted a second time, by an agent
+     who had already read the correction saying it was wrong.** Eight assertions
+     in a continuation_b test read it. Two greps missed it: one had the wrong
+     subscript spelling, the other had the right pattern and ended in `| head`.
+     Restored. And since those readers are an EXPERIMENT test, the core suite can
+     no longer catch this — so
+     `test_every_snapshot_key_a_test_reads_still_exists` now scans both trees for
+     readers of a reclaimed key. Mutation-verified: deleting the key names the
+     real reader.
+
+- **The snapshot needed no new raise.** Both branches had raised the ceiling
+  independently from one base — 16_000 and 16_500 — and the union fits under the
+  higher of those two at 16_299, after reclamation that also found a
+  contradiction: five fields described why D1 is blocked and two still said TWO
+  after a third blocker appeared. `d_series.blockers` owns the reasons now.
+
+- **Cost:** `$0`. No pod, no GPU, no grant, no authorization change, no scientific
+  result moved, and no frozen evidence rewritten.
+
 ## 2026-10-03 — The test refactor integrates into `main` by SQUASH AND MERGE
 
 - **Context:** `refactor/test-suite-boundary@a2dab91c` was reviewed on the remote
@@ -379,7 +444,7 @@ these. `$0`, no pod, no GPU.
 
 - **Decision:** define a **family**, `d_series_behavioural_v1`, and freeze its
   allocation rule **today, before any D1 outcome exists**. Owner:
-  [`scripts/experiments/phase_d_series/battery_family.py`](../../scripts/experiments/phase_d_series/battery_family.py);
+  [`scripts/experiments/stage-1/phase_d_series/battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py);
   record:
   [`logs/shared/analyses/autoinit_d_series_battery_family.json`](../shared/analyses/autoinit_d_series_battery_family.json).
 
@@ -563,7 +628,7 @@ these. `$0`, no pod, no GPU.
   two-seed screening stability (C2's specific weakness was a single-draw
   ordering), fresh independent confirmation, and the chain's cost — **not** as a
   formally demonstrated optimum. The arithmetic and its claim boundary are in
-  `scripts/experiments/phase_d1/selection_noise.py`, with a quadrature
+  `scripts/experiments/stage-1/phase_d1/selection_noise.py`, with a quadrature
   self-check against two closed forms. This remains a prospective design
   derivation: it re-analyses no C2 figure and changes nothing about C2's
   closure.

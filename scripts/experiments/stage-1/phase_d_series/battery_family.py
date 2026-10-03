@@ -69,7 +69,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/data"):
     _path = str(REPO_ROOT / _extra)
     if _path not in sys.path:
