@@ -49,13 +49,19 @@
      on the branch *before* the integration, so `main` lands on a tree that
      describes itself.
 
-  **The enforcement P12.2 names is not on this branch.** P12.2 says
-  `scripts/consolidate/converge_before_sweep.py` resolves every cited commit hash
-  against the object store; that function was written on `review/d1-target-aware`,
-  so the rule's text reached `main` ahead of its implementation and arrives with
-  the D1 reconciliation. The check was therefore performed inline for this
-  integration — the fields above, swept over `logs/**/*.json`, resolved in one
-  `git cat-file --batch-check`:
+  **Neither P12.2's text nor its enforcement was on the integrated branch — and
+  this entry first said otherwise.** It claimed "the rule's text reached `main`
+  ahead of its implementation", which was wrong: the rule and
+  `converge_before_sweep.py`'s reachability check were written together in one
+  commit on `review/d1-target-aware`, and `main` had neither until the D1
+  reconciliation that carries this correction. What governed the integration was
+  the maintainer's instruction to go by AGENTS.md, against the AGENTS.md of the
+  session's working tree — where P12.2 was already a 2026-10-03 maintainer
+  decision. The rule applied; only my account of where its bytes lived was false.
+
+  The check was therefore performed inline for that integration — the fields
+  above, swept over `logs/**/*.json`, resolved in one `git cat-file
+  --batch-check`:
 
   ```text
   622 distinct commit hashes cited across 1,742 record files · 0 unreachable
@@ -313,6 +319,53 @@ these. `$0`, no pod, no GPU.
 
 - **Revisit when:** a fourth suite is proposed. Three is the number of questions
   this repository actually asks; a fourth needs the same argument.
+## 2026-10-03 — Integration to `main` becomes SQUASH AND MERGE
+
+- **Context:** `main` had been left at the 2026-09-24 C2 snapshot repair while
+  nine days of C3, A3 and D1-design work accumulated on
+  `review/c3-operator-batching`. The maintainer authorized the integration and
+  it went in as a fast-forward: **597 commits, 1,491 files, 1,129,146 inserted
+  lines**, 85% of it `logs/` evidence. `main`'s history is now nine days of
+  working material rather than a list of completed rounds, and nothing about it
+  is easier to read for having each repair individually.
+
+- **Decision:** every future integration of a working branch into `main` is a
+  **squash and merge** — one commit on `main` per integration. Recorded as
+  **AGENTS.md P12.2**, next to P12.1's statement that a merge needs a
+  maintainer decision, because the two are one subject. P12.1 is unchanged: the
+  decision is still required, and P12.2 says only what shape the merge takes
+  once it exists.
+
+- **What the decision costs, and why it is a clause rather than a caveat.**
+  This repository binds scientific evidence to specific commit hashes —
+  `session_commit`, `authorized_session_commit`, `head_commit`,
+  `swept_base_commit`, `declared_at_commit`, and the commit a comparison
+  artifact names as having computed it. **785 records did so when this was
+  decided**, and they are reachable today only because the 2026-10-03
+  integration was a fast-forward. A squash commit is not any of those hashes.
+  So P4's requirement that an experiment be reproducible from its logged code
+  state now depends on the working branch surviving, and P12.2 requires three
+  things of every squash integration: the source branch is **not deleted**, the
+  squash commit **names the range it collapses** (branch, tip, merge base), and
+  the state docs say what `main` carries, recorded *before* the integration.
+
+- **Alternatives considered:** keeping fast-forward — rejected by the
+  maintainer, and the 597-commit integration is the evidence; a merge commit
+  per integration — it would keep the hashes on `main` and the integration
+  point visible, but leaves the same working history in `main`'s log, which is
+  the thing being removed; squashing **and** deleting the branch, which is the
+  host's default offer — refused outright, because it is the one combination
+  that silently invalidates 785 records.
+
+- **Risks:** stale working branches accumulate, and the first instinct when
+  they do will be to delete them. P12.2 names that instinct and forbids acting
+  on it for any branch a record cites; re-anchoring commit-bound evidence is a
+  separate maintainer decision with its own record, taken *before* a deletion
+  rather than discovered after one.
+
+- **Revisit when:** branch accumulation becomes a real constraint, or when
+  commit-bound evidence stops being how this project establishes
+  reproducibility.
 
 ## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
 

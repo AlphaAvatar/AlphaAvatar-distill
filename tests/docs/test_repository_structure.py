@@ -289,6 +289,34 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     result blocks are still decisions anyone acts on, or whether the lineage
     they carry would read better as one line naming the incumbent.
 
+    THAT QUESTION WAS THEN ASKED AND ANSWERED, AND ON THE BRANCH THAT ASKED IT
+    THE CEILING DID NOT MOVE AGAIN. Adding the merge-method record (AGENTS.md
+    P12.2) left 38 bytes under 15_500, and a third raise in two rounds would
+    have made this guard decorative. So `phase_a_result` and `phase_b_result`
+    were folded into `phases` as two lines: both are COMPLETE and FROZEN, their
+    own directories own every figure, and what is still live is one fact —
+    Phase B's winner is the lineage of the incumbent B — carried together with
+    the caution that its margin of `0.000070` is ~1.23 SE and must not be
+    quoted as comfortable. Nothing read the two removed keys;
+    `phase_a_result.json` in the run evidence is a different object and is
+    untouched.
+
+    TWO BRANCHES ANSWERED THE SAME QUESTION DIFFERENTLY, AND BOTH ANSWERS ARE
+    NOW IN FORCE. The paragraph above was written on the D1 branch against
+    15_500; the paragraph below raised the ceiling to 16_000 on the
+    test-boundary branch, from the same base and without knowing about the
+    fold. Reconciled at the D1 reconciliation: the ceiling is 16_000 AND the
+    fold stands, so the file has more headroom than either branch planned. That
+    is not a licence to spend it — the next subject still reclaims first. It
+    does mean the fold is no longer load-bearing, and if Phase A's or Phase B's
+    lineage ever needs a block of its own again, the room exists.
+
+    The next place to look is `behavioural_session` and `phase_c2_replay`,
+    whose subject C2 is CLOSED WITHOUT PROMOTION and whose figures `c2_closure`
+    already owns — but check first which of them carries the word `ACCEPTED`,
+    because the attempt-4 gate reads it and this file has already broken that
+    gate three times.
+
     AND THE SAME SQUEEZE BROKE THE SAME GATE A THIRD TIME. Trimming
     `next_starting_point.status` dropped "with its Top-5 ACCEPTED and FROZEN",
     and `test_the_snapshot_does_not_contradict_itself_about_attempt_4` refused

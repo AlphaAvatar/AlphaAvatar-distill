@@ -809,6 +809,77 @@ merely because another ordinary engineering test failed.
 **Each task's dollar amounts live in that task's governance artifact, never in
 reusable core.**
 
+### P12.2. Integration to `main` is SQUASH AND MERGE
+
+**MAINTAINER DECISION 2026-10-03.** Every integration of a working branch into
+`main` from now on is a **squash and merge**: one commit on `main` per
+integration, whatever the branch's internal commit count. Fast-forward and
+ordinary merge commits are no longer the route.
+
+This does not relax P12.1. A merge still needs a maintainer decision; this says
+only what shape the merge takes once that decision exists.
+
+**Why a squash, and what it costs.** A round's internal history is working
+material — a sequence of repairs, regenerated records and corrected
+measurements that is useful while the round is live and noise afterwards. The
+2026-10-03 integration landed **597 commits** on `main` in one step, nine days
+of campaign history, and nothing about `main` is easier to read for having them
+individually. One commit per integration makes `main` a list of completed
+rounds.
+
+**The cost is real and it is a reproducibility cost, so it is handled rather
+than accepted.** This repository binds scientific evidence to specific commit
+hashes — `session_commit`, `authorized_session_commit`, `head_commit`,
+`swept_base_commit`, `declared_at_commit`, and the commit a comparison artifact
+names as having computed it. **785 records did so as of 2026-10-03.** Those
+hashes exist on the working branch and a squash commit is not one of them, so
+P4's requirement that an experiment be reproducible from its logged code state
+depends entirely on those commits remaining reachable.
+
+Therefore, every squash integration owes all three of:
+
+* **The source branch is NOT deleted.** Not after the merge, not later as
+  tidying. It is the only thing keeping 785 records' commit hashes reachable,
+  and the usual post-squash cleanup — the one the host offers by default —
+  would silently invalidate every one of them. A branch whose commits a record
+  cites is evidence, not clutter.
+* **The squash commit names the range it collapses**: the source branch, its
+  tip hash, and the merge base. A reader holding a hash from an experiment log
+  must be able to find which integration carried it without searching every
+  branch.
+* **The state docs say what `main` carries**, recorded on the branch *before*
+  the integration, so `main` lands on a tree that describes itself rather than
+  trailing the record of its own contents.
+
+The first of those three is **checked, not merely required**:
+`scripts/consolidate/converge_before_sweep.py` resolves every commit hash the
+records cite against the object store in one batch call — 606 hashes across 788
+files in 0.14 s — and reports an unreachable one as a launch-blocking problem
+naming the record that cites it. It is skipped on a shallow or single-commit
+checkout, which legitimately cannot answer. A rule whose violation is invisible
+until someone needs a hash is not a rule.
+
+**After a squash integration, cut a FRESH working branch from `main`.** This is
+the operational consequence and it bites immediately: a squash commit does not
+have the branch's commits as ancestors, so the branch is no longer an ancestor
+of `main` and `main..branch` still lists everything already integrated.
+Continuing on the old branch and squashing again would re-apply the whole
+range. Cut a new branch from `main`, keep the old one — P12.2 forbids deleting
+it anyway, and now it has a second job: it is where the integrated round's
+commit hashes live.
+
+The branch name is worth choosing at that moment rather than inherited. The
+2026-10-03 integration left `review/c3-operator-batching` holding the A3 round
+and the whole D1 design, which is a name that stopped describing its contents
+two rounds earlier.
+
+**If preserving the branch ever becomes impractical** — too many stale
+branches, a host-side limit — the answer is not to delete one a record cites.
+It is to decide, as a maintainer decision with its own record, how
+commit-bound evidence is re-anchored first. Deleting the branch and
+discovering the breakage afterwards is the failure this clause exists to
+prevent.
+
 ### P13. Actively search for better techniques
 
 AlphaAvatar-distill is a research-driven engineering project. Agents should actively search for relevant new techniques, papers, repositories, kernels, training recipes, and evaluation methods when they may improve the project.

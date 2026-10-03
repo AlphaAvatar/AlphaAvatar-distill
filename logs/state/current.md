@@ -158,9 +158,17 @@ reason P12.2 exists. `git log main` owns the hashes.
 **The operational consequence, and it bites immediately.** A squash commit does
 not have the branch's commits as ancestors, so `refactor/test-suite-boundary` is
 no longer an ancestor of `main` and `main..refactor/test-suite-boundary` still
-lists all five. **Continuing on it would re-apply the whole range** — cut a fresh
+lists all six. **Continuing on it would re-apply the whole range** — cut a fresh
 branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
 it is where this round's commit hashes live.
+
+**Why keeping the branch is not tidiness debt.** Records bind evidence to commit
+hashes — `session_commit`, `authorized_session_commit`, `head_commit`,
+`swept_base_commit`, `declared_at_commit`, and the commit a comparison names as
+having computed it. **622 distinct hashes across 1,742 record files**, measured
+before this integration and again after it, zero unreachable. A squash commit is
+none of them, so they survive only on the branch, and the usual post-squash
+cleanup — the one the host offers by default — would invalidate every one.
 
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 
