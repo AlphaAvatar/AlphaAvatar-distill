@@ -81,29 +81,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "phases": {
-  "phase_a": "COMPLETE / FROZEN",
-  "phase_b": "COMPLETE / RESOLVED / FROZEN",
+  "phase_a": "COMPLETE / FROZEN 2026-08-24, unresolved_equivalence, no winner. Owner: logs/stages/stage-1/recovery_continuation/runs/attempt7/.",
+  "phase_b": "COMPLETE / RESOLVED / FROZEN. Winner fe9683e6a9c783bbc6fe276a78c851c6 -- the lineage of the incumbent B -- but it clears the equivalence interval by 0.000070, about 1.23 SE at C0-measured noise: protocol-resolved, NOT comfortable, and SELECTION evidence under a fixed 0.86M probe rather than capability. Authorizes nothing. Owner: logs/stages/stage-1/phase_b/.",
   "formal_recovery_evidence": "NONE",
-  "_c_phases": "phase_c owns c0..c4; they are deliberately not restated here."
- },
- "phase_a_result": {
-  "status": "COMPLETE 2026-08-24, $12.8587, ALL_DONE",
-  "decision_status": "unresolved_equivalence",
-  "winner": null,
-  "owner": "logs/stages/stage-1/recovery_continuation/runs/attempt7/"
+  "_c_and_later_phases": "phase_c owns c0..c4 and phase_d1 owns D1; deliberately not restated here."
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
- "phase_b_result": {
-  "status": "RESOLVED",
-  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
-  "winner_is_control": false,
-  "tie_break_ran": true,
-  "clears_by": 7e-05,
-  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
-  "not_capability": "SELECTION evidence under a fixed 0.86M probe.",
-  "authorizes": "nothing",
-  "owner": "logs/stages/stage-1/phase_b/"
- },
  "phase_c": {
   "c0": {
    "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
@@ -230,6 +213,7 @@
  },
  "main_branch": {
   "carries": "the C3, A3 and D1-design rounds, fast-forwarded 2026-10-03 from review/c3-operator-batching; previously the 2026-09-24 C2 snapshot repair. `git log main` owns the hashes.",
-  "authorizes": "nothing. A merge records work: not a release, not a promotion, not a public claim. README is unchanged by the range."
+  "authorizes": "nothing. A merge records work: not a release, not a promotion, not a public claim. README is unchanged by the range.",
+  "integration_method": "SQUASH AND MERGE from here on, per AGENTS.md P12.2. The 2026-10-03 fast-forward above was the last of its kind. A squash integration must not delete the source branch: 785 records bind commit hashes that exist only there."
  }
 }

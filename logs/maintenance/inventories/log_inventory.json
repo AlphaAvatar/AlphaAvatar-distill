@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-03T06:47:15+00:00",
+  "created_utc": "2026-10-03T07:20:34+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3090,
-    "bytes": 90146733,
+    "bytes": 90154231,
     "by_disposition": {
       "keep_canonical": 194,
       "keep_immutable": 2674,
@@ -6331,8 +6331,8 @@
   "files": [
     {
       "path": "AGENTS.md",
-      "size_bytes": 94202,
-      "sha256": "4bd8d712fb791f3fac15033f5a5dbd57c61442d7521a4031c67ee2698a5d7b3d",
+      "size_bytes": 98263,
+      "sha256": "ada8a148ed77988d8484cacbe83e672acd406aafa23d77c2c78049cfa9ae5c45",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -6430,6 +6430,7 @@
         "logs/stages/stage-3/e8/plans/e8_preregistration.md",
         "logs/stages/stage-3/history/EXPERIMENTS.md",
         "logs/state/artifact_manifests.md",
+        "logs/state/current.json",
         "logs/state/current.md",
         "logs/state/supported_models.md",
         "scripts/architecture/core_ownership.py",
@@ -6445,6 +6446,7 @@
         "scripts/autoinit/write_d1_design.py",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/build_log_inventory.py",
+        "scripts/consolidate/converge_before_sweep.py",
         "scripts/consolidate/render_log_navigation.py",
         "scripts/consolidate/stage_attribution.py",
         "scripts/data/build_stage2_v0.py",
@@ -6525,6 +6527,7 @@
         "scripts/autoinit/write_d1_design.py",
         "scripts/consolidate/build_checkpoint_registry.py",
         "scripts/consolidate/build_log_inventory.py",
+        "scripts/consolidate/converge_before_sweep.py",
         "scripts/consolidate/render_log_navigation.py",
         "scripts/consolidate/stage_attribution.py",
         "scripts/data/build_stage2_v0.py",
@@ -7657,8 +7660,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 913984,
-      "sha256": "e7804a1905e544f78c3115d41f54e188976b38d88175d621c250953d64f21cc0",
+      "size_bytes": 916876,
+      "sha256": "94337a3931c7f56e0754f0f7a6f14f636e2e8847842e7b6cd444facfc36af857",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -21670,7 +21673,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 138974,
-      "sha256": "6b0f0c2a36afc8e4948a6c55d01266495331f78c9e5c77932fc580e9096928f3",
+      "sha256": "8e64fe08e34407a5b2a89a02d1e080388f96c34c943a3d4846f65241dbbfc9ec",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -53238,8 +53241,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 15213,
-      "sha256": "b55cb715cb226c914be6a8b9434aabb6f0aebfb8099f677cc5ec0e5b05569157",
+      "size_bytes": 15289,
+      "sha256": "971d65113021a237c69eac7ac946bfb488b151353c4d16e734622b6956247b2a",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -53286,8 +53289,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 184574,
-      "sha256": "930e13cca119a64f5d9cfa606bf6563f606945778736021cc87b4f6e5edf8bae",
+      "size_bytes": 185043,
+      "sha256": "538820a077c7284086ccd37095d59b4e4c5027df61a79de1fbc4df7360a65b2d",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
