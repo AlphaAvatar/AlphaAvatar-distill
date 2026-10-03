@@ -18,13 +18,24 @@ same, so it is imported rather than copied: `experiments.search_cost_model` owns
 branching and pricing, and `experiments.phase_c2.search_space` owns the measured
 per-expansion cost table and the non-search session shape.
 
-**The cost table is conservative in the safe direction, and the reason is
-stated.** Every cell was measured with an UNBATCHED state evaluation and a
-one-item-per-forward statistics pass. D1 runs both batched, which can only reduce
-the time per expansion — so these minutes bound D1 rather than describe it. They
-are not adjusted downward on that argument: a ceiling derived from a predicted
-speed-up is a prediction, not a ceiling, and the measurement that would justify
-it has not been taken on this protocol.
+**The cost table is a PROVISIONAL planning ceiling, not a measurement of D1.**
+Every cell was measured with an UNBATCHED state evaluation and a
+one-item-per-forward statistics pass. D1 runs both batched, and batching does
+**not** reliably reduce the time per expansion: A3 measured
+`attention.activation_importance_v1`'s scorer 8.2–10.0% SLOWER at batch 3 than
+at batch 1, on three separate pods with the sign never flipping, at +29.6% peak
+VRAM. Length-sorted packing won `1.1884x` on causal-KL, which has 60,099
+forwards each carrying a fixed ablation setup cost to amortize; an operator
+whose per-forward fixed cost is near zero gets padded positions and wider
+tensors instead. So batching moves different operators in different directions,
+and the net effect on a D1 expansion — which runs all four — is **unmeasured**.
+
+The figures here are therefore a planning ceiling to be REFRESHED by the owed
+short GPU qualification (real CUDA/bf16 execution, the real state-eval memory
+peak, the target-aware batched path's correctness, and the actual timing of a
+representative expansion). They are not a finalized authorization price, and no
+cell is adjusted on a predicted speed-up: a ceiling derived from a prediction is
+a prediction.
 
 **What this module does NOT do.** It does not authorize anything, it does not
 choose the behavioural design, and it does not pretend the chain is fundable.
@@ -381,18 +392,24 @@ def chain_cost(*, screening_probes: int, confirmation_probes: int,
 def designs(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED
             ) -> list[dict[str, Any]]:
     """The behavioural designs worth considering, each priced and each with its
-    selection-noise property.
+    selection-noise properties.
 
-    The point of the table is that the probe count and the selection bias move
-    together, so the trade is visible rather than inherited. The bias figure is
-    the expected maximum of ``k`` zero-mean draws at the measured per-seed
-    standard deviation, divided by the number of screening seeds' square root —
-    which is what a screening rung that advances the best of ``k`` candidates
-    adds to the advancing candidate's apparent delta when none of them is
-    actually better.
+    The point of the table is that the probe count, the screening estimate's
+    winner's curse and the discrimination all move together, so the trade is
+    visible rather than inherited.
+
+    **No column here is an admissibility rule.** ``screening_estimate_inflation``
+    describes the SCREENING estimate under the null; it is not compared to the
+    SESOI, and a design is not admitted or rejected by it — a fresh disjoint
+    confirmation rung is unbiased under that null whatever the screening
+    inflation was. ``advance_probability`` is conditional on a good candidate
+    being inside the screened field. See
+    ``selection_noise.CLAIM_BOUNDARY``.
     """
     from experiments.phase_d1.selection_noise import (
-        SESOI, advance_probability, expected_max_bias,
+        advance_probability,
+        advance_probability_sensitivity,
+        screening_estimate_inflation,
     )
 
     out = []
@@ -419,16 +436,17 @@ def designs(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED
                     "hard_ceiling_usd": round(search["hard_ceiling_usd"]
                                               + confirmation["hard_ceiling_usd"], 4),
                     "total_probes": confirmation_probes}
-        bias = expected_max_bias(top_k, screen_seeds)
         out.append({
             "top_k": top_k,
             "screening_seeds": screen_seeds,
             "screening_probes": screening_probes,
             "confirmation_probes": confirmation_probes,
             "total_probes": cost["total_probes"],
-            "selection_bias": bias,
-            "bias_under_sesoi": bias < SESOI,
+            "screening_estimate_inflation": screening_estimate_inflation(
+                top_k, screen_seeds),
             "advance_probability": advance_probability(top_k, screen_seeds),
+            "advance_probability_sensitivity": advance_probability_sensitivity(
+                top_k, screen_seeds),
             "hard_ceiling_usd": cost["hard_ceiling_usd"],
             "fresh_batteries_required": (2 if screen_seeds else 1),
             "_c2_design": top_k == 5 and screen_seeds == 1,
@@ -477,21 +495,26 @@ def main() -> int:
         print(f"  UNMEASURED inputs       : {search['unmeasured_inputs']}")
 
     print("\n  behavioural designs, priced:\n")
-    print(f"  {'K':>3} {'seed':>5} {'probes':>7} {'bias':>8} {'P(adv)':>7} "
-          f"{'batt':>5} {'chain $':>9}")
+    print(f"  {'K':>3} {'seed':>5} {'probes':>7} {'inflate':>8} {'P(adv)':>7} "
+          f"{'lo/hi':>15} {'batt':>5} {'chain $':>9}")
     for row in doc["designs"]:
-        flag = "  <- C2's design" if row["_c2_design"] else (
-            "" if row["bias_under_sesoi"] else "  BIAS > SESOI")
+        flag = "  <- C2's design" if row["_c2_design"] else ""
+        sens = row["advance_probability_sensitivity"]
         print(f"  {row['top_k']:>3} {row['screening_seeds']:>5} "
-              f"{row['total_probes']:>7} {row['selection_bias']:>8.5f} "
+              f"{row['total_probes']:>7} "
+              f"{row['screening_estimate_inflation']:>8.5f} "
               f"{row['advance_probability']:>7.4f} "
+              f"{sens['p_at_sd_low']:>6.3f}/{sens['p_at_sd_high']:<8.3f}"
               f"{row['fresh_batteries_required']:>5} "
               f"{row['hard_ceiling_usd']:>9.4f}{flag}")
-    print("\n  bias   = apparent delta of the advancing candidate under the null;")
-    print("           the SESOI is 0.010 and a design above it cannot tell")
-    print("           selection noise from the effect it tests for.")
-    print("  P(adv) = P(the candidate better by the SESOI is the one advanced).")
-    print("  batt   = fresh disjoint batteries the design consumes.")
+    print("\n  inflate = the winner's curse on the SCREENING estimate under the")
+    print("            null. NOT compared to the SESOI and NOT an admissibility")
+    print("            rule: a fresh disjoint confirmation rung is unbiased")
+    print("            under that null whatever the screening inflation was.")
+    print("  P(adv)  = P(the candidate better by the SESOI is advanced | it is")
+    print("            among the K). lo/hi span the per-seed sd's own 95%")
+    print("            sampling interval, which comes from THREE observations.")
+    print("  batt    = fresh disjoint batteries the design consumes.")
     print("\n  AUTHORIZES NOTHING.")
     return 0
 

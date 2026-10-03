@@ -299,13 +299,20 @@ def search_stage() -> dict[str, Any]:
                      "width": SCHEDULE_V1.width,
                      "warmup_levels": SCHEDULE_V1.warmup_levels},
         "cost": cost,
-        "_cost_is_conservative": (
+        "_cost_is_PROVISIONAL": (
             "every cell of the per-expansion table was measured with an "
             "UNBATCHED state evaluation and a one-item-per-forward statistics "
-            "pass. D1 runs both batched, which can only reduce the time per "
-            "expansion, so these minutes bound D1 rather than describe it. They "
-            "are deliberately not adjusted downward: a ceiling derived from a "
-            "predicted speed-up is a prediction."),
+            "pass. D1 runs both batched, and batching does NOT reliably reduce "
+            "the time per expansion: A3 measured the ATTENTION scorer 8.2-10.0% "
+            "SLOWER at batch 3 on three separate pods with the sign never "
+            "flipping, at +29.6% peak VRAM, while length-sorted packing won "
+            "1.1884x on causal-KL, whose 60,099 forwards each carry a fixed "
+            "ablation setup to amortize. Batching moves different operators in "
+            "different directions and the net effect on a D1 expansion is "
+            "UNMEASURED. These minutes are a planning ceiling to be refreshed "
+            "by the owed short GPU qualification, not a finalized authorization "
+            "price; no cell is adjusted on a predicted speed-up, because a "
+            "ceiling derived from a prediction is a prediction."),
         "stops_at": (
             "commit_top_k. The search trains nothing, measures no behaviour and "
             "has no code path into a behavioural stage — the same boundary C2's "
@@ -313,49 +320,96 @@ def search_stage() -> dict[str, Any]:
     }
 
 
+#: The design, FIXED HERE rather than selected by a rule.
+#:
+#: An earlier version of this file chose by filtering the priced grid on
+#: `bias_under_sesoi` and maximizing the advance probability. That filter
+#: encoded a validity condition that does not exist: the winner's curse lives in
+#: the SCREENING estimate, and a confirmation rung on fresh disjoint prompts and
+#: fresh seeds is unbiased under the global null however inflated the screening
+#: number was. Choosing a design by comparing that inflation to the SESOI was
+#: arithmetic in the service of a wrong argument.
+#:
+#: So the three numbers are stated as a judgement, with the reasons recorded,
+#: and the arithmetic is reported beside them as planning and sensitivity
+#: analysis rather than as the thing that picked them.
+D1_TOP_K = 2
+D1_SCREENING_SEEDS = 2
+D1_CONFIRMATION_SEEDS = 3
+
+
 def behavioural_design() -> dict[str, Any]:
-    """Top-K and the screening seeds, DERIVED from the measured noise."""
+    """Top-K, screening seeds and confirmation seeds, with their rationale."""
     from experiments.phase_d1 import search_space as d1
     from experiments.phase_d1.selection_noise import (
-        SEED_SD, SESOI, advance_probability, expected_max_bias, report as noise,
+        CLAIM_BOUNDARY,
+        P_IN_TOP_K_SENSITIVITY,
+        SEED_SD,
+        SEED_SD_INTERVAL,
+        SESOI,
+        advance_probability,
+        advance_probability_sensitivity,
+        pipeline_detection_probability,
+        report as noise,
+        screening_estimate_inflation,
     )
 
     grid = d1.designs()
-    admissible = [row for row in grid if row["bias_under_sesoi"]]
-    #: The choice: among designs whose selection bias is under the SESOI, the one
-    #: with the HIGHEST advance probability. It is also the cheapest of those
-    #: that screen at all, which is a property of the arithmetic rather than a
-    #: compromise — see `_why_narrow_and_replicate`.
-    chosen = max((row for row in admissible if row["screening_seeds"] > 0),
-                 key=lambda row: (row["advance_probability"],
-                                  -row["hard_ceiling_usd"]))
+    chosen = next(row for row in grid
+                  if row["top_k"] == D1_TOP_K
+                  and row["screening_seeds"] == D1_SCREENING_SEEDS)
     return {
-        "top_k": chosen["top_k"],
-        "screening_seeds": chosen["screening_seeds"],
-        "confirmation_seeds": 3,
+        "top_k": D1_TOP_K,
+        "screening_seeds": D1_SCREENING_SEEDS,
+        "confirmation_seeds": D1_CONFIRMATION_SEEDS,
         "screening_probes": chosen["screening_probes"],
         "confirmation_probes": chosen["confirmation_probes"],
         "total_probes": chosen["total_probes"],
-        "selection_bias": chosen["selection_bias"],
+        "screening_estimate_inflation": chosen["screening_estimate_inflation"],
         "advance_probability": chosen["advance_probability"],
+        "advance_probability_sensitivity": advance_probability_sensitivity(
+            D1_TOP_K, D1_SCREENING_SEEDS),
+        "pipeline_probability_at_assumed_values": {
+            str(p): pipeline_detection_probability(
+                D1_TOP_K, D1_SCREENING_SEEDS, p_in_top_k=p)
+            for p in P_IN_TOP_K_SENSITIVITY},
         "sesoi": SESOI,
         "seed_sd": round(SEED_SD, 6),
+        "seed_sd_n": 3,
+        "seed_sd_interval_95": [round(SEED_SD_INTERVAL[0], 6),
+                                round(SEED_SD_INTERVAL[1], 6)],
         "noise_model": noise(),
         "priced_grid": grid,
-        "_derivation": (
-            "the screening rung advances the best of K candidates on m seeds. "
-            "The maximum of K noisy estimates is biased upward even when every "
-            "candidate is exactly as good as the anchor, so a design has TWO "
-            "requirements: the bias must sit under the SESOI, and the "
-            "probability of advancing a candidate that really is better by the "
-            "SESOI must be worth the probes. Both are derived from A3's "
-            "measured per-seed spread of the paired delta."),
-        "_why_narrow_and_replicate": (
-            "bias and discrimination pull opposite ways in K, and at this noise "
-            "level the narrow design wins on both: K=2 at two screening seeds "
-            "has a lower bias AND a higher advance probability than K=3 at two "
-            "seeds, at fewer probes. More behavioural breadth is actively worse "
-            "unless the seeds grow with it."),
+        "_how_these_three_numbers_were_chosen": (
+            "as a pragmatic balance, not as the optimum of a formula. Top-K=2 "
+            "buys some behavioural breadth over the search's own ranking while "
+            "keeping the screening field small enough that two seeds per arm "
+            "give a stable ordering; two screening seeds make the ordering "
+            "stable rather than a single-draw coin flip, which is the specific "
+            "weakness of C2's one-seed rung; three confirmation seeds are the "
+            "same count A3 used, on a FRESH disjoint battery, which keeps the "
+            "confirmation estimate independent of everything the screening rung "
+            "saw. The cost of the whole chain is what caps all three.\n\n"
+            "NOT claimed: that this is a formally demonstrated optimum, or "
+            "that it was derived from a bias-versus-SESOI comparison. The "
+            "numbers below describe the design; they did not select it."),
+        "_what_the_arithmetic_says_about_it": (
+            "the winner's curse on the screening estimate is "
+            f"{screening_estimate_inflation(D1_TOP_K, D1_SCREENING_SEEDS):.6f} "
+            "— a property of the screening number, which is never reported as "
+            "D1's effect estimate and never promotes anything by itself. The "
+            "probability of advancing a candidate that is better by the SESOI, "
+            "GIVEN that it is among the two, is "
+            f"{advance_probability(D1_TOP_K, D1_SCREENING_SEEDS):.4f} at the "
+            "point estimate of the per-seed spread — and "
+            f"{advance_probability_sensitivity(D1_TOP_K, D1_SCREENING_SEEDS)['p_at_sd_high']:.4f}"
+            " to "
+            f"{advance_probability_sensitivity(D1_TOP_K, D1_SCREENING_SEEDS)['p_at_sd_low']:.4f}"
+            " across that spread's own 95% sampling interval, because it was "
+            "estimated from THREE A3 deltas. The interval is wider than the "
+            "differences between the candidate designs, which is why no design "
+            "was selected by maximizing it."),
+        "_claim_boundary_of_the_noise_model": CLAIM_BOUNDARY,
         "_what_the_derivation_does_NOT_cover": (
             "WHETHER A GOOD CANDIDATE IS IN THE TOP-K AT ALL. Both figures "
             "above condition on the better candidate being inside the screened "
@@ -386,18 +440,20 @@ def behavioural_design() -> dict[str, Any]:
             "scoring in general — only about this path under this policy."),
         "_what_this_replaces": {
             "c2_design": "K=5 at ONE screening seed",
-            "c2_selection_bias": expected_max_bias(5, 1),
-            "c2_bias_over_sesoi": round(expected_max_bias(5, 1) / SESOI, 3),
+            "c2_screening_estimate_inflation": screening_estimate_inflation(5, 1),
             "c2_advance_probability": advance_probability(5, 1),
             "reading": (
-                "C2's screening rung inflated whichever candidate it advanced "
-                "by about 1.5x the effect it was looking for, and was more "
-                "likely to advance a candidate that was NOT the better one "
-                "(0.42). At the SAME probe count the design above has a bias of "
-                "0.52x the SESOI and an advance probability of 0.78. This is a "
-                "quantified diagnosis of C2's behavioural stage, derived from "
-                "the project's own measurements — it is NOT a re-analysis of "
-                "C2's result and it changes no C2 figure."),
+                "C2's screening rung reported a screening delta inflated by "
+                "about 1.5x the effect it was looking for, and at one seed it "
+                "was more likely to advance a candidate that was NOT the better "
+                "one (0.42 conditional on the better one being in the field). "
+                "The design above trades breadth for a more stable ordering at "
+                "the same noise level. This is a diagnosis of C2's SCREENING "
+                "rung's discriminating power, derived from the project's own "
+                "measurements — it is NOT a re-analysis of C2's result, it "
+                "changes no C2 figure, and it does not say C2's confirmation "
+                "estimate was biased: C2's confirmation ran on its own "
+                "disjoint battery."),
         },
         "protocol_uniformity": {
             "requirement": (
@@ -547,6 +603,26 @@ def contamination() -> dict[str, Any]:
             "five isolation roles, c1_confirmation_v1 and c2_screening_v1. D1 "
             "cannot be executed as designed until this is resolved, and neither "
             "can D2 or D3."),
+        #: THE FAMILY OWNS THE RESOLUTION, and it corrects the first option
+        #: below. See `logs/shared/analyses/autoinit_d_series_battery_family.json`.
+        "d_series_battery_family": {
+            "owner": "scripts/experiments/phase_d_series/battery_family.py",
+            "record": "logs/shared/analyses/autoinit_d_series_battery_family.json",
+            "family_id": "d_series_behavioural_v1",
+            "what": ("six roles - D1/D2/D3 x screening/confirmation - allocated "
+                     "by ONE rule frozen before any D1 outcome exists, each "
+                     "disjoint from the others and from every historical role "
+                     "by stable id AND normalized prompt content. It carries "
+                     "its own behavioural-distribution identity and is NOT the "
+                     "c1_confirmation distribution."),
+            "_it_corrects_the_first_option_below": (
+                "extending math_verified alone unblocks D1 and leaves the "
+                "FAMILY short. Six roles need 6x the mixture at once, and at "
+                "that scale three strata are short rather than one: "
+                "math_verified by 830 items, code by 321 and gsm8k by 11. The "
+                "capacity record's 'zero batteries remaining, binding on "
+                "math_verified' is the right answer to a different question."),
+        },
         "resolutions_for_the_maintainer": [
             {"option": "extend the verified-math source",
              "what": ("draw the stratum from the full Hendrycks MATH test set "
@@ -558,7 +634,11 @@ def contamination() -> dict[str, Any]:
                       "shift. `correct_overall` would remain a mean over the "
                       "same stratum BALANCE but over a different population, so "
                       "the SESOI's transfer needs an explicit argument."),
-             "unblocks": "D1, D2 and D3 (about 4,500 further eligible items)"},
+             "unblocks": ("D1's two batteries (about 4,500 further eligible "
+                          "items). NOT the full six-role family: see "
+                          "`d_series_battery_family` above - code and gsm8k are "
+                          "short too at six roles, and both are answerable from "
+                          "files of repositories already pinned."),},
             {"option": "reduce the math_verified count per battery",
              "what": "e.g. 70 instead of 150, with the other strata unchanged",
              "cost": ("changes the MIXTURE, and `correct_overall` and its SESOI "
@@ -624,6 +704,25 @@ def budget() -> dict[str, Any]:
                 "re-derived from it."),
         },
         "chain": chain,
+        "price_status": "PROVISIONAL CONSERVATIVE PLANNING CEILING",
+        "_price_status": (
+            "every figure in `chain` is a planning ceiling, NOT a finalized "
+            "authorization price. Two reasons, and the first is the one that "
+            "matters:\n\n"
+            "1. the per-expansion minutes were measured on an UNBATCHED state "
+            "evaluation and a one-item-per-forward statistics pass, and D1 runs "
+            "both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at "
+            "batch 3; causal-KL's length-sorted packing won 1.1884x. The net "
+            "effect on a D1 expansion running all four operators is UNMEASURED, "
+            "so the direction of the correction is unknown, not merely its "
+            "size.\n"
+            "2. `securePrice` is re-queried live at authorization, so every "
+            "dollar figure here is a derived consequence of an hour-old quote.\n\n"
+            "WHAT MUST REFRESH IT: a short GPU qualification measuring real "
+            "CUDA/bf16 execution, the real state-eval memory peak, the "
+            "target-aware batched path's correctness, and the actual timing of "
+            "a representative expansion. Until that runs, these numbers size a "
+            "grant request; they do not price one."),
         "sessions": 3,
         "_why_three_sessions": (
             "the search commits a candidate set and stops; the screening rung "
@@ -633,6 +732,25 @@ def budget() -> dict[str, Any]:
         "per_session_envelope_usd": terms["per_attempt_hard_ceiling_usd"],
         "fits_per_session_envelope": chain["max_session_hard_ceiling_usd"]
             <= terms["per_attempt_hard_ceiling_usd"],
+        "per_session_envelope_excess_usd": round(
+            chain["max_session_hard_ceiling_usd"]
+            - terms["per_attempt_hard_ceiling_usd"], 4),
+        "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
+            "the SEARCH session alone is priced at "
+            f"${chain['max_session_hard_ceiling_usd']:.4f}, and the execution "
+            "package's per-session envelope is "
+            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The search does not "
+            "fit in one authorized session, and this is a SEPARATE constraint "
+            "from the project-level cap: a D1 grant that only moved the "
+            "cumulative cap would still be unable to authorize the search "
+            "session, because `per_attempt_hard_ceiling_usd` binds each session "
+            "independently (see the C1 authorization, where the grant issuer "
+            "refused a session price that disagreed with its pricing file). A "
+            "future D1 grant must resolve this explicitly — by raising the "
+            "per-session envelope for the phase, by splitting the search into "
+            "sessions that each fit, or by a cheaper search protocol — and the "
+            "resolution has to be recorded as a maintainer decision rather "
+            "than inferred from a cap change."),
         "position": {
             "project_cap_usd": float(live["project"]["cap_usd"]),
             "project_remaining_usd": project_remaining,
@@ -758,9 +876,16 @@ def main(argv=None) -> int:
           f"{design['screening_seeds']} screening seed(s), "
           f"{design['confirmation_seeds']} confirmation seeds, "
           f"{design['total_probes']} probes")
-    print(f"  selection bias : {design['selection_bias']:.6f} against a SESOI "
-          f"of {design['sesoi']} (C2's design: "
-          f"{design['_what_this_replaces']['c2_selection_bias']:.6f})")
+    sens = design["advance_probability_sensitivity"]
+    print(f"  screening      : inflation "
+          f"{design['screening_estimate_inflation']:.6f} on the SCREENING "
+          f"estimate (not a validity condition); P(advance | in Top-K) "
+          f"{design['advance_probability']:.4f} "
+          f"[{sens['p_at_sd_high']:.3f}–{sens['p_at_sd_low']:.3f}]")
+    print(f"  UNKNOWN factor : P(a good candidate is in the Top-{design['top_k']}"
+          f") is unmeasured; pipeline probability "
+          + ", ".join(f"{k}->{v}" for k, v in
+                      design['pipeline_probability_at_assumed_values'].items()))
     print(f"  chain ceiling  : ${doc['budget']['chain']['hard_ceiling_usd']:.4f}")
     print(f"\n  BLOCKER (evidence) : "
           f"{doc['contamination_protection']['batteries_available']} of "

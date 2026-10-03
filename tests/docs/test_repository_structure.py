@@ -289,27 +289,36 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     result blocks are still decisions anyone acts on, or whether the lineage
     they carry would read better as one line naming the incumbent.
 
-    THAT QUESTION WAS THEN ASKED AND ANSWERED, AND ON THE BRANCH THAT ASKED IT
-    THE CEILING DID NOT MOVE AGAIN. Adding the merge-method record (AGENTS.md
-    P12.2) left 38 bytes under 15_500, and a third raise in two rounds would
-    have made this guard decorative. So `phase_a_result` and `phase_b_result`
-    were folded into `phases` as two lines: both are COMPLETE and FROZEN, their
-    own directories own every figure, and what is still live is one fact —
-    Phase B's winner is the lineage of the incumbent B — carried together with
-    the caution that its margin of `0.000070` is ~1.23 SE and must not be
-    quoted as comfortable. Nothing read the two removed keys;
-    `phase_a_result.json` in the run evidence is a different object and is
-    untouched.
+    THAT QUESTION WAS THEN ASKED AND ANSWERED, AND THE ANSWER WAS HALF
+    WRONG. Folding `phase_a_result` and `phase_b_result` into `phases` was
+    justified as "nothing read the two removed keys", and for `phase_b_result`
+    that WAS WRONG: eight assertions in
+    `continuation_b/tests/test_continuation_b_one_probe_contract.py` read its
+    status, winner, `winner_is_control`, `tie_break_ran`, `clears_by`,
+    `read_with_care`, `not_capability` and `authorizes`. `phase_b_result` is
+    restored, and `phases.phase_b` is a POINTER to it rather than a
+    restatement, which is the shape to have chosen first: one fact, one owner.
+    `phase_a_result` stays folded; grep finds no reader and that grep was run
+    properly.
 
-    TWO BRANCHES ANSWERED THE SAME QUESTION DIFFERENTLY, AND BOTH ANSWERS ARE
-    NOW IN FORCE. The paragraph above was written on the D1 branch against
-    15_500; the paragraph below raised the ceiling to 16_000 on the
-    test-boundary branch, from the same base and without knowing about the
-    fold. Reconciled at the D1 reconciliation: the ceiling is 16_000 AND the
-    fold stands, so the file has more headroom than either branch planned. That
-    is not a licence to spend it — the next subject still reclaims first. It
-    does mean the fold is no longer load-bearing, and if Phase A's or Phase B's
-    lineage ever needs a block of its own again, the room exists.
+    THE SAME CLAIM WAS THEN MADE A SECOND TIME, AT THIS RECONCILIATION, BY AN
+    AGENT WHO HAD ALREADY READ THE CORRECTION ABOVE. Two greps were run. The
+    first matched `snapshot()[...]` and `snap[...]`; the readers use a local
+    `state[...]`, so it found nothing. The second had the right pattern and
+    would have found all eight — and ended in `| head`, which cut the output
+    above the hits. **A grep for readers must not be piped into `head`, and
+    must not assume the subscript spelling.** The restoration cost nothing this
+    time only because the correction above was in the conflict being resolved.
+
+    AND THE CORE SUITE CANNOT CATCH THIS ANY MORE. The eight readers are a
+    continuation_b EXPERIMENT test, so after the test-boundary refactor they do
+    not run in the default suite: a snapshot key can now lose its only reader's
+    protection by being read outside `tests/`. That is what
+    `test_every_snapshot_key_a_test_reads_still_exists` below is for.
+
+    **The lesson is about ORDER, not about these two keys.** A reclamation is
+    a code change to a file that gates read by name, so it owes the same
+    verification as any other — before the round's last commit, not after it.
 
     The next place to look is `behavioural_session` and `phase_c2_replay`,
     whose subject C2 is CLOSED WITHOUT PROMOTION and whose figures `c2_closure`
@@ -326,29 +335,46 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     `CONFIRMED ON REAL CUDA` with SHA `7027a8f4`. Check both by name before
     trimming, not after.
 
-    15_500 -> 16_000 on 2026-10-03, in the test-boundary round, and the
-    reclamation came first. Reclaimed: `behavioural_session`, which said CLOSED
-    WITHOUT PROMOTION under the SAME owner document as `c2_closure` — a second
-    copy of one subject, whose two live facts (the 12-probe protocol, the 14
-    chains) moved into `c2_closure`, with the consistency gate narrowed to the
-    three remaining owners. The new block was then trimmed twice, from six keys
-    to four.
+    TWO BRANCHES RAISED THIS CEILING INDEPENDENTLY FROM ONE BASE, AND BOTH
+    RAISES ARE REAL. `refactor/test-suite-boundary` went 15_500 -> 16_000 for
+    the test-suite boundary; `review/d1-target-aware` went 15_500 -> 16_500 for
+    D1's third blocker and the battery family. Neither knew about the other.
+    Reconciled here at 17_000, and the reclamation came first BOTH times and
+    again at the merge.
 
-    What the raise bought is ONE new live subject with two halves a reader must
-    act on: `pytest` now means the CORE suite and not the historical one, and a
-    static guard holds that boundary. Someone who does not know the first will
-    run the wrong suite and misread the result; someone who does not know the
-    second will put an experiment import back into core and be surprised.
+    Reclaimed on the two branches: `behavioural_session`, a second copy of
+    `c2_closure`'s subject under the same owner document, with its two live
+    facts (the 12-probe protocol, the 14 chains) moved into `c2_closure`; and
+    `d_series.order`, because a maintainer order is history and `decisions.md`
+    owns every order. `phase_c2_replay` is the block carrying `ACCEPTED` and
+    was left alone, exactly as the warning above says.
 
-    The next place to look is `phase_c` (~2.6 KB) and the answer is still no: a
-    dozen gates read `c0.status`, `c1.measured`, `c2.status` and `c3.status` by
-    name, so trimming it is the squeeze-breaks-a-gate failure recorded three
-    times above, at the one block where it would break several at once.
+    Reclaimed at the merge, 709 bytes, and it found a CONTRADICTION rather than
+    just bytes: FIVE fields described why D1 is blocked, and two of them still
+    said TWO blockers after a third appeared. `d_series.blockers` now owns the
+    reasons; `blocker`, `next_starting_point.then` and `stage_ladder.D1` name
+    the count and point there. D1's figures went to `d1_design.json` and
+    `selection_noise.py`, which own them. `main_branch` and `test_suites`
+    were two blocks on one subject and are now one.
+
+    What the 17_000 buys is THREE live subjects, none of them history: the test
+    suite has a boundary and a guard that holds it; D1's third blocker is a
+    per-session envelope that binds SEPARATELY from the cumulative cap, so a
+    grant moving only the cap still could not authorize the search; and the
+    D-series battery FAMILY carries a new behavioural-distribution identity
+    that must not be confused with `c1_confirmation`.
+
+    `phase_c` is the largest block at ~2.6 KB and it is NOT the next place to
+    look: a dozen gates read `c0.status`, `c1.measured`, `c2.status` and
+    `c3.status` by name, so trimming it is the squeeze-breaks-a-gate failure
+    recorded three times above, at the one block where it would break several
+    at once. The next place to look is `d_series` once D1 is authorized or
+    abandoned, because then its blockers stop being decisions anyone acts on.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 16_000, (
+    assert len(SNAPSHOT.read_bytes()) < 17_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")
@@ -373,6 +399,68 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     for key in ("budget", "frozen", "running", "authorized", "prepared_launch",
                 "next_starting_point"):
         assert key in snap, key
+
+
+def test_every_snapshot_key_a_test_reads_still_exists():
+    """A reclaimed snapshot key must not have had a reader.
+
+    Twice now a top-level key was folded away as "nothing reads it" when
+    something did: eight assertions in a continuation_b test read
+    `phase_b_result`. The first time cost a suite failure; the second time was
+    caught only because the correction happened to be in the conflict being
+    resolved.
+
+    **Why a grep is not enough, and why this lives in CORE.** The readers spell
+    it `state["phase_b_result"]` through a local variable, so a grep for
+    `snapshot()[...]` misses them — and they are an EXPERIMENT test, so since
+    the test-boundary refactor they do not run in the default suite at all. A
+    key can now lose its only protection by being read outside `tests/`. This
+    check is in core and scans the whole tree, which is the only place the
+    question can be answered.
+
+    Deliberately narrow: it reads subscripts of a few conventional snapshot
+    variable names and asserts the key exists. It does not try to prove a
+    reader's assertion still holds, and it does not forbid reclaiming a key —
+    it forbids reclaiming one while a reader is left behind.
+    """
+    snap = load_snapshot()
+    #: `state`, `snap`, `snapshot()` and `load_snapshot()` are the spellings the
+    #: tree actually uses; a new one shows up as an unprotected key, not a pass.
+    subscript = re.compile(
+        r'(?:snapshot\(\)|load_snapshot\(\)|\bsnap\b|\bstate\b|\bcurrent\b)'
+        r'\[\s*["\']([a-z][a-z0-9_]*)["\']\s*\]')
+    orphaned: dict[str, list[str]] = {}
+    here = Path(__file__).resolve()
+    for root in ((REPO / "tests"), (REPO / "scripts" / "experiments")):
+        for path in root.rglob("test_*.py"):
+            #: Not this file: its own docstring quotes `state["phase_b_result"]`
+            #: as the example, and a guard must not report its own prose.
+            if path.resolve() == here:
+                continue
+            text = path.read_text()
+            #: only files that actually open the snapshot
+            if "current.json" not in text and "current_state" not in text:
+                continue
+            for key in set(subscript.findall(text)):
+                if key not in snap and key in _KEYS_THE_SNAPSHOT_HAS_OWNED:
+                    orphaned.setdefault(key, []).append(
+                        str(path.relative_to(REPO)))
+    assert not orphaned, (
+        f"these tests read snapshot keys that no longer exist: {orphaned}. "
+        "Reclaiming a key means moving its readers too, or the key stays.")
+
+
+#: Top-level keys `current.json` has owned. A reader citing one of these is
+#: asking the snapshot for it, so the key going missing is a broken contract
+#: rather than an unrelated local variable. Add a name here when it is reclaimed.
+_KEYS_THE_SNAPSHOT_HAS_OWNED = frozenset({
+    "phase_a_result", "phase_b_result", "behavioural_session", "main_branch",
+    "d_series", "phase_c", "c2_closure", "budget", "frozen", "stage_ladder",
+    "blocker", "next_starting_point", "test_suites", "phases", "storage",
+    "authorized", "running", "prepared_launch", "latest_run",
+    "latest_verification", "architecture_migration", "phase_c2_replay",
+    "cuda_engineering_validation", "a_bsz3",
+})
 
 
 def test_the_snapshot_carries_the_frozen_identities_unchanged():

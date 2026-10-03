@@ -39,6 +39,7 @@ from aadistill.initialization.specs.materialization import (  # noqa: E402
     NumericalEnvironment,
     materialization_id,
     numerical_execution_fingerprint,
+    root_materialization_id,
 )
 
 #: The two protocols A3 compared.
@@ -50,11 +51,16 @@ A_BSZ3 = ExecutionConfig(micro_batch_size=3,
 POD = NumericalEnvironment(device_type="cuda", compute_dtype="bfloat16")
 SEMANTIC = "a3semanticstateid" + "0" * 15
 
+#: A stand-in parent materialization. Every child binds one, so the helper
+#: supplies a fixed value and the lineage tests vary it deliberately.
+PARENT = "parentmaterialization" + "0" * 11
 
-def identity(execution, environment=POD, semantic=SEMANTIC):
+
+def identity(execution, environment=POD, semantic=SEMANTIC, parent=PARENT):
     return MaterializationIdentity.build(semantic_state_id=semantic,
                                          execution=execution,
-                                         environment=environment)
+                                         environment=environment,
+                                         parent_materialization_id=parent)
 
 
 class TestTheA3Collision:
@@ -180,7 +186,19 @@ class TestBindingTheBytes:
 class TestRefusals:
     def test_no_semantic_id_is_refused(self):
         with pytest.raises(MaterializationError, match="semantic state id"):
-            materialization_id("", "fingerprint")
+            materialization_id("", "fingerprint", PARENT)
+
+    def test_no_parent_is_refused_by_naming_the_consumed_bytes(self):
+        """The third required term, and it has no default on purpose.
+
+        An optional parent would reintroduce the collision one level up the
+        tree: two children of differently materialized parents, same path, same
+        protocol, sharing one id and therefore able to resume each other.
+        """
+        with pytest.raises(MaterializationError) as caught:
+            materialization_id(SEMANTIC, "fingerprint", "")
+        assert "parent materialization" in str(caught.value)
+        assert "root_materialization_id" in str(caught.value)
 
     def test_no_fingerprint_is_refused_by_naming_the_collision(self):
         """And the assertion is on the CONTENT, not on a sentence.
@@ -193,7 +211,7 @@ class TestRefusals:
         the words are the module's to choose.
         """
         with pytest.raises(MaterializationError) as caught:
-            materialization_id(SEMANTIC, "")
+            materialization_id(SEMANTIC, "", PARENT)
         message = str(caught.value)
         assert "fingerprint" in message
         assert "collision" in message
@@ -239,3 +257,117 @@ class TestNoFakeOperatorIdentity:
             f"{offenders} name an execution protocol in an operator id. "
             "Execution belongs in the numerical fingerprint; an operator id "
             "names an algorithm.")
+
+
+class TestParentLineage:
+    """A child's bytes are a function of the bytes it consumed.
+
+    Without the parent term, two children of two differently materialized
+    parents — same path, same execution protocol — would share one
+    materialization id and could resume each other. That is the original
+    collision one level up the tree, and it is the reason the term is required
+    rather than optional.
+    """
+
+    def test_a_different_parent_is_a_different_materialization(self):
+        a = identity(A_BSZ1, parent="parent-A" + "0" * 24)
+        b = identity(A_BSZ1, parent="parent-B" + "0" * 24)
+        assert a.semantic_state_id == b.semantic_state_id
+        assert a.numerical_execution_fingerprint == \
+            b.numerical_execution_fingerprint
+        assert a.materialization_id != b.materialization_id
+
+    def test_all_three_terms_move_it_independently(self):
+        base = identity(A_BSZ1)
+        variants = {
+            base.materialization_id,
+            identity(A_BSZ3).materialization_id,                     # protocol
+            identity(A_BSZ1, semantic="b" * 32).materialization_id,  # path
+            identity(A_BSZ1, parent="c" * 32).materialization_id,    # parent
+        }
+        assert len(variants) == 4, (
+            "each of the three terms must move the id on its own; "
+            f"got {len(variants)} distinct ids from four combinations")
+
+    def test_the_lineage_is_readable_not_only_hashed(self):
+        """A record should be able to say WHICH bytes it consumed, not merely
+        that it consumed some. Carried as a field for that reason."""
+        child = identity(A_BSZ1)
+        assert child.parent_materialization_id == PARENT
+        assert child.as_dict()["parent_materialization_id"] == PARENT
+
+    def test_binding_the_digest_keeps_the_lineage(self):
+        bound = identity(A_BSZ3).bind("7dd2f6f6980b")
+        assert bound.parent_materialization_id == PARENT
+        assert bound.materialization_id == identity(A_BSZ3).materialization_id
+
+
+class TestTheRootIdentity:
+    """A root is not something this project built, so its materialization is
+    its published revision — and nothing else."""
+
+    def test_it_is_the_pinned_teacher_and_not_the_execution(self):
+        a = MaterializationIdentity.root(
+            semantic_state_id=SEMANTIC, root_teacher_id="org/teacher",
+            root_teacher_sha256="ab" * 32)
+        b = MaterializationIdentity.root(
+            semantic_state_id=SEMANTIC, root_teacher_id="org/teacher",
+            root_teacher_sha256="ab" * 32)
+        assert a.materialization_id == b.materialization_id
+        #: No parent, by construction.
+        assert a.parent_materialization_id is None
+        #: And the fingerprint IS the root id: there was no execution of ours to
+        #: fingerprint, and claiming the teacher's bytes depend on our batch
+        #: size would be false.
+        assert a.numerical_execution_fingerprint == a.materialization_id
+
+    def test_a_different_revision_is_a_different_root(self):
+        a = MaterializationIdentity.root(
+            semantic_state_id=SEMANTIC, root_teacher_id="org/teacher",
+            root_teacher_sha256="ab" * 32)
+        b = MaterializationIdentity.root(
+            semantic_state_id=SEMANTIC, root_teacher_id="org/teacher",
+            root_teacher_sha256="cd" * 32)
+        assert a.materialization_id != b.materialization_id
+
+    def test_an_unpinned_root_is_refused(self):
+        for bad in ({"root_teacher_id": "", "root_teacher_sha256": "ab" * 32},
+                    {"root_teacher_id": "org/t", "root_teacher_sha256": ""}):
+            with pytest.raises(MaterializationError, match="unpinned root|needs the teacher"):
+                root_materialization_id(**bad)
+
+    def test_it_names_no_experiment(self):
+        """Generic by construction: it takes the two fields that pin ANY
+        teacher, whatever family, stage or scale."""
+        import inspect
+
+        params = set(inspect.signature(root_materialization_id).parameters)
+        assert params == {"root_teacher_id", "root_teacher_sha256"}
+
+
+class TestTheFingerprintGrowthRule:
+    """Item 5: the boundary is written down, so a future field is added
+    deliberately rather than by whoever hits the problem first."""
+
+    def test_the_rule_names_both_sides(self):
+        from aadistill.initialization.specs.materialization import (
+            FINGERPRINT_GROWTH_RULE,
+        )
+
+        rule = FINGERPRINT_GROWTH_RULE.lower()
+        assert "in:" in rule and "out:" in rule
+        #: The in-side must name an arithmetic-path control, the out-side a
+        #: where/when fact. Checked by category rather than by exact wording.
+        assert any(w in rule for w in ("backend", "kernel", "attention"))
+        assert any(w in rule for w in ("ordinal", "provider", "host"))
+
+    def test_the_declared_fields_are_all_arithmetic_path(self):
+        """No `where`/`when` field may be in the fingerprint itself."""
+        from aadistill.initialization.specs.materialization import (
+            FINGERPRINT_FIELDS,
+        )
+
+        forbidden = ("provider", "pod", "ordinal", "host", "driver", "run_id",
+                     "workdir", "utc", "log")
+        for field in FINGERPRINT_FIELDS:
+            assert not any(f in field for f in forbidden), field

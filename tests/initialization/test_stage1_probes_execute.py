@@ -21,6 +21,7 @@ it was produced this way (`is_gate_measurement` / `is_real_teacher`).
 
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -56,11 +57,6 @@ def tiny_suite(tmp_path_factory) -> Path:
     """A state-eval suite of the frozen asset's exact schema, two items."""
     d = tmp_path_factory.mktemp("tiny_suite")
     domains = {"general": ["prose"], "reasoning": ["math"]}
-    (d / "manifest.json").write_text(json.dumps({
-        "artifact": "state_eval_tiny", "role": "INITIALIZER_STATE_EVAL",
-        "suite_id": "state_eval_tiny", "version": 1,
-        "domains": domains, "critical_tags": ["eos"],
-    }))
     rows = []
     for i, (domain, subtype) in enumerate((("general", "prose"),
                                            ("reasoning", "math"))):
@@ -68,8 +64,21 @@ def tiny_suite(tmp_path_factory) -> Path:
         rows.append({"item_id": f"t{i}", "ids": ids, "domain": domain,
                      "subtype": subtype, "n_prediction_positions": len(ids) - 1,
                      "tags": {"eos": [len(ids) - 2]}})
-    (d / "items.jsonl").write_text(
-        "\n".join(json.dumps(r) for r in rows) + "\n")
+    items = "\n".join(json.dumps(r) for r in rows) + "\n"
+    (d / "items.jsonl").write_text(items)
+    #: `content_sha256` IS PART OF THE SCHEMA this fixture claims to copy, and
+    #: it was missing. The real builder writes it; `load_state_eval` now refuses
+    #: an asset without one, because a measurement taken on an asset whose
+    #: content is unidentified cannot be told apart from one taken on different
+    #: prompts. A fixture that omits a field the asset carries is not a smaller
+    #: asset, it is a different one — and the refusal firing here is the
+    #: mechanism reaching the only caller that was pretending.
+    (d / "manifest.json").write_text(json.dumps({
+        "artifact": "state_eval_tiny", "role": "INITIALIZER_STATE_EVAL",
+        "suite_id": "state_eval_tiny", "version": 1,
+        "domains": domains, "critical_tags": ["eos"],
+        "content_sha256": hashlib.sha256(items.encode()).hexdigest(),
+    }))
     return d
 
 
