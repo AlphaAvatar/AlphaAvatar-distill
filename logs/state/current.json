@@ -160,7 +160,7 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "next": "the D-series source decision, then pin/verify sources, derive REAL eligible capacity, freeze batteries, authorize the short GPU qualification, reprice, and ONLY THEN finalize D1 funding and the per-session envelope. Order: logs/budget/decisions.md 2026-10-03. No further D1 architecture round.",
+ "next": "the MAINTAINER SOURCE DECISION per stratum, on the measured evidence in logs/shared/analyses/autoinit_d_series_source_evidence.json. The nine-step order after it: logs/budget/decisions.md 2026-10-03.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -201,15 +201,15 @@
  "d_series": {
   "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED, BLOCKED. D2 and D3 NOT STARTED.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "a3_precondition": "MET, ownership closed, ACCEPTED on maintainer review 2026-10-03. Owner: d1_design.json :: materialization_prerequisite.",
+  "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
-  "behavioural_design": "Top-K 2 / 2 screening seeds / 3 confirmation seeds, a pragmatic balance and NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py :: CLAIM_BOUNDARY.",
-  "battery_family": "d_series_behavioural_v1: six roles, rule frozen before any outcome. DESIGNED / NOT MATERIALIZED. Owner: logs/shared/analyses/autoinit_d_series_battery_family.json.",
-  "blockers": "EVIDENCE (definite): 0 of 2 batteries for D1, 0 of 6 for the family. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of -- no allowance covers it at any price. Not a cost question; no measurement closes it, only a maintainer funding-scope decision. PER-SESSION ENVELOPE: compatibility UNRESOLVED and therefore blocking -- provisional $31.1577 vs $30.00, NOT a measured excess. The GPU qualification settles the cost-dependent funding figure and the envelope compatibility; it cannot settle the funding authorization.",
-  "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent figures only -- see `blockers` for what it cannot settle.",
+  "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
+  "family_and_sources": "d_series_behavioural_v1: six roles, rule frozen before any outcome, DESIGNED / NOT MATERIALIZED. Source evidence MEASURED $0 offline, NOTHING PINNED: gsm8k train is a RENDERER BLOCKER (1319 positional-id collisions), the exclusion chain has no near-duplicate stage (MBPP 602 == consumed 217 passes it), full MATH is not cached so not measurable. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,source_evidence}.json.",
+  "blockers": "EVIDENCE (definite): no fresh battery exists. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of -- no allowance at any price, and no measurement closes it; only a maintainer funding-scope decision. PER-SESSION ENVELOPE: compatibility UNRESOLVED and therefore blocking -- provisional $31.1577 vs $30.00, NOT a measured excess.",
+  "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent funding figure and the envelope compatibility. It CANNOT settle the funding authorization -- that is a scope fact, not a price.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
-  "authorizes": "nothing",
-  "execution_wiring": "CONTRACT ONLY, no driver exists. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required."
+  "execution_wiring": "CONTRACT ONLY, no driver exists. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required.",
+  "authorizes": "nothing"
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",

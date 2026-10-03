@@ -59,6 +59,7 @@ studies *of* it.
 | --- | --- | --- | --- |
 | PCA / sandwich structural initialization of the 0.6B student | `pipeline-activity` | none | complete |
 | Causal-depth runtime measurement — pricing a Stage-1 operator | `engineering-measurement` | [`measurement/`](measurement/) | complete |
+| D-series family and source records, spanning D1/D2/D3 | `experiment-spanning` | logs/shared/analyses | here by design, not by inheritance |
 | AutoInit program analyses and harness validations, spanning the Stage-1 experiments | `experiment-spanning` | logs/shared/ (BLOCKED — pinned by frozen sources) | pinned in place |
 
 `autoinit_program_material` is stage-1 material that stays where it is: scripts/pod/autoinit_phase_b_driver.py and scripts/pod/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/. Moving it would mean editing frozen-set members to tidy a directory. Declared rather than left looking stage-neutral.

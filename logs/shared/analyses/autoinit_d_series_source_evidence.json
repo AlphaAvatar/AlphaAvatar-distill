@@ -1,0 +1,249 @@
+{
+ "_authorizes": "nothing",
+ "_contract": "Evidence for the maintainer source decision. AUTHORIZES NOTHING and MATERIALIZES NOTHING. No row here is called eligible: the live exclusion chain has not been run against any candidate, and only its output is an eligible count. $0, offline, no download.",
+ "_stage1_provenance_meaning": "the Stage-1 calibration and state-evaluation items of these strata carry token ids rather than text, so they cannot be compared by content. Every one is traceable into `corpus_v2`, so excluding the training corpus already excludes them and the chain has one fewer independent population than its documentation suggests.",
+ "chain_gap": {
+  "_what": "the live chain isolates on a stable id AND a normalized rendered prompt, compared EXACTLY. It has no near-duplicate stage.",
+  "consequence": "cross-split expansion of a stratum needs a problem-text key added to the chain, or an explicit review of the screen's high-Jaccard candidates. Which, and at what threshold, is a maintainer decision -- a threshold invented here would be a guess wearing a number.",
+  "demonstrated": "MBPP `full/train` task 602 is the same problem as the already-consumed `full/test` task 217. Different `task_id` and different test asserts, so the rendered id and the rendered prompt both differ: the duplicate passes the chain. Found by the screen, not by the chain."
+ },
+ "renderer_blockers": {
+  "gsm8k": "1319 rendered ids collide with the pinned file and 0 of them are the same prompt. The existing renderer CANNOT be used on this candidate: every colliding id would name a different problem than the already-consumed row holding that id, and ids are what the exclusion chain, the frozen batteries and every score record key on. A split-aware id scheme is required, and changing an id scheme is a data decision rather than a refactor."
+ },
+ "schema": "aadistill.autoinit.d_series_source_evidence/v1",
+ "six_role_shortfall": {
+  "code": 321,
+  "gsm8k": 11,
+  "math_verified": 830
+ },
+ "stage1_provenance": {
+  "e8_calibration_v1": {
+   "items_in_these_strata": 16,
+   "traceable_into_corpus_v2": 16
+  },
+  "reasoning_heavy_v2": {
+   "items_in_these_strata": 20,
+   "traceable_into_corpus_v2": 20
+  },
+  "state_eval_v1": {
+   "items_in_these_strata": 15,
+   "traceable_into_corpus_v2": 15
+  }
+ },
+ "status": "EVIDENCE ONLY -- no source pinned, no battery materialized",
+ "still_owed_before_any_materialization": [
+  "the maintainer source decision, per stratum",
+  "a revision pin and per-file digest for anything newly pinned",
+  "the live exclusion/contamination chain, run against the pinned candidate -- its output is the first eligible count",
+  "a maintainer ruling on near-duplicate handling and its threshold",
+  "a split-aware id scheme wherever `renderer_blockers` is non-empty",
+  "renderer parity against the existing stratum, re-checked after any id or field change"
+ ],
+ "strata": {
+  "code": {
+   "_why_that_matters": "licence, redistribution terms and the revision pin are INHERITED. No new data decision is needed about provenance -- only about whether a different split of the same release is an acceptable population for this stratum.",
+   "against_the_family_shortfall": {
+    "_not_a_sufficiency_claim": "the remainder is measured under exact matching only. Whether it covers the shortfall depends on the full chain, which has not run, and on how many near-duplicates are rejected.",
+    "headroom": 153,
+    "remaining_after_exact_exclusions": 474,
+    "six_role_shortfall": 321
+   },
+   "bare_problem_screen": {
+    "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
+    "_scope": "on `text` only -- the problem without the instruction preamble or the test list. The reserved side is the pinned file's rows for the 220 consumed source_keys.",
+    "_what": "max token-set Jaccard of each non-exact candidate against any reserved prompt, via a rare-token index",
+    "_why_separately": "the rendered-prompt screen above shares a fixed instruction across every item, which inflates agreement. This one answers whether the same PROBLEM reappears, which is what disjointness means.",
+    "at_or_above": {
+     "0.5": 273,
+     "0.7": 64,
+     "0.8": 43,
+     "0.9": 2
+    },
+    "compared": 473,
+    "exact_matches": 1,
+    "highest": 0.9091,
+    "with_any_neighbour": 437
+   },
+   "candidate_files": [
+    "full/train-00000-of-00001.parquet",
+    "full/validation-00000-of-00001.parquet",
+    "full/prompt-00000-of-00001.parquet"
+   ],
+   "exclusion_measurement": {
+    "_label": "overlap under the LIVE chain's comparison -- `norm`, exact. Not an eligible count.",
+    "candidate_distinct_normalized": 474,
+    "consumed_distinct_normalized": 220,
+    "consumed_pools": {
+     "c1_confirmation_v1": 100,
+     "c2_screening_v1": 100,
+     "recovery_search_v2": 20
+    },
+    "duplicates_within_candidates": 0,
+    "overlap_consumed_pools": 0,
+    "overlap_training_corpus": 0,
+    "remaining_after_exact_exclusions": 474,
+    "training_corpus_distinct_normalized": 10128
+   },
+   "near_duplicate_screen": {
+    "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
+    "_what": "max token-set Jaccard of each non-exact candidate against any reserved prompt, via a rare-token index",
+    "at_or_above": {
+     "0.5": 350,
+     "0.7": 159,
+     "0.8": 28,
+     "0.9": 0
+    },
+    "compared": 474,
+    "exact_matches": 0,
+    "highest": 0.8696,
+    "with_any_neighbour": 378
+   },
+   "pinned_file_in_use": "full/test-00000-of-00001.parquet",
+   "renderer": {
+    "candidate_fields": [
+     "challenge_test_list",
+     "code",
+     "task_id",
+     "test_list",
+     "test_setup_code",
+     "text"
+    ],
+    "example_collisions": [],
+    "fields_match_the_pinned_file": true,
+    "id_collisions_with_the_pinned_file": 0,
+    "id_scheme_note": "no collision: `task_id` partitions across the splits, so `mbpp-test-<task_id>` stays unique. The literal `test` in the id would nonetheless be WRONG for rows from another split -- cosmetic for uniqueness, misleading in provenance, and worth correcting when the source is pinned rather than after a battery is frozen on it.",
+    "pinned_fields": [
+     "challenge_test_list",
+     "code",
+     "task_id",
+     "test_list",
+     "test_setup_code",
+     "text"
+    ],
+    "rendered_ids_candidate": 474,
+    "rendered_ids_pinned": 500
+   },
+   "same_repository_and_revision": true,
+   "snapshot_cached": true,
+   "upstream_identity": {
+    "repo_id": "google-research-datasets/mbpp",
+    "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+   },
+   "upstream_rows": {
+    "_label": "UPSTREAM ROW COUNTS BEFORE ANY EXCLUSION -- not eligible counts",
+    "candidate_files": {
+     "full/prompt-00000-of-00001.parquet": 10,
+     "full/train-00000-of-00001.parquet": 374,
+     "full/validation-00000-of-00001.parquet": 90
+    },
+    "candidate_total": 474,
+    "pinned_file_in_use": 500
+   }
+  },
+  "gsm8k": {
+   "_why_that_matters": "licence, redistribution terms and the revision pin are INHERITED. No new data decision is needed about provenance -- only about whether a different split of the same release is an acceptable population for this stratum.",
+   "against_the_family_shortfall": {
+    "_not_a_sufficiency_claim": "the remainder is measured under exact matching only. Whether it covers the shortfall depends on the full chain, which has not run, and on how many near-duplicates are rejected.",
+    "headroom": 5754,
+    "remaining_after_exact_exclusions": 5765,
+    "six_role_shortfall": 11
+   },
+   "candidate_files": [
+    "main/train-00000-of-00001.parquet"
+   ],
+   "exclusion_measurement": {
+    "_label": "overlap under the LIVE chain's comparison -- `norm`, exact. Not an eligible count.",
+    "candidate_distinct_normalized": 7473,
+    "consumed_distinct_normalized": 330,
+    "consumed_pools": {
+     "c1_confirmation_v1": 150,
+     "c2_screening_v1": 150,
+     "recovery_search_v2": 30
+    },
+    "duplicates_within_candidates": 0,
+    "overlap_consumed_pools": 0,
+    "overlap_training_corpus": 1708,
+    "remaining_after_exact_exclusions": 5765,
+    "training_corpus_distinct_normalized": 10128
+   },
+   "near_duplicate_screen": {
+    "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
+    "_what": "max token-set Jaccard of each non-exact candidate against any reserved prompt, via a rare-token index",
+    "at_or_above": {
+     "0.5": 24,
+     "0.7": 4,
+     "0.8": 0,
+     "0.9": 0
+    },
+    "compared": 5765,
+    "exact_matches": 1708,
+    "highest": 0.7879,
+    "with_any_neighbour": 4726
+   },
+   "pinned_file_in_use": "main/test-00000-of-00001.parquet",
+   "renderer": {
+    "BLOCKER": "1319 rendered ids collide with the pinned file and 0 of them are the same prompt. The existing renderer CANNOT be used on this candidate: every colliding id would name a different problem than the already-consumed row holding that id, and ids are what the exclusion chain, the frozen batteries and every score record key on. A split-aware id scheme is required, and changing an id scheme is a data decision rather than a refactor.",
+    "candidate_fields": [
+     "answer",
+     "question"
+    ],
+    "colliding_ids_that_are_the_same_prompt": 0,
+    "example_collisions": [
+     "gsm8k-test-00000",
+     "gsm8k-test-00001",
+     "gsm8k-test-00002"
+    ],
+    "fields_match_the_pinned_file": true,
+    "id_collisions_with_the_pinned_file": 1319,
+    "pinned_fields": [
+     "answer",
+     "question"
+    ],
+    "rendered_ids_candidate": 7473,
+    "rendered_ids_pinned": 1319
+   },
+   "same_repository_and_revision": true,
+   "snapshot_cached": true,
+   "upstream_identity": {
+    "repo_id": "openai/gsm8k",
+    "revision": "740312add88f781978c0658806c59bc2815b9866"
+   },
+   "upstream_rows": {
+    "_label": "UPSTREAM ROW COUNTS BEFORE ANY EXCLUSION -- not eligible counts",
+    "candidate_files": {
+     "main/train-00000-of-00001.parquet": 7473
+    },
+    "candidate_total": 7473,
+    "pinned_file_in_use": 1319
+   }
+  },
+  "math_verified": {
+   "candidate_repo": "the upstream Hendrycks MATH release",
+   "currently_pinned": "HuggingFaceH4/MATH-500, test.jsonl",
+   "owed_after_pinning": [
+    "a revision pin and per-file digest",
+    "the row count of the test split actually drawn from",
+    "overlap against the consumed pools, the training corpus and MATH-500's own 500 rows",
+    "renderer parity: `make_math_verified` reads `unique_id`, `subject`, `level`, `problem`, `answer`. An upstream release with different field names needs a renderer, and a renderer change is a new id scheme",
+    "whether the 500 pinned rows are a subset, which the exclusion chain handles either way but which changes what the remainder is"
+   ],
+   "relationship": "MATH-500 is a 500-item subset of the MATH test split, so the larger source is the SAME population sampled less sparsely -- a population change, not a task change. The subset was itself selected, so its difficulty distribution is not the parent's.",
+   "status": "NOT CACHED, NOT PINNED, NOT MEASURED",
+   "why_not_measured": "a different repository from the pinned one, absent from the local hub cache, so no row count or overlap can be derived offline. Pinning it is a maintainer data decision (licence, revision, redistribution) and downloading a new dataset needs approval per AGENTS.md P15/4.4."
+  }
+ },
+ "traps": [
+  {
+   "trap": "gsm8k `socratic` config",
+   "why_not": "the same problems with a different answer rendering. It is not additional capacity, and treating it as such would put one problem into two roles of a family whose whole point is disjointness."
+  },
+  {
+   "trap": "mbpp `sanitized` config",
+   "why_not": "a hand-verified SUBSET of `full`, so it adds no problems that `full` does not already contain."
+  },
+  {
+   "trap": "reading an upstream row total as capacity",
+   "why_not": "every count in this record is upstream-rows or measured-overlap. The eligible count is the output of the exclusion chain, which has not been run."
+  }
+ ]
+}
