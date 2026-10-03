@@ -71,7 +71,7 @@
   "what_it_means_afterwards": "if A-bsz3 produces a different artifact and its downstream behaviour is acceptable, the closeout records it as a DISTINCT NUMERICAL MATERIALIZATION PROTOCOL. That label carries exactly one forward obligation: before A-bsz3 is used in D1/D2/D3 -- that is, before it enters a RESUMABLE BEAM SEARCH -- the repository must bind the numerical execution fingerprint to materialization/resume identity, so two artifacts differing in bytes cannot share one resume key. A3's behavioural result does not discharge that obligation, because it is an engineering correctness property rather than a behavioural one.",
   "_forbidden_resolution": "do NOT invent `attention.activation_importance_bsz3`. The operator semantics are unchanged, a second impl id would fork the scientific identity to repair a materialization problem, and it would answer the equivalence question by definition.",
   "_required_shape_if_it_is_ever_needed": "the SMALLEST generic separation between semantic/scientific path identity and the numerical/materialization identity used for artifact ownership, resume and deduplication. Generic, not A-bsz3 specific: any execution knob that can move bytes has this property. NOT BUILT, and if A3 finds the digests identical it is never needed.",
-  "regression_that_holds_today": "tests/autoinit/test_corrections.py :: test_resume_refuses_a_record_from_a_different_numerical_protocol -- a matching semantic state id is not sufficient to reuse a checkpoint, driven through the real resume path and mutation-checked."
+  "regression_that_holds_today": "tests/initialization/test_corrections.py :: test_resume_refuses_a_record_from_a_different_numerical_protocol -- a matching semantic state id is not sufficient to reuse a checkpoint, driven through the real resume path and mutation-checked."
  },
  "initialization": {
   "parent": "the exact frozen shared parent eea90c91346a, replayed under its digest gate",
@@ -262,7 +262,7 @@
     "rule": "per primary stratum: candidate usable rate < 0.10 while control usable rate > 0.40",
     "candidate_max": 0.1,
     "control_min": 0.4,
-    "implementation": "scripts/experiments/phase_c1/probe_results.py :: decision_inputs"
+    "implementation": "scripts/experiments/stage-1/phase_c1/probe_results.py :: decision_inputs"
    },
    "_role": "reported as safety observations. They do not gate the chain's completion."
   }
@@ -281,7 +281,7 @@
  },
  "pricing": {
   "_owner": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-  "_derived_by": "scripts/experiments/phase_c3/a3_pricing.py",
+  "_derived_by": "scripts/experiments/stage-1/phase_a3/a3_pricing.py",
   "gpu_rate_usd_per_hour": 1.09,
   "_rate_note": "the live L40S securePrice at pricing time. Re-quote immediately before authorization.",
   "expected_usd": 5.9051,
@@ -333,5 +333,5 @@
   "starting D1/D2/D3, the FFN experiment or Stage-0 v2",
   "increasing the approved budget"
  ],
- "design_sha256": "8d390eed92c50b9035391f3be03e47d48bd065737e5f7b979663e9dddd7650f6"
+ "design_sha256": "07c3c583ea53d86e87bc8a9d2f63e9008024ced01d4116b56845e584d54dc69b"
 }

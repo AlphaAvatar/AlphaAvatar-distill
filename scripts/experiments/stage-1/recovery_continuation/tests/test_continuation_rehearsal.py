@@ -961,7 +961,8 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     from experiments.recovery_policy import POOLED_COUNTS_V2
 
     spec = importlib.util.spec_from_file_location(
-        "rs_tests", REPO / "tests/autoinit/test_recovery_search_scoring.py")
+        "rs_tests",
+        REPO / "scripts/experiments/tests/test_recovery_search_scoring.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
