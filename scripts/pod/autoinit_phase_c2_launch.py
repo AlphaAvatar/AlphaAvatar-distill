@@ -68,7 +68,7 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
-    derive_contract, ignores_for_selection)
+    derive_contract)
 from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 #: The GENERIC run-layout primitives. `scripts/experiments/run_layout.py` owns
 #: the five-area convention, the occupancy rule, the output claim and the
@@ -390,7 +390,7 @@ LOCAL_ASSETS = (
 
 #: The directory the paid pod runs, named so the contract is greppable from the
 #: launcher rather than only inferable from what is missing.
-POD_TEST_SELECTION = "tests/c2_preflight"
+POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
 
 #: Ignored by the pod's blocking test gate: everything that is not the
 #: selection, DERIVED from the tree at launch time.
@@ -407,7 +407,15 @@ POD_TEST_SELECTION = "tests/c2_preflight"
 #: suite silently. Derivation makes the default EXCLUDED, and the 65 skips the
 #: probe recorded stop being a launch problem — a readiness sweep over this
 #: selection has no expected-skip map to populate because there are no skips.
-TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+#: POSITIVE now, not a complement. This was
+#: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
+#: `--ignore` list that left the session's own preflight the only collectable
+#: directory under `tests/`. Since the 2026-10-03 boundary decision the
+#: preflight lives beside its experiment, so there is nothing to take the
+#: complement of: the gate collects `SESSION_TEST_PATHS` and the ignore list is
+#: empty.
+TEST_IGNORES: tuple[str, ...] = ()
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 #: Derived, not guessed. Peak resident search states = the kept parents plus the
 #: level being generated plus the leaves accumulated so far, over the real
@@ -892,7 +900,7 @@ def spec(args) -> SessionSpec:
                  #: NAMED, not inherited. See FROZEN_EXPECT above.
                  "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES, test_paths=TEST_PATHS),
         driver_command=driver_command,
         driver_job_id="autoinit_phase_c2_driver",
         status_path=STATUS, run_log_path=RUN_LOG,

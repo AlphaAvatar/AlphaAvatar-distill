@@ -52,5 +52,20 @@ torch = { index = "pytorch-cpu" }
 # framework: nothing here deletes by pattern, so no other user's or other
 # project's directory is reachable from it.
 [tool.pytest.ini_options]
+# THE DEFAULT SUITE IS THE CORE SUITE. `pytest` from the repository root
+# collects reusable framework behaviour and nothing else.
+#
+# An experiment suite is explicit, because it validates one experiment's wiring
+# rather than the framework:
+#
+#     pytest scripts/experiments/phase_d1/tests        # current experiment
+#     pytest scripts/experiments/phase_c2/tests        # historical verification
+#
+# Maintainer decision 2026-10-03. Before it, `tests/` held both and the default
+# run spent most of a 43-minute suite re-validating closed experiments' frozen
+# records, grants, budgets and snapshots. Those tests still exist and still run
+# on request; they are no longer what "the full suite" means. See AGENTS.md
+# §2.9a for the three terms.
+testpaths = ["tests"]
 tmp_path_retention_count = 1
 tmp_path_retention_policy = "failed"

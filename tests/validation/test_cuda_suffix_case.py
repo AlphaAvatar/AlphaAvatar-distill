@@ -33,12 +33,12 @@ ENTRY = REPO / "scripts/validation/cuda_engineering_check.py"
 CONFIG = REPO / "configs/validation/cuda_engineering.json"
 
 sys.path.insert(0, str(REPO / "src"))
-sys.path.insert(0, str(REPO / "tests/autoinit"))
+sys.path.insert(0, str(REPO / "tests/initialization"))
 sys.path.insert(0, str(REPO / "scripts/validation"))
 
 from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 
-from device_split import CrossDeviceUse, on_cache_device  # noqa: E402
+from support.device_split import CrossDeviceUse, on_cache_device  # noqa: E402
 from device_observations import DeviceObservations  # noqa: E402
 
 

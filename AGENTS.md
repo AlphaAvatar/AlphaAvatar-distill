@@ -1169,6 +1169,75 @@ If a check cannot run because the code, dependency, data, or hardware does not e
 mature component owes; P8.3 says that the debt is settled once per coherent
 round of work, not after every edit or every commit.
 
+### 2.8a Three suites, and which one "the full suite" means
+
+**MAINTAINER DECISION 2026-10-03.** There are three test suites in this
+repository and they answer different questions. Conflating them is what made a
+default run take 43 minutes to tell a developer mostly about experiments that
+closed weeks earlier.
+
+**1. The core full suite — `pytest` from the repository root.**
+
+```text
+FULL SUITE = tests of reusable core code, core functionality and generic
+             integration contracts.
+```
+
+It is the default and `testpaths = ["tests"]` makes it so. It **must not**
+automatically include tests whose purpose is to validate a specific historical
+experiment, a historical grant or readiness chain, a historical budget balance,
+a historical checkpoint digest or candidate set, a closed experiment's
+preregistration, a closed experiment's proposal or readiness state, whether
+current `main` still matches a historical snapshot, or any C1/C2/C3/A3-specific
+wiring or outcome record.
+
+**The core suite aims to be GREEN.** A red test in it means a current core
+problem. `N passed + 11 expected historical failures` is no longer an acceptable
+normal state, and the eleven that used to be quoted that way were every one of
+them a closed experiment's historical-state assertion; they now live with their
+experiments.
+
+**2. A current experiment suite — `pytest scripts/experiments/<phase>/tests`.**
+
+That experiment's wiring, config, preflight and protocol. Explicitly invoked,
+because it validates one experiment rather than the framework. A session may
+also hand it to a pod: `SetupManifest.test_paths` is the positive declaration,
+and the pod gate collects exactly that.
+
+**3. Historical verification — the same command, for a closed experiment.**
+
+Never part of ordinary full-suite completion. Closed experiments stay auditable:
+their tests live with them and run on request. They do not run during ordinary
+development, a core full suite, pod setup for an unrelated experiment, or CI
+meant to validate reusable core. Historical git commits already preserve the
+historical executable tree; current `main` is not permanently constrained by
+every old experiment's state assertions.
+
+**Reporting.** Report these separately, always. One number covering all three
+describes nothing:
+
+```text
+core full suite      : N passed / M failed, T minutes
+<phase> experiment   : N passed / M failed            (if run)
+GPU validation       : ...                            (if separately authorized)
+historical suites    : not run  (or: which, and why)
+```
+
+**Classify by what the assertion protects, not by the filename.** A historical
+experiment that exposed a *generic* core defect leaves its regression in core —
+state and materialization identity, resume and dedup isolation, beam behaviour,
+adapter contracts, scoring and masking arithmetic, weighted reductions, generic
+budget refusal, provider and resource safety, artifact lifecycle, config and
+schema validation, device and dtype behaviour, operators as reusable
+implementations. What belongs to the experiment is its own state: C2's Top-5
+identities, C3's arms, A3's protocol and result, a specific authorization, a
+specific budget balance, a frozen run's digest, an old phase's expected proposal,
+a closed preregistration's contents. **When one file mixes both, split it.**
+
+Shared test helpers live in `tests/support/`, which contains no tests and is
+importable as `support.<module>` from every suite — so moving a test to its
+owning experiment does not strand its fixtures.
+
 ### 2.9 Definition of done
 
 A task is done only when:

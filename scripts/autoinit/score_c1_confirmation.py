@@ -18,7 +18,7 @@ sets, because the historical implementation has that loop inline in `main()` and
 there is no seam to call. That duplication is the one real risk here, and it is
 closed by an admission gate rather than by reading: `score_battery` below is
 battery-agnostic precisely so
-`tests/autoinit/test_c1_confirmation_scoring.py` can drive real retained
+`scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py` can drive real retained
 `recovery_search_v2` generations through it and require equality of every
 material numerical field against the frozen scorer's own output. The C1 pins
 stay on `main()`, so the production path cannot be aimed anywhere else.

@@ -99,11 +99,11 @@ def implementation_identity() -> dict:
         "aggregator_path": "scripts/autoinit/aggregate_c3_stage_i.py",
         "aggregator_sha256": sha256_file(Path(__file__).resolve()),
         "session_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/phase_c3/session.py"),
+            REPO_ROOT / "scripts/experiments/stage-1/phase_c3/session.py"),
         "isolation_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/phase_c1/isolation.py"),
+            REPO_ROOT / "scripts/experiments/stage-1/phase_c1/isolation.py"),
         "probe_results_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/phase_c1/probe_results.py"),
+            REPO_ROOT / "scripts/experiments/stage-1/phase_c1/probe_results.py"),
     }
 
 

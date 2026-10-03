@@ -81,7 +81,7 @@ def main() -> None:
         # `StateEvaluation` — the toy path in `characterize_thresholds.py` does
         # not go through it — and it cost a $0.29 pod on 2026-08-13, dying with
         # `KeyError: 'metrics'` after both models had loaded and a full
-        # evaluation pass had completed. `tests/autoinit/test_ranking.py::
+        # evaluation pass had completed. `tests/initialization/test_ranking.py::
         # test_the_repeatability_probe_reads_the_evaluation_it_is_given` now
         # runs it on a fake model.
         row = result.as_dict()["values"]

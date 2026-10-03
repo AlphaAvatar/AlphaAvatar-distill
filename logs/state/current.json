@@ -177,12 +177,6 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "behavioural_session": {
-  "state": "CLOSED WITHOUT PROMOTION",
-  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
-  "chains_consumed": 14,
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
- },
  "next": "Await a maintainer ruling on D1's evidence resolution and a D1 phase grant. Owner: logs/stages/stage-1/phase_d1/plans/d1_design.json.",
  "stage_ladder": {
   "C0": "COMPLETE",
@@ -210,7 +204,9 @@
   "observations_averaged_or_ranked": false,
   "further_scientific_spend": "NOT AUTHORIZED",
   "probes_remaining": 0,
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md"
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
+  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
+  "chains_consumed": 14
  },
  "a_bsz3": {
   "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
@@ -231,5 +227,10 @@
  "main_branch": {
   "carries": "the C3, A3 and D1-design rounds, fast-forwarded 2026-10-03 from review/c3-operator-batching; previously the 2026-09-24 C2 snapshot repair. `git log main` owns the hashes.",
   "authorizes": "nothing. A merge records work: not a release, not a promotion, not a public claim. README is unchanged by the range."
+ },
+ "test_suites": {
+  "contract": "AGENTS.md 2.8a: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment = `pytest scripts/experiments/stage-<n>/<exp>/tests`.",
+  "core": "3030 collected, 3016 passed / 14 skipped, AIMS GREEN.",
+  "the_eleven": "retired from the default run. Each was a closed experiment's historical-state assertion that moved with its experiment; none was repaired to achieve it."
  }
 }

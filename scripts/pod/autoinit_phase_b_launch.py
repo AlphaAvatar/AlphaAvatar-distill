@@ -102,14 +102,14 @@ REUSE_RECORD = REPO_ROOT / "logs/shared/analyses/autoinit_historical_probe_reuse
 #: whole pricing module would have been the wrong repair: everything else in it
 #: reads committed records and is exactly the kind of thing a pod should re-check.
 PHASE_B_TEST_IGNORES = (*TEST_IGNORES,
-                        "tests/autoinit/test_phase_b_reuse_hostlocal.py",
+                        "scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
                         #: A ~7 min CPU beam search. It exists to execute the
                         #: Phase-B Stage-1 path at `$0` on the dev box, which is
                         #: precisely where it belongs — running it again inside
                         #: the pod's setup gate would bill seven minutes of L40S
                         #: to re-prove something already proven for free, exactly
                         #: as `test_phase_a_stages1_5_execute.py` is excluded.
-                        "tests/pod/test_phase_b_stage1_executes.py")
+                        "scripts/experiments/stage-1/phase_b/tests/test_phase_b_stage1_executes.py")
 
 #: The citations Phase B's ten-probe budget spends nothing on, derived from the
 #: candidate rules rather than pasted: sa/sb/sc for each imported finalist, and

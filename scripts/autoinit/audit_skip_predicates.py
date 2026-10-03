@@ -36,7 +36,7 @@ sys.path.insert(0, str(REPO / "src"))
 #: a subprocess with a caller-set PYTHONPATH.
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
-sys.path.insert(0, str(REPO / "tests/pod"))
+sys.path.insert(0, str(REPO / "tests"))
 
 RECORD = "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json"
 REGISTRY = "configs/autoinit/c1_skip_predicate_classification.json"
@@ -129,7 +129,7 @@ def c1_selected_modules(repo: Path) -> tuple[list[Path], list[str]]:
     This used to scan "the modules the C1 session actually runs", which was the
     same thing while a C1 pod ran the whole repository minus four modules. It
     stopped being the same thing on 2026-09-13, when the pod's selection became
-    `tests/c1_preflight/` — thirteen tests with no skip predicate in them at all.
+    `scripts/experiments/stage-1/phase_c1/tests/` — thirteen tests with no skip predicate in them at all.
 
     Scoping the audit to that selection would have left it auditing nothing and
     claiming PASS, which is worse than useless. So the coupling is removed
@@ -137,7 +137,7 @@ def c1_selected_modules(repo: Path) -> tuple[list[Path], list[str]]:
     suite, and it is NOT a launch blocker.
 
     The pod-parity property it used to assert for a paid run is now asserted
-    where it is cheap and true — `tests/c1_preflight/` contains no skip
+    where it is cheap and true — `scripts/experiments/stage-1/phase_c1/tests/` contains no skip
     predicate, checked by the preflight itself.
     """
     files = sorted((repo / "tests").rglob("test_*.py"))
@@ -238,7 +238,7 @@ def repo_inventory(repo: Path) -> tuple[set[str], set[str]]:
     keyword guess with the two mechanisms that actually put files on a pod.
     """
     from aadistill.runtime import staging_contract as sc
-    from session_specs import load_session_launcher, session_args
+    from support.session_specs import load_session_launcher, session_args
     out = subprocess.run(["git", "-C", str(repo), "ls-files"],
                          capture_output=True, text=True, check=True)
     tracked = {p for p in out.stdout.split("\n") if p.strip()}
@@ -358,7 +358,7 @@ def known_classification(nodeid: str) -> str | None:
     """Groups the readiness contract already names, by nodeid.
 
     C1's contract named nine groups of repository test node ids while a pod ran
-    the whole repository. It runs `tests/c1_preflight/` now — thirteen tests,
+    the whole repository. It runs `scripts/experiments/stage-1/phase_c1/tests/` now — thirteen tests,
     none of which skips anywhere — so all nine described tests no pod collects,
     and they were deleted rather than left to report a missing expectation
     forever.
@@ -546,7 +546,7 @@ def audit(repo: Path = REPO) -> dict:
     live_keys = {p["nodeid"] for p in needs_a_word}
     #: STALE means "registered, in scope, and no longer holding a predicate".
     #: An entry for a module this session does not select is OUT OF SCOPE, not
-    #: rotten: C1's pod selection narrowed to `tests/c1_preflight/` on
+    #: rotten: C1's pod selection narrowed to `scripts/experiments/stage-1/phase_c1/tests/` on
     #: 2026-09-13 and 40-odd honest entries describing development-side
     #: predicates would otherwise all have read as excuses that had decayed.
     stale = sorted(k for k in registered if k not in live_keys)

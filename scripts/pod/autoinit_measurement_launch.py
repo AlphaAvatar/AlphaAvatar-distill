@@ -81,8 +81,12 @@ LOCAL_ASSETS = (
     LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
                "artifacts/stage3"),
 )
-TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "tests/pod/test_phase_a_stages1_5_execute.py")
+#: One entry now. `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
+#: a ~20-minute Phase-A pre-flight rehearsal that a pod would otherwise re-run
+#: inside its 2700 s gate; the 2026-10-03 boundary moved it to
+#: `scripts/experiments/stage-1/phase_a/tests/`, so the core suite no longer contains it
+#: and ignoring it would name a path that is not there.
+TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",)
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
 #: From `logs/shared/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is

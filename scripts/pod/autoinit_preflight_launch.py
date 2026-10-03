@@ -76,8 +76,12 @@ LOCAL_ASSETS = (
 )
 #: Ignored by the pod's blocking test gate. Must stay equal to the pod
 #: simulator's list, and a test pins them equal.
-TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "tests/pod/test_phase_a_stages1_5_execute.py")
+#: One entry now. `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
+#: a ~20-minute Phase-A pre-flight rehearsal that a pod would otherwise re-run
+#: inside its 2700 s gate; the 2026-10-03 boundary moved it to
+#: `scripts/experiments/stage-1/phase_a/tests/`, so the core suite no longer contains it
+#: and ignoring it would name a path that is not there.
+TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",)
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
 

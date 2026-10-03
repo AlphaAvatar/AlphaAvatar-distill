@@ -76,7 +76,7 @@ NOT_BOUND_BY_THE_CLOSED_EXPERIMENT: tuple[str, ...] = (
 #: The two evidence declarations. Restated here rather than imported, because
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
 #: turned into a checked invariant by
-#: tests/pod/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
+#: scripts/experiments/stage-1/phase_c1/tests/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
 SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
 SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 
@@ -84,8 +84,8 @@ SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 #: failure mode as the other source-digest sets: a missing declared file raises
 #: rather than yielding a digest over a smaller contract.
 C1_SOURCE_FILES: tuple[str, ...] = (
-    "scripts/experiments/phase_c1/isolation.py",
-    "scripts/experiments/phase_c1/session.py",
+    "scripts/experiments/stage-1/phase_c1/isolation.py",
+    "scripts/experiments/stage-1/phase_c1/session.py",
     "src/aadistill/initialization/planning/fixed_path.py",
     "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
     "src/aadistill/initialization/operators/attention/gqa/_statistics.py",

@@ -154,73 +154,33 @@ C1_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 #: the same class of defect as inheriting its driver. So C1 declares its own.
 TEACHER_REVISION = CS.TEACHER_REVISION
 
-#: WHAT THE PAID POD RUNS: `tests/c1_preflight/` and nothing else.
+#: WHAT THE PAID POD RUNS: C1's own suite, and nothing else.
 #:
 #: Until 2026-09-13 this was a four-entry exclusion list against the whole
 #: repository, so a C1 pod ran 3892 tests for 16 minutes of billed L40S to prove
 #: that AlphaAvatar-distill passes on that machine. It does not need to know
 #: that. Attempt 14 died in it on two tests with no C1 content at all — one
-#: asserting a dev-box artifact store, one a `.venv` a pod checkout never has —
-#: and the exclusion list had grown by one module per such discovery.
+#: asserting a dev-box artifact store, one a `.venv` a pod checkout never has.
 #:
-#: The selection is positive now. `tests/c1_preflight/` holds the checks a C1 pod
-#: can fail in a way that costs money or invalidates the result: the
-#: launcher/driver CLI seam that cost attempt 7 $0.4231, the frozen scientific
-#: identities, the staged battery bytes, the artifact spec that can block
-#: teardown, the imports the driver needs after 70 minutes of training, and a
-#: GPU smoke. Thirteen tests, under a second.
+#: Then the selection became positive and the ignore list became its COMPLEMENT,
+#: because the gate's base path was `tests/` and C1's preflight lived inside it.
+#: That complement went stale SIX times, once per experiment preflight directory
+#: created after C1 closed — C2's, the baseline completion's, the full search's,
+#: the replay's, the behavioural campaign's, C3's and A3's, plus
+#: `tests/initialization` — and each one was a directory a C1 pod would have
+#: collected on its own meter to prove another experiment passes. The comment
+#: here predicted that drift and then recorded it happening four times before
+#: giving up and asking for the entries by hand.
 #:
-#: Expressed as ignores because the shared setup script's pytest invocation is
-#: `pytest tests/ $SESSION_TEST_IGNORES`, and the session may only add flags. One
-#: entry per sibling of the preflight directory; a NEW top-level test directory
-#: must be added here, which is why `test_the_pod_selection_is_exactly_the_preflight`
-#: derives the expected list from the tree rather than restating it.
-#:
-#: The full suite is unchanged and still runs in development, in convergence and
-#: in CI. What changed is that a billing GPU is no longer responsible for it.
-#:
-#: `tests/c2_preflight` and `tests/c2_baseline_completion_preflight` are here
-#: for the reason the derivation exists: each is another experiment's pod
-#: selection, each appeared after C1 closed, and a C1 pod has no business
-#: running either. The second one arrived with the baseline completion and was
-#: NOT added at the time, so the launcher's own guard was red — a C1 pod would
-#: have collected the completion's preflight. That is the drift the comment
-#: above predicts, arriving exactly as predicted; adding a test directory has
-#: consumers, and every other session's exclusion complement is one of them.
-#: The list is still hand-written because C1 is frozen and re-deriving it would
-#: move the digest a closed attempt's evidence describes; a NEW session should
-#: use `ignores_for_selection` instead.
-#: Four MORE arrived and were again not added at the time: the full search's,
-#: the replay's and the behavioural campaign's preflights, plus
-#: `tests/initialization`. Three C2 sessions in a row therefore each left C1's
-#: guard red, and each one is a directory C1's pod would have collected on its
-#: own meter to prove another experiment passes. The prediction above has now
-#: come true four times, which is the argument for deriving — and the reason
-#: not to is unchanged and stated above, so the entries are added by hand and
-#: the guard stays the thing that catches the next one.
-#: A FIFTH: `tests/c3_preflight`, added here in the same commit that
-#: created it. C3 itself uses `ignores_for_selection` and needs no such
-#: entry; this line exists only so C1's guard stays green.
-#: A SIXTH: `tests/a3_preflight`, same shape and same reason. A3 derives its
-#: own complement, so its pod is not at risk; this entry keeps C1's from
-#: collecting A3's preflight.
-TEST_IGNORES = ("tests/a3_preflight",
-                "tests/architecture", "tests/autoinit",
-                "tests/c3_preflight",
-                "tests/c2_baseline_completion_preflight",
-                "tests/c2_behavioural_preflight",
-                "tests/c2_full_search_preflight", "tests/c2_preflight",
-                "tests/c2_replay_preflight",
-                "tests/data", "tests/docs", "tests/evaluation",
-                "tests/infrastructure", "tests/init", "tests/initialization",
-                "tests/models",
-                "tests/pod", "tests/rollout", "tests/runtime", "tests/support",
-                "tests/training", "tests/validation",
-                "tests/test_usable_rollout.py")
-
-#: The directory that survives those ignores. Named so the contract is greppable
-#: from the launcher rather than only inferable from what is missing.
-POD_TEST_SELECTION = "tests/c1_preflight"
+#: THE 2026-10-03 BOUNDARY DECISION REMOVED THE MECHANISM. An experiment's tests
+#: live beside the experiment, `tests/` is the reusable core suite, and a session
+#: declares the suite it wants positively — `SESSION_TEST_PATHS`, one entry,
+#: nothing to keep in step. There is no complement, so there is nothing to drift:
+#: a new experiment directory cannot join a closed experiment's paid gate by
+#: existing.
+TEST_IGNORES: tuple[str, ...] = ()
+POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c1/tests"
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 STATUS = f"{WS}/autoinit_c1.status"
 RUN_LOG = f"{WS}/autoinit_c1_run.log"
@@ -947,7 +907,7 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
 def renderer_parity_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Is the C1 battery still rendered exactly as every historical measurement?
 
-    The seven parametrized parity cases in `tests/data/test_c1_battery.py` used to
+    The seven parametrized parity cases in `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` used to
     carry this guarantee alone. They need the pinned Hugging Face source snapshots
     — a dev-box readiness input, never a C1 runtime or scientific one — so on a
     pod they could only ever fail, and on 2026-09-04 fourteen of them did, at the
@@ -1308,7 +1268,8 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES,
+            test_paths=TEST_PATHS),
         driver_command=driver_command,
         driver_job_id="autoinit_c1",
         status_path=STATUS, run_log_path=RUN_LOG,

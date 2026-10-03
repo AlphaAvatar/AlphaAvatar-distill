@@ -38,6 +38,56 @@ which owns every D1 figure and its claim boundary;
 owns the battery arithmetic. The phase `README.md` beside them is generated from
 the index and carries no narrative.
 
+## The test suite has a boundary now, and the trees line up
+
+**`pytest` means the CORE suite: 3,030 tests, ~4m50s.** Reusable framework
+behaviour and generic integration contracts, nothing else. It aims to be
+**green** — a red test in it means a current core problem, not a closed
+experiment's record. AGENTS.md **§2.8a** names the three suites and
+`testpaths = ["tests"]` makes the first the default.
+
+```text
+pytest                                              core full suite
+pytest scripts/experiments/stage-1/phase_d1/tests   a current experiment
+pytest scripts/experiments/stage-1/phase_c2/tests   historical verification
+```
+
+**The eleven "expected" failures are gone from the default run, and none was
+repaired to get there.** Every one was a closed experiment's historical-state
+assertion — C1's readiness gates and session contract, C2's behavioural proposal
+and three full-search chain proposals, C2's full-search budget/determinism/
+headroom, C1's provider-resource agreement, continuation-B's preregistration
+digest. They live with their experiments and still run on request.
+
+**The experiment tree mirrors the evidence tree.**
+
+```text
+scripts/experiments/stage-1/phase_d1/   <->  logs/stages/stage-1/phase_d1/
+scripts/experiments/stage-1/phase_c3/   <->  logs/stages/stage-1/phase_c3/
+scripts/experiments/stage-3/tests/      <->  logs/stages/stage-3/
+```
+
+Stage ownership comes from [`index.json`](../stages/index.json), not
+from names: Stage 1 holds `phase_a`, `phase_a3`, `phase_b`, `phase_c1`,
+`phase_c2`, `phase_c3`, `phase_d1`, `measurement` and `recovery_continuation`;
+Stage 3 holds the E-series ladder. **A3 is its own package now** — the index has
+always called it its own experiment, while its six modules sat inside
+`phase_c3`.
+
+`stage-1` is not a Python identifier, so `scripts/experiments/__init__.py`
+extends `__path__` over the stage directories and `experiments.phase_d1` keeps
+resolving. No import in the repository grew a stage, and core knows nothing about
+stages — the closure deriver follows a grouped package by globbing one level,
+reading no directory name.
+
+**What a session's pod gate runs is now declared POSITIVELY.**
+`SetupManifest.test_paths` names the suite; the ignore-complement is gone.
+`autoinit_c1_launch` recorded that complement going stale six times, once per
+experiment preflight directory created after C1 closed — each one a directory a
+C1 pod would have collected on its own meter. And `scripts/pod/setup.sh` ran the
+whole suite **twice**, once for a `tail -3` and once for an exit status; it is one
+invocation with `tee` and `PIPESTATUS[0]`.
+
 ## What `main` carries
 
 Fast-forwarded to this branch on **2026-10-03**, bringing the C3, A3 and
@@ -109,7 +159,7 @@ advanced by `0.015009`, **1.5× the `0.010` SESOI**, and advanced the genuinely
 better one with probability `0.42`. D1 screens **two** candidates on **two**
 seeds: bias `0.005149`, advance probability `0.78`, at the **same twelve
 probes**. Owner:
-[`selection_noise.py`](../../scripts/experiments/phase_d1/selection_noise.py),
+[`selection_noise.py`](../../scripts/experiments/stage-1/phase_d1/selection_noise.py),
 whose quadrature is self-checked against two closed forms. This is a
 prospective design derivation and re-analyses no C2 figure.
 
@@ -239,7 +289,7 @@ maintainer accepted the root-cause fix and the direct contract regression and
 **forbade** building a canary or rehearsal subsystem for it.
 
 **Two mechanisms exist now, and both are small.**
-`tests/pod/test_setup_env_requirements.py` parses the shell's own `${VAR:?}`
+`tests/integration/test_setup_env_requirements.py` parses the shell's own `${VAR:?}`
 requirements and asserts every session launcher supplies them — the contract,
 checked from the side that breaks.
 [`failure_signature.py`](../../src/aadistill/infrastructure/failure_signature.py)
@@ -918,7 +968,7 @@ larger campaign ceiling buys another attempt and nothing else — no runtime, no
 disk, no probes, no seeds, no scientific scope. Owners:
 `behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD` and
 `authorization_terms`; the separation is asserted by driving the two apart in
-`tests/c2_behavioural_preflight/test_behavioural_continuation.py`.
+`scripts/experiments/stage-1/phase_c2/tests/test_behavioural_continuation.py`.
 
 **Cleanup failure now fails closed at the caller.** `release_intermediates`
 stays non-raising — a cleanup error must not destroy a verified, announced arm
@@ -1277,7 +1327,7 @@ Three defects were found adjacent to this work and fixed, all `$0`:
   sweep would have been green about a gate that fails at TESTS_OK a minute or
   two into a billing pod. Reproduced at `$0` with `unshare -r -m` and a tmpfs
   over the store: **at `147b2c6` the selection fails; on this tree all 121 pass.**
-  The check moved to `tests/autoinit/test_c2_behavioural_launch_governance.py`
+  The check moved to `scripts/experiments/stage-1/phase_c2/tests/test_c2_behavioural_launch_governance.py`
   with the other three dev-box-only cases, and its real production caller,
   `destination_gate`, now has tests — it had none, and had drifted to reading
   the `DURABLE_STORE` constant while the fetcher honoured `--ckpt-store`.
@@ -1474,7 +1524,7 @@ branching factor: the promoted ATTENTION operator consumes calibration where
 offered once however many mixtures were active. Nothing is pinned — every
 applicable implementation, every applicable profile and every order compete, so
 calibration choices can affect pruning. Owner:
-[`full_search_space.py`](../../scripts/experiments/phase_c2/full_search_space.py),
+[`full_search_space.py`](../../scripts/experiments/stage-1/phase_c2/full_search_space.py),
 with a test that refuses those integers as literals.
 
 **One exclusion, and it is scientific, not economic.**
@@ -1976,7 +2026,7 @@ part of it is C3's envelope. Its executable is
 that every number a conclusion rests on is emitted by that file: the verdict is
 COMPUTED by `derive_conclusion()` from the stage outputs rather than written
 beside them, and that function is tabled and mutation-checked in
-`tests/validation/test_batch_invariance_conclusion.py`. Records:
+`scripts/experiments/stage-1/phase_c3/tests/test_batch_invariance_conclusion.py`. Records:
 [`scope.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/scope.json),
 [`authorization.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json),
 [`campaign.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/campaign.json).
@@ -2279,7 +2329,7 @@ that a call it had just written passed a `1`, which a pilot that forgot the
 argument entirely would also have passed.
 
 **Pricing is conservative and arm-identical**, derived by
-[`phase_c3/pricing.py`](../../scripts/experiments/phase_c3/pricing.py) from the
+[`phase_c3/pricing.py`](../../scripts/experiments/stage-1/phase_c3/pricing.py) from the
 frozen mixture through the real loader and the real grouper:
 
 | | groups | item-forward equiv. | physical invocations | padded positions | pad/valid |

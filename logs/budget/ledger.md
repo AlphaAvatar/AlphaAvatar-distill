@@ -676,7 +676,7 @@ Bounded measurement attempt 1 (L40S, 4.0 min) SETUP CONTRACT   $  0.0700
     setup ($0.0637). The 2026-08-18 fix stopped the setup COPYING
     undeclared assets -- correct, and it held here -- but nothing told a
     session which assets it MUST declare.
-    REPAIRED at $0: tests/pod/test_session_setup_contract.py asserts
+    REPAIRED at $0: tests/integration/test_session_setup_contract.py asserts
     verifier_required_local_roots is a subset of every session's
     installed local roots, comparing DECLARATIONS not filesystem
     presence, with the requirement DERIVED from verify_frozen_assets
@@ -1473,7 +1473,7 @@ setup's `ROPE_OK` step requires a *loadable* checkpoint under
 `tokenizer_config.json` and `chat_template.jinja` there — no `config.json` — so
 the glob found nothing.
 
-`tests/pod/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without`
+`tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without`
 **was exactly that guard**, and on 2026-09-02 I narrowed its trigger from "any
 file under the canonical-init prefix" to "`model.safetensors`", reasoning that C1
 loads no model from there. That reasoning was about what C1 reads. The guard was

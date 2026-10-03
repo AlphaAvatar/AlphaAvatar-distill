@@ -49,14 +49,14 @@ OUT = "logs/maintenance/inventories/architecture_declaration_history.json"
 
 #: (declaration, file it lives in, module, the version constant to bump)
 DECLARATIONS = [
-    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "scripts/experiments/phase_a/plan.py",
+    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "scripts/experiments/stage-1/phase_a/plan.py",
      "experiments.phase_a.plan", "PHASE_A_HARNESS_SOURCE_SET_VERSION"),
-    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "scripts/experiments/phase_b/plan.py",
+    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "scripts/experiments/stage-1/phase_b/plan.py",
      "experiments.phase_b.plan", "PHASE_B_SOURCE_SET_VERSION"),
-    ("CONTINUATION_SOURCE_FILES_V2", "scripts/experiments/phase_b/continuation.py",
+    ("CONTINUATION_SOURCE_FILES_V2", "scripts/experiments/stage-1/phase_b/continuation.py",
      "experiments.phase_b.continuation", "CONTINUATION_SOURCE_SET_VERSION"),
     ("CONTINUATION_HARNESS_SOURCE_FILES_V1",
-     "scripts/experiments/recovery_continuation/plan.py",
+     "scripts/experiments/stage-1/recovery_continuation/plan.py",
      "experiments.recovery_continuation.plan", None),
     ("HARNESS_SOURCE_FILES_V1", "src/aadistill/governance/authorization.py",
      "aadistill.governance.authorization", "HARNESS_SOURCE_SET_VERSION"),
@@ -64,7 +64,7 @@ DECLARATIONS = [
     #: now the derived closure (`c1_current_executable`), so repointing the list
     #: as well would leave two implementations owning one identity. Its history
     #: is recorded below like the others; the list itself stays historical.
-    ("C1_SCORING_FILES_V1", "scripts/experiments/phase_c1/scoring.py",
+    ("C1_SCORING_FILES_V1", "scripts/experiments/stage-1/phase_c1/scoring.py",
      "experiments.phase_c1.scoring", "C1_SCORING_CONTRACT_VERSION"),
 ]
 

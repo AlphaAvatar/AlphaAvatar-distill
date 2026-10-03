@@ -102,7 +102,17 @@ fi
 echo "MARKER:CKPT_READY"
 
 # --- tests ---
-uv run pytest tests/ -q 2>&1 | tail -3
-uv run pytest tests/ -q > /workspace/pytest.log 2>&1 || fail tests
+# ONE invocation. This ran the whole suite TWICE -- once piped to `tail -3` for
+# the console and once redirected to a log for the exit status -- so every pod
+# using this script paid for its test gate twice to obtain a tail and a status
+# that one run produces. `PIPESTATUS` is the pytest exit code rather than
+# `tee`'s, which is the reason the two-run shape existed.
+#
+# The path is the session's to choose, defaulting to the CORE suite: `tests/` is
+# reusable-framework behaviour only since 2026-10-03, and an experiment that
+# wants its own preflight on a billing machine names it in SESSION_TEST_PATHS.
+uv run pytest ${SESSION_TEST_PATHS:-tests/} -q ${SESSION_TEST_IGNORES:-} \
+  2>&1 | tee /workspace/pytest.log | tail -3
+[ "${PIPESTATUS[0]}" -eq 0 ] || fail tests
 echo "MARKER:TESTS_PASSED"
 echo "MARKER:SETUP_DONE"

@@ -313,8 +313,26 @@ class SetupManifest:
     uv_max_seconds: int = 1500
     tests_max_seconds: int = 2700
     teacher_revision: str = ""
+    #: WHAT THE POD'S BLOCKING TEST GATE RUNS, positively. Empty means the
+    #: default, which is the CORE suite: `tests/` is reusable-framework
+    #: behaviour only since the 2026-10-03 boundary decision, so a session that
+    #: declares nothing gets the framework checked on its machine and no other
+    #: experiment's records.
+    #:
+    #: An experiment that wants its OWN preflight on a billing machine names it:
+    #: `test_paths=("scripts/experiments/stage-1/phase_d1/tests",)`. Naming the suite is
+    #: the whole declaration; there is no complement to maintain.
+    test_paths: tuple[str, ...] = ()
     #: Ignored by the pod's blocking test gate. Must stay equal to the pod
     #: simulator's list or the simulation runs a command the pod does not.
+    #:
+    #: HISTORICAL, and kept because closed sessions declared it. Before the
+    #: boundary decision every experiment's preflight directory lived inside
+    #: `tests/`, so "run only mine" could only be said as the complement of
+    #: everything else -- and `autoinit_c1_launch`'s own comment records that
+    #: complement going stale SIX times, once per experiment directory added
+    #: after C1 closed, each one a directory a C1 pod would have collected on
+    #: its own meter. A new session uses `test_paths`.
     test_ignores: tuple[str, ...] = ()
 
     def assets_env(self) -> str:
@@ -352,6 +370,16 @@ class SetupManifest:
 
     def test_ignores_env(self) -> str:
         return " ".join(f"--ignore={p}" for p in self.test_ignores)
+
+    def test_paths_env(self) -> str:
+        """`SESSION_TEST_PATHS`: what the gate collects, or empty for the core
+        suite.
+
+        Empty rather than a literal `tests/` default so the shell keeps owning
+        that default in one place (`${SESSION_TEST_PATHS:-tests/}`) and a
+        session's manifest records what the session actually DECLARED.
+        """
+        return " ".join(self.test_paths)
 
     def staged_relay_inputs(self) -> tuple[RelayInput, ...]:
         """The subset setup stages. The rest exist for the $0 precheck only."""
@@ -839,6 +867,7 @@ class SessionSpec:
             "SESSION_ASSETS": self.setup.assets_env(),
             "SESSION_RELAY_INPUTS": self.setup.relay_env(),
             "SESSION_TEST_IGNORES": self.setup.test_ignores_env(),
+            "SESSION_TEST_PATHS": self.setup.test_paths_env(),
             #: The step-selection contract. The shell runs an optional section
             #: only when this names its marker, so a session's declaration
             #: DECIDES its setup rather than describing it afterwards.
@@ -897,6 +926,7 @@ class SessionSpec:
                 "tests_max_seconds": self.setup.tests_max_seconds,
                 "teacher_revision": self.setup.teacher_revision,
                 "test_ignores": list(self.setup.test_ignores),
+                "test_paths": list(self.setup.test_paths),
                 #: Serialized because it is now an execution contract: the
                 #: record of a run has to say which setup steps that run
                 #: declared, not only which markers it happened to emit.
@@ -915,7 +945,7 @@ class SessionSpec:
 #: constants and became manifest fields. The attribute that killed device-canary
 #: attempt 1 stops being an argument at all.
 #:
-#: Declared here so `tests/pod/test_session_argument_contract.py` can check every
+#: Declared here so `tests/integration/test_session_architecture.py` can check every
 #: launcher's REAL parser against it, rather than against a transcription.
 RUNNER_ARGUMENT_CONTRACT: tuple[str, ...] = (
     "scr", "session_commit", "bundle", "out",

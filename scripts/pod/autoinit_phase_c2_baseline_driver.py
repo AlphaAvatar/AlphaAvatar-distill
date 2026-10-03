@@ -15,7 +15,7 @@ the baseline side does not exist. This driver supplies only the missing half.
 **The beam search is unreachable from here.** Not by instruction -- by
 construction. Nothing in this module imports `run_phase_a_search`, `BeamSearch`,
 `SCHEDULE_V1` or any search entry point, and there is no code path that could
-generate a candidate. `tests/pod/test_phase_c2_baseline_completion.py` asserts
+generate a candidate. `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts
 that over the module's import graph, so an edit that reintroduces the search
 fails a test rather than quietly widening what a grant authorizes.
 

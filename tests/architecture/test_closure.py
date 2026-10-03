@@ -1,4 +1,4 @@
-"""The derived executable closure.
+"""The derived executable closure — the MECHANISM, on a synthetic repository.
 
 Built against a synthetic repository under `tmp_path` rather than the real tree,
 so each property is pinned by construction instead of by whatever the repository
@@ -172,39 +172,9 @@ class TestCompare:
                          "removed_files": [], "changed_files": []}
 
 
-class TestRealTree:
-    """Facts that are only meaningful about the actual repository."""
-
-    def test_current_digest_computes(self, repo_root):
-        from experiments.phase_c1.authorization import c1_current_executable
-        doc = c1_current_executable(repo_root)
-        assert doc["n_files"] > 40
-        assert len(doc["digest"]) == 64
-
-    def test_historical_declaration_fails_closed(self, repo_root):
-        """An old authorization must not be revalidatable on the migrated tree."""
-        from aadistill.governance.authorization import AuthorizationError
-        from experiments.phase_c1.authorization import c1_historical_harness_digest
-        with pytest.raises(AuthorizationError, match="is missing"):
-            c1_historical_harness_digest(repo_root)
-
-    def test_closure_covers_the_paid_resource_path(self, repo_root):
-        """Whatever can create or terminate a billed pod is part of identity.
-
-        These three were the modules the silent walk missed.
-        """
-        from experiments.phase_c1.authorization import c1_current_executable
-        paths = {r["path"] for r in c1_current_executable(repo_root)["files"]}
-        for rel in ("src/aadistill/infrastructure/provider.py",
-                    "src/aadistill/infrastructure/remote.py",
-                    "src/aadistill/infrastructure/log_relay.py"):
-            assert rel in paths, f"{rel} can spend money and must bind"
-
-    def test_snapshot_matches_live(self, repo_root):
-        """The committed snapshot is kept current, so drift is reviewable."""
-        from experiments.phase_c1.authorization import (
-            CURRENT_CLOSURE_SNAPSHOT, c1_current_executable)
-        recorded = json.loads((repo_root / CURRENT_CLOSURE_SNAPSHOT).read_text())
-        drift = compare(c1_current_executable(repo_root), recorded)
-        assert drift["added_files"] == [] and drift["removed_files"] == [], (
-            "re-run scripts/architecture/derive_closure.py --write")
+#: `TestRealTree` moved to `scripts/experiments/stage-1/phase_c1/tests/test_closure_of_c1.py`
+#: in the 2026-10-03 boundary round. Everything above is pinned by construction
+#: against a synthetic tree under `tmp_path`, so it describes the deriver; the
+#: four tests that moved asked whether C1's committed snapshot still matches this
+#: repository, which is a fact about one closed experiment's record and goes
+#: stale whenever core source legitimately changes.

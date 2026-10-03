@@ -121,7 +121,15 @@ RUN_LOG = f"{WS}/autoinit_c2_replay_run.log"
 LOCAL_ASSETS = RG.staged_assets(REPO_ROOT)
 
 POD_TEST_SELECTION = RPE.POD_TEST_SELECTION
-TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+#: POSITIVE now, not a complement. This was
+#: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
+#: `--ignore` list that left the session's own preflight the only collectable
+#: directory under `tests/`. Since the 2026-10-03 boundary decision the
+#: preflight lives beside its experiment, so there is nothing to take the
+#: complement of: the gate collects `SESSION_TEST_PATHS` and the ignore list is
+#: empty.
+TEST_IGNORES: tuple[str, ...] = ()
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 CONTAINER_DISK_GB = 120
 
@@ -739,7 +747,7 @@ def spec(args) -> SessionSpec:
                  "SESSION_FROZEN_EXPECT": FROZEN_EXPECT},
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION,
-            test_ignores=TEST_IGNORES),
+            test_ignores=TEST_IGNORES, test_paths=TEST_PATHS),
         driver_command=driver_command,
         driver_job_id="autoinit_c2_replay_driver",
         status_path=STATUS, run_log_path=RUN_LOG,

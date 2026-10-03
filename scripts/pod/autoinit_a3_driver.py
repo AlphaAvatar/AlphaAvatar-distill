@@ -87,7 +87,7 @@ from experiments.phase_c1.probe_results import C1ProbeRecord  # noqa: E402
 from experiments.phase_c1.scoring import (  # noqa: E402
     C1_METRIC_CONTRACT, c1_scoring_contract,
 )
-from experiments.phase_c3 import a3_session as A3S  # noqa: E402
+from experiments.phase_a3 import a3_session as A3S  # noqa: E402
 from experiments.source_sets import generation_source_digest  # noqa: E402
 
 #: Explicit. Importing the core registers neither a mixture nor an adapter, and
@@ -451,7 +451,7 @@ class A3Driver:
         if not self.afford(28.0, "parent replay"):
             raise A3DriverError("budget refuses the parent replay")
         from aadistill.initialization.specs.arch import get_adapter
-        from experiments.phase_c3.a_bsz3 import A_BSZ1
+        from experiments.phase_a3.a_bsz3 import A_BSZ1
 
         spec = A3S.path_spec(workdir_device="cuda")
         adapter = get_adapter("qwen3")
@@ -522,7 +522,7 @@ class A3Driver:
         """
         mark("STAGE_START:E")
         from compare_a_bsz3 import structural_half
-        from experiments.phase_c3.a_bsz3 import (
+        from experiments.phase_a3.a_bsz3 import (
             execution_comparison, item_token_counts,
         )
 

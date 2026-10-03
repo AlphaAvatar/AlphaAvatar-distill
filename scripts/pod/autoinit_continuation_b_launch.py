@@ -116,11 +116,11 @@ AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_i
 #: excluded here and checked before a pod exists.
 CONTINUATION_TEST_IGNORES = (
     *TEST_IGNORES,
-    "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-    "tests/pod/test_phase_b_stage1_executes.py",
-    "tests/pod/test_continuation_b_executes.py",
-    "tests/autoinit/test_causal_depth_measurement_job.py",
-    "tests/pod/test_phase_b_driver_and_launcher.py",
+    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
+    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_stage1_executes.py",
+    "scripts/experiments/stage-1/phase_b/tests/test_continuation_b_executes.py",
+    "tests/initialization/test_causal_depth_measurement_job.py",
+    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py",
 )
 
 #: The advancing candidates whose bytes must be on the pod. `fe9683e6a9c7` is the

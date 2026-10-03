@@ -162,7 +162,7 @@ C3_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 #: the same class of defect as inheriting its driver. So C1 declares its own.
 TEACHER_REVISION = CS.TEACHER_REVISION
 
-#: WHAT THE PAID POD RUNS: `tests/c1_preflight/` and nothing else.
+#: WHAT THE PAID POD RUNS: `scripts/experiments/stage-1/phase_c1/tests/` and nothing else.
 #:
 #: Until 2026-09-13 this was a four-entry exclusion list against the whole
 #: repository, so a C1 pod ran 3892 tests for 16 minutes of billed L40S to prove
@@ -171,7 +171,7 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: asserting a dev-box artifact store, one a `.venv` a pod checkout never has —
 #: and the exclusion list had grown by one module per such discovery.
 #:
-#: The selection is positive now. `tests/c1_preflight/` holds the checks a C1 pod
+#: The selection is positive now. `scripts/experiments/stage-1/phase_c1/tests/` holds the checks a C1 pod
 #: can fail in a way that costs money or invalidates the result: the
 #: launcher/driver CLI seam that cost attempt 7 $0.4231, the frozen scientific
 #: identities, the staged battery bytes, the artifact spec that can block
@@ -187,7 +187,7 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: The full suite is unchanged and still runs in development, in convergence and
 #: in CI. What changed is that a billing GPU is no longer responsible for it.
 #:
-#: `tests/c2_preflight` and `tests/c2_baseline_completion_preflight` are here
+#: `scripts/experiments/stage-1/phase_c2/tests` and `scripts/experiments/stage-1/phase_c2/tests` are here
 #: for the reason the derivation exists: each is another experiment's pod
 #: selection, each appeared after C1 closed, and a C1 pod has no business
 #: running either. The second one arrived with the baseline completion and was
@@ -214,8 +214,16 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: prove another experiment passes. C3 is new, so it uses the mechanism built
 #: for that: anything added tomorrow is excluded by DEFAULT, which is the
 #: safe direction for a GPU that charges by the minute.
-POD_TEST_SELECTION = "tests/c3_preflight"
-TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c3/tests"
+#: POSITIVE now, not a complement. This was
+#: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
+#: `--ignore` list that left the session's own preflight the only collectable
+#: directory under `tests/`. Since the 2026-10-03 boundary decision the
+#: preflight lives beside its experiment, so there is nothing to take the
+#: complement of: the gate collects `SESSION_TEST_PATHS` and the ignore list is
+#: empty.
+TEST_IGNORES: tuple[str, ...] = ()
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 #: From the one owner, and NOT `autoinit_c1.*`. See `CS.STATUS_PATH`: these
 #: two constants disagreeing with the driver's is what made every driver
@@ -1022,7 +1030,7 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
 def renderer_parity_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Is the C1 battery still rendered exactly as every historical measurement?
 
-    The seven parametrized parity cases in `tests/data/test_c1_battery.py` used to
+    The seven parametrized parity cases in `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` used to
     carry this guarantee alone. They need the pinned Hugging Face source snapshots
     — a dev-box readiness input, never a C1 runtime or scientific one — so on a
     pod they could only ever fail, and on 2026-09-04 fourteen of them did, at the
@@ -1399,7 +1407,7 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES),
+            teacher_revision=TEACHER_REVISION, test_ignores=TEST_IGNORES, test_paths=TEST_PATHS),
         driver_command=driver_command,
         driver_job_id="autoinit_c1",
         status_path=STATUS, run_log_path=RUN_LOG,

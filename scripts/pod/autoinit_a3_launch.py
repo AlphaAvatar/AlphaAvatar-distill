@@ -45,7 +45,7 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
 )
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
-    derive_contract, ignores_for_selection,
+    derive_contract,
 )
 from autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, RECOVERY_LADDER,
@@ -55,8 +55,8 @@ from experiments.deployment import (  # noqa: E402
 )
 from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
 from experiments.run_layout import rel_run_dir  # noqa: E402
-from experiments.phase_c3 import a3_session as A3S  # noqa: E402
-from experiments.phase_c3.a3_authorization import (  # noqa: E402
+from experiments.phase_a3 import a3_session as A3S  # noqa: E402
+from experiments.phase_a3.a3_authorization import (  # noqa: E402
     A3Authorization, a3_budget_spec, a3_harness_digest, a3_hard_ceiling_usd,
     load_live_pricing,
 )
@@ -85,8 +85,16 @@ SPEC_FAILED = "configs/autoinit/a3_artifacts_failed.json"
 #: from the five documented development-only failures, killing the session
 #: during setup with 11 of 11 markers unset. C1 paid 16 billed minutes to learn
 #: the first half of that; A3 would have paid for both halves.
-POD_TEST_SELECTION = "tests/a3_preflight"
-TEST_IGNORES = ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)
+POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c3/tests"
+#: POSITIVE now, not a complement. This was
+#: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
+#: `--ignore` list that left the session's own preflight the only collectable
+#: directory under `tests/`. Since the 2026-10-03 boundary decision the
+#: preflight lives beside its experiment, so there is nothing to take the
+#: complement of: the gate collects `SESSION_TEST_PATHS` and the ignore list is
+#: empty.
+TEST_IGNORES: tuple[str, ...] = ()
+TEST_PATHS = (POD_TEST_SELECTION,)
 
 #: attempt75's control evidence, which the OFF-POD comparison reads. Checked
 #: here at $0 because a session that trains three probes and then cannot be
@@ -550,10 +558,10 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
     generous than the pod.
     """
     from aadistill.runtime.pod_environment import LAUNCH_BOUND
-    from experiments.phase_c3.a3_pod_environment import (
+    from experiments.phase_a3.a3_pod_environment import (
         a3_record_contract, load_record,
     )
-    from experiments.phase_c3.a3_pod_environment import (
+    from experiments.phase_a3.a3_pod_environment import (
         verify_record as verify_a3_record,
     )
 
@@ -909,7 +917,7 @@ def spec(args) -> SessionSpec:
                            "TEACHER_READY", "ROPE_OK", "TESTS_OK",
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
-            test_ignores=TEST_IGNORES,
+            test_ignores=TEST_IGNORES, test_paths=TEST_PATHS,
             teacher_revision=CS.TEACHER_REVISION),
         driver_command=driver_command,
         #: A host whose NVIDIA driver BRANCH differs from the one attempt75's
@@ -969,7 +977,7 @@ def spec(args) -> SessionSpec:
             local_files_gate(REPO_ROOT,
                              ("scripts/pod/autoinit_a3_driver.py",
                               "scripts/autoinit/aggregate_a3.py",
-                              "scripts/experiments/phase_c3/a3_session.py"),
+                              "scripts/experiments/stage-1/phase_a3/a3_session.py"),
                              what="the A3 executable"),
             readiness_gate,
             bundle_staged_gate,
@@ -1049,7 +1057,7 @@ def build_parser() -> argparse.ArgumentParser:
                          "restores and scores instead of training its own")
     ap.add_argument("--gpu", default="NVIDIA L40S")
     #: NOT `required`, and the reason is mechanical rather than stylistic.
-    #: `tests/pod/test_session_kind_dispatch.py` enumerates launchers by
+    #: `tests/integration/test_session_kind_dispatch.py` enumerates launchers by
     #: filling every required option with the STRING `"kind_probe"`, so a
     #: required `type=float` flag raises during conversion, puts the launcher
     #: in `UNPARSEABLE`, and **removes it from every check in that module** --

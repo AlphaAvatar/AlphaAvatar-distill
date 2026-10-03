@@ -91,7 +91,7 @@ LOCAL_ASSETS = (
                "artifacts/stage3"),
 )
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "tests/pod/test_phase_a_stages1_5_execute.py")
+                "scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
 #: Measured, not estimated. 61.55 min end-to-end for an 0.86M probe (attempt 4,

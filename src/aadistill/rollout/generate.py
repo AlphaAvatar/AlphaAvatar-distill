@@ -27,7 +27,7 @@ text is derived for readability only.
 
 What is verified, and what is not
 ---------------------------------
-`tests/test_generate_toy.py` asserts that a prompt decodes to the same tokens
+`tests/rollout/test_generate.py` asserts that a prompt decodes to the same tokens
 whether it is generated alone or inside a batch, and at different batch
 positions. That property is **not** free: left-padding plus reduction-order
 differences in batched attention can change logits in the last bits and flip an

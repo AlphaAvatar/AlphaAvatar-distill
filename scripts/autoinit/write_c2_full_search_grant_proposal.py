@@ -330,7 +330,7 @@ def proposal() -> dict:
                 "effect": (
                     "bind_identities in the baseline-completion driver now "
                     "REFUSES, which is the gate working. Six tests in "
-                    "tests/pod/test_phase_c2_baseline_completion.py are red "
+                    "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py are red "
                     "for this single reason and were deliberately left red."),
                 "what_is_NOT_affected": (
                     "no completed result: both sides of every finished "

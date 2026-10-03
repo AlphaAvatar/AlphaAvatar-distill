@@ -35,7 +35,7 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-#: NOT `scripts/experiments/phase_c3` on sys.path -- the sibling phase_c1
+#: NOT `scripts/experiments/stage-1/phase_c3` on sys.path -- the sibling phase_c1
 #: directory holds `packaging.py`, which shadows the third-party `packaging`
 #: distribution and breaks the next transformers import in the process.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))

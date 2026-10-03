@@ -449,13 +449,13 @@ def build() -> dict:
 
         "implementation_state": {
             "governance_module":
-                "scripts/experiments/phase_c2/behavioural.py — BUILT",
+                "scripts/experiments/stage-1/phase_c2/behavioural.py — BUILT",
             "launch_governance":
-                "scripts/experiments/phase_c2/behavioural_governance.py — BUILT",
+                "scripts/experiments/stage-1/phase_c2/behavioural_governance.py — BUILT",
             "schedule_control_flow":
-                "scripts/experiments/phase_c2/behavioural_schedule.py — BUILT",
+                "scripts/experiments/stage-1/phase_c2/behavioural_schedule.py — BUILT",
             "decision":
-                "scripts/experiments/phase_c2/behavioural_decision.py — BUILT. "
+                "scripts/experiments/stage-1/phase_c2/behavioural_decision.py — BUILT. "
                 "Composes C1's paired_differences, decision_inputs, "
                 "stratified_cluster_bootstrap and decide; supplies a C2 "
                 "decision-rule view derived from the frozen protocol rather "
@@ -482,7 +482,7 @@ def build() -> dict:
                 "destination re-identification and a teardown gate that "
                 "refuses while evidence is unreadable.",
             "continuation":
-                "scripts/experiments/phase_c2/behavioural_continuation.py — "
+                "scripts/experiments/stage-1/phase_c2/behavioural_continuation.py — "
                 "BUILT. Reads the campaign's verified state from the durable "
                 "destination, derives the remaining work mechanically, and "
                 "builds the manifest a replacement pod reads. The launcher's "
@@ -491,7 +491,7 @@ def build() -> dict:
             "b_binding": "BUILT",
             "storage_derivation": "BUILT",
             "rehearsal":
-                "tests/c2_behavioural_preflight/ — BUILT. One production-path "
+                "scripts/experiments/stage-1/phase_c2/tests/ — BUILT. One production-path "
                 "rehearsal drives the real driver P through D and reaches all "
                 "three terminal states from separate deterministic fixtures, "
                 "replacing only hardware-bound calls.",

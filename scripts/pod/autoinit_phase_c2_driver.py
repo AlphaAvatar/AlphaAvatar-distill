@@ -71,7 +71,7 @@ from experiments.phase_c2 import comparison as C  # noqa: E402
 #: $0.1674. No `$0` test could see it: `tests/conftest.py` imports this
 #: bootstrap, so the registry is full in every pytest process and the empty
 #: registry exists only in a fresh interpreter — which is what a pod runs.
-#: `tests/pod/test_phase_c2_collection_and_profiles.py` therefore asks in a
+#: `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` therefore asks in a
 #: SUBPROCESS.
 #:
 #: Module scope rather than a call added to stage A: an import cannot be

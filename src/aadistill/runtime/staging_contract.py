@@ -58,6 +58,15 @@ TOOLING_SUBSTRINGS: tuple[str, ...] = ("__pycache__/",)
 SCHEMA = "aadistill.autoinit.staging_contract/v1"
 
 
+class SelectionOutsideCoreSuite(FileNotFoundError):
+    """A test selection that no `--ignore` complement of `tests/` can express.
+
+    Its own subclass so a caller can tell "you asked for the superseded
+    mechanism" apart from "your directory is missing", and so the message can
+    name the replacement rather than leaving a reader to find it.
+    """
+
+
 def _is_tooling(rel: str) -> bool:
     return (rel.startswith(TOOLING_PREFIXES)
             or any(s in rel for s in TOOLING_SUBSTRINGS)
@@ -68,19 +77,35 @@ def ignores_for_selection(selection: str,
                           repo_root: str | Path = ".") -> tuple[str, ...]:
     """The `--ignore` list that leaves exactly `selection` collectable.
 
-    The pod's blocking gate is `pytest tests/ $SESSION_TEST_IGNORES` and a
-    session may only add flags, so "run only my preflight directory" has to be
-    expressed as a COMPLEMENT — and this module's opening argument applies to
-    that complement too. Hand-written, it drifts in the dangerous direction: a
-    test directory added tomorrow says nothing about itself, joins the paid
-    suite by default, and is discovered on a billing machine. Derived, anything
-    new is excluded by default, which is the safe direction for a GPU that
-    charges by the minute; a session that wants it must say so.
+    **SUPERSEDED for new sessions by `SetupManifest.test_paths`.** A session now
+    declares the suite it wants POSITIVELY and the gate collects exactly that;
+    there is no complement to derive and nothing to keep in step.
+
+    This is kept, and kept working, because it is how a selection INSIDE
+    `tests/` has to be expressed: the gate's historical shape is
+    `pytest tests/ $SESSION_TEST_IGNORES`, a session may only add flags, so
+    "run only my preflight directory" could only be said as the complement of
+    everything else. It drifted exactly as its own docstring predicted — six
+    times, once per experiment preflight directory added after C1 closed, each
+    one a directory a C1 pod would have collected on its own meter. Deriving it
+    made new directories excluded by default, which is the safe direction for a
+    GPU that charges by the minute.
+
+    Since the 2026-10-03 boundary decision an experiment's tests live beside the
+    experiment, OUTSIDE `tests/`, so a selection is no longer a sibling to
+    exclude the others of. A caller passing such a path is asking for the old
+    mechanism to express something it cannot, and the error below says so.
 
     `conftest.py` is never ignored — it is where the suite's fixtures come from,
     not a test. `__pycache__` and dotted entries are not collectable.
     """
     root = Path(repo_root) / "tests"
+    if not selection.startswith("tests/") and not (root / selection).exists():
+        raise SelectionOutsideCoreSuite(
+            f"{selection!r} is not under {root}, so no `--ignore` complement can "
+            "select it: the gate's base path is `tests/`. Declare it positively "
+            "instead -- `SetupManifest(test_paths=(" + repr(selection) + ",))` -- "
+            "which the setup script reads as SESSION_TEST_PATHS.")
     keep = selection.split("/", 1)[1] if "/" in selection else selection
     if not (root / keep).is_dir():
         raise FileNotFoundError(

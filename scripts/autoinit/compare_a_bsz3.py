@@ -66,7 +66,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_c3.a_bsz3 import (  # noqa: E402
+from experiments.phase_a3.a_bsz3 import (  # noqa: E402
     ATTENTION_IMPL_ID, PROTOCOLS, execution_comparison, frozen_identities,
     item_token_counts,
 )

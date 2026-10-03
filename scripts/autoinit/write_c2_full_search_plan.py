@@ -666,7 +666,7 @@ def protocol() -> dict[str, Any]:
                 "the live operator registry, through applicable_implementations "
                 "and expansion_profiles — the same two functions BeamSearch "
                 "calls. Enumerated, not computed from a product formula."),
-            "owner": "scripts/experiments/phase_c2/full_search_space.py",
+            "owner": "scripts/experiments/stage-1/phase_c2/full_search_space.py",
             **size,
             "order": "FREE. A kind is applied at most once per path.",
             "impl_profiles": None,
@@ -839,7 +839,7 @@ def protocol() -> dict[str, Any]:
                 "implemented": True,
                 "executed_end_to_end_at_toy_scale": True,
                 "_toy_execution": (
-                    "tests/pod/test_phase_c2_full_search_driver.py drives the "
+                    "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_full_search_driver.py drives the "
                     "real stages with a scaled-down model: real operators, real "
                     "checkpoints, real reloads, real hashing, real measurement. "
                     "It found and closed one real defect — a relative_to() that "

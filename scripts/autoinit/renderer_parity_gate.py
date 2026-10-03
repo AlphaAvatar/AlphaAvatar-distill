@@ -2,7 +2,7 @@
 
     PYTHONPATH=src .venv/bin/python scripts/autoinit/renderer_parity_gate.py
 
-`tests/data/test_c1_battery.py` asserts that the shared renderers in
+`scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` asserts that the shared renderers in
 `scripts/data/battery_render.py` reproduce the frozen `recovery_search_v2`
 prompts byte for byte. That assertion needs the seven pinned Hugging Face source
 snapshots — roughly four gigabytes that the dev box holds from earlier work and
@@ -95,7 +95,7 @@ def run_parity() -> dict[str, Any]:
         "groups": groups,
         "shared_implementation": "scripts/data/battery_render.py:check_group_parity",
         "also_executed_by": (
-            "tests/data/test_c1_battery.py::"
+            "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::"
             "test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte"),
     }
     return record

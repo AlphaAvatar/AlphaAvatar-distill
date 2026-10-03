@@ -95,7 +95,7 @@ def implementation_identity() -> dict[str, Any]:
         #: prompt counts the estimand is defined over, and the comparability
         #: rule whose id the admission records are checked against.
         "probe_results_module_sha256": sha(
-            "scripts/experiments/phase_c1/probe_results.py"),
+            "scripts/experiments/stage-1/phase_c1/probe_results.py"),
         "generation_compat_module_sha256": sha(
             "src/aadistill/initialization/planning/generation_compat.py"),
     }
