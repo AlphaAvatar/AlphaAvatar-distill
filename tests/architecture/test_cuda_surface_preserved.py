@@ -1167,6 +1167,96 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "cost model's own anchor tests instead. No value, no arithmetic and "
             "no behaviour changed.",
      }),
+    ("06cab9c8f106ed6f35db4c5cd6bf9d47288da139",
+     "materialization ownership, scoring content, one measurement protocol",
+     {
+        "src/aadistill/initialization/scoring/content.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE by construction. "
+            "The identity of the position metadata a policy actually consumes. "
+            "It exists because a mixture's `content_sha256` hashes item ids and "
+            "token ids only, so two assets could share every hash in the "
+            "operator path -- profile hash, content hash, policy hash -- and "
+            "carry DIFFERENT supervised masks, producing different DEPTH, FFN, "
+            "WIDTH and ATTENTION decisions under one scientific path identity. "
+            "The bound terms are asked of the POLICY (`reads_tags`), so a "
+            "future policy reading another tag binds the right thing with no "
+            "edit here and no tag name is hardcoded. EMPTY-EQUIVALENT at the "
+            "incumbent policy, which reads no position metadata, so every "
+            "committed state id stays derivable. NO CUDA SURFACE: it reads "
+            "boolean masks on the host and hashes strings.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "NEW MODULE, therefore a DECLARED SEMANTIC CHANGE. One "
+            "`measurement_protocol_id` over the suite's STRUCTURAL identity, "
+            "the suite's CONTENT identity, the scoring content, the position "
+            "policy, the reduction semantics (chunk, reference strategy, "
+            "aggregation rule) and the execution fingerprint -- so `_restore` "
+            "asks one question instead of the two independent comparisons it "
+            "had and the three it would have grown. A record predating the "
+            "identity is judged by its own historical fields and its id is "
+            "NEVER reconstructed, because that would assert a reduction and an "
+            "execution nobody recorded. NO CUDA SURFACE: it hashes strings.",
+        "src/aadistill/initialization/specs/materialization.py":
+            "DECLARED SEMANTIC CHANGE: `materialization_id` now binds the "
+            "PARENT materialization as a third required term, because a child's "
+            "bytes are a function of the bytes it consumed, and a root derives "
+            "its identity from the pinned teacher revision rather than from an "
+            "experiment special case. `FINGERPRINT_GROWTH_RULE` states what a "
+            "future field owes: in if it selects a different ARITHMETIC PATH "
+            "over the same inputs (an explicit attention/kernel/backend or "
+            "determinism selection, once one exists), out if it names where or "
+            "when the work ran. Every id this round produces differs from the "
+            "two-term ones, which is the intended consequence -- no two-term id "
+            "was ever written to a journal. NO CUDA SURFACE.",
+        "src/aadistill/initialization/specs/state.py":
+            "ADDITIVE: `latest_by_materialization_id()` beside an UNCHANGED "
+            "`latest_by_state_id()`. The semantic view keeps one record per "
+            "path and therefore cannot find an earlier materialization once "
+            "another protocol has journalled a newer one; the new view can. "
+            "The old one is untouched deliberately -- the frozen C2 canonical "
+            "record rule reads it and a test asserts it picks the LAST record. "
+            "NO CUDA SURFACE.",
+        "src/aadistill/initialization/planning/search.py":
+            "DECLARED SEMANTIC CHANGE, and the one that closes ownership rather "
+            "than detection. `checkpoint_dir()` is the single owner of "
+            "`states/<semantic_state_id>/<materialization_id>/`, where two "
+            "materializations of one path previously owned one destination and "
+            "the second overwrote the first. `_restore` looks up BY "
+            "materialization and asks `measurement_is_comparable` once, "
+            "replacing the inline suite-hash and policy-hash comparisons; the "
+            "`require_same_materialization` refusal is kept as a structural "
+            "assertion, since a keyed hit cannot mismatch. The run learns its "
+            "measurement protocol from its config or, failing that, from its "
+            "first measurement -- every driver wraps its evaluator in a lambda, "
+            "so a search that could not learn it would stamp records it could "
+            "never adopt and silently re-measure everything on resume. A "
+            "declared-vs-observed conflict raises. NO CUDA SURFACE: the "
+            "materialize/reload/validate/measure cycle and its device "
+            "placement are unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "DECLARED SEMANTIC CHANGE: `StateEvaluator` computes a "
+            "`measurement_protocol_id` at construction and stamps it, with a "
+            "`reduction` block, into every evaluation's detail; it accepts an "
+            "optional `NumericalEnvironment` and an optional "
+            "`suite_content_sha256`. The last one is deliberate: `suite_hash` "
+            "is the STRUCTURAL identity that 45 committed records pin, so the "
+            "suite's CONTENT is bound in the new protocol id rather than folded "
+            "into the structural hash -- which would have moved the identity of "
+            "an unchanged asset and did, in five tests, before being reverted. "
+            "The arithmetic is untouched: an evaluator given no policy, no "
+            "numerics and no content hash performs exactly the operations it "
+            "performed before, recording `undeclared` and `unbound` for what "
+            "nobody stated. CUDA-ADJACENT: batching, chunk boundaries, dtypes "
+            "and device placement are unchanged by this round. Recorded in the "
+            "C2 evaluator lineage as this file's THIRD movement.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "DECLARED SEMANTIC CHANGE: the step trace records a "
+            "`scoring_content_report` -- the identity of the position metadata "
+            "the resolved policy will read, plus the three totals a reader "
+            "checks it against. EVIDENCE ONLY: it enters the trace, not any "
+            "hashed config, and is empty-equivalent at the incumbent policy. "
+            "HISTORICAL CUDA SURFACE -- unchanged from the previous round's "
+            "entry; this round adds no device, dtype or shape behaviour.",
+     }),
 )
 
 
