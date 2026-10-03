@@ -2619,14 +2619,54 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 ## The full suite is not green: 11 failures, and the count is trustworthy
 
-**Closeout measurement, A3 terminal round: 11 failed, 5555 passed, 229
-skipped, ZERO errors** in 43m10s, on the clean tree at `6a901cae`. Exactly the
-eleven documented failures, as an **identical node-id set** to the previous
-run — no new ones, and none of the eleven fixed. `5392 → 5555` passed is the
-163 tests the round added.
+**Closing measurement, D1 design round: 11 failed, 5683 passed, 229 skipped,
+ZERO errors** in 42m54s, on the clean tree at `fc73c09a`. Exactly the eleven
+documented failures, as an **identical node-id set** to the previous run — no
+new ones, and none of the eleven fixed. `5555 → 5683` passed is the 128 tests
+the round added. The set was diffed against the `<details>` list below
+programmatically rather than read off, which is how the unlisted eleventh
+below was found.
 
-*The previous closeout measured the same eleven with 5392 passed. It is not
-restated beyond that, because a count belongs to the tree it was taken on.*
+*Earlier closeouts measured the same eleven at 5555 and 5392 passed. Not
+restated beyond that: a count belongs to the tree it was taken on.*
+
+**THE FIRST FULL SUITE OF THIS ROUND READ 28, AND 17 WERE MINE.** Five causes,
+not seventeen — and three were records the round owed rather than code defects:
+
+* **the executable closure went stale a third time** (12 of the 17).
+  `derive_closure.py --write` ran, then three more core and script files
+  changed, and every grant-issuing gate correctly refused a closure that no
+  longer described the tree. Running the convergence tool *before* the last
+  edit is not running it.
+* **the C2 evaluator lineage owed a second entry for `planning/metrics.py`.**
+  The frozen baseline-completion protocol binds four evaluator files BY
+  CONTENT, and the test asserts the drift SET equals the DOCUMENTED set — the
+  mechanism working. Making the global state metric target-aware *is* a change
+  to that evaluator, so the obligation was to record it, with the superseded
+  prefix kept rather than overwritten. **The protocol stays frozen exactly as
+  it is, and that is the point:** a `B` measurement taken under a target-aware
+  policy measures a different quantity and must not join the old series.
+* **`phase_d1` had no stage-index row.** A directory under a stage with no row
+  is the drift the index exists to prevent, so the row was owed before the
+  directory existed.
+* **the snapshot's size contract, and a word a gate reads.** `current.json`
+  stood at 13,739 of 14,000, so 261 bytes of headroom had to absorb a fourth
+  live subject and could not. `a_bsz3` was consolidated to its live facts
+  first — A3 is terminal and its closeout owns the figures — and the ceiling
+  then moved to 15,500 with the arithmetic in the guard's own docstring. The
+  squeeze also dropped "Top-5 **ACCEPTED** and FROZEN" and the attempt-4 gate
+  refused, which is the **third** time that squeeze has broken that gate.
+* **one phrasing lock of the round's own making.** A test written this round
+  matched the sentence "collision A3 found"; a later pass removing a
+  campaign's experiment label from reusable core rewrote it. The refusal was
+  still correct and the test had locked the wording. It asserts the content
+  now.
+
+**The eleventh documented failure is named below for the first time.** The
+`<details>` block enumerated ten while the prose said eleven, so attributing
+`test_the_headroom_verdict_matches_what_plan_session_actually_does` cost a
+HEAD-worktree run to establish it was not this round's. A list that claims to
+enumerate the set should be the set.
 
 **An earlier full suite in this round read 15, and four were mine.** Each was
 one mistake: a producer changed and its consumers not enumerated. Adding
@@ -2686,13 +2726,14 @@ launch from those records, and rewriting a closed phase's history to make a
 test green would be editing the past. Each failure points in the refusing
 direction.
 
-<details><summary>the 10 long-standing ones, by nodeid</summary>
+<details><summary>all eleven, by nodeid</summary>
 
 ```text
 autoinit/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable
 autoinit/test_c2_behavioural_proposal.py::test_the_ceiling_fits_the_project_cap_with_headroom
 autoinit/test_phase_c2_full_search.py::test_the_budget_position_is_derived_not_restated
 autoinit/test_phase_c2_full_search.py::test_the_documents_are_deterministic_and_regenerating_verifies_them
+autoinit/test_phase_c2_full_search.py::test_the_headroom_verdict_matches_what_plan_session_actually_does
 pod/test_c1_one_provider_resource.py::test_M_the_live_grant_and_the_launcher_agree_on_acquisition
 pod/test_c1_session_contract.py::test_the_writer_refuses_to_rewrite_the_frozen_preregistration
 pod/test_continuation_b_one_probe_contract.py::test_the_preregistration_binds_the_live_executable_digest
@@ -2700,6 +2741,18 @@ pod/test_phase_c2_full_search_chain.py::test_the_proposal_regenerates_byte_ident
 pod/test_phase_c2_full_search_chain.py::test_the_proposal_reproduces_the_live_identities
 pod/test_phase_c2_full_search_chain.py::test_the_proposal_states_the_figures_a_launch_review_needs
 ```
+
+*The fifth entry is the one the list used to omit. It refuses because the C2
+full-search pricing record says the beam-6 search session fits while
+`plan_session` says it does not — a closed phase's proposal tracking a balance
+it can never spend, which is the same reason as its three `_chain` siblings. It
+is red at `4ae52e2e` too, measured in a detached worktree, so a reader
+attributing a suite result does not have to re-establish that.*
+
+*Reading it off a `<details>` block is also not the way to attribute a result.
+Diff the observed node-ids against this list programmatically; eleven entries
+and a summary that said ten is exactly the kind of near-miss an eye slides
+over.*
 
 </details>
 
