@@ -264,6 +264,14 @@ def build_general_items(tokenizer, docs_path: Path, special: dict[str, int]):
             "templated": False, "ids": ids,
             # Raw prose has no assistant turn, no reasoning delimiters and no
             # terminator: an empty tag set is the correct answer, not a bug.
+            #
+            # EMPTY DICT, NOT AN EMPTY `assistant` LIST, and the difference is
+            # load-bearing. `tag_positions` returns `{}` here, so the key is
+            # ABSENT and `SupervisedTargetV1` takes its untemplated raw-LM
+            # fallback — every real prediction stays active, which is what keeps
+            # the general-language domain in the mixture. Serializing
+            # `"assistant": []` instead would be REFUSED as malformed
+            # supervision metadata. Do not "normalize" one into the other.
             "tags": tag_positions(ids, [False] * len(ids), 0, special),
         })
         used.append(d)

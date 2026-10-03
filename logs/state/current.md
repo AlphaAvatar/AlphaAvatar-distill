@@ -143,12 +143,30 @@ merge base    : 4dc579ba4938e1a2bfb05565d0b3594077bb531e
 tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
 ```
 
-`a2dab91c` is the executable tree the core suite ran against and the commit the
-maintainer approved. `c7a39f3b` adds the pre-integration state record on top and
-touches nothing the suite executes, which is why no second run was owed: the
-squash commit's tree hash equals the branch tip's, verified before pushing.
-Where a later record needs the commit that produced the measurement, it is
-`a2dab91c`.
+**What the `2945 passed` measurement does and does not cover — corrected
+2026-10-04 on maintainer review.** The squash was correct and is not being
+rewritten; the claim made about it was too strong. Precisely:
+
+```text
+a2dab91c  the measured implementation/test tree, and the approved commit
+c7a39f3b  adds pre-integration state/decision records on top
+          (logs/state/current.json, logs/state/current.md,
+           logs/budget/decisions.md -- nothing executable)
+06cab9c8  tree == c7a39f3b tree, byte for byte, verified before pushing
+          tree != a2dab91c tree
+```
+
+The earlier wording said the squash preserved *the measured tree*. It preserved
+the **branch tip's** tree, which is a different object: `c7a39f3b` edits three
+records, and **6, 4 and 1 core test files read them respectively** — the suite
+asserts *on* those documents, so "touches nothing the suite executes" was wrong.
+No executable implementation changed after `a2dab91c`, which is why a rerun was
+not thought necessary; but those final state-only changes were **not separately
+rerun at that point**, and that is the honest limit of the evidence.
+
+The later D1 reconciliation's green core suite is new validation covering those
+records — on a different tree again, with its own content. Where a record needs
+the commit that produced the `2945 passed` measurement, it is `a2dab91c`.
 
 **The branch is kept permanently, and it is load-bearing.** 623 distinct commit
 hashes across the records resolve through branches, not through squash commits —

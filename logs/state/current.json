@@ -75,7 +75,7 @@
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "accepted_incumbent": "B = frozen C1 treatment",
   "then": "A MAINTAINER DECISION ON D1's BLOCKERS (`d_series.blockers`). None is an agent decision: evidence needs a data ruling, funding a grant, the ceiling an envelope change.",
-  "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN experiment; and no D1 LAUNCH while either blocker is open."
+  "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN experiment; and no D1 LAUNCH while ANY blocker in `d_series.blockers` is open."
  },
  "read_order": [
   "logs/README.md -- START HERE, the index"
@@ -200,15 +200,16 @@
  },
  "d_series": {
   "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED, BLOCKED. D2 and D3 NOT STARTED.",
-  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary; phase_c_roadmap.md owns the series plan.",
-  "a3_precondition": "MET, ownership closed. The materialization id binds semantic state + execution fingerprint + PARENT materialization; checkpoints live at states/<semantic>/<materialization>/ and resume keys on it.",
-  "scoring_identity": "one measurement_protocol_id folds the suite's structural and content identities, the scoring content, the policy, the reduction and the execution. Content is bound in scoring/content.py, NEVER in suite_hash.",
+  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
+  "a3_precondition": "MET, ownership closed, ACCEPTED on maintainer review 2026-10-04. Owner: d1_design.json :: materialization_prerequisite.",
+  "scoring_identity": "one measurement_protocol_id binds the suite, the scoring content, the policy, the reduction and the execution. Content is bound in scoring/content.py, NEVER in suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening seeds / 3 confirmation seeds, a pragmatic balance and NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py :: CLAIM_BOUNDARY.",
-  "battery_family": "d_series_behavioural_v1: six roles, rule frozen before any outcome, a NEW distribution rather than c1_confirmation. DESIGNED / NOT MATERIALIZED. Owner: logs/shared/analyses/autoinit_d_series_battery_family.json.",
+  "battery_family": "d_series_behavioural_v1: six roles, rule frozen before any outcome. DESIGNED / NOT MATERIALIZED. Owner: logs/shared/analyses/autoinit_d_series_battery_family.json.",
   "blockers": "EVIDENCE: 0 of 2 batteries for D1, 0 of 6 for the family; three strata short (math_verified 830, code 321, gsm8k 11). FUNDING: provisional $60.7509 against $13.1777, and phase_d1 is absent from funds_formal_sessions_of. CEILING: the $31.1577 search session exceeds the $30.00 per_attempt_hard_ceiling_usd, which binds separately.",
-  "owed_gpu_qualification": "NOT RUN. Prices come from unbatched telemetry while D1 runs batched, in an unmeasured direction, so every figure sizes a grant request rather than pricing one.",
-  "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy; D2's continuous c_ref(t) needs a weighted denominator in StatsSpec.",
-  "authorizes": "nothing"
+  "owed_gpu_qualification": "NOT RUN. The unbatched cost table is a PROVISIONAL PLANNING BASIS, direction UNKNOWN -- it does NOT bound batched D1. The chain figures size a grant request; they are not ceilings.",
+  "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
+  "authorizes": "nothing",
+  "execution_wiring": "CONTRACT ONLY, no driver exists. A frozen D1 run may NOT execute with suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required."
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",

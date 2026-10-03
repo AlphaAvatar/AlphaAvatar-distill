@@ -21,12 +21,17 @@ themselves. Typing any of them here would create a second copy to keep in step
 with the first, and this repository has already had a plan assert a bootstrap
 seed the computation did not use.
 
-**It authorizes nothing, and it says so where a reader will see it.** D1 is not
-fundable at the current balance and its fresh behavioural evidence cannot be
-built under the frozen mixture. Both are derived below and both are stated as
-blockers rather than as caveats, because a design that reads as ready when it is
-not is how a grant gets requested for an experiment that could not have produced
-a valid result.
+**It authorizes nothing, and it says so where a reader will see it.** Its
+fresh behavioural evidence cannot be built under the frozen mixture, it is not
+fundable at the current balance, and its search session alone exceeds the
+package's per-session envelope — which binds separately, so a grant that moved
+only the cumulative cap would still not authorize the search. All three are
+derived by `open_blockers()` from figures that live elsewhere, and every
+statement of the count follows from that list rather than being typed: this
+document read "two blockers" and "either blocker" for a round after the third
+appeared. They are stated as blockers rather than caveats, because a design that
+reads as ready when it is not is how a grant gets requested for an experiment
+that could not have produced a valid result.
 """
 from __future__ import annotations
 
@@ -161,6 +166,69 @@ def scoring_policy() -> dict[str, Any]:
     }
 
 
+def execution_wiring_required() -> dict[str, Any]:
+    """What a D1 execution entry point must wire, recorded before one exists.
+
+    No D1 launcher is authorized, so this is a CONTRACT and not an
+    implementation. It is written down now because every item is a thing the
+    core permits a caller to omit, and omitting any of them produces a run
+    whose records are valid-looking and scientifically unusable.
+    """
+    return {
+        "status": ("CONTRACT ONLY. No D1 launcher exists and none is "
+                   "authorized. Nothing here is implemented or validated."),
+        "must_be_wired": [
+            {"requirement": (
+                "the frozen state-eval manifest's `content_sha256` is passed "
+                "into `StateEvaluator(suite_content_sha256=...)`"),
+             "why": (
+                 "the evaluator falls back to `suite.content_sha256` and then "
+                 "to `UNBOUND_SUITE_CONTENT`. A frozen D1 run must NOT execute "
+                 "with `suite_content_identity = \"unbound\"`: the whole point "
+                 "of binding content separately from the structural "
+                 "`suite_hash` is lost, and the resulting "
+                 "`measurement_protocol_id` would not distinguish two suites "
+                 "with the same structure and different items."),
+             "mechanism": "aadistill.initialization.planning.metrics.StateEvaluator"},
+            {"requirement": (
+                "the evaluator is constructed with D1's position policy "
+                "(`positions.supervised_target_v1` for the treatment, "
+                "`positions.all_v1` for the control) and the declared "
+                "`NumericalEnvironment`"),
+             "why": (
+                 "both are terms of `measurement_protocol_id`. A treatment arm "
+                 "measured under the control's policy, or under an unrecorded "
+                 "execution environment, produces a protocol id that does not "
+                 "describe what ran."),
+             "mechanism": "aadistill.initialization.scoring.protocol_identity"},
+            {"requirement": (
+                "`SearchConfig.measurement_protocol_id` is SET to the "
+                "evaluator's protocol id before the first expensive expansion "
+                "— declared, not learned from the first measurement"),
+             "why": (
+                 "the search already refuses a declared id that disagrees with "
+                 "its measurer, at construction, because every state measured "
+                 "in between would have to be discarded. Learning it instead "
+                 "means the config hash does not carry the protocol until "
+                 "after work has been done under it, and a resume cannot tell "
+                 "whether the records it is adopting were measured the same "
+                 "way."),
+             "mechanism": "aadistill.initialization.planning.search"},
+        ],
+        "owed_test": (
+            "a small D1 EXPERIMENT-suite contract test, written when the driver "
+            "is — asserting the evaluator receives the frozen content hash, the "
+            "declared policy and environment, and that the search's declared "
+            "protocol id is non-null and equals the evaluator's before any "
+            "expansion. It belongs in "
+            "scripts/experiments/stage-1/phase_d1/tests/, not the core suite: "
+            "it checks THIS experiment's wiring, not a reusable mechanism."),
+        "_not_a_gate": ("this record blocks nothing today. It exists so the "
+                        "requirement is not rediscovered after a paid run "
+                        "produced unusable records."),
+    }
+
+
 def materialization_prerequisite() -> dict[str, Any]:
     """The A3 blocker, and the state of its resolution."""
     return {
@@ -213,7 +281,7 @@ def materialization_prerequisite() -> dict[str, Any]:
 
 
 def execution_protocol() -> dict[str, Any]:
-    """The batching protocol, by maintainer instruction, and what bounds it."""
+    """The batching protocol, by maintainer instruction, and what prices it."""
     return {
         "micro_batch_size": 3,
         "calibration_batch_packing": "length_sorted_v1",
@@ -223,9 +291,16 @@ def execution_protocol() -> dict[str, Any]:
             "ATTENTION. A3 measured that it is NOT an optimization on "
             "attention.activation_importance_v1 — 8-10% slower on the scorer "
             "with no detectable correctness effect — so this is a uniformity "
-            "decision rather than a performance claim, and the search ceiling "
-            "below is derived from UNBATCHED telemetry and therefore bounds it "
-            "either way."),
+            "decision rather than a performance claim. The search ceiling below "
+            "is derived from UNBATCHED telemetry, which makes it a PROVISIONAL "
+            "PLANNING BASIS and NOT a bound: unbatched timing does not "
+            "upper-bound the batched implementation in either direction. A3 "
+            "measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 while "
+            "causal-KL's length-sorted packing won 1.1884x, and the net effect "
+            "on an expansion running all four operators is unmeasured. The "
+            "direction of the correction is unknown, so the figure sizes a "
+            "grant request rather than capping one; only the owed GPU "
+            "qualification can turn it into a price."),
         "_the_value_is_config_not_core": (
             "`3` is an experiment-policy number carried by ExecutionConfig. The "
             "core accepts 2, 4, 8 or a future token-budget batching policy with "
@@ -264,15 +339,35 @@ def execution_protocol() -> dict[str, Any]:
     }
 
 
-def search_stage() -> dict[str, Any]:
+def _ensure_the_frozen_operators_are_registered() -> None:
+    """Register the frozen D1 operator set. Idempotent, and called by every
+    function that needs it rather than by one that happens to run first.
+
+    `attention.activation_importance_v1` registers from its own module instead
+    of as a shipped default, so a bare `register_c2_operators()` leaves the
+    frozen set incomplete. Both are needed and both are safe to repeat.
+
+    **This exists because the call order was load-bearing and undeclared.**
+    `budget()` reads `d1.chain_cost`, which searches the frozen space, and it
+    worked only because `search_stage()` appeared earlier in `build()`'s dict
+    literal and registered as a side effect. Hoisting `budget()` to derive the
+    blocker list broke it immediately -- which is the good version of that bug,
+    since the alternative is a caller that imports the sections in another
+    order and gets an unregistered-operator failure far from its cause.
+    """
     from experiments.phase_c2.search_space import register_c2_operators
     from aadistill.initialization.operators.attention.gqa import (
         activation_importance,
     )
-    from experiments.phase_d1 import search_space as d1
 
     register_c2_operators()
     activation_importance.register()
+
+
+def search_stage() -> dict[str, Any]:
+    from experiments.phase_d1 import search_space as d1
+
+    _ensure_the_frozen_operators_are_registered()
     size = d1.size_report()
     cost = d1.search_cost()
     return {
@@ -498,9 +593,10 @@ def behavioural_design() -> dict[str, Any]:
 def gpu_validation_owed() -> dict[str, Any]:
     """What a GPU must answer before D1 executes, and what it must not re-ask.
 
-    Scoped here rather than run, because D1 cannot execute while either blocker
-    is open and validating code for an experiment that cannot start is spending
-    a paid resource on a question nothing is waiting for. AGENTS.md P8.2 asks a
+    Scoped here rather than run, because D1 cannot execute while ANY of its
+    open blockers stands — see `open_blockers` — and validating code for an
+    experiment that cannot start is spending a paid resource on a question
+    nothing is waiting for. AGENTS.md P8.2 asks a
     hardware request to state what gate it is intended to pass; this is that
     statement, for the maintainer to decide alongside the blockers.
     """
@@ -538,8 +634,12 @@ def gpu_validation_owed() -> dict[str, Any]:
             "batching protocol — the operator decisions are integer choices "
             "over float scores and a near-tie can flip",
             "the real per-expansion time under batched statistics and batched "
-            "state evaluation, which the conservative unbatched cost table "
-            "bounds but does not describe",
+            "state evaluation. The unbatched cost table is a PROVISIONAL "
+            "PLANNING ESTIMATE whose direction relative to the batched "
+            "implementation is UNKNOWN -- it neither bounds nor describes it, "
+            "because A3 measured batching slower on the ATTENTION scorer and "
+            "packing faster on causal-KL, and the net across four operators "
+            "has never been measured",
         ],
         "surface_that_owes_it": {
             "_what": ("files on the historically CUDA-validated surface that "
@@ -571,8 +671,11 @@ def gpu_validation_owed() -> dict[str, Any]:
         "funding": (
             "the GPU engineering allowance, which is a different book from the "
             "formal one and does not transfer into it. It is not requested here: "
-            "D1 cannot execute while either blocker is open, so the validation "
-            "is owed at authorization time rather than now."),
+            "D1 cannot execute while any of its open blockers stands, so the "
+            "validation is owed at authorization time rather than now. It is "
+            "nonetheless a PREREQUISITE of pricing, not a consequence of "
+            "funding: the chain figures cannot become authorization prices "
+            "until it runs."),
     }
 
 
@@ -606,7 +709,7 @@ def contamination() -> dict[str, Any]:
         #: THE FAMILY OWNS THE RESOLUTION, and it corrects the first option
         #: below. See `logs/shared/analyses/autoinit_d_series_battery_family.json`.
         "d_series_battery_family": {
-            "owner": "scripts/experiments/phase_d_series/battery_family.py",
+            "owner": "scripts/experiments/stage-1/phase_d_series/battery_family.py",
             "record": "logs/shared/analyses/autoinit_d_series_battery_family.json",
             "family_id": "d_series_behavioural_v1",
             "what": ("six roles - D1/D2/D3 x screening/confirmation - allocated "
@@ -634,11 +737,25 @@ def contamination() -> dict[str, Any]:
                       "shift. `correct_overall` would remain a mean over the "
                       "same stratum BALANCE but over a different population, so "
                       "the SESOI's transfer needs an explicit argument."),
-             "unblocks": ("D1's two batteries (about 4,500 further eligible "
-                          "items). NOT the full six-role family: see "
+             "unblocks": ("potentially D1's two batteries. The full MATH test "
+                          "set holds ~4,500 additional upstream candidate rows "
+                          "BEFORE exclusions -- not 4,500 eligible items. How "
+                          "many survive is an OWED MEASUREMENT: the source has "
+                          "not been pinned and the exclusion/contamination "
+                          "chain that produced the current pools (committed "
+                          "roles, c1_confirmation_v1, c2_screening_v1, "
+                          "near-duplicate and leakage screening) has not been "
+                          "run against it. Until it is, `4,500` is an upstream "
+                          "row count and the eligible count is unknown. NOT the "
+                          "full six-role family either: see "
                           "`d_series_battery_family` above - code and gsm8k are "
                           "short too at six roles, and both are answerable from "
-                          "files of repositories already pinned."),},
+                          "files of repositories already pinned."),
+             "owed_measurement": (
+                 "run the exclusion/contamination chain against the pinned "
+                 "full-MATH source and report the ELIGIBLE count per stratum. "
+                 "Only that number says whether this option unblocks D1's two "
+                 "batteries; the upstream row count does not."),},
             {"option": "reduce the math_verified count per battery",
              "what": "e.g. 70 instead of 150, with the other strata unchanged",
              "cost": ("changes the MIXTURE, and `correct_overall` and its SESOI "
@@ -684,6 +801,9 @@ def budget() -> dict[str, Any]:
     from experiments.phase_d1 import search_space as d1
     from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
 
+    #: `chain_cost` searches the frozen space, so the operators must be there.
+    _ensure_the_frozen_operators_are_registered()
+
     design = behavioural_design()
     chain = d1.chain_cost(
         screening_probes=design["screening_probes"],
@@ -704,11 +824,12 @@ def budget() -> dict[str, Any]:
                 "re-derived from it."),
         },
         "chain": chain,
-        "price_status": "PROVISIONAL CONSERVATIVE PLANNING CEILING",
+        "price_status": "PROVISIONAL PLANNING BASIS -- DIRECTION UNKNOWN",
         "_price_status": (
-            "every figure in `chain` is a planning ceiling, NOT a finalized "
-            "authorization price. Two reasons, and the first is the one that "
-            "matters:\n\n"
+            "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
+            "finalized authorization price and NOT a proven upper bound on "
+            "the batched implementation. Two reasons, and the first is the "
+            "one that matters:\n\n"
             "1. the per-expansion minutes were measured on an UNBATCHED state "
             "evaluation and a one-item-per-forward statistics pass, and D1 runs "
             "both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at "
@@ -792,14 +913,72 @@ def budget() -> dict[str, Any]:
     }
 
 
+#: The three constraints that independently prevent a D1 launch, each named by
+#: the section that owns its figures. DERIVED, not counted: this document said
+#: "two blockers" and "either blocker" for a round after the per-session ceiling
+#: became the third, because the count was prose in four places while the facts
+#: lived in `budget` and `contamination_protection`. A fourth blocker now adds
+#: one entry here and every statement follows.
+BLOCKER_SPECS: tuple[tuple[str, str], ...] = (
+    ("evidence", "contamination_protection.BLOCKER"),
+    ("funding", "budget.BLOCKER"),
+    ("per-session ceiling", "budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING"),
+)
+
+
+def open_blockers(budget_section: dict[str, Any],
+                  contamination_section: dict[str, Any]) -> tuple[str, ...]:
+    """Which of :data:`BLOCKER_SPECS` are open, from the derived figures.
+
+    Each test reads a field another function already computed from the live
+    balance, the frozen capacity analysis or the package's own terms — so a
+    blocker closes here when the underlying fact changes, and not when someone
+    remembers to edit a sentence.
+    """
+    open_: list[str] = []
+    if (contamination_section["batteries_available"]
+            < contamination_section["batteries_D1_requires"]):
+        open_.append("evidence")
+    if (budget_section["shortfall_usd"] > 0
+            or not budget_section["d1_is_in_the_funded_list"]):
+        open_.append("funding")
+    if not budget_section["fits_per_session_envelope"]:
+        open_.append("per-session ceiling")
+    return tuple(open_)
+
+
+def _blocker_phrase(open_: tuple[str, ...]) -> str:
+    """`THREE INDEPENDENT BLOCKERS: evidence, funding, per-session ceiling`."""
+    words = {0: "NO", 1: "ONE", 2: "TWO", 3: "THREE", 4: "FOUR"}
+    n = len(open_)
+    if not n:
+        return "NO OPEN BLOCKER"
+    return (f"{words.get(n, str(n))} INDEPENDENT BLOCKER"
+            f"{'' if n == 1 else 'S'}: {', '.join(open_)}")
+
+
 def build() -> dict[str, Any]:
+    budget_section = budget()
+    contamination_section = contamination()
+    open_ = open_blockers(budget_section, contamination_section)
+    phrase = _blocker_phrase(open_)
+    any_one = ("it" if len(open_) == 1
+               else "any one of them alone")
     doc = {
         "schema": SCHEMA,
         "_contract": (
             "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and "
-            "two independent blockers are recorded below — the behavioural "
-            "evidence cannot be built under the frozen mixture, and the chain "
-            "is not fundable at the current balance."),
+            f"{phrase.lower()} are recorded below, each independently "
+            "sufficient to prevent a launch. The behavioural evidence cannot "
+            "be built under the frozen mixture; the chain is not fundable at "
+            "the current balance; and the search session alone exceeds the "
+            "package's per-session envelope, which binds separately from the "
+            "cumulative cap."),
+        "open_blockers": list(open_),
+        "_open_blockers": (
+            "DERIVED by `open_blockers()` from the figures in `budget` and "
+            "`contamination_protection`, not transcribed. Owners: "
+            + "; ".join(f"{name} -> {owner}" for name, owner in BLOCKER_SPECS)),
         "experiment_id": "phase_d1",
         "stage_id": "1",
         "_stage_id_meaning": (
@@ -807,7 +986,7 @@ def build() -> dict[str, Any]:
             "a Stage-1 initialization is SCORED; the 0.86M recovery probes it "
             "trains are the measuring instrument for that question, not the "
             "subject."),
-        "status": "DESIGNED / NOT AUTHORIZED / BLOCKED ON EVIDENCE AND FUNDING",
+        "status": f"DESIGNED / NOT AUTHORIZED / BLOCKED -- {phrase}",
         "incumbent": {"state_id": INCUMBENT_STATE_ID,
                       "artifact_digest": INCUMBENT_DIGEST,
                       "_what_it_is": "B, the frozen C1 treatment. C2 closed "
@@ -820,12 +999,13 @@ def build() -> dict[str, Any]:
         "hypothesis": hypothesis(),
         "scoring_policy": scoring_policy(),
         "materialization_prerequisite": materialization_prerequisite(),
+        "execution_wiring_required": execution_wiring_required(),
         "execution_protocol": execution_protocol(),
         "gpu_validation_owed": gpu_validation_owed(),
         "search_stage": search_stage(),
         "behavioural_design": behavioural_design(),
-        "contamination_protection": contamination(),
-        "budget": budget(),
+        "contamination_protection": contamination_section,
+        "budget": budget_section,
         "inputs": {"c0_preregistration": C0_PREREG, "c1_battery": C1_BATTERY,
                    "a3_comparison": A3_COMPARISON,
                    "evidence_capacity": CAPACITY,
@@ -833,8 +1013,8 @@ def build() -> dict[str, Any]:
         "what_this_may_not_be_used_to_claim": [
             "that target-aware scoring is better. Nothing has been measured; "
             "this is a design.",
-            "that D1 is ready to launch. Two blockers are open and either one "
-            "alone prevents it.",
+            "that D1 is ready to launch. " + phrase + ", and " + any_one + " "
+            "prevents it.",
             "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION "
             "and no figure of its is restated, re-analysed or revised here.",
         ],
@@ -887,12 +1067,25 @@ def main(argv=None) -> int:
           + ", ".join(f"{k}->{v}" for k, v in
                       design['pipeline_probability_at_assumed_values'].items()))
     print(f"  chain ceiling  : ${doc['budget']['chain']['hard_ceiling_usd']:.4f}")
-    print(f"\n  BLOCKER (evidence) : "
-          f"{doc['contamination_protection']['batteries_available']} of "
-          f"{doc['contamination_protection']['batteries_D1_requires']} fresh "
-          f"batteries available")
-    print(f"  BLOCKER (funding)  : short by "
-          f"${doc['budget']['shortfall_usd']:.4f}")
+    #: Printed from the DERIVED list, so the console cannot disagree with the
+    #: document about how many blockers are open -- which it did, showing two
+    #: while the record carried three.
+    detail = {
+        "evidence": (
+            f"{doc['contamination_protection']['batteries_available']} of "
+            f"{doc['contamination_protection']['batteries_D1_requires']} fresh "
+            "batteries available"),
+        "funding": f"short by ${doc['budget']['shortfall_usd']:.4f}",
+        "per-session ceiling": (
+            f"${doc['budget']['chain']['max_session_hard_ceiling_usd']:.4f} "
+            f"search session against a "
+            f"${doc['budget']['per_session_envelope_usd']:.2f} envelope"),
+    }
+    print()
+    for name in doc["open_blockers"]:
+        print(f"  BLOCKER ({name}) : {detail.get(name, 'see the record')}")
+    if not doc["open_blockers"]:
+        print("  no open blocker")
     print("\n  AUTHORIZES NOTHING.")
     return 0
 

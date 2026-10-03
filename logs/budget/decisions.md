@@ -1,5 +1,89 @@
 # Budget decisions
 
+## 2026-10-04 — Empty supervision fails closed, and the blocker count is derived
+
+A `$0` consistency round on maintainer review, closing the D1 design. Nothing
+scientific moved and nothing was authorized.
+
+- **The blocker count is now DERIVED, not typed.** The design read "two
+  blockers", "either blocker" and `BLOCKED ON EVIDENCE AND FUNDING` for a round
+  after the per-session ceiling became the third — because the count was prose in
+  four places while the facts lived in `budget` and `contamination_protection`.
+  `write_d1_design.py` gained `open_blockers()`, which tests the derived figures
+  (`batteries_available < batteries_D1_requires`, `shortfall_usd > 0 or not
+  d1_is_in_the_funded_list`, `not fits_per_session_envelope`) and returns the
+  open list. `status`, `_contract`, the may-not-claim line and the console
+  summary all read from it, and the new `open_blockers` field is what
+  `stage_attribution.py` pins instead of the sentence — an `equals` on prose goes
+  stale the next time a blocker opens or closes, which is the failure being
+  fixed. A fourth blocker now adds one entry to `BLOCKER_SPECS`.
+
+  Hoisting `budget()` to derive the list exposed a second defect: the operator
+  registration was a side effect of `search_stage()` appearing earlier in
+  `build()`'s dict literal, and `budget()` silently depended on the call order.
+  Both now call `_ensure_the_frozen_operators_are_registered()`, which is
+  idempotent and declared.
+
+- **"Unbatched telemetry bounds the batched implementation" is removed, because
+  it is false.** Unbatched timing does not upper-bound the batched path in either
+  direction: A3 measured the ATTENTION scorer 8.2–10.0% SLOWER at batch 3 while
+  causal-KL's length-sorted packing won 1.1884x, and the net across four
+  operators is unmeasured. `execution_protocol._decision` and
+  `gpu_validation_owed.what_only_a_GPU_can_answer` now say **provisional
+  planning basis / estimate, direction unknown**; `price_status` drops
+  `CONSERVATIVE`, which asserted the one thing nobody knows. **`$31.1577` and
+  `$60.7509` remain current planning figures and are NOT authorization ceilings
+  proven to bound the batched implementation.** Only the owed GPU qualification
+  can turn them into prices.
+
+- **`SupervisedTargetV1` fails closed on empty supervision.**
+  `content.py::_position_component` binds `assistant=absent` and
+  `assistant=0:<digest>` to different identities, on the stated grounds that the
+  policy treats them differently. It did not — one `or` collapsed both into the
+  all-positions fallback — so an asset whose `assistant` tag named nothing scored
+  FULL-SEQUENCE under a target-aware policy id, which is the failure
+  `normalized_prediction_tags` warns about in its own docstring. Now: **absent →
+  untemplated raw-LM fallback** (the general-language domain, a DATA property
+  that must not change); **present but empty → refused as malformed supervision
+  metadata**.
+
+  **Measured safe before changing it, not argued safe.** `tag_positions` filters
+  empty tags, but the artifacts were written by whatever the builder was then, so
+  the assets were counted: 203 rows across `e8_calibration_v1` and
+  `state_eval_v1` are **56 absent, 26 empty-dict, 121 non-empty, ZERO
+  present-but-empty**. The refusal refuses nothing that exists and no committed
+  state id moves. That count is now a test rather than a paragraph.
+
+  Declared in the CUDA-surface ledger as its own round over `f8ccdd11`.
+  `positions.py` is NOT on the historical CUDA-validated surface, so **no new GPU
+  validation is owed**.
+
+- **One source-capacity claim corrected.** The full MATH test set holds **~4,500
+  additional upstream candidate rows BEFORE exclusions**, not "about 4,500
+  further eligible items": the source is not pinned and the
+  exclusion/contamination chain has not been run against it, so the eligible
+  count is unknown and now carries an explicit `owed_measurement`. Wording and
+  claim boundary only — no data study was run. The battery-family record already
+  stated this correctly and was left alone.
+
+- **The D1 execution-wiring contract is recorded before a driver exists**, as
+  `execution_wiring_required`, CONTRACT ONLY: the frozen state-eval manifest's
+  `content_sha256` must reach `StateEvaluator`; the evaluator must carry D1's
+  position policy and declared `NumericalEnvironment`; and
+  `SearchConfig.measurement_protocol_id` must be SET before the first expensive
+  expansion rather than learned after the first measurement. **A frozen D1 run
+  must not execute with `suite_content_identity = "unbound"`.** Each is something
+  the core permits a caller to omit. The owed test is a small D1
+  experiment-suite contract test, written when the driver is — it checks this
+  experiment's wiring, not a reusable mechanism, so it does not belong in core.
+
+- **Two reported pre-existing issues were deliberately NOT repaired**, per the
+  review: `continuation_b::test_the_preregistration_binds_the_live_executable_digest`
+  (a frozen declaration is allowed to say the current implementation is no longer
+  its executable — that is historical verification) and the 19 stale
+  skip-predicate declarations (`unaccounted = 0`, REVIEW-only, no launch gate
+  consumes it). Revisit the latter only if it enters a live launch-bound chain.
+
 ## 2026-10-03 — D1 is replayed onto the squashed `main`, not merged into it
 
 - **Context:** the squash integration above put the test-suite boundary on `main`
@@ -139,11 +223,30 @@
   grant, not an authorization change. No GPU or paid resource is authorized by it.
   `README.md` is unchanged by the whole range, so nothing public-facing moved.
 
-- **Validation evidence.** The core suite was measured on this exact executable
-  tree: `2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s`. A squash
-  preserves the tree byte for byte — the merge commit's tree hash equals the
-  branch tip's — so that measurement is the validation for `main`, and re-running
-  it would measure the same tree twice.
+- **Validation evidence, and its exact limit — CORRECTED 2026-10-04 on maintainer
+  review.** The core suite measured `2959 collected, 2945 passed / 14 skipped, 0
+  failed, 3m18s` on `a2dab91c`. This entry first said the squash "preserves the
+  tree byte for byte … so that measurement is the validation for `main`". That
+  conflated two trees:
+
+  ```text
+  a2dab91c  the measured implementation/test tree, and the approved commit
+  c7a39f3b  + pre-integration state/decision records (this file,
+            logs/state/current.json, logs/state/current.md)
+  06cab9c8  tree == c7a39f3b tree  (verified)
+            tree != a2dab91c tree
+  ```
+
+  What the squash preserved was the **branch tip's** tree. `c7a39f3b` edits three
+  records that **6, 4 and 1 core test files read respectively** — the suite
+  asserts on those documents, so describing them as untouched by anything the
+  suite executes was wrong. The accurate statement is: no executable
+  implementation changed after the measured tree, and the state-only changes on
+  top of it were **not separately rerun at that point**.
+
+  The squash itself is correct and is NOT rewritten; this correction is recorded
+  prospectively. Validation for the records now comes from the D1
+  reconciliation's green core suite, which is a third tree with its own content.
 
 - **The operational consequence, per P12.2.** A squash commit does not have the
   branch's commits as ancestors, so `refactor/test-suite-boundary` is no longer an

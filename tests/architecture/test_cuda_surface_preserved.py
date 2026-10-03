@@ -1257,6 +1257,28 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "HISTORICAL CUDA SURFACE -- unchanged from the previous round's "
             "entry; this round adds no device, dtype or shape behaviour.",
      }),
+    ("f8ccdd1163428a48887b50bed14f71d94ea52cc5",
+     "empty supervision fails closed, and the blocker count is derived",
+     {
+        "src/aadistill/initialization/scoring/positions.py":
+            "DECLARED SEMANTIC CHANGE: `SupervisedTargetV1._prediction_mask` "
+            "now REFUSES a present-but-empty `assistant` tag instead of "
+            "falling back to all positions. The two cases were already bound to "
+            "different scoring content identities -- `assistant=absent` against "
+            "`assistant=0:<digest>` -- by `content.py::_position_component`, on "
+            "the stated grounds that this policy treats them differently; one "
+            "`or` meant it did not, so an asset whose supervision metadata "
+            "named nothing scored FULL-SEQUENCE under a target-aware policy id. "
+            "ABSENT still falls back, which is the raw-LM/general-language case "
+            "and a DATA property that must not change. Measured safe against "
+            "the frozen assets before changing it: 203 rows across "
+            "e8_calibration_v1 and state_eval_v1 are 56 absent, 26 empty-dict "
+            "and 121 non-empty, with ZERO present-but-empty, so the refusal "
+            "refuses nothing that exists and no committed state id moves. NO "
+            "CUDA SURFACE: it builds boolean masks on the host, and the file is "
+            "not on the historical CUDA-validated surface, so no new GPU "
+            "validation is owed.",
+     }),
 )
 
 
