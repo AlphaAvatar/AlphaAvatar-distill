@@ -1459,7 +1459,7 @@
   },
   {
    "file": "tests/docs/test_repository_structure.py",
-   "line": 457,
+   "line": 471,
    "kind": "skipif",
    "function": "<module>",
    "condition": "_logs_tree_is_partial()",
@@ -2549,5 +2549,5 @@
   }
  },
  "verdict": "PASS",
- "digest": "b42ef96536f834305215c53aa1e7a4a72f279d15dc9fccfcfdecd9aaba13523f"
+ "digest": "6ffd314210f7d150d0608895cbb8f08da79d4f156df583dff5ad0ee7c44f2bb9"
 }
