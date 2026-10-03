@@ -144,7 +144,7 @@ tested tree   : a2dab91ceb773699079cab4d15b03dfb67691ed2
 ```
 
 **What the `2945 passed` measurement does and does not cover — corrected
-2026-10-04 on maintainer review.** The squash was correct and is not being
+2026-10-03 on maintainer review.** The squash was correct and is not being
 rewritten; the claim made about it was too strong. Precisely:
 
 ```text
@@ -188,9 +188,12 @@ historical run. **43m20s → 3m18s.**
 a public claim.** `README.md` is unchanged by the whole range. No GPU or paid
 resource is authorized by it, and no scientific result moved.
 
-The validation is the core suite measured on this exact tree —
-`2959 collected, 2945 passed / 14 skipped, 0 failed` — and a squash preserves the
-tree byte for byte, so it stands for `main` without a second run.
+The validation of that integration, and its exact limit, is stated above — it
+is not restated here, because the earlier version of this paragraph claimed the
+squash "preserves the tree byte for byte, so it stands for `main` without a
+second run", which is the sentence the correction above retracts. **The current
+validation of the live tree is `test_suites.core` in the snapshot**, which is a
+different and later measurement.
 
 **Before `main` carried this, it stood at `4dc579ba`**: the C3, A3 and D1-design
 rounds, fast-forwarded on 2026-10-03 in a 597-commit integration that is the

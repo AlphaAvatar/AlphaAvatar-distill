@@ -851,27 +851,53 @@ def budget() -> dict[str, Any]:
             "cannot be bound until screening names the one candidate that "
             "advances. Each is separately priced and separately authorized."),
         "per_session_envelope_usd": terms["per_attempt_hard_ceiling_usd"],
-        "fits_per_session_envelope": chain["max_session_hard_ceiling_usd"]
+        #: PROVISIONAL IN THE NAME, not only in a docstring. These compare a
+        #: planning basis derived from UNBATCHED telemetry against a real
+        #: envelope, and the comparison's direction relative to measured batched
+        #: D1 is unknown. A field called `fits_per_session_envelope` would be
+        #: read later as a finalized authorization fact; this one cannot be.
+        "provisional_basis_fits_per_session_envelope":
+            chain["max_session_hard_ceiling_usd"]
             <= terms["per_attempt_hard_ceiling_usd"],
-        "per_session_envelope_excess_usd": round(
+        "provisional_per_session_excess_usd": round(
             chain["max_session_hard_ceiling_usd"]
             - terms["per_attempt_hard_ceiling_usd"], 4),
+        "per_session_envelope_compatibility": "UNRESOLVED",
+        "_per_session_envelope_compatibility": (
+            "UNRESOLVED, and it BLOCKS AUTHORIZATION while it is. It is not "
+            "RESOLVED-INCOMPATIBLE: nothing has measured the batched D1 search, "
+            "so it is NOT established that the real session exceeds "
+            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
+            "basis says it would, by "
+            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
+            "and an unresolved compatibility is a blocker because authorization "
+            "needs a figure it can bind — not because the incompatibility is "
+            "proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS."),
         "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
-            "the SEARCH session alone is priced at "
-            f"${chain['max_session_hard_ceiling_usd']:.4f}, and the execution "
-            "package's per-session envelope is "
-            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The search does not "
-            "fit in one authorized session, and this is a SEPARATE constraint "
-            "from the project-level cap: a D1 grant that only moved the "
-            "cumulative cap would still be unable to authorize the search "
-            "session, because `per_attempt_hard_ceiling_usd` binds each session "
-            "independently (see the C1 authorization, where the grant issuer "
-            "refused a session price that disagreed with its pricing file). A "
-            "future D1 grant must resolve this explicitly — by raising the "
-            "per-session envelope for the phase, by splitting the search into "
-            "sessions that each fit, or by a cheaper search protocol — and the "
-            "resolution has to be recorded as a maintainer decision rather "
-            "than inferred from a cap change."),
+            "WHAT IS DEFINITE: per-session envelope compatibility is "
+            "UNRESOLVED, and an unresolved compatibility blocks authorization. "
+            "This is a SEPARATE constraint from the project-level cap — "
+            "`per_attempt_hard_ceiling_usd` binds each session independently, "
+            "and the C1 authorization shows the grant issuer refusing a session "
+            "price that disagreed with its pricing file — so a D1 grant that "
+            "moved only the cumulative cap would still not authorize the search "
+            "session.\n\n"
+            "WHAT IS NOT ESTABLISHED: that the real batched D1 search exceeds "
+            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
+            "basis puts the search session at "
+            f"${chain['max_session_hard_ceiling_usd']:.4f}, over by "
+            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
+            "but that basis comes from UNBATCHED telemetry whose direction "
+            "relative to the batched implementation is unknown. The measured "
+            "session could land either side of the envelope, so this document "
+            "does NOT claim the search has been shown not to fit.\n\n"
+            "WHAT RESOLVES IT: the owed short GPU qualification, which prices a "
+            "representative batched expansion. ONLY THEN is the envelope "
+            "question answerable, and only then can a grant choose between "
+            "raising the per-session envelope for the phase, splitting the "
+            "search into sessions that each fit, or a cheaper search protocol. "
+            "That resolution is a maintainer decision recorded as one, never "
+            "inferred from a cap change."),
         "position": {
             "project_cap_usd": float(live["project"]["cap_usd"]),
             "project_remaining_usd": project_remaining,
@@ -889,15 +915,29 @@ def budget() -> dict[str, Any]:
                             "quietly."),
             "_cap_cross_check": pricing["cumulative_cap_usd"],
         },
-        "shortfall_usd": round(chain["hard_ceiling_usd"] - project_remaining, 4),
+        #: PROVISIONAL: the difference between a planning basis and the live
+        #: balance. NOT the finalized amount by which the project cap must
+        #: increase -- that figure does not exist until the GPU qualification
+        #: reprices the chain.
+        "provisional_shortfall_usd": round(
+            chain["hard_ceiling_usd"] - project_remaining, 4),
         "funds_formal_sessions_of": list(funded),
         "d1_is_in_the_funded_list": "phase_d1" in funded,
         "BLOCKER": (
-            "D1 is NOT FUNDABLE. The chain's hard ceiling exceeds the project's "
-            "entire remaining headroom, and `phase_d1` is not in the C1 "
-            "execution package's `funds_formal_sessions_of` list, so no "
-            "existing allowance covers it. A maintainer grant is required for "
-            "the phase, and the cap would have to move with it."),
+            "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope "
+            "rather than arithmetic: `phase_d1` is not in the C1 execution "
+            "package's `funds_formal_sessions_of` list, so NO existing "
+            "allowance covers it at any price. A maintainer grant is required "
+            "for the phase. That alone blocks D1 and does not depend on any "
+            "cost estimate.\n\n"
+            "THE SHORTFALL IS PROVISIONAL. "
+            f"`provisional_shortfall_usd` = ${round(chain['hard_ceiling_usd'] - project_remaining, 4)} "
+            "is the gap between a planning basis derived from UNBATCHED "
+            "telemetry and the live balance. It is NOT the finalized amount by "
+            "which the project cap must increase: the direction of the batched "
+            "correction is unknown, so the real figure is unknown until the "
+            "owed GPU qualification reprices the chain. This document does not "
+            "claim the cap must move by that amount."),
         "d_series_extrapolation": {
             "_what": ("D2 and D3 repeat this shape by the maintainer's "
                       "instruction — each a full search, freeze, recovery, "
@@ -934,15 +974,32 @@ def open_blockers(budget_section: dict[str, Any],
     balance, the frozen capacity analysis or the package's own terms — so a
     blocker closes here when the underlying fact changes, and not when someone
     remembers to edit a sentence.
+
+    **A blocker being open is not the same as its cause being settled, and the
+    three differ.** Evidence is definite: the batteries do not exist. Funding is
+    definite for a reason that needs no cost estimate — `phase_d1` is outside
+    the package's `funds_formal_sessions_of`, so no allowance covers it at any
+    price — while the shortfall figure beside it is provisional. The per-session
+    envelope is open because compatibility is UNRESOLVED, not because
+    incompatibility is proven: the comparison rests on unbatched telemetry whose
+    direction relative to batched D1 is unknown. The owed GPU qualification is
+    what settles the last two figures; it cannot change the first.
     """
     open_: list[str] = []
     if (contamination_section["batteries_available"]
             < contamination_section["batteries_D1_requires"]):
         open_.append("evidence")
-    if (budget_section["shortfall_usd"] > 0
-            or not budget_section["d1_is_in_the_funded_list"]):
+    #: Either is sufficient, and they are different kinds of fact. The funded
+    #: list is categorical; the shortfall is a provisional comparison that a
+    #: repricing could move to zero while the list still blocked D1.
+    if (not budget_section["d1_is_in_the_funded_list"]
+            or budget_section["provisional_shortfall_usd"] > 0):
         open_.append("funding")
-    if not budget_section["fits_per_session_envelope"]:
+    #: Open while compatibility is unresolved. Under the provisional basis it
+    #: does not fit; a resolved-and-fits answer needs the qualification, so the
+    #: condition is deliberately "not proven to fit" rather than "proven not to".
+    if (budget_section["per_session_envelope_compatibility"] != "RESOLVED_FITS"
+            or not budget_section["provisional_basis_fits_per_session_envelope"]):
         open_.append("per-session ceiling")
     return tuple(open_)
 
@@ -1075,11 +1132,13 @@ def main(argv=None) -> int:
             f"{doc['contamination_protection']['batteries_available']} of "
             f"{doc['contamination_protection']['batteries_D1_requires']} fresh "
             "batteries available"),
-        "funding": f"short by ${doc['budget']['shortfall_usd']:.4f}",
+        "funding": (
+            "phase_d1 is not in funds_formal_sessions_of (definite); "
+            f"provisional shortfall ${doc['budget']['provisional_shortfall_usd']:.4f}"),
         "per-session ceiling": (
-            f"${doc['budget']['chain']['max_session_hard_ceiling_usd']:.4f} "
-            f"search session against a "
-            f"${doc['budget']['per_session_envelope_usd']:.2f} envelope"),
+            f"compatibility {doc['budget']['per_session_envelope_compatibility']}; "
+            f"provisional ${doc['budget']['chain']['max_session_hard_ceiling_usd']:.4f} "
+            f"vs ${doc['budget']['per_session_envelope_usd']:.2f} envelope"),
     }
     print()
     for name in doc["open_blockers"]:

@@ -523,8 +523,9 @@
   "total_probes": 12
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE. The chain's hard ceiling exceeds the project's entire remaining headroom, and `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so no existing allowance covers it. A maintainer grant is required for the phase, and the cap would have to move with it.",
-  "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "the SEARCH session alone is priced at $31.1577, and the execution package's per-session envelope is $30.00. The search does not fit in one authorized session, and this is a SEPARATE constraint from the project-level cap: a D1 grant that only moved the cumulative cap would still be unable to authorize the search session, because `per_attempt_hard_ceiling_usd` binds each session independently (see the C1 authorization, where the grant issuer refused a session price that disagreed with its pricing file). A future D1 grant must resolve this explicitly \u2014 by raising the per-session envelope for the phase, by splitting the search into sessions that each fit, or by a cheaper search protocol \u2014 and the resolution has to be recorded as a maintainer decision rather than inferred from a cap change.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = $47.5732 is the gap between a planning basis derived from UNBATCHED telemetry and the live balance. It is NOT the finalized amount by which the project cap must increase: the direction of the batched correction is unknown, so the real figure is unknown until the owed GPU qualification reprices the chain. This document does not claim the cap must move by that amount.",
+  "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "WHAT IS DEFINITE: per-session envelope compatibility is UNRESOLVED, and an unresolved compatibility blocks authorization. This is a SEPARATE constraint from the project-level cap \u2014 `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file \u2014 so a D1 grant that moved only the cumulative cap would still not authorize the search session.\n\nWHAT IS NOT ESTABLISHED: that the real batched D1 search exceeds $30.00. The provisional basis puts the search session at $31.1577, over by $1.1577, but that basis comes from UNBATCHED telemetry whose direction relative to the batched implementation is unknown. The measured session could land either side of the envelope, so this document does NOT claim the search has been shown not to fit.\n\nWHAT RESOLVES IT: the owed short GPU qualification, which prices a representative batched expansion. ONLY THEN is the envelope question answerable, and only then can a grant choose between raising the per-session envelope for the phase, splitting the search into sessions that each fit, or a cheaper search protocol. That resolution is a maintainer decision recorded as one, never inferred from a cap change.",
+  "_per_session_envelope_compatibility": "UNRESOLVED, and it BLOCKS AUTHORIZATION while it is. It is not RESOLVED-INCOMPATIBLE: nothing has measured the batched D1 search, so it is NOT established that the real session exceeds $30.00. The provisional basis says it would, by $1.1577, and an unresolved compatibility is a blocker because authorization needs a figure it can bind \u2014 not because the incompatibility is proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS.",
   "_price_status": "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a finalized authorization price and NOT a proven upper bound on the batched implementation. Two reasons, and the first is the one that matters:\n\n1. the per-expansion minutes were measured on an UNBATCHED state evaluation and a one-item-per-forward statistics pass, and D1 runs both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3; causal-KL's length-sorted packing won 1.1884x. The net effect on a D1 expansion running all four operators is UNMEASURED, so the direction of the correction is unknown, not merely its size.\n2. `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nWHAT MUST REFRESH IT: a short GPU qualification measuring real CUDA/bf16 execution, the real state-eval memory peak, the target-aware batched path's correctness, and the actual timing of a representative expansion. Until that runs, these numbers size a grant request; they do not price one.",
   "_why_three_sessions": "the search commits a candidate set and stops; the screening rung cannot be bound until that set exists, and the confirmation rung cannot be bound until screening names the one candidate that advances. Each is separately priced and separately authorized.",
   "chain": {
@@ -590,13 +591,12 @@
    "_what": "D2 and D3 repeat this shape by the maintainer's instruction \u2014 each a full search, freeze, recovery, behavioural evaluation and promotion decision.",
    "three_chains_hard_ceiling_usd": 182.2527
   },
-  "fits_per_session_envelope": false,
   "funds_formal_sessions_of": [
    "phase_c1",
    "phase_c3",
    "phase_a3"
   ],
-  "per_session_envelope_excess_usd": 1.1577,
+  "per_session_envelope_compatibility": "UNRESOLVED",
   "per_session_envelope_usd": 30.0,
   "position": {
    "_cap_cross_check": 410.0,
@@ -614,8 +614,10 @@
    "usd_per_hour": 1.09
   },
   "price_status": "PROVISIONAL PLANNING BASIS -- DIRECTION UNKNOWN",
-  "sessions": 3,
-  "shortfall_usd": 47.5732
+  "provisional_basis_fits_per_session_envelope": false,
+  "provisional_per_session_excess_usd": 1.1577,
+  "provisional_shortfall_usd": 47.5732,
+  "sessions": 3
  },
  "contamination_protection": {
   "BLOCKER": "ZERO further disjoint batteries can be drawn under the frozen C1 mixture. math_verified holds 70 eligible items of the 150 a battery needs: MATH-500's 500 rows are already committed to the five isolation roles, c1_confirmation_v1 and c2_screening_v1. D1 cannot be executed as designed until this is resolved, and neither can D2 or D3.",
@@ -656,7 +658,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "6162ddda71cba442040cd93de938c8e287b95400941738a00ea20c0f9342b01b",
+ "design_hash": "2c54dcd193c3d7748de82565fddad27719c1e23ca930238d18739c028cdf3f9c",
  "execution_protocol": {
   "_decision": "maintainer engineering decision after A3: batched execution is adopted across every batchable path from D1 onward, not only ATTENTION. A3 measured that it is NOT an optimization on attention.activation_importance_v1 \u2014 8-10% slower on the scorer with no detectable correctness effect \u2014 so this is a uniformity decision rather than a performance claim. The search ceiling below is derived from UNBATCHED telemetry, which makes it a PROVISIONAL PLANNING BASIS and NOT a bound: unbatched timing does not upper-bound the batched implementation in either direction. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 while causal-KL's length-sorted packing won 1.1884x, and the net effect on an expansion running all four operators is unmeasured. The direction of the correction is unknown, so the figure sizes a grant request rather than capping one; only the owed GPU qualification can turn it into a price.",
   "_the_value_is_config_not_core": "`3` is an experiment-policy number carried by ExecutionConfig. The core accepts 2, 4, 8 or a future token-budget batching policy with no edit; `aadistill.initialization.execution` owns the knob and `calibration.packing` owns the policies.",

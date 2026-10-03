@@ -1,6 +1,6 @@
 # Budget decisions
 
-## 2026-10-04 — Empty supervision fails closed, and the blocker count is derived
+## 2026-10-03 — Empty supervision fails closed, and the blocker count is derived
 
 A `$0` consistency round on maintainer review, closing the D1 design. Nothing
 scientific moved and nothing was authorized.
@@ -83,6 +83,75 @@ scientific moved and nothing was authorized.
   its executable — that is historical verification) and the 19 stale
   skip-predicate declarations (`unaccounted = 0`, REVIEW-only, no launch gate
   consumes it). Revisit the latter only if it enters a live launch-bound chain.
+
+- **GO on review, with three record corrections before the merge.**
+
+  **The date was a day in the future.** This entry and two state records were
+  stamped `2026-10-04`. The host clock is `+08:00`, so a commit made at
+  `01:56+08:00` is `2026-10-03T17:56Z` — the repository dates in UTC
+  (`generated_utc`), and the local offset put four records a day ahead of the
+  decision they describe. Corrected to `2026-10-03`. A future-dated maintainer
+  decision in a provenance chain is worse than a wrong one, because it cannot be
+  ordered against the evidence it authorizes.
+
+  **The snapshot's current validation was two rounds stale.**
+  `test_suites.core` still read `2959 collected, 2945 passed, 3m18s on a2dab91c`
+  while this branch had been measured at `3019 passed / 14 skipped / 0 failed,
+  4m06s`. No rerun was needed to fix a record. `current.md` also still restated
+  the retracted "a squash preserves the tree byte for byte, so it stands for
+  `main` without a second run" — in the same section as the correction
+  retracting it. It now points at `test_suites.core` instead of contradicting
+  the paragraph above it.
+
+  **The blockers now separate DEFINITE from PROVISIONAL**, because three
+  statements read as settled facts and only one was:
+
+  * **evidence — definite.** 0 of 2 batteries exist.
+  * **funding — definite, for a reason needing no cost estimate.** `phase_d1` is
+    outside the package's `funds_formal_sessions_of`, so no allowance covers it
+    at any price. The `$47.5732` is a **provisional planning shortfall**, NOT
+    the amount by which the cap must increase; that figure does not exist until
+    the GPU qualification reprices the chain.
+  * **per-session envelope — UNRESOLVED, and blocking because unresolved.** It
+    is NOT established that the measured batched search exceeds `$30.00`. The
+    provisional basis says it would by `$1.1577`, from unbatched telemetry whose
+    direction is unknown, so the measured session could land either side. The
+    owed GPU qualification is exactly what resolves it.
+
+  The provisional nature is in the **field names**, not only in prose, because a
+  name is what a later reader trusts: `shortfall_usd` →
+  `provisional_shortfall_usd`, `per_session_envelope_excess_usd` →
+  `provisional_per_session_excess_usd`, `fits_per_session_envelope` →
+  `provisional_basis_fits_per_session_envelope`, plus a new
+  `per_session_envelope_compatibility: "UNRESOLVED"` carrying the actual state.
+  Consumers were enumerated before renaming (the producer, `open_blockers()`,
+  one D1 test — `e5_driver.py`'s `shortfall_usd` is a different record's field
+  and was not touched). A guard refuses the retired names, mutation-verified,
+  and `open_blockers()`'s per-session test is now "not proven to fit" rather
+  than "proven not to".
+
+  The D1 test that asserted TWO blockers now reads the count from the document.
+
+- **MAINTAINER ORDER 2026-10-03 — the next phase, and what must NOT be frozen
+  before it.** No further D1 architecture round. The sequence is:
+
+  ```text
+  1. maintainer decision on D-series source extensions
+  2. pin/verify the selected sources
+  3. run the exclusion + contamination chain, derive REAL eligible capacity
+  4. materialize/freeze the D-series batteries once capacity suffices
+  5. authorize the short engineering GPU qualification
+  6. measure real batched CUDA correctness, memory, representative timing
+  7. reprice D1 from that measurement
+  8. ONLY THEN finalize formal D1 funding and the per-session envelope
+  9. build/authorize the formal D1 execution chain
+  ```
+
+  **The formal funding and envelope must not be frozen before steps 6–7.** This
+  round established that the present timing basis has unknown direction relative
+  to the batched implementation, so a figure frozen now would be frozen against
+  a number nobody has measured. The two deferred historical issues stay
+  untouched and non-blocking.
 
 ## 2026-10-03 — D1 is replayed onto the squashed `main`, not merged into it
 
@@ -223,7 +292,7 @@ scientific moved and nothing was authorized.
   grant, not an authorization change. No GPU or paid resource is authorized by it.
   `README.md` is unchanged by the whole range, so nothing public-facing moved.
 
-- **Validation evidence, and its exact limit — CORRECTED 2026-10-04 on maintainer
+- **Validation evidence, and its exact limit — CORRECTED 2026-10-03 on maintainer
   review.** The core suite measured `2959 collected, 2945 passed / 14 skipped, 0
   failed, 3m18s` on `a2dab91c`. This entry first said the squash "preserves the
   tree byte for byte … so that measurement is the validation for `main`". That

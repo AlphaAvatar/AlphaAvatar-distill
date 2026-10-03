@@ -399,16 +399,53 @@ class TestTheCommittedRecords:
         assert "NOT AUTHORIZED" in doc["status"]
         assert doc["search_stage"]["cost"]["hard_ceiling_usd"] > 0
 
-    def test_both_blockers_are_recorded_as_blockers(self):
-        """Not as caveats. Either alone prevents execution, and a design that
-        buried them in prose would read as ready."""
+    def test_all_three_blockers_are_recorded_as_blockers(self):
+        """Not as caveats. Any one alone prevents execution, and a design that
+        buried them in prose would read as ready.
+
+        **Three, and the count is read from the document rather than written
+        here.** This test asserted TWO for a round after the per-session ceiling
+        became the third — a test that names the number is one more place the
+        number can go stale, so it checks the derived list against the fields
+        each entry is derived from.
+        """
         doc = json.loads(DESIGN.read_text())
         assert "BLOCKER" in doc["contamination_protection"]
         assert "BLOCKER" in doc["budget"]
+        assert set(doc["open_blockers"]) == {
+            "evidence", "funding", "per-session ceiling"}
+
+        #: evidence — definite: the batteries do not exist.
         assert doc["contamination_protection"]["batteries_available"] < \
             doc["contamination_protection"]["batteries_D1_requires"]
-        assert doc["budget"]["shortfall_usd"] > 0
+        #: funding — definite for a reason needing no cost estimate.
         assert doc["budget"]["d1_is_in_the_funded_list"] is False
+        #: per-session envelope — open because UNRESOLVED, not proven to fail.
+        assert doc["budget"]["per_session_envelope_compatibility"] == "UNRESOLVED"
+
+    def test_the_two_cost_derived_blocker_figures_are_named_provisional(self):
+        """A planning figure must not be readable as finalized authorization
+        pricing, and the name is where that is enforced.
+
+        Both come from UNBATCHED telemetry whose direction relative to batched
+        D1 is unknown, so neither bounds the real cost. `shortfall_usd` and
+        `fits_per_session_envelope` were exactly the names a later reader would
+        have taken for settled figures.
+        """
+        budget = json.loads(DESIGN.read_text())["budget"]
+        for field in ("provisional_shortfall_usd",
+                      "provisional_per_session_excess_usd",
+                      "provisional_basis_fits_per_session_envelope"):
+            assert field in budget, f"{field} is missing"
+        for retired in ("shortfall_usd", "per_session_envelope_excess_usd",
+                        "fits_per_session_envelope"):
+            assert retired not in budget, (
+                f"{retired} is back; a cost-derived field whose direction is "
+                "unknown must say so in its name")
+        #: and the claim boundary is in the prose, not only the field names
+        assert "NOT the finalized amount" in budget["BLOCKER"]
+        assert "NOT ESTABLISHED" in budget[
+            "_SECOND_BLOCKER_THE_PER_SESSION_CEILING"]
 
     def test_the_budget_position_is_derived_not_restated(self):
         """The writer calls `derive_budget.derive()`; a hand-copied balance

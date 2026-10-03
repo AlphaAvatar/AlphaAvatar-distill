@@ -128,7 +128,7 @@
   "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and BLOCKED THREE TIMES -- evidence, funding and the per-session ceiling, any one alone sufficient. Reasons and figures: `d_series.blockers`.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 is designed and implemented at $0 and BLOCKED THREE TIMES, any one alone sufficient. Which, how definite, and the figures: `d_series.blockers`.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -160,7 +160,7 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "next": "Await a maintainer ruling on the three D-series source extensions, a D1 phase grant, and the per-session envelope. The owed GPU qualification comes after the review of this $0 round. Owners: phase_d1/plans/d1_design.json and logs/shared/analyses/autoinit_d_series_battery_family.json.",
+ "next": "the D-series source decision, then pin/verify sources, derive REAL eligible capacity, freeze batteries, authorize the short GPU qualification, reprice, and ONLY THEN finalize D1 funding and the per-session envelope. Order: logs/budget/decisions.md 2026-10-03. No further D1 architecture round.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -201,19 +201,19 @@
  "d_series": {
   "state": "D1 DESIGNED, IMPLEMENTED at $0, PRICED, BLOCKED. D2 and D3 NOT STARTED.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "a3_precondition": "MET, ownership closed, ACCEPTED on maintainer review 2026-10-04. Owner: d1_design.json :: materialization_prerequisite.",
-  "scoring_identity": "one measurement_protocol_id binds the suite, the scoring content, the policy, the reduction and the execution. Content is bound in scoring/content.py, NEVER in suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
+  "a3_precondition": "MET, ownership closed, ACCEPTED on maintainer review 2026-10-03. Owner: d1_design.json :: materialization_prerequisite.",
+  "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening seeds / 3 confirmation seeds, a pragmatic balance and NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py :: CLAIM_BOUNDARY.",
   "battery_family": "d_series_behavioural_v1: six roles, rule frozen before any outcome. DESIGNED / NOT MATERIALIZED. Owner: logs/shared/analyses/autoinit_d_series_battery_family.json.",
-  "blockers": "EVIDENCE: 0 of 2 batteries for D1, 0 of 6 for the family; three strata short (math_verified 830, code 321, gsm8k 11). FUNDING: provisional $60.7509 against $13.1777, and phase_d1 is absent from funds_formal_sessions_of. CEILING: the $31.1577 search session exceeds the $30.00 per_attempt_hard_ceiling_usd, which binds separately.",
-  "owed_gpu_qualification": "NOT RUN. The unbatched cost table is a PROVISIONAL PLANNING BASIS, direction UNKNOWN -- it does NOT bound batched D1. The chain figures size a grant request; they are not ceilings.",
+  "blockers": "EVIDENCE (definite): 0 of 2 batteries for D1, 0 of 6 for the family. FUNDING (definite): phase_d1 is absent from funds_formal_sessions_of, so no allowance covers it at any price; the shortfall figure is PROVISIONAL and is not the amount the cap must move. PER-SESSION ENVELOPE: compatibility UNRESOLVED and therefore blocking -- provisional $31.1577 vs $30.00, NOT a measured excess. The owed GPU qualification settles the last two.",
+  "owed_gpu_qualification": "NOT RUN. It is what settles the funding and envelope figures: the unbatched cost table is a planning basis whose direction relative to batched D1 is UNKNOWN.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "authorizes": "nothing",
-  "execution_wiring": "CONTRACT ONLY, no driver exists. A frozen D1 run may NOT execute with suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required."
+  "execution_wiring": "CONTRACT ONLY, no driver exists. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required."
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s on tree a2dab91c. No skip depends on historical evidence.",
+  "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (this branch). No skip depends on historical evidence.",
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, from the 2026-10-03 test-boundary integration onward. The source branch must NOT be deleted: records bind commit hashes that exist only there. Range and obligations: logs/budget/decisions.md 2026-10-03.",
   "next_work": "review/d1-identity-correction, cut fresh from main's squash 06cab9c8. The D1 round was REPLAYED, not merged: the old branch is no longer an ancestor of main. Owner: logs/budget/decisions.md 2026-10-03."
