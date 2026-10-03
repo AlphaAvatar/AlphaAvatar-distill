@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 110,
- "digest": "84c419fab58f84f26e24f59c969c23943fc868078f8b2358849fa9ac21fd23c5",
+ "n_files": 111,
+ "digest": "27684359cb7f5f934b58600025a0359a1879bad73856e83ca0cd12d67082d8d3",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -454,8 +454,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/fixed_path.py",
-   "sha256": "fe945a22bd174219a87d6bb838ed5f318342d0f92bc691a0ac6a5da79c612581",
-   "bytes": 40821
+   "sha256": "ed5cb7016db7992447c19259102510183150bcc50cafbe03f7ca537d6ce97c11",
+   "bytes": 41813
   },
   {
    "path": "src/aadistill/initialization/planning/generation.py",
@@ -471,6 +471,11 @@
    "path": "src/aadistill/initialization/scoring/batches.py",
    "sha256": "19a8fdc987f872d9b7c9ef3c20ffa0fcb45a6d9a81b26579c538c3fec755d9d8",
    "bytes": 12562
+  },
+  {
+   "path": "src/aadistill/initialization/scoring/content.py",
+   "sha256": "ecc2f1830501949705446d16dd15396a7e36a74027d7687601e4e3f9f52d6f09",
+   "bytes": 9244
   },
   {
    "path": "src/aadistill/initialization/scoring/positions.py",
@@ -489,8 +494,8 @@
   },
   {
    "path": "src/aadistill/initialization/specs/materialization.py",
-   "sha256": "b089488374b0a3a97ff9ca645af1022caf1d31f63365da99317bcc4da63a50c5",
-   "bytes": 13768
+   "sha256": "f459d6608e2f0bd8e0a28946917176570f9fb310cd5f4ff61563e1d06289db8b",
+   "bytes": 21257
   },
   {
    "path": "src/aadistill/initialization/specs/metrics.py",
@@ -499,8 +504,8 @@
   },
   {
    "path": "src/aadistill/initialization/specs/state.py",
-   "sha256": "2595aa41da05d1eb3ea0bd709f53d9d7d6b7f019c5770053d29c856789ffb2d2",
-   "bytes": 24145
+   "sha256": "41c0bf50e0df8b2e30e197141799dc457781e30d92df30a78167a699aedc45a4",
+   "bytes": 25998
   },
   {
    "path": "src/aadistill/initialization/statistics/collect.py",

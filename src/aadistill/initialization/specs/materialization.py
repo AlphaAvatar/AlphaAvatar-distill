@@ -34,10 +34,19 @@ So the single id becomes four, each with one job:
     detail would fork on a log level.
 
 ``materialization_id``
-    ``semantic_state_id`` + ``numerical_execution_fingerprint``. **This** is what
-    resume, dedup and checkpoint ownership may key on. Two protocols of one path
-    have one semantic id and two materialization ids, which is exactly the
-    distinction the measurement above found and the single id could not express.
+    ``semantic_state_id`` + ``numerical_execution_fingerprint`` + **the parent
+    materialization actually consumed**. **This** is what resume, dedup and
+    checkpoint ownership may key on. Two protocols of one path have one semantic
+    id and two materialization ids, which is exactly the distinction the
+    measurement above found and the single id could not express.
+
+    **The parent term is not decoration.** A child's bytes are a function of the
+    bytes it was handed, not only of its own operator and execution protocol.
+    Without it, two children of two *differently materialized* parents — same
+    path, same fingerprint — would share one materialization id and could
+    therefore resume each other, which is the original collision one level up
+    the tree. A root has no parent and takes
+    :func:`root_materialization_id` instead.
 
 ``artifact_digest``
     What was actually built. Observed, not predicted. The materialization id says
@@ -68,6 +77,11 @@ SCHEMA = "aadistill.autoinit.materialization_identity/v1"
 
 FINGERPRINT_SCHEMA = "aadistill.autoinit.numerical_execution_fingerprint/v1"
 
+#: The ROOT's materialization schema, separate from the child one because the
+#: two are computed from different things: a root from its published revision,
+#: a child from its path, its execution and its parent.
+ROOT_SCHEMA = "aadistill.autoinit.root_materialization/v1"
+
 #: Every field the fingerprint covers, enumerated POSITIVELY. The same
 #: discipline `aadistill.initialization.execution` adopted for the
 #: science/execution boundary, and for the same reason: an exclusion list spelled
@@ -81,6 +95,50 @@ FINGERPRINT_FIELDS: tuple[str, ...] = (
     "device_type",
     "compute_dtype",
     "accumulation_dtype",
+)
+
+#: WHAT BELONGS IN THE FINGERPRINT, AND WHAT DOES NOT. The list above is v1 and
+#: will grow; this is the rule for growing it, so that a future field is added
+#: deliberately rather than by whoever hits the problem first.
+#:
+#: **In** — anything that selects a different ARITHMETIC PATH over the same
+#: inputs, because two arithmetic paths can produce two sets of bytes:
+#:
+#: * which items share a forward, and how they are grouped (both v1 fields);
+#: * the device CLASS, the compute dtype, the accumulation dtype (v1);
+#: * an explicit attention/kernel/backend selection — an SDPA-vs-eager choice,
+#:   a flash/math/mem-efficient kernel preference, a deterministic-algorithms
+#:   flag, a TF32 or reduced-precision-reduction setting. **None of these is a
+#:   field yet, because nothing in this project selects them explicitly.** The
+#:   moment something does, it belongs here: this project has already measured
+#:   an attention output reducing shape-dependently on one card, so a backend
+#:   choice is exactly the kind of thing that moves bytes under an unchanged
+#:   operator.
+#:
+#: **Out** — anything that identifies WHERE or WHEN the work ran rather than
+#: what arithmetic it performed. A provider or pod id, a CUDA ordinal, a host
+#: name, a driver patch number, a log level, a telemetry flag, a wall clock, a
+#: run id, a workdir path. A fingerprint that absorbed these would fork on
+#: scheduling, and resume would never match anything.
+#:
+#: **The boundary case, stated because it is the one that will come up.** A
+#: driver or image version is OUT: `generation_compat` already classifies a
+#: driver patch as provenance rather than a runtime event, and the project has
+#: reproduced one artifact digest byte-identically across three separately
+#: rented cards of one model. A MAJOR version change that alters kernel
+#: selection would be a real arithmetic-path change — and the way to express it
+#: is an explicit field for the thing that changed, not a version string that
+#: forks the identity on every patch.
+#:
+#: The objective is narrow: a future explicit backend choice must not be able
+#: to produce different bytes under one `materialization_id`. Nothing here asks
+#: for a runtime framework.
+FINGERPRINT_GROWTH_RULE = (
+    "in: anything selecting a different arithmetic path over the same inputs "
+    "(grouping, device class, dtypes, and an explicit attention/kernel/backend "
+    "or determinism/TF32 selection once one exists). out: anything naming "
+    "where or when the work ran (provider or pod id, CUDA ordinal, host, "
+    "driver patch, log level, wall clock, run id, workdir)."
 )
 
 
@@ -171,8 +229,40 @@ def _execution_fingerprint_fields(execution: Any) -> Mapping[str, Any]:
     return view()
 
 
-def materialization_id(semantic_state_id: str, execution_fingerprint: str) -> str:
-    """The identity resume, dedup and checkpoint ownership may key on."""
+def root_materialization_id(*, root_teacher_id: str,
+                            root_teacher_sha256: str) -> str:
+    """The root's materialization: the teacher's own published identity.
+
+    A root is not something this project built. Its bytes are a published
+    revision, so its materialization is that revision's identity and **nothing
+    else** — in particular it is deliberately NOT fingerprinted, because the
+    teacher's weights do not depend on how this project groups calibration
+    items or which dtype a later operator accumulates in.
+
+    Generic by construction: it takes the two fields that pin any teacher,
+    whatever family, stage or scale, rather than naming an experiment's
+    checkpoint. `make_root_state` already requires both.
+    """
+    if not root_teacher_id or not root_teacher_sha256:
+        raise MaterializationError(
+            "a root materialization needs the teacher's id AND its revision "
+            f"hash; got {root_teacher_id!r} / {root_teacher_sha256!r}. An "
+            "unpinned root is a lineage that starts from nothing in "
+            "particular, which every child would then inherit")
+    return sha256_json({"schema": ROOT_SCHEMA,
+                        "root_teacher_id": root_teacher_id,
+                        "root_teacher_sha256": root_teacher_sha256})[:32]
+
+
+def materialization_id(semantic_state_id: str, execution_fingerprint: str,
+                       parent_materialization_id: str) -> str:
+    """The identity resume, dedup and checkpoint ownership may key on.
+
+    All three terms are REQUIRED and none has a default. An optional parent
+    would reintroduce the collision one level up the tree — two children of
+    differently materialized parents sharing an id — and the whole point of
+    this function is that such a collision cannot be formed by omission.
+    """
     if not semantic_state_id:
         raise MaterializationError(
             "refusing to form a materialization id without a semantic state id")
@@ -181,9 +271,17 @@ def materialization_id(semantic_state_id: str, execution_fingerprint: str) -> st
             "refusing to form a materialization id without an execution "
             "fingerprint: its absence is precisely the measured collision "
             "this type exists to prevent")
+    if not parent_materialization_id:
+        raise MaterializationError(
+            "refusing to form a materialization id without the parent "
+            "materialization actually consumed: a child's bytes are a function "
+            "of the bytes handed to it, so two children of differently "
+            "materialized parents would otherwise share one id. A root has no "
+            "parent and uses `root_materialization_id`")
     return sha256_json({"schema": SCHEMA,
                         "semantic_state_id": semantic_state_id,
                         "numerical_execution_fingerprint": execution_fingerprint,
+                        "parent_materialization_id": parent_materialization_id,
                         })[:32]
 
 
@@ -201,17 +299,48 @@ class MaterializationIdentity:
     numerical_execution_fingerprint: str
     materialization_id: str
     artifact_digest: str | None = None
+    #: The parent materialization this one was built FROM. `None` only on a
+    #: root, which has no parent by construction. Carried as a field rather
+    #: than left inside the hash so lineage is readable: a record can say which
+    #: bytes it consumed, not merely that it consumed some.
+    parent_materialization_id: str | None = None
+
+    @classmethod
+    def root(cls, *, semantic_state_id: str, root_teacher_id: str,
+             root_teacher_sha256: str,
+             artifact_digest: str | None = None) -> "MaterializationIdentity":
+        """The root's identity, from the pinned teacher and nothing else.
+
+        Its `numerical_execution_fingerprint` is the root materialization id
+        itself, because there is no execution to fingerprint — this project did
+        not run anything to produce the teacher. Stated rather than left as a
+        surprising value: the alternative was an empty string, which
+        `require_same_materialization` would then have to special-case, or a
+        fingerprint of the *current* run's execution, which would falsely claim
+        the teacher's bytes depend on how we batch.
+        """
+        root_id = root_materialization_id(
+            root_teacher_id=root_teacher_id,
+            root_teacher_sha256=root_teacher_sha256)
+        return cls(semantic_state_id=semantic_state_id,
+                   numerical_execution_fingerprint=root_id,
+                   materialization_id=root_id,
+                   artifact_digest=artifact_digest,
+                   parent_materialization_id=None)
 
     @classmethod
     def build(cls, *, semantic_state_id: str, execution: Any,
               environment: NumericalEnvironment,
+              parent_materialization_id: str,
               artifact_digest: str | None = None) -> "MaterializationIdentity":
         fingerprint = numerical_execution_fingerprint(execution, environment)
         return cls(semantic_state_id=semantic_state_id,
                    numerical_execution_fingerprint=fingerprint,
-                   materialization_id=materialization_id(semantic_state_id,
-                                                         fingerprint),
-                   artifact_digest=artifact_digest)
+                   materialization_id=materialization_id(
+                       semantic_state_id, fingerprint,
+                       parent_materialization_id),
+                   artifact_digest=artifact_digest,
+                   parent_materialization_id=parent_materialization_id)
 
     def bind(self, artifact_digest: str) -> "MaterializationIdentity":
         if not artifact_digest:
@@ -228,7 +357,8 @@ class MaterializationIdentity:
             semantic_state_id=self.semantic_state_id,
             numerical_execution_fingerprint=self.numerical_execution_fingerprint,
             materialization_id=self.materialization_id,
-            artifact_digest=artifact_digest)
+            artifact_digest=artifact_digest,
+            parent_materialization_id=self.parent_materialization_id)
 
     def same_materialization(self, other: "MaterializationIdentity | Mapping[str, Any]",
                              ) -> bool:
@@ -263,7 +393,8 @@ class MaterializationIdentity:
                 "numerical_execution_fingerprint":
                     self.numerical_execution_fingerprint,
                 "materialization_id": self.materialization_id,
-                "artifact_digest": self.artifact_digest}
+                "artifact_digest": self.artifact_digest,
+                "parent_materialization_id": self.parent_materialization_id}
 
 
 def _materialization_of(other: Any) -> str | None:

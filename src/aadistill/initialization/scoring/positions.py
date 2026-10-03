@@ -353,6 +353,12 @@ class SupervisedTargetV1(ScoringPositionPolicy):
     legitimate supervised position. It is NOT given zero weight: that would
     silently drop the general-language domain out of the mixture and change the
     data, which this policy must not do.
+
+    An item whose ``assistant`` tag is **present but selects nothing** is a
+    different asset and is REFUSED rather than given that fallback — see
+    :meth:`_prediction_mask`. The two are already bound to different scoring
+    content identities, so treating them identically made the identity
+    distinction describe a difference that did not exist.
     """
 
     policy_id = "positions.supervised_target_v1"
@@ -374,14 +380,50 @@ class SupervisedTargetV1(ScoringPositionPolicy):
 
     def _prediction_mask(self, n_predictions: int,
                          tags: Mapping[str, torch.Tensor]) -> torch.Tensor:
+        """Fail closed on empty supervision; fall back only when there is none.
+
+        **Absent and present-but-empty are different assets.**
+        :func:`~aadistill.initialization.scoring.content._position_component`
+        binds them to different identities — `assistant=absent` against
+        `assistant=0:<digest>` — on the stated grounds that this policy treats
+        them differently. It did not: one `or` collapsed both into the
+        all-positions fallback, so an asset whose `assistant` tag selected
+        nothing scored full-sequence under a target-aware policy id, which is
+        the failure `normalized_prediction_tags` warns about in its own
+        docstring ("a tag that silently selected nothing would make a
+        target-aware objective quietly full-sequence").
+
+        So:
+
+        * **absent** — an untemplated document with no assistant turn. Every
+          real prediction is legitimate supervision; fall back to all of them.
+          This is the general-language domain and must not be dropped.
+        * **present but empty** — supervision metadata that exists and names no
+          position. There is no reading of that which is a measurement: either
+          the builder emitted a malformed tag or the item has no supervised
+          span and should carry no tag at all. Refuse.
+
+        `normalized_prediction_tags` turns a stored `[]` into a correct-length
+        all-False mask, so the length check below cannot see this case and the
+        emptiness check has to be its own.
+        """
         mask = tags.get(self.SUPERVISION_TAG)
-        if mask is None or not bool(mask.any()):
+        if mask is None:
             return torch.ones(n_predictions, dtype=torch.bool)
         if int(mask.numel()) != n_predictions:
             raise ScoringPositionError(
                 f"{self.policy_id}: the {self.SUPERVISION_TAG!r} tag covers "
                 f"{int(mask.numel())} positions but the item predicts "
                 f"{n_predictions}")
+        if not bool(mask.any()):
+            raise ScoringPositionError(
+                f"{self.policy_id}: the {self.SUPERVISION_TAG!r} tag is present "
+                "but selects no prediction position. An item with no supervised "
+                f"span carries no {self.SUPERVISION_TAG!r} tag at all and falls "
+                "back to every real prediction; a tag that exists and names "
+                "nothing is malformed supervision metadata, and scoring it as "
+                "full-sequence would make a target-aware objective silently "
+                "untargeted")
         return mask.bool()
 
     def prediction_weights(self, *, n_predictions: int,

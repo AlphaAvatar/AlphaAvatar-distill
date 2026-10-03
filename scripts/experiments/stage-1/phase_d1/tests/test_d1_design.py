@@ -89,41 +89,144 @@ class TestTheMeasuredNoiseInput:
 
 
 class TestTheDesignTrade:
-    def test_more_screening_seeds_always_reduce_the_bias(self):
+    def test_more_screening_seeds_always_reduce_the_inflation(self):
         for k in (2, 3, 5):
-            biases = [noise.expected_max_bias(k, m) for m in (1, 2, 3)]
-            assert biases == sorted(biases, reverse=True)
+            values = [noise.screening_estimate_inflation(k, m)
+                      for m in (1, 2, 3)]
+            assert values == sorted(values, reverse=True)
 
-    def test_more_candidates_always_increase_the_bias(self):
+    def test_more_candidates_always_increase_the_inflation(self):
         for m in (1, 2, 3):
-            biases = [noise.expected_max_bias(k, m) for k in (2, 3, 4, 5)]
-            assert biases == sorted(biases)
+            values = [noise.screening_estimate_inflation(k, m)
+                      for k in (2, 3, 4, 5)]
+            assert values == sorted(values)
 
     def test_no_screening_is_an_honest_zero(self):
-        assert noise.expected_max_bias(5, 0) == 0.0
+        assert noise.screening_estimate_inflation(5, 0) == 0.0
         assert noise.advance_probability(1, 2) == 1.0
 
     def test_discrimination_falls_as_the_field_widens(self):
-        """The half of the trade a bias figure alone would hide: a design can
-        have a low bias and still be a coin flip."""
+        """The half of the trade an inflation figure alone would hide: a design
+        can have a low inflation and still be a coin flip."""
         probabilities = [noise.advance_probability(k, 1) for k in (2, 3, 4, 5)]
         assert probabilities == sorted(probabilities, reverse=True)
-
-    def test_the_c2_design_exceeds_the_sesoi_and_the_d1_design_does_not(self):
-        """The comparison the D1 design is built on, asserted rather than
-        narrated. Five candidates on one seed against two on two."""
-        c2 = noise.expected_max_bias(5, 1)
-        d1 = noise.expected_max_bias(2, 2)
-        assert c2 > noise.SESOI > d1
-        assert noise.advance_probability(2, 2) > noise.advance_probability(5, 1)
-        #: And the probe counts are equal, which is what makes it a strict
-        #: improvement rather than a trade: (5+1)*1 + 6 == (2+1)*2 + 6.
-        assert (5 + 1) * 1 + 6 == (2 + 1) * 2 + 6
 
     def test_the_report_is_deterministic(self):
         """It uses a seeded generator, so the design table is a property of the
         arithmetic rather than of when it ran."""
         assert noise.report()["rows"] == noise.report()["rows"]
+
+
+class TestTheClaimBoundaryOfTheNoiseModel:
+    """The correction of 2026-10-03, asserted so it cannot drift back.
+
+    This class replaces a test named
+    `test_the_c2_design_exceeds_the_sesoi_and_the_d1_design_does_not`, which
+    asserted `c2 > SESOI > d1` and so encoded the wrong argument as a
+    requirement. The max-of-K inflation is the winner's curse on the SCREENING
+    estimate; it is not a validity condition for a confirmation rung measured on
+    fresh disjoint prompts and fresh seeds, and no design may be admitted or
+    rejected by comparing it to the SESOI.
+    """
+
+    def test_no_design_row_carries_a_sesoi_comparison(self):
+        """The structural guard. The filter that encoded the wrong rule read a
+        boolean column off these rows, so the regression is that no such column
+        exists — not merely that nothing currently reads one."""
+        from experiments.phase_d1 import search_space as d1
+
+        for row in d1.designs():
+            for key in row:
+                assert "sesoi" not in key.lower(), (
+                    f"{key!r} invites a design to be admitted or rejected by "
+                    "comparing a screening-estimate property to the SESOI")
+
+    def test_the_three_design_numbers_are_stated_not_selected(self):
+        """K, screening seeds and confirmation seeds are a recorded judgement.
+        Mutating the grid's probabilities must not move them."""
+        from autoinit.write_d1_design import (
+            D1_CONFIRMATION_SEEDS,
+            D1_SCREENING_SEEDS,
+            D1_TOP_K,
+            behavioural_design,
+        )
+
+        design = behavioural_design()
+        assert (design["top_k"], design["screening_seeds"],
+                design["confirmation_seeds"]) == \
+            (D1_TOP_K, D1_SCREENING_SEEDS, D1_CONFIRMATION_SEEDS) == (2, 2, 3)
+
+    def test_the_design_records_how_the_numbers_were_chosen(self):
+        from autoinit.write_d1_design import behavioural_design
+
+        design = behavioural_design()
+        why = design["_how_these_three_numbers_were_chosen"]
+        assert "pragmatic balance" in why
+        assert "NOT claimed" in why and "optimum" in why
+
+    def test_the_design_carries_the_claim_boundary(self):
+        from autoinit.write_d1_design import behavioural_design
+
+        boundary = behavioural_design()["_claim_boundary_of_the_noise_model"]
+        assert "not a validity condition" in boundary
+        assert "UNKNOWN" in boundary
+
+    def test_the_unknown_factor_is_named_and_not_assumed_to_be_one(self):
+        report = noise.report()
+        unknown = report["unknown_factor"]
+        assert unknown["status"] == "UNMEASURED"
+        assert "Top-K" in unknown["name"]
+        #: Reported across assumed values, never as one number.
+        assert len(unknown["pipeline_probability_at_assumed_values"]) >= 3
+        at_one = unknown["pipeline_probability_at_assumed_values"]["1.0"]
+        assert at_one == noise.advance_probability(2, 2)
+        assert unknown["pipeline_probability_at_assumed_values"]["0.5"] \
+            == pytest.approx(at_one / 2, abs=1e-4)
+
+    def test_the_pipeline_probability_has_no_default_for_the_unknown(self):
+        """A caller cannot quote one without stating what it assumed."""
+        with pytest.raises(TypeError):
+            noise.pipeline_detection_probability(2, 2)
+        with pytest.raises(ValueError):
+            noise.pipeline_detection_probability(2, 2, p_in_top_k=1.5)
+
+    def test_the_sesoi_role_is_recorded_as_an_effect_size_not_a_threshold(self):
+        role = noise.report()["sesoi_role"]
+        assert "NOT a threshold" in role
+
+
+class TestTheSpreadIsThreeObservations:
+    """Why `0.7808` is planning analysis and not a power claim."""
+
+    def test_the_interval_is_derived_from_the_three_deltas(self):
+        low, high = noise.seed_sd_interval()
+        assert low < noise.SEED_SD < high
+        #: At n=3 the chi-square interval spans a factor of about twelve. A
+        #: narrower claim would need more than three paired seeds.
+        assert 10.0 < high / low < 14.0
+
+    def test_two_observations_still_give_an_interval(self):
+        low, high = noise.seed_sd_interval((0.01, -0.01))
+        assert 0 < low < high
+
+    def test_one_observation_is_refused(self):
+        with pytest.raises(ValueError, match="two observations"):
+            noise.seed_sd_interval((0.01,))
+
+    def test_the_advance_probability_spans_the_interval(self):
+        sens = noise.advance_probability_sensitivity(2, 2)
+        assert sens["p_at_sd_high"] < sens["p_at_sd_point"] < sens["p_at_sd_low"]
+        #: The width that makes the point estimate a planning figure: the
+        #: interval is wider than the differences between candidate designs.
+        spread = sens["p_at_sd_low"] - sens["p_at_sd_high"]
+        between_designs = abs(noise.advance_probability(2, 2)
+                              - noise.advance_probability(3, 2))
+        assert spread > between_designs
+
+    def test_the_report_states_how_many_observations_it_rests_on(self):
+        report = noise.report()
+        assert report["seed_sd_n"] == 3
+        assert len(report["seed_sd_interval_95"]) == 2
 
 
 @pytest.fixture(scope="module", autouse=True)
@@ -296,16 +399,53 @@ class TestTheCommittedRecords:
         assert "NOT AUTHORIZED" in doc["status"]
         assert doc["search_stage"]["cost"]["hard_ceiling_usd"] > 0
 
-    def test_both_blockers_are_recorded_as_blockers(self):
-        """Not as caveats. Either alone prevents execution, and a design that
-        buried them in prose would read as ready."""
+    def test_all_three_blockers_are_recorded_as_blockers(self):
+        """Not as caveats. Any one alone prevents execution, and a design that
+        buried them in prose would read as ready.
+
+        **Three, and the count is read from the document rather than written
+        here.** This test asserted TWO for a round after the per-session ceiling
+        became the third — a test that names the number is one more place the
+        number can go stale, so it checks the derived list against the fields
+        each entry is derived from.
+        """
         doc = json.loads(DESIGN.read_text())
         assert "BLOCKER" in doc["contamination_protection"]
         assert "BLOCKER" in doc["budget"]
+        assert set(doc["open_blockers"]) == {
+            "evidence", "funding", "per-session ceiling"}
+
+        #: evidence — definite: the batteries do not exist.
         assert doc["contamination_protection"]["batteries_available"] < \
             doc["contamination_protection"]["batteries_D1_requires"]
-        assert doc["budget"]["shortfall_usd"] > 0
+        #: funding — definite for a reason needing no cost estimate.
         assert doc["budget"]["d1_is_in_the_funded_list"] is False
+        #: per-session envelope — open because UNRESOLVED, not proven to fail.
+        assert doc["budget"]["per_session_envelope_compatibility"] == "UNRESOLVED"
+
+    def test_the_two_cost_derived_blocker_figures_are_named_provisional(self):
+        """A planning figure must not be readable as finalized authorization
+        pricing, and the name is where that is enforced.
+
+        Both come from UNBATCHED telemetry whose direction relative to batched
+        D1 is unknown, so neither bounds the real cost. `shortfall_usd` and
+        `fits_per_session_envelope` were exactly the names a later reader would
+        have taken for settled figures.
+        """
+        budget = json.loads(DESIGN.read_text())["budget"]
+        for field in ("provisional_shortfall_usd",
+                      "provisional_per_session_excess_usd",
+                      "provisional_basis_fits_per_session_envelope"):
+            assert field in budget, f"{field} is missing"
+        for retired in ("shortfall_usd", "per_session_envelope_excess_usd",
+                        "fits_per_session_envelope"):
+            assert retired not in budget, (
+                f"{retired} is back; a cost-derived field whose direction is "
+                "unknown must say so in its name")
+        #: and the claim boundary is in the prose, not only the field names
+        assert "NOT the finalized amount" in budget["BLOCKER"]
+        assert "NOT ESTABLISHED" in budget[
+            "_SECOND_BLOCKER_THE_PER_SESSION_CEILING"]
 
     def test_the_budget_position_is_derived_not_restated(self):
         """The writer calls `derive_budget.derive()`; a hand-copied balance

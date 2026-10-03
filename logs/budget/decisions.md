@@ -1,5 +1,223 @@
 # Budget decisions
 
+## 2026-10-03 — Empty supervision fails closed, and the blocker count is derived
+
+A `$0` consistency round on maintainer review, closing the D1 design. Nothing
+scientific moved and nothing was authorized.
+
+- **The blocker count is now DERIVED, not typed.** The design read "two
+  blockers", "either blocker" and `BLOCKED ON EVIDENCE AND FUNDING` for a round
+  after the per-session ceiling became the third — because the count was prose in
+  four places while the facts lived in `budget` and `contamination_protection`.
+  `write_d1_design.py` gained `open_blockers()`, which tests the derived figures
+  (`batteries_available < batteries_D1_requires`, `shortfall_usd > 0 or not
+  d1_is_in_the_funded_list`, `not fits_per_session_envelope`) and returns the
+  open list. `status`, `_contract`, the may-not-claim line and the console
+  summary all read from it, and the new `open_blockers` field is what
+  `stage_attribution.py` pins instead of the sentence — an `equals` on prose goes
+  stale the next time a blocker opens or closes, which is the failure being
+  fixed. A fourth blocker now adds one entry to `BLOCKER_SPECS`.
+
+  Hoisting `budget()` to derive the list exposed a second defect: the operator
+  registration was a side effect of `search_stage()` appearing earlier in
+  `build()`'s dict literal, and `budget()` silently depended on the call order.
+  Both now call `_ensure_the_frozen_operators_are_registered()`, which is
+  idempotent and declared.
+
+- **"Unbatched telemetry bounds the batched implementation" is removed, because
+  it is false.** Unbatched timing does not upper-bound the batched path in either
+  direction: A3 measured the ATTENTION scorer 8.2–10.0% SLOWER at batch 3 while
+  causal-KL's length-sorted packing won 1.1884x, and the net across four
+  operators is unmeasured. `execution_protocol._decision` and
+  `gpu_validation_owed.what_only_a_GPU_can_answer` now say **provisional
+  planning basis / estimate, direction unknown**; `price_status` drops
+  `CONSERVATIVE`, which asserted the one thing nobody knows. **`$31.1577` and
+  `$60.7509` remain current planning figures and are NOT authorization ceilings
+  proven to bound the batched implementation.** Only the owed GPU qualification
+  can turn them into prices.
+
+- **`SupervisedTargetV1` fails closed on empty supervision.**
+  `content.py::_position_component` binds `assistant=absent` and
+  `assistant=0:<digest>` to different identities, on the stated grounds that the
+  policy treats them differently. It did not — one `or` collapsed both into the
+  all-positions fallback — so an asset whose `assistant` tag named nothing scored
+  FULL-SEQUENCE under a target-aware policy id, which is the failure
+  `normalized_prediction_tags` warns about in its own docstring. Now: **absent →
+  untemplated raw-LM fallback** (the general-language domain, a DATA property
+  that must not change); **present but empty → refused as malformed supervision
+  metadata**.
+
+  **Measured safe before changing it, not argued safe.** `tag_positions` filters
+  empty tags, but the artifacts were written by whatever the builder was then, so
+  the assets were counted: 203 rows across `e8_calibration_v1` and
+  `state_eval_v1` are **56 absent, 26 empty-dict, 121 non-empty, ZERO
+  present-but-empty**. The refusal refuses nothing that exists and no committed
+  state id moves. That count is now a test rather than a paragraph.
+
+  Declared in the CUDA-surface ledger as its own round over `f8ccdd11`.
+  `positions.py` is NOT on the historical CUDA-validated surface, so **no new GPU
+  validation is owed**.
+
+- **One source-capacity claim corrected.** The full MATH test set holds **~4,500
+  additional upstream candidate rows BEFORE exclusions**, not "about 4,500
+  further eligible items": the source is not pinned and the
+  exclusion/contamination chain has not been run against it, so the eligible
+  count is unknown and now carries an explicit `owed_measurement`. Wording and
+  claim boundary only — no data study was run. The battery-family record already
+  stated this correctly and was left alone.
+
+- **The D1 execution-wiring contract is recorded before a driver exists**, as
+  `execution_wiring_required`, CONTRACT ONLY: the frozen state-eval manifest's
+  `content_sha256` must reach `StateEvaluator`; the evaluator must carry D1's
+  position policy and declared `NumericalEnvironment`; and
+  `SearchConfig.measurement_protocol_id` must be SET before the first expensive
+  expansion rather than learned after the first measurement. **A frozen D1 run
+  must not execute with `suite_content_identity = "unbound"`.** Each is something
+  the core permits a caller to omit. The owed test is a small D1
+  experiment-suite contract test, written when the driver is — it checks this
+  experiment's wiring, not a reusable mechanism, so it does not belong in core.
+
+- **Two reported pre-existing issues were deliberately NOT repaired**, per the
+  review: `continuation_b::test_the_preregistration_binds_the_live_executable_digest`
+  (a frozen declaration is allowed to say the current implementation is no longer
+  its executable — that is historical verification) and the 19 stale
+  skip-predicate declarations (`unaccounted = 0`, REVIEW-only, no launch gate
+  consumes it). Revisit the latter only if it enters a live launch-bound chain.
+
+- **GO on review, with three record corrections before the merge.**
+
+  **The date was a day in the future.** This entry and two state records were
+  stamped `2026-10-04`. The host clock is `+08:00`, so a commit made at
+  `01:56+08:00` is `2026-10-03T17:56Z` — the repository dates in UTC
+  (`generated_utc`), and the local offset put four records a day ahead of the
+  decision they describe. Corrected to `2026-10-03`. A future-dated maintainer
+  decision in a provenance chain is worse than a wrong one, because it cannot be
+  ordered against the evidence it authorizes.
+
+  **The snapshot's current validation was two rounds stale.**
+  `test_suites.core` still read `2959 collected, 2945 passed, 3m18s on a2dab91c`
+  while this branch had been measured at `3019 passed / 14 skipped / 0 failed,
+  4m06s`. No rerun was needed to fix a record. `current.md` also still restated
+  the retracted "a squash preserves the tree byte for byte, so it stands for
+  `main` without a second run" — in the same section as the correction
+  retracting it. It now points at `test_suites.core` instead of contradicting
+  the paragraph above it.
+
+  **The blockers now separate DEFINITE from PROVISIONAL**, because three
+  statements read as settled facts and only one was:
+
+  * **evidence — definite.** 0 of 2 batteries exist.
+  * **funding — definite, for a reason needing no cost estimate.** `phase_d1` is
+    outside the package's `funds_formal_sessions_of`, so no allowance covers it
+    at any price. The `$47.5732` is a **provisional planning shortfall**, NOT
+    the amount by which the cap must increase; that figure does not exist until
+    the GPU qualification reprices the chain.
+  * **per-session envelope — UNRESOLVED, and blocking because unresolved.** It
+    is NOT established that the measured batched search exceeds `$30.00`. The
+    provisional basis says it would by `$1.1577`, from unbatched telemetry whose
+    direction is unknown, so the measured session could land either side. The
+    owed GPU qualification is exactly what resolves it.
+
+  The provisional nature is in the **field names**, not only in prose, because a
+  name is what a later reader trusts: `shortfall_usd` →
+  `provisional_shortfall_usd`, `per_session_envelope_excess_usd` →
+  `provisional_per_session_excess_usd`, `fits_per_session_envelope` →
+  `provisional_basis_fits_per_session_envelope`, plus a new
+  `per_session_envelope_compatibility: "UNRESOLVED"` carrying the actual state.
+  Consumers were enumerated before renaming (the producer, `open_blockers()`,
+  one D1 test — `e5_driver.py`'s `shortfall_usd` is a different record's field
+  and was not touched). A guard refuses the retired names, mutation-verified,
+  and `open_blockers()`'s per-session test is now "not proven to fit" rather
+  than "proven not to".
+
+  The D1 test that asserted TWO blockers now reads the count from the document.
+
+- **MAINTAINER ORDER 2026-10-03 — the next phase, and what must NOT be frozen
+  before it.** No further D1 architecture round. The sequence is:
+
+  ```text
+  1. maintainer decision on D-series source extensions
+  2. pin/verify the selected sources
+  3. run the exclusion + contamination chain, derive REAL eligible capacity
+  4. materialize/freeze the D-series batteries once capacity suffices
+  5. authorize the short engineering GPU qualification
+  6. measure real batched CUDA correctness, memory, representative timing
+  7. reprice D1 from that measurement
+  8. ONLY THEN finalize formal D1 funding and the per-session envelope
+  9. build/authorize the formal D1 execution chain
+  ```
+
+  **The formal funding and envelope must not be frozen before steps 6–7.** This
+  round established that the present timing basis has unknown direction relative
+  to the batched implementation, so a figure frozen now would be frozen against
+  a number nobody has measured. The two deferred historical issues stay
+  untouched and non-blocking.
+
+## 2026-10-03 — D1 is replayed onto the squashed `main`, not merged into it
+
+- **Context:** the squash integration above put the test-suite boundary on `main`
+  and, as P12.2 warns, left `review/d1-target-aware` no longer an ancestor of
+  `main`. Merging it would have re-applied the whole range and recreated
+  `tests/autoinit/` and the flat experiment directory the refactor removed. Its
+  three commits were therefore **replayed** onto a fresh branch cut from `main`:
+  `review/d1-identity-correction`.
+
+- **Placement, by §2.8a's question — what would change when this experiment
+  closes?** `test_scoring_content_identity.py` and
+  `test_target_aware_scoring_end_to_end.py` are CORE: they prove
+  `scoring/content.py` and `protocol_identity.py` bind what they claim, for any
+  policy and any suite. `test_d1_design.py` is D1's, and the D-series battery
+  family went to `scripts/experiments/stage-1/phase_d_series/` with its test
+  beside it.
+
+  **The battery family's placement was the one real judgement.** Flat under
+  `scripts/experiments/` would have made the boundary guard treat it as SHARED
+  APPLICATION LAYER — the guard derives that from tree position — and let any core
+  test import one series' arms. It is Stage-1 program material spanning D1, D2 and
+  D3, so it belongs under `stage-1/`, which is also where
+  `experiments/__init__.py`'s existing `stage-*` path extension already resolves
+  it: no new mechanism, and the import line is unchanged. Its record stays in
+  `logs/shared/analyses/`, covered by that directory's existing declaration as
+  Stage-1-owned material belonging to no single experiment.
+
+- **Three conflicts were science, not paths, and the newer side won each.**
+  The behavioural-design rationale: the superseded text justified the design by
+  `screening bias < SESOI`, and the 2026-10-03 review retired exactly that
+  argument — max-of-K inflation is the winner's curse on the SCREENING estimate
+  and is not a validity condition for a fresh disjoint confirmation. The corrected
+  text replaced it in `current.md` and in `decisions.md`. The CUDA-surface ledger
+  took BOTH rounds as separate entries, and the D1 round's base is `main`'s squash
+  commit rather than the old `4dc579ba`: measuring it from the older base would
+  fold the test-boundary round's changes into D1's diff and defeat the
+  undeclared-edit check the ledger exists for.
+
+- **Two defects were found by the reconciliation itself.**
+
+  1. **The reachability gate P12.2 names was blind to `git_commit`.** The rule's
+     text and its implementation were written in one commit on the D1 branch, so
+     `main` had neither; the integration ran a hand sweep instead, and comparing
+     622 hashes by hand against the tool's 606 isolated two missing fields.
+     `git_commit` is the one AGENTS.md §3.6 names for an experiment log and 20
+     records use it. Now 623 covered, zero unreachable.
+  2. **"Nothing reads `phase_b_result`" was asserted a second time, by an agent
+     who had already read the correction saying it was wrong.** Eight assertions
+     in a continuation_b test read it. Two greps missed it: one had the wrong
+     subscript spelling, the other had the right pattern and ended in `| head`.
+     Restored. And since those readers are an EXPERIMENT test, the core suite can
+     no longer catch this — so
+     `test_every_snapshot_key_a_test_reads_still_exists` now scans both trees for
+     readers of a reclaimed key. Mutation-verified: deleting the key names the
+     real reader.
+
+- **The snapshot needed no new raise.** Both branches had raised the ceiling
+  independently from one base — 16_000 and 16_500 — and the union fits under the
+  higher of those two at 16_299, after reclamation that also found a
+  contradiction: five fields described why D1 is blocked and two still said TWO
+  after a third blocker appeared. `d_series.blockers` owns the reasons now.
+
+- **Cost:** `$0`. No pod, no GPU, no grant, no authorization change, no scientific
+  result moved, and no frozen evidence rewritten.
+
 ## 2026-10-03 — The test refactor integrates into `main` by SQUASH AND MERGE
 
 - **Context:** `refactor/test-suite-boundary@a2dab91c` was reviewed on the remote
@@ -49,13 +267,19 @@
      on the branch *before* the integration, so `main` lands on a tree that
      describes itself.
 
-  **The enforcement P12.2 names is not on this branch.** P12.2 says
-  `scripts/consolidate/converge_before_sweep.py` resolves every cited commit hash
-  against the object store; that function was written on `review/d1-target-aware`,
-  so the rule's text reached `main` ahead of its implementation and arrives with
-  the D1 reconciliation. The check was therefore performed inline for this
-  integration — the fields above, swept over `logs/**/*.json`, resolved in one
-  `git cat-file --batch-check`:
+  **Neither P12.2's text nor its enforcement was on the integrated branch — and
+  this entry first said otherwise.** It claimed "the rule's text reached `main`
+  ahead of its implementation", which was wrong: the rule and
+  `converge_before_sweep.py`'s reachability check were written together in one
+  commit on `review/d1-target-aware`, and `main` had neither until the D1
+  reconciliation that carries this correction. What governed the integration was
+  the maintainer's instruction to go by AGENTS.md, against the AGENTS.md of the
+  session's working tree — where P12.2 was already a 2026-10-03 maintainer
+  decision. The rule applied; only my account of where its bytes lived was false.
+
+  The check was therefore performed inline for that integration — the fields
+  above, swept over `logs/**/*.json`, resolved in one `git cat-file
+  --batch-check`:
 
   ```text
   622 distinct commit hashes cited across 1,742 record files · 0 unreachable
@@ -68,11 +292,30 @@
   grant, not an authorization change. No GPU or paid resource is authorized by it.
   `README.md` is unchanged by the whole range, so nothing public-facing moved.
 
-- **Validation evidence.** The core suite was measured on this exact executable
-  tree: `2959 collected, 2945 passed / 14 skipped, 0 failed, 3m18s`. A squash
-  preserves the tree byte for byte — the merge commit's tree hash equals the
-  branch tip's — so that measurement is the validation for `main`, and re-running
-  it would measure the same tree twice.
+- **Validation evidence, and its exact limit — CORRECTED 2026-10-03 on maintainer
+  review.** The core suite measured `2959 collected, 2945 passed / 14 skipped, 0
+  failed, 3m18s` on `a2dab91c`. This entry first said the squash "preserves the
+  tree byte for byte … so that measurement is the validation for `main`". That
+  conflated two trees:
+
+  ```text
+  a2dab91c  the measured implementation/test tree, and the approved commit
+  c7a39f3b  + pre-integration state/decision records (this file,
+            logs/state/current.json, logs/state/current.md)
+  06cab9c8  tree == c7a39f3b tree  (verified)
+            tree != a2dab91c tree
+  ```
+
+  What the squash preserved was the **branch tip's** tree. `c7a39f3b` edits three
+  records that **6, 4 and 1 core test files read respectively** — the suite
+  asserts on those documents, so describing them as untouched by anything the
+  suite executes was wrong. The accurate statement is: no executable
+  implementation changed after the measured tree, and the state-only changes on
+  top of it were **not separately rerun at that point**.
+
+  The squash itself is correct and is NOT rewritten; this correction is recorded
+  prospectively. Validation for the records now comes from the D1
+  reconciliation's green core suite, which is a third tree with its own content.
 
 - **The operational consequence, per P12.2.** A squash commit does not have the
   branch's commits as ancestors, so `refactor/test-suite-boundary` is no longer an
@@ -313,6 +556,138 @@ these. `$0`, no pod, no GPU.
 
 - **Revisit when:** a fourth suite is proposed. Three is the number of questions
   this repository actually asks; a fourth needs the same argument.
+## 2026-10-03 — Integration to `main` becomes SQUASH AND MERGE
+
+- **Context:** `main` had been left at the 2026-09-24 C2 snapshot repair while
+  nine days of C3, A3 and D1-design work accumulated on
+  `review/c3-operator-batching`. The maintainer authorized the integration and
+  it went in as a fast-forward: **597 commits, 1,491 files, 1,129,146 inserted
+  lines**, 85% of it `logs/` evidence. `main`'s history is now nine days of
+  working material rather than a list of completed rounds, and nothing about it
+  is easier to read for having each repair individually.
+
+- **Decision:** every future integration of a working branch into `main` is a
+  **squash and merge** — one commit on `main` per integration. Recorded as
+  **AGENTS.md P12.2**, next to P12.1's statement that a merge needs a
+  maintainer decision, because the two are one subject. P12.1 is unchanged: the
+  decision is still required, and P12.2 says only what shape the merge takes
+  once it exists.
+
+- **What the decision costs, and why it is a clause rather than a caveat.**
+  This repository binds scientific evidence to specific commit hashes —
+  `session_commit`, `authorized_session_commit`, `head_commit`,
+  `swept_base_commit`, `declared_at_commit`, and the commit a comparison
+  artifact names as having computed it. **785 records did so when this was
+  decided**, and they are reachable today only because the 2026-10-03
+  integration was a fast-forward. A squash commit is not any of those hashes.
+  So P4's requirement that an experiment be reproducible from its logged code
+  state now depends on the working branch surviving, and P12.2 requires three
+  things of every squash integration: the source branch is **not deleted**, the
+  squash commit **names the range it collapses** (branch, tip, merge base), and
+  the state docs say what `main` carries, recorded *before* the integration.
+
+- **Alternatives considered:** keeping fast-forward — rejected by the
+  maintainer, and the 597-commit integration is the evidence; a merge commit
+  per integration — it would keep the hashes on `main` and the integration
+  point visible, but leaves the same working history in `main`'s log, which is
+  the thing being removed; squashing **and** deleting the branch, which is the
+  host's default offer — refused outright, because it is the one combination
+  that silently invalidates 785 records.
+
+- **Risks:** stale working branches accumulate, and the first instinct when
+  they do will be to delete them. P12.2 names that instinct and forbids acting
+  on it for any branch a record cites; re-anchoring commit-bound evidence is a
+  separate maintainer decision with its own record, taken *before* a deletion
+  rather than discovered after one.
+
+- **Revisit when:** branch accumulation becomes a real constraint, or when
+  commit-bound evidence stops being how this project establishes
+  reproducibility.
+
+## 2026-10-03 — The D-series behavioural battery family, frozen before any outcome
+
+- **Context:** the D-series needs six behavioural batteries — D1/D2/D3 x
+  screening/confirmation — and **zero** can be drawn. `c1_confirmation_v1` must
+  stay held out (B was promoted on it; C2's, C3's and A3's results were measured
+  on it) and the pool under the frozen C1 mixture is exhausted at
+  `math_verified`. The alternative to deciding this now is a one-off workaround
+  per experiment, each chosen after the previous result is known — which is how
+  a held-out battery stops being held out.
+
+- **Decision:** define a **family**, `d_series_behavioural_v1`, and freeze its
+  allocation rule **today, before any D1 outcome exists**. Owner:
+  [`scripts/experiments/stage-1/phase_d_series/battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py);
+  record:
+  [`logs/shared/analyses/autoinit_d_series_battery_family.json`](../shared/analyses/autoinit_d_series_battery_family.json).
+
+  * **Six roles in a fixed build order**, each with its own frozen `rank_domain`
+    string. Distinct domains give *independent* samples, not disjoint ones, so
+    disjointness comes from the build order: each role excludes the five
+    baseline isolation roles, both drawn behavioural batteries, and every
+    D-role built before it — by stable id **and** by normalized prompt content,
+    because either kind alone misses a real collision.
+  * **No new selection code.** `battery_render.rank_take` already orders a pool
+    by `SHA256(base_digest : rank_domain : stratum : stable_id)`; it is how
+    `c2_screening_v1` was drawn beside `c1_confirmation_v1`. There is no seed
+    and no date in the rule, so there is nothing an agent could choose after
+    seeing a result.
+  * **Two identities, frozen at different times.** `allocation_rule_id`
+    (`ced017a1f3f155ba5aaf383e61156c12`) covers the roles, order, domains,
+    mixture and exclusion chain and is computable with no pool and no source
+    decision — which is what makes "frozen prospectively" checkable rather than
+    asserted. `family_content_id` binds the source pins and realized item
+    digests and is **null**: a value there today would be invented provenance.
+  * **A new behavioural distribution, declared as such.** Stratum names,
+    domains and counts are inherited unchanged from the C1 mixture (imported,
+    never restated), so the balance and the 950/850 denominators are preserved.
+    The *population* changes, so the family is not the C1 confirmation
+    distribution: B's historical C1 number is not imported, and C0's SESOI is
+    carried forward as a **recorded assumption** about this population rather
+    than an inherited measurement. This is acceptable because every D-series
+    comparison re-measures challenger and incoming incumbent together, on the
+    same fresh battery, under one protocol — no D-series decision reads a
+    historical score.
+
+- **What the derivation found, and it corrects the D1 record above.** Six roles
+  need `6 x` the mixture *at once*, and at that scale **three** strata are
+  short, not one:
+
+  ```text
+  stratum         per role   x6    eligible   short   roles fundable
+  math_verified        150   900         70     830                0
+  code                 100   600        279     321                2
+  gsm8k                150   900        889      11                5
+  knowledge/multihop/rag/tool                      0            36+
+  ```
+
+  The capacity record's "zero batteries remaining, binding on `math_verified`"
+  is the correct answer to a different question, and the resolution it records
+  — extend the math source — unblocks **D1's two batteries and not the family**.
+
+- **Alternatives considered:** a per-experiment battery decided when each
+  experiment needs one — rejected, that is the workaround the directive
+  forbids and its selection risk is cumulative across rounds; deal all six from
+  ONE content-derived ordering instead of six chained domains — workable and
+  rejected as a second mechanism beside `rank_take`, which already does this and
+  is already verified; reduce `math_verified` to 70 per battery — rejected,
+  `correct_overall` and its SESOI are defined **on** the mixture, so this is a
+  C0-level redesign; round-robin dealing instead of per-role draws — no
+  validity difference, and chained draws are what the existing builder does.
+
+- **Risks:** the three short strata need source decisions this round does not
+  take. `gsm8k` (short 11) and `code` (short 321) are answerable from files of
+  repositories **already pinned at frozen revisions**, which inherits licence
+  and renderer; MBPP's remaining splits may not cover 321, and if they do not,
+  either a second code source or a smaller behaviour-only code component is a
+  maintainer decision — and the second moves the 950 denominator of
+  `usable_rollout_rate`. `math_verified` needs the full Hendrycks MATH release:
+  a new dataset, so licence, revision, digests, renderer parity and
+  contamination all have to be recorded before it is pinned. No source is
+  pinned here and nothing was fetched.
+
+- **Revisit when:** the maintainer rules on the three source extensions. Until
+  then the family is DESIGNED / NOT MATERIALIZED / BLOCKED ON SOURCES, zero of
+  six roles are fundable, and D1 cannot execute.
 
 ## 2026-10-03 — The D-series is ordered started, and D1 is designed, priced and BLOCKED
 
@@ -339,6 +714,27 @@ these. `$0`, no pod, no GPU.
     configuration rather than as a core constant;
   * the derived D1 protocol and its price.
 
+- **A within-round correction, recorded because the first answer was wrong in
+  a way that mattered.** Review asked for the state-eval loader to pass the
+  manifest's `content_sha256` into `StateEvalSuite`, since `suite_hash` accepts
+  it. Doing that moved the frozen asset's `suite_hash` from `6421fa4c…` to
+  `a39df3c0…` — and `suite_hash` is the **structural** identity by this
+  project's own design: `autoinit_phase_a_driver` pins it as
+  "suite_id/version/domains/subtypes/critical_tags" with
+  `STATE_EVAL_CONTENT_SHA256` pinned beside it as a separate field, **45
+  committed records bind the structural value**, and the C2 baseline driver
+  refuses a measurement whose staged suite hash differs from the one its frozen
+  candidates were measured under. It refused, in five tests. Folding content
+  into that hash would have silently reinterpreted every one of those records.
+
+  The repair: the loader still **requires** the manifest to carry a content
+  hash, so no caller can bind `None`; the suite's content is bound in the new
+  `measurement_protocol_id`, which pins nothing historical, beside the
+  structural hash as a separate term. The hole review named — a measurement
+  identity that did not bind the suite's content — is closed; the identity 45
+  records pinned did not move. The third movement of `planning/metrics.py` is
+  recorded in the C2 evaluator lineage with its cause, as the previous two are.
+
 - **The two blockers, both derived at `$0`, either one alone preventing
   execution:**
 
@@ -349,25 +745,69 @@ these. `$0`, no pod, no GPU.
   FUNDING    chain hard ceiling $60.7509 against $13.1777 of project
              headroom; short by $47.5732, and D1 is not in the package's
              funds_formal_sessions_of list.
+  CEILING    the SEARCH session alone prices at $31.1577 against the
+             package's $30.00 per_attempt_hard_ceiling_usd -- over by
+             $1.1577. This binds SEPARATELY from the cumulative cap: a
+             grant that moved only the cap could still not authorize the
+             search session.
   ```
+
+  **The $60.7509 is a PROVISIONAL conservative planning ceiling, not a price.**
+  The per-expansion minutes were measured on an unbatched state evaluation and a
+  one-item-per-forward statistics pass, and D1 runs both batched -- in an
+  unmeasured direction (see the correction below). It is refreshed by the owed
+  short GPU qualification: real CUDA/bf16 execution, real state-eval memory
+  peak, target-aware batched path correctness, and the actual timing of a
+  representative expansion. It sizes a grant request; it does not price one.
 
   Owners: `logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json` and
   `logs/stages/stage-1/phase_d1/plans/d1_design.json :: budget`.
 
 - **What the design changed rather than copied.** C2's behavioural stage
-  screened five candidates on one seed. At A3's measured per-seed spread of the
-  paired delta (`0.012906`), the maximum of five noisy estimates is inflated by
-  `0.015009` — **1.5x the `0.010` SESOI** — and the rung advances the genuinely
-  better candidate with probability `0.42`. D1 instead screens **two** candidates
-  on **two** seeds: bias `0.005149` (0.52x the SESOI), advance probability
-  `0.78`, at the **same twelve probes**. The arithmetic says narrow and
-  replicate, and it is in
-  `scripts/experiments/stage-1/phase_d1/selection_noise.py` with a quadrature self-check
-  against two closed forms. This is a prospective design derivation; it
-  re-analyses no C2 figure and changes nothing about C2's closure.
+  screened five candidates on one seed; D1 screens **two** candidates on **two**
+  seeds and confirms on **three**, at the same twelve probes, on a fresh
+  disjoint battery.
 
-- **Alternatives considered:** copying C2's `K=5` — refused, the figures above
-  are why; dropping the screening rung to fit the evidence capacity (`K=1`, six
+  **CORRECTED 2026-10-03, on maintainer review, before anything ran.** The
+  first version of this entry justified those numbers by comparing a screening
+  "selection bias" to the SESOI — `0.005149` (0.52x) for D1 against `0.015009`
+  (1.5x) for C2 — and said "the arithmetic says narrow and replicate". **That
+  was the wrong argument.** The max-of-K inflation is the winner's curse **on
+  the screening estimate**. It does not bias a confirmation estimate taken on
+  genuinely fresh, disjoint prompts and fresh seeds: under the global null that
+  fresh estimate is unbiased however inflated the screening number was. So
+  `screening bias < SESOI` is **not** a validity condition for confirmation, and
+  no design may be admitted or rejected by it.
+
+  What actually governs whether D1 can find something is
+
+  ```text
+  P(a behaviourally good candidate is in the Top-K)
+    x  P(screening advances it | it is in the Top-K)
+  ```
+
+  The second factor is `0.7808` at the point estimate — but the per-seed spread
+  behind it comes from **three** A3 deltas, whose own 95% sampling interval
+  spans `0.006719`–`0.081108` (a factor of 12), across which that probability
+  runs `0.549`–`0.932`. It is planning and sensitivity analysis, not a power
+  calculation. **The first factor is UNKNOWN**, and C2's negative behavioural
+  result is a reason not to assume the state-eval beam ranking is a strong
+  behavioural predictor; the pipeline probability is therefore reported across
+  assumed values (`0.25 -> 0.1952` ... `1.0 -> 0.7808`) and never as one number.
+
+  **K=2 / 2 screening seeds / 3 confirmation seeds are retained**, justified as
+  a pragmatic balance of behavioural breadth over the search's own ranking,
+  two-seed screening stability (C2's specific weakness was a single-draw
+  ordering), fresh independent confirmation, and the chain's cost — **not** as a
+  formally demonstrated optimum. The arithmetic and its claim boundary are in
+  `scripts/experiments/stage-1/phase_d1/selection_noise.py`, with a quadrature
+  self-check against two closed forms. This remains a prospective design
+  derivation: it re-analyses no C2 figure and changes nothing about C2's
+  closure.
+
+- **Alternatives considered:** copying C2's `K=5` at one seed — refused, for
+  its single-draw screening ordering rather than for any bias-versus-SESOI
+  comparison; dropping the screening rung to fit the evidence capacity (`K=1`, six
   probes, one battery) — possible and cheaper at `$45.9543`, but it hands the
   promotion decision to a cheap metric C2's own result shows predicts behaviour
   poorly; reducing the `math_verified` count per battery — refused as an
@@ -379,7 +819,9 @@ these. `$0`, no pod, no GPU.
   whole series rather than for D1 alone. Extending the verified-math source is
   the only resolution that unblocks all three, and it needs a licence and
   contamination check plus an explicit argument for the SESOI's transfer to a
-  different math population.
+  different math population. The resolution is designed as the **D-series
+  behavioural battery family v1** (same date, below): a new explicit
+  behavioural-distribution identity rather than a continuation of C1's.
 
 - **Revisit when:** the maintainer rules on the evidence resolution and on a D1
   phase grant. Until both, D1 stays DESIGNED / NOT AUTHORIZED and nothing may

@@ -56,6 +56,7 @@ from aadistill.initialization.calibration.items import prepare_calibration_items
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.device import model_device
 from aadistill.initialization.operators.base import OperatorContext, get_implementation
+from aadistill.initialization.scoring.content import scoring_content_report
 from aadistill.initialization.scoring.positions import resolve_position_policy
 from aadistill.initialization.statistics.spec import (
     DEFAULT_STATS_SPEC,
@@ -553,6 +554,14 @@ def _run_steps(
         position_policy = resolve_position_policy(
             operator_config,
             where=f"{spec.path_id} step {i} ({impl.impl_id}): ")
+        #: EVIDENCE here, identity in the search. A fixed path is a declared
+        #: rebuild whose result is gated against an expected artifact digest, so
+        #: a changed supervised mask surfaces as a digest mismatch rather than
+        #: as a silently shared id. What this adds is the figure a reader checks
+        #: that mismatch against: `BeamSearch` binds the same value into
+        #: `config_hash`, where the collision actually lived.
+        scoring_content = (
+            scoring_content_report(items, position_policy) if items else None)
 
         ctx = OperatorContext(
             adapter=adapter, model=model, parent_spec=parent_spec,
@@ -605,7 +614,12 @@ def _run_steps(
             kind=impl.kind, result_spec_hash=plan.result_spec.spec_hash,
             identity=identity, checkpoint_path=str(ckpt), seconds=seconds,
             local_metrics=dict(getattr(lm, "values", {}) or {}),
-            trace=dict(outcome.trace),
+            #: The scoring-content identity travels WITH the step's own trace,
+            #: so a step result states which positions its operator read rather
+            #: than leaving a reader to re-derive it from the mixture.
+            trace={**dict(outcome.trace),
+                   **({"scoring_content": scoring_content}
+                      if scoring_content is not None else {})},
             selection=_selection_evidence(outcome.artifacts),
             digest_expected=step.expected_artifact_digest,
             digest_matches=(None if step.expected_artifact_digest is None

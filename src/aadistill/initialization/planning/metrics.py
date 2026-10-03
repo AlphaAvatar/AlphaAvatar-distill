@@ -46,10 +46,22 @@ from aadistill.initialization.calibration.packing import (
     padding_profile,
 )
 from aadistill.initialization.execution import ExecutionConfig
+from aadistill.initialization.scoring.content import scoring_content_identity
+from aadistill.initialization.scoring.protocol_identity import (
+    PROTOCOL_FIELD,
+    ReductionSemantics,
+    UNBOUND_SUITE_CONTENT,
+    UNDECLARED_EXECUTION,
+    measurement_protocol_id,
+)
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     PREDICTION_AXIS,
     ScoringPositionPolicy,
+)
+from aadistill.initialization.specs.materialization import (
+    NumericalEnvironment,
+    numerical_execution_fingerprint,
 )
 from aadistill.initialization.statistics.contribution import (
     DistortionSums,
@@ -102,6 +114,8 @@ class StateEvaluator:
         position_policy: ScoringPositionPolicy = ALL_POSITIONS_V1,
         execution: ExecutionConfig = REFERENCE_EXECUTION,
         batch_budget_bytes: int = DEFAULT_STATE_EVAL_BATCH_BUDGET_BYTES,
+        numerics: NumericalEnvironment | None = None,
+        suite_content_sha256: str | None = None,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -140,6 +154,48 @@ class StateEvaluator:
                 self._weights[item.item_id] = w.weights
         self.execution = execution
         self.batch_budget_bytes = int(batch_budget_bytes)
+        self.numerics = numerics
+        #: The suite's CONTENT identity, taken as a parameter rather than read
+        #: off the suite.
+        #:
+        #: `StateEvalSuite.suite_hash` is the STRUCTURAL identity — id, version,
+        #: domains, sub-types, critical tags — and this project pins it that way
+        #: in many committed records, with the asset's content hash pinned
+        #: beside it as a separate field. Folding the content into the
+        #: structural hash would move the identity of an unchanged asset and
+        #: reinterpret every record that pinned it, so the content is bound
+        #: here instead, in an identity that is new and that nothing historical
+        #: pins.
+        #:
+        #: `None` is recorded as `UNBOUND_SUITE_CONTENT` rather than refused: an
+        #: in-memory suite has no frozen content record, and a protocol id that
+        #: were unavailable there would be unavailable exactly where it is
+        #: cheapest to test. The literal keeps the omission visible.
+        #:
+        #: **Every frozen-asset caller SHOULD pass this.** The asset's loader
+        #: returns the manifest, so the value is already in the caller's hand;
+        #: a caller that omits it stamps `unbound` and gets a protocol identity
+        #: that cannot tell two same-shaped suites apart. That is the honest
+        #: record of what it bound, not a substitute for binding.
+        self.suite_content_sha256 = suite_content_sha256
+        #: WHAT PROTOCOL THIS EVALUATOR MEASURES UNDER. Computed once, because
+        #: every term is fixed for the evaluator's lifetime, and stamped into
+        #: every evaluation so a consumer asks ONE question instead of
+        #: comparing a growing list of fields.
+        self.reduction = ReductionSemantics(
+            chunk=int(chunk), reference_strategy=reference_strategy.value)
+        self.measurement_protocol_id = measurement_protocol_id(
+            suite_structural_identity=suite.suite_hash,
+            suite_content_identity=(suite_content_sha256
+                                    or suite.content_sha256
+                                    or UNBOUND_SUITE_CONTENT),
+            scoring_content_identity=scoring_content_identity(
+                self.items, position_policy),
+            position_policy_hash=position_policy.policy_hash,
+            reduction=self.reduction,
+            execution_fingerprint=(
+                numerical_execution_fingerprint(execution, numerics)
+                if numerics is not None else UNDECLARED_EXECUTION))
         #: THE REFERENCE PATH, named once. One item per forward in the suite's own
         #: order with no reassembly — the loop every committed state measurement
         #: ran, and the one the drift certification measured. Anything else
@@ -461,6 +517,12 @@ class StateEvaluator:
                     #: the count, and under a restriction they differ.
                     "position_policy": self.position_policy.qualified_id,
                     "position_policy_hash": self.position_policy.policy_hash,
+                    #: THE ONE FIELD A CONSUMER COMPARES. It binds the suite's
+                    #: content, the scoring content, the policy, the reduction
+                    #: semantics and the execution; the individual fields stay
+                    #: beside it as the evidence a reader checks it against.
+                    PROTOCOL_FIELD: self.measurement_protocol_id,
+                    "reduction": self.reduction.as_dict(),
                     "scored_weight": float(agg["weight"]),
                     #: HOW the forwards were issued. Execution evidence, not
                     #: identity — it changes no estimand — but a state metric

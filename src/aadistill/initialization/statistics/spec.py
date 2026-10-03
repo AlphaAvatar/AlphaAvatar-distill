@@ -40,7 +40,19 @@ from aadistill.infrastructure.manifest import sha256_json
 
 @dataclass(frozen=True)
 class StatsSpec:
-    """What is collected, independent of what it is collected from."""
+    """What is collected, independent of what it is collected from.
+
+    **A D2 capability gap is recorded here rather than in a snapshot.** The
+    activation collectors implement only the BINARY form of a scoring-position
+    policy: `token_counts` is a count of ACTIVE positions, so a weight is
+    effectively 0 or 1. D2's planned continuous `c_ref(t)` needs a WEIGHTED
+    denominator — the sum of the weights, not the number of non-zero ones —
+    which is a change to the quantities below and therefore to `spec_hash`.
+
+    Noted at the thing it constrains because the next person to add a quantity
+    here is the one who needs to know. It is not a plan and authorizes nothing;
+    D2 is NOT STARTED.
+    """
 
     spec_id: str = "residual_moments_and_ffn_magnitude"
     version: int = 1

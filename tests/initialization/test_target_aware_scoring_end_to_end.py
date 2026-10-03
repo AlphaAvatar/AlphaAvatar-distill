@@ -20,6 +20,7 @@ the driver.
 
 from __future__ import annotations
 
+import json
 import shutil
 import sys
 import tempfile
@@ -439,6 +440,11 @@ def _search(workdir, *, policy, execution, teacher, calib, suite, suite_items):
         schedule=SCHEDULE_V1, seed=7, workdir=workdir,
         profiles=(make_profile("balanced"),), policy=PARETO_V1, suite=suite,
         position_policy=policy,
+        #: DECLARED, which is the path a driver should take: the protocol enters
+        #: `config_hash`, it is checked before the first expensive measurement,
+        #: and the first restore of a resumed run is answered correctly instead
+        #: of being declined while the search waits to learn its own protocol.
+        measurement_protocol_id=evaluator.measurement_protocol_id,
         allowed_impls=("depth.positional_v0", "ffn.activation_importance_v0",
                        "width.global_pca_v0", "attention.weight_proxy_v0"),
         device="cpu")
@@ -624,6 +630,139 @@ class TestResumeRefusals:
             shutil.rmtree(tmp, ignore_errors=True)
 
 
+class TestTheMeasurementProtocolBinder:
+    """One run, one measurement protocol — however the search comes to know it.
+
+    `_restore` used to ask two independent questions (the suite hash, then the
+    policy hash) and the next three terms would have been three more questions.
+    One `measurement_protocol_id` replaced them, which moves the risk: a search
+    that did not know its own protocol would decline every restore silently.
+    """
+
+    @pytest.fixture
+    def pieces(self, teacher):
+        calib = prepare_calibration_items(tagged_items(), profile_id="toy")
+        rows = tagged_items(seed=606)
+        from aadistill.initialization.scoring.positions import (
+            normalized_prediction_tags,
+        )
+        for r in rows:
+            r["tags"] = normalized_prediction_tags(
+                r["tags"], int(r["input_ids"].shape[1]) - 1)
+        items = _suite_items(rows)
+        return calib, _suite(items), items
+
+    def _evaluator(self, teacher, suite, items, policy=ALL_POSITIONS_V1):
+        evaluator = StateEvaluator(
+            suite, items, device="cpu",
+            reference_strategy=ReferenceStrategy.CACHE_IN_MEMORY,
+            vocab_size=TEACHER_GEOMETRY["vocab_size"], position_policy=policy)
+        evaluator.prime_reference(teacher)
+        return evaluator
+
+    def _build(self, tmp, teacher, calib, suite, items, *, evaluator,
+               declared, run_id="binder"):
+        adapter = adapter_for_config(teacher.config)
+        config = SearchConfig(
+            run_id=run_id, target_spec=ArchSpec.of("qwen3", TARGET_GEOMETRY),
+            schedule=SCHEDULE_V1, seed=7, workdir=tmp,
+            profiles=(make_profile("balanced"),), policy=PARETO_V1, suite=suite,
+            measurement_protocol_id=declared,
+            allowed_impls=("depth.positional_v0", "ffn.activation_importance_v0",
+                           "width.global_pca_v0", "attention.weight_proxy_v0"),
+            device="cpu")
+        return BeamSearch(
+            adapter=adapter, config=config, root_teacher_id="toy/teacher",
+            root_teacher_sha256="de" * 32, root_loader=lambda: teacher,
+            calibration_loader=lambda profile: calib,
+            measurer=lambda m, d: evaluator.evaluate(m, d),
+            execution=B1_ORIGINAL, numerics=CPU_NUMERICS)
+
+    def test_an_undeclared_search_adopts_the_protocol_it_measured_under(
+            self, teacher, pieces):
+        """Every driver wraps its evaluator in a lambda, so the attribute the
+        constructor looks for is invisible. A search that could not learn its
+        own protocol would stamp records it could never match again."""
+        calib, suite, items = pieces
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            evaluator = self._evaluator(teacher, suite, items)
+            search = self._build(tmp, teacher, calib, suite, items,
+                                 evaluator=evaluator, declared=None)
+            assert search.measurement_protocol_id is None
+            search.run()
+            assert search.measurement_protocol_id == \
+                evaluator.measurement_protocol_id
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_a_declared_protocol_is_known_before_the_first_measurement(
+            self, teacher, pieces):
+        """Which is the better path, and why a driver should declare: the first
+        restore of a resumed run is answered correctly instead of being
+        declined while the search waits to learn its own protocol."""
+        calib, suite, items = pieces
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            evaluator = self._evaluator(teacher, suite, items)
+            search = self._build(
+                tmp, teacher, calib, suite, items, evaluator=evaluator,
+                declared=evaluator.measurement_protocol_id)
+            assert search.measurement_protocol_id == \
+                evaluator.measurement_protocol_id
+            result = search.run()
+            #: And it is in the run's own identity, not only in its records.
+            assert result.config.as_dict()["measurement_protocol_id"] == \
+                evaluator.measurement_protocol_id
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_a_declaration_disagreeing_with_the_measurer_is_refused(
+            self, teacher, pieces):
+        """At the FIRST measurement, not silently: a search that declared one
+        protocol and measured under another has no comparable numbers at all."""
+        calib, suite, items = pieces
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            evaluator = self._evaluator(teacher, suite, items)
+            search = self._build(tmp, teacher, calib, suite, items,
+                                 evaluator=evaluator, declared="f" * 32)
+            with pytest.raises(SearchError, match="another protocol"):
+                search.run()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_a_declared_run_does_not_resume_an_undeclared_journal(
+            self, teacher, pieces):
+        """A record written before measurement-protocol identity existed has no
+        recorded reduction or execution, so nothing can show it comparable. The
+        refusal is explicit — the old record is not reinterpreted."""
+        calib, suite, items = pieces
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            evaluator = self._evaluator(teacher, suite, items)
+            first = self._build(tmp, teacher, calib, suite, items,
+                                evaluator=evaluator, declared=None)
+            first.run()
+            #: Strip the protocol from every journal record, which is exactly
+            #: what a pre-identity journal looks like.
+            journal = tmp / "states.jsonl"
+            rows = [json.loads(line) for line in
+                    journal.read_text().splitlines() if line.strip()]
+            for row in rows:
+                detail = ((row.get("evaluation") or {}).get("detail") or {})
+                detail.pop("measurement_protocol_id", None)
+            journal.write_text("".join(json.dumps(r) + "\n" for r in rows))
+
+            again = self._build(
+                tmp, teacher, calib, suite, items, evaluator=evaluator,
+                declared=evaluator.measurement_protocol_id)
+            again.run()
+            assert again.resumed_ids == set()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
 class TestOnePolicyForTheOperatorsAndTheBeam:
     def test_a_measurer_scoring_other_positions_is_refused(self, teacher):
         """`measurer` is an opaque callable, so this is the only place the search
@@ -736,5 +875,171 @@ class TestOnePolicyForTheOperatorsAndTheBeam:
             assert len(keys) == 4, (
                 "two policies x two execution protocols must be four distinct "
                 f"statistics-cache keys, got {len(keys)}")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+
+class TestMaterializationOwnership:
+    """Ownership, not only checking: paths and the resume lookup.
+
+    Refusing a mismatched record was necessary and not sufficient. Two further
+    things had to become materialization-keyed, and each is driven here against
+    a real search rather than argued:
+
+    * the checkpoint destination, because two materializations of one semantic
+      state writing to one directory means the second overwrites the first;
+    * the journal lookup, because keyed on the semantic state the journal can
+      only offer the NEWEST record for a path — so a run whose own
+      materialization was journalled first would be told "not yours" and would
+      rebuild work it already had.
+    """
+
+    @pytest.fixture
+    def pieces(self, teacher):
+        calib = prepare_calibration_items(tagged_items(), profile_id="toy")
+        rows = tagged_items(seed=1111)
+        from aadistill.initialization.scoring.positions import (
+            normalized_prediction_tags,
+        )
+        for r in rows:
+            r["tags"] = normalized_prediction_tags(
+                r["tags"], int(r["input_ids"].shape[1]) - 1)
+        items = _suite_items(rows)
+        return calib, _suite(items), items
+
+    def _run(self, tmp, execution, teacher, pieces):
+        calib, suite, items = pieces
+        search, _ = _search(tmp, policy=ALL_POSITIONS_V1, execution=execution,
+                            teacher=teacher, calib=calib, suite=suite,
+                            suite_items=items)
+        return search, search.run()
+
+    def test_checkpoint_directories_cannot_collide(self, teacher, pieces):
+        """Two protocols, one semantic state, two destinations."""
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            one, first = self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            three, second = self._run(tmp, B3_SORTED, teacher, pieces)
+
+            shared = ({s.state_id for s in first.leaves}
+                      & {s.state_id for s in second.leaves})
+            assert shared, "the two runs must share at least one semantic state"
+            by_id_one = {s.state_id: s for s in first.leaves}
+            by_id_three = {s.state_id: s for s in second.leaves}
+            for state_id in shared:
+                a, b = by_id_one[state_id], by_id_three[state_id]
+                assert a.materialization.materialization_id != \
+                    b.materialization.materialization_id
+                assert a.checkpoint_path != b.checkpoint_path, (
+                    f"{state_id} has one checkpoint path for two "
+                    "materializations; the second overwrote the first")
+                #: And the layout is the stated one: the semantic id is still
+                #: the outer level, so one hypothesis's materializations sit
+                #: together rather than scattered by protocol.
+                assert Path(a.checkpoint_path).parent.name == state_id
+                assert Path(a.checkpoint_path).name == \
+                    a.materialization.materialization_id
+            #: Both sets of bytes survive on disk at once.
+            for state_id in shared:
+                assert Path(by_id_one[state_id].checkpoint_path).is_dir()
+                assert Path(by_id_three[state_id].checkpoint_path).is_dir()
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_one_semantic_state_retains_and_resolves_two_materializations(
+            self, teacher, pieces):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            one, _ = self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            three, _ = self._run(tmp, B3_SORTED, teacher, pieces)
+            journal = one.store.latest_by_materialization_id()
+            semantic = one.store.latest_by_state_id()
+            #: The materialization view keeps BOTH; the semantic view keeps one
+            #: record per path and therefore strictly fewer. That difference is
+            #: the whole reason the second view exists.
+            assert len(journal) > len(semantic)
+            ids = {r["state_id"] for r in journal.values()}
+            per_state = {sid: sum(1 for r in journal.values()
+                                  if r["state_id"] == sid) for sid in ids}
+            assert max(per_state.values()) >= 2, (
+                "no semantic state retained two materializations, so this test "
+                "did not exercise what it claims")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_resume_finds_ITS_materialization_not_the_latest(self, teacher,
+                                                             pieces):
+        """THE BUG THE REFUSAL ALONE LEFT OPEN.
+
+        Run protocol A, then protocol B — so B's records are the newest for
+        every shared semantic state — then run A again. A must RESUME. Keyed on
+        the semantic state it would find B's record, correctly refuse it as not
+        its own, and rebuild everything it already had.
+        """
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            self._run(tmp, B3_SORTED, teacher, pieces)
+            again, _ = self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            assert again.resumed_ids, (
+                "protocol A did not resume its own earlier materialization "
+                "after protocol B wrote newer records for the same semantic "
+                "states — the lookup is still semantic-state keyed")
+
+            #: And the resumed records really are A's, not B's.
+            #:
+            #: ASSERTED, not skipped over. This used to end in a `pytest.skip`
+            #: for "the toy search did not reach the interesting case", which
+            #: was both unreachable — protocol B visits the same semantic states
+            #: and therefore writes the newest record for every one of them —
+            #: and a skip predicate that no contract said would decide the same
+            #: way on a pod. A test that cannot show it exercised its own case
+            #: should fail, not pass quietly.
+            journal = again.store.latest_by_state_id()
+            foreign_newest = 0
+            for state_id in again.resumed_ids:
+                newest = journal[state_id]
+                restored = again.states[state_id]
+                assert restored.materialization is not None
+                if newest.get("materialization", {}).get("materialization_id") \
+                        != restored.materialization.materialization_id:
+                    foreign_newest += 1
+            assert foreign_newest, (
+                "every resumed state's newest semantic record was its own, so "
+                "this run never faced a foreign newer record and did not "
+                "exercise the bug it exists for")
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_the_root_carries_the_teachers_pinned_identity(self, teacher,
+                                                           pieces):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            search, _ = self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            root = search.root_state()
+            assert root.materialization is not None
+            assert root.materialization.parent_materialization_id is None
+            #: Derived from the teacher, so it does not move with the protocol.
+            other, _ = self._run(tmp, B3_SORTED, teacher, pieces)
+            assert other.root_state().materialization.materialization_id == \
+                root.materialization.materialization_id
+        finally:
+            shutil.rmtree(tmp, ignore_errors=True)
+
+    def test_a_child_binds_the_parent_it_actually_consumed(self, teacher,
+                                                           pieces):
+        tmp = Path(tempfile.mkdtemp())
+        try:
+            search, result = self._run(tmp, B1_ORIGINAL, teacher, pieces)
+            root_id = search.root_state().materialization.materialization_id
+            depth1 = [s for s in search.states.values() if s.depth == 1]
+            assert depth1, "the search produced no level-1 state"
+            for s in depth1:
+                assert s.materialization.parent_materialization_id == root_id
+            deeper = [s for s in search.states.values() if s.depth == 2]
+            for s in deeper:
+                parent = search.states[s.parent_id]
+                assert s.materialization.parent_materialization_id == \
+                    parent.materialization.materialization_id
         finally:
             shutil.rmtree(tmp, ignore_errors=True)

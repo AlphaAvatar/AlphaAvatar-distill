@@ -57,6 +57,11 @@ from aadistill.initialization.specs.materialization import (
 from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
+from aadistill.initialization.scoring.content import scoring_content_config
+from aadistill.initialization.scoring.protocol_identity import (
+    PROTOCOL_FIELD,
+    measurement_is_comparable,
+)
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     ScoringPositionPolicy,
@@ -87,6 +92,7 @@ from aadistill.initialization.specs.state import (
     StateStore,
     StateValidity,
     child_state,
+    compute_state_id,
     make_root_state,
 )
 
@@ -228,11 +234,22 @@ class SearchConfig:
     #: over every position are two different hypotheses and must not share a
     #: `config_hash`.
     #:
-    #: It lives on the RUN rather than per operator for the reason the D-series
-    #: directive gives: a candidate chosen by target-aware operators must not then
-    #: be pruned by a full-sequence beam metric. One policy, consumed by the
+    #: It lives on the RUN rather than per operator because of what the
+    #: alternative permits: a candidate chosen by target-aware operators must not
+    #: then be pruned by a full-sequence beam metric. One policy, consumed by the
     #: operators and by the measurer, makes that disagreement unexpressible.
     position_policy: ScoringPositionPolicy = ALL_POSITIONS_V1
+    #: The measurement protocol the injected measurer takes its numbers under,
+    #: as declared by the driver that built it — `StateEvaluator` exposes it as
+    #: `measurement_protocol_id`. ONE field covering the suite's content, the
+    #: scoring content, the policy, the reduction semantics and the execution,
+    #: so resume and the measurer-agreement check ask one question instead of a
+    #: list that grows until something is forgotten.
+    #:
+    #: `None` is the historical default: a run that declares none is judged by
+    #: the two fields a pre-identity record carries. See
+    #: `aadistill.initialization.scoring.protocol_identity`.
+    measurement_protocol_id: str | None = None
     max_depth: int | None = None
     allow_kind_repeat: bool = False
     device: str = "cpu"
@@ -274,6 +291,11 @@ class SearchConfig:
                 "position_policy_hash": self.position_policy.policy_hash}
                if self.position_policy.policy_hash
                != ALL_POSITIONS_V1.policy_hash else {}),
+            #: ABSENT when undeclared, for the same compatibility reason: a
+            #: search recorded before measurement-protocol identity existed must
+            #: still hash to the value its own record carries.
+            **({"measurement_protocol_id": self.measurement_protocol_id}
+               if self.measurement_protocol_id else {}),
             "max_depth": self.max_depth,
             "allow_kind_repeat": self.allow_kind_repeat,
             "device": self.device,
@@ -387,6 +409,29 @@ class BeamSearch:
         #: Operational timings. Never hashed, never returned into a state.
         self.telemetry = TelemetrySink(self.workdir / "telemetry.jsonl")
 
+        #: WHICH MEASUREMENT PROTOCOL THIS SEARCH IS RESUMABLE UNDER.
+        #:
+        #: Taken from the config when a driver declares it — which also puts it
+        #: in `config_hash` — and otherwise asked of the measurer, which knows
+        #: its own protocol. Asking matters: `StateEvaluator` stamps every
+        #: measurement with its protocol id, so a search that neither declared
+        #: nor asked would write records it could never adopt again and would
+        #: silently re-measure every state on resume. Resume must not depend on
+        #: a driver remembering to pass a field.
+        #:
+        #: `None` only when the measurer declares none, which is the historical
+        #: case; `measurement_is_comparable` then applies the historical rule.
+        measurer_protocol = getattr(measurer, "measurement_protocol_id", None)
+        declared = self.config.measurement_protocol_id
+        if declared and measurer_protocol and str(measurer_protocol) != declared:
+            raise SearchError(
+                f"this search declares measurement protocol {declared[:12]} and "
+                f"its measurer reports {str(measurer_protocol)[:12]}. Refused at "
+                "construction rather than at the first measurement, because "
+                "every state measured in between would have to be discarded.")
+        self.measurement_protocol_id = (
+            declared or (str(measurer_protocol) if measurer_protocol else None))
+
         adapter.validate_target(config.target_spec)
         self._validate_impl_profiles()
 
@@ -448,11 +493,17 @@ class BeamSearch:
                 f"teacher family {spec.family!r} and target family "
                 f"{self.config.target_spec.family!r} differ; one adapter cannot span them")
         self._assert_target_reachable(spec)
-        return make_root_state(
+        #: STAMPED HERE, not in `run()`, so every caller of `root_state()` gets
+        #: a root that carries its lineage. A root built without one would make
+        #: `_materialization_for` refuse its first child, which is the correct
+        #: failure but a confusing place to meet it.
+        root = make_root_state(
             root_teacher_id=self.root_teacher_id,
             root_teacher_sha256=self.root_teacher_sha256,
             spec=spec, target_spec=self.config.target_spec,
             num_parameters=self.adapter.param_count(spec), seed=self.config.seed)
+        root.materialization = self._root_materialization()
+        return root
 
     def _assert_target_reachable(self, root_spec: ArchSpec) -> None:
         """Every field the target changes must be some implementation's business.
@@ -513,7 +564,7 @@ class BeamSearch:
         loads, is the file — so the file is what gets hashed and what gets
         measured, not the in-memory object that wrote it.
         """
-        ckpt_dir = self.workdir / "states" / state.state_id
+        ckpt_dir = self.checkpoint_dir(state)
         ckpt_dir.mkdir(parents=True, exist_ok=True)
         with self.telemetry.timed("materialize_seconds"):
             self.adapter.save(model, str(ckpt_dir),
@@ -569,8 +620,8 @@ class BeamSearch:
         #: operator and the beam metric cannot disagree. Without this they could:
         #: a driver that passed the policy to `SearchConfig` and forgot the
         #: evaluator would run target-aware operators and prune them on a
-        #: full-sequence KL, which is the one failure mode the D-series directive
-        #: names.
+        #: full-sequence KL — selecting on one objective and pruning on
+        #: another.
         #:
         #: Absent means the incumbent policy, for the same reason `_restore`
         #: reads it that way: every evaluation written before the policy existed
@@ -587,6 +638,12 @@ class BeamSearch:
                 "beam metric must consume ONE policy; a candidate selected on "
                 "supervised positions and pruned on all of them is two "
                 "experiments reported as one.")
+        #: AND THE WHOLE PROTOCOL, not only the policy. The check above catches
+        #: a measurer scoring other POSITIONS; this catches the rest of the list
+        #: — a measurer whose suite content, scoring content, reduction semantics
+        #: or execution is not the one the rest of this search measured under.
+        self._bind_measurement_protocol(state,
+                                        (evaluation.detail or {}).get(PROTOCOL_FIELD))
         state.attach_evaluation(evaluation)
         del reloaded
 
@@ -653,7 +710,7 @@ class BeamSearch:
     def _expand_one(self, parent: InitializationState, impl: OperatorImplementation,
                     profile: CalibrationProfile) -> InitializationState:
         operator_config = {"n_calibration_items": len(self.calibration_for(profile)),
-                           **self._position_policy_config(impl)}
+                           **self._position_policy_config(impl, profile)}
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
         config_hash = sha256_json(
             {k: v for k, v in operator_config.items() if k != "n_calibration_items"})
@@ -665,7 +722,7 @@ class BeamSearch:
             seed=self.config.seed, result_spec_hash=plan.result_spec.spec_hash)
         state = child_state(parent, step, plan.result_spec,
                             self.adapter.param_count(plan.result_spec), self.config.seed)
-        state.materialization = self._materialization_for(state.state_id)
+        state.materialization = self._materialization_for(state.state_id, parent)
 
         restored = self._restore(state)
         if restored is not None:
@@ -722,14 +779,23 @@ class BeamSearch:
         self.store.append(state)
         return state
 
-    def _position_policy_config(
-            self, impl: OperatorImplementation) -> dict[str, Any]:
-        """The scoring-position policy, as HASHED operator config.
+    def _position_policy_config(self, impl: OperatorImplementation,
+                                profile: CalibrationProfile) -> dict[str, Any]:
+        """The scoring-position policy AND its content, as HASHED operator config.
 
         In `operator_config` rather than in `ctx.execution` because it changes
         what is computed: two searches whose operators protect different
         positions reach different leaves and must not share a state id. It is
         therefore read by `config_hash`, which is what forks the whole subtree.
+
+        **The policy id alone was not enough**, and that is the gap this closes.
+        A policy that reads positions consumes metadata no other identity
+        covers: `profile_hash` pins the profile's SPEC, which pins one
+        `content_sha256`, which hashes only item ids and token ids. Two assets
+        with identical tokens and different supervised masks therefore agreed on
+        every term above — the policy hash included — while producing different
+        operator decisions. `scoring_content_config` binds what the policy
+        actually reads, so the mask is part of the scientific path identity.
 
         **Omitted at the incumbent policy**, and omitted for an implementation
         that consumes no calibration data. Both omissions preserve a recorded
@@ -741,22 +807,76 @@ class BeamSearch:
         """
         if not consumes_calibration(impl):
             return {}
-        return policy_config(self.config.position_policy)
+        policy = self.config.position_policy
+        named = policy_config(policy)
+        if not named:
+            return {}
+        items = self.calibration_for(profile)
+        return {**named, **scoring_content_config(items, policy)}
 
-    def _materialization_for(self, semantic_state_id: str
+    def _materialization_for(self, semantic_state_id: str,
+                             parent: InitializationState,
                              ) -> MaterializationIdentity | None:
-        """The state's four-part identity, when the caller declared its numerics.
+        """The state's identity, when the caller declared its numerics.
 
         `None` otherwise, which is the historical behaviour and is why this is
         not a hard requirement: a toy construction that has not stated a device
         class or a compute dtype has nothing honest to fingerprint, and inventing
         one would be worse than having none.
+
+        **The parent's materialization is REQUIRED when numerics are declared**,
+        because the child's bytes are a function of the bytes it consumed. A
+        parent that somehow lacks one under a fingerprinted run is a gap in the
+        lineage, not something to paper over with a placeholder: every state in
+        such a run gets its identity here or at the root, so the only way to
+        reach this refusal is a bug.
         """
         if self.numerics is None:
             return None
+        if parent.materialization is None:
+            raise SearchError(
+                f"{parent.state_id} carries no materialization identity, so the "
+                f"child of it cannot bind the bytes it consumed. This run "
+                "declared its numerics, so every state in it should have one — "
+                "including the root, which takes the teacher's pinned identity")
         return MaterializationIdentity.build(
             semantic_state_id=semantic_state_id, execution=self.execution,
-            environment=self.numerics)
+            environment=self.numerics,
+            parent_materialization_id=parent.materialization.materialization_id)
+
+    def _root_materialization(self) -> MaterializationIdentity | None:
+        """The root's identity: the teacher's published revision, not an
+        execution. See `MaterializationIdentity.root`."""
+        if self.numerics is None:
+            return None
+        return MaterializationIdentity.root(
+            semantic_state_id=compute_state_id(
+                self.root_teacher_sha256, self.config.target_spec.spec_hash, ()),
+            root_teacher_id=self.root_teacher_id,
+            root_teacher_sha256=self.root_teacher_sha256)
+
+    def checkpoint_dir(self, state: InitializationState) -> Path:
+        """Where a state's weights live. ONE owner for the layout.
+
+        Materialization-keyed, because two materializations of one semantic
+        state are two different sets of bytes and a shared destination means
+        the second silently overwrites the first:
+
+            states/<semantic_state_id>/<materialization_id>/
+
+        The semantic id stays the outer level deliberately. It is still the
+        scientific coordinate — every materialization of one hypothesis sits
+        together, and a reader looking for "that path's checkpoints" finds them
+        in one place rather than scattered by protocol.
+
+        A run that declared no numerics keeps the historical flat layout. It has
+        no materialization to key on, and relocating its checkpoints would move
+        paths that committed records already name.
+        """
+        base = Path(self.workdir) / "states" / state.state_id
+        if state.materialization is None:
+            return base
+        return base / state.materialization.materialization_id
 
     def _stats_key(self, parent: InitializationState,
                    profile: CalibrationProfile) -> str | None:
@@ -801,27 +921,39 @@ class BeamSearch:
 
     def _restore(self, state: InitializationState) -> InitializationState | None:
         """Rehydrate a state the journal already carries a full measurement for."""
-        record = self._journal.get(state.state_id)
+        #: LOOKED UP BY MATERIALIZATION when this run has one, and that is the
+        #: whole fix rather than a refinement of the refusal below.
+        #:
+        #: Refusing a mismatch is necessary and was not sufficient: keyed on the
+        #: semantic state, the journal can only ever offer the NEWEST record for
+        #: a path, so a run whose own materialization was journalled before
+        #: another protocol's would be told "that record is not yours" and
+        #: rebuild work it already had. Keyed on the materialization, an earlier
+        #: record is as findable as a later one and a hit matches by
+        #: construction.
+        if state.materialization is not None:
+            record = self._journal_by_materialization.get(
+                state.materialization.materialization_id)
+        else:
+            record = self._journal.get(state.state_id)
         if record is None or record.get("validity") != StateValidity.MEASURED.value:
             return None
-        #: THE A3 COLLISION, refused. A journal entry's `state_id` says the same
-        #: path was walked; it does not say the same bytes were built. A-bsz1 and
-        #: A-bsz3 share a semantic id, a `result_spec_hash` and a hashed config,
-        #: and produced `53e30566c5f7` and `7dd2f6f6980b` — so a record written
-        #: under one protocol must not restore a run executing the other.
-        #:
-        #: Declining to resume is the right failure, not raising: a protocol
-        #: change is a legitimate new run and it should simply rebuild. What is
-        #: illegitimate is adopting the other protocol's checkpoint and metrics,
-        #: which is what returning the record would do.
+        #: THE A3 COLLISION, still refused — now as a structural assertion
+        #: rather than the mechanism. A keyed hit cannot mismatch, so this fires
+        #: only if the index and the record disagree, which would be a defect in
+        #: `latest_by_materialization_id`. Kept because a lookup whose key is
+        #: trusted silently is a lookup nobody checks: one semantic id covered
+        #: two artifacts in this project, and the cost of re-asserting it here
+        #: is one comparison per restored state.
         if state.materialization is not None:
-            if not state.materialization.same_materialization(
-                    record.get("materialization") or {}):
-                return None
+            state.materialization.require_same_materialization(
+                record.get("materialization") or {},
+                what=f"journal record for {state.state_id}")
         elif record.get("materialization"):
             #: The journal declared a materialization and this run has not. The
             #: run cannot show the record describes its own execution, so it does
-            #: not get to inherit it.
+            #: not get to inherit it. Declining rather than raising: a protocol
+            #: change is a legitimate new run and it should simply rebuild.
             return None
         path = record.get("checkpoint_path")
         if not path or not Path(path).is_dir():
@@ -841,25 +973,26 @@ class BeamSearch:
         if artifact.artifact_digest != artifact_record.get("artifact_digest"):
             return None
         eval_record = record.get("evaluation") or {}
-        # A state's identity is its path, which does not include the evaluation
-        # suite — so a journal written under a different suite would otherwise be
-        # adopted wholesale, and the beam would rank this run's states on last
-        # run's questions. Metrics bind to the artifact *and* to the suite.
-        if eval_record.get("suite_hash") != self.config.suite.suite_hash:
-            return None
-        #: And the same argument for the SCORING POSITIONS, which the suite hash
-        #: does not cover. A state id forks on the position policy only for
-        #: operators that consume calibration — a path made of weight-only
-        #: operators, and the root, keep their ids — so without this a journal
-        #: written over all positions would hand a target-aware run a
-        #: full-sequence teacher KL and the beam would rank on it.
+        #: ONE QUESTION, and it replaced two. A state's identity is its path,
+        #: which does not include the suite, the scoring positions, the
+        #: reduction or the execution — so a journal written under any of those
+        #: differing would otherwise be adopted wholesale and the beam would
+        #: rank this run's states on another run's questions.
         #:
-        #: Absent means the incumbent policy: every record written before the
-        #: policy existed was measured over all positions, and reading the
-        #: omission as anything else would refuse every historical resume.
-        recorded_policy = (eval_record.get("detail") or {}).get(
-            "position_policy_hash", ALL_POSITIONS_V1.policy_hash)
-        if recorded_policy != self.config.position_policy.policy_hash:
+        #: This used to be an inline suite-hash comparison, then an inline
+        #: policy-hash comparison beside it, and the next three terms would have
+        #: been three more. `measurement_is_comparable` owns the rule, including
+        #: how a record that predates the identity is judged, and it returns the
+        #: reason so a declined resume is distinguishable from an empty journal.
+        comparable, why = measurement_is_comparable(
+            {"detail": eval_record.get("detail") or {},
+             "suite_hash": eval_record.get("suite_hash")},
+            protocol_id=self.measurement_protocol_id,
+            historical_suite_hash=self.config.suite.suite_hash,
+            historical_policy_hash=self.config.position_policy.policy_hash)
+        if not comparable:
+            self.telemetry.record("restore_declined", state_id=state.state_id,
+                                  reason=why)
             return None
         state.mark_materialized(artifact)
         state.validity = StateValidity.VALIDATED
@@ -876,8 +1009,59 @@ class BeamSearch:
 
     # --- the loop ----------------------------------------------------------
 
+    def _bind_measurement_protocol(self, state: InitializationState,
+                                   measured: str | None) -> None:
+        """Hold every measurement in this run to ONE protocol.
+
+        Two directions, because the protocol can be known in either order:
+
+        * the search already knows one — from `SearchConfig`, or adopted below —
+          and the measurement must agree, or the run is mixing measurements of
+          different quantities and stops.
+        * the search knows none and the measurement carries one: ADOPT it.
+
+        Adoption is what makes the mechanism work without a driver remembering
+        anything. Every driver wraps its evaluator in a lambda, so the attribute
+        the constructor looks for is invisible, and a search that asked for a
+        declaration and got none would write records stamped with a protocol it
+        could never match again — resume would decline every state, silently,
+        and a nine-hour search would re-measure everything it had already done.
+        Learning from the first measurement costs at most ONE re-measured state
+        on a resumed run that declared nothing, and that one is recorded.
+
+        Declaring `measurement_protocol_id` on the config is still better: it
+        enters `config_hash`, so the run's own identity states what it measured
+        under, and it is checked before the first expensive measurement rather
+        than at it.
+        """
+        measured = str(measured) if measured else None
+        declared = self.measurement_protocol_id
+        if declared and measured != declared:
+            state.mark_invalid(
+                f"the measurer reports protocol {str(measured)[:12]} and the "
+                f"rest of this search measured under {declared[:12]}")
+            raise SearchError(
+                f"{state.state_id}: {state.invalid_reason}. A measurement taken "
+                "under another protocol is a measurement of another quantity; "
+                "ranking them together would compare two experiments as one.")
+        if declared is None and measured:
+            self.measurement_protocol_id = measured
+            self.telemetry.record("measurement_protocol_adopted",
+                                  state_id=state.state_id, protocol_id=measured)
+            print(f"measurement protocol {measured[:12]} adopted from the first "
+                  f"measurement ({state.state_id[:12]}); declare it on "
+                  "SearchConfig to have it checked before the first expansion "
+                  "and recorded in config_hash")
+
     def run(self) -> "SearchResult":
         self._journal = self.store.latest_by_state_id()
+        #: THE RESUME VIEW, keyed on the materialization. The semantic view
+        #: above is kept for records written before the field existed and for
+        #: the frozen canonical-record rule that reads it; neither can find an
+        #: EARLIER materialization of a path whose newest record belongs to
+        #: another protocol, which is what this one is for.
+        self._journal_by_materialization = (
+            self.store.latest_by_materialization_id())
         root = self.root_state()
         self.states[root.state_id] = root
         beam: list[InitializationState] = [root]

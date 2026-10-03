@@ -143,11 +143,59 @@ class TestTheSupervisedTargetPolicy:
         assert w.form == FORM_ALL
         assert w.n_active == 19
 
-    def test_an_empty_tag_is_treated_as_untagged(self):
+    def test_a_present_but_empty_tag_is_REFUSED_not_treated_as_untagged(self):
+        """The distinction the content identity already claimed to make.
+
+        `scoring/content.py::_position_component` binds `assistant=absent` and
+        `assistant=0:<digest>` to different identities, on the stated grounds
+        that this policy treats them differently. **It did not** — one `or`
+        collapsed both into the all-positions fallback — so an asset whose
+        `assistant` tag named nothing was scored FULL-SEQUENCE under a
+        target-aware policy id. This test asserts the fail-closed semantics and
+        is the reason this file no longer contains
+        `test_an_empty_tag_is_treated_as_untagged`, which encoded the defect.
+        """
         raw = item(12)
         raw["tags"]["assistant"] = []
+        with pytest.raises(ScoringPositionError, match="selects no prediction"):
+            SUPERVISED_TARGET_V1.weights(raw, axis=PREDICTION_AXIS)
+
+    def test_the_two_empty_cases_are_not_the_same_case(self):
+        """Absent falls back; present-and-empty refuses. Asserted together so a
+        future change cannot quietly re-merge them."""
+        absent = item(12)
+        assert absent["tags"] == {}, "the helper's untagged item must carry no tag"
         assert SUPERVISED_TARGET_V1.weights(
-            raw, axis=PREDICTION_AXIS).form == FORM_ALL
+            absent, axis=PREDICTION_AXIS).form == FORM_ALL
+
+        present_empty = item(12)
+        present_empty["tags"]["assistant"] = []
+        with pytest.raises(ScoringPositionError):
+            SUPERVISED_TARGET_V1.weights(present_empty, axis=PREDICTION_AXIS)
+
+    def test_an_all_false_mask_is_refused_as_well_as_an_empty_index_list(self):
+        """The two STORED forms of "present but empty" must behave alike.
+
+        `normalized_prediction_tags` accepts a tag either as prediction-position
+        indices (the frozen mixtures' form) or as a boolean mask (a loaded
+        `SuiteItem`'s form), and turns an empty index list into a correct-length
+        all-False mask. So the length check cannot see this case, and a policy
+        that only refused one form would refuse the mixture but not the loaded
+        suite — or the reverse.
+        """
+        as_mask = item(12)
+        as_mask["tags"]["assistant"] = torch.zeros(11, dtype=torch.bool)
+        with pytest.raises(ScoringPositionError, match="selects no prediction"):
+            SUPERVISED_TARGET_V1.weights(as_mask, axis=PREDICTION_AXIS)
+
+    def test_the_token_axis_refuses_it_too(self):
+        """Not only the prediction axis: the token-axis vector is derived from
+        the prediction mask, so a refusal there must not be bypassable by
+        asking for activations instead."""
+        raw = item(12)
+        raw["tags"]["assistant"] = []
+        with pytest.raises(ScoringPositionError, match="selects no prediction"):
+            SUPERVISED_TARGET_V1.weights(raw, axis=TOKEN_AXIS)
 
     def test_the_token_axis_drops_the_final_token(self):
         """The documented consequence of defining the statistic over positions
@@ -204,15 +252,45 @@ class TestAgainstTheFrozenMixtures:
         assert all(w.total > 0 for w in pred)
 
     @pytest.mark.parametrize("rel", MIXTURES)
+    def test_no_frozen_item_carries_a_present_but_empty_assistant_tag(self, rel):
+        """What makes the fail-closed policy safe for the frozen assets.
+
+        `tag_positions` ends with `{k: v for k, v in tags.items() if v}` and
+        returns `{}` outright for raw prose, so it never serializes an empty
+        tag — but that is the BUILDER, and these are the ARTIFACTS, which were
+        written by whatever the builder was at the time. Measured here instead:
+        every row is `absent` or non-empty, so refusing present-but-empty
+        refuses nothing that exists. If this ever fails, the policy change and
+        the asset have to be reconciled before either is used.
+        """
+        offenders = [raw.get("item_id")
+                     for raw in load_mixture(rel)
+                     if "assistant" in (raw.get("tags") or {})
+                     and not (raw["tags"]["assistant"])]
+        assert not offenders, (
+            f"{rel} carries a present-but-empty `assistant` tag on "
+            f"{offenders}; SupervisedTargetV1 refuses those")
+
+    @pytest.mark.parametrize("rel", MIXTURES)
     def test_the_restriction_is_exactly_the_assistant_tag_plus_untagged_items(
             self, rel):
         """Derived independently from the mixture's own fields, so the policy is
-        checked against the artifact rather than against itself."""
+        checked against the artifact rather than against itself.
+
+        The two cases are spelled out rather than collapsed into `if tag`: a
+        falsy tag used to mean both "absent" and "present but empty", and those
+        are now different outcomes. Only `absent` contributes the item's full
+        prediction count; a present-but-empty tag would raise, which the test
+        above establishes does not occur in these assets.
+        """
         items = load_mixture(rel)
         expected = 0
         for raw in items:
-            tag = (raw.get("tags") or {}).get("assistant")
-            expected += len(tag) if tag else int(raw["n_prediction_positions"])
+            tags = raw.get("tags") or {}
+            if "assistant" in tags:
+                expected += len(tags["assistant"])
+            else:
+                expected += int(raw["n_prediction_positions"])
         got = sum(w.total for w in weights_for_items(
             items, SUPERVISED_TARGET_V1, axis=PREDICTION_AXIS))
         assert got == expected

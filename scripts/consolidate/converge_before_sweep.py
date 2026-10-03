@@ -41,6 +41,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -175,6 +176,84 @@ def generators(write: bool) -> list[str]:
     return problems
 
 
+#: JSON fields whose value is a commit this repository's evidence BINDS to.
+#: Not every field named `commit` anywhere — these are the ones a record uses to
+#: say "this is the code that ran", which is what P4 requires an experiment to
+#: be reproducible from.
+#: `git_commit` was missing from the first version of this tuple, and it is the
+#: field AGENTS.md 3.6 names for an experiment log -- 20 record files use it. The
+#: hole was found by sweeping a WIDER field set by hand during the 2026-10-03
+#: squash integration and comparing the counts: 622 hashes by hand against 606
+#: here. When this list and a hand sweep disagree, the difference is the answer.
+#: Occurrences as of 2026-10-03: session_commit, authorized_session_commit,
+#: head_commit, swept_base_commit, declared_at_commit, commit and git_commit are
+#: all live; `base_commit` is in 3 records; `binding_commit` in none yet.
+CITED_COMMIT_FIELDS: tuple[str, ...] = (
+    "session_commit", "authorized_session_commit", "head_commit",
+    "swept_base_commit", "declared_at_commit", "binding_commit",
+    "base_commit", "git_commit", "commit",
+)
+
+_CITED_COMMIT = re.compile(
+    r'"(' + "|".join(CITED_COMMIT_FIELDS) + r')"\s*:\s*"([0-9a-f]{7,40})"')
+
+
+def cited_commits(root: Path = REPO) -> dict[str, set[str]]:
+    """Every commit hash the records cite, and who cites it."""
+    out: dict[str, set[str]] = {}
+    for p in (*root.glob("logs/**/*.json"), *root.glob("configs/**/*.json")):
+        try:
+            text = p.read_text()
+        except (OSError, UnicodeDecodeError):
+            continue
+        for field, sha in _CITED_COMMIT.findall(text):
+            out.setdefault(sha, set()).add(
+                f"{p.relative_to(root)}:{field}")
+    return out
+
+
+def cited_commits_are_reachable(root: Path = REPO) -> list[str]:
+    """AGENTS.md P12.2: a squash integration must not delete the source branch.
+
+    This is what makes that clause checkable instead of aspirational. Under
+    squash-and-merge a branch's individual commits never land on `main`, so the
+    hashes in `session_commit`, `authorized_session_commit`, `head_commit`,
+    `swept_base_commit`, `declared_at_commit` and a comparison's binding commit
+    survive only on the branch. Deleting it — the cleanup the host offers by
+    default right after a squash merge — would make every one of those records
+    unreproducible, and nothing would say so until someone needed a hash.
+
+    One `git cat-file --batch-check` call for all of them: 606 hashes across 788
+    files resolved in 0.14 s when this was written, so there is no reason to
+    find out any later than now.
+
+    Skipped on a repository with no history to resolve against — a shallow
+    bundle or a single-commit pod checkout legitimately cannot answer, and
+    reporting that as drift would make this refuse on exactly the machines it
+    is not about.
+    """
+    shallow = git("rev-parse", "--is-shallow-repository").strip() == "true"
+    if shallow or int(git("rev-list", "--count", "HEAD").strip() or 0) <= 1:
+        return []
+    cited = cited_commits(root)
+    if not cited:
+        return []
+    check = subprocess.run(["git", "cat-file", "--batch-check"], cwd=root,
+                           input="\n".join(cited) + "\n",
+                           capture_output=True, text=True)
+    missing = sorted(line.split()[0] for line in check.stdout.splitlines()
+                     if line.endswith(" missing") or " missing" in line)
+    if not missing:
+        return []
+    examples = "; ".join(
+        f"{sha[:12]} cited by {sorted(cited[sha])[0]}" for sha in missing[:3])
+    return [(f"{len(missing)} of {len(cited)} cited commit(s) are unreachable "
+             f"from any ref — e.g. {examples}. AGENTS.md P12.2: a squash "
+             "integration must NOT delete the source branch, because these "
+             "hashes exist only there and P4 reproducibility depends on them. "
+             "Restore the branch or ref before anything else.")]
+
+
 def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     from experiments.phase_c1 import pod_environment as pe
     from experiments.phase_c1.authorization_payload import (
@@ -243,6 +322,7 @@ def main() -> int:
     a = ap.parse_args()
 
     problems = generators(a.write)
+    problems += cited_commits_are_reachable()
     problems += launch_preconditions(a.run_id, a.stage_id)
     left = dirty()
     if left:

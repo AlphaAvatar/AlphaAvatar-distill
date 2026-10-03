@@ -498,10 +498,44 @@ class StateStore:
                 if line.strip()]
 
     def latest_by_state_id(self) -> dict[str, dict[str, Any]]:
-        """Last written record per state id — the journal's current view."""
+        """Last written record per state id — the journal's current view.
+
+        **Unchanged, and it must stay unchanged.** This is the canonical-record
+        rule a frozen comparison already depends on — `freeze_c2_comparison_inputs`
+        reads it, and a test asserts it chooses the LAST record rather than the
+        first — so it keeps collapsing every materialization of one semantic
+        state into the newest. That collapse is exactly what
+        :meth:`latest_by_materialization_id` exists to avoid for new runs;
+        changing it here would rewrite how closed evidence was selected.
+        """
         out: dict[str, dict[str, Any]] = {}
         for record in self.records():
             out[record["state_id"]] = record
+        return out
+
+    def latest_by_materialization_id(self) -> dict[str, dict[str, Any]]:
+        """Last written record per MATERIALIZATION. The resume/dedup view.
+
+        `latest_by_state_id` can only ever offer the newest record for a
+        semantic state, so a journal holding two protocols' records for one path
+        hides the older one completely. Refusing a mismatch — which is what the
+        search did first — is necessary but not sufficient: a run whose own
+        materialization was journalled *before* another protocol's would be told
+        "that record is not yours" and rebuild work it already had.
+
+        Keyed on the materialization, that stops being possible: a hit matches
+        by construction and an earlier record is as findable as a later one.
+
+        Records written before the field existed are **not indexed here at
+        all**. They have no materialization to key on, and inventing one would
+        be asserting which protocol produced bytes nobody fingerprinted;
+        `latest_by_state_id` stays the way to read them.
+        """
+        out: dict[str, dict[str, Any]] = {}
+        for record in self.records():
+            key = (record.get("materialization") or {}).get("materialization_id")
+            if key:
+                out[str(key)] = record
         return out
 
 

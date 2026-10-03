@@ -271,8 +271,19 @@ class TestTheSnapshotStatesTheRequiredFacts:
         about C2. Requiring the key would require keeping a vestigial C2
         sentence inside a record about a different experiment — the duplication
         this gate exists to prevent, pointing the wrong way. So the gate asks
-        the four owners that are still owners, and the newest-run block is
-        checked by the tests that own IT.
+        the owners that are still owners, and the newest-run block is checked by
+        the tests that own IT.
+
+        **`behavioural_session` went the same way on 2026-10-03.** It said
+        `CLOSED WITHOUT PROMOTION` under the same owner document as
+        `c2_closure`, which already carries the deltas, the limitation and the
+        probes-remaining — so it was a second copy of one subject, reclaimed
+        when the snapshot needed room rather than a ceiling raise (the size
+        guard in `test_repository_structure` asks for exactly that trade). Its
+        two live facts, the 12-probe protocol and the 14 chains, moved into
+        `c2_closure`, and the assertions below follow them. Three owners now,
+        and the gate's point is unchanged: any one of them drifting is the
+        defect, and asking only the ladder would not catch it.
         """
         s = snapshot()
         closed = "CLOSED WITHOUT PROMOTION"
