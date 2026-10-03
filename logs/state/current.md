@@ -206,7 +206,39 @@ lists all six. **Continuing on it would re-apply the whole range** — cut a fre
 branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
 it is where this round's commit hashes live.
 
-## This branch: D1 replayed onto the squashed `main`
+## The D1 identity round, integrated into `main` by SQUASH AND MERGE
+
+**Approved on review 2026-10-03 and integrated per AGENTS.md P12.2.** One commit
+on `main` collapsing seven:
+
+```text
+source branch : review/d1-identity-correction   (NOT deleted -- P12.2)
+merge base    : 06cab9c8f106ed6f35db4c5cd6bf9d47288da139
+measured tree : 909d1c8bf1794a587002b2b21dfbf8243a7b4561
+squash commit : named by the commit itself on `main`
+```
+
+The branch tip and the measured tree are the **same** commit this time, which is
+the difference from the previous integration: the last commit is a records
+change, and `tests/docs` — which asserts on those records — was run against it.
+The earlier round's correction stands as written: there, the state-record commit
+was never separately validated.
+
+Validation on this tree: **core suite 3019 passed / 14 skipped / 0 failed**
+(`b0ca0fec`, the last commit that changed executable code), then D1 + D-series
+86 passed, `tests/docs` 158 passed, CUDA ledger 46 passed and both record
+regenerators at a fixed point for the records-only commit on top. 623 cited
+commit hashes resolve, zero unreachable — checked by
+`converge_before_sweep.py`'s own implementation, which this branch is what
+brought to `main`.
+
+**The source branch is NOT deleted.** `review/d1-target-aware` is kept too: it
+holds `e93b627c 38c46a32 161215c9`, the replayed round's original commits.
+
+**Cut a fresh branch from the new `main`.** A squash commit does not have this
+branch's commits as ancestors, so continuing here re-applies all seven.
+
+### What the round was
 
 **`review/d1-identity-correction`, cut fresh from `06cab9c8`.** The D1 identity
 round was **replayed**, not merged: `review/d1-target-aware` is no longer an

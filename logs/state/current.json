@@ -215,8 +215,8 @@
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (this branch). No skip depends on historical evidence.",
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2, from the 2026-10-03 test-boundary integration onward. The source branch must NOT be deleted: records bind commit hashes that exist only there. Range and obligations: logs/budget/decisions.md 2026-10-03.",
-  "next_work": "review/d1-identity-correction, cut fresh from main's squash 06cab9c8. The D1 round was REPLAYED, not merged: the old branch is no longer an ancestor of main. Owner: logs/budget/decisions.md 2026-10-03."
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
+  "next_work": "a FRESH branch from main. The D1 identity round was squashed in from review/d1-identity-correction (base 06cab9c8, tree 909d1c8b); that branch is no longer an ancestor of main."
  },
  "phase_b_result": {
   "status": "RESOLVED",
