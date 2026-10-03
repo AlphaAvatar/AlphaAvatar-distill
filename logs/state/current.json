@@ -227,5 +227,9 @@
   "blockers": "EVIDENCE: 0 of 2 fresh disjoint batteries, owner phase_d1/analyses/d1_evidence_capacity.json. FUNDING: $60.7509 chain against $13.1777, and phase_d1 is absent from the package's funds_formal_sessions_of.",
   "d2_owed_engineering": "the activation collectors implement only the BINARY form of a position policy; D2's continuous c_ref(t) needs a weighted denominator in StatsSpec.",
   "authorizes": "nothing"
+ },
+ "main_branch": {
+  "carries": "the C3, A3 and D1-design rounds, fast-forwarded 2026-10-03 from review/c3-operator-batching; previously the 2026-09-24 C2 snapshot repair. `git log main` owns the hashes.",
+  "authorizes": "nothing. A merge records work: not a release, not a promotion, not a public claim. README is unchanged by the range."
  }
 }

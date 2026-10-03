@@ -38,6 +38,22 @@ which owns every D1 figure and its claim boundary;
 owns the battery arithmetic. The phase `README.md` beside them is generated from
 the index and carries no narrative.
 
+## What `main` carries
+
+Fast-forwarded to this branch on **2026-10-03**, bringing the C3, A3 and
+D1-design rounds. Before that it stood at the 2026-09-24 C2 snapshot repair,
+so nine days and 597 commits of campaign history landed in one integration.
+`git log main` owns the hashes and they are deliberately not restated here.
+
+**A merge records work. It is not a release, not a promotion and not a public
+claim.** `README.md` is unchanged by the whole range, so nothing public-facing
+moved; the eleven documented suite failures came with it and are the same
+eleven; and the two D1 blockers above are still open. The repository's one
+prior integration went through a GitHub pull request, which is the route to
+prefer when a range is reviewable — this one is 1,491 files and 1.13M inserted
+lines, almost all of it `logs/` evidence, and is a record of completed rounds
+rather than a change to review.
+
 ## D1 — target-aware search. DESIGNED, NOT AUTHORIZED, BLOCKED.
 
 **The A3 precondition is MET.** The A3 closeout refused to let A-bsz3 enter
