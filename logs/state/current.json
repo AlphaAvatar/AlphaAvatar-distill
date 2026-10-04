@@ -66,18 +66,17 @@
   "c2_full_search": "PASS, CLOSED. $0.1453. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
   "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
   "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked absolute drift 9.032e-06 inside the predeclared 1e-5 -- the live constraint on perturbing state_eval. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/",
-  "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED across 5 paid subruns, $3.2258 of an $8.0000 ceiling. No single subrun is complete; every answer names the subruns that produced it. The incumbent reconstruction agreed across three independent pods on 53e30566c5f795f1. Found: the CALIBRATION BATCH SIZE, not the position policy, moves three of four operator selections; batching costs x1.97 on DEPTH at all positions and x1.08 at the target-aware policy; the derived logit bound holds for what it claims and understates the reduction transients x4.13 at bsz=1, x1.99 at bsz=3. AUTHORIZES NOTHING and closed no D1 blocker. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
+  "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED, $3.2258 of an $8.0000 ceiling. The CALIBRATION BATCH SIZE, not the position policy, moves three of four operator selections. AUTHORIZES NOTHING and closed no D1 blocker. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
  },
  "d_series": {
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
   "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
-  "blockers": "EVIDENCE: CLOSED on independent review 2026-10-03. OPEN: funding authorization (phase_d1 absent from funds_formal_sessions_of -- categorical, no measurement closes it) and the per-session envelope (unresolved pending the GPU qualification and repricing). Owner: d1_design.json :: open_blockers.",
+  "blockers": "EVIDENCE CLOSED. OPEN: funding authorization (CATEGORICAL) and per-session envelope (UNRESOLVED). Derived by open_blockers(); owner d1_design.json.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a): six roles, 950/850 each, pairwise disjoint, every item checked on all four coordinates against the complete baseline, built BEFORE any D1 outcome. Rule v3 f6047343; family_content_id 1e3445f1b6769169 binds the 42 output files' BYTES, superseding c773fad0. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,family_manifest}.json.",
-  "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent figures only; it cannot settle the funding authorization.",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a): six disjoint roles, allocation rule f6047343, family_content_id 1e3445f1. Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
