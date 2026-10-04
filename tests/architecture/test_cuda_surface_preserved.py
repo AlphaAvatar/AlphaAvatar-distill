@@ -1279,6 +1279,71 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "not on the historical CUDA-validated surface, so no new GPU "
             "validation is owed.",
      }),
+    ("df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e",
+     "reference_topk_tail_v1: the D-series KL support becomes scalable",
+     {
+        "src/aadistill/initialization/scoring/support.py":
+            "NEW FILE. The `reference_topk_tail_v1` distribution support: KL "
+            "reduced over the Top-K entries of the REFERENCE distribution plus "
+            "one aggregate tail bucket, with a `ReferenceDistributionSketch` "
+            "holding O(T*K) instead of O(T*V), a numerically stable `log1mexp` "
+            "tail, the six-quantity reducer and DEPTH's forward-KL-only pair. "
+            "THIS IS A DECLARED SEMANTIC CHANGE by virtue of being new "
+            "executable core, AND it is a SCIENTIFIC PROTOCOL AMENDMENT -- "
+            "maintainer decision 2026-10-04 -- because Top-K+tail is not "
+            "mathematically identical to full-vocabulary KL: it is a coarsening "
+            "of the partition and therefore a lower bound on it. The "
+            "full-vocabulary reducer is UNTOUCHED and remains the oracle. CUDA "
+            "SURFACE: it runs on the device the logits are on, in float32 "
+            "chunks with float64 accumulators, exactly as the full-vocabulary "
+            "reducer does -- so a GPU validation IS owed and is what the "
+            "adoption qualification exists to provide.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "`ReductionSemantics` gains an OPTIONAL `distribution_support`, and "
+            "`as_dict` OMITS it when it is None or full-vocabulary. That "
+            "absence is the design: 785 committed records cite protocol ids "
+            "computed before the field existed, and a key added "
+            "unconditionally -- even carrying \"full_vocab_v1\" -- would move "
+            "every one of them. THIS IS A DECLARED SEMANTIC CHANGE for the new "
+            "contract only: a Top-K measurement gets a different id, as it must, "
+            "and no historical id recomputes differently. Asserted both "
+            "directions. NO CUDA SURFACE: it hashes a mapping.",
+        "src/aadistill/initialization/operators/base.py":
+            "`OperatorContext` gains `distribution_support`, defaulting to the "
+            "historical full-vocabulary contract, and `execute` refuses a "
+            "mismatch between the handed object and the `config` declaration "
+            "that reaches `config_hash` -- the same two-sided contract "
+            "`position_policy` already has, for the same reason: a caller "
+            "updating one and not the other would record a state id describing "
+            "a divergence nobody computed. Under the historical contract the "
+            "config key is ABSENT rather than null, so no existing config hash "
+            "moves and 886 initialization tests pass unchanged. NO CUDA "
+            "SURFACE: a dataclass field and an equality check.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "`_ReferenceSketches` beside `_ReferenceLogits`, selected by the "
+            "run's declared support, and the batched recording path SHARED "
+            "between them. THIS IS A DECLARED SEMANTIC CHANGE under the Top-K "
+            "support and a no-op under full vocabulary, which is what every "
+            "frozen DEPTH decision was produced by and is untouched. The "
+            "reference state goes from 33.8 GiB at the frozen mixture to "
+            "megabytes, so the recompute fallback -- which doubled the forwards "
+            "for a whole expansion -- never arms. Sketches are built from the "
+            "SAME canonical padded batches the candidate forwards use, so a "
+            "cache hit still cannot move batch membership, shape or position "
+            "alignment. CUDA SURFACE, and the operator this amendment exists to "
+            "make scalable: a GPU validation IS owed.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`StateEvaluator` takes a `distribution_support`, folds it into its "
+            "`ReductionSemantics` and therefore its `measurement_protocol_id`, "
+            "and reduces through the K+1 reducer when it is not "
+            "full-vocabulary. `_sketch_for` caches the teacher's sketches under "
+            "their OWN budget rather than inheriting the full-logit cache's "
+            "refusal, which does not apply at O(T*K). THE SKETCH IS SCIENCE AND "
+            "THE CACHING IS EXECUTION: tested by requiring a cached evaluator "
+            "and a zero-budget one to agree on every metric. THIS IS A DECLARED "
+            "SEMANTIC CHANGE under the Top-K support and a no-op under full "
+            "vocabulary. CUDA SURFACE: a GPU validation IS owed.",
+     }),
 )
 
 

@@ -5,7 +5,6 @@ Everything this experiment produced, in one place.
 | area | what it holds |
 | --- | --- |
 | [`analyses/`](analyses/) | working analyses and audits |
-| [`history/`](history/) | narrative: what happened, session by session |
 | [`investigations/`](investigations/) | material |
 | [`pilots/`](pilots/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |

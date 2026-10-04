@@ -113,10 +113,10 @@
  "latest_verification": {
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
-   "describes_head": false,
    "kind": "launch_bound",
+   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "verdict": "PASS"
+   "describes_head": false
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
