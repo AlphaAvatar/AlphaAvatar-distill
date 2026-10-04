@@ -1,0 +1,25 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 1.626, "stage": "environment", "status": "ok", "t": 1.626}
+{"stage": "register_operators", "status": "start", "t": 1.627}
+{"operators_ok": true, "profiles": 4, "seconds": 0.04, "stage": "register_operators", "status": "ok", "t": 1.667}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 1.667}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.033, "stage": "bind_protocol_incumbent", "status": "ok", "t": 1.701}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 1.701}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.038, "stage": "bind_protocol_target_aware", "status": "ok", "t": 1.739}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.74}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 8.408, "stage": "teacher_fetch_verify", "status": "ok", "t": 10.148}
+{"stage": "A_incumbent", "status": "start", "t": 10.152}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 1170.1418, "stage": "A_incumbent.step0", "status": "ok", "t": 1190.477}
+{"digest": "6b7d902f6ae4", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 42.6906, "stage": "A_incumbent.step1", "status": "ok", "t": 1236.926}
+{"digest": "eea90c91346a", "impl": "width.global_pca_v0", "matches": true, "seconds": 33.5264, "stage": "A_incumbent.step2", "status": "ok", "t": 1271.912}
+{"digest": "53e30566c5f7", "impl": "attention.activation_importance_v1", "matches": null, "seconds": 7.9878, "stage": "A_incumbent.step3", "status": "ok", "t": 1280.921}
+{"arm": "A_incumbent", "freed_gib": 10.64, "n": 3, "stage": "release_intermediates", "status": "ok", "t": 1281.339}
+{"digest": "53e30566c5f7", "reconstructed": true, "seconds": 1271.188, "stage": "A_incumbent", "status": "ok", "t": 1281.339}
+{"stage": "D_state_eval_incumbent", "status": "start", "t": 1281.34}
+{"peak_gib": 13.339, "seconds": 8.04, "stage": "state_eval.incumbent", "status": "ok", "t": 1290.526}
+{"peak_gib": 13.339, "seconds": 9.272, "stage": "D_state_eval_incumbent", "status": "ok", "t": 1290.612}
+{"stage": "D_state_eval_target_aware", "status": "start", "t": 1290.613}
+{"peak_gib": 22.977, "seconds": 8.232, "stage": "state_eval.target_aware", "status": "ok", "t": 1300.204}
+{"peak_gib": 22.977, "seconds": 9.693, "stage": "D_state_eval_target_aware", "status": "ok", "t": 1300.306}
+{"stage": "C_discrete_decisions", "status": "start", "t": 1300.307}
+{"n_moved": 0, "seconds": 0.0, "stage": "C_discrete_decisions", "status": "ok", "t": 1300.307}

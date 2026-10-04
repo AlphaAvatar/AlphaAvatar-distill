@@ -1,11 +1,11 @@
 {
- "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 + 0.0632 = 2.7544",
+ "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 + 0.0632 + 0.4714 = 3.2258",
  "_contract": "Cumulative cost of the D1 engineering GPU qualification, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- which is the book the 2026-10-03 amendment raised for exactly this work.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.7544,
+ "booked_usd": 3.2258,
  "campaign_id": "d1_gpu_qualification",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
@@ -14,6 +14,7 @@
  "status": "OPEN -- s1 failed before measurement, repaired, retrying",
  "subruns": [
   {
+   "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
    "container_disk_gb": 60,
    "container_disk_usd": 0.0008,
    "cost_usd": 0.1098,
@@ -25,6 +26,7 @@
    "pod_id": "y9ilsahujayqft",
    "rate_usd_per_hour": 1.09,
    "repair": "register_builtin_profiles() added, plus an ASSERTION in the same stage that the profiles the path needs are present -- so the $0 preflight now covers this class instead of the paid run.",
+   "session_commit": "690494c3e2c8bdcf43abdd17253009343d03ad87",
    "subrun_id": "d1_qual_20261004_131735_s1",
    "teardown": "provider-confirmed gone, attempt 1",
    "what_it_nonetheless_established": [
@@ -34,6 +36,7 @@
    ]
   },
   {
+   "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
    "container_disk_gb": 60,
    "container_disk_usd": 0.0068,
    "cost_usd": 0.9006,
@@ -45,9 +48,11 @@
    "outcome": "INCOMPLETE",
    "pod_id": "u99fhssac9f6i7",
    "rate_usd_per_hour": 1.09,
+   "session_commit": "0f69c75584f98f03f4b16192d5bd7f6326ca26be",
    "subrun_id": "d1_qual_20261004_132544_s2"
   },
   {
+   "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
    "_outcome_corrected": "first booked PASSED by a defective verdict: D_state_eval was a non-empty list of two FAILURE entries, and the check tested `not d` for absence and `within_derived_budget is False` for a violation -- neither of which a failed measurement trips. A list of failures is not a list of measurements.",
    "container_disk_gb": 60,
    "container_disk_usd": 0.0128,
@@ -60,9 +65,11 @@
    "outcome": "INCOMPLETE",
    "pod_id": "cnzdnn3m890m1f",
    "rate_usd_per_hour": 1.09,
+   "session_commit": "a208e97c459296b572b57376ab73ae67ff83d520",
    "subrun_id": "d1_qual_20261004_142346_s3"
   },
   {
+   "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
    "container_disk_gb": 60,
    "container_disk_usd": 0.0005,
    "cost_usd": 0.0632,
@@ -74,7 +81,24 @@
    "outcome": "INCOMPLETE",
    "pod_id": "3gvfeqnkbyptc4",
    "rate_usd_per_hour": 1.09,
+   "session_commit": "053c9133c33159732bd9c0af620e4194acac6baf",
    "subrun_id": "d1_qual_20261004_160221_s4"
+  },
+  {
+   "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
+   "container_disk_gb": 60,
+   "container_disk_usd": 0.0036,
+   "cost_usd": 0.4714,
+   "elapsed_minutes": 25.75,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/runs/d1_qual_20261004_160758_s5",
+   "gpu": "NVIDIA L40S",
+   "gpu_usd": 0.4678,
+   "notes": "Stage D MEASURED on both protocols. A reconstructed the frozen incumbent a fourth time (1271.1s). Arms=A only, so B/C were not run in this subrun by design -- their answers are s3's.",
+   "outcome": "INCOMPLETE",
+   "pod_id": "3xs9her5kavk14",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "36ec6d5ef9fbe8c899f7ea18a51fe9565b13f201",
+   "subrun_id": "d1_qual_20261004_160758_s5"
   }
  ],
  "teardown_reserve_usd": 0.3

@@ -1,0 +1,15 @@
+[    0.000] environment start {}
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+[    1.669] environment ok {"seconds": 1.669, "gpu": "NVIDIA L40S"}
+[    1.671] register_operators start {}
+[    1.792] register_operators ok {"seconds": 0.12, "profiles": 4, "operators_ok": true}
+[    1.792] bind_protocol_incumbent start {}
+[    1.841] bind_protocol_incumbent ok {"seconds": 0.049, "protocol": "3b12ecbf2fcb2a1a"}
+[    1.842] bind_protocol_target_aware start {}
+[    1.886] bind_protocol_target_aware ok {"seconds": 0.045, "protocol": "d463a1dc6afbd778"}
+[    1.887] teacher_fetch_verify start {}
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Fetching 13 files:   8%|▊         | 1/13 [00:00<00:04,  2.43it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 27.35it/s]
+[   10.708] teacher_fetch_verify ok {"seconds": 8.821, "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea"}
+
+wrote /workspace/out/preflight/qualification.json  status=CHECK_ONLY_OK
