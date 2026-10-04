@@ -170,6 +170,18 @@ class OperatorContext:
     #: in `apply_checked`.
     distribution_support: DistributionSupport = field(
         default_factory=lambda: FULL_VOCAB_V1)
+    #: OPTIONAL OBSERVER, called with each reduction's inputs as it happens.
+    #: EXECUTION ONLY and it cannot change a score: the operator ignores whatever
+    #: it returns, and it is excluded from every config, hash and identity. It
+    #: exists so a validation can compute a SECOND reduction from the SAME model
+    #: forwards -- paying for a duplicate set of forwards to compare two reducers
+    #: would buy nothing -- without the operator knowing what is being compared.
+    #:
+    #: Signature: `observer(**fields)`, keyword-only, so a new field can be added
+    #: without breaking an existing observer. An observer that raises is NOT
+    #: caught: a validation whose measurement silently stopped recording would be
+    #: worse than one that failed.
+    score_observer: Any = None
     #: The search's wall-clock budget, or None. An operator whose work is
     #: measured in hours is expected to call `deadline.check(...)` inside its own
     #: loop: `depth.causal_kl_greedy_v1` ran 10.78 h against a 3.0 h budget

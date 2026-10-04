@@ -263,6 +263,15 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
+                    if ctx.score_observer is not None:
+                        #: The SAME `refs` and `abls` this round already paid for.
+                        #: Execution only -- the return value is ignored and this
+                        #: cannot reach a score, a config or an identity.
+                        ctx.score_observer(
+                            skip=frozenset(skip), group=group, indices=indices,
+                            refs=refs, abls=abls, mask=mask,
+                            weights=batch_weights, values=values,
+                            support=support)
                 elif sketches is not None:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         sketch_forward_kl_mean(

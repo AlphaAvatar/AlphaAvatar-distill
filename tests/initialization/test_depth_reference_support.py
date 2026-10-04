@@ -174,3 +174,93 @@ class TestTheDeclarationMustMatchWhatRuns:
         op = causal_kl_greedy.DepthCausalKLGreedyV1()
         with pytest.raises(ContractViolation, match="distribution support"):
             op.execute(ctx)
+
+
+class TestTheScoreObserverIsExecutionOnly:
+    """A validation computes a second reduction from the SAME forwards.
+
+    Paying for a duplicate set of 260 model forwards to compare two reducers
+    would buy nothing, so the operator lets a caller watch each reduction. What
+    must hold is that watching cannot change anything.
+    """
+
+    def _with_observer(self, support, seen):
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from aadistill.initialization.specs.arch import get_adapter
+        import dataclasses
+
+        register_builtin_adapters()
+        model = build_tiny_model(GEOMETRY)
+        model.config.use_cache = False
+        items = _items(vocab=GEOMETRY["vocab_size"])
+        ctx = _context(model, items, support=support, batch_size=2,
+                       target_layers=4)
+        ctx = dataclasses.replace(ctx, score_observer=lambda **kw: seen.append(kw))
+        op = causal_kl_greedy.DepthCausalKLGreedyV1()
+        return op.apply(ctx)
+
+    def test_it_sees_the_real_reference_and_candidate_of_every_reduction(self):
+        seen = []
+        out = self._with_observer(FULL_VOCAB_V1, seen)
+        assert seen, "the observer was never called"
+        first = seen[0]
+        assert set(first) >= {"skip", "group", "indices", "refs", "abls", "mask",
+                              "weights", "values", "support"}
+        #: Full-vocabulary refs are the `[B, T, V]` logits, which is what lets an
+        #: observer build a sketch and reduce a SECOND time without a new forward.
+        assert first["refs"].shape == first["abls"].shape
+        assert first["refs"].shape[-1] == GEOMETRY["vocab_size"]
+        #: One call per (candidate, group), and the values it is handed are the
+        #: ones the operator recorded.
+        assert len(first["values"]) == len(first["group"].items)
+
+    def test_watching_cannot_change_a_decision(self):
+        """The same run with and without an observer chooses the same layers."""
+        without = _run(FULL_VOCAB_V1, 2)
+        seen = []
+        with_obs = self._with_observer(FULL_VOCAB_V1, seen)
+        a = [r["chosen"] for r in without.artifacts["search_rounds"]]
+        b = [r["chosen"] for r in with_obs.artifacts["search_rounds"]]
+        assert a == b
+        assert seen
+
+    def test_an_observer_that_returns_something_is_ignored(self):
+        """Its return value must not be mistaken for a score."""
+        import dataclasses
+
+        from aadistill.initialization.adapters import register_builtin_adapters
+        register_builtin_adapters()
+        model = build_tiny_model(GEOMETRY)
+        model.config.use_cache = False
+        items = _items(vocab=GEOMETRY["vocab_size"])
+        ctx = dataclasses.replace(
+            _context(model, items, support=FULL_VOCAB_V1, batch_size=2,
+                     target_layers=4),
+            score_observer=lambda **kw: 1e9)
+        out = causal_kl_greedy.DepthCausalKLGreedyV1().apply(ctx)
+        baseline = _run(FULL_VOCAB_V1, 2)
+        assert [r["chosen"] for r in out.artifacts["search_rounds"]] == \
+            [r["chosen"] for r in baseline.artifacts["search_rounds"]]
+
+    def test_a_second_reduction_from_the_observed_forwards_agrees_with_core(self):
+        """The thing the hook exists for, end to end on a real operator run."""
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch, sketch_reference,
+        )
+
+        seen = []
+        self._with_observer(FULL_VOCAB_V1, seen)
+        call = seen[0]
+        refs, abls = call["refs"], call["abls"]
+        B, T, V = refs.shape
+        flat = refs.reshape(-1, V)
+        sk = sketch_reference(flat, torch.zeros(B * T, dtype=torch.long),
+                              top_k=V, chunk=256)
+        second = sketch_forward_kl_mean_batch(
+            sk.support_indices.reshape(B, T, -1),
+            sk.support_log_probs.reshape(B, T, -1),
+            sk.tail_log_prob.reshape(B, T), abls, call["mask"],
+            has_tail=False, weights=call["weights"])
+        #: At K >= V the second reduction must reproduce the operator's own.
+        assert torch.allclose(second, call["values"], rtol=1e-4), (
+            "a second reduction from the same forwards disagrees with the first")
