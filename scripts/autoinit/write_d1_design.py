@@ -872,7 +872,10 @@ def budget() -> dict[str, Any]:
             f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
             "and an unresolved compatibility is a blocker because authorization "
             "needs a figure it can bind — not because the incompatibility is "
-            "proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS."),
+            "proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS — this "
+            "one it genuinely can, because the question is a price. It does NOT "
+            "resolve the funding AUTHORIZATION blocker, which is a scope fact "
+            "no measurement reaches."),
         "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
             "WHAT IS DEFINITE: per-session envelope compatibility is "
             "UNRESOLVED, and an unresolved compatibility blocks authorization. "
@@ -982,8 +985,17 @@ def open_blockers(budget_section: dict[str, Any],
     price — while the shortfall figure beside it is provisional. The per-session
     envelope is open because compatibility is UNRESOLVED, not because
     incompatibility is proven: the comparison rests on unbatched telemetry whose
-    direction relative to batched D1 is unknown. The owed GPU qualification is
-    what settles the last two figures; it cannot change the first.
+    direction relative to batched D1 is unknown.
+
+    **What the GPU qualification can and cannot settle.** It settles the
+    cost-dependent figures: real batched timing, the resulting project funding
+    requirement, and the per-session envelope compatibility. It CANNOT settle
+    the funding AUTHORIZATION blocker — `phase_d1` being outside
+    `funds_formal_sessions_of` is a scope fact, not a price, and no measurement
+    puts an experiment inside a package's funded list. That needs an explicit
+    maintainer funding decision. Saying the qualification "settles the last two"
+    conflated the two, and would have let a repricing read as closing a blocker
+    it cannot touch.
     """
     open_: list[str] = []
     if (contamination_section["batteries_available"]

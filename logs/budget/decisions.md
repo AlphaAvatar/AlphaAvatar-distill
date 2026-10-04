@@ -1,5 +1,388 @@
 # Budget decisions
 
+## 2026-10-03 — Allocation rule v2, and one authoritative eligible count
+
+The two cleanup steps the review required before materialization. `$0`, no
+battery built, nothing admitted.
+
+- **One authoritative eligible count per stratum.** The record carried two
+  machine-readable values called eligible: `eligible_rows.count` (463 / 5,433 /
+  4,670) and `against_the_family_shortfall.eligible_rows` (464 / 7,043 / 4,670),
+  the second with prose saying the problem-content key was still owed. The
+  duplicate is **removed**, not updated — that block now carries
+  `eligible_ref: "eligible_rows.count"` and derives `headroom` from the
+  authoritative count.
+
+  The regression is **path-based, not name-based**: a numeric eligible-ish field
+  is permitted at exactly `eligible_rows.count` and nowhere else. A whitelist of
+  the key *name* would have accepted the copy that caused this, since it was
+  called `eligible_rows` too. Mutation-verified by reintroducing a duplicate
+  under a different name.
+
+- **The record describes current state.** `proposed_source_decision` →
+  `source_decision`, marked DECIDED and IMPLEMENTED with the proposal reasoning
+  left in this file where it belongs. Removed from the owed list: the source
+  decision, the MATH pin, the problem-content key, the GSM training-content
+  repair, the download decision. What remains owed is the GSM8K renderer and the
+  materialization decision — and a `_what_is_no_longer_owed` field says which
+  items were closed, because a list that silently shrinks is hard to audit.
+
+  Also retired: the module docstring's claim that no candidate is called eligible
+  and the third source is not downloaded, and the trap saying the eligible chain
+  has not run.
+
+- **ALLOCATION RULE v2.** v1 bound two isolation coordinates and ranked on the
+  historical stable id. Both are now wrong: there are three coordinates, and new
+  D-series rows use a split-aware item identity — which is what the ranking
+  hashes, so it decides *which* rows are selected. Neither can be deferred to
+  `family_content_id`, because by materialization the selection has happened.
+
+  v2 binds: every role's rank domain and the base digest; the **ranking
+  stable-id semantics** (split-aware for new rows, unchanged for historical);
+  **three** isolation coordinates with the reserved populations including the
+  training corpus *by first user problem* and every prior D-series role; the
+  **frozen review** (602 excluded, 43 retained, pre-outcome); and the **source
+  policy** for all three strata with the excluded populations named.
+
+  ```text
+  v1  ced017a1f3f155ba5aaf383e61156c12   superseded, still recomputable
+  v2  <see battery_family.allocation_rule_id()>   live
+  ```
+
+  **v1 is not mutated.** Its shape is preserved by `allocation_rule_v1()` so a
+  reader holding the old id can recompute it. That nearly failed: factoring v1's
+  `distribution_identity` into a shared helper left a trailing comma, so the
+  helper returned a one-element **tuple** and v1's id moved to `8d266c70`. It was
+  caught only because `V1_RULE_ID_AS_COMMITTED` existed to compare against — a
+  function preserved for reproducibility with nothing pinning it is not
+  preserved. There is now a regression, plus a parametrized check that every
+  bound section moves the v2 hash when mutated.
+
+  What stays out of the rule: per-file **digests** and realized item lists, which
+  describe what was drawn rather than how. The line moved from v1 for a stated
+  reason — a source *policy* decides the candidate pool, so it belongs in the
+  rule; a file digest does not.
+
+- **The family record no longer calls the sources an open decision.** Its
+  `blocker` said "THREE strata cannot fund six roles". It now says capacity is
+  CLOSED, names the evidence record that owns the figures rather than copying
+  them, and states the two remaining non-capacity blockers. The per-stratum
+  shortfalls move to `shortfall_against_the_original_pins` — what they are now is
+  the history of a closed problem.
+
+- **GSM8K's 5,433 is conservative capacity evidence, not rendered membership.**
+  It was derived with the historical positional renderer participating, and the
+  D-series renderer will use the split-aware identity, so the false collisions
+  disappear and the realized pool may differ. Recorded as a trap in the evidence
+  record. A change there needs no new source decision.
+
+Validation: D-series 105 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change. No core full suite, no historical suites, no GPU.
+
+## 2026-10-03 — The source decision implemented: all three strata have final capacity
+
+Maintainer source decision of 2026-10-03, implemented. **No battery
+materialized, nothing admitted, no GPU, no funding or envelope change.**
+
+- **`eligible` now means one thing.** The record had said "no row is called
+  eligible" beside `eligible_rows = 464`, and the CLI printed both "ELIGIBLE" and
+  "NO ROW CALLED ELIGIBLE". Survivors of the contract as it exists are
+  `current_exact_chain_survivors`; **eligible** is reserved for the output of the
+  **strengthened** chain. The guard enforcing it is now **structural** — no
+  count-bearing field may be named `eligible` outside the strengthened output —
+  because the previous prose-keyword version needed a new exemption every time
+  the record legitimately explained its own terminology, and a guard that gets
+  widened on every run stops guarding.
+
+- **One new concept, in the D-series application layer**:
+  `identity.py :: problem_content_id` — `sha256(norm(<problem>))`, payload
+  declared per source (MBPP `text`, GSM8K `question`, MATH `problem`). It
+  **supplements** native provenance, the split-aware item id and the historical
+  rendered-prompt exclusion. Three coordinates, kept separate: conflating the last
+  two is what made `gsm8k-test-00000` name a different problem in two files.
+
+  **The historical chain is NOT modified** — a test reads
+  `excluded_identities`' source and fails if a problem-content key appears in it,
+  because frozen C1/C2/C3 membership is reproducible only from the original.
+
+- **Final strengthened-chain capacity. All three clear their shortfalls.**
+
+  | stratum | upstream | current contract | **eligible** | 6-role short | headroom |
+  | --- | --- | --- | --- | --- | --- |
+  | `code` | 474 | 464 | **463** | 321 | +142 |
+  | `gsm8k` | 7,473 | 7,043 | **5,433** | 11 | +5,422 |
+  | `math_verified` | 5,000 | 4,670 | **4,670** | 830 | +3,840 |
+
+  `code` is 464 → 463 exactly as the review predicted. **`gsm8k` loses 1,610 to
+  problem content, and 0 recovery-training rows survive** — asserted directly by
+  recomputing the survivor set, not inferred from the subtraction.
+
+- **A hole in my own first implementation, found and closed.** It recovered
+  reserved problem content only through a native key, so for GSM8K — which has
+  none — it reported **430 reserved problems as unrecoverable** while their text
+  sat in the pools' `prompt_text` all along. An unrecoverable reserved problem is
+  a gap in the isolation, so over-reporting one is not a safe error.
+  `RENDERED_PROMPT_IS_THE_PROBLEM` now declares, per source, whether the rendering
+  *is* the problem — and a test renders real rows and checks the declaration
+  against the renderers. Both strata now report **0 unrecoverable**.
+
+- **The frozen duplicate review is DATA, not a threshold.** The maintainer's
+  ruling on all 44 pairs is recorded in `identity.py`: task 602 **excluded**
+  (exact same problem text as consumed 217), the other **43 retained** (min vs
+  max, even vs odd, area vs perimeter, first vs last, sum vs product). Frozen
+  before any D1 outcome exists. Worth noting what carries the weight: the exact
+  content key catches 602 by itself, so the review's load-bearing contribution is
+  the **43 retentions** — a Jaccard cutoff would have discarded all of them.
+
+- **`math_verified` is pinned, fetched and measured.**
+  `EleutherAI/hendrycks_math` at the immutable revision
+  `21a5633873b6a120296cce3e2df9d5550074f4a3`, licence **mit**, **test splits
+  only** — seven files, 1.879 MB, SHA256 recorded per file, no train file
+  fetched. **5,000 test rows**; MATH-500 is a measured **exact subset** (500/500
+  found), so the new capacity is **4,500** rather than the "~4,500" previously
+  quoted from a card.
+
+  Adapter: `problem→problem`, `type→subject`, `solution→gold` via
+  `boxed_answer`, and **`level` needed a mapping the contract did not name** —
+  upstream emits `"Level 3"` where the frozen stratum stores `3`. Passing it
+  through would have put a string where consumers expect an integer and turned a
+  level stratification into one bucket per string. Parity holds: the rule
+  reproduces the frozen gold on **500/500** pinned rows and agrees on **500/500**
+  shared problems. A row with no boxed answer, or a config whose `type` disagrees
+  with the mapping, is refused rather than admitted.
+
+  Recorded as a **NEW behavioural population**: historical C1/C2/C3/A3 scores are
+  not imported or compared.
+
+- **`gsm8k` remains BLOCKED on its renderer.** 5,433 is its content-contract
+  capacity, not permission: the positional renderer still collides with the
+  consumed test split on every id it emits. The split-aware scheme
+  (`gsm8k-main-train-00000`) exists in `identity.py`; building the rows is not
+  authorized and was not done.
+
+Validation: D-series 94 passed (new layer, two guards mutation-verified), D1 43,
+`tests/docs` 158, both regenerators at a fixed point. **No `src/` change**, so the
+CUDA ledger is untouched. No core full suite, no historical suites, no GPU. The
+only network use was the authorized MATH fetch.
+
+## 2026-10-03 — Chain parity, and the gap it found that a wrong measurement hid
+
+A `$0` evidence-parity correction on review. Still **nothing pinned, nothing
+materialized**. The previous round's capacity figures were not measured under the
+live contract, so they were not capacity figures.
+
+- **The chain is now IMPORTED, not reproduced.** `source_evidence.py` calls
+  `build_c1_confirmation_battery.excluded_identities` and applies it with the
+  same `rank_take` the builder uses, so what is excluded and how — FINAL_PROMOTION
+  by id and prompt hash, recovery search by id *and* `source_key`, the whole
+  training corpus by `source_id` plus a hash of every session's non-assistant
+  messages **joined**, and the two Stage-1 assets by `source_id` — is the
+  builder's definition. The first version omitted FINAL_PROMOTION entirely and
+  hashed only each session's **first user turn**.
+
+  **Parity is demonstrated, not asserted.** Re-deriving the frozen
+  `c1_confirmation_v1` from the pinned sources with the imported chain reproduces
+  its committed membership **exactly** — 150/150 gsm8k and 100/100 code.
+  Membership, not order: the committed file is id-sorted while `rank_take`
+  returns rank order, and asserting order would have pinned a serialization
+  detail. Mutation-verified: pointing the battery input at a missing path breaks
+  the re-derivation.
+
+- **The four levels are now separate**, because collapsing them is how a
+  baseline-only remainder became "capacity":
+
+  | stratum | upstream | baseline survivors | + D-series isolation | eligible (exact identity) | 6-role short |
+  | --- | --- | --- | --- | --- | --- |
+  | `code` | 474 | 464 | 464 | **464** | 321 |
+  | `gsm8k` | 7,473 | 7,343 | 7,043 | **7,043** | 11 |
+  | `math_verified` | — | — | — | not measurable | 830 |
+
+  Only the last column is called eligible, and only under the chain **as it is**.
+
+- **A SECOND, larger gap, found only by getting parity right.** The chain hashes
+  each training session's non-assistant messages **joined**, and every one of the
+  11,174 sessions carries a system message — so that hash can never equal a bare
+  rendered question. Measured: the joined-hash set and the first-user-turn-hash
+  set are **disjoint**. For a new upstream source there are no corpus
+  `source_id`s either, so the training-corpus protection is **INERT**: it catches
+  **0 of the 1,708** gsm8k train rows that are literally in the recovery-training
+  corpus.
+
+  **No historical battery is contaminated** — measured, not assumed: 0 of 1,319
+  gsm8k test rows and 0 items in any committed pool appear as a corpus first
+  turn. The corpus drew gsm8k from `main/train` and every battery from
+  `main/test`, so **split separation** did the protecting and the inert hash was
+  never load-bearing. The proposed gsm8k extension *is* that train split, which
+  makes this the first case that would have relied on it.
+
+  **The wrong measurement had hidden this.** Comparing first user turns reported
+  1,708 exclusions the chain would never make — a remainder of 5,765 against the
+  chain's actual 7,043. A non-parity measurement that is accidentally *stricter*
+  than the contract it claims to describe conceals the contract's hole instead of
+  finding it.
+
+- **The source-decision PROPOSAL is recorded**, per the review, as a proposal:
+  MBPP's other splits at the same pin for `code`; `openai/gsm8k` `main/train` for
+  `gsm8k` but **blocked twice** — the positional renderer cannot be reused and
+  the training-corpus gap must be closed first; and the canonical Hendrycks MATH
+  **test** split as a candidate to pin and measure. Provenance and
+  problem-content are required to stay **separate coordinates** in every new id
+  scheme.
+
+- **The duplicate review list is reviewable, not a threshold.** 44 bare-problem
+  pairs at Jaccard ≥ 0.8, each with both problems and both native `task_id`s so a
+  human can read the pair — one of them identical text (602 vs 217). It is 44 and
+  not 43 because the screen's Jaccard bands exclude exact matches, counting them
+  separately; the review list includes them, since an identical problem is the
+  first thing a reviewer must see. The threshold selects what is looked at and
+  **excludes nothing**.
+
+- **MATH readiness was established without a download.** Upstream carries
+  `solution` and no `answer`, so the adapter must derive the gold — and the rule
+  `boxed_answer(solution)` reproduces the existing stratum's own `answer` field
+  on **500/500** pinned rows. So the adapter is the *same* correctness semantics
+  rather than a new one arriving with a new source, verified at `$0` before any
+  bytes move. The subject/level distribution baseline is recorded now so the owed
+  shift measurement cannot choose its own baseline afterwards.
+
+- **Two residual state strings cleaned:** `test_suites.next_work` named the
+  superseded `909d1c8b` tree, and `core` called `b0ca0fec` "this branch" when it
+  belongs to the retained D1 source lineage.
+
+Validation: D-series 71 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change, so the CUDA ledger is untouched. No core full
+suite, no historical suites, `$0`, no network.
+
+## 2026-10-03 — D-series source evidence: measured, `$0`, offline, nothing pinned
+
+Step 1 of the recorded sequence. **AUTHORIZES NOTHING and MATERIALIZES NOTHING.**
+No source pinned, no battery built, no row called eligible. Owner:
+`logs/shared/analyses/autoinit_d_series_source_evidence.json`, generated by
+`scripts/experiments/stage-1/phase_d_series/source_evidence.py`.
+
+**It cost `$0` and needed no network.** Two of the three candidates live in
+repositories already pinned at a frozen revision, and the candidate files are
+already in the local hub cache — so licence, redistribution and the revision pin
+are **inherited**, and the counts were measurable offline. GSM8K is **MIT** and
+MBPP is **CC-BY-4.0**, read from the pinned snapshots' own READMEs.
+
+| stratum | candidate | upstream rows | overlap: consumed / training | remaining, exact-match only | 6-role shortfall |
+| --- | --- | --- | --- | --- | --- |
+| `code` | MBPP `full/train`+`validation`+`prompt`, same pin | 474 | 0 / 0 | 474 | 321 |
+| `gsm8k` | `openai/gsm8k` `main/train`, same pin | 7,473 | 0 / **1,708** | 5,765 | 11 |
+| `math_verified` | upstream Hendrycks MATH | **not measured** | — | — | 830 |
+
+**Three findings that change which option is cheapest.**
+
+1. **GSM8K is a RENDERER BLOCKER, and it looked like the easy one.** `make_gsm8k`
+   builds its id from the row's **position in the file** —
+   `gsm8k-test-{_index:05d}`. Rendering `main/train` produces **1,319 ids that
+   collide with the consumed test split, and zero of them are the same
+   question**. Every colliding id would name a different problem than the
+   already-consumed row holding it, and ids are what the exclusion chain, the
+   frozen batteries and every score record key on. A split-aware id scheme is
+   required first, and changing an id scheme is a data decision, not a refactor.
+   The stratum that is 11 items short carries the highest identity risk.
+
+2. **The exclusion chain has no near-duplicate stage, and that is not
+   hypothetical.** It isolates on a stable id AND a normalized rendered prompt,
+   compared **exactly**. MBPP `full/train` task **602** is the same problem as
+   the already-consumed `full/test` task **217** — different `task_id`,
+   different test asserts, so both keys differ and **the duplicate passes the
+   chain**. On bare problem text, 1 exact duplicate, 3 at Jaccard ≥ 0.9, 43 at
+   ≥ 0.8. Cross-split expansion needs a problem-text key added, or an explicit
+   review at a threshold — and the threshold is a maintainer decision, because
+   one invented here would be a guess wearing a number.
+
+3. **The exclusion set is smaller than it looks.** All 51 Stage-1
+   calibration/state-eval items in these strata trace into `corpus_v2`, so
+   excluding the training corpus already excludes them. They carry token ids
+   rather than text and cannot be compared by content at all — a test asserts the
+   provenance holds, because if it stops holding the remainder is overstated.
+
+**`math_verified` is reported as not measurable, which is the finding.** It is a
+different repository, absent from the cache, so no count or overlap can be
+derived offline. Pinning it is a maintainer data decision and downloading a new
+dataset needs approval (AGENTS.md P15, §4.4). What is owed after pinning is
+listed in the record, including renderer parity: `make_math_verified` reads
+`unique_id`/`subject`/`level`/`problem`/`answer`, and an upstream release with
+different field names needs a renderer — which is a new id scheme again.
+
+**Two traps are named** so the obvious-looking answers are not taken: GSM8K's
+`socratic` config is the same problems with different answer renderings, and
+MBPP's `sanitized` config is a verified **subset** of `full`. Neither adds
+capacity, and treating either as capacity would put one problem into two roles of
+a family whose point is disjointness.
+
+**What is still owed before anything is materialized:** the maintainer source
+decision per stratum; a revision pin and digest for anything newly pinned; the
+live exclusion chain run against the pinned candidate (its output is the first
+eligible count); a ruling on near-duplicate handling and its threshold; a
+split-aware id scheme wherever a renderer blocker stands; and renderer parity
+re-checked after any id or field change.
+
+Validation: D-series 55 passed (12 new, two guards mutation-verified), D1 43
+passed, `tests/docs` 158 passed, both record regenerators at a fixed point. The
+record is declared in `stage_attribution.py` rather than hand-written into
+`logs/shared/README.md`, which is generated — the first attempt edited the
+generated file and was reverted.
+
+## 2026-10-03 — Three provenance corrections, and what a GPU measurement cannot settle
+
+Records-only, `$0`, opening the source-preparation round. The D1 identity/design
+integration is GO and CLOSED — `main = aac482d5`, retained source tip
+`ccf1c1c4`, same tree `bbd19a76`, squash base `06cab9c8`. D1 architecture is not
+reopened.
+
+- **The range was eight commits, and the state record said seven.** The squash
+  commit itself recorded `commits: 8` correctly, so the prose in
+  `logs/state/current.md` disagreed with the commit message beside it. Corrected
+  in both places it appeared.
+
+- **The record named `909d1c8b` as the "measured tree" and claimed the branch tip
+  equalled it. Neither was true.** `ccf1c1c4` sits on top of `909d1c8b` and is
+  the tip. What actually happened, now recorded as three separate statements
+  rather than one conflated one:
+
+  ```text
+  core executable validation : b0ca0fec   3019 passed / 14 skipped / 0 failed
+  records/docs validation    : ccf1c1c4   tests/docs 158 passed, at that exact
+                                          tree hash on a clean tree
+  pre-integration state tip  : ccf1c1c4
+  squash tree                : bbd19a76   == ccf1c1c4's tree
+  ```
+
+  The records-validation line was **re-verified** rather than recalled: `main`'s
+  tree is `ccf1c1c4`'s tree, the working tree was clean at it, and `tests/docs`
+  was re-run there — 158 passed. So `ccf1c1c4` is the records-validation tree,
+  and no rerun was needed to make the record truthful.
+
+  **This is the third time a record on a branch has tried to pin its own
+  branch's tip.** The first two were caught before merging; this one was not. The
+  earlier variant was a record naming the tip it would itself become. This
+  variant is subtler and worse: the hash written was the *then-current* HEAD,
+  correct at the moment of writing, and made false one commit later. The rule is
+  not "name the tip more carefully" — a validated-tree hash written inside a
+  commit that will be followed by more commits is wrong by construction. Either
+  re-derive it at the end or leave it to the squash commit, which is created
+  after the range is closed.
+
+- **"The owed GPU qualification settles the last two" was too broad.** It
+  conflated a price with an authorization scope. The qualification settles the
+  real batched timing/cost, the cost-dependent project funding requirement and
+  the per-session envelope compatibility. It CANNOT settle `phase_d1` being
+  absent from `funds_formal_sessions_of`: no measurement puts an experiment
+  inside a package's funded list, and that blocker stands until a maintainer
+  explicitly funds the phase. Corrected at the producer
+  (`write_d1_design.py` — `open_blockers()`'s docstring and the per-session
+  blocker text) as well as in the snapshot, so the generated record carries it.
+  The three-blocker structure is unchanged; the funding blocker is now labelled
+  CATEGORICAL to mark that it is not a cost question.
+
+- **Validation:** `tests/docs` 158 passed, D1 design 43 passed, both record
+  regenerators at a fixed point. No core full suite and no historical suites —
+  the only code change is the D1 producer's prose, and its own suite covers it.
+
 ## 2026-10-03 — Empty supervision fails closed, and the blocker count is derived
 
 A `$0` consistency round on maintainer review, closing the D1 design. Nothing

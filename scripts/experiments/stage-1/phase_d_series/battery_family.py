@@ -266,6 +266,59 @@ def exclusion_chain() -> dict[str, Any]:
         })
     return {
         "order_is_part_of_the_rule": True,
+        #: THREE coordinates in v2. The first two are the historical chain's; the
+        #: third is what the 2026-10-03 source round established as necessary.
+        "identity_kinds": [
+            "historical native/source identity (stable id, including source_key)",
+            "historical rendered-prompt exact identity "
+            "(sha256 of norm(prompt_text))",
+            "canonical problem-content identity "
+            "(sha256 of norm(<problem>), experiments.phase_d_series.identity)",
+        ],
+        "all_three_required": (
+            "each misses what the others catch. An id misses one problem "
+            "entering the pool under two ids. A rendered-prompt hash misses the "
+            "same problem rendered differently -- MBPP full/train task 602 and "
+            "consumed full/test task 217 are the same problem and differ in both "
+            "task_id and rendered tests. And neither sees a problem that reached "
+            "the recovery-training corpus: the historical chain hashes a "
+            "session's non-assistant messages JOINED, which can never equal a "
+            "bare problem, so it caught 0 of the 1,708 GSM8K train rows that are "
+            "in the corpus."),
+        "problem_content_payload": {
+            "code": "the bare problem text", "gsm8k": "the question",
+            "math_verified": "the problem statement",
+            "_owner": "experiments.phase_d_series.identity.PROBLEM_FIELD",
+        },
+        "reserved_populations_for_problem_content": [
+            "the five baseline isolation roles",
+            *HELD_OUT_BATTERIES,
+            "the recovery-training corpus, by FIRST USER PROBLEM -- not the "
+            "historical joined system+user hash",
+            "every prior D-series role",
+        ],
+        "historical_chain_is_unmodified": (
+            "`build_c1_confirmation_battery.excluded_identities` keeps its exact "
+            "semantics, because frozen C1/C2/C3 battery membership is "
+            "reproducible only from it. The third coordinate is a D-series layer "
+            "ON TOP, not a repair of the historical function."),
+        "chain": chain,
+    }
+
+
+def _exclusion_chain_v1() -> dict[str, Any]:
+    """v1's exclusion block verbatim, so v1's id stays reproducible."""
+    chain = []
+    for index, (role, domain, _experiment, _purpose) in enumerate(ROLES):
+        chain.append({
+            "role": role,
+            "rank_domain": domain,
+            "excludes": ["the five baseline isolation roles",
+                         *HELD_OUT_BATTERIES,
+                         *[prior[0] for prior in ROLES[:index]]],
+        })
+    return {
+        "order_is_part_of_the_rule": True,
         "identity_kinds": ["stable id (including source_key)",
                            "normalized prompt content (sha256 of norm(text))"],
         "both_required": (
@@ -275,8 +328,122 @@ def exclusion_chain() -> dict[str, Any]:
     }
 
 
-def allocation_rule() -> dict[str, Any]:
-    """The rule, frozen prospectively — everything except the realized items."""
+def allocation_rule_id_of(rule: dict[str, Any]) -> str:
+    """`H(rule)[:32]` — one hashing function for every rule version."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    return sha256_json(rule)[:32]
+
+
+#: ALLOCATION RULE VERSION. v1 froze a rule with two isolation coordinates and a
+#: ranking keyed on the HISTORICAL stable id. The 2026-10-03 source round
+#: established that contract is insufficient and added canonical
+#: `problem_content_id` as a third load-bearing coordinate -- and new D-series
+#: rows use a split-aware item identity, which is what the ranking hashes. Both
+#: changes decide WHICH candidate wins the ranking and WHETHER a candidate may
+#: enter it, so neither belongs in `family_content_id` at materialization: they
+#: belong in the prospectively frozen rule.
+#:
+#: v1 is NOT mutated. Its shape is preserved by `allocation_rule_v1` so its id
+#: stays reproducible, and it is recorded as superseded with the reason. Silently
+#: changing what a committed hash meant is the one thing a prospective freeze
+#: cannot survive.
+ALLOCATION_RULE_VERSION = 2
+#: v1's id as it was COMMITTED, so `allocation_rule_v1` is checked against the
+#: value a reader may already hold rather than against itself. Factoring v1's
+#: `distribution_identity` into a shared helper left a trailing comma, which made
+#: the return value a one-element tuple and moved the hash to 8d266c70 -- caught
+#: only because this value existed to compare against. A preserved-for-
+#: reproducibility function with nothing pinning it is not preserved.
+V1_RULE_ID_AS_COMMITTED = "ced017a1f3f155ba5aaf383e61156c12"
+
+
+def _frozen_review() -> dict[str, Any]:
+    """The duplicate review, bound into the rule because it gates entry.
+
+    Imported from `identity.py` rather than restated: the decision has one owner
+    and a second copy here would be the duplicate-source-of-truth problem the
+    source round just finished removing.
+    """
+    from experiments.phase_d_series.identity import (
+        REVIEW_PROVENANCE,
+        SEMANTIC_DUPLICATE_EXCLUSIONS,
+    )
+
+    return {
+        "_why_in_the_rule": (
+            "a reviewed exclusion decides WHETHER a candidate may enter the "
+            "ranking, so it is part of the prospective rule and not of the "
+            "realized content."),
+        "provenance": dict(REVIEW_PROVENANCE),
+        "exclusions": {group: [dict(d) for d in rows]
+                       for group, rows in sorted(
+                           SEMANTIC_DUPLICATE_EXCLUSIONS.items()) if rows},
+        "retained_explicitly": (
+            "the other 43 reviewed pairs are RETAINED by decision, not by "
+            "default. A similarity cutoff would have dropped all 44."),
+        "threshold_role": (
+            "the 0.8 Jaccard trigger selected which pairs a human read and "
+            "excluded nothing by itself."),
+    }
+
+
+def _source_policy() -> dict[str, Any]:
+    """Which population each short stratum draws from. Decided 2026-10-03."""
+    from experiments.phase_d_series import math_source as ms
+
+    return {
+        "_why_in_the_rule": (
+            "the population a stratum draws from determines the candidate pool, "
+            "so it decides which rows can win the ranking at all. The per-file "
+            "digests stay with `family_content_id`; the POLICY is here."),
+        "code": ("google-research-datasets/mbpp, the already-pinned revision, "
+                 "full/train + full/validation + full/prompt"),
+        "gsm8k": "openai/gsm8k, the already-pinned revision, main/train",
+        "math_verified": (f"{ms.REPO_ID} @ {ms.REVISION}, TEST splits only, "
+                          f"licence {ms.LICENCE}; the canonical MATH test "
+                          "population"),
+        "excluded_populations": [
+            "gsm8k `socratic` -- the same problems re-rendered, not capacity",
+            "mbpp `sanitized` -- a verified SUBSET of `full`",
+            "MATH train -- not used for this behavioural stratum",
+            "any second code dataset -- MBPP's own splits suffice",
+        ],
+        "status": "DECIDED and IMPLEMENTED; see "
+                  "logs/shared/analyses/autoinit_d_series_source_evidence.json",
+    }
+
+
+def _distribution_identity() -> dict[str, Any]:
+    return {
+        "id": FAMILY_ID,
+        "is_not": "c1_confirmation",
+        "why": ("three strata must draw from larger populations, and a "
+                "different population is a different behavioural "
+                "distribution. The stratum names, domains and counts are "
+                "inherited unchanged, so the high-level balance and the "
+                "950/850 denominators are preserved — but a score on this "
+                "family is NOT comparable with a score on "
+                "c1_confirmation_v1, and B's historical C1 number is not "
+                "imported."),
+        "sesoi_transfer": (
+            "the C0 SESOI of 0.010 is CARRIED FORWARD AS AN ASSUMPTION, not "
+            "as an inherited measurement. It was characterized on the C1 "
+            "population. Every D-series comparison re-measures both arms on "
+            "this family under one protocol, so the SESOI is used as a "
+            "decision boundary for a within-family paired difference — "
+            "which is the use it can support — and not as a claim that a "
+            "difference measured here equals one measured on C1."),
+    }
+
+
+def allocation_rule_v1() -> dict[str, Any]:
+    """The v1 rule verbatim, so its committed id remains reproducible.
+
+    Kept as a function rather than a recorded constant: a hand-copied hash would
+    be a second source of truth for what v1 meant, and the point of keeping v1 is
+    that a reader can recompute it.
+    """
     return {
         "schema": SCHEMA,
         "family_id": FAMILY_ID,
@@ -303,7 +470,7 @@ def allocation_rule() -> dict[str, Any]:
                                   "result is seen",
             "deterministic": True,
         },
-        "exclusion": exclusion_chain(),
+        "exclusion": _exclusion_chain_v1(),
         "what_is_NOT_in_this_rule": (
             "the source pins and the realized item lists. The sources for the "
             "three short strata are an open maintainer decision, and the items "
@@ -311,26 +478,87 @@ def allocation_rule() -> dict[str, Any]:
             "until materialization, which would defeat the point of freezing "
             "it before any D1 outcome. They are bound by `family_content_id` at "
             "materialization instead."),
-        "distribution_identity": {
-            "id": FAMILY_ID,
-            "is_not": "c1_confirmation",
-            "why": ("three strata must draw from larger populations, and a "
-                    "different population is a different behavioural "
-                    "distribution. The stratum names, domains and counts are "
-                    "inherited unchanged, so the high-level balance and the "
-                    "950/850 denominators are preserved — but a score on this "
-                    "family is NOT comparable with a score on "
-                    "c1_confirmation_v1, and B's historical C1 number is not "
-                    "imported."),
-            "sesoi_transfer": (
-                "the C0 SESOI of 0.010 is CARRIED FORWARD AS AN ASSUMPTION, not "
-                "as an inherited measurement. It was characterized on the C1 "
-                "population. Every D-series comparison re-measures both arms on "
-                "this family under one protocol, so the SESOI is used as a "
-                "decision boundary for a within-family paired difference — "
-                "which is the use it can support — and not as a claim that a "
-                "difference measured here equals one measured on C1."),
+        "distribution_identity": _distribution_identity(),
+    }
+
+
+def allocation_rule() -> dict[str, Any]:
+    """The rule, frozen prospectively — everything except the realized items."""
+    return {
+        "allocation_rule_version": ALLOCATION_RULE_VERSION,
+        "_supersedes": {
+            "version": 1,
+            "id": allocation_rule_id_of(allocation_rule_v1()),
+            "why": (
+                "v1 bound two isolation coordinates and ranked on the HISTORICAL "
+                "stable id. The 2026-10-03 source round established that "
+                "contract is insufficient -- MBPP full/train task 602 is the "
+                "same problem as consumed full/test task 217 and passes both of "
+                "v1's coordinates, and the historical chain's training-corpus "
+                "content exclusion catches 0 of the 1,708 GSM8K train rows that "
+                "are in the corpus. v1 is not mutated; it is superseded, and its "
+                "id above is recomputed from its preserved shape rather than "
+                "transcribed."),
         },
+        "schema": SCHEMA,
+        "family_id": FAMILY_ID,
+        "n_roles": N_ROLES,
+        "roles": [{"role": r, "rank_domain": d, "experiment": e, "purpose": p}
+                  for r, d, e, p in ROLES],
+        "mixture": {name: take for name, (_d, take, _s) in sorted(
+            strata().items())},
+        "mixture_source": ("imported from build_c1_confirmation_battery.SETS; "
+                           "never restated"),
+        "n_prompts_per_role": sum(take for _d, take, _s in strata().values()),
+        "n_scorable_prompts_per_role": sum(
+            take for _d, take, scorable in strata().values() if scorable),
+        "selection": {
+            "mechanism": "battery_render.rank_take",
+            "order": "ascending SHA256(base_digest : rank_domain : stratum : "
+                     "stable_id), ties broken by str(id)",
+            "base_digest": "the C0 digest the C1 and C2 batteries were ordered "
+                           "from, so the family's ordering is derived from a "
+                           "constant that predates every D-series result",
+            "rank_domains": {role: domain for role, domain, _e, _p in ROLES},
+            #: THE SEMANTICS OF `stable_id`, bound because it decides the order.
+            "ranking_stable_id_semantics": {
+                "for_new_d_series_rows": (
+                    "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- "
+                    "`experiments.phase_d_series.identity.d_series_item_id`. "
+                    "mbpp-<config>-<split>-<task_id>, "
+                    "gsm8k-<config>-<split>-<NNNNN>, "
+                    "math-<config>-<split>-<NNNNN>"),
+                "for_historical_rows": (
+                    "unchanged. No frozen battery's item is renamed, and the "
+                    "historical renderers keep their ids exactly."),
+                "_why_this_is_in_the_RULE": (
+                    "the ranking hashes the stable id, so changing the id scheme "
+                    "changes the order and therefore WHICH rows are selected. "
+                    "That cannot be deferred to `family_content_id` at "
+                    "materialization: by then the selection has happened."),
+                "_why_the_historical_scheme_cannot_be_reused": (
+                    "`make_gsm8k` builds its id from the row's POSITION in the "
+                    "file, so applied to main/train it emits 1,319 ids that "
+                    "collide with the consumed test split and name different "
+                    "problems. `mbpp-test-<task_id>` names the wrong split for "
+                    "three of MBPP's four files."),
+            },
+            "outcome_dependence": "NONE. The order is a function of the pool and "
+                                  "the frozen domain strings; there is no seed, "
+                                  "no date and no choice available after a "
+                                  "result is seen",
+            "deterministic": True,
+        },
+        "exclusion": exclusion_chain(),
+        "review": _frozen_review(),
+        "source_policy": _source_policy(),
+        "what_is_NOT_in_this_rule": (
+            "the per-file source DIGESTS and the realized item lists. Those are "
+            "bound by `family_content_id` at materialization, because they "
+            "describe what was drawn rather than how. Everything that decides "
+            "WHICH candidate wins the ranking, or WHETHER a candidate may enter "
+            "it, is above -- which is the correction v2 makes to v1."),
+        "distribution_identity": _distribution_identity(),
     }
 
 
@@ -339,12 +567,15 @@ def allocation_rule_id() -> str:
 
     This is what "frozen before any D1 outcome is observed" means operationally:
     the hash can be committed now, and a materialization that produced different
-    roles, a different order or a different exclusion chain could not reproduce
-    it.
-    """
-    from aadistill.infrastructure.manifest import sha256_json
+    roles, a different order, a different exclusion chain, a different ranking
+    identity, a different review decision or a different source policy could not
+    reproduce it.
 
-    return sha256_json(allocation_rule())[:32]
+    **v2.** The id below is NOT v1's. v1 is superseded for a stated reason and its
+    own id remains recomputable from `allocation_rule_v1`, so nothing that was
+    committed under v1 is silently reinterpreted.
+    """
+    return allocation_rule_id_of(allocation_rule())
 
 
 def report() -> dict[str, Any]:
@@ -378,12 +609,21 @@ def report() -> dict[str, Any]:
                 "math alone would unblock D1 and still leave the family short."),
         },
         "source_options": SOURCE_OPTIONS,
+        "shortfall_against_the_original_pins": {
+            "_what": ("how far each stratum fell short of six roles under the "
+                      "ORIGINAL pinned files. Kept because it is what the "
+                      "source decision was taken to resolve."),
+            **{k: v for k, v in sorted(short.items())},
+        },
         "blocker": (
-            "THREE strata cannot fund six roles from their currently pinned "
-            f"sources: {', '.join(f'{k} short by {v}' for k, v in sorted(short.items()))}. "
-            "Extending a source changes the evaluation population, so it is a "
-            "maintainer decision with a licence and contamination record "
-            "attached, and it is not taken here."),
+            "CAPACITY IS CLOSED. The source decision of 2026-10-03 extended all "
+            "three short strata and the strengthened chain's measured eligible "
+            "counts clear every shortfall -- see "
+            "logs/shared/analyses/autoinit_d_series_source_evidence.json, which "
+            "owns those figures. The remaining blockers are NOT capacity: the "
+            "GSM8K split-aware RENDERER does not exist, so its realized "
+            "membership is not final, and the MATERIALIZATION decision itself "
+            "has not been taken. No row is drawn."),
         "_authorizes": "nothing",
         "_materializes": "nothing",
         "what_this_may_not_be_used_to_claim": [
