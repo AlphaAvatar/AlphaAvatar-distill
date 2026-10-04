@@ -206,6 +206,53 @@ lists all six. **Continuing on it would re-apply the whole range** — cut a fre
 branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
 it is where this round's commit hashes live.
 
+## The D-series source-prep round, integrated by SQUASH AND MERGE
+
+**Approved on review 2026-10-03 and integrated per AGENTS.md P12.2.** One commit
+on `main` collapsing **six**:
+
+```text
+source branch : prep/d-series-sources   (NOT deleted -- P12.2)
+merge base    : aac482d58206987cd37533f1f57a76f6b413ab6d
+branch tip    : named by the squash commit on `main`, not here
+```
+
+The tip is left to the squash commit for the reason the previous round
+established the hard way: a record that is itself the last commit on the branch
+cannot name its own hash, and naming the *then-current* HEAD is how this section
+came to cite `909d1c8b` after `ccf1c1c4` landed on top.
+
+**What `main` gains.** The D-series evidence blocker is scientifically closed:
+the source decision is made and implemented, and all three short strata clear
+their six-role shortfall under a **strengthened** exclusion contract — the
+historical chain plus canonical problem-content identity, with the historical
+chain itself unmodified so frozen C1/C2/C3 membership stays reproducible.
+
+```text
+code           eligible 463   shortfall 321
+gsm8k          eligible 5433  shortfall 11    (conservative; see below)
+math_verified  eligible 4670  shortfall 830
+```
+
+`math_verified` is pinned at `EleutherAI/hendrycks_math` revision
+`21a5633873b6a120296cce3e2df9d5550074f4a3`, licence **mit**, **test splits
+only**, SHA256 per file. Allocation rule **v2** supersedes v1 `ced017a1`, which
+stays recomputable; v2 binds the split-aware ranking identity, three isolation
+coordinates, the frozen duplicate review and the source policy.
+
+**NOT materialized, and two things still block construction:** GSM8K's
+split-aware renderer does not exist — so its 5,433 is capacity evidence and not
+final rendered membership — and the materialization decision has not been taken.
+
+Validation on this tree: D-series 105 passed, D1 43, `tests/docs` 158, both
+record regenerators at a fixed point. **No `src/` change in the whole range**, so
+no core suite was run and the CUDA-surface ledger is untouched. The only network
+use was the authorized MATH fetch.
+
+**Cut a fresh branch from the new `main`** — `prep/d-series-batteries` — to
+implement the renderer and build the six roles. Continuing here would re-apply
+the range.
+
 ## The D1 identity round, integrated into `main` by SQUASH AND MERGE
 
 **Approved on review 2026-10-03 and integrated per AGENTS.md P12.2.** One commit
