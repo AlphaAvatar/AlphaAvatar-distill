@@ -165,3 +165,55 @@ class TestAMovedSelectionIsAttributedToAKnob:
         #: silently reporting a cause it cannot know.
         assert drv.compare_selections(a, b)["attributions"][
             "ffn.activation_importance_v0"].startswith("UNATTRIBUTED")
+
+
+class TestACompletedArmReleasesWhatNothingReads:
+    """Intermediates go; the final and every digest stay.
+
+    Three arms retain ~11.75 GiB each, ~10.6 GiB of it intermediate, so a
+    three-arm run would want ~65 GiB of a 60 GiB disk -- and the arm that failed
+    would be the LAST one, after the first two had already been paid for.
+    """
+
+    @staticmethod
+    def _arm(tmp_path):
+        steps = []
+        for i, name in enumerate(("00_depth", "01_ffn", "02_width", "03_attn")):
+            d = tmp_path / name
+            d.mkdir()
+            (d / "model.safetensors").write_bytes(b"x" * (100 * (i + 1)))
+            steps.append({"index": i, "impl_id": f"op{i}",
+                          "artifact_digest": f"{i}" * 64,
+                          "checkpoint_path": str(d)})
+        return {"arm": "A", "steps": steps,
+                "final_checkpoint_path": str(tmp_path / "03_attn")}
+
+    def test_it_keeps_the_final_and_frees_the_rest(self, tmp_path):
+        import types
+
+        arm = self._arm(tmp_path)
+        journal = types.SimpleNamespace(event=lambda **k: None)
+        out = drv.release_intermediates(arm, journal=journal)
+
+        assert out["released"] == ["00_depth", "01_ffn", "02_width"]
+        assert out["freed_bytes"] == 100 + 200 + 300
+        assert not (tmp_path / "00_depth").exists()
+        #: The one stage D loads must survive.
+        assert (tmp_path / "03_attn" / "model.safetensors").is_file()
+
+    def test_every_digest_survives_the_release(self, tmp_path):
+        """Identities are the evidence; the bytes nobody reads are not."""
+        import types
+
+        arm = self._arm(tmp_path)
+        before = [s["artifact_digest"] for s in arm["steps"]]
+        drv.release_intermediates(arm, journal=types.SimpleNamespace(
+            event=lambda **k: None))
+
+        assert [s["artifact_digest"] for s in arm["steps"]] == before
+        assert [s.get("checkpoint_released") for s in arm["steps"]] == \
+            [True, True, True, None], (
+                "each released step says so, and the kept one does not claim to")
+        #: And the path it USED is still recorded -- a released artifact is
+        #: traceable, not erased from the record.
+        assert all(s["checkpoint_path"] for s in arm["steps"])

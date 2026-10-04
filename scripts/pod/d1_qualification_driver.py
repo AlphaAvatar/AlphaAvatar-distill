@@ -264,6 +264,46 @@ def _path_profiles():
     return A3S.path_spec(workdir_device="cuda").steps
 
 
+def release_intermediates(arm_record: dict[str, Any], *,
+                          journal: Journal) -> dict[str, Any]:
+    """Delete a completed arm's INTERMEDIATE checkpoints, keep its final.
+
+    P8.4: artifacts follow consumers. Once an arm is recorded, nothing reads its
+    intermediates -- stage C compares digests and selections that are already in
+    the record, and stage D loads only `final_checkpoint_path`. Their bytes are
+    pure disk pressure, and on a three-arm run they are the difference between
+    fitting and not: each arm retains ~11.75 GiB, of which ~10.6 GiB is
+    intermediate, so three arms would want ~65 GiB of a 60 GiB disk and the LAST
+    arm would fail after the first two had already been paid for.
+
+    The digests are what survive, which is the point -- an identity is evidence
+    and a 6 GiB intermediate nobody reads is not.
+    """
+    import shutil
+
+    keep = arm_record.get("final_checkpoint_path")
+    freed, removed = 0, []
+    for step in arm_record.get("steps") or []:
+        path = step.get("checkpoint_path")
+        if not path or path == keep:
+            continue
+        p = Path(path)
+        if not p.is_dir():
+            continue
+        size = sum(f.stat().st_size for f in p.rglob("*") if f.is_file())
+        shutil.rmtree(p, ignore_errors=True)
+        freed += size
+        removed.append(p.name)
+        #: The record keeps the path it USED, and says the bytes are gone.
+        step["checkpoint_released"] = True
+    out = {"released": removed, "freed_bytes": freed, "kept": keep}
+    if removed:
+        journal.event(stage="release_intermediates", status="ok",
+                      arm=arm_record.get("arm"), n=len(removed),
+                      freed_gib=round(freed / 2**30, 3))
+    return out
+
+
 def unpinned(spec):
     """`spec` with every step's expected-artifact pin cleared.
 
@@ -820,6 +860,9 @@ def main(argv: list[str] | None = None) -> int:
                                         or "")[:12]}
                 if expected_final is not None:
                     st.result["reconstructed"] = record[key]["reconstructed"]
+                #: Immediately, not at closeout: the next arm needs the disk.
+                record[key]["released_intermediates"] = release_intermediates(
+                    record[key], journal=journal)
                 return record[key]
 
         #: A -- the hard gate. Pinned, because this arm claims to reproduce the
