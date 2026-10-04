@@ -1,18 +1,18 @@
 {
- "_booked_recomputed_from_components": "0.6382 = 0.6382",
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 = 1.5919",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 0.6382,
+ "booked_usd": 1.5919,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- a1 produced A/B/C/E; stage D owed",
+ "status": "CLOSED -- 3 paid subruns, $1.5919 of $8.0000; the verdict and every answer's provenance are in closeout.json",
  "subruns": [
   {
    "cost_usd": 0.6382,
@@ -29,6 +29,37 @@
     "analyse"
    ],
    "subrun_id": "a1"
+  },
+  {
+   "cost_usd": 0.8552,
+   "elapsed_minutes": 46.717,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a2",
+   "gpu": "NVIDIA L40S",
+   "notes": "see WHY_NO_RECORD.md. Two defects repaired after it: the policy id is now resolved the qualified way `d1_qualification_driver` already documented, and the per-position mass is reduced ON THE POD so a 300 MB record cannot recur.",
+   "outcome": "INCOMPLETE -- stage C and its analysis succeeded and CONFIRM a1; stage D failed on a bare position-policy id; the JSON record arrived truncated and the journal is the evidence",
+   "pod_id": "rtrdbu3wi6sfrv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "0a6fe379ddd0e3b3985739ca1f9b5183dca2d31e",
+   "stages_run": [
+    "C",
+    "analyse"
+   ],
+   "subrun_id": "a2"
+  },
+  {
+   "cost_usd": 0.0985,
+   "elapsed_minutes": 5.383,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a3",
+   "gpu": "NVIDIA L40S",
+   "notes": "70.8 s. Candidate built by depth.positional_v0 in 30.7 s rather than repeating the half-hour search, because stage D compares two REDUCERS and the candidate's selection rule does not enter that comparison.",
+   "outcome": "COMPLETE -- stage D measured under both supports",
+   "pod_id": "5db8r0r06vd5k5",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "5c64afc83e5f17f4fe4c21f6a496624e0abc604b",
+   "stages_run": [
+    "D"
+   ],
+   "subrun_id": "a3"
   }
  ],
  "teardown_reserve_usd": 0.3

@@ -572,7 +572,7 @@ def build_positional_candidate(*, repo: Path, workdir: Path,
 
 
 def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
-                       journal: Journal) -> dict[str, Any]:
+                       journal: Journal, numerics=None) -> dict[str, Any]:
     """Item 10D and the state-eval half of 10E, both supports, one pair of models.
 
     Two evaluators over the SAME suite and the SAME loaded models. The forwards are
@@ -623,9 +623,14 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     out: dict[str, Any] = {"arms": {}}
     for label, support in (("full_vocab_v1", FULL_VOCAB_V1),
                            ("reference_topk_tail_v1", D_SERIES_SUPPORT)):
+        #: `numerics` too. Without it these evaluators computed a DIFFERENT
+        #: execution fingerprint from the pair the driver bound up front, so one
+        #: record carried two protocol ids per support and a reader could not tell
+        #: which measurement it described. The identity must be the bound one.
         ev = StateEvaluator(suite, items, device="cuda", position_policy=policy,
                             execution=execution, distribution_support=support,
-                            suite_content_sha256=content_sha256)
+                            suite_content_sha256=content_sha256,
+                            numerics=numerics)
         ev.prime_reference(teacher)
         torch.cuda.reset_peak_memory_stats()
         before = int(torch.cuda.memory_allocated())
@@ -655,6 +660,11 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
         torch.cuda.empty_cache()
 
     a, b = out["arms"]["full_vocab_v1"], out["arms"]["reference_topk_tail_v1"]
+    if a["measurement_protocol_id"] == b["measurement_protocol_id"]:
+        raise AdoptionError(
+            "both state evaluations carry the SAME protocol id, so the identity "
+            "does not distinguish the two supports and this comparison describes "
+            "one measurement against itself")
     shared = sorted(set(a["values"]) & set(b["values"]))
     out["comparison"] = {
         "protocol_ids_differ": (a["measurement_protocol_id"]
@@ -877,7 +887,8 @@ def main(argv: list[str] | None = None) -> int:
                     record["D_candidate"] = built
                 record["D_state_eval"] = stage_D_state_eval(
                     repo=repo, artifact_path=candidate,
-                    teacher_path=teacher_path, journal=journal)
+                    teacher_path=teacher_path, journal=journal,
+                    numerics=numerics)
                 cmp_ = record["D_state_eval"]["comparison"]
                 st.result = {
                     "protocol_ids_differ": cmp_["protocol_ids_differ"],

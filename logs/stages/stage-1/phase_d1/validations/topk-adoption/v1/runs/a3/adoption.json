@@ -1,0 +1,397 @@
+{
+ "D_candidate": {
+  "_why_this_candidate": "stage D compares two REDUCERS on one candidate; the candidate's selection rule does not enter that comparison, and this one needs no calibration so it costs seconds instead of half an hour. The geometry, vocabulary, device and evaluator are all real.",
+  "built_by": "depth.positional_v0",
+  "candidate_checkpoint": "/workspace/out/adoption/candidate/positional_candidate",
+  "seconds": 30.669
+ },
+ "D_state_eval": {
+  "arms": {
+   "full_vocab_v1": {
+    "allocated_before_bytes": 14575939584,
+    "detail_per_domain": {
+     "code": 1.8579363384518013,
+     "general": 1.6509756036932832,
+     "rag_multihop": 1.8849247976183154,
+     "reasoning_math": 1.9367944587417691,
+     "tool": 1.8914918027811034
+    },
+    "evaluation_delta_bytes": 7264833536,
+    "measurement_protocol_id": "9383f8220535ce925e763df5d5135240",
+    "n_reference_sketches": 0,
+    "peak_memory_bytes": 21840773120,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 0,
+    "seconds": 11.058,
+    "values": {
+     "state.critical_token_kl": 5.145334515710836,
+     "state.critical_token_kl.assistant": 1.8952086934803671,
+     "state.critical_token_kl.eos": 6.660313643727984,
+     "state.critical_token_kl.final_answer": 1.7318008444280315,
+     "state.critical_token_kl.reasoning": 1.940047373815999,
+     "state.critical_token_kl.think_close": 1.7430049819073508,
+     "state.critical_token_kl.tool_close": 10.446218592779976,
+     "state.nll.code": 2.0355939964547543,
+     "state.nll.general": 3.921405671009494,
+     "state.nll.pooled_all_domains": 2.3648620388052053,
+     "state.nll.rag_multihop": 2.0631024126313515,
+     "state.nll.reasoning_math": 2.0778574318949667,
+     "state.nll.teacher_reference_pooled": 0.5076326291573745,
+     "state.nll.tool": 2.1569026647458625,
+     "state.nll_delta_vs_teacher_pooled": 1.8572294096478306,
+     "state.reverse_kl.token_mean": 8.635600558936444,
+     "state.teacher_kl.code": 1.8579363384518013,
+     "state.teacher_kl.equal_domain_mean": 1.8444246002572544,
+     "state.teacher_kl.general": 1.6509756036932832,
+     "state.teacher_kl.rag_multihop": 1.8849247976183154,
+     "state.teacher_kl.reasoning_math": 1.9367944587417691,
+     "state.teacher_kl.token_mean": 1.8580722776174183,
+     "state.teacher_kl.tool": 1.8914918027811034,
+     "state.teacher_kl.worst_domain": 1.9367944587417691,
+     "state.top1_agreement": 0.4907801681045655
+    },
+    "worst_domain": null
+   },
+   "reference_topk_tail_v1": {
+    "allocated_before_bytes": 14584459264,
+    "detail_per_domain": {
+     "code": 1.8579321256233587,
+     "general": 1.6340711936893584,
+     "rag_multihop": 1.8848956970222563,
+     "reasoning_math": 1.936790013348437,
+     "tool": 1.891483834904672
+    },
+    "evaluation_delta_bytes": 7418650112,
+    "measurement_protocol_id": "70856044a8b256914579544ea444fec6",
+    "n_reference_sketches": 80,
+    "peak_memory_bytes": 22003109376,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "distribution_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     },
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 178837152,
+    "seconds": 10.422,
+    "values": {
+     "state.critical_token_kl": 5.145283168390031,
+     "state.critical_token_kl.assistant": 1.8951996285390709,
+     "state.critical_token_kl.eos": 6.660314071178436,
+     "state.critical_token_kl.final_answer": 1.7317981764489392,
+     "state.critical_token_kl.reasoning": 1.9400366446091002,
+     "state.critical_token_kl.think_close": 1.7429485968181064,
+     "state.critical_token_kl.tool_close": 10.446071829114642,
+     "state.nll.code": 2.035594192839347,
+     "state.nll.general": 3.92140590661222,
+     "state.nll.pooled_all_domains": 2.3648622636374474,
+     "state.nll.rag_multihop": 2.063102628596234,
+     "state.nll.reasoning_math": 2.0778576682284626,
+     "state.nll.teacher_reference_pooled": 0.5076325964397109,
+     "state.nll.tool": 2.1569028919590685,
+     "state.nll_delta_vs_teacher_pooled": 1.8572296671977369,
+     "state.reverse_kl.token_mean": 7.018594005602232,
+     "state.teacher_kl.code": 1.8579321256233587,
+     "state.teacher_kl.equal_domain_mean": 1.8410345729176165,
+     "state.teacher_kl.general": 1.6340711936893584,
+     "state.teacher_kl.rag_multihop": 1.8848956970222563,
+     "state.teacher_kl.reasoning_math": 1.936790013348437,
+     "state.teacher_kl.token_mean": 1.855494221877452,
+     "state.teacher_kl.tool": 1.891483834904672,
+     "state.teacher_kl.worst_domain": 1.936790013348437,
+     "state.top1_agreement": 0.4907801681045655
+    },
+    "worst_domain": null
+   }
+  },
+  "comparison": {
+   "_memory": {
+    "delta_ratio": 1.0212,
+    "full_vocab_peak_bytes": 21840773120,
+    "topk_peak_bytes": 22003109376,
+    "topk_reference_sketch_bytes": 178837152
+   },
+   "_nll_must_be_exact": "CE is not a KL and is not coarsened by this protocol. Any `.nll` metric differing by more than float noise is a DEFECT, not a protocol difference.",
+   "_speed": {
+    "full_vocab_seconds": 11.058,
+    "ratio": 0.9425,
+    "topk_seconds": 10.422
+   },
+   "metrics": {
+    "state.critical_token_kl": {
+     "absolute": -5.1347320805028573e-05,
+     "full_vocab": 5.145334515710836,
+     "reference_topk_tail": 5.145283168390031,
+     "relative": -9.979394079868656e-06
+    },
+    "state.critical_token_kl.assistant": {
+     "absolute": -9.064941296266227e-06,
+     "full_vocab": 1.8952086934803671,
+     "reference_topk_tail": 1.8951996285390709,
+     "relative": -4.783083428991316e-06
+    },
+    "state.critical_token_kl.eos": {
+     "absolute": 4.274504519230504e-07,
+     "full_vocab": 6.660313643727984,
+     "reference_topk_tail": 6.660314071178436,
+     "relative": 6.417872712729984e-08
+    },
+    "state.critical_token_kl.final_answer": {
+     "absolute": -2.667979092318973e-06,
+     "full_vocab": 1.7318008444280315,
+     "reference_topk_tail": 1.7317981764489392,
+     "relative": -1.5405807780398307e-06
+    },
+    "state.critical_token_kl.reasoning": {
+     "absolute": -1.0729206898707488e-05,
+     "full_vocab": 1.940047373815999,
+     "reference_topk_tail": 1.9400366446091002,
+     "relative": -5.530383970780852e-06
+    },
+    "state.critical_token_kl.think_close": {
+     "absolute": -5.638508924432628e-05,
+     "full_vocab": 1.7430049819073508,
+     "reference_topk_tail": 1.7429485968181064,
+     "relative": -3.234935632979357e-05
+    },
+    "state.critical_token_kl.tool_close": {
+     "absolute": -0.0001467636653345039,
+     "full_vocab": 10.446218592779976,
+     "reference_topk_tail": 10.446071829114642,
+     "relative": -1.4049453783777922e-05
+    },
+    "state.nll.code": {
+     "absolute": 1.9638459258786156e-07,
+     "full_vocab": 2.0355939964547543,
+     "reference_topk_tail": 2.035594192839347,
+     "relative": 9.647532510406805e-08
+    },
+    "state.nll.general": {
+     "absolute": 2.3560272577327623e-07,
+     "full_vocab": 3.921405671009494,
+     "reference_topk_tail": 3.92140590661222,
+     "relative": 6.008119167957051e-08
+    },
+    "state.nll.pooled_all_domains": {
+     "absolute": 2.2483224215719133e-07,
+     "full_vocab": 2.3648620388052053,
+     "reference_topk_tail": 2.3648622636374474,
+     "relative": 9.507203315368997e-08
+    },
+    "state.nll.rag_multihop": {
+     "absolute": 2.1596488242181522e-07,
+     "full_vocab": 2.0631024126313515,
+     "reference_topk_tail": 2.063102628596234,
+     "relative": 1.0467967130452153e-07
+    },
+    "state.nll.reasoning_math": {
+     "absolute": 2.3633349588436658e-07,
+     "full_vocab": 2.0778574318949667,
+     "reference_topk_tail": 2.0778576682284626,
+     "relative": 1.1373903341810843e-07
+    },
+    "state.nll.teacher_reference_pooled": {
+     "absolute": -3.2717663578374356e-08,
+     "full_vocab": 0.5076326291573745,
+     "reference_topk_tail": 0.5076325964397109,
+     "relative": -6.445145898655647e-08
+    },
+    "state.nll.tool": {
+     "absolute": 2.272132060276988e-07,
+     "full_vocab": 2.1569026647458625,
+     "reference_topk_tail": 2.1569028919590685,
+     "relative": 1.0534235491543159e-07
+    },
+    "state.nll_delta_vs_teacher_pooled": {
+     "absolute": 2.575499062906772e-07,
+     "full_vocab": 1.8572294096478306,
+     "reference_topk_tail": 1.8572296671977369,
+     "relative": 1.386742558311706e-07
+    },
+    "state.reverse_kl.token_mean": {
+     "absolute": -1.6170065533342122,
+     "full_vocab": 8.635600558936444,
+     "reference_topk_tail": 7.018594005602232,
+     "relative": -0.18724888237921947
+    },
+    "state.teacher_kl.code": {
+     "absolute": -4.2128284425402285e-06,
+     "full_vocab": 1.8579363384518013,
+     "reference_topk_tail": 1.8579321256233587,
+     "relative": -2.2674772839906526e-06
+    },
+    "state.teacher_kl.equal_domain_mean": {
+     "absolute": -0.003390027339637891,
+     "full_vocab": 1.8444246002572544,
+     "reference_topk_tail": 1.8410345729176165,
+     "relative": -0.0018379864046299647
+    },
+    "state.teacher_kl.general": {
+     "absolute": -0.01690441000392484,
+     "full_vocab": 1.6509756036932832,
+     "reference_topk_tail": 1.6340711936893584,
+     "relative": -0.010239042882347357
+    },
+    "state.teacher_kl.rag_multihop": {
+     "absolute": -2.9100596059095096e-05,
+     "full_vocab": 1.8849247976183154,
+     "reference_topk_tail": 1.8848956970222563,
+     "relative": -1.5438597919590728e-05
+    },
+    "state.teacher_kl.reasoning_math": {
+     "absolute": -4.445393332108694e-06,
+     "full_vocab": 1.9367944587417691,
+     "reference_topk_tail": 1.936790013348437,
+     "relative": -2.2952323681247135e-06
+    },
+    "state.teacher_kl.token_mean": {
+     "absolute": -0.0025780557399663895,
+     "full_vocab": 1.8580722776174183,
+     "reference_topk_tail": 1.855494221877452,
+     "relative": -0.0013874894809109346
+    },
+    "state.teacher_kl.tool": {
+     "absolute": -7.967876431314025e-06,
+     "full_vocab": 1.8914918027811034,
+     "reference_topk_tail": 1.891483834904672,
+     "relative": -4.212482665586325e-06
+    },
+    "state.teacher_kl.worst_domain": {
+     "absolute": -4.445393332108694e-06,
+     "full_vocab": 1.9367944587417691,
+     "reference_topk_tail": 1.936790013348437,
+     "relative": -2.2952323681247135e-06
+    },
+    "state.top1_agreement": {
+     "absolute": 0.0,
+     "full_vocab": 0.4907801681045655,
+     "reference_topk_tail": 0.4907801681045655,
+     "relative": 0.0
+    }
+   },
+   "protocol_ids_differ": true,
+   "worst_domain_agrees": true
+  }
+ },
+ "_contract": "ENGINEERING EVIDENCE ONLY, for the maintainer decision of 2026-10-04. No recovery training, no behavioural screening, no confirmation, no formal search, no promotion, no GO/NO-GO. No D-series behavioural prompt is read. AUTHORIZES NOTHING.",
+ "bound_full_vocab": {
+  "distribution_support": "full_vocab_v1",
+  "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "bound_reference_topk_tail": {
+  "distribution_support": "reference_topk_tail_v1(top_k=200)",
+  "measurement_protocol_id": "9c9b0b43dc00b695c185982b8b0a18e7",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "elapsed_seconds": 70.841,
+ "ended_utc": "2026-10-04T20:31:09Z",
+ "environment": {
+  "_device_count": 1,
+  "_no_ordinal_is_hardcoded": "the index comes from torch.cuda.current_device(), so the record describes whichever device the runtime selected",
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "cudnn_tf32": true,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "gpu_total_memory_bytes": 47665709056,
+  "matmul_tf32": false,
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1"
+ },
+ "schema": "aadistill.d_series.topk_adoption/v1",
+ "scoring_protocol": {
+  "_does_not_move_the_batteries": "Top-K changes structural scoring and evaluation, not prompt content. family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+  "coarsened_under_this_protocol": [
+   "forward KL",
+   "reverse KL",
+   "critical-token KL"
+  ],
+  "critical_tokens": "critical tags identify prediction POSITIONS, not vocabulary entries, so those positions use this same KL and need no separate support rule",
+  "decision_record": "logs/budget/decisions.md 2026-10-04",
+  "exact_under_this_protocol": [
+   "target-token CE/NLL",
+   "top-1 agreement"
+  ],
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "k_is_not_outcome_selected": "maintainer-selected 2026-10-04. No sweep was run and K must not be tuned against D1/D2/D3 results.",
+  "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "protocol_id": "reference_topk_tail_v1",
+  "reference_for_depth": "the intact current parent; the candidate is that parent with the candidate block bypassed. NOT the original teacher -- DEPTH's objective is local and parent-relative, and forcing the teacher's support onto it would score a different question",
+  "reference_for_state_evaluation": "the original teacher",
+  "reverse_kl_partition": "the SAME reference-defined K+1 partition as the forward direction. One state evaluation must not carry two incompatible partitions",
+  "support": "the Top-200 entries of the REFERENCE distribution at each prediction position",
+  "tail": "every vocabulary entry outside that support, aggregated into one K+1 bucket",
+  "top_k": 200
+ },
+ "stages": [
+  {
+   "gpu": "NVIDIA L40S",
+   "seconds": 1.818,
+   "stage": "environment",
+   "status": "ok"
+  },
+  {
+   "seconds": 0.036,
+   "stage": "register_and_policy",
+   "status": "ok",
+   "top_k": 200
+  },
+  {
+   "protocol": "d463a1dc6afbd778",
+   "seconds": 0.042,
+   "stage": "bind_full_vocab",
+   "status": "ok"
+  },
+  {
+   "protocol": "9c9b0b43dc00b695",
+   "seconds": 0.038,
+   "stage": "bind_reference_topk_tail",
+   "status": "ok"
+  },
+  {
+   "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 8.309,
+   "stage": "teacher_fetch_verify",
+   "status": "ok"
+  },
+  {
+   "protocol_ids_differ": true,
+   "seconds": 60.594,
+   "stage": "D_state_eval_both_supports",
+   "status": "ok",
+   "worst_domain_agrees": true
+  }
+ ],
+ "stages_requested": [
+  "D"
+ ],
+ "started_utc": "2026-10-04T20:29:58Z",
+ "status": "COMPLETE"
+}

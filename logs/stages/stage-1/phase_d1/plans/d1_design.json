@@ -523,7 +523,7 @@
   "total_probes": 12
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = $50.799 is the gap between a planning basis derived from UNBATCHED telemetry and the live balance. It is NOT the finalized amount by which the project cap must increase: the direction of the batched correction is unknown, so the real figure is unknown until the owed GPU qualification reprices the chain. This document does not claim the cap must move by that amount.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = $52.3909 is the gap between a planning basis derived from UNBATCHED telemetry and the live balance. It is NOT the finalized amount by which the project cap must increase: the direction of the batched correction is unknown, so the real figure is unknown until the owed GPU qualification reprices the chain. This document does not claim the cap must move by that amount.",
   "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "WHAT IS DEFINITE: per-session envelope compatibility is UNRESOLVED, and an unresolved compatibility blocks authorization. This is a SEPARATE constraint from the project-level cap \u2014 `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file \u2014 so a D1 grant that moved only the cumulative cap would still not authorize the search session.\n\nWHAT IS NOT ESTABLISHED: that the real batched D1 search exceeds $30.00. The provisional basis puts the search session at $31.1577, over by $1.1577, but that basis comes from UNBATCHED telemetry whose direction relative to the batched implementation is unknown. The measured session could land either side of the envelope, so this document does NOT claim the search has been shown not to fit.\n\nWHAT RESOLVES IT: the owed short GPU qualification, which prices a representative batched expansion. ONLY THEN is the envelope question answerable, and only then can a grant choose between raising the per-session envelope for the phase, splitting the search into sessions that each fit, or a cheaper search protocol. That resolution is a maintainer decision recorded as one, never inferred from a cap change.",
   "_per_session_envelope_compatibility": "UNRESOLVED, and it BLOCKS AUTHORIZATION while it is. It is not RESOLVED-INCOMPATIBLE: nothing has measured the batched D1 search, so it is NOT established that the real session exceeds $30.00. The provisional basis says it would, by $1.1577, and an unresolved compatibility is a blocker because authorization needs a figure it can bind \u2014 not because the incompatibility is proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS \u2014 this one it genuinely can, because the question is a price. It does NOT resolve the funding AUTHORIZATION blocker, which is a scope fact no measurement reaches.",
   "_price_status": "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a finalized authorization price and NOT a proven upper bound on the batched implementation. Two reasons, and the first is the one that matters:\n\n1. the per-expansion minutes were measured on an UNBATCHED state evaluation and a one-item-per-forward statistics pass, and D1 runs both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3; causal-KL's length-sorted packing won 1.1884x. The net effect on a D1 expansion running all four operators is UNMEASURED, so the direction of the correction is unknown, not merely its size.\n2. `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nWHAT MUST REFRESH IT: a short GPU qualification measuring real CUDA/bf16 execution, the real state-eval memory peak, the target-aware batched path's correctness, and the actual timing of a representative expansion. Until that runs, these numbers size a grant request; they do not price one.",
@@ -601,12 +601,12 @@
   "position": {
    "_cap_cross_check": 410.0,
    "_derived_by": "scripts/consolidate/derive_budget.py, CALLED by this writer rather than copied from it. A hand-copied balance expires the next time anything spends, and this document is regenerated often enough that it would expire quietly.",
-   "engineering_remaining_usd": 8.7137,
+   "engineering_remaining_usd": 7.1218,
    "formal_remaining_usd": 7.2431,
    "full_ceiling_sessions_fundable": 0,
-   "package_remaining_usd": 15.9568,
+   "package_remaining_usd": 14.3649,
    "project_cap_usd": 410.0,
-   "project_remaining_usd": 9.9519
+   "project_remaining_usd": 8.36
   },
   "price_basis": {
    "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
@@ -616,7 +616,7 @@
   "price_status": "PROVISIONAL PLANNING BASIS -- DIRECTION UNKNOWN",
   "provisional_basis_fits_per_session_envelope": false,
   "provisional_per_session_excess_usd": 1.1577,
-  "provisional_shortfall_usd": 50.799,
+  "provisional_shortfall_usd": 52.3909,
   "sessions": 3
  },
  "contamination_protection": {
@@ -659,7 +659,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "d44c62e8750e67f6f3a7dcd3873db4c77a85ca76dfabce5a7ececb9cdac95822",
+ "design_hash": "e069eba7289ed76435e69ab92dd0c09149e6553e3c6f5e34b59e1c6b7080002e",
  "evidence": {
   "_authorizes": "nothing. The evidence exists; the funding scope and the per-session envelope are separate and still open.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",

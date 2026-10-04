@@ -50,15 +50,34 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**NEXT: the D-series reference-topK-tail protocol, before formal D1.** Maintainer
-decision **2026-10-04** replaces the full-vocabulary KL contract with
-`reference_topk_tail_v1` at **K = 200** for D1, D2 and D3 — a scientific protocol
-amendment, not an execution optimization. The full-vocab qualification above is
-retained as the **baseline engineering measurement** against which the new
-protocol is qualified, and its repricing is explicitly **NOT** the final D1
-authorization price: the per-session envelope stays UNRESOLVED until Top-K is
-measured. K is a maintainer-selected protocol parameter and must never be tuned
-against D1/D2/D3 outcomes. Branch: `prep/d-series-topk-tail`.
+**THE TOP-K PROTOCOL IS ADOPTED ON MEASUREMENT, and formal D1 is still not
+authorized.** Maintainer decision **2026-10-04** replaced the D-series
+full-vocabulary KL contract with `reference_topk_tail_v1` at **K = 200** — a
+scientific protocol amendment. It is implemented in reusable core, every identity
+that must distinguish it moves, every historical full-vocabulary identity is
+byte-identical, and it is qualified on real GPU against the full-vocab baseline for
+`$1.5919` of an `$8.0000` ceiling across three subruns. Owner:
+[`topk-adoption/`](../stages/stage-1/phase_d1/validations/topk-adoption/).
+
+```text
+ZERO of 8 DEPTH decisions move; the removal orders are identical
+CE/NLL exact to 1.4e-07, top-1 bit-identical
+forward teacher KL moves 1.8e-03; the worst-domain identity agrees
+REVERSE KL moves -18.7% -- the one materially different metric
+reference state 16.91 GiB -> 144 MB (120x); reduction 1.59x faster
+state-eval only 5.7% faster and 2% MORE peak: the output head's O(V)
+  compute is NOT removed, and no O(K) claim is made
+```
+
+`K = 200` is maintainer-selected: no sweep was run and it must never be tuned
+against D1/D2/D3 results. The behavioural family does not move —
+`family_content_id 1e3445f1…74cd58` stands.
+
+**D1's claim boundary is narrower than it was.** The full-vocab qualification
+measured that the calibration batch size, not the position policy, moves three of
+four fixed-path selections. With this amendment D1 differs from the historical
+incumbent on three axes at once, so it is an optimization/challenger experiment
+against incumbent B and **not** a causal attribution to position weighting.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
@@ -3350,7 +3369,7 @@ these by hand; run the deriver.**
 | formal sessions | `$7.2431` of `$76.6523` |
 | GPU engineering | `$8.7137` of `$20.0000` |
 | package | `$15.9568` of `$96.6523` |
-| project cap | `$400.0481` spent of `$410.0000`, leaving `$9.9519` |
+| project cap | `$401.6400` spent of `$410.0000`, leaving `$8.3600` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 

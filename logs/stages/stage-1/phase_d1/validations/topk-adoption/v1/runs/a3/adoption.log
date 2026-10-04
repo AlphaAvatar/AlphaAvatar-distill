@@ -1,0 +1,23 @@
+[    0.000] environment start {}
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+[    1.818] environment ok {"seconds": 1.818}
+[    1.819] register_and_policy start {}
+[    1.854] register_and_policy ok {"seconds": 0.036}
+[    1.855] bind_full_vocab start {}
+[    1.897] bind_full_vocab ok {"seconds": 0.042}
+[    1.898] bind_reference_topk_tail start {}
+[    1.935] bind_reference_topk_tail ok {"seconds": 0.038}
+[    1.936] teacher_fetch_verify start {}
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 42202.75it/s]
+[   10.244] teacher_fetch_verify ok {"seconds": 8.309}
+[   10.246] D_state_eval_both_supports start {}
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 8369.18it/s]
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.22s/it]Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.22s/it]
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights: 100%|██████████| 398/398 [00:00<00:00, 7829.67it/s]
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]Loading weights: 100%|██████████| 310/310 [00:00<00:00, 9303.07it/s]
+[   59.635] state_eval.full_vocab_v1 ok {"seconds": 11.058, "peak_gib": 20.341, "protocol": "9383f8220535ce92"}
+[   70.140] state_eval.reference_topk_tail_v1 ok {"seconds": 10.422, "peak_gib": 20.492, "protocol": "70856044a8b25691"}
+[   70.840] D_state_eval_both_supports ok {"seconds": 60.594}
+
+wrote /workspace/out/adoption/adoption.json  status=COMPLETE
