@@ -244,6 +244,13 @@ def _load_suite(load_state_eval, repo: Path):
 
 # --- stages 4 and 6: the two fixed-path runs ------------------------------
 
+def _path_profiles():
+    """The fixed path's steps, so the registry check knows what to require."""
+    from experiments.phase_a3 import a3_session as A3S
+
+    return A3S.path_spec(workdir_device="cuda").steps
+
+
 def run_path(*, repo: Path, workdir: Path, arm: str, batch_size: int,
              policy_id: str, expected_final: str | None, teacher_path: str,
              journal: Journal, deadline=None) -> dict[str, Any]:
@@ -584,12 +591,39 @@ def main(argv: list[str] | None = None) -> int:
             from aadistill.initialization.adapters import (
                 register_builtin_adapters,
             )
+            from aadistill.initialization.calibration.profiles import (
+                registered_profiles,
+            )
+            from experiments.calibration import register_builtin_profiles
             from experiments.phase_c2.search_space import register_c2_operators
 
+            #: FOUR process-global registries, all empty in a fresh interpreter.
+            #: The CALIBRATION PROFILES were missing and subrun s1 paid $0.1098
+            #: to find out: adapters and operators were registered, the protocol
+            #: bound, and the fixed path then raised `no calibration profile
+            #: 'calib.domain_balanced@v1'; registered: []` six seconds in.
             register_builtin_adapters()
+            register_builtin_profiles()
             register_c2_operators()
             activation_importance.register()
-            st.result = {"registered": True}
+
+            profiles = registered_profiles()
+            #: ASSERTED, not assumed. The whole class of failure is a registry
+            #: that is empty when something reads it, so the stage that fills
+            #: them checks they are filled.
+            needed = {step.profile_id for step in _path_profiles()}
+            missing = sorted(needed - set(profiles))
+            if missing:
+                raise QualificationError(
+                    f"the fixed path needs calibration profiles {missing} and "
+                    f"the registry holds {sorted(profiles)}. Registering is "
+                    "explicit in this project; a missing one is a crash at the "
+                    "first operator, not at import.")
+            st.result = {"profiles": len(profiles), "operators_ok": True}
+            record["registries"] = {
+                "calibration_profiles": sorted(profiles),
+                "required_by_the_path": sorted(needed),
+            }
 
         if args.deadline_s:
             deadline = WallClockDeadline(args.deadline_s)
