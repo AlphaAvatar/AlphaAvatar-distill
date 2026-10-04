@@ -1,5 +1,84 @@
 # Budget decisions
 
+## 2026-10-03 — Allocation rule v2, and one authoritative eligible count
+
+The two cleanup steps the review required before materialization. `$0`, no
+battery built, nothing admitted.
+
+- **One authoritative eligible count per stratum.** The record carried two
+  machine-readable values called eligible: `eligible_rows.count` (463 / 5,433 /
+  4,670) and `against_the_family_shortfall.eligible_rows` (464 / 7,043 / 4,670),
+  the second with prose saying the problem-content key was still owed. The
+  duplicate is **removed**, not updated — that block now carries
+  `eligible_ref: "eligible_rows.count"` and derives `headroom` from the
+  authoritative count.
+
+  The regression is **path-based, not name-based**: a numeric eligible-ish field
+  is permitted at exactly `eligible_rows.count` and nowhere else. A whitelist of
+  the key *name* would have accepted the copy that caused this, since it was
+  called `eligible_rows` too. Mutation-verified by reintroducing a duplicate
+  under a different name.
+
+- **The record describes current state.** `proposed_source_decision` →
+  `source_decision`, marked DECIDED and IMPLEMENTED with the proposal reasoning
+  left in this file where it belongs. Removed from the owed list: the source
+  decision, the MATH pin, the problem-content key, the GSM training-content
+  repair, the download decision. What remains owed is the GSM8K renderer and the
+  materialization decision — and a `_what_is_no_longer_owed` field says which
+  items were closed, because a list that silently shrinks is hard to audit.
+
+  Also retired: the module docstring's claim that no candidate is called eligible
+  and the third source is not downloaded, and the trap saying the eligible chain
+  has not run.
+
+- **ALLOCATION RULE v2.** v1 bound two isolation coordinates and ranked on the
+  historical stable id. Both are now wrong: there are three coordinates, and new
+  D-series rows use a split-aware item identity — which is what the ranking
+  hashes, so it decides *which* rows are selected. Neither can be deferred to
+  `family_content_id`, because by materialization the selection has happened.
+
+  v2 binds: every role's rank domain and the base digest; the **ranking
+  stable-id semantics** (split-aware for new rows, unchanged for historical);
+  **three** isolation coordinates with the reserved populations including the
+  training corpus *by first user problem* and every prior D-series role; the
+  **frozen review** (602 excluded, 43 retained, pre-outcome); and the **source
+  policy** for all three strata with the excluded populations named.
+
+  ```text
+  v1  ced017a1f3f155ba5aaf383e61156c12   superseded, still recomputable
+  v2  <see battery_family.allocation_rule_id()>   live
+  ```
+
+  **v1 is not mutated.** Its shape is preserved by `allocation_rule_v1()` so a
+  reader holding the old id can recompute it. That nearly failed: factoring v1's
+  `distribution_identity` into a shared helper left a trailing comma, so the
+  helper returned a one-element **tuple** and v1's id moved to `8d266c70`. It was
+  caught only because `V1_RULE_ID_AS_COMMITTED` existed to compare against — a
+  function preserved for reproducibility with nothing pinning it is not
+  preserved. There is now a regression, plus a parametrized check that every
+  bound section moves the v2 hash when mutated.
+
+  What stays out of the rule: per-file **digests** and realized item lists, which
+  describe what was drawn rather than how. The line moved from v1 for a stated
+  reason — a source *policy* decides the candidate pool, so it belongs in the
+  rule; a file digest does not.
+
+- **The family record no longer calls the sources an open decision.** Its
+  `blocker` said "THREE strata cannot fund six roles". It now says capacity is
+  CLOSED, names the evidence record that owns the figures rather than copying
+  them, and states the two remaining non-capacity blockers. The per-stratum
+  shortfalls move to `shortfall_against_the_original_pins` — what they are now is
+  the history of a closed problem.
+
+- **GSM8K's 5,433 is conservative capacity evidence, not rendered membership.**
+  It was derived with the historical positional renderer participating, and the
+  D-series renderer will use the split-aware identity, so the false collisions
+  disappear and the realized pool may differ. Recorded as a trap in the evidence
+  record. A change there needs no new source decision.
+
+Validation: D-series 105 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change. No core full suite, no historical suites, no GPU.
+
 ## 2026-10-03 — The source decision implemented: all three strata have final capacity
 
 Maintainer source decision of 2026-10-03, implemented. **No battery

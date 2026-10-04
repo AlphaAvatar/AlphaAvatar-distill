@@ -10,19 +10,19 @@ candidates against what the repository has actually consumed, so the maintainer
 source decision rests on counts rather than on row totals quoted from a dataset
 card.
 
-**What it deliberately does NOT do.** It does not call any row *eligible*. The
-live exclusion chain compares a stable id and a **normalized rendered prompt**,
-exactly (`battery_render.norm` is whitespace-collapse plus lower-case). Running
-it is a separate step that happens after a source is pinned, and only its output
-is an eligible count. Everything here is either an upstream row count or a
-measured overlap, labelled as such.
+**Counts are reported at four named levels, and `eligible` means one of them.**
+Upstream rows; survivors of the historical chain; survivors of that plus the
+D-series pool/calibration isolation (`current_exact_chain_survivors`); and
+survivors of the **strengthened** contract, which adds canonical problem-content
+identity. Only the last is called eligible, at exactly one place per stratum —
+`eligible_rows.count`. The level below it is blind to recovery-training problem
+content, which is why it is not an eligible count.
 
-**It also does not download anything.** Two of the three candidates live in
-repositories already pinned at a frozen revision whose other files are already
-in the local hub cache, so their counts are measurable at `$0` offline. The
-third is a different repository, is not cached, and is reported as needing a
-pinning decision before it can be measured at all. A candidate nobody can
-measure yet is a finding, not a gap to paper over.
+**Two of the three sources were measurable offline** — already-pinned
+repositories whose other files were already in the local hub cache. The third,
+the canonical MATH test population, was pinned and fetched under the maintainer
+source decision of 2026-10-03: an immutable revision, test splits only, a SHA256
+per file.
 
 **Why the near-duplicate screen is here and labelled a screen.** The live chain
 is an exact comparison, so a restatement of a consumed problem passes it. For
@@ -498,8 +498,15 @@ def math_stratum() -> dict[str, Any]:
     short = _shortfall().get("math_verified")
     if short is not None:
         out["against_the_family_shortfall"] = {
-            "six_role_shortfall": short, "eligible_rows": kept,
-            "headroom": kept - short,
+            "six_role_shortfall": short,
+            #: A REFERENCE, not a copy. This block previously carried its own
+            #: numeric `eligible_rows`, which went stale the moment the
+            #: strengthened contract changed the authoritative count -- it read
+            #: 464/7043 against the real 463/5433, with prose saying the
+            #: problem-content key was still owed. Two machine-readable values
+            #: called eligible is one too many.
+            "eligible_ref": "eligible_rows.count",
+            "headroom": out["eligible_rows"]["count"] - short,
         }
     out["scope"] = (
         "a NEW D-series behavioural population. Historical C1/C2/C3/A3 scores "
@@ -582,10 +589,12 @@ def math_pinning_readiness() -> dict[str, Any]:
             "subjects": dict(sorted(subjects.items())),
             "levels": dict(sorted(levels.items())),
         },
-        "still_requires_a_download_decision": (
-            "row counts, overlap and the eligible count cannot be derived "
-            "offline. Pinning and fetching the candidate is a maintainer data "
-            "decision (AGENTS.md P15, 4.4) and nothing here presumes it."),
+        "_download_decision": (
+            "MADE and EXECUTED 2026-10-03. This block was written while the "
+            "candidate was unpinned, to show the pinning decision was not "
+            "blocked on a download for the part that did not need one. The "
+            "measured counts now live in `strata.math_verified`; this stays as "
+            "the parity baseline those counts were checked against."),
     }
 
 
@@ -1115,12 +1124,14 @@ def pinned_stratum(group: str) -> dict[str, Any]:
     if short is not None:
         out["against_the_family_shortfall"] = {
             "six_role_shortfall": short,
-            "eligible_rows": len(full_survivors),
-            "headroom": len(full_survivors) - short,
-            "_not_a_sufficiency_claim": (
-                "eligible under EXACT identity. The problem-content key is not "
-                "yet in the chain, and the pre-freeze duplicate review has not "
-                "run, so this headroom can only shrink."),
+            #: A REFERENCE, not a copy. This block previously carried its own
+            #: numeric `eligible_rows`, which went stale the moment the
+            #: strengthened contract changed the authoritative count -- it read
+            #: 464/7043 against the real 463/5433, with prose saying the
+            #: problem-content key was still owed. Two machine-readable values
+            #: called eligible is one too many.
+            "eligible_ref": "eligible_rows.count",
+            "headroom": out["eligible_rows"]["count"] - short,
         }
     return out
 
@@ -1281,140 +1292,82 @@ def report() -> dict[str, Any]:
                  "that `full` does not already contain.")},
             {"trap": "reading an upstream row total as capacity",
              "why_not": (
-                 "every count in this record is upstream-rows or "
-                 "measured-overlap. The eligible count is the output of the "
-                 "exclusion chain, which has not been run.")},
+                 "upstream rows, current-contract survivors and eligible rows "
+                 "are three different numbers and the record reports all three. "
+                 "`eligible_rows.count` is the strengthened chain's output and "
+                 "the only one that answers the capacity question.")},
+            {"trap": "reading GSM8K's eligible count as rendered membership",
+             "why_not": (
+                 "it was derived with the HISTORICAL positional renderer "
+                 "participating in the chain. The D-series renderer uses a "
+                 "split-aware identity, so the positional false collisions "
+                 "disappear and the realized pool may differ. 5,433 is "
+                 "conservative capacity evidence; realized membership is frozen "
+                 "when the renderer exists. A change there needs no new source "
+                 "decision.")},
         ],
-        "proposed_source_decision": {
+        "source_decision": {
             "_status": (
-                "A PROPOSAL recorded for maintainer decision, from the review of "
-                "2026-10-03. NOT a decision, NOT an authorization, and nothing "
-                "is pinned or materialized by it. Each entry states what would "
-                "be pinned and what must be built before it could be."),
+                "DECIDED by the maintainer on 2026-10-03 and IMPLEMENTED. This "
+                "is current state, not a proposal: the proposal language and the "
+                "reasoning that led to it live in logs/budget/decisions.md. It "
+                "still authorizes no battery and admits no row."),
             "code": {
-                "preferred": ("google-research-datasets/mbpp, the SAME pinned "
-                              "revision, full/train + full/validation + "
-                              "full/prompt"),
-                "second_dataset": (
-                    "NOT to be introduced unless the complete chain proves this "
-                    "source insufficient. Eligible under the chain as it is: "
-                    "see `eligible_rows`, against a shortfall of 321."),
-                "identity_requirements": [
-                    "preserve the native `task_id` as provenance / source "
-                    "identity",
-                    "do NOT label a non-test row `mbpp-test-*`",
-                    "use a split-aware D-series item id",
-                    "add a canonical hash of the BARE PROBLEM TEXT as an "
-                    "exclusion identity -- required by task 602 == task 217, "
-                    "which differ in `task_id` and in rendered tests and so "
-                    "pass both of the chain's current keys",
-                ],
-                "pre_freeze_review": (
-                    "the `bare_problem_screen.review_list` pairs, ruled on and "
-                    "frozen BEFORE any D1 outcome exists. The trigger threshold "
-                    "selects what is looked at and decides nothing."),
+                "source": ("google-research-datasets/mbpp, the already-pinned "
+                           "revision, full/train + full/validation + "
+                           "full/prompt"),
+                "second_dataset": "NOT introduced; this source is sufficient",
+                "identity": ("native task_id as provenance, split-aware D-series "
+                             "item id, canonical problem-content id"),
             },
             "gsm8k": {
-                "preferred": ("openai/gsm8k, the SAME pinned revision, "
-                              "main/train"),
-                "BLOCKED_ON": [
-                    "the positional renderer may NOT be reused: it collides "
-                    "with the consumed test split on every id it emits",
-                    "the training-corpus content gap -- see "
-                    "`training_corpus_content_gap`. The chain catches 0 of the "
-                    "rows that ARE in the recovery-training corpus, because it "
-                    "hashes joined non-assistant text and every session carries "
-                    "a system message. This stratum's extension IS the split "
-                    "the corpus drew from, so split separation no longer "
-                    "protects it.",
-                ],
-                "identity_requirements": [
-                    "historical test ids stay untouched",
-                    "new train rows get a split-aware identity, e.g. "
-                    "`gsm8k-main-train-00000`",
-                    "bind a canonical normalized-question hash SEPARATELY as "
-                    "the semantic exclusion identity -- the provenance "
-                    "coordinate and the problem-content coordinate must not be "
-                    "conflated",
-                ],
-                "not_capacity": "the `socratic` configuration",
-                "_the_count_is_preliminary": (
-                    "`eligible_rows` is eligible under the chain AS IT IS, and "
-                    "the chain is measurably blind to this stratum's training "
-                    "overlap. The usable figure is not known until the renderer "
-                    "is corrected and a content key is added."),
+                "source": ("openai/gsm8k, the already-pinned revision, "
+                           "main/train"),
+                "identity": ("split-aware D-series item id "
+                             "(gsm8k-main-train-NNNNN), canonical "
+                             "problem-content id as a SEPARATE coordinate"),
+                "socratic": "NOT used as capacity",
+                "REMAINING_BLOCKER": (
+                    "the split-aware RENDERER does not exist yet. The historical "
+                    "positional renderer may not be reused. Capacity is "
+                    "established; rendered membership is not."),
             },
             "math_verified": {
-                "preferred_population": (
-                    "the canonical Hendrycks MATH TEST split -- not MATH train, "
-                    "and not another rendering of MATH-500"),
-                "status": ("APPROVED AS A CANDIDATE TO PIN AND MEASURE, not as "
-                           "a materialized D-series source"),
-                "pin_requirements": [
-                    "an immutable revision of the canonical dataset "
-                    "corresponding to the upstream Hendrycks MATH release",
-                    "the exact test-file SHA256",
-                    "the licence and provenance record",
-                ],
-                "measure_after_pinning": [
-                    "actual test rows",
-                    "overlap with MATH-500's 500 rows",
-                    "overlap with every historical isolation role",
-                    "recovery-training overlap",
-                    "the eligible count the same exclusion contract would "
-                    "produce -- not known for this stratum until it runs",
-                    "subject/level distribution shift relative to the existing "
-                    "`math_verified` stratum",
-                    "renderer and scorer parity",
-                ],
-                "adapter_requirements": [
-                    "the upstream representation uses fields equivalent to "
-                    "`problem`, `level`, `type`, `solution`, so it is NOT "
-                    "directly compatible with `make_math_verified`, which reads "
-                    "`unique_id`, `subject`, `level`, `problem`, `answer`",
-                    "map `type` -> `subject`",
-                    "derive the final scored answer from `solution` under "
-                    "EXACTLY the correctness semantics the existing "
-                    "`math_verified` stratum uses",
-                    "parity must pass before the source can be accepted",
-                ],
-                "scope": (
-                    "a NEW D-series behavioural population. Historical "
-                    "C1/C2/C3/A3 scores are NOT imported into it."),
+                "source": ("the canonical Hendrycks MATH TEST population, "
+                           "PINNED AND FETCHED -- see `strata.math_verified.pin`"),
+                "train_split": "NOT used for this behavioural stratum",
+                "adapter": ("problem->problem, type->subject, level 'Level N'->N, "
+                            "solution->gold via boxed_answer; parity verified "
+                            "against the frozen stratum"),
+                "scope": ("a NEW behavioural population; historical C1/C2/C3/A3 "
+                          "scores are not imported or compared"),
             },
-            "duplicate_policy_this_round": {
-                "add": ("the exact PROBLEM-CONTENT identity described above, "
-                        "which is principled and decidable"),
-                "do_not_add": (
-                    "automatic exclusion above a similarity number. Fuzzy "
-                    "similarity stays a pre-freeze audit surface."),
-                "freeze": (
-                    "any semantic-duplicate exclusion list is frozen before "
-                    "outcomes and becomes part of the family content identity"),
-                "stop_condition": (
-                    "if the review shows the exact-problem key is materially "
-                    "insufficient, STOP and report rather than inventing a "
-                    "general semantic-dedup system"),
+            "duplicate_policy": {
+                "added": "the exact canonical problem-content identity",
+                "not_added": ("any automatic similarity cutoff. Fuzzy similarity "
+                              "remains a pre-freeze review surface."),
+                "frozen_review": ("MBPP 602 excluded as an exact duplicate of "
+                                  "consumed 217; the other 43 reviewed pairs "
+                                  "explicitly retained. Frozen before any D1 "
+                                  "outcome. Owner: identity.py"),
             },
         },
         "still_owed_before_any_materialization": [
-            "the maintainer source decision, per stratum",
-            "for `math_verified`: a revision pin, a per-file digest and a "
-            "licence/provenance record -- the chain has NOT been run against "
-            "it, and its output would be that stratum's first eligible count",
-            "an EXACT problem-content exclusion key added to the chain. The "
-            "`eligible_rows` counts here are eligible under the chain AS IT IS, "
-            "and the chain cannot see a restated problem",
-            "for `gsm8k`: the training-corpus content gap must be closed before "
-            "the train split can be used at all -- the chain catches 0 of the "
-            "rows that are literally in the recovery-training corpus",
-            "a split-aware id scheme wherever `renderer_blockers` is non-empty, "
-            "with provenance and problem-content kept as SEPARATE coordinates",
-            "a pre-freeze review list of the high-Jaccard bare-problem "
-            "candidates, decided and frozen BEFORE any D1 outcome exists",
-            "renderer and scorer parity against the existing stratum, "
-            "re-checked after any id, field or adapter change",
+            "the GSM8K split-aware RENDERER, and renderer/scorer parity for it. "
+            "Until it exists the 5,433 figure is conservative capacity evidence "
+            "and not final rendered membership",
+            "the explicit maintainer MATERIALIZATION decision for the six-role "
+            "family",
         ],
+        "_what_is_no_longer_owed": (
+            "the source decision (made and implemented 2026-10-03), the MATH pin "
+            "and fetch (done -- immutable revision, per-file SHA256, test only), "
+            "the canonical problem-content key (implemented in identity.py and "
+            "load-bearing in every count above), the GSM8K training-content "
+            "repair (0 recovery-training rows survive), and the duplicate review "
+            "(frozen before any outcome). Each was listed here while open; "
+            "leaving them would make the record describe a state it is no longer "
+            "in."),
         "_authorizes": "nothing",
     }
 

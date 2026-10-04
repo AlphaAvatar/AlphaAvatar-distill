@@ -160,7 +160,7 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "next": "the MAINTAINER CAPACITY DECISION: all three strata now have final strengthened-chain capacity and MATH is pinned/verified, so the question is whether the six-role family is materialized. gsm8k needs its split-aware renderer first. Owner: logs/budget/decisions.md 2026-10-03.",
+ "next": "MATERIALIZE the six-role family on a fresh branch: implement the D-series renderer, re-derive pools under it, build all six roles in the frozen order, derive family_content_id, prove pairwise disjointness. $0 data work. Order: logs/budget/decisions.md 2026-10-03.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -204,7 +204,7 @@
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
-  "family_and_sources": "d_series_behavioural_v1: six roles, DESIGNED / NOT MATERIALIZED. Sources DECIDED; eligible capacity measured under a STRENGTHENED chain (historical contract + problem-content identity, the historical chain unmodified) and ALL THREE STRATA CLEAR their shortfall. MATH pinned at EleutherAI/hendrycks_math@21a5633873b6, mit, test only. gsm8k still BLOCKED on its positional renderer.",
+  "family_and_sources": "d_series_behavioural_v1, allocation rule v2 (supersedes v1 ced017a1, still recomputable): binds the split-aware ranking identity, THREE isolation coordinates, the frozen duplicate review and the source policy. CAPACITY CLOSED, all three strata clear. MATH pinned at EleutherAI/hendrycks_math@21a5633873b6, mit, test only. NOT MATERIALIZED; gsm8k's split-aware renderer is the remaining blocker.",
   "blockers": "EVIDENCE: CLOSED -- capacity clears for all three strata. Remaining: gsm8k's split-aware renderer, and the materialization decision. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of; no allowance at any price and no measurement closes it. PER-SESSION ENVELOPE: UNRESOLVED, provisional $31.1577 vs $30.00, NOT a measured excess.",
   "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent funding figure and the envelope compatibility. It CANNOT settle the funding authorization -- that is a scope fact, not a price.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",

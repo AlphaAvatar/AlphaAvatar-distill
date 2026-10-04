@@ -49,49 +49,79 @@ class TestTheRecordClaimsNothingItHasNotMeasured:
         assert "AUTHORIZES NOTHING" in record["_contract"]
         assert "MATERIALIZES NOTHING" in record["_contract"]
 
-    def test_only_the_strengthened_output_is_named_eligible(self, record):
-        """Structural, not a prose keyword scan.
+    def test_exactly_one_authoritative_eligible_count_per_stratum(self, record):
+        """ONE numeric eligible count per stratum, at `eligible_rows.count`.
 
-        An earlier version scanned every string for the word and needed a new
-        exemption each time the record legitimately explained its own
-        terminology — a guard that gets widened on every run stops guarding. What
-        actually matters is narrower and checkable: no COUNT may be carried by a
-        field named `eligible` except the strengthened chain's output, and the
-        level below it must say in words that it is not one.
+        Not a whitelist of the key NAME: `against_the_family_shortfall` used to
+        carry its own numeric `eligible_rows`, and a name-based allowance would
+        have accepted it. It read 464/7043 against the authoritative 463/5433,
+        with prose saying the problem-content key was still owed — a second
+        machine-readable value that went stale the moment the real one moved.
+
+        So the check counts numeric eligible-ish fields by PATH and requires the
+        path to be exactly `eligible_rows.count`. A copy anywhere else fails,
+        whatever it is called.
         """
-        allowed_count_fields = {"eligible_rows"}
-
-        def count_fields_named_eligible(node, path=""):
+        def numeric_eligible_paths(node, path=""):
             found = []
             if isinstance(node, dict):
                 for key, value in node.items():
                     here = f"{path}.{key}" if path else key
-                    if "eligible" in key.lower() and isinstance(
-                            value, (int, float)) and not isinstance(value, bool):
-                        if key not in allowed_count_fields and \
-                                path.split(".")[-1] not in allowed_count_fields:
-                            found.append(here)
-                    found += count_fields_named_eligible(value, here)
+                    if isinstance(value, (int, float)) and not isinstance(
+                            value, bool) and "eligible" in here.lower():
+                        found.append(here)
+                    found += numeric_eligible_paths(value, here)
             elif isinstance(node, list):
                 for i, v in enumerate(node):
-                    found += count_fields_named_eligible(v, f"{path}[{i}]")
+                    found += numeric_eligible_paths(v, f"{path}[{i}]")
             return found
-
-        offenders = count_fields_named_eligible(record)
-        assert not offenders, (
-            f"these counts are named eligible but are not the strengthened "
-            f"chain's output: {offenders}")
 
         for name, s in record["strata"].items():
             if "eligible_rows" not in s:
                 continue
+            paths = numeric_eligible_paths(s)
+            assert paths == ["eligible_rows.count"], (
+                f"{name}: expected exactly one authoritative eligible count at "
+                f"eligible_rows.count, found {paths}")
+
+            #: and it IS the strengthened output, not a coincidence
             assert s["eligible_rows"]["count"] == s[
                 "strengthened_contract"]["survivors"], name
             assert "strengthened chain" in s["eligible_rows"][
                 "_this_is_the_eligible_count"], name
-            #: and the level below must disclaim the word explicitly
             assert "NOT an eligible count" in s[
                 "current_exact_chain_survivors"]["_what_this_is_NOT"], name
+
+    def test_the_shortfall_block_references_rather_than_copies(self, record):
+        """`headroom` must be derived from the authoritative count."""
+        for name, s in record["strata"].items():
+            block = s.get("against_the_family_shortfall")
+            if not block:
+                continue
+            assert block["eligible_ref"] == "eligible_rows.count", name
+            assert "eligible_rows" not in block or not isinstance(
+                block.get("eligible_rows"), (int, float)), name
+            assert (block["headroom"]
+                    == s["eligible_rows"]["count"] - block["six_role_shortfall"]), name
+
+    def test_the_record_describes_current_state_not_a_proposal(self, record):
+        """The decision was made and implemented; a live object that still calls
+        it proposed, or still owes what has been done, is describing a state the
+        repository is no longer in."""
+        assert "proposed_source_decision" not in record
+        decided = record["source_decision"]
+        assert "DECIDED" in decided["_status"] and "IMPLEMENTED" in decided["_status"]
+
+        owed = " ".join(record["still_owed_before_any_materialization"]).lower()
+        for closed in ("source decision", "math pin", "problem-content key",
+                       "exclusion chain, run against the pinned candidate"):
+            assert closed not in owed, f"{closed!r} is listed as owed but is done"
+        assert "renderer" in owed and "materialization decision" in owed
+        assert "_what_is_no_longer_owed" in record
+
+        #: the pinning block must not still ask for a download decision
+        assert "still_requires_a_download_decision" not in record[
+            "math_pinning_readiness"]
 
     def test_the_four_levels_are_reported_separately(self, record):
         """upstream -> baseline survivors -> D-series survivors -> eligible.
@@ -348,56 +378,48 @@ class TestTheTrainingCorpusContentGap:
                     "first user turn")
 
 
-class TestTheProposalIsAProposal:
-    """It records intent for a maintainer decision and claims no authority."""
+class TestTheDecisionIsRecordedAsDecided:
+    """It WAS a proposal; it is now made and implemented.
 
-    def test_it_is_labelled_a_proposal_and_authorizes_nothing(self, record):
-        prop = record["proposed_source_decision"]
-        assert "A PROPOSAL" in prop["_status"]
-        assert "NOT a decision" in prop["_status"]
-        assert "nothing is pinned or materialized" in prop["_status"].lower()
+    This class replaces `TestTheProposalIsAProposal`, which asserted the
+    pre-decision state -- that MATH was "a candidate to pin, not a source", that
+    the gsm8k count was "preliminary" because the proposal had not been accepted.
+    Those assertions were correct and are now false, and a test that pins a
+    superseded state is a test that must be edited to tell the truth.
+    """
 
-    def test_gsm8k_carries_both_of_its_blockers(self, record):
-        """The renderer AND the training-corpus gap. Either alone stops it, and
-        the second was only found by getting chain parity right."""
-        blocked = " ".join(record["proposed_source_decision"]["gsm8k"]["BLOCKED_ON"])
-        assert "positional renderer" in blocked
-        assert "training-corpus content gap" in blocked
-        assert "catches 0" in blocked
+    def test_the_sources_are_recorded_as_decided(self, record):
+        d = record["source_decision"]
+        assert "mbpp" in d["code"]["source"]
+        assert "main/train" in d["gsm8k"]["source"]
+        assert "PINNED AND FETCHED" in d["math_verified"]["source"]
 
-    def test_gsm8k_count_is_marked_preliminary(self, record):
-        g = record["proposed_source_decision"]["gsm8k"]
-        assert "preliminary" in g["_the_count_is_preliminary"].lower() or \
-            "not known" in g["_the_count_is_preliminary"]
+    def test_gsm8k_still_carries_its_remaining_blocker(self, record):
+        """Decided is not usable: the renderer is still missing, and the
+        distinction between capacity and rendered membership is the point."""
+        blocker = record["source_decision"]["gsm8k"]["REMAINING_BLOCKER"]
+        assert "RENDERER" in blocker
+        assert "not be reused" in blocker
+        assert "Capacity is established" in blocker
+        #: and the trap list says the same thing where a reader meets the number
+        traps = {t["trap"]: t["why_not"] for t in record["traps"]}
+        key = next(k for k in traps if "rendered membership" in k)
+        assert "conservative capacity evidence" in traps[key]
+        assert "no new source decision" in traps[key]
 
-    def test_math_is_a_candidate_to_pin_not_a_source(self, record):
-        m = record["proposed_source_decision"]["math_verified"]
-        assert "CANDIDATE TO PIN" in m["status"]
-        assert "not as a materialized" in m["status"]
-        assert "TEST split" in m["preferred_population"]
-        assert "not MATH train" in m["preferred_population"]
-        #: the adapter is not pretended to be compatible
-        adapter = " ".join(m["adapter_requirements"])
-        assert "NOT directly compatible" in adapter
-        assert "type` -> `subject" in adapter
-        assert "NOT imported" in m["scope"]
+    def test_math_is_recorded_as_a_pinned_source_now(self, record):
+        m = record["source_decision"]["math_verified"]
+        assert "PINNED AND FETCHED" in m["source"]
+        assert "NOT used" in m["train_split"]
+        assert "level 'Level N'->N" in m["adapter"]
+        assert "not imported" in m["scope"]
 
-    def test_the_duplicate_policy_adds_an_exact_key_and_no_threshold(self, record):
-        pol = record["proposed_source_decision"]["duplicate_policy_this_round"]
-        assert "exact PROBLEM-CONTENT identity" in pol["add"]
-        assert "automatic exclusion above a similarity number" in pol["do_not_add"]
-        assert "STOP and report" in pol["stop_condition"]
-
-    def test_the_review_list_is_a_surface_not_a_threshold(self, record):
-        rl = record["strata"]["code"]["bare_problem_screen"]["review_list"]
-        assert rl["n_to_review"] > 0
-        assert rl["identical_problem_text"] >= 1
-        assert "NOT an equivalence criterion" in rl["_what"]
-        assert "BEFORE any D1 outcome" in rl["_when"]
-        #: each pair is readable: both problems and both native ids
-        for e in rl["pairs"]:
-            assert e["candidate_problem"] and e["consumed_problem"]
-            assert e["candidate_task_id"] != e["resembles_consumed_task_id"]
+    def test_the_duplicate_policy_is_an_exact_key_and_a_frozen_review(self, record):
+        pol = record["source_decision"]["duplicate_policy"]
+        assert "exact canonical problem-content identity" in pol["added"]
+        assert "automatic similarity cutoff" in pol["not_added"]
+        assert "602" in pol["frozen_review"] and "43" in pol["frozen_review"]
+        assert "before any D1 outcome" in pol["frozen_review"]
 
 
 @requires_the_sources
@@ -423,10 +445,14 @@ class TestTheMathPinningReadiness:
             record["math_pinning_readiness"]["parity_baseline"]["rows"])
         assert len(base["subjects"]) >= 5
 
-    def test_it_does_not_presume_the_download(self, record):
+    def test_the_readiness_block_is_now_the_parity_baseline(self, record):
+        """It existed to show the pinning decision was not blocked on a download
+        for the part that did not need one. The download has happened, so what it
+        keeps is the baseline the measured counts were checked against."""
         m = record["math_pinning_readiness"]
-        assert "maintainer data decision" in m["still_requires_a_download_decision"]
-        assert "cannot be derived" in m["still_requires_a_download_decision"]
+        assert "still_requires_a_download_decision" not in m
+        assert "MADE and EXECUTED" in m["_download_decision"]
+        assert m["answer_derivation_rule"]["status"].startswith("VERIFIED")
 
     def test_the_unique_id_gap_is_named(self, record):
         mapping = record["math_pinning_readiness"]["field_mapping_required"]

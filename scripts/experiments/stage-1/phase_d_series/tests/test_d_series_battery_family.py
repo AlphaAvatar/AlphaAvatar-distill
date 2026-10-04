@@ -95,14 +95,22 @@ class TestDisjointnessIsNotAssumed:
         assert any("c1_confirmation_v1" in b
                    for b in family.HELD_OUT_BATTERIES)
 
-    def test_both_identity_kinds_are_required(self):
-        """Either alone is insufficient — ids miss one question entering the
-        pool twice, content hashes miss a paraphrase under one id."""
+    def test_all_three_identity_kinds_are_required(self):
+        """Two was insufficient, and this test said two.
+
+        v1 bound a stable id and a rendered-prompt hash. The 2026-10-03 source
+        round measured what they miss: MBPP full/train 602 is the same problem as
+        consumed full/test 217 and differs in both, and the historical chain's
+        training-corpus hash catches 0 of the 1,708 GSM8K train rows in the
+        corpus. The third coordinate is canonical problem content.
+        """
         chain = family.exclusion_chain()
-        assert len(chain["identity_kinds"]) == 2
+        assert len(chain["identity_kinds"]) == 3
         kinds = " ".join(chain["identity_kinds"]).lower()
-        assert "id" in kinds and "normalized prompt content" in kinds
-        assert "insufficient" in chain["both_required"]
+        assert "native/source identity" in kinds
+        assert "rendered-prompt exact identity" in kinds
+        assert "problem-content identity" in kinds
+        assert "misses" in chain["all_three_required"]
 
 
 class TestItIsFrozenProspectively:
@@ -139,22 +147,45 @@ class TestItIsFrozenProspectively:
         assert report["family_content_id"] is None
         assert "fabricated" in report["_family_content_id_is_null"]
 
-    def test_the_rule_excludes_the_things_it_cannot_know_yet(self):
-        """No repository, revision or digest appears in the rule. If one did,
-        the rule could not be frozen until the sources were decided — which is
-        the decision this round explicitly does not take."""
+    def test_the_rule_excludes_only_what_it_cannot_know_yet(self):
+        """The line moved, for a stated reason.
+
+        v1 kept every source name out of the rule because the sources were an
+        open decision. They are now DECIDED, and which population a stratum
+        draws from determines its candidate pool — so it decides which rows can
+        win the ranking, and it belongs in the prospective rule.
+
+        What still may not appear: the per-file DIGESTS and the realized item
+        lists. Those describe what was drawn rather than how, and binding them
+        would make the rule unfreezable until materialization.
+        """
         rule = family.allocation_rule()
         rendered = json.dumps(rule)
-        for forbidden in ("repo_id", "revision", "parquet", "huggingface",
-                          "hendrycks", "openai/", "google-research"):
+        #: a source POLICY is in; a per-file digest or a realized item is not
+        assert "source_policy" in rule
+        for forbidden in ("parquet", "sha256_of_file", "realized_items",
+                          "item_list"):
             assert forbidden not in rendered.lower(), forbidden
+        #: and a 64-hex file digest must not have crept in anywhere
+        import re as _re
+        assert not _re.search(r"\b[0-9a-f]{64}\b", rendered), (
+            "a file digest is in the rule; digests belong to family_content_id")
         #: `sha256` DOES appear — in the order formula, which is the mechanism
         #: and not a pin. The distinction is the point: the rule may describe
         #: how it will hash, and may not name what it will hash over.
         assert "sha256" in rule["selection"]["order"].lower()
-        assert "sources" not in rule
-        assert "source pins" in rule["what_is_NOT_in_this_rule"]
-        assert "unfreezable" in rule["what_is_NOT_in_this_rule"]
+        #: v1 said "source pins" were out. v2 keeps the per-file DIGESTS out and
+        #: the POLICY in, which is the correction.
+        assert "DIGESTS" in rule["what_is_NOT_in_this_rule"]
+        assert "realized item lists" in rule["what_is_NOT_in_this_rule"]
+        #: the REASON, not a phrase. v1 said "unfreezable"; v2 says the excluded
+        #: things describe what was drawn rather than how. Pinning the wording
+        #: makes a test fail on a rewrite that improved it.
+        excluded_why = rule["what_is_NOT_in_this_rule"]
+        assert "family_content_id" in excluded_why
+        assert "what was drawn rather than how" in excluded_why
+        assert "source pins" not in excluded_why, (
+            "the sources are decided; calling their pins unknowable is stale")
 
     def test_there_is_no_outcome_dependence_and_it_says_so(self):
         selection = family.allocation_rule()["selection"]
@@ -242,11 +273,23 @@ class TestTheRequirementNobodyHadComputed:
         assert "six roles" in why
         assert report["capacity_record"]["batteries_remaining_for_one"] == 0
 
-    def test_the_blocker_names_all_three_shortfalls(self):
-        blocker = family.report()["blocker"]
+    def test_the_blocker_is_no_longer_about_capacity(self):
+        """It was "THREE strata cannot fund six roles". The source decision
+        closed that, so a blocker still naming it would be describing a state the
+        repository has left -- and the per-stratum shortfalls move to their own
+        field, because what they are now is the history of a closed problem."""
+        report = family.report()
+        blocker = report["blocker"]
+        assert "CAPACITY IS CLOSED" in blocker
+        assert "RENDERER" in blocker and "MATERIALIZATION" in blocker
+        assert "No row is drawn" in blocker
+        #: the shortfalls are kept, where they belong
+        short = report["shortfall_against_the_original_pins"]
         for stratum in ("math_verified", "code", "gsm8k"):
-            assert stratum in blocker
-        assert "maintainer decision" in blocker
+            assert stratum in short
+        #: and the record that owns the eligible figures is named rather than
+        #: the figures being copied here
+        assert "source_evidence.json" in blocker
 
 
 class TestTheSourceOptionsArePinnedToNothing:
@@ -326,3 +369,91 @@ class TestZeroRolesAreFundableToday:
         """The design is a deliverable on its own: the rule is frozen, the
         requirement is derived, and the gap is named — with nothing drawn."""
         assert family.report()[key]
+
+
+class TestTheAllocationRuleVersioning:
+    """v2 binds what decides selection; v1 stays recomputable."""
+
+    def test_v1_still_reproduces_its_committed_id(self):
+        """The one thing a prospective freeze cannot survive is a committed hash
+        quietly meaning something else.
+
+        This caught a real regression: factoring v1's `distribution_identity`
+        into a shared helper left a trailing comma, so the helper returned a
+        one-element TUPLE and v1's id moved from `ced017a1` to `8d266c70`. The
+        shape looked right in every other respect.
+        """
+        assert family.allocation_rule_id_of(family.allocation_rule_v1()) == \
+            family.V1_RULE_ID_AS_COMMITTED
+
+    def test_v2_is_the_live_rule_and_differs_from_v1(self):
+        rule = family.allocation_rule()
+        assert rule["allocation_rule_version"] == 2
+        assert family.allocation_rule_id() != family.V1_RULE_ID_AS_COMMITTED
+        assert rule["_supersedes"]["version"] == 1
+        assert rule["_supersedes"]["id"] == family.V1_RULE_ID_AS_COMMITTED
+        assert "insufficient" in rule["_supersedes"]["why"]
+
+    def test_the_ranking_identity_semantics_are_bound(self):
+        """Changing the id scheme changes the order and therefore the selection,
+        so it cannot be deferred to materialization."""
+        sel = family.allocation_rule()["selection"]
+        sem = sel["ranking_stable_id_semantics"]
+        assert "SPLIT-AWARE" in sem["for_new_d_series_rows"]
+        assert "d_series_item_id" in sem["for_new_d_series_rows"]
+        assert "unchanged" in sem["for_historical_rows"]
+        assert "POSITION" in sem["_why_the_historical_scheme_cannot_be_reused"]
+        #: and every role's rank domain is in the rule
+        assert set(sel["rank_domains"]) == {r[0] for r in family.ROLES}
+
+    def test_all_three_isolation_coordinates_are_bound(self):
+        ex = family.allocation_rule()["exclusion"]
+        assert len(ex["identity_kinds"]) == 3
+        joined = " ".join(ex["identity_kinds"]).lower()
+        assert "native/source identity" in joined
+        assert "rendered-prompt exact identity" in joined
+        assert "problem-content identity" in joined
+        assert "all_three_required" in ex
+        assert "0 of the 1,708" in ex["all_three_required"]
+        #: prior roles and the training corpus by FIRST USER PROBLEM
+        reserved = " ".join(ex["reserved_populations_for_problem_content"])
+        assert "FIRST USER PROBLEM" in reserved
+        assert "prior D-series role" in reserved
+        assert "not a repair of the historical function" in ex[
+            "historical_chain_is_unmodified"]
+
+    def test_the_frozen_review_is_bound_into_the_rule(self):
+        rv = family.allocation_rule()["review"]
+        assert rv["provenance"]["retained"] == 43
+        assert rv["exclusions"]["code"][0]["native_task_id"] == 602
+        assert "RETAINED by decision" in rv["retained_explicitly"]
+        assert "excluded nothing by itself" in rv["threshold_role"]
+
+    def test_the_source_policy_is_bound_into_the_rule(self):
+        sp = family.allocation_rule()["source_policy"]
+        assert "full/train" in sp["code"] and "full/validation" in sp["code"]
+        assert "main/train" in sp["gsm8k"]
+        assert "TEST splits only" in sp["math_verified"]
+        excluded = " ".join(sp["excluded_populations"])
+        for name in ("socratic", "sanitized", "MATH train", "second code"):
+            assert name in excluded
+        assert "DECIDED and IMPLEMENTED" in sp["status"]
+
+    def test_the_rule_no_longer_calls_the_sources_an_open_decision(self):
+        rule = family.allocation_rule()
+        assert "open maintainer decision" not in rule["what_is_NOT_in_this_rule"]
+        assert "DIGESTS" in rule["what_is_NOT_in_this_rule"]
+
+    @pytest.mark.parametrize("mutate", [
+        lambda r: r["selection"]["ranking_stable_id_semantics"].__setitem__(
+            "for_new_d_series_rows", "historical ids"),
+        lambda r: r["exclusion"]["identity_kinds"].pop(),
+        lambda r: r["review"]["provenance"].__setitem__("retained", 0),
+        lambda r: r["source_policy"].__setitem__("gsm8k", "socratic"),
+    ])
+    def test_every_bound_section_moves_the_rule_id(self, mutate):
+        """If a section can change without moving the hash, it is not bound."""
+        rule = family.allocation_rule()
+        before = family.allocation_rule_id_of(rule)
+        mutate(rule)
+        assert family.allocation_rule_id_of(rule) != before
