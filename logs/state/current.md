@@ -9,20 +9,46 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**A GPU IS BILLING.** The D1 engineering GPU qualification is executing on a
-secure **L40S at the live `$1.09/h`**, authorized by the maintainer on
-2026-10-03 as an **ENGINEERING qualification and explicitly NOT formal D1
-authorization**. Three subruns so far; the campaign ledger at
+**Nothing is running and nothing is billing.** All five D1-qualification pods are
+provider-confirmed gone and an account-wide re-query returns **0 pods and 0
+network volumes**.
+
+**The D1 engineering GPU qualification is COMPLETE.** Authorized by the
+maintainer on 2026-10-03 as an **ENGINEERING qualification and explicitly NOT
+formal D1 authorization**; it closed no blocker and funded nothing. Its subruns,
+every one of them paid, ran on a secure **L40S at the live `$1.09/h`** for
+`$3.2258` of an `$8.0000` ceiling. The campaign ledger at
 [`gpu-qualification/v1/campaign.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json)
-owns every dollar and recomputes its total from components.
+owns every dollar and recomputes its total from components; the verdict and every
+answer's provenance live in
+[`gpu-qualification/v1/closeout.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json).
 
 ```text
-s1   $0.1098   FAILED  the calibration-profile registry was empty -- the
-                       driver filled three of FOUR process-global registries
-s2   $0.9006   FAILED  arm A PASSED its hard gate; arm B hit A3's
+s1   $0.1098   FAILED  the calibration-profile registry was empty -- three of
+                       FOUR process-global registries were filled
+s2   $0.9006   PARTIAL arm A passed its hard gate; arm B hit A3's
                        pre-ATTENTION pin, which was doing its job
-s3   running           three arms, with the pin, evidence and confound fixed
+s3   $1.6808   PARTIAL all three arms; stage D lost to a signature contract
+s4   $0.0632   FAILED  UnboundLocalError 15 s in, from an edit's ordering
+s5   $0.4714   PARTIAL arm A again, and stage D MEASURED
 ```
+
+**No single subrun is complete and the closeout says so.** Every answer is from a
+real paid measurement and names the subruns that produced it. The incumbent
+reconstruction agreed across **three independent pods** on
+`53e30566c5f795f1` — that agreement is the cross-environment determinism
+evidence, and the aggregation refuses to write a closeout if the digests
+disagree.
+
+What it found, each owned by the closeout rather than restated here: the
+incumbent path rebuilds the frozen incumbent on real CUDA; the target-aware path
+executes at `bsz=3`; **the calibration batch size, not the position policy,
+moves three of four operator selections**, attributed by an arm that holds the
+policy and moves only the batch size; batching costs **×1.97** on the dominant
+DEPTH operator at all positions but only **×1.08** at the target-aware policy,
+which very nearly cancels it; and the derived logit bound holds for what it
+claims while understating the reduction's transients by **4.13×** at `bsz=1` and
+**1.99×** at `bsz=3`.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
@@ -57,12 +83,13 @@ ENVELOPE   OPEN and UNRESOLVED. The SEARCH session's provisional $31.1577 is
            qualification's timing is for.
 ```
 
-**The owed GPU qualification is what is running.** The per-expansion minutes
-were measured unbatched; D1 runs batched, in a direction nothing had measured.
-Until it completes, the dollar figures size a grant request rather than price
-one. Its status is DERIVED from
-[`gpu-qualification/v1/closeout.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/)
-— absent means not yet complete, and the design moves with the file.
+**The owed GPU qualification has RUN, and the design derives that** from
+`gpu-qualification/v1/closeout.json` rather than carrying a sentence —
+`gpu_validation_owed.status` reads `RUN -- PASSED` and still says it authorizes
+nothing. The direction D1's design called UNKNOWN is now measured, so the chain
+figures rest on measurement rather than on an unbatched table; they are still
+PROVISIONAL until a maintainer prices them, and the funding and envelope
+blockers are untouched by the spend.
 
 Start at [`d1_design.json`](../stages/stage-1/phase_d1/plans/d1_design.json),
 which owns every D1 figure and its claim boundary;
@@ -3311,9 +3338,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$7.2431` of `$76.6523` |
-| GPU engineering | `$11.9395` of `$20.0000` |
-| package | `$19.1826` of `$96.6523` |
-| project cap | `$396.8223` spent of `$410.0000`, leaving `$13.1777` |
+| GPU engineering | `$8.7137` of `$20.0000` |
+| package | `$15.9568` of `$96.6523` |
+| project cap | `$400.0481` spent of `$410.0000`, leaving `$9.9519` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 
