@@ -3,9 +3,115 @@
  "_contract": "Evidence for the maintainer source decision. AUTHORIZES NOTHING and MATERIALIZES NOTHING. No row here is called eligible: the live exclusion chain has not been run against any candidate, and only its output is an eligible count. $0, offline, no download.",
  "_stage1_provenance_meaning": "the Stage-1 calibration and state-evaluation items of these strata carry token ids rather than text, so they cannot be compared by content. Every one is traceable into `corpus_v2`, so excluding the training corpus already excludes them and the chain has one fewer independent population than its documentation suggests.",
  "chain_gap": {
+  "SECOND_GAP_FOUND_BY_CHAIN_PARITY": "getting parity right revealed a larger hole than the one above. The chain hashes each training session's non-assistant messages JOINED, and every session carries a system message, so that hash can never equal a bare rendered question: the joined-hash set and the first-user-turn-hash set are measurably DISJOINT. For a new upstream source there are no corpus `source_id`s either, so the training-corpus protection is INERT. It caught 0 of the 1,708 gsm8k train rows that are literally in the corpus. See `strata.gsm8k.training_corpus_content_gap`.",
+  "_how_the_first_version_of_this_record_got_it_backwards": "it compared each session's FIRST USER TURN, which is not what the chain does, and so reported 1,708 exclusions the chain would not make -- a remainder of 5,765 against the chain's actual 7,043. A non-parity measurement was accidentally stricter than the contract it claimed to describe, which hid the defect instead of finding it.",
   "_what": "the live chain isolates on a stable id AND a normalized rendered prompt, compared EXACTLY. It has no near-duplicate stage.",
-  "consequence": "cross-split expansion of a stratum needs a problem-text key added to the chain, or an explicit review of the screen's high-Jaccard candidates. Which, and at what threshold, is a maintainer decision -- a threshold invented here would be a guess wearing a number.",
+  "_why_the_second_gap_never_bit": "the corpus drew each stratum from one split and every historical battery drew from another, so split separation did the protecting and the inert hash was never load-bearing. NO historical battery is contaminated -- measured, not assumed. The gsm8k extension is the first case that would rely on the hash, because it extends INTO the corpus's own split.",
+  "consequence": "cross-split expansion of a stratum needs an exact problem-content key added to the chain, plus a pre-freeze review of the high-Jaccard pairs. The threshold selects what is reviewed and decides nothing -- one invented here would be a guess wearing a number.",
   "demonstrated": "MBPP `full/train` task 602 is the same problem as the already-consumed `full/test` task 217. Different `task_id` and different test asserts, so the rendered id and the rendered prompt both differ: the duplicate passes the chain. Found by the screen, not by the chain."
+ },
+ "math_pinning_readiness": {
+  "_what": "measurable readiness for the MATH pinning decision, derived from the ALREADY PINNED MATH-500 without downloading the candidate",
+  "answer_derivation_rule": {
+   "_why_this_settles_the_adapter": "upstream carries `solution` and no `answer`, so the adapter must derive the gold. This rule reproduces the existing stratum's gold field exactly on every pinned row, so applying it upstream is the SAME correctness semantics rather than a new one introduced with a new source. Verified at $0, before any download.",
+   "reproduces_the_pinned_gold_answer": "500/500",
+   "rule": "aadistill.data.verify.boxed_answer(solution)",
+   "status": "VERIFIED against the existing stratum"
+  },
+  "distribution_baseline": {
+   "_what": "the existing stratum's subject and level distribution. The owed shift measurement compares the pinned candidate against THIS, and it is recorded now so the comparison has a baseline that predates the decision.",
+   "levels": {
+    "1": 43,
+    "2": 90,
+    "3": 105,
+    "4": 128,
+    "5": 134
+   },
+   "subjects": {
+    "Algebra": 124,
+    "Counting & Probability": 38,
+    "Geometry": 41,
+    "Intermediate Algebra": 97,
+    "Number Theory": 62,
+    "Prealgebra": 82,
+    "Precalculus": 56
+   }
+  },
+  "field_mapping_required": {
+   "_unique_id": "the existing renderer builds `math500-<unique_id>`, and upstream has no `unique_id`. A split-aware D-series id is required, with the problem-content hash as a SEPARATE coordinate -- the same separation the other two strata owe.",
+   "upstream_to_existing": {
+    "level": "level",
+    "problem": "problem",
+    "solution": "answer (via the derivation rule above)",
+    "type": "subject"
+   }
+  },
+  "parity_baseline": {
+   "file": "test.jsonl",
+   "repo_id": "HuggingFaceH4/MATH-500",
+   "revision": "6e4ed1a2a79af7d8630a6b768ec859cb5af4d3be",
+   "rows": 500
+  },
+  "still_requires_a_download_decision": "row counts, overlap and the eligible count cannot be derived offline. Pinning and fetching the candidate is a maintainer data decision (AGENTS.md P15, 4.4) and nothing here presumes it."
+ },
+ "proposed_source_decision": {
+  "_status": "A PROPOSAL recorded for maintainer decision, from the review of 2026-10-03. NOT a decision, NOT an authorization, and nothing is pinned or materialized by it. Each entry states what would be pinned and what must be built before it could be.",
+  "code": {
+   "identity_requirements": [
+    "preserve the native `task_id` as provenance / source identity",
+    "do NOT label a non-test row `mbpp-test-*`",
+    "use a split-aware D-series item id",
+    "add a canonical hash of the BARE PROBLEM TEXT as an exclusion identity -- required by task 602 == task 217, which differ in `task_id` and in rendered tests and so pass both of the chain's current keys"
+   ],
+   "pre_freeze_review": "the `bare_problem_screen.review_list` pairs, ruled on and frozen BEFORE any D1 outcome exists. The trigger threshold selects what is looked at and decides nothing.",
+   "preferred": "google-research-datasets/mbpp, the SAME pinned revision, full/train + full/validation + full/prompt",
+   "second_dataset": "NOT to be introduced unless the complete chain proves this source insufficient. Eligible under the chain as it is: see `eligible_rows`, against a shortfall of 321."
+  },
+  "duplicate_policy_this_round": {
+   "add": "the exact PROBLEM-CONTENT identity described above, which is principled and decidable",
+   "do_not_add": "automatic exclusion above a similarity number. Fuzzy similarity stays a pre-freeze audit surface.",
+   "freeze": "any semantic-duplicate exclusion list is frozen before outcomes and becomes part of the family content identity",
+   "stop_condition": "if the review shows the exact-problem key is materially insufficient, STOP and report rather than inventing a general semantic-dedup system"
+  },
+  "gsm8k": {
+   "BLOCKED_ON": [
+    "the positional renderer may NOT be reused: it collides with the consumed test split on every id it emits",
+    "the training-corpus content gap -- see `training_corpus_content_gap`. The chain catches 0 of the rows that ARE in the recovery-training corpus, because it hashes joined non-assistant text and every session carries a system message. This stratum's extension IS the split the corpus drew from, so split separation no longer protects it."
+   ],
+   "_the_count_is_preliminary": "`eligible_rows` is eligible under the chain AS IT IS, and the chain is measurably blind to this stratum's training overlap. The usable figure is not known until the renderer is corrected and a content key is added.",
+   "identity_requirements": [
+    "historical test ids stay untouched",
+    "new train rows get a split-aware identity, e.g. `gsm8k-main-train-00000`",
+    "bind a canonical normalized-question hash SEPARATELY as the semantic exclusion identity -- the provenance coordinate and the problem-content coordinate must not be conflated"
+   ],
+   "not_capacity": "the `socratic` configuration",
+   "preferred": "openai/gsm8k, the SAME pinned revision, main/train"
+  },
+  "math_verified": {
+   "adapter_requirements": [
+    "the upstream representation uses fields equivalent to `problem`, `level`, `type`, `solution`, so it is NOT directly compatible with `make_math_verified`, which reads `unique_id`, `subject`, `level`, `problem`, `answer`",
+    "map `type` -> `subject`",
+    "derive the final scored answer from `solution` under EXACTLY the correctness semantics the existing `math_verified` stratum uses",
+    "parity must pass before the source can be accepted"
+   ],
+   "measure_after_pinning": [
+    "actual test rows",
+    "overlap with MATH-500's 500 rows",
+    "overlap with every historical isolation role",
+    "recovery-training overlap",
+    "the eligible count the same exclusion contract would produce -- not known for this stratum until it runs",
+    "subject/level distribution shift relative to the existing `math_verified` stratum",
+    "renderer and scorer parity"
+   ],
+   "pin_requirements": [
+    "an immutable revision of the canonical dataset corresponding to the upstream Hendrycks MATH release",
+    "the exact test-file SHA256",
+    "the licence and provenance record"
+   ],
+   "preferred_population": "the canonical Hendrycks MATH TEST split -- not MATH train, and not another rendering of MATH-500",
+   "scope": "a NEW D-series behavioural population. Historical C1/C2/C3/A3 scores are NOT imported into it.",
+   "status": "APPROVED AS A CANDIDATE TO PIN AND MEASURE, not as a materialized D-series source"
+  }
  },
  "renderer_blockers": {
   "gsm8k": "1319 rendered ids collide with the pinned file and 0 of them are the same prompt. The existing renderer CANNOT be used on this candidate: every colliding id would name a different problem than the already-consumed row holding that id, and ids are what the exclusion chain, the frozen batteries and every score record key on. A split-aware id scheme is required, and changing an id scheme is a data decision rather than a refactor."
@@ -33,19 +139,20 @@
  "status": "EVIDENCE ONLY -- no source pinned, no battery materialized",
  "still_owed_before_any_materialization": [
   "the maintainer source decision, per stratum",
-  "a revision pin and per-file digest for anything newly pinned",
-  "the live exclusion/contamination chain, run against the pinned candidate -- its output is the first eligible count",
-  "a maintainer ruling on near-duplicate handling and its threshold",
-  "a split-aware id scheme wherever `renderer_blockers` is non-empty",
-  "renderer parity against the existing stratum, re-checked after any id or field change"
+  "for `math_verified`: a revision pin, a per-file digest and a licence/provenance record -- the chain has NOT been run against it, and its output would be that stratum's first eligible count",
+  "an EXACT problem-content exclusion key added to the chain. The `eligible_rows` counts here are eligible under the chain AS IT IS, and the chain cannot see a restated problem",
+  "for `gsm8k`: the training-corpus content gap must be closed before the train split can be used at all -- the chain catches 0 of the rows that are literally in the recovery-training corpus",
+  "a split-aware id scheme wherever `renderer_blockers` is non-empty, with provenance and problem-content kept as SEPARATE coordinates",
+  "a pre-freeze review list of the high-Jaccard bare-problem candidates, decided and frozen BEFORE any D1 outcome exists",
+  "renderer and scorer parity against the existing stratum, re-checked after any id, field or adapter change"
  ],
  "strata": {
   "code": {
    "_why_that_matters": "licence, redistribution terms and the revision pin are INHERITED. No new data decision is needed about provenance -- only about whether a different split of the same release is an acceptable population for this stratum.",
    "against_the_family_shortfall": {
-    "_not_a_sufficiency_claim": "the remainder is measured under exact matching only. Whether it covers the shortfall depends on the full chain, which has not run, and on how many near-duplicates are rejected.",
-    "headroom": 153,
-    "remaining_after_exact_exclusions": 474,
+    "_not_a_sufficiency_claim": "eligible under EXACT identity. The problem-content key is not yet in the chain, and the pre-freeze duplicate review has not run, so this headroom can only shrink.",
+    "eligible_rows": 464,
+    "headroom": 143,
     "six_role_shortfall": 321
    },
    "bare_problem_screen": {
@@ -62,40 +169,452 @@
     "compared": 473,
     "exact_matches": 1,
     "highest": 0.9091,
+    "review_list": {
+     "_what": "candidates at Jaccard >= 0.8 against a consumed problem. A REVIEW SURFACE: each pair needs a human ruling before the source is frozen, and the decisions become part of the family's content identity. The threshold is the review trigger and is NOT an equivalence criterion -- nothing here is excluded by it.",
+     "_when": "frozen BEFORE any D1 outcome exists, so a later result cannot have informed which duplicates were dropped",
+     "_why_this_is_one_more_than_the_band_above": "`at_or_above['0.8']` excludes exact matches -- `near_duplicate_screen` counts those separately as `exact_matches`, because a Jaccard of 1.0 is a different finding from a near miss. The review list includes them: an identical problem is the first thing a reviewer must see.",
+     "identical_problem_text": 1,
+     "n_to_review": 44,
+     "pairs": [
+      {
+       "candidate_problem": "Write a python function to find the first repeated character in a given string.",
+       "candidate_task_id": 602,
+       "consumed_problem": "Write a python function to find the first repeated character in a given string.",
+       "identical_problem_text": true,
+       "jaccard": 1.0,
+       "resembles_consumed_task_id": 217
+      },
+      {
+       "candidate_problem": "Write a function to find the lateral surface area of a cone.",
+       "candidate_task_id": 731,
+       "consumed_problem": "Write a function to find the surface area of a cone.",
+       "identical_problem_text": false,
+       "jaccard": 0.9091,
+       "resembles_consumed_task_id": 497
+      },
+      {
+       "candidate_problem": "Write a python function to check whether the given number can be represented by sum of two squares or not.",
+       "candidate_task_id": 683,
+       "consumed_problem": "Write a python function to check whether the given number can be represented by product of two squares or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.9048,
+       "resembles_consumed_task_id": 188
+      },
+      {
+       "candidate_problem": "Write a function to find number of even elements in the given list using lambda function.",
+       "candidate_task_id": 697,
+       "consumed_problem": "Write a function to find number of odd elements in the given list using lambda function.",
+       "identical_problem_text": false,
+       "jaccard": 0.8824,
+       "resembles_consumed_task_id": 258
+      },
+      {
+       "candidate_problem": "Write a python function to find the minimum difference between any two elements in a given array.",
+       "candidate_task_id": 763,
+       "consumed_problem": "Write a python function to find the maximum difference between any two elements in a given array.",
+       "identical_problem_text": false,
+       "jaccard": 0.8824,
+       "resembles_consumed_task_id": 145
+      },
+      {
+       "candidate_problem": "Write a function to find the product of first even and odd number of a given list.",
+       "candidate_task_id": 784,
+       "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 38
+      },
+      {
+       "candidate_problem": "Write a python function to find the last position of an element in a sorted array.",
+       "candidate_task_id": 793,
+       "consumed_problem": "Write a python function to find the first position of an element in a sorted array.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 195
+      },
+      {
+       "candidate_problem": "Write a python function to find the first odd number in a given list of numbers.",
+       "candidate_task_id": 807,
+       "consumed_problem": "Write a python function to find the first even number in a given list of numbers.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 221
+      },
+      {
+       "candidate_problem": "Write a python function to find the cube sum of first n odd natural numbers.",
+       "candidate_task_id": 837,
+       "consumed_problem": "Write a python function to find the cube sum of first n even natural numbers.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 420
+      },
+      {
+       "candidate_problem": "Write a function to find the sum of first even and odd number of a given list.",
+       "candidate_task_id": 881,
+       "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 38
+      },
+      {
+       "candidate_problem": "Write a function to find the difference of first even and odd number of a given list.",
+       "candidate_task_id": 594,
+       "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 38
+      },
+      {
+       "candidate_problem": "Write a python function to find the sum of non-repeated elements in a given array.",
+       "candidate_task_id": 777,
+       "consumed_problem": "Write a python function to find the product of non-repeated elements in a given array.",
+       "identical_problem_text": false,
+       "jaccard": 0.8667,
+       "resembles_consumed_task_id": 25
+      },
+      {
+       "candidate_problem": "Write a function to find the ration of negative numbers in an array of integers.",
+       "candidate_task_id": 530,
+       "consumed_problem": "Write a function to find the ration of positive numbers in an array of integers.",
+       "identical_problem_text": false,
+       "jaccard": 0.8667,
+       "resembles_consumed_task_id": 442
+      },
+      {
+       "candidate_problem": "Write a function to find squares of individual elements in a list using lambda function.",
+       "candidate_task_id": 8,
+       "consumed_problem": "Write a function to find cubes of individual elements in a list using lambda function.",
+       "identical_problem_text": false,
+       "jaccard": 0.8667,
+       "resembles_consumed_task_id": 447
+      },
+      {
+       "candidate_problem": "Write a python function to count the number of digits in factorial of a given number.",
+       "candidate_task_id": 845,
+       "consumed_problem": "Write a python function to count the number of digits of a given number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 365
+      },
+      {
+       "candidate_problem": "Write a function to find the minimum total path sum in the given triangle.",
+       "candidate_task_id": 974,
+       "consumed_problem": "Write a function to find the maximum total path sum in the given triangle.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 147
+      },
+      {
+       "candidate_problem": "Write a function to print check if the triangle is scalene or not.",
+       "candidate_task_id": 521,
+       "consumed_problem": "Write a function to print check if the triangle is equilateral or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 51
+      },
+      {
+       "candidate_problem": "Write a python function to find the first repeated word in a given string.",
+       "candidate_task_id": 537,
+       "consumed_problem": "Write a python function to find the first repeated character in a given string.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 217
+      },
+      {
+       "candidate_problem": "Write a function to find if the given number is abundant or not.",
+       "candidate_task_id": 541,
+       "consumed_problem": "Write a function to find if the given number is a keith number or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 179
+      },
+      {
+       "candidate_problem": "Write a function to divide two lists using map and lambda function.",
+       "candidate_task_id": 618,
+       "consumed_problem": "Write a function to substaract two lists using map and lambda function.",
+       "identical_problem_text": false,
+       "jaccard": 0.8462,
+       "resembles_consumed_task_id": 282
+      },
+      {
+       "candidate_problem": "Write a function to multiply two lists using map and lambda function.",
+       "candidate_task_id": 682,
+       "consumed_problem": "Write a function to substaract two lists using map and lambda function.",
+       "identical_problem_text": false,
+       "jaccard": 0.8462,
+       "resembles_consumed_task_id": 282
+      },
+      {
+       "candidate_problem": "Write a function to add two lists using map and lambda function.",
+       "candidate_task_id": 729,
+       "consumed_problem": "Write a function to substaract two lists using map and lambda function.",
+       "identical_problem_text": false,
+       "jaccard": 0.8462,
+       "resembles_consumed_task_id": 282
+      },
+      {
+       "candidate_problem": "Write a function to find the list of lists with minimum length.",
+       "candidate_task_id": 528,
+       "consumed_problem": "Write a function to find the list of lists with maximum length.",
+       "identical_problem_text": false,
+       "jaccard": 0.8462,
+       "resembles_consumed_task_id": 290
+      },
+      {
+       "candidate_problem": "Write a python function to set the right most unset bit.",
+       "candidate_task_id": 671,
+       "consumed_problem": "Write a python function to set the left most unset bit.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 311
+      },
+      {
+       "candidate_problem": "Write a python function to check whether all the bits are within a given range or not.",
+       "candidate_task_id": 884,
+       "consumed_problem": "Write a python function to check whether all the bits are unset in the given range or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 228
+      },
+      {
+       "candidate_problem": "Write a python function to find the length of the shortest word.",
+       "candidate_task_id": 947,
+       "consumed_problem": "Write a python function to find the length of the longest word.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 90
+      },
+      {
+       "candidate_problem": "Write a function to sort a list of elements using radix sort.",
+       "candidate_task_id": 516,
+       "consumed_problem": "Write a function to sort a list of elements using comb sort.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 71
+      },
+      {
+       "candidate_problem": "Write a python function to find the maximum length of sublist.",
+       "candidate_task_id": 562,
+       "consumed_problem": "Write a python function to find the minimum length of sublist.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 95
+      },
+      {
+       "candidate_problem": "Write a python function to find the sum of fourth power of first n even natural numbers.",
+       "candidate_task_id": 634,
+       "consumed_problem": "Write a python function to find the cube sum of first n even natural numbers.",
+       "identical_problem_text": false,
+       "jaccard": 0.8235,
+       "resembles_consumed_task_id": 420
+      },
+      {
+       "candidate_problem": "Write a function to calculate the perimeter of a regular polygon.",
+       "candidate_task_id": 789,
+       "consumed_problem": "Write a function to calculate the area of a regular polygon.",
+       "identical_problem_text": false,
+       "jaccard": 0.8182,
+       "resembles_consumed_task_id": 163
+      },
+      {
+       "candidate_problem": "Write a function to find the surface area of a cylinder.",
+       "candidate_task_id": 574,
+       "consumed_problem": "Write a function to find the surface area of a cuboid.",
+       "identical_problem_text": false,
+       "jaccard": 0.8182,
+       "resembles_consumed_task_id": 379
+      },
+      {
+       "candidate_problem": "Write a python function to check whether the given number is a perfect square or not.",
+       "candidate_task_id": 803,
+       "consumed_problem": "Write a python function to check whether the given number is co-prime or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8125,
+       "resembles_consumed_task_id": 151
+      },
+      {
+       "candidate_problem": "Write a function to find the nth nonagonal number.",
+       "candidate_task_id": 641,
+       "consumed_problem": "Write a function to find the nth hexagonal number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 135
+      },
+      {
+       "candidate_problem": "Write a function to split a string at uppercase letters.",
+       "candidate_task_id": 647,
+       "consumed_problem": "Write a function to split a string at lowercase letters.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 15
+      },
+      {
+       "candidate_problem": "Write a function to find the perimeter of a rectangle.",
+       "candidate_task_id": 654,
+       "consumed_problem": "Write a function to find the area of a rectangle.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 458
+      },
+      {
+       "candidate_problem": "Write a function to find maximum of three numbers.",
+       "candidate_task_id": 672,
+       "consumed_problem": "Write a function to find minimum of three numbers.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 227
+      },
+      {
+       "candidate_problem": "Write a function to find the perimeter of a rombus.",
+       "candidate_task_id": 716,
+       "consumed_problem": "Write a function to find the perimeter of a square.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 17
+      },
+      {
+       "candidate_problem": "Write a function to find the nth jacobsthal number.",
+       "candidate_task_id": 752,
+       "consumed_problem": "Write a function to find the nth hexagonal number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 135
+      },
+      {
+       "candidate_problem": "Write a function to find the area of a rombus.",
+       "candidate_task_id": 814,
+       "consumed_problem": "Write a function to find the area of a rectangle.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 458
+      },
+      {
+       "candidate_problem": "Write a function to find the area of a trapezium.",
+       "candidate_task_id": 848,
+       "consumed_problem": "Write a function to find the area of a rectangle.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 458
+      },
+      {
+       "candidate_problem": "Write a function to find the nth delannoy number.",
+       "candidate_task_id": 934,
+       "consumed_problem": "Write a function to find the nth hexagonal number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 135
+      },
+      {
+       "candidate_problem": "Write a function to find minimum of two numbers.",
+       "candidate_task_id": 970,
+       "consumed_problem": "Write a function to find minimum of three numbers.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 227
+      },
+      {
+       "candidate_problem": "Write a function to find the nth jacobsthal-lucas number.",
+       "candidate_task_id": 529,
+       "consumed_problem": "Write a function to find the nth hexagonal number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 135
+      },
+      {
+       "candidate_problem": "Write a function to check whether the given number is armstrong or not.",
+       "candidate_task_id": 598,
+       "consumed_problem": "Write a python function to check whether the given number is co-prime or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 151
+      }
+     ]
+    },
     "with_any_neighbour": 437
+   },
+   "baseline_chain": {
+    "_survivors_label": "EXACT BASELINE-CHAIN SURVIVORS. Not yet eligible: the D-series owes further isolation below.",
+    "_what": "the LIVE C1 exclusion chain, by calling `build_c1_confirmation_battery.excluded_identities` -- not a reimplementation",
+    "exclude_ids": 11922,
+    "exclude_prompt_hashes": 11983,
+    "populations": {
+     "final_promotion": {
+      "asset": "artifacts/eval/battery_v2",
+      "n_prompts": 770,
+      "note": "read for exclusion only; not sampled from, remains unconsumed"
+     },
+     "initializer_state_eval": {
+      "asset": "artifacts/stage1/state_eval_v1",
+      "excluded_source_ids": 80,
+      "n_items": 80
+     },
+     "operator_calibration": {
+      "asset": "artifacts/stage1/e8_calibration_v1",
+      "excluded_source_ids": 51,
+      "n_items": 67
+     },
+     "recovery_search": {
+      "asset": "artifacts/stage3/recovery_search_v2",
+      "n_prompts": 190,
+      "note": "historical/development evidence; excluded from C1 confirmation"
+     },
+     "recovery_training": {
+      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "distinct_source_ids": 10831,
+      "n_sessions": 11174,
+      "note": "the whole recovery corpus, not just the 0.86M rung"
+     }
+    },
+    "survivors": 464
    },
    "candidate_files": [
     "full/train-00000-of-00001.parquet",
     "full/validation-00000-of-00001.parquet",
     "full/prompt-00000-of-00001.parquet"
    ],
-   "exclusion_measurement": {
-    "_label": "overlap under the LIVE chain's comparison -- `norm`, exact. Not an eligible count.",
-    "candidate_distinct_normalized": 474,
-    "consumed_distinct_normalized": 220,
-    "consumed_pools": {
-     "c1_confirmation_v1": 100,
-     "c2_screening_v1": 100,
-     "recovery_search_v2": 20
+   "d_series_isolation": {
+    "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
+    "_what": "what the D-series owes beyond the baseline chain, applied by the same `rank_take` predicate",
+    "additional_exclude_ids": 439,
+    "additional_exclude_prompt_hashes": 200,
+    "populations": {
+     "c1_confirmation_v1": {
+      "n_items": 100,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "c2_screening_v1": {
+      "n_items": 100,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "prior_d_series_roles": {
+      "n_roles": 0,
+      "note": "none allocated: the family is DESIGNED and NOT MATERIALIZED. Each role freezes into this list as it is drawn, so round n+1 isolates against rounds 1..n."
+     },
+     "reasoning_heavy_v2": {
+      "excluded_source_ids": 39,
+      "n_items": 62,
+      "note": "the second calibration mixture D1's scoring policy is measured over; items carry token ids, so only source_ids can be excluded"
+     }
     },
-    "duplicates_within_candidates": 0,
-    "overlap_consumed_pools": 0,
-    "overlap_training_corpus": 0,
-    "remaining_after_exact_exclusions": 474,
-    "training_corpus_distinct_normalized": 10128
+    "removed_beyond_baseline": 0,
+    "survivors": 464
+   },
+   "eligible_rows": {
+    "_this_is_the_eligible_count": "the output of the complete live chain -- baseline plus D-series isolation -- applied by the builder's own `rank_take`. This is the ONLY number in this record that may be called eligible, and it is eligible under EXACT identity only: the problem-content key and the pre-freeze duplicate review below are still owed.",
+    "count": 464
    },
    "near_duplicate_screen": {
     "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
     "_what": "max token-set Jaccard of each non-exact candidate against any reserved prompt, via a rare-token index",
     "at_or_above": {
-     "0.5": 350,
-     "0.7": 159,
-     "0.8": 28,
+     "0.5": 325,
+     "0.7": 80,
+     "0.8": 6,
      "0.9": 0
     },
     "compared": 474,
     "exact_matches": 0,
-    "highest": 0.8696,
+    "highest": 0.8333,
     "with_any_neighbour": 378
    },
    "pinned_file_in_use": "full/test-00000-of-00001.parquet",
@@ -125,6 +644,17 @@
    },
    "same_repository_and_revision": true,
    "snapshot_cached": true,
+   "training_corpus_content_gap": {
+    "IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT": 0,
+    "_verdict": "no training-corpus content overlap in this candidate set",
+    "_what": "whether the chain's training-corpus content exclusion can see a candidate that IS in the training corpus",
+    "_why_it_never_bit_historically": "the corpus drew this stratum from one split and every historical battery drew from another, so split separation protected them and this hash was never load-bearing. An extension INTO the corpus's own split removes that protection.",
+    "candidates_caught_by_the_chain": 0,
+    "candidates_present_as_a_corpus_first_user_turn": 0,
+    "first_user_turn_hashes": 10128,
+    "joined_hashes": 11024,
+    "the_two_sets_overlap_by": 0
+   },
    "upstream_identity": {
     "repo_id": "google-research-datasets/mbpp",
     "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
@@ -143,42 +673,93 @@
   "gsm8k": {
    "_why_that_matters": "licence, redistribution terms and the revision pin are INHERITED. No new data decision is needed about provenance -- only about whether a different split of the same release is an acceptable population for this stratum.",
    "against_the_family_shortfall": {
-    "_not_a_sufficiency_claim": "the remainder is measured under exact matching only. Whether it covers the shortfall depends on the full chain, which has not run, and on how many near-duplicates are rejected.",
-    "headroom": 5754,
-    "remaining_after_exact_exclusions": 5765,
+    "_not_a_sufficiency_claim": "eligible under EXACT identity. The problem-content key is not yet in the chain, and the pre-freeze duplicate review has not run, so this headroom can only shrink.",
+    "eligible_rows": 7043,
+    "headroom": 7032,
     "six_role_shortfall": 11
+   },
+   "baseline_chain": {
+    "_survivors_label": "EXACT BASELINE-CHAIN SURVIVORS. Not yet eligible: the D-series owes further isolation below.",
+    "_what": "the LIVE C1 exclusion chain, by calling `build_c1_confirmation_battery.excluded_identities` -- not a reimplementation",
+    "exclude_ids": 11922,
+    "exclude_prompt_hashes": 11983,
+    "populations": {
+     "final_promotion": {
+      "asset": "artifacts/eval/battery_v2",
+      "n_prompts": 770,
+      "note": "read for exclusion only; not sampled from, remains unconsumed"
+     },
+     "initializer_state_eval": {
+      "asset": "artifacts/stage1/state_eval_v1",
+      "excluded_source_ids": 80,
+      "n_items": 80
+     },
+     "operator_calibration": {
+      "asset": "artifacts/stage1/e8_calibration_v1",
+      "excluded_source_ids": 51,
+      "n_items": 67
+     },
+     "recovery_search": {
+      "asset": "artifacts/stage3/recovery_search_v2",
+      "n_prompts": 190,
+      "note": "historical/development evidence; excluded from C1 confirmation"
+     },
+     "recovery_training": {
+      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "distinct_source_ids": 10831,
+      "n_sessions": 11174,
+      "note": "the whole recovery corpus, not just the 0.86M rung"
+     }
+    },
+    "survivors": 7343
    },
    "candidate_files": [
     "main/train-00000-of-00001.parquet"
    ],
-   "exclusion_measurement": {
-    "_label": "overlap under the LIVE chain's comparison -- `norm`, exact. Not an eligible count.",
-    "candidate_distinct_normalized": 7473,
-    "consumed_distinct_normalized": 330,
-    "consumed_pools": {
-     "c1_confirmation_v1": 150,
-     "c2_screening_v1": 150,
-     "recovery_search_v2": 30
+   "d_series_isolation": {
+    "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
+    "_what": "what the D-series owes beyond the baseline chain, applied by the same `rank_take` predicate",
+    "additional_exclude_ids": 339,
+    "additional_exclude_prompt_hashes": 300,
+    "populations": {
+     "c1_confirmation_v1": {
+      "n_items": 150,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "c2_screening_v1": {
+      "n_items": 150,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "prior_d_series_roles": {
+      "n_roles": 0,
+      "note": "none allocated: the family is DESIGNED and NOT MATERIALIZED. Each role freezes into this list as it is drawn, so round n+1 isolates against rounds 1..n."
+     },
+     "reasoning_heavy_v2": {
+      "excluded_source_ids": 39,
+      "n_items": 62,
+      "note": "the second calibration mixture D1's scoring policy is measured over; items carry token ids, so only source_ids can be excluded"
+     }
     },
-    "duplicates_within_candidates": 0,
-    "overlap_consumed_pools": 0,
-    "overlap_training_corpus": 1708,
-    "remaining_after_exact_exclusions": 5765,
-    "training_corpus_distinct_normalized": 10128
+    "removed_beyond_baseline": 300,
+    "survivors": 7043
+   },
+   "eligible_rows": {
+    "_this_is_the_eligible_count": "the output of the complete live chain -- baseline plus D-series isolation -- applied by the builder's own `rank_take`. This is the ONLY number in this record that may be called eligible, and it is eligible under EXACT identity only: the problem-content key and the pre-freeze duplicate review below are still owed.",
+    "count": 7043
    },
    "near_duplicate_screen": {
     "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
     "_what": "max token-set Jaccard of each non-exact candidate against any reserved prompt, via a rare-token index",
     "at_or_above": {
-     "0.5": 24,
-     "0.7": 4,
-     "0.8": 0,
-     "0.9": 0
+     "0.5": 1726,
+     "0.7": 1707,
+     "0.8": 1640,
+     "0.9": 597
     },
-    "compared": 5765,
-    "exact_matches": 1708,
-    "highest": 0.7879,
-    "with_any_neighbour": 4726
+    "compared": 7473,
+    "exact_matches": 0,
+    "highest": 0.9651,
+    "with_any_neighbour": 6483
    },
    "pinned_file_in_use": "main/test-00000-of-00001.parquet",
    "renderer": {
@@ -204,6 +785,17 @@
    },
    "same_repository_and_revision": true,
    "snapshot_cached": true,
+   "training_corpus_content_gap": {
+    "IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT": 1708,
+    "_verdict": "INERT for bare-prompt candidates",
+    "_what": "whether the chain's training-corpus content exclusion can see a candidate that IS in the training corpus",
+    "_why_it_never_bit_historically": "the corpus drew this stratum from one split and every historical battery drew from another, so split separation protected them and this hash was never load-bearing. An extension INTO the corpus's own split removes that protection.",
+    "candidates_caught_by_the_chain": 0,
+    "candidates_present_as_a_corpus_first_user_turn": 1708,
+    "first_user_turn_hashes": 10128,
+    "joined_hashes": 11024,
+    "the_two_sets_overlap_by": 0
+   },
    "upstream_identity": {
     "repo_id": "openai/gsm8k",
     "revision": "740312add88f781978c0658806c59bc2815b9866"

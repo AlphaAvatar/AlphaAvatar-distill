@@ -204,7 +204,7 @@
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
-  "family_and_sources": "d_series_behavioural_v1: six roles, rule frozen before any outcome, DESIGNED / NOT MATERIALIZED. Source evidence MEASURED $0 offline, NOTHING PINNED: gsm8k train is a RENDERER BLOCKER (1319 positional-id collisions), the exclusion chain has no near-duplicate stage (MBPP 602 == consumed 217 passes it), full MATH is not cached so not measurable. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,source_evidence}.json.",
+  "family_and_sources": "d_series_behavioural_v1: six roles, DESIGNED / NOT MATERIALIZED. Source evidence measured $0 offline under the IMPORTED live chain (parity: the frozen C1 battery re-derives exactly). NOTHING PINNED. gsm8k train is BLOCKED TWICE: positional-id collisions, and the chain's training-corpus content exclusion is INERT. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,source_evidence}.json.",
   "blockers": "EVIDENCE (definite): no fresh battery exists. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of -- no allowance at any price, and no measurement closes it; only a maintainer funding-scope decision. PER-SESSION ENVELOPE: compatibility UNRESOLVED and therefore blocking -- provisional $31.1577 vs $30.00, NOT a measured excess.",
   "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent funding figure and the envelope compatibility. It CANNOT settle the funding authorization -- that is a scope fact, not a price.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
@@ -213,10 +213,10 @@
  },
  "test_suites": {
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (this branch). No skip depends on historical evidence.",
+  "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (the D1 source lineage). No skip depends on historical evidence.",
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
-  "next_work": "a FRESH branch from main. The D1 identity round was squashed in from review/d1-identity-correction (base 06cab9c8, tree 909d1c8b); that branch is no longer an ancestor of main."
+  "next_work": "prep/d-series-sources, cut from main aac482d5. The D1 round was squashed in from review/d1-identity-correction (tip ccf1c1c4, whose tree is main's); that branch is no longer an ancestor of main."
  },
  "phase_b_result": {
   "status": "RESOLVED",

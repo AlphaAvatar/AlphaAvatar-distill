@@ -1,5 +1,93 @@
 # Budget decisions
 
+## 2026-10-03 — Chain parity, and the gap it found that a wrong measurement hid
+
+A `$0` evidence-parity correction on review. Still **nothing pinned, nothing
+materialized**. The previous round's capacity figures were not measured under the
+live contract, so they were not capacity figures.
+
+- **The chain is now IMPORTED, not reproduced.** `source_evidence.py` calls
+  `build_c1_confirmation_battery.excluded_identities` and applies it with the
+  same `rank_take` the builder uses, so what is excluded and how — FINAL_PROMOTION
+  by id and prompt hash, recovery search by id *and* `source_key`, the whole
+  training corpus by `source_id` plus a hash of every session's non-assistant
+  messages **joined**, and the two Stage-1 assets by `source_id` — is the
+  builder's definition. The first version omitted FINAL_PROMOTION entirely and
+  hashed only each session's **first user turn**.
+
+  **Parity is demonstrated, not asserted.** Re-deriving the frozen
+  `c1_confirmation_v1` from the pinned sources with the imported chain reproduces
+  its committed membership **exactly** — 150/150 gsm8k and 100/100 code.
+  Membership, not order: the committed file is id-sorted while `rank_take`
+  returns rank order, and asserting order would have pinned a serialization
+  detail. Mutation-verified: pointing the battery input at a missing path breaks
+  the re-derivation.
+
+- **The four levels are now separate**, because collapsing them is how a
+  baseline-only remainder became "capacity":
+
+  | stratum | upstream | baseline survivors | + D-series isolation | eligible (exact identity) | 6-role short |
+  | --- | --- | --- | --- | --- | --- |
+  | `code` | 474 | 464 | 464 | **464** | 321 |
+  | `gsm8k` | 7,473 | 7,343 | 7,043 | **7,043** | 11 |
+  | `math_verified` | — | — | — | not measurable | 830 |
+
+  Only the last column is called eligible, and only under the chain **as it is**.
+
+- **A SECOND, larger gap, found only by getting parity right.** The chain hashes
+  each training session's non-assistant messages **joined**, and every one of the
+  11,174 sessions carries a system message — so that hash can never equal a bare
+  rendered question. Measured: the joined-hash set and the first-user-turn-hash
+  set are **disjoint**. For a new upstream source there are no corpus
+  `source_id`s either, so the training-corpus protection is **INERT**: it catches
+  **0 of the 1,708** gsm8k train rows that are literally in the recovery-training
+  corpus.
+
+  **No historical battery is contaminated** — measured, not assumed: 0 of 1,319
+  gsm8k test rows and 0 items in any committed pool appear as a corpus first
+  turn. The corpus drew gsm8k from `main/train` and every battery from
+  `main/test`, so **split separation** did the protecting and the inert hash was
+  never load-bearing. The proposed gsm8k extension *is* that train split, which
+  makes this the first case that would have relied on it.
+
+  **The wrong measurement had hidden this.** Comparing first user turns reported
+  1,708 exclusions the chain would never make — a remainder of 5,765 against the
+  chain's actual 7,043. A non-parity measurement that is accidentally *stricter*
+  than the contract it claims to describe conceals the contract's hole instead of
+  finding it.
+
+- **The source-decision PROPOSAL is recorded**, per the review, as a proposal:
+  MBPP's other splits at the same pin for `code`; `openai/gsm8k` `main/train` for
+  `gsm8k` but **blocked twice** — the positional renderer cannot be reused and
+  the training-corpus gap must be closed first; and the canonical Hendrycks MATH
+  **test** split as a candidate to pin and measure. Provenance and
+  problem-content are required to stay **separate coordinates** in every new id
+  scheme.
+
+- **The duplicate review list is reviewable, not a threshold.** 44 bare-problem
+  pairs at Jaccard ≥ 0.8, each with both problems and both native `task_id`s so a
+  human can read the pair — one of them identical text (602 vs 217). It is 44 and
+  not 43 because the screen's Jaccard bands exclude exact matches, counting them
+  separately; the review list includes them, since an identical problem is the
+  first thing a reviewer must see. The threshold selects what is looked at and
+  **excludes nothing**.
+
+- **MATH readiness was established without a download.** Upstream carries
+  `solution` and no `answer`, so the adapter must derive the gold — and the rule
+  `boxed_answer(solution)` reproduces the existing stratum's own `answer` field
+  on **500/500** pinned rows. So the adapter is the *same* correctness semantics
+  rather than a new one arriving with a new source, verified at `$0` before any
+  bytes move. The subject/level distribution baseline is recorded now so the owed
+  shift measurement cannot choose its own baseline afterwards.
+
+- **Two residual state strings cleaned:** `test_suites.next_work` named the
+  superseded `909d1c8b` tree, and `core` called `b0ca0fec` "this branch" when it
+  belongs to the retained D1 source lineage.
+
+Validation: D-series 71 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change, so the CUDA ledger is untouched. No core full
+suite, no historical suites, `$0`, no network.
+
 ## 2026-10-03 — D-series source evidence: measured, `$0`, offline, nothing pinned
 
 Step 1 of the recorded sequence. **AUTHORIZES NOTHING and MATERIALIZES NOTHING.**
