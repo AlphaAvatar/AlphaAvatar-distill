@@ -1,0 +1,302 @@
+{
+ "A_reference_top_k_mass": {
+  "_sampled": "up to 4096 valid positions per (candidate, group) reduction, which is every position for these group widths; stated so a reader does not take it for the whole mixture if a wider batch ever truncates.",
+  "_what": "the reference distribution's probability mass inside its own Top-K, per valid prediction position. The tail bucket holds one minus this.",
+  "distribution": {
+   "max": 1.000002145767212,
+   "mean": 0.9940048497456154,
+   "min": 0.022924339398741722,
+   "n": 14375660,
+   "p1": 0.8618628978729248,
+   "p5": 0.9800642728805542,
+   "p50": 0.999999463558197,
+   "p95": 1.000001311302185,
+   "p99": 1.0000017881393433
+  },
+  "top_k": 200
+ },
+ "B_full_vs_k_plus_1": {
+  "per_candidate": {
+   "_sign_of_the_difference": "the K+1 KL is a coarsening of the partition and therefore a LOWER bound on the full-vocabulary KL, so every signed difference should be <= 0 up to float error. A positive one would be a defect, not a finding.",
+   "absolute_difference": {
+    "max": 0.04803305706885652,
+    "mean": 0.005913085598840823,
+    "min": 0.0004770781481877734,
+    "n": 260,
+    "p1": 0.0005697659438384101,
+    "p5": 0.0008483679067235739,
+    "p50": 0.004257958035534748,
+    "p95": 0.02372425938777134,
+    "p99": 0.04415871118285608
+   },
+   "n": 260,
+   "n_positive_signed": 0,
+   "relative_difference": {
+    "max": 0.027364599267689426,
+    "mean": 0.010064691551477394,
+    "min": 0.0028573526422318043,
+    "n": 260,
+    "p1": 0.004552891733735776,
+    "p5": 0.0061043101705495284,
+    "p50": 0.00963856987273494,
+    "p95": 0.014886529894020409,
+    "p99": 0.02110166000833429
+   },
+   "signed_difference": {
+    "max": -0.0004770781481877734,
+    "mean": -0.005913085598840823,
+    "min": -0.04803305706885652,
+    "n": 260,
+    "p1": -0.04415871118285608,
+    "p5": -0.02372425938777134,
+    "p50": -0.004255493111873121,
+    "p95": -0.0008483679067235739,
+    "p99": -0.0005697659438384101
+   },
+   "spearman": 0.9999822482581102,
+   "worst": {
+    "absolute": 0.04803305706885652,
+    "full": 10.243384318387033,
+    "index": 138,
+    "relative": 0.0046891784566392225,
+    "topk": 10.195351261318176
+   }
+  },
+  "per_item_per_group": {
+   "_sign_of_the_difference": "the K+1 KL is a coarsening of the partition and therefore a LOWER bound on the full-vocabulary KL, so every signed difference should be <= 0 up to float error. A positive one would be a defect, not a finding.",
+   "absolute_difference": {
+    "max": 0.41952487441801267,
+    "mean": 0.006441935768266333,
+    "min": 6.251153220797681e-06,
+    "n": 17420,
+    "p1": 5.662771897607666e-05,
+    "p5": 0.00019109273320427889,
+    "p50": 0.002858452071995643,
+    "p95": 0.020458611475358934,
+    "p99": 0.07182123467023516
+   },
+   "n": 17420,
+   "n_positive_signed": 1,
+   "relative_difference": {
+    "max": 0.1760340459335675,
+    "mean": 0.010344907479765577,
+    "min": 0.000148339835422114,
+    "n": 17420,
+    "p1": 0.0005259362074971604,
+    "p5": 0.0011565251683468439,
+    "p50": 0.007205766745965603,
+    "p95": 0.03443743915537906,
+    "p99": 0.05356609481692645
+   },
+   "signed_difference": {
+    "max": 0.00029677556884746825,
+    "mean": -0.006441901695296316,
+    "min": -0.41952487441801267,
+    "n": 17420,
+    "p1": -0.07182123467023516,
+    "p5": -0.020458611475358934,
+    "p50": -0.0028581204462794774,
+    "p95": -0.0001909722472440284,
+    "p99": -5.605995192350943e-05
+   },
+   "spearman": 0.9998969825285937,
+   "worst": {
+    "absolute": 0.41952487441801267,
+    "full": 9.341300718245968,
+    "index": 7035,
+    "relative": 0.04491075569364473,
+    "topk": 8.921775843827955
+   }
+  }
+ },
+ "C_discrete_decisions": {
+  "_a_moved_decision_is_not_a_failure": "this is an authorized new protocol. A disagreement means it is observably different from the full-vocabulary one, which is the thing being characterized.",
+  "_claim_boundary": "the greedy chose by FULL VOCABULARY, so its removal order is the historical protocol's and is exact. The Top-K column is the layer that protocol WOULD have chosen given the same parent -- exact up to and including the first disagreeing round, and counterfactual after it, because from that round on the Top-K protocol's own parent would differ and these forwards do not describe it. Sharing forwards is what makes the comparison affordable and this is its price.",
+  "_reconstruction_check": "every round reports whether the full-vocabulary winner recomputed from the recorded pairs equals the layer the OPERATOR chose. A False anywhere means this analysis is not reading the same scores the decision was made on, and nothing below it can be trusted.",
+  "comparison_is_exact_through_round": 7,
+  "first_disagreeing_round": null,
+  "full_vocab_removal_order": [
+   2,
+   16,
+   3,
+   32,
+   20,
+   26,
+   15,
+   21
+  ],
+  "n_rounds_where_winners_disagree": 0,
+  "rounds": [
+   {
+    "full_vocab": {
+     "margin": 0.019187458511857214,
+     "runner_up": 3,
+     "winner": 2,
+     "winner_score": 0.043672206808675826
+    },
+    "n_candidates": 36,
+    "operator_chose": 2,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.018916301878097633,
+     "runner_up": 3,
+     "winner": 2,
+     "winner_score": 0.0429814068882677
+    },
+    "round": 0,
+    "spearman_over_candidates": 0.9987129987129987,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.008434796295003724,
+     "runner_up": 20,
+     "winner": 16,
+     "winner_score": 0.11072055696882976
+    },
+    "n_candidates": 35,
+    "operator_chose": 16,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.008518002100084035,
+     "runner_up": 20,
+     "winner": 16,
+     "winner_score": 0.10957493719764547
+    },
+    "round": 1,
+    "spearman_over_candidates": 0.9994397759103641,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.00044469251322279413,
+     "runner_up": 32,
+     "winner": 3,
+     "winner_score": 0.19028685495051598
+    },
+    "n_candidates": 34,
+    "operator_chose": 3,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.0008667302690178735,
+     "runner_up": 32,
+     "winner": 3,
+     "winner_score": 0.1877306372752756
+    },
+    "round": 2,
+    "spearman_over_candidates": 0.999694423223835,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.0071153028366121585,
+     "runner_up": 26,
+     "winner": 32,
+     "winner_score": 0.2656640791212178
+    },
+    "n_candidates": 33,
+    "operator_chose": 32,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.0075418252602909575,
+     "runner_up": 26,
+     "winner": 32,
+     "winner_score": 0.26207698241572447
+    },
+    "round": 3,
+    "spearman_over_candidates": 1.0,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.003225201101321906,
+     "runner_up": 15,
+     "winner": 20,
+     "winner_score": 0.3433421693452763
+    },
+    "n_candidates": 32,
+    "operator_chose": 20,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.002947394019762517,
+     "runner_up": 15,
+     "winner": 20,
+     "winner_score": 0.33950616618569524
+    },
+    "round": 4,
+    "spearman_over_candidates": 0.9996334310850438,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.002660208233486616,
+     "runner_up": 15,
+     "winner": 26,
+     "winner_score": 0.43713870470108446
+    },
+    "n_candidates": 31,
+    "operator_chose": 26,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.0023322198818527262,
+     "runner_up": 15,
+     "winner": 26,
+     "winner_score": 0.43271278509121486
+    },
+    "round": 5,
+    "spearman_over_candidates": 1.0,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.015662948689726175,
+     "runner_up": 17,
+     "winner": 15,
+     "winner_score": 0.5216669343481508
+    },
+    "n_candidates": 30,
+    "operator_chose": 15,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.01570770612876282,
+     "runner_up": 17,
+     "winner": 15,
+     "winner_score": 0.5164430852867451
+    },
+    "round": 6,
+    "spearman_over_candidates": 1.0000000000000002,
+    "winners_agree": true
+   },
+   {
+    "full_vocab": {
+     "margin": 0.0015627673772549144,
+     "runner_up": 17,
+     "winner": 21,
+     "winner_score": 0.6255395912093673
+    },
+    "n_candidates": 29,
+    "operator_chose": 21,
+    "reconstruction_matches_the_operator": true,
+    "reference_topk_tail": {
+     "margin": 0.0008840102561299412,
+     "runner_up": 17,
+     "winner": 21,
+     "winner_score": 0.6200759689697981
+    },
+    "round": 7,
+    "spearman_over_candidates": 1.0,
+    "winners_agree": true
+   }
+  ],
+  "topk_removal_order_would_be": [
+   2,
+   16,
+   3,
+   32,
+   20,
+   26,
+   15,
+   21
+  ]
+ }
+}

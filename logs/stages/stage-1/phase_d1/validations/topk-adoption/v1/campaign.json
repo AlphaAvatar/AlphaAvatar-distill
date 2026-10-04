@@ -1,17 +1,35 @@
 {
+ "_booked_recomputed_from_components": "0.6382 = 0.6382",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 0.0,
+ "booked_usd": 0.6382,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- no resource created",
- "subruns": [],
+ "status": "OPEN -- a1 produced A/B/C/E; stage D owed",
+ "subruns": [
+  {
+   "cost_usd": 0.6382,
+   "elapsed_minutes": 34.867,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a1",
+   "gpu": "NVIDIA L40S",
+   "notes": "stage D was DEFINED AND NEVER CALLED in the driver this subrun ran, so items A/B/C/E only. The in-run analysis of C was also defective -- it aggregated candidates by a POOLED mean where the operator uses domain_balanced_score -- and its own reconstruction check caught that, disagreeing with the operator at rounds 4 and 5. Re-analysed OFFLINE from the recorded per-item scores with the corrected aggregation: the reconstruction then matches the operator in every round. No GPU time was repaid for the fix.",
+   "outcome": "COMPLETE for items A, B, C and the DEPTH half of E",
+   "pod_id": "d3zrira2zl98kd",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "39a1013d010f490ecfd32ac33c49a677e2bf7924",
+   "stages_run": [
+    "C",
+    "analyse"
+   ],
+   "subrun_id": "a1"
+  }
+ ],
  "teardown_reserve_usd": 0.3
 }

@@ -299,8 +299,16 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
     adapter.save(outcome.model, str(child_path))
     del model
     torch.cuda.empty_cache()
+    domain_map: dict[str, list[str]] = {}
+    for item in items:
+        domain_map.setdefault(item["domain"], [])
+        if item["subtype"] not in domain_map[item["domain"]]:
+            domain_map[item["domain"]].append(item["subtype"])
     return {
         "candidate_checkpoint": str(child_path),
+        #: RECORDED, from the items this run actually scored, so the analysis
+        #: cannot balance over a different map than the decision did.
+        "domain_map": domain_map,
         "seconds": seconds,
         "peak_memory_bytes": peak,
         "observer_seconds": round(sketch_seconds[0], 3),
@@ -313,27 +321,56 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
     }
 
 
-def analyse_C(stage_c: dict[str, Any]) -> dict[str, Any]:
+def candidate_scores(pairs: list[dict[str, Any]],
+                    domain_map: dict[str, list[str]],
+                    ) -> dict[tuple, dict[str, float]]:
+    """A candidate's two scores, aggregated THE WAY THE OPERATOR AGGREGATES.
+
+    This was a plain pooled mean over items, and it was wrong. The operator scores
+    a candidate with `domain_balanced_score` -- mean per SUBTYPE, then balanced
+    across DOMAINS -- so a pooled mean weights each domain by how many items it
+    happens to contribute. The reconstruction disagreed with the operator at two
+    of eight rounds and produced a removal order containing one layer three times,
+    which is impossible for a greedy removal.
+
+    `domain_balanced_score` is IMPORTED rather than reimplemented: the aggregation
+    is the thing that was got wrong once, and a second hand-written copy of it is
+    how that happens again.
+    """
+    from aadistill.initialization.statistics.contribution import (
+        domain_balanced_score,
+    )
+
+    grouped: dict[tuple, dict[str, dict[str, list[float]]]] = {}
+    for p in pairs:
+        key = tuple(p["skip"])
+        slot = grouped.setdefault(key, {"full": {}, "topk": {}})
+        for subtype, f, t in zip(p["subtypes"], p["full"], p["topk"]):
+            slot["full"].setdefault(subtype, []).append(f)
+            slot["topk"].setdefault(subtype, []).append(t)
+
+    out: dict[tuple, dict[str, float]] = {}
+    for key, slot in grouped.items():
+        scores = {}
+        for arm in ("full", "topk"):
+            means = {st: sum(v) / len(v) for st, v in slot[arm].items()}
+            primary, _ = domain_balanced_score(means, domain_map)
+            scores[arm] = primary
+        out[key] = scores
+    return out
+
+
+def analyse_C(stage_c: dict[str, Any],
+              domain_map: dict[str, list[str]]) -> dict[str, Any]:
     """Items 10A, 10B and 10C, from stage C's recorded pairs."""
     pairs = stage_c["pairs"]
     full = [v for p in pairs for v in p["full"]]
     topk = [v for p in pairs for v in p["topk"]]
     mass = [m for p in pairs for m in p["mass"]]
 
-    #: Per CANDIDATE, not per group: a candidate's score is the domain-balanced
-    #: mean over its groups, and the decision is made on that. Grouped back by
-    #: `skip` so the two protocols' per-candidate orderings can be compared.
-    by_skip: dict[tuple, dict[str, list[float]]] = {}
-    for p in pairs:
-        key = tuple(p["skip"])
-        slot = by_skip.setdefault(key, {"full": [], "topk": []})
-        slot["full"].extend(p["full"])
-        slot["topk"].extend(p["topk"])
-    cand_full, cand_topk, cand_keys = [], [], []
-    for key, slot in by_skip.items():
-        cand_keys.append(list(key))
-        cand_full.append(sum(slot["full"]) / len(slot["full"]))
-        cand_topk.append(sum(slot["topk"]) / len(slot["topk"]))
+    by_skip = candidate_scores(pairs, domain_map)
+    cand_full = [v["full"] for v in by_skip.values()]
+    cand_topk = [v["topk"] for v in by_skip.values()]
 
     return {
         "A_reference_top_k_mass": {
@@ -356,7 +393,7 @@ def analyse_C(stage_c: dict[str, Any]) -> dict[str, Any]:
 
 
 def _decision_comparison(stage_c: dict[str, Any],
-                         by_skip: dict[tuple, dict[str, list[float]]],
+                         by_skip: dict[tuple, dict[str, float]],
                          ) -> dict[str, Any]:
     """Which layer each protocol would choose, round by round.
 
@@ -377,9 +414,7 @@ def _decision_comparison(stage_c: dict[str, Any],
             if len(key) == len(removed_before) + 1 and len(extra) == 1 and \
                     set(removed_before) <= set(key):
                 layer = next(iter(extra))
-                candidates[layer] = (
-                    sum(slot["full"]) / len(slot["full"]),
-                    sum(slot["topk"]) / len(slot["topk"]))
+                candidates[layer] = (slot["full"], slot["topk"])
         if not candidates:
             continue
         full_rank = sorted(candidates, key=lambda l: candidates[l][0])
@@ -445,6 +480,58 @@ def _decision_comparison(stage_c: dict[str, Any],
             "from the recorded pairs equals the layer the OPERATOR chose. A "
             "False anywhere means this analysis is not reading the same scores "
             "the decision was made on, and nothing below it can be trusted."),
+    }
+
+
+def build_positional_candidate(*, repo: Path, workdir: Path,
+                              teacher_path: str) -> dict[str, Any]:
+    """A real compressed candidate for stage D, without re-running a search.
+
+    `depth.positional_v0` declares `CalibrationNeed.NONE`, so this is seconds
+    rather than the half hour `depth.causal_kl_greedy_v1` costs. That is the right
+    trade HERE and the reason is specific: stage D compares two REDUCERS on one
+    candidate, and the candidate's selection rule does not enter the comparison.
+    What has to be real is the geometry, the vocabulary, the device and the
+    evaluator -- all of which are.
+
+    It is NOT a substitute for stage C's candidate anywhere a selection rule
+    matters, and the record says which candidate it used so no reader has to
+    guess.
+    """
+    import torch
+
+    from aadistill.initialization.execution import ExecutionConfig
+    from aadistill.initialization.operators.base import OperatorContext
+    from aadistill.initialization.operators.register import BUILTIN_OPERATORS
+    from aadistill.initialization.specs.arch import get_adapter
+    from experiments.phase_a3 import a3_session as A3S
+
+    impl = next(o for o in BUILTIN_OPERATORS
+                if o.impl_id == "depth.positional_v0")
+    adapter = get_adapter("qwen3")
+    spec = A3S.path_spec(workdir_device="cuda")
+    model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+    ctx = OperatorContext(
+        adapter=adapter, model=model, parent_spec=adapter.spec_of(model),
+        target_spec=spec.target_spec, profile=None, calibration_items=(),
+        seed=spec.seed, device="cuda", workdir=workdir, config={},
+        execution=ExecutionConfig())
+    t0 = time.time()
+    outcome = impl.apply(ctx)
+    path = workdir / "positional_candidate"
+    adapter.save(outcome.model, str(path))
+    seconds = round(time.time() - t0, 3)
+    del model
+    torch.cuda.empty_cache()
+    return {
+        "candidate_checkpoint": str(path),
+        "built_by": "depth.positional_v0",
+        "seconds": seconds,
+        "_why_this_candidate": (
+            "stage D compares two REDUCERS on one candidate; the candidate's "
+            "selection rule does not enter that comparison, and this one needs "
+            "no calibration so it costs seconds instead of half an hour. The "
+            "geometry, vocabulary, device and evaluator are all real."),
     }
 
 
@@ -570,6 +657,11 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--required-inputs", action="store_true",
                     help="print the frozen assets this needs, one JSON per line, "
                          "and exit. The launcher pushes exactly these.")
+    ap.add_argument("--stages", default="C,D",
+                    help="which stages to run: C (the DEPTH dual scoring, ~30 "
+                         "min) and D (the state evaluation, minutes). A subrun "
+                         "that needs only D builds its candidate with "
+                         "depth.positional_v0 instead of repeating the search.")
     ap.add_argument("--check-only", action="store_true",
                     help="every stage except the two expensive ones: the CUDA "
                          "probe, the four process-global registries, the frozen "
@@ -678,33 +770,75 @@ def main(argv: list[str] | None = None) -> int:
         if args.deadline_s > 0:
             deadline = WallClockDeadline(args.deadline_s)
 
-        with journal.stage("C_depth_dual_scores") as st:
-            record["C_depth"] = stage_C_depth_dual_scores(
-                repo=repo, workdir=out / "depth", teacher_path=teacher_path,
-                journal=journal, deadline=deadline)
-            st.result = {"seconds": record["C_depth"]["seconds"],
-                         "pairs": len(record["C_depth"]["pairs"])}
+        wanted = {x.strip() for x in (args.stages or "C,D").split(",")
+                  if x.strip()}
+        record["stages_requested"] = sorted(wanted)
+        unknown = wanted - {"C", "D"}
+        if unknown:
+            raise AdoptionError(
+                f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
+                "scoring), D (state evaluation). A typo would silently run less "
+                "than intended and look like a clean result.")
 
-        with journal.stage("analyse_ABC") as st:
-            record["analysis"] = analyse_C(record["C_depth"])
-            c = record["analysis"]["C_discrete_decisions"]
-            st.result = {"disagreeing_rounds":
-                         c["n_rounds_where_winners_disagree"],
-                         "mass_p5": record["analysis"]["A_reference_top_k_mass"][
-                             "distribution"].get("p5")}
+        if "C" in wanted:
+            with journal.stage("C_depth_dual_scores") as st:
+                record["C_depth"] = stage_C_depth_dual_scores(
+                    repo=repo, workdir=out / "depth",
+                    teacher_path=teacher_path, journal=journal,
+                    deadline=deadline)
+                st.result = {"seconds": record["C_depth"]["seconds"],
+                             "pairs": len(record["C_depth"]["pairs"])}
 
-        with journal.stage("D_state_eval_both_supports") as st:
-            #: DEFINED AND NEVER CALLED in the first version of this driver, which
-            #: would have produced items A, B, C and E and silently omitted D.
-            #: Found by reading the stage list against the authorization's
-            #: `covers` before the run that needed it, not after.
-            record["D_state_eval"] = stage_D_state_eval(
-                repo=repo,
-                artifact_path=record["C_depth"]["candidate_checkpoint"],
-                teacher_path=teacher_path, journal=journal)
-            cmp_ = record["D_state_eval"]["comparison"]
-            st.result = {"protocol_ids_differ": cmp_["protocol_ids_differ"],
-                         "worst_domain_agrees": cmp_["worst_domain_agrees"]}
+            with journal.stage("analyse_ABC") as st:
+                #: The subtype -> domain map from the FROZEN mixture the operator
+                #: scored, so the reconstruction balances domains exactly as the
+                #: decision did -- a POOLED mean instead disagreed with the
+                #: operator at two of eight rounds.
+                record["analysis"] = analyse_C(record["C_depth"],
+                                               record["C_depth"]["domain_map"])
+                c = record["analysis"]["C_discrete_decisions"]
+                bad = [r["round"] for r in c["rounds"]
+                       if not r["reconstruction_matches_the_operator"]]
+                if bad:
+                    raise AdoptionError(
+                        f"the analysis reconstructed a different winner from the "
+                        f"operator at rounds {bad}, so it is not reading the "
+                        "scores the decision was made on and nothing it reports "
+                        "about decisions can be trusted")
+                st.result = {"disagreeing_rounds":
+                             c["n_rounds_where_winners_disagree"],
+                             "mass_p5":
+                                 record["analysis"]["A_reference_top_k_mass"][
+                                     "distribution"].get("p5")}
+
+        if "D" in wanted:
+            with journal.stage("D_state_eval_both_supports") as st:
+                #: DEFINED AND NEVER CALLED in the first version of this driver,
+                #: which would have produced items A, B, C and E and silently
+                #: omitted D. Found by reading the stage list against the
+                #: authorization's `covers` while a run was in flight.
+                #:
+                #: Stage C's own child when C ran, otherwise a positional
+                #: candidate -- and the record states WHICH, because a reader must
+                #: not have to guess what was evaluated.
+                if record.get("C_depth"):
+                    candidate = record["C_depth"]["candidate_checkpoint"]
+                    record["D_candidate"] = {
+                        "from": "C_depth",
+                        "built_by": "depth.causal_kl_greedy_v1"}
+                else:
+                    built = build_positional_candidate(
+                        repo=repo, workdir=out / "candidate",
+                        teacher_path=teacher_path)
+                    candidate = built["candidate_checkpoint"]
+                    record["D_candidate"] = built
+                record["D_state_eval"] = stage_D_state_eval(
+                    repo=repo, artifact_path=candidate,
+                    teacher_path=teacher_path, journal=journal)
+                cmp_ = record["D_state_eval"]["comparison"]
+                st.result = {
+                    "protocol_ids_differ": cmp_["protocol_ids_differ"],
+                    "worst_domain_agrees": cmp_["worst_domain_agrees"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001
