@@ -1,5 +1,79 @@
 # Budget decisions
 
+## 2026-10-03 — The six-role D-series family is built, hash-bound and verified
+
+All six behavioural batteries exist, **before any D1 outcome**. `$0` data work.
+No GPU, no recovery probes, no D1 search, no funding or envelope change.
+
+```text
+family_content_id  c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+allocation rule    v3  f6047343c1c1ad2172f500e979c704c1
+roles              d1_screening d1_confirmation d2_screening
+                   d2_confirmation d3_screening d3_confirmation
+each role          950 prompts, 850 scorable, the frozen 7-stratum mixture
+items              artifacts/stage3/d_series_behavioural_v1 (22 MB, gitignored)
+record             logs/shared/analyses/autoinit_d_series_family_manifest.json
+```
+
+- **Allocation rule v3**, because v2 was incomplete and the builder proved it. v2
+  enumerated the split-aware id scheme for the **three** strata the source
+  decision touched; all **seven** are ranked, so all seven schemes decide which
+  candidate wins. v3 derives the enumeration from `identity.ID_SCHEME` so it
+  cannot fall behind the code again. Caught **before any row was drawn**, which is
+  the only time it is cheap.
+
+  v1 and v2 are both preserved and both recompute to their committed ids.
+  **v2 is preserved as a JSON snapshot, not as a function** — reconstructing v1 in
+  code had already nearly moved its hash, and a snapshot cannot acquire a stray
+  trailing comma.
+
+- **Selection is `rank_take`, the historical function**, with each role's frozen
+  rank domain. The D-series adds exactly two things on top: the split-aware item
+  identity, and the problem-content coordinate filtering the pool before ranking.
+  Every item's **content** — prompt, gold, every scorer field — is the historical
+  renderer's output verbatim, which the verifier checks field by field.
+
+- **The independent verifier found a real isolation defect, and it was mine.** Ten
+  rows across `rag` and `multihop` were already consumed by FINAL_PROMOTION and
+  passed every coordinate:
+
+  * the **id** coordinate missed them because the historical exclusion set holds
+    `squad-val-<key>` while a D-series row's id is
+    `squad-squad_v2-validation-<key>` — changing the id scheme moved the rows out
+    of the namespace the exclusion set is written in, and `battery_v2` stores no
+    `source_key` to fall back on;
+  * the **rendered-prompt** coordinate missed them because `battery_v2` was built
+    before `RAG_INSTRUCTION` was reworded — "say you cannot answer from the
+    context" became "say you cannot answer", so its prompt hashes no longer match
+    what the current renderer produces;
+  * the **problem-content** coordinate does not apply: `rag` and `multihop` have
+    no declared problem payload.
+
+  So the id coordinate had been carrying the load for these strata, and changing
+  the id scheme silently removed it. The build now also excludes on each
+  candidate's `historical_render_id`, which applies the historical coordinate in
+  the historical namespace. **This is why the verifier re-derives instead of
+  checking the builder's own claims** — a verifier that imported the selection
+  would have agreed with the bug.
+
+- **Six checks, all passing, all able to fail.** Counts and the 950/850
+  denominators; renderer/scorer parity field by field; pairwise disjointness
+  across all six roles on all three coordinates; isolation from every historical
+  reserved population; no role containing a recovery-training problem; and the
+  manifest describing the items on disk. Each has a mutation test that corrupts a
+  loaded copy and asserts the check reports it.
+
+- **The build is deterministic**: `family_content_id` and every per-role item
+  digest are identical across rebuilds. Only `code_state` differs, and
+  `family_content_id` does not hash it.
+
+- **What is NOT authorized by this**: GPU qualification, D1 search, recovery
+  probes, formal D1 funding, a per-session envelope change. The evidence blocker
+  is now a maintainer judgement rather than a measurement.
+
+Validation: D-series 127 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change, so no core suite and the CUDA ledger is untouched.
+
 ## 2026-10-03 — Allocation rule v2, and one authoritative eligible count
 
 The two cleanup steps the review required before materialization. `$0`, no

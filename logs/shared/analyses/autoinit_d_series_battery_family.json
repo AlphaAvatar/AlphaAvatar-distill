@@ -3,12 +3,20 @@
  "_family_content_id_is_null": "it binds the source pins and the realized item digests, neither of which exists. A non-null value here would be fabricated.",
  "_materializes": "nothing",
  "allocation_rule": {
-  "_supersedes": {
-   "id": "ced017a1f3f155ba5aaf383e61156c12",
-   "version": 1,
-   "why": "v1 bound two isolation coordinates and ranked on the HISTORICAL stable id. The 2026-10-03 source round established that contract is insufficient -- MBPP full/train task 602 is the same problem as consumed full/test task 217 and passes both of v1's coordinates, and the historical chain's training-corpus content exclusion catches 0 of the 1,708 GSM8K train rows that are in the corpus. v1 is not mutated; it is superseded, and its id above is recomputed from its preserved shape rather than transcribed."
-  },
-  "allocation_rule_version": 2,
+  "_superseded_rules_are_preserved": "v1 by `allocation_rule_v1()`, v2 by a JSON snapshot under `superseded_rules/`. Both ids are pinned as constants and checked against the preserved shapes, because a preserved-for-reproducibility rule with nothing pinning it is not preserved.",
+  "_supersedes": [
+   {
+    "id": "ced017a1f3f155ba5aaf383e61156c12",
+    "version": 1,
+    "why": "v1 bound two isolation coordinates and ranked on the HISTORICAL stable id. The 2026-10-03 source round established that contract is insufficient -- MBPP full/train task 602 is the same problem as consumed full/test task 217 and passes both of v1's coordinates, and the historical chain's training-corpus content exclusion catches 0 of the 1,708 GSM8K train rows that are in the corpus."
+   },
+   {
+    "id": "b06a239b7e47540b9888cfc393499ef4",
+    "version": 2,
+    "why": "v2 enumerated the split-aware id scheme for THREE strata, because the source decision concerned three. Building the family showed all SEVEN are ranked, so all seven schemes decide which candidate wins -- and a rule that describes three of them does not describe the rule the batteries execute. v3 derives the enumeration from `ID_SCHEME` so it cannot fall behind the code again. Caught before any row was drawn, which is the only time it is cheap."
+   }
+  ],
+  "allocation_rule_version": 3,
   "distribution_identity": {
    "id": "d_series_behavioural_v1",
    "is_not": "c1_confirmation",
@@ -203,10 +211,20 @@
     "d3_screening": "d-series-v1-d3-screening"
    },
    "ranking_stable_id_semantics": {
+    "_schemes_are_derived": "read from `identity.ID_SCHEME` rather than listed here. v2 listed three by hand and fell behind the code the moment the builder drew all seven.",
     "_why_the_historical_scheme_cannot_be_reused": "`make_gsm8k` builds its id from the row's POSITION in the file, so applied to main/train it emits 1,319 ids that collide with the consumed test split and name different problems. `mbpp-test-<task_id>` names the wrong split for three of MBPP's four files.",
     "_why_this_is_in_the_RULE": "the ranking hashes the stable id, so changing the id scheme changes the order and therefore WHICH rows are selected. That cannot be deferred to `family_content_id` at materialization: by then the selection has happened.",
     "for_historical_rows": "unchanged. No frozen battery's item is renamed, and the historical renderers keep their ids exactly.",
-    "for_new_d_series_rows": "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- `experiments.phase_d_series.identity.d_series_item_id`. mbpp-<config>-<split>-<task_id>, gsm8k-<config>-<split>-<NNNNN>, math-<config>-<split>-<NNNNN>"
+    "for_new_d_series_rows": "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- `experiments.phase_d_series.identity.d_series_item_id`, `<prefix>-<config>-<split>-<native key or row index>`",
+    "schemes": {
+     "code": "mbpp-<config>-<split>-<task_id>",
+     "gsm8k": "gsm8k-<config>-<split>-<row index>",
+     "knowledge": "trivia-<config>-<split>-<question_id>",
+     "math_verified": "math-<config>-<split>-<row index>",
+     "multihop": "hotpot-<config>-<split>-<id>",
+     "rag": "squad-<config>-<split>-<id>",
+     "tool": "xlam-<config>-<split>-<id>"
+    }
    }
   },
   "source_policy": {
@@ -224,7 +242,7 @@
   },
   "what_is_NOT_in_this_rule": "the per-file source DIGESTS and the realized item lists. Those are bound by `family_content_id` at materialization, because they describe what was drawn rather than how. Everything that decides WHICH candidate wins the ranking, or WHETHER a candidate may enter it, is above -- which is the correction v2 makes to v1."
  },
- "allocation_rule_id": "b06a239b7e47540b9888cfc393499ef4",
+ "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
  "binding_stratum": "math_verified",
  "blocker": "CAPACITY IS CLOSED. The source decision of 2026-10-03 extended all three short strata and the strengthened chain's measured eligible counts clear every shortfall -- see logs/shared/analyses/autoinit_d_series_source_evidence.json, which owns those figures. The remaining blockers are NOT capacity: the GSM8K split-aware RENDERER does not exist, so its realized membership is not final, and the MATERIALIZATION decision itself has not been taken. No row is drawn.",
  "capacity_record": {

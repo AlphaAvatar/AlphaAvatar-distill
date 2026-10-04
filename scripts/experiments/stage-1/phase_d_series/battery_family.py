@@ -348,7 +348,20 @@ def allocation_rule_id_of(rule: dict[str, Any]) -> str:
 #: stays reproducible, and it is recorded as superseded with the reason. Silently
 #: changing what a committed hash meant is the one thing a prospective freeze
 #: cannot survive.
-ALLOCATION_RULE_VERSION = 2
+ALLOCATION_RULE_VERSION = 3
+
+#: Superseded rules, preserved as DATA rather than reconstructed in code.
+#: v1 was preserved as a function and its hash nearly moved -- factoring one
+#: field into a shared helper left a trailing comma, the helper returned a
+#: one-element tuple, and the id changed while the shape looked right. A JSON
+#: snapshot cannot drift that way, and the ids below are checked against it.
+SUPERSEDED_RULES_DIR = Path(__file__).resolve().parent / "superseded_rules"
+V2_RULE_ID_AS_COMMITTED = "b06a239b7e47540b9888cfc393499ef4"
+
+
+def allocation_rule_v2() -> dict[str, Any]:
+    """v2's exact shape, from the preserved snapshot."""
+    return json.loads((SUPERSEDED_RULES_DIR / "v2.json").read_text())
 #: v1's id as it was COMMITTED, so `allocation_rule_v1` is checked against the
 #: value a reader may already hold rather than against itself. Factoring v1's
 #: `distribution_identity` into a shared helper left a trailing comma, which made
@@ -356,6 +369,15 @@ ALLOCATION_RULE_VERSION = 2
 #: only because this value existed to compare against. A preserved-for-
 #: reproducibility function with nothing pinning it is not preserved.
 V1_RULE_ID_AS_COMMITTED = "ced017a1f3f155ba5aaf383e61156c12"
+
+
+def _id_schemes() -> dict[str, str]:
+    """Every stratum's D-series id shape, from the one place it is declared."""
+    from experiments.phase_d_series.identity import ID_SCHEME
+
+    return {group: (f"{prefix}-<config>-<split>-<{key}>" if key
+                    else f"{prefix}-<config>-<split>-<row index>")
+            for group, (prefix, key) in sorted(ID_SCHEME.items())}
 
 
 def _frozen_review() -> dict[str, Any]:
@@ -486,20 +508,34 @@ def allocation_rule() -> dict[str, Any]:
     """The rule, frozen prospectively — everything except the realized items."""
     return {
         "allocation_rule_version": ALLOCATION_RULE_VERSION,
-        "_supersedes": {
-            "version": 1,
-            "id": allocation_rule_id_of(allocation_rule_v1()),
-            "why": (
-                "v1 bound two isolation coordinates and ranked on the HISTORICAL "
-                "stable id. The 2026-10-03 source round established that "
-                "contract is insufficient -- MBPP full/train task 602 is the "
-                "same problem as consumed full/test task 217 and passes both of "
-                "v1's coordinates, and the historical chain's training-corpus "
-                "content exclusion catches 0 of the 1,708 GSM8K train rows that "
-                "are in the corpus. v1 is not mutated; it is superseded, and its "
-                "id above is recomputed from its preserved shape rather than "
-                "transcribed."),
-        },
+        "_supersedes": [
+            {"version": 1,
+             "id": allocation_rule_id_of(allocation_rule_v1()),
+             "why": (
+                 "v1 bound two isolation coordinates and ranked on the "
+                 "HISTORICAL stable id. The 2026-10-03 source round established "
+                 "that contract is insufficient -- MBPP full/train task 602 is "
+                 "the same problem as consumed full/test task 217 and passes "
+                 "both of v1's coordinates, and the historical chain's "
+                 "training-corpus content exclusion catches 0 of the 1,708 "
+                 "GSM8K train rows that are in the corpus.")},
+            {"version": 2,
+             "id": V2_RULE_ID_AS_COMMITTED,
+             "why": (
+                 "v2 enumerated the split-aware id scheme for THREE strata, "
+                 "because the source decision concerned three. Building the "
+                 "family showed all SEVEN are ranked, so all seven schemes "
+                 "decide which candidate wins -- and a rule that describes "
+                 "three of them does not describe the rule the batteries "
+                 "execute. v3 derives the enumeration from `ID_SCHEME` so it "
+                 "cannot fall behind the code again. Caught before any row was "
+                 "drawn, which is the only time it is cheap.")},
+        ],
+        "_superseded_rules_are_preserved": (
+            "v1 by `allocation_rule_v1()`, v2 by a JSON snapshot under "
+            "`superseded_rules/`. Both ids are pinned as constants and checked "
+            "against the preserved shapes, because a preserved-for-"
+            "reproducibility rule with nothing pinning it is not preserved."),
         "schema": SCHEMA,
         "family_id": FAMILY_ID,
         "n_roles": N_ROLES,
@@ -524,10 +560,13 @@ def allocation_rule() -> dict[str, Any]:
             "ranking_stable_id_semantics": {
                 "for_new_d_series_rows": (
                     "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- "
-                    "`experiments.phase_d_series.identity.d_series_item_id`. "
-                    "mbpp-<config>-<split>-<task_id>, "
-                    "gsm8k-<config>-<split>-<NNNNN>, "
-                    "math-<config>-<split>-<NNNNN>"),
+                    "`experiments.phase_d_series.identity.d_series_item_id`, "
+                    "`<prefix>-<config>-<split>-<native key or row index>`"),
+                "schemes": _id_schemes(),
+                "_schemes_are_derived": (
+                    "read from `identity.ID_SCHEME` rather than listed here. v2 "
+                    "listed three by hand and fell behind the code the moment "
+                    "the builder drew all seven."),
                 "for_historical_rows": (
                     "unchanged. No frozen battery's item is renamed, and the "
                     "historical renderers keep their ids exactly."),

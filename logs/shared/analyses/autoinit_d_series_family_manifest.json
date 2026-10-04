@@ -1,0 +1,276 @@
+{
+ "_built_before_any_outcome": "all six roles are drawn in one deterministic pass, before any D1 search has run. No later choice about which prompts a confirmation rung sees is available.",
+ "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+ "allocation_rule_version": 3,
+ "candidate_pools": {
+  "code": 974,
+  "gsm8k": 8792,
+  "knowledge": 17944,
+  "math_verified": 5000,
+  "multihop": 7405,
+  "rag": 5928,
+  "tool": 60000
+ },
+ "code_state": {
+  "dirty": true,
+  "git_commit": "bc31175f764fda3134a48f20a29834a7edda090c",
+  "git_commit_source": "git",
+  "uncommitted_state_sha256": "b96a3ce61e50585d4e029b9df499a832f3ca9fd73c5d7bb9754d8d69b4282d5c",
+  "untracked_files": [
+   "scripts/experiments/stage-1/phase_d_series/build_batteries.py",
+   "scripts/experiments/stage-1/phase_d_series/superseded_rules/v2.json",
+   "scripts/experiments/stage-1/phase_d_series/verify_batteries.py"
+  ]
+ },
+ "family_content_id": "c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a",
+ "family_id": "d_series_behavioural_v1",
+ "role_order": [
+  "d1_screening",
+  "d1_confirmation",
+  "d2_screening",
+  "d2_confirmation",
+  "d3_screening",
+  "d3_confirmation"
+ ],
+ "roles": {
+  "d1_confirmation": {
+   "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  },
+  "d1_screening": {
+   "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  },
+  "d2_confirmation": {
+   "item_ids_sha256": "6b50625e764454c93bf62ee7b6289897cb9cba6c9a39382816250ad463850ddb",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  },
+  "d2_screening": {
+   "item_ids_sha256": "89758b3a0887e857aaf5c11f7fa87a1be4adecaa930eee266c4d64e800f63c55",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  },
+  "d3_confirmation": {
+   "item_ids_sha256": "60c08be46befd52293263895ef51108782b7c180a05c0073848b28e8c1c1cb95",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  },
+  "d3_screening": {
+   "item_ids_sha256": "91e8987d0b228e2b97ba6bf4507bba0bfe269b6ee99ec97af5f429cb63bb1f01",
+   "n_prompts": 950,
+   "n_scorable": 850,
+   "per_stratum": {
+    "code": 100,
+    "gsm8k": 150,
+    "knowledge": 150,
+    "math_verified": 150,
+    "multihop": 150,
+    "rag": 150,
+    "tool": 100
+   }
+  }
+ },
+ "schema": "aadistill.autoinit.d_series_battery/v1",
+ "sources": {
+  "code": {
+   "files": {
+    "full/prompt-00000-of-00001.parquet": {
+     "file": "full/prompt-00000-of-00001.parquet",
+     "repo_id": "google-research-datasets/mbpp",
+     "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+     "sha256": "a053e4bb85ceb77430ae80592addb4ca4dc6ba087592f9e04537800ee88b7431",
+     "size_bytes": 7878
+    },
+    "full/test-00000-of-00001.parquet": {
+     "file": "full/test-00000-of-00001.parquet",
+     "repo_id": "google-research-datasets/mbpp",
+     "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+     "sha256": "566fd53060ffba5766dace1d1e2f4c38906781526de222b0dfbdbc325b696c77",
+     "size_bytes": 115824
+    },
+    "full/train-00000-of-00001.parquet": {
+     "file": "full/train-00000-of-00001.parquet",
+     "repo_id": "google-research-datasets/mbpp",
+     "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+     "sha256": "09d125ca31edacb7800be8c67c45abff618faf0214ff551291817d06bdb914ae",
+     "size_bytes": 87223
+    },
+    "full/validation-00000-of-00001.parquet": {
+     "file": "full/validation-00000-of-00001.parquet",
+     "repo_id": "google-research-datasets/mbpp",
+     "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c",
+     "sha256": "3f0ec060987432d99fe8fb409d31e6c67445b208a01741c5583517c80a10fe80",
+     "size_bytes": 25144
+    }
+   },
+   "repo_id": "google-research-datasets/mbpp",
+   "revision": "4bb6404fdc6cacfda99d4ac4205087b89d32030c"
+  },
+  "gsm8k": {
+   "files": {
+    "main/test-00000-of-00001.parquet": {
+     "file": "main/test-00000-of-00001.parquet",
+     "repo_id": "openai/gsm8k",
+     "revision": "740312add88f781978c0658806c59bc2815b9866",
+     "sha256": "ee7b8da9e381df27b9e3f7758a159ab2bdaa4dbaa910546cbbc47e0cb44e4f59",
+     "size_bytes": 419088
+    },
+    "main/train-00000-of-00001.parquet": {
+     "file": "main/train-00000-of-00001.parquet",
+     "repo_id": "openai/gsm8k",
+     "revision": "740312add88f781978c0658806c59bc2815b9866",
+     "sha256": "ea82612ea9582142387730c793eb67d3b12849002bc0b7fa6f8efafa7351419d",
+     "size_bytes": 2306545
+    }
+   },
+   "repo_id": "openai/gsm8k",
+   "revision": "740312add88f781978c0658806c59bc2815b9866"
+  },
+  "knowledge": {
+   "files": {
+    "rc.nocontext/validation-00000-of-00001.parquet": {
+     "file": "rc.nocontext/validation-00000-of-00001.parquet",
+     "repo_id": "mandarjoshi/trivia_qa",
+     "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f",
+     "sha256": "48a5005c0eb4f8a4ae5b9868644297fd5bf1e694aeb3dc9c8ab958cac0d5b201",
+     "size_bytes": 7335321
+    }
+   },
+   "repo_id": "mandarjoshi/trivia_qa",
+   "revision": "0f7faf33a3908546c6fd5b73a660e0f8ff173c2f"
+  },
+  "math_verified": {
+   "_revision_is_immutable": "a commit sha, not a branch. `main` would make every count below describe whatever the mirror held at read time.",
+   "configs": {
+    "algebra": "Algebra",
+    "counting_and_probability": "Counting & Probability",
+    "geometry": "Geometry",
+    "intermediate_algebra": "Intermediate Algebra",
+    "number_theory": "Number Theory",
+    "prealgebra": "Prealgebra",
+    "precalculus": "Precalculus"
+   },
+   "files": {
+    "algebra/test-00000-of-00001.parquet": {
+     "sha256": "0e04a850dac9cfc758eac0c80afd2d0cc65e29ea72f916c8ac1045b12af937f5",
+     "size_bytes": 353114
+    },
+    "counting_and_probability/test-00000-of-00001.parquet": {
+     "sha256": "c324818949c75a6227c0328a8499d58023cbbf6757cfc1736f5ab24cc8d87966",
+     "size_bytes": 175032
+    },
+    "geometry/test-00000-of-00001.parquet": {
+     "sha256": "98720f3a8134ad9784fd8951195245264495df03ffc5c9485a9a54ff5ae2431a",
+     "size_bytes": 263835
+    },
+    "intermediate_algebra/test-00000-of-00001.parquet": {
+     "sha256": "e859f72486c951c2017da880541ca729940eaa986b0364eb23e238983df9bfeb",
+     "size_bytes": 394797
+    },
+    "number_theory/test-00000-of-00001.parquet": {
+     "sha256": "ba156c9c9fa2040836ba12135fd964e6e67d6bccd8c469ec4a3ad941f8f6fbe9",
+     "size_bytes": 182003
+    },
+    "prealgebra/test-00000-of-00001.parquet": {
+     "sha256": "301e5d8ade5c7b5038032532e498bdc9dca799e7f1061a63f2e7d980803240cc",
+     "size_bytes": 267729
+    },
+    "precalculus/test-00000-of-00001.parquet": {
+     "sha256": "da37474ba3761ae5727af3844a7ba963a735bd6a14c65e6137593669a4fe3b9c",
+     "size_bytes": 242241
+    }
+   },
+   "licence": "mit",
+   "repo_id": "EleutherAI/hendrycks_math",
+   "revision": "21a5633873b6a120296cce3e2df9d5550074f4a3",
+   "splits_fetched": "TEST ONLY -- no train file is fetched or used"
+  },
+  "multihop": {
+   "files": {
+    "distractor/validation-00000-of-00001.parquet": {
+     "file": "distractor/validation-00000-of-00001.parquet",
+     "repo_id": "hotpotqa/hotpot_qa",
+     "revision": "1908d6afbbead072334abe2965f91bd2709910ab",
+     "sha256": "c20b638ca82b21d04fe12e14ff417ad05153d4d215a65de54497fca4e972f7c6",
+     "size_bytes": 27452575
+    }
+   },
+   "repo_id": "hotpotqa/hotpot_qa",
+   "revision": "1908d6afbbead072334abe2965f91bd2709910ab"
+  },
+  "rag": {
+   "files": {
+    "squad_v2/validation-00000-of-00001.parquet": {
+     "file": "squad_v2/validation-00000-of-00001.parquet",
+     "repo_id": "rajpurkar/squad_v2",
+     "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412",
+     "sha256": "0560174ab095c5ac0a8c8dc8da05f1625453c45a77e4ce9cabc6947ddfdd24cb",
+     "size_bytes": 1350511
+    }
+   },
+   "repo_id": "rajpurkar/squad_v2",
+   "revision": "3ffb306f725f7d2ce8394bc1873b24868140c412"
+  },
+  "tool": {
+   "files": {
+    "xlam_function_calling_60k.json": {
+     "file": "xlam_function_calling_60k.json",
+     "repo_id": "Salesforce/xlam-function-calling-60k",
+     "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866",
+     "sha256": "4ef5c6f0dc552f2231f93f5853a9ef431e9e806d7aa514d0f6b615606ce576c6",
+     "size_bytes": 96116570
+    }
+   },
+   "repo_id": "Salesforce/xlam-function-calling-60k",
+   "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866"
+  }
+ }
+}

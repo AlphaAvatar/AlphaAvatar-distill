@@ -386,13 +386,33 @@ class TestTheAllocationRuleVersioning:
         assert family.allocation_rule_id_of(family.allocation_rule_v1()) == \
             family.V1_RULE_ID_AS_COMMITTED
 
-    def test_v2_is_the_live_rule_and_differs_from_v1(self):
+    def test_v2_still_reproduces_its_committed_id(self):
+        """Preserved as a JSON snapshot rather than reconstructed in code, after
+        reconstructing v1 nearly moved its hash."""
+        assert family.allocation_rule_id_of(family.allocation_rule_v2()) == \
+            family.V2_RULE_ID_AS_COMMITTED
+
+    def test_v3_is_the_live_rule_and_supersedes_both(self):
+        """v2 enumerated three id schemes because the source decision concerned
+        three strata. The builder draws all SEVEN, so all seven schemes decide
+        which candidate wins -- caught before any row was drawn."""
         rule = family.allocation_rule()
-        assert rule["allocation_rule_version"] == 2
-        assert family.allocation_rule_id() != family.V1_RULE_ID_AS_COMMITTED
-        assert rule["_supersedes"]["version"] == 1
-        assert rule["_supersedes"]["id"] == family.V1_RULE_ID_AS_COMMITTED
-        assert "insufficient" in rule["_supersedes"]["why"]
+        assert rule["allocation_rule_version"] == 3
+        live = family.allocation_rule_id()
+        assert live not in (family.V1_RULE_ID_AS_COMMITTED,
+                            family.V2_RULE_ID_AS_COMMITTED)
+        superseded = {s["version"]: s["id"] for s in rule["_supersedes"]}
+        assert superseded == {1: family.V1_RULE_ID_AS_COMMITTED,
+                             2: family.V2_RULE_ID_AS_COMMITTED}
+        assert "all SEVEN" in superseded_why(rule, 2)
+        assert "preserved" in rule["_superseded_rules_are_preserved"]
+
+    def test_the_id_schemes_are_derived_from_the_one_declaration(self):
+        from experiments.phase_d_series.identity import ID_SCHEME
+
+        sem = family.allocation_rule()["selection"]["ranking_stable_id_semantics"]
+        assert sorted(sem["schemes"]) == sorted(ID_SCHEME)
+        assert "fell behind the code" in sem["_schemes_are_derived"]
 
     def test_the_ranking_identity_semantics_are_bound(self):
         """Changing the id scheme changes the order and therefore the selection,
@@ -457,3 +477,7 @@ class TestTheAllocationRuleVersioning:
         before = family.allocation_rule_id_of(rule)
         mutate(rule)
         assert family.allocation_rule_id_of(rule) != before
+
+
+def superseded_why(rule, version: int) -> str:
+    return next(s["why"] for s in rule["_supersedes"] if s["version"] == version)
