@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_family_content_id_is_null": "it binds the source pins and the realized item digests, neither of which exists. A non-null value here would be fabricated.",
+ "_capacity_source_blocker": "closed by the maintainer source decision of 2026-10-03, integrated as main@bc31175f. The measured eligible counts clear every shortfall; owner: logs/shared/analyses/autoinit_d_series_source_evidence.json.",
  "_materializes": "nothing",
  "allocation_rule": {
   "_superseded_rules_are_preserved": "v1 by `allocation_rule_v1()`, v2 by a JSON snapshot under `superseded_rules/`. Both ids are pinned as constants and checked against the preserved shapes, because a preserved-for-reproducibility rule with nothing pinning it is not preserved.",
@@ -251,8 +251,24 @@
   "binding_stratum_for_one_battery": "math_verified",
   "path": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
  },
- "family_content_id": null,
+ "capacity_source_blocker": "CLOSED",
+ "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
  "family_id": "d_series_behavioural_v1",
+ "realization": {
+  "_division": "this record owns the ALLOCATION and the DESIGN; the manifest owns the REALIZED family -- per-role item digests, the 42 output-file digests and the source file digests.",
+  "allocation_rule_id_at_build": "f6047343c1c1ad2172f500e979c704c1",
+  "items": "artifacts/stage3/d_series_behavioural_v1 (gitignored)",
+  "owner": "logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "roles_built": [
+   "d1_confirmation",
+   "d1_screening",
+   "d2_confirmation",
+   "d2_screening",
+   "d3_confirmation",
+   "d3_screening"
+  ],
+  "verified_by": "scripts/experiments/stage-1/phase_d_series/verify_batteries.py"
+ },
  "requirement": {
   "code": {
    "domain": "code",
@@ -404,11 +420,11 @@
    }
   ]
  },
- "status": "DESIGNED / NOT MATERIALIZED / BLOCKED ON SOURCES",
+ "status": "BUILT / VERIFIED",
  "what_this_may_not_be_used_to_claim": [
-  "that the six batteries exist. None is built.",
+  "that a D-series result exists. The batteries are evaluation DATA; nothing has been measured on them.",
   "that a D-series score is comparable with a C1 score. The population differs and the family carries its own identity.",
   "that the SESOI has been characterized on this population. It is carried forward as a recorded assumption.",
-  "that any source is pinned. The options above are candidates with unverified licences and no revisions."
+  "that the sources were always pinned. `source_options` below is the HISTORICAL candidate list from before the 2026-10-03 decision, kept as the record of what was considered; the decided and verified pins live in the source-evidence record and in the manifest's `sources`."
  ]
 }

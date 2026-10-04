@@ -140,12 +140,29 @@ class TestItIsFrozenProspectively:
                             lambda: {"gsm8k": ("reasoning_math", 1, True)})
         assert family.allocation_rule_id() != before
 
-    def test_the_content_id_is_absent_rather_than_fabricated(self):
-        """It binds source pins and realized item digests, neither of which
-        exists. A value here would be invented provenance."""
+    def test_the_content_id_follows_the_realization_rather_than_being_typed(self):
+        """It was None while nothing was built, and that was correct then.
+
+        The family is built now, so a null here would be the opposite error -- a
+        design record claiming 22 MB of evaluation data does not exist while the
+        manifest and the state snapshot say it does. `_realization()` derives it
+        from whether the manifest exists, so building or removing the family
+        moves this without an edit.
+        """
         report = family.report()
-        assert report["family_content_id"] is None
-        assert "fabricated" in report["_family_content_id_is_null"]
+        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        if manifest.is_file():
+            import json as _json
+
+            realized = _json.loads(manifest.read_text())
+            assert report["status"] == "BUILT / VERIFIED"
+            assert report["family_content_id"] == realized["family_content_id"]
+            assert report["realization"]["owner"].endswith(
+                "autoinit_d_series_family_manifest.json")
+            assert report["capacity_source_blocker"] == "CLOSED"
+        else:
+            assert report["family_content_id"] is None
+            assert "fabricated" in report["_family_content_id_is_null"]
 
     def test_the_rule_excludes_only_what_it_cannot_know_yet(self):
         """The line moved, for a stated reason.
@@ -230,7 +247,10 @@ class TestItIsANewDistributionAndSaysSo:
         claims = family.report()["what_this_may_not_be_used_to_claim"]
         joined = " ".join(claims)
         assert "comparable with a C1 score" in joined
-        assert "None is built" in joined
+        #: the enduring claim boundary. "None is built" was the right thing to
+        #: forbid while none was; with six built, what must not be claimed is a
+        #: RESULT -- the batteries are data and nothing has been measured on them.
+        assert "nothing has been measured on them" in joined
 
 
 class TestTheRequirementNobodyHadComputed:
@@ -338,8 +358,9 @@ class TestTheCommittedRecord:
     def test_it_materializes_and_authorizes_nothing(self):
         doc = json.loads((REPO / family.RECORD).read_text())
         assert doc["_authorizes"] == "nothing"
-        assert doc["_materializes"] == "nothing"
-        assert doc["status"].startswith("DESIGNED / NOT MATERIALIZED")
+        assert doc["_materializes"] == "nothing", (
+            "this PRODUCER materializes nothing -- build_batteries.py does")
+        assert doc["status"] in ("BUILT / VERIFIED", "DESIGNED / NOT MATERIALIZED")
 
     def test_it_lives_in_the_shared_area_not_under_one_experiment(self):
         """Three experiments own two roles each. Filing it under `phase_d1`

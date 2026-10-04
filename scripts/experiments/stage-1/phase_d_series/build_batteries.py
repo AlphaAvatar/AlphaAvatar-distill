@@ -308,6 +308,12 @@ def _document(roles, pools, isolation) -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "family_id": FAMILY_ID,
+        "output_files": output_files(roles),
+        "_output_files": (
+            "the 42 realized item files, by SHA256 of their actual bytes. "
+            "`family_content_id` binds these; the per-role `item_ids_sha256` is "
+            "a readable secondary identity that binds only which source rows "
+            "the ids refer to."),
         "allocation_rule_id": allocation_rule_id(),
         "allocation_rule_version": allocation_rule()["allocation_rule_version"],
         "_built_before_any_outcome": (
@@ -338,18 +344,57 @@ def _source_manifest() -> dict[str, Any]:
     return out
 
 
-def family_content_id(doc: dict[str, Any]) -> str:
-    """`H(what was actually drawn)` — the realized counterpart to the rule id.
+def serialize(items: list[dict[str, Any]]) -> bytes:
+    """The exact bytes one role/stratum file holds.
 
-    Binds the rule id, every role's realized item/content list and every source
-    file digest. The rule says HOW the family is drawn and can be hashed before
-    the sources are read; this says WHAT was drawn and cannot.
+    One function for both the digest and the write, so a dry run's digest is the
+    digest of what a write would produce. Computing them separately is how a
+    manifest comes to describe bytes that were never on disk.
+    """
+    return "".join(json.dumps(i, sort_keys=True) + "\n"
+                   for i in items).encode()
+
+
+def output_files(roles) -> dict[str, dict[str, Any]]:
+    """Per role/stratum: path, size, SHA256 of the actual bytes, item count.
+
+    6 roles x 7 strata = 42 realized files. This is what makes the manifest
+    identify the family rather than merely the source rows its ids point at.
+    """
+    out: dict[str, dict[str, Any]] = {}
+    for role, _d, _e, _p in ROLES:
+        for group, items in sorted(roles[role].items()):
+            raw = serialize(items)
+            out[f"{role}/{group}.jsonl"] = {
+                "size_bytes": len(raw),
+                "sha256": hashlib.sha256(raw).hexdigest(),
+                "n_items": len(items),
+            }
+    return out
+
+
+def family_content_id(doc: dict[str, Any]) -> str:
+    """`H(the actual battery bytes)` — the realized counterpart to the rule id.
+
+    **Binds the OUTPUT FILE DIGESTS, not just the ids.** The previous version
+    hashed `item id : problem_content_id` per role, which identifies *which
+    source rows the ids refer to* and nothing about the behavioural item. Every
+    one of these could change without moving it: `prompt_text`, `messages`,
+    `gold`, `aliases`, a tool schema, expected tool calls, any scorer field.
+
+    That is not hypothetical. This same round found that `battery_v2`'s RAG
+    prompts no longer match the current renderer because `RAG_INSTRUCTION` was
+    reworded — a rendered-content change with every id intact. A family identity
+    blind to that would certify the wrong 22 MB.
+
+    `family.json` is deliberately NOT an input: it carries this value, so hashing
+    it would be circular. The id/content digest per role stays in the manifest as
+    a readable secondary identity and is not what this binds.
     """
     return sha256_json({
         "allocation_rule_id": doc["allocation_rule_id"],
-        "roles": {r: {"item_ids_sha256": v["item_ids_sha256"],
-                      "per_stratum": v["per_stratum"]}
-                  for r, v in sorted(doc["roles"].items())},
+        "output_files": {path: got["sha256"]
+                         for path, got in sorted(doc["output_files"].items())},
         "sources": doc["sources"],
     })
 
@@ -392,8 +437,7 @@ def main(argv: list[str] | None = None) -> int:
             role_dir = root / role
             role_dir.mkdir(exist_ok=True)
             for group, items in sorted(built.items()):
-                (role_dir / f"{group}.jsonl").write_text(
-                    "".join(json.dumps(i, sort_keys=True) + "\n" for i in items))
+                (role_dir / f"{group}.jsonl").write_bytes(serialize(items))
         (root / "family.json").write_text(
             json.dumps(doc, indent=1, sort_keys=True) + "\n")
         manifest = REPO_ROOT / MANIFEST

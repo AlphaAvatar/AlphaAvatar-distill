@@ -70,16 +70,16 @@ class TestTheManifestIsACommittedRecord:
             for rel, got in files.items():
                 assert len(got["sha256"]) == 64, (group, rel)
 
-    def test_the_family_content_id_binds_what_was_drawn(self, manifest):
-        """It must move when any role's realized items move, and it must NOT be
-        the rule id — the rule says how, this says what."""
+    def test_the_family_content_id_is_not_the_rule_id(self, manifest):
+        """The rule says HOW the family is drawn; this says WHAT was drawn.
+
+        This test used to assert that moving a role's `item_ids_sha256` moved the
+        family id. It did then, and that was the defect: the id digest binds only
+        which SOURCE ROWS the ids refer to. What moves the family id now is a
+        changed output-file digest -- see `TestTheArtifactDigestIsWhatBinds`.
+        """
         assert manifest["family_content_id"] != manifest["allocation_rule_id"]
         assert build.family_content_id(manifest) == manifest["family_content_id"]
-
-        moved = json.loads(json.dumps(manifest))
-        role = manifest["role_order"][0]
-        moved["roles"][role]["item_ids_sha256"] = "0" * 64
-        assert build.family_content_id(moved) != manifest["family_content_id"]
 
     def test_it_says_the_family_predates_any_outcome(self, manifest):
         #: the CLAIM, not a phrase: all six drawn in one pass before any search
@@ -194,3 +194,151 @@ class TestTheIdentityCoordinatesOnDisk:
             for group in PROBLEM_FIELD:
                 for item in per[group]:
                     assert item.get("problem_content_id"), (role, group, item["id"])
+
+
+@requires_the_built_family
+class TestTheArtifactDigestIsWhatBinds:
+    """`family_content_id` must identify the actual bytes, not only the ids.
+
+    The first version hashed `item id : problem_content_id` per role, which says
+    which SOURCE ROWS the ids refer to and nothing about the behavioural item.
+    `prompt_text`, `gold`, `messages`, aliases, a tool schema and every scorer
+    field could all change without moving it -- and this round had already found
+    `battery_v2`'s RAG prompts drifting from the current renderer with every id
+    intact.
+    """
+
+    @pytest.fixture
+    def mutated(self, tmp_path):
+        """A full copy of the family, safe to corrupt."""
+        import shutil
+
+        root = tmp_path / "family"
+        shutil.copytree(ROOT, root)
+        return root
+
+    def _rewrite(self, path, mutate):
+        rows = [json.loads(line) for line in path.read_text().splitlines()
+                if line.strip()]
+        mutate(rows)
+        path.write_bytes(build.serialize(rows))
+        return rows
+
+    def test_the_manifest_names_one_file_per_role_and_stratum(self, manifest):
+        expected = len(family.ROLES) * len(family.strata())
+        assert len(manifest["output_files"]) == expected == 42
+        for rel, got in manifest["output_files"].items():
+            assert len(got["sha256"]) == 64, rel
+            assert got["size_bytes"] > 0 and got["n_items"] > 0, rel
+
+    def test_the_family_id_follows_from_the_output_digests(self, manifest):
+        """And a changed digest moves it."""
+        assert build.family_content_id(manifest) == manifest["family_content_id"]
+        moved = json.loads(json.dumps(manifest))
+        rel = sorted(moved["output_files"])[0]
+        moved["output_files"][rel]["sha256"] = "0" * 64
+        assert build.family_content_id(moved) != manifest["family_content_id"]
+
+    def test_the_id_digest_alone_no_longer_binds_the_family(self, manifest):
+        """The readable secondary identity must not be what the family id uses.
+
+        If `family_content_id` still followed from `item_ids_sha256`, changing a
+        gold would leave it unchanged -- which is the whole defect.
+        """
+        moved = json.loads(json.dumps(manifest))
+        for role in moved["roles"]:
+            moved["roles"][role]["item_ids_sha256"] = "0" * 64
+        assert build.family_content_id(moved) == manifest["family_content_id"], (
+            "family_content_id still depends on the id digest; it must bind the "
+            "output bytes")
+
+    def test_changing_a_gold_is_caught_by_the_artifact_digest_alone(self, mutated):
+        """Id and problem_content_id untouched; only the behavioural content."""
+        path = mutated / "d1_screening" / "gsm8k.jsonl"
+        before = json.loads(path.read_text().splitlines()[0])
+        rows = self._rewrite(path, lambda rs: rs[0].__setitem__("gold", "999999"))
+        assert rows[0]["id"] == before["id"]
+        assert rows[0]["problem_content_id"] == before["problem_content_id"]
+
+        roles, doc = verify.load(mutated)
+        assert verify.check_output_digests(mutated, doc), (
+            "a changed gold must fail the artifact digest")
+        #: and `check_manifest` must fail from the artifact digest ALONE
+        assert verify.check_manifest(roles, doc, mutated)
+
+    def test_changing_a_prompt_is_caught_by_the_artifact_digest(self, mutated):
+        path = mutated / "d1_screening" / "rag.jsonl"
+        self._rewrite(path, lambda rs: rs[0].__setitem__(
+            "prompt_text", rs[0]["prompt_text"] + " (drifted)"))
+        _roles, doc = verify.load(mutated)
+        assert verify.check_output_digests(mutated, doc)
+
+    def test_an_extra_file_on_disk_is_caught(self, mutated):
+        (mutated / "d1_screening" / "extra.jsonl").write_text("{}\n")
+        _roles, doc = verify.load(mutated)
+        problems = verify.check_output_digests(mutated, doc)
+        assert any("not named by the manifest" in p for p in problems), problems
+
+
+@requires_the_built_family
+class TestEveryItemIsCheckedAgainstTheWholeContract:
+    """The native-identity coordinate, independently verified for every stratum.
+
+    `rag`, `multihop`, `knowledge` and `tool` declare no problem payload, so the
+    native/source-id coordinate is the only one with teeth there — and it was the
+    one resting on the builder's word.
+    """
+
+    def test_the_contract_covers_the_complete_baseline(self):
+        """Recovery training, calibration and state evaluation contribute source
+        ids, and the contract must include them."""
+        reserved = verify.reserved_contract("rag")
+        assert len(reserved["ids"]) > 10000, (
+            "the reserved id set looks too small to include the training corpus")
+        #: a known recovery-training source id must be in it
+        first = json.loads(
+            (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl")
+            .read_text(errors="ignore").split("\n", 1)[0])
+        assert str(first["source_id"]) in reserved["ids"]
+
+    def test_a_reserved_source_key_is_caught_on_a_no_payload_stratum(self, tmp_path):
+        """RAG: no `problem_content_id`, so only the id coordinate can catch this."""
+        import shutil
+
+        root = tmp_path / "family"
+        shutil.copytree(ROOT, root)
+        first = json.loads(
+            (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl")
+            .read_text(errors="ignore").split("\n", 1)[0])
+        reserved_id = str(first["source_id"])
+
+        path = root / "d1_screening" / "rag.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()
+                if line.strip()]
+        assert rows[0].get("problem_content_id") is None, (
+            "this test needs a stratum with no problem payload")
+        rows[0]["source_key"] = reserved_id
+        path.write_bytes(build.serialize(rows))
+
+        roles, _doc = verify.load(root)
+        problems = verify.check_every_item_against_the_contract(roles)
+        assert any("source_key" in p and "reserved id" in p for p in problems), (
+            problems[:3])
+
+    def test_a_reserved_historical_render_id_is_caught(self, tmp_path):
+        import shutil
+
+        root = tmp_path / "family"
+        shutil.copytree(ROOT, root)
+        consumed = json.loads(
+            (REPO / "artifacts/stage3/c1_confirmation_v1/multihop.jsonl")
+            .read_text().splitlines()[0])
+        path = root / "d2_screening" / "multihop.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()
+                if line.strip()]
+        rows[0]["historical_render_id"] = consumed["id"]
+        path.write_bytes(build.serialize(rows))
+
+        roles, _doc = verify.load(root)
+        problems = verify.check_every_item_against_the_contract(roles)
+        assert any("historical_render_id" in p for p in problems), problems[:3]

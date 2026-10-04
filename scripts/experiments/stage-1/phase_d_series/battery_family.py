@@ -617,6 +617,52 @@ def allocation_rule_id() -> str:
     return allocation_rule_id_of(allocation_rule())
 
 
+def _realization() -> dict[str, Any]:
+    """Whether the family has been BUILT, read from the realized manifest.
+
+    **This record owns the design; the manifest owns the realization.** It must
+    still point at reality: while this said `DESIGNED / NOT MATERIALIZED` and
+    `family_content_id: null`, the manifest and the state snapshot said the six
+    batteries existed. Two records disagreeing about whether 22 MB of evaluation
+    data exists is worse than either being wrong alone.
+
+    Derived rather than typed, so building or removing the family moves this
+    without an edit.
+    """
+    manifest = REPO_ROOT / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+    if not manifest.is_file():
+        return {
+            "status": "DESIGNED / NOT MATERIALIZED",
+            "family_content_id": None,
+            "_family_content_id_is_null": (
+                "no realized manifest exists, so there are no item digests to "
+                "bind. A non-null value here would be fabricated."),
+        }
+    doc = json.loads(manifest.read_text())
+    return {
+        "status": "BUILT / VERIFIED",
+        "family_content_id": doc.get("family_content_id"),
+        "realization": {
+            "owner": "logs/shared/analyses/autoinit_d_series_family_manifest.json",
+            "_division": ("this record owns the ALLOCATION and the DESIGN; the "
+                          "manifest owns the REALIZED family -- per-role item "
+                          "digests, the 42 output-file digests and the source "
+                          "file digests."),
+            "roles_built": sorted(doc.get("roles", {})),
+            "allocation_rule_id_at_build": doc.get("allocation_rule_id"),
+            "items": "artifacts/stage3/d_series_behavioural_v1 (gitignored)",
+            "verified_by": ("scripts/experiments/stage-1/phase_d_series/"
+                            "verify_batteries.py"),
+        },
+        "capacity_source_blocker": "CLOSED",
+        "_capacity_source_blocker": (
+            "closed by the maintainer source decision of 2026-10-03, integrated "
+            "as main@bc31175f. The measured eligible counts clear every "
+            "shortfall; owner: "
+            "logs/shared/analyses/autoinit_d_series_source_evidence.json."),
+    }
+
+
 def report() -> dict[str, Any]:
     need = requirement()
     short = {name: row["short_by"] for name, row in need.items()
@@ -625,13 +671,9 @@ def report() -> dict[str, Any]:
     return {
         "schema": SCHEMA,
         "family_id": FAMILY_ID,
-        "status": "DESIGNED / NOT MATERIALIZED / BLOCKED ON SOURCES",
+        **_realization(),
         "allocation_rule": allocation_rule(),
         "allocation_rule_id": allocation_rule_id(),
-        "family_content_id": None,
-        "_family_content_id_is_null": (
-            "it binds the source pins and the realized item digests, neither of "
-            "which exists. A non-null value here would be fabricated."),
         "requirement": need,
         "short_strata": short,
         "roles_fundable_today": min(row["roles_fundable_today"]
@@ -666,13 +708,17 @@ def report() -> dict[str, Any]:
         "_authorizes": "nothing",
         "_materializes": "nothing",
         "what_this_may_not_be_used_to_claim": [
-            "that the six batteries exist. None is built.",
+            "that a D-series result exists. The batteries are evaluation DATA; "
+            "nothing has been measured on them.",
             "that a D-series score is comparable with a C1 score. The "
             "population differs and the family carries its own identity.",
             "that the SESOI has been characterized on this population. It is "
             "carried forward as a recorded assumption.",
-            "that any source is pinned. The options above are candidates with "
-            "unverified licences and no revisions.",
+            "that the sources were always pinned. `source_options` below is the "
+            "HISTORICAL candidate list from before the 2026-10-03 decision, kept "
+            "as the record of what was considered; the decided and verified "
+            "pins live in the source-evidence record and in the manifest's "
+            "`sources`.",
         ],
     }
 

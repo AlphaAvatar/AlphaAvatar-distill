@@ -214,9 +214,150 @@ def check_training_corpus(roles) -> list[str]:
     return problems
 
 
-def check_manifest(roles, doc) -> list[str]:
-    """The committed manifest must describe the items on disk."""
+def check_output_digests(root: Path, doc) -> list[str]:
+    """Every realized file's SHA256, recomputed from disk.
+
+    The manifest must identify the actual 22 MB. Recomputed here from the bytes
+    on disk rather than read back from the builder's claim, and the family
+    content id is recomputed from those recomputed digests -- so a changed
+    `prompt_text`, `gold` or tool schema fails even when every id is intact.
+    """
+    import hashlib
+
     problems = []
+    claimed = doc.get("output_files")
+    if not claimed:
+        return ["the manifest carries no output_files; it cannot identify the "
+                "family it was built from"]
+    spec = strata()
+    expected_n = len(ROLES) * len(spec)
+    if len(claimed) != expected_n:
+        problems.append(
+            f"manifest names {len(claimed)} output files, expected "
+            f"{expected_n} ({len(ROLES)} roles x {len(spec)} strata)")
+
+    recomputed: dict[str, str] = {}
+    for rel, got in sorted(claimed.items()):
+        path = root / rel
+        if not path.is_file():
+            problems.append(f"{rel}: named by the manifest but not on disk")
+            continue
+        raw = path.read_bytes()
+        digest = hashlib.sha256(raw).hexdigest()
+        recomputed[rel] = digest
+        if digest != got["sha256"]:
+            problems.append(
+                f"{rel}: bytes hash {digest[:12]} but the manifest says "
+                f"{got['sha256'][:12]}")
+        if len(raw) != got["size_bytes"]:
+            problems.append(f"{rel}: {len(raw)} bytes, manifest says "
+                            f"{got['size_bytes']}")
+        n = sum(1 for line in raw.decode().splitlines() if line.strip())
+        if n != got["n_items"]:
+            problems.append(f"{rel}: {n} items, manifest says {got['n_items']}")
+
+    #: every file on disk must be named by the manifest, not only the reverse
+    for role, _d, _e, _p in ROLES:
+        for path in sorted((root / role).glob("*.jsonl")):
+            rel = f"{role}/{path.name}"
+            if rel not in claimed:
+                problems.append(f"{rel}: on disk but not named by the manifest")
+
+    #: and the family id must follow from the RECOMPUTED digests
+    if recomputed and not problems:
+        from experiments.phase_d_series.build_batteries import family_content_id
+
+        rebuilt = family_content_id({
+            "allocation_rule_id": doc["allocation_rule_id"],
+            "output_files": {rel: {"sha256": d} for rel, d in recomputed.items()},
+            "sources": doc["sources"]})
+        if rebuilt != doc.get("family_content_id"):
+            problems.append(
+                f"family_content_id does not follow from the bytes on disk: "
+                f"recomputed {rebuilt[:12]}, manifest "
+                f"{str(doc.get('family_content_id'))[:12]}")
+    return problems
+
+
+def reserved_contract(group: str) -> dict[str, set[str]]:
+    """The historical exclusion SET, as a contract input.
+
+    Sharing the frozen SET DEFINITION is deliberate and allowed: a verifier that
+    invented its own reserved populations would be checking a different contract.
+    What it must not share is the builder's selection or admission RESULT, and it
+    does not -- every candidate decision below is made here from these sets.
+
+    This is the complete baseline, including the three populations the previous
+    verifier did not check for the strata that have no problem payload: recovery
+    training, operator calibration and state evaluation contribute `source_id`s
+    that `rank_take` relies on, and for `rag`, `multihop`, `knowledge` and `tool`
+    that native-identity coordinate is the only one with teeth.
+    """
+    from experiments.phase_d_series.source_evidence import (
+        baseline_chain,
+        d_series_additional,
+    )
+
+    base_ids, base_hashes, _prov = baseline_chain()
+    add_ids, add_hashes, _add_prov = d_series_additional(group)
+    return {
+        "ids": set(base_ids) | set(add_ids),
+        "prompt_hashes": set(base_hashes) | set(add_hashes),
+        "problem_contents": set(reserved_problem_content(group)["ids"]),
+    }
+
+
+def check_every_item_against_the_contract(roles) -> list[str]:
+    """Requirement 2: all four coordinates, every item, every stratum.
+
+    The previous version checked rebuilt pools for the committed batteries and
+    FINAL_PROMOTION, plus problem content for the three strata that declare a
+    payload. That left the native/source-id protection for `rag`, `multihop`,
+    `knowledge` and `tool` resting on the builder's word -- and those are exactly
+    the strata where the id coordinate is the only one that bites.
+    """
+    problems = []
+    spec = strata()
+    for group in sorted(spec):
+        reserved = reserved_contract(group)
+        for role, _d, _e, _p in ROLES:
+            for item in roles[role][group]:
+                where = f"{group}/{role}/{item['id']}"
+                historical = str(item.get("historical_render_id") or "")
+                if historical and historical in reserved["ids"]:
+                    problems.append(
+                        f"{where}: historical_render_id {historical!r} is a "
+                        "reserved id")
+                key = item.get("source_key")
+                if key is not None and str(key) in reserved["ids"]:
+                    problems.append(
+                        f"{where}: source_key {str(key)!r} is a reserved id")
+                if content_sha256(norm(item["prompt_text"])) in reserved[
+                        "prompt_hashes"]:
+                    problems.append(
+                        f"{where}: its rendered prompt is a reserved prompt")
+                content = item.get("problem_content_id")
+                if content and content in reserved["problem_contents"]:
+                    problems.append(
+                        f"{where}: its problem content is reserved")
+                if len(problems) > 40:
+                    return problems
+    return problems
+
+
+def check_manifest(roles, doc, root: Path | None = None) -> list[str]:
+    """The committed manifest must describe the items on disk.
+
+    `root` is required for the part that matters: the family id has to be
+    recomputed from the BYTES, not from the manifest's own claim about them.
+    Recomputing it from `doc["output_files"]` would pass for any corruption that
+    edits the items and the claimed digests together -- and, worse, for one that
+    edits only the items, because then nothing in the doc moved at all. A changed
+    `gold` with an intact id is exactly that case.
+    """
+    problems = []
+    if root is not None:
+        problems += check_output_digests(root, doc)
     if doc.get("allocation_rule_id") != allocation_rule_id():
         problems.append(
             f"manifest names rule {doc.get('allocation_rule_id')} but the live "
@@ -232,11 +373,13 @@ def check_manifest(roles, doc) -> list[str]:
                 f"{claimed[:12]}")
         if doc["roles"][role]["n_prompts"] != len(items):
             problems.append(f"{role}: manifest n_prompts disagrees with disk")
+    #: from the doc's own fields -- a self-consistency check only, which is why
+    #: the disk-based recomputation above is the one that binds.
     recomputed = family_content_id(doc)
     if doc.get("family_content_id") != recomputed:
         problems.append(
-            f"family_content_id {doc.get('family_content_id', '')[:12]} != "
-            f"recomputed {recomputed[:12]}")
+            f"family_content_id {doc.get('family_content_id', '')[:12]} is not "
+            f"self-consistent with the manifest's own fields ({recomputed[:12]})")
     return problems
 
 
@@ -309,9 +452,12 @@ def verify(root: Path) -> dict[str, list[str]]:
         "counts_and_denominators": check_counts(roles),
         "renderer_scorer_parity": check_renderer_parity(roles),
         "pairwise_disjointness": check_pairwise_disjointness(roles),
+        "contract_isolation_all_coordinates": (
+            check_every_item_against_the_contract(roles)),
         "isolation_from_history": check_isolation_from_history(roles),
         "recovery_training": check_training_corpus(roles),
-        "manifest": check_manifest(roles, doc),
+        "output_file_digests": check_output_digests(root, doc),
+        "manifest": check_manifest(roles, doc, root),
     }
 
 
