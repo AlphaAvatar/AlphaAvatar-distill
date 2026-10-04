@@ -290,9 +290,17 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
     outcome = DepthCausalKLGreedyV1().apply(ctx)
     seconds = round(time.time() - t0, 3)
     peak = int(torch.cuda.max_memory_allocated())
+    #: SAVE THE CHILD. Stage D needs a real candidate of a real compressed
+    #: geometry, and this is one -- produced by the operator under measurement, at
+    #: the real vocabulary, so it is logit-comparable with the teacher. Buying a
+    #: second materialization to get a candidate would be paying twice for
+    #: something this stage already built.
+    child_path = workdir / "depth_child"
+    adapter.save(outcome.model, str(child_path))
     del model
     torch.cuda.empty_cache()
     return {
+        "candidate_checkpoint": str(child_path),
         "seconds": seconds,
         "peak_memory_bytes": peak,
         "observer_seconds": round(sketch_seconds[0], 3),
@@ -684,6 +692,19 @@ def main(argv: list[str] | None = None) -> int:
                          c["n_rounds_where_winners_disagree"],
                          "mass_p5": record["analysis"]["A_reference_top_k_mass"][
                              "distribution"].get("p5")}
+
+        with journal.stage("D_state_eval_both_supports") as st:
+            #: DEFINED AND NEVER CALLED in the first version of this driver, which
+            #: would have produced items A, B, C and E and silently omitted D.
+            #: Found by reading the stage list against the authorization's
+            #: `covers` before the run that needed it, not after.
+            record["D_state_eval"] = stage_D_state_eval(
+                repo=repo,
+                artifact_path=record["C_depth"]["candidate_checkpoint"],
+                teacher_path=teacher_path, journal=journal)
+            cmp_ = record["D_state_eval"]["comparison"]
+            st.result = {"protocol_ids_differ": cmp_["protocol_ids_differ"],
+                         "worst_domain_agrees": cmp_["worst_domain_agrees"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001
