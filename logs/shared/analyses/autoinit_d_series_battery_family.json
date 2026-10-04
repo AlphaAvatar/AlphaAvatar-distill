@@ -1,6 +1,7 @@
 {
  "_authorizes": "nothing",
  "_capacity_source_blocker": "closed by the maintainer source decision of 2026-10-03, integrated as main@bc31175f. The measured eligible counts clear every shortfall; owner: logs/shared/analyses/autoinit_d_series_source_evidence.json.",
+ "_d1_evidence_blocker": "closed on the realized family: construction pinned to a clean commit, the family identity binding the 42 output files' bytes, pairwise disjointness across six roles, and every item checked independently against the complete historical exclusion contract. Closing it authorizes NO paid execution: the short GPU qualification still needs explicit maintainer authorization.",
  "_materializes": "nothing",
  "allocation_rule": {
   "_superseded_rules_are_preserved": "v1 by `allocation_rule_v1()`, v2 by a JSON snapshot under `superseded_rules/`. Both ids are pinned as constants and checked against the preserved shapes, because a preserved-for-reproducibility rule with nothing pinning it is not preserved.",
@@ -244,7 +245,7 @@
  },
  "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
  "binding_stratum": "math_verified",
- "blocker": "CAPACITY IS CLOSED. The source decision of 2026-10-03 extended all three short strata and the strengthened chain's measured eligible counts clear every shortfall -- see logs/shared/analyses/autoinit_d_series_source_evidence.json, which owns those figures. The remaining blockers are NOT capacity: the GSM8K split-aware RENDERER does not exist, so its realized membership is not final, and the MATERIALIZATION decision itself has not been taken. No row is drawn.",
+ "blocker": "NOTHING BLOCKS THIS RECORD'S SUBJECT. The capacity/source blocker is CLOSED (maintainer source decision 2026-10-03, integrated as main@bc31175f) and the D1 EVIDENCE BLOCKER is CLOSED on independent review of the realized family. The six roles are built, byte-hashed and verified; the realized bytes are owned by logs/shared/analyses/autoinit_d_series_family_manifest.json.\n\nD1 itself remains blocked, for reasons outside this record: FUNDING AUTHORIZATION (phase_d1 is absent from funds_formal_sessions_of -- categorical, and no measurement closes it) and the PER-SESSION ENVELOPE (unresolved pending the short GPU qualification and repricing). Owner: logs/state/current.json :: d_series.blockers.",
  "capacity_record": {
   "_why_the_two_disagree": "the record asks how many whole batteries remain and answers zero, binding on math_verified. At six roles the question changes: gsm8k funds five roles and code two, so extending math alone would unblock D1 and still leave the family short.",
   "batteries_remaining_for_one": 0,
@@ -252,6 +253,7 @@
   "path": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
  },
  "capacity_source_blocker": "CLOSED",
+ "d1_evidence_blocker": "CLOSED on independent review 2026-10-03",
  "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
  "family_id": "d_series_behavioural_v1",
  "realization": {

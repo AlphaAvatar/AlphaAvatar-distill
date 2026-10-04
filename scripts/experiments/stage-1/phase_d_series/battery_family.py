@@ -655,12 +655,50 @@ def _realization() -> dict[str, Any]:
                             "verify_batteries.py"),
         },
         "capacity_source_blocker": "CLOSED",
+        "d1_evidence_blocker": "CLOSED on independent review 2026-10-03",
+        "_d1_evidence_blocker": (
+            "closed on the realized family: construction pinned to a clean "
+            "commit, the family identity binding the 42 output files' bytes, "
+            "pairwise disjointness across six roles, and every item checked "
+            "independently against the complete historical exclusion contract. "
+            "Closing it authorizes NO paid execution: the short GPU "
+            "qualification still needs explicit maintainer authorization."),
         "_capacity_source_blocker": (
             "closed by the maintainer source decision of 2026-10-03, integrated "
             "as main@bc31175f. The measured eligible counts clear every "
             "shortfall; owner: "
             "logs/shared/analyses/autoinit_d_series_source_evidence.json."),
     }
+
+
+def _blocker() -> str:
+    """What still blocks, derived from whether the family has been realized.
+
+    Three successive versions of this string described a state the repository had
+    already left: first "THREE strata cannot fund six roles" after the source
+    decision closed capacity, then "the GSM8K split-aware RENDERER does not
+    exist" and "No row is drawn" after all 5,700 rows had been drawn with that
+    renderer. A hand-written blocker goes stale at exactly the moment the thing
+    it names is fixed, which is when a reader is most likely to trust it.
+    """
+    manifest = REPO_ROOT / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+    if not manifest.is_file():
+        return (
+            "NOT MATERIALIZED. The allocation rule is frozen and the sources are "
+            "decided, but no row has been drawn. Build with "
+            "scripts/experiments/stage-1/phase_d_series/build_batteries.py.")
+    return (
+        "NOTHING BLOCKS THIS RECORD'S SUBJECT. The capacity/source blocker is "
+        "CLOSED (maintainer source decision 2026-10-03, integrated as "
+        "main@bc31175f) and the D1 EVIDENCE BLOCKER is CLOSED on independent "
+        "review of the realized family. The six roles are built, byte-hashed and "
+        "verified; the realized bytes are owned by "
+        "logs/shared/analyses/autoinit_d_series_family_manifest.json.\n\n"
+        "D1 itself remains blocked, for reasons outside this record: FUNDING "
+        "AUTHORIZATION (phase_d1 is absent from funds_formal_sessions_of -- "
+        "categorical, and no measurement closes it) and the PER-SESSION ENVELOPE "
+        "(unresolved pending the short GPU qualification and repricing). Owner: "
+        "logs/state/current.json :: d_series.blockers.")
 
 
 def report() -> dict[str, Any]:
@@ -696,15 +734,7 @@ def report() -> dict[str, Any]:
                       "source decision was taken to resolve."),
             **{k: v for k, v in sorted(short.items())},
         },
-        "blocker": (
-            "CAPACITY IS CLOSED. The source decision of 2026-10-03 extended all "
-            "three short strata and the strengthened chain's measured eligible "
-            "counts clear every shortfall -- see "
-            "logs/shared/analyses/autoinit_d_series_source_evidence.json, which "
-            "owns those figures. The remaining blockers are NOT capacity: the "
-            "GSM8K split-aware RENDERER does not exist, so its realized "
-            "membership is not final, and the MATERIALIZATION decision itself "
-            "has not been taken. No row is drawn."),
+        "blocker": _blocker(),
         "_authorizes": "nothing",
         "_materializes": "nothing",
         "what_this_may_not_be_used_to_claim": [

@@ -293,23 +293,46 @@ class TestTheRequirementNobodyHadComputed:
         assert "six roles" in why
         assert report["capacity_record"]["batteries_remaining_for_one"] == 0
 
-    def test_the_blocker_is_no_longer_about_capacity(self):
-        """It was "THREE strata cannot fund six roles". The source decision
-        closed that, so a blocker still naming it would be describing a state the
-        repository has left -- and the per-stratum shortfalls move to their own
-        field, because what they are now is the history of a closed problem."""
+    def test_the_blocker_tracks_the_realization_rather_than_being_typed(self):
+        """Three successive hand-written versions described a state the repository
+        had already left.
+
+        First "THREE strata cannot fund six roles", after the source decision
+        closed capacity. Then "the GSM8K split-aware RENDERER does not exist" and
+        "No row is drawn", after all 5,700 rows had been drawn with that renderer.
+        A hand-written blocker goes stale at exactly the moment the thing it names
+        is fixed, so `_blocker()` derives it from whether the realized manifest
+        exists.
+        """
         report = family.report()
         blocker = report["blocker"]
-        assert "CAPACITY IS CLOSED" in blocker
-        assert "RENDERER" in blocker and "MATERIALIZATION" in blocker
-        assert "No row is drawn" in blocker
-        #: the shortfalls are kept, where they belong
+        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        if manifest.is_file():
+            assert "NOTHING BLOCKS THIS RECORD'S SUBJECT" in blocker
+            assert "EVIDENCE BLOCKER is CLOSED" in blocker
+            #: and it must still say what blocks D1, which is not this record
+            assert "FUNDING AUTHORIZATION" in blocker
+            assert "PER-SESSION ENVELOPE" in blocker
+            for stale in ("RENDERER does not exist", "No row is drawn",
+                          "cannot fund six roles"):
+                assert stale not in blocker, stale
+        else:
+            assert "NOT MATERIALIZED" in blocker
+        #: the per-stratum shortfalls are kept as the history of a closed problem
         short = report["shortfall_against_the_original_pins"]
         for stratum in ("math_verified", "code", "gsm8k"):
             assert stratum in short
-        #: and the record that owns the eligible figures is named rather than
-        #: the figures being copied here
-        assert "source_evidence.json" in blocker
+
+    def test_closing_the_evidence_blocker_authorizes_nothing(self):
+        """A closed blocker is not a grant. The record must say so where a reader
+        meets the closure, not only in a global `_authorizes` field."""
+        report = family.report()
+        assert report["_authorizes"] == "nothing"
+        if "d1_evidence_blocker" in report:
+            assert "CLOSED" in report["d1_evidence_blocker"]
+            assert "authorizes NO paid execution" in report["_d1_evidence_blocker"]
+            assert "explicit maintainer authorization" in report[
+                "_d1_evidence_blocker"]
 
 
 class TestTheSourceOptionsArePinnedToNothing:

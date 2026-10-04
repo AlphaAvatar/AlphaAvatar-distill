@@ -74,7 +74,7 @@
  "next_starting_point": {
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "A MAINTAINER DECISION on D1's remaining blockers (`d_series.blockers`): funding scope needs a grant and the envelope needs an envelope change -- neither is an agent decision and no measurement closes either. The evidence blocker awaits review of the built family.",
+  "then": "the short ENGINEERING GPU QUALIFICATION, PENDING EXPLICIT MAINTAINER AUTHORIZATION -- it is owed, not approved. It verifies the incumbent rebuild and the target-aware bsz=3 path on real CUDA, measures state-eval peak memory and representative expansion timing, and reprices the chain. Only then can funding scope and the envelope be decided.",
   "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN experiment; and no D1 LAUNCH while ANY blocker in `d_series.blockers` is open."
  },
  "read_order": [
@@ -128,7 +128,7 @@
   "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
  },
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED TWICE: funding authorization and the per-session envelope. The evidence blocker's source/capacity half closed at main@bc31175f; its realized-family half is under review here. Reasons: `d_series.blockers`.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED TWICE: funding authorization and the per-session envelope. The evidence blocker is CLOSED. Reasons: `d_series.blockers`.",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -160,7 +160,7 @@
   "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
   "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
  },
- "next": "MAINTAINER REVIEW of the built family, then the short GPU qualification, reprice, and only then formal D1 funding and the envelope. Order: logs/budget/decisions.md 2026-10-03.",
+ "next": "the short engineering GPU qualification, PENDING EXPLICIT MAINTAINER AUTHORIZATION. No paid execution is authorized by the evidence blocker closing. Order: logs/budget/decisions.md 2026-10-03.",
  "stage_ladder": {
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
@@ -205,7 +205,7 @@
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a): six roles, 950/850 each, pairwise disjoint, every item checked on all four coordinates against the complete baseline, built BEFORE any D1 outcome. Rule v3 f6047343; family_content_id 1e3445f1b6769169 binds the 42 output files' BYTES, superseding c773fad0. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,family_manifest}.json.",
-  "blockers": "EVIDENCE: source/capacity CLOSED at main@bc31175f; the realized six-role family is BUILT and VERIFIED on this branch and awaits maintainer review. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of; no allowance at any price and no measurement closes it. PER-SESSION ENVELOPE: UNRESOLVED, provisional $31.1577 vs $30.00, NOT a measured excess.",
+  "blockers": "EVIDENCE: CLOSED on independent review 2026-10-03 -- source/capacity at main@bc31175f, the realized six-role family verified on prep/d-series-batteries. FUNDING AUTHORIZATION: OPEN, CATEGORICAL -- phase_d1 is absent from funds_formal_sessions_of; no allowance at any price and no measurement closes it. PER-SESSION ENVELOPE: OPEN, UNRESOLVED -- needs the short GPU qualification and repricing.",
   "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent figures only; it cannot settle the funding authorization.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",

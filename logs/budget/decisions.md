@@ -1,5 +1,67 @@
 # Budget decisions
 
+## 2026-10-03 — MAINTAINER DECISION: the D1 evidence blocker is CLOSED
+
+Closed on independent review of the realized six-role family. **Records-only
+round; closing it authorizes no paid execution.**
+
+```text
+evidence blocker        CLOSED
+construction commit     29f99b9abc4c0cabce6066dc8ef306e2fc61b7f6  (clean tree)
+allocation rule v3      f6047343c1c1ad2172f500e979c704c1
+family_content_id       1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58
+superseded identity     c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+```
+
+The maintainer verified independently: the 42 realized files byte-hashed; the
+family identity binding the rule, the output-file SHA256s and the source
+identities; a changed `gold` or `prompt_text` with ids intact detected; the
+verifier recomputing from disk rather than trusting the manifest; the frozen
+950/850 mixture in all six roles; all 5,700 items rebuilding with identical
+membership on clean provenance; pairwise disjointness; every item checked against
+the complete historical exclusion contract on all four coordinates, now including
+recovery-training, calibration and state-evaluation source ids; the RAG
+no-payload mutation demonstrating the native-id verifier detects its failure mode;
+and renderer/scorer parity intact.
+
+**No allocation-rule v4** for `historical_render_id` — it implements the
+historical native/source identity v3 already binds and introduces no new
+selection criterion.
+
+- **D1's blocker state is now exactly three lines**, and the record says so in
+  one place:
+
+  ```text
+  EVIDENCE               CLOSED
+  FUNDING AUTHORIZATION  OPEN / CATEGORICAL   phase_d1 absent from
+                                              funds_formal_sessions_of
+  PER-SESSION ENVELOPE   OPEN / UNRESOLVED    needs the GPU qualification
+                                              and repricing
+  ```
+
+- **The design record's `blocker` is now derived, after three stale versions.** It
+  said "THREE strata cannot fund six roles" after capacity closed, then "the GSM8K
+  split-aware RENDERER does not exist" and "No row is drawn" after all 5,700 rows
+  had been drawn with that renderer. A hand-written blocker goes stale at exactly
+  the moment the thing it names is fixed, which is when a reader is most likely to
+  trust it. `_blocker()` derives it from whether the realized manifest exists, and
+  a test asserts the three retired phrases cannot come back.
+
+- **Closing a blocker is not a grant**, and the record says so where a reader
+  meets the closure rather than only in a global field. The short engineering GPU
+  qualification is **owed, not approved**: it still needs explicit maintainer
+  authorization. Its scope when authorized is narrow — verify the incumbent path
+  still rebuilds the frozen incumbent artifact on real CUDA; verify the
+  target-aware bsz=3 path executes correctly under CUDA/bf16; measure state-eval
+  peak memory against the derived budget; measure representative batched D1
+  expansion timing; reprice the chain. Only that measurement can inform formal
+  funding scope, cap changes and the envelope.
+
+Validation, scoped to a records change: the battery-family test and `tests/docs`,
+215 passed, both regenerators at a fixed point. The 42 battery files were **not**
+rebuilt, the full D-series suite was not rerun for prose, and no core or
+historical suite ran.
+
 ## 2026-10-03 — The family identity binds its bytes, and the provenance is clean
 
 The three closure items from review, in the required order. `$0`. No GPU, no
