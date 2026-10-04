@@ -114,8 +114,15 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
                          "incumbent's")
 
     b = record.get("B_target_aware") or {}
-    if not b:
-        unmet.append("B did not run: the target-aware path was never executed")
+    #: A PARTIAL arm is present-but-failed: `PartialPath` files what it finished,
+    #: so the key exists and is truthy while the path did not complete. Require
+    #: the FINAL artifact, which only a completed arm has.
+    if not b or not b.get("final_artifact_digest"):
+        unmet.append(
+            "B did not complete: the target-aware path produced no final "
+            f"artifact (failed at step {b.get('failed_at_step')}: "
+            f"{b.get('failure')})" if b else
+            "B did not run: the target-aware path was never executed")
     else:
         answers["target_aware_execution"] = {
             "artifact_digest": b.get("final_artifact_digest"),
@@ -125,8 +132,9 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         }
 
     c = record.get("C_selection_comparison") or {}
-    if not c:
-        unmet.append("C did not run: no selection comparison exists")
+    if not c or not c.get("steps"):
+        unmet.append("C compared nothing: no per-step selection comparison "
+                     "exists, so no discrete difference was examined")
     else:
         #: A difference here is EVIDENCE, not a failure. It is reported, with
         #: the steps that moved, and it does not make the verdict anything.
@@ -143,9 +151,21 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         }
 
     d = record.get("D_state_eval") or []
-    if not d:
-        unmet.append("D did not run: state-eval peak memory was never measured")
-    else:
+    #: THIS IS THE ONE THAT CERTIFIED A FAILED RUN. s3's `D_state_eval` was a
+    #: non-empty list of two FAILURE entries, so `not d` was False, and
+    #: `within_derived_budget is False` is not tripped by a measurement that was
+    #: never taken -- the field is simply absent. A list of failures is not a
+    #: list of measurements, and presence is not success anywhere in this file.
+    measured = [m for m in d if not m.get("failed")
+                and isinstance(m.get("peak_memory_bytes"), (int, float))]
+    failed = [m for m in d if m.get("failed")]
+    if failed:
+        for m in failed:
+            unmet.append(f"D failed for {m.get('label')!r}: {m.get('failed')}")
+    if not measured:
+        unmet.append("D produced no state-eval memory measurement at all")
+    if measured:
+        d = measured
         answers["state_eval_memory"] = [{
             "label": m.get("label"),
             "peak_memory_bytes": m.get("peak_memory_bytes"),

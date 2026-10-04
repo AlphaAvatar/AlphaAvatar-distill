@@ -217,3 +217,144 @@ class TestACompletedArmReleasesWhatNothingReads:
         #: And the path it USED is still recorded -- a released artifact is
         #: traceable, not erased from the record.
         assert all(s["checkpoint_path"] for s in arm["steps"])
+
+
+class TestPresenceIsNotSuccess:
+    """A gate that certified a failed run, and the two beside it that could.
+
+    s3's `D_state_eval` was a non-empty list of two FAILURE entries. The check
+    tested `not d` for absence and `within_derived_budget is False` for a
+    violation. A measurement that was never taken trips neither: the field is
+    simply absent. So the closeout called s3 PASSED and wrote the record that
+    tells the rest of the repository the owed GPU validation had run, while
+    stage D had produced nothing at all.
+    """
+
+    @staticmethod
+    def _complete():
+        """A record that legitimately passes, as the baseline to break."""
+        return {
+            "status": "COMPLETE",
+            "bound_protocol_incumbent": {"suite_content_sha256": "a" * 64,
+                                         "measurement_protocol_id": "p1"},
+            "bound_protocol_target_aware": {"suite_content_sha256": "a" * 64,
+                                            "measurement_protocol_id": "p2"},
+            "A_incumbent": {"reconstructed": True, "seconds": 1.0,
+                            "final_artifact_digest": "f" * 64,
+                            "expected_final_artifact_digest": "f" * 64},
+            "B_target_aware": {"final_artifact_digest": "b" * 64,
+                               "seconds": 2.0, "batch_size": 3},
+            "C_selection_comparison": {"steps": [{"impl_id": "op",
+                                                  "selection_differs": False}],
+                                       "n_moved": 0},
+            "D_state_eval": [{"label": "incumbent", "peak_memory_bytes": 1,
+                              "within_derived_budget": True, "seconds": 1.0}],
+        }
+
+    def _verdict(self, record):
+        import d1_qualification_closeout as co
+        return co.verdict_of(record)
+
+    def test_the_baseline_passes(self):
+        """Otherwise the breakages below prove nothing."""
+        verdict, _ = self._verdict(self._complete())
+        assert verdict == "PASSED"
+
+    def test_a_list_of_D_failures_does_not_pass(self):
+        """THE REGRESSION. This exact shape was booked as PASSED."""
+        record = self._complete()
+        record["D_state_eval"] = [
+            {"label": "incumbent", "failed": "TypeError: evaluate() missing 1 "
+                                             "required positional argument"},
+            {"label": "target_aware", "failed": "TypeError: evaluate() missing "
+                                                "1 required positional argument"}]
+        verdict, detail = self._verdict(record)
+
+        assert verdict == "INCOMPLETE"
+        assert any("D failed for 'incumbent'" in u for u in detail["unmet"])
+        assert any("no state-eval memory measurement at all" in u
+                   for u in detail["unmet"])
+
+    def test_a_partial_B_arm_does_not_pass(self):
+        """`PartialPath` makes the key present and truthy without completing."""
+        record = self._complete()
+        record["B_target_aware"] = {"arm": "B", "n_steps": 3, "failed_at_step": 3,
+                                    "steps": [{}, {}, {}],
+                                    "failure": "FixedPathDigestMismatch: ..."}
+        verdict, detail = self._verdict(record)
+
+        assert verdict == "INCOMPLETE"
+        assert any("B did not complete" in u for u in detail["unmet"])
+
+    def test_a_comparison_with_no_steps_does_not_pass(self):
+        record = self._complete()
+        record["C_selection_comparison"] = {"n_moved": 0, "steps": []}
+        verdict, detail = self._verdict(record)
+
+        assert verdict == "INCOMPLETE"
+        assert any("C compared nothing" in u for u in detail["unmet"])
+
+    def test_a_failed_D_beside_a_good_one_still_fails(self):
+        """One measurement does not excuse the arm that produced none."""
+        record = self._complete()
+        record["D_state_eval"] = record["D_state_eval"] + [
+            {"label": "target_aware", "failed": "CUDA out of memory"}]
+        verdict, detail = self._verdict(record)
+
+        assert verdict == "INCOMPLETE"
+        assert any("target_aware" in u and "CUDA out of memory" in u
+                   for u in detail["unmet"])
+
+
+class TestStageDMeasuresWithoutRepeatingTheArms:
+    """Which protocol is state-evaluated, on whose artifact.
+
+    s3 lost stage D to two contract defects after paying for all three arms. The
+    repair must be able to measure D alone: repeating 85 minutes of arms whose
+    digests are already recorded is paying twice for one measurement. What makes
+    that sound is that state-eval memory is a property of the geometry and the
+    protocol's batch plan, not of the weights -- and the fallback is recorded.
+    """
+
+    PROTOCOLS = (("incumbent", {"evaluator": "E1"}),
+                 ("target_aware", {"evaluator": "E2"}))
+
+    def test_each_protocol_prefers_its_own_arm(self):
+        record = {"A_incumbent": {"final_artifact_digest": "a" * 64},
+                  "B_target_aware": {"final_artifact_digest": "b" * 64}}
+        plan, failures = drv.state_eval_plan(record, self.PROTOCOLS)
+
+        assert not failures
+        assert [(p[0], p[3], p[4]) for p in plan] == [
+            ("incumbent", "A_incumbent", True),
+            ("target_aware", "B_target_aware", True)]
+
+    def test_with_only_arm_A_both_protocols_still_measure(self):
+        """The repair subrun's shape: one materialization, two protocols."""
+        record = {"A_incumbent": {"final_artifact_digest": "a" * 64}}
+        plan, failures = drv.state_eval_plan(record, self.PROTOCOLS)
+
+        assert not failures
+        assert [(p[0], p[3], p[4]) for p in plan] == [
+            ("incumbent", "A_incumbent", True),
+            ("target_aware", "A_incumbent", False)]
+        #: The evaluator is still the TARGET-AWARE protocol's own -- only the
+        #: artifact is borrowed. Measuring at the incumbent's batch plan and
+        #: calling it the target-aware figure is the mistake this guards.
+        assert plan[1][2]["evaluator"] == "E2"
+
+    def test_a_partial_arm_is_not_a_materialized_artifact(self):
+        """A `PartialPath` record is truthy and has no final digest."""
+        record = {"A_incumbent": {"arm": "A", "steps": [{}], "n_steps": 1,
+                                  "failure": "boom"}}
+        plan, failures = drv.state_eval_plan(record, self.PROTOCOLS)
+
+        assert plan == []
+        assert [f["label"] for f in failures] == ["incumbent", "target_aware"]
+        assert all("nothing to state-evaluate" in f["failed"] for f in failures)
+
+    def test_no_arms_at_all_fails_rather_than_raising(self):
+        """An empty record must not KeyError in the middle of a paid run."""
+        plan, failures = drv.state_eval_plan({}, self.PROTOCOLS)
+        assert plan == []
+        assert len(failures) == 2

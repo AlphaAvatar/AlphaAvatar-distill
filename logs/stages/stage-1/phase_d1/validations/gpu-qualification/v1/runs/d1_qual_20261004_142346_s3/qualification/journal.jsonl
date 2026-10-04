@@ -1,0 +1,34 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 2.684, "stage": "environment", "status": "ok", "t": 2.684}
+{"stage": "register_operators", "status": "start", "t": 2.685}
+{"operators_ok": true, "profiles": 4, "seconds": 0.061, "stage": "register_operators", "status": "ok", "t": 2.747}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 2.747}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.06, "stage": "bind_protocol_incumbent", "status": "ok", "t": 2.807}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 2.808}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.072, "stage": "bind_protocol_target_aware", "status": "ok", "t": 2.879}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.88}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 11.679, "stage": "teacher_fetch_verify", "status": "ok", "t": 14.559}
+{"stage": "A_incumbent", "status": "start", "t": 14.564}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 1192.754, "stage": "A_incumbent.step0", "status": "ok", "t": 1224.208}
+{"digest": "6b7d902f6ae4", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 51.4619, "stage": "A_incumbent.step1", "status": "ok", "t": 1282.894}
+{"digest": "eea90c91346a", "impl": "width.global_pca_v0", "matches": true, "seconds": 36.3241, "stage": "A_incumbent.step2", "status": "ok", "t": 1321.751}
+{"digest": "53e30566c5f7", "impl": "attention.activation_importance_v1", "matches": null, "seconds": 10.7605, "stage": "A_incumbent.step3", "status": "ok", "t": 1334.451}
+{"digest": "53e30566c5f7", "reconstructed": true, "seconds": 1320.516, "stage": "A_incumbent", "status": "ok", "t": 1335.08}
+{"stage": "B_target_aware", "status": "start", "t": 1335.08}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 1285.2212, "stage": "B_target_aware.step0", "status": "ok", "t": 2629.018}
+{"digest": "1e3b4ac002f7", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 56.7641, "stage": "B_target_aware.step1", "status": "ok", "t": 2692.322}
+{"digest": "52bcb68c2680", "impl": "width.global_pca_v0", "matches": null, "seconds": 37.5564, "stage": "B_target_aware.step2", "status": "ok", "t": 2732.457}
+{"digest": "181bbd637435", "impl": "attention.activation_importance_v1", "matches": null, "seconds": 11.7509, "stage": "B_target_aware.step3", "status": "ok", "t": 2745.95}
+{"digest": "181bbd637435", "seconds": 1411.569, "stage": "B_target_aware", "status": "ok", "t": 2746.65}
+{"stage": "B_batch_only", "status": "start", "t": 2746.651}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 2346.997, "stage": "B_batch_only.step0", "status": "ok", "t": 5108.351}
+{"digest": "1e3b4ac002f7", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 52.7984, "stage": "B_batch_only.step1", "status": "ok", "t": 5169.605}
+{"digest": "52bcb68c2680", "impl": "width.global_pca_v0", "matches": null, "seconds": 36.7834, "stage": "B_batch_only.step2", "status": "ok", "t": 5209.223}
+{"digest": "181bbd637435", "impl": "attention.activation_importance_v1", "matches": null, "seconds": 12.1084, "stage": "B_batch_only.step3", "status": "ok", "t": 5223.558}
+{"digest": "181bbd637435", "seconds": 2477.554, "stage": "B_batch_only", "status": "ok", "t": 5224.205}
+{"stage": "D_state_eval_incumbent", "status": "start", "t": 5224.206}
+{"failed": true, "seconds": 0.387, "stage": "D_state_eval_incumbent", "status": "ok", "t": 5224.593}
+{"stage": "D_state_eval_target_aware", "status": "start", "t": 5224.594}
+{"failed": true, "seconds": 0.469, "stage": "D_state_eval_target_aware", "status": "ok", "t": 5225.063}
+{"stage": "C_discrete_decisions", "status": "start", "t": 5225.064}
+{"n_moved": 3, "seconds": 0.006, "stage": "C_discrete_decisions", "status": "ok", "t": 5225.07}

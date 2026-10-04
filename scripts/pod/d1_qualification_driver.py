@@ -511,15 +511,31 @@ def _numerics(env: dict[str, Any]):
 
 # --- stage D: real state-eval peak memory ---------------------------------
 
-def measure_state_eval(evaluator, model, *, label: str,
+def measure_state_eval(evaluator, model, *, label: str, teacher,
+                       artifact_digest: str,
                        journal: Journal) -> dict[str, Any]:
-    """Peak memory and wall clock of one real state evaluation."""
+    """Peak memory and wall clock of one real state evaluation.
+
+    `teacher` and `artifact_digest` are REQUIRED, not optional with defaults.
+    The evaluator refuses to measure without either, and a keyword default here
+    would move that refusal from this signature to the middle of a paid run.
+    """
     import torch
 
     torch.cuda.reset_peak_memory_stats()
     before = int(torch.cuda.memory_allocated())
     t0 = time.time()
-    evaluation = evaluator.evaluate(model)
+    #: TWO contract defects cost stage D its whole measurement on s3, and both
+    #: were readable at $0 from the signature:
+    #:
+    #:   `evaluate(self, model, artifact_digest, *, reference=..., runtime=...)`
+    #:
+    #: `evaluate(model)` raised TypeError, and the evaluator ALSO refuses
+    #: without a primed reference -- "a candidate cannot be scored against a
+    #: teacher that was not run". The teacher is the reference the distortion is
+    #: measured against, so priming it is not setup, it is half the measurement.
+    evaluator.prime_reference(teacher)
+    evaluation = evaluator.evaluate(model, artifact_digest)
     elapsed = round(time.time() - t0, 3)
     peak = int(torch.cuda.max_memory_allocated())
     derived = getattr(evaluator, "batch_budget_bytes", None)
@@ -567,6 +583,43 @@ def measure_state_eval(evaluator, model, *, label: str,
     journal.event(stage=f"state_eval.{label}", status="ok",
                   peak_gib=round(peak / 2**30, 3), seconds=elapsed)
     return out
+
+
+#: Which protocol gets state-evaluated, on whose artifact.
+PROTOCOL_ARM = {"incumbent": "A_incumbent", "target_aware": "B_target_aware"}
+FALLBACK_ORDER = ("A_incumbent", "B_target_aware", "B_batch_only")
+
+
+def state_eval_plan(record: dict[str, Any], protocols):
+    """`(label, arm_record, bound, source_arm, is_own)` per protocol, plus failures.
+
+    State-eval memory is a property of the GEOMETRY, the vocabulary and the
+    protocol's batch plan -- not of the weights. Both arms' finals are the same
+    target `ArchSpec`, so one materialized artifact measures both protocols and
+    the record states which it used. That is what lets a repair subrun measure
+    stage D without repeating the arms whose findings are already complete.
+
+    A protocol whose own arm did not materialize falls back to any arm that did,
+    and the fallback is RECORDED rather than silent: the memory figure transfers
+    across arms, the distortion VALUES do not.
+    """
+    plan, failures = [], []
+    for label, bound in protocols:
+        own = PROTOCOL_ARM[label]
+        if (record.get(own) or {}).get("final_artifact_digest"):
+            source = own
+        else:
+            source = next((k for k in FALLBACK_ORDER
+                           if (record.get(k) or {}).get(
+                               "final_artifact_digest")), None)
+        if source is None:
+            failures.append({
+                "label": label,
+                "failed": ("no materialized artifact exists in this subrun, so "
+                           "there is nothing to state-evaluate")})
+            continue
+        plan.append((label, record[source], bound, source, source == own))
+    return plan, failures
 
 
 # --- C: did any discrete decision move? -----------------------------------
@@ -690,6 +743,12 @@ def main(argv: list[str] | None = None) -> int:
                          "policy; the core accepts any value)")
     ap.add_argument("--required-inputs", action="store_true",
                     help="print the inputs this driver needs and exit")
+    ap.add_argument("--arms", default="A,B,Cattr",
+                    help="which fixed-path arms to materialize: A (the pinned "
+                         "incumbent hard gate), B (the target-aware D1 path), "
+                         "Cattr (the attribution arm, incumbent policy at the "
+                         "D1 batch size). A repair subrun that needs only stage "
+                         "D should not repeat arms already measured.")
     ap.add_argument("--check-only", action="store_true",
                     help=("run every stage EXCEPT the two expensive path runs: "
                           "the CUDA probe, the three process-global registries, "
@@ -867,13 +926,24 @@ def main(argv: list[str] | None = None) -> int:
 
         #: A -- the hard gate. Pinned, because this arm claims to reproduce the
         #: incumbent, and it is the only arm that claims that.
-        arm("A_incumbent", workdir="incumbent", batch_size=1,
-            policy_id="positions.all_v1", expected_final=expected)
+        if "A" in wanted:
+            arm("A_incumbent", workdir="incumbent", batch_size=1,
+                policy_id="positions.all_v1", expected_final=expected)
+
+        #: WHICH ARMS THIS SUBRUN RUNS. A repair subrun that needs only stage D
+        #: must not repeat 85 minutes of arms whose findings are already
+        #: complete and recorded -- that is paying twice for one measurement.
+        #: Default is every arm; the record states what ran.
+        wanted = {a.strip() for a in (args.arms or "A,B,Cattr").split(",")
+                  if a.strip()}
+        record["arms_requested"] = sorted(wanted)
 
         #: B -- the intended D1 path: target-aware policy AT the D1 batch size.
-        arm("B_target_aware", workdir="target_aware",
-            batch_size=args.batch_size,
-            policy_id="positions.supervised_target_v1", expected_final=None)
+        if "B" in wanted:
+            arm("B_target_aware", workdir="target_aware",
+                batch_size=args.batch_size,
+                policy_id="positions.supervised_target_v1",
+                expected_final=None)
 
         #: B_batch_only -- the ATTRIBUTION arm, and the reason it exists:
         #: A and B differ in TWO knobs at once, the position policy and the
@@ -885,20 +955,25 @@ def main(argv: list[str] | None = None) -> int:
         #: incumbent's and moves ONLY the batch size, so the comparison is
         #: identified: matching A means the POLICY moved the selection, matching
         #: B means the BATCH SIZE did.
-        arm("B_batch_only", workdir="batch_only", batch_size=args.batch_size,
-            policy_id="positions.all_v1", expected_final=None)
+        if "Cattr" in wanted:
+            arm("B_batch_only", workdir="batch_only",
+                batch_size=args.batch_size, policy_id="positions.all_v1",
+                expected_final=None)
 
-        #: D -- real state-eval peak memory, on each arm's own final artifact,
-        #: under that arm's own bound evaluator. The point is the DEVICE's
-        #: memory at the real vocabulary, so it runs on the artifact the path
-        #: just built rather than on a stand-in.
-        record["D_state_eval"] = []
-        for label, arm_record, bound in (
-                ("incumbent", record["A_incumbent"], bound_inc),
-                ("target_aware", record["B_target_aware"], bound_tgt)):
-            #: The attribution arm is not state-evaluated: its artifact
-            #: exists to identify a selection difference, and no consumer
-            #: reads its memory. P8.4 -- artifacts follow consumers.
+        #: D -- real state-eval peak memory, PER BOUND PROTOCOL, on a real
+        #: materialized artifact. The quantity is a property of the geometry, the
+        #: vocabulary and the protocol's batch plan, not of the weights: both
+        #: arms' finals ARE the same target `ArchSpec`, so one materialization
+        #: measures both protocols and the record says which artifact it used.
+        #: That is what lets a repair subrun re-measure D without repeating the
+        #: arms whose findings are already complete.
+        d_plan, d_failures = state_eval_plan(
+            record, (("incumbent", bound_inc), ("target_aware", bound_tgt)))
+        record.setdefault("D_state_eval", []).extend(d_failures)
+        for label, arm_record, bound, source, is_own in d_plan:
+            #: The attribution arm is not state-evaluated for its own sake: its
+            #: artifact exists to identify a selection difference, and no
+            #: consumer reads its memory. P8.4 -- artifacts follow consumers.
             with journal.stage(f"D_state_eval_{label}") as st:
                 try:
                     from aadistill.initialization.specs.arch import get_adapter
@@ -906,10 +981,35 @@ def main(argv: list[str] | None = None) -> int:
                     adapter = get_adapter("qwen3")
                     model = adapter.load(arm_record["final_checkpoint_path"],
                                          dtype="bfloat16", device="cuda")
+                    #: The REFERENCE teacher, loaded here because the distortion
+                    #: is measured against it. Its bytes are part of the peak
+                    #: this stage exists to report -- a state evaluation holds
+                    #: the teacher, the candidate and two logit blocks at once,
+                    #: and reporting the candidate's memory alone would describe
+                    #: a measurement nobody runs.
+                    teacher = adapter.load(teacher_path, dtype="bfloat16",
+                                           device="cuda")
                     record["D_state_eval"].append(
-                        measure_state_eval(bound["evaluator"], model,
-                                           label=label, journal=journal))
-                    del model
+                        measure_state_eval(
+                            bound["evaluator"], model, label=label,
+                            teacher=teacher,
+                            artifact_digest=arm_record["final_artifact_digest"],
+                            journal=journal))
+                    record["D_state_eval"][-1]["measured_on"] = {
+                        "arm": source, "is_the_protocols_own_arm": is_own,
+                        "artifact_digest":
+                            arm_record["final_artifact_digest"],
+                        "_why_this_is_sound": (
+                            "state-eval memory is a property of the geometry, "
+                            "the vocabulary and the protocol's batch plan. Both "
+                            "arms' finals are the same target ArchSpec, so the "
+                            "figure does not depend on which arm's weights are "
+                            "loaded -- only the distortion VALUES do, and those "
+                            "are reported as this artifact's, not as the other "
+                            "arm's."
+                            if not is_own else
+                            "this protocol's own arm")}
+                    del model, teacher
                     import torch
 
                     torch.cuda.empty_cache()
@@ -924,9 +1024,20 @@ def main(argv: list[str] | None = None) -> int:
 
         #: C
         with journal.stage("C_discrete_decisions") as st:
-            record["C_selection_comparison"] = compare_selections(
-                record["A_incumbent"], record["B_target_aware"],
-                record.get("B_batch_only"))
+            #: Only when both arms ran in THIS subrun. Comparing this run's
+            #: arm against another run's recorded digests would be a comparison
+            #: across two environments presented as one.
+            if (record.get("A_incumbent") or {}).get("steps") and \
+                    (record.get("B_target_aware") or {}).get("steps"):
+                record["C_selection_comparison"] = compare_selections(
+                    record["A_incumbent"], record["B_target_aware"],
+                    record.get("B_batch_only"))
+            else:
+                record["C_selection_comparison"] = {
+                    "_not_run": ("this subrun did not materialize both the "
+                                 "incumbent and the target-aware arm, so there "
+                                 "is no within-run comparison to make"),
+                    "steps": [], "n_moved": 0}
             st.result = {"n_moved": record["C_selection_comparison"]["n_moved"]}
 
         record["status"] = "COMPLETE"

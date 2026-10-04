@@ -1,11 +1,11 @@
 {
- "_booked_recomputed_from_components": "0.1098 + 0.9006 = 1.0104",
+ "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 = 2.6912",
  "_contract": "Cumulative cost of the D1 engineering GPU qualification, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- which is the book the 2026-10-03 amendment raised for exactly this work.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 1.0104,
+ "booked_usd": 2.6912,
  "campaign_id": "d1_gpu_qualification",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
@@ -46,6 +46,21 @@
    "pod_id": "u99fhssac9f6i7",
    "rate_usd_per_hour": 1.09,
    "subrun_id": "d1_qual_20261004_132544_s2"
+  },
+  {
+   "_outcome_corrected": "first booked PASSED by a defective verdict: D_state_eval was a non-empty list of two FAILURE entries, and the check tested `not d` for absence and `within_derived_budget is False` for a violation -- neither of which a failed measurement trips. A list of failures is not a list of measurements.",
+   "container_disk_gb": 60,
+   "container_disk_usd": 0.0128,
+   "cost_usd": 1.6808,
+   "elapsed_minutes": 91.817,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/runs/d1_qual_20261004_142346_s3",
+   "gpu": "NVIDIA L40S",
+   "gpu_usd": 1.668,
+   "notes": "A reconstructed the frozen incumbent a THIRD time (53e30566c5f7, 1320.5s). B completed unpinned (181bbd637435, 1411.6s). C attributed all three moved selections to the CALIBRATION BATCH SIZE, not the position policy: the batch-only arm reproduced B's digests exactly at every step. D failed on two driver contract defects: evaluate() needs artifact_digest, and prime_reference(teacher) was never called.",
+   "outcome": "INCOMPLETE",
+   "pod_id": "cnzdnn3m890m1f",
+   "rate_usd_per_hour": 1.09,
+   "subrun_id": "d1_qual_20261004_142346_s3"
   }
  ],
  "teardown_reserve_usd": 0.3
