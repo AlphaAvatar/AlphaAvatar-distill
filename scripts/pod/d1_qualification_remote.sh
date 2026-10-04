@@ -198,12 +198,17 @@ say "preflight ok"
 done
 
 # --- the qualification ------------------------------------------------------
-say "QUALIFICATION: incumbent fixed path at bsz=1, then target-aware at bsz=3"
+# QUAL_ARMS selects which fixed-path arms materialize. Defaulting to all three
+# keeps the ordinary invocation unchanged; a REPAIR subrun that needs only stage
+# D passes a subset rather than paying again for arms already measured.
+QUAL_ARMS="${QUAL_ARMS:-A,B,Cattr}"
+say "QUALIFICATION: arms ${QUAL_ARMS}"
 # The deadline is the launcher's remaining seconds, so the operator deadline and
 # the session ceiling cannot disagree about what is affordable.
 PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
     scripts/pod/d1_qualification_driver.py \
     --out "${OUTROOT}/qualification" \
+    --arms "${QUAL_ARMS}" \
     --deadline-s "${QUAL_DEADLINE_S:-0}" 2>&1 | tee "${OUTROOT}/qualification.log"
 RC=${PIPESTATUS[0]}
 say "qualification rc=${RC}"
