@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "Evidence for the maintainer source decision. AUTHORIZES NOTHING and MATERIALIZES NOTHING. No row here is called eligible: the live exclusion chain has not been run against any candidate, and only its output is an eligible count. $0, offline, no download.",
+ "_contract": "Evidence for the maintainer source decision. AUTHORIZES NOTHING and MATERIALIZES NOTHING -- no battery is built and no row is admitted anywhere by it. Counts are reported at four named levels and `eligible` means ONE of them: the output of the STRENGTHENED chain, which is the historical contract plus canonical problem-content identity. Survivors of the contract as it exists today are reported as `current_exact_chain_survivors` and are NOT eligible counts, because that contract is measurably blind to recovery-training problem content.",
  "_stage1_provenance_meaning": "the Stage-1 calibration and state-evaluation items of these strata carry token ids rather than text, so they cannot be compared by content. Every one is traceable into `corpus_v2`, so excluding the training corpus already excludes them and the chain has one fewer independent population than its documentation suggests.",
  "chain_gap": {
   "SECOND_GAP_FOUND_BY_CHAIN_PARITY": "getting parity right revealed a larger hole than the one above. The chain hashes each training session's non-assistant messages JOINED, and every session carries a system message, so that hash can never equal a bare rendered question: the joined-hash set and the first-user-turn-hash set are measurably DISJOINT. For a new upstream source there are no corpus `source_id`s either, so the training-corpus protection is INERT. It caught 0 of the 1,708 gsm8k train rows that are literally in the corpus. See `strata.gsm8k.training_corpus_content_gap`.",
@@ -136,7 +136,7 @@
    "traceable_into_corpus_v2": 15
   }
  },
- "status": "EVIDENCE ONLY -- no source pinned, no battery materialized",
+ "status": "EVIDENCE ONLY. MBPP and GSM8K use already-pinned revisions; the canonical MATH test population is NOW PINNED AND FETCHED. NO BATTERY MATERIALIZED.",
  "still_owed_before_any_materialization": [
   "the maintainer source decision, per stratum",
   "for `math_verified`: a revision pin, a per-file digest and a licence/provenance record -- the chain has NOT been run against it, and its output would be that stratum's first eligible count",
@@ -572,6 +572,10 @@
     "full/validation-00000-of-00001.parquet",
     "full/prompt-00000-of-00001.parquet"
    ],
+   "current_exact_chain_survivors": {
+    "_what_this_is_NOT": "NOT an eligible count and NOT final D-series admissibility. These are survivors under the contract AS IT EXISTS TODAY -- the historical chain plus the D-series pool/calibration isolation -- and that contract is measurably blind to recovery-training problem CONTENT. The word `eligible` is reserved for `strengthened_contract` below, which adds the problem-content coordinate.",
+    "count": 464
+   },
    "d_series_isolation": {
     "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
     "_what": "what the D-series owes beyond the baseline chain, applied by the same `rank_take` predicate",
@@ -600,8 +604,8 @@
     "survivors": 464
    },
    "eligible_rows": {
-    "_this_is_the_eligible_count": "the output of the complete live chain -- baseline plus D-series isolation -- applied by the builder's own `rank_take`. This is the ONLY number in this record that may be called eligible, and it is eligible under EXACT identity only: the problem-content key and the pre-freeze duplicate review below are still owed.",
-    "count": 464
+    "_this_is_the_eligible_count": "the output of the complete strengthened chain. The only number in this stratum that may be called eligible without qualification.",
+    "count": 463
    },
    "near_duplicate_screen": {
     "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
@@ -644,6 +648,61 @@
    },
    "same_repository_and_revision": true,
    "snapshot_cached": true,
+   "strengthened_contract": {
+    "_what": "the current chain PLUS canonical problem-content identity and the frozen duplicate-review decision. The historical chain is unchanged -- this is a D-series layer on top, so frozen C1/C2/C3 battery membership stays reproducible.",
+    "frozen_review": {
+     "excluded": [
+      {
+       "d_series_item_id": "mbpp-full-train-602",
+       "duplicate_of_consumed_task_id": 217,
+       "jaccard": 1.0,
+       "native_task_id": 602,
+       "reason": "exact same problem text as a consumed full/test row"
+      }
+     ],
+     "n_excluded": 1,
+     "provenance": {
+      "_the_threshold_decided_nothing": "it selected which 44 pairs a human read. Excluding on it would have dropped 43 usable problems.",
+      "decided_utc": "2026-10-03",
+      "excluded": 1,
+      "frozen_before_any_d1_outcome": true,
+      "retained": 43,
+      "retained_reason": "distinct task semantics despite high lexical overlap: min vs max, even vs odd, area vs perimeter, first vs last, sum vs product and similar",
+      "reviewed_pairs": 44,
+      "trigger_threshold": 0.8
+     }
+    },
+    "removed_by_frozen_review": 0,
+    "removed_by_problem_content": 1,
+    "reserved_problem_content_ids": 10348,
+    "reserved_provenance": {
+     "c1_confirmation_v1": {
+      "_how": "through the pinned source file by native key",
+      "items": 100,
+      "problem_content_recovered": 100,
+      "unrecoverable": 0
+     },
+     "c2_screening_v1": {
+      "_how": "through the pinned source file by native key",
+      "items": 100,
+      "problem_content_recovered": 100,
+      "unrecoverable": 0
+     },
+     "recovery_search_v2": {
+      "_how": "through the pinned source file by native key",
+      "items": 20,
+      "problem_content_recovered": 20,
+      "unrecoverable": 0
+     },
+     "recovery_training": {
+      "_why_first_user_and_not_joined": "the historical chain hashes non-assistant messages JOINED, and every session carries a system message, so that hash can never equal a bare problem. Hashing the first user problem is what closes the gap -- and it does NOT change the historical chain, which keeps its own semantics so frozen battery membership stays reproducible.",
+      "first_user_problems_hashed": 11174
+     }
+    },
+    "reserved_unrecoverable": 0,
+    "survivors": 463,
+    "unhashable_rows": 0
+   },
    "training_corpus_content_gap": {
     "IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT": 0,
     "_verdict": "no training-corpus content overlap in this candidate set",
@@ -716,6 +775,10 @@
    "candidate_files": [
     "main/train-00000-of-00001.parquet"
    ],
+   "current_exact_chain_survivors": {
+    "_what_this_is_NOT": "NOT an eligible count and NOT final D-series admissibility. These are survivors under the contract AS IT EXISTS TODAY -- the historical chain plus the D-series pool/calibration isolation -- and that contract is measurably blind to recovery-training problem CONTENT. The word `eligible` is reserved for `strengthened_contract` below, which adds the problem-content coordinate.",
+    "count": 7043
+   },
    "d_series_isolation": {
     "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
     "_what": "what the D-series owes beyond the baseline chain, applied by the same `rank_take` predicate",
@@ -744,8 +807,8 @@
     "survivors": 7043
    },
    "eligible_rows": {
-    "_this_is_the_eligible_count": "the output of the complete live chain -- baseline plus D-series isolation -- applied by the builder's own `rank_take`. This is the ONLY number in this record that may be called eligible, and it is eligible under EXACT identity only: the problem-content key and the pre-freeze duplicate review below are still owed.",
-    "count": 7043
+    "_this_is_the_eligible_count": "the output of the complete strengthened chain. The only number in this stratum that may be called eligible without qualification.",
+    "count": 5433
    },
    "near_duplicate_screen": {
     "_not_an_acceptance_criterion": "a screen of what the exact-match chain would miss. Thresholds are descriptive. A paraphrase that replaces the rare tokens is invisible to it.",
@@ -785,6 +848,59 @@
    },
    "same_repository_and_revision": true,
    "snapshot_cached": true,
+   "strengthened_contract": {
+    "_what": "the current chain PLUS canonical problem-content identity and the frozen duplicate-review decision. The historical chain is unchanged -- this is a D-series layer on top, so frozen C1/C2/C3 battery membership stays reproducible.",
+    "frozen_review": {
+     "excluded": [],
+     "n_excluded": 0,
+     "provenance": {
+      "_the_threshold_decided_nothing": "it selected which 44 pairs a human read. Excluding on it would have dropped 43 usable problems.",
+      "decided_utc": "2026-10-03",
+      "excluded": 1,
+      "frozen_before_any_d1_outcome": true,
+      "retained": 43,
+      "retained_reason": "distinct task semantics despite high lexical overlap: min vs max, even vs odd, area vs perimeter, first vs last, sum vs product and similar",
+      "reviewed_pairs": 44,
+      "trigger_threshold": 0.8
+     }
+    },
+    "removed_by_frozen_review": 0,
+    "removed_by_problem_content": 1610,
+    "reserved_problem_content_ids": 10558,
+    "reserved_provenance": {
+     "c1_confirmation_v1": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 150,
+      "problem_content_recovered": 150,
+      "unrecoverable": 0
+     },
+     "c2_screening_v1": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 150,
+      "problem_content_recovered": 150,
+      "unrecoverable": 0
+     },
+     "final_promotion": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 100,
+      "problem_content_recovered": 100,
+      "unrecoverable": 0
+     },
+     "recovery_search_v2": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 30,
+      "problem_content_recovered": 30,
+      "unrecoverable": 0
+     },
+     "recovery_training": {
+      "_why_first_user_and_not_joined": "the historical chain hashes non-assistant messages JOINED, and every session carries a system message, so that hash can never equal a bare problem. Hashing the first user problem is what closes the gap -- and it does NOT change the historical chain, which keeps its own semantics so frozen battery membership stays reproducible.",
+      "first_user_problems_hashed": 11174
+     }
+    },
+    "reserved_unrecoverable": 0,
+    "survivors": 5433,
+    "unhashable_rows": 0
+   },
    "training_corpus_content_gap": {
     "IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT": 1708,
     "_verdict": "INERT for bare-prompt candidates",
@@ -810,18 +926,241 @@
    }
   },
   "math_verified": {
-   "candidate_repo": "the upstream Hendrycks MATH release",
-   "currently_pinned": "HuggingFaceH4/MATH-500, test.jsonl",
-   "owed_after_pinning": [
-    "a revision pin and per-file digest",
-    "the row count of the test split actually drawn from",
-    "overlap against the consumed pools, the training corpus and MATH-500's own 500 rows",
-    "renderer parity: `make_math_verified` reads `unique_id`, `subject`, `level`, `problem`, `answer`. An upstream release with different field names needs a renderer, and a renderer change is a new id scheme",
-    "whether the 500 pinned rows are a subset, which the exclusion chain handles either way but which changes what the remainder is"
-   ],
-   "relationship": "MATH-500 is a 500-item subset of the MATH test split, so the larger source is the SAME population sampled less sparsely -- a population change, not a task change. The subset was itself selected, so its difficulty distribution is not the parent's.",
-   "status": "NOT CACHED, NOT PINNED, NOT MEASURED",
-   "why_not_measured": "a different repository from the pinned one, absent from the local hub cache, so no row count or overlap can be derived offline. Pinning it is a maintainer data decision (licence, revision, redistribution) and downloading a new dataset needs approval per AGENTS.md P15/4.4."
+   "adapter_parity": {
+    "_what": "the adapter must produce, for the rows the two populations share, exactly what the frozen stratum already holds",
+    "gold_agrees_on_shared_problems": "500/500",
+    "level_mapping": "upstream 'Level N' -> N; the frozen stratum stores N",
+    "reproduces_pinned_gold_on_the_pinned_file": "500/500",
+    "rule": "aadistill.data.verify.boxed_answer(solution)",
+    "shared_problems": 500,
+    "status": "PARITY HOLDS",
+    "subject_mapping": "config name -> the frozen stratum's subject value"
+   },
+   "against_the_family_shortfall": {
+    "eligible_rows": 4670,
+    "headroom": 3840,
+    "six_role_shortfall": 830
+   },
+   "baseline_chain": {
+    "_survivors_label": "EXACT BASELINE-CHAIN SURVIVORS. Not yet eligible.",
+    "_what": "the historical chain's rendered-prompt hash, applied by coordinate. `make_math_verified` reads `unique_id`, which this source lacks, so `rank_take` cannot be called on it.",
+    "populations": {
+     "final_promotion": {
+      "asset": "artifacts/eval/battery_v2",
+      "n_prompts": 770,
+      "note": "read for exclusion only; not sampled from, remains unconsumed"
+     },
+     "initializer_state_eval": {
+      "asset": "artifacts/stage1/state_eval_v1",
+      "excluded_source_ids": 80,
+      "n_items": 80
+     },
+     "operator_calibration": {
+      "asset": "artifacts/stage1/e8_calibration_v1",
+      "excluded_source_ids": 51,
+      "n_items": 67
+     },
+     "recovery_search": {
+      "asset": "artifacts/stage3/recovery_search_v2",
+      "n_prompts": 190,
+      "note": "historical/development evidence; excluded from C1 confirmation"
+     },
+     "recovery_training": {
+      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "distinct_source_ids": 10831,
+      "n_sessions": 11174,
+      "note": "the whole recovery corpus, not just the 0.86M rung"
+     }
+    },
+    "removed_by_rendered_prompt_hash": 330,
+    "survivors": 4670
+   },
+   "current_exact_chain_survivors": {
+    "_what_this_is_NOT": "NOT an eligible count. The contract as it exists is blind to recovery-training problem content, exactly as for the other two strata.",
+    "count": 4670
+   },
+   "d_series_isolation": {
+    "_note": "the D-series pools' math prompts are rendered as the bare problem, so they are already inside the rendered-prompt hash above; the problem-content coordinate below is what adds isolation for this stratum",
+    "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
+    "populations": {
+     "c1_confirmation_v1": {
+      "n_items": 150,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "c2_screening_v1": {
+      "n_items": 150,
+      "note": "post-dates the C1 builder, so its defaults do not know about it"
+     },
+     "prior_d_series_roles": {
+      "n_roles": 0,
+      "note": "none allocated: the family is DESIGNED and NOT MATERIALIZED. Each role freezes into this list as it is drawn, so round n+1 isolates against rounds 1..n."
+     },
+     "reasoning_heavy_v2": {
+      "excluded_source_ids": 39,
+      "n_items": 62,
+      "note": "the second calibration mixture D1's scoring policy is measured over; items carry token ids, so only source_ids can be excluded"
+     }
+    },
+    "removed_beyond_baseline": 0,
+    "survivors": 4670
+   },
+   "distribution_shift": {
+    "_what": "the candidate population against the frozen MATH-500 baseline. A population change, which the maintainer decision accepts explicitly -- recorded so it is not discovered later",
+    "level": {
+     "candidate": {
+      "1": 0.0874,
+      "2": 0.1788,
+      "3": 0.2262,
+      "4": 0.2428,
+      "5": 0.2648
+     },
+     "frozen_math500": {
+      "1": 0.086,
+      "2": 0.18,
+      "3": 0.21,
+      "4": 0.256,
+      "5": 0.268
+     }
+    },
+    "subject": {
+     "candidate": {
+      "Algebra": 0.2374,
+      "Counting & Probability": 0.0948,
+      "Geometry": 0.0958,
+      "Intermediate Algebra": 0.1806,
+      "Number Theory": 0.108,
+      "Prealgebra": 0.1742,
+      "Precalculus": 0.1092
+     },
+     "frozen_math500": {
+      "Algebra": 0.248,
+      "Counting & Probability": 0.076,
+      "Geometry": 0.082,
+      "Intermediate Algebra": 0.194,
+      "Number Theory": 0.124,
+      "Prealgebra": 0.164,
+      "Precalculus": 0.112
+     }
+    }
+   },
+   "eligible_rows": {
+    "_this_is_the_eligible_count": "the output of the complete strengthened chain for this stratum.",
+    "count": 4670
+   },
+   "pin": {
+    "_revision_is_immutable": "a commit sha, not a branch. `main` would make every count below describe whatever the mirror held at read time.",
+    "configs": {
+     "algebra": "Algebra",
+     "counting_and_probability": "Counting & Probability",
+     "geometry": "Geometry",
+     "intermediate_algebra": "Intermediate Algebra",
+     "number_theory": "Number Theory",
+     "prealgebra": "Prealgebra",
+     "precalculus": "Precalculus"
+    },
+    "files": {
+     "algebra/test-00000-of-00001.parquet": {
+      "sha256": "0e04a850dac9cfc758eac0c80afd2d0cc65e29ea72f916c8ac1045b12af937f5",
+      "size_bytes": 353114
+     },
+     "counting_and_probability/test-00000-of-00001.parquet": {
+      "sha256": "c324818949c75a6227c0328a8499d58023cbbf6757cfc1736f5ab24cc8d87966",
+      "size_bytes": 175032
+     },
+     "geometry/test-00000-of-00001.parquet": {
+      "sha256": "98720f3a8134ad9784fd8951195245264495df03ffc5c9485a9a54ff5ae2431a",
+      "size_bytes": 263835
+     },
+     "intermediate_algebra/test-00000-of-00001.parquet": {
+      "sha256": "e859f72486c951c2017da880541ca729940eaa986b0364eb23e238983df9bfeb",
+      "size_bytes": 394797
+     },
+     "number_theory/test-00000-of-00001.parquet": {
+      "sha256": "ba156c9c9fa2040836ba12135fd964e6e67d6bccd8c469ec4a3ad941f8f6fbe9",
+      "size_bytes": 182003
+     },
+     "prealgebra/test-00000-of-00001.parquet": {
+      "sha256": "301e5d8ade5c7b5038032532e498bdc9dca799e7f1061a63f2e7d980803240cc",
+      "size_bytes": 267729
+     },
+     "precalculus/test-00000-of-00001.parquet": {
+      "sha256": "da37474ba3761ae5727af3844a7ba963a735bd6a14c65e6137593669a4fe3b9c",
+      "size_bytes": 242241
+     }
+    },
+    "licence": "mit",
+    "repo_id": "EleutherAI/hendrycks_math",
+    "revision": "21a5633873b6a120296cce3e2df9d5550074f4a3",
+    "splits_fetched": "TEST ONLY -- no train file is fetched or used"
+   },
+   "scope": "a NEW D-series behavioural population. Historical C1/C2/C3/A3 scores are measured on a different population and are NOT imported or compared to anything measured here.",
+   "strengthened_contract": {
+    "_removed_beyond_the_current_contract": 0,
+    "_what": "the contract plus canonical problem-content identity, applied to what the contract already admits so the figure is what this coordinate ADDS. For this source the rendered prompt IS the problem, so the two coordinates largely coincide and the addition is small by construction -- which is a property of the source, not a weaker contract.",
+    "frozen_review": {
+     "excluded": [],
+     "n_excluded": 0,
+     "provenance": {
+      "_the_threshold_decided_nothing": "it selected which 44 pairs a human read. Excluding on it would have dropped 43 usable problems.",
+      "decided_utc": "2026-10-03",
+      "excluded": 1,
+      "frozen_before_any_d1_outcome": true,
+      "retained": 43,
+      "retained_reason": "distinct task semantics despite high lexical overlap: min vs max, even vs odd, area vs perimeter, first vs last, sum vs product and similar",
+      "reviewed_pairs": 44,
+      "trigger_threshold": 0.8
+     }
+    },
+    "removed_by_frozen_review": 0,
+    "removed_by_problem_content": 0,
+    "reserved_problem_content_ids": 10558,
+    "reserved_provenance": {
+     "c1_confirmation_v1": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 150,
+      "problem_content_recovered": 150,
+      "unrecoverable": 0
+     },
+     "c2_screening_v1": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 150,
+      "problem_content_recovered": 150,
+      "unrecoverable": 0
+     },
+     "final_promotion": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 100,
+      "problem_content_recovered": 100,
+      "unrecoverable": 0
+     },
+     "recovery_search_v2": {
+      "_how": "from `prompt_text` directly -- this source renders the bare problem",
+      "items": 30,
+      "problem_content_recovered": 30,
+      "unrecoverable": 0
+     },
+     "recovery_training": {
+      "_why_first_user_and_not_joined": "the historical chain hashes non-assistant messages JOINED, and every session carries a system message, so that hash can never equal a bare problem. Hashing the first user problem is what closes the gap -- and it does NOT change the historical chain, which keeps its own semantics so frozen battery membership stays reproducible.",
+      "first_user_problems_hashed": 11174
+     }
+    },
+    "reserved_unrecoverable": 0,
+    "survivors": 4670,
+    "unhashable_rows": 0
+   },
+   "upstream_rows": {
+    "_label": "UPSTREAM TEST ROWS BEFORE ANY EXCLUSION -- not eligible counts",
+    "per_subject": {
+     "Algebra": 1187,
+     "Counting & Probability": 474,
+     "Geometry": 479,
+     "Intermediate Algebra": 903,
+     "Number Theory": 540,
+     "Prealgebra": 871,
+     "Precalculus": 546
+    },
+    "total": 5000
+   }
   }
  },
  "traps": [

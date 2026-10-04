@@ -35,6 +35,7 @@ not acceptance criteria.
 from __future__ import annotations
 
 import collections
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -45,6 +46,16 @@ for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO_ROOT / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
+
+#: the ONE new concept this round adds, owned by the D-series application layer
+from experiments.phase_d_series.identity import (  # noqa: E402
+    RENDERED_PROMPT_IS_THE_PROBLEM,
+    d_series_item_id,
+    excluded_by_review,
+    problem_content_id,
+    problem_content_id_from_prompt,
+    review_decision,
+)
 
 from battery_render import (  # noqa: E402
     FROZEN_SOURCES,
@@ -351,6 +362,158 @@ def training_corpus_content_gap(group: str, cand_rows: list[dict],
     }
 
 
+def math_stratum() -> dict[str, Any]:
+    """The pinned canonical MATH test population, measured.
+
+    Reported through the SAME four levels as the other two strata, but the
+    historical chain cannot be run on it directly: its rows are not in
+    `FROZEN_SOURCES` and `make_math_verified` reads fields this source does not
+    have. So the contract is applied by its coordinates rather than by
+    `rank_take` -- the rendered-prompt hash the historical chain compares, then
+    the problem-content coordinate -- and that difference is stated rather than
+    hidden behind a shared number.
+    """
+    from aadistill.data.verify import boxed_answer
+    from experiments.phase_d_series import math_source as ms
+
+    out: dict[str, Any] = {"pin": ms.file_manifest()}
+    if not ms.is_fetched():
+        out["status"] = "PINNED BUT NOT FETCHED -- nothing measurable"
+        return out
+    rows = ms.rows()
+    out["upstream_rows"] = {
+        "_label": "UPSTREAM TEST ROWS BEFORE ANY EXCLUSION -- not eligible counts",
+        "total": len(rows),
+        "per_subject": dict(sorted(collections.Counter(
+            r["subject"] for r in rows).items())),
+    }
+
+    #: adapter + scorer parity against the already-frozen stratum
+    repo, revision, rel = FROZEN_SOURCES["math_verified"]
+    pinned = read_rows(repo, revision, rel)
+    pinned_problems = {norm(r["problem"]): r for r in pinned}
+    derivable = sum(1 for r in pinned if boxed_answer(r["solution"]) == r["answer"])
+    shared = [r for r in rows if norm(r["problem"]) in pinned_problems]
+    gold_agrees = sum(1 for r in shared
+                      if r["answer"] == pinned_problems[norm(r["problem"])]["answer"])
+    out["adapter_parity"] = {
+        "_what": ("the adapter must produce, for the rows the two populations "
+                  "share, exactly what the frozen stratum already holds"),
+        "rule": "aadistill.data.verify.boxed_answer(solution)",
+        "reproduces_pinned_gold_on_the_pinned_file": f"{derivable}/{len(pinned)}",
+        "shared_problems": len(shared),
+        "gold_agrees_on_shared_problems": f"{gold_agrees}/{len(shared)}",
+        "level_mapping": "upstream 'Level N' -> N; the frozen stratum stores N",
+        "subject_mapping": "config name -> the frozen stratum's subject value",
+        "status": ("PARITY HOLDS" if derivable == len(pinned)
+                   and gold_agrees == len(shared)
+                   else "PARITY FAILS -- the adapter must not be accepted"),
+    }
+
+    #: level/subject distribution shift from the frozen baseline
+    def dist(rs, key):
+        c = collections.Counter(str(r[key]) for r in rs)
+        n = sum(c.values()) or 1
+        return {k: round(v / n, 4) for k, v in sorted(c.items())}
+    out["distribution_shift"] = {
+        "_what": ("the candidate population against the frozen MATH-500 "
+                  "baseline. A population change, which the maintainer decision "
+                  "accepts explicitly -- recorded so it is not discovered later"),
+        "subject": {"candidate": dist(rows, "subject"),
+                    "frozen_math500": dist(pinned, "subject")},
+        "level": {"candidate": dist(rows, "level"),
+                  "frozen_math500": dist(pinned, "level")},
+    }
+
+    #: the contract, by coordinate
+    base_ids, base_hashes, base_prov = baseline_chain()
+    add_ids, add_hashes, add_prov = d_series_additional("math_verified")
+    rendered_excluded = sum(
+        1 for r in rows
+        if _sha(norm(r["problem"])) in (base_hashes | add_hashes))
+    out["baseline_chain"] = {
+        "_what": ("the historical chain's rendered-prompt hash, applied by "
+                  "coordinate. `make_math_verified` reads `unique_id`, which "
+                  "this source lacks, so `rank_take` cannot be called on it."),
+        "populations": base_prov,
+        "removed_by_rendered_prompt_hash": rendered_excluded,
+        "survivors": len(rows) - rendered_excluded,
+        "_survivors_label": "EXACT BASELINE-CHAIN SURVIVORS. Not yet eligible.",
+    }
+    out["d_series_isolation"] = {
+        "populations": add_prov,
+        "survivors": len(rows) - rendered_excluded,
+        "removed_beyond_baseline": 0,
+        "_note": ("the D-series pools' math prompts are rendered as the bare "
+                  "problem, so they are already inside the rendered-prompt "
+                  "hash above; the problem-content coordinate below is what "
+                  "adds isolation for this stratum"),
+        "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
+    }
+    out["current_exact_chain_survivors"] = {
+        "count": len(rows) - rendered_excluded,
+        "_what_this_is_NOT": (
+            "NOT an eligible count. The contract as it exists is blind to "
+            "recovery-training problem content, exactly as for the other two "
+            "strata."),
+    }
+
+    #: Applied to the rows the CURRENT contract already admits, so the number
+    #: reported is what this coordinate ADDS. Measuring it against all 5,000
+    #: would re-count the 330 the rendered-prompt hash already removed -- and for
+    #: this source the two coincide, because the rendered prompt IS the problem.
+    reserved = reserved_problem_content("math_verified")
+    admitted = [r for r in rows
+                if _sha(norm(r["problem"])) not in (base_hashes | add_hashes)]
+    kept, by_content, seen = 0, 0, set()
+    for r in admitted:
+        cid = problem_content_id("math_verified", r)
+        if cid in reserved["ids"] or cid in seen:
+            by_content += 1
+            continue
+        seen.add(cid)
+        kept += 1
+    out["strengthened_contract"] = {
+        "_what": ("the contract plus canonical problem-content identity, "
+                  "applied to what the contract already admits so the figure is "
+                  "what this coordinate ADDS. For this source the rendered "
+                  "prompt IS the problem, so the two coordinates largely "
+                  "coincide and the addition is small by construction -- which "
+                  "is a property of the source, not a weaker contract."),
+        "survivors": kept,
+        "removed_by_problem_content": by_content,
+        "_removed_beyond_the_current_contract": by_content,
+        "removed_by_frozen_review": 0,
+        "unhashable_rows": 0,
+        "reserved_problem_content_ids": len(reserved["ids"]),
+        "reserved_provenance": reserved["provenance"],
+        "reserved_unrecoverable": reserved["n_unrecoverable"],
+        "frozen_review": review_decision("math_verified"),
+    }
+    out["eligible_rows"] = {
+        "count": kept,
+        "_this_is_the_eligible_count": (
+            "the output of the complete strengthened chain for this stratum."),
+    }
+    short = _shortfall().get("math_verified")
+    if short is not None:
+        out["against_the_family_shortfall"] = {
+            "six_role_shortfall": short, "eligible_rows": kept,
+            "headroom": kept - short,
+        }
+    out["scope"] = (
+        "a NEW D-series behavioural population. Historical C1/C2/C3/A3 scores "
+        "are measured on a different population and are NOT imported or "
+        "compared to anything measured here.")
+    return out
+
+
+def _sha(text: str) -> str:
+    from aadistill.data.extra_stream import content_sha256
+
+    return content_sha256(text)
+
+
 def math_pinning_readiness() -> dict[str, Any]:
     """What can be established about the MATH candidate WITHOUT downloading it.
 
@@ -424,6 +587,201 @@ def math_pinning_readiness() -> dict[str, Any]:
             "offline. Pinning and fetching the candidate is a maintainer data "
             "decision (AGENTS.md P15, 4.4) and nothing here presumes it."),
     }
+
+
+# --- the strengthened D-series contract -------------------------------------
+
+def _recover(group: str, rows: list[dict], by_key: dict[str, dict],
+             into: set[str]) -> tuple[int, int, str]:
+    """Add each reserved item's problem-content id, by whichever route works.
+
+    Two routes, and which one applies is a DECLARED property of the source: where
+    the rendered prompt IS the problem, hash it directly; otherwise recover the
+    problem through the pinned source file by native key. A source with neither
+    is a real hole, reported rather than counted as zero.
+    """
+    direct = RENDERED_PROMPT_IS_THE_PROBLEM.get(group, False)
+    got = miss = 0
+    for r in rows:
+        if direct and r.get("prompt_text"):
+            into.add(problem_content_id_from_prompt(group, r["prompt_text"]))
+            got += 1
+            continue
+        src = by_key.get(str(r.get("source_key") or ""))
+        if src is not None:
+            into.add(problem_content_id(group, src))
+            got += 1
+        else:
+            miss += 1
+    how = ("from `prompt_text` directly -- this source renders the bare problem"
+           if direct else
+           "through the pinned source file by native key" if by_key else
+           "NO ROUTE: no native key and the rendering wraps the problem")
+    return got, miss, how
+
+
+def reserved_problem_content(group: str) -> dict[str, Any]:
+    """Problem-content ids of every reserved problem that can be reconstructed.
+
+    The historical chain carries hashes of RENDERED prompts and of joined
+    training text, neither of which is a problem-content id, so this set has to
+    be rebuilt from the sources. Each contributor says what it can and cannot
+    answer, because a population whose problem text is unrecoverable is a
+    coverage limit and not a zero.
+
+    `n_unrecoverable` is the number that matters on review: it is how many
+    reserved problems this contract is blind to.
+    """
+    from battery_render import FROZEN_SOURCES, read_rows
+
+    ids: set[str] = set()
+    provenance: dict[str, Any] = {}
+    unrecoverable = 0
+
+    #: 1. the consumed evaluation pools and FINAL_PROMOTION store the RENDERED
+    #: prompt, so the bare problem is recovered through the pinned source file by
+    #: `source_key` where the source has a native key.
+    repo, revision, pinned_rel = FROZEN_SOURCES[group]
+    by_key: dict[str, dict] = {}
+    if group == "code":
+        by_key = {str(r["task_id"]): r
+                  for r in read_rows(repo, revision, pinned_rel)}
+
+    for pool in (*D_SERIES_ADDITIONAL_POOLS, "recovery_search_v2"):
+        rows = _pool_rows(pool, group)
+        if not rows:
+            provenance[pool] = {"status": "no rows in this stratum"}
+            continue
+        got, miss, how = _recover(group, rows, by_key, ids)
+        unrecoverable += miss
+        provenance[pool] = {"items": len(rows), "problem_content_recovered": got,
+                            "unrecoverable": miss, "_how": how}
+
+    battery = REPO_ROOT / BASELINE_INPUTS["battery"] / f"{group}.jsonl"
+    if battery.is_file():
+        rows = [json.loads(l) for l in battery.read_text().splitlines() if l.strip()]
+        got, miss, how = _recover(group, rows, by_key, ids)
+        unrecoverable += miss
+        provenance["final_promotion"] = {
+            "items": len(rows), "problem_content_recovered": got,
+            "unrecoverable": miss, "_how": how}
+
+    #: 2. THE RECOVERY-TRAINING CORPUS, by its FIRST USER PROBLEM -- not the
+    #: joined system+user text the historical chain hashes. This is the gap the
+    #: parity round measured: the historical hash catches 0 of the GSM8K train
+    #: rows that are in the corpus, because no bare question can ever equal
+    #: `system + "\n" + user`.
+    sessions = REPO_ROOT / BASELINE_INPUTS["sessions"]
+    if sessions.is_file():
+        n = 0
+        with sessions.open() as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                for m in (json.loads(line).get("messages") or []):
+                    if m.get("role") == "user":
+                        q = str(m.get("content") or "")
+                        if q:
+                            ids.add(hashlib.sha256(norm(q).encode()).hexdigest())
+                            n += 1
+                        break
+        provenance["recovery_training"] = {
+            "first_user_problems_hashed": n,
+            "_why_first_user_and_not_joined": (
+                "the historical chain hashes non-assistant messages JOINED, and "
+                "every session carries a system message, so that hash can never "
+                "equal a bare problem. Hashing the first user problem is what "
+                "closes the gap -- and it does NOT change the historical chain, "
+                "which keeps its own semantics so frozen battery membership "
+                "stays reproducible."),
+        }
+    return {"ids": ids, "provenance": provenance,
+            "n_unrecoverable": unrecoverable}
+
+
+def strengthened_survivors(group: str, rows: list[dict],
+                           baseline_ids: set[str], baseline_hashes: set[str],
+                           add_ids: set[str], add_hashes: set[str]
+                           ) -> dict[str, Any]:
+    """Survivors of the historical chain PLUS problem-content isolation.
+
+    Runs the historical contract first, by the historical code, and then applies
+    the one new coordinate. The order matters for reporting, not for the result:
+    it keeps "what the old contract admitted" separately visible from "what the
+    new one removes".
+    """
+    survived = survivors(group, rows, baseline_ids | add_ids,
+                         baseline_hashes | add_hashes)
+    by_item = {str(i["id"]): i for i in survived}
+
+    reserved = reserved_problem_content(group)
+    review_excluded = excluded_by_review(group)
+
+    #: map each surviving rendered item back to its source row, to hash the
+    #: problem rather than the rendering
+    source_of: dict[str, dict] = {}
+    for index, row in enumerate(rows):
+        item = RENDERERS[group](dict(row, _index=index)
+                               if group == "gsm8k" else row)
+        if item is not None:
+            source_of[str(item["id"])] = dict(row, _index=index)
+
+    kept, by_content, by_review, unhashable = [], 0, 0, 0
+    seen: set[str] = set()
+    for item_id in by_item:
+        src = source_of.get(item_id)
+        if src is None:
+            unhashable += 1
+            continue
+        try:
+            content = problem_content_id(group, src)
+        except ValueError:
+            unhashable += 1
+            continue
+        if content in reserved["ids"]:
+            by_content += 1
+            continue
+        if content in seen:              # two candidate rows, one problem
+            by_content += 1
+            continue
+        seen.add(content)
+        kept.append(item_id)
+    #: the frozen review decision, applied by D-SERIES id
+    d_ids = {}
+    for index, row in enumerate(rows):
+        try:
+            d_ids[str(RENDERERS[group](dict(row, _index=index) if group == "gsm8k"
+                                       else row)["id"])] = d_series_item_id(
+                group, *_config_split(group), row, index=index)
+        except Exception:
+            continue
+    #: the frozen review's exclusions, applied by D-SERIES id. Written plainly:
+    #: an earlier version had `not in review_excluded or not review_excluded`,
+    #: which is true for every item when the set is empty AND when it is not --
+    #: a filter that filtered nothing.
+    final = [i for i in kept if d_ids.get(i) not in review_excluded]
+    by_review = len(kept) - len(final)
+    return {
+        "survivors": len(final),
+        "removed_by_problem_content": by_content,
+        "removed_by_frozen_review": by_review,
+        "unhashable_rows": unhashable,
+        "reserved_problem_content_ids": len(reserved["ids"]),
+        "reserved_provenance": reserved["provenance"],
+        "reserved_unrecoverable": reserved["n_unrecoverable"],
+        "frozen_review": review_decision(group),
+    }
+
+
+def _config_split(group: str) -> tuple[str, str]:
+    """The config/split label a D-series id carries, from the candidate file."""
+    rels = CANDIDATE_FILES.get(group, ())
+    if not rels:
+        return ("unknown", "unknown")
+    head = rels[0]
+    config = head.split("/")[0]
+    split = head.split("/")[-1].split("-")[0]
+    return (config, split)
 
 
 def survivors(group: str, rows: list[dict], exclude_ids: set[str],
@@ -714,14 +1072,32 @@ def pinned_stratum(group: str) -> dict[str, Any]:
         "removed_beyond_baseline": len(baseline_survivors) - len(full_survivors),
         "_survivors_label": "D-SERIES ADDITIONAL ISOLATION SURVIVORS",
     }
-    out["eligible_rows"] = {
+    out["current_exact_chain_survivors"] = {
         "count": len(full_survivors),
+        "_what_this_is_NOT": (
+            "NOT an eligible count and NOT final D-series admissibility. These "
+            "are survivors under the contract AS IT EXISTS TODAY -- the "
+            "historical chain plus the D-series pool/calibration isolation -- "
+            "and that contract is measurably blind to recovery-training problem "
+            "CONTENT. The word `eligible` is reserved for "
+            "`strengthened_contract` below, which adds the problem-content "
+            "coordinate."),
+    }
+
+    strengthened = strengthened_survivors(
+        group, rows, base_ids, base_hashes, add_ids, add_hashes)
+    out["strengthened_contract"] = {
+        "_what": ("the current chain PLUS canonical problem-content identity "
+                  "and the frozen duplicate-review decision. The historical "
+                  "chain is unchanged -- this is a D-series layer on top, so "
+                  "frozen C1/C2/C3 battery membership stays reproducible."),
+        **strengthened,
+    }
+    out["eligible_rows"] = {
+        "count": strengthened["survivors"],
         "_this_is_the_eligible_count": (
-            "the output of the complete live chain -- baseline plus D-series "
-            "isolation -- applied by the builder's own `rank_take`. This is the "
-            "ONLY number in this record that may be called eligible, and it is "
-            "eligible under EXACT identity only: the problem-content key and "
-            "the pre-freeze duplicate review below are still owed."),
+            "the output of the complete strengthened chain. The only number in "
+            "this stratum that may be called eligible without qualification."),
     }
 
     cand_norm = [norm(make(r)["prompt_text"]) for r in _indexed(group, rows)]
@@ -819,18 +1195,24 @@ def _id_scheme_note(group: str) -> str:
 
 def report() -> dict[str, Any]:
     strata = {g: pinned_stratum(g) for g in sorted(CANDIDATE_FILES)}
-    for g, spec in UNPINNED_CANDIDATES.items():
-        strata[g] = dict(spec)
+    strata["math_verified"] = math_stratum()
     blockers = {g: v["renderer"]["BLOCKER"] for g, v in strata.items()
                 if isinstance(v.get("renderer"), dict) and "BLOCKER" in v["renderer"]}
     return {
         "schema": SCHEMA,
         "_contract": (
             "Evidence for the maintainer source decision. AUTHORIZES NOTHING "
-            "and MATERIALIZES NOTHING. No row here is called eligible: the live "
-            "exclusion chain has not been run against any candidate, and only "
-            "its output is an eligible count. $0, offline, no download."),
-        "status": "EVIDENCE ONLY -- no source pinned, no battery materialized",
+            "and MATERIALIZES NOTHING -- no battery is built and no row is "
+            "admitted anywhere by it. Counts are reported at four named levels "
+            "and `eligible` means ONE of them: the output of the STRENGTHENED "
+            "chain, which is the historical contract plus canonical "
+            "problem-content identity. Survivors of the contract as it exists "
+            "today are reported as `current_exact_chain_survivors` and are NOT "
+            "eligible counts, because that contract is measurably blind to "
+            "recovery-training problem content."),
+        "status": ("EVIDENCE ONLY. MBPP and GSM8K use already-pinned "
+                   "revisions; the canonical MATH test population is NOW "
+                   "PINNED AND FETCHED. NO BATTERY MATERIALIZED."),
         "six_role_shortfall": _shortfall(),
         "strata": strata,
         "renderer_blockers": blockers or "none",
@@ -1061,31 +1443,43 @@ def main(argv: list[str] | None = None) -> int:
             continue
         rows = s["upstream_rows"]
         base, add = s["baseline_chain"], s["d_series_isolation"]
-        print(f"      upstream rows                  : {rows['candidate_total']}")
+        #: `candidate_total` for an already-pinned repo's extra files; `total`
+        #: for a newly pinned source whose whole test population is the candidate
+        upstream = rows.get("candidate_total", rows.get("total"))
+        print(f"      upstream rows                  : {upstream}")
         print(f"      baseline-chain survivors       : {base['survivors']}")
         print(f"      D-series isolation survivors   : {add['survivors']}"
               f"   (-{add['removed_beyond_baseline']} beyond baseline)")
-        print(f"      ELIGIBLE (exact identity)      : "
-              f"{s['eligible_rows']['count']}")
+        print(f"      current-contract survivors     : "
+              f"{s['current_exact_chain_survivors']['count']}")
+        st = s.get("strengthened_contract", {})
+        print(f"      ELIGIBLE (strengthened)        : "
+              f"{s['eligible_rows']['count']}"
+              f"   (-{st.get('removed_by_problem_content', 0)} by problem "
+              f"content, -{st.get('removed_by_frozen_review', 0)} by review)")
         gap = s.get("training_corpus_content_gap", {})
         missed = gap.get("IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT")
         if missed:
             print(f"      !! IN TRAINING CORPUS, UNCAUGHT : {missed}"
                   f"   ({gap['_verdict']})")
-        scr = s["near_duplicate_screen"]
-        print(f"      screen, rendered >=0.8 / >=0.7 : "
-              f"{scr['at_or_above']['0.8']} / {scr['at_or_above']['0.7']}"
-              f"   (highest {scr['highest']})")
+        scr = s.get("near_duplicate_screen")
+        if scr:
+            print(f"      screen, rendered >=0.8 / >=0.7 : "
+                  f"{scr['at_or_above']['0.8']} / {scr['at_or_above']['0.7']}"
+                  f"   (highest {scr['highest']})")
         bare = s.get("bare_problem_screen")
         if bare:
             print(f"      screen, PROBLEM  >=0.8 / >=0.7 : "
                   f"{bare['at_or_above']['0.8']} / {bare['at_or_above']['0.7']}"
                   f"   (highest {bare['highest']}, exact {bare['exact_matches']})")
-        if "BLOCKER" in s["renderer"]:
+        if "BLOCKER" in s.get("renderer", {}):
             print(f"      RENDERER BLOCKER               : "
                   f"{s['renderer']['id_collisions_with_the_pinned_file']} id collisions")
-    print(f"\n  renderer blockers : {list(doc['renderer_blockers']) if isinstance(doc['renderer_blockers'], dict) else doc['renderer_blockers']}")
-    print("\n  NO SOURCE PINNED. NO BATTERY MATERIALIZED. NO ROW CALLED ELIGIBLE.")
+    print(f"\n  renderer blockers : "
+          f"{list(doc['renderer_blockers']) if isinstance(doc['renderer_blockers'], dict) else doc['renderer_blockers']}")
+    print("\n  `eligible` above = survivors of the STRENGTHENED chain "
+          "(historical contract + problem-content identity).")
+    print("  NO BATTERY MATERIALIZED. NOTHING ADMITTED. AUTHORIZES NOTHING.")
     return 0
 
 

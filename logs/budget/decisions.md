@@ -1,5 +1,91 @@
 # Budget decisions
 
+## 2026-10-03 — The source decision implemented: all three strata have final capacity
+
+Maintainer source decision of 2026-10-03, implemented. **No battery
+materialized, nothing admitted, no GPU, no funding or envelope change.**
+
+- **`eligible` now means one thing.** The record had said "no row is called
+  eligible" beside `eligible_rows = 464`, and the CLI printed both "ELIGIBLE" and
+  "NO ROW CALLED ELIGIBLE". Survivors of the contract as it exists are
+  `current_exact_chain_survivors`; **eligible** is reserved for the output of the
+  **strengthened** chain. The guard enforcing it is now **structural** — no
+  count-bearing field may be named `eligible` outside the strengthened output —
+  because the previous prose-keyword version needed a new exemption every time
+  the record legitimately explained its own terminology, and a guard that gets
+  widened on every run stops guarding.
+
+- **One new concept, in the D-series application layer**:
+  `identity.py :: problem_content_id` — `sha256(norm(<problem>))`, payload
+  declared per source (MBPP `text`, GSM8K `question`, MATH `problem`). It
+  **supplements** native provenance, the split-aware item id and the historical
+  rendered-prompt exclusion. Three coordinates, kept separate: conflating the last
+  two is what made `gsm8k-test-00000` name a different problem in two files.
+
+  **The historical chain is NOT modified** — a test reads
+  `excluded_identities`' source and fails if a problem-content key appears in it,
+  because frozen C1/C2/C3 membership is reproducible only from the original.
+
+- **Final strengthened-chain capacity. All three clear their shortfalls.**
+
+  | stratum | upstream | current contract | **eligible** | 6-role short | headroom |
+  | --- | --- | --- | --- | --- | --- |
+  | `code` | 474 | 464 | **463** | 321 | +142 |
+  | `gsm8k` | 7,473 | 7,043 | **5,433** | 11 | +5,422 |
+  | `math_verified` | 5,000 | 4,670 | **4,670** | 830 | +3,840 |
+
+  `code` is 464 → 463 exactly as the review predicted. **`gsm8k` loses 1,610 to
+  problem content, and 0 recovery-training rows survive** — asserted directly by
+  recomputing the survivor set, not inferred from the subtraction.
+
+- **A hole in my own first implementation, found and closed.** It recovered
+  reserved problem content only through a native key, so for GSM8K — which has
+  none — it reported **430 reserved problems as unrecoverable** while their text
+  sat in the pools' `prompt_text` all along. An unrecoverable reserved problem is
+  a gap in the isolation, so over-reporting one is not a safe error.
+  `RENDERED_PROMPT_IS_THE_PROBLEM` now declares, per source, whether the rendering
+  *is* the problem — and a test renders real rows and checks the declaration
+  against the renderers. Both strata now report **0 unrecoverable**.
+
+- **The frozen duplicate review is DATA, not a threshold.** The maintainer's
+  ruling on all 44 pairs is recorded in `identity.py`: task 602 **excluded**
+  (exact same problem text as consumed 217), the other **43 retained** (min vs
+  max, even vs odd, area vs perimeter, first vs last, sum vs product). Frozen
+  before any D1 outcome exists. Worth noting what carries the weight: the exact
+  content key catches 602 by itself, so the review's load-bearing contribution is
+  the **43 retentions** — a Jaccard cutoff would have discarded all of them.
+
+- **`math_verified` is pinned, fetched and measured.**
+  `EleutherAI/hendrycks_math` at the immutable revision
+  `21a5633873b6a120296cce3e2df9d5550074f4a3`, licence **mit**, **test splits
+  only** — seven files, 1.879 MB, SHA256 recorded per file, no train file
+  fetched. **5,000 test rows**; MATH-500 is a measured **exact subset** (500/500
+  found), so the new capacity is **4,500** rather than the "~4,500" previously
+  quoted from a card.
+
+  Adapter: `problem→problem`, `type→subject`, `solution→gold` via
+  `boxed_answer`, and **`level` needed a mapping the contract did not name** —
+  upstream emits `"Level 3"` where the frozen stratum stores `3`. Passing it
+  through would have put a string where consumers expect an integer and turned a
+  level stratification into one bucket per string. Parity holds: the rule
+  reproduces the frozen gold on **500/500** pinned rows and agrees on **500/500**
+  shared problems. A row with no boxed answer, or a config whose `type` disagrees
+  with the mapping, is refused rather than admitted.
+
+  Recorded as a **NEW behavioural population**: historical C1/C2/C3/A3 scores are
+  not imported or compared.
+
+- **`gsm8k` remains BLOCKED on its renderer.** 5,433 is its content-contract
+  capacity, not permission: the positional renderer still collides with the
+  consumed test split on every id it emits. The split-aware scheme
+  (`gsm8k-main-train-00000`) exists in `identity.py`; building the rows is not
+  authorized and was not done.
+
+Validation: D-series 94 passed (new layer, two guards mutation-verified), D1 43,
+`tests/docs` 158, both regenerators at a fixed point. **No `src/` change**, so the
+CUDA ledger is untouched. No core full suite, no historical suites, no GPU. The
+only network use was the authorized MATH fetch.
+
 ## 2026-10-03 — Chain parity, and the gap it found that a wrong measurement hid
 
 A `$0` evidence-parity correction on review. Still **nothing pinned, nothing

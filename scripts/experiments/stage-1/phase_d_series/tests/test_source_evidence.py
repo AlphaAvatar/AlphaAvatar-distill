@@ -19,6 +19,9 @@ for extra in ("src", "scripts", "scripts/data"):
         sys.path.insert(0, path)
 
 from experiments.phase_d_series import source_evidence as ev  # noqa: E402
+from experiments.phase_d_series.identity import (  # noqa: E402
+    problem_content_id,
+)
 
 RECORD = REPO / ev.RECORD
 
@@ -46,40 +49,49 @@ class TestTheRecordClaimsNothingItHasNotMeasured:
         assert "AUTHORIZES NOTHING" in record["_contract"]
         assert "MATERIALIZES NOTHING" in record["_contract"]
 
-    def test_only_the_full_chain_output_is_called_eligible(self, record):
-        """The word belongs to ONE place: the complete chain's output.
+    def test_only_the_strengthened_output_is_named_eligible(self, record):
+        """Structural, not a prose keyword scan.
 
-        Upstream rows and baseline-chain survivors are not eligible counts --
-        the baseline chain is not the whole contract, and the D-series owes more
-        isolation on top of it. Any other appearance of the word must be saying
-        it is not yet known, or is still owed.
+        An earlier version scanned every string for the word and needed a new
+        exemption each time the record legitimately explained its own
+        terminology — a guard that gets widened on every run stops guarding. What
+        actually matters is narrower and checkable: no COUNT may be carried by a
+        field named `eligible` except the strengthened chain's output, and the
+        level below it must say in words that it is not one.
         """
+        allowed_count_fields = {"eligible_rows"}
+
+        def count_fields_named_eligible(node, path=""):
+            found = []
+            if isinstance(node, dict):
+                for key, value in node.items():
+                    here = f"{path}.{key}" if path else key
+                    if "eligible" in key.lower() and isinstance(
+                            value, (int, float)) and not isinstance(value, bool):
+                        if key not in allowed_count_fields and \
+                                path.split(".")[-1] not in allowed_count_fields:
+                            found.append(here)
+                    found += count_fields_named_eligible(value, here)
+            elif isinstance(node, list):
+                for i, v in enumerate(node):
+                    found += count_fields_named_eligible(v, f"{path}[{i}]")
+            return found
+
+        offenders = count_fields_named_eligible(record)
+        assert not offenders, (
+            f"these counts are named eligible but are not the strengthened "
+            f"chain's output: {offenders}")
+
         for name, s in record["strata"].items():
             if "eligible_rows" not in s:
                 continue
-            assert "_this_is_the_eligible_count" in s["eligible_rows"]
-            assert "complete live chain" in s["eligible_rows"][
-                "_this_is_the_eligible_count"]
-
-        #: everywhere else, scanned by INDEX -- consecutive occurrences are close
-        #: enough that a regex window consumed the next match's leading context.
-        blob = json.dumps(record)
-        at, offences = 0, []
-        allowed = ("not ", "owed", "only its output", "this_is_the_eligible_count",
-                   "eligible_rows", "output of the complete", "under exact",
-                   "first eligible", "would be that stratum's",
-                   "eligible under the chain as it is")
-        while True:
-            i = blob.find("eligible", at)
-            if i < 0:
-                break
-            ctx = blob[max(0, i - 160):i + 80].lower()
-            if not any(w in ctx for w in allowed):
-                offences.append(blob[max(0, i - 80):i + 60])
-            at = i + len("eligible")
-        assert not offences, (
-            "'eligible' used outside the chain's output and outside a "
-            "not-yet-known context: " + " | ".join(offences))
+            assert s["eligible_rows"]["count"] == s[
+                "strengthened_contract"]["survivors"], name
+            assert "strengthened chain" in s["eligible_rows"][
+                "_this_is_the_eligible_count"], name
+            #: and the level below must disclaim the word explicitly
+            assert "NOT an eligible count" in s[
+                "current_exact_chain_survivors"]["_what_this_is_NOT"], name
 
     def test_the_four_levels_are_reported_separately(self, record):
         """upstream -> baseline survivors -> D-series survivors -> eligible.
@@ -95,11 +107,17 @@ class TestTheRecordClaimsNothingItHasNotMeasured:
             base = s["baseline_chain"]
             add = s["d_series_isolation"]
             assert "Not yet eligible" in base["_survivors_label"]
-            assert base["survivors"] <= s["upstream_rows"]["candidate_total"]
+            upstream = s["upstream_rows"].get("candidate_total") or \
+                s["upstream_rows"]["total"]
+            assert base["survivors"] <= upstream
             assert add["survivors"] <= base["survivors"]
-            assert s["eligible_rows"]["count"] == add["survivors"]
+            cur = s["current_exact_chain_survivors"]["count"]
+            assert cur == add["survivors"]
             assert (add["removed_beyond_baseline"]
                     == base["survivors"] - add["survivors"])
+            #: and the strengthened level is the LAST one, never above the one
+            #: before it -- a coordinate that admits more is not an isolation
+            assert s["eligible_rows"]["count"] <= cur
 
     def test_the_baseline_chain_names_all_five_populations(self, record):
         """FINAL_PROMOTION was missing from the first version, so this asserts
@@ -165,13 +183,16 @@ class TestTheFindingsThatBlockANaiveExpansion:
         assert any("socratic" in t for t in traps)
         assert any("sanitized" in t for t in traps)
 
-    def test_math_verified_is_not_measured_and_says_why(self, record):
+    def test_math_verified_is_now_pinned_and_measured(self, record):
+        """It was "NOT MEASURED" because it was not pinned. The maintainer
+        source decision authorized pinning and fetching it, so now the record
+        must carry real counts -- and they must come from the pin, not a card."""
         m = record["strata"]["math_verified"]
-        assert "NOT MEASURED" in m["status"]
-        assert "owed_after_pinning" in m
-        assert "upstream_rows" not in m, (
-            "an unpinned, uncached source must carry no row count -- quoting a "
-            "dataset card's total is the transcription this record avoids")
+        assert "upstream_rows" in m, "a pinned source owes measured counts"
+        assert m["upstream_rows"]["total"] > 0
+        assert len(m["pin"]["revision"]) == 40
+        assert sum(m["upstream_rows"]["per_subject"].values()) == \
+            m["upstream_rows"]["total"]
 
 
 @requires_the_sources
@@ -412,3 +433,255 @@ class TestTheMathPinningReadiness:
         assert mapping["upstream_to_existing"]["type"] == "subject"
         assert "no `unique_id`" in mapping["_unique_id"]
         assert "SEPARATE coordinate" in mapping["_unique_id"]
+
+
+class TestTheTerminologyIsNotSelfContradictory:
+    """The record said "no row is called eligible" beside `eligible_rows = 464`."""
+
+    def test_the_contract_does_not_deny_what_the_record_reports(self, record):
+        c = record["_contract"]
+        assert "No row here is called eligible" not in c
+        assert "has not been run against any candidate" not in c
+        assert "STRENGTHENED" in c
+
+    def test_the_current_contract_level_is_not_called_eligible(self, record):
+        for name, s in record["strata"].items():
+            cur = s.get("current_exact_chain_survivors")
+            if not cur:
+                continue
+            assert "NOT an eligible count" in cur["_what_this_is_NOT"]
+            #: and it is >= the eligible count, never equal by accident of naming
+            assert cur["count"] >= s["eligible_rows"]["count"]
+
+    def test_eligible_means_the_strengthened_output(self, record):
+        for name, s in record["strata"].items():
+            if "strengthened_contract" not in s:
+                continue
+            assert s["eligible_rows"]["count"] == s["strengthened_contract"]["survivors"]
+            assert "strengthened chain" in s["eligible_rows"][
+                "_this_is_the_eligible_count"]
+
+
+@requires_the_sources
+class TestTheStrengthenedContract:
+    def test_it_does_not_change_the_historical_chain(self):
+        """The whole reason it is a layer: frozen battery membership must stay
+        reproducible from the builder's own function."""
+        import inspect
+
+        from build_c1_confirmation_battery import excluded_identities
+
+        src = inspect.getsource(excluded_identities)
+        assert "problem_content" not in src, (
+            "the historical chain has grown a problem-content key; frozen "
+            "C1/C2/C3 membership is no longer reproducible from it")
+
+    def test_no_recovery_training_row_survives_for_gsm8k(self, record):
+        """The blocker the maintainer named. The historical chain catches 0 of
+        the 1,708; the strengthened contract must catch all of them."""
+        st = record["strata"]["gsm8k"]["strengthened_contract"]
+        gap = record["strata"]["gsm8k"]["training_corpus_content_gap"]
+        assert gap["IN_THE_TRAINING_CORPUS_BUT_NOT_CAUGHT"] > 0, (
+            "the gap is the premise; if it closed, this stratum's story changed")
+        #: recompute the survivor set and check it directly
+        import hashlib as _h
+        import json as _j
+
+        from battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
+
+        train = set()
+        with (REPO / ev.BASELINE_INPUTS["sessions"]).open() as fh:
+            for line in fh:
+                if not line.strip():
+                    continue
+                for m in (_j.loads(line).get("messages") or []):
+                    if m.get("role") == "user":
+                        q = str(m.get("content") or "")
+                        if q:
+                            train.add(_h.sha256(norm(q).encode()).hexdigest())
+                        break
+        repo, revision, _ = FROZEN_SOURCES["gsm8k"]
+        rows = read_rows(repo, revision, "main/train-00000-of-00001.parquet")
+        base_ids, base_hashes, _ = ev.baseline_chain()
+        add_ids, add_hashes, _ = ev.d_series_additional("gsm8k")
+        surv = ev.survivors("gsm8k", rows, base_ids | add_ids,
+                            base_hashes | add_hashes)
+        src = {}
+        for i, r in enumerate(rows):
+            item = RENDERERS["gsm8k"](dict(r, _index=i))
+            if item:
+                src[str(item["id"])] = dict(r, _index=i)
+        reserved = ev.reserved_problem_content("gsm8k")["ids"]
+        seen, leaked = set(), 0
+        for item in surv:
+            row = src[str(item["id"])]
+            content = problem_content_id("gsm8k", row)
+            if content in reserved or content in seen:
+                continue
+            seen.add(content)
+            if _h.sha256(norm(row["question"]).encode()).hexdigest() in train:
+                leaked += 1
+        assert leaked == 0, (
+            f"{leaked} recovery-training rows survive the strengthened contract")
+        assert len(seen) == st["survivors"]
+
+    def test_every_reserved_problem_is_recoverable(self, record):
+        """An unrecoverable reserved problem is a hole in the isolation, and
+        reporting one as zero would be the dangerous direction."""
+        for name, s in record["strata"].items():
+            st = s.get("strengthened_contract")
+            if not st:
+                continue
+            assert st["reserved_unrecoverable"] == 0, (
+                f"{name}: {st['reserved_unrecoverable']} reserved problems "
+                "could not be content-hashed, so the contract is blind to them")
+
+    def test_the_frozen_review_is_data_not_a_threshold(self, record):
+        from experiments.phase_d_series.identity import REVIEW_PROVENANCE
+
+        rv = record["strata"]["code"]["strengthened_contract"]["frozen_review"]
+        assert rv["n_excluded"] == 1
+        assert rv["excluded"][0]["native_task_id"] == 602
+        assert rv["excluded"][0]["duplicate_of_consumed_task_id"] == 217
+        assert rv["provenance"]["retained"] == 43
+        assert rv["provenance"]["frozen_before_any_d1_outcome"] is True
+        assert REVIEW_PROVENANCE["trigger_threshold"] == 0.8
+
+
+class TestTheDSeriesIdentityCoordinates:
+    """Three coordinates, and they must not be conflated."""
+
+    def test_the_item_id_is_split_aware_for_every_source(self):
+        from experiments.phase_d_series.identity import d_series_item_id
+
+        assert d_series_item_id("code", "full", "train", {"task_id": 602}) == \
+            "mbpp-full-train-602"
+        assert d_series_item_id("gsm8k", "main", "train", {}, index=0) == \
+            "gsm8k-main-train-00000"
+        #: and a non-test MBPP row never gets a `mbpp-test-` id
+        assert not d_series_item_id(
+            "code", "full", "train", {"task_id": 602}).startswith("mbpp-test-")
+
+    def test_gsm8k_without_an_index_is_refused(self):
+        from experiments.phase_d_series.identity import d_series_item_id
+
+        with pytest.raises(ValueError, match="no native key"):
+            d_series_item_id("gsm8k", "main", "train", {})
+
+    def test_problem_content_is_independent_of_the_rendering(self):
+        """The point of the coordinate: two different renderings of one problem
+        share a content id, which is what the historical chain could not see."""
+        a = {"text": "Write a function to add two numbers."}
+        b = {"text": "write  a FUNCTION to add two numbers. "}
+        assert problem_content_id("code", a) == problem_content_id("code", b)
+
+    def test_an_empty_problem_is_refused_not_hashed(self):
+        with pytest.raises(ValueError, match="no 'text'|carries no"):
+            problem_content_id("code", {"text": "   "})
+
+    def test_an_undeclared_source_is_refused(self):
+        with pytest.raises(KeyError, match="no problem payload"):
+            problem_content_id("not_a_source", {"text": "x"})
+
+    def test_hashing_a_wrapped_prompt_as_content_is_refused(self):
+        """MBPP's rendered prompt wraps the problem, so hashing it would make
+        every wrapped item look like a distinct problem."""
+        from experiments.phase_d_series.identity import (
+            problem_content_id_from_prompt,
+        )
+
+        with pytest.raises(ValueError, match="wraps the problem"):
+            problem_content_id_from_prompt("code", "instruction + problem")
+        #: and it is allowed where the rendering IS the problem
+        assert problem_content_id_from_prompt("gsm8k", "a question")
+
+    def test_the_declared_rendering_property_matches_the_renderers(self):
+        """Declared, then verified against the real renderers -- the first
+        version assumed only a native-key route and reported 430 reserved
+        problems as unrecoverable when their text was in `prompt_text`."""
+        from battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
+        from experiments.phase_d_series.identity import (
+            PROBLEM_FIELD,
+            RENDERED_PROMPT_IS_THE_PROBLEM,
+        )
+
+        for group, declared in RENDERED_PROMPT_IS_THE_PROBLEM.items():
+            if group not in FROZEN_SOURCES:
+                continue
+            repo, revision, rel = FROZEN_SOURCES[group]
+            rows = read_rows(repo, revision, rel)[:50]
+            if group == "gsm8k":
+                rows = [dict(r, _index=i) for i, r in enumerate(rows)]
+            make, field = RENDERERS[group], PROBLEM_FIELD[group]
+            same = all(norm(make(r)["prompt_text"]) == norm(str(r[field]))
+                       for r in rows)
+            assert same == declared, (
+                f"{group}: RENDERED_PROMPT_IS_THE_PROBLEM says {declared} but "
+                f"the renderer says {same}")
+
+
+@requires_the_sources
+class TestThePinnedMathSource:
+    def test_the_pin_is_an_immutable_revision_with_a_licence(self, record):
+        pin = record["strata"]["math_verified"]["pin"]
+        assert pin["repo_id"] == "EleutherAI/hendrycks_math"
+        assert len(pin["revision"]) == 40, "a branch name is not a pin"
+        assert pin["licence"] == "mit"
+        assert "TEST ONLY" in pin["splits_fetched"]
+
+    def test_every_pinned_file_has_a_sha256(self, record):
+        files = record["strata"]["math_verified"]["pin"]["files"]
+        assert len(files) == 7, "seven configs, test split each"
+        for rel, got in files.items():
+            assert rel.endswith("test-00000-of-00001.parquet"), rel
+            assert len(got["sha256"]) == 64, rel
+            assert got["size_bytes"] > 0
+
+    def test_no_train_file_is_pinned(self, record):
+        files = record["strata"]["math_verified"]["pin"]["files"]
+        assert not any("train" in rel for rel in files), (
+            "MATH train must not be used for this behavioural stratum")
+
+    def test_the_adapter_parity_holds(self, record):
+        par = record["strata"]["math_verified"]["adapter_parity"]
+        assert par["status"] == "PARITY HOLDS"
+        got, total = par["reproduces_pinned_gold_on_the_pinned_file"].split("/")
+        assert got == total
+        agreed, shared = par["gold_agrees_on_shared_problems"].split("/")
+        assert agreed == shared and int(shared) > 0
+
+    def test_the_level_mapping_is_applied_not_passed_through(self):
+        """Upstream emits `"Level 3"`; the frozen stratum stores `3`."""
+        from experiments.phase_d_series.math_source import level_to_int
+
+        assert level_to_int("Level 3") == 3
+        assert level_to_int(4) == 4
+        with pytest.raises(ValueError, match="cannot read a level"):
+            level_to_int("unknown")
+
+    def test_a_row_with_no_boxed_answer_is_refused(self):
+        from experiments.phase_d_series.math_source import adapt
+
+        with pytest.raises(ValueError, match="no boxed answer"):
+            adapt({"problem": "p", "level": "Level 1", "type": "Algebra",
+                   "solution": "no box here"}, config="algebra", index=0)
+
+    def test_a_config_type_disagreement_is_refused(self):
+        from experiments.phase_d_series.math_source import adapt
+
+        with pytest.raises(ValueError, match="mapping and the data disagree"):
+            adapt({"problem": "p", "level": "Level 1", "type": "Geometry",
+                   "solution": r"$\boxed{2}$"}, config="algebra", index=0)
+
+    def test_the_distribution_shift_is_recorded_against_the_frozen_baseline(
+            self, record):
+        shift = record["strata"]["math_verified"]["distribution_shift"]
+        for axis in ("subject", "level"):
+            assert set(shift[axis]["candidate"]) == set(
+                shift[axis]["frozen_math500"]), axis
+            assert abs(sum(shift[axis]["candidate"].values()) - 1.0) < 0.01
+
+    def test_it_is_declared_a_new_population(self, record):
+        scope = record["strata"]["math_verified"]["scope"]
+        assert "NEW D-series behavioural population" in scope
+        assert "NOT imported" in scope
