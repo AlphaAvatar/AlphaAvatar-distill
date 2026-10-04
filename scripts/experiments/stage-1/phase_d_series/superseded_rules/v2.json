@@ -1,0 +1,222 @@
+{
+ "_supersedes": {
+  "id": "ced017a1f3f155ba5aaf383e61156c12",
+  "version": 1,
+  "why": "v1 bound two isolation coordinates and ranked on the HISTORICAL stable id. The 2026-10-03 source round established that contract is insufficient -- MBPP full/train task 602 is the same problem as consumed full/test task 217 and passes both of v1's coordinates, and the historical chain's training-corpus content exclusion catches 0 of the 1,708 GSM8K train rows that are in the corpus. v1 is not mutated; it is superseded, and its id above is recomputed from its preserved shape rather than transcribed."
+ },
+ "allocation_rule_version": 2,
+ "distribution_identity": {
+  "id": "d_series_behavioural_v1",
+  "is_not": "c1_confirmation",
+  "sesoi_transfer": "the C0 SESOI of 0.010 is CARRIED FORWARD AS AN ASSUMPTION, not as an inherited measurement. It was characterized on the C1 population. Every D-series comparison re-measures both arms on this family under one protocol, so the SESOI is used as a decision boundary for a within-family paired difference \u2014 which is the use it can support \u2014 and not as a claim that a difference measured here equals one measured on C1.",
+  "why": "three strata must draw from larger populations, and a different population is a different behavioural distribution. The stratum names, domains and counts are inherited unchanged, so the high-level balance and the 950/850 denominators are preserved \u2014 but a score on this family is NOT comparable with a score on c1_confirmation_v1, and B's historical C1 number is not imported."
+ },
+ "exclusion": {
+  "all_three_required": "each misses what the others catch. An id misses one problem entering the pool under two ids. A rendered-prompt hash misses the same problem rendered differently -- MBPP full/train task 602 and consumed full/test task 217 are the same problem and differ in both task_id and rendered tests. And neither sees a problem that reached the recovery-training corpus: the historical chain hashes a session's non-assistant messages JOINED, which can never equal a bare problem, so it caught 0 of the 1,708 GSM8K train rows that are in the corpus.",
+  "chain": [
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1"
+    ],
+    "rank_domain": "d-series-v1-d1-screening",
+    "role": "d1_screening"
+   },
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1",
+     "d1_screening"
+    ],
+    "rank_domain": "d-series-v1-d1-confirmation",
+    "role": "d1_confirmation"
+   },
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1",
+     "d1_screening",
+     "d1_confirmation"
+    ],
+    "rank_domain": "d-series-v1-d2-screening",
+    "role": "d2_screening"
+   },
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1",
+     "d1_screening",
+     "d1_confirmation",
+     "d2_screening"
+    ],
+    "rank_domain": "d-series-v1-d2-confirmation",
+    "role": "d2_confirmation"
+   },
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1",
+     "d1_screening",
+     "d1_confirmation",
+     "d2_screening",
+     "d2_confirmation"
+    ],
+    "rank_domain": "d-series-v1-d3-screening",
+    "role": "d3_screening"
+   },
+   {
+    "excludes": [
+     "the five baseline isolation roles",
+     "artifacts/stage3/c1_confirmation_v1",
+     "artifacts/stage3/c2_screening_v1",
+     "d1_screening",
+     "d1_confirmation",
+     "d2_screening",
+     "d2_confirmation",
+     "d3_screening"
+    ],
+    "rank_domain": "d-series-v1-d3-confirmation",
+    "role": "d3_confirmation"
+   }
+  ],
+  "historical_chain_is_unmodified": "`build_c1_confirmation_battery.excluded_identities` keeps its exact semantics, because frozen C1/C2/C3 battery membership is reproducible only from it. The third coordinate is a D-series layer ON TOP, not a repair of the historical function.",
+  "identity_kinds": [
+   "historical native/source identity (stable id, including source_key)",
+   "historical rendered-prompt exact identity (sha256 of norm(prompt_text))",
+   "canonical problem-content identity (sha256 of norm(<problem>), experiments.phase_d_series.identity)"
+  ],
+  "order_is_part_of_the_rule": true,
+  "problem_content_payload": {
+   "_owner": "experiments.phase_d_series.identity.PROBLEM_FIELD",
+   "code": "the bare problem text",
+   "gsm8k": "the question",
+   "math_verified": "the problem statement"
+  },
+  "reserved_populations_for_problem_content": [
+   "the five baseline isolation roles",
+   "artifacts/stage3/c1_confirmation_v1",
+   "artifacts/stage3/c2_screening_v1",
+   "the recovery-training corpus, by FIRST USER PROBLEM -- not the historical joined system+user hash",
+   "every prior D-series role"
+  ]
+ },
+ "family_id": "d_series_behavioural_v1",
+ "mixture": {
+  "code": 100,
+  "gsm8k": 150,
+  "knowledge": 150,
+  "math_verified": 150,
+  "multihop": 150,
+  "rag": 150,
+  "tool": 100
+ },
+ "mixture_source": "imported from build_c1_confirmation_battery.SETS; never restated",
+ "n_prompts_per_role": 950,
+ "n_roles": 6,
+ "n_scorable_prompts_per_role": 850,
+ "review": {
+  "_why_in_the_rule": "a reviewed exclusion decides WHETHER a candidate may enter the ranking, so it is part of the prospective rule and not of the realized content.",
+  "exclusions": {
+   "code": [
+    {
+     "d_series_item_id": "mbpp-full-train-602",
+     "duplicate_of_consumed_task_id": 217,
+     "jaccard": 1.0,
+     "native_task_id": 602,
+     "reason": "exact same problem text as a consumed full/test row"
+    }
+   ]
+  },
+  "provenance": {
+   "_the_threshold_decided_nothing": "it selected which 44 pairs a human read. Excluding on it would have dropped 43 usable problems.",
+   "decided_utc": "2026-10-03",
+   "excluded": 1,
+   "frozen_before_any_d1_outcome": true,
+   "retained": 43,
+   "retained_reason": "distinct task semantics despite high lexical overlap: min vs max, even vs odd, area vs perimeter, first vs last, sum vs product and similar",
+   "reviewed_pairs": 44,
+   "trigger_threshold": 0.8
+  },
+  "retained_explicitly": "the other 43 reviewed pairs are RETAINED by decision, not by default. A similarity cutoff would have dropped all 44.",
+  "threshold_role": "the 0.8 Jaccard trigger selected which pairs a human read and excluded nothing by itself."
+ },
+ "roles": [
+  {
+   "experiment": "D1",
+   "purpose": "rank the Top-K candidates of the D1 target-aware search",
+   "rank_domain": "d-series-v1-d1-screening",
+   "role": "d1_screening"
+  },
+  {
+   "experiment": "D1",
+   "purpose": "confirm the advanced D1 candidate against the incoming incumbent",
+   "rank_domain": "d-series-v1-d1-confirmation",
+   "role": "d1_confirmation"
+  },
+  {
+   "experiment": "D2",
+   "purpose": "rank the Top-K candidates of the D2 confidence-weighted search",
+   "rank_domain": "d-series-v1-d2-screening",
+   "role": "d2_screening"
+  },
+  {
+   "experiment": "D2",
+   "purpose": "confirm the advanced D2 candidate against the incoming incumbent",
+   "rank_domain": "d-series-v1-d2-confirmation",
+   "role": "d2_confirmation"
+  },
+  {
+   "experiment": "D3",
+   "purpose": "rank the Top-K candidates of the D3 search",
+   "rank_domain": "d-series-v1-d3-screening",
+   "role": "d3_screening"
+  },
+  {
+   "experiment": "D3",
+   "purpose": "confirm the advanced D3 candidate against the incoming incumbent",
+   "rank_domain": "d-series-v1-d3-confirmation",
+   "role": "d3_confirmation"
+  }
+ ],
+ "schema": "aadistill.autoinit.d_series_battery_family/v1",
+ "selection": {
+  "base_digest": "the C0 digest the C1 and C2 batteries were ordered from, so the family's ordering is derived from a constant that predates every D-series result",
+  "deterministic": true,
+  "mechanism": "battery_render.rank_take",
+  "order": "ascending SHA256(base_digest : rank_domain : stratum : stable_id), ties broken by str(id)",
+  "outcome_dependence": "NONE. The order is a function of the pool and the frozen domain strings; there is no seed, no date and no choice available after a result is seen",
+  "rank_domains": {
+   "d1_confirmation": "d-series-v1-d1-confirmation",
+   "d1_screening": "d-series-v1-d1-screening",
+   "d2_confirmation": "d-series-v1-d2-confirmation",
+   "d2_screening": "d-series-v1-d2-screening",
+   "d3_confirmation": "d-series-v1-d3-confirmation",
+   "d3_screening": "d-series-v1-d3-screening"
+  },
+  "ranking_stable_id_semantics": {
+   "_why_the_historical_scheme_cannot_be_reused": "`make_gsm8k` builds its id from the row's POSITION in the file, so applied to main/train it emits 1,319 ids that collide with the consumed test split and name different problems. `mbpp-test-<task_id>` names the wrong split for three of MBPP's four files.",
+   "_why_this_is_in_the_RULE": "the ranking hashes the stable id, so changing the id scheme changes the order and therefore WHICH rows are selected. That cannot be deferred to `family_content_id` at materialization: by then the selection has happened.",
+   "for_historical_rows": "unchanged. No frozen battery's item is renamed, and the historical renderers keep their ids exactly.",
+   "for_new_d_series_rows": "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- `experiments.phase_d_series.identity.d_series_item_id`. mbpp-<config>-<split>-<task_id>, gsm8k-<config>-<split>-<NNNNN>, math-<config>-<split>-<NNNNN>"
+  }
+ },
+ "source_policy": {
+  "_why_in_the_rule": "the population a stratum draws from determines the candidate pool, so it decides which rows can win the ranking at all. The per-file digests stay with `family_content_id`; the POLICY is here.",
+  "code": "google-research-datasets/mbpp, the already-pinned revision, full/train + full/validation + full/prompt",
+  "excluded_populations": [
+   "gsm8k `socratic` -- the same problems re-rendered, not capacity",
+   "mbpp `sanitized` -- a verified SUBSET of `full`",
+   "MATH train -- not used for this behavioural stratum",
+   "any second code dataset -- MBPP's own splits suffice"
+  ],
+  "gsm8k": "openai/gsm8k, the already-pinned revision, main/train",
+  "math_verified": "EleutherAI/hendrycks_math @ 21a5633873b6a120296cce3e2df9d5550074f4a3, TEST splits only, licence mit; the canonical MATH test population",
+  "status": "DECIDED and IMPLEMENTED; see logs/shared/analyses/autoinit_d_series_source_evidence.json"
+ },
+ "what_is_NOT_in_this_rule": "the per-file source DIGESTS and the realized item lists. Those are bound by `family_content_id` at materialization, because they describe what was drawn rather than how. Everything that decides WHICH candidate wins the ranking, or WHETHER a candidate may enter it, is above -- which is the correction v2 makes to v1."
+}

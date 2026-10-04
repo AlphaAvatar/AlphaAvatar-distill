@@ -140,12 +140,29 @@ class TestItIsFrozenProspectively:
                             lambda: {"gsm8k": ("reasoning_math", 1, True)})
         assert family.allocation_rule_id() != before
 
-    def test_the_content_id_is_absent_rather_than_fabricated(self):
-        """It binds source pins and realized item digests, neither of which
-        exists. A value here would be invented provenance."""
+    def test_the_content_id_follows_the_realization_rather_than_being_typed(self):
+        """It was None while nothing was built, and that was correct then.
+
+        The family is built now, so a null here would be the opposite error -- a
+        design record claiming 22 MB of evaluation data does not exist while the
+        manifest and the state snapshot say it does. `_realization()` derives it
+        from whether the manifest exists, so building or removing the family
+        moves this without an edit.
+        """
         report = family.report()
-        assert report["family_content_id"] is None
-        assert "fabricated" in report["_family_content_id_is_null"]
+        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        if manifest.is_file():
+            import json as _json
+
+            realized = _json.loads(manifest.read_text())
+            assert report["status"] == "BUILT / VERIFIED"
+            assert report["family_content_id"] == realized["family_content_id"]
+            assert report["realization"]["owner"].endswith(
+                "autoinit_d_series_family_manifest.json")
+            assert report["capacity_source_blocker"] == "CLOSED"
+        else:
+            assert report["family_content_id"] is None
+            assert "fabricated" in report["_family_content_id_is_null"]
 
     def test_the_rule_excludes_only_what_it_cannot_know_yet(self):
         """The line moved, for a stated reason.
@@ -230,7 +247,10 @@ class TestItIsANewDistributionAndSaysSo:
         claims = family.report()["what_this_may_not_be_used_to_claim"]
         joined = " ".join(claims)
         assert "comparable with a C1 score" in joined
-        assert "None is built" in joined
+        #: the enduring claim boundary. "None is built" was the right thing to
+        #: forbid while none was; with six built, what must not be claimed is a
+        #: RESULT -- the batteries are data and nothing has been measured on them.
+        assert "nothing has been measured on them" in joined
 
 
 class TestTheRequirementNobodyHadComputed:
@@ -273,23 +293,46 @@ class TestTheRequirementNobodyHadComputed:
         assert "six roles" in why
         assert report["capacity_record"]["batteries_remaining_for_one"] == 0
 
-    def test_the_blocker_is_no_longer_about_capacity(self):
-        """It was "THREE strata cannot fund six roles". The source decision
-        closed that, so a blocker still naming it would be describing a state the
-        repository has left -- and the per-stratum shortfalls move to their own
-        field, because what they are now is the history of a closed problem."""
+    def test_the_blocker_tracks_the_realization_rather_than_being_typed(self):
+        """Three successive hand-written versions described a state the repository
+        had already left.
+
+        First "THREE strata cannot fund six roles", after the source decision
+        closed capacity. Then "the GSM8K split-aware RENDERER does not exist" and
+        "No row is drawn", after all 5,700 rows had been drawn with that renderer.
+        A hand-written blocker goes stale at exactly the moment the thing it names
+        is fixed, so `_blocker()` derives it from whether the realized manifest
+        exists.
+        """
         report = family.report()
         blocker = report["blocker"]
-        assert "CAPACITY IS CLOSED" in blocker
-        assert "RENDERER" in blocker and "MATERIALIZATION" in blocker
-        assert "No row is drawn" in blocker
-        #: the shortfalls are kept, where they belong
+        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        if manifest.is_file():
+            assert "NOTHING BLOCKS THIS RECORD'S SUBJECT" in blocker
+            assert "EVIDENCE BLOCKER is CLOSED" in blocker
+            #: and it must still say what blocks D1, which is not this record
+            assert "FUNDING AUTHORIZATION" in blocker
+            assert "PER-SESSION ENVELOPE" in blocker
+            for stale in ("RENDERER does not exist", "No row is drawn",
+                          "cannot fund six roles"):
+                assert stale not in blocker, stale
+        else:
+            assert "NOT MATERIALIZED" in blocker
+        #: the per-stratum shortfalls are kept as the history of a closed problem
         short = report["shortfall_against_the_original_pins"]
         for stratum in ("math_verified", "code", "gsm8k"):
             assert stratum in short
-        #: and the record that owns the eligible figures is named rather than
-        #: the figures being copied here
-        assert "source_evidence.json" in blocker
+
+    def test_closing_the_evidence_blocker_authorizes_nothing(self):
+        """A closed blocker is not a grant. The record must say so where a reader
+        meets the closure, not only in a global `_authorizes` field."""
+        report = family.report()
+        assert report["_authorizes"] == "nothing"
+        if "d1_evidence_blocker" in report:
+            assert "CLOSED" in report["d1_evidence_blocker"]
+            assert "authorizes NO paid execution" in report["_d1_evidence_blocker"]
+            assert "explicit maintainer authorization" in report[
+                "_d1_evidence_blocker"]
 
 
 class TestTheSourceOptionsArePinnedToNothing:
@@ -338,8 +381,9 @@ class TestTheCommittedRecord:
     def test_it_materializes_and_authorizes_nothing(self):
         doc = json.loads((REPO / family.RECORD).read_text())
         assert doc["_authorizes"] == "nothing"
-        assert doc["_materializes"] == "nothing"
-        assert doc["status"].startswith("DESIGNED / NOT MATERIALIZED")
+        assert doc["_materializes"] == "nothing", (
+            "this PRODUCER materializes nothing -- build_batteries.py does")
+        assert doc["status"] in ("BUILT / VERIFIED", "DESIGNED / NOT MATERIALIZED")
 
     def test_it_lives_in_the_shared_area_not_under_one_experiment(self):
         """Three experiments own two roles each. Filing it under `phase_d1`
@@ -386,13 +430,33 @@ class TestTheAllocationRuleVersioning:
         assert family.allocation_rule_id_of(family.allocation_rule_v1()) == \
             family.V1_RULE_ID_AS_COMMITTED
 
-    def test_v2_is_the_live_rule_and_differs_from_v1(self):
+    def test_v2_still_reproduces_its_committed_id(self):
+        """Preserved as a JSON snapshot rather than reconstructed in code, after
+        reconstructing v1 nearly moved its hash."""
+        assert family.allocation_rule_id_of(family.allocation_rule_v2()) == \
+            family.V2_RULE_ID_AS_COMMITTED
+
+    def test_v3_is_the_live_rule_and_supersedes_both(self):
+        """v2 enumerated three id schemes because the source decision concerned
+        three strata. The builder draws all SEVEN, so all seven schemes decide
+        which candidate wins -- caught before any row was drawn."""
         rule = family.allocation_rule()
-        assert rule["allocation_rule_version"] == 2
-        assert family.allocation_rule_id() != family.V1_RULE_ID_AS_COMMITTED
-        assert rule["_supersedes"]["version"] == 1
-        assert rule["_supersedes"]["id"] == family.V1_RULE_ID_AS_COMMITTED
-        assert "insufficient" in rule["_supersedes"]["why"]
+        assert rule["allocation_rule_version"] == 3
+        live = family.allocation_rule_id()
+        assert live not in (family.V1_RULE_ID_AS_COMMITTED,
+                            family.V2_RULE_ID_AS_COMMITTED)
+        superseded = {s["version"]: s["id"] for s in rule["_supersedes"]}
+        assert superseded == {1: family.V1_RULE_ID_AS_COMMITTED,
+                             2: family.V2_RULE_ID_AS_COMMITTED}
+        assert "all SEVEN" in superseded_why(rule, 2)
+        assert "preserved" in rule["_superseded_rules_are_preserved"]
+
+    def test_the_id_schemes_are_derived_from_the_one_declaration(self):
+        from experiments.phase_d_series.identity import ID_SCHEME
+
+        sem = family.allocation_rule()["selection"]["ranking_stable_id_semantics"]
+        assert sorted(sem["schemes"]) == sorted(ID_SCHEME)
+        assert "fell behind the code" in sem["_schemes_are_derived"]
 
     def test_the_ranking_identity_semantics_are_bound(self):
         """Changing the id scheme changes the order and therefore the selection,
@@ -457,3 +521,7 @@ class TestTheAllocationRuleVersioning:
         before = family.allocation_rule_id_of(rule)
         mutate(rule)
         assert family.allocation_rule_id_of(rule) != before
+
+
+def superseded_why(rule, version: int) -> str:
+    return next(s["why"] for s in rule["_supersedes"] if s["version"] == version)

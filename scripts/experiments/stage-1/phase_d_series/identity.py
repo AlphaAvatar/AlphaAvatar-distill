@@ -91,30 +91,54 @@ def problem_content_id(group: str, row: dict[str, Any]) -> str:
 #: renderer's id: `mbpp-test-<task_id>` names the wrong split for three of the
 #: four MBPP files, and `gsm8k-test-<row index>` names a different problem in
 #: every file it is applied to.
+#: The id prefix and native-key field per stratum. ALL SEVEN are declared, not
+#: only the three the source decision extended: the builder draws every stratum
+#: and a scheme missing for one of them is a crash at best and an inconsistent
+#: ranking at worst. `None` means the source has no native key and position is
+#: the only provenance available.
+ID_SCHEME: dict[str, tuple[str, str | None]] = {
+    "code": ("mbpp", "task_id"),        # MBPP's own key, partitions across splits
+    "gsm8k": ("gsm8k", None),           # no native key; position only
+    "math_verified": ("math", None),    # no native key; position only
+    "knowledge": ("trivia", "question_id"),
+    "multihop": ("hotpot", "id"),
+    "rag": ("squad", "id"),
+    "tool": ("xlam", "id"),
+}
+
+
 def d_series_item_id(group: str, config: str, split: str,
                      row: dict[str, Any], *, index: int | None = None) -> str:
-    """A provenance id that says which file the row came from.
+    """A provenance id that says which FILE the row came from.
 
-    Historical ids are untouched: this builds ids for NEW D-series rows only, and
-    nothing here renames an item in a frozen battery.
+    `<prefix>-<config>-<split>-<native key or row index>`. The config and split
+    are always present, which is the whole point: a historical id that omits them
+    cannot distinguish two files of one repository, and `make_gsm8k`'s positional
+    id actively names a different problem in each.
+
+    Historical ids are untouched. This builds ids for D-series rows, and nothing
+    here renames an item in a frozen battery.
     """
-    if group == "code":
-        #: `task_id` is MBPP's own key and partitions across the splits, so it is
-        #: preserved verbatim as the provenance payload.
-        return f"mbpp-{config}-{split}-{int(row['task_id'])}"
-    if group == "gsm8k":
-        #: GSM8K rows carry no native key, so position is the only provenance
-        #: available -- which is exactly why the split must be in the id.
-        if index is None:
+    scheme = ID_SCHEME.get(group)
+    if scheme is None:
+        raise KeyError(
+            f"no D-series id scheme declared for {group!r}; add it to ID_SCHEME. "
+            "Every stratum the builder draws needs one -- a missing scheme is an "
+            "inconsistent ranking, not a missing convenience.")
+    prefix, key_field = scheme
+    if key_field is not None:
+        native = row.get(key_field)
+        if native is None or str(native) == "":
             raise ValueError(
-                "gsm8k rows have no native key, so a row index is required; "
-                "without it the id cannot distinguish two files' row 0")
-        return f"gsm8k-{config}-{split}-{index:05d}"
-    if group == "math_verified":
-        if index is None:
-            raise ValueError("math rows carry no native key; an index is required")
-        return f"math-{config}-{split}-{index:05d}"
-    raise KeyError(f"no D-series id scheme declared for {group!r}")
+                f"{group}: row carries no {key_field!r}, but the declared scheme "
+                "says it has a native key. Falling back to position would make "
+                "two rows' ids depend on file order.")
+        return f"{prefix}-{config}-{split}-{native}"
+    if index is None:
+        raise ValueError(
+            f"{group} rows have no native key, so a row index is required; "
+            "without it the id cannot distinguish two files' row 0")
+    return f"{prefix}-{config}-{split}-{index:05d}"
 
 
 # --- the frozen duplicate-review decision ------------------------------------

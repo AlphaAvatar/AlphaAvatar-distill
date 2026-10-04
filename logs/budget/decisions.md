@@ -1,5 +1,221 @@
 # Budget decisions
 
+## 2026-10-03 — MAINTAINER DECISION: the D1 evidence blocker is CLOSED
+
+Closed on independent review of the realized six-role family. **Records-only
+round; closing it authorizes no paid execution.**
+
+```text
+evidence blocker        CLOSED
+construction commit     29f99b9abc4c0cabce6066dc8ef306e2fc61b7f6  (clean tree)
+allocation rule v3      f6047343c1c1ad2172f500e979c704c1
+family_content_id       1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58
+superseded identity     c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+```
+
+The maintainer verified independently: the 42 realized files byte-hashed; the
+family identity binding the rule, the output-file SHA256s and the source
+identities; a changed `gold` or `prompt_text` with ids intact detected; the
+verifier recomputing from disk rather than trusting the manifest; the frozen
+950/850 mixture in all six roles; all 5,700 items rebuilding with identical
+membership on clean provenance; pairwise disjointness; every item checked against
+the complete historical exclusion contract on all four coordinates, now including
+recovery-training, calibration and state-evaluation source ids; the RAG
+no-payload mutation demonstrating the native-id verifier detects its failure mode;
+and renderer/scorer parity intact.
+
+**No allocation-rule v4** for `historical_render_id` — it implements the
+historical native/source identity v3 already binds and introduces no new
+selection criterion.
+
+- **D1's blocker state is now exactly three lines**, and the record says so in
+  one place:
+
+  ```text
+  EVIDENCE               CLOSED
+  FUNDING AUTHORIZATION  OPEN / CATEGORICAL   phase_d1 absent from
+                                              funds_formal_sessions_of
+  PER-SESSION ENVELOPE   OPEN / UNRESOLVED    needs the GPU qualification
+                                              and repricing
+  ```
+
+- **The design record's `blocker` is now derived, after three stale versions.** It
+  said "THREE strata cannot fund six roles" after capacity closed, then "the GSM8K
+  split-aware RENDERER does not exist" and "No row is drawn" after all 5,700 rows
+  had been drawn with that renderer. A hand-written blocker goes stale at exactly
+  the moment the thing it names is fixed, which is when a reader is most likely to
+  trust it. `_blocker()` derives it from whether the realized manifest exists, and
+  a test asserts the three retired phrases cannot come back.
+
+- **Closing a blocker is not a grant**, and the record says so where a reader
+  meets the closure rather than only in a global field. The short engineering GPU
+  qualification is **owed, not approved**: it still needs explicit maintainer
+  authorization. Its scope when authorized is narrow — verify the incumbent path
+  still rebuilds the frozen incumbent artifact on real CUDA; verify the
+  target-aware bsz=3 path executes correctly under CUDA/bf16; measure state-eval
+  peak memory against the derived budget; measure representative batched D1
+  expansion timing; reprice the chain. Only that measurement can inform formal
+  funding scope, cap changes and the envelope.
+
+Validation, scoped to a records change: the battery-family test and `tests/docs`,
+215 passed, both regenerators at a fixed point. The 42 battery files were **not**
+rebuilt, the full D-series suite was not rerun for prose, and no core or
+historical suite ran.
+
+## 2026-10-03 — The family identity binds its bytes, and the provenance is clean
+
+The three closure items from review, in the required order. `$0`. No GPU, no
+search, no probes, no funding or envelope change.
+
+- **`family_content_id` binds the 42 output files' BYTES.** It previously hashed
+  `item id : problem_content_id` per role, which identifies which *source rows*
+  the ids refer to and nothing about the behavioural item — `prompt_text`,
+  `messages`, `gold`, aliases, tool schemas and every scorer field could change
+  without moving it. This round had already found `battery_v2`'s RAG prompts
+  drifting from the current renderer with every id intact, so the failure was
+  demonstrated rather than imagined.
+
+  ```text
+  family_content_id  1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58
+  supersedes         c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+  ```
+
+  The manifest records path, size, SHA256 and item count for each of the 42
+  realized files. `serialize()` is the single function used for both the digest
+  and the write, so a dry run's digest is the digest of what a write produces.
+  `family.json` is excluded from its own hash. The per-role id/content digest
+  stays as a readable secondary identity, and a test asserts that zeroing every
+  one of them leaves the family id unchanged — which is what makes it secondary
+  rather than load-bearing.
+
+- **Every item is now checked on all four coordinates, independently.** The
+  verifier previously rebuilt the committed pools and FINAL_PROMOTION, plus
+  problem content for the three strata that declare a payload. That left the
+  native/source-id protection for `rag`, `multihop`, `knowledge` and `tool`
+  resting on the builder's word — and those are precisely the strata where the id
+  coordinate is the only one with teeth, as the ten-row defect last round showed.
+
+  It now takes the frozen exclusion **set** as a contract input — the set
+  definition, never the builder's selection or admission result — and asserts
+  `historical_render_id`, `source_key`, the rendered-prompt hash and
+  `problem_content_id` against the complete baseline: recovery training, operator
+  calibration, state evaluation, recovery search, final promotion and the
+  D-series pools.
+
+  `check_manifest` recomputes the family id from the bytes on disk rather than
+  from the manifest's claim about them. Recomputing from the document would pass
+  for a corruption that edits only the items, because then nothing in the
+  document moved at all.
+
+  Both mutations required by the review pass: a changed `gold` with `id` and
+  `problem_content_id` intact fails the artifact digest alone, and a `rag` item
+  given a real reserved recovery-training `source_id` fails the contract check on
+  a stratum with no problem payload.
+
+- **The design record points at reality.** It said `DESIGNED / NOT MATERIALIZED`
+  with `family_content_id: null` while the manifest and the snapshot said six
+  batteries existed. `_realization()` now derives status, the family id and the
+  realization owner from whether the manifest exists, so building or removing the
+  family moves it without an edit. Ownership is explicit: this record owns the
+  **allocation and design**, the manifest owns the **realized family**. Stale
+  current-state claims — "None is built", "unverified licences" — became
+  historical explanation. The attribution pins `_authorizes` instead of a status
+  string that is now derived.
+
+  `current.json` reconciled: the top-level blocker, `next_starting_point` and
+  `test_suites.next_work`. **The evidence blocker's source/capacity half closed at
+  `main@bc31175f`; its realized-family half is under review on
+  `prep/d-series-batteries`.** Neither record claims the whole blocker is closed.
+
+- **Clean construction provenance, in the required order.** Code committed first
+  (`29f99b9a`), worktree clean, then rebuilt. The manifest records
+  `git_commit 29f99b9a, dirty: false` rather than the earlier dirty tree, and
+  `P12.2` keeps that commit reachable after any squash because the source branch
+  is preserved.
+
+  **The membership is byte-for-byte identical.** All 42 role/stratum files, all
+  5,700 items, every id in every position unchanged — only the stronger family
+  identity moved, which is exactly the expected outcome. Had any membership
+  changed, this round would have stopped and reported instead.
+
+Validation: D-series 136 passed, `tests/docs` 158, both regenerators at a fixed
+point, independent family verifier 8/8. No `src/` change, so no core suite and the
+CUDA ledger is untouched.
+
+## 2026-10-03 — The six-role D-series family is built, hash-bound and verified
+
+All six behavioural batteries exist, **before any D1 outcome**. `$0` data work.
+No GPU, no recovery probes, no D1 search, no funding or envelope change.
+
+```text
+family_content_id  c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+allocation rule    v3  f6047343c1c1ad2172f500e979c704c1
+roles              d1_screening d1_confirmation d2_screening
+                   d2_confirmation d3_screening d3_confirmation
+each role          950 prompts, 850 scorable, the frozen 7-stratum mixture
+items              artifacts/stage3/d_series_behavioural_v1 (22 MB, gitignored)
+record             logs/shared/analyses/autoinit_d_series_family_manifest.json
+```
+
+- **Allocation rule v3**, because v2 was incomplete and the builder proved it. v2
+  enumerated the split-aware id scheme for the **three** strata the source
+  decision touched; all **seven** are ranked, so all seven schemes decide which
+  candidate wins. v3 derives the enumeration from `identity.ID_SCHEME` so it
+  cannot fall behind the code again. Caught **before any row was drawn**, which is
+  the only time it is cheap.
+
+  v1 and v2 are both preserved and both recompute to their committed ids.
+  **v2 is preserved as a JSON snapshot, not as a function** — reconstructing v1 in
+  code had already nearly moved its hash, and a snapshot cannot acquire a stray
+  trailing comma.
+
+- **Selection is `rank_take`, the historical function**, with each role's frozen
+  rank domain. The D-series adds exactly two things on top: the split-aware item
+  identity, and the problem-content coordinate filtering the pool before ranking.
+  Every item's **content** — prompt, gold, every scorer field — is the historical
+  renderer's output verbatim, which the verifier checks field by field.
+
+- **The independent verifier found a real isolation defect, and it was mine.** Ten
+  rows across `rag` and `multihop` were already consumed by FINAL_PROMOTION and
+  passed every coordinate:
+
+  * the **id** coordinate missed them because the historical exclusion set holds
+    `squad-val-<key>` while a D-series row's id is
+    `squad-squad_v2-validation-<key>` — changing the id scheme moved the rows out
+    of the namespace the exclusion set is written in, and `battery_v2` stores no
+    `source_key` to fall back on;
+  * the **rendered-prompt** coordinate missed them because `battery_v2` was built
+    before `RAG_INSTRUCTION` was reworded — "say you cannot answer from the
+    context" became "say you cannot answer", so its prompt hashes no longer match
+    what the current renderer produces;
+  * the **problem-content** coordinate does not apply: `rag` and `multihop` have
+    no declared problem payload.
+
+  So the id coordinate had been carrying the load for these strata, and changing
+  the id scheme silently removed it. The build now also excludes on each
+  candidate's `historical_render_id`, which applies the historical coordinate in
+  the historical namespace. **This is why the verifier re-derives instead of
+  checking the builder's own claims** — a verifier that imported the selection
+  would have agreed with the bug.
+
+- **Six checks, all passing, all able to fail.** Counts and the 950/850
+  denominators; renderer/scorer parity field by field; pairwise disjointness
+  across all six roles on all three coordinates; isolation from every historical
+  reserved population; no role containing a recovery-training problem; and the
+  manifest describing the items on disk. Each has a mutation test that corrupts a
+  loaded copy and asserts the check reports it.
+
+- **The build is deterministic**: `family_content_id` and every per-role item
+  digest are identical across rebuilds. Only `code_state` differs, and
+  `family_content_id` does not hash it.
+
+- **What is NOT authorized by this**: GPU qualification, D1 search, recovery
+  probes, formal D1 funding, a per-session envelope change. The evidence blocker
+  is now a maintainer judgement rather than a measurement.
+
+Validation: D-series 127 passed, D1 43, `tests/docs` 158, both regenerators at a
+fixed point. No `src/` change, so no core suite and the CUDA ledger is untouched.
+
 ## 2026-10-03 — Allocation rule v2, and one authoritative eligible count
 
 The two cleanup steps the review required before materialization. `$0`, no
