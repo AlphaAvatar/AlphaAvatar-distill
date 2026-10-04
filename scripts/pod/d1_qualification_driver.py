@@ -66,6 +66,19 @@ class QualificationError(RuntimeError):
     """A stage could not produce the evidence it exists to produce."""
 
 
+class PartialPath(QualificationError):
+    """A fixed-path arm failed, CARRYING the steps it had already completed.
+
+    The point is that the caller files `partial` into the record before letting
+    the failure propagate. A paid stage that completes expensive work and then
+    fails must not report that work as absent.
+    """
+
+    def __init__(self, message: str, *, partial: dict[str, Any]) -> None:
+        super().__init__(message)
+        self.partial = partial
+
+
 # --- stage plumbing ---------------------------------------------------------
 
 class Journal:
@@ -251,6 +264,22 @@ def _path_profiles():
     return A3S.path_spec(workdir_device="cuda").steps
 
 
+def unpinned(spec):
+    """`spec` with every step's expected-artifact pin cleared.
+
+    `dataclasses.replace`, so a field added to `FixedPathStep` or
+    `FixedPathSpec` later is carried rather than silently dropped by a
+    hand-written reconstruction. The `path_id` gains a suffix because an
+    unpinned path is NOT the pinned one and must not be recorded under its id.
+    """
+    import dataclasses
+
+    steps = tuple(dataclasses.replace(s, expected_artifact_digest=None)
+                  for s in spec.steps)
+    return dataclasses.replace(spec, steps=steps,
+                               path_id=f"{spec.path_id}.unpinned")
+
+
 def run_path(*, repo: Path, workdir: Path, arm: str, batch_size: int,
              policy_id: str, expected_final: str | None, teacher_path: str,
              journal: Journal, deadline=None) -> dict[str, Any]:
@@ -270,6 +299,16 @@ def run_path(*, repo: Path, workdir: Path, arm: str, batch_size: int,
     from experiments.phase_a3 import a3_session as A3S
 
     spec = A3S.path_spec(workdir_device="cuda")
+    if expected_final is None:
+        #: A3's spec pins every intermediate to the INCUMBENT's artifact, so it
+        #: can replay the incumbent exactly. That is right for arm A and a
+        #: contradiction for any other arm: an arm that changes the position
+        #: policy or the calibration batch size is EXPECTED to build something
+        #: else, and the pin stopped s2 at step 2 after 1,384 paid seconds for
+        #: doing precisely its job. The pin is not the bug -- reusing a pinned
+        #: spec to run an unpinned question is. Only the arm that claims to
+        #: reproduce the incumbent keeps the pins.
+        spec = unpinned(spec)
     adapter = get_adapter("qwen3")
     execution = ExecutionConfig(micro_batch_size=batch_size,
                                calibration_batch_packing="length_sorted_v1")
@@ -293,12 +332,30 @@ def run_path(*, repo: Path, workdir: Path, arm: str, batch_size: int,
 
     torch.cuda.reset_peak_memory_stats()
     t0 = time.time()
-    results = materialize_fixed_path(
-        spec, adapter=adapter,
-        root_loader=lambda: adapter.load(teacher_path, dtype="bfloat16",
-                                         device="cuda"),
-        workdir=workdir, repo_root=repo, on_step=on_step,
-        deadline=deadline, execution=execution)
+    try:
+        materialize_fixed_path(
+            spec, adapter=adapter,
+            root_loader=lambda: adapter.load(teacher_path, dtype="bfloat16",
+                                             device="cuda"),
+            workdir=workdir, repo_root=repo, on_step=on_step,
+            deadline=deadline, execution=execution)
+    except BaseException as exc:
+        #: EVERY completed step survives the failure of a later one. s2's arm B
+        #: ran 1,384 paid seconds, completed three steps and recorded their
+        #: digests -- and the record kept `batch_size: null, steps: []`, because
+        #: the raise happened before the return dict was built. The digests were
+        #: recoverable from the journal only by luck. An expensive unit of work
+        #: that is finished must be persisted at the moment it finishes, not at
+        #: the moment the stage happens to succeed.
+        raise PartialPath(f"{arm}: {type(exc).__name__}: {exc}", partial={
+            "arm": arm, "batch_size": batch_size, "position_policy": policy_id,
+            "path_id": spec.path_id, "pinned": expected_final is not None,
+            "n_steps": len(steps), "steps": steps,
+            "seconds": round(time.time() - t0, 3),
+            "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
+            "failed_at_step": len(steps),
+            "failure": f"{type(exc).__name__}: {exc}",
+        }) from exc
     elapsed = round(time.time() - t0, 3)
     final = steps[-1]["artifact_digest"] if steps else None
     final_checkpoint = steps[-1]["checkpoint_path"] if steps else None
@@ -446,37 +503,75 @@ def measure_state_eval(evaluator, model, *, label: str,
 
 # --- C: did any discrete decision move? -----------------------------------
 
-def compare_selections(incumbent: dict[str, Any],
-                       target_aware: dict[str, Any]) -> dict[str, Any]:
-    """Per-step discrete differences between the two arms.
+def _attribute(a: dict[str, Any], b: dict[str, Any],
+               c: dict[str, Any] | None) -> str:
+    """Which knob moved this step's selection: the POLICY or the BATCH SIZE.
 
-    Reported as evidence. A difference is expected -- the arms differ in both
-    the scoring policy and the batch size -- and the record says which of those
-    could explain it rather than ruling either way.
+    A differs from B in two knobs at once, so A-vs-B alone cannot say. C holds
+    the policy at the incumbent's and moves only the batch size, which
+    identifies the comparison.
+    """
+    if a["selection"] == b["selection"]:
+        return "no difference between the incumbent and the target-aware arm"
+    if c is None:
+        return ("UNATTRIBUTED: the batch-only arm did not reach this step, so "
+                "the policy and the batch size remain confounded here")
+    if c["selection"] == a["selection"]:
+        return ("THE POSITION POLICY moved it: holding the policy and changing "
+                "only the batch size reproduced the incumbent's selection")
+    if c["selection"] == b["selection"]:
+        return ("THE CALIBRATION BATCH SIZE moved it: changing only the batch "
+                "size, at the incumbent's own policy, already reproduced the "
+                "target-aware selection -- so the policy is not implicated")
+    return ("BOTH KNOBS, or an interaction: changing only the batch size "
+            "produced a THIRD selection, equal to neither arm")
+
+
+def compare_selections(incumbent: dict[str, Any],
+                       target_aware: dict[str, Any],
+                       batch_only: dict[str, Any] | None = None,
+                       ) -> dict[str, Any]:
+    """Per-step discrete differences between the arms, and what moved them.
+
+    A difference is EVIDENCE, not a failure. What would be a failure is a
+    difference nobody can explain -- so the comparison is three-armed and each
+    moved selection is attributed to a knob rather than left ambiguous.
     """
     rows = []
+    c_steps = {s["index"]: s for s in (batch_only or {}).get("steps", [])}
     for a, b in zip(incumbent.get("steps", []), target_aware.get("steps", [])):
+        c = c_steps.get(a["index"])
         rows.append({
             "index": a["index"],
             "impl_id": a["impl_id"],
             "artifact_digest_differs": a["artifact_digest"] != b["artifact_digest"],
             "incumbent_digest": (a["artifact_digest"] or "")[:16],
             "target_aware_digest": (b["artifact_digest"] or "")[:16],
+            "batch_only_digest": ((c or {}).get("artifact_digest") or "")[:16],
             "selection_differs": a["selection"] != b["selection"],
             "incumbent_selection": a["selection"],
             "target_aware_selection": b["selection"],
+            "batch_only_selection": (c or {}).get("selection"),
+            "attribution": _attribute(a, b, c),
         })
     moved = [r["impl_id"] for r in rows if r["selection_differs"]]
     return {
-        "_what": ("per-step discrete comparison of the incumbent protocol and "
-                  "the target-aware protocol on the same CUDA device"),
-        "_a_difference_is_evidence": (
-            "the arms differ in TWO ways -- the scoring position policy and the "
-            "micro-batch size -- so a moved decision is not attributable to "
-            "either alone from this comparison. It is recorded, not adjudicated."),
+        "_what": ("per-step discrete comparison of three arms on the same CUDA "
+                  "device: the incumbent protocol, the target-aware protocol at "
+                  "the D1 batch size, and the incumbent policy at the D1 batch "
+                  "size"),
+        "_why_three_arms": (
+            "the incumbent and target-aware arms differ in TWO knobs at once, "
+            "the scoring position policy and the calibration micro-batch size. "
+            "s2 measured a moved FFN selection between them and could attribute "
+            "it to neither, which is most of the value of the finding lost. The "
+            "third arm moves ONLY the batch size, so each difference is "
+            "identified."),
         "steps": rows,
         "operators_whose_selection_moved": moved,
         "n_moved": len(moved),
+        "attributions": {r["impl_id"]: r["attribution"] for r in rows
+                         if r["selection_differs"]},
         "final_artifacts_differ": (
             incumbent.get("final_artifact_digest")
             != target_aware.get("final_artifact_digest")),
@@ -676,25 +771,51 @@ def main(argv: list[str] | None = None) -> int:
                 "were NOT executed.")
             return 0
 
-        #: A -- the hard gate
-        with journal.stage("A_incumbent_reconstruction") as st:
-            record["A_incumbent"] = run_path(
-                repo=repo, workdir=out / "incumbent", arm="A_incumbent",
-                batch_size=1, policy_id="positions.all_v1",
-                expected_final=expected, teacher_path=teacher_path,
-                journal=journal, deadline=deadline)
-            st.result = {"reconstructed": record["A_incumbent"]["reconstructed"]}
+        def arm(key: str, *, workdir: str, batch_size: int, policy_id: str,
+                expected_final: str | None) -> dict[str, Any]:
+            """One fixed-path arm, whose partial evidence survives its failure."""
+            with journal.stage(key) as st:
+                try:
+                    record[key] = run_path(
+                        repo=repo, workdir=out / workdir, arm=key,
+                        batch_size=batch_size, policy_id=policy_id,
+                        expected_final=expected_final,
+                        teacher_path=teacher_path, journal=journal,
+                        deadline=deadline)
+                except PartialPath as exc:
+                    #: FILE IT, THEN RE-RAISE. The steps this arm completed are
+                    #: paid evidence and they go into the record whether or not
+                    #: the arm finished.
+                    record[key] = exc.partial
+                    raise
+                st.result = {"digest": (record[key]["final_artifact_digest"]
+                                        or "")[:12]}
+                if expected_final is not None:
+                    st.result["reconstructed"] = record[key]["reconstructed"]
+                return record[key]
 
-        #: B -- the target-aware path
-        with journal.stage("B_target_aware") as st:
-            record["B_target_aware"] = run_path(
-                repo=repo, workdir=out / "target_aware", arm="B_target_aware",
-                batch_size=args.batch_size,
-                policy_id="positions.supervised_target_v1",
-                expected_final=None, teacher_path=teacher_path,
-                journal=journal, deadline=deadline)
-            st.result = {"digest":
-                         (record["B_target_aware"]["final_artifact_digest"] or "")[:12]}
+        #: A -- the hard gate. Pinned, because this arm claims to reproduce the
+        #: incumbent, and it is the only arm that claims that.
+        arm("A_incumbent", workdir="incumbent", batch_size=1,
+            policy_id="positions.all_v1", expected_final=expected)
+
+        #: B -- the intended D1 path: target-aware policy AT the D1 batch size.
+        arm("B_target_aware", workdir="target_aware",
+            batch_size=args.batch_size,
+            policy_id="positions.supervised_target_v1", expected_final=None)
+
+        #: B_batch_only -- the ATTRIBUTION arm, and the reason it exists:
+        #: A and B differ in TWO knobs at once, the position policy and the
+        #: calibration batch size. s2 found the FFN top-k diverging between them
+        #: and could not say which knob moved it, which makes the finding nearly
+        #: useless -- `fixed_path`'s own docstring records that an operator
+        #: selects differently at a different calibration forward batch size, so
+        #: both explanations were live. This arm holds the policy at the
+        #: incumbent's and moves ONLY the batch size, so the comparison is
+        #: identified: matching A means the POLICY moved the selection, matching
+        #: B means the BATCH SIZE did.
+        arm("B_batch_only", workdir="batch_only", batch_size=args.batch_size,
+            policy_id="positions.all_v1", expected_final=None)
 
         #: D -- real state-eval peak memory, on each arm's own final artifact,
         #: under that arm's own bound evaluator. The point is the DEVICE's
@@ -704,6 +825,9 @@ def main(argv: list[str] | None = None) -> int:
         for label, arm_record, bound in (
                 ("incumbent", record["A_incumbent"], bound_inc),
                 ("target_aware", record["B_target_aware"], bound_tgt)):
+            #: The attribution arm is not state-evaluated: its artifact
+            #: exists to identify a selection difference, and no consumer
+            #: reads its memory. P8.4 -- artifacts follow consumers.
             with journal.stage(f"D_state_eval_{label}") as st:
                 try:
                     from aadistill.initialization.specs.arch import get_adapter
@@ -730,7 +854,8 @@ def main(argv: list[str] | None = None) -> int:
         #: C
         with journal.stage("C_discrete_decisions") as st:
             record["C_selection_comparison"] = compare_selections(
-                record["A_incumbent"], record["B_target_aware"])
+                record["A_incumbent"], record["B_target_aware"],
+                record.get("B_batch_only"))
             st.result = {"n_moved": record["C_selection_comparison"]["n_moved"]}
 
         record["status"] = "COMPLETE"

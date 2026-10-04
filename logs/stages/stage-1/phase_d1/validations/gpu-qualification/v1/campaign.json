@@ -1,11 +1,11 @@
 {
- "_booked_recomputed_from_components": "0.1098 = 0.1098",
+ "_booked_recomputed_from_components": "0.1098 + 0.9006 = 1.0104",
  "_contract": "Cumulative cost of the D1 engineering GPU qualification, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- which is the book the 2026-10-03 amendment raised for exactly this work.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 0.1098,
+ "booked_usd": 1.0104,
  "campaign_id": "d1_gpu_qualification",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
@@ -32,6 +32,20 @@
     "BOTH protocol bindings succeed on real CUDA over the frozen suite content a1197205 -- incumbent 3b12ecbf, target-aware d463a1dc",
     "the 4/4 input push, the teacher binding path and the evidence collector"
    ]
+  },
+  {
+   "container_disk_gb": 60,
+   "container_disk_usd": 0.0068,
+   "cost_usd": 0.9006,
+   "elapsed_minutes": 49.2,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/runs/d1_qual_20261004_132544_s2",
+   "gpu": "NVIDIA L40S",
+   "gpu_usd": 0.8938,
+   "notes": "arm A PASSED its hard gate on real CUDA (reconstructed the frozen incumbent 53e30566c5f795f1, 1306.4s, 26.518 GiB peak). Arm B failed on A3's pre-ATTENTION parent pin after 1384s: the pinned spec was reused for an arm that changes the position policy and therefore builds a different parent by construction. The pin behaved correctly; reusing it was the defect.",
+   "outcome": "INCOMPLETE",
+   "pod_id": "u99fhssac9f6i7",
+   "rate_usd_per_hour": 1.09,
+   "subrun_id": "d1_qual_20261004_132544_s2"
   }
  ],
  "teardown_reserve_usd": 0.3

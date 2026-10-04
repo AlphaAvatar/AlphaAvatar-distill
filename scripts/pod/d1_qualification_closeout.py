@@ -50,6 +50,8 @@ def _load(path: Path) -> dict[str, Any]:
 #: one that is meant, and refuse an ambiguity rather than guess at it.
 RECORD = "qualification/qualification.json"
 PREFLIGHT_STATUS = "CHECK_ONLY_OK"
+#: What `d1_qualification_driver` writes when every stage ran.
+COMPLETE_STATUS = "COMPLETE"
 
 
 def qualification_record(run_dir: Path) -> Path:
@@ -168,8 +170,13 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         unmet.append("E has no representative timing from both arms, so D1 "
                      "cannot be repriced from measurement")
 
-    if record.get("status") != "PASSED":
-        unmet.append(f"the record's own status is {record.get('status')!r}")
+    #: The DRIVER writes "COMPLETE"; nothing writes "PASSED". Testing for a
+    #: string the producer never emits would call every complete run
+    #: incomplete -- the same two-sided field contract that has bitten this
+    #: repository before, caught here at $0 rather than after a paid run.
+    if record.get("status") != COMPLETE_STATUS:
+        unmet.append(f"the record's own status is "
+                     f"{record.get('status')!r}, not {COMPLETE_STATUS!r}")
 
     return ("PASSED" if not unmet else "INCOMPLETE"), {
         "answers": answers, "unmet": unmet}

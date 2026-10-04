@@ -1,0 +1,22 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 2.354, "stage": "environment", "status": "ok", "t": 2.355}
+{"stage": "register_operators", "status": "start", "t": 2.355}
+{"operators_ok": true, "profiles": 4, "seconds": 0.06, "stage": "register_operators", "status": "ok", "t": 2.415}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 2.415}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.052, "stage": "bind_protocol_incumbent", "status": "ok", "t": 2.467}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 2.467}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.06, "stage": "bind_protocol_target_aware", "status": "ok", "t": 2.528}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.528}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 12.123, "stage": "teacher_fetch_verify", "status": "ok", "t": 14.651}
+{"stage": "A_incumbent_reconstruction", "status": "start", "t": 14.662}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 1175.4369, "stage": "A_incumbent.step0", "status": "ok", "t": 1207.159}
+{"digest": "6b7d902f6ae4", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 53.1422, "stage": "A_incumbent.step1", "status": "ok", "t": 1266.759}
+{"digest": "eea90c91346a", "impl": "width.global_pca_v0", "matches": true, "seconds": 37.0657, "stage": "A_incumbent.step2", "status": "ok", "t": 1306.612}
+{"digest": "53e30566c5f7", "impl": "attention.activation_importance_v1", "matches": null, "seconds": 11.8019, "stage": "A_incumbent.step3", "status": "ok", "t": 1320.502}
+{"reconstructed": true, "seconds": 1306.363, "stage": "A_incumbent_reconstruction", "status": "ok", "t": 1321.025}
+{"stage": "B_target_aware", "status": "start", "t": 1321.025}
+{"digest": "ea630bd9bdcc", "impl": "depth.causal_kl_greedy_v1", "matches": null, "seconds": 1277.2165, "stage": "B_target_aware.step0", "status": "ok", "t": 2608.932}
+{"digest": "1e3b4ac002f7", "impl": "ffn.activation_importance_v0", "matches": null, "seconds": 51.0177, "stage": "B_target_aware.step1", "status": "ok", "t": 2666.669}
+{"digest": "52bcb68c2680", "impl": "width.global_pca_v0", "matches": false, "seconds": 35.4136, "stage": "B_target_aware.step2", "status": "ok", "t": 2705.095}
+{"error": "FixedPathDigestMismatch: step 2 (pre-ATTENTION parent eea90c91346a): artifact digest 52bcb68c26802c4501864f7edd2f301108fe7aa205080163ec99c86bb695999e does not match the pinned eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722. STOP: this is a replay mismatch, not a recoverable condition. Record the evidence and refer it to review; do not continue to any recovery or behavioural measurement.", "seconds": 1384.071, "stage": "B_target_aware", "status": "failed", "t": 2705.096}
+{"error": "step 2 (pre-ATTENTION parent eea90c91346a): artifact digest 52bcb68c26802c4501864f7edd2f301108fe7aa205080163ec99c86bb695999e does not match the pinned eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722. STOP: this is a replay mismatch, not a recoverable condition. Record the evidence a", "stage": "driver", "status": "failed", "t": 2705.097}
