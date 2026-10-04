@@ -1,0 +1,270 @@
+{
+ "_authorizes": "nothing. This is ENGINEERING evidence from the engineering book, which does not transfer into the formal one. It closes none of D1's open blockers and it is not D1 authorization.",
+ "_owner_of": "whether the GPU validation D1 owes has run. scripts/autoinit/write_d1_design.py reads this file, so the design's status derives from it.",
+ "_verdict_is_across_subruns": "NO SINGLE SUBRUN IS COMPLETE. Every required answer was produced by a real paid measurement, and `answer_provenance` names which subrun produced each. The merge is sound because every subrun bound the same two protocol identities over the same frozen suite content, which is checked above rather than assumed.",
+ "answer_provenance": {
+  "discrete_decisions": [
+   "d1_qual_20261004_142346_s3"
+  ],
+  "incumbent_reconstruction": [
+   "d1_qual_20261004_132544_s2",
+   "d1_qual_20261004_142346_s3",
+   "d1_qual_20261004_160758_s5"
+  ],
+  "protocol_incumbent": [
+   "d1_qual_20261004_131735_s1",
+   "d1_qual_20261004_132544_s2",
+   "d1_qual_20261004_142346_s3",
+   "d1_qual_20261004_160221_s4",
+   "d1_qual_20261004_160758_s5"
+  ],
+  "protocol_target_aware": [
+   "d1_qual_20261004_131735_s1",
+   "d1_qual_20261004_132544_s2",
+   "d1_qual_20261004_142346_s3",
+   "d1_qual_20261004_160221_s4",
+   "d1_qual_20261004_160758_s5"
+  ],
+  "state_eval_memory": [
+   "d1_qual_20261004_160758_s5"
+  ],
+  "target_aware_execution": [
+   "d1_qual_20261004_142346_s3"
+  ],
+  "timing": [
+   "d1_qual_20261004_142346_s3"
+  ]
+ },
+ "answers": {
+  "discrete_decisions": {
+   "_reading": "a CPU-vs-GPU or policy-vs-policy selection difference is evidence about the operators, not a qualification failure. What would fail is an unexplained difference between two runs of the SAME environment.",
+   "_selection_lists_live_in": "runs/<subrun>/qualification/qualification.json, under each arm's steps[].selection -- raw evidence, preserved, not copied",
+   "final_artifacts_differ": true,
+   "n_moved": 3,
+   "steps_that_moved": [
+    {
+     "_batch_only_selection_length": null,
+     "_incumbent_selection_length": null,
+     "_target_aware_selection_length": null,
+     "artifact_digest_differs": true,
+     "attribution": "THE CALIBRATION BATCH SIZE moved it: changing only the batch size, at the incumbent's own policy, already reproduced the target-aware selection -- so the policy is not implicated",
+     "batch_only_digest": "1e3b4ac002f78d5a",
+     "batch_only_selection_sha256": "a648e166d0da6f7b2df9a44bf460c8551f2ad41f4f682a36f86813ad5bc4db5b",
+     "impl_id": "ffn.activation_importance_v0",
+     "incumbent_digest": "6b7d902f6ae4c548",
+     "incumbent_selection_sha256": "44d15938183ea6fd971fc816915f410fa1771edac5238f9c89f4fc26717f5912",
+     "index": 1,
+     "selection_differs": true,
+     "target_aware_digest": "1e3b4ac002f78d5a",
+     "target_aware_selection_sha256": "a648e166d0da6f7b2df9a44bf460c8551f2ad41f4f682a36f86813ad5bc4db5b"
+    },
+    {
+     "_batch_only_selection_length": null,
+     "_incumbent_selection_length": null,
+     "_target_aware_selection_length": null,
+     "artifact_digest_differs": true,
+     "attribution": "THE CALIBRATION BATCH SIZE moved it: changing only the batch size, at the incumbent's own policy, already reproduced the target-aware selection -- so the policy is not implicated",
+     "batch_only_digest": "52bcb68c26802c45",
+     "batch_only_selection_sha256": "09c21d0b2b96a6b200f80a9f0abaf618ff083f11937249e06636ba645410ec60",
+     "impl_id": "width.global_pca_v0",
+     "incumbent_digest": "eea90c91346a0745",
+     "incumbent_selection_sha256": "1170036082ddf456a4f0b62da9046b185d3c57c7664046072ddb14207005db38",
+     "index": 2,
+     "selection_differs": true,
+     "target_aware_digest": "52bcb68c26802c45",
+     "target_aware_selection_sha256": "09c21d0b2b96a6b200f80a9f0abaf618ff083f11937249e06636ba645410ec60"
+    },
+    {
+     "_batch_only_selection_length": null,
+     "_incumbent_selection_length": null,
+     "_target_aware_selection_length": null,
+     "artifact_digest_differs": true,
+     "attribution": "THE CALIBRATION BATCH SIZE moved it: changing only the batch size, at the incumbent's own policy, already reproduced the target-aware selection -- so the policy is not implicated",
+     "batch_only_digest": "181bbd6374351cbb",
+     "batch_only_selection_sha256": "0893c351d0496f9254bf6005e6ad32017a9805fa4f9faaf1461b915e0067abaf",
+     "impl_id": "attention.activation_importance_v1",
+     "incumbent_digest": "53e30566c5f795f1",
+     "incumbent_selection_sha256": "3ac887644e7b643b6c965e8748a14b4dc5ed7f604badf0eed4c1e8c79d6da3bd",
+     "index": 3,
+     "selection_differs": true,
+     "target_aware_digest": "181bbd6374351cbb",
+     "target_aware_selection_sha256": "0893c351d0496f9254bf6005e6ad32017a9805fa4f9faaf1461b915e0067abaf"
+    }
+   ]
+  },
+  "incumbent_reconstruction": {
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "expected": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "matched_the_frozen_incumbent": true,
+   "peak_memory_bytes": 28473329152,
+   "seconds": 1306.361
+  },
+  "protocol_incumbent": {
+   "measurement_protocol_id": "3b12ecbf2fcb2a1a6db05c0ab95839bc",
+   "numerical_environment": null,
+   "position_policy": "positions.all_v1",
+   "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+  },
+  "protocol_target_aware": {
+   "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+   "numerical_environment": null,
+   "position_policy": "positions.supervised_target_v1",
+   "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+  },
+  "state_eval_memory": [
+   {
+    "delta_over_predicted_logits": 4.1345,
+    "derived_budget_bytes": 12884901888,
+    "evaluation_delta_bytes": 5027906048,
+    "label": "incumbent",
+    "peak_memory_bytes": 14322779648,
+    "predicted_peak_logit_bytes": 1216095744,
+    "seconds": 8.04,
+    "within_derived_budget": false
+   },
+   {
+    "delta_over_predicted_logits": 1.989,
+    "derived_budget_bytes": 12884901888,
+    "evaluation_delta_bytes": 7256556544,
+    "label": "target_aware",
+    "peak_memory_bytes": 24671490048,
+    "predicted_peak_logit_bytes": 3648287232,
+    "seconds": 8.232,
+    "within_derived_budget": false
+   }
+  ],
+  "target_aware_execution": {
+   "artifact_digest": "181bbd6374351cbbd46e80dfe6f3ef38ce62276f44fc7f30ca910753fb720570",
+   "batch_size": 3,
+   "peak_memory_bytes": 34621054976,
+   "seconds": 1411.568
+  },
+  "timing": {
+   "incumbent_seconds": 1320.514,
+   "ratio_target_aware_over_incumbent": 1.069,
+   "target_aware_seconds": 1411.568
+  }
+ },
+ "bound_protocols": {
+  "bound_protocol_incumbent": [
+   "3b12ecbf2fcb2a1a6db05c0ab95839bc"
+  ],
+  "bound_protocol_target_aware": [
+   "d463a1dc6afbd778123a128f4ed46e16"
+  ]
+ },
+ "cost_usd": 3.2258,
+ "gpu": "NVIDIA L40S",
+ "paid_subruns": 5,
+ "price_per_hour_usd": 1.09,
+ "reconstruction_agreement": {
+  "_reading": "each of these is a separate pod on a separate physical L40S. Agreement across them is the cross-environment determinism evidence; disagreement would be the failure the qualification exists to surface.",
+  "all_agree": true,
+  "distinct_artifact_digests": [
+   "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342"
+  ],
+  "n_independent_pods": 3,
+  "subruns": [
+   "d1_qual_20261004_132544_s2",
+   "d1_qual_20261004_142346_s3",
+   "d1_qual_20261004_160758_s5"
+  ]
+ },
+ "schema": "aadistill.d1.gpu_qualification_closeout/v2",
+ "session_commits": {
+  "d1_qual_20261004_131735_s1": "690494c3e2c8bdcf43abdd17253009343d03ad87",
+  "d1_qual_20261004_132544_s2": "0f69c75584f98f03f4b16192d5bd7f6326ca26be",
+  "d1_qual_20261004_142346_s3": "a208e97c459296b572b57376ab73ae67ff83d520",
+  "d1_qual_20261004_160221_s4": "053c9133c33159732bd9c0af620e4194acac6baf",
+  "d1_qual_20261004_160758_s5": "36ec6d5ef9fbe8c899f7ea18a51fe9565b13f201"
+ },
+ "subruns": [
+  {
+   "answered": [
+    "protocol_incumbent",
+    "protocol_target_aware"
+   ],
+   "status": "FAILED",
+   "subrun_id": "d1_qual_20261004_131735_s1",
+   "unmet": [
+    "A did not run: the incumbent was never reconstructed",
+    "B did not run: the target-aware path was never executed",
+    "C compared nothing: no per-step selection comparison exists, so no discrete difference was examined",
+    "D produced no state-eval memory measurement at all",
+    "E has no representative timing from both arms, so D1 cannot be repriced from measurement",
+    "the record's own status is 'FAILED', not 'COMPLETE'"
+   ],
+   "verdict": "INCOMPLETE"
+  },
+  {
+   "answered": [
+    "incumbent_reconstruction",
+    "protocol_incumbent",
+    "protocol_target_aware"
+   ],
+   "status": "FAILED",
+   "subrun_id": "d1_qual_20261004_132544_s2",
+   "unmet": [
+    "B did not run: the target-aware path was never executed",
+    "C compared nothing: no per-step selection comparison exists, so no discrete difference was examined",
+    "D produced no state-eval memory measurement at all",
+    "E has no representative timing from both arms, so D1 cannot be repriced from measurement",
+    "the record's own status is 'FAILED', not 'COMPLETE'"
+   ],
+   "verdict": "INCOMPLETE"
+  },
+  {
+   "answered": [
+    "discrete_decisions",
+    "incumbent_reconstruction",
+    "protocol_incumbent",
+    "protocol_target_aware",
+    "target_aware_execution",
+    "timing"
+   ],
+   "status": "COMPLETE",
+   "subrun_id": "d1_qual_20261004_142346_s3",
+   "unmet": [
+    "D failed for 'incumbent': TypeError: StateEvaluator.evaluate() missing 1 required positional argument: 'artifact_digest'",
+    "D failed for 'target_aware': TypeError: StateEvaluator.evaluate() missing 1 required positional argument: 'artifact_digest'",
+    "D produced no state-eval memory measurement at all"
+   ],
+   "verdict": "INCOMPLETE"
+  },
+  {
+   "answered": [
+    "protocol_incumbent",
+    "protocol_target_aware"
+   ],
+   "status": "FAILED",
+   "subrun_id": "d1_qual_20261004_160221_s4",
+   "unmet": [
+    "A did not run: the incumbent was never reconstructed",
+    "B did not run: the target-aware path was never executed",
+    "C compared nothing: no per-step selection comparison exists, so no discrete difference was examined",
+    "D produced no state-eval memory measurement at all",
+    "E has no representative timing from both arms, so D1 cannot be repriced from measurement",
+    "the record's own status is 'FAILED', not 'COMPLETE'"
+   ],
+   "verdict": "INCOMPLETE"
+  },
+  {
+   "answered": [
+    "incumbent_reconstruction",
+    "protocol_incumbent",
+    "protocol_target_aware",
+    "state_eval_memory"
+   ],
+   "status": "COMPLETE",
+   "subrun_id": "d1_qual_20261004_160758_s5",
+   "unmet": [
+    "B did not run: the target-aware path was never executed",
+    "C compared nothing: no per-step selection comparison exists, so no discrete difference was examined",
+    "E has no representative timing from both arms, so D1 cannot be repriced from measurement"
+   ],
+   "verdict": "INCOMPLETE"
+  }
+ ],
+ "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+ "verdict": "PASSED"
+}

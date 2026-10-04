@@ -36,6 +36,7 @@ that could not have produced a valid result.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -590,6 +591,61 @@ def behavioural_design() -> dict[str, Any]:
     }
 
 
+#: The qualification's own closeout is the single owner of whether the owed GPU
+#: validation has run. This writer derives from it rather than carrying a typed
+#: status, because a hand-written "NOT RUN" is false exactly when the run
+#: succeeds — the one moment a reader is most likely to trust it.
+QUALIFICATION_CLOSEOUT = ("logs/stages/stage-1/phase_d1/validations/"
+                          "gpu-qualification/v1/closeout.json")
+
+
+def _qualification_state() -> dict[str, Any]:
+    """`status` for `gpu_validation_owed`, read off the qualification closeout."""
+    path = REPO / QUALIFICATION_CLOSEOUT
+    if not path.is_file():
+        return {
+            "status": "OWED, NOT RUN. Nothing was created and $0 was spent.",
+            "_status_owner": (f"derived: no closeout at {QUALIFICATION_CLOSEOUT}. "
+                              "Writing one moves this line with no edit here."),
+        }
+    raw = path.read_bytes()
+    doc = json.loads(raw)
+    answers = doc.get("answers") or {}
+    recon = answers.get("incumbent_reconstruction") or {}
+    decisions = answers.get("discrete_decisions") or {}
+    return {
+        "status": f"RUN -- {doc['verdict']}",
+        "_status_owner": QUALIFICATION_CLOSEOUT,
+        "ran": {
+            #: The closeout's PATH and CONTENT HASH, so this design is bound to
+            #: the exact bytes it read, plus ONLY the conclusions the design
+            #: consumes. It used to inline the whole `answers` object, which made
+            #: this one key 1.48 MB of a 3.9 MB design -- a third copy of
+            #: selection lists that `runs/` already owned.
+            "closeout": QUALIFICATION_CLOSEOUT,
+            "closeout_sha256": hashlib.sha256(raw).hexdigest(),
+            "verdict": doc["verdict"],
+            "gpu": doc.get("gpu"),
+            "price_per_hour_usd": doc.get("price_per_hour_usd"),
+            "cost_usd": doc.get("cost_usd"),
+            "reconstructed_the_frozen_incumbent":
+                recon.get("matched_the_frozen_incumbent"),
+            "n_operator_selections_moved": decisions.get("n_moved"),
+            "what_moved_them": sorted({
+                s.get("attribution", "").split(":")[0]
+                for s in (decisions.get("steps_that_moved") or [])}),
+            "_everything_else_is_in_the_closeout": (
+                "the per-arm answers, the provenance, the agreement across pods "
+                "and the source run ids live in the closeout named above; its "
+                "raw evidence lives in that directory's runs/. This design "
+                "carries the hash and the conclusions it uses, not a copy."),
+            "_authorizes": ("nothing. A passed engineering qualification is not "
+                            "formal D1 authorization, and it closes none of the "
+                            "open blockers: see `open_blockers`."),
+        },
+    }
+
+
 def gpu_validation_owed() -> dict[str, Any]:
     """What a GPU must answer before D1 executes, and what it must not re-ask.
 
@@ -601,7 +657,7 @@ def gpu_validation_owed() -> dict[str, Any]:
     statement, for the maintainer to decide alongside the blockers.
     """
     return {
-        "status": "OWED, NOT RUN. Nothing was created and $0 was spent.",
+        **_qualification_state(),
         "why_a_gpu_is_required": (
             "the questions are CUDA numerical behaviour and real memory, which "
             "no CPU substitute reaches. AGENTS.md P8.2: a CPU rehearsal that "
@@ -670,12 +726,10 @@ def gpu_validation_owed() -> dict[str, Any]:
             "neither authorizes D1."),
         "funding": (
             "the GPU engineering allowance, which is a different book from the "
-            "formal one and does not transfer into it. It is not requested here: "
-            "D1 cannot execute while any of its open blockers stands, so the "
-            "validation is owed at authorization time rather than now. It is "
-            "nonetheless a PREREQUISITE of pricing, not a consequence of "
-            "funding: the chain figures cannot become authorization prices "
-            "until it runs."),
+            "formal one and does not transfer into it — so paying for this "
+            "validation moves D1's funding blocker not at all. It is a "
+            "PREREQUISITE of pricing rather than a consequence of funding: the "
+            "chain figures cannot become authorization prices until it runs."),
     }
 
 
@@ -962,10 +1016,67 @@ def budget() -> dict[str, Any]:
 #: became the third, because the count was prose in four places while the facts
 #: lived in `budget` and `contamination_protection`. A fourth blocker now adds
 #: one entry here and every statement follows.
+#: The realized D-series family D1's behavioural evidence comes from. Read, not
+#: assumed: the evidence blocker closes because these roles EXIST and are
+#: verified, and it would reopen if the manifest vanished.
+FAMILY_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+
+#: The two roles D1 itself consumes. D2 and D3 own the other four; D1's evidence
+#: readiness must not depend on roles it never reads.
+D1_ROLES = ("d1_screening", "d1_confirmation")
+
+
+def d_series_evidence() -> dict[str, Any]:
+    """Whether D1's behavioural evidence exists, from the realized family.
+
+    **This replaces the capacity question.** `contamination_protection` asked how
+    many further batteries the frozen C1 mixture could support and answered zero,
+    which was the right question while no D-series family existed and the sources
+    were undecided. The family is built now, so the live question is whether the
+    roles D1 consumes exist and are identified -- and the old capacity analysis is
+    kept below as the historical reasoning that led to extending the sources,
+    where it no longer drives a blocker.
+    """
+    path = REPO / FAMILY_MANIFEST
+    if not path.is_file():
+        return {
+            "status": "OPEN",
+            "why": (f"{FAMILY_MANIFEST} does not exist, so D1 has no fresh "
+                    "disjoint behavioural battery to confirm on."),
+            "roles_required": list(D1_ROLES),
+            "roles_available": [],
+        }
+    doc = json.loads(path.read_text())
+    built = sorted(doc.get("roles", {}))
+    missing = [role for role in D1_ROLES if role not in built]
+    if missing:
+        return {
+            "status": "OPEN",
+            "why": f"the realized family is missing {missing}",
+            "roles_required": list(D1_ROLES),
+            "roles_available": built,
+        }
+    return {
+        "status": "CLOSED",
+        "why": ("the realized D-series family provides both roles D1 consumes, "
+                "built before any D1 outcome, pairwise disjoint and isolated "
+                "from every historical reserved population. Closed on "
+                "independent maintainer review 2026-10-03."),
+        "roles_required": list(D1_ROLES),
+        "roles_available": built,
+        "allocation_rule_id": doc.get("allocation_rule_id"),
+        "family_content_id": doc.get("family_content_id"),
+        "construction_commit": (doc.get("code_state") or {}).get("git_commit"),
+        "owner": FAMILY_MANIFEST,
+        "_authorizes": ("nothing. The evidence exists; the funding scope and the "
+                        "per-session envelope are separate and still open."),
+    }
+
+
 BLOCKER_SPECS: tuple[tuple[str, str], ...] = (
-    ("evidence", "contamination_protection.BLOCKER"),
-    ("funding", "budget.BLOCKER"),
-    ("per-session ceiling", "budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING"),
+    ("evidence", "d_series_evidence"),
+    ("funding authorization", "budget.BLOCKER"),
+    ("per-session envelope", "budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING"),
 )
 
 
@@ -998,21 +1109,24 @@ def open_blockers(budget_section: dict[str, Any],
     it cannot touch.
     """
     open_: list[str] = []
-    if (contamination_section["batteries_available"]
-            < contamination_section["batteries_D1_requires"]):
+    #: EVIDENCE is now about whether the realized family EXISTS, not about how
+    #: many batteries the original pins could have supported. That capacity
+    #: question was answered by extending the sources and building the family; a
+    #: blocker still driven by it would reopen a closed problem on every run.
+    if d_series_evidence()["status"] != "CLOSED":
         open_.append("evidence")
     #: Either is sufficient, and they are different kinds of fact. The funded
     #: list is categorical; the shortfall is a provisional comparison that a
     #: repricing could move to zero while the list still blocked D1.
     if (not budget_section["d1_is_in_the_funded_list"]
             or budget_section["provisional_shortfall_usd"] > 0):
-        open_.append("funding")
+        open_.append("funding authorization")
     #: Open while compatibility is unresolved. Under the provisional basis it
     #: does not fit; a resolved-and-fits answer needs the qualification, so the
     #: condition is deliberately "not proven to fit" rather than "proven not to".
     if (budget_section["per_session_envelope_compatibility"] != "RESOLVED_FITS"
             or not budget_section["provisional_basis_fits_per_session_envelope"]):
-        open_.append("per-session ceiling")
+        open_.append("per-session envelope")
     return tuple(open_)
 
 
@@ -1067,13 +1181,22 @@ def build() -> dict[str, Any]:
         "recovery_recipe": RECOVERY_RECIPE,
         "hypothesis": hypothesis(),
         "scoring_policy": scoring_policy(),
+        "evidence": d_series_evidence(),
         "materialization_prerequisite": materialization_prerequisite(),
         "execution_wiring_required": execution_wiring_required(),
         "execution_protocol": execution_protocol(),
         "gpu_validation_owed": gpu_validation_owed(),
         "search_stage": search_stage(),
         "behavioural_design": behavioural_design(),
-        "contamination_protection": contamination_section,
+        "contamination_protection": {
+            "_status": (
+                "HISTORICAL REASONING, no longer a live blocker. This analysis "
+                "asked how many further disjoint batteries the ORIGINAL pins "
+                "could support and answered zero -- which is what prompted the "
+                "2026-10-03 source decision. The realized family superseded it; "
+                "live evidence readiness is `evidence` above."),
+            **contamination_section,
+        },
         "budget": budget_section,
         "inputs": {"c0_preregistration": C0_PREREG, "c1_battery": C1_BATTERY,
                    "a3_comparison": A3_COMPARISON,
@@ -1144,10 +1267,10 @@ def main(argv=None) -> int:
             f"{doc['contamination_protection']['batteries_available']} of "
             f"{doc['contamination_protection']['batteries_D1_requires']} fresh "
             "batteries available"),
-        "funding": (
+        "funding authorization": (
             "phase_d1 is not in funds_formal_sessions_of (definite); "
             f"provisional shortfall ${doc['budget']['provisional_shortfall_usd']:.4f}"),
-        "per-session ceiling": (
+        "per-session envelope": (
             f"compatibility {doc['budget']['per_session_envelope_compatibility']}; "
             f"provisional ${doc['budget']['chain']['max_session_hard_ceiling_usd']:.4f} "
             f"vs ${doc['budget']['per_session_envelope_usd']:.2f} envelope"),

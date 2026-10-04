@@ -1,0 +1,97 @@
+{
+ "_contract": "ENGINEERING EVIDENCE ONLY. No recovery training, no behavioural screening, no confirmation, no formal search, no promotion, no GO/NO-GO. No D-series behavioural prompt was read. AUTHORIZES NOTHING.",
+ "bound_protocol_incumbent": {
+  "measurement_protocol_id": "3b12ecbf2fcb2a1a6db05c0ab95839bc",
+  "n_items": 80,
+  "position_policy": "positions.all_v1",
+  "position_policy_hash": "f0d6271329edb3c6987df50ec1417b779b95d98210e14481584cf6d43ab9e4fd",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "bound_protocol_target_aware": {
+  "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "elapsed_seconds": 15.05,
+ "ended_utc": "2026-10-04T16:05:33Z",
+ "environment": {
+  "_device_count": 1,
+  "_no_ordinal_is_hardcoded": "the index comes from torch.cuda.current_device(), so the record describes whichever device the runtime selected",
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "cudnn_tf32": true,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "gpu_total_memory_bytes": 47677177856,
+  "matmul_tf32": false,
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1"
+ },
+ "failure": {
+  "message": "cannot access local variable 'wanted' where it is not associated with a value",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/repo/scripts/pod/d1_qualification_driver.py\", line 929, in main\n    if \"A\" in wanted:\n              ^^^^^^\nUnboundLocalError: cannot access local variable 'wanted' where it is not associated with a value\n",
+  "type": "UnboundLocalError"
+ },
+ "frozen_incumbent_artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+ "registries": {
+  "calibration_profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v1",
+   "calib.reasoning_heavy@v2",
+   "calib.stage0_current@v1"
+  ],
+  "required_by_the_path": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ]
+ },
+ "schema": "aadistill.d1_gpu_qualification/v1",
+ "stages": [
+  {
+   "gpu": "NVIDIA L40S",
+   "seconds": 2.725,
+   "stage": "environment",
+   "status": "ok"
+  },
+  {
+   "operators_ok": true,
+   "profiles": 4,
+   "seconds": 0.063,
+   "stage": "register_operators",
+   "status": "ok"
+  },
+  {
+   "protocol": "3b12ecbf2fcb2a1a",
+   "seconds": 0.051,
+   "stage": "bind_protocol_incumbent",
+   "status": "ok"
+  },
+  {
+   "protocol": "d463a1dc6afbd778",
+   "seconds": 0.058,
+   "stage": "bind_protocol_target_aware",
+   "status": "ok"
+  },
+  {
+   "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 12.107,
+   "stage": "teacher_fetch_verify",
+   "status": "ok"
+  }
+ ],
+ "started_utc": "2026-10-04T16:05:18Z",
+ "status": "FAILED"
+}

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-03. The human view. Every number here has an owner named
+**Updated:** 2026-10-04. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,46 +9,97 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** `a3_attempt38`'s pod was deleted
-after 78.9 min and is provider-confirmed gone; an account-wide re-query returns
-**0 pods and 0 network volumes**.
+**Nothing is running and nothing is billing.** All five D1-qualification pods are
+provider-confirmed gone and an account-wide re-query returns **0 pods and 0
+network volumes**.
 
-**A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
-THREE TIMES.** The maintainer's order of **2026-10-03** superseded the
-2026-10-01 stop: skip the FFN-specific F1 experiment, carry
-`ffn.activation_importance_v0` forward as the current best FFN, and take D1
-through design, implementation, validation, pricing and preparation for
-independent review — without launching. A **second `$0` round on 2026-10-03**,
-also on maintainer order, then closed the materialization-ownership gaps,
-corrected the behavioural-selection rationale and the pricing claims, and
-designed the D-series battery family. Both rounds spent `$0` and created no
-provider resource.
-
-The next action is a **maintainer decision on three blockers**, any one of
-which alone prevents D1 from executing:
+**The D1 engineering GPU qualification is COMPLETE.** Authorized by the
+maintainer on 2026-10-03 as an **ENGINEERING qualification and explicitly NOT
+formal D1 authorization**; it closed no blocker and funded nothing. Its subruns,
+every one of them paid, ran on a secure **L40S at the live `$1.09/h`** for
+`$3.2258` of an `$8.0000` ceiling. The campaign ledger at
+[`gpu-qualification/v1/campaign.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json)
+owns every dollar and recomputes its total from components; the verdict and every
+answer's provenance live in
+[`gpu-qualification/v1/closeout.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json).
 
 ```text
-EVIDENCE   0 of 2 fresh disjoint batteries for D1, and 0 of 6 for the
-           D-series family. THREE strata cannot fund six roles from their
-           pinned sources: math_verified short 830 items, code short 321,
-           gsm8k short 11. Extending math alone unblocks D1's two and
-           leaves the family short.
-FUNDING    chain hard ceiling $60.7509 -- a PROVISIONAL planning ceiling,
-           not a price -- against $13.1777 of project headroom, short by
-           $47.5732, and D1 is not in the C1 package's
-           funds_formal_sessions_of list, so no existing allowance covers it.
-CEILING    the SEARCH session alone prices at $31.1577 against the package's
-           $30.00 per_attempt_hard_ceiling_usd. This binds SEPARATELY from
-           the cumulative cap: a grant that moved only the cap still could
-           not authorize the search session.
+s1   $0.1098   FAILED  the calibration-profile registry was empty -- three of
+                       FOUR process-global registries were filled
+s2   $0.9006   PARTIAL arm A passed its hard gate; arm B hit A3's
+                       pre-ATTENTION pin, which was doing its job
+s3   $1.6808   PARTIAL all three arms; stage D lost to a signature contract
+s4   $0.0632   FAILED  UnboundLocalError 15 s in, from an edit's ordering
+s5   $0.4714   PARTIAL arm A again, and stage D MEASURED
 ```
 
-**A short GPU qualification is OWED and has not run.** The per-expansion
-minutes were measured unbatched; D1 runs batched, in an unmeasured direction.
-Until that qualification measures real CUDA/bf16 execution, the real state-eval
-memory peak, the target-aware batched path's correctness and the actual timing
-of a representative expansion, the dollar figures size a grant request rather
-than price one.
+**No single subrun is complete and the closeout says so.** Every answer is from a
+real paid measurement and names the subruns that produced it. The incumbent
+reconstruction agreed across **three independent pods** on
+`53e30566c5f795f1` — that agreement is the cross-environment determinism
+evidence, and the aggregation refuses to write a closeout if the digests
+disagree.
+
+What it found, each owned by the closeout rather than restated here: the
+incumbent path rebuilds the frozen incumbent on real CUDA; the target-aware path
+executes at `bsz=3`; **the calibration batch size, not the position policy,
+moves three of four operator selections**, attributed by an arm that holds the
+policy and moves only the batch size; batching costs **×1.97** on the dominant
+DEPTH operator at all positions but only **×1.08** at the target-aware policy,
+which very nearly cancels it; and the derived logit bound holds for what it
+claims while understating the reduction's transients by **4.13×** at `bsz=1` and
+**1.99×** at `bsz=3`.
+
+**NEXT: the D-series reference-topK-tail protocol, before formal D1.** Maintainer
+decision **2026-10-04** replaces the full-vocabulary KL contract with
+`reference_topk_tail_v1` at **K = 200** for D1, D2 and D3 — a scientific protocol
+amendment, not an execution optimization. The full-vocab qualification above is
+retained as the **baseline engineering measurement** against which the new
+protocol is qualified, and its repricing is explicitly **NOT** the final D1
+authorization price: the per-session envelope stays UNRESOLVED until Top-K is
+measured. K is a maintainer-selected protocol parameter and must never be tuned
+against D1/D2/D3 outcomes. Branch: `prep/d-series-topk-tail`.
+
+**A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
+TWICE** — the evidence blocker is closed; funding and the per-session envelope
+are not. The maintainer's order of **2026-10-03** superseded the 2026-10-01
+stop: skip the FFN-specific F1 experiment, carry
+`ffn.activation_importance_v0` forward as the current best FFN, and take D1
+through design, implementation, validation, pricing and preparation for
+independent review — without launching. Two further `$0` rounds then closed the
+materialization-ownership gaps, corrected the behavioural-selection rationale
+and the pricing claims, and **built and bound** the D-series battery family.
+
+The remaining blockers, each of which alone prevents D1 from executing. Owner:
+`open_blockers()` in
+[`write_d1_design.py`](../../scripts/autoinit/write_d1_design.py), which DERIVES
+them rather than restating them:
+
+```text
+EVIDENCE   CLOSED. Six disjoint batteries exist, allocation rule
+           f6047343c1c1ad2172f500e979c704c1, family_content_id
+           1e3445f1b676...74cd58 binding 42 output files. Closing this
+           blocker authorized nothing.
+FUNDING    OPEN, and CATEGORICAL rather than arithmetic: `phase_d1` is not in
+           the C1 package's funds_formal_sessions_of, so no existing
+           allowance covers it at any amount. The 2026-10-03 amendment raised
+           the ENGINEERING allowance to $20.0000 and the package to
+           $96.6523 and deliberately did NOT add phase_d1 -- those books do
+           not transfer into the formal one.
+ENVELOPE   OPEN and UNRESOLVED. The SEARCH session's provisional $31.1577 is
+           over the $30.00 per-session envelope, and "unresolved" is the
+           honest state: nothing had measured the batched search, so it is
+           not established as incompatible either. This is what the
+           qualification's timing is for.
+```
+
+**The owed GPU qualification has RUN, and the design derives that** from
+`gpu-qualification/v1/closeout.json` rather than carrying a sentence —
+`gpu_validation_owed.status` reads `RUN -- PASSED` and still says it authorizes
+nothing. The direction D1's design called UNKNOWN is now measured, so the chain
+figures rest on measurement rather than on an unbatched table; they are still
+PROVISIONAL until a maintainer prices them, and the funding and envelope
+blockers are untouched by the spend.
 
 Start at [`d1_design.json`](../stages/stage-1/phase_d1/plans/d1_design.json),
 which owns every D1 figure and its claim boundary;
@@ -549,7 +600,19 @@ weighted denominator in `StatsSpec` and three divisor call sites.
 `require_binary_token_weights` refuses by name rather than rounding a confidence
 weight to a mask.
 
-## The D-series behavioural battery family. DESIGNED, NOT MATERIALIZED.
+## The D-series behavioural battery family. BUILT AND BOUND TO ITS BYTES.
+
+> This heading read `DESIGNED, NOT MATERIALIZED` while the section above it said
+> the family was built and on `main`, which is the worse of the two failures: a
+> reader who scrolled here would have concluded the 22 MB of evaluation data did
+> not exist. Six batteries exist, `family_content_id`
+> `1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58` binds their
+> 42 output files, and the allocation rule is
+> `f6047343c1c1ad2172f500e979c704c1`. The producer derives this now — see
+> [`battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py)'s
+> `_realization()` — so building or removing the family moves the record without
+> an edit. The description below of the ROLES and the RULE is unchanged and still
+> accurate.
 
 **Six roles, one rule, frozen before any D1 outcome exists.** `d1_screening`,
 `d1_confirmation`, `d2_screening`, `d2_confirmation`, `d3_screening`,
@@ -1781,7 +1844,16 @@ was made. Owners:
 Project: `$309.2043` of `$370.0000` — owner
 `scripts/consolidate/derive_budget.py --json :: project`.
 
-## The suite is 38 red, and a reader deserves the attribution
+## HISTORICAL — the 38 red, before the suite had a boundary
+
+> **This describes the OLD monolithic suite**, when one `pytest` run mixed
+> reusable-core tests with closed experiments' state assertions. AGENTS.md
+> **§2.8a** split them, and almost every failure counted below was a closed
+> experiment's historical-state assertion that now lives with its experiment and
+> runs on request. The current core suite aims to be **green** — see *The test
+> suite has a boundary now* above for what `pytest` means today and where each
+> figure is measured. Kept because the attribution work was real and a future
+> reader may need to know which families these were.
 
 A permanently red suite is a hazard — it is what let 14 failures sit unnoticed
 at a remote HEAD once — so the count is named here rather than left as folklore.
@@ -3276,9 +3348,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$7.2431` of `$76.6523` |
-| GPU engineering | `$1.9395` of `$10.0000` |
-| package | `$9.1826` of `$86.6523` |
-| project cap | `$396.8223` spent of `$410.0000`, leaving `$13.1777` |
+| GPU engineering | `$8.7137` of `$20.0000` |
+| package | `$15.9568` of `$96.6523` |
+| project cap | `$400.0481` spent of `$410.0000`, leaving `$9.9519` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -1,0 +1,10 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 2.704, "stage": "environment", "status": "ok", "t": 2.704}
+{"stage": "register_operators", "status": "start", "t": 2.71}
+{"operators_ok": true, "profiles": 4, "seconds": 0.15, "stage": "register_operators", "status": "ok", "t": 2.86}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 2.862}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.073, "stage": "bind_protocol_incumbent", "status": "ok", "t": 2.935}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 2.935}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.074, "stage": "bind_protocol_target_aware", "status": "ok", "t": 3.009}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 3.013}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 12.336, "stage": "teacher_fetch_verify", "status": "ok", "t": 15.349}

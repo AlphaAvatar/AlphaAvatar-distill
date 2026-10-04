@@ -1,232 +1,233 @@
 {
- "schema": "aadistill.current_state/v2",
- "generated_utc": "2026-10-03T00:00:00Z",
  "_contract": "Minimal machine-readable CURRENT snapshot: live facts only, each with its owner named. Human view: logs/state/current.md. History: logs/budget/decisions.md. Index: logs/README.md.",
- "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "running": {
-  "paid_compute": false,
-  "pods": 0,
-  "network_volumes": 0,
-  "_verified": "an account-wide provider query returns [] for both pods and network volumes. Both campaign volumes -- 59qt99zeg5 (40 GB) and a0zqgxsm7p (10 GB) -- are deleted."
- },
- "authorized": {
-  "any": true,
-  "note": "The C1 execution package (approved 2026-09-11, amended 2026-09-11b, 2026-09-27, 2026-10-01 and 2026-10-02). It funds formal sessions of phase_c1, phase_c3 and phase_a3; A3 is COMPLETE and its spend is settled. An approval is not a launch. NOTHING may launch now. Owner: logs/budget/decisions.md.",
-  "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)",
-  "formal_sessions_used": 9,
-  "formal_sessions_max": null,
-  "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap."
- },
- "prepared_launch": {
-  "any": false,
-  "run": null,
-  "note": "No chain is prepared and none may be built for C3: the measurement completed and returned NO_GO, which ends formal execution for this round."
- },
- "budget": {
-  "cumulative_spend_usd": 396.8223,
-  "authorized_cap_usd": 410.0,
-  "remaining_usd": 13.1777,
-  "remaining_is_not_permission": true,
-  "formal_remaining_usd": 7.2431,
-  "engineering_remaining_usd": 1.9395,
-  "package_remaining_usd": 9.1826,
-  "per_session_ceiling_usd": 30.0,
-  "full_ceiling_sessions_fundable": 0,
-  "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
-  "_project_spend_before_this_package_usd": 267.8998,
-  "ledger": "logs/budget/ledger.md",
-  "terms": "configs/experiments/phase_c1/authorization.json:execution_package",
-  "_package_spent_usd": 77.4697,
-  "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "planning_floor_usd": 13.4401,
-  "_amendments": "formal 55.0000 -> 65.6523 -> 76.6523 and package 65.0000 -> 75.6523 -> 86.6523, with the project cap 400 -> 410 on 2026-10-02. Prospective; nothing was rewritten. Owner: logs/budget/decisions.md."
- },
- "frozen": {
-  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
-  "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
-  "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4",
-  "equivalence_interval": 0.011695296982299022,
-  "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
-  "owner": "logs/stages/stage-1/phase_c1/plans/ owns every frozen identity, in phase_c0_preregistration.json and execution_preregistration.json. The hashes above are the ones a reader needs to recognise, not the set.",
-  "feasibility_floor": 0.3,
-  "seeds": {
-   "sa": 20260726,
-   "sb": 20260801,
-   "sc_conditional": 20260813,
-   "fourth_seed": "never"
-  }
- },
- "latest_verification": {
-  "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
-  "latest_sweep": {
-   "kind": "launch_bound",
-   "verdict": "PASS",
-   "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
-  },
-  "launch_bound_ready": false,
-  "launch_bound_failures": 1,
-  "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
+ "a_bsz3": {
+  "authorizes": "nothing",
+  "blocks": "nothing any more: the numerical execution fingerprint is now bound to materialization/resume identity, so the precondition it imposed on D1/D2/D3 is MET. See `d_series.a3_precondition`.",
+  "owner": "logs/stages/stage-1/phase_a3/analyses/a3_closeout.md owns every figure, its replicate structure and its claim boundary",
+  "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
+  "verdict": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL. Slower on every pod that measured it; no detectable correctness effect."
  },
  "abandoned": [
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
- "next_starting_point": {
-  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
-  "accepted_incumbent": "B = frozen C1 treatment",
-  "then": "the short ENGINEERING GPU QUALIFICATION, PENDING EXPLICIT MAINTAINER AUTHORIZATION -- it is owed, not approved. It verifies the incumbent rebuild and the target-aware bsz=3 path on real CUDA, measures state-eval peak memory and representative expansion timing, and reprices the chain. Only then can funding scope and the envelope be decided.",
-  "not_next": "no retry, resume or pooling of any complete measurement -- including A3's; no C4; no C2 spend; no FFN experiment; and no D1 LAUNCH while ANY blocker in `d_series.blockers` is open."
+ "architecture_migration": {
+  "record": "logs/maintenance/source-relocations/initialization-core/v1/",
+  "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing."
  },
- "read_order": [
-  "logs/README.md -- START HERE, the index"
- ],
- "phases": {
-  "phase_a": "COMPLETE / FROZEN 2026-08-24, unresolved_equivalence, no winner. Owner: logs/stages/stage-1/recovery_continuation/runs/attempt7/.",
-  "phase_b": "COMPLETE / RESOLVED / FROZEN. Figures, caution and scope: `phase_b_result`.",
-  "formal_recovery_evidence": "NONE",
-  "_c_and_later_phases": "phase_c owns c0..c4 and phase_d1 owns D1; deliberately not restated here."
+ "authorized": {
+  "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap.",
+  "any": true,
+  "formal_sessions_max": null,
+  "formal_sessions_used": 9,
+  "note": "The C1 execution package, amended six times through 2026-10-03. The latest is ENGINEERING ONLY: GPU engineering 10->20, package ->96.6523; formal, the project cap, the envelope and funds_formal_sessions_of UNCHANGED, phase_d1 NOT in the funded list. It authorizes the D1 engineering GPU qualification and no D1 science. An approval is not a launch. Owner: logs/budget/decisions.md.",
+  "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
+ },
+ "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED TWICE: funding authorization and the per-session envelope. The evidence blocker is CLOSED. Reasons: `d_series.blockers`.",
+ "budget": {
+  "_amendments": "formal 55.0000 -> 65.6523 -> 76.6523 and package 65.0000 -> 75.6523 -> 86.6523, with the project cap 400 -> 410 on 2026-10-02. Prospective; nothing was rewritten. Owner: logs/budget/decisions.md.",
+  "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
+  "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
+  "_package_spent_usd": 80.6955,
+  "_project_spend_before_this_package_usd": 267.8998,
+  "authorized_cap_usd": 410.0,
+  "cumulative_spend_usd": 400.0481,
+  "engineering_remaining_usd": 8.7137,
+  "formal_remaining_usd": 7.2431,
+  "full_ceiling_sessions_fundable": 0,
+  "ledger": "logs/budget/ledger.md",
+  "package_remaining_usd": 15.9568,
+  "per_session_ceiling_usd": 30.0,
+  "planning_floor_usd": 13.4401,
+  "remaining_is_not_permission": true,
+  "remaining_usd": 9.9519,
+  "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
+ },
+ "c2_closure": {
+  "accepted_incumbent_after_c2": "B = frozen C1 treatment",
+  "attempt13_delta": -0.008235294117647058,
+  "attempt14_reconstructed_delta": -0.009019607843137253,
+  "canonical_no_go_claimed": false,
+  "chains_consumed": 14,
+  "decided_utc": "2026-09-24",
+  "decision": "CLOSED WITHOUT PROMOTION",
+  "further_scientific_spend": "NOT AUTHORIZED",
+  "limitation": "mixed evaluation-protocol identities in the confirmation field",
+  "new_incumbent_named_by_c2": null,
+  "observations_averaged_or_ranked": false,
+  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
+  "probes_remaining": 0,
+  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
+  "why_b_stands": "no valid C2 challenger displaced it"
+ },
+ "cuda_engineering_validation": {
+  "_what": "engineering evidence only; none authorizes anything.",
+  "authorizes": "nothing",
+  "c2_full_search": "PASS, CLOSED. $0.1453. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
+  "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
+  "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked drift 9.032e-06 inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/",
+  "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED, $3.2258 of an $8.0000 ceiling. The CALIBRATION BATCH SIZE, not the position policy, moves three of four operator selections. AUTHORIZES NOTHING and closed no D1 blocker. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
+  "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
+ },
+ "d_series": {
+  "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
+  "authorizes": "nothing",
+  "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Owner: d1_design.json.",
+  "blockers": "EVIDENCE CLOSED. OPEN: funding authorization (CATEGORICAL) and per-session envelope (UNRESOLVED). Derived by open_blockers(); owner d1_design.json.",
+  "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
+  "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
+  "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id, never into a config hash.",
+  "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
+ },
+ "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
+ "frozen": {
+  "equivalence_interval": 0.011695296982299022,
+  "feasibility_floor": 0.3,
+  "owner": "logs/stages/stage-1/phase_c1/plans/ owns every frozen identity, in phase_c0_preregistration.json and execution_preregistration.json. The hashes above are the ones a reader needs to recognise, not the set.",
+  "science_plan_hash": "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c",
+  "seeds": {
+   "fourth_seed": "never",
+   "sa": 20260726,
+   "sb": 20260801,
+   "sc_conditional": 20260813
+  },
+  "seeds_scope": "PHASE A/B ONLY. Phase C1 uses 3 FRESH seeds from the C0 digest.",
+  "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
+  "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
+ },
+ "generated_utc": "2026-10-03T00:00:00Z",
+ "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
+ "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
+ "latest_run": {
+  "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout",
+  "experiment_id": "phase_a3",
+  "index": "logs/index.json",
+  "last_executed": null,
+  "outcome": "not recorded; MEASUREMENT_COMPLETE_3_PROBES_SCORED, $1.4300",
+  "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt38",
+  "run_id": "a3_attempt38",
+  "state": "no run manifest; its closeout states: MEASUREMENT_COMPLETE_3_PROBES_SCORED"
+ },
+ "latest_verification": {
+  "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
+  "latest_sweep": {
+   "describes_head": false,
+   "kind": "launch_bound",
+   "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
+   "verdict": "PASS"
+  },
+  "launch_bound_failures": 1,
+  "launch_bound_ready": false,
+  "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
+ },
+ "next": "D-series reference-topK-tail protocol adoption and qualification, BEFORE formal D1. K=200, reference-defined support. GPU authorized from the engineering allowance up to $8.0; formal D1 remains NOT AUTHORIZED. Order: decisions.md 2026-10-04.",
+ "next_starting_point": {
+  "accepted_incumbent": "B = frozen C1 treatment",
+  "next_work": "prep/d-series-topk-tail, cut from main after the full-vocab qualification merged: reference_topk_tail_v1 in reusable core, the identities that must distinguish it from full_vocab_v1, and a GPU adoption run against the full-vocab baseline.",
+  "not_next": "no retry/resume/pooling of any complete measurement; no C4; no C2 spend; no FFN experiment; no formal D1 while any d_series.blockers entry stands; no K sweep (K=200 is a maintainer-selected protocol parameter, never tuned against outcomes); no rerun of C1/C2/C3/A3 under Top-K; no rebuild of the frozen behavioural family. Owner: decisions.md.",
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
+  "then": "the short ENGINEERING GPU QUALIFICATION, PENDING EXPLICIT MAINTAINER AUTHORIZATION -- it is owed, not approved. It verifies the incumbent rebuild and the target-aware bsz=3 path on real CUDA, measures state-eval peak memory and representative expansion timing, and reprices the chain. Only then can funding scope and the envelope be decided."
+ },
+ "phase_b_result": {
+  "authorizes": "nothing",
+  "clears_by": 7e-05,
+  "not_capability": "SELECTION evidence under a fixed 0.86M probe.",
+  "owner": "logs/stages/stage-1/phase_b/",
+  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
+  "status": "RESOLVED",
+  "tie_break_ran": true,
+  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
+  "winner_is_control": false
  },
  "phase_b_state": "PHASE_B COMPLETE -- behavioural selection RESOLVED",
  "phase_c": {
   "c0": {
-   "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)",
+   "authorizes": "nothing",
    "owner": "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json fb2eeea531f9f0d1 and .../phase_c0_sizing_evidence.json 4786242d349e9b21",
-   "authorizes": "nothing"
+   "status": "COMPLETE / APPROVED / CANONICALLY FROZEN 2026-09-01 (commit be2ab08)"
   },
   "c1": {
-   "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line.",
+   "blocker": "none; see the top-level blocker.",
    "incumbent": "fe9683e6a9c7..., digest c313d1b4081b. NOT recovered.",
    "measured": "replay: MEASURED, 2/2 PASS. treatment + endpoint: MEASURED ONCE by attempt 18, verdict GO -- logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json owns every figure and its claim boundary. Attempts 9 and 17 remain NO DECISION after a pre-treatment infrastructure abort.",
    "owners": "logs/stages/stage-1/phase_c1/ \u2014 plans, runs, analyses and the attempt-18 closeout own every C1 figure.",
-   "blocker": "none; see the top-level blocker."
+   "status": "COMPLETE and CLOSED by a verdict. See measured below and the decision record, not this line."
   },
   "c2": {
-   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 DONE and FROZEN, the joint re-search complete with an accepted, frozen Top-5, all 12 behavioural probes trained and scored. No canonical verdict and no new incumbent; B stands. Every figure and its claim boundary: see `c2_closure`.",
-   "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "campaign": "c2-behavioural-12probe-v1",
-   "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/",
+   "closure": "see the top-level `c2_closure`",
+   "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "probes_owed": 0,
-   "closure": "see the top-level `c2_closure`"
+   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 DONE and FROZEN, the joint re-search complete with an accepted, frozen Top-5, all 12 behavioural probes trained and scored. No canonical verdict and no new incumbent; B stands. Every figure and its claim boundary: see `c2_closure`.",
+   "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/"
   },
   "c3": {
-   "status": "COMPLETE / NO_GO on the primary operator-isolation contrast, 2026-10-01. All nine probes trained, preserved and scored; the verdict was computed OFF POD at $0 after stage I failed on the pod. B remains the incumbent.",
+   "closed_pilots": "three, CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION. Each owns its figures.",
    "latest_attempt": "attempt75",
+   "not_next": "no retry, resume or pooling; C4 is not authorized.",
+   "open": "the B1-vs-B3 protocol choice, a post-C3 maintainer decision. See `a_bsz3`.",
    "operator": "attention.causal_kl_v1 ran in formal C3 and returned NO_GO; it does not promote.",
    "owner": "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json owns every figure and its claim boundary",
    "preregistration_sha256": "ac44662c02d53359826984b5bfd9020b983aea5dc11562db83f8e8f563cbe624",
-   "closed_pilots": "three, CLOSED 2026-09-27 and not formal C3: B4_NOT_WORTH_ADOPTION_PILOT, packing v1 superseded, PACKED_BATCH_NOT_WORTH_ADOPTION. Each owns its figures.",
-   "open": "the B1-vs-B3 protocol choice, a post-C3 maintainer decision. See `a_bsz3`.",
-   "not_next": "no retry, resume or pooling; C4 is not authorized."
+   "status": "COMPLETE / NO_GO on the primary operator-isolation contrast, 2026-10-01. All nine probes trained, preserved and scored; the verdict was computed OFF POD at $0 after stage I failed on the pod. B remains the incumbent."
   },
   "c4": "NOT AUTHORIZED. C3 returned NO_GO, so the promotion it was conditional on did not happen."
  },
- "storage": {
-  "roots": {
-   "git": "/home/ecs-user/AlphaAvatar-distill",
-   "artifacts": "/home/ecs-user/aad-artifacts"
-  },
-  "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
-  "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json"
- },
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED TWICE: funding authorization and the per-session envelope. The evidence blocker is CLOSED. Reasons: `d_series.blockers`.",
- "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
- "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
- "latest_run": {
-  "experiment_id": "phase_a3",
-  "run_id": "a3_attempt38",
-  "root": "logs/stages/stage-1/phase_a3/runs/a3_attempt38",
-  "outcome": "not recorded; MEASUREMENT_COMPLETE_3_PROBES_SCORED, $1.4300",
-  "index": "logs/index.json",
-  "state": "no run manifest; its closeout states: MEASUREMENT_COMPLETE_3_PROBES_SCORED",
-  "last_executed": null,
-  "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout"
- },
- "architecture_migration": {
-  "status": "MERGED to main 2026-09-10. NOT a C1 result, no ATTENTION evidence, authorizes nothing.",
-  "record": "logs/maintenance/source-relocations/initialization-core/v1/"
- },
- "cuda_engineering_validation": {
-  "_what": "engineering evidence only -- none is a scientific result and none authorizes anything.",
-  "authorizes": "nothing",
-  "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/",
-  "c2_full_search": "PASS, CLOSED. $0.1453. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
-  "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
-  "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked absolute drift 9.032e-06 inside the predeclared 1e-5 -- the live constraint on perturbing state_eval. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/"
- },
- "superseded_handoff": "none. The live handoff is logs/state/current.md.",
- "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "phase_c2_replay": {
+  "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json",
   "status": "search attempt 3 COMPLETE, Top-5 ACCEPTED and FROZEN; reconstruction attempt 9 COMPLETE, 5/5 exact and durable. Campaign CLOSED; remaining allowance not to be spent.",
-  "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay",
-  "owner": "logs/stages/stage-1/phase_c2_replay/runs/attempt9/closeout/outcome.json"
+  "store": "/home/ecs-user/aad-artifacts/phase_c2_full_search/attempt3_replay"
  },
- "next": "the short engineering GPU qualification, PENDING EXPLICIT MAINTAINER AUTHORIZATION. No paid execution is authorized by the evidence blocker closing. Order: logs/budget/decisions.md 2026-10-03.",
+ "phases": {
+  "_c_and_later_phases": "phase_c owns c0..c4 and phase_d1 owns D1; deliberately not restated here.",
+  "formal_recovery_evidence": "NONE",
+  "phase_a": "COMPLETE / FROZEN 2026-08-24, unresolved_equivalence, no winner. Owner: logs/stages/stage-1/recovery_continuation/runs/attempt7/.",
+  "phase_b": "COMPLETE / RESOLVED / FROZEN. Figures, caution and scope: `phase_b_result`."
+ },
+ "prepared_launch": {
+  "any": false,
+  "note": "No chain is prepared and none may be built for C3: the measurement completed and returned NO_GO, which ends formal execution for this round.",
+  "run": null
+ },
+ "read_order": [
+  "logs/README.md -- START HERE, the index"
+ ],
+ "running": {
+  "_verified": "an account-wide provider query returns [] for both pods and network volumes. Both campaign volumes -- 59qt99zeg5 (40 GB) and a0zqgxsm7p (10 GB) -- are deleted.",
+  "network_volumes": 0,
+  "paid_compute": false,
+  "pods": 0
+ },
+ "schema": "aadistill.current_state/v2",
  "stage_ladder": {
+  "A3": "COMPLETE 2026-10-03",
   "C0": "COMPLETE",
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
-  "A3": "COMPLETE 2026-10-03",
-  "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
   "D1": "DESIGNED 2026-10-03 / NOT AUTHORIZED / BLOCKED -- see `d_series.blockers`",
   "D2": "NOT STARTED",
   "D3": "NOT STARTED",
-  "next_scientific_stage": "D1",
-  "_next_is_not_null_because": "the 2026-10-01 order that made it null was superseded on 2026-10-03. D1 is blocked rather than forbidden."
+  "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
+  "_next_is_not_null_because": "the 2026-10-01 order that made it null was superseded on 2026-10-03. D1 is blocked rather than forbidden.",
+  "next_scientific_stage": "D1"
  },
- "c2_closure": {
-  "decision": "CLOSED WITHOUT PROMOTION",
-  "decided_utc": "2026-09-24",
-  "new_incumbent_named_by_c2": null,
-  "accepted_incumbent_after_c2": "B = frozen C1 treatment",
-  "why_b_stands": "no valid C2 challenger displaced it",
-  "canonical_no_go_claimed": false,
-  "limitation": "mixed evaluation-protocol identities in the confirmation field",
-  "attempt13_delta": -0.008235294117647058,
-  "attempt14_reconstructed_delta": -0.009019607843137253,
-  "observations_averaged_or_ranked": false,
-  "further_scientific_spend": "NOT AUTHORIZED",
-  "probes_remaining": 0,
-  "owner": "logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md",
-  "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
-  "chains_consumed": 14
+ "storage": {
+  "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",
+  "hf_private_headroom_gib": "32-33, measured by bisection 2026-10-01",
+  "roots": {
+   "artifacts": "/home/ecs-user/aad-artifacts",
+   "git": "/home/ecs-user/AlphaAvatar-distill"
+  }
  },
- "a_bsz3": {
-  "state": "COMPLETE 2026-10-03 on a3_attempt38. 34 pods, $13.4600.",
-  "verdict": "DISTINCT_NUMERICAL_MATERIALIZATION_PROTOCOL. Slower on every pod that measured it; no detectable correctness effect.",
-  "blocks": "nothing any more: the numerical execution fingerprint is now bound to materialization/resume identity, so the precondition it imposed on D1/D2/D3 is MET. See `d_series.a3_precondition`.",
-  "owner": "logs/stages/stage-1/phase_a3/analyses/a3_closeout.md owns every figure, its replicate structure and its claim boundary",
-  "authorizes": "nothing"
- },
- "d_series": {
-  "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED.",
-  "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
-  "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
-  "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a): six roles, 950/850 each, pairwise disjoint, every item checked on all four coordinates against the complete baseline, built BEFORE any D1 outcome. Rule v3 f6047343; family_content_id 1e3445f1b6769169 binds the 42 output files' BYTES, superseding c773fad0. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,family_manifest}.json.",
-  "blockers": "EVIDENCE: CLOSED on independent review 2026-10-03 -- source/capacity at main@bc31175f, the realized six-role family verified on prep/d-series-batteries. FUNDING AUTHORIZATION: OPEN, CATEGORICAL -- phase_d1 is absent from funds_formal_sessions_of; no allowance at any price and no measurement closes it. PER-SESSION ENVELOPE: OPEN, UNRESOLVED -- needs the short GPU qualification and repricing.",
-  "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent figures only; it cannot settle the funding authorization.",
-  "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
-  "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
-  "authorizes": "nothing"
- },
+ "superseded_handoff": "none. The live handoff is logs/state/current.md.",
  "test_suites": {
+  "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (the D1 source lineage). No skip depends on historical evidence.",
-  "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
-  "next_work": "prep/d-series-batteries, cut from main bc31175f. It builds and verifies the six-role behavioural family; prep/d-series-sources was squashed into bc31175f and is kept on the remote."
- },
- "phase_b_result": {
-  "status": "RESOLVED",
-  "winner": "fe9683e6a9c783bbc6fe276a78c851c6",
-  "winner_is_control": false,
-  "tie_break_ran": true,
-  "clears_by": 7e-05,
-  "read_with_care": "clears by 0.000070 -- ~1.23 SE at C0-measured noise. Protocol-resolved, not comfortable.",
-  "not_capability": "SELECTION evidence under a fixed 0.86M probe.",
-  "authorizes": "nothing",
-  "owner": "logs/stages/stage-1/phase_b/"
+  "next_work": "prep/d-series-topk-tail. The battery branch is COMPLETE and its family frozen."
  }
 }

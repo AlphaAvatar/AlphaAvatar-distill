@@ -1,0 +1,12 @@
+{
+ "elapsed_minutes": 3.45,
+ "rate_usd_per_hour": 1.09,
+ "_rate_is": "the LIVE securePrice quoted immediately before creation",
+ "container_disk_gb": 60,
+ "gpu_usd": 0.0627,
+ "container_disk_usd": 0.0005,
+ "all_in_usd": 0.0632,
+ "pod_id": "3gvfeqnkbyptc4",
+ "script_exit": 1,
+ "_basis": "wall clock from pod creation to confirmed teardown x the live secure rate, plus container disk billed separately"
+}

@@ -1,0 +1,12 @@
+{
+ "torch": "2.11.0+cu128",
+ "transformers": "5.13.1",
+ "cuda": "12.8",
+ "cuda_available": true,
+ "device": "NVIDIA L40S",
+ "capability": [
+  8,
+  9
+ ],
+ "bf16_supported": true
+}

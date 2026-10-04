@@ -1,0 +1,230 @@
+{
+ "_authorizes": "nothing. A measured direction makes D1's chain figures better founded; it does not fund them, and the funding and per-session blockers are untouched by it.",
+ "_what": "Reprice D1's search from the GPU qualification's measurements.",
+ "cells": [
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "incumbent",
+   "frozen_expansion_minutes_max": 34.3539,
+   "frozen_expansion_minutes_mean": 29.2482,
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "index": 0,
+   "measured_materialize_minutes": 19.8792,
+   "ratio_to_frozen_max": 0.5787,
+   "ratio_to_frozen_mean": 0.6797,
+   "scope": "root"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "incumbent",
+   "frozen_expansion_minutes_max": 3.0038,
+   "frozen_expansion_minutes_mean": 1.9978,
+   "impl_id": "ffn.activation_importance_v0",
+   "index": 1,
+   "measured_materialize_minutes": 0.8577,
+   "ratio_to_frozen_max": 0.2855,
+   "ratio_to_frozen_mean": 0.4293,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "incumbent",
+   "frozen_expansion_minutes_max": 3.2187,
+   "frozen_expansion_minutes_mean": 2.1185,
+   "impl_id": "width.global_pca_v0",
+   "index": 2,
+   "measured_materialize_minutes": 0.6054,
+   "ratio_to_frozen_max": 0.1881,
+   "ratio_to_frozen_mean": 0.2858,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "incumbent",
+   "frozen_expansion_minutes_max": 3.0156,
+   "frozen_expansion_minutes_mean": 2.4302,
+   "impl_id": "attention.activation_importance_v1",
+   "index": 3,
+   "measured_materialize_minutes": 0.1793,
+   "ratio_to_frozen_max": 0.0595,
+   "ratio_to_frozen_mean": 0.0738,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "target_aware",
+   "frozen_expansion_minutes_max": 34.3539,
+   "frozen_expansion_minutes_mean": 29.2482,
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "index": 0,
+   "measured_materialize_minutes": 21.4204,
+   "ratio_to_frozen_max": 0.6235,
+   "ratio_to_frozen_mean": 0.7324,
+   "scope": "root"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "target_aware",
+   "frozen_expansion_minutes_max": 3.0038,
+   "frozen_expansion_minutes_mean": 1.9978,
+   "impl_id": "ffn.activation_importance_v0",
+   "index": 1,
+   "measured_materialize_minutes": 0.9461,
+   "ratio_to_frozen_max": 0.315,
+   "ratio_to_frozen_mean": 0.4736,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "target_aware",
+   "frozen_expansion_minutes_max": 3.2187,
+   "frozen_expansion_minutes_mean": 2.1185,
+   "impl_id": "width.global_pca_v0",
+   "index": 2,
+   "measured_materialize_minutes": 0.6259,
+   "ratio_to_frozen_max": 0.1945,
+   "ratio_to_frozen_mean": 0.2955,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "target_aware",
+   "frozen_expansion_minutes_max": 3.0156,
+   "frozen_expansion_minutes_mean": 2.4302,
+   "impl_id": "attention.activation_importance_v1",
+   "index": 3,
+   "measured_materialize_minutes": 0.1958,
+   "ratio_to_frozen_max": 0.0649,
+   "ratio_to_frozen_mean": 0.0806,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "batch_only",
+   "frozen_expansion_minutes_max": 34.3539,
+   "frozen_expansion_minutes_mean": 29.2482,
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "index": 0,
+   "measured_materialize_minutes": 39.1166,
+   "ratio_to_frozen_max": 1.1386,
+   "ratio_to_frozen_mean": 1.3374,
+   "scope": "root"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "batch_only",
+   "frozen_expansion_minutes_max": 3.0038,
+   "frozen_expansion_minutes_mean": 1.9978,
+   "impl_id": "ffn.activation_importance_v0",
+   "index": 1,
+   "measured_materialize_minutes": 0.88,
+   "ratio_to_frozen_max": 0.293,
+   "ratio_to_frozen_mean": 0.4405,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "batch_only",
+   "frozen_expansion_minutes_max": 3.2187,
+   "frozen_expansion_minutes_mean": 2.1185,
+   "impl_id": "width.global_pca_v0",
+   "index": 2,
+   "measured_materialize_minutes": 0.6131,
+   "ratio_to_frozen_max": 0.1905,
+   "ratio_to_frozen_mean": 0.2894,
+   "scope": "deeper"
+  },
+  {
+   "_measured_is_a_lower_bound_because": "the frozen cell is a whole expansion and this is a materialize+identify step: it omits ('identify_seconds', 'canonical_reload_seconds', 'validation_seconds')",
+   "arm": "batch_only",
+   "frozen_expansion_minutes_max": 3.0156,
+   "frozen_expansion_minutes_mean": 2.4302,
+   "impl_id": "attention.activation_importance_v1",
+   "index": 3,
+   "measured_materialize_minutes": 0.2018,
+   "ratio_to_frozen_max": 0.0669,
+   "ratio_to_frozen_mean": 0.083,
+   "scope": "deeper"
+  }
+ ],
+ "direction": {
+  "batch_size_alone": {
+   "_what": "same position policy, different calibration micro-batch size: the net batching cost across all four operators",
+   "net_ratio": 1.8963,
+   "per_step": {
+    "attention.activation_importance_v1": {
+     "bsz1_minutes": 0.1793,
+     "bszN_minutes": 0.2018,
+     "ratio": 1.1255
+    },
+    "depth.causal_kl_greedy_v1": {
+     "bsz1_minutes": 19.8792,
+     "bszN_minutes": 39.1166,
+     "ratio": 1.9677
+    },
+    "ffn.activation_importance_v0": {
+     "bsz1_minutes": 0.8577,
+     "bszN_minutes": 0.88,
+     "ratio": 1.026
+    },
+    "width.global_pca_v0": {
+     "bsz1_minutes": 0.6054,
+     "bszN_minutes": 0.6131,
+     "ratio": 1.0127
+    }
+   },
+   "reading": "a ratio above 1 means the D1 batch size costs MORE wall clock per materialization than the incumbent's, which is the direction A3 measured on the ATTENTION scorer alone; below 1 means the net across four operators goes the other way.",
+   "total_bsz1_minutes": 21.5216,
+   "total_bszN_minutes": 40.8115
+  },
+  "per_arm": {
+   "batch_only": {
+    "_still_unmeasured": [
+     "identify_seconds",
+     "canonical_reload_seconds",
+     "validation_seconds"
+    ],
+    "frozen_total_minutes_max": 43.592,
+    "frozen_total_minutes_mean": 35.7947,
+    "measured_comparable_total_minutes": null,
+    "measured_materialize_minutes_total": 40.8115,
+    "measured_state_eval_minutes_each": null,
+    "verdict": "state evaluation was not measured for this arm, so no comparable total exists and the direction stays UNKNOWN"
+   },
+   "incumbent": {
+    "_still_unmeasured": [
+     "identify_seconds",
+     "canonical_reload_seconds",
+     "validation_seconds"
+    ],
+    "frozen_total_minutes_max": 43.592,
+    "frozen_total_minutes_mean": 35.7947,
+    "measured_comparable_total_minutes": null,
+    "measured_materialize_minutes_total": 21.5216,
+    "measured_state_eval_minutes_each": null,
+    "verdict": "state evaluation was not measured for this arm, so no comparable total exists and the direction stays UNKNOWN"
+   },
+   "target_aware": {
+    "_still_unmeasured": [
+     "identify_seconds",
+     "canonical_reload_seconds",
+     "validation_seconds"
+    ],
+    "frozen_total_minutes_max": 43.592,
+    "frozen_total_minutes_mean": 35.7947,
+    "measured_comparable_total_minutes": null,
+    "measured_materialize_minutes_total": 23.1882,
+    "measured_state_eval_minutes_each": null,
+    "verdict": "state evaluation was not measured for this arm, so no comparable total exists and the direction stays UNKNOWN"
+   }
+  }
+ },
+ "frozen_table": {
+  "_rule": "per-cell maximum and mean over every expansion recorded by any committed search on this image and card",
+  "sources": [
+   "phase_b_attempt5",
+   "phase_c2_attempt4"
+  ]
+ },
+ "schema": "aadistill.d1.reprice_from_qualification/v1"
+}

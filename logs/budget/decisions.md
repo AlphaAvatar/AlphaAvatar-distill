@@ -1,5 +1,69 @@
 # Budget decisions
 
+## 2026-10-03 — GPU AUTHORIZED: the D1 engineering qualification, and evidence closed in the design
+
+**MAINTAINER DECISION.** GPU authorized for the **D1 engineering qualification
+only**. This is NOT formal D1 authorization.
+
+```text
+gpu_engineering_allowance_usd   10.0000 -> 20.0000
+package_total_usd               86.6523 -> 96.6523   (= formal + engineering)
+formal_allowance_usd            UNCHANGED   76.6523
+project cumulative cap          UNCHANGED  410.0000
+per-session envelope            UNCHANGED   30.0000
+funds_formal_sessions_of        UNCHANGED   phase_d1 NOT added
+```
+
+Derived balances after the amendment, from `derive_budget.py`:
+
+```text
+engineering remaining   11.9395   of 20.0000
+project remaining       13.1777   of 410.0000
+formal remaining         7.2431   of 76.6523   (untouched by this)
+package remaining       19.1826   of 96.6523
+```
+
+**ENGINEERING ONLY, and the books do not transfer.** No formal headroom is added
+and no D1 science is authorized. The qualification performs no recovery training,
+no behavioural screening, no confirmation, no formal search, no promotion and no
+GO/NO-GO. It is a phase-level engineering envelope rather than another
+micro-budget, because the same decision requires ordinary setup, provider,
+environment, device, dtype and OOM failures to be repaired and retried
+autonomously — which an allowance sized to one flawless run cannot execute. Every
+cost still counts and the four limits still bind separately.
+
+- **The D1 design's evidence blocker now derives from the realized family.** The
+  design still reported `THREE INDEPENDENT BLOCKERS: evidence, funding,
+  per-session ceiling` while `main` said the evidence blocker was closed, and its
+  `contamination_protection` still described the pre-D-series state where no
+  batteries exist. Fixed at the producer: `d_series_evidence()` reads the realized
+  manifest and reports CLOSED when both roles D1 consumes are present, carrying
+  the allocation rule id `f6047343…`, the family id `1e3445f1…` and the
+  construction commit `29f99b9a`.
+
+  The old capacity analysis is **kept as historical reasoning** — it is what
+  prompted the source decision, and its figures survive — but it no longer drives
+  `open_blockers()`. A blocker still driven by it would reopen a closed problem on
+  every regeneration.
+
+  The live design now reports exactly:
+
+  ```text
+  EVIDENCE               CLOSED
+  FUNDING AUTHORIZATION  OPEN / CATEGORICAL
+  PER-SESSION ENVELOPE   OPEN / UNRESOLVED
+  ```
+
+  Two tests that pinned the blocker list by value were retargeted: the list has
+  now been wrong in **both** directions — two before the ceiling appeared, three
+  after the family closed the evidence one — so what is pinned is the enduring
+  claim, that the design authorizes nothing either way.
+
+Validation, scoped to records and one producer: D1 suite and `tests/docs`, 202
+passed, regenerators at a fixed point. No core suite, no historical suite, no GPU
+spend yet.
+
+
 ## 2026-10-03 — MAINTAINER DECISION: the D1 evidence blocker is CLOSED
 
 Closed on independent review of the realized six-role family. **Records-only
@@ -10159,3 +10223,61 @@ on a paid pod.
 - **Revisit when:** v2 reaches a terminal result, or the engineering
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
+
+## 2026-10-04 — Replace the D-series full-vocabulary KL with reference-Top-K + tail
+
+- **Context:** the D-series scoring contract reduced KL over the full 151,936-token
+  vocabulary. The persistent reference state scales `O(T·V)`, which the completed
+  full-vocab GPU qualification confirmed is the dominant DEPTH scaling problem:
+  its reference cache, its KL reduction work and its state-eval reference storage
+  all carry the vocabulary dimension.
+- **Decision:** before any formal D1/D2/D3 experiment, adopt
+  `reference_topk_tail_v1` with **`top_k = 200`**. Support is the Top-K tokens of
+  the **REFERENCE** distribution at each prediction position; every token outside
+  that support is aggregated into one `K+1` tail bucket. D1, D2 and D3 all use
+  this one protocol. The full-vocabulary reducer is retained as an oracle, not
+  deleted.
+- **This is a scientific protocol amendment, not an execution optimization.**
+  Top-K + tail is not mathematically identical to full-vocabulary KL, so it moves
+  scientific identity: the DEPTH operator's config/state identity, the
+  `StateEvaluator`'s `measurement_protocol_id`, the search protocol that inherits
+  it, and the D-series design hash.
+- **K is not an outcome-selected parameter.** `K = 200` is maintainer-selected for
+  the D-series. There is NO K sweep and K must not be tuned against D1/D2/D3
+  results.
+- **Alternatives considered:** keeping full-vocab and buying more memory (does not
+  scale to D2/D3 and leaves the `O(T·V)` reference cache); candidate-defined
+  Top-K as in the SDPO reference (incompatible with our forward-KL semantics,
+  which require reference-defined support); a K sweep (rejected — it would make K
+  an outcome-selected parameter).
+- **Expected upside:** persistent reference state goes from `O(T·V)` to `O(T·K)`,
+  with reductions in reference cache size, KL reduction work, cached-reference
+  recomputation pressure and state-eval reference storage.
+- **Risks:** it is a different measurement, so a discrete decision may move
+  relative to the historical full-vocab path. That is an expected consequence of
+  an authorized protocol change, not a failure. It does **not** yet remove the
+  output head's `O(V)` compute or the instantaneous candidate `[B,T,V]` block, and
+  no claim of `O(K)` output-head memory may be made until a vocab-streaming or
+  chunked output path exists.
+- **Reference examined:** `lasgroup/SDPO @ 7c457fc1b1f636ae794eb0362ba37d4743b06fbc`
+  — used for normalized top-k log probabilities, the optional aggregate tail
+  bucket, the numerically stable complement probability, and gathering the
+  compared distribution on one fixed support. Its local student-top-k support
+  policy is deliberately **not** adopted.
+- **Budget:** GPU adoption validation authorized from the existing **engineering**
+  allowance, campaign ceiling up to **$8.0000**, inside the already-authorized
+  engineering and project headroom. No formal allowance is touched.
+- **Consequence for D1's claim boundary:** the full-vocab qualification showed
+  `all_v1@bsz=1` vs `all_v1@bsz=3` moves 3 of 4 fixed-path selections while
+  `all_v1@bsz=3` vs `supervised_target_v1@bsz=3` moved none of that path's
+  selected digests. D1 therefore may **not** claim the position policy is its only
+  changed axis. D1 becomes an optimization/challenger experiment against incumbent
+  B over the combined protocol, not a clean causal attribution to position
+  weighting.
+- **Formal D1 remains NOT AUTHORIZED.** `phase_d1` is not added to
+  `funds_formal_sessions_of`; the formal allowance and the per-session envelope
+  are unchanged. The per-session envelope stays UNRESOLVED until Top-K is
+  measured, so the full-vocab repricing is explicitly not the final price.
+- **Revisit when:** the Top-K adoption qualification is complete and reviewed. The
+  next maintainer decision after that is the final formal D1 funding/envelope
+  authorization.

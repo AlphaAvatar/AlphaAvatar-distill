@@ -1,0 +1,36 @@
+{
+ "_all_in_ceiling": "a PHASE-level engineering ceiling for the whole qualification across every resource and subrun, sized so ordinary setup/provider/device/dtype/OOM failures can be repaired and retried autonomously rather than returning for another micro-budget. It is NOT a per-session ceiling and NOT a grant to spend: $11.9395 of engineering allowance remains and this reserves 8.0000 of it, leaving the rest for the repairs this instruction requires. Every cost still counts and a rerun does not reset it.",
+ "_book": "the ENGINEERING book. The four limits bind separately and do not transfer; nothing here may be charged to the formal allowance.",
+ "_contract": "The D1 ENGINEERING GPU QUALIFICATION. Authorized by the maintainer decision of 2026-10-03, which raised the GPU engineering allowance 10.0000 -> 20.0000 and the package total 86.6523 -> 96.6523 and changed nothing else. ENGINEERING ONLY: it authorizes no D1 science and adds no formal headroom.",
+ "all_in_ceiling_usd": 8.0,
+ "authorized_by": "maintainer decision, 2026-10-03, GPU authorized for the D1 engineering qualification only",
+ "authorized_utc": "2026-10-03",
+ "authorizes": "engineering measurement only",
+ "book": "gpu_engineering_allowance_usd",
+ "covers": [
+  "ONE active provider resource at a time, secure cloud, cheapest suitable",
+  "the incumbent fixed-path reconstruction on real CUDA",
+  "the target-aware supervised_target_v1 path at bsz=3 under CUDA/bf16 through the real evaluator, including candidate/state evaluation",
+  "state-eval peak memory at the real vocabulary and batch plan",
+  "representative batched expansion and fixed-path timing",
+  "ordinary autonomous repair and retry inside this ceiling"
+ ],
+ "does_not_cover": [
+  "recovery training",
+  "behavioural screening",
+  "confirmation",
+  "formal D1 search",
+  "promotion",
+  "any scientific GO/NO-GO",
+  "adding phase_d1 to funds_formal_sessions_of",
+  "changing the formal allowance, the project cap or the per-session envelope",
+  "consuming any D-series behavioural battery"
+ ],
+ "frozen_inputs": {
+  "_the_family_is_not_consumed": "the family identity is recorded so a reader can see WHICH frozen family existed when the qualification ran. The qualification reads no behavioural prompt from it.",
+  "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+  "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58"
+ },
+ "schema": "aadistill.engineering_authorization/v1",
+ "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
+}
