@@ -399,29 +399,43 @@ class TestTheCommittedRecords:
         assert "NOT AUTHORIZED" in doc["status"]
         assert doc["search_stage"]["cost"]["hard_ceiling_usd"] > 0
 
-    def test_all_three_blockers_are_recorded_as_blockers(self):
-        """Not as caveats. Any one alone prevents execution, and a design that
-        buried them in prose would read as ready.
+    def test_the_open_blockers_are_exactly_the_two_that_remain(self):
+        """Not as caveats. Either alone prevents execution.
 
-        **Three, and the count is read from the document rather than written
-        here.** This test asserted TWO for a round after the per-session ceiling
-        became the third — a test that names the number is one more place the
-        number can go stale, so it checks the derived list against the fields
-        each entry is derived from.
+        **The count has now been wrong in both directions**, which is why neither
+        the number nor the membership is written here as a constant: it read TWO
+        after the per-session ceiling became the third, then THREE after the
+        realized D-series family closed the evidence one. Each entry is checked
+        against the field it is derived from, and the evidence entry's ABSENCE is
+        checked against the realized family.
         """
         doc = json.loads(DESIGN.read_text())
-        assert "BLOCKER" in doc["contamination_protection"]
         assert "BLOCKER" in doc["budget"]
         assert set(doc["open_blockers"]) == {
-            "evidence", "funding", "per-session ceiling"}
+            "funding authorization", "per-session envelope"}
 
-        #: evidence — definite: the batteries do not exist.
-        assert doc["contamination_protection"]["batteries_available"] < \
-            doc["contamination_protection"]["batteries_D1_requires"]
+        #: evidence — CLOSED, and the design says so from the realized family
+        evidence = doc["evidence"]
+        assert evidence["status"] == "CLOSED"
+        assert set(("d1_screening", "d1_confirmation")) <= set(
+            evidence["roles_available"])
+        assert len(evidence["family_content_id"]) == 64
+        assert evidence["_authorizes"].startswith("nothing")
         #: funding — definite for a reason needing no cost estimate.
         assert doc["budget"]["d1_is_in_the_funded_list"] is False
         #: per-session envelope — open because UNRESOLVED, not proven to fail.
         assert doc["budget"]["per_session_envelope_compatibility"] == "UNRESOLVED"
+
+    def test_the_old_capacity_analysis_no_longer_drives_a_blocker(self):
+        """It is kept as the reasoning that prompted the source decision, and it
+        must not reopen a closed problem on every regeneration."""
+        doc = json.loads(DESIGN.read_text())
+        contamination = doc["contamination_protection"]
+        assert "HISTORICAL REASONING" in contamination["_status"]
+        assert "no longer a live blocker" in contamination["_status"]
+        #: the figures survive -- it is history, not a deletion
+        assert contamination["batteries_available"] == 0
+        assert "evidence" not in doc["open_blockers"]
 
     def test_the_two_cost_derived_blocker_figures_are_named_provisional(self):
         """A planning figure must not be readable as finalized authorization

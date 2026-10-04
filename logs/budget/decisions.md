@@ -1,5 +1,69 @@
 # Budget decisions
 
+## 2026-10-03 — GPU AUTHORIZED: the D1 engineering qualification, and evidence closed in the design
+
+**MAINTAINER DECISION.** GPU authorized for the **D1 engineering qualification
+only**. This is NOT formal D1 authorization.
+
+```text
+gpu_engineering_allowance_usd   10.0000 -> 20.0000
+package_total_usd               86.6523 -> 96.6523   (= formal + engineering)
+formal_allowance_usd            UNCHANGED   76.6523
+project cumulative cap          UNCHANGED  410.0000
+per-session envelope            UNCHANGED   30.0000
+funds_formal_sessions_of        UNCHANGED   phase_d1 NOT added
+```
+
+Derived balances after the amendment, from `derive_budget.py`:
+
+```text
+engineering remaining   11.9395   of 20.0000
+project remaining       13.1777   of 410.0000
+formal remaining         7.2431   of 76.6523   (untouched by this)
+package remaining       19.1826   of 96.6523
+```
+
+**ENGINEERING ONLY, and the books do not transfer.** No formal headroom is added
+and no D1 science is authorized. The qualification performs no recovery training,
+no behavioural screening, no confirmation, no formal search, no promotion and no
+GO/NO-GO. It is a phase-level engineering envelope rather than another
+micro-budget, because the same decision requires ordinary setup, provider,
+environment, device, dtype and OOM failures to be repaired and retried
+autonomously — which an allowance sized to one flawless run cannot execute. Every
+cost still counts and the four limits still bind separately.
+
+- **The D1 design's evidence blocker now derives from the realized family.** The
+  design still reported `THREE INDEPENDENT BLOCKERS: evidence, funding,
+  per-session ceiling` while `main` said the evidence blocker was closed, and its
+  `contamination_protection` still described the pre-D-series state where no
+  batteries exist. Fixed at the producer: `d_series_evidence()` reads the realized
+  manifest and reports CLOSED when both roles D1 consumes are present, carrying
+  the allocation rule id `f6047343…`, the family id `1e3445f1…` and the
+  construction commit `29f99b9a`.
+
+  The old capacity analysis is **kept as historical reasoning** — it is what
+  prompted the source decision, and its figures survive — but it no longer drives
+  `open_blockers()`. A blocker still driven by it would reopen a closed problem on
+  every regeneration.
+
+  The live design now reports exactly:
+
+  ```text
+  EVIDENCE               CLOSED
+  FUNDING AUTHORIZATION  OPEN / CATEGORICAL
+  PER-SESSION ENVELOPE   OPEN / UNRESOLVED
+  ```
+
+  Two tests that pinned the blocker list by value were retargeted: the list has
+  now been wrong in **both** directions — two before the ceiling appeared, three
+  after the family closed the evidence one — so what is pinned is the enduring
+  claim, that the design authorizes nothing either way.
+
+Validation, scoped to records and one producer: D1 suite and `tests/docs`, 202
+passed, regenerators at a fixed point. No core suite, no historical suite, no GPU
+spend yet.
+
+
 ## 2026-10-03 — MAINTAINER DECISION: the D1 evidence blocker is CLOSED
 
 Closed on independent review of the realized six-role family. **Records-only

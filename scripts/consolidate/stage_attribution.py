@@ -820,8 +820,11 @@ STAGE_1 = [
               #: rather than the sentence. `equals` on the prose would go stale
               #: the next time a blocker opens or closes -- which is exactly
               #: what happened when the per-session ceiling became the third.
-              field="open_blockers",
-              equals=["evidence", "funding", "per-session ceiling"]),
+              #: The LIST has now been wrong in both directions -- it read two
+              #: before the per-session ceiling appeared and three after the
+              #: realized family closed the evidence one. What endures is that
+              #: the design authorizes nothing, built family or not.
+              field="_authorizes", equals="nothing"),
             E("logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
               "how many further disjoint behavioural batteries the prompt pool "
               "supports under the frozen C1 mixture. The answer is zero and it "
