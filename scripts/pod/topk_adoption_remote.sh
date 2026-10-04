@@ -204,6 +204,7 @@ say "ADOPTION: one DEPTH path, two reductions from the same forwards"
 PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
     scripts/pod/topk_adoption_driver.py \
     --out "${OUTROOT}/adoption" \
+    --stages "${ADOPT_STAGES:-C,D}" \
     --deadline-s "${ADOPT_DEADLINE_S:-0}" 2>&1 | tee "${OUTROOT}/adoption.log"
 RC=${PIPESTATUS[0]}
 say "adoption rc=${RC}"
