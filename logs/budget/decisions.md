@@ -1,5 +1,85 @@
 # Budget decisions
 
+## 2026-10-03 — The family identity binds its bytes, and the provenance is clean
+
+The three closure items from review, in the required order. `$0`. No GPU, no
+search, no probes, no funding or envelope change.
+
+- **`family_content_id` binds the 42 output files' BYTES.** It previously hashed
+  `item id : problem_content_id` per role, which identifies which *source rows*
+  the ids refer to and nothing about the behavioural item — `prompt_text`,
+  `messages`, `gold`, aliases, tool schemas and every scorer field could change
+  without moving it. This round had already found `battery_v2`'s RAG prompts
+  drifting from the current renderer with every id intact, so the failure was
+  demonstrated rather than imagined.
+
+  ```text
+  family_content_id  1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58
+  supersedes         c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+  ```
+
+  The manifest records path, size, SHA256 and item count for each of the 42
+  realized files. `serialize()` is the single function used for both the digest
+  and the write, so a dry run's digest is the digest of what a write produces.
+  `family.json` is excluded from its own hash. The per-role id/content digest
+  stays as a readable secondary identity, and a test asserts that zeroing every
+  one of them leaves the family id unchanged — which is what makes it secondary
+  rather than load-bearing.
+
+- **Every item is now checked on all four coordinates, independently.** The
+  verifier previously rebuilt the committed pools and FINAL_PROMOTION, plus
+  problem content for the three strata that declare a payload. That left the
+  native/source-id protection for `rag`, `multihop`, `knowledge` and `tool`
+  resting on the builder's word — and those are precisely the strata where the id
+  coordinate is the only one with teeth, as the ten-row defect last round showed.
+
+  It now takes the frozen exclusion **set** as a contract input — the set
+  definition, never the builder's selection or admission result — and asserts
+  `historical_render_id`, `source_key`, the rendered-prompt hash and
+  `problem_content_id` against the complete baseline: recovery training, operator
+  calibration, state evaluation, recovery search, final promotion and the
+  D-series pools.
+
+  `check_manifest` recomputes the family id from the bytes on disk rather than
+  from the manifest's claim about them. Recomputing from the document would pass
+  for a corruption that edits only the items, because then nothing in the
+  document moved at all.
+
+  Both mutations required by the review pass: a changed `gold` with `id` and
+  `problem_content_id` intact fails the artifact digest alone, and a `rag` item
+  given a real reserved recovery-training `source_id` fails the contract check on
+  a stratum with no problem payload.
+
+- **The design record points at reality.** It said `DESIGNED / NOT MATERIALIZED`
+  with `family_content_id: null` while the manifest and the snapshot said six
+  batteries existed. `_realization()` now derives status, the family id and the
+  realization owner from whether the manifest exists, so building or removing the
+  family moves it without an edit. Ownership is explicit: this record owns the
+  **allocation and design**, the manifest owns the **realized family**. Stale
+  current-state claims — "None is built", "unverified licences" — became
+  historical explanation. The attribution pins `_authorizes` instead of a status
+  string that is now derived.
+
+  `current.json` reconciled: the top-level blocker, `next_starting_point` and
+  `test_suites.next_work`. **The evidence blocker's source/capacity half closed at
+  `main@bc31175f`; its realized-family half is under review on
+  `prep/d-series-batteries`.** Neither record claims the whole blocker is closed.
+
+- **Clean construction provenance, in the required order.** Code committed first
+  (`29f99b9a`), worktree clean, then rebuilt. The manifest records
+  `git_commit 29f99b9a, dirty: false` rather than the earlier dirty tree, and
+  `P12.2` keeps that commit reachable after any squash because the source branch
+  is preserved.
+
+  **The membership is byte-for-byte identical.** All 42 role/stratum files, all
+  5,700 items, every id in every position unchanged — only the stronger family
+  identity moved, which is exactly the expected outcome. Had any membership
+  changed, this round would have stopped and reported instead.
+
+Validation: D-series 136 passed, `tests/docs` 158, both regenerators at a fixed
+point, independent family verifier 8/8. No `src/` change, so no core suite and the
+CUDA ledger is untouched.
+
 ## 2026-10-03 — The six-role D-series family is built, hash-bound and verified
 
 All six behavioural batteries exist, **before any D1 outcome**. `$0` data work.

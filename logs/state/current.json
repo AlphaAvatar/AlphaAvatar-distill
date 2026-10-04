@@ -204,11 +204,11 @@
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "scoring_identity": "content is bound in scoring/content.py and folded into one measurement_protocol_id, NEVER into suite_hash. SupervisedTargetV1 refuses a present-but-empty `assistant` tag; absent falls back.",
   "behavioural_design": "Top-K 2 / 2 screening / 3 confirmation seeds, a pragmatic balance NOT an optimum. Screening inflation is NOT a confirmation validity condition. Owner: phase_d1/selection_noise.py.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED: six roles, 950/850 each, pairwise disjoint, isolated from every reserved population, built BEFORE any D1 outcome. Rule v3 f6047343; family_content_id binds the 42 output files' bytes. Design owner: autoinit_d_series_battery_family.json; realization owner: autoinit_d_series_family_manifest.json.",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a): six roles, 950/850 each, pairwise disjoint, every item checked on all four coordinates against the complete baseline, built BEFORE any D1 outcome. Rule v3 f6047343; family_content_id 1e3445f1b6769169 binds the 42 output files' BYTES, superseding c773fad0. Owners: logs/shared/analyses/autoinit_d_series_{battery_family,family_manifest}.json.",
   "blockers": "EVIDENCE: source/capacity CLOSED at main@bc31175f; the realized six-role family is BUILT and VERIFIED on this branch and awaits maintainer review. FUNDING AUTHORIZATION (definite, CATEGORICAL): phase_d1 is absent from funds_formal_sessions_of; no allowance at any price and no measurement closes it. PER-SESSION ENVELOPE: UNRESOLVED, provisional $31.1577 vs $30.00, NOT a measured excess.",
   "owed_gpu_qualification": "NOT RUN. Settles the cost-dependent figures only; it cannot settle the funding authorization.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
-  "execution_wiring": "CONTRACT ONLY, no driver exists. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json :: execution_wiring_required.",
+  "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
   "authorizes": "nothing"
  },
  "test_suites": {
