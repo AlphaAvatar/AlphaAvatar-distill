@@ -659,7 +659,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "dfea8e1e1252327713b5e455bbf5b0e45f02d6f8241660db554ba8aad02168a6",
+ "design_hash": "d44c62e8750e67f6f3a7dcd3873db4c77a85ca76dfabce5a7ececb9cdac95822",
  "evidence": {
   "_authorizes": "nothing. The evidence exists; the funding scope and the per-session envelope are separate and still open.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -773,10 +773,45 @@
   "why_a_gpu_is_required": "the questions are CUDA numerical behaviour and real memory, which no CPU substitute reaches. AGENTS.md P8.2: a CPU rehearsal that cannot reach the behaviour under test is a more expensive way of learning nothing."
  },
  "hypothesis": {
+  "claim_boundary": {
+   "_what_would_be_needed_for_attribution": "a design that varies ONE axis at a time against a common baseline. D1 does not do that and must not be read as if it did.",
+   "evidence": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json",
+   "it_is": "an optimization/challenger experiment against incumbent B over the combined protocol",
+   "it_is_NOT": "a causal attribution of any improvement to position weighting alone",
+   "why": "three axes differ from the historical incumbent at once: the distribution support, the calibration batch size and the position policy. The qualification measured that the BATCH SIZE moves three of four fixed-path selections and the position policy moved none of them, so the policy is demonstrably not the dominant axis."
+  },
   "measured_restriction": "the policy admits 44,746 of 59,763 prediction positions on calib.domain_balanced@v1 (74.9%) and 46,825 of 59,763 on calib.reasoning_heavy@v2 (78.4%), and 54,014 of 74,022 on the state_eval_v1 suite (73.0%). Derived from each asset's own `assistant` tag; see `scoring_policy.verification`.",
-  "question": "Does making structural scoring and global candidate evaluation SUPERVISED-TARGET-AWARE produce a better initialization than the incumbent full-sequence scoring, under the same operator set, the same calibration data, the same beam and the same recovery recipe?",
+  "question": "Does the scalable D-series scoring protocol -- reference_topk_tail_v1 at K=200, the adopted bsz=3 / length_sorted_v1 execution protocol, and supervised-target-aware scoring -- produce an initialization that, after the frozen recovery recipe, outperforms the incoming incumbent B?",
+  "scoring_protocol": {
+   "_does_not_move_the_batteries": "Top-K changes structural scoring and evaluation, not prompt content. family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+   "coarsened_under_this_protocol": [
+    "forward KL",
+    "reverse KL",
+    "critical-token KL"
+   ],
+   "critical_tokens": "critical tags identify prediction POSITIONS, not vocabulary entries, so those positions use this same KL and need no separate support rule",
+   "decision_record": "logs/budget/decisions.md 2026-10-04",
+   "exact_under_this_protocol": [
+    "target-token CE/NLL",
+    "top-1 agreement"
+   ],
+   "execution": {
+    "calibration_batch_packing": "length_sorted_v1",
+    "micro_batch_size": 3
+   },
+   "k_is_not_outcome_selected": "maintainer-selected 2026-10-04. No sweep was run and K must not be tuned against D1/D2/D3 results.",
+   "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+   "protocol_id": "reference_topk_tail_v1",
+   "reference_for_depth": "the intact current parent; the candidate is that parent with the candidate block bypassed. NOT the original teacher -- DEPTH's objective is local and parent-relative, and forcing the teacher's support onto it would score a different question",
+   "reference_for_state_evaluation": "the original teacher",
+   "reverse_kl_partition": "the SAME reference-defined K+1 partition as the forward direction. One state evaluation must not carry two incompatible partitions",
+   "support": "the Top-200 entries of the REFERENCE distribution at each prediction position",
+   "tail": "every vocabulary entry outside that support, aggregated into one K+1 bucket",
+   "top_k": 200
+  },
   "untemplated_items": "an item with no `assistant` tag is untemplated raw text with no assistant turn, and every one of its real prediction positions stays active. That keeps D1's DATA identical to the incumbent search's and changes only the scoring semantics; removing the raw-LM exception belongs to the later Stage-0 teacher-native-v2 experiment, not here.",
   "what_D1_changes": [
+   "DISTRIBUTION SUPPORT: KL is reduced over the reference's Top-200 entries plus one aggregate tail bucket, not the full vocabulary",
    "DEPTH: the causal-KL mean is taken over supervised target positions only",
    "FFN: E[|a_j|] is an expectation with respect to supervised target positions only",
    "RESIDUAL_WIDTH: the residual second moments accumulate over the token positions that feed supervised predictions",

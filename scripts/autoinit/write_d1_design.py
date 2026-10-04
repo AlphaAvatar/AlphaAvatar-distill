@@ -84,13 +84,54 @@ def _load(rel: str) -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
+def _d_series_protocol() -> dict[str, Any]:
+    """The D-series scoring protocol, from its owner rather than retyped."""
+    from experiments.phase_d_series.scoring_protocol import describe
+
+    return describe()
+
+
 def hypothesis() -> dict[str, Any]:
     return {
+        #: CORRECTED 2026-10-04, and the correction narrows what D1 may claim.
+        #:
+        #: The full-vocabulary GPU qualification measured that
+        #: `all_v1 @ bsz=1` vs `all_v1 @ bsz=3` moves THREE of four fixed-path
+        #: operator selections, while `all_v1 @ bsz=3` vs
+        #: `supervised_target_v1 @ bsz=3` moved none of that path's selected
+        #: digests. So the position policy is not D1's only changed axis relative
+        #: to the historical incumbent -- the adopted bsz=3 execution protocol is
+        #: another, and it is the one that moved those selections. The maintainer
+        #: decision of 2026-10-04 adds a third: `reference_topk_tail_v1` at K=200.
+        #:
+        #: D1 is therefore an OPTIMIZATION/CHALLENGER experiment against incumbent
+        #: B over the combined protocol. It is NOT a clean causal attribution of
+        #: any improvement to position weighting, and a reading that treats it as
+        #: one would be attributing to the policy an effect three changes could
+        #: have produced.
         "question": (
-            "Does making structural scoring and global candidate evaluation "
-            "SUPERVISED-TARGET-AWARE produce a better initialization than the "
-            "incumbent full-sequence scoring, under the same operator set, the "
-            "same calibration data, the same beam and the same recovery recipe?"),
+            "Does the scalable D-series scoring protocol -- "
+            "reference_topk_tail_v1 at K=200, the adopted bsz=3 / "
+            "length_sorted_v1 execution protocol, and supervised-target-aware "
+            "scoring -- produce an initialization that, after the frozen recovery "
+            "recipe, outperforms the incoming incumbent B?"),
+        "claim_boundary": {
+            "it_is": ("an optimization/challenger experiment against incumbent B "
+                      "over the combined protocol"),
+            "it_is_NOT": ("a causal attribution of any improvement to position "
+                          "weighting alone"),
+            "why": ("three axes differ from the historical incumbent at once: the "
+                    "distribution support, the calibration batch size and the "
+                    "position policy. The qualification measured that the BATCH "
+                    "SIZE moves three of four fixed-path selections and the "
+                    "position policy moved none of them, so the policy is "
+                    "demonstrably not the dominant axis."),
+            "evidence": ("logs/stages/stage-1/phase_d1/validations/"
+                         "gpu-qualification/v1/closeout.json"),
+            "_what_would_be_needed_for_attribution": (
+                "a design that varies ONE axis at a time against a common "
+                "baseline. D1 does not do that and must not be read as if it did."),
+        },
         "why_it_might": (
             "every calibration-derived objective in the incumbent search is an "
             "expectation over EVERY token position of the mixture. For the 51 of "
@@ -101,7 +142,10 @@ def hypothesis() -> dict[str, Any]:
             "care about, which is a plausible misallocation of a fixed capacity "
             "budget — and it has never been varied, so there is no evidence "
             "either way."),
+        "scoring_protocol": _d_series_protocol(),
         "what_D1_changes": [
+            "DISTRIBUTION SUPPORT: KL is reduced over the reference's Top-200 "
+            "entries plus one aggregate tail bucket, not the full vocabulary",
             "DEPTH: the causal-KL mean is taken over supervised target "
             "positions only",
             "FFN: E[|a_j|] is an expectation with respect to supervised target "
