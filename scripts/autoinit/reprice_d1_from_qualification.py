@@ -73,7 +73,8 @@ def compare(record: dict[str, Any], table: dict[str, Any]) -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
 
     for arm, key in (("incumbent", "A_incumbent"),
-                     ("target_aware", "B_target_aware")):
+                     ("target_aware", "B_target_aware"),
+                     ("batch_only", "B_batch_only")):
         steps = _steps(record, key)
         for i, step in enumerate(steps):
             impl = step.get("impl_id")
@@ -148,6 +149,47 @@ def direction(rows: list[dict[str, Any]], state_eval: dict[str, float]
     return out
 
 
+def batch_size_effect(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """The PURE batch-size cost, policy held fixed.
+
+    The incumbent arm and the attribution arm run the same position policy and
+    differ only in the calibration micro-batch size, so their per-step times
+    isolate what moving to the D1 batch size costs. This is the quantity the
+    design wanted and could not get: its per-expansion table was measured
+    unbatched, and nothing had measured the net across all four operators.
+    """
+    a = {r["impl_id"]: r for r in rows if r["arm"] == "incumbent"}
+    c = {r["impl_id"]: r for r in rows if r["arm"] == "batch_only"}
+    shared = [i for i in a if i in c]
+    if not shared:
+        return {"status": ("the attribution arm did not run, so the batch-size "
+                           "effect is not isolated by this record")}
+    per_step = {
+        impl: {
+            "bsz1_minutes": a[impl]["measured_materialize_minutes"],
+            "bszN_minutes": c[impl]["measured_materialize_minutes"],
+            "ratio": (round(c[impl]["measured_materialize_minutes"]
+                            / a[impl]["measured_materialize_minutes"], 4)
+                      if a[impl]["measured_materialize_minutes"] else None),
+        } for impl in shared}
+    low = sum(a[i]["measured_materialize_minutes"] for i in shared)
+    high = sum(c[i]["measured_materialize_minutes"] for i in shared)
+    return {
+        "_what": ("same position policy, different calibration micro-batch "
+                  "size: the net batching cost across all four operators"),
+        "per_step": per_step,
+        "total_bsz1_minutes": round(low, 4),
+        "total_bszN_minutes": round(high, 4),
+        "net_ratio": round(high / low, 4) if low else None,
+        "reading": (
+            "a ratio above 1 means the D1 batch size costs MORE wall clock per "
+            "materialization than the incumbent's, which is the direction A3 "
+            "measured on the ATTENTION scorer alone; below 1 means the net "
+            "across four operators goes the other way."
+            if low else "no comparable total"),
+    }
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("record")
@@ -158,6 +200,7 @@ def main(argv: list[str] | None = None) -> int:
     table = derive_cost_table(REPO)
     comparison = compare(record, table)
     verdicts = direction(comparison["cells"], _state_eval_minutes(record))
+    verdicts["batch_size_alone"] = batch_size_effect(comparison["cells"])
 
     doc = {
         "schema": "aadistill.d1.reprice_from_qualification/v1",
