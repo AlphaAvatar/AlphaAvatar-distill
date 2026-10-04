@@ -304,7 +304,18 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     #: The store the gate compares the battery against. Its ABSENCE is the pod's
     #: condition and the sweep now models it; its absence HERE would mean the
     #: launcher's own pre-provider gate cannot pass.
-    sys.path.insert(0, str(REPO / "tests"))
+    #: AGENTS.md §2.8a moved C1's own state assertions out of the core suite and
+    #: into its experiment directory, and this reader still pointed at `tests/`.
+    #: A core suite that is green does not cover readers outside it: this one
+    #: crashed on the import, and it is the check P12.2 relies on to prove that
+    #: every commit an experiment record cites is still reachable.
+    #: TWO paths, for two different reasons. The module itself now lives with its
+    #: experiment; `support` is the shared helper package that §2.8a keeps in
+    #: `tests/` precisely so a moved test does not strand its fixtures.
+    for extra in ("scripts/experiments/stage-1/phase_c1/tests", "tests"):
+        path = str(REPO / extra)
+        if path not in sys.path:
+            sys.path.insert(0, path)
     from test_c1_session_contract import canonical_battery_store
     if not canonical_battery_store().is_dir():
         problems.append(f"the canonical battery store {canonical_battery_store()} "
