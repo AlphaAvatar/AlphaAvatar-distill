@@ -1,18 +1,18 @@
 {
- "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 = 2.2024",
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 = 2.3009",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.2024,
+ "booked_usd": 2.3009,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- corrective A/B/C/D passed with zero violations; the production Top-K timing is owed",
+ "status": "CLOSED -- 5 paid subruns, $2.3009 of $8.0000; zero lower-bound violations after the corrective repair",
  "subruns": [
   {
    "cost_usd": 0.6382,
@@ -78,6 +78,21 @@
     "P(failed)"
    ],
    "subrun_id": "a4"
+  },
+  {
+   "cost_usd": 0.0985,
+   "elapsed_minutes": 5.383,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a5",
+   "gpu": "NVIDIA L40S",
+   "notes": "82.3 s. 4.6048 s per candidate over 12 candidates and 23 groups at bsz=3 / length_sorted_v1, forward 83% and reduction 17%. Reference sketch 137.5 MiB against 16.91 GiB of full-vocabulary logits (126x), peak 16.282 GiB against a4's 34.774 GiB. Top-K reduction only -- no dual reduction -- so this is a production cost.",
+   "outcome": "COMPLETE -- the PRODUCTION Top-K-only expansion timing",
+   "pod_id": "9rmme5u9yd68g5",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "a84af127a7767f3867b34dec4507859a8b13ec89",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a5"
   }
  ],
  "teardown_reserve_usd": 0.3

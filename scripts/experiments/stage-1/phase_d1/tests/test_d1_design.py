@@ -399,20 +399,36 @@ class TestTheCommittedRecords:
         assert "NOT AUTHORIZED" in doc["status"]
         assert doc["search_stage"]["cost"]["hard_ceiling_usd"] > 0
 
-    def test_the_open_blockers_are_exactly_the_two_that_remain(self):
-        """Not as caveats. Either alone prevents execution.
+    def test_every_open_blocker_is_backed_by_the_field_it_derives_from(self):
+        """Not a count, and not a membership list.
 
-        **The count has now been wrong in both directions**, which is why neither
-        the number nor the membership is written here as a constant: it read TWO
-        after the per-session ceiling became the third, then THREE after the
-        realized D-series family closed the evidence one. Each entry is checked
-        against the field it is derived from, and the evidence entry's ABSENCE is
-        checked against the realized family.
+        **The count has been wrong in both directions and has now moved a third
+        time** -- TWO, then THREE, then TWO again, now ONE after the production
+        Top-K measurement resolved the envelope. So neither the number nor the
+        membership is written here. Each POSSIBLE entry is checked against the
+        field it derives from, in both directions: present when the field says
+        open, absent when the field says closed.
         """
         doc = json.loads(DESIGN.read_text())
         assert "BLOCKER" in doc["budget"]
-        assert set(doc["open_blockers"]) == {
-            "funding authorization", "per-session envelope"}
+        open_ = set(doc["open_blockers"])
+        budget = doc["budget"]
+
+        #: funding -- open iff D1 is outside the funded list OR the provisional
+        #: shortfall is positive.
+        funding_open = (not budget["d1_is_in_the_funded_list"]
+                        or budget["provisional_shortfall_usd"] > 0)
+        assert ("funding authorization" in open_) is funding_open
+
+        #: envelope -- open iff measured compatibility is not RESOLVED_FITS. The
+        #: provisional basis does NOT enter this, deliberately.
+        envelope_open = (budget["per_session_envelope_compatibility"]
+                         != "RESOLVED_FITS")
+        assert ("per-session envelope" in open_) is envelope_open
+
+        #: and nothing else may appear.
+        assert open_ <= {"evidence", "funding authorization",
+                         "per-session envelope"}, open_
 
         #: evidence — CLOSED, and the design says so from the realized family
         evidence = doc["evidence"]
@@ -423,8 +439,10 @@ class TestTheCommittedRecords:
         assert evidence["_authorizes"].startswith("nothing")
         #: funding — definite for a reason needing no cost estimate.
         assert doc["budget"]["d1_is_in_the_funded_list"] is False
-        #: per-session envelope — open because UNRESOLVED, not proven to fail.
-        assert doc["budget"]["per_session_envelope_compatibility"] == "UNRESOLVED"
+        #: per-session envelope -- whichever state it is in, the test above
+        #: checks the blocker against it rather than pinning one value.
+        assert doc["budget"]["per_session_envelope_compatibility"] in (
+            "UNRESOLVED", "RESOLVED_FITS", "RESOLVED_NEEDS_RAISE")
 
     def test_the_old_capacity_analysis_no_longer_drives_a_blocker(self):
         """It is kept as the reasoning that prompted the source decision, and it
@@ -441,8 +459,8 @@ class TestTheCommittedRecords:
         """A planning figure must not be readable as finalized authorization
         pricing, and the name is where that is enforced.
 
-        Both come from UNBATCHED telemetry whose direction relative to batched
-        D1 is unknown, so neither bounds the real cost. `shortfall_usd` and
+        Both come from FULL-VOCABULARY telemetry for a protocol D1 will not run,
+        so neither bounds the real cost. `shortfall_usd` and
         `fits_per_session_envelope` were exactly the names a later reader would
         have taken for settled figures.
         """
@@ -564,7 +582,11 @@ class TestTheOwedGpuValidationStatusIsDerived:
         monkeypatch.setattr(w, "REPO", tmp_path)
         state = w._qualification_state()
 
-        assert state["status"] == "RUN -- PASSED"
+        #: TWO ROUNDS now, and the status names each: a bare "RUN -- PASSED" was
+        #: true of the full-vocab qualification and would read as true of the
+        #: Top-K adoption too.
+        assert "full-vocab qualification RUN -- PASSED" in state["status"]
+        assert "Top-K adoption" in state["status"]
         assert state["_status_owner"] == w.QUALIFICATION_CLOSEOUT
         assert state["ran"]["cost_usd"] == 1.23
         #: The design carries the closeout's PATH and CONTENT HASH plus the

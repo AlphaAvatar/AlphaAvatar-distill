@@ -50,40 +50,43 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**REVIEW REOPENED THE TOP-K ADOPTION. Engineering work remains.** The scientific
-direction is accepted — `reference_topk_tail_v1`, **K = 200**, reference-defined
-support, one aggregate tail bucket, shared by D1/D2/D3, no sweep — but the
-implementation's tail arithmetic was invalid at the numerical edge and the adoption
-evidence is being re-measured.
+**THE TOP-K PROTOCOL IS SOUND AND THE ENVELOPE IS RESOLVED. One blocker left,
+and it is a maintainer decision.** An independent review reopened the adoption
+because the tail arithmetic was invalid at the numerical edge; the repair is in and
+the corrective measurement is clean.
 
 ```text
-next:  correct Top-K tail numerics        DONE
-    -> revalidate adoption on GPU         lower_bound_violations must be 0
-    -> production Top-K-only repricing    the dual-reducer clock is NOT it
-    -> maintainer funding/envelope decision
+lower-bound violations   0   (was 1 -- and zero even at the looser 1e-6 threshold)
+DEPTH decisions moved    0 of 8; the removal orders are identical
+CE / NLL                 exact to 1.4e-07;  top-1 bit-identical
+forward teacher KL       -1.8e-03 on the equal-domain mean; worst domain agrees
+reverse KL               -18.7%, DIAGNOSTIC only, not a ranking objective
+reference state          16.91 GiB -> 137.5 MiB (126x);  peak 34.8 -> 16.3 GiB
+production cost          4.6048 s per candidate, Top-K reduction only
+search session           measured $19.5308  vs the $30.00 envelope  -> FITS
 ```
 
-**What was wrong.** The tail was reconstructed as `1 - sum(support)`. On real
-logits the measured Top-200 support mass reached **1.000001** — a probability above
-one — so the complement was below float32 resolution; and the code then *dropped*
-the tail term whenever either mass rounded to zero, when only a zero **reference**
-mass may make a forward-KL term vanish. One coarse KL consequently exceeded the
-full-vocabulary KL, which a coarsening cannot do. I had recorded that as a
-"bounded open numerical observation"; it was a defect, and our own `1.000001` was
-the evidence. Repaired: the tail now comes from the complement's own logits, a
-zero candidate tail against a non-zero reference tail is `+inf` and is preserved,
-and `nan_to_num(posinf=0)` is gone from the batched mean.
+**What was wrong, and why I should have seen it.** The tail was reconstructed as
+`1 - sum(support)`. The measured Top-200 support mass reached **1.000001** — a
+probability above one — so the complement was below float32 resolution, and the
+code then *dropped* the tail term whenever either mass rounded to zero, when only
+a zero **reference** mass may make a forward-KL term vanish. One coarse KL
+exceeded the full-vocabulary KL, which a coarsening cannot do. I recorded that as
+a "bounded open numerical observation"; the `1.000001` in my own report was the
+evidence that it was a defect. The tail now comes from the complement's own
+logits, a genuine `+inf` survives masking, and the superseded findings are kept at
+[`closeout.SUPERSEDED_BY_REVIEW.json`](../stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.SUPERSEDED_BY_REVIEW.json).
 
-The superseded findings are kept at
-[`closeout.SUPERSEDED_BY_REVIEW.json`](../stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.SUPERSEDED_BY_REVIEW.json)
-— a1/a2/a3 are real paid measurements and are what the repair must be judged
-against. `$1.5919` of an `$8.0000` ceiling spent so far.
+**The remaining blocker is CATEGORICAL and no measurement reaches it:** `phase_d1`
+is not in the C1 package's `funds_formal_sessions_of`. The per-session envelope is
+`RESOLVED_FITS` on a measured production Top-K price, and `open_blockers()` no
+longer lets the superseded full-vocab estimate veto that.
 
-**D1's claim boundary.** The full-vocab qualification measured that the calibration
-batch size, not the position policy, moves three of four fixed-path selections.
-D1 differs from incumbent B on three axes — distribution support, numerical
-execution, scoring positions — so it is a **challenger** experiment against B and
-**not** a causal isolation of position weighting.
+**D1's claim boundary.** It differs from incumbent B on three axes — distribution
+support, numerical execution, scoring positions — and the qualification measured
+that the batch size, not the position policy, moved three of four fixed-path
+selections. D1 is a **challenger** experiment against B, not a causal isolation of
+position weighting.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
@@ -3375,7 +3378,7 @@ these by hand; run the deriver.**
 | formal sessions | `$7.2431` of `$76.6523` |
 | GPU engineering | `$8.7137` of `$20.0000` |
 | package | `$15.9568` of `$96.6523` |
-| project cap | `$401.6400` spent of `$410.0000`, leaving `$8.3600` |
+| project cap | `$402.3490` spent of `$410.0000`, leaving `$7.6510` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 

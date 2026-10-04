@@ -1,0 +1,160 @@
+{
+ "_authorizes": "nothing. ENGINEERING evidence from the engineering book, which does not transfer into the formal one. Formal D1 remains NOT AUTHORIZED, phase_d1 is not in funds_formal_sessions_of, and neither the formal allowance, the project cap nor the $30.00 envelope was changed.",
+ "_does_not_move_the_batteries": "family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+ "_review_reopened_this": "An independent review of prep/d-series-topk-tail@bd70a165 reopened the adoption because the old tail arithmetic was invalid at the numerical edge. The tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- the measured support mass reached 1.000001 -- and the code then DROPPED the tail term whenever either mass rounded to zero, when only a zero REFERENCE mass may make a forward-KL term vanish. I had classified the resulting single violation as a 'bounded open numerical observation'; it was a defect, and the 1.000001 in my own report was the evidence. The superseded findings are preserved at closeout.SUPERSEDED_BY_REVIEW.json and in runs/a1..a3.",
+ "answers": {
+  "A_reference_top200_mass": {
+   "_sample_changed": "a1 recorded the first 4,096 valid positions of each reduction, which weights early positions; a4 strides across them, capped at 200,000. Same min (0.022924). a1's p1 of 0.861863 should NOT be cited -- the strided p1 is 0.025284 and is the better estimate.",
+   "from": "a4",
+   "over_all_valid_positions": {
+    "max": 1.000002145767212,
+    "mean": 0.9942112026020448,
+    "min": 0.022924339398741722,
+    "n": 15538380
+   },
+   "sampled_distribution": {
+    "max": 1.0000020265579224,
+    "mean": 0.9783449189796113,
+    "min": 0.022924339398741722,
+    "n": 200000,
+    "p1": 0.02528420463204384,
+    "p5": 0.9467403292655945,
+    "p50": 0.9999991059303284,
+    "p95": 1.000001311302185,
+    "p99": 1.0000017881393433
+   }
+  },
+  "B_full_vs_k_plus_1": {
+   "from": "a4",
+   "per_candidate_abs_max": 0.048031295256523165,
+   "per_candidate_spearman": 0.9999849792953239,
+   "per_item_rel_mean": 0.01025947811101314,
+   "per_item_spearman": 0.9998978246607836
+  },
+  "C_depth_decisions": {
+   "_reading": "ZERO of 8 rounds move; the removal orders are identical and nothing is counterfactual. Unchanged by the repair, which is what it should be: the repair fixed the tail's magnitude at the edge, not the ordering.",
+   "comparison_is_exact_through_round": 7,
+   "from": "a4, and a1/a2 agreed before the repair",
+   "full_vocab_removal_order": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ],
+   "rounds_where_winners_disagree": 0,
+   "topk_removal_order_would_be": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ]
+  },
+  "D1_repricing": {
+   "_how": "the PRODUCTION cost path priced against a cost model whose DEPTH cell is the measured Top-K figure and whose other three cells are unchanged -- they reduce activation statistics, not KL, so the support cannot touch them, and their frozen UNBATCHED cells overstate rather than understate.",
+   "depth_cell_before": 34.3539,
+   "depth_minutes_measured": 19.954,
+   "per_session_envelope_compatibility": "RESOLVED_FITS",
+   "per_session_envelope_usd": 30.0,
+   "search_session_hard_ceiling_minutes": 1022.95,
+   "search_session_hard_ceiling_usd": 19.5308
+  },
+  "D_state_evaluation": {
+   "exact": {
+    "top1_relative": 0.0,
+    "worst_nll_relative": 9.561014157640786e-08
+   },
+   "forward_kl": {
+    "state.critical_token_kl": {
+     "absolute": -1.943137904292236e-05,
+     "full_vocab": 1.0567343017820117,
+     "reference_topk_tail": 1.0567148704029687,
+     "relative": -1.8388140718205586e-05
+    },
+    "state.teacher_kl.equal_domain_mean": {
+     "absolute": -0.001358514205028083,
+     "full_vocab": 0.5577435467924972,
+     "reference_topk_tail": 0.5563850325874691,
+     "relative": -0.002435732717735064
+    },
+    "state.teacher_kl.worst_domain": {
+     "absolute": -0.006772422498881769,
+     "full_vocab": 0.5982456077223615,
+     "reference_topk_tail": 0.5914731852234797,
+     "relative": -0.011320471745151146
+    }
+   },
+   "from": "a4",
+   "protocol_ids_differ": true,
+   "reverse_kl": {
+    "_not_a_blocker": "confirmed by review: the live beam ranking objectives are state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain and state.critical_token_kl -- all forward/reference-weighted. state.reverse_kl.token_mean is DIAGNOSTIC and is not a pruning or ranking objective. It is still recorded.",
+    "_not_comparable": "reverse KL under reference_topk_tail_v1 is NOT numerically comparable with historical full-vocab reverse KL. It must not be made to match by choosing a candidate-defined support.",
+    "absolute": -0.014069289683168229,
+    "full_vocab": 1.3128704457430096,
+    "reference_topk_tail": 1.2988011560598414,
+    "relative": -0.01071643415295697
+   },
+   "worst_domain_identity_agrees": true
+  },
+  "E_production_cost": {
+   "_peak_against_a4": "16.282 GiB here against a4's 34.774 GiB, which held the full-vocabulary reference cache.",
+   "_this_is_production": "Top-K reduction only, no dual reduction, no full-vocabulary reference cache. The adoption validation's wall clock is NOT this and must not be used to price D1.",
+   "candidates_timed": 12,
+   "forward_seconds": 45.741,
+   "from": "a5",
+   "full_vocab_bytes_avoided": 18160302336,
+   "peak_memory_bytes": 17482989568,
+   "reduce_seconds": 9.452,
+   "reference_sketch_bytes": 144148356,
+   "reference_state_ratio": 126.0,
+   "seconds_per_candidate": 4.6048
+  },
+  "lower_bound": {
+   "_reading": "ZERO, and zero even at the looser 1e-6 threshold rather than merely inside the predeclared tolerance. The driver now RAISES on any violation outside tolerance rather than reporting one.",
+   "any_excess_at_1e-6_per_item": 0,
+   "before_the_repair": "1 violation, +2.968e-04 absolute / +2.2e-03 relative",
+   "from": "a4",
+   "tolerance": {
+    "absolute": 1e-05,
+    "relative": 1e-05
+   },
+   "violations_per_candidate": 0,
+   "violations_per_item": 0
+  }
+ },
+ "cost": {
+  "booked_usd": 2.3009,
+  "ceiling_usd": 8.0,
+  "subruns": 5,
+  "teardown": "every pod provider-confirmed gone"
+ },
+ "identity": {
+  "bound_full_vocab": "d463a1dc6afbd778",
+  "bound_reference_topk_tail": "9c9b0b43dc00b695",
+  "d1_design_hash": "8d5cdf902e691ac7705a5ee0",
+  "they_differ": true
+ },
+ "protocol": {
+  "k_is_maintainer_selected": "2026-10-04, no sweep, never tuned against D1/D2/D3 results",
+  "protocol_id": "reference_topk_tail_v1",
+  "top_k": 200
+ },
+ "remaining_blockers": [
+  "funding authorization"
+ ],
+ "repair": {
+  "infinities": "a zero candidate tail against a non-zero reference tail is +inf and is PRESERVED; the dynamic 'degenerate' branch is gone and `has_tail` is structural (K < V)",
+  "masking": "`nan_to_num(posinf=0)` removed from the batched mean; masking happens before the multiply, so a padded position contributes zero and a VALID +inf survives",
+  "ownership": "the reducers own the fp32 tensor they mask -- `.float()` aliases an fp32 input and would have destroyed the caller's cached reference block",
+  "tail": "computed from the COMPLEMENT's own logits -- mask the support to -inf and reduce the rest against the same log_z -- so no cancellation exists to lose and the partition's two masses sum to one by construction"
+ },
+ "schema": "aadistill.d_series.topk_adoption_closeout/v2",
+ "verdict": "COMPLETE -- zero lower-bound violations; the protocol is sound"
+}

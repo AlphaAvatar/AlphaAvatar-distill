@@ -1,0 +1,12 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 2.518, "stage": "environment", "status": "ok", "t": 2.519}
+{"stage": "register_and_policy", "status": "start", "t": 2.519}
+{"seconds": 0.05, "stage": "register_and_policy", "status": "ok", "t": 2.569}
+{"stage": "bind_full_vocab", "status": "start", "t": 2.57}
+{"seconds": 0.065, "stage": "bind_full_vocab", "status": "ok", "t": 2.635}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 2.636}
+{"seconds": 0.056, "stage": "bind_reference_topk_tail", "status": "ok", "t": 2.692}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.692}
+{"seconds": 12.025, "stage": "teacher_fetch_verify", "status": "ok", "t": 14.718}
+{"stage": "P_production_topk_timing", "status": "start", "t": 14.726}
+{"seconds": 67.618, "stage": "P_production_topk_timing", "status": "ok", "t": 82.345}

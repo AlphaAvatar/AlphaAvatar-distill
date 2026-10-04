@@ -31,16 +31,17 @@
   "_package_spent_usd": 80.6955,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 410.0,
-  "cumulative_spend_usd": 401.64,
-  "engineering_remaining_usd": 7.1218,
+  "cumulative_spend_usd": 402.349,
+  "engineering_remaining_usd": 6.4128,
   "formal_remaining_usd": 7.2431,
   "full_ceiling_sessions_fundable": 0,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 14.3649,
+  "package_remaining_usd": 13.6559,
   "per_session_ceiling_usd": 30.0,
+  "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
-  "remaining_usd": 8.36,
+  "remaining_usd": 7.651,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -59,26 +60,26 @@
   "why_b_stands": "no valid C2 challenger displaced it"
  },
  "cuda_engineering_validation": {
-  "_open_campaigns_are_not_listed_here": "this names CLOSED engineering campaigns. The Top-K adoption is REOPENED and is in `next`; owner logs/stages/stage-1/phase_d1/validations/topk-adoption/",
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
   "c2_full_search": "PASS, CLOSED. $0.1453. Owner: logs/stages/stage-1/phase_c2/validations/full-search-cuda/",
   "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
   "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked drift 9.032e-06 inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/",
   "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED, $3.2258; the full-vocabulary BASELINE the Top-K adoption is measured against. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
+  "d_series_topk_adoption": "COMPLETE, CLOSED after review reopened it over the tail arithmetic: ZERO lower-bound violations (was 1), zero of 8 DEPTH decisions move, measured search session $19.5308 vs the $30.00 envelope. $2.3009 of $8.0000. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/topk-adoption/",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
  },
  "d_series": {
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
-  "blockers": "EVIDENCE CLOSED. OPEN: funding authorization (CATEGORICAL) and per-session envelope (UNRESOLVED). Derived by open_blockers(); owner d1_design.json.",
+  "blockers": "EVIDENCE CLOSED. ENVELOPE RESOLVED_FITS on measurement. OPEN: funding authorization (CATEGORICAL). Derived by open_blockers().",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
-  "scoring_protocol": "reference_topk_tail_v1, K=200, reference-defined support + one K+1 tail bucket. Maintainer-selected 2026-10-04, no sweep, never tuned against outcomes. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "scoring_protocol": "reference_topk_tail_v1, K=200, reference-defined support + one K+1 tail bucket computed from the COMPLEMENT's logits. Maintainer-selected 2026-10-04, no sweep. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
   "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
@@ -122,13 +123,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "correct Top-K tail numerics -> revalidate adoption -> production Top-K repricing -> maintainer funding/envelope decision. Review REOPENED the adoption: the tail was reconstructed by subtraction and was invalid at the numerical edge. Formal D1 NOT AUTHORIZED.",
+ "next": "the final formal D1 funding/envelope decision -- a MAINTAINER decision, and now well-defined: the Top-K adoption is CLOSED with zero lower-bound violations and the per-session envelope is RESOLVED_FITS at a measured $19.5308 against $30.00. ONE blocker remains and no measurement reaches it: phase_d1 is not in funds_formal_sessions_of.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "the corrective Top-K pass: tail from the complement logits (done), revalidate the adoption on GPU with zero lower-bound violations, obtain a PRODUCTION Top-K-only timing, reprice D1 and resolve the per-session envelope.",
+  "next_work": "maintainer review of the corrective Top-K round, then the formal D1 funding decision. No engineering work is owed.",
   "not_next": "no retry/resume/pooling of any complete measurement; no C4; no C2 spend; no FFN experiment; no formal D1 while any d_series.blockers entry stands; no K sweep (K=200 is a maintainer-selected protocol parameter, never tuned against outcomes); no rerun of C1/C2/C3/A3 under Top-K; no rebuild of the frozen behavioural family. Owner: decisions.md.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
-  "then": "the final formal D1 funding/envelope authorization, a MAINTAINER decision -- but NOT yet: engineering work remains. phase_d1 is still not in funds_formal_sessions_of and the $30.00 per-session envelope is unchanged."
+  "then": "the final formal D1 funding authorization. The envelope is RESOLVED_FITS on measurement; the funding blocker is CATEGORICAL and needs a maintainer decision, not a price."
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -228,6 +229,6 @@
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (the D1 source lineage). No skip depends on historical evidence.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
-  "next_work": "the corrective Top-K pass on prep/d-series-topk-tail."
+  "next_work": "none owed; awaiting a maintainer decision."
  }
 }

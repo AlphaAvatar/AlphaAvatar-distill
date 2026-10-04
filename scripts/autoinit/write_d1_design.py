@@ -933,6 +933,124 @@ def _derived_budget() -> dict[str, Any]:
     return module.derive()
 
 
+#: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
+TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
+                   "runs/a5/adoption.json")
+
+
+def _topk_production_basis() -> dict[str, Any] | None:
+    """The measured Top-K-only per-candidate cost, or None if not yet measured."""
+    path = REPO / TOPK_PRODUCTION
+    if not path.is_file():
+        return None
+    P = (json.loads(path.read_text()).get("P_production_timing") or {})
+    if not P.get("seconds_per_candidate"):
+        return None
+    #: DEPTH's whole greedy under the production protocol. The candidate count is
+    #: the greedy's own: one layer removed per round from the parent depth down to
+    #: the target, so sum(parent-i) over the rounds. Derived, not typed.
+    #:
+    #: REGISTER FIRST. `path_spec` resolves every step's implementation, and the
+    #: four registries are empty in a fresh interpreter -- the ordering that cost
+    #: paid subrun s1 $0.1098.
+    _ensure_the_frozen_operators_are_registered()
+    from experiments.phase_a3 import a3_session as A3S
+
+    spec = A3S.path_spec(workdir_device="cpu")
+    parent_depth = 36
+    target_depth = int(spec.target_spec["num_hidden_layers"])
+    rounds = parent_depth - target_depth
+    candidates = sum(parent_depth - i for i in range(rounds))
+    minutes = candidates * float(P["seconds_per_candidate"]) / 60.0
+    return {
+        "owner": TOPK_PRODUCTION,
+        "seconds_per_candidate": P["seconds_per_candidate"],
+        "candidates_timed": P["n_candidates_timed"],
+        "greedy_candidates": candidates,
+        "greedy_rounds": rounds,
+        "depth_minutes": round(minutes, 3),
+        "reference_sketch_bytes": P["reference_sketch_bytes"],
+        "full_vocab_bytes_avoided": P["full_vocab_bytes_avoided"],
+        "peak_memory_bytes": P["peak_memory_bytes"],
+        "_what_it_is": (
+            "Top-K reduction only, no dual reduction and no full-vocabulary "
+            "reference cache -- so it is a PRODUCTION cost, unlike the adoption "
+            "validation's wall clock, which computes both reducers."),
+        "_what_it_omits": (
+            "the per-expansion canonical reload, validation and global state "
+            "evaluation. Those keep their frozen full-vocabulary cells below, "
+            "which is CONSERVATIVE: the measured batched figures were faster."),
+    }
+
+
+def _envelope_compatibility(topk: dict[str, Any] | None,
+                            envelope_usd: float) -> str:
+    """`RESOLVED_FITS` / `RESOLVED_NEEDS_RAISE` / `UNRESOLVED`, from measurement.
+
+    Three states and no fourth. A measured session price inside the envelope
+    resolves it; outside, the envelope would have to move; and with no production
+    Top-K timing there is nothing to resolve it with.
+    """
+    if topk is None:
+        return "UNRESOLVED"
+    priced = topk["search_session"]["hard_ceiling_usd"]
+    return "RESOLVED_FITS" if priced <= envelope_usd else "RESOLVED_NEEDS_RAISE"
+
+
+def topk_search_cost() -> dict[str, Any] | None:
+    """The SEARCH session priced with the measured Top-K DEPTH cell.
+
+    Runs the PRODUCTION cost path -- `search_space.search_cost` -- against a cost
+    model whose DEPTH cell is the measured Top-K figure and whose other three
+    cells are unchanged. The other three do not reduce KL at all (activation
+    importance, PCA, attention activation importance), so the distribution
+    support cannot touch them; leaving them at their frozen UNBATCHED values is
+    conservative, because every batched figure measured so far was faster.
+
+    The substitution is explicit and temporary rather than a second copy of the
+    pricing arithmetic: a reimplementation here could disagree with the model the
+    design actually publishes.
+    """
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    import dataclasses
+
+    from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
+    from experiments.phase_d1 import search_space as d1
+
+    _ensure_the_frozen_operators_are_registered()
+    frozen = d1.cost_model()
+    depth_id = "depth.causal_kl_greedy_v1"
+    minutes = {k: dict(v) for k, v in frozen.minutes.items()}
+    before = dict(minutes[depth_id])
+    for key in ("root_max", "root_mean", "deeper_max", "deeper_mean"):
+        if key in minutes[depth_id]:
+            minutes[depth_id][key] = basis["depth_minutes"]
+    adjusted = dataclasses.replace(
+        frozen, minutes=minutes,
+        source=(f"{frozen.source} -- with {depth_id} REPLACED by the measured "
+                f"production Top-K figure {basis['depth_minutes']} min from "
+                f"{TOPK_PRODUCTION}"))
+    original = d1.cost_model
+    try:
+        d1.cost_model = lambda *a, **k: adjusted
+        priced = d1.search_cost(price_per_hour=PRICE_PER_HOUR_LAST_QUOTED)
+    finally:
+        d1.cost_model = original
+    return {
+        "basis": basis,
+        "depth_cell_before": before,
+        "depth_cell_after": dict(minutes[depth_id]),
+        "search_session": priced,
+        "_other_three_cells_unchanged": (
+            "ffn.activation_importance_v0, width.global_pca_v0 and "
+            "attention.activation_importance_v1 reduce activation statistics, "
+            "not KL, so the distribution support cannot move them. Their frozen "
+            "UNBATCHED cells are kept, which overstates rather than understates."),
+    }
+
+
 def budget() -> dict[str, Any]:
     from experiments.phase_d1 import search_space as d1
     from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
@@ -941,6 +1059,8 @@ def budget() -> dict[str, Any]:
     _ensure_the_frozen_operators_are_registered()
 
     design = behavioural_design()
+    #: The measured production Top-K basis, or None before it is measured.
+    topk = topk_search_cost()
     chain = d1.chain_cost(
         screening_probes=design["screening_probes"],
         confirmation_probes=design["confirmation_probes"])
@@ -1003,20 +1123,22 @@ def budget() -> dict[str, Any]:
         "provisional_per_session_excess_usd": round(
             chain["max_session_hard_ceiling_usd"]
             - terms["per_attempt_hard_ceiling_usd"], 4),
-        "per_session_envelope_compatibility": "UNRESOLVED",
+        "per_session_envelope_compatibility": _envelope_compatibility(
+            topk, terms["per_attempt_hard_ceiling_usd"]),
+        "topk_production_basis": topk,
         "_per_session_envelope_compatibility": (
-            "UNRESOLVED, and it BLOCKS AUTHORIZATION while it is. It is not "
-            "RESOLVED-INCOMPATIBLE: nothing has measured the batched D1 search, "
-            "so it is NOT established that the real session exceeds "
-            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
-            "basis says it would, by "
-            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
-            "and an unresolved compatibility is a blocker because authorization "
-            "needs a figure it can bind — not because the incompatibility is "
-            "proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS — this "
-            "one it genuinely can, because the question is a price. It does NOT "
-            "resolve the funding AUTHORIZATION blocker, which is a scope fact "
-            "no measurement reaches."),
+            "DERIVED from the measured production Top-K session price against "
+            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. RESOLVED_FITS means "
+            "the measured session ceiling is inside the envelope; "
+            "RESOLVED_NEEDS_RAISE means it is outside and the envelope would have "
+            "to move; UNRESOLVED means no production Top-K timing exists yet, "
+            "which blocks authorization because authorization needs a figure it "
+            "can bind -- not because incompatibility is proven.\n\n"
+            "THE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They "
+            "are historical planning evidence from UNBATCHED telemetry for a "
+            "protocol D1 will not run. `open_blockers` used to require both this "
+            "field AND that the provisional basis fit, so a measurement proving "
+            "D1 fits would have stayed blocked by an estimate it supersedes."),
         "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
             "WHAT IS DEFINITE: per-session envelope compatibility is "
             "UNRESOLVED, and an unresolved compatibility blocks authorization. "
