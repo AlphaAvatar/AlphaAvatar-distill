@@ -206,6 +206,55 @@ lists all six. **Continuing on it would re-apply the whole range** — cut a fre
 branch from `main` instead, and keep the old one: P12.2 forbids deleting it, and
 it is where this round's commit hashes live.
 
+## The D1 EVIDENCE BLOCKER is CLOSED, and the family is on `main`
+
+**Maintainer decision 2026-10-03, on independent review of the realized six-role
+family.** Integrated per AGENTS.md P12.2.
+
+```text
+source branch        prep/d-series-batteries   (NOT deleted -- P12.2)
+merge base           bc31175f764fda3134a48f20a29834a7edda090c
+construction commit  29f99b9abc4c0cabce6066dc8ef306e2fc61b7f6   clean tree
+allocation rule v3   f6047343c1c1ad2172f500e979c704c1
+family_content_id    1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58
+superseded identity  c773fad0c658da76d6193e876c6a80e60b9a9b4f568f95a0813203080dfc196a
+branch tip           named by the squash commit on `main`, not here
+```
+
+**The branch must be kept.** `29f99b9a` is the commit the family's construction
+provenance names — the manifest records it with `dirty: false` — and a squash
+commit is not it.
+
+**What exists.** Six behavioural roles, 950 prompts / 850 scorable each, 5,700
+items in `artifacts/stage3/d_series_behavioural_v1` (22 MB, gitignored). The
+record is `logs/shared/analyses/autoinit_d_series_family_manifest.json`, which
+carries all 42 output-file digests; `family_content_id` binds those bytes, not
+merely which source rows the ids refer to.
+
+**What was verified independently**: the 42 byte-hashes recomputed from disk; a
+changed `gold` or `prompt_text` with ids intact detected; the frozen mixture in
+every role; identical membership after moving to clean provenance; pairwise
+disjointness across six roles; every item against the complete historical
+exclusion contract on all four coordinates, including recovery-training,
+calibration and state-evaluation source ids; and renderer/scorer parity.
+
+**D1's blocker state, in full:**
+
+```text
+EVIDENCE               CLOSED
+FUNDING AUTHORIZATION  OPEN / CATEGORICAL   phase_d1 absent from
+                                            funds_formal_sessions_of
+PER-SESSION ENVELOPE   OPEN / UNRESOLVED    needs the GPU qualification
+```
+
+**Closing the evidence blocker authorized nothing.** The short engineering GPU
+qualification is **owed, not approved** — it needs an explicit maintainer
+authorization. Its scope when granted is narrow: verify the incumbent path still
+rebuilds the frozen incumbent artifact on real CUDA; verify the target-aware bsz=3
+path under CUDA/bf16; measure state-eval peak memory against the derived budget;
+measure representative batched expansion timing; reprice the chain. **Formal D1
+does not begin next.**
+
 ## The D-series source-prep round, integrated by SQUASH AND MERGE
 
 **Approved on review 2026-10-03 and integrated per AGENTS.md P12.2.** One commit
