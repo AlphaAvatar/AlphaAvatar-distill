@@ -161,6 +161,15 @@ class TestAMovedSelectionIsAttributedToAKnob:
         assert out["final_artifacts_differ"] is True
         assert "THE POSITION POLICY moved it" in \
             out["attributions"]["ffn.activation_importance_v0"]
+        #: Fingerprints, not copies: the arms own their selection lists, and a
+        #: per-process-salted `hash()` would make the record incomparable.
+        row = out["steps"][0]
+        assert len(row["incumbent_selection_sha256"]) == 64
+        assert row["incumbent_selection_sha256"] != \
+            row["target_aware_selection_sha256"]
+        assert row["incumbent_selection_sha256"] == \
+            row["batch_only_selection_sha256"]
+        assert "incumbent_selection" not in row
         #: And without the third arm it degrades to UNATTRIBUTED rather than
         #: silently reporting a cause it cannot know.
         assert drv.compare_selections(a, b)["attributions"][

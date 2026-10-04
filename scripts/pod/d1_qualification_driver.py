@@ -624,6 +624,20 @@ def state_eval_plan(record: dict[str, Any], protocols):
 
 # --- C: did any discrete decision move? -----------------------------------
 
+def _sel(step: dict[str, Any] | None) -> str | None:
+    """A stable fingerprint of one step's selection, for the comparison record.
+
+    `sha256` of the canonical JSON, not Python's `hash` -- which is salted per
+    process and would make a record that cannot be compared with another run's.
+    """
+    if step is None or "selection" not in step:
+        return None
+    import hashlib
+
+    return hashlib.sha256(
+        json.dumps(step["selection"], sort_keys=True).encode()).hexdigest()
+
+
 def _attribute(a: dict[str, Any], b: dict[str, Any],
                c: dict[str, Any] | None) -> str:
     """Which knob moved this step's selection: the POLICY or the BATCH SIZE.
@@ -670,9 +684,16 @@ def compare_selections(incumbent: dict[str, Any],
             "target_aware_digest": (b["artifact_digest"] or "")[:16],
             "batch_only_digest": ((c or {}).get("artifact_digest") or "")[:16],
             "selection_differs": a["selection"] != b["selection"],
-            "incumbent_selection": a["selection"],
-            "target_aware_selection": b["selection"],
-            "batch_only_selection": (c or {}).get("selection"),
+            #: FINGERPRINTS, not copies. The arms' own step records are the
+            #: single owner of their selection lists; embedding all three here
+            #: tripled a 478 KB keep-list per step and made the comparison 1.4 MB
+            #: of a 6.6 MB record that no reviewer can read. The decision is what
+            #: this section owns.
+            "incumbent_selection_sha256": _sel(a),
+            "target_aware_selection_sha256": _sel(b),
+            "batch_only_selection_sha256": _sel(c),
+            "_selections_live_in": ("A_incumbent / B_target_aware / "
+                                    "B_batch_only steps[].selection"),
             "attribution": _attribute(a, b, c),
         })
     moved = [r["impl_id"] for r in rows if r["selection_differs"]]
