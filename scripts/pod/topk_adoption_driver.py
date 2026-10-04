@@ -45,6 +45,8 @@ from typing import Any
 
 REPO_DEFAULT = Path(__file__).resolve().parents[2]
 STATE_EVAL = "artifacts/stage1/state_eval_v1"
+#: One spelling of the policy, used by every stage here.
+POLICY_ID = "positions.supervised_target_v1"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 
 
@@ -241,6 +243,10 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
     #: forwards the operator already did.
     pairs: list[dict[str, Any]] = []
     sketch_seconds = [0.0]
+    #: [n, sum, min, max] over every valid position, plus a strided sample for
+    #: the quantiles. Reduced on the pod so the record stays transportable.
+    mass_hist = [0, 0.0, float("inf"), float("-inf")]
+    mass_sample: list[float] = []
 
     def observer(**kw) -> None:
         t0 = time.perf_counter()
@@ -259,13 +265,28 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
         #: VALID positions: padding holds whatever the pad token produced.
         mass = sk.support_log_probs.exp().sum(dim=-1).reshape(B, T)
         valid = kw["mask"].to(mass.device).bool()
+        #: THE MASS IS REDUCED HERE, NOT SHIPPED. Recording every valid
+        #: position's mass made the record 300 MB -- 71 million floats -- and
+        #: a2's fetch truncated at 211 MB, leaving a record that will not parse
+        #: at all. What item 10A needs is the DISTRIBUTION, so the pod computes
+        #: the running histogram and the extremes and ships those.
+        flat = mass[valid].flatten()
+        nonlocal_mass = flat.double()
+        mass_hist[0] += int(flat.numel())
+        mass_hist[1] += float(nonlocal_mass.sum())
+        mass_hist[2] = min(mass_hist[2], float(flat.min()))
+        mass_hist[3] = max(mass_hist[3], float(flat.max()))
+        #: A bounded RESERVOIR for the quantiles: deterministic stride, so two
+        #: runs of the same work sample the same positions.
+        if len(mass_sample) < 200_000:
+            step = max(1, int(flat.numel()) // 64)
+            mass_sample.extend(float(x) for x in flat[::step][:64])
         pairs.append({
             "skip": sorted(kw["skip"]),
             "items": [i["item_id"] for i in kw["group"].items],
             "subtypes": [i["subtype"] for i in kw["group"].items],
             "full": [float(v) for v in kw["values"]],
             "topk": [float(v) for v in topk],
-            "mass": [float(m) for m in mass[valid].flatten()[:4096]],
         })
         sketch_seconds[0] += time.perf_counter() - t0
 
@@ -317,6 +338,18 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
         "timing": outcome.artifacts["timing"],
         "pairs": pairs,
         "top_k": int(D_SERIES_SUPPORT.top_k),
+        "mass_summary": {
+            "n": mass_hist[0],
+            "mean": (mass_hist[1] / mass_hist[0]) if mass_hist[0] else None,
+            "min": mass_hist[2] if mass_hist[0] else None,
+            "max": mass_hist[3] if mass_hist[0] else None,
+            "sample": mass_sample,
+            "_sample_rule": ("a deterministic stride over each reduction's valid "
+                             "positions, capped at 200,000 values, so the "
+                             "quantiles are reproducible and the record stays "
+                             "transportable. n/mean/min/max are over EVERY valid "
+                             "position, not the sample."),
+        },
         "_trajectory_defined_by": "full_vocab_v1",
     }
 
@@ -366,7 +399,8 @@ def analyse_C(stage_c: dict[str, Any],
     pairs = stage_c["pairs"]
     full = [v for p in pairs for v in p["full"]]
     topk = [v for p in pairs for v in p["topk"]]
-    mass = [m for p in pairs for m in p["mass"]]
+    summary = stage_c.get("mass_summary") or {}
+    mass = list(summary.get("sample") or [])
 
     by_skip = candidate_scores(pairs, domain_map)
     cand_full = [v["full"] for v in by_skip.values()]
@@ -375,6 +409,8 @@ def analyse_C(stage_c: dict[str, Any],
     return {
         "A_reference_top_k_mass": {
             "top_k": stage_c["top_k"],
+            "over_all_valid_positions": {k: summary.get(k) for k in
+                                         ("n", "mean", "min", "max")},
             "distribution": quantiles(mass),
             "_what": ("the reference distribution's probability mass inside its "
                       "own Top-K, per valid prediction position. The tail bucket "
@@ -573,7 +609,14 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     adapter = get_adapter("qwen3")
     teacher = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
     candidate = adapter.load(artifact_path, dtype="bfloat16", device="cuda")
-    policy = get_position_policy("positions.supervised_target_v1")
+    #: QUALIFIED id. The registry keys on `positions.x_v1@v1`, and resolving by
+    #: the bare id raises -- which it did, 1987 s into a $0.8552 subrun, AFTER
+    #: stage C had completed. `d1_qualification_driver` carries a comment saying
+    #: exactly this; I wrote a second call instead of using the one that already
+    #: knew, which is the whole argument for importing a contract rather than
+    #: restating it.
+    policy = get_position_policy(POLICY_ID if "@" in POLICY_ID
+                                 else f"{POLICY_ID}@v1")
     execution = ExecutionConfig(micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
                                 calibration_batch_packing=D_SERIES_BATCH_PACKING)
 
@@ -742,7 +785,7 @@ def main(argv: list[str] | None = None) -> int:
                                ("reference_topk_tail", D_SERIES_SUPPORT)):
             with journal.stage(f"bind_{label}") as st:
                 bound = bind_protocol(
-                    repo, policy_id="positions.supervised_target_v1",
+                    repo, policy_id=POLICY_ID,
                     execution=execution, numerics=numerics,
                     distribution_support=support)
                 record[f"bound_{label}"] = bound["bound"]

@@ -86,8 +86,10 @@ class TestTheProtocolPolicyIsTheOneOwner:
                     value = None
                 if isinstance(value, str) and value in docs:
                     continue
-            if "200" in tok.string:
-                hits.append((tok.start[0], tok.string[:60]))
+            #: The exact TOKEN, not a substring: `200_000` is a sample cap and
+            #: `0.2001` would be a tolerance. What must not appear is K itself.
+            if tok.type == tokenize.NUMBER and tok.string.replace("_", "") == "200":
+                hits.append((tok.start[0], tok.string))
         assert not hits, f"the driver carries K as a literal: {hits}"
 
     def test_the_policy_names_k_once(self):
