@@ -50,6 +50,16 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
+**NEXT: the D-series reference-topK-tail protocol, before formal D1.** Maintainer
+decision **2026-10-04** replaces the full-vocabulary KL contract with
+`reference_topk_tail_v1` at **K = 200** for D1, D2 and D3 — a scientific protocol
+amendment, not an execution optimization. The full-vocab qualification above is
+retained as the **baseline engineering measurement** against which the new
+protocol is qualified, and its repricing is explicitly **NOT** the final D1
+authorization price: the per-session envelope stays UNRESOLVED until Top-K is
+measured. K is a maintainer-selected protocol parameter and must never be tuned
+against D1/D2/D3 outcomes. Branch: `prep/d-series-topk-tail`.
+
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
 are not. The maintainer's order of **2026-10-03** superseded the 2026-10-01

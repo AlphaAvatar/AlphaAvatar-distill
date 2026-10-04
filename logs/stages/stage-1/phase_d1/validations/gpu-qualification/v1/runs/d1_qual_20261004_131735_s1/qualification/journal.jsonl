@@ -1,0 +1,13 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 2.542, "stage": "environment", "status": "ok", "t": 2.542}
+{"stage": "register_operators", "status": "start", "t": 2.546}
+{"registered": true, "seconds": 0.049, "stage": "register_operators", "status": "ok", "t": 2.595}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 2.595}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.05, "stage": "bind_protocol_incumbent", "status": "ok", "t": 2.645}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 2.646}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.058, "stage": "bind_protocol_target_aware", "status": "ok", "t": 2.704}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.705}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 11.665, "stage": "teacher_fetch_verify", "status": "ok", "t": 14.37}
+{"stage": "A_incumbent_reconstruction", "status": "start", "t": 14.376}
+{"error": "KeyError: \"no calibration profile 'calib.domain_balanced@v1'; registered: []\"", "seconds": 6.631, "stage": "A_incumbent_reconstruction", "status": "failed", "t": 21.008}
+{"error": "\"no calibration profile 'calib.domain_balanced@v1'; registered: []\"", "stage": "driver", "status": "failed", "t": 21.01}

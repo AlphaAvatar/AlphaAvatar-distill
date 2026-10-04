@@ -36,6 +36,7 @@ that could not have produced a valid result.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -607,18 +608,37 @@ def _qualification_state() -> dict[str, Any]:
             "_status_owner": (f"derived: no closeout at {QUALIFICATION_CLOSEOUT}. "
                               "Writing one moves this line with no edit here."),
         }
-    doc = json.loads(path.read_text())
+    raw = path.read_bytes()
+    doc = json.loads(raw)
+    answers = doc.get("answers") or {}
+    recon = answers.get("incumbent_reconstruction") or {}
+    decisions = answers.get("discrete_decisions") or {}
     return {
         "status": f"RUN -- {doc['verdict']}",
         "_status_owner": QUALIFICATION_CLOSEOUT,
         "ran": {
+            #: The closeout's PATH and CONTENT HASH, so this design is bound to
+            #: the exact bytes it read, plus ONLY the conclusions the design
+            #: consumes. It used to inline the whole `answers` object, which made
+            #: this one key 1.48 MB of a 3.9 MB design -- a third copy of
+            #: selection lists that `runs/` already owned.
+            "closeout": QUALIFICATION_CLOSEOUT,
+            "closeout_sha256": hashlib.sha256(raw).hexdigest(),
             "verdict": doc["verdict"],
             "gpu": doc.get("gpu"),
             "price_per_hour_usd": doc.get("price_per_hour_usd"),
             "cost_usd": doc.get("cost_usd"),
-            "paid_subruns": doc.get("paid_subruns"),
-            "commit": doc.get("qualification_commit"),
-            "answers": doc.get("answers"),
+            "reconstructed_the_frozen_incumbent":
+                recon.get("matched_the_frozen_incumbent"),
+            "n_operator_selections_moved": decisions.get("n_moved"),
+            "what_moved_them": sorted({
+                s.get("attribution", "").split(":")[0]
+                for s in (decisions.get("steps_that_moved") or [])}),
+            "_everything_else_is_in_the_closeout": (
+                "the per-arm answers, the provenance, the agreement across pods "
+                "and the source run ids live in the closeout named above; its "
+                "raw evidence lives in that directory's runs/. This design "
+                "carries the hash and the conclusions it uses, not a copy."),
             "_authorizes": ("nothing. A passed engineering qualification is not "
                             "formal D1 authorization, and it closes none of the "
                             "open blockers: see `open_blockers`."),

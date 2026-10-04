@@ -10223,3 +10223,61 @@ on a paid pod.
 - **Revisit when:** v2 reaches a terminal result, or the engineering
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
+
+## 2026-10-04 — Replace the D-series full-vocabulary KL with reference-Top-K + tail
+
+- **Context:** the D-series scoring contract reduced KL over the full 151,936-token
+  vocabulary. The persistent reference state scales `O(T·V)`, which the completed
+  full-vocab GPU qualification confirmed is the dominant DEPTH scaling problem:
+  its reference cache, its KL reduction work and its state-eval reference storage
+  all carry the vocabulary dimension.
+- **Decision:** before any formal D1/D2/D3 experiment, adopt
+  `reference_topk_tail_v1` with **`top_k = 200`**. Support is the Top-K tokens of
+  the **REFERENCE** distribution at each prediction position; every token outside
+  that support is aggregated into one `K+1` tail bucket. D1, D2 and D3 all use
+  this one protocol. The full-vocabulary reducer is retained as an oracle, not
+  deleted.
+- **This is a scientific protocol amendment, not an execution optimization.**
+  Top-K + tail is not mathematically identical to full-vocabulary KL, so it moves
+  scientific identity: the DEPTH operator's config/state identity, the
+  `StateEvaluator`'s `measurement_protocol_id`, the search protocol that inherits
+  it, and the D-series design hash.
+- **K is not an outcome-selected parameter.** `K = 200` is maintainer-selected for
+  the D-series. There is NO K sweep and K must not be tuned against D1/D2/D3
+  results.
+- **Alternatives considered:** keeping full-vocab and buying more memory (does not
+  scale to D2/D3 and leaves the `O(T·V)` reference cache); candidate-defined
+  Top-K as in the SDPO reference (incompatible with our forward-KL semantics,
+  which require reference-defined support); a K sweep (rejected — it would make K
+  an outcome-selected parameter).
+- **Expected upside:** persistent reference state goes from `O(T·V)` to `O(T·K)`,
+  with reductions in reference cache size, KL reduction work, cached-reference
+  recomputation pressure and state-eval reference storage.
+- **Risks:** it is a different measurement, so a discrete decision may move
+  relative to the historical full-vocab path. That is an expected consequence of
+  an authorized protocol change, not a failure. It does **not** yet remove the
+  output head's `O(V)` compute or the instantaneous candidate `[B,T,V]` block, and
+  no claim of `O(K)` output-head memory may be made until a vocab-streaming or
+  chunked output path exists.
+- **Reference examined:** `lasgroup/SDPO @ 7c457fc1b1f636ae794eb0362ba37d4743b06fbc`
+  — used for normalized top-k log probabilities, the optional aggregate tail
+  bucket, the numerically stable complement probability, and gathering the
+  compared distribution on one fixed support. Its local student-top-k support
+  policy is deliberately **not** adopted.
+- **Budget:** GPU adoption validation authorized from the existing **engineering**
+  allowance, campaign ceiling up to **$8.0000**, inside the already-authorized
+  engineering and project headroom. No formal allowance is touched.
+- **Consequence for D1's claim boundary:** the full-vocab qualification showed
+  `all_v1@bsz=1` vs `all_v1@bsz=3` moves 3 of 4 fixed-path selections while
+  `all_v1@bsz=3` vs `supervised_target_v1@bsz=3` moved none of that path's
+  selected digests. D1 therefore may **not** claim the position policy is its only
+  changed axis. D1 becomes an optimization/challenger experiment against incumbent
+  B over the combined protocol, not a clean causal attribution to position
+  weighting.
+- **Formal D1 remains NOT AUTHORIZED.** `phase_d1` is not added to
+  `funds_formal_sessions_of`; the formal allowance and the per-session envelope
+  are unchanged. The per-session envelope stays UNRESOLVED until Top-K is
+  measured, so the full-vocab repricing is explicitly not the final price.
+- **Revisit when:** the Top-K adoption qualification is complete and reviewed. The
+  next maintainer decision after that is the final formal D1 funding/envelope
+  authorization.

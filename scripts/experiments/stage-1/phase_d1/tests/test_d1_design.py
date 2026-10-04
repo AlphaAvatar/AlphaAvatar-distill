@@ -542,11 +542,24 @@ class TestTheOwedGpuValidationStatusIsDerived:
 
         closeout = tmp_path / w.QUALIFICATION_CLOSEOUT
         closeout.parent.mkdir(parents=True)
+        #: The REAL answer shape, not a stand-in. The first version put a
+        #: string where the closeout has an object, and when the writer started
+        #: reading named fields out of it the test failed on its own fixture
+        #: rather than on the code.
         closeout.write_text(json.dumps({
             "verdict": "PASSED", "gpu": "NVIDIA L40S", "cost_usd": 1.23,
             "price_per_hour_usd": 1.09, "paid_subruns": 2,
-            "qualification_commit": "0" * 40,
-            "answers": {"incumbent_reconstruction": "digest matched"},
+            "answers": {
+                "incumbent_reconstruction": {
+                    "matched_the_frozen_incumbent": True,
+                    "artifact_digest": "a" * 64},
+                "discrete_decisions": {
+                    "n_moved": 3,
+                    "steps_that_moved": [
+                        {"impl_id": "ffn.activation_importance_v0",
+                         "attribution": "THE CALIBRATION BATCH SIZE moved it: "
+                                        "holding the policy reproduced it"}]},
+            },
         }))
         monkeypatch.setattr(w, "REPO", tmp_path)
         state = w._qualification_state()
@@ -554,6 +567,16 @@ class TestTheOwedGpuValidationStatusIsDerived:
         assert state["status"] == "RUN -- PASSED"
         assert state["_status_owner"] == w.QUALIFICATION_CLOSEOUT
         assert state["ran"]["cost_usd"] == 1.23
+        #: The design carries the closeout's PATH and CONTENT HASH plus the
+        #: conclusions it consumes -- never a copy of `answers`, which made this
+        #: one key 1.48 MB of a 3.9 MB design.
+        assert state["ran"]["closeout"] == w.QUALIFICATION_CLOSEOUT
+        assert len(state["ran"]["closeout_sha256"]) == 64
+        assert "answers" not in state["ran"]
+        assert state["ran"]["reconstructed_the_frozen_incumbent"] is True
+        assert state["ran"]["n_operator_selections_moved"] == 3
+        assert state["ran"]["what_moved_them"] == [
+            "THE CALIBRATION BATCH SIZE moved it"]
         #: A passed qualification is an ENGINEERING result. It must not read as
         #: though it had funded D1 or closed one of D1's blockers.
         assert state["ran"]["_authorizes"].startswith("nothing")

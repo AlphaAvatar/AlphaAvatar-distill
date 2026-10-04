@@ -36,6 +36,37 @@ CAMPAIGN = QUAL / "campaign.json"
 CLOSEOUT = QUAL / "closeout.json"
 
 
+#: Fields of a moved step that the closeout owns. Everything else -- above all
+#: the selection lists -- stays in the raw run evidence.
+DECISION_FIELDS = ("index", "impl_id", "selection_differs",
+                   "artifact_digest_differs", "attribution",
+                   "incumbent_digest", "target_aware_digest",
+                   "batch_only_digest",
+                   "incumbent_selection_sha256",
+                   "target_aware_selection_sha256",
+                   "batch_only_selection_sha256")
+
+
+def _decision(step: dict[str, Any]) -> dict[str, Any]:
+    """One moved step, as its decision plus selection FINGERPRINTS.
+
+    s3's record predates the driver's own fingerprinting, so its steps still
+    carry whole keep-lists inline. Fingerprint them here rather than copying,
+    so an old raw record cannot inflate a derived one.
+    """
+    import hashlib
+
+    out = {k: step[k] for k in DECISION_FIELDS if k in step}
+    for arm in ("incumbent", "target_aware", "batch_only"):
+        key, digest_key = f"{arm}_selection", f"{arm}_selection_sha256"
+        if digest_key not in out and key in step and step[key] is not None:
+            out[digest_key] = hashlib.sha256(
+                json.dumps(step[key], sort_keys=True).encode()).hexdigest()
+            out[f"_{arm}_selection_length"] = (
+                len(step[key]) if isinstance(step[key], (list, tuple)) else None)
+    return out
+
+
 def _load(path: Path) -> dict[str, Any]:
     if not path.is_file():
         raise SystemExit(f"no record at {path}")
@@ -141,9 +172,17 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         answers["discrete_decisions"] = {
             "n_moved": c.get("n_moved"),
             "final_artifacts_differ": c.get("final_artifacts_differ"),
-            "steps_that_moved": [s for s in (c.get("steps") or [])
+            #: THE DECISION, NOT THE SELECTION LISTS. Copying each arm's keep-list
+            #: here made the closeout 3.4 MB, of which 1.47 MB was this key, and
+            #: the D1 design then inlined the lot and became 3.9 MB. The lists
+            #: belong to `runs/<subrun>/` and nothing else needs them: what the
+            #: closeout owns is which operator moved and what moved it.
+            "steps_that_moved": [_decision(s) for s in (c.get("steps") or [])
                                  if s.get("selection_differs")
                                  or s.get("artifact_digest_differs")],
+            "_selection_lists_live_in": (
+                "runs/<subrun>/qualification/qualification.json, under each "
+                "arm's steps[].selection -- raw evidence, preserved, not copied"),
             "_reading": ("a CPU-vs-GPU or policy-vs-policy selection difference "
                          "is evidence about the operators, not a qualification "
                          "failure. What would fail is an unexplained difference "
@@ -415,7 +454,26 @@ def aggregate() -> int:
                       "scripts/autoinit/write_d1_design.py reads this file, so "
                       "the design's status derives from it."),
     }, indent=1, sort_keys=True) + "\n")
+    #: THE CAMPAIGN IS CLOSED BY DERIVATION, not by a sentence someone
+    #: remembers to change. It read "OPEN -- s1 failed before measurement,
+    #: repaired, retrying" while every resource was gone and the closeout
+    #: existed -- a completed paid campaign machine-readable as OPEN is exactly
+    #: the staleness that has to stop being typed.
+    #: The count comes from the CAMPAIGN, which owns every paid draw, not from
+    #: the filed records -- s1 was booked before this tool existed and said "4
+    #: paid subruns" where there were five. A cost ledger's count must come from
+    #: the ledger.
+    camp["status"] = (
+        f"CLOSED -- {len(camp['subruns'])} paid subruns, "
+        f"${camp['booked_usd']:.4f} of ${camp['ceiling_usd']:.4f}; the verdict "
+        "and every answer's provenance are in closeout.json")
+    camp["_status_is_derived_by"] = (
+        "scripts/pod/d1_qualification_closeout.py --aggregate, from the filed "
+        "subruns and the closeout it writes. It is CLOSED when a closeout "
+        "exists, because that is the only condition under which one is written.")
+    CAMPAIGN.write_text(json.dumps(camp, indent=1, sort_keys=True) + "\n")
     print(f"\nwrote {CLOSEOUT.relative_to(REPO)}")
+    print(f"  campaign: {camp['status'][:60]}")
     for key in REQUIRED_ANSWERS:
         print(f"  {key:<28}<- {', '.join(provenance[key])}")
     print(f"\n  reconstruction agreed across {agreement['n_independent_pods']} "

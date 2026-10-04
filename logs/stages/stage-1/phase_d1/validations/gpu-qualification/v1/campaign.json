@@ -2,6 +2,7 @@
  "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 + 0.0632 + 0.4714 = 3.2258",
  "_contract": "Cumulative cost of the D1 engineering GPU qualification, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- which is the book the 2026-10-03 amendment raised for exactly this work.",
+ "_status_is_derived_by": "scripts/pod/d1_qualification_closeout.py --aggregate, from the filed subruns and the closeout it writes. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
@@ -11,7 +12,7 @@
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- s1 failed before measurement, repaired, retrying",
+ "status": "CLOSED -- 5 paid subruns, $3.2258 of $8.0000; the verdict and every answer's provenance are in closeout.json",
  "subruns": [
   {
    "_commit_backfilled": "the booking function dropped the commit it was passed; recovered from the launch log and resolved through `git rev-parse`, so no hash here was typed by hand -- one that was did not exist, and a fabricated hash in a reproducibility record is worse than an absent one because it looks checkable",
