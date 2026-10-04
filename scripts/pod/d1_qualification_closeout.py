@@ -149,6 +149,9 @@ def verdict_of(record: dict[str, Any]) -> tuple[str, dict[str, Any]]:
         answers["state_eval_memory"] = [{
             "label": m.get("label"),
             "peak_memory_bytes": m.get("peak_memory_bytes"),
+            "evaluation_delta_bytes": m.get("evaluation_delta_bytes"),
+            "predicted_peak_logit_bytes": m.get("predicted_peak_logit_bytes"),
+            "delta_over_predicted_logits": m.get("delta_over_predicted_logits"),
             "derived_budget_bytes": m.get("derived_budget_bytes"),
             "within_derived_budget": m.get("within_derived_budget"),
             "seconds": m.get("seconds"),

@@ -483,13 +483,41 @@ def measure_state_eval(evaluator, model, *, label: str,
     elapsed = round(time.time() - t0, 3)
     peak = int(torch.cuda.max_memory_allocated())
     derived = getattr(evaluator, "batch_budget_bytes", None)
+    #: THE CEILING IS NOT THE PREDICTION, and conflating them makes stage D
+    #: unable to answer what it exists to answer. `batch_budget_bytes` is a
+    #: configured ceiling on the two LOGIT BLOCKS; `batch_plan`'s
+    #: `peak_logit_bytes` is this protocol's own derived prediction of them. The
+    #: process peak includes neither alone -- it also holds the model and the
+    #: reduction's transients. So all three are recorded, plus the DELTA the
+    #: evaluation itself added, which is the quantity the prediction is about.
+    plan: dict[str, Any] | None = None
+    try:
+        vocab = int(getattr(model.config, "vocab_size", 0) or 0)
+        plan = dict(evaluator.batch_plan(
+            vocab, next(model.parameters()).dtype.itemsize))
+    except Exception as exc:                      # noqa: BLE001
+        plan = {"failed": f"{type(exc).__name__}: {exc}"}
+    predicted = (plan or {}).get("peak_logit_bytes")
     out = {
         "label": label,
         "seconds": elapsed,
         "peak_memory_bytes": peak,
         "allocated_before_bytes": before,
+        "evaluation_delta_bytes": peak - before,
+        "batch_plan": plan,
+        "predicted_peak_logit_bytes": predicted,
+        "delta_over_predicted_logits": (
+            None if not predicted else round((peak - before) / predicted, 4)),
         "derived_budget_bytes": derived,
         "within_derived_budget": (None if derived is None else peak <= derived),
+        "_what_each_bound_is": (
+            "`derived_budget_bytes` is the configured CEILING on the logit "
+            "blocks; `predicted_peak_logit_bytes` is this protocol's derived "
+            "prediction of them; `peak_memory_bytes` is the whole process. "
+            "`delta_over_predicted_logits` is the ratio that says whether the "
+            "derivation describes the real allocation -- near 1 means the "
+            "prediction is the allocation, well above 1 means the transients "
+            "the bound excludes dominate it."),
         "values": {k: (round(float(v), 8) if isinstance(v, (int, float)) else v)
                    for k, v in (getattr(evaluation, "values", {}) or {}).items()},
         "protocol_id": getattr(evaluation, "measurement_protocol_id", None)
