@@ -1,11 +1,11 @@
 {
- "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 = 2.6912",
+ "_booked_recomputed_from_components": "0.1098 + 0.9006 + 1.6808 + 0.0632 = 2.7544",
  "_contract": "Cumulative cost of the D1 engineering GPU qualification, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- which is the book the 2026-10-03 amendment raised for exactly this work.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.6912,
+ "booked_usd": 2.7544,
  "campaign_id": "d1_gpu_qualification",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
@@ -61,6 +61,20 @@
    "pod_id": "cnzdnn3m890m1f",
    "rate_usd_per_hour": 1.09,
    "subrun_id": "d1_qual_20261004_142346_s3"
+  },
+  {
+   "container_disk_gb": 60,
+   "container_disk_usd": 0.0005,
+   "cost_usd": 0.0632,
+   "elapsed_minutes": 3.45,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/runs/d1_qual_20261004_160221_s4",
+   "gpu": "NVIDIA L40S",
+   "gpu_usd": 0.0627,
+   "notes": "UnboundLocalError 15s in: the arms selector was computed between arm A and arm B, so arm A's guard read it before assignment. Invisible to the $0 preflight because --check-only returns before the arms block. Repaired by resolving the selector before the early return, where the preflight executes it.",
+   "outcome": "INCOMPLETE",
+   "pod_id": "3gvfeqnkbyptc4",
+   "rate_usd_per_hour": 1.09,
+   "subrun_id": "d1_qual_20261004_160221_s4"
   }
  ],
  "teardown_reserve_usd": 0.3

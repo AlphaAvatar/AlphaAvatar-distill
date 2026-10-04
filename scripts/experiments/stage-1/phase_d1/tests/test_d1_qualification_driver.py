@@ -358,3 +358,39 @@ class TestStageDMeasuresWithoutRepeatingTheArms:
         plan, failures = drv.state_eval_plan({}, self.PROTOCOLS)
         assert plan == []
         assert len(failures) == 2
+
+
+class TestTheArmsSelectorResolvesBeforeAnyStage:
+    """`$0.0632` for a variable defined between the arm that used it and the next.
+
+    The selector was computed between arm A and arm B, so arm A's
+    `if "A" in wanted` raised UnboundLocalError 15 seconds into a paid pod. The
+    `--check-only` preflight could not catch it because it returns before the
+    arms block -- so the fix is not a lint for one name, it is resolving the
+    configuration BEFORE the early return, where the free preflight executes it.
+    """
+
+    def test_the_selector_is_resolved_before_the_first_arm_call(self):
+        source = (REPO / "scripts/pod/d1_qualification_driver.py").read_text()
+        resolved = source.index('    wanted = {a.strip() for a in')
+        first_use = source.index('if "A" in wanted:')
+        early_return = source.index('record["status"] = "CHECK_ONLY_OK"')
+
+        assert resolved < first_use, (
+            "the arms selector must be resolved before any arm reads it")
+        assert resolved < early_return, (
+            "and before `--check-only` returns, so the $0 preflight executes "
+            "it -- otherwise this whole class of defect is invisible until a "
+            "pod is already billing")
+
+    def test_an_unknown_arm_name_is_refused(self):
+        """A typo would silently run fewer arms and look like a clean result."""
+        import io
+        import contextlib
+
+        buf = io.StringIO()
+        with pytest.raises(SystemExit) as caught, \
+                contextlib.redirect_stderr(buf):
+            drv.main(["--out", "/tmp/unused-d1-qual-argcheck",
+                      "--arms", "A,Battr"])
+        assert "Battr" in str(caught.value) or "Battr" in buf.getvalue()

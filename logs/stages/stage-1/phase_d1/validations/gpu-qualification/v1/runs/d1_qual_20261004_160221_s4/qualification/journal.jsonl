@@ -1,0 +1,11 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"gpu": "NVIDIA L40S", "seconds": 2.725, "stage": "environment", "status": "ok", "t": 2.725}
+{"stage": "register_operators", "status": "start", "t": 2.728}
+{"operators_ok": true, "profiles": 4, "seconds": 0.063, "stage": "register_operators", "status": "ok", "t": 2.791}
+{"stage": "bind_protocol_incumbent", "status": "start", "t": 2.792}
+{"protocol": "3b12ecbf2fcb2a1a", "seconds": 0.051, "stage": "bind_protocol_incumbent", "status": "ok", "t": 2.843}
+{"stage": "bind_protocol_target_aware", "status": "start", "t": 2.844}
+{"protocol": "d463a1dc6afbd778", "seconds": 0.058, "stage": "bind_protocol_target_aware", "status": "ok", "t": 2.902}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.903}
+{"path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea", "seconds": 12.107, "stage": "teacher_fetch_verify", "status": "ok", "t": 15.01}
+{"error": "cannot access local variable 'wanted' where it is not associated with a value", "stage": "driver", "status": "failed", "t": 15.049}

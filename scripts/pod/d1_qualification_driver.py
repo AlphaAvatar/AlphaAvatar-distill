@@ -801,6 +801,28 @@ def main(argv: list[str] | None = None) -> int:
     }
     deadline = None
 
+    #: WHICH ARMS THIS SUBRUN RUNS, resolved HERE -- before the first stage and
+    #: before `--check-only` returns. Two reasons, and the second one cost
+    #: $0.0632 to learn:
+    #:
+    #: 1. a repair subrun that needs only stage D must not repeat 85 minutes of
+    #:    arms whose findings are already recorded;
+    #: 2. this used to be computed between arm A and arm B, so arm A's `if "A" in
+    #:    wanted` raised UnboundLocalError 15 s into a paid pod -- and the $0
+    #:    preflight could not see it, because `--check-only` returns before the
+    #:    arms block. Configuration resolved before the early return IS covered
+    #:    by the preflight. That is the general fix, not a lint for this one name.
+    wanted = {a.strip() for a in (args.arms or "A,B,Cattr").split(",")
+              if a.strip()}
+    record["arms_requested"] = sorted(wanted)
+    unknown = wanted - {"A", "B", "Cattr"}
+    if unknown:
+        raise SystemExit(
+            f"--arms names {sorted(unknown)}, which is not an arm. Known: A "
+            "(pinned incumbent hard gate), B (target-aware D1 path), Cattr "
+            "(attribution arm). A typo here would silently run fewer arms than "
+            "intended and look like a clean result.")
+
     try:
         with journal.stage("environment") as st:
             record["environment"] = environment(repo)
@@ -929,14 +951,6 @@ def main(argv: list[str] | None = None) -> int:
         if "A" in wanted:
             arm("A_incumbent", workdir="incumbent", batch_size=1,
                 policy_id="positions.all_v1", expected_final=expected)
-
-        #: WHICH ARMS THIS SUBRUN RUNS. A repair subrun that needs only stage D
-        #: must not repeat 85 minutes of arms whose findings are already
-        #: complete and recorded -- that is paying twice for one measurement.
-        #: Default is every arm; the record states what ran.
-        wanted = {a.strip() for a in (args.arms or "A,B,Cattr").split(",")
-                  if a.strip()}
-        record["arms_requested"] = sorted(wanted)
 
         #: B -- the intended D1 path: target-aware policy AT the D1 batch size.
         if "B" in wanted:

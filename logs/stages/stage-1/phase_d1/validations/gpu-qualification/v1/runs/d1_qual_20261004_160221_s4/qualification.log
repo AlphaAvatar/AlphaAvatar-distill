@@ -1,0 +1,16 @@
+[    0.000] environment start {}
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+[    2.725] environment ok {"seconds": 2.725, "gpu": "NVIDIA L40S"}
+[    2.728] register_operators start {}
+[    2.791] register_operators ok {"seconds": 0.063, "profiles": 4, "operators_ok": true}
+[    2.792] bind_protocol_incumbent start {}
+[    2.843] bind_protocol_incumbent ok {"seconds": 0.051, "protocol": "3b12ecbf2fcb2a1a"}
+[    2.844] bind_protocol_target_aware start {}
+[    2.902] bind_protocol_target_aware ok {"seconds": 0.058, "protocol": "d463a1dc6afbd778"}
+[    2.903] teacher_fetch_verify start {}
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 10597.85it/s]
+[   15.010] teacher_fetch_verify ok {"seconds": 12.107, "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea"}
+[   15.049] driver failed {"error": "cannot access local variable 'wanted' where it is not associated with a value"}
+
+wrote /workspace/out/qualification/qualification.json  status=FAILED
