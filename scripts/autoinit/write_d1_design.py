@@ -590,6 +590,42 @@ def behavioural_design() -> dict[str, Any]:
     }
 
 
+#: The qualification's own closeout is the single owner of whether the owed GPU
+#: validation has run. This writer derives from it rather than carrying a typed
+#: status, because a hand-written "NOT RUN" is false exactly when the run
+#: succeeds — the one moment a reader is most likely to trust it.
+QUALIFICATION_CLOSEOUT = ("logs/stages/stage-1/phase_d1/validations/"
+                          "gpu-qualification/v1/closeout.json")
+
+
+def _qualification_state() -> dict[str, Any]:
+    """`status` for `gpu_validation_owed`, read off the qualification closeout."""
+    path = REPO / QUALIFICATION_CLOSEOUT
+    if not path.is_file():
+        return {
+            "status": "OWED, NOT RUN. Nothing was created and $0 was spent.",
+            "_status_owner": (f"derived: no closeout at {QUALIFICATION_CLOSEOUT}. "
+                              "Writing one moves this line with no edit here."),
+        }
+    doc = json.loads(path.read_text())
+    return {
+        "status": f"RUN -- {doc['verdict']}",
+        "_status_owner": QUALIFICATION_CLOSEOUT,
+        "ran": {
+            "verdict": doc["verdict"],
+            "gpu": doc.get("gpu"),
+            "price_per_hour_usd": doc.get("price_per_hour_usd"),
+            "cost_usd": doc.get("cost_usd"),
+            "paid_subruns": doc.get("paid_subruns"),
+            "commit": doc.get("qualification_commit"),
+            "answers": doc.get("answers"),
+            "_authorizes": ("nothing. A passed engineering qualification is not "
+                            "formal D1 authorization, and it closes none of the "
+                            "open blockers: see `open_blockers`."),
+        },
+    }
+
+
 def gpu_validation_owed() -> dict[str, Any]:
     """What a GPU must answer before D1 executes, and what it must not re-ask.
 
@@ -601,7 +637,7 @@ def gpu_validation_owed() -> dict[str, Any]:
     statement, for the maintainer to decide alongside the blockers.
     """
     return {
-        "status": "OWED, NOT RUN. Nothing was created and $0 was spent.",
+        **_qualification_state(),
         "why_a_gpu_is_required": (
             "the questions are CUDA numerical behaviour and real memory, which "
             "no CPU substitute reaches. AGENTS.md P8.2: a CPU rehearsal that "
@@ -670,12 +706,10 @@ def gpu_validation_owed() -> dict[str, Any]:
             "neither authorizes D1."),
         "funding": (
             "the GPU engineering allowance, which is a different book from the "
-            "formal one and does not transfer into it. It is not requested here: "
-            "D1 cannot execute while any of its open blockers stands, so the "
-            "validation is owed at authorization time rather than now. It is "
-            "nonetheless a PREREQUISITE of pricing, not a consequence of "
-            "funding: the chain figures cannot become authorization prices "
-            "until it runs."),
+            "formal one and does not transfer into it — so paying for this "
+            "validation moves D1's funding blocker not at all. It is a "
+            "PREREQUISITE of pricing rather than a consequence of funding: the "
+            "chain figures cannot become authorization prices until it runs."),
     }
 
 

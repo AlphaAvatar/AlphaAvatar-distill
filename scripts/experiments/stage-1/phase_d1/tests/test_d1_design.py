@@ -515,3 +515,53 @@ class TestTheCommittedRecords:
 
         assert (json.dumps(write_d1_design.build(), indent=1, sort_keys=True)
                 + "\n") == DESIGN.read_text()
+
+
+class TestTheOwedGpuValidationStatusIsDerived:
+    """The status of the owed GPU validation is a function of the qualification's
+    closeout, not a sentence.
+
+    A typed status is wrong exactly when the work it describes completes, which
+    is the moment a reader is most likely to trust it. `_qualification_state`
+    reads the closeout, so writing or removing one moves the design with no edit
+    to the writer -- and these assert BOTH directions, because a derivation that
+    has only ever been exercised on its absent branch is not known to derive.
+    """
+
+    def test_absent_closeout_reads_owed(self, monkeypatch, tmp_path):
+        import write_d1_design as w
+
+        monkeypatch.setattr(w, "REPO", tmp_path)
+        state = w._qualification_state()
+        assert state["status"].startswith("OWED, NOT RUN")
+        assert "no closeout at" in state["_status_owner"]
+
+    def test_a_closeout_flips_it_and_still_authorizes_nothing(
+            self, monkeypatch, tmp_path):
+        import write_d1_design as w
+
+        closeout = tmp_path / w.QUALIFICATION_CLOSEOUT
+        closeout.parent.mkdir(parents=True)
+        closeout.write_text(json.dumps({
+            "verdict": "PASSED", "gpu": "NVIDIA L40S", "cost_usd": 1.23,
+            "price_per_hour_usd": 1.09, "paid_subruns": 2,
+            "qualification_commit": "0" * 40,
+            "answers": {"incumbent_reconstruction": "digest matched"},
+        }))
+        monkeypatch.setattr(w, "REPO", tmp_path)
+        state = w._qualification_state()
+
+        assert state["status"] == "RUN -- PASSED"
+        assert state["_status_owner"] == w.QUALIFICATION_CLOSEOUT
+        assert state["ran"]["cost_usd"] == 1.23
+        #: A passed qualification is an ENGINEERING result. It must not read as
+        #: though it had funded D1 or closed one of D1's blockers.
+        assert state["ran"]["_authorizes"].startswith("nothing")
+
+    def test_the_retired_phrasings_cannot_come_back(self):
+        """Pin the wording that went stale, not the wording that is current."""
+        source = (REPO / "scripts/autoinit/write_d1_design.py").read_text()
+        for retired in ("the validation is owed at authorization time rather "
+                        "than now",
+                        "It is not requested here"):
+            assert retired not in source, retired
