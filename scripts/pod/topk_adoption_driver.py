@@ -49,6 +49,15 @@ STATE_EVAL = "artifacts/stage1/state_eval_v1"
 POLICY_ID = "positions.supervised_target_v1"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 
+#: PREDECLARED, before the measurement, and not to be widened to admit a
+#: violation. `KL(topK+tail) <= KL(full)` is mathematics; two independent float32
+#: implementations summing V against K+1 terms agree to about this much. The
+#: violation an independent review caught was 2.968e-04 absolute / 2.2e-03
+#: relative -- two orders outside it -- and it was a defect in the tail
+#: arithmetic, not a tolerance question.
+LOWER_BOUND_ABS_TOL = 1e-5
+LOWER_BOUND_REL_TOL = 1e-5
+
 
 def _bootstrap(repo: Path) -> None:
     for extra in ("src", "scripts", "scripts/data", "scripts/pod"):
@@ -138,6 +147,14 @@ def compare_scalars(full: list[float], topk: list[float]) -> dict[str, Any]:
             "be <= 0 up to float error. A positive one would be a defect, not a "
             "finding."),
         "n_positive_signed": sum(1 for d in diffs if d > 1e-6),
+        #: AGAINST THE PREDECLARED TOLERANCE. `n_positive_signed` counts any
+        #: excess at all, which float noise reaches; this counts excesses that
+        #: cannot be float noise, and it is the number that decides.
+        "lower_bound_tolerance": {"absolute": LOWER_BOUND_ABS_TOL,
+                                  "relative": LOWER_BOUND_REL_TOL},
+        "lower_bound_violations": sum(
+            1 for f, t in zip(full, topk)
+            if (t - f) > LOWER_BOUND_ABS_TOL + LOWER_BOUND_REL_TOL * abs(f)),
     }
 
 
@@ -393,6 +410,124 @@ def candidate_scores(pairs: list[dict[str, Any]],
     return out
 
 
+def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
+                                   n_candidates: int, journal: Journal,
+                                   ) -> dict[str, Any]:
+    """A PRODUCTION Top-K-only expansion cost. No dual reduction.
+
+    The adoption validation deliberately computes BOTH reducers from the same
+    forwards, so its wall clock includes work the formal Top-K path will not do.
+    Using it to price D1 would overstate the cost. This measures the real thing:
+    the reference sketched ONCE, then `n_candidates` candidate evaluations with
+    the Top-K reduction and nothing else.
+
+    A representative expansion rather than the whole greedy, which is sufficient
+    to price a session and costs minutes instead of half an hour: the greedy's
+    cost is `rounds x candidates x (forward + reduction)`, and this measures the
+    per-candidate term that the round count multiplies.
+    """
+    import torch
+
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+    from aadistill.initialization.execution import ExecutionConfig
+    from aadistill.initialization.operators.depth.causal_kl_greedy import (
+        _ReferenceSketches, _forward_logit_block,
+    )
+    from aadistill.initialization.calibration.packing import (
+        packed_batches,
+    )
+    from aadistill.initialization.scoring.support import (
+        sketch_forward_kl_mean_batch,
+    )
+    from aadistill.initialization.specs.arch import get_adapter
+    from experiments.phase_a3 import a3_session as A3S
+    from experiments.phase_d_series.scoring_protocol import (
+        D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
+    )
+
+    adapter = get_adapter("qwen3")
+    spec = A3S.path_spec(workdir_device="cuda")
+    profile = get_profile(spec.steps[0].profile_id)
+    items = prepare_calibration_items(profile.resolve(repo),
+                                      profile_id=profile.qualified_id)
+    model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+    if getattr(model.config, "use_cache", False):
+        model.config.use_cache = False
+
+    from aadistill.initialization.operators._common import resolve_pad_id
+
+    groups = [(pk.batch, pk.original_indices) for pk in packed_batches(
+        items, D_SERIES_MICRO_BATCH_SIZE, packing=D_SERIES_BATCH_PACKING,
+        pad_id=resolve_pad_id(model), device="cuda")]
+
+    torch.cuda.reset_peak_memory_stats()
+    sketches = _ReferenceSketches(model, items, "cuda",
+                                  top_k=int(D_SERIES_SUPPORT.top_k))
+    t0 = time.time()
+    for group, _ in groups:
+        sketches.sketch_block(group)
+    sketch_seconds = round(time.time() - t0, 3)
+    sketch_peak = int(torch.cuda.max_memory_allocated())
+
+    #: Candidate evaluations. The skip sets are the first `n_candidates` single
+    #: layers, which is exactly what a greedy round 0 evaluates.
+    depth = int(adapter.spec_of(model).fields["num_hidden_layers"])
+    skips = [frozenset({i}) for i in range(min(n_candidates, depth))]
+    torch.cuda.reset_peak_memory_stats()
+    forward_s, reduce_s = 0.0, 0.0
+    t_all = time.time()
+    for skip in skips:
+        for group, _ in groups:
+            idx, lp, tail = sketches.sketch_block(group)
+            t1 = time.time()
+            abls = _forward_logit_block(model, group, "cuda", skip)
+            torch.cuda.synchronize()
+            t2 = time.time()
+            sketch_forward_kl_mean_batch(
+                idx, lp, tail, abls, group.prediction_mask().to(abls.device),
+                has_tail=sketches.has_tail)
+            torch.cuda.synchronize()
+            t3 = time.time()
+            forward_s += t2 - t1
+            reduce_s += t3 - t2
+            del abls
+    total = round(time.time() - t_all, 3)
+    peak = int(torch.cuda.max_memory_allocated())
+    decision = sketches.decision()
+    del model
+    torch.cuda.empty_cache()
+
+    per_candidate = total / max(len(skips), 1)
+    return {
+        "n_candidates_timed": len(skips),
+        "n_groups": len(groups),
+        "micro_batch_size": D_SERIES_MICRO_BATCH_SIZE,
+        "packing": D_SERIES_BATCH_PACKING,
+        "top_k": int(D_SERIES_SUPPORT.top_k),
+        "reference_sketch_seconds": sketch_seconds,
+        "reference_sketch_peak_bytes": sketch_peak,
+        "reference_sketch_bytes": decision["sketch_bytes"],
+        "full_vocab_bytes_avoided": decision["full_vocab_bytes_avoided"],
+        "candidate_seconds_total": total,
+        "candidate_forward_seconds": round(forward_s, 3),
+        "candidate_reduce_seconds": round(reduce_s, 3),
+        "seconds_per_candidate": round(per_candidate, 4),
+        "minutes_per_candidate": round(per_candidate / 60.0, 5),
+        "peak_memory_bytes": peak,
+        "_this_is_the_production_cost": (
+            "Top-K reduction only, no dual reduction, no full-vocabulary "
+            "reference cache. This is the per-candidate term a D1 round "
+            "multiplies, and it is what may be used to price a session."),
+        "_what_it_omits": (
+            "the per-round overheads a whole expansion also pays -- canonical "
+            "reload, validation and the global state evaluation. Those are "
+            "priced from the frozen per-cell table and from stage D, not here."),
+    }
+
+
 def analyse_C(stage_c: dict[str, Any],
               domain_map: dict[str, list[str]]) -> dict[str, Any]:
     """Items 10A, 10B and 10C, from stage C's recorded pairs."""
@@ -405,7 +540,21 @@ def analyse_C(stage_c: dict[str, Any],
     by_skip = candidate_scores(pairs, domain_map)
     cand_full = [v["full"] for v in by_skip.values()]
     cand_topk = [v["topk"] for v in by_skip.values()]
+    #: AFTER the aggregation, not before it. Reading `cand_full` one line above
+    #: where it is built is the same use-before-assignment that cost $0.0632 and
+    #: 15 seconds of a paid pod once already; here a $0 import check caught it.
+    B_per_item = compare_scalars(full, topk)
+    B_per_cand = compare_scalars(cand_full, cand_topk)
 
+    viol = (B_per_item["lower_bound_violations"]
+            + B_per_cand["lower_bound_violations"])
+    if viol:
+        raise AdoptionError(
+            f"{viol} lower-bound violation(s) outside the predeclared tolerance "
+            f"({LOWER_BOUND_ABS_TOL} absolute / {LOWER_BOUND_REL_TOL} relative). "
+            "KL(topK+tail) <= KL(full) is mathematics, so this is a defect in the "
+            "implementation and NOT a finding about the protocol. The protocol is "
+            "not adopted on this evidence -- stop and diagnose.")
     return {
         "A_reference_top_k_mass": {
             "top_k": stage_c["top_k"],
@@ -421,8 +570,8 @@ def analyse_C(stage_c: dict[str, Any],
                          "whole mixture if a wider batch ever truncates."),
         },
         "B_full_vs_k_plus_1": {
-            "per_item_per_group": compare_scalars(full, topk),
-            "per_candidate": compare_scalars(cand_full, cand_topk),
+            "per_item_per_group": B_per_item,
+            "per_candidate": B_per_cand,
         },
         "C_discrete_decisions": _decision_comparison(stage_c, by_skip),
     }
@@ -710,11 +859,16 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--required-inputs", action="store_true",
                     help="print the frozen assets this needs, one JSON per line, "
                          "and exit. The launcher pushes exactly these.")
-    ap.add_argument("--stages", default="C,D",
+    ap.add_argument("--stages", default="C,D,P",
                     help="which stages to run: C (the DEPTH dual scoring, ~30 "
-                         "min) and D (the state evaluation, minutes). A subrun "
-                         "that needs only D builds its candidate with "
+                         "min), D (the state evaluation, minutes) and P (the "
+                         "PRODUCTION Top-K-only expansion timing, minutes). A "
+                         "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
+    ap.add_argument("--timing-candidates", type=int, default=6,
+                    help="how many candidate evaluations stage P times. A "
+                         "representative sample, not the whole round: the "
+                         "per-candidate cost is what a round multiplies.")
     ap.add_argument("--check-only", action="store_true",
                     help="every stage except the two expensive ones: the CUDA "
                          "probe, the four process-global registries, the frozen "
@@ -823,10 +977,10 @@ def main(argv: list[str] | None = None) -> int:
         if args.deadline_s > 0:
             deadline = WallClockDeadline(args.deadline_s)
 
-        wanted = {x.strip() for x in (args.stages or "C,D").split(",")
+        wanted = {x.strip() for x in (args.stages or "C,D,P").split(",")
                   if x.strip()}
         record["stages_requested"] = sorted(wanted)
-        unknown = wanted - {"C", "D"}
+        unknown = wanted - {"C", "D", "P"}
         if unknown:
             raise AdoptionError(
                 f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
@@ -893,6 +1047,15 @@ def main(argv: list[str] | None = None) -> int:
                 st.result = {
                     "protocol_ids_differ": cmp_["protocol_ids_differ"],
                     "worst_domain_agrees": cmp_["worst_domain_agrees"]}
+
+        if "P" in wanted:
+            with journal.stage("P_production_topk_timing") as st:
+                record["P_production_timing"] = stage_P_production_topk_timing(
+                    repo=repo, teacher_path=teacher_path,
+                    n_candidates=args.timing_candidates, journal=journal)
+                st.result = {"s_per_candidate":
+                             record["P_production_timing"][
+                                 "seconds_per_candidate"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001

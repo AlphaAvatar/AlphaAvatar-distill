@@ -368,7 +368,7 @@ say "setup + adoption validation (bounded at ${MAX_SECONDS}s)"
 #: ceiling cannot disagree about what is affordable. Minus 300s so the
 #: driver stops itself before the ssh timeout cuts it mid-write.
 DRIVER_DEADLINE=$(python3 -c "print(max(60, ${MAX_SECONDS} - 300))")
-timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} ADOPT_DEADLINE_S=${DRIVER_DEADLINE} ADOPT_STAGES=${ADOPT_STAGES:-C,D} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
+timeout "${MAX_SECONDS}" $SSH "HF_TOKEN=${HF_TOKEN} ADOPT_DEADLINE_S=${DRIVER_DEADLINE} ADOPT_STAGES=${ADOPT_STAGES:-C,D,P} ADOPT_TIMING_CANDIDATES=${ADOPT_TIMING_CANDIDATES:-6} bash -s" < "$REMOTE_SH" >>"$LOG" 2>&1
 RC=$?
 say "remote finished rc=${RC}"
 
