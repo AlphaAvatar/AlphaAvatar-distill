@@ -1,0 +1,1967 @@
+{
+ "C_depth": {
+  "_trajectory_defined_by": "full_vocab_v1",
+  "candidate_checkpoint": "/workspace/out/adoption/depth/depth_child",
+  "domain_map": {
+   "code": [
+    "code"
+   ],
+   "general": [
+    "general"
+   ],
+   "math": [
+    "gsm8k",
+    "openmath"
+   ],
+   "rag_multihop": [
+    "rag_evidence",
+    "multihop_qa"
+   ],
+   "tool": [
+    "tool_calling"
+   ]
+  },
+  "mass_summary": {
+   "_sample_rule": "a deterministic stride over each reduction's valid positions, capped at 200,000 values, so the quantiles are reproducible and the record stays transportable. n/mean/min/max are over EVERY valid position, not the sample.",
+   "max": 1.000002145767212,
+   "mean": 0.9942112026020448,
+   "min": 0.022924339398741722,
+   "n": 15538380,
+   "sample": "200000 sampled values, in the raw record"
+  },
+  "observer_seconds": 468.44,
+  "pairs": "5980 pairs, in the raw record under artifacts/qualification/topk_adoption/topk_20261004_213231/out",
+  "peak_memory_bytes": 37338263552,
+  "reference_cache": {
+   "admitted_bytes": 18160302336,
+   "admitted_gib": 16.913,
+   "available_bytes": 39107035136,
+   "budget_fraction": 0.66,
+   "cached": true,
+   "estimate_bytes": 18160302336,
+   "estimate_gib": 16.913,
+   "fallback": null,
+   "headroom_source": "cuda.mem_get_info:cuda:0",
+   "items_cached": 67,
+   "items_recomputed_per_candidate": 0,
+   "items_total": 67,
+   "memory_at_admission": {
+    "allocator_allocated_bytes": 8101709824,
+    "allocator_allocated_gib": 7.545,
+    "allocator_reserved_bytes": 8103395328,
+    "allocator_reserved_gib": 7.547,
+    "allocator_reserved_not_allocated_bytes": 1685504,
+    "device": "cuda:0",
+    "driver_free_bytes": 39107035136,
+    "driver_free_gib": 36.421,
+    "driver_total_bytes": 47665709056,
+    "kind": "cuda",
+    "reclaimable_by_empty_cache_gib": 0.002,
+    "unaccounted_gib": 0.424
+   },
+   "mode": "cached"
+  },
+  "rounds": [
+   {
+    "chosen": 2,
+    "chosen_score": 0.043672206808675826,
+    "n_candidates": 36,
+    "removed_before": [],
+    "round": 0,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 8.302881148488881
+     },
+     {
+      "candidate": 1,
+      "score": 0.37456417499267547
+     },
+     {
+      "candidate": 2,
+      "score": 0.043672206808675826
+     },
+     {
+      "candidate": 3,
+      "score": 0.06285966532053304
+     },
+     {
+      "candidate": 4,
+      "score": 0.0911989766291506
+     },
+     {
+      "candidate": 5,
+      "score": 0.10628635365321995
+     },
+     {
+      "candidate": 6,
+      "score": 1.49538655208151
+     },
+     {
+      "candidate": 7,
+      "score": 0.08672005928517973
+     },
+     {
+      "candidate": 8,
+      "score": 0.08553737771339565
+     },
+     {
+      "candidate": 9,
+      "score": 0.10287553979397095
+     },
+     {
+      "candidate": 10,
+      "score": 0.10302050821783751
+     },
+     {
+      "candidate": 11,
+      "score": 0.09115645604020187
+     },
+     {
+      "candidate": 12,
+      "score": 0.11326402136892615
+     },
+     {
+      "candidate": 13,
+      "score": 0.10291968954245316
+     },
+     {
+      "candidate": 14,
+      "score": 0.0826384880990055
+     },
+     {
+      "candidate": 15,
+      "score": 0.08404656370026513
+     },
+     {
+      "candidate": 16,
+      "score": 0.07211085525650077
+     },
+     {
+      "candidate": 17,
+      "score": 0.08395441121724075
+     },
+     {
+      "candidate": 18,
+      "score": 0.1018111114528136
+     },
+     {
+      "candidate": 19,
+      "score": 0.11221730765492954
+     },
+     {
+      "candidate": 20,
+      "score": 0.08056553449121055
+     },
+     {
+      "candidate": 21,
+      "score": 0.0933383016130581
+     },
+     {
+      "candidate": 22,
+      "score": 0.1209223136788686
+     },
+     {
+      "candidate": 23,
+      "score": 0.13366927554003882
+     },
+     {
+      "candidate": 24,
+      "score": 0.16017736205882624
+     },
+     {
+      "candidate": 25,
+      "score": 0.11342580740176533
+     },
+     {
+      "candidate": 26,
+      "score": 0.09042936951043519
+     },
+     {
+      "candidate": 27,
+      "score": 0.10648330846470533
+     },
+     {
+      "candidate": 28,
+      "score": 0.11449192746509862
+     },
+     {
+      "candidate": 29,
+      "score": 0.12443771398738779
+     },
+     {
+      "candidate": 30,
+      "score": 0.12797565213257944
+     },
+     {
+      "candidate": 31,
+      "score": 0.11162801295961211
+     },
+     {
+      "candidate": 32,
+      "score": 0.0911619343881087
+     },
+     {
+      "candidate": 33,
+      "score": 0.13654390941971778
+     },
+     {
+      "candidate": 34,
+      "score": 0.20210117453268
+     },
+     {
+      "candidate": 35,
+      "score": 0.24779397538966777
+     }
+    ]
+   },
+   {
+    "chosen": 16,
+    "chosen_score": 0.11072055696882976,
+    "n_candidates": 35,
+    "removed_before": [
+     2
+    ],
+    "round": 1,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 8.908988607272978
+     },
+     {
+      "candidate": 1,
+      "score": 1.9200906229500823
+     },
+     {
+      "candidate": 3,
+      "score": 0.12632596632959409
+     },
+     {
+      "candidate": 4,
+      "score": 0.1762433590142933
+     },
+     {
+      "candidate": 5,
+      "score": 0.17469637826864032
+     },
+     {
+      "candidate": 6,
+      "score": 2.0300145861171197
+     },
+     {
+      "candidate": 7,
+      "score": 0.142252755143669
+     },
+     {
+      "candidate": 8,
+      "score": 0.14278604355090882
+     },
+     {
+      "candidate": 9,
+      "score": 0.15182473884602707
+     },
+     {
+      "candidate": 10,
+      "score": 0.1525507142868308
+     },
+     {
+      "candidate": 11,
+      "score": 0.14040518171745006
+     },
+     {
+      "candidate": 12,
+      "score": 0.15660612999004545
+     },
+     {
+      "candidate": 13,
+      "score": 0.15306400639968434
+     },
+     {
+      "candidate": 14,
+      "score": 0.12624410773475175
+     },
+     {
+      "candidate": 15,
+      "score": 0.12050782617005262
+     },
+     {
+      "candidate": 16,
+      "score": 0.11072055696882976
+     },
+     {
+      "candidate": 17,
+      "score": 0.12164981786742177
+     },
+     {
+      "candidate": 18,
+      "score": 0.13439624941649075
+     },
+     {
+      "candidate": 19,
+      "score": 0.149488792944374
+     },
+     {
+      "candidate": 20,
+      "score": 0.11915535326383349
+     },
+     {
+      "candidate": 21,
+      "score": 0.1314158162432087
+     },
+     {
+      "candidate": 22,
+      "score": 0.16591305083686453
+     },
+     {
+      "candidate": 23,
+      "score": 0.17921928931183126
+     },
+     {
+      "candidate": 24,
+      "score": 0.19853400950980132
+     },
+     {
+      "candidate": 25,
+      "score": 0.16004909280982269
+     },
+     {
+      "candidate": 26,
+      "score": 0.13411440668422356
+     },
+     {
+      "candidate": 27,
+      "score": 0.14657806070767376
+     },
+     {
+      "candidate": 28,
+      "score": 0.15151861894372598
+     },
+     {
+      "candidate": 29,
+      "score": 0.16149288451939142
+     },
+     {
+      "candidate": 30,
+      "score": 0.16723078156108442
+     },
+     {
+      "candidate": 31,
+      "score": 0.15201624254757812
+     },
+     {
+      "candidate": 32,
+      "score": 0.13124731247659388
+     },
+     {
+      "candidate": 33,
+      "score": 0.1757026823427324
+     },
+     {
+      "candidate": 34,
+      "score": 0.24084041988241775
+     },
+     {
+      "candidate": 35,
+      "score": 0.28810767435756846
+     }
+    ]
+   },
+   {
+    "chosen": 3,
+    "chosen_score": 0.19028685495051598,
+    "n_candidates": 34,
+    "removed_before": [
+     2,
+     16
+    ],
+    "round": 2,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 8.966080891523996
+     },
+     {
+      "candidate": 1,
+      "score": 2.01507177593245
+     },
+     {
+      "candidate": 3,
+      "score": 0.19028685495051598
+     },
+     {
+      "candidate": 4,
+      "score": 0.2424656202847179
+     },
+     {
+      "candidate": 5,
+      "score": 0.24156594614184823
+     },
+     {
+      "candidate": 6,
+      "score": 3.326073254172119
+     },
+     {
+      "candidate": 7,
+      "score": 0.2145210823969677
+     },
+     {
+      "candidate": 8,
+      "score": 0.21653068346949164
+     },
+     {
+      "candidate": 9,
+      "score": 0.22935668733927309
+     },
+     {
+      "candidate": 10,
+      "score": 0.22697344194289953
+     },
+     {
+      "candidate": 11,
+      "score": 0.22420519979599662
+     },
+     {
+      "candidate": 12,
+      "score": 0.2428424695947991
+     },
+     {
+      "candidate": 13,
+      "score": 0.2551703251225721
+     },
+     {
+      "candidate": 14,
+      "score": 0.22333071253891515
+     },
+     {
+      "candidate": 15,
+      "score": 0.19810037612412146
+     },
+     {
+      "candidate": 17,
+      "score": 0.20415664840975234
+     },
+     {
+      "candidate": 18,
+      "score": 0.2232297941154202
+     },
+     {
+      "candidate": 19,
+      "score": 0.23861028016686622
+     },
+     {
+      "candidate": 20,
+      "score": 0.19664533412364774
+     },
+     {
+      "candidate": 21,
+      "score": 0.21077092505075795
+     },
+     {
+      "candidate": 22,
+      "score": 0.2291103796885226
+     },
+     {
+      "candidate": 23,
+      "score": 0.2391964272927815
+     },
+     {
+      "candidate": 24,
+      "score": 0.26524933168336945
+     },
+     {
+      "candidate": 25,
+      "score": 0.21792428960374927
+     },
+     {
+      "candidate": 26,
+      "score": 0.19567671081177296
+     },
+     {
+      "candidate": 27,
+      "score": 0.20321608461705484
+     },
+     {
+      "candidate": 28,
+      "score": 0.20773138014303544
+     },
+     {
+      "candidate": 29,
+      "score": 0.21716775997827473
+     },
+     {
+      "candidate": 30,
+      "score": 0.22481951892664184
+     },
+     {
+      "candidate": 31,
+      "score": 0.2122503231849177
+     },
+     {
+      "candidate": 32,
+      "score": 0.19073154746373877
+     },
+     {
+      "candidate": 33,
+      "score": 0.22768425561850947
+     },
+     {
+      "candidate": 34,
+      "score": 0.29879135640413595
+     },
+     {
+      "candidate": 35,
+      "score": 0.33949291112068336
+     }
+    ]
+   },
+   {
+    "chosen": 32,
+    "chosen_score": 0.2656640791212178,
+    "n_candidates": 33,
+    "removed_before": [
+     2,
+     16,
+     3
+    ],
+    "round": 3,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 10.410302567658805
+     },
+     {
+      "candidate": 1,
+      "score": 0.6142423706873387
+     },
+     {
+      "candidate": 4,
+      "score": 0.4871974524494285
+     },
+     {
+      "candidate": 5,
+      "score": 0.443118246986739
+     },
+     {
+      "candidate": 6,
+      "score": 5.970128745572531
+     },
+     {
+      "candidate": 7,
+      "score": 0.35290880148256104
+     },
+     {
+      "candidate": 8,
+      "score": 0.336190202548856
+     },
+     {
+      "candidate": 9,
+      "score": 0.34049364442583635
+     },
+     {
+      "candidate": 10,
+      "score": 0.32684199296116556
+     },
+     {
+      "candidate": 11,
+      "score": 0.3244046170974022
+     },
+     {
+      "candidate": 12,
+      "score": 0.35358933463770686
+     },
+     {
+      "candidate": 13,
+      "score": 0.36341818190120023
+     },
+     {
+      "candidate": 14,
+      "score": 0.31721162074763737
+     },
+     {
+      "candidate": 15,
+      "score": 0.27768500282780034
+     },
+     {
+      "candidate": 17,
+      "score": 0.28761386163750857
+     },
+     {
+      "candidate": 18,
+      "score": 0.3086839492568958
+     },
+     {
+      "candidate": 19,
+      "score": 0.3213172889659527
+     },
+     {
+      "candidate": 20,
+      "score": 0.2749406412963221
+     },
+     {
+      "candidate": 21,
+      "score": 0.2892088395373612
+     },
+     {
+      "candidate": 22,
+      "score": 0.3069101236343647
+     },
+     {
+      "candidate": 23,
+      "score": 0.3190579431390561
+     },
+     {
+      "candidate": 24,
+      "score": 0.3344640129089425
+     },
+     {
+      "candidate": 25,
+      "score": 0.3021479513890585
+     },
+     {
+      "candidate": 26,
+      "score": 0.27277938195782997
+     },
+     {
+      "candidate": 27,
+      "score": 0.2820900072746277
+     },
+     {
+      "candidate": 28,
+      "score": 0.28459776530451875
+     },
+     {
+      "candidate": 29,
+      "score": 0.2917256828753053
+     },
+     {
+      "candidate": 30,
+      "score": 0.2982877810046241
+     },
+     {
+      "candidate": 31,
+      "score": 0.2874556692367709
+     },
+     {
+      "candidate": 32,
+      "score": 0.2656640791212178
+     },
+     {
+      "candidate": 33,
+      "score": 0.30031869657717986
+     },
+     {
+      "candidate": 34,
+      "score": 0.36944576456675626
+     },
+     {
+      "candidate": 35,
+      "score": 0.41176216534493204
+     }
+    ]
+   },
+   {
+    "chosen": 20,
+    "chosen_score": 0.3433421693452763,
+    "n_candidates": 32,
+    "removed_before": [
+     2,
+     16,
+     3,
+     32
+    ],
+    "round": 4,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 10.243384318387033
+     },
+     {
+      "candidate": 1,
+      "score": 0.670586992786866
+     },
+     {
+      "candidate": 4,
+      "score": 0.5508558892814286
+     },
+     {
+      "candidate": 5,
+      "score": 0.5035401659203014
+     },
+     {
+      "candidate": 6,
+      "score": 6.000558128618022
+     },
+     {
+      "candidate": 7,
+      "score": 0.41922722011745756
+     },
+     {
+      "candidate": 8,
+      "score": 0.40063924247120697
+     },
+     {
+      "candidate": 9,
+      "score": 0.4047761509379564
+     },
+     {
+      "candidate": 10,
+      "score": 0.39088216597637326
+     },
+     {
+      "candidate": 11,
+      "score": 0.3924357617569124
+     },
+     {
+      "candidate": 12,
+      "score": 0.41753470752756544
+     },
+     {
+      "candidate": 13,
+      "score": 0.42642402593919204
+     },
+     {
+      "candidate": 14,
+      "score": 0.3846505870294852
+     },
+     {
+      "candidate": 15,
+      "score": 0.3465673704465982
+     },
+     {
+      "candidate": 17,
+      "score": 0.35378206336769996
+     },
+     {
+      "candidate": 18,
+      "score": 0.37070632474350973
+     },
+     {
+      "candidate": 19,
+      "score": 0.39020688399785247
+     },
+     {
+      "candidate": 20,
+      "score": 0.3433421693452763
+     },
+     {
+      "candidate": 21,
+      "score": 0.3589114188413542
+     },
+     {
+      "candidate": 22,
+      "score": 0.38139126332065343
+     },
+     {
+      "candidate": 23,
+      "score": 0.3991587071439957
+     },
+     {
+      "candidate": 24,
+      "score": 0.399365900201914
+     },
+     {
+      "candidate": 25,
+      "score": 0.42346009650806016
+     },
+     {
+      "candidate": 26,
+      "score": 0.3490117904411922
+     },
+     {
+      "candidate": 27,
+      "score": 0.3647803089266242
+     },
+     {
+      "candidate": 28,
+      "score": 0.37920379179994124
+     },
+     {
+      "candidate": 29,
+      "score": 0.38281930474119463
+     },
+     {
+      "candidate": 30,
+      "score": 0.3909443815433423
+     },
+     {
+      "candidate": 31,
+      "score": 0.4036939617550887
+     },
+     {
+      "candidate": 33,
+      "score": 0.4611760674537052
+     },
+     {
+      "candidate": 34,
+      "score": 0.618356637089536
+     },
+     {
+      "candidate": 35,
+      "score": 0.5241655509436633
+     }
+    ]
+   },
+   {
+    "chosen": 26,
+    "chosen_score": 0.43713870470108446,
+    "n_candidates": 31,
+    "removed_before": [
+     2,
+     16,
+     3,
+     32,
+     20
+    ],
+    "round": 5,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 10.140247137956914
+     },
+     {
+      "candidate": 1,
+      "score": 0.7630056141521466
+     },
+     {
+      "candidate": 4,
+      "score": 0.6503341539095067
+     },
+     {
+      "candidate": 5,
+      "score": 0.6001999429607738
+     },
+     {
+      "candidate": 6,
+      "score": 6.980304028477872
+     },
+     {
+      "candidate": 7,
+      "score": 0.5038457843619294
+     },
+     {
+      "candidate": 8,
+      "score": 0.48564527864653834
+     },
+     {
+      "candidate": 9,
+      "score": 0.4933850831038164
+     },
+     {
+      "candidate": 10,
+      "score": 0.47704381582711697
+     },
+     {
+      "candidate": 11,
+      "score": 0.47127120310157233
+     },
+     {
+      "candidate": 12,
+      "score": 0.510868086105873
+     },
+     {
+      "candidate": 13,
+      "score": 0.5249315616829854
+     },
+     {
+      "candidate": 14,
+      "score": 0.479657090850581
+     },
+     {
+      "candidate": 15,
+      "score": 0.4397989129345711
+     },
+     {
+      "candidate": 17,
+      "score": 0.452874850229776
+     },
+     {
+      "candidate": 18,
+      "score": 0.47358375039738776
+     },
+     {
+      "candidate": 19,
+      "score": 0.4903527244778731
+     },
+     {
+      "candidate": 21,
+      "score": 0.44186580869054726
+     },
+     {
+      "candidate": 22,
+      "score": 0.49007756961610677
+     },
+     {
+      "candidate": 23,
+      "score": 0.5061598030016974
+     },
+     {
+      "candidate": 24,
+      "score": 0.49134100718820795
+     },
+     {
+      "candidate": 25,
+      "score": 0.5055236594908332
+     },
+     {
+      "candidate": 26,
+      "score": 0.43713870470108446
+     },
+     {
+      "candidate": 27,
+      "score": 0.44811214753530726
+     },
+     {
+      "candidate": 28,
+      "score": 0.4598594462856524
+     },
+     {
+      "candidate": 29,
+      "score": 0.4646368469123508
+     },
+     {
+      "candidate": 30,
+      "score": 0.46783687482276964
+     },
+     {
+      "candidate": 31,
+      "score": 0.47742946089398874
+     },
+     {
+      "candidate": 33,
+      "score": 0.5460436329046441
+     },
+     {
+      "candidate": 34,
+      "score": 0.7172194405805296
+     },
+     {
+      "candidate": 35,
+      "score": 0.589760764483312
+     }
+    ]
+   },
+   {
+    "chosen": 15,
+    "chosen_score": 0.5216669343481508,
+    "n_candidates": 30,
+    "removed_before": [
+     2,
+     16,
+     3,
+     32,
+     20,
+     26
+    ],
+    "round": 6,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 9.699047059619538
+     },
+     {
+      "candidate": 1,
+      "score": 0.8462914199324159
+     },
+     {
+      "candidate": 4,
+      "score": 0.7400348634104968
+     },
+     {
+      "candidate": 5,
+      "score": 0.6886771133381162
+     },
+     {
+      "candidate": 6,
+      "score": 6.561652780728776
+     },
+     {
+      "candidate": 7,
+      "score": 0.5922043434498027
+     },
+     {
+      "candidate": 8,
+      "score": 0.5733893294174613
+     },
+     {
+      "candidate": 9,
+      "score": 0.5806302392843679
+     },
+     {
+      "candidate": 10,
+      "score": 0.566158832823373
+     },
+     {
+      "candidate": 11,
+      "score": 0.558694516422749
+     },
+     {
+      "candidate": 12,
+      "score": 0.5968211068288962
+     },
+     {
+      "candidate": 13,
+      "score": 0.6124929897785389
+     },
+     {
+      "candidate": 14,
+      "score": 0.5646406301614778
+     },
+     {
+      "candidate": 15,
+      "score": 0.5216669343481508
+     },
+     {
+      "candidate": 17,
+      "score": 0.537329883037877
+     },
+     {
+      "candidate": 18,
+      "score": 0.5631836657496766
+     },
+     {
+      "candidate": 19,
+      "score": 0.5813748644098103
+     },
+     {
+      "candidate": 21,
+      "score": 0.543255852427903
+     },
+     {
+      "candidate": 22,
+      "score": 0.6031277943799065
+     },
+     {
+      "candidate": 23,
+      "score": 0.6332685934887325
+     },
+     {
+      "candidate": 24,
+      "score": 0.6245212292777241
+     },
+     {
+      "candidate": 25,
+      "score": 0.5873954686638458
+     },
+     {
+      "candidate": 27,
+      "score": 0.5555796931341559
+     },
+     {
+      "candidate": 28,
+      "score": 0.5720266473192664
+     },
+     {
+      "candidate": 29,
+      "score": 0.5774708896483038
+     },
+     {
+      "candidate": 30,
+      "score": 0.5764038710947826
+     },
+     {
+      "candidate": 31,
+      "score": 0.5716653992526719
+     },
+     {
+      "candidate": 33,
+      "score": 0.6570400698510493
+     },
+     {
+      "candidate": 34,
+      "score": 0.8214265597390036
+     },
+     {
+      "candidate": 35,
+      "score": 0.6831874441857599
+     }
+    ]
+   },
+   {
+    "chosen": 21,
+    "chosen_score": 0.6255395912093673,
+    "n_candidates": 29,
+    "removed_before": [
+     2,
+     16,
+     3,
+     32,
+     20,
+     26,
+     15
+    ],
+    "round": 7,
+    "table": [
+     {
+      "candidate": 0,
+      "score": 9.430780230579595
+     },
+     {
+      "candidate": 1,
+      "score": 0.9483755902414398
+     },
+     {
+      "candidate": 4,
+      "score": 0.8699090629800906
+     },
+     {
+      "candidate": 5,
+      "score": 0.7996365471555419
+     },
+     {
+      "candidate": 6,
+      "score": 7.034588324125055
+     },
+     {
+      "candidate": 7,
+      "score": 0.6980070955595874
+     },
+     {
+      "candidate": 8,
+      "score": 0.6740708054406584
+     },
+     {
+      "candidate": 9,
+      "score": 0.6838516791544914
+     },
+     {
+      "candidate": 10,
+      "score": 0.6594469124612294
+     },
+     {
+      "candidate": 11,
+      "score": 0.6679578871120252
+     },
+     {
+      "candidate": 12,
+      "score": 0.6952836831509104
+     },
+     {
+      "candidate": 13,
+      "score": 0.7304686927747628
+     },
+     {
+      "candidate": 14,
+      "score": 0.6413956366040953
+     },
+     {
+      "candidate": 17,
+      "score": 0.6271023585866222
+     },
+     {
+      "candidate": 18,
+      "score": 0.6660121412864002
+     },
+     {
+      "candidate": 19,
+      "score": 0.6988153806511678
+     },
+     {
+      "candidate": 21,
+      "score": 0.6255395912093673
+     },
+     {
+      "candidate": 22,
+      "score": 0.6931045839385719
+     },
+     {
+      "candidate": 23,
+      "score": 0.7070870466411265
+     },
+     {
+      "candidate": 24,
+      "score": 0.7016288871144654
+     },
+     {
+      "candidate": 25,
+      "score": 0.6691613271392087
+     },
+     {
+      "candidate": 27,
+      "score": 0.6366210011015865
+     },
+     {
+      "candidate": 28,
+      "score": 0.6489785689911797
+     },
+     {
+      "candidate": 29,
+      "score": 0.6477108906964746
+     },
+     {
+      "candidate": 30,
+      "score": 0.6512362645065257
+     },
+     {
+      "candidate": 31,
+      "score": 0.6447277633974464
+     },
+     {
+      "candidate": 33,
+      "score": 0.7313337748593367
+     },
+     {
+      "candidate": 34,
+      "score": 0.9172660073160255
+     },
+     {
+      "candidate": 35,
+      "score": 0.7517813262606666
+     }
+    ]
+   }
+  ],
+  "seconds": 1704.907,
+  "timing": {
+   "ablated_forwards": 5980,
+   "ablated_items": 17420,
+   "ablated_seconds": 420.2945,
+   "calibration_batch_packing": "length_sorted_v1",
+   "candidate_subsets": 260,
+   "distortion_calls": 17420,
+   "distortion_seconds": 1254.0898,
+   "item_seconds": 1677.1949,
+   "micro_batch_size": 3,
+   "reference_seconds": 2.7832,
+   "split_is_attributed": false
+  },
+  "top_k": 200
+ },
+ "D_candidate": {
+  "built_by": "depth.causal_kl_greedy_v1",
+  "from": "C_depth"
+ },
+ "D_state_eval": {
+  "arms": {
+   "full_vocab_v1": {
+    "allocated_before_bytes": 14584459264,
+    "detail_per_domain": {
+     "code": 0.5793866333803295,
+     "general": 0.5982456077223615,
+     "rag_multihop": 0.45747569398535814,
+     "reasoning_math": 0.5745700172438639,
+     "tool": 0.579039781630573
+    },
+    "evaluation_delta_bytes": 7254771712,
+    "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+    "n_reference_sketches": 0,
+    "peak_memory_bytes": 21839230976,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 0,
+    "seconds": 10.729,
+    "values": {
+     "state.critical_token_kl": 1.0567343017820117,
+     "state.critical_token_kl.assistant": 0.557196144469349,
+     "state.critical_token_kl.eos": 3.162299286375388,
+     "state.critical_token_kl.final_answer": 0.43115627547871593,
+     "state.critical_token_kl.reasoning": 0.5935510669675894,
+     "state.critical_token_kl.think_close": 0.6096926811142891,
+     "state.critical_token_kl.tool_close": 0.023788964159653654,
+     "state.nll.code": 0.7502387937211312,
+     "state.nll.general": 2.9459945514288335,
+     "state.nll.pooled_all_domains": 1.0650609347699074,
+     "state.nll.rag_multihop": 0.6213950028088495,
+     "state.nll.reasoning_math": 0.6930836504809431,
+     "state.nll.teacher_reference_pooled": 0.5076326291573745,
+     "state.nll.tool": 0.815893905996244,
+     "state.nll_delta_vs_teacher_pooled": 0.5574283056125328,
+     "state.reverse_kl.token_mean": 1.3128704457430096,
+     "state.teacher_kl.code": 0.5793866333803295,
+     "state.teacher_kl.equal_domain_mean": 0.5577435467924972,
+     "state.teacher_kl.general": 0.5982456077223615,
+     "state.teacher_kl.rag_multihop": 0.45747569398535814,
+     "state.teacher_kl.reasoning_math": 0.5745700172438639,
+     "state.teacher_kl.token_mean": 0.5634378455412375,
+     "state.teacher_kl.tool": 0.579039781630573,
+     "state.teacher_kl.worst_domain": 0.5982456077223615,
+     "state.top1_agreement": 0.7654867256637168
+    },
+    "worst_domain": null
+   },
+   "reference_topk_tail_v1": {
+    "allocated_before_bytes": 14584459264,
+    "detail_per_domain": {
+     "code": 0.5793854310122498,
+     "general": 0.5914731852234797,
+     "rag_multihop": 0.4574613607865083,
+     "reasoning_math": 0.5745688013126209,
+     "tool": 0.5790363846024863
+    },
+    "evaluation_delta_bytes": 7418464768,
+    "measurement_protocol_id": "9c9b0b43dc00b695c185982b8b0a18e7",
+    "n_reference_sketches": 80,
+    "peak_memory_bytes": 22002924032,
+    "reduction": {
+     "aggregation_rule": "equal_subtype_then_equal_domain/v1",
+     "chunk": 512,
+     "distribution_support": {
+      "support_id": "reference_topk_tail_v1",
+      "top_k": 200
+     },
+     "reference_strategy": "recompute"
+    },
+    "reference_sketch_bytes": 178837152,
+    "seconds": 10.864,
+    "values": {
+     "state.critical_token_kl": 1.0567148704029687,
+     "state.critical_token_kl.assistant": 0.5571923195635541,
+     "state.critical_token_kl.eos": 3.162299204253525,
+     "state.critical_token_kl.final_answer": 0.43115577768762664,
+     "state.critical_token_kl.reasoning": 0.5935463911310688,
+     "state.critical_token_kl.think_close": 0.6096559966041241,
+     "state.critical_token_kl.tool_close": 0.02374850306659937,
+     "state.nll.code": 0.7502387993708606,
+     "state.nll.general": 2.9459947861026183,
+     "state.nll.pooled_all_domains": 1.065060955348043,
+     "state.nll.rag_multihop": 0.6213949751808128,
+     "state.nll.reasoning_math": 0.6930836274911566,
+     "state.nll.teacher_reference_pooled": 0.5076325964397109,
+     "state.nll.tool": 0.8158938861265586,
+     "state.nll_delta_vs_teacher_pooled": 0.557428358908332,
+     "state.reverse_kl.token_mean": 1.2988011560598414,
+     "state.teacher_kl.code": 0.5793854310122498,
+     "state.teacher_kl.equal_domain_mean": 0.5563850325874691,
+     "state.teacher_kl.general": 0.5914731852234797,
+     "state.teacher_kl.rag_multihop": 0.4574613607865083,
+     "state.teacher_kl.reasoning_math": 0.5745688013126209,
+     "state.teacher_kl.token_mean": 0.5624048339054833,
+     "state.teacher_kl.tool": 0.5790363846024863,
+     "state.teacher_kl.worst_domain": 0.5914731852234797,
+     "state.top1_agreement": 0.7654867256637168
+    },
+    "worst_domain": null
+   }
+  },
+  "comparison": {
+   "_memory": {
+    "delta_ratio": 1.0226,
+    "full_vocab_peak_bytes": 21839230976,
+    "topk_peak_bytes": 22002924032,
+    "topk_reference_sketch_bytes": 178837152
+   },
+   "_nll_must_be_exact": "CE is not a KL and is not coarsened by this protocol. Any `.nll` metric differing by more than float noise is a DEFECT, not a protocol difference.",
+   "_speed": {
+    "full_vocab_seconds": 10.729,
+    "ratio": 1.0126,
+    "topk_seconds": 10.864
+   },
+   "metrics": {
+    "state.critical_token_kl": {
+     "absolute": -1.943137904292236e-05,
+     "full_vocab": 1.0567343017820117,
+     "reference_topk_tail": 1.0567148704029687,
+     "relative": -1.8388140718205586e-05
+    },
+    "state.critical_token_kl.assistant": {
+     "absolute": -3.82490579486916e-06,
+     "full_vocab": 0.557196144469349,
+     "reference_topk_tail": 0.5571923195635541,
+     "relative": -6.864558975927311e-06
+    },
+    "state.critical_token_kl.eos": {
+     "absolute": -8.212186264344723e-08,
+     "full_vocab": 3.162299286375388,
+     "reference_topk_tail": 3.162299204253525,
+     "relative": -2.5969035567653344e-08
+    },
+    "state.critical_token_kl.final_answer": {
+     "absolute": -4.977910892933757e-07,
+     "full_vocab": 0.43115627547871593,
+     "reference_topk_tail": 0.43115577768762664,
+     "relative": -1.1545490987941081e-06
+    },
+    "state.critical_token_kl.reasoning": {
+     "absolute": -4.675836520640075e-06,
+     "full_vocab": 0.5935510669675894,
+     "reference_topk_tail": 0.5935463911310688,
+     "relative": -7.87773248311825e-06
+    },
+    "state.critical_token_kl.think_close": {
+     "absolute": -3.668451016503038e-05,
+     "full_vocab": 0.6096926811142891,
+     "reference_topk_tail": 0.6096559966041241,
+     "relative": -6.016885441036439e-05
+    },
+    "state.critical_token_kl.tool_close": {
+     "absolute": -4.046109305428508e-05,
+     "full_vocab": 0.023788964159653654,
+     "reference_topk_tail": 0.02374850306659937,
+     "relative": -0.0017008345879518177
+    },
+    "state.nll.code": {
+     "absolute": 5.649729351020483e-09,
+     "full_vocab": 0.7502387937211312,
+     "reference_topk_tail": 0.7502387993708606,
+     "relative": 7.530574796056901e-09
+    },
+    "state.nll.general": {
+     "absolute": 2.3467378484909318e-07,
+     "full_vocab": 2.9459945514288335,
+     "reference_topk_tail": 2.9459947861026183,
+     "relative": 7.965859432267935e-08
+    },
+    "state.nll.pooled_all_domains": {
+     "absolute": 2.0578135639937045e-08,
+     "full_vocab": 1.0650609347699074,
+     "reference_topk_tail": 1.065060955348043,
+     "relative": 1.932108761869356e-08
+    },
+    "state.nll.rag_multihop": {
+     "absolute": -2.7628036747273654e-08,
+     "full_vocab": 0.6213950028088495,
+     "reference_topk_tail": 0.6213949751808128,
+     "relative": -4.446131144020876e-08
+    },
+    "state.nll.reasoning_math": {
+     "absolute": -2.2989786518934352e-08,
+     "full_vocab": 0.6930836504809431,
+     "reference_topk_tail": 0.6930836274911566,
+     "relative": -3.3170291209410766e-08
+    },
+    "state.nll.teacher_reference_pooled": {
+     "absolute": -3.2717663578374356e-08,
+     "full_vocab": 0.5076326291573745,
+     "reference_topk_tail": 0.5076325964397109,
+     "relative": -6.445145898655647e-08
+    },
+    "state.nll.tool": {
+     "absolute": -1.986968545253376e-08,
+     "full_vocab": 0.815893905996244,
+     "reference_topk_tail": 0.8158938861265586,
+     "relative": -2.435327106441855e-08
+    },
+    "state.nll_delta_vs_teacher_pooled": {
+     "absolute": 5.32957992183114e-08,
+     "full_vocab": 0.5574283056125328,
+     "reference_topk_tail": 0.557428358908332,
+     "relative": 9.561014157640786e-08
+    },
+    "state.reverse_kl.token_mean": {
+     "absolute": -0.014069289683168229,
+     "full_vocab": 1.3128704457430096,
+     "reference_topk_tail": 1.2988011560598414,
+     "relative": -0.01071643415295697
+    },
+    "state.teacher_kl.code": {
+     "absolute": -1.2023680796557912e-06,
+     "full_vocab": 0.5793866333803295,
+     "reference_topk_tail": 0.5793854310122498,
+     "relative": -2.0752430421820156e-06
+    },
+    "state.teacher_kl.equal_domain_mean": {
+     "absolute": -0.001358514205028083,
+     "full_vocab": 0.5577435467924972,
+     "reference_topk_tail": 0.5563850325874691,
+     "relative": -0.002435732717735064
+    },
+    "state.teacher_kl.general": {
+     "absolute": -0.006772422498881769,
+     "full_vocab": 0.5982456077223615,
+     "reference_topk_tail": 0.5914731852234797,
+     "relative": -0.011320471745151146
+    },
+    "state.teacher_kl.rag_multihop": {
+     "absolute": -1.4333198849858508e-05,
+     "full_vocab": 0.45747569398535814,
+     "reference_topk_tail": 0.4574613607865083,
+     "relative": -3.133106094663305e-05
+    },
+    "state.teacher_kl.reasoning_math": {
+     "absolute": -1.2159312430259916e-06,
+     "full_vocab": 0.5745700172438639,
+     "reference_topk_tail": 0.5745688013126209,
+     "relative": -2.1162455515145957e-06
+    },
+    "state.teacher_kl.token_mean": {
+     "absolute": -0.0010330116357541996,
+     "full_vocab": 0.5634378455412375,
+     "reference_topk_tail": 0.5624048339054833,
+     "relative": -0.001833408323436084
+    },
+    "state.teacher_kl.tool": {
+     "absolute": -3.3970280867157143e-06,
+     "full_vocab": 0.579039781630573,
+     "reference_topk_tail": 0.5790363846024863,
+     "relative": -5.866657515567758e-06
+    },
+    "state.teacher_kl.worst_domain": {
+     "absolute": -0.006772422498881769,
+     "full_vocab": 0.5982456077223615,
+     "reference_topk_tail": 0.5914731852234797,
+     "relative": -0.011320471745151146
+    },
+    "state.top1_agreement": {
+     "absolute": 0.0,
+     "full_vocab": 0.7654867256637168,
+     "reference_topk_tail": 0.7654867256637168,
+     "relative": 0.0
+    }
+   },
+   "protocol_ids_differ": true,
+   "worst_domain_agrees": true
+  }
+ },
+ "_contract": "ENGINEERING EVIDENCE ONLY, for the maintainer decision of 2026-10-04. No recovery training, no behavioural screening, no confirmation, no formal search, no promotion, no GO/NO-GO. No D-series behavioural prompt is read. AUTHORIZES NOTHING.",
+ "analysis": {
+  "A_reference_top_k_mass": {
+   "_sampled": "up to 4096 valid positions per (candidate, group) reduction, which is every position for these group widths; stated so a reader does not take it for the whole mixture if a wider batch ever truncates.",
+   "_what": "the reference distribution's probability mass inside its own Top-K, per valid prediction position. The tail bucket holds one minus this.",
+   "distribution": {
+    "max": 1.0000020265579224,
+    "mean": 0.9783449189796113,
+    "min": 0.022924339398741722,
+    "n": 200000,
+    "p1": 0.02528420463204384,
+    "p5": 0.9467403292655945,
+    "p50": 0.9999991059303284,
+    "p95": 1.000001311302185,
+    "p99": 1.0000017881393433
+   },
+   "over_all_valid_positions": {
+    "max": 1.000002145767212,
+    "mean": 0.9942112026020448,
+    "min": 0.022924339398741722,
+    "n": 15538380
+   },
+   "top_k": 200
+  },
+  "B_full_vs_k_plus_1": {
+   "per_candidate": {
+    "_sign_of_the_difference": "the K+1 KL is a coarsening of the partition and therefore a LOWER bound on the full-vocabulary KL, so every signed difference should be <= 0 up to float error. A positive one would be a defect, not a finding.",
+    "absolute_difference": {
+     "max": 0.048031295256523165,
+     "mean": 0.005843962222709083,
+     "min": 0.0004771367405095456,
+     "n": 260,
+     "p1": 0.0005688897711265545,
+     "p5": 0.0008482830689838794,
+     "p50": 0.004158516649238053,
+     "p95": 0.023722492816458995,
+     "p99": 0.04415696766473509
+    },
+    "lower_bound_tolerance": {
+     "absolute": 1e-05,
+     "relative": 1e-05
+    },
+    "lower_bound_violations": 0,
+    "n": 260,
+    "n_positive_signed": 0,
+    "relative_difference": {
+     "max": 0.027361987795184745,
+     "mean": 0.009898344098849186,
+     "min": 0.0028571398761713545,
+     "n": 260,
+     "p1": 0.004552711971939564,
+     "p5": 0.006077254299191911,
+     "p50": 0.009572575665137362,
+     "p95": 0.014817701056800945,
+     "p99": 0.021106819761721848
+    },
+    "signed_difference": {
+     "max": -0.0004771367405095456,
+     "mean": -0.005843962222709083,
+     "min": -0.048031295256523165,
+     "n": 260,
+     "p1": -0.04415696766473509,
+     "p5": -0.023722492816458995,
+     "p50": -0.004093117535861501,
+     "p95": -0.0008482830689838794,
+     "p99": -0.0005688897711265545
+    },
+    "spearman": 0.9999849792953239,
+    "worst": {
+     "absolute": 0.048031295256523165,
+     "full": 10.243384318387033,
+     "index": 138,
+     "relative": 0.00468900646149791,
+     "topk": 10.19535302313051
+    }
+   },
+   "per_item_per_group": {
+    "_sign_of_the_difference": "the K+1 KL is a coarsening of the partition and therefore a LOWER bound on the full-vocabulary KL, so every signed difference should be <= 0 up to float error. A positive one would be a defect, not a finding.",
+    "absolute_difference": {
+     "max": 0.41952489028053996,
+     "mean": 0.006410587746214228,
+     "min": 6.311783306029578e-06,
+     "n": 17420,
+     "p1": 5.670375474418898e-05,
+     "p5": 0.00019012360625009217,
+     "p50": 0.0028115887942488094,
+     "p95": 0.020458164048365812,
+     "p99": 0.0718205283788027
+    },
+    "lower_bound_tolerance": {
+     "absolute": 1e-05,
+     "relative": 1e-05
+    },
+    "lower_bound_violations": 0,
+    "n": 17420,
+    "n_positive_signed": 0,
+    "relative_difference": {
+     "max": 0.1760580454407601,
+     "mean": 0.01025947811101314,
+     "min": 0.00014890511467293704,
+     "n": 17420,
+     "p1": 0.000527645348937777,
+     "p5": 0.0011426935001504757,
+     "p50": 0.007112749919205391,
+     "p95": 0.034201051032563844,
+     "p99": 0.05356592762717299
+    },
+    "signed_difference": {
+     "max": -6.311783306029578e-06,
+     "mean": -0.006410587746214228,
+     "min": -0.41952489028053996,
+     "n": 17420,
+     "p1": -0.0718205283788027,
+     "p5": -0.020458164048365812,
+     "p50": -0.002810959975221322,
+     "p95": -0.00019012360625009217,
+     "p99": -5.670375474418898e-05
+    },
+    "spearman": 0.9998978246607836,
+    "worst": {
+     "absolute": 0.41952489028053996,
+     "full": 9.341300718245968,
+     "index": 7035,
+     "relative": 0.044910757391751634,
+     "topk": 8.921775827965428
+    }
+   }
+  },
+  "C_discrete_decisions": {
+   "_a_moved_decision_is_not_a_failure": "this is an authorized new protocol. A disagreement means it is observably different from the full-vocabulary one, which is the thing being characterized.",
+   "_claim_boundary": "the greedy chose by FULL VOCABULARY, so its removal order is the historical protocol's and is exact. The Top-K column is the layer that protocol WOULD have chosen given the same parent -- exact up to and including the first disagreeing round, and counterfactual after it, because from that round on the Top-K protocol's own parent would differ and these forwards do not describe it. Sharing forwards is what makes the comparison affordable and this is its price.",
+   "_reconstruction_check": "every round reports whether the full-vocabulary winner recomputed from the recorded pairs equals the layer the OPERATOR chose. A False anywhere means this analysis is not reading the same scores the decision was made on, and nothing below it can be trusted.",
+   "comparison_is_exact_through_round": 7,
+   "first_disagreeing_round": null,
+   "full_vocab_removal_order": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ],
+   "n_rounds_where_winners_disagree": 0,
+   "rounds": [
+    {
+     "full_vocab": {
+      "margin": 0.019187458511857214,
+      "runner_up": 3,
+      "winner": 2,
+      "winner_score": 0.043672206808675826
+     },
+     "n_candidates": 36,
+     "operator_chose": 2,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.018916356932652666,
+      "runner_up": 3,
+      "winner": 2,
+      "winner_score": 0.042981517895296265
+     },
+     "round": 0,
+     "spearman_over_candidates": 0.9987129987129987,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.008434796295003724,
+      "runner_up": 20,
+      "winner": 16,
+      "winner_score": 0.11072055696882976
+     },
+     "n_candidates": 35,
+     "operator_chose": 16,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.008518014175051797,
+      "runner_up": 20,
+      "winner": 16,
+      "winner_score": 0.10957504147995692
+     },
+     "round": 1,
+     "spearman_over_candidates": 0.9994397759103641,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.00044469251322279413,
+      "runner_up": 32,
+      "winner": 3,
+      "winner_score": 0.19028685495051598
+     },
+     "n_candidates": 34,
+     "operator_chose": 3,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.0007664344539890511,
+      "runner_up": 32,
+      "winner": 3,
+      "winner_score": 0.18783092873771037
+     },
+     "round": 2,
+     "spearman_over_candidates": 0.999694423223835,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.0071153028366121585,
+      "runner_up": 26,
+      "winner": 32,
+      "winner_score": 0.2656640791212178
+     },
+     "n_candidates": 33,
+     "operator_chose": 32,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.007542831771012726,
+      "runner_up": 26,
+      "winner": 32,
+      "winner_score": 0.26216560634447045
+     },
+     "round": 3,
+     "spearman_over_candidates": 1.0,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.003225201101321906,
+      "runner_up": 15,
+      "winner": 20,
+      "winner_score": 0.3433421693452763
+     },
+     "n_candidates": 32,
+     "operator_chose": 20,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.0029679098819964667,
+      "runner_up": 15,
+      "winner": 20,
+      "winner_score": 0.3395063430287402
+     },
+     "round": 4,
+     "spearman_over_candidates": 0.9996334310850438,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.002660208233486616,
+      "runner_up": 15,
+      "winner": 26,
+      "winner_score": 0.43713870470108446
+     },
+     "n_candidates": 31,
+     "operator_chose": 26,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.0023622763143911207,
+      "runner_up": 15,
+      "winner": 26,
+      "winner_score": 0.4327122594414631
+     },
+     "round": 5,
+     "spearman_over_candidates": 1.0,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.015662948689726175,
+      "runner_up": 17,
+      "winner": 15,
+      "winner_score": 0.5216669343481508
+     },
+     "n_candidates": 30,
+     "operator_chose": 15,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.01571064224380092,
+      "runner_up": 17,
+      "winner": 15,
+      "winner_score": 0.5164430010192421
+     },
+     "round": 6,
+     "spearman_over_candidates": 1.0000000000000002,
+     "winners_agree": true
+    },
+    {
+     "full_vocab": {
+      "margin": 0.0015627673772549144,
+      "runner_up": 17,
+      "winner": 21,
+      "winner_score": 0.6255395912093673
+     },
+     "n_candidates": 29,
+     "operator_chose": 21,
+     "reconstruction_matches_the_operator": true,
+     "reference_topk_tail": {
+      "margin": 0.0008836484198730954,
+      "runner_up": 17,
+      "winner": 21,
+      "winner_score": 0.6200766070922563
+     },
+     "round": 7,
+     "spearman_over_candidates": 1.0,
+     "winners_agree": true
+    }
+   ],
+   "topk_removal_order_would_be": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ]
+  }
+ },
+ "bound_full_vocab": {
+  "distribution_support": "full_vocab_v1",
+  "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "bound_reference_topk_tail": {
+  "distribution_support": "reference_topk_tail_v1(top_k=200)",
+  "measurement_protocol_id": "9c9b0b43dc00b695c185982b8b0a18e7",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "elapsed_seconds": 1752.806,
+ "ended_utc": "2026-10-04T22:05:39Z",
+ "environment": {
+  "_device_count": 1,
+  "_no_ordinal_is_hardcoded": "the index comes from torch.cuda.current_device(), so the record describes whichever device the runtime selected",
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "cudnn_tf32": true,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "gpu_total_memory_bytes": 47665709056,
+  "matmul_tf32": false,
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1"
+ },
+ "failure": {
+  "message": "tuple indices must be integers or slices, not str",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/repo/scripts/pod/topk_adoption_driver.py\", line 1053, in main\n    record[\"P_production_timing\"] = stage_P_production_topk_timing(\n                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/repo/scripts/pod/topk_adoption_driver.py\", line 477, in stage_P_production_topk_timing\n    depth = int(adapter.spec_of(model).fields[\"num_hidden_layers\"])\n                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\nTypeError: tuple indices must be integers or slices, not str\n",
+  "type": "TypeError"
+ },
+ "schema": "aadistill.d_series.topk_adoption/v1",
+ "scoring_protocol": {
+  "_does_not_move_the_batteries": "Top-K changes structural scoring and evaluation, not prompt content. family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+  "coarsened_under_this_protocol": [
+   "forward KL",
+   "reverse KL",
+   "critical-token KL"
+  ],
+  "critical_tokens": "critical tags identify prediction POSITIONS, not vocabulary entries, so those positions use this same KL and need no separate support rule",
+  "decision_record": "logs/budget/decisions.md 2026-10-04",
+  "exact_under_this_protocol": [
+   "target-token CE/NLL",
+   "top-1 agreement"
+  ],
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "k_is_not_outcome_selected": "maintainer-selected 2026-10-04. No sweep was run and K must not be tuned against D1/D2/D3 results.",
+  "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "protocol_id": "reference_topk_tail_v1",
+  "reference_for_depth": "the intact current parent; the candidate is that parent with the candidate block bypassed. NOT the original teacher -- DEPTH's objective is local and parent-relative, and forcing the teacher's support onto it would score a different question",
+  "reference_for_state_evaluation": "the original teacher",
+  "reverse_kl_partition": "the SAME reference-defined K+1 partition as the forward direction. One state evaluation must not carry two incompatible partitions",
+  "support": "the Top-200 entries of the REFERENCE distribution at each prediction position",
+  "tail": "every vocabulary entry outside that support, aggregated into one K+1 bucket",
+  "top_k": 200
+ },
+ "stages": [
+  {
+   "gpu": "NVIDIA L40S",
+   "seconds": 1.868,
+   "stage": "environment",
+   "status": "ok"
+  },
+  {
+   "seconds": 0.042,
+   "stage": "register_and_policy",
+   "status": "ok",
+   "top_k": 200
+  },
+  {
+   "protocol": "d463a1dc6afbd778",
+   "seconds": 0.045,
+   "stage": "bind_full_vocab",
+   "status": "ok"
+  },
+  {
+   "protocol": "9c9b0b43dc00b695",
+   "seconds": 0.041,
+   "stage": "bind_reference_topk_tail",
+   "status": "ok"
+  },
+  {
+   "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 7.786,
+   "stage": "teacher_fetch_verify",
+   "status": "ok"
+  },
+  {
+   "pairs": 5980,
+   "seconds": 1704.907,
+   "stage": "C_depth_dual_scores",
+   "status": "ok"
+  },
+  {
+   "disagreeing_rounds": 0,
+   "mass_p5": 0.9467403292655945,
+   "seconds": 0.063,
+   "stage": "analyse_ABC",
+   "status": "ok"
+  },
+  {
+   "protocol_ids_differ": true,
+   "seconds": 24.122,
+   "stage": "D_state_eval_both_supports",
+   "status": "ok",
+   "worst_domain_agrees": true
+  },
+  {
+   "error": "TypeError: tuple indices must be integers or slices, not str",
+   "seconds": 5.84,
+   "stage": "P_production_topk_timing",
+   "status": "failed",
+   "traceback": "Traceback (most recent call last):\n  File \"/workspace/repo/scripts/pod/topk_adoption_driver.py\", line 1053, in main\n    record[\"P_production_timing\"] = stage_P_production_topk_timing(\n                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/repo/scripts/pod/topk_adoption_driver.py\", line 477, in stage_P_production_topk_timing\n    depth = int(adapter.spec_of(model).fields[\"num_hidden_layers\"])\n                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^\nTypeError: tuple indices must be integers or slices, not str\n"
+  }
+ ],
+ "stages_requested": [
+  "C",
+  "D",
+  "P"
+ ],
+ "started_utc": "2026-10-04T21:36:26Z",
+ "status": "FAILED"
+}

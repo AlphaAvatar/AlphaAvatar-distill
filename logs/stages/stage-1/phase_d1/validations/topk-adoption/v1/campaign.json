@@ -1,18 +1,18 @@
 {
- "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 = 1.5919",
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 = 2.2024",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 1.5919,
+ "booked_usd": 2.2024,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "REOPENED BY REVIEW -- 3 paid subruns, $1.5919 of $8.0000; the tail arithmetic was invalid at the numerical edge and the adoption evidence is being re-measured",
+ "status": "OPEN -- corrective A/B/C/D passed with zero violations; the production Top-K timing is owed",
  "subruns": [
   {
    "cost_usd": 0.6382,
@@ -60,6 +60,24 @@
     "D"
    ],
    "subrun_id": "a3"
+  },
+  {
+   "cost_usd": 0.6105,
+   "elapsed_minutes": 33.35,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a4",
+   "gpu": "NVIDIA L40S",
+   "notes": "the repair is CONFIRMED on real logits: 0 violations of KL(topK+tail) <= KL(full) across 17,420 per-item and 260 per-candidate scores, against 1 before, and zero even at the looser 1e-6 threshold. C unchanged: 0 of 8 rounds disagree. Stage P died 5.84 s in on `spec.fields[\"num_hidden_layers\"]` -- `fields` is a tuple of pairs, not a mapping.",
+   "outcome": "CORRECTIVE -- A/B/C/D re-measured under the repaired tail with ZERO lower-bound violations; stage P failed on a shape bug",
+   "pod_id": "6g42msvfrzemos",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "b2b1bb7fbf643692f0b8f74930eb3c3f1f6ebb23",
+   "stages_run": [
+    "C",
+    "analyse",
+    "D",
+    "P(failed)"
+   ],
+   "subrun_id": "a4"
   }
  ],
  "teardown_reserve_usd": 0.3

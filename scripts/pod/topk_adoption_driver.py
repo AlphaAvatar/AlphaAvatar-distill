@@ -474,7 +474,12 @@ def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
 
     #: Candidate evaluations. The skip sets are the first `n_candidates` single
     #: layers, which is exactly what a greedy round 0 evaluates.
-    depth = int(adapter.spec_of(model).fields["num_hidden_layers"])
+    #: `ArchSpec.__getitem__`, not `.fields[...]`. `fields` is a TUPLE of
+    #: (name, value) pairs -- indexing it by string is a TypeError, which is what
+    #: ended this stage 5.84 s in. The subscript is what `operators/base.py`
+    #: already uses, and a $0 probe of module SYMBOLS does not catch a wrong
+    #: assumption about the SHAPE of what one returns.
+    depth = int(adapter.spec_of(model)["num_hidden_layers"])
     skips = [frozenset({i}) for i in range(min(n_candidates, depth))]
     torch.cuda.reset_peak_memory_stats()
     forward_s, reduce_s = 0.0, 0.0

@@ -142,3 +142,85 @@ class TestTheAnalysisChecksItself:
         got = quantiles([float(i) for i in range(100)])
         for key in ("mean", "min", "p1", "p5", "p50", "p95", "p99", "max"):
             assert key in got, key
+
+
+class TestStagePsInnerLoopRunsAtAToyGeometry:
+    """Every shape stage P reads, exercised on CPU.
+
+    Stage P died 5.84 s into a paid subrun on `spec.fields["num_hidden_layers"]`:
+    `fields` is a TUPLE of (name, value) pairs. My $0 probe had checked that every
+    module and symbol stage P imports EXISTS, which it did -- and said nothing
+    about the SHAPE of what one returns. This runs the loop.
+    """
+
+    GEOMETRY = dict(hidden_size=32, intermediate_size=64, num_hidden_layers=4,
+                    num_attention_heads=4, num_key_value_heads=2, head_dim=8,
+                    vocab_size=64, tie_word_embeddings=True)
+
+    @pytest.fixture
+    def pieces(self):
+        torch = pytest.importorskip("torch")
+        sys.path.insert(0, str(REPO / "tests"))
+        from support.toy import build_tiny_model
+
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from aadistill.initialization.specs.arch import get_adapter
+
+        register_builtin_adapters()
+        model = build_tiny_model(self.GEOMETRY)
+        model.config.use_cache = False
+        items = [{"item_id": f"i{n}",
+                  "input_ids": torch.randint(1, 64, (1, 9 + n)),
+                  "domain": "general", "subtype": "general"} for n in range(3)]
+        return torch, model, items, get_adapter("qwen3")
+
+    def test_the_depth_comes_from_a_subscript_not_a_field_lookup(self, pieces):
+        """THE REGRESSION."""
+        _, model, _, adapter = pieces
+        spec = adapter.spec_of(model)
+        assert isinstance(spec.fields, tuple), (
+            "if `fields` became a mapping this test is obsolete, not passing")
+        with pytest.raises(TypeError):
+            spec.fields["num_hidden_layers"]          # what stage P used to do
+        assert int(spec["num_hidden_layers"]) == self.GEOMETRY["num_hidden_layers"]
+
+    def test_the_whole_inner_loop_runs(self, pieces):
+        """Sketch cache -> packed batch -> ablated forward -> Top-K reduction."""
+        torch, model, items, adapter = pieces
+        from aadistill.initialization.calibration.packing import packed_batches
+        from aadistill.initialization.operators._common import resolve_pad_id
+        from aadistill.initialization.operators.depth.causal_kl_greedy import (
+            _ReferenceSketches, _forward_logit_block,
+        )
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        sketches = _ReferenceSketches(model, items, "cpu", top_k=8)
+        groups = [(p.batch, p.original_indices) for p in packed_batches(
+            items, 3, packing="length_sorted_v1",
+            pad_id=resolve_pad_id(model), device="cpu")]
+        assert groups
+        for group, _ in groups:
+            idx, lp, tail = sketches.sketch_block(group)
+            mask = group.prediction_mask()
+            assert idx.shape[:2] == lp.shape[:2] == tail.shape
+            assert tail.shape == mask.shape
+            abls = _forward_logit_block(model, group, "cpu", frozenset({0}))
+            out = sketch_forward_kl_mean_batch(
+                idx, lp, tail, abls, mask, has_tail=sketches.has_tail)
+            assert out.shape == (len(group.items),)
+            assert out.dtype == torch.float64
+            assert torch.isfinite(out).all()
+
+    def test_the_decision_record_carries_what_stage_P_reports(self, pieces):
+        _, model, items, _ = pieces
+        from aadistill.initialization.operators.depth.causal_kl_greedy import (
+            _ReferenceSketches,
+        )
+
+        d = _ReferenceSketches(model, items, "cpu", top_k=8).decision()
+        for key in ("sketch_bytes", "full_vocab_bytes_avoided", "mode",
+                    "top_k", "has_tail"):
+            assert key in d, key
+        assert d["sketch_bytes"] < d["full_vocab_bytes_avoided"]
