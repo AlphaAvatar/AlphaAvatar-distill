@@ -550,3 +550,108 @@ class TestTheDepthReducers:
         sk = sketch_reference(ref, targets, top_k=4, chunk=4)
         with pytest.raises(ValueError, match="every scoring weight is zero"):
             sketch_forward_kl_mean(sk, cand, weights=torch.zeros(6))
+
+
+class TestTheStateEvaluatorUnderTheNewSupport:
+    """Item 9's contract: the evaluator consumes the compact reference, the
+    sketch definition is science and the caching policy is execution.
+    """
+
+    @staticmethod
+    def _harness():
+        from support.toy import TARGET_GEOMETRY, TEACHER_GEOMETRY, build_tiny_model
+        from aadistill.initialization.specs.metrics import (
+            StateEvalSuite, SuiteItem,
+        )
+
+        g = torch.Generator().manual_seed(17)
+        vocab = TEACHER_GEOMETRY["vocab_size"]
+        items, specs = [], (("general", "text"), ("math", "arith"))
+        for i in range(4):
+            domain, subtype = specs[i % 2]
+            items.append(SuiteItem(
+                item_id=f"s{i}",
+                input_ids=torch.randint(1, vocab, (1, 10 + i), generator=g),
+                domain=domain, subtype=subtype, tags={}))
+        suite = StateEvalSuite(
+            suite_id="t", version=1, domains=("general", "math"),
+            subtypes={"general": ("text",), "math": ("arith",)},
+            critical_tags=(), general_domain="general")
+        teacher = build_tiny_model(TEACHER_GEOMETRY)
+        student = build_tiny_model(TARGET_GEOMETRY, seed=3)
+        return suite, items, teacher, student, vocab
+
+    def _evaluate(self, support):
+        from aadistill.initialization.planning.metrics import StateEvaluator
+
+        suite, items, teacher, student, _ = self._harness()
+        ev = StateEvaluator(suite, items, distribution_support=support)
+        ev.prime_reference(teacher)
+        return ev, ev.evaluate(student, "digest")
+
+    def test_at_k_at_least_v_it_agrees_with_the_full_vocab_evaluator(self):
+        _, _, _, _, vocab = self._harness()
+        _, full = self._evaluate(FULL_VOCAB_V1)
+        _, topk = self._evaluate(reference_topk_tail(vocab))
+        shared = set(full.values) & set(topk.values)
+        assert shared, "the two evaluations report no common metric"
+        for key in sorted(shared):
+            assert topk.values[key] == pytest.approx(
+                full.values[key], rel=1e-4, abs=1e-6), key
+
+    def test_the_protocol_id_moves_and_the_full_vocab_one_does_not(self):
+        _, _, _, _, vocab = self._harness()
+        full_ev, _ = self._evaluate(FULL_VOCAB_V1)
+        topk_ev, _ = self._evaluate(reference_topk_tail(200))
+        assert topk_ev.measurement_protocol_id != \
+            full_ev.measurement_protocol_id, (
+                "Top-K+tail is a different measurement and must not be "
+                "comparable with a full-vocabulary one")
+        #: And the full-vocabulary evaluator's id is what it was before the field
+        #: existed: its reduction serializes without the key.
+        assert "distribution_support" not in full_ev.reduction.as_dict()
+        assert "distribution_support" in topk_ev.reduction.as_dict()
+
+    def test_a_coarser_support_changes_the_measurement(self):
+        """Otherwise the support is not reaching the reduction at all."""
+        _, full = self._evaluate(FULL_VOCAB_V1)
+        _, coarse = self._evaluate(reference_topk_tail(2))
+        kl_keys = [k for k in full.values if "kl" in k]
+        assert kl_keys
+        assert any(coarse.values[k] != pytest.approx(full.values[k], rel=1e-3)
+                   for k in kl_keys), (
+            "a 2-entry support must not reproduce the full-vocabulary KL")
+
+    def test_nll_stays_exact_under_the_coarse_support(self):
+        """CE is not a KL and must not be coarsened with the partition."""
+        _, full = self._evaluate(FULL_VOCAB_V1)
+        _, coarse = self._evaluate(reference_topk_tail(2))
+        nll = [k for k in full.values if ".nll" in k]
+        assert nll
+        for key in nll:
+            assert coarse.values[key] == pytest.approx(
+                full.values[key], rel=1e-4), key
+
+    def test_the_sketch_cache_is_execution_not_science(self):
+        """Caching must not be able to reach a number."""
+        from aadistill.initialization.planning.metrics import StateEvaluator
+
+        suite, items, teacher, student, _ = self._harness()
+        support = reference_topk_tail(5)
+
+        cached = StateEvaluator(suite, items, distribution_support=support)
+        cached.prime_reference(teacher)
+        first = cached.evaluate(student, "digest")
+        assert cached._ref_sketches, "nothing was cached, so this proves nothing"
+        second = cached.evaluate(student, "digest")
+
+        uncached = StateEvaluator(suite, items, distribution_support=support,
+                                  cache_budget_bytes=0)
+        uncached.prime_reference(teacher)
+        third = uncached.evaluate(student, "digest")
+        assert not uncached._ref_sketches, "the zero budget still cached"
+
+        for key in sorted(first.values):
+            assert second.values[key] == pytest.approx(first.values[key]), key
+            assert third.values[key] == pytest.approx(first.values[key],
+                                                      rel=1e-9), key
