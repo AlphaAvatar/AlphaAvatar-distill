@@ -31,7 +31,20 @@ or quietly changing the formal semantics so CUDA matches CPU.
 v1/authorization.json   the ceiling and what it does and does not cover
 v1/campaign.json        cumulative cost across every resource and subrun
 v1/runs/<subrun>/       per-attempt evidence; retries stay here
+v1/closeout.json        the verdict and the answers — written only when complete
 ```
 
 One canonical owner per fact: the authorization owns the ceiling, the campaign
-owns the costs, each run owns its own measurements.
+owns the costs, each run owns its own measurements, and the closeout owns the
+verdict.
+
+`closeout.json` is also what tells the rest of the repository that this ran:
+`scripts/autoinit/write_d1_design.py` derives
+`gpu_validation_owed.status` from its presence, so the D1 design moves with this
+directory instead of carrying a sentence that someone has to remember to edit.
+It is written by `scripts/pod/d1_qualification_closeout.py`, which derives the
+verdict from the run's own gates — a caller cannot name it, so an incomplete
+run cannot be filed as a passed one.
+
+Nothing here authorizes D1. The engineering and formal books do not transfer,
+so spending from this one moves D1's funding blocker not at all.
