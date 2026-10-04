@@ -451,3 +451,103 @@ def _term(p: torch.Tensor, p_log: torch.Tensor,
     empty = p <= 0
     diff = torch.where(empty, torch.zeros_like(p_log), p_log - q_log)
     return torch.where(empty, torch.zeros_like(p), p * diff)
+
+
+# --- DEPTH's reducer: forward KL only, on the reference support --------------
+
+def sketch_forward_kl(support_indices: torch.Tensor,
+                      support_log_probs: torch.Tensor,
+                      tail_log_prob: torch.Tensor,
+                      cand_logits: torch.Tensor,
+                      *, has_tail: bool) -> torch.Tensor:
+    """Per-position forward KL on the reference's ``K+1`` partition.
+
+    Generic over leading dimensions: ``support_indices`` and
+    ``support_log_probs`` are ``[..., K]``, ``tail_log_prob`` is ``[...]`` and
+    ``cand_logits`` is ``[..., V]``; the result is ``[...]``. ONE implementation
+    serves the per-item and the batched DEPTH paths, so the two cannot drift.
+
+    ``has_tail`` is the caller's and is not inferred from the sketch. A tail value
+    exists in the sketch either way, and only the caller knows whether
+    ``top_k >= vocab_size`` — trusting the stored value is how a partition that
+    should have no tail acquires a spurious one.
+
+    Forward KL ONLY. DEPTH reads exactly this quantity and discards the other
+    five, 260 candidate subsets x 67 items per expansion, which is why it does
+    not come through the six-quantity reducer.
+    """
+    cand = cand_logits.float()
+    q_all = cand - torch.logsumexp(cand, dim=-1, keepdim=True)
+    q_log = q_all.gather(-1, support_indices)
+    p_log = support_log_probs.float()
+
+    kl = _term(p_log.exp(), p_log, q_log).sum(dim=-1)
+    if not has_tail:
+        return kl
+    p_tail_log = tail_log_prob.float()
+    q_tail_log = log1mexp(torch.logsumexp(q_log, dim=-1).clamp(max=0.0))
+    p_tail, q_tail = p_tail_log.exp(), q_tail_log.exp()
+    keep = ~((p_tail <= 0) | (q_tail <= 0))
+    return kl + torch.where(keep, _term(p_tail, p_tail_log, q_tail_log),
+                            torch.zeros_like(kl))
+
+
+def sketch_forward_kl_mean(sketch: ReferenceDistributionSketch,
+                           cand_logits: torch.Tensor,
+                           *, weights: torch.Tensor | None = None) -> float:
+    """``forward_kl_mean``'s quantity, on the reference support. One item."""
+    kl = sketch_forward_kl(
+        sketch.support_indices.to(cand_logits.device),
+        sketch.support_log_probs.to(cand_logits.device),
+        sketch.tail_log_prob.to(cand_logits.device),
+        cand_logits, has_tail=sketch.top_k < sketch.vocab_size)
+    if weights is None:
+        return float(kl.mean())
+    w = weights.to(kl.device).float()
+    total = float(w.sum())
+    if total <= 0:
+        raise ValueError(
+            "every scoring weight is zero, so the weighted mean has no "
+            "denominator; a zero-weight item cannot contribute a score")
+    return float((kl * w).sum() / total)
+
+
+def sketch_forward_kl_mean_batch(support_indices: torch.Tensor,
+                                 support_log_probs: torch.Tensor,
+                                 tail_log_prob: torch.Tensor,
+                                 cand_logits: torch.Tensor,
+                                 prediction_mask: torch.Tensor,
+                                 *, has_tail: bool,
+                                 weights: torch.Tensor | None = None,
+                                 ) -> torch.Tensor:
+    """``forward_kl_mean_batch``'s quantity, on the reference support.
+
+    ``[B]`` out, where ``out[i]`` is item ``i``'s mean over **item i's own** valid
+    positions — a PER-ITEM mean, never a pooled one. Pooling would hand a
+    1000-position item ten times the influence of a 100-position one and change
+    the objective, which is the same reason the full-vocabulary batched reducer
+    reduces per row.
+
+    ``weights`` multiplies INTO the validity mask rather than replacing it: the
+    mask says which positions exist, the weights say which the objective cares
+    about, and a padded position must be zero under both.
+    """
+    kl = sketch_forward_kl(support_indices, support_log_probs, tail_log_prob,
+                           cand_logits, has_tail=has_tail)
+    m = prediction_mask.to(kl.device).float()
+    if weights is not None:
+        m = m * weights.to(kl.device).float()
+    denom = m.sum(dim=-1)
+    if bool((denom <= 0).any()):
+        raise ValueError(
+            "a row has no weighted valid position, so its mean has no "
+            "denominator; an item that contributes nothing must not be scored")
+    #: Padded positions are masked out of the NUMERATOR too -- they hold whatever
+    #: the pad token produced and must not reach the sum through a NaN or an inf.
+    #:
+    #: float64 to match `forward_kl_mean_batch`, which this stands in for. The
+    #: dtype is part of the contract its caller consumes, not an implementation
+    #: detail: returning float32 made the two incomparable in a single
+    #: `torch.allclose`, which is a small sign of a larger mismatch.
+    numer = (torch.nan_to_num(kl, nan=0.0, posinf=0.0, neginf=0.0) * m)
+    return numer.double().sum(dim=-1) / denom.double()

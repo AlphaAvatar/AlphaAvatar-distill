@@ -414,3 +414,139 @@ class TestTheReduction:
         out = distortion_on_reference_support(sk, cand, targets, chunk=4)
         assert not math.isnan(out.kl), out.kl
         assert not math.isnan(out.reverse_kl), out.reverse_kl
+
+
+class TestTheDepthReducers:
+    """DEPTH reads forward KL only, so it has its own thinner reducers.
+
+    They must agree with the full-vocabulary ones they stand in for when the
+    support is the vocabulary, and the per-item and batched forms must agree with
+    each other — they share one implementation precisely so they cannot drift.
+    """
+
+    def test_the_per_item_mean_matches_the_full_vocab_reducer_at_k_ge_v(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean,
+        )
+        from aadistill.initialization.statistics.contribution import (
+            forward_kl_mean,
+        )
+
+        ref, cand, targets = _pair(T=40, V=300, spread=1.5, noise=0.4)
+        sk = sketch_reference(ref, targets, top_k=int(ref.shape[1]), chunk=8)
+        assert sketch_forward_kl_mean(sk, cand) == pytest.approx(
+            forward_kl_mean(ref, cand, chunk=8), rel=1e-4)
+        w = torch.rand(40)
+        assert sketch_forward_kl_mean(sk, cand, weights=w) == pytest.approx(
+            forward_kl_mean(ref, cand, weights=w, chunk=8), rel=1e-4)
+
+    def test_the_batched_mean_matches_the_full_vocab_reducer_at_k_ge_v(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+        from aadistill.initialization.statistics.contribution import (
+            forward_kl_mean_batch,
+        )
+
+        g = torch.Generator().manual_seed(5)
+        B, T, V = 3, 20, 120
+        rb = torch.randn(B, T, V, generator=g) * 1.5
+        cb = rb + torch.randn(B, T, V, generator=g) * 0.4
+        mask = torch.zeros(B, T, dtype=torch.bool)
+        mask[0, :20] = mask[1, :12] = mask[2, :7] = True
+
+        flat = rb.reshape(-1, V)
+        sb = sketch_reference(flat, torch.zeros(B * T, dtype=torch.long),
+                              top_k=V, chunk=64)
+        got = sketch_forward_kl_mean_batch(
+            sb.support_indices.reshape(B, T, -1),
+            sb.support_log_probs.reshape(B, T, -1),
+            sb.tail_log_prob.reshape(B, T), cb, mask, has_tail=False)
+        want = forward_kl_mean_batch(rb, cb, mask, chunk=8)
+        assert got.dtype == want.dtype, (
+            'the stand-in must return what its caller consumes')
+        assert torch.allclose(got, want, rtol=1e-4)
+
+    def test_the_batched_mean_is_per_item_not_pooled(self):
+        """Rows of different lengths must get different means."""
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        g = torch.Generator().manual_seed(7)
+        B, T, V = 3, 24, 90
+        rb = torch.randn(B, T, V, generator=g)
+        cb = rb + torch.randn(B, T, V, generator=g) * 0.6
+        mask = torch.zeros(B, T, dtype=torch.bool)
+        mask[0, :24] = mask[1, :10] = mask[2, :3] = True
+        flat = rb.reshape(-1, V)
+        sb = sketch_reference(flat, torch.zeros(B * T, dtype=torch.long),
+                              top_k=9, chunk=64)
+        got = sketch_forward_kl_mean_batch(
+            sb.support_indices.reshape(B, T, -1),
+            sb.support_log_probs.reshape(B, T, -1),
+            sb.tail_log_prob.reshape(B, T), cb, mask, has_tail=True)
+        #: A pooled reduction would give every row the same number.
+        assert len({round(float(v), 5) for v in got}) == B
+        #: And a row's mean must not depend on its neighbours. Score row 2 alone
+        #: and require the same answer.
+        alone = sketch_forward_kl_mean_batch(
+            sb.support_indices.reshape(B, T, -1)[2:3],
+            sb.support_log_probs.reshape(B, T, -1)[2:3],
+            sb.tail_log_prob.reshape(B, T)[2:3], cb[2:3], mask[2:3],
+            has_tail=True)
+        assert float(alone[0]) == pytest.approx(float(got[2]), rel=1e-6)
+
+    def test_has_tail_is_the_callers_and_changes_the_answer(self):
+        """A sketch carries a tail value whether or not the partition has one."""
+        from aadistill.initialization.scoring.support import sketch_forward_kl
+
+        ref, cand, targets = _pair(T=8, V=50)
+        sk = sketch_reference(ref, targets, top_k=5, chunk=4)
+        with_tail = sketch_forward_kl(
+            sk.support_indices, sk.support_log_probs, sk.tail_log_prob, cand,
+            has_tail=True)
+        without = sketch_forward_kl(
+            sk.support_indices, sk.support_log_probs, sk.tail_log_prob, cand,
+            has_tail=False)
+        assert not torch.allclose(with_tail, without), (
+            "if these agree the tail term is not being applied at all")
+        #: NO ORDERING between them, and asserting one was my error. The tail
+        #: term `p_tail * (log p_tail - log q_tail)` is NEGATIVE whenever the
+        #: candidate puts more mass outside the support than the reference does,
+        #: and the support-only sum is not a KL at all when `K < V` -- its `p_i`
+        #: sum to `1 - p_tail`, not to 1. What DOES hold is that the complete
+        #: `K+1` divergence is a real KL between two distributions over K+1
+        #: buckets, so it is non-negative. That is the property worth pinning.
+        assert float(with_tail.min()) >= -1e-6, (
+            "the complete K+1 divergence is a KL and cannot be negative")
+
+    def test_a_row_with_no_valid_position_is_refused(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        g = torch.Generator().manual_seed(9)
+        B, T, V = 2, 6, 40
+        rb = torch.randn(B, T, V, generator=g)
+        cb = torch.randn(B, T, V, generator=g)
+        mask = torch.zeros(B, T, dtype=torch.bool)
+        mask[0, :4] = True          # row 1 has nothing
+        flat = rb.reshape(-1, V)
+        sb = sketch_reference(flat, torch.zeros(B * T, dtype=torch.long),
+                              top_k=4, chunk=16)
+        with pytest.raises(ValueError, match="no weighted valid position"):
+            sketch_forward_kl_mean_batch(
+                sb.support_indices.reshape(B, T, -1),
+                sb.support_log_probs.reshape(B, T, -1),
+                sb.tail_log_prob.reshape(B, T), cb, mask, has_tail=True)
+
+    def test_an_all_zero_weight_item_is_refused(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean,
+        )
+
+        ref, cand, targets = _pair(T=6, V=30)
+        sk = sketch_reference(ref, targets, top_k=4, chunk=4)
+        with pytest.raises(ValueError, match="every scoring weight is zero"):
+            sketch_forward_kl_mean(sk, cand, weights=torch.zeros(6))
