@@ -641,6 +641,9 @@ def behavioural_design() -> dict[str, Any]:
 #: succeeds — the one moment a reader is most likely to trust it.
 QUALIFICATION_CLOSEOUT = ("logs/stages/stage-1/phase_d1/validations/"
                           "gpu-qualification/v1/closeout.json")
+#: The Top-K adoption validation, whose closeout is under corrective review.
+TOPK_ADOPTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
+                 "closeout.json")
 
 
 def _qualification_state() -> dict[str, Any]:
@@ -654,11 +657,20 @@ def _qualification_state() -> dict[str, Any]:
         }
     raw = path.read_bytes()
     doc = json.loads(raw)
+    #: TWO GPU ROUNDS NOW, and the status must not read as though both were
+    #: settled. The full-vocabulary qualification passed; the Top-K adoption was
+    #: reopened by an independent review over the tail arithmetic. A bare
+    #: "RUN -- PASSED" here would be the kind of status that is true of one thing
+    #: and read as true of everything.
+    topk = REPO / TOPK_ADOPTION
+    topk_state = ("ADOPTION UNDER CORRECTIVE REVIEW" if not topk.is_file()
+                  else json.loads(topk.read_text()).get("verdict", "unknown"))
     answers = doc.get("answers") or {}
     recon = answers.get("incumbent_reconstruction") or {}
     decisions = answers.get("discrete_decisions") or {}
     return {
-        "status": f"RUN -- {doc['verdict']}",
+        "status": (f"full-vocab qualification RUN -- {doc['verdict']}; "
+                   f"Top-K adoption: {topk_state}"),
         "_status_owner": QUALIFICATION_CLOSEOUT,
         "ran": {
             #: The closeout's PATH and CONTENT HASH, so this design is bound to
@@ -725,21 +737,47 @@ def gpu_validation_owed() -> dict[str, Any]:
             "host. Meta performs no arithmetic, so it answers placement and "
             "nothing else — which is the only question it is asked.",
         ],
-        "what_only_a_GPU_can_answer": [
-            "whether the batched state evaluation's measured peak matches the "
-            "derived `peak_logit_bytes` at the real 151,936 vocabulary, and "
-            "whether `batch_plan`'s budget is the right bound",
-            "whether the bf16 reductions move a SELECTION under the "
-            "target-aware policy, as they were measured to do under the "
-            "batching protocol — the operator decisions are integer choices "
-            "over float scores and a near-tie can flip",
-            "the real per-expansion time under batched statistics and batched "
-            "state evaluation. The unbatched cost table is a PROVISIONAL "
-            "PLANNING ESTIMATE whose direction relative to the batched "
-            "implementation is UNKNOWN -- it neither bounds nor describes it, "
-            "because A3 measured batching slower on the ATTENTION scorer and "
-            "packing faster on causal-KL, and the net across four operators "
-            "has never been measured",
+        "what_the_gpu_rounds_ANSWERED": {
+            "full_vocab_qualification": {
+                "status": "COMPLETE -- baseline engineering evidence",
+                "owner": QUALIFICATION_CLOSEOUT,
+                "answered": [
+                    "the incumbent fixed path reconstructs the frozen incumbent "
+                    "artifact identity on real CUDA, agreed across three pods",
+                    "the real state-eval peak memory at the real 151,936 "
+                    "vocabulary, and that the derived logit bound holds for what "
+                    "it claims while understating the reduction's transients",
+                    "that the CALIBRATION BATCH SIZE, not the position policy, "
+                    "moves three of four fixed-path operator selections",
+                    "the batched direction, which was UNKNOWN: batching costs "
+                    "x1.97 on the dominant DEPTH operator at all positions and "
+                    "x1.08 at the target-aware policy, so the policy's smaller "
+                    "reduction very nearly cancels the batching penalty",
+                ],
+            },
+            "topk_adoption": {
+                "status": ("UNDER CORRECTIVE REVIEW -- an independent review "
+                           "reopened it because the tail arithmetic was invalid "
+                           "at the numerical edge"),
+                "owner": TOPK_ADOPTION,
+                "what_is_being_corrected": (
+                    "the tail was reconstructed as `1 - sum(support)`, which "
+                    "crosses float32 resolution once the support holds nearly all "
+                    "the mass -- the measured support mass reached 1.000001 -- and "
+                    "one coarse KL consequently exceeded the full-vocabulary KL, "
+                    "which a coarsening cannot do. Repaired to compute the tail "
+                    "from the complement's own logits; the adoption evidence is "
+                    "being re-measured."),
+            },
+        },
+        "what_is_STILL_not_priced": [
+            "the PRODUCTION Top-K D1 search cost. The adoption validation "
+            "deliberately computes BOTH reducers from the same forwards, so its "
+            "wall clock includes work the formal Top-K path will not do and must "
+            "NOT be used as a production timing.",
+            "and therefore the per-session envelope, which stays UNRESOLVED "
+            "until a Top-K-only representative timing exists. The full-vocab "
+            "provisional basis is NOT the Top-K price.",
         ],
         "surface_that_owes_it": {
             "_what": ("files on the historically CUDA-validated surface that "
@@ -922,26 +960,30 @@ def budget() -> dict[str, Any]:
                 "re-derived from it."),
         },
         "chain": chain,
-        "price_status": "PROVISIONAL PLANNING BASIS -- DIRECTION UNKNOWN",
+        "price_status": ("PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. "
+                         "The batched direction is now MEASURED; the production "
+                         "Top-K cost is not."),
         "_price_status": (
             "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
-            "finalized authorization price and NOT a proven upper bound on "
-            "the batched implementation. Two reasons, and the first is the "
-            "one that matters:\n\n"
-            "1. the per-expansion minutes were measured on an UNBATCHED state "
-            "evaluation and a one-item-per-forward statistics pass, and D1 runs "
-            "both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at "
-            "batch 3; causal-KL's length-sorted packing won 1.1884x. The net "
-            "effect on a D1 expansion running all four operators is UNMEASURED, "
-            "so the direction of the correction is unknown, not merely its "
-            "size.\n"
-            "2. `securePrice` is re-queried live at authorization, so every "
+            "finalized authorization price. What has changed and what has not:\n\n"
+            "MEASURED, by the full-vocabulary GPU qualification: the batched "
+            "direction, which this field used to call UNKNOWN. Batching costs "
+            "x1.97 on the dominant DEPTH operator at all positions and x1.08 at "
+            "the target-aware policy, so the policy's smaller reduction very "
+            "nearly cancels the penalty. Against the frozen per-cell table that "
+            "means it does NOT bound the all-positions bsz=3 case (39.117 over a "
+            "34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a "
+            "29.248 mean).\n\n"
+            "STILL NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion "
+            "minutes come from FULL-VOCABULARY telemetry, and D1 will run "
+            "reference_topk_tail_v1. The adoption validation's wall clock is not "
+            "a substitute: it deliberately computes BOTH reducers from the same "
+            "forwards and therefore includes work the formal path will not do.\n\n"
+            "AND `securePrice` is re-queried live at authorization, so every "
             "dollar figure here is a derived consequence of an hour-old quote.\n\n"
-            "WHAT MUST REFRESH IT: a short GPU qualification measuring real "
-            "CUDA/bf16 execution, the real state-eval memory peak, the "
-            "target-aware batched path's correctness, and the actual timing of "
-            "a representative expansion. Until that runs, these numbers size a "
-            "grant request; they do not price one."),
+            "WHAT MUST REFRESH IT: a Top-K-only representative expansion timing. "
+            "Until that exists these numbers size a grant request; they do not "
+            "price one."),
         "sessions": 3,
         "_why_three_sessions": (
             "the search commits a candidate set and stops; the screening rung "
@@ -950,10 +992,11 @@ def budget() -> dict[str, Any]:
             "advances. Each is separately priced and separately authorized."),
         "per_session_envelope_usd": terms["per_attempt_hard_ceiling_usd"],
         #: PROVISIONAL IN THE NAME, not only in a docstring. These compare a
-        #: planning basis derived from UNBATCHED telemetry against a real
-        #: envelope, and the comparison's direction relative to measured batched
-        #: D1 is unknown. A field called `fits_per_session_envelope` would be
-        #: read later as a finalized authorization fact; this one cannot be.
+        #: planning basis derived from FULL-VOCABULARY telemetry against a real
+        #: envelope, while D1 will run `reference_topk_tail_v1` -- so the
+        #: comparison is against the wrong protocol, not merely an unmeasured
+        #: direction. A field called `fits_per_session_envelope` would be read
+        #: later as a finalized authorization fact; this one cannot be.
         "provisional_basis_fits_per_session_envelope":
             chain["max_session_hard_ceiling_usd"]
             <= terms["per_attempt_hard_ceiling_usd"],
@@ -1139,12 +1182,19 @@ def open_blockers(budget_section: dict[str, Any],
     the package's `funds_formal_sessions_of`, so no allowance covers it at any
     price — while the shortfall figure beside it is provisional. The per-session
     envelope is open because compatibility is UNRESOLVED, not because
-    incompatibility is proven: the comparison rests on unbatched telemetry whose
-    direction relative to batched D1 is unknown.
+    incompatibility is proven: the only comparison available rests on
+    FULL-VOCABULARY telemetry, and D1 will run `reference_topk_tail_v1`.
 
-    **What the GPU qualification can and cannot settle.** It settles the
-    cost-dependent figures: real batched timing, the resulting project funding
-    requirement, and the per-session envelope compatibility. It CANNOT settle
+    **Once measured compatibility exists it is authoritative.** The envelope test
+    reads `per_session_envelope_compatibility` and nothing else. It used to ALSO
+    require that the provisional full-vocab basis fit, which would have let a
+    superseded planning figure veto a measurement proving D1 fits.
+
+    **What a GPU round can and cannot settle.** It settles the cost-dependent
+    figures: real timing, the resulting project funding requirement, and the
+    per-session envelope compatibility -- and for D1 that timing must come from a
+    PRODUCTION Top-K path, not from the adoption validation's dual-reducer wall
+    clock, which includes work the formal path will not do. It CANNOT settle
     the funding AUTHORIZATION blocker — `phase_d1` being outside
     `funds_formal_sessions_of` is a scope fact, not a price, and no measurement
     puts an experiment inside a package's funded list. That needs an explicit
@@ -1165,11 +1215,24 @@ def open_blockers(budget_section: dict[str, Any],
     if (not budget_section["d1_is_in_the_funded_list"]
             or budget_section["provisional_shortfall_usd"] > 0):
         open_.append("funding authorization")
-    #: Open while compatibility is unresolved. Under the provisional basis it
-    #: does not fit; a resolved-and-fits answer needs the qualification, so the
-    #: condition is deliberately "not proven to fit" rather than "proven not to".
-    if (budget_section["per_session_envelope_compatibility"] != "RESOLVED_FITS"
-            or not budget_section["provisional_basis_fits_per_session_envelope"]):
+    #: MEASURED COMPATIBILITY IS AUTHORITATIVE, and the provisional comparison
+    #: does not get a veto over it.
+    #:
+    #: This used to require BOTH `RESOLVED_FITS` and that the provisional basis
+    #: fit -- so a future Top-K measurement proving D1 fits would have stayed
+    #: blocked by a FULL-VOCABULARY planning figure it supersedes. That is a
+    #: superseded estimate outvoting a measurement, which is backwards.
+    #:
+    #: The provisional field remains historical planning evidence and is still
+    #: reported beside the resolution; it simply no longer decides. While
+    #: compatibility is UNRESOLVED it is the only thing there is, so the blocker
+    #: is open then -- "not proven to fit" rather than "proven not to".
+    compatibility = budget_section["per_session_envelope_compatibility"]
+    if compatibility == "RESOLVED_FITS":
+        pass
+    elif compatibility == "RESOLVED_NEEDS_RAISE":
+        open_.append("per-session envelope")
+    else:
         open_.append("per-session envelope")
     return tuple(open_)
 

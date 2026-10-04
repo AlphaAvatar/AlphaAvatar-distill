@@ -1,6 +1,8 @@
 {
  "_authorizes": "nothing. ENGINEERING evidence from the engineering book, which does not transfer into the formal one. Formal D1 remains NOT AUTHORIZED, phase_d1 is not in funds_formal_sessions_of, and the per-session envelope is unchanged.",
  "_does_not_move_the_batteries": "family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands. Top-K changes structural scoring and evaluation, not prompt content.",
+ "_replaced_by": "closeout.json, once the corrective measurement completes",
+ "_superseded": "An independent review of prep/d-series-topk-tail@bd70a165 reopened this adoption. The single lower-bound violation I had recorded as a 'bounded open numerical observation' was a real defect: the tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- our own measured support mass reached 1.000001 -- and the code then DROPPED the tail term whenever either mass rounded to zero, when only a zero REFERENCE mass may make a forward-KL term vanish. The findings below were computed under that arithmetic and are NOT the adopted evidence. They are kept because a1/a2/a3 are real paid measurements and because the superseded numbers are what the repair has to be judged against.",
  "_verdict_is_across_subruns": "NO SINGLE SUBRUN answered everything. a1 produced A/B/C and the DEPTH half of E; a2 independently CONFIRMED C with the corrected in-run analysis but lost stage D to a bare policy id and its record arrived truncated; a3 measured D. Every answer below names the subrun that produced it.",
  "answers": {
   "A_reference_top200_mass": {
@@ -152,5 +154,5 @@
   "top_k": 200
  },
  "schema": "aadistill.d_series.topk_adoption_closeout/v1",
- "verdict": "COMPLETE -- every authorized item answered"
+ "verdict": "SUPERSEDED BY REVIEW -- the tail arithmetic was invalid"
 }

@@ -12,7 +12,7 @@
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "CLOSED -- 3 paid subruns, $1.5919 of $8.0000; the verdict and every answer's provenance are in closeout.json",
+ "status": "REOPENED BY REVIEW -- 3 paid subruns, $1.5919 of $8.0000; the tail arithmetic was invalid at the numerical edge and the adoption evidence is being re-measured",
  "subruns": [
   {
    "cost_usd": 0.6382,

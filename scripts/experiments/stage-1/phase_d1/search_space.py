@@ -10,7 +10,24 @@ every calibration-derived operator objective and the global state metric read
 positions through one hash-bound
 :class:`~aadistill.initialization.scoring.positions.ScoringPositionPolicy`
 instead of over every token. The four implementations are **frozen at the current
-best per structural kind**, so the only experimental variable is the policy.
+best per structural kind**, so the OPERATOR LIBRARY is not an experimental
+variable.
+
+**The policy is NOT D1's only changed axis, and saying so was wrong.** Against the
+historical incumbent B, the formal D1 challenger differs on three things at once:
+
+1. the DISTRIBUTION SUPPORT, ``full_vocab_v1`` -> ``reference_topk_tail_v1`` at
+   K=200 (maintainer decision 2026-10-04);
+2. the NUMERICAL EXECUTION, the historical materialization -> ``bsz=3`` with
+   ``length_sorted_v1`` packing;
+3. the SCORING POSITIONS, ``positions.all_v1`` -> ``positions.supervised_target_v1``.
+
+The full-vocabulary GPU qualification measured that the batch size ALONE moves
+three of four fixed-path operator selections while the position policy moved none
+of them, so the policy is demonstrably not even the dominant axis. D1 is therefore
+a CHALLENGER experiment against incumbent B over the combined protocol, and NOT a
+causal isolation of position weighting. Evidence:
+``logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json``.
 
 That makes the space much smaller than C2's full joint re-search — one
 implementation per kind rather than a library — and the cost arithmetic is the
@@ -88,8 +105,10 @@ class D1SpaceError(RuntimeError):
 
 
 #: THE FROZEN CURRENT BEST PER STRUCTURAL KIND, by maintainer instruction. One
-#: implementation per kind, so the operator library is not an experimental
-#: variable in D1 and the scoring semantics are the only one.
+#: implementation per kind, so the operator LIBRARY is not an experimental
+#: variable in D1. It is not the only one that is held fixed, and the scoring
+#: semantics are not the only one that moves -- see the module docstring: the
+#: distribution support and the numerical execution move too.
 #:
 #: `ffn.activation_importance_v0` stays the FFN operator: the maintainer
 #: explicitly deferred `ffn.residual_write_energy_v1` and any new formal FFN
@@ -234,7 +253,7 @@ def coverage(*, beam_width: int | None = None,
             "hypothesis unmeasured."),
         "_this_is_not_a_defence_of_the_width": (
             "beam width 6 is the standing declared schedule and is held fixed "
-            "across D1/D2/D3 so the scoring semantics are the only variable. "
+            "across D1/D2/D3 so the BREADTH is not a variable. "
             "Whether 6 is the right breadth for a 384-leaf space is a separate "
             "question, and changing it here would be a new breadth decision "
             "taken for no measured reason."),
@@ -262,10 +281,10 @@ def size_report() -> dict[str, Any]:
                  "warmup_levels": SCHEDULE_V1.warmup_levels,
                  "schedule_id": SCHEDULE_V1.schedule_id,
                  "_why_unchanged": (
-                     "the standing declared schedule. D1/D2/D3 must share a "
-                     "beam width for the scoring semantics to be the only "
-                     "variable, and adopting a different one here would be a "
-                     "new breadth decision taken for no measured reason.")},
+                     "the standing declared schedule. D1/D2/D3 share a beam "
+                     "width so the BREADTH is not a variable between them, and "
+                     "adopting a different one here would be a new breadth "
+                     "decision taken for no measured reason.")},
     }
 
 

@@ -588,3 +588,43 @@ class TestTheOwedGpuValidationStatusIsDerived:
                         "than now",
                         "It is not requested here"):
             assert retired not in source, retired
+
+
+class TestMeasuredEnvelopeCompatibilityIsAuthoritative:
+    """A superseded planning figure must not veto a measurement.
+
+    `open_blockers` used to require BOTH `RESOLVED_FITS` and that the provisional
+    FULL-VOCABULARY basis fit. So a future Top-K measurement proving D1 fits
+    inside the envelope would have stayed blocked by an estimate it supersedes --
+    an estimate outvoting a measurement.
+    """
+
+    FUNDED = {"d1_is_in_the_funded_list": True,
+              "provisional_shortfall_usd": 0.0}
+
+    def _blockers(self, compatibility, provisional_fits):
+        import write_d1_design
+
+        return write_d1_design.open_blockers(
+            {**self.FUNDED,
+             "per_session_envelope_compatibility": compatibility,
+             "provisional_basis_fits_per_session_envelope": provisional_fits},
+            {})
+
+    def test_resolved_fits_closes_it_even_when_the_provisional_basis_does_not(self):
+        """THE REGRESSION."""
+        assert self._blockers("RESOLVED_FITS", False) == ()
+
+    def test_resolved_needs_raise_keeps_it_open(self):
+        assert "per-session envelope" in self._blockers("RESOLVED_NEEDS_RAISE",
+                                                       True)
+
+    def test_unresolved_keeps_it_open_whatever_the_provisional_basis_says(self):
+        for provisional in (True, False):
+            assert "per-session envelope" in self._blockers("UNRESOLVED",
+                                                            provisional)
+
+    def test_an_unknown_compatibility_value_does_not_silently_close_it(self):
+        """A typo must fail closed."""
+        for value in ("RESOLVED", "FITS", "", None, "resolved_fits"):
+            assert "per-session envelope" in self._blockers(value, True), value

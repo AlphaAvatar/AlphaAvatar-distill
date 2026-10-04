@@ -50,34 +50,40 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**THE TOP-K PROTOCOL IS ADOPTED ON MEASUREMENT, and formal D1 is still not
-authorized.** Maintainer decision **2026-10-04** replaced the D-series
-full-vocabulary KL contract with `reference_topk_tail_v1` at **K = 200** — a
-scientific protocol amendment. It is implemented in reusable core, every identity
-that must distinguish it moves, every historical full-vocabulary identity is
-byte-identical, and it is qualified on real GPU against the full-vocab baseline for
-`$1.5919` of an `$8.0000` ceiling across three subruns. Owner:
-[`topk-adoption/`](../stages/stage-1/phase_d1/validations/topk-adoption/).
+**REVIEW REOPENED THE TOP-K ADOPTION. Engineering work remains.** The scientific
+direction is accepted — `reference_topk_tail_v1`, **K = 200**, reference-defined
+support, one aggregate tail bucket, shared by D1/D2/D3, no sweep — but the
+implementation's tail arithmetic was invalid at the numerical edge and the adoption
+evidence is being re-measured.
 
 ```text
-ZERO of 8 DEPTH decisions move; the removal orders are identical
-CE/NLL exact to 1.4e-07, top-1 bit-identical
-forward teacher KL moves 1.8e-03; the worst-domain identity agrees
-REVERSE KL moves -18.7% -- the one materially different metric
-reference state 16.91 GiB -> 144 MB (120x); reduction 1.59x faster
-state-eval only 5.7% faster and 2% MORE peak: the output head's O(V)
-  compute is NOT removed, and no O(K) claim is made
+next:  correct Top-K tail numerics        DONE
+    -> revalidate adoption on GPU         lower_bound_violations must be 0
+    -> production Top-K-only repricing    the dual-reducer clock is NOT it
+    -> maintainer funding/envelope decision
 ```
 
-`K = 200` is maintainer-selected: no sweep was run and it must never be tuned
-against D1/D2/D3 results. The behavioural family does not move —
-`family_content_id 1e3445f1…74cd58` stands.
+**What was wrong.** The tail was reconstructed as `1 - sum(support)`. On real
+logits the measured Top-200 support mass reached **1.000001** — a probability above
+one — so the complement was below float32 resolution; and the code then *dropped*
+the tail term whenever either mass rounded to zero, when only a zero **reference**
+mass may make a forward-KL term vanish. One coarse KL consequently exceeded the
+full-vocabulary KL, which a coarsening cannot do. I had recorded that as a
+"bounded open numerical observation"; it was a defect, and our own `1.000001` was
+the evidence. Repaired: the tail now comes from the complement's own logits, a
+zero candidate tail against a non-zero reference tail is `+inf` and is preserved,
+and `nan_to_num(posinf=0)` is gone from the batched mean.
 
-**D1's claim boundary is narrower than it was.** The full-vocab qualification
-measured that the calibration batch size, not the position policy, moves three of
-four fixed-path selections. With this amendment D1 differs from the historical
-incumbent on three axes at once, so it is an optimization/challenger experiment
-against incumbent B and **not** a causal attribution to position weighting.
+The superseded findings are kept at
+[`closeout.SUPERSEDED_BY_REVIEW.json`](../stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.SUPERSEDED_BY_REVIEW.json)
+— a1/a2/a3 are real paid measurements and are what the repair must be judged
+against. `$1.5919` of an `$8.0000` ceiling spent so far.
+
+**D1's claim boundary.** The full-vocab qualification measured that the calibration
+batch size, not the position policy, moves three of four fixed-path selections.
+D1 differs from incumbent B on three axes — distribution support, numerical
+execution, scoring positions — so it is a **challenger** experiment against B and
+**not** a causal isolation of position weighting.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
