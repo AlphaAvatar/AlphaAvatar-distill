@@ -40,12 +40,27 @@ contract so that no existing ``measurement_protocol_id`` recomputes differently.
 ``top_k`` is always supplied by the caller. It is an experiment-policy parameter,
 not a framework default, and this module contains no value for it.
 
+**The tail is computed from the complement's own logits, never by subtracting
+the support's mass from one.** An independent review caught the subtraction as a
+real numerical-semantic defect, and the evidence was already in our own report: on
+real logits the measured Top-200 support mass reached ``1.000001``, a probability
+above one, so the complement was below float32 resolution and one per-item score
+had the coarse KL EXCEED the full-vocabulary KL by 2.2e-03 relative. A coarsening
+cannot do that. Masking the support and reducing the rest has no cancellation, and
+the partition's two masses then sum to one by construction.
+
+**A zero candidate tail against a non-zero reference tail is ``+inf``, and stays
+``+inf``.** Only zero REFERENCE mass makes a forward-KL term vanish. The earlier
+code dropped the term whenever either mass rounded to zero, which silently turned
+an infinite divergence into a finite and favourable score.
+
 Implementation notes taken from ``lasgroup/SDPO`` @
 ``7c457fc1b1f636ae794eb0362ba37d4743b06fbc``: normalized top-k log
-probabilities, the optional aggregate tail bucket, a numerically stable
-complement probability, and gathering the compared distribution on one fixed
-support. Its support policy — the *student's* top-k — is deliberately NOT
-adopted, for the reason above.
+probabilities, the optional aggregate tail bucket, and gathering the compared
+distribution on one fixed support. Its support policy — the *student's* top-k —
+is deliberately NOT adopted, for the reason above, and its stable-complement
+formulation is superseded here by the complement logsumexp, which needs no
+stabilisation because it never cancels.
 """
 from __future__ import annotations
 
@@ -121,34 +136,39 @@ def reference_topk_tail(top_k: int) -> DistributionSupport:
 
 # --- numerics ---------------------------------------------------------------
 
-#: `log(2)`. Below this, `expm1` is the accurate branch; above it, `log1p`.
-_LOG2 = 0.6931471805599453
+def owned_float32(logits: torch.Tensor) -> torch.Tensor:
+    """An fp32 copy this module may destroy.
 
-
-def log1mexp(x: torch.Tensor) -> torch.Tensor:
-    """``log(1 - exp(x))`` for ``x <= 0``, without cancelling.
-
-    The naive form loses everything in one of the two regimes: near ``x = 0`` the
-    subtraction ``1 - exp(x)`` cancels, and for very negative ``x`` the ``log1p``
-    argument underflows. The standard split evaluates each regime on the function
-    that is accurate there:
-
-    * ``x > -log 2``  ->  ``log(-expm1(x))``
-    * ``x <= -log 2`` ->  ``log1p(-exp(x))``
-
-    At ``x == 0`` the true value is ``-inf`` — the reference's Top-K holds all the
-    mass and the tail bucket is empty. That is returned rather than raised; the
-    reducer multiplies it by a zero tail probability and the term vanishes, which
-    is the limit.
+    `.float()` RETURNS THE SAME TENSOR when the input is already fp32, so masking
+    the support in place would mutate the caller's logits -- the reference block a
+    search has cached, or the candidate block the operator is still holding. The
+    copy is explicit for that reason, not defensively.
     """
-    #: Both branches are evaluated and selected with `where`, so neither can
-    #: produce a NaN gradient through the unused side. `clamp` keeps the inputs
-    #: inside each branch's valid domain before evaluation rather than after.
-    near = torch.log(-torch.expm1(torch.clamp(x, max=-torch.finfo(x.dtype).tiny)))
-    far = torch.log1p(-torch.exp(torch.clamp(x, max=0.0)))
-    out = torch.where(x > -_LOG2, near, far)
-    #: x == 0 exactly: the tail is empty and log(0) = -inf is the answer.
-    return torch.where(x >= 0.0, torch.full_like(out, float("-inf")), out)
+    return logits.to(torch.float32, copy=True)
+
+
+def complement_log_mass(z_owned: torch.Tensor, support: torch.Tensor,
+                        log_z: torch.Tensor) -> torch.Tensor:
+    """``log P(outside support)``, from the complement's own logits.
+
+    DESTROYS ``z_owned``: the support entries are set to ``-inf`` and the
+    remaining row is reduced. The caller must own it.
+
+    This replaces ``log(1 - sum of the support's probabilities)``, which is the
+    defect an independent review caught. Reconstructing the tail by subtraction
+    crosses float32 resolution whenever the support holds nearly all the mass:
+    the measured Top-200 support mass reached **1.000001** on real logits, a
+    probability above one, and from there the complement is noise. One per-item
+    score consequently had the coarse KL EXCEED the full-vocabulary KL by
+    2.2e-03 relative, which a coarsening cannot do.
+
+    The complement logits already exist in the row. Reducing them directly has no
+    cancellation at all, and it is exact in the only sense that matters here: the
+    K+1 partition's two masses are computed by the same ``logsumexp`` against the
+    same normalizer, so they sum to one by construction rather than by luck.
+    """
+    z_owned.scatter_(-1, support, float("-inf"))
+    return torch.logsumexp(z_owned, dim=-1) - log_z
 
 
 # --- the reference sketch ---------------------------------------------------
@@ -239,25 +259,36 @@ def sketch_reference(logits: torch.Tensor, targets: torch.Tensor, *,
     top1 = torch.empty((t_pred,), dtype=torch.long, device=logits.device)
     tgt = torch.empty((t_pred,), dtype=torch.float32, device=logits.device)
 
+    has_tail = k < vocab
     for start in range(0, t_pred, max(1, int(chunk))):
         stop = min(start + max(1, int(chunk)), t_pred)
-        block = logits[start:stop].float()
+        #: OWNED, because the tail is computed by masking this tensor below.
+        block = owned_float32(logits[start:stop])
         #: ONE log-normalizer over the FULL vocabulary. Every log probability
         #: below is normalized against it, including the gold token's -- so CE
         #: stays exact whether or not the gold token is in the Top-K.
         log_z = torch.logsumexp(block, dim=-1, keepdim=True)
-        log_probs = block - log_z
-        top = torch.topk(log_probs, k, dim=-1, largest=True, sorted=True)
+        top = torch.topk(block, k, dim=-1, largest=True, sorted=True)
         idx[start:stop] = top.indices
-        lp[start:stop] = top.values
-        #: The tail in log space from the support's own mass, NOT by summing the
-        #: complement -- which would need the full row again and defeat the point.
-        tail[start:stop] = log1mexp(
-            torch.logsumexp(top.values, dim=-1).clamp(max=0.0))
+        lp[start:stop] = top.values - log_z
         top1[start:stop] = top.indices[:, 0]
-        tgt[start:stop] = log_probs.gather(
-            1, targets[start:stop].view(-1, 1).to(log_probs.device)).squeeze(1)
-        del block, log_probs, log_z, top
+        #: EVERYTHING THAT NEEDS THE UNMODIFIED ROW IS CAPTURED FIRST. The gold
+        #: token may be inside the support, so its logit must be read before the
+        #: support is masked out.
+        tgt[start:stop] = (
+            block.gather(1, targets[start:stop].view(-1, 1).to(block.device))
+            .squeeze(1) - log_z.squeeze(-1))
+        #: Only now: the tail from the complement's own logits. `block` is
+        #: destroyed by this and is not read again.
+        if has_tail:
+            tail[start:stop] = complement_log_mass(
+                block, top.indices, log_z.squeeze(-1))
+        else:
+            #: K >= V: the support IS the vocabulary and there is structurally no
+            #: tail bucket. `-inf` records an empty one; no consumer reads it,
+            #: because `has_tail` is false everywhere downstream.
+            tail[start:stop] = float("-inf")
+        del block, log_z, top
 
     return ReferenceDistributionSketch(
         support_indices=idx, support_log_probs=lp, tail_log_prob=tail,
@@ -328,46 +359,35 @@ def distortion_on_reference_support(
     tag_acc = {name: torch.zeros(3, dtype=torch.float64, device=device)
                for name in tags}
 
+    has_tail = sketch.top_k < sketch.vocab_size
     step = max(1, int(chunk))
     for start in range(0, t_pred, step):
         stop = min(start + step, t_pred)
-        cand = cand_logits[start:stop].float()
-        #: The candidate's OWN full-vocabulary normalizer. It is not optional: the
-        #: candidate's probabilities on the reference support only mean anything
-        #: relative to its whole distribution, and its tail is one minus their sum.
+        #: OWNED: the candidate's tail is computed by masking this tensor.
+        cand = owned_float32(cand_logits[start:stop])
+        #: The candidate's OWN full-vocabulary normalizer. Not optional: its
+        #: probabilities on the reference support only mean anything relative to
+        #: its whole distribution.
         cand_log_z = torch.logsumexp(cand, dim=-1, keepdim=True)
-        cand_log_probs_all = cand - cand_log_z
 
         p_log = sketch.support_log_probs[start:stop].to(device).float()
         p_tail_log = sketch.tail_log_prob[start:stop].to(device).float()
         support = sketch.support_indices[start:stop].to(device)
         #: GATHERED ON THE REFERENCE SUPPORT. The candidate does not choose it.
-        q_log = cand_log_probs_all.gather(1, support)
-        q_tail_log = log1mexp(torch.logsumexp(q_log, dim=-1).clamp(max=0.0))
+        q_log = cand.gather(1, support) - cand_log_z
+        tgt = targets[start:stop].to(device)
+        #: Captured before the mask, since the gold token may be in the support.
+        abl_ce = -(cand.gather(1, tgt.view(-1, 1)).squeeze(1)
+                   - cand_log_z.squeeze(-1))
+        cand_argmax = cand.argmax(dim=-1)
+        #: The candidate's tail from ITS OWN complement logits, against the
+        #: reference support. `cand` is destroyed here and not read again.
+        q_tail_log = (complement_log_mass(cand, support,
+                                          cand_log_z.squeeze(-1))
+                      if has_tail else None)
 
         p = p_log.exp()
         q = q_log.exp()
-        p_tail = p_tail_log.exp()
-        q_tail = q_tail_log.exp()
-
-        #: WHEN THERE IS NO TAIL BUCKET, there is no tail term. Two cases, and
-        #: the first is structural:
-        #:
-        #: 1. `top_k >= vocab_size`. The support IS the vocabulary, the partition
-        #:    is not coarsened at all, and this reduction must equal the
-        #:    full-vocabulary one exactly. That identity is what the correctness
-        #:    tests pin.
-        #: 2. Either tail has rounded to empty. The support masses sum to 1.0 in
-        #:    float32, so the true tail is below the arithmetic's resolution.
-        #:
-        #: The second case is why this is not merely tidiness. At `K == V` the two
-        #: tails round INDEPENDENTLY: `p_tail` can land at ~1e-8 while `q_tail`
-        #: rounds to exactly 0, and `1e-8 * (log 1e-8 - log 0)` is `+inf` --- a
-        #: spurious infinity from float noise, which is exactly what this returned
-        #: before. A bucket below the resolution of the arithmetic is empty for
-        #: BOTH distributions or for neither; it cannot be empty for one.
-        no_tail = sketch.top_k >= sketch.vocab_size
-        degenerate = (p_tail <= 0) | (q_tail <= 0)
 
         #: Forward KL on the K+1 partition. `_term` is the convention that makes
         #: the empty-bucket limits right: a bucket with zero reference mass
@@ -378,24 +398,24 @@ def distortion_on_reference_support(
         #: candidate look merely bad.
         kl_support = _term(p, p_log, q_log).sum(dim=-1)
         rkl_support = _term(q, q_log, p_log).sum(dim=-1)
-        if no_tail:
+        if not has_tail:
+            #: K >= V: the partition is the vocabulary and has no tail bucket.
             kl, rkl = kl_support, rkl_support
         else:
-            keep = ~degenerate
-            kl = kl_support + torch.where(
-                keep, _term(p_tail, p_tail_log, q_tail_log),
-                torch.zeros_like(kl_support))
-            #: Reverse KL on the SAME partition, roles swapped -- and gated by the
-            #: SAME `keep`, so one state evaluation cannot carry a forward KL with
-            #: a tail bucket and a reverse KL without one.
-            rkl = rkl_support + torch.where(
-                keep, _term(q_tail, q_tail_log, p_tail_log),
-                torch.zeros_like(rkl_support))
+            #: THE TAIL TERM IS NOT CONDITIONAL. For finite logits and K < V a
+            #: mathematical complement exists, and the only thing that makes the
+            #: forward term vanish is zero REFERENCE mass -- which `_term`
+            #: handles. If the candidate has zero complement mass while the
+            #: reference does not, forward KL is `+inf` and is PRESERVED: that is
+            #: a candidate assigning zero probability to something the reference
+            #: does, and reporting it as finite would be a false measurement.
+            p_tail, q_tail = p_tail_log.exp(), q_tail_log.exp()
+            kl = kl_support + _term(p_tail, p_tail_log, q_tail_log)
+            #: Reverse KL on the SAME partition, roles swapped.
+            rkl = rkl_support + _term(q_tail, q_tail_log, p_tail_log)
 
-        tgt = targets[start:stop].to(device)
         ref_ce = -sketch.target_log_prob[start:stop].to(device).float()
-        abl_ce = -cand_log_probs_all.gather(1, tgt.view(-1, 1)).squeeze(1)
-        agree = (cand.argmax(dim=-1)
+        agree = (cand_argmax
                  == sketch.top1_token[start:stop].to(device)).float()
 
         block_w = None if w is None else w[start:stop]
@@ -422,8 +442,7 @@ def distortion_on_reference_support(
                 tag_acc[name][1] += (m * block_w).sum().double()
             tag_acc[name][2] += m.sum().double()
 
-        del (cand, cand_log_z, cand_log_probs_all, p_log, p_tail_log, support,
-             q_log, q_tail_log, p, q, p_tail, q_tail, kl, rkl)
+        del cand, cand_log_z, p_log, p_tail_log, support, q_log, kl, rkl
 
     host = acc.cpu() if resident else acc
     out.positions = t_pred
@@ -476,20 +495,28 @@ def sketch_forward_kl(support_indices: torch.Tensor,
     five, 260 candidate subsets x 67 items per expansion, which is why it does
     not come through the six-quantity reducer.
     """
-    cand = cand_logits.float()
-    q_all = cand - torch.logsumexp(cand, dim=-1, keepdim=True)
-    q_log = q_all.gather(-1, support_indices)
+    #: OWNED: the tail is computed by masking this tensor, and `.float()` would
+    #: alias a caller-owned fp32 block -- the reference a search has cached or the
+    #: candidate the operator still holds.
+    cand = owned_float32(cand_logits)
+    log_z = torch.logsumexp(cand, dim=-1, keepdim=True)
+    q_log = cand.gather(-1, support_indices) - log_z
     p_log = support_log_probs.float()
 
     kl = _term(p_log.exp(), p_log, q_log).sum(dim=-1)
     if not has_tail:
+        #: K >= V: no tail bucket exists.
         return kl
     p_tail_log = tail_log_prob.float()
-    q_tail_log = log1mexp(torch.logsumexp(q_log, dim=-1).clamp(max=0.0))
-    p_tail, q_tail = p_tail_log.exp(), q_tail_log.exp()
-    keep = ~((p_tail <= 0) | (q_tail <= 0))
-    return kl + torch.where(keep, _term(p_tail, p_tail_log, q_tail_log),
-                            torch.zeros_like(kl))
+    #: The candidate's tail from ITS OWN complement logits on the reference
+    #: support. NOT `1 - sum(support)`, which crosses float32 resolution once the
+    #: support holds nearly all the mass and is what let a coarse KL exceed the
+    #: full one. `cand` is destroyed here.
+    q_tail_log = complement_log_mass(cand, support_indices, log_z.squeeze(-1))
+    #: UNCONDITIONAL. Only zero REFERENCE mass makes the forward term vanish, and
+    #: `_term` is what decides that. A candidate with zero complement mass against
+    #: a non-zero reference tail is `+inf`, and that is preserved.
+    return kl + _term(p_tail_log.exp(), p_tail_log, q_tail_log)
 
 
 def sketch_forward_kl_mean(sketch: ReferenceDistributionSketch,
@@ -542,12 +569,14 @@ def sketch_forward_kl_mean_batch(support_indices: torch.Tensor,
         raise ValueError(
             "a row has no weighted valid position, so its mean has no "
             "denominator; an item that contributes nothing must not be scored")
-    #: Padded positions are masked out of the NUMERATOR too -- they hold whatever
-    #: the pad token produced and must not reach the sum through a NaN or an inf.
-    #:
-    #: float64 to match `forward_kl_mean_batch`, which this stands in for. The
-    #: dtype is part of the contract its caller consumes, not an implementation
-    #: detail: returning float32 made the two incomparable in a single
-    #: `torch.allclose`, which is a small sign of a larger mismatch.
-    numer = (torch.nan_to_num(kl, nan=0.0, posinf=0.0, neginf=0.0) * m)
-    return numer.double().sum(dim=-1) / denom.double()
+    #: MASK BEFORE MULTIPLY, and never `nan_to_num`. A padded or zero-weight
+    #: position holds whatever the pad token produced and must contribute zero; a
+    #: VALID position holding `+inf` must stay `+inf`, because that is a candidate
+    #: assigning zero probability to something the reference does. The previous
+    #: `nan_to_num(posinf=0.0)` erased exactly that distinction and could turn a
+    #: genuine infinite divergence into a finite -- and favourable -- score.
+    effective = m
+    safe = torch.where(effective > 0, kl, torch.zeros_like(kl))
+    #: float64 to match `forward_kl_mean_batch`, which this stands in for; the
+    #: dtype is part of the contract its caller consumes.
+    return (safe * effective).double().sum(dim=-1) / denom.double()

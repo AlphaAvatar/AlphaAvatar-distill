@@ -19,7 +19,7 @@ from aadistill.initialization.scoring.protocol_identity import (  # noqa: E402
 from aadistill.initialization.scoring.support import (  # noqa: E402
     FULL_VOCAB_V1, SUPPORT_FULL_VOCAB_V1, SUPPORT_REFERENCE_TOPK_TAIL_V1,
     DistributionSupport, ReferenceDistributionSketch,
-    distortion_on_reference_support, log1mexp, reference_topk_tail,
+    distortion_on_reference_support, reference_topk_tail,
     sketch_reference,
 )
 from aadistill.initialization.statistics.contribution import distortion  # noqa: E402
@@ -58,13 +58,35 @@ class TestTheSupportIsAnIdentityBearingValue:
 
         import aadistill.initialization.scoring.support as mod
 
+        import ast
+        import io
+        import tokenize
+
         source = Path(mod.__file__).read_text()
-        #: Only inside the prose that explains it is NOT a default.
-        code = "\n".join(line for line in source.splitlines()
-                         if not line.lstrip().startswith(("#", "*", '"', "'"))
-                         and "``" not in line)
-        assert "200" not in code, (
-            "a core module must not carry an experiment's K")
+        #: Tokens, not line prefixes: a docstring's body lines start with
+        #: ordinary words, and the crude filter let one through once.
+        tree = ast.parse(source)
+        docs = set()
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.Module, ast.ClassDef, ast.FunctionDef,
+                                 ast.AsyncFunctionDef)):
+                text = ast.get_docstring(node, clean=False)
+                if text:
+                    docs.add(text)
+        hits = []
+        for tok in tokenize.generate_tokens(io.StringIO(source).readline):
+            if tok.type == tokenize.COMMENT:
+                continue
+            if tok.type == tokenize.STRING:
+                try:
+                    value = ast.literal_eval(tok.string)
+                except Exception:
+                    value = None
+                if isinstance(value, str) and value in docs:
+                    continue
+            if tok.type == tokenize.NUMBER and tok.string.replace("_", "") == "200":
+                hits.append((tok.start[0], tok.string))
+        assert not hits, f"a core module carries an experiment's K: {hits}"
 
 
 class TestHistoricalIdentityDoesNotMove:
@@ -111,27 +133,113 @@ class TestHistoricalIdentityDoesNotMove:
         assert len(set(ids.values())) == 3
 
 
-class TestLog1mexp:
+class TestTheTailComesFromTheComplement:
+    """The repair an independent review required, and what it replaced.
 
-    def test_it_matches_the_naive_form_where_the_naive_form_is_accurate(self):
-        x = torch.tensor([-0.1, -0.5, -1.0, -5.0, -20.0], dtype=torch.float64)
-        naive = torch.log1p(-torch.exp(x))
-        assert torch.allclose(log1mexp(x), naive, atol=1e-12)
+    The tail was `log(1 - sum of the support's probabilities)`. On real logits the
+    support mass reached 1.000001 -- above one -- so the complement was noise, and
+    one per-item score had the coarse KL exceed the full-vocabulary KL. These pin
+    the property that makes that impossible.
+    """
 
-    def test_it_survives_both_regimes_without_nan(self):
-        x = torch.tensor([-1e-12, -1e-8, -0.69, -0.70, -1e3, -1e30],
-                         dtype=torch.float64)
-        got = log1mexp(x)
-        assert torch.isfinite(got).all(), got
+    def test_the_support_mass_can_exceed_one_which_is_why_subtraction_was_wrong(self):
+        """THE OBSERVABLE THAT GAVE THE DEFECT AWAY, stated correctly.
 
-    def test_at_zero_the_tail_is_empty(self):
-        got = log1mexp(torch.zeros(3, dtype=torch.float64))
-        assert torch.isinf(got).all() and (got < 0).all()
+        The measured `p95 = 1.000001` was not a bug in the mass -- it is what the
+        arithmetic does. `log_z` carries its own float error, every
+        `logit - log_z` inherits it, and on a peaked row their exponentials sum to
+        slightly MORE than one (1.0000018 here, in float64 too). So
+        `1 - sum(support)` is NEGATIVE, the old code clamped it to zero, and the
+        tail term was dropped -- or worse, kept with a noise-valued magnitude
+        whose sign could push the coarse KL above the full one.
 
-    def test_near_zero_does_not_cancel(self):
-        """`log(1 - exp(-1e-10))` is about `log(1e-10)`, not `-inf`."""
-        got = float(log1mexp(torch.tensor([-1e-10], dtype=torch.float64))[0])
-        assert math.isclose(got, math.log(1e-10), rel_tol=1e-6), got
+        The property to pin is therefore not "the mass is at most one". It is that
+        the TAIL does not come from that subtraction, which the next two tests
+        establish.
+        """
+        ref, _, targets = _pair(T=24, V=300, spread=12.0)
+        sk = sketch_reference(ref, targets, top_k=200, chunk=8)
+        mass = sk.support_log_probs.double().exp().sum(dim=-1)
+        assert float(mass.max()) > 1.0, (
+            "pick a spread where the support mass does exceed one, or this "
+            "documents nothing")
+        #: And the tail is finite anyway -- see below.
+        assert torch.isfinite(sk.tail_log_prob).all()
+
+    def test_the_tail_is_finite_for_finite_logits_at_every_spread(self):
+        """What the subtraction could not do.
+
+        The old formulation produced `-inf` -- a dropped bucket -- whenever the
+        support mass rounded to one or above. The complement logsumexp cannot:
+        for finite logits and `K < V` the complement contains real logits, so its
+        reduction is finite.
+        """
+        for spread in (0.02, 0.5, 3.0, 12.0, 40.0):
+            for k in (1, 8, 200, 299):
+                ref, _, targets = _pair(T=16, V=300, spread=spread)
+                sk = sketch_reference(ref, targets, top_k=k, chunk=8)
+                assert torch.isfinite(sk.tail_log_prob).all(), (
+                    f"tail is not finite at spread={spread} K={k}")
+
+    def test_support_mass_plus_tail_mass_is_one(self):
+        for spread in (0.02, 0.5, 3.0, 12.0):
+            ref, _, targets = _pair(T=24, V=300, spread=spread)
+            sk = sketch_reference(ref, targets, top_k=50, chunk=8)
+            total = (sk.support_log_probs.double().exp().sum(dim=-1)
+                     + sk.tail_log_prob.double().exp())
+            #: 1e-5 and not tighter: both masses are normalized by the same
+            #: float32 `log_z`, so they inherit its relative error -- about 2e-6
+            #: at the worst spread here. What matters is that the error is
+            #: INHERITED rather than AMPLIFIED by a cancellation.
+            assert torch.allclose(total, torch.ones_like(total), atol=1e-5), (
+                float((total - 1).abs().max()))
+
+    def test_it_does_not_mutate_the_callers_logits(self):
+        """`.float()` aliases an fp32 input; masking it would destroy the cache."""
+        ref, _, targets = _pair(T=12, V=80)
+        assert ref.dtype == torch.float32
+        before = ref.clone()
+        sketch_reference(ref, targets, top_k=10, chunk=4)
+        assert torch.equal(ref, before), (
+            "the sketch builder mutated the reference logits it was handed")
+
+    def test_the_candidate_reducers_do_not_mutate_either(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl, sketch_forward_kl_mean,
+        )
+
+        ref, cand, targets = _pair(T=12, V=80)
+        sk = sketch_reference(ref, targets, top_k=10, chunk=4)
+        before = cand.clone()
+        distortion_on_reference_support(sk, cand, targets, chunk=4)
+        assert torch.equal(cand, before), "the six-quantity reducer mutated it"
+        sketch_forward_kl_mean(sk, cand)
+        assert torch.equal(cand, before), "the per-item reducer mutated it"
+        sketch_forward_kl(sk.support_indices, sk.support_log_probs,
+                          sk.tail_log_prob, cand, has_tail=True)
+        assert torch.equal(cand, before), "sketch_forward_kl mutated it"
+
+    def test_a_zero_candidate_tail_against_a_real_reference_tail_is_infinite(self):
+        """The contract the old `degenerate` branch violated.
+
+        A candidate that assigns zero probability outside the reference's support,
+        while the reference assigns some, has infinite forward KL. The old code
+        dropped the term and returned a finite -- and favourable -- score.
+        """
+        from aadistill.initialization.scoring.support import sketch_forward_kl
+
+        T, V, K = 4, 60, 8
+        g = torch.Generator().manual_seed(3)
+        ref = torch.randn(T, V, generator=g) * 0.5      # flat: a real tail
+        sk = sketch_reference(ref, torch.zeros(T, dtype=torch.long), top_k=K,
+                              chunk=2)
+        assert float(sk.tail_log_prob.exp().min()) > 1e-3, "no reference tail"
+        #: A candidate with -inf everywhere outside the reference's support.
+        cand = torch.full((T, V), float("-inf"))
+        cand.scatter_(1, sk.support_indices, 0.0)
+        kl = sketch_forward_kl(sk.support_indices, sk.support_log_probs,
+                               sk.tail_log_prob, cand, has_tail=True)
+        assert torch.isinf(kl).all() and (kl > 0).all(), kl
 
 
 class TestTheSketchHoldsOnlyWhatIsNeeded:
@@ -655,3 +763,244 @@ class TestTheStateEvaluatorUnderTheNewSupport:
             assert second.values[key] == pytest.approx(first.values[key]), key
             assert third.values[key] == pytest.approx(first.values[key],
                                                       rel=1e-9), key
+
+
+class TestTheLowerBoundHoldsEverywhere:
+    """`KL(topK+tail) <= KL(full)` across the regimes that broke it.
+
+    The review's required matrix. The inequality is mathematics -- coarsening a
+    partition cannot increase KL -- so a violation is a defect in the
+    implementation, never a finding about the protocol. The tolerance is
+    PREDECLARED here and is not to be widened to admit a violation.
+    """
+
+    #: Two independent float32 implementations summing different numbers of terms
+    #: (V against K+1) agree to about float32 epsilon times the dynamic range.
+    #: 1e-5 absolute / 1e-5 relative is the declared allowance; a real violation
+    #: of the kind the review caught was 2.968e-04 absolute / 2.2e-03 relative,
+    #: two orders of magnitude outside it.
+    ABS_TOL = 1e-5
+    REL_TOL = 1e-5
+
+    @staticmethod
+    def _violations(ref, cand, targets, k, chunk=8):
+        from aadistill.initialization.statistics.contribution import distortion
+
+        full = distortion(ref, cand, targets, chunk=chunk)
+        sk = sketch_reference(ref, targets, top_k=k, chunk=chunk)
+        got = distortion_on_reference_support(sk, cand, targets, chunk=chunk)
+        excess = got.kl - full.kl
+        allowed = TestTheLowerBoundHoldsEverywhere.ABS_TOL + \
+            TestTheLowerBoundHoldsEverywhere.REL_TOL * abs(full.kl)
+        return excess, allowed, full.kl, got.kl
+
+    @pytest.mark.parametrize("dtype", ["float32", "bfloat16"])
+    @pytest.mark.parametrize("spread", [0.02, 0.5, 3.0, 12.0])
+    @pytest.mark.parametrize("k", [1, 8, 200, 299])
+    def test_across_dtype_spread_and_k(self, dtype, spread, k):
+        ref, cand, targets = _pair(T=20, V=300, spread=spread, noise=spread * 0.5)
+        if dtype == "bfloat16":
+            ref, cand = ref.bfloat16(), cand.bfloat16()
+        excess, allowed, f, t = self._violations(ref, cand, targets, k)
+        assert excess <= allowed, (
+            f"{dtype} spread={spread} K={k}: coarse KL {t} exceeds full {f} by "
+            f"{excess:.3e}, allowance {allowed:.3e}")
+
+    def test_with_a_highly_peaked_reference(self):
+        """Its tail is below float32 resolution -- the regime that broke."""
+        T, V = 16, 400
+        ref = torch.full((T, V), -40.0)
+        ref[:, :3] = torch.tensor([60.0, 59.0, 58.0])
+        g = torch.Generator().manual_seed(2)
+        cand = torch.randn(T, V, generator=g) * 2.0
+        targets = torch.zeros(T, dtype=torch.long)
+        for k in (1, 2, 8, 200):
+            excess, allowed, f, t = self._violations(ref, cand, targets, k, chunk=4)
+            assert excess <= allowed, (k, f, t, excess)
+
+    def test_with_a_highly_peaked_candidate(self):
+        """Its complement mass is below resolution -- the other side."""
+        T, V = 16, 400
+        g = torch.Generator().manual_seed(4)
+        ref = torch.randn(T, V, generator=g) * 1.5
+        cand = torch.full((T, V), -40.0)
+        cand[:, :3] = torch.tensor([60.0, 59.0, 58.0])
+        targets = torch.zeros(T, dtype=torch.long)
+        for k in (1, 8, 200, 399):
+            excess, allowed, f, t = self._violations(ref, cand, targets, k, chunk=4)
+            assert excess <= allowed, (k, f, t, excess)
+
+    def test_with_k_one_below_the_vocabulary(self):
+        """A single-entry tail: the smallest real complement there is."""
+        ref, cand, targets = _pair(T=16, V=120, spread=2.0)
+        excess, allowed, f, t = self._violations(ref, cand, targets, 119, chunk=4)
+        assert excess <= allowed, (f, t, excess)
+
+    def test_the_case_the_old_implementation_would_have_broken(self):
+        """A reference whose support mass sums ABOVE one in float32.
+
+        `1 - sum(support)` is negative here, so the old formulation clamped the
+        tail to zero and dropped the term. Reconstructed explicitly so the
+        regression has a named witness rather than relying on a random draw.
+        """
+        ref, cand, targets = _pair(T=24, V=300, spread=12.0, noise=6.0)
+        sk = sketch_reference(ref, targets, top_k=200, chunk=8)
+        mass = sk.support_log_probs.double().exp().sum(dim=-1)
+        assert float(mass.max()) > 1.0, (
+            "this witness requires a support mass above one; the draw changed")
+        #: The old code's tail: clamped, then log1mexp -> -inf -> term dropped.
+        old_tail_would_be = (1.0 - mass).clamp(min=0.0)
+        assert float(old_tail_would_be.min()) == 0.0, (
+            "the old formulation would not have clamped here")
+        #: The new one is finite and the bound holds.
+        assert torch.isfinite(sk.tail_log_prob).all()
+        excess, allowed, f, t = self._violations(ref, cand, targets, 200)
+        assert excess <= allowed, (f, t, excess)
+
+
+class TestInfinitiesSurviveMaskingOnValidPositionsOnly:
+    """`nan_to_num(posinf=0)` erased the distinction; masking before the multiply
+    keeps it.
+
+    A padded or zero-weight position holds whatever the pad token produced and
+    must contribute nothing. A VALID position holding `+inf` is a candidate
+    assigning zero probability to something the reference does, and turning that
+    into zero manufactures a finite -- and favourable -- score.
+    """
+
+    @staticmethod
+    def _batch(valid_lengths, infinite_at):
+        """A `[B, T, V]` pair whose chosen positions have infinite forward KL."""
+        B, T, V, K = len(valid_lengths), max(valid_lengths), 60, 6
+        g = torch.Generator().manual_seed(8)
+        ref = torch.randn(B * T, V, generator=g) * 0.5
+        sk = sketch_reference(ref, torch.zeros(B * T, dtype=torch.long),
+                              top_k=K, chunk=16)
+        cand = (ref + torch.randn(B * T, V, generator=g) * 0.3).clone()
+        #: Make the chosen flat indices put ZERO mass outside the reference's
+        #: support, which is an infinite forward KL there.
+        for flat in infinite_at:
+            cand[flat] = float("-inf")
+            cand[flat].scatter_(0, sk.support_indices[flat], 0.0)
+        mask = torch.zeros(B, T, dtype=torch.bool)
+        for row, length in enumerate(valid_lengths):
+            mask[row, :length] = True
+        return sk, cand.reshape(B, T, V), mask, B, T, K
+
+    def test_a_valid_infinite_position_keeps_the_row_infinite(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        #: row 0 position 1 is VALID and infinite.
+        sk, cand, mask, B, T, K = self._batch([4, 4], infinite_at=[1])
+        got = sketch_forward_kl_mean_batch(
+            sk.support_indices.reshape(B, T, -1),
+            sk.support_log_probs.reshape(B, T, -1),
+            sk.tail_log_prob.reshape(B, T), cand, mask, has_tail=True)
+        assert torch.isinf(got[0]) and got[0] > 0, (
+            f"a valid +inf position was absorbed: row 0 = {float(got[0])}")
+        assert torch.isfinite(got[1]), "row 1 should be unaffected"
+
+    def test_a_padded_infinite_position_is_masked_out(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        #: row 0 is valid for 2 positions; flat index 3 is row 0 position 3 --
+        #: PADDING -- and is infinite.
+        sk, cand, mask, B, T, K = self._batch([2, 4], infinite_at=[3])
+        got = sketch_forward_kl_mean_batch(
+            sk.support_indices.reshape(B, T, -1),
+            sk.support_log_probs.reshape(B, T, -1),
+            sk.tail_log_prob.reshape(B, T), cand, mask, has_tail=True)
+        assert torch.isfinite(got[0]), (
+            f"padding leaked into the row mean: {float(got[0])}")
+
+    def test_a_zero_weight_infinite_position_is_masked_out(self):
+        from aadistill.initialization.scoring.support import (
+            sketch_forward_kl_mean_batch,
+        )
+
+        sk, cand, mask, B, T, K = self._batch([4, 4], infinite_at=[2])
+        weights = torch.ones(B, T)
+        weights[0, 2] = 0.0          # the objective does not score this position
+        got = sketch_forward_kl_mean_batch(
+            sk.support_indices.reshape(B, T, -1),
+            sk.support_log_probs.reshape(B, T, -1),
+            sk.tail_log_prob.reshape(B, T), cand, mask, has_tail=True,
+            weights=weights)
+        assert torch.isfinite(got[0]), (
+            f"a zero-weight +inf reached the mean: {float(got[0])}")
+
+    def test_the_reducer_calls_no_nan_to_num(self):
+        """Pin the retired pattern -- in CODE.
+
+        The comment explaining why it was retired necessarily names it, and that
+        comment is the record. So this checks tokens rather than text; a plain
+        substring search failed on the explanation, which is the test being wrong
+        rather than the code.
+        """
+        import io
+        import tokenize
+        from pathlib import Path
+
+        import aadistill.initialization.scoring.support as mod
+
+        source = Path(mod.__file__).read_text()
+        calls = [tok.start[0] for tok in
+                 tokenize.generate_tokens(io.StringIO(source).readline)
+                 if tok.type == tokenize.NAME and tok.string == "nan_to_num"]
+        assert not calls, (
+            f"nan_to_num is called at lines {calls}; it cannot distinguish a "
+            "padded infinity from a real one")
+
+
+class TestTheSixQuantityReducerPreservesInfinities:
+    """The same contract as DEPTH's reducer, in the reducer the evaluator uses.
+
+    Added because a mutation survived: making the tail term conditional again --
+    `drop it when either mass is zero` -- passed every test, since with the
+    complement logsumexp neither mass is ever zero for finite logits. The only
+    witness is a candidate whose complement logits are genuinely `-inf`, and that
+    case was covered for `sketch_forward_kl` and not here.
+    """
+
+    @staticmethod
+    def _zero_tail_candidate(T=6, V=80, K=5):
+        g = torch.Generator().manual_seed(12)
+        ref = torch.randn(T, V, generator=g) * 0.5        # flat: a real tail
+        sk = sketch_reference(ref, torch.zeros(T, dtype=torch.long), top_k=K,
+                              chunk=3)
+        assert float(sk.tail_log_prob.exp().min()) > 1e-3, "no reference tail"
+        cand = torch.full((T, V), float("-inf"))
+        cand.scatter_(1, sk.support_indices, 0.0)
+        return sk, cand
+
+    def test_forward_kl_is_infinite(self):
+        sk, cand = self._zero_tail_candidate()
+        out = distortion_on_reference_support(
+            sk, cand, torch.zeros(sk.positions, dtype=torch.long), chunk=3)
+        assert out.kl == float("inf"), (
+            f"forward KL is {out.kl}; a candidate assigning zero probability "
+            "outside the reference's support has infinite forward KL, and "
+            "reporting it as finite is a false measurement")
+
+    def test_a_tagged_subset_inherits_the_infinity(self):
+        """A diagnostic tag must not launder it either."""
+        sk, cand = self._zero_tail_candidate()
+        tag = torch.ones(sk.positions, dtype=torch.bool)
+        out = distortion_on_reference_support(
+            sk, cand, torch.zeros(sk.positions, dtype=torch.long),
+            tags={"all": tag}, chunk=3)
+        assert out.tagged["all"][0] == float("inf")
+
+    def test_ce_and_top1_stay_finite_and_meaningful(self):
+        """The infinity is in the KL, not everywhere."""
+        sk, cand = self._zero_tail_candidate()
+        out = distortion_on_reference_support(
+            sk, cand, sk.support_indices[:, 0].clone(), chunk=3)
+        #: The gold token is each row's reference argmax, which IS in the support,
+        #: so the candidate assigns it real probability and CE is finite.
+        assert math.isfinite(out.abl_ce), out.abl_ce
+        assert out.top1_agree >= 0.0
