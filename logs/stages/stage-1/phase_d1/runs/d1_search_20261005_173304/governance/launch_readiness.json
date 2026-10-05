@@ -49,6 +49,15 @@
   ],
   "n_files": 93
  },
+ "launch_invocation": {
+  "_must_use": "6c1dd8d9e795004aa7bf1423070682e3c4ac636b",
+  "closure_digest_at_bound_commit": "f4fbc8b5a90fea8a2c9291a2986896969cf3a6cf32b48bd537f5c43a2002b230",
+  "closure_digest_now": "f4fbc8b5a90fea8a2c9291a2986896969cf3a6cf32b48bd537f5c43a2002b230",
+  "closure_unchanged": true,
+  "command": "nohup bash -c 'PYTHONPATH=src:scripts .venv/bin/python scripts/pod/autoinit_d1_launch.py --scr <scr> --session-commit 6c1dd8d9e795004aa7bf1423070682e3c4ac636b --bundle aad_autoinit_6c1dd8d9.bundle --run-id d1_search_20261005_173304' &",
+  "head_at_preparation": "550e6f273b5fa3f11615e416ca22dfd0a36dc6dc",
+  "why": "the authorization binds the commit whose CLOSURE it measured, and `require_session_commit` refuses any other. HEAD is now 550e6f273b5fa3f11615e416ca22dfd0a36dc6dc because later commits recorded this preparation -- they touch no member of the executable closure, which is why the closure digest is unchanged and the narrower-than-HEAD closure is the point. Launching at HEAD would be refused; launching at the bound commit runs exactly the tree that was verified."
+ },
  "live_price": {
   "_quoted": "live, immediately before issuance",
   "gpu": "NVIDIA L40S",
