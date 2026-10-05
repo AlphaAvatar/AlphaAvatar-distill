@@ -134,6 +134,38 @@ def load_state_eval_suite(repo_root: str | Path = REPO):
     return suite, items, content
 
 
+#: THE BUNDLE. The name is DERIVED from the session commit, never chosen: an
+#: alias must fail at `$0` rather than at `SETUP_RC=1` on a billing pod.
+D1_TRANSPORT = None  # built lazily; see `transport()`
+
+
+def transport():
+    """D1's bundle transport. One declaration, so the name has one derivation."""
+    global D1_TRANSPORT
+    if D1_TRANSPORT is None:
+        from aadistill.infrastructure.bundle_transport import TransportSpec
+        from experiments.deployment import MAIN_RELAY
+
+        D1_TRANSPORT = TransportSpec(
+            label="Phase-D1 formal search",
+            relay_repo=MAIN_RELAY,
+            transfer_prefix="transfer")
+    return D1_TRANSPORT
+
+
+def canonical_bundle_name(session_commit: str) -> str:
+    return transport().bundle_name(session_commit)
+
+
+def canonical_bundle_path(session_commit: str) -> str:
+    return transport().repo_path(session_commit)
+
+
+def require_canonical_bundle(bundle: str, session_commit: str) -> str:
+    """An alias fails here, at `$0`, not after setup has been paid for."""
+    return transport().require_canonical(bundle, session_commit)
+
+
 #: THE FROZEN ROOT TEACHER's own record. Owned by C1's plan, used by the whole
 #: search lineage, and NOT re-typed here: a second copy of a teacher identity is a
 #: second thing that can disagree about which bytes the lineage started from.

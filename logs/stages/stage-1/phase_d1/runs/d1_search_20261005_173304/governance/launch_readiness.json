@@ -1,0 +1,68 @@
+{
+ "_contract": "LAUNCH-BOUND. Every fact a launch consumes, verified at $0 immediately before it, with the identity it is bound to. It AUTHORIZES NOTHING: the one-use artifact does that, and this is what a reviewer checks it against.",
+ "arm": "supervised_target",
+ "authorization": {
+  "authorization_sha256": "d8f0a9da3cb6d5bdfc0cac9d76856fd2183bf88d27e80499bb8566f4e825d899",
+  "authorized_stages": [
+   "A",
+   "B",
+   "C",
+   "D"
+  ],
+  "expected_usd": 12.5429,
+  "hard_cap_usd": 21.4897,
+  "path": "logs/stages/stage-1/phase_d1/runs/d1_search_20261005_173304/governance/authorization.json"
+ },
+ "authorizes": "nothing",
+ "balances_after_this_session": {
+  "formal_remaining_usd": 40.7534,
+  "package_remaining_usd": 45.7793,
+  "project_remaining_usd": 39.7744
+ },
+ "bundle": {
+  "_derived": "from the session commit; an alias fails at $0",
+  "name": "aad_autoinit_6c1dd8d9.bundle",
+  "repo_path": "transfer/aad_autoinit_6c1dd8d9.bundle"
+ },
+ "derived_session": {
+  "_basis": "MEASURED production Top-K invocation, rebuilt end to end: 1194.2624 s",
+  "_what_moved": "ONLY the rate. The accepted 1125.55-minute search bound and the accepted container-disk model are unchanged, and no GPU timing was repeated: this is the dollar consequence of an already-accepted minute bound.",
+  "accepted_at_price_per_hour": 1.09,
+  "accepted_hard_ceiling_usd": 21.4897,
+  "container_disk_usd": 1.0422,
+  "expected_minutes": 656.95,
+  "expected_usd": 12.5429,
+  "hard_ceiling_minutes": 1125.55,
+  "hard_ceiling_usd": 21.4897,
+  "price_per_hour": 1.09
+ },
+ "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+ "four_conditions": "ALL FOUR PASS",
+ "harness": {
+  "digest": "f4fbc8b5a90fea8a2c9291a2986896969cf3a6cf32b48bd537f5c43a2002b230",
+  "entry_points": [
+   "scripts/pod/autoinit_d1_launch.py",
+   "scripts/pod/autoinit_d1_driver.py",
+   "scripts/experiments/stage-1/phase_d1/d1_session.py",
+   "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
+   "scripts/pod/collect_artifacts.py"
+  ],
+  "n_files": 93
+ },
+ "live_price": {
+  "_quoted": "live, immediately before issuance",
+  "gpu": "NVIDIA L40S",
+  "stock_status": "Low",
+  "usd_per_hour": 1.09
+ },
+ "no_resource_exists": true,
+ "open_blockers": [],
+ "products_owed": {
+  "gate": "ArtifactPolicy.products_secured requires BOTH, identity-verified at the destination",
+  "what": "the committed Top-2 checkpoints",
+  "why": "the next D1 stage trains recovery probes FROM these initializations and the $14.7966 screening price does not fund rebuilding two complete structural paths"
+ },
+ "run_id": "d1_search_20261005_173304",
+ "schema": "aadistill.phase_d1.launch_readiness/v1",
+ "session_commit": "6c1dd8d9e795004aa7bf1423070682e3c4ac636b"
+}

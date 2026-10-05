@@ -77,8 +77,8 @@
   "authorizes": "nothing",
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
   "blockers": "NONE OPEN. Evidence CLOSED. ENVELOPE RESOLVED_FITS on measurement. FUNDING AUTHORIZED by the 2026-10-05 phase amendment. Derived by open_blockers(); owner d1_design.json.",
-  "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
-  "execution_wiring": "IMPLEMENTED AND CHECKED AT $0: session, authorization, driver, launcher, SESSION_KIND=d1 dispatch; contract asserted before the first expansion. Owner: d1_design.json :: execution_wiring_required.",
+  "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
+  "execution_wiring": "IMPLEMENTED AND VERIFIED AT $0: session, authorization (real SessionRunner protocol, derived closure, self-hashed), driver, launcher, SESSION_KIND=d1. A run is prepared; see `next`. Owner: d1_design.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
@@ -127,10 +127,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "the first paid formal D1 search session, after the launch review. The execution chain exists and nothing is launched. Reasons: d_series.blockers.",
+ "next": "the first paid formal D1 search session. A run is PREPARED at $0 -- authorization, readiness and bundle bound, pre-provider chain verified, NO resource created. Owner: the run's governance/ dir.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "maintainer launch review of the D1 execution chain -- session, authorization, driver, launcher, dispatch -- then the first paid formal search session.",
+  "next_work": "maintainer launch review of the prepared run named in `next`, then the launcher. The chain is verified at $0 and no provider resource exists.",
   "not_next": "no paid resource before the launch review; no recovery, screening or confirmation session (each separately authorized); no D2/D3; no retry of a complete measurement; no K sweep; no change to the frozen design. Owner: decisions.md and the 2026-10-05 amendment.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "then": "the first paid formal D1 search session, after the launch review. $21.4897 of a $62.2431 formal allowance."
