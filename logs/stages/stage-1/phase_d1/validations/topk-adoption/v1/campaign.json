@@ -2,7 +2,7 @@
  "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 + 0.3057 + 0.2675 = 2.8741",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
- "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
+ "_status_is_derived_by": "scripts/pod/d1_qualification_closeout.py --aggregate, from the filed subruns and the closeout it writes. It is CLOSED when a closeout exists; this REOPENED state is the one case the tool cannot derive -- a review withdrawing an answer -- and the next --aggregate run restates it.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
@@ -12,7 +12,7 @@
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "CLOSED -- 7 paid subruns, $2.8741 of $8.0000; zero lower-bound violations and the envelope RESOLVED_FITS on an un-synced end-to-end measurement",
+ "status": "REOPENED -- 7 paid subruns, $2.8741 of $8.0000. Review withdrew the production-cost answer: a7 timed a shadow of the production scorer. One more P-only subrun measures the real invocation.",
  "subruns": [
   {
    "cost_usd": 0.6382,

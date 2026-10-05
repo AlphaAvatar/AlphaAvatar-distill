@@ -414,175 +414,389 @@ def candidate_scores(pairs: list[dict[str, Any]],
     return out
 
 
-def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
-                                   n_candidates: int, journal: Journal,
-                                   ) -> dict[str, Any]:
-    """PRODUCTION Top-K operator cost per candidate. Both profiles. A MAX.
+def _depth_operator_premises(repo: Path) -> dict[str, Any]:
+    """Resolve what stage P needs, at `$0`, and say which arm prices.
 
-    No dual reduction, no full-vocabulary reference cache: this is the cost the
-    formal path will pay, which the adoption validation's wall clock is not.
+    Three failures this would have caught, each of which has cost a paid session
+    in this repository: an implementation id that the registries do not resolve; a
+    calibration mixture that is not staged; and a position policy whose weights
+    are silently `None`, which is how a timing run comes to omit the weighted
+    reduction it was supposed to price.
 
-    **A MEAN IS NOT A CEILING**, and the first version of this stage timed 12
-    candidates and reported `total / 12`, which was then promoted into `root_max`.
-    It now times EVERY round-0 single-layer candidate and reports the
-    distribution -- mean, p50, p95 and max -- with the MAX as the pricing input.
-
-    **BOTH D1 DEPTH calibration profiles.** D1 permits either, and historical
-    full-vocab evidence showed materially different DEPTH timings between them, so
-    one profile's max is not the cell's max.
-
-    Round 0 at the root parent suffices to bound the later rounds, and that is
-    established mechanically rather than assumed -- see
-    `tests/initialization/test_operators_only_shrink.py`: the skip set only grows
-    so the executed block count is non-increasing, round 0 has the most
-    candidates, and every frozen operator only shrinks the geometry.
+    The arm is DERIVED here rather than chosen in the stage: whichever of D1's two
+    policies actually hands the reducer a weight tensor is the more expensive one,
+    and if that ever stops being the treatment the stage must not quietly keep
+    timing the treatment.
     """
-    import torch
-
     from aadistill.initialization.calibration.items import (
         prepare_calibration_items,
     )
     from aadistill.initialization.calibration.packing import packed_batches
     from aadistill.initialization.calibration.profiles import get_profile
-    from aadistill.initialization.operators._common import resolve_pad_id
-    from aadistill.initialization.operators.depth.causal_kl_greedy import (
-        _ReferenceSketches, _forward_logit_block,
+    from aadistill.initialization.operators.base import get_implementation
+    from aadistill.initialization.scoring.batches import active_positions
+    from aadistill.initialization.scoring.content import scoring_content_config
+    from aadistill.initialization.scoring.positions import (
+        ALL_POSITIONS_V1, SUPERVISED_TARGET_V1, policy_config,
     )
-    from aadistill.initialization.scoring.support import (
-        sketch_forward_kl_mean_batch,
-    )
-    from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_d_series.scoring_protocol import (
-        D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
-    )
+    from experiments.phase_a3 import a3_session as A3S
+    from experiments.phase_d_series import scoring_protocol as SP
 
-    #: THE FORWARD/REDUCTION SPLIT IS OPT-IN, and pricing must never use a run
-    #: that enabled it. Splitting needs a `synchronize()` after each phase, which
-    #: is 1,656 of them across 23 groups and 36 candidates -- and the DEPTH
-    #: operator's own source says in as many words that inserting syncs "perturbs
-    #: the hot path this pass exists to make faster". My first version of this
-    #: stage did exactly that and measured 5.45-7.37 s/candidate where the
-    #: operator's own un-synced loop gives ~3.42, so the ceiling it produced was
-    #: inflated by its instrument. Same discipline as the operator: opt-in, and
-    #: recorded in the output so a synced run cannot be mistaken for a price.
-    split = os.environ.get("AADISTILL_P_SYNC_SPLIT") == "1"
-    adapter = get_adapter("qwen3")
-    model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
-    if getattr(model.config, "use_cache", False):
-        model.config.use_cache = False
-    #: ROUND 0 AT THE ROOT: one candidate per block of the intact parent.
-    depth = int(adapter.spec_of(model)["num_hidden_layers"])
-    layers = list(range(depth))[:max(1, int(n_candidates))] \
-        if n_candidates and int(n_candidates) < depth else list(range(depth))
-
+    spec = A3S.path_spec(workdir_device="cpu")
+    impl = get_implementation(spec.steps[0].impl_id)
+    arms = {"treatment": SUPERVISED_TARGET_V1, "control": ALL_POSITIONS_V1}
+    weighted: dict[str, list[str]] = {"treatment": [], "control": []}
     per_profile: dict[str, Any] = {}
-    all_totals: list[float] = []
     for profile_id in D1_DEPTH_PROFILES:
         profile = get_profile(profile_id)
         items = prepare_calibration_items(profile.resolve(repo),
                                           profile_id=profile.qualified_id)
         groups = [(pk.batch, pk.original_indices) for pk in packed_batches(
-            items, D_SERIES_MICRO_BATCH_SIZE, packing=D_SERIES_BATCH_PACKING,
-            pad_id=resolve_pad_id(model), device="cuda")]
-        torch.cuda.reset_peak_memory_stats()
-        sketches = _ReferenceSketches(model, items, "cuda",
-                                     top_k=int(D_SERIES_SUPPORT.top_k))
-        t0 = time.time()
-        for group, _ in groups:
-            sketches.sketch_block(group)
-        sketch_seconds = round(time.time() - t0, 3)
-
-        rows = []
-        for layer in layers:
-            skip = frozenset({layer})
-            fwd = red = 0.0
-            t_c = time.time()
-            for group, _ in groups:
-                idx, lp, tail = sketches.sketch_block(group)
-                t1 = time.time()
-                abls = _forward_logit_block(model, group, "cuda", skip)
-                if split:
-                    torch.cuda.synchronize()
-                t2 = time.time()
-                sketch_forward_kl_mean_batch(
-                    idx, lp, tail, abls,
-                    group.prediction_mask().to(abls.device),
-                    has_tail=sketches.has_tail)
-                if split:
-                    torch.cuda.synchronize()
-                t3 = time.time()
-                fwd += t2 - t1
-                red += t3 - t2
-                del abls
-            #: ONE synchronize per candidate, at the end. The per-candidate TOTAL
-            #: is then exact, and the hot path is not perturbed.
-            torch.cuda.synchronize()
-            total = time.time() - t_c
-            row = {"layer": layer, "total_seconds": round(total, 4)}
-            if split:
-                row["forward_seconds"] = round(fwd, 4)
-                row["reduction_seconds"] = round(red, 4)
-            rows.append(row)
-            all_totals.append(total)
-        decision = sketches.decision()
-        totals = [r["total_seconds"] for r in rows]
+            items, SP.D_SERIES_MICRO_BATCH_SIZE,
+            packing=SP.D_SERIES_BATCH_PACKING, pad_id=0, device="cpu")]
+        group, indices = groups[0]
+        shapes: dict[str, Any] = {}
+        for arm, policy in arms.items():
+            w = active_positions(items, policy).prediction_weights_for(
+                group, indices)
+            shapes[arm] = (None if w is None else
+                           {"shape": list(w.shape),
+                            "nonzero": int((w > 0).sum()),
+                            "positions": int(w.numel())})
+            if w is not None:
+                weighted[arm].append(profile_id)
+        #: And the hashed config builds -- `scoring_content_config` reads the
+        #: items, so an unstaged mixture fails HERE rather than mid-invocation.
+        config = SP.operator_config(
+            {"n_calibration_items": len(items),
+             **policy_config(SUPERVISED_TARGET_V1),
+             **scoring_content_config(items, SUPERVISED_TARGET_V1)})
         per_profile[profile_id] = {
-            "n_candidates": len(rows),
-            "n_groups": len(groups),
-            "n_items": len(items),
-            "reference_sketch_seconds": sketch_seconds,
-            "reference_sketch_bytes": decision["sketch_bytes"],
-            "full_vocab_bytes_avoided": decision["full_vocab_bytes_avoided"],
-            "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
-            "per_candidate": rows,
-            "distribution": quantiles(totals),
-            "forward_share": (round(sum(r["forward_seconds"] for r in rows)
-                                    / sum(totals), 4) if split else None),
+            "n_items": len(items), "n_groups": len(groups),
+            "weights": shapes,
+            "config_keys": sorted(config),
         }
+    if not weighted["treatment"]:
+        raise AdoptionError(
+            "D1's treatment policy weights NEITHER mixture, so a timing run "
+            "would not exercise the weighted reduction it is meant to price. "
+            "Refusing to spend GPU time on a path that is not production's.")
+    if weighted["control"]:
+        raise AdoptionError(
+            "the CONTROL arm now produces weights too "
+            f"({weighted['control']}), so the treatment is no longer known to be "
+            "the more expensive arm. The ceiling must be measured on whichever "
+            "is, and that is a decision this driver must not take silently.")
+    return {
+        "impl_id": impl.impl_id,
+        "impl_signature_hash": impl.signature_hash[:16],
+        "ceiling_arm": "treatment",
+        "_why_the_treatment": (
+            "both D1 arms reach the same weighted reducer, and this measured that "
+            "only the treatment hands it a weight tensor on the real mixtures -- "
+            "the control's `prediction_weights_for` returns None, its uniform "
+            "answer. So the treatment is the more expensive arm and bounds both."),
+        "per_profile": per_profile,
+    }
+
+
+def production_operator_context(*, adapter, model, target_spec, profile, items,
+                                seed: int, device: str, workdir: Path, policy,
+                                observer=None):
+    """An `OperatorContext` built the way `BeamSearch._expand_one` builds one.
+
+    Separate from the stage so that the construction -- not a paraphrase of it --
+    is what a `$0` CPU test executes on a toy model. The two halves that can
+    silently diverge from core are both here: the hashed operator config (the
+    policy's named config plus what the policy READS, via the same two helpers
+    core calls) and the context fields themselves.
+
+    `tests` asserts this passes every keyword `_expand_one` passes, except the
+    ones a single operator invocation genuinely has no use for, so a field added
+    to the production path cannot be missed here in silence.
+    """
+    from aadistill.initialization.execution import ExecutionConfig
+    from aadistill.initialization.operators.base import OperatorContext
+    from aadistill.initialization.scoring.content import scoring_content_config
+    from aadistill.initialization.scoring.positions import policy_config
+    from experiments.phase_d_series import scoring_protocol as SP
+
+    operator_config = SP.operator_config(
+        {"n_calibration_items": len(items),
+         **policy_config(policy),
+         **scoring_content_config(items, policy)})
+    workdir.mkdir(parents=True, exist_ok=True)
+    return OperatorContext(
+        adapter=adapter, model=model, parent_spec=adapter.spec_of(model),
+        target_spec=target_spec, profile=profile, calibration_items=items,
+        seed=seed, device=device, workdir=workdir, config=operator_config,
+        distribution_support=SP.D_SERIES_SUPPORT,
+        execution=ExecutionConfig(
+            micro_batch_size=SP.D_SERIES_MICRO_BATCH_SIZE,
+            calibration_batch_packing=SP.D_SERIES_BATCH_PACKING),
+        position_policy=policy, score_observer=observer)
+
+
+def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
+                                          journal: Journal,
+                                          workdir: Path) -> dict[str, Any]:
+    """Time ONE REAL ``depth.causal_kl_greedy_v1`` invocation. Both profiles.
+
+    **This stage exists because its predecessor timed a shadow loop.** The first
+    version reimplemented the candidate inner loop here -- sketch, forward,
+    reduce -- and so omitted everything else the production scorer pays:
+    ``active.prediction_weights_for(group, indices)``, the weighted reduction,
+    the ``values.tolist()`` host transfer that IS the production synchronization,
+    the per-subtype collection and ``domain_balanced_score``. It also prebuilt the
+    reference sketches before timing, so the cache fill -- operator work that
+    happens once inside every real ``apply()`` -- was priced at zero. An
+    independent review caught both.
+
+    **What historical ``operator_seconds`` actually measures** settles the shape
+    of this stage. `BeamSearch._expand_one` records
+    ``operator_seconds=round(elapsed, 4)`` around ``impl.execute(ctx)`` -- the
+    WHOLE invocation: packing, the reference cache, every candidate of every
+    round, the greedy bookkeeping and the child construction. So the honest
+    measurement is the same timing around the same call, and no term has to be
+    extrapolated from a per-candidate figure at all. ``260 x per-candidate`` was
+    never the quantity the cost table holds.
+
+    The production path is REUSED, not approximated: the operator is fetched from
+    the registry by the id the frozen path declares, the context is built from the
+    same values `_expand_one` builds it from -- including
+    ``policy_config``/``scoring_content_config`` for the hashed position policy --
+    and ``execute`` is called so the contract checks run too.
+
+    NO EXTRA SYNCHRONIZATIONS. `values.tolist()` already forces one per group in
+    production, so a wall clock around the invocation is exact without help. The
+    forward/reduction split stays where the operator put it: opt-in, diagnostic,
+    and refused for pricing.
+    """
+    import dataclasses
+    import time as _time
+
+    import torch
+
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+    from aadistill.initialization.operators.base import get_implementation
+    from aadistill.initialization.scoring.batches import active_positions
+    from aadistill.initialization.scoring.positions import (
+        ALL_POSITIONS_V1, SUPERVISED_TARGET_V1, policy_config,
+    )
+    from aadistill.initialization.specs.arch import get_adapter
+    from experiments.phase_a3 import a3_session as A3S
+    from experiments.phase_d_series import scoring_protocol as SP
+
+    #: A SYNCED RUN CANNOT PRICE, and the operator's own split is the one that
+    #: would do it. Recorded so a diagnostic run can never be read as a price.
+    split = os.environ.get("AADISTILL_DEPTH_SYNC_TELEMETRY") == "1"
+    adapter = get_adapter("qwen3")
+    spec = A3S.path_spec(workdir_device="cuda")
+    depth_step = spec.steps[0]
+    impl = get_implementation(depth_step.impl_id)
+    #: D1's TREATMENT arm. Both arms reach `prediction_weights_for` -- the control
+    #: is the incumbent `policy_config` but still yields an `ActivePositions` -- so
+    #: the weighted path is paid either way; the treatment additionally reads each
+    #: item's supervised spans, which is the more expensive setup. The control's
+    #: weighting work is measured separately below rather than assumed equal.
+    policy = SUPERVISED_TARGET_V1
+
+    per_profile: dict[str, Any] = {}
+    invocations: list[float] = []
+    for profile_id in D1_DEPTH_PROFILES:
+        profile = get_profile(profile_id)
+        items = prepare_calibration_items(profile.resolve(repo),
+                                          profile_id=profile.qualified_id)
+        model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+        if getattr(model.config, "use_cache", False):
+            model.config.use_cache = False
+
+        #: PER-CANDIDATE BOUNDARIES, from a timestamp in the execution-only
+        #: observer. A timestamp is not a synchronization: these are DIAGNOSTIC
+        #: and the pricing input is the invocation total below.
+        stamps: list[tuple[str, float]] = []
+
+        def stamp(**kw) -> None:
+            stamps.append((repr(sorted(kw["skip"])), _time.perf_counter()))
+
+        ctx = production_operator_context(
+            adapter=adapter, model=model, target_spec=spec.target_spec,
+            profile=profile, items=items, seed=spec.seed, device="cuda",
+            workdir=workdir / f"P-{profile_id.replace('@', '-')}",
+            policy=policy, observer=stamp)
+
+        torch.cuda.reset_peak_memory_stats()
+        #: TIMED EXACTLY AS `BeamSearch._expand_one` TIMES IT.
+        started = _time.time()
+        outcome = impl.execute(ctx)
+        elapsed = _time.time() - started
+
+        timing = dict(outcome.artifacts.get("timing") or {})
+        cache = dict(outcome.artifacts.get("reference_cache") or {})
+        rounds = list(outcome.artifacts.get("search_rounds") or [])
+        spans = _candidate_spans(stamps, started)
+        totals = [s["seconds"] for s in spans]
+        item_seconds = float(timing.get("item_seconds") or 0.0)
+        per_profile[profile_id] = {
+            "operator_invocation_seconds": round(elapsed, 4),
+            "n_items": len(items),
+            "candidate_subsets": int(timing.get("candidate_subsets") or 0),
+            "rounds": len(rounds),
+            "removed": [r.get("chosen") for r in rounds],
+            "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
+            "operator_timing": timing,
+            "reference_cache": cache,
+            #: WHERE THE TIME WENT, so a reader can see that the terms a
+            #: per-candidate figure omits are real and are included here.
+            "attribution": {
+                "scoring_loop_seconds": round(item_seconds, 4),
+                "outside_scoring_loop_seconds": round(elapsed - item_seconds, 4),
+                "_outside_is": ("packing, the reference-sketch cache object, the "
+                                "position-policy setup, greedy bookkeeping and "
+                                "the CHILD CONSTRUCTION -- all of it inside "
+                                "operator_seconds and none of it in a "
+                                "per-candidate number"),
+                "reference_seconds": timing.get("reference_seconds"),
+                "ablated_seconds": timing.get("ablated_seconds"),
+                "distortion_seconds": timing.get("distortion_seconds"),
+                "_distortion_includes": ("the weighted Top-K reduction, the "
+                                         "values.tolist() host transfer and the "
+                                         "per-subtype collection"),
+            },
+            #: DIAGNOSTIC ONLY.
+            "per_candidate_distribution": quantiles(totals) if totals else None,
+            "per_candidate_n": len(spans),
+            "_extrapolation_cross_check": (
+                {"candidates_times_max_seconds":
+                     round(len(spans) * max(totals), 4),
+                 "measured_invocation_seconds": round(elapsed, 4),
+                 "_meaning": ("`candidates x max` is what the superseded stage "
+                              "would have priced, BEFORE adding any fixed term. "
+                              "Reported so the direction of the old error is "
+                              "visible, not to price anything.")}
+                if totals else None),
+        }
+        invocations.append(elapsed)
         journal.event(stage=f"P.{profile_id}", status="ok",
-                      candidates=len(rows),
-                      max_s=round(max(totals), 4),
-                      mean_s=round(sum(totals) / len(totals), 4))
-        del sketches
+                      invocation_s=round(elapsed, 2),
+                      candidates=int(timing.get("candidate_subsets") or 0),
+                      outside_loop_s=round(elapsed - item_seconds, 2))
+        del outcome, ctx, model
         torch.cuda.empty_cache()
 
-    del model
-    torch.cuda.empty_cache()
-    overall = quantiles(all_totals)
+    weighting = _weighting_cost_both_policies(
+        repo=repo, profile_id=D1_DEPTH_PROFILES[0],
+        policies={"treatment": SUPERVISED_TARGET_V1,
+                  "control": ALL_POSITIONS_V1},
+        active_positions=active_positions)
+
     return {
-        "candidates_per_profile": len(layers),
+        "measurement_path": "operator_execute_v1",
+        "_measurement_path_meaning": (
+            "the number below is a wall clock around `impl.execute(ctx)` on the "
+            "registry's `depth.causal_kl_greedy_v1`, which is the SAME quantity "
+            "and the same code path `BeamSearch._expand_one` records as "
+            "`operator_seconds`. A record without this marker was produced by the "
+            "superseded shadow loop and cannot price."),
         "profiles": list(D1_DEPTH_PROFILES),
+        "position_policy": policy_config(policy) or {"position_policy": "incumbent"},
         "per_profile": per_profile,
-        "overall_distribution": overall,
-        #: THE PRICING INPUT. The max over every candidate of every profile.
-        "operator_seconds_max": round(overall["max"], 4),
+        #: THE PRICING INPUT. One measured invocation, the MAX over the profiles.
+        #: Nothing is multiplied by a candidate count and nothing is added for a
+        #: fixed term -- a whole invocation already contains both.
+        "operator_invocation_seconds_max": round(max(invocations), 4),
+        "operator_invocation_seconds_mean": round(
+            sum(invocations) / len(invocations), 4),
         "sync_split_enabled": split,
         "_valid_for_pricing": not split,
         "_if_split_was_enabled": (
-            "the per-candidate totals include two cuda synchronize() calls per "
-            "group and are INFLATED by the instrument. Such a run describes the "
-            "phase split and must not price anything."),
-        "operator_seconds_mean": round(overall["mean"], 4),
-        "micro_batch_size": D_SERIES_MICRO_BATCH_SIZE,
-        "packing": D_SERIES_BATCH_PACKING,
-        "top_k": int(D_SERIES_SUPPORT.top_k),
-        "_this_is_the_operator_term_only": (
-            "the DEPTH operator's per-candidate work. A cost-model CELL is one "
-            "EXPANSION end to end, so the non-operator phases -- parent load, "
+            "AADISTILL_DEPTH_SYNC_TELEMETRY=1 inserts two synchronize() calls per "
+            "group inside the hot path. The operator's own source says that "
+            "perturbs it. Such a run describes the split and prices nothing."),
+        "position_weighting_cost": weighting,
+        "micro_batch_size": SP.D_SERIES_MICRO_BATCH_SIZE,
+        "packing": SP.D_SERIES_BATCH_PACKING,
+        "top_k": int(SP.D_SERIES_SUPPORT.top_k),
+        "_this_is_the_operator_term": (
+            "one DEPTH expansion's OPERATOR cost, complete. A cost-model CELL is "
+            "one expansion END TO END, so the non-operator phases -- parent load, "
             "materialize, identify, canonical reload, validation, state "
-            "evaluation -- must be ADDED from committed telemetry. Substituting "
-            "this number for a whole cell deletes them, which is the defect an "
-            "independent review caught."),
+            "evaluation -- must still be ADDED from committed telemetry. They are "
+            "NOT re-measured here: paying GPU time again for phases the committed "
+            "telemetry already holds would buy nothing."),
         "_max_not_mean": (
-            "a ceiling built on a mean is not a ceiling. The max over both "
-            "profiles is the pricing input; mean/p50/p95 are reported as "
-            "description."),
-        "_round_0_at_the_root": (
-            "bounds the later rounds: the skip set only grows so the executed "
-            "block count is non-increasing, round 0 has the most candidates, and "
-            "every frozen operator only shrinks the geometry. Established by "
-            "tests/initialization/test_operators_only_shrink.py."),
+            "a ceiling built on a mean is not a ceiling. The max over the two "
+            "profiles is the pricing input."),
+        "_root_bounds_the_deeper_parents": (
+            "measured at the ROOT parent. A deeper parent is a strictly smaller "
+            "model -- no frozen operator increases any structural field, "
+            "established by tests/initialization/test_operators_only_shrink.py -- "
+            "so the root invocation bounds the deeper cell too."),
     }
+
+
+def _candidate_spans(stamps: list[tuple[str, float]],
+                     started: float) -> list[dict[str, Any]]:
+    """Per-candidate wall times, from the observer's timestamps.
+
+    The observer fires once per (candidate, group) AFTER that group's host
+    transfer, so the last stamp of a candidate marks the end of its scoring. A
+    span therefore runs from the previous candidate's last stamp to this one's,
+    which charges each candidate one neighbour's subtype aggregation -- exact in
+    the sum, and off by the difference between two aggregations in the max. That
+    is why these are diagnostic and the invocation total is what prices.
+    """
+    if not stamps:
+        return []
+    spans: list[dict[str, Any]] = []
+    prev = started
+    i = 0
+    while i < len(stamps):
+        key = stamps[i][0]
+        j = i
+        while j + 1 < len(stamps) and stamps[j + 1][0] == key:
+            j += 1
+        end = stamps[j][1]
+        spans.append({"skip": key, "groups": j - i + 1,
+                      "seconds": round(end - prev, 4)})
+        prev = end
+        i = j + 1
+    return spans
+
+
+def _weighting_cost_both_policies(*, repo: Path, profile_id: str,
+                                  policies: dict[str, Any],
+                                  active_positions) -> dict[str, Any]:
+    """`active_positions` setup cost for each D1 arm, measured not assumed.
+
+    The invocation above runs the TREATMENT. The control reaches the same
+    weighted reduction -- it is the incumbent `policy_config` but still yields an
+    `ActivePositions` -- so the only way its cost could exceed the treatment's is
+    in this setup. Measured on the host, where it runs.
+    """
+    import time as _time
+
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+
+    profile = get_profile(profile_id)
+    items = prepare_calibration_items(profile.resolve(repo),
+                                      profile_id=profile.qualified_id)
+    out: dict[str, Any] = {"profile": profile_id, "n_items": len(items)}
+    for arm, policy in policies.items():
+        t0 = _time.perf_counter()
+        active_positions(items, policy)
+        out[arm] = {"setup_seconds": round(_time.perf_counter() - t0, 4),
+                    "policy_hash": policy.policy_hash[:16]}
+    out["_why"] = ("the priced invocation runs the treatment; this shows whether "
+                   "the control's position setup could exceed it. It is per "
+                   "INVOCATION, not per candidate.")
+    return out
 
 
 def analyse_C(stage_c: dict[str, Any],
@@ -918,15 +1132,10 @@ def main(argv: list[str] | None = None) -> int:
                          "and exit. The launcher pushes exactly these.")
     ap.add_argument("--stages", default="C,D,P",
                     help="which stages to run: C (the DEPTH dual scoring, ~30 "
-                         "min), D (the state evaluation, minutes) and P (the "
-                         "PRODUCTION Top-K-only expansion timing, minutes). A "
+                         "min), D (the state evaluation, minutes) and P (ONE REAL "
+                         "DEPTH operator invocation per profile, ~25 min each). A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
-    ap.add_argument("--timing-candidates", type=int, default=0,
-                    help="how many round-0 candidates stage P times per profile. "
-                         "0 means ALL of them, which is what a MAX requires -- a "
-                         "subset gives a point estimate, and a point estimate "
-                         "cannot price an authorization ceiling.")
     ap.add_argument("--check-only", action="store_true",
                     help="every stage except the two expensive ones: the CUDA "
                          "probe, the four process-global registries, the frozen "
@@ -1020,6 +1229,29 @@ def main(argv: list[str] | None = None) -> int:
                 "the identity does not distinguish them and every comparison "
                 "below would be of one measurement against itself")
 
+        wanted = {x.strip() for x in (args.stages or "C,D,P").split(",")
+                  if x.strip()}
+        record["stages_requested"] = sorted(wanted)
+        unknown = wanted - {"C", "D", "P"}
+        if unknown:
+            raise AdoptionError(
+                f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
+                "scoring), D (state evaluation), P (one real DEPTH operator "
+                "invocation). A typo would silently run less than intended and "
+                "look like a clean result.")
+
+        #: EVERY PREMISE STAGE P RESTS ON, before the teacher is resident and
+        #: before a candidate is scored. The superseded timing stage needed none of
+        #: this because it reimplemented the inner loop; running the REAL operator
+        #: means the registry, the policy and the mixture all have to be there, and
+        #: each of them has failed a paid session before.
+        if "P" in wanted or args.check_only:
+            with journal.stage("depth_operator_and_policy") as st:
+                record["P_premises"] = _depth_operator_premises(repo)
+                st.result = {
+                    "impl": record["P_premises"]["impl_id"],
+                    "weighted_arm": record["P_premises"]["ceiling_arm"]}
+
         with journal.stage("teacher_fetch_verify") as st:
             teacher_path = fetch_teacher(repo)
             st.result = {"path": teacher_path}
@@ -1028,22 +1260,14 @@ def main(argv: list[str] | None = None) -> int:
             record["status"] = "CHECK_ONLY_OK"
             record["_check_only"] = (
                 "the CUDA probe, the four registries, the D-series policy, both "
-                "protocol bindings (which differ) and the frozen teacher resolved "
-                "on this interpreter. Neither expensive stage ran.")
+                "protocol bindings (which differ), the frozen teacher and stage "
+                "P's premises -- the DEPTH implementation, the real mixtures and "
+                "which arm weights them -- resolved on this interpreter. Neither "
+                "expensive stage ran.")
             return 0
 
         if args.deadline_s > 0:
             deadline = WallClockDeadline(args.deadline_s)
-
-        wanted = {x.strip() for x in (args.stages or "C,D,P").split(",")
-                  if x.strip()}
-        record["stages_requested"] = sorted(wanted)
-        unknown = wanted - {"C", "D", "P"}
-        if unknown:
-            raise AdoptionError(
-                f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
-                "scoring), D (state evaluation). A typo would silently run less "
-                "than intended and look like a clean result.")
 
         if "C" in wanted:
             with journal.stage("C_depth_dual_scores") as st:
@@ -1107,13 +1331,14 @@ def main(argv: list[str] | None = None) -> int:
                     "worst_domain_agrees": cmp_["worst_domain_agrees"]}
 
         if "P" in wanted:
-            with journal.stage("P_production_topk_timing") as st:
-                record["P_production_timing"] = stage_P_production_topk_timing(
-                    repo=repo, teacher_path=teacher_path,
-                    n_candidates=args.timing_candidates, journal=journal)
-                st.result = {"operator_s_max":
+            with journal.stage("P_production_operator_invocation") as st:
+                record["P_production_timing"] = (
+                    stage_P_production_operator_invocation(
+                        repo=repo, teacher_path=teacher_path, journal=journal,
+                        workdir=out / "P"))
+                st.result = {"invocation_s_max":
                              record["P_production_timing"][
-                                 "operator_seconds_max"]}
+                                 "operator_invocation_seconds_max"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001

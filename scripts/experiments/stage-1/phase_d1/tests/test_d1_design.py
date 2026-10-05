@@ -493,13 +493,26 @@ class TestTheCommittedRecords:
         budget = json.loads(DESIGN.read_text())["budget"]
         topk = budget["topk_production_basis"]
         envelope = budget["per_session_envelope_usd"]
+        status = budget["per_session_envelope_compatibility"]
         notes = {s: w._envelope_blocker_note(budget_section_compatibility=s,
                                             envelope_usd=envelope, topk=topk)
-                 for s in ("UNRESOLVED", "RESOLVED_FITS",
-                           "RESOLVED_NEEDS_RAISE")}
+                 for s in (("UNRESOLVED",) if topk is None else
+                           ("UNRESOLVED", "RESOLVED_FITS",
+                            "RESOLVED_NEEDS_RAISE"))}
         #: The committed note is the one its own status produces.
-        assert budget["_SECOND_BLOCKER_THE_PER_SESSION_CEILING"] == \
-            notes[budget["per_session_envelope_compatibility"]]
+        assert budget["_SECOND_BLOCKER_THE_PER_SESSION_CEILING"] == notes[status]
+        if topk is None:
+            #: No valid production measurement exists, so UNRESOLVED is the ONLY
+            #: reachable state and there is no price for a note to name. The
+            #: resolved branches are exercised whenever a basis is present, which
+            #: is the state this file's `TestThePricingGate...` sibling in the
+            #: D-series suite drives through all three with synthetic records.
+            assert status == "UNRESOLVED", (
+                f"the design says {status} with no valid production basis, so a "
+                "sentence is resolving the envelope that no measurement can")
+            assert "SEPARATE constraint from the project-level cap" in \
+                notes["UNRESOLVED"]
+            return
         #: Each note names its own state and no other, and only a resolved one
         #: may name a price -- keyed on the state tokens the writer must use,
         #: not on a phrase it happens to use today.

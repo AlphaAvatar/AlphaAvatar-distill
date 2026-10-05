@@ -19,11 +19,11 @@
   "any": true,
   "formal_sessions_max": null,
   "formal_sessions_used": 9,
-  "note": "The C1 execution package, amended six times through 2026-10-03. The latest is ENGINEERING ONLY: formal, the project cap, the envelope and funds_formal_sessions_of UNCHANGED, phase_d1 NOT in the funded list. It authorizes the D1 engineering GPU qualification and no D1 science. An approval is not a launch. Owner: logs/budget/decisions.md.",
+  "note": "The C1 execution package, amended six times. The latest is ENGINEERING ONLY: formal, the project cap, the envelope and funds_formal_sessions_of UNCHANGED, phase_d1 NOT in the funded list. It authorizes the D1 engineering GPU qualification and no D1 science. An approval is not a launch. Owner: logs/budget/decisions.md.",
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED ONCE: funding authorization. Evidence CLOSED; envelope RESOLVED_FITS on measurement. Owner: d1_design.json :: open_blockers.",
+ "blocker": "NOTHING IS RUNNING. D1 BLOCKED TWICE: funding authorization and per-session envelope. Envelope UNRESOLVED: review withdrew the a7 price. Owner: d1_design.json :: open_blockers.",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
@@ -38,7 +38,7 @@
   "ledger": "logs/budget/ledger.md",
   "package_remaining_usd": 13.0827,
   "per_session_ceiling_usd": 30.0,
-  "per_session_envelope_compatibility": "RESOLVED_FITS",
+  "per_session_envelope_compatibility": "UNRESOLVED",
   "planning_floor_usd": 13.4401,
   "remaining_is_not_permission": true,
   "remaining_usd": 7.0778,
@@ -66,14 +66,14 @@
   "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
   "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked drift 9.032e-06 inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/",
   "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED, $3.2258; the full-vocabulary BASELINE the Top-K adoption is measured against. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
-  "d_series_topk_adoption": "COMPLETE, CLOSED. ZERO lower-bound violations, zero of 8 DEPTH decisions move, measured END-TO-END search session $23.0738 vs the $30.00 envelope. $2.8741 of $8.0000. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/topk-adoption/",
+  "d_series_topk_adoption": "COMPLETE on the science, campaign REOPENED: review withdrew the production cost (a7 timed a shadow of the real scorer). ZERO lower-bound violations, zero of 8 DEPTH decisions move. $2.8741 of $8.0000. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/topk-adoption/",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
  },
  "d_series": {
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
-  "blockers": "EVIDENCE CLOSED. ENVELOPE RESOLVED_FITS. OPEN: funding authorization (CATEGORICAL -- no measurement reaches it). Derived by open_blockers(); owner d1_design.json.",
+  "blockers": "EVIDENCE CLOSED. ENVELOPE UNRESOLVED. OPEN: funding authorization, per-session envelope. The envelope awaits ONE P-only subrun timing the REAL operator invocation. Derived by open_blockers(); owner d1_design.json.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
@@ -114,19 +114,19 @@
  "latest_verification": {
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
+   "describes_head": false,
    "kind": "launch_bound",
-   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
+   "verdict": "PASS"
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "the formal D1 funding authorization -- a MAINTAINER decision, now well-defined. Top-K adoption CLOSED and the envelope resolved on measurement. Reasons: d_series.blockers.",
+ "next": "measure the production DEPTH operator invocation (a8, P-only, engineering book), reprice, then the formal D1 funding decision. Reasons: d_series.blockers.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "maintainer review of the corrected pricing, then the D1 funding decision. No engineering work is owed.",
+  "next_work": "a8: ONE real depth.causal_kl_greedy_v1 invocation per DEPTH profile, timed as search.py times operator_seconds; then rebuild the cell and rerun the existing beam bound.",
   "not_next": "no retry/resume/pooling of any complete measurement; no C4; no C2 spend; no FFN experiment; no formal D1 while any d_series.blockers entry stands; no K sweep (K=200 is a maintainer-selected protocol parameter, never tuned against outcomes); no rerun of C1/C2/C3/A3 under Top-K; no rebuild of the frozen behavioural family. Owner: decisions.md.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "then": "the formal D1 funding authorization; reasons in d_series.blockers."
@@ -229,7 +229,7 @@
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (the D1 source lineage). No skip depends on historical evidence.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
-  "known_red": "ONE, pre-existing (bc31175f) and out-of-tree: phase_d_series test_source_evidence::test_it_regenerates_identically. The near-duplicate SCREEN is nondeterministic across processes (gsm8k with_any_neighbour 6461..6488), so regenerating the record cannot fix it -- the generator must be. Review ruled it non-blocking; evidence-only, admits no row.",
-  "next_work": "none owed for this round; awaiting a maintainer decision."
+  "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core: phase_d_series test_source_evidence::test_it_regenerates_identically. Its near-duplicate SCREEN is nondeterministic across processes, so regenerating the record cannot fix it. Diagnosis: current.md.",
+  "next_work": "a8's convergence, after the subrun lands."
  }
 }

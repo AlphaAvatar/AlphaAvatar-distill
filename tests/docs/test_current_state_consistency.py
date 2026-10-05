@@ -540,8 +540,20 @@ class TestTheSnapshotStatesTheRequiredFacts:
             assert any(v in text for v in TERMINAL), (
                 f"{key} states no terminal verdict; one of {TERMINAL} is "
                 "expected, and which one is a matter of what happened")
-            assert "CLOSED" in text or "campaign CLOSED" in text, (
-                f"{key} does not state that its campaign is closed")
+            #: CLOSED, or REOPENED with the reason. A campaign can legitimately
+            #: come back to life -- a review withdrew one of this one's answers
+            #: and another subrun is owed -- and demanding the word CLOSED then
+            #: makes the honest state the failing one. What still has to hold is
+            #: that a live campaign says WHY it is live, so that "reopened"
+            #: cannot be where a campaign quietly goes to be forgotten.
+            if "REOPENED" in text:
+                assert len(text.split("REOPENED", 1)[1].strip(" -:.")) > 20, (
+                    f"{key} says REOPENED and gives no reason; a campaign that "
+                    "is live again must say what put it back")
+            else:
+                assert "CLOSED" in text or "campaign CLOSED" in text, (
+                    f"{key} states neither that its campaign is closed nor that "
+                    "it was reopened")
             #: A dollar figure, so a campaign cannot be named without being
             #: priced -- the condition under which spend goes uncounted.
             assert re.search(r"\$\d+\.\d{4}", text), (

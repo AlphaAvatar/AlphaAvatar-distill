@@ -1,4 +1,12 @@
 {
+ "_REOPENED_BY_REVIEW": {
+  "a6_and_a7_both_stand_as_diagnostics": "a6 has MORE synchronizations than production (two per group, inserted by me) and a7 has FEWER (one per candidate, where production has one per group via tolist). The production value is not between them by construction -- it has to be measured, and a8 measures it by running the real invocation.",
+  "superseded_by": "runs/a8, and the aggregate tool rewrites this file from it",
+  "what_stands": "the scientific verdict. reference_topk_tail_v1 / K=200 is GO, zero lower-bound violations, zero of 8 DEPTH decisions move, removal order identical, the complement-logsumexp repair, the infinity/masking/fp32 ownership repairs, and reverse KL at -1.07% as a diagnostic.",
+  "what_was_withdrawn": "answer E, the production Top-K cost, and every figure derived from it: the rebuilt DEPTH cell, the $23.0738 search session and the RESOLVED_FITS envelope.",
+  "when": "2026-10-05",
+  "why": "a7 timed a SHADOW of the production scorer. Its loop called sketch_forward_kl_mean_batch without weights and discarded the result, so it omitted active.prediction_weights_for, the weighted reduction, the values.tolist() host transfer that IS production's synchronization, the per-subtype collection and domain_balanced_score. It also prebuilt the reference sketches before timing, so the cache fill -- operator work inside every real apply() -- was priced at zero. And `260 x per-candidate` was never the quantity the cost table holds: BeamSearch._expand_one records operator_seconds around impl.execute(ctx), the WHOLE invocation."
+ },
  "_authorizes": "nothing. ENGINEERING evidence from the engineering book, which does not transfer into the formal one. Formal D1 remains NOT AUTHORIZED, phase_d1 is not in funds_formal_sessions_of, and neither the formal allowance, the project cap nor the $30.00 envelope was changed.",
  "_does_not_move_the_batteries": "family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
  "_review_reopened_this": "An independent review of prep/d-series-topk-tail@bd70a165 reopened the adoption because the old tail arithmetic was invalid at the numerical edge. The tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- the measured support mass reached 1.000001 -- and the code then DROPPED the tail term whenever either mass rounded to zero, when only a zero REFERENCE mass may make a forward-KL term vanish. I had classified the resulting single violation as a 'bounded open numerical observation'; it was a defect, and the 1.000001 in my own report was the evidence. The superseded findings are preserved at closeout.SUPERSEDED_BY_REVIEW.json and in runs/a1..a3.",
@@ -208,5 +216,8 @@
   "tail": "computed from the COMPLEMENT's own logits -- mask the support to -inf and reduce the rest against the same log_z -- so no cancellation exists to lose and the partition's two masses sum to one by construction"
  },
  "schema": "aadistill.d_series.topk_adoption_closeout/v2",
- "verdict": "COMPLETE -- zero lower-bound violations; the protocol is sound"
+ "verdict": {
+  "_prior": "COMPLETE -- zero lower-bound violations; the protocol is sound",
+  "_status": "REOPENED -- see _REOPENED_BY_REVIEW"
+ }
 }

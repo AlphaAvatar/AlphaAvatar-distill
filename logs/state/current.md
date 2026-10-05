@@ -50,9 +50,10 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**TOP-K IS GO AND THE ENVELOPE FITS ON MEASUREMENT. One blocker left, and it is a
-maintainer decision.** Review reopened this round twice — once over the tail
-arithmetic, once over the pricing — and both are now closed.
+**TOP-K IS GO. THE PRICE IS NOT MEASURED YET, and the envelope is back to
+UNRESOLVED.** Review reopened this round three times — the tail arithmetic, then
+the cost cell, then what the cost cell was a measurement *of*. The science is
+settled; the pricing is not.
 
 ```text
 lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
@@ -61,33 +62,49 @@ CE / NLL                 exact to 1.4e-07;  top-1 bit-identical
 forward teacher KL       -1.8e-03 equal-domain mean; worst domain agrees
 reverse KL               -1.07%, DIAGNOSTIC only, not a ranking objective
 reference state          16.91 GiB -> 137.5 MiB (126x);  peak 34.8 -> 16.3 GiB
-production cost          5.0972 s/candidate MAX, un-synced, both profiles
-DEPTH cell (END TO END)  25.159 min root  (frozen full-vocab was 34.354)
-search session           measured $23.0738  vs the $30.00 envelope  -> FITS
+production cost          NOT MEASURED -- a7 timed a shadow of the real scorer
+envelope                 UNRESOLVED
 ```
 
-**Two defects review caught, both mine.** The tail was reconstructed as
-`1 - sum(support)`, and the measured support mass reached **1.000001** — a
-probability above one — so the complement was noise and one coarse KL exceeded the
-full-vocabulary KL. Then the pricing replaced the **whole** DEPTH cell with the
-operator term, deleting ~3.07 min of non-operator cost per expansion, and promoted
-a 12-candidate **mean** into `root_max`. A `CostModel` cell is one expansion end to
-end and a ceiling built on a mean is not a ceiling.
+**Three defects review caught, all mine, each one layer deeper.** The tail was
+reconstructed as `1 - sum(support)` and the measured support mass reached
+**1.000001**, so one coarse KL exceeded the full-vocabulary KL it must bound.
+Then the pricing replaced the **whole** `CostModel` cell with the operator term,
+deleting ~3.07 min of non-operator cost per expansion, and promoted a
+12-candidate **mean** into `root_max`. Then — the one that matters now — the
+"production" timing was a **shadow loop**: the driver reimplemented the candidate
+inner body and so never paid
 
-A third I caught while fixing the second: my own timing stage synchronized twice
-per group to split forward from reduction — 1,656 calls — and the DEPTH operator's
-source says in as many words that this perturbs the hot path. That inflated the
-max by **53%** and would have declared the envelope violated on the strength of my
-instrument. The split is now opt-in and a synced record cannot price.
+```text
+active.prediction_weights_for(group, indices)   a real [3, 308] tensor on the
+                                                real mixture, 665/924 nonzero
+the weighted reduction                          weights= was simply omitted
+values.tolist()                                 production's OWN sync, per group
+per-subtype collection, domain_balanced_score   the aggregation
+_ReferenceSketches fill                         prebuilt before the clock started
+```
 
-**The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
-`funds_formal_sessions_of`. No measurement reaches it.
+and it synchronized **once per candidate** where production synchronizes once per
+group. a6 had *more* syncs than production, a7 *fewer*; the true value is not
+between them by construction. `a6 7.8031 s → ~$31.58 → NEEDS_RAISE` and
+`a7 5.0972 s → $23.0738 → FITS` straddle the decision, so it has to be measured.
+
+**What historical `operator_seconds` actually is** settles the shape of the fix.
+`BeamSearch._expand_one` records it around `impl.execute(ctx)` — the whole
+invocation: packing, the reference-cache fill, all 260 candidates over 8 rounds,
+the greedy bookkeeping and the child construction. So `260 × per-candidate` was
+never the quantity the cost table holds, and the measurement is one timed real
+invocation per DEPTH profile. Nothing extrapolated, no fixed term added back.
+
+The envelope returned to `UNRESOLVED` **by mechanism**: `_topk_production_basis`
+requires `measurement_path == "operator_execute_v1"`, so a5's, a6's and a7's
+records all yield `None`.
 
 **D1's claim boundary.** It differs from incumbent B on three axes — distribution
 support, numerical execution, scoring positions — and the qualification measured
 that the batch size, not the position policy, moved three of four fixed-path
-selections. D1 is a **challenger** experiment against B, not a causal isolation of
-position weighting.
+selections. D1 is a **challenger** experiment against B, not a causal isolation
+of position weighting.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
