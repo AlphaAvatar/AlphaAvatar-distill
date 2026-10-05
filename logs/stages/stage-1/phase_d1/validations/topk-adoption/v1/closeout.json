@@ -58,13 +58,42 @@
    ]
   },
   "D1_repricing": {
-   "_how": "the PRODUCTION cost path priced against a cost model whose DEPTH cell is the measured Top-K figure and whose other three cells are unchanged -- they reduce activation statistics, not KL, so the support cannot touch them, and their frozen UNBATCHED cells overstate rather than understate.",
-   "depth_cell_before": 34.3539,
-   "depth_minutes_measured": 19.954,
+   "_priced_by": "experiments.phase_d1.search_space.search_cost, which calls search_cost_model.bound. No second pricing formula exists here.",
+   "_what_was_corrected": "the first substitution replaced the WHOLE DEPTH cell with the operator term, deleting the non-operator phases -- about 3.07 min per root expansion -- and promoted a 12-candidate MEAN into `root_max`. A `CostModel` cell is one expansion end to end and a ceiling built on a mean is not a ceiling.",
+   "bounds_later_rounds": {
+    "_not_a_family_shortcut": "the third premise is checked against the operator/adapter contract on a toy geometry, not asserted for one model family, and nothing about it lives in src/aadistill.",
+    "because": [
+     "the skip set only grows, so the ablated forward's executed block count is non-increasing in the round index",
+     "round 0 evaluates the most candidates",
+     "every frozen operator only shrinks the geometry it modifies, so a deeper parent runs a smaller model"
+    ],
+    "claim": "a round-0 measurement at the ROOT parent conservatively bounds every later DEPTH round and every deeper parent",
+    "established_by": "tests/initialization/test_operators_only_shrink.py"
+   },
+   "depth_cell_before": {
+    "deeper_max": 36.07,
+    "deeper_mean": 27.5781,
+    "root_max": 34.3539,
+    "root_mean": 29.2482
+   },
+   "depth_cell_is_END_TO_END": true,
+   "depth_deeper_max_minutes": 24.8196,
+   "depth_root_max_minutes": 25.1594,
+   "non_operator_overhead_minutes": {
+    "_derived_from": "the committed search telemetry, via full_search_space.non_operator_observations",
+    "_phases": "parent_load, materialize, identify, canonical_reload, validation, state_evaluation -- everything an operator-only figure omits",
+    "deeper_max": 2.7317,
+    "deeper_mean": 1.5388,
+    "deeper_n": 16,
+    "root_max": 3.0715,
+    "root_mean": 2.881,
+    "root_n": 3
+   },
+   "operator_minutes_at_max": 22.0879,
    "per_session_envelope_compatibility": "RESOLVED_FITS",
    "per_session_envelope_usd": 30.0,
-   "search_session_hard_ceiling_minutes": 1022.95,
-   "search_session_hard_ceiling_usd": 19.5308
+   "search_session_hard_ceiling_minutes": 1208.52,
+   "search_session_hard_ceiling_usd": 23.0738
   },
   "D_state_evaluation": {
    "exact": {
@@ -94,6 +123,7 @@
    "from": "a4",
    "protocol_ids_differ": true,
    "reverse_kl": {
+    "_figure_provenance": "-1.07% is the POST-REPAIR figure and is the authoritative one. The -18.7% that appeared in earlier reporting is from the PRE-REPAIR closeout and must not be propagated. The gap is itself informative: the broken tail was hitting reverse KL hardest, which fits, since reverse KL weights by the candidate's mass and the candidate's tail was the mis-computed one.",
     "_not_a_blocker": "confirmed by review: the live beam ranking objectives are state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain and state.critical_token_kl -- all forward/reference-weighted. state.reverse_kl.token_mean is DIAGNOSTIC and is not a pruning or ranking objective. It is still recorded.",
     "_not_comparable": "reverse KL under reference_topk_tail_v1 is NOT numerically comparable with historical full-vocab reverse KL. It must not be made to match by choosing a candidate-defined support.",
     "absolute": -0.014069289683168229,
@@ -104,17 +134,31 @@
    "worst_domain_identity_agrees": true
   },
   "E_production_cost": {
-   "_peak_against_a4": "16.282 GiB here against a4's 34.774 GiB, which held the full-vocabulary reference cache.",
-   "_this_is_production": "Top-K reduction only, no dual reduction, no full-vocabulary reference cache. The adoption validation's wall clock is NOT this and must not be used to price D1.",
-   "candidates_timed": 12,
-   "forward_seconds": 45.741,
-   "from": "a5",
-   "full_vocab_bytes_avoided": 18160302336,
-   "peak_memory_bytes": 17482989568,
-   "reduce_seconds": 9.452,
-   "reference_sketch_bytes": 144148356,
-   "reference_state_ratio": 126.0,
-   "seconds_per_candidate": 4.6048
+   "_max_not_mean": "a ceiling built on a mean is not a ceiling. 72 observations, both profiles, every round-0 candidate.",
+   "_why_a6_is_superseded": "a6 synchronized twice per group to split forward from reduction -- 1,656 calls -- and the DEPTH operator's own source says inserting syncs perturbs the hot path. Its max of 7.8031 s/candidate was 53% instrument inflation against a7's 5.0972, and un-synced the two profiles are nearly identical, so a6's apparent profile gap was largely the syncs too. a6 remains the record of the phase split; it prices nothing.",
+   "candidates_per_profile": 36,
+   "from": "a7 (un-synced, valid for pricing); a6 superseded",
+   "operator_seconds_max": 5.0972,
+   "overall_distribution": {
+    "max": 5.0972373485565186,
+    "mean": 4.6387895411915245,
+    "min": 4.520792007446289,
+    "n": 72,
+    "p1": 4.530153036117554,
+    "p5": 4.555751800537109,
+    "p50": 4.640181064605713,
+    "p95": 4.669371843338013,
+    "p99": 4.834033966064453
+   },
+   "per_profile_means": {
+    "calib.domain_balanced@v1": 4.621613888888889,
+    "calib.reasoning_heavy@v2": 4.655966666666667
+   },
+   "profiles": [
+    "calib.domain_balanced@v1",
+    "calib.reasoning_heavy@v2"
+   ],
+   "sync_split_enabled": false
   },
   "lower_bound": {
    "_reading": "ZERO, and zero even at the looser 1e-6 threshold rather than merely inside the predeclared tolerance. The driver now RAISES on any violation outside tolerance rather than reporting one.",
@@ -130,16 +174,24 @@
   }
  },
  "cost": {
-  "booked_usd": 2.3009,
+  "booked_usd": 2.8741,
   "ceiling_usd": 8.0,
-  "subruns": 5,
+  "subruns": 7,
   "teardown": "every pod provider-confirmed gone"
  },
  "identity": {
+  "_design_hash_semantics": "`design_hash_at_measurement` is the D1 design hash AS IT WAS when this measurement was taken, and it is deliberately not updated: a closeout records what it measured against. The CURRENT hash has ONE owner, logs/stages/stage-1/phase_d1/plans/d1_design.json, which is regenerated and whose `design_hash` is authoritative. Carrying a copy of the current hash here created a second owner that silently went stale.",
   "bound_full_vocab": "d463a1dc6afbd778",
   "bound_reference_topk_tail": "9c9b0b43dc00b695",
-  "d1_design_hash": "8d5cdf902e691ac7705a5ee0",
+  "current_design_owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: design_hash",
+  "design_hash_at_measurement": "8d5cdf902e691ac7705a5ee0",
   "they_differ": true
+ },
+ "live_budget": {
+  "_derived_by": "scripts/consolidate/derive_budget.py",
+  "engineering_remaining_usd": 5.8396,
+  "formal_remaining_usd": 7.2431,
+  "project_remaining_usd": 7.0778
  },
  "protocol": {
   "k_is_maintainer_selected": "2026-10-04, no sweep, never tuned against D1/D2/D3 results",

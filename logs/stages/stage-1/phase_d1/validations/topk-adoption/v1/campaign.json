@@ -1,18 +1,18 @@
 {
- "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 + 0.3057 = 2.6066",
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 + 0.3057 + 0.2675 = 2.8741",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.6066,
+ "booked_usd": 2.8741,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "CLOSED -- 5 paid subruns, $2.3009 of $8.0000; zero lower-bound violations after the corrective repair",
+ "status": "CLOSED -- 7 paid subruns, $2.8741 of $8.0000; zero lower-bound violations and the envelope RESOLVED_FITS on an un-synced end-to-end measurement",
  "subruns": [
   {
    "cost_usd": 0.6382,
@@ -108,6 +108,21 @@
     "P"
    ],
    "subrun_id": "a6"
+  },
+  {
+   "cost_usd": 0.2675,
+   "elapsed_minutes": 14.617,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a7",
+   "gpu": "NVIDIA L40S",
+   "notes": "366 s. 72 observations, both profiles, one synchronize per CANDIDATE. MAX 5.0972 s/candidate against a6's synced 7.8031 -- a6 was 53% inflated by its own instrument. Un-synced the two profiles are nearly identical (means 4.6216 and 4.6560), so a6's apparent profile gap was largely the syncs as well.",
+   "outcome": "COMPLETE -- the UN-SYNCED per-candidate MAX, valid for pricing",
+   "pod_id": "8v4jc1c5mwnipb",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "7c3cabe2930f1745b4bf3e832d3f70d35d1e89de",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a7"
   }
  ],
  "teardown_reserve_usd": 0.3

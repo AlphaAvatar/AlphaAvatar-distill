@@ -943,7 +943,7 @@ D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
 
 #: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
 TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
-                   "runs/a6/adoption.json")
+                   "runs/a7/adoption.json")
 
 
 def non_operator_expansion_overhead() -> dict[str, Any] | None:
@@ -1219,9 +1219,14 @@ def budget() -> dict[str, Any]:
                 "re-derived from it."),
         },
         "chain": chain,
-        "price_status": ("PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. "
-                         "The batched direction is now MEASURED; the production "
-                         "Top-K cost is not."),
+        "price_status": (
+            "MEASURED PRODUCTION TOP-K BASIS for the search session: "
+            f"${topk['search_session']['hard_ceiling_usd']:.4f} hard ceiling from "
+            f"an END-TO-END DEPTH cell. The chain's other sessions keep their "
+            "full-vocab basis."
+            if topk else
+            "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched "
+            "direction is now MEASURED; the production Top-K cost is not."),
         "_price_status": (
             "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
             "finalized authorization price. What has changed and what has not:\n\n"
@@ -1278,31 +1283,14 @@ def budget() -> dict[str, Any]:
             "protocol D1 will not run. `open_blockers` used to require both this "
             "field AND that the provisional basis fit, so a measurement proving "
             "D1 fits would have stayed blocked by an estimate it supersedes."),
-        "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
-            "WHAT IS DEFINITE: per-session envelope compatibility is "
-            "UNRESOLVED, and an unresolved compatibility blocks authorization. "
-            "This is a SEPARATE constraint from the project-level cap — "
-            "`per_attempt_hard_ceiling_usd` binds each session independently, "
-            "and the C1 authorization shows the grant issuer refusing a session "
-            "price that disagreed with its pricing file — so a D1 grant that "
-            "moved only the cumulative cap would still not authorize the search "
-            "session.\n\n"
-            "WHAT IS NOT ESTABLISHED: that the real batched D1 search exceeds "
-            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
-            "basis puts the search session at "
-            f"${chain['max_session_hard_ceiling_usd']:.4f}, over by "
-            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
-            "but that basis comes from UNBATCHED telemetry whose direction "
-            "relative to the batched implementation is unknown. The measured "
-            "session could land either side of the envelope, so this document "
-            "does NOT claim the search has been shown not to fit.\n\n"
-            "WHAT RESOLVES IT: the owed short GPU qualification, which prices a "
-            "representative batched expansion. ONLY THEN is the envelope "
-            "question answerable, and only then can a grant choose between "
-            "raising the per-session envelope for the phase, splitting the "
-            "search into sessions that each fit, or a cheaper search protocol. "
-            "That resolution is a maintainer decision recorded as one, never "
-            "inferred from a cap change."),
+        #: DERIVED from the live compatibility state. It used to assert
+        #: UNRESOLVED unconditionally, which contradicts the measured value
+        #: whenever one exists.
+        "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": _envelope_blocker_note(
+            budget_section_compatibility=_envelope_compatibility(
+                topk, terms["per_attempt_hard_ceiling_usd"]),
+            envelope_usd=terms["per_attempt_hard_ceiling_usd"],
+            topk=topk),
         "position": {
             "project_cap_usd": float(live["project"]["cap_usd"]),
             "project_remaining_usd": project_remaining,
@@ -1498,6 +1486,68 @@ def open_blockers(budget_section: dict[str, Any],
     return tuple(open_)
 
 
+def _envelope_blocker_note(*, budget_section_compatibility: str,
+                           envelope_usd: float,
+                           topk: dict[str, Any] | None) -> str:
+    """The per-session-envelope note, written from the live state.
+
+    Three states, three notes. The constraint it describes -- that
+    `per_attempt_hard_ceiling_usd` binds each session independently of the
+    cumulative cap -- is true in all three and is stated in all three; what
+    changes is whether it is satisfied, unknown, or violated.
+    """
+    separate = (
+        "This is a SEPARATE constraint from the project-level cap: "
+        "`per_attempt_hard_ceiling_usd` binds each session independently, and "
+        "the C1 authorization shows the grant issuer refusing a session price "
+        "that disagreed with its pricing file -- so a D1 grant that moved only "
+        "the cumulative cap would still not authorize the search session.")
+    if budget_section_compatibility == "RESOLVED_FITS":
+        priced = topk["search_session"]["hard_ceiling_usd"]
+        return (f"SATISFIED ON MEASUREMENT: the corrected production Top-K search "
+                f"session prices at ${priced:.4f} against the ${envelope_usd:.2f} "
+                f"envelope, so this is no longer a blocker. " + separate)
+    if budget_section_compatibility == "RESOLVED_NEEDS_RAISE":
+        priced = topk["search_session"]["hard_ceiling_usd"]
+        return (f"VIOLATED ON MEASUREMENT: the corrected production Top-K search "
+                f"session prices at ${priced:.4f} against the ${envelope_usd:.2f} "
+                f"envelope, so the envelope would have to move -- a maintainer "
+                f"decision, not something this design may take. " + separate)
+    return ("WHAT IS DEFINITE: per-session envelope compatibility is UNRESOLVED, "
+            "and an unresolved compatibility blocks authorization because "
+            "authorization needs a figure it can bind -- not because "
+            "incompatibility is proven. What resolves it is a PRODUCTION Top-K "
+            "measurement: an un-synced per-candidate MAX over both DEPTH "
+            "calibration profiles, rebuilt into an END-TO-END cell with the "
+            "committed non-operator overhead. " + separate)
+
+
+def _blocker_causes(open_: tuple[str, ...],
+                    budget_section: dict[str, Any]) -> str:
+    """One clause per LIVE blocker, in the contract line.
+
+    Each clause states the live reason rather than a historical one, so a closed
+    blocker cannot leave its cause behind as prose.
+    """
+    clauses = []
+    if "evidence" in open_:
+        clauses.append("the behavioural evidence does not exist")
+    if "funding authorization" in open_:
+        clauses.append(
+            "`phase_d1` is outside the package's `funds_formal_sessions_of`, so "
+            "no allowance covers it at any price")
+    if "per-session envelope" in open_:
+        state = budget_section["per_session_envelope_compatibility"]
+        clauses.append(
+            "the search session's envelope compatibility is "
+            f"{state}, and authorization needs a figure it can bind"
+            if state == "UNRESOLVED" else
+            f"the measured search session does not fit the package's "
+            f"per-session envelope ({state}), which binds separately from the "
+            "cumulative cap")
+    return "Live causes: " + "; ".join(clauses) + "."
+
+
 def _blocker_phrase(open_: tuple[str, ...]) -> str:
     """`THREE INDEPENDENT BLOCKERS: evidence, funding, per-session ceiling`."""
     words = {0: "NO", 1: "ONE", 2: "TWO", 3: "THREE", 4: "FOUR"}
@@ -1517,14 +1567,21 @@ def build() -> dict[str, Any]:
                else "any one of them alone")
     doc = {
         "schema": SCHEMA,
+        #: DERIVED, clause by clause. This used to state all three causes
+        #: unconditionally -- including "the behavioural evidence cannot be built
+        #: under the frozen mixture", which is false since the family was built,
+        #: and "the search session alone exceeds the envelope", which contradicts
+        #: measured compatibility whenever that resolves. A contract that
+        #: enumerates causes must enumerate the LIVE ones.
         "_contract": (
             "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and "
-            f"{phrase.lower()} are recorded below, each independently "
-            "sufficient to prevent a launch. The behavioural evidence cannot "
-            "be built under the frozen mixture; the chain is not fundable at "
-            "the current balance; and the search session alone exceeds the "
-            "package's per-session envelope, which binds separately from the "
-            "cumulative cap."),
+            f"{phrase.lower()} recorded below"
+            + (", each independently sufficient to prevent a launch."
+               if len(open_) > 1 else
+               ", sufficient on its own to prevent a launch."
+               if open_ else ".")
+            + (
+                "" if not open_ else " " + _blocker_causes(open_, budget_section))),
         "open_blockers": list(open_),
         "_open_blockers": (
             "DERIVED by `open_blockers()` from the figures in `budget` and "

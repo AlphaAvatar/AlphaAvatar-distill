@@ -476,8 +476,50 @@ class TestTheCommittedRecords:
                 "unknown must say so in its name")
         #: and the claim boundary is in the prose, not only the field names
         assert "NOT the finalized amount" in budget["BLOCKER"]
-        assert "NOT ESTABLISHED" in budget[
-            "_SECOND_BLOCKER_THE_PER_SESSION_CEILING"]
+
+    def test_the_second_blocker_note_is_a_function_of_the_measured_status(self):
+        """The ceiling note must say what the DERIVED status says, in all three
+        directions.
+
+        It used to be locked to the phrase `NOT ESTABLISHED`, which was true only
+        while no production Top-K timing existed. A measurement then made that
+        prose false, and the lock made the measurement look like the regression.
+        So this exercises the writer's own branch function over every state
+        instead: the note is derived, and no state may leave prose that
+        contradicts it.
+        """
+        import write_d1_design as w
+
+        budget = json.loads(DESIGN.read_text())["budget"]
+        topk = budget["topk_production_basis"]
+        envelope = budget["per_session_envelope_usd"]
+        notes = {s: w._envelope_blocker_note(budget_section_compatibility=s,
+                                            envelope_usd=envelope, topk=topk)
+                 for s in ("UNRESOLVED", "RESOLVED_FITS",
+                           "RESOLVED_NEEDS_RAISE")}
+        #: The committed note is the one its own status produces.
+        assert budget["_SECOND_BLOCKER_THE_PER_SESSION_CEILING"] == \
+            notes[budget["per_session_envelope_compatibility"]]
+        #: Each note names its own state and no other, and only a resolved one
+        #: may name a price -- keyed on the state tokens the writer must use,
+        #: not on a phrase it happens to use today.
+        priced = f"${topk['search_session']['hard_ceiling_usd']:.4f}"
+        assert "UNRESOLVED" in notes["UNRESOLVED"]
+        assert priced not in notes["UNRESOLVED"], (
+            "an unresolved ceiling must not quote a price as though it were "
+            "bound")
+        for resolved in ("RESOLVED_FITS", "RESOLVED_NEEDS_RAISE"):
+            assert "UNRESOLVED" not in notes[resolved], (
+                f"{resolved} prose still calls the ceiling unresolved, which "
+                "would let a sentence outvote a measurement")
+            assert priced in notes[resolved], (
+                f"{resolved} must name the price it was resolved at")
+        assert "no longer a blocker" in notes["RESOLVED_FITS"]
+        assert "would have to move" in notes["RESOLVED_NEEDS_RAISE"]
+        #: And every state keeps the distinction the field exists to make: this
+        #: ceiling binds one session, the project cap is cumulative.
+        for note in notes.values():
+            assert "SEPARATE constraint from the project-level cap" in note
 
     def test_the_budget_position_is_derived_not_restated(self):
         """The writer calls `derive_budget.derive()`; a hand-copied balance

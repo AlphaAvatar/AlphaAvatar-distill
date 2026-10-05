@@ -50,37 +50,38 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**THE TOP-K PROTOCOL IS SOUND AND THE ENVELOPE IS RESOLVED. One blocker left,
-and it is a maintainer decision.** An independent review reopened the adoption
-because the tail arithmetic was invalid at the numerical edge; the repair is in and
-the corrective measurement is clean.
+**TOP-K IS GO AND THE ENVELOPE FITS ON MEASUREMENT. One blocker left, and it is a
+maintainer decision.** Review reopened this round twice — once over the tail
+arithmetic, once over the pricing — and both are now closed.
 
 ```text
-lower-bound violations   0   (was 1 -- and zero even at the looser 1e-6 threshold)
-DEPTH decisions moved    0 of 8; the removal orders are identical
+lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
+DEPTH decisions moved    0 of 8; removal orders identical
 CE / NLL                 exact to 1.4e-07;  top-1 bit-identical
-forward teacher KL       -1.8e-03 on the equal-domain mean; worst domain agrees
-reverse KL               -18.7%, DIAGNOSTIC only, not a ranking objective
+forward teacher KL       -1.8e-03 equal-domain mean; worst domain agrees
+reverse KL               -1.07%, DIAGNOSTIC only, not a ranking objective
 reference state          16.91 GiB -> 137.5 MiB (126x);  peak 34.8 -> 16.3 GiB
-production cost          4.6048 s per candidate, Top-K reduction only
-search session           measured $19.5308  vs the $30.00 envelope  -> FITS
+production cost          5.0972 s/candidate MAX, un-synced, both profiles
+DEPTH cell (END TO END)  25.159 min root  (frozen full-vocab was 34.354)
+search session           measured $23.0738  vs the $30.00 envelope  -> FITS
 ```
 
-**What was wrong, and why I should have seen it.** The tail was reconstructed as
-`1 - sum(support)`. The measured Top-200 support mass reached **1.000001** — a
-probability above one — so the complement was below float32 resolution, and the
-code then *dropped* the tail term whenever either mass rounded to zero, when only
-a zero **reference** mass may make a forward-KL term vanish. One coarse KL
-exceeded the full-vocabulary KL, which a coarsening cannot do. I recorded that as
-a "bounded open numerical observation"; the `1.000001` in my own report was the
-evidence that it was a defect. The tail now comes from the complement's own
-logits, a genuine `+inf` survives masking, and the superseded findings are kept at
-[`closeout.SUPERSEDED_BY_REVIEW.json`](../stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.SUPERSEDED_BY_REVIEW.json).
+**Two defects review caught, both mine.** The tail was reconstructed as
+`1 - sum(support)`, and the measured support mass reached **1.000001** — a
+probability above one — so the complement was noise and one coarse KL exceeded the
+full-vocabulary KL. Then the pricing replaced the **whole** DEPTH cell with the
+operator term, deleting ~3.07 min of non-operator cost per expansion, and promoted
+a 12-candidate **mean** into `root_max`. A `CostModel` cell is one expansion end to
+end and a ceiling built on a mean is not a ceiling.
 
-**The remaining blocker is CATEGORICAL and no measurement reaches it:** `phase_d1`
-is not in the C1 package's `funds_formal_sessions_of`. The per-session envelope is
-`RESOLVED_FITS` on a measured production Top-K price, and `open_blockers()` no
-longer lets the superseded full-vocab estimate veto that.
+A third I caught while fixing the second: my own timing stage synchronized twice
+per group to split forward from reduction — 1,656 calls — and the DEPTH operator's
+source says in as many words that this perturbs the hot path. That inflated the
+max by **53%** and would have declared the envelope violated on the strength of my
+instrument. The split is now opt-in and a synced record cannot price.
+
+**The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
+`funds_formal_sessions_of`. No measurement reaches it.
 
 **D1's claim boundary.** It differs from incumbent B on three axes — distribution
 support, numerical execution, scoring positions — and the qualification measured
@@ -3207,18 +3208,38 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 11 failures, and the count is trustworthy
+## Three suites, and the core one is green
 
-**Closing measurement, D1 design round: 11 failed, 5683 passed, 229 skipped,
-ZERO errors** in 42m54s, on the clean tree at `fc73c09a`. Exactly the eleven
-documented failures, as an **identical node-id set** to the previous run — no
-new ones, and none of the eleven fixed. `5555 → 5683` passed is the 128 tests
-the round added. The set was diffed against the `<details>` list below
-programmatically rather than read off, which is how the unlisted eleventh
-below was found.
+AGENTS.md 2.8a split what used to be one 43-minute run into three, because a
+default `pytest` that spent most of its time on experiments closed weeks earlier
+told a developer almost nothing about the framework.
 
-*Earlier closeouts measured the same eleven at 5555 and 5392 passed. Not
-restated beyond that: a count belongs to the tree it was taken on.*
+```text
+core full suite   3019 passed / 14 skipped / 0 failed   4m06s
+D1 + D-series     targeted, run per round
+historical        run on request, never part of core completion
+```
+
+**The eleven documented failures below are HISTORY.** Every one was a closed
+experiment's state assertion — C1/C2 closure and preregistration gates, a
+consumed proposal tracking a balance it can never spend — and they now live with
+the experiments that own them. `N passed + 11 expected failures` is no longer an
+acceptable normal state for core, and none of the eleven was repaired to get
+there: a closed phase's records still refuse, in the refusing direction, where
+their own suite can see it.
+
+**One known red, and it is not core.** `phase_d_series`
+`test_source_evidence::test_it_regenerates_identically`, pre-existing at
+`bc31175f` and gated on out-of-tree assets. The near-duplicate **screen** is
+nondeterministic across processes — gsm8k `with_any_neighbour` measured at
+6461/6484/6488 on three runs of the same tree — so **regenerating the record
+cannot fix it**; the generator has to become deterministic first. Review ruled it
+non-blocking: the record is evidence for a maintainer source decision and admits
+no row anywhere. Whoever picks it up should fix the ordering, not the number.
+
+The counts that follow belong to the trees they were taken on, kept because a
+suite result that was wrong for a knowable reason is worth more than one quietly
+replaced.
 
 **THE FIRST FULL SUITE OF THIS ROUND READ 28, AND 17 WERE MINE.** Five causes,
 not seventeen — and three were records the round owed rather than code defects:
@@ -3376,9 +3397,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$7.2431` of `$76.6523` |
-| GPU engineering | `$8.7137` of `$20.0000` |
-| package | `$15.9568` of `$96.6523` |
-| project cap | `$402.3490` spent of `$410.0000`, leaving `$7.6510` |
+| GPU engineering | `$5.8396` of `$20.0000` |
+| package | `$13.0827` of `$96.6523` |
+| project cap | `$402.9222` spent of `$410.0000`, leaving `$7.0778` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 
