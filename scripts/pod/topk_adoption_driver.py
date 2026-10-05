@@ -629,15 +629,29 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
             policy=policy, observer=stamp)
 
         torch.cuda.reset_peak_memory_stats()
-        #: TIMED EXACTLY AS `BeamSearch._expand_one` TIMES IT.
+        #: TIMED EXACTLY AS `BeamSearch._expand_one` TIMES IT -- `time.time()`
+        #: around `execute`, so the number is the same quantity the committed cost
+        #: table holds. The observer's stamps are `perf_counter`, a DIFFERENT
+        #: epoch, so the span baseline below must be taken from that clock and not
+        #: from this one: subtracting a `perf_counter` reading from a `time.time`
+        #: reading yields about -1.76e9 seconds for the first candidate.
         started = _time.time()
+        span_base = _time.perf_counter()
         outcome = impl.execute(ctx)
         elapsed = _time.time() - started
 
         timing = dict(outcome.artifacts.get("timing") or {})
         cache = dict(outcome.artifacts.get("reference_cache") or {})
         rounds = list(outcome.artifacts.get("search_rounds") or [])
-        spans = _candidate_spans(stamps, started)
+        #: A DEFECTIVE DIAGNOSTIC MUST NOT COST THE MEASUREMENT. `_candidate_spans`
+        #: refuses an impossible duration, which is a programming error and fails
+        #: in the CPU tests; here the invocation has already been paid for, so the
+        #: record keeps the price and says the distribution is unavailable.
+        spans_error = None
+        try:
+            spans = _candidate_spans(stamps, span_base)
+        except ValueError as exc:
+            spans, spans_error = [], str(exc)
         totals = [s["seconds"] for s in spans]
         item_seconds = float(timing.get("item_seconds") or 0.0)
         per_profile[profile_id] = {
@@ -669,6 +683,8 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
             #: DIAGNOSTIC ONLY.
             "per_candidate_distribution": quantiles(totals) if totals else None,
             "per_candidate_n": len(spans),
+            "per_candidate_seconds": [s["seconds"] for s in spans],
+            "_per_candidate_unavailable": spans_error,
             "_extrapolation_cross_check": (
                 {"candidates_times_max_seconds":
                      round(len(spans) * max(totals), 4),
@@ -752,6 +768,14 @@ def _candidate_spans(stamps: list[tuple[str, float]],
     if not stamps:
         return []
     spans: list[dict[str, Any]] = []
+    #: One clock. The stamps come from `perf_counter` and a baseline taken from
+    #: `time.time()` differs from them by the unix epoch, so the first span would
+    #: read about -1.76e9 seconds and the distribution's min, p1, p5 and mean
+    #: would all be that number wearing a plausible shape.
+    if min(s[1] for s in stamps) < started:
+        raise ValueError(
+            "a stamp precedes the span baseline, so the two came from different "
+            "clocks: stamps must be perf_counter() and so must the baseline")
     prev = started
     i = 0
     while i < len(stamps):

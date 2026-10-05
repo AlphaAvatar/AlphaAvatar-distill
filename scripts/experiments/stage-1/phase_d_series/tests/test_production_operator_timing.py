@@ -237,9 +237,13 @@ class TestTheRealOperatorRunsThroughThatBuilder:
             workdir=tmp_path / "w", policy=SUPERVISED_TARGET_V1,
             observer=stamp)
         impl = get_implementation("depth.causal_kl_greedy_v1")
-        started = _t.time()
+        #: `perf_counter`, the clock the observer stamps with. The stage takes the
+        #: invocation total from `time.time()` -- production's definition -- and
+        #: the span baseline from this one, and conflating them is the defect
+        #: `TestTheSpanArithmetic` now refuses.
+        span_base = _t.perf_counter()
         outcome = impl.execute(ctx)
-        return outcome, stamps, started
+        return outcome, stamps, span_base
 
     def test_the_artifacts_the_stage_reads_are_all_present(self, tmp_path):
         outcome, stamps, _ = self._run(tmp_path)
@@ -392,6 +396,27 @@ class TestTheSpanArithmetic:
         spans = drv._candidate_spans(
             [("[0]", 1.0), ("[1]", 2.0), ("[0]", 3.0)], started=0.0)
         assert [s["skip"] for s in spans] == ["[0]", "[1]", "[0]"]
+
+    def test_a_baseline_from_the_other_clock_is_refused(self):
+        """The defect this guard exists for, and it already shipped once.
+
+        The stage took its baseline from `time.time()` while the observer stamped
+        `perf_counter()`. The first span then read about -1.76e9 seconds and the
+        distribution's min, p1, p5 and mean were all that number in a plausible
+        shape. The invocation total was unaffected -- it is a `time.time()`
+        interval, which is exactly what `search.py` records -- so the price was
+        right and only the diagnostic lied, which is the worst version of this bug.
+        """
+        import time
+
+        with pytest.raises(ValueError, match="different"):
+            drv._candidate_spans([("[0]", time.perf_counter())],
+                                 started=time.time())
+
+    def test_a_single_impossible_stamp_is_enough_to_refuse(self):
+        """Not only the first one: any stamp before the baseline is impossible."""
+        with pytest.raises(ValueError, match="different"):
+            drv._candidate_spans([("[0]", 10.0), ("[1]", 4.0)], started=5.0)
 
     def test_no_stamps_is_no_spans_not_a_crash(self):
         assert drv._candidate_spans([], started=0.0) == []
