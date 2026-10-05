@@ -24,6 +24,7 @@
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
  "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED ONCE: funding authorization. Envelope RESOLVED_FITS on measurement. Owner: d1_design.json :: open_blockers.",
+ "branch": "prep/d1-funding-decision",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
@@ -59,6 +60,7 @@
   "protocol": "12 probes: 6 screening, 6 confirmation. All executed and scored.",
   "why_b_stands": "no valid C2 challenger displaced it"
  },
+ "commit": "4500d7753aee6358eef5578830ed20fc4fef71d5",
  "cuda_engineering_validation": {
   "_what": "engineering evidence only; none authorizes anything.",
   "authorizes": "nothing",
@@ -83,6 +85,7 @@
   "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
+ "dirty": false,
  "frozen": {
   "equivalence_interval": 0.011695296982299022,
   "feasibility_floor": 0.3,
@@ -228,7 +231,7 @@
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3146 passed / 14 skipped / 0 failed, 4m00s. GREEN. The boundary guard caught two experiment imports an earlier round of mine added.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. This round: prep/d-series-topk-tail from merge-base df41bee0; the squash commit names the exact tip and count. Source branches are NOT deleted: cited commit hashes resolve only there. Ranges: decisions.md.",
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. DONE 2026-10-05: main 4500d775 squashes prep/d-series-topk-tail, which is PRESERVED -- 637 cited commit hashes resolve only there. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core: phase_d_series test_source_evidence::test_it_regenerates_identically. Its near-duplicate SCREEN is nondeterministic across processes, so regenerating the record cannot fix it. Diagnosis: current.md.",
   "next_work": "none owed; awaiting a maintainer decision."
  }

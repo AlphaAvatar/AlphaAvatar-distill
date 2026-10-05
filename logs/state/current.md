@@ -3598,43 +3598,42 @@ Those terms are C1's. A C2 session would need its own grant and its own ceiling;
 neither the project headroom above nor C1's unused formal allowance is
 authorization for one.
 
-## What `main` carries after this integration
-
-Written here BEFORE the merge, so `main` lands on a tree that describes itself
-rather than trailing the record of its own contents (P12.2).
+## `main` carries this round, as of 2026-10-05
 
 ```text
-source branch   prep/d-series-topk-tail
-merge base      df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e
-tip and count   named by the squash commit on main
+main            4500d7753aee6358eef5578830ed20fc4fef71d5
+squashes        prep/d-series-topk-tail  (34 commits from df41bee0)
+source branch   PRESERVED, and must stay
+working branch  prep/d1-funding-decision, cut fresh from main
 ```
 
-The tip is NOT pinned here: a record cannot name the commit that contains it without
-being false by one commit, and then by two. The branch and the merge base are
-stable, and P12.2 asks the squash commit for the exact range — which is written
-after the tip exists.
-
-**What it adds.** `reference_topk_tail_v1` at `K=200` as the D-series KL protocol —
-reference-defined Top-K support plus one aggregate tail bucket, the tail computed
-from the complement's own logits — carried end to end:
+**What it added.** `reference_topk_tail_v1` at `K=200` as the D-series KL
+protocol — reference-defined Top-K support plus one aggregate tail bucket, the tail
+computed from the complement's own logits — carried end to end:
 `SearchConfig.distribution_support` → `_expand_one` → `OperatorContext`, with the
 state evaluator checked per measurement against the partition it actually reduced
 over. Historical full-vocabulary identity is preserved by the field being absent at
 its default. The full-vocabulary reducer stays as the oracle.
 
-**What it settles.** Zero lower-bound violations; zero of eight DEPTH decisions
-moved; the reference state down from 16.91 GiB to 137.5 MiB; the production DEPTH
-operator invocation measured at 19.9044 min, giving a `$21.4897` search session
-inside the `$30.00` per-session envelope and a derived `$51.0829` D1 chain.
+**What it settled.** Zero lower-bound violations; zero of eight DEPTH decisions
+moved; reference state 16.91 GiB → 137.5 MiB; the production DEPTH operator
+invocation measured at 19.9044 min, giving a `$21.4897` search session inside the
+`$30.00` per-session envelope and a derived `$51.0829` D1 chain.
 
 **What it does NOT do.** It authorizes nothing. `phase_d1` is still absent from
 `funds_formal_sessions_of`, no allowance or cap moved, and formal D1 has not
 started. The one remaining blocker is a maintainer funding decision.
 
 **Why the source branch is kept.** 637 distinct commit hashes are cited by 1,074
-record files and resolve only through this branch's history. Deleting it would
-invalidate every one of them; the reachability check that says so runs in
-`scripts/consolidate/converge_before_sweep.py` and resolved all 637 in 0.28 s.
+record files and resolve only through that branch's history — confirmed reachable
+in 0.28 s immediately before and after the merge, by
+`scripts/consolidate/converge_before_sweep.py`. Deleting it, which the host offers
+by default after a squash, would invalidate every one of them.
+
+**Why a fresh working branch.** A squash commit does not have the branch's commits
+as ancestors, so `prep/d-series-topk-tail` is not an ancestor of `main` and
+`main..prep/d-series-topk-tail` still lists all 34. Continuing there would
+re-apply the whole range at the next integration.
 
 ## What ends a round
 
