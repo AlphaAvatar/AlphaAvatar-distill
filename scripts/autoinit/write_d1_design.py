@@ -1232,11 +1232,16 @@ def budget() -> dict[str, Any]:
         "price_status": (
             "MEASURED PRODUCTION TOP-K BASIS for the search session: "
             f"${topk['search_session']['hard_ceiling_usd']:.4f} hard ceiling from "
-            f"an END-TO-END DEPTH cell. The chain's other sessions keep their "
-            "full-vocab basis."
+            f"an END-TO-END DEPTH cell whose operator term is ONE MEASURED "
+            f"`impl.execute` invocation "
+            f"({topk['basis']['operator_minutes_at_max']:.4f} min, the max of both "
+            f"DEPTH profiles) plus the committed non-operator MAX. The chain's "
+            "other sessions keep their full-vocab basis."
             if topk else
             "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched "
-            "direction is now MEASURED; the production Top-K cost is not."),
+            "direction is now MEASURED; the production Top-K cost is not. A "
+            "per-candidate measurement does not supply it: the cost table holds "
+            "whole-invocation `operator_seconds`."),
         "_price_status": (
             "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
             "finalized authorization price. What has changed and what has not:\n\n"

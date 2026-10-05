@@ -613,7 +613,7 @@
    "gpu": "NVIDIA L40S securePrice",
    "usd_per_hour": 1.09
   },
-  "price_status": "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched direction is now MEASURED; the production Top-K cost is not.",
+  "price_status": "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched direction is now MEASURED; the production Top-K cost is not. A per-candidate measurement does not supply it: the cost table holds whole-invocation `operator_seconds`.",
   "provisional_basis_fits_per_session_envelope": false,
   "provisional_per_session_excess_usd": 1.1577,
   "provisional_shortfall_usd": 53.6731,
@@ -660,7 +660,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "e90dce9aaffa963cd022e5a73dba86050a1ef3d4b8cdb8200609835fd302073c",
+ "design_hash": "2cc793d0ff5491e5c1d7d2368d9b52b8150065f47f6e401743c15c00cf1b629a",
  "evidence": {
   "_authorizes": "nothing. The evidence exists; the funding scope and the per-session envelope are separate and still open.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
