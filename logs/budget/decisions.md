@@ -10224,6 +10224,39 @@ on a paid pod.
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
 
+## 2026-10-05 — Integration: the D-series Top-K protocol lands on `main`
+
+- **Context:** the Top-K round is complete and reviewed. P12.2 requires one commit
+  on `main` per integration and requires the range it collapses to be named, so a
+  reader holding a commit hash from an experiment log can find which integration
+  carried it.
+- **The range:** source branch `prep/d-series-topk-tail`, merge base
+  `df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e`. The exact tip and commit count
+  are named by the squash commit on `main`, not here: a record cannot pin the
+  commit that contains it without being false by one commit, and then two.
+- **The source branch is NOT deleted.** 637 distinct commit hashes are cited by
+  1,074 record files and resolve only through this branch's history;
+  `cited_commits_are_reachable()` resolved all 637 in 0.28 s before the merge. The
+  host's offer to delete the branch after a squash would silently invalidate every
+  one of them.
+- **What lands:** `reference_topk_tail_v1` at `K = 200` as the D-series KL
+  protocol, wired from `SearchConfig.distribution_support` through `_expand_one`
+  into every operator invocation and checked per measurement against the partition
+  the state evaluator actually reduced over. Historical full-vocabulary identity is
+  preserved by the field being absent at its default. Zero lower-bound violations,
+  zero of eight DEPTH decisions moved, reference state 16.91 GiB → 137.5 MiB, the
+  production DEPTH invocation measured at 19.9044 min, a `$21.4897` search session
+  inside the `$30.00` envelope and a derived `$51.0829` D1 chain.
+- **What it authorizes:** nothing. `phase_d1` remains outside
+  `funds_formal_sessions_of`; no allowance, package cap, project cap or
+  per-session envelope moved in this integration; formal D1 has not started.
+- **Operational consequence:** a squash commit does not have the branch's commits
+  as ancestors, so a fresh working branch is cut from `main` afterwards. Continuing
+  on the old branch would re-apply the whole range at the next integration.
+- **Revisit when:** preserving a cited branch becomes impractical — at which point
+  how commit-bound evidence is re-anchored is a maintainer decision with its own
+  record, taken BEFORE any branch a record cites is deleted.
+
 ## 2026-10-05 — A DEPTH cost cell is one MEASURED operator invocation
 
 - **Context:** three successive attempts to price the Top-K DEPTH cell were

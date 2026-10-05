@@ -66,7 +66,7 @@
   "c2_full_search_performance": "COMPLETE, CLOSED -- not a PASS: two optimizations adopted on measured equivalence, one refused, one refuted. $0.2252. Owner: logs/stages/stage-1/phase_c2/validations/full-search-performance/",
   "c2_state_eval_certification": "COMPLETE, CLOSED. Ranked drift 9.032e-06 inside the predeclared 1e-5. $0.8446. Owner: logs/stages/stage-1/phase_c2/validations/state-eval-certification/",
   "d1_gpu_qualification": "COMPLETE, CLOSED. PASSED, $3.2258; the full-vocabulary BASELINE the Top-K adoption is measured against. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/gpu-qualification/",
-  "d_series_topk_adoption": "COMPLETE, campaign CLOSED after review reopened it twice. ZERO lower-bound violations, zero of 8 DEPTH decisions move, and the production operator invocation MEASURED at 19.9044 min -> search session $21.4897 vs the $30.00 envelope. $3.6878 of $8.0000. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/topk-adoption/",
+  "d_series_topk_adoption": "COMPLETE, campaign CLOSED. ZERO lower-bound violations, zero of 8 DEPTH decisions move, production operator invocation MEASURED at 19.9044 min. $3.6878 of $8.0000. AUTHORIZES NOTHING. Owner: logs/stages/stage-1/phase_d1/validations/topk-adoption/",
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
  },
  "d_series": {
@@ -228,7 +228,7 @@
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
   "core": "3146 passed / 14 skipped / 0 failed, 4m00s. GREEN. The boundary guard caught two experiment imports an earlier round of mine added.",
-  "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
+  "integration": "SQUASH AND MERGE, AGENTS.md P12.2. This round: prep/d-series-topk-tail from merge-base df41bee0; the squash commit names the exact tip and count. Source branches are NOT deleted: cited commit hashes resolve only there. Ranges: decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core: phase_d_series test_source_evidence::test_it_regenerates_identically. Its near-duplicate SCREEN is nondeterministic across processes, so regenerating the record cannot fix it. Diagnosis: current.md.",
   "next_work": "none owed; awaiting a maintainer decision."
  }

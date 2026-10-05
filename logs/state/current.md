@@ -3598,6 +3598,44 @@ Those terms are C1's. A C2 session would need its own grant and its own ceiling;
 neither the project headroom above nor C1's unused formal allowance is
 authorization for one.
 
+## What `main` carries after this integration
+
+Written here BEFORE the merge, so `main` lands on a tree that describes itself
+rather than trailing the record of its own contents (P12.2).
+
+```text
+source branch   prep/d-series-topk-tail
+merge base      df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e
+tip and count   named by the squash commit on main
+```
+
+The tip is NOT pinned here: a record cannot name the commit that contains it without
+being false by one commit, and then by two. The branch and the merge base are
+stable, and P12.2 asks the squash commit for the exact range — which is written
+after the tip exists.
+
+**What it adds.** `reference_topk_tail_v1` at `K=200` as the D-series KL protocol —
+reference-defined Top-K support plus one aggregate tail bucket, the tail computed
+from the complement's own logits — carried end to end:
+`SearchConfig.distribution_support` → `_expand_one` → `OperatorContext`, with the
+state evaluator checked per measurement against the partition it actually reduced
+over. Historical full-vocabulary identity is preserved by the field being absent at
+its default. The full-vocabulary reducer stays as the oracle.
+
+**What it settles.** Zero lower-bound violations; zero of eight DEPTH decisions
+moved; the reference state down from 16.91 GiB to 137.5 MiB; the production DEPTH
+operator invocation measured at 19.9044 min, giving a `$21.4897` search session
+inside the `$30.00` per-session envelope and a derived `$51.0829` D1 chain.
+
+**What it does NOT do.** It authorizes nothing. `phase_d1` is still absent from
+`funds_formal_sessions_of`, no allowance or cap moved, and formal D1 has not
+started. The one remaining blocker is a maintainer funding decision.
+
+**Why the source branch is kept.** 637 distinct commit hashes are cited by 1,074
+record files and resolve only through this branch's history. Deleting it would
+invalidate every one of them; the reachability check that says so runs in
+`scripts/consolidate/converge_before_sweep.py` and resolved all 637 in 0.28 s.
+
 ## What ends a round
 
 A complete `GO`, `NO-GO` **or** `INCONCLUSIVE` all end it. `INCONCLUSIVE` is a
