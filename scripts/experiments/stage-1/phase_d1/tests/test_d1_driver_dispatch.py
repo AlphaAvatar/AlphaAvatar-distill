@@ -157,17 +157,46 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         assert record["stages"][-1]["stage"] == "A"
         assert record["stages"][-1]["status"] == "failed"
 
-    def test_an_authorization_for_the_other_arm_is_refused(self, driver, tmp_path):
+    def test_a_control_arm_authorization_cannot_even_be_built(self):
+        """A formal D1 search is treatment-only, so the refusal is at ISSUANCE.
+        The control arm stays constructible as a $0 session for protocol-identity
+        checks; what it may not be is a paid beam."""
+        from experiments.phase_d1 import d1_authorization as A
+        from experiments.phase_d1 import d1_session as S
+
+        with pytest.raises(A.D1AuthorizationRefused, match="may not be issued"):
+            A.build_payload(grant={"granted_by": "test"},
+                            session_commit="b" * 40,
+                            granted_utc="2026-10-06T00:00:00Z",
+                            arm=S.CONTROL_ARM, live_rate=1.09)
+
+    def test_the_driver_refuses_an_artifact_whose_arm_was_altered(
+            self, driver, tmp_path):
+        """The driver's own check, driven against an artifact that claims another
+        arm -- which can only arise from editing one, and the self-hash catches
+        that first. Both layers are asserted, in order."""
+        from aadistill.infrastructure.manifest import sha256_json
         from experiments.phase_d1 import d1_authorization as A
         from experiments.phase_d1 import d1_session as S
 
         payload = A.build_payload(
             grant={"granted_by": "test"}, session_commit="b" * 40,
-            granted_utc="2026-10-05T00:00:00Z", arm=S.CONTROL_ARM)
-        path = tmp_path / "authorization.json"
+            granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
+        payload["arm"] = S.CONTROL_ARM
+        path = tmp_path / "edited.json"
         path.write_text(json.dumps(payload))
-        with pytest.raises(A.D1AuthorizationRefused, match="covers the"):
+        #: FIRST the self-hash, because the artifact was edited.
+        with pytest.raises(A.D1AuthorizationRefused,
+                           match="authorization_sha256"):
             driver.load_authorization(str(path), arm=S.TREATMENT_ARM,
+                                      design_hash=payload["design_hash"])
+        #: Re-hashed, so the driver's arm check is what is left.
+        payload.pop("authorization_sha256", None)
+        payload["authorization_sha256"] = sha256_json(payload)
+        rehashed = tmp_path / "rehashed.json"
+        rehashed.write_text(json.dumps(payload))
+        with pytest.raises(A.D1AuthorizationRefused, match="covers the"):
+            driver.load_authorization(str(rehashed), arm=S.TREATMENT_ARM,
                                       design_hash=payload["design_hash"])
 
     def test_an_authorization_bound_to_another_design_revision_is_refused(
@@ -177,7 +206,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
 
         payload = A.build_payload(
             grant={"granted_by": "test"}, session_commit="b" * 40,
-            granted_utc="2026-10-05T00:00:00Z", arm=S.TREATMENT_ARM)
+            granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
         path = tmp_path / "authorization.json"
         path.write_text(json.dumps(payload))
         with pytest.raises(A.D1AuthorizationRefused, match="different design"):
@@ -191,7 +220,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
 
         payload = A.build_payload(
             grant={"granted_by": "test"}, session_commit="b" * 40,
-            granted_utc="2026-10-05T00:00:00Z", arm=S.TREATMENT_ARM)
+            granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
         path = tmp_path / "authorization.json"
         path.write_text(json.dumps(payload))
         auth = driver.load_authorization(str(path), arm=S.TREATMENT_ARM,

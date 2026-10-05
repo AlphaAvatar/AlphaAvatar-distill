@@ -211,6 +211,46 @@ def scoring_policy() -> dict[str, Any]:
     }
 
 
+def _execution_wiring_status() -> str:
+    """Whether the D1 execution surface exists, DERIVED from the tree.
+
+    This read "CONTRACT ONLY. No D1 launcher exists and none is authorized" for
+    two rounds after the launcher existed. A status that outlives its subject is
+    how a reader concludes a design is less ready than it is -- and the previous
+    round's review had to point it out rather than read it.
+
+    Derived from what the contract itself names: the modules that discharge the
+    requirements, and the experiment-suite test that checks them.
+    """
+    surface = {
+        "session": "scripts/experiments/stage-1/phase_d1/d1_session.py",
+        "authorization": "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
+        "driver": "scripts/pod/autoinit_d1_driver.py",
+        "launcher": "scripts/pod/autoinit_d1_launch.py",
+        "contract test": ("scripts/experiments/stage-1/phase_d1/tests/"
+                          "test_d1_execution_contract.py"),
+        "runner-interface test": ("scripts/experiments/stage-1/phase_d1/tests/"
+                                  "test_d1_runner_interface.py"),
+    }
+    missing = [name for name, rel in surface.items()
+               if not (REPO / rel).is_file()]
+    if missing:
+        return (f"PARTIALLY IMPLEMENTED: {sorted(missing)} do not exist. Until "
+                "every one does, this record is a CONTRACT and nothing here is "
+                "validated.")
+    return (
+        "IMPLEMENTED AND CHECKED AT $0. Every requirement below is discharged in "
+        "`d1_session.build_session`, in one function rather than left to a driver "
+        "to remember, and `d1_session.assert_session_contract` verifies the result "
+        "against THIS DESIGN before the first expansion -- so a miswired session "
+        "costs nothing instead of producing records that look valid and are "
+        "scientifically unusable. The experiment suite drives the checker through "
+        "every requirement broken on its own, and a separate test constructs the "
+        "REAL SessionRunner to prove the authorization interface is satisfied "
+        "before any provider work. NOT a launch authorization: see "
+        "`open_blockers` and the one-use artifact.")
+
+
 def execution_wiring_required() -> dict[str, Any]:
     """What a D1 execution entry point must wire, recorded before one exists.
 
@@ -220,8 +260,7 @@ def execution_wiring_required() -> dict[str, Any]:
     whose records are valid-looking and scientifically unusable.
     """
     return {
-        "status": ("CONTRACT ONLY. No D1 launcher exists and none is "
-                   "authorized. Nothing here is implemented or validated."),
+        "status": _execution_wiring_status(),
         "must_be_wired": [
             {"requirement": (
                 "the frozen state-eval manifest's `content_sha256` is passed "
@@ -260,7 +299,7 @@ def execution_wiring_required() -> dict[str, Any]:
                  "way."),
              "mechanism": "aadistill.initialization.planning.search"},
         ],
-        "owed_test": (
+        "the_test_that_was_owed": (
             "a small D1 EXPERIMENT-suite contract test, written when the driver "
             "is — asserting the evaluator receives the frozen content hash, the "
             "declared policy and environment, and that the search's declared "
@@ -268,9 +307,10 @@ def execution_wiring_required() -> dict[str, Any]:
             "expansion. It belongs in "
             "scripts/experiments/stage-1/phase_d1/tests/, not the core suite: "
             "it checks THIS experiment's wiring, not a reusable mechanism."),
-        "_not_a_gate": ("this record blocks nothing today. It exists so the "
-                        "requirement is not rediscovered after a paid run "
-                        "produced unusable records."),
+        "_why_it_was_written_before_an_implementation": (
+            "so the requirement was not rediscovered after a paid run produced "
+            "unusable records. Each item is a thing the core PERMITS a caller to "
+            "omit."),
     }
 
 
@@ -1851,8 +1891,12 @@ def build() -> dict[str, Any]:
             f"records {phrase.lower()}"
             + (" -- each independently sufficient to prevent a launch."
                if len(open_) > 1 else
-               ", sufficient on its own to prevent a launch."
-               if open_ else ".")
+               ", sufficient on its own to prevent a launch." if open_ else
+               #: NO CLAUSE ABOUT MEMBERS OF AN EMPTY SET. The previous wording
+               #: read "NO OPEN BLOCKER, and any one of them alone prevents it".
+               ". A launch still needs the one-use authorization, which is issued "
+               "against the live rate and the derived harness, and which this "
+               "document does not grant.")
             + (
                 "" if not open_ else " " + _blocker_causes(open_, budget_section))),
         "open_blockers": list(open_),

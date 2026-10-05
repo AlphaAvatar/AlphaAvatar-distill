@@ -35,8 +35,8 @@ for extra in ("src", "scripts", "scripts/autoinit"):
         sys.path.insert(0, p)
 
 from aadistill.infrastructure.session import (  # noqa: E402
-    ArtifactPolicy, BudgetSpec, ExecutionCommands, MarkerPolicy, SessionSpec,
-    SetupManifest, TeardownPolicy,
+    ArtifactPolicy, BudgetSpec, ExecutionCommands, MarkerPolicy,
+    ProductFetchResult, SessionSpec, SetupManifest, TeardownPolicy,
 )
 from experiments.deployment import deployment_commands  # noqa: E402
 from experiments.phase_d1 import d1_session as D1S  # noqa: E402
@@ -81,20 +81,148 @@ def driver_command(ctx: Any, plan: Any) -> str:
             + (f" --deadline-s {deadline}" if deadline else ""))
 
 
+def committed_selection(ctx) -> list[dict]:
+    """The two selected leaves, read from the evidence the driver already wrote.
+
+    The SELECTION decides which checkpoint directories are products -- not a glob
+    over the beam workspace. A search materializes every state it expands; only the
+    committed ones are what the next stage trains from, and transferring the rest
+    would move tens of GiB nothing consumes.
+    """
+    import json as _json
+
+    record = Path(ctx.args.scr) / "d1_search.json"
+    if not record.is_file():
+        return []
+    try:
+        doc = _json.loads(record.read_text())
+    except ValueError:
+        return []
+    return list((doc.get("commit") or {}).get("selected_rows") or [])
+
+
+def fetch_selected_checkpoints(ctx) -> list:
+    """Fetch the committed Top-2 off-pod, then RE-IDENTIFY them here.
+
+    These are this session's PRODUCTS. The next D1 stage trains recovery probes
+    FROM these initializations, and the $14.7966 screening price does not fund
+    re-running two complete selected structural paths after the search -- so
+    rebuilding them later under that price is not an option either.
+
+    Fetched whenever they EXIST rather than only on a fully successful session:
+    `if terminal == "ALL_DONE"` deleted $2.82 of verified checkpoints on
+    2026-08-13 for want of exactly that distinction.
+    """
+    import subprocess
+
+    fetched: list = []
+    if not ctx.products_eligible:
+        return fetched
+    rows = committed_selection(ctx)
+    if not rows:
+        ctx.say("  no committed selection yet; nothing to secure")
+        return fetched
+    store = Path(getattr(ctx.args, "ckpt_store", None)
+                 or Path(ctx.args.scr) / "products")
+    store.mkdir(parents=True, exist_ok=True)
+    for row in rows:
+        state_id = row.get("state_id") or "unknown"
+        remote = row.get("checkpoint_path")
+        if not remote:
+            fetched.append(ProductFetchResult(
+                kind="transfer", rc=1,
+                detail=f"{state_id} names no checkpoint_path"))
+            continue
+        dest = store / state_id
+        rc = subprocess.run(
+            ["timeout", f"{getattr(ctx.args, 'ckpt_fetch_limit_min', 45)}m",
+             "scp", "-r", "-P", str(ctx.target.port),
+             "-o", "StrictHostKeyChecking=no",
+             "-o", "UserKnownHostsFile=/dev/null",
+             f"root@{ctx.host}:{remote}", str(dest)],
+            capture_output=True, timeout=None).returncode
+        size = (sum(f.stat().st_size for f in dest.rglob("*") if f.is_file())
+                if dest.exists() else 0)
+        verified, why = _reidentify(dest, row)
+        fetched.append(ProductFetchResult(
+            kind="transfer", rc=(0 if rc == 0 and verified else 1),
+            detail=(f"{state_id}: rc={rc}, {size / 2**30:.2f} GiB -> {dest}; "
+                  f"identity {'MATCHED' if verified else 'NOT MATCHED'} ({why})")))
+        ctx.say(f"  product {state_id}: rc={rc}, {size / 2**30:.2f} GiB, "
+                f"identity {'MATCHED' if verified else 'NOT MATCHED'}")
+    return fetched
+
+
+def _reidentify(directory: Path, row: dict) -> tuple[bool, str]:
+    """Rebuild the leaf's identity from the bytes that ARRIVED.
+
+    Staging a checkpoint on the pod is not durability; it is a copy that dies with
+    the pod. This is the other half, run on the destination: the artifact digest,
+    the weights digest and the shard hashes are recomputed locally, so a transfer
+    that truncated a shard is caught here rather than assumed away.
+    """
+    try:
+        from aadistill.initialization.specs.arch import get_adapter
+        from aadistill.runtime.leaf_durability import (
+            LeafDurabilityError, verify_transferred_leaf,
+        )
+    except ImportError as exc:                                  # noqa: BLE001
+        return False, f"cannot import the verifier: {exc}"
+    if not directory.is_dir():
+        return False, "nothing arrived"
+    try:
+        out = verify_transferred_leaf(directory, row,
+                                     adapter=get_adapter("qwen3"))
+    except LeafDurabilityError as exc:
+        return False, str(exc)[:160]
+    except Exception as exc:                                    # noqa: BLE001
+        return False, f"{type(exc).__name__}: {exc}"[:160]
+    return bool(out.get("matched", True)), str(out.get("why", "re-identified"))
+
+
+def both_selected_leaves_secured(ctx, fetched) -> tuple[bool, str]:
+    """BOTH, or this session owes products it did not secure.
+
+    Separate from `fetch_products` returning cleanly, because `all([])` is True: a
+    fetch that returned NOTHING would pass every transfer check while having
+    secured nothing at all, and the pod would then be deleted with the only copies
+    of the selected initializations on it.
+    """
+    rows = committed_selection(ctx)
+    expected = len(rows)
+    if not expected:
+        #: NO COMMITTED SELECTION is not "nothing owed" on a session that was
+        #: supposed to commit one: it means the search did not complete, which is
+        #: a failure the driver already recorded. There are no product bytes to
+        #: owe, so teardown is not blocked -- the evidence is what matters then.
+        return True, ("no selection was committed, so there are no product bytes "
+                      "to secure; the search did not complete")
+    ok = [f for f in fetched if getattr(f, "ok", False)]
+    if len(ok) != expected:
+        return False, (
+            f"{len(ok)} of {expected} selected checkpoints were secured and "
+            "identity-verified off-pod. The next D1 stage trains recovery probes "
+            "FROM these initializations and the screening price does not fund "
+            "rebuilding them, so a pod may not be deleted while they are only on "
+            "it.")
+    return True, (f"both selected checkpoints secured off-pod and "
+                  f"identity-verified ({expected} of {expected})")
+
+
 def budget_spec(repo_root: Path) -> BudgetSpec:
-    """The `BudgetSpec` the runner plans from, from the SAME ingredients the
-    pricing record uses.
+    """The `BudgetSpec` the runner plans from, DECOMPOSING the accepted bound.
 
-    `BudgetSpec` is a PHASE-TIME model, not a dollar cap: the runner derives
-    minutes from it and the money comes from the authorization's ceiling. So the
-    phases here are the ones `search_cost` already decomposes -- the session
-    overhead and the structural search minutes -- read from that priced session
-    rather than decomposed a second time. Two decompositions of one cost have to
-    be kept agreeing by hand, and this project has paid for that twice.
+    `BudgetSpec` is a phase-TIME model and the runner's plan is
+    `expected x (1 + contingency) + reserves + recovery_reserve`. The accepted
+    search bound is `hard_ceiling_minutes` from `search_cost`, which already
+    carries its own overrun factor -- so the reserve is DERIVED as whatever makes
+    the plan land exactly on that bound, rather than added on top of it.
 
-    `arms=0`: a search trains nothing, so the step term multiplies out. The
-    measured floor is passed only so the below-floor guard cannot fire on a figure
-    that means nothing here.
+    The first version added a 10% contingency and a 30-minute reserve ON TOP of
+    the accepted ceiling and produced a plan terminating at $22.19 against a
+    $21.4897 authorization. The runner refused it, correctly, and the refusal was
+    right about the cause: two models of one session. There is one total, and this
+    decomposes it.
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
@@ -103,10 +231,26 @@ def budget_spec(repo_root: Path) -> BudgetSpec:
     priced = A.session_ceiling(repo_root)
     session = _priced_session(repo_root)
     overhead = float(session["session_overhead_minutes"])
-    expected_search = max(
-        0.0, float(session["expected_minutes"]) - overhead)
-    worst_search = max(
-        0.0, float(session["structural_minutes_max"]))
+    accepted_hard = float(priced["hard_ceiling_minutes"])
+    expected_total = float(session["expected_minutes"])
+    expected_search = max(0.0, expected_total - overhead)
+    contingency = 0.10
+    recovery_reserve = 30.0
+
+    #: WHATEVER MAKES THE PLAN LAND ON THE ACCEPTED BOUND. Named as what it is:
+    #: the gap between the expected trajectory and the structural worst case, an
+    #: identified bounded risk that is not on the expected path -- which is why it
+    #: belongs AFTER the contingency multiplier, where it protects the work rather
+    #: than only moving the watchdog's kill time.
+    reserve = round(accepted_hard - expected_total * (1.0 + contingency)
+                    - recovery_reserve, 2)
+    if reserve < 0:
+        raise SystemExit(
+            f"the accepted {accepted_hard:.2f}-minute bound cannot hold the "
+            f"expected {expected_total:.2f} min plus a {contingency:.0%} "
+            f"contingency and a {recovery_reserve:.0f}-minute recovery reserve. "
+            "Obtain a larger authorization or choose a smaller run; do not shrink "
+            "the reserve to fit.")
 
     return BudgetSpec(
         arms=0, steps_per_arm=0,
@@ -115,26 +259,19 @@ def budget_spec(repo_root: Path) -> BudgetSpec:
                      "the step term is zero. The measured floor is passed so the "
                      "below-floor guard cannot be satisfied by accident"),
         #: The session overhead the cost model already prices, split the way the
-        #: runner expects rather than invented: setup and the bundle transfer are
-        #: inside `session_overhead_minutes`, so they are taken from it.
+        #: runner expects rather than invented.
         setup_minutes=round(overhead * 0.75, 2),
         transfer_minutes=round(overhead * 0.25, 2),
         other_phases=(
             Phase("beam_search_expected_trajectory", round(expected_search, 2)),
         ),
-        contingency_fraction=0.10,
-        #: The difference between the expected trajectory and the structural worst
-        #: case, NAMED rather than folded in: an identified bounded risk that is
-        #: not on the expected path belongs after the contingency multiplier, so it
-        #: protects the work instead of moving the watchdog's kill time.
-        soft_stop_reserves=(
-            Phase("beam_composition_risk",
-                  round(worst_search - expected_search, 2)),),
-        artifact_recovery_reserve_minutes=30.0,
+        contingency_fraction=contingency,
+        soft_stop_reserves=(Phase("beam_composition_risk", reserve),),
+        artifact_recovery_reserve_minutes=recovery_reserve,
         below_floor_reason=(
             f"priced at ${priced['hard_ceiling_usd']:.4f} / "
-            f"{priced['hard_ceiling_minutes']:.2f} min by "
-            "search_space.search_cost; see d1_design.json :: "
+            f"{accepted_hard:.2f} min by search_space.search_cost; this spec "
+            "DECOMPOSES that bound and does not add to it. See d1_design.json :: "
             "budget.chain.sessions.search"),
     )
 
@@ -224,7 +361,13 @@ def spec(args) -> SessionSpec:
             #: legitimately have produced none of it, and demanding an artifact
             #: there would block the collection of what the run DOES have.
             spec_failed="configs/autoinit/d1_search_artifacts_failed.json",
-            report_names=("d1_search.json", "journal.jsonl")),
+            report_names=("d1_search.json", "journal.jsonl",
+                          "stage1_selection.json"),
+            #: THE COMMITTED TOP-2 ARE PRODUCTS. Without these two the runner
+            #: would report that D1 owes nothing off-pod and delete the pod with
+            #: the only copies of the selected initializations on it.
+            fetch_products=fetch_selected_checkpoints,
+            products_secured=both_selected_leaves_secured),
         teardown=TeardownPolicy(
             note="delete the pod, verify from the provider that it is gone, STOP"),
     )
@@ -272,6 +415,40 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--max-price", type=float, default=None,
                     help="omit to use the rate the derived ceiling was priced at")
     ap.add_argument("--disk-gb", type=int, default=None)
+    ap.add_argument("--ckpt-store", default=None,
+                    help="where the committed Top-2 checkpoints are secured; "
+                         "defaults to <scr>/products")
+    ap.add_argument("--ckpt-fetch-limit-min", type=int, default=45,
+                    help="per-checkpoint transfer timeout")
+    #: EVERY ARGUMENT THE RUNNER READS. It validates the namespace at
+    #: construction and names what is absent, which is how this set was
+    #: enumerated: `missing_arguments` reported `out, image, token_src,
+    #: startup_limit_min, create_attempts, create_retry_seconds, host_draws,
+    #: setup_timeout_s, poll_seconds, poll_limit_min, settle_seconds`. Without
+    #: them the launcher aborts at construction -- cheap, but only because the $0
+    #: interface test constructs the real runner; a launch would otherwise have
+    #: discovered it after setup.
+    ap.add_argument("--out", default=None)
+    #: THE FORMAL IMAGE. `POD_IMAGE` holds the interpreter and the checkout
+    #: roots, not the image name, so this is declared where every sibling
+    #: launcher declares it.
+    ap.add_argument("--image",
+                    default="runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404")
+    ap.add_argument("--token-src",
+                    default=str(Path("~/.cache/huggingface/token").expanduser()))
+    ap.add_argument("--startup-limit-min", type=float, default=15.0)
+    #: ONE create call per acquisition invocation, by the package's own rule. A
+    #: corrected attempt is an explicit new subrun, never an invisible retry.
+    ap.add_argument("--create-attempts", type=int, default=1)
+    ap.add_argument("--create-retry-seconds", type=float, default=300.0)
+    #: Draws replace an unusable HOST without consuming an attempt.
+    ap.add_argument("--host-draws", type=int, default=3)
+    ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
+    ap.add_argument("--poll-seconds", type=float, default=120.0)
+    #: MUST OUTLAST THE HARD THRESHOLD, or the launcher stops watching a pod that
+    #: is still billing. The search's own bound is 1125.55 min.
+    ap.add_argument("--poll-limit-min", type=float, default=1400.0)
+    ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--uv-max-s", type=int, default=1500)
     ap.add_argument("--tests-max-s", type=int, default=2700)
     ap.add_argument("--dry-run", action="store_true",
@@ -302,7 +479,11 @@ def main(argv: list[str] | None = None) -> int:
         print(f"test_paths     {list(session.setup.test_paths)}")
         print("CREATED NOTHING: --dry-run validates the declaration only.")
         return 0
-    return SessionRunner(session, args).run()
+    #: `repo_root` is POSITIONAL and required: the runner resolves the
+    #: authorization path, the harness and the bundle against it. Omitting it is a
+    #: TypeError at construction -- cheap, but only if something constructs the
+    #: runner before a launch, which is why the $0 interface test does.
+    return SessionRunner(session, args, REPO_ROOT).run()
 
 
 if __name__ == "__main__":

@@ -120,7 +120,33 @@ UNBUILDABLE: list[tuple[str, str]] = []
 
 
 def launchers() -> dict[str, tuple[str, str]]:
-    """launcher module -> (SESSION_KIND it exports, authorization class name)."""
+    """launcher module -> (SESSION_KIND it exports, authorization class name).
+
+    **THE REGISTRY IS RESTORED BEFORE THIS RETURNS.** Building a spec runs the
+    launcher's own registration — the C3 launcher's `spec()` calls
+    `register_experimental_operators()` — and this function is called at MODULE
+    scope because `@pytest.mark.parametrize` needs its result at collection time.
+    So the additions land BEFORE any module-scoped fixture takes its `before`
+    snapshot, and the root `conftest`'s cross-module isolation can never remove
+    them: every later module inherits them as part of its baseline.
+
+    Measured: with this module in the run, `write_d1_design.build()` enumerated a
+    larger operator space and the D1 design stopped regenerating byte-identically
+    — a failure in another experiment's committed record, caused by a collection
+    -time side effect here. Cleaning up is this function's job because this
+    function is what dirtied it.
+    """
+    from aadistill.initialization.operators import base as _ops
+
+    before = set(_ops._IMPLEMENTATIONS)
+    try:
+        return _enumerate_launchers()
+    finally:
+        for impl_id in sorted(set(_ops._IMPLEMENTATIONS) - before):
+            _ops.unregister_implementation(impl_id)
+
+
+def _enumerate_launchers() -> dict[str, tuple[str, str]]:
     found = {}
     for path in sorted((REPO / "scripts/pod").glob("*_launch.py")):
         mod_name = path.stem

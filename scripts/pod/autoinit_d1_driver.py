@@ -231,19 +231,30 @@ def main(argv: list[str] | None = None) -> int:
 
         with journal.stage("B", "teacher_and_reference") as st:
             teacher, teacher_id = _load_root_teacher()
+            #: THE STAGED BYTES, against the frozen binding, BEFORE expansion. A
+            #: declared root identity binds nothing on its own: the lineage would
+            #: record the frozen revision while the search read whatever was
+            #: staged.
+            record["root_teacher"] = S.verify_staged_teacher(teacher_id["path"])
             session.evaluator.prime_reference(teacher)
             record["teacher"] = teacher_id
-            st.result = {"teacher": teacher_id.get("revision", "")[:12]}
+            st.result = {"revision": teacher_id.get("revision", "")[:12],
+                         "root_sha256":
+                             record["root_teacher"]["root_teacher_sha256"][:12]}
 
         with journal.stage("C", "beam_search") as st:
-            result = _run_search(session, teacher, args, journal)
-            record["search"] = result
-            st.result = {"states": result["n_states"],
-                         "leaves": result["n_leaves"]}
+            summary, result_obj = _run_search(session, teacher, args, journal)
+            record["search"] = summary
+            #: The live object, for the ranking. Popped before the record is
+            #: written: a `SearchResult` is not JSON and the record must be.
+            record["_search_result"] = result_obj
+            st.result = {"states": summary["n_states"],
+                         "leaves": summary["n_leaves"]}
 
         with journal.stage("D", "commit_top_k") as st:
-            record["commit"] = _commit(session, record)
-            st.result = {"committed": len(record["commit"]["top_k"])}
+            record["commit"] = _commit(session, record, out)
+            st.result = {"committed": record["commit"]["n_selected"],
+                         "state_ids": record["commit"]["state_ids"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001
@@ -252,6 +263,8 @@ def main(argv: list[str] | None = None) -> int:
                              "traceback": traceback.format_exc()}
         journal.event(stage="driver", status="failed", error=str(exc)[:400])
     finally:
+        #: NOT JSON, and never was meant to be in the record.
+        record.pop("_search_result", None)
         record["stages"] = journal.stages
         record["elapsed_seconds"] = round(time.time() - journal.started, 3)
         record["ended_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
@@ -297,11 +310,18 @@ def _run_search(session, teacher, args, journal) -> dict[str, Any]:
 
     deadline = Deadline(seconds=float(args.deadline_s)) if args.deadline_s > 0 \
         else None
+    #: THE TEACHER's OWN IDENTITY. `root_materialization_id()` refuses an empty id
+    #: or hash -- an unpinned root is a lineage that starts from nothing in
+    #: particular, which every child inherits -- and the first version passed
+    #: `f"d1/{arm}"` with an empty hash. The ARM belongs to the scoring protocol
+    #: identity, which carries it through `position_policy` and `config_hash`; the
+    #: root identity describes the teacher.
+    root = S.root_teacher_identity()
     search = BeamSearch(
         adapter=get_adapter(session.config.target_spec.family),
         config=session.config,
-        root_teacher_id=f"d1/{session.arm}",
-        root_teacher_sha256="",
+        root_teacher_id=root["root_teacher_id"],
+        root_teacher_sha256=root["root_teacher_sha256"],
         root_loader=lambda: teacher,
         calibration_loader=calibration_loader,
         measurer=lambda model, digest: session.evaluator.evaluate(model, digest),
@@ -318,24 +338,87 @@ def _run_search(session, teacher, args, journal) -> dict[str, Any]:
         "levels": [getattr(level, "as_dict", lambda: {})() for level in
                    result.levels],
         "config_hash": session.config.config_hash,
-    }
+        "root_teacher_id": root["root_teacher_id"],
+        "root_teacher_sha256": root["root_teacher_sha256"],
+    }, result
 
 
-def _commit(session, record) -> dict[str, Any]:
-    """`commit_top_k`: the candidate set, and nothing beyond it."""
+def _commit(session, record, out: Path) -> dict[str, Any]:
+    """`commit_top_k`: the REAL Stage-1 ranking, written by the REAL committer.
+
+    `result.top_n(PARETO_V1, k)` then `stage1_selection.commit(...)`. Not a second
+    ranking or a second record format: the first version of this function returned
+    `top_k: []`, which cannot be a successful D1 search and would have let a
+    session mark ALL_DONE with no candidate set at all.
+
+    EXACTLY `k` recovery-admissible leaves, or the search is NOT COMPLETE. The
+    ranking's own guard is what stops a depth-only intermediate -- which often
+    scores BETTER on teacher KL than any fully compressed leaf -- from being
+    promoted into a recovery probe it could never be a candidate for.
+    """
+    from aadistill.initialization.planning import stage1_selection
     from aadistill.initialization.planning.ranking import PARETO_V1
     from experiments.phase_d1 import d1_session as S
 
     doc = S.design()
     k = int(doc["behavioural_design"]["top_k"])
+    result = record["_search_result"]
+    ranking = result.top_n(PARETO_V1, k)
+    if len(ranking.selected) != k:
+        raise D1DriverError(
+            f"the ranking selected {len(ranking.selected)} recovery-admissible "
+            f"leaves and the design commits {k}. The formal search is NOT "
+            "COMPLETE: a partial or empty candidate set must not be marked done, "
+            "because the behavioural rungs would then screen something the search "
+            "did not choose.")
+    path = stage1_selection.commit(
+        search_config=session.config, ranking=ranking, suite=session.config.suite,
+        policy=PARETO_V1, profiles=session.config.profiles,
+        journal_path=out / "search" / "states.jsonl",
+        directory=out)
+    committed = json.loads(Path(path).read_text())
+    selected = committed["selected"]
+    #: EVERY IDENTITY A TRANSFER NEEDS. `verify_transferred_leaf` rebuilds the
+    #: identity from the bytes that arrive and takes `arch_signature` and
+    #: `weights_digest` from this record because no file carries them; omitting
+    #: one once made every transfer report NOT MATCHED on a KeyError while the
+    #: bytes were correct.
+    for row in selected:
+        for required in ("state_id", "checkpoint_path", "artifact_digest",
+                         "arch_signature", "weights_digest"):
+            if not row.get(required):
+                raise D1DriverError(
+                    f"the committed selection omits {required!r} for "
+                    f"{row.get('state_id')}, so its checkpoint could not be "
+                    "identity-verified after transfer")
     return {
-        "top_k": [],
+        "selection_path": str(Path(path).relative_to(out)),
         "k": k,
+        "n_selected": len(selected),
+        #: THE ROWS THE LAUNCHER'S PRODUCT FETCHER READS, by the name it reads
+        #: them under. A launcher consuming a field the driver never writes is the
+        #: writer/consumer gap this project has paid for more than once -- and the
+        #: consequence here would be silent: no rows means no products, and the pod
+        #: is deleted with the selected checkpoints on it.
+        "selected_rows": [
+            {k2: r.get(k2) for k2 in
+             ("state_id", "path", "checkpoint_path", "artifact_digest",
+              "weights_digest", "arch_signature", "single_shard_sha256",
+              "num_parameters")}
+            for r in selected],
+        "state_ids": [r["state_id"] for r in selected],
+        "checkpoint_paths": [r["checkpoint_path"] for r in selected],
+        "artifact_digests": [r["artifact_digest"] for r in selected],
+        "ranking_policy": PARETO_V1.qualified_id,
         "_what_this_is": (
             "the committed candidate set the behavioural rungs will screen. This "
             "session ranks and commits; it trains nothing and evaluates no "
             "behaviour."),
-        "_ranking_policy": PARETO_V1.qualified_id,
+        "_products": (
+            "these checkpoint directories are this session's PRODUCTS and must be "
+            "secured off-pod before teardown: the next stage trains recovery "
+            "probes FROM these initializations, and the screening price does not "
+            "fund re-running two complete structural paths."),
         "_next": ("screening, as a SEPARATELY authorized session. Neither "
                   "behavioural rung could be bound before this set existed."),
     }

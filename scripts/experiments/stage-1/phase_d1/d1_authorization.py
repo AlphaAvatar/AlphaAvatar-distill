@@ -26,7 +26,56 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Mapping
 
+from aadistill.governance.authorization import (
+    ActionPolicy, AuthorizationError, SpendAuthorization,
+)
+from aadistill.infrastructure.manifest import sha256_json
+
 REPO = Path(__file__).resolve().parents[4]
+
+SCHEMA = "aadistill.phase_d1.authorization/v1"
+
+#: A FORMAL D1 search is treatment-only. The control arm stays constructible at
+#: `$0` for protocol-identity checks and is not issuable for a paid beam.
+FORMAL_ARM = "supervised_target"
+#: WHAT A D1 SEARCH AUTHORIZATION MAY EXPRESS. Absence is denial.
+#:
+#: `beam_search` is ALLOWED and is the only one: D1 is the first of these
+#: sessions that actually searches. Recovery, behavioural work and a follow-on
+#: start are denied by the policy itself, so an artifact claiming one is refused
+#: at load by `check_claims` rather than by a hand-written chain of `if`s.
+D1_SEARCH_POLICY = ActionPolicy(
+    policy_id="phase_d1_search",
+    allowed=frozenset({"beam_search", "d1_search"}),
+    wire_claims={
+        "allows_beam_search": "beam_search",
+        "authorizes_d1_search": "d1_search",
+        "allows_recovery": "recovery",
+        "allows_behavioural": "behavioural",
+        "automatic_followon_start": "automatic_followon_start",
+    },
+    wire_schema=SCHEMA,
+    plan_hash_key="plan_hash",
+    enforcement=(
+        "the launcher loads this artifact, refuses a pod whose priced hard "
+        "threshold exceeds hard_cap_usd or per_launch_hard_usd, refuses a harness "
+        "whose derived closure differs from the bound one in membership or "
+        "digest, refuses a plan hash that is not this design revision, and has no "
+        "code path to recovery, behavioural evaluation or a promotion decision"),
+    refusal_notes={
+        "recovery": ("a D1 SEARCH session trains nothing. Recovery of a selected "
+                     "candidate is a separately authorized session and cannot be "
+                     "reached from this artifact."),
+        "behavioural": ("screening and confirmation are separately authorized "
+                        "sessions; neither can be bound until the search has "
+                        "committed its candidate set."),
+        "automatic_followon_start": (
+            "nothing chains off the D1 search. The committed Top-2 is reviewed "
+            "before any probe is trained."),
+    },
+)
+
+
 
 BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
 DESIGN_REL = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
@@ -55,34 +104,105 @@ GRANT_MAY_NOT_STATE = (
 )
 
 
-class D1AuthorizationRefused(RuntimeError):
-    """A condition does not hold. A refusal is the product, not a warning."""
+class D1AuthorizationRefused(AuthorizationError):
+    """A condition does not hold. A refusal is the product, not a warning.
+
+    An `AuthorizationError` by inheritance, deliberately: `SessionRunner` catches
+    that type around its four authorization calls, so a D1-specific refusal raised
+    anywhere in this module is reported as a refusal rather than escaping as an
+    unhandled error after a pod may already exist.
+    """
+
+# ---------------------------------------------------------------------------
+# the D1 executable closure
+# ---------------------------------------------------------------------------
+
+#: The entry points a D1 formal search session executes. The closure is DERIVED
+#: from these by an import walk -- never a hand-maintained file list, which cannot
+#: promise completeness and goes stale on the first edit while still reporting a
+#: confident identity for the wrong set.
+D1_ENTRY_POINTS: tuple[str, ...] = (
+    "scripts/pod/autoinit_d1_launch.py",
+    "scripts/pod/autoinit_d1_driver.py",
+    "scripts/experiments/stage-1/phase_d1/d1_session.py",
+    "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
+    "scripts/pod/collect_artifacts.py",
+)
+
+#: Files no import edge reaches, whose bytes still decide what runs or what is
+#: authorized. Hashed identically to the modules.
+#:
+#: The DESIGN is deliberately absent and is the one runtime input that cannot be
+#: here: `plan_hash` is its hash, so including its bytes would be a fixed point
+#: with no solution. It is bound by `require_plan` instead.
+D1_DECLARED_INPUTS: tuple[str, ...] = (
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "configs/experiments/phase_c1/authorization.json",
+    "configs/autoinit/d1_search_artifacts.json",
+    "configs/autoinit/d1_search_artifacts_failed.json",
+    "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+)
+
+D1_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
+                                    "scripts/autoinit")
+
+CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_d1/executable_closure.json"
+
+
+def d1_current_executable(repo_root: str | Path = REPO) -> dict[str, Any]:
+    """What a D1 session would execute NOW, derived live from the tree."""
+    from aadistill.governance.closure import ClosureError, derive
+
+    try:
+        return derive(repo_root, "phase_d1", D1_ENTRY_POINTS, D1_DECLARED_INPUTS,
+                      roots=D1_SOURCE_ROOTS)
+    except ClosureError as exc:
+        raise D1AuthorizationRefused(
+            f"cannot derive the D1 executable set: {exc}") from exc
+
+
+def d1_closure_drift(repo_root: str | Path = REPO) -> dict[str, Any] | None:
+    """How the live closure differs from the recorded snapshot, or None.
+
+    Reported, never gated on: an edited file is ordinary work, whereas a file
+    appearing in or vanishing from the set is a change in what would run.
+    """
+    from aadistill.governance.closure import compare
+
+    path = Path(repo_root) / CURRENT_CLOSURE_SNAPSHOT
+    if not path.is_file():
+        return None
+    return compare(d1_current_executable(repo_root),
+                   json.loads(path.read_text()))
+
+
 
 
 @dataclass(frozen=True)
-class D1Authorization:
-    """The issued artifact. `load` is the only way back in."""
+class D1Authorization(SpendAuthorization):
+    """The issued artifact. A `SpendAuthorization` by TYPE, and D1 by schema.
 
-    authorization_id: str
-    granted_utc: str
-    granted_by: str
-    plan_id: str
-    plan_hash: str
-    science_plan_hash: str
-    expected_usd: float
-    hard_cap_usd: float
-    per_launch_hard_usd: float
-    authorized_stages: tuple[str, ...]
-    stage_conditions: Mapping[str, str]
-    session_commit: str
-    design_hash: str
-    arm: str
-    measurement_protocol_id: str
-    config_hash: str
-    suite_content_sha256: str
+    Subclassing the real base rather than reimplementing it is the point: the
+    runner calls `require_plan`, `require_harness`, `require_within_cap` and
+    `require_within_launch_limit`, and the first version of this class implemented
+    only the first — so the launcher could not have reached a provider query. It
+    would have failed locally on the authorization object, which is the cheap
+    failure, but it would have failed having reported itself ready.
+
+    What is D1's and therefore overridden here: the schema, the typed permissions,
+    the arm, the scientific identities the money was authorized against, and a
+    `require_harness` that refuses MEMBERSHIP drift as well as content drift.
+    """
+
+    #: D1's own, beyond the base's.
+    design_hash: str = ""
+    arm: str = ""
+    measurement_protocol_id: str = ""
+    config_hash: str = ""
+    suite_content_sha256: str = ""
+    science_plan_hash: str = ""
     money: Mapping[str, Any] = field(default_factory=dict)
     one_use: str = ""
-    authorizes: str = ""
     #: TYPED PERMISSIONS, so a D1 artifact cannot be mistaken for another
     #: experiment's and vice versa. The pod's dispatch branch asserts these before
     #: the driver starts: a missing branch falls through to the generic loader,
@@ -96,42 +216,52 @@ class D1Authorization:
     allows_behavioural: bool = False
     automatic_followon_start: bool = False
 
-    def as_dict(self) -> dict[str, Any]:
-        return {
-            "schema": "aadistill.phase_d1.authorization/v1",
-            "authorization_id": self.authorization_id,
-            "granted_utc": self.granted_utc,
-            "granted_by": self.granted_by,
-            "plan_id": self.plan_id,
-            "plan_hash": self.plan_hash,
-            "science_plan_hash": self.science_plan_hash,
-            "expected_usd": round(float(self.expected_usd), 4),
-            "hard_cap_usd": round(float(self.hard_cap_usd), 4),
-            "per_launch_hard_usd": round(float(self.per_launch_hard_usd), 4),
-            "authorized_stages": list(self.authorized_stages),
-            "stage_conditions": dict(self.stage_conditions),
-            "session_commit": self.session_commit,
-            "design_hash": self.design_hash,
-            "arm": self.arm,
-            "measurement_protocol_id": self.measurement_protocol_id,
-            "config_hash": self.config_hash,
-            "suite_content_sha256": self.suite_content_sha256,
-            "money": dict(self.money),
-            "one_use": self.one_use,
-            "authorizes": self.authorizes,
-            "authorizes_d1_search": bool(self.authorizes_d1_search),
-            "allows_beam_search": bool(self.allows_beam_search),
-            "allows_recovery": bool(self.allows_recovery),
-            "allows_behavioural": bool(self.allows_behavioural),
-            "automatic_followon_start": bool(self.automatic_followon_start),
-        }
+    # -- the harness ------------------------------------------------------
+
+    def require_harness(self, repo_root: str | Path = REPO) -> dict[str, Any]:
+        """Re-derive the live closure and refuse drift. Both kinds.
+
+        The base compares a DIGEST over `harness_source_files`, which catches a
+        content change. It cannot catch a MEMBERSHIP change, because the file list
+        it digests is the authorization's own: a module added to or removed from
+        what actually runs would be digested as the same set. So this re-derives
+        the closure from the entry points and compares the file set first.
+
+        An edited launcher, driver, session or setup script is an unrehearsed
+        harness, and a paid run that produces permanent artifacts must not be
+        executed by one.
+        """
+        observed = d1_current_executable(repo_root)
+        if not self.harness_source_digest:
+            raise D1AuthorizationRefused(
+                "this D1 authorization declares no harness_source_digest, so it "
+                "cannot authorize any executable. Re-issue it against the "
+                f"rehearsed harness (observed {observed['digest'][:16]}).")
+        recorded = set(self.harness_source_files)
+        live = {f["path"] for f in observed["files"]}
+        if recorded and recorded != live:
+            added, gone = sorted(live - recorded), sorted(recorded - live)
+            raise D1AuthorizationRefused(
+                "the D1 executable closure MEMBERSHIP has changed since this "
+                f"authorization was granted: {len(added)} added {added[:4]}, "
+                f"{len(gone)} removed {gone[:4]}. A digest over the recorded list "
+                "would not have seen this -- a module that joins or leaves what "
+                "runs is a change in what runs. Re-derive and re-issue.")
+        if observed["digest"] != self.harness_source_digest:
+            raise D1AuthorizationRefused(
+                f"the D1 harness digests to {observed['digest'][:16]} and this "
+                f"authorization was granted against "
+                f"{self.harness_source_digest[:16]}. The rehearsed harness and "
+                "the executable harness differ; re-rehearse and re-issue rather "
+                "than running an unrehearsed harness against a paid "
+                "authorization.")
+        return observed
 
     def require_plan(self, plan_hash: str) -> None:
         """Refuse an artifact that does not bind THIS session's plan.
 
-        Called by the pod's dispatch branch before the driver starts. A plan hash
-        that disagrees means the authorization was issued against a different
-        design revision than the one the pod checked out.
+        A plan hash that disagrees means the authorization was issued against a
+        different design revision than the one the pod checked out.
         """
         if not plan_hash:
             raise D1AuthorizationRefused(
@@ -143,47 +273,125 @@ class D1Authorization:
                 f"session declares {plan_hash[:16]}. The artifact was issued "
                 "against a different design revision than this pod runs.")
 
+    def require_session_commit(self, commit: str) -> None:
+        """The pod checks out a commit; this is where it must be the bound one."""
+        if not self.authorized_session_commit:
+            raise D1AuthorizationRefused(
+                "this authorization binds no session commit, so it cannot say "
+                "which tree it authorized")
+        if commit != self.authorized_session_commit:
+            raise D1AuthorizationRefused(
+                f"this authorization binds commit "
+                f"{self.authorized_session_commit[:12]} and the session declares "
+                f"{commit[:12]}")
+
+    def require_treatment_arm(self) -> None:
+        """A FORMAL D1 search is treatment-only. The control is a $0 check.
+
+        The frozen hypothesis is the combined protocol -- Top-K + bsz3 +
+        supervised-target scoring -- as a challenger against incumbent B, and the
+        funded chain prices ONE formal search. `all_positions` stays constructible
+        for protocol-identity tests at $0; it must not be issuable for a second
+        full paid beam.
+        """
+        if self.arm != FORMAL_ARM:
+            raise D1AuthorizationRefused(
+                f"this authorization names the {self.arm!r} arm. A FORMAL D1 "
+                f"search is {FORMAL_ARM!r} only: the funded chain prices ONE "
+                "search, and the control arm is a $0 contract check rather than "
+                "a second paid beam.")
+
+    # -- serialization ----------------------------------------------------
+
+    def as_dict(self) -> dict[str, Any]:
+        payload = dict(super().as_dict())
+        payload["schema"] = SCHEMA
+        payload.update({
+            "design_hash": self.design_hash,
+            "arm": self.arm,
+            "measurement_protocol_id": self.measurement_protocol_id,
+            "config_hash": self.config_hash,
+            "suite_content_sha256": self.suite_content_sha256,
+            "science_plan_hash": self.science_plan_hash,
+            "money": dict(self.money),
+            "one_use": self.one_use,
+            #: FROM THE FIELDS, never a literal: a document that disagreed with
+            #: the object that wrote it would be worse than no document.
+            "authorizes_d1_search": bool(self.authorizes_d1_search),
+            "allows_beam_search": bool(self.allows_beam_search),
+            "allows_recovery": bool(self.allows_recovery),
+            "allows_behavioural": bool(self.allows_behavioural),
+            "automatic_followon_start": bool(self.automatic_followon_start),
+        })
+        #: A HASH OF ITSELF, last, over everything above it.
+        payload.pop("authorization_sha256", None)
+        payload["authorization_sha256"] = sha256_json(payload)
+        return payload
+
     @classmethod
     def load(cls, path: str | Path) -> "D1Authorization":
-        """Read an issued authorization back. The issuer round-trips through it.
+        """Read an issued authorization back, self-hash verified.
 
-        An artifact the issuer can write and the loader cannot read is a defect
-        that surfaces on the pod, after the money is committed.
+        An artifact the issuer can write and the loader cannot read fails on the
+        pod, after the money is committed.
         """
-        doc = json.loads(Path(path).read_text())
-        if doc.get("schema") != "aadistill.phase_d1.authorization/v1":
+        raw = json.loads(Path(path).read_text())
+        stated = raw.get("authorization_sha256")
+        check = dict(raw)
+        check.pop("authorization_sha256", None)
+        if not stated or stated != sha256_json(check):
             raise D1AuthorizationRefused(
-                f"{path} is not a D1 authorization: schema {doc.get('schema')!r}")
+                f"{path} does not match its own authorization_sha256; it has "
+                "been edited since it was granted")
+        if raw.get("schema") != SCHEMA:
+            raise D1AuthorizationRefused(
+                f"{path} declares schema {raw.get('schema')!r}, not {SCHEMA!r}. "
+                "Another experiment's grant measures a different harness and "
+                "carries a ceiling derived for different work; it cannot "
+                "authorize a D1 search.")
         missing = [f for f in (
-            "authorization_id", "granted_utc", "hard_cap_usd", "session_commit",
-            "design_hash", "arm", "measurement_protocol_id", "config_hash",
-            "suite_content_sha256", "authorized_stages") if not doc.get(f)]
+            "authorization_id", "granted_utc", "hard_cap_usd",
+            "authorized_session_commit", "design_hash", "arm",
+            "measurement_protocol_id", "config_hash", "suite_content_sha256",
+            "authorized_stages", "harness_source_digest") if not raw.get(f)]
         if missing:
             raise D1AuthorizationRefused(f"{path} omits {missing}")
+        #: THE POLICY REFUSES A DENIED CLAIM, so the list of forbidden keys lives
+        #: in one declaration rather than in a chain of `if`s here that a new
+        #: permission could be added without.
+        D1_SEARCH_POLICY.check_claims(raw, where=str(path))
+        if not raw.get("allows_beam_search") or not raw.get("authorizes_d1_search"):
+            raise D1AuthorizationRefused(
+                f"{path} does not authorize a D1 beam search")
         return cls(
-            authorization_id=doc["authorization_id"],
-            granted_utc=doc["granted_utc"],
-            granted_by=doc.get("granted_by", ""),
-            plan_id=doc["plan_id"], plan_hash=doc["plan_hash"],
-            science_plan_hash=doc["science_plan_hash"],
-            expected_usd=float(doc["expected_usd"]),
-            hard_cap_usd=float(doc["hard_cap_usd"]),
-            per_launch_hard_usd=float(doc["per_launch_hard_usd"]),
-            authorized_stages=tuple(doc["authorized_stages"]),
-            stage_conditions=dict(doc["stage_conditions"]),
-            session_commit=doc["session_commit"],
-            design_hash=doc["design_hash"], arm=doc["arm"],
-            measurement_protocol_id=doc["measurement_protocol_id"],
-            config_hash=doc["config_hash"],
-            suite_content_sha256=doc["suite_content_sha256"],
-            money=dict(doc.get("money") or {}),
-            one_use=doc.get("one_use", ""), authorizes=doc.get("authorizes", ""),
-            authorizes_d1_search=bool(doc.get("authorizes_d1_search", False)),
-            allows_beam_search=bool(doc.get("allows_beam_search", False)),
-            allows_recovery=bool(doc.get("allows_recovery", False)),
-            allows_behavioural=bool(doc.get("allows_behavioural", False)),
+            authorization_id=raw["authorization_id"],
+            granted_utc=raw["granted_utc"], granted_by=raw.get("granted_by", ""),
+            plan_id=raw["plan_id"], plan_hash=raw["plan_hash"],
+            expected_usd=float(raw["expected_usd"]),
+            hard_cap_usd=float(raw["hard_cap_usd"]),
+            authorized_stages=tuple(raw["authorized_stages"]),
+            stage_conditions=dict(raw["stage_conditions"]),
+            scope_note=raw.get("scope_note", ""),
+            authorized_session_commit=raw["authorized_session_commit"],
+            harness_source_digest=raw["harness_source_digest"],
+            harness_source_files=tuple(raw.get("harness_source_files") or ()),
+            per_launch_hard_usd=(float(raw["per_launch_hard_usd"])
+                                 if raw.get("per_launch_hard_usd") else None),
+            provenance_commit=raw.get("provenance_commit"),
+            design_hash=raw["design_hash"], arm=raw["arm"],
+            measurement_protocol_id=raw["measurement_protocol_id"],
+            config_hash=raw["config_hash"],
+            suite_content_sha256=raw["suite_content_sha256"],
+            science_plan_hash=raw.get("science_plan_hash", ""),
+            money=dict(raw.get("money") or {}),
+            one_use=raw.get("one_use", ""),
+            authorizes_d1_search=bool(raw["authorizes_d1_search"]),
+            allows_beam_search=bool(raw["allows_beam_search"]),
+            allows_recovery=bool(raw.get("allows_recovery", False)),
+            allows_behavioural=bool(raw.get("allows_behavioural", False)),
             automatic_followon_start=bool(
-                doc.get("automatic_followon_start", False)))
+                raw.get("automatic_followon_start", False)),
+            action_policy=D1_SEARCH_POLICY)
 
 
 def live_money(repo_root: str | Path = REPO) -> dict[str, Any]:
@@ -248,8 +456,90 @@ def session_ceiling(repo_root: str | Path = REPO) -> dict[str, float]:
             * float(session["expected_minutes"])
             / float(session["hard_ceiling_minutes"]), 4),
         "hard_ceiling_minutes": float(session["hard_ceiling_minutes"]),
+        "expected_minutes": float(session["expected_minutes"]),
+        "container_disk_usd": float(session["container_disk_usd"]),
+        "container_disk_gb": int(session.get("container_disk_gb") or 0),
         "price_per_hour": float(session["price_per_hour"]),
         "_basis": basis,
+    }
+
+
+def live_secure_price(gpu: str = "NVIDIA L40S") -> dict[str, Any]:
+    """The provider's CURRENT securePrice for `gpu`. `$0`, and required.
+
+    The package contract says the secure rate is re-queried immediately before
+    authorization. Reading the measured basis' $1.09/h and letting the launcher
+    abort later if the market moved is NOT that contract: it issues a ceiling at a
+    rate nothing re-checked, and a lower live rate would silently authorize more
+    than the session costs.
+    """
+    import json as _json
+    import urllib.request
+
+    from aadistill.infrastructure.provider import read_api_key
+
+    key = read_api_key(str(Path("~/.runpod/config.toml").expanduser()))
+    query = ("query { gpuTypes(input:{id:\"" + gpu + "\"}) { id securePrice "
+             "lowestPrice(input:{gpuCount:1}) { stockStatus } } }")
+    req = urllib.request.Request(
+        "https://api.runpod.io/graphql",
+        data=_json.dumps({"query": query}).encode(),
+        headers={"Authorization": f"Bearer {key}",
+                 "Content-Type": "application/json",
+                 #: REQUIRED. The provider sits behind a CDN that rejects
+                 #: `Python-urllib/3.x` with HTTP 403 and body `error code: 1010`
+                 #: -- which reads exactly like a credential failure and is not
+                 #: one. The same query succeeds from curl, whose only relevant
+                 #: difference is this header.
+                 "User-Agent": "aadistill-d1-authorization/1.0"})
+    body = _json.loads(urllib.request.urlopen(req, timeout=30).read())
+    types = ((body.get("data") or {}).get("gpuTypes") or [])
+    if not types or types[0].get("securePrice") in (None, 0):
+        raise D1AuthorizationRefused(
+            f"the provider returned no securePrice for {gpu!r}; an authorization "
+            "may not be issued at a rate nothing quoted")
+    row = types[0]
+    return {"gpu": gpu, "usd_per_hour": float(row["securePrice"]),
+            "stock_status": ((row.get("lowestPrice") or {}).get("stockStatus")),
+            "_quoted": "live, immediately before issuance"}
+
+
+def reprice_at(rate_usd_per_hour: float,
+               repo_root: str | Path = REPO) -> dict[str, Any]:
+    """The SAME accepted minute bound, costed at a different rate.
+
+    NO GPU TIMING IS REPEATED and no minute assumption changes: the accepted
+    `hard_ceiling_minutes` and the accepted container-disk model are re-costed, and
+    only the dollar consequence moves. A lower live rate therefore LOWERS the
+    authorized ceiling, which is the half of this contract that an abort-if-higher
+    launcher check cannot provide.
+    """
+    accepted = session_ceiling(repo_root)
+    minutes = accepted["hard_ceiling_minutes"]
+    expected_minutes = accepted["expected_minutes"]
+    #: The accepted disk model, scaled by nothing: container disk is billed per
+    #: hour of the SAME bound, so it moves with the rate only through the hours.
+    disk_per_hour = (accepted["container_disk_usd"] / (minutes / 60.0)
+                     if minutes else 0.0)
+    hard = round(minutes / 60.0 * rate_usd_per_hour
+                 + minutes / 60.0 * disk_per_hour, 4)
+    expected = round(expected_minutes / 60.0 * rate_usd_per_hour
+                     + expected_minutes / 60.0 * disk_per_hour, 4)
+    return {
+        "hard_ceiling_usd": hard,
+        "expected_usd": expected,
+        "hard_ceiling_minutes": minutes,
+        "expected_minutes": expected_minutes,
+        "price_per_hour": float(rate_usd_per_hour),
+        "accepted_at_price_per_hour": accepted["price_per_hour"],
+        "accepted_hard_ceiling_usd": accepted["hard_ceiling_usd"],
+        "container_disk_usd": round(minutes / 60.0 * disk_per_hour, 4),
+        "_basis": accepted["_basis"],
+        "_what_moved": (
+            "ONLY the rate. The accepted "
+            f"{minutes:.2f}-minute search bound and the accepted container-disk "
+            "model are unchanged, and no GPU timing was repeated: this is the "
+            "dollar consequence of an already-accepted minute bound."),
     }
 
 
@@ -283,10 +573,16 @@ def check_the_four_conditions(*, ceiling: float,
 
 
 def build_payload(*, grant: Mapping[str, Any], session_commit: str,
-                  granted_utc: str, arm: str,
+                  granted_utc: str, arm: str = FORMAL_ARM,
                   repo_root: str | Path = REPO,
-                  workdir: Path | None = None) -> dict[str, Any]:
-    """The authorization payload, fully derived from the tree it will bind."""
+                  workdir: Path | None = None,
+                  live_rate: float | None = None) -> dict[str, Any]:
+    """The authorization payload, fully derived from the tree it will bind.
+
+    `live_rate` is quoted here by default, immediately before issuance, which is
+    what the package contract requires. Passing one is for tests: a round that
+    reads a committed rate is not re-querying it.
+    """
     import tempfile
 
     from experiments.phase_d1 import d1_session as S
@@ -298,6 +594,20 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                 f"the grant states {f!r}, which this module DERIVES. A grant that "
                 "can state its own identity or its own stages can change the "
                 "experiment or over-authorize itself.")
+
+    #: TREATMENT ONLY, at the paid boundary. The frozen hypothesis is the combined
+    #: protocol as a challenger against B and the funded chain prices ONE search;
+    #: `all_positions` stays constructible at $0 for protocol-identity checks.
+    if arm != FORMAL_ARM:
+        raise D1AuthorizationRefused(
+            f"a FORMAL D1 search authorization may not be issued for the {arm!r} "
+            f"arm. It is {FORMAL_ARM!r} only: the funded chain prices ONE search, "
+            "and the control is a $0 contract check rather than a second paid "
+            "beam.")
+    if not session_commit or len(session_commit) != 40:
+        raise D1AuthorizationRefused(
+            f"session_commit {session_commit!r} is not a full commit id; the pod "
+            "checks out this tree and the authorization must bind which one")
 
     design = json.loads((root / DESIGN_REL).read_text())
     blockers = list(design["open_blockers"])
@@ -314,20 +624,31 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
             "reach the project cumulative while the formal book reported it as "
             "never having happened")
 
-    priced = session_ceiling(root)
+    #: THE LIVE RATE, then the SAME accepted minute bound costed at it. No GPU
+    #: timing is repeated; only the dollar consequence moves. A lower live rate
+    #: lowers the authorized ceiling, which an abort-if-higher launcher check
+    #: cannot do.
+    quote = ({"gpu": "NVIDIA L40S", "usd_per_hour": float(live_rate),
+              "_quoted": "supplied by the caller (tests only)"}
+             if live_rate is not None else live_secure_price())
+    priced = reprice_at(quote["usd_per_hour"], root)
     ceiling = priced["hard_ceiling_usd"]
     failed = check_the_four_conditions(ceiling=ceiling, money=money)
     if failed:
         raise D1AuthorizationRefused(
-            "the session is not fundable:\n  - " + "\n  - ".join(failed))
+            f"at the live rate ${quote['usd_per_hour']:.4f}/h the session is not "
+            "fundable:\n  - " + "\n  - ".join(failed)
+            + "\n\nThe science does not change to absorb a price movement: "
+              "neither the beam nor the minute bound may be narrowed. Stop at $0.")
 
-    #: THE ENVELOPE IS NOT THE GRANT. A grant asking for the envelope would
-    #: authorize more than the session was priced at.
+    #: THE ENVELOPE IS NOT THE GRANT, and neither is a stale ceiling. A grant
+    #: asking for a figure the live rate no longer produces is refused.
     asked = grant.get("hard_cap_usd")
     if asked is not None and abs(float(asked) - ceiling) > 5e-4:
         raise D1AuthorizationRefused(
-            f"the grant asks for ${float(asked):.4f}; the DERIVED ceiling is "
-            f"${ceiling:.4f}. The authorization carries the derived figure.")
+            f"the grant asks for ${float(asked):.4f}; the ceiling DERIVED at the "
+            f"live ${quote['usd_per_hour']:.4f}/h is ${ceiling:.4f}. The "
+            "authorization carries the derived figure.")
     stated_cap = grant.get("cumulative_cap_usd")
     if stated_cap is not None and \
             abs(float(stated_cap) - money["project_cap_usd"]) > 5e-4:
@@ -343,6 +664,9 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                               device="cpu", repo_root=root)
     contract = S.assert_session_contract(session, root)
 
+    #: THE HARNESS, derived live and bound BY MEMBERSHIP AND DIGEST.
+    closure = d1_current_executable(root)
+
     auth = D1Authorization(
         authorization_id=f"autoinit.v1.{S.EXPERIMENT_ID}",
         granted_utc=granted_utc,
@@ -355,20 +679,40 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         per_launch_hard_usd=ceiling,
         authorized_stages=AUTHORIZED_STAGES,
         stage_conditions=STAGE_CONDITIONS,
-        session_commit=session_commit,
+        scope_note=str(grant.get("covers") or "")[:4000],
+        authorized_session_commit=session_commit,
+        harness_source_digest=closure["digest"],
+        harness_source_files=tuple(f["path"] for f in closure["files"]),
+        provenance_commit=session_commit,
         design_hash=design["design_hash"],
         arm=arm,
         measurement_protocol_id=contract["measurement_protocol_id"],
         config_hash=contract["config_hash"],
         suite_content_sha256=contract["suite_content_sha256"],
-        money={**money, "derived_session": priced,
-               "four_conditions": "all four checked; see check_the_four_conditions"},
+        money={**money, "derived_session": priced, "live_quote": quote,
+               "four_conditions": "all four checked at the LIVE rate; see "
+                                  "check_the_four_conditions"},
         one_use=("ONE grant, ONE issuance, ONE launcher session. A failure is this "
                  "session's result; a retry is a new grant and a new "
                  "authorization."),
-        authorizes=("ONE D1 formal SEARCH session on the frozen design, stages "
-                    f"{'/'.join(AUTHORIZED_STAGES)}. It does NOT authorize "
-                    "recovery, behavioural screening, confirmation, promotion, "
-                    "D2, D3, or any repetition of a completed measurement."),
+        action_policy=D1_SEARCH_POLICY,
     )
-    return auth.as_dict()
+    payload = auth.as_dict()
+    payload["authorizes"] = (
+        "ONE D1 formal SEARCH session on the frozen design, stages "
+        f"{'/'.join(AUTHORIZED_STAGES)}, on the {FORMAL_ARM} arm. It does NOT "
+        "authorize recovery, behavioural screening, confirmation, promotion, D2, "
+        "D3, or any repetition of a completed measurement.")
+    payload["harness"] = {
+        "n_files": closure["n_files"],
+        "entry_points": list(closure["entry_points"]),
+        "digest": closure["digest"],
+        "_derived": ("live from the tree by aadistill.governance.closure, never a "
+                     "hand-maintained list: a recorded file list goes stale on the "
+                     "first edit and then reports a confident identity for the "
+                     "wrong set"),
+    }
+    #: The self-hash is computed LAST, over the final payload.
+    payload.pop("authorization_sha256", None)
+    payload["authorization_sha256"] = sha256_json(payload)
+    return payload

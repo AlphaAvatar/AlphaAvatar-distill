@@ -10,14 +10,26 @@
    "lifecycle": "evidence"
   },
   {
-   "artifact_class": "d1_search_journal",
-   "pattern": "audit/autoinit_d1/journal.jsonl",
+   "artifact_class": "d1_stage1_selection",
+   "pattern": "artifacts/stage1/d1/*/stage1_selection.json",
    "required": false,
    "lifecycle": "evidence"
   },
   {
-   "artifact_class": "d1_search_partial",
-   "pattern": "artifacts/stage1/d1/*/search/**/*.json",
+   "artifact_class": "d1_state_journal",
+   "pattern": "artifacts/stage1/d1/*/search/states.jsonl",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_search_telemetry",
+   "pattern": "artifacts/stage1/d1/*/search/telemetry.jsonl",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_search_journal",
+   "pattern": "audit/autoinit_d1/journal.jsonl",
    "required": false,
    "lifecycle": "evidence"
   }

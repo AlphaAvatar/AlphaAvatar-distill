@@ -134,6 +134,88 @@ def load_state_eval_suite(repo_root: str | Path = REPO):
     return suite, items, content
 
 
+#: THE FROZEN ROOT TEACHER's own record. Owned by C1's plan, used by the whole
+#: search lineage, and NOT re-typed here: a second copy of a teacher identity is a
+#: second thing that can disagree about which bytes the lineage started from.
+TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
+
+
+def root_teacher_identity(repo_root: str | Path = REPO) -> dict[str, Any]:
+    """`(id, sha256)` for the root, from the frozen binding. Never the arm.
+
+    `root_materialization_id()` REFUSES an empty id or hash -- "an unpinned root is
+    a lineage that starts from nothing in particular, which every child would then
+    inherit" -- and the first version of this session passed `f"d1/{arm}"` with an
+    empty hash. Both halves were wrong: the hash was absent, and the ID described
+    the SCORING ARM. The arm belongs to the scoring/search protocol identity, which
+    already carries it through `position_policy` and `config_hash`; the root
+    identity describes the teacher.
+
+    The single hash is derived from the binding's per-shard digests in shard order,
+    so it moves if any shard's content moves and is stable otherwise.
+    """
+    import hashlib
+
+    path = Path(repo_root) / TEACHER_BINDING
+    if not path.is_file():
+        raise D1SessionError(
+            f"no teacher binding at {TEACHER_BINDING}; a formal session may not "
+            "start from a root it cannot pin")
+    doc = json.loads(path.read_text())
+    shards = list(doc["weight_shards"])
+    digests = doc["expected_shard_sha256"]
+    missing = [s for s in shards if not digests.get(s)]
+    if missing:
+        raise D1SessionError(
+            f"the teacher binding names shards with no sha256: {missing}")
+    combined = hashlib.sha256(
+        "".join(f"{s}:{digests[s]}\n" for s in shards).encode()).hexdigest()
+    return {
+        "root_teacher_id": f"{doc['repo_id']}@{doc['revision']}",
+        "root_teacher_sha256": combined,
+        "repo_id": doc["repo_id"],
+        "revision": doc["revision"],
+        "n_shards": int(doc["n_shards"]),
+        "shard_sha256": {s: digests[s] for s in shards},
+        "_owner": TEACHER_BINDING,
+        "_combined_over": ("the per-shard sha256 digests in shard order, so the "
+                           "root hash moves if any shard's content moves"),
+    }
+
+
+def verify_staged_teacher(path: str | Path,
+                          repo_root: str | Path = REPO) -> dict[str, Any]:
+    """Check the teacher ON DISK against the frozen binding, before expansion.
+
+    A root identity that is merely DECLARED binds nothing: the lineage would
+    record the frozen revision while the search read whatever bytes were staged.
+    Every named shard is hashed and compared.
+    """
+    from aadistill.infrastructure.manifest import sha256_file
+
+    identity = root_teacher_identity(repo_root)
+    staged = Path(path)
+    checked, problems = {}, []
+    for shard, expected in identity["shard_sha256"].items():
+        f = staged / shard
+        if not f.is_file():
+            problems.append(f"{shard} is absent from {staged}")
+            continue
+        got = sha256_file(f)
+        checked[shard] = got
+        if got != expected:
+            problems.append(
+                f"{shard} hashes to {got[:12]} and the binding records "
+                f"{expected[:12]}")
+    if problems:
+        raise D1SessionError(
+            "the staged teacher is not the frozen root:\n  - "
+            + "\n  - ".join(problems))
+    return {"verified": sorted(checked), "root_teacher_id":
+            identity["root_teacher_id"],
+            "root_teacher_sha256": identity["root_teacher_sha256"]}
+
+
 @dataclass(frozen=True)
 class D1Session:
     """A wired D1 search session. Built by `build_session`, never by hand."""
@@ -165,6 +247,7 @@ class D1Session:
                 "calibration_batch_packing":
                     self.evaluator.execution.calibration_batch_packing,
             },
+            "root_teacher": root_teacher_identity(),
             "beam": {"width": self.config.schedule.width,
                      "warmup_levels": self.config.schedule.warmup_levels},
             "profiles": [p.qualified_id for p in self.config.profiles],

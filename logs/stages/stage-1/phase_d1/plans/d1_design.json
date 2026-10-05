@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records no open blocker.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records no open blocker. A launch still needs the one-use authorization, which is issued against the live rate and the derived harness, and which this document does not grant.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
@@ -897,7 +897,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "4da9af37d6b1ce30f78513097824821e57dbc844b648c467f61c22bf68ad1e2c",
+ "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -944,7 +944,7 @@
   }
  },
  "execution_wiring_required": {
-  "_not_a_gate": "this record blocks nothing today. It exists so the requirement is not rediscovered after a paid run produced unusable records.",
+  "_why_it_was_written_before_an_implementation": "so the requirement was not rediscovered after a paid run produced unusable records. Each item is a thing the core PERMITS a caller to omit.",
   "must_be_wired": [
    {
     "mechanism": "aadistill.initialization.planning.metrics.StateEvaluator",
@@ -962,8 +962,8 @@
     "why": "the search already refuses a declared id that disagrees with its measurer, at construction, because every state measured in between would have to be discarded. Learning it instead means the config hash does not carry the protocol until after work has been done under it, and a resume cannot tell whether the records it is adopting were measured the same way."
    }
   ],
-  "owed_test": "a small D1 EXPERIMENT-suite contract test, written when the driver is \u2014 asserting the evaluator receives the frozen content hash, the declared policy and environment, and that the search's declared protocol id is non-null and equals the evaluator's before any expansion. It belongs in scripts/experiments/stage-1/phase_d1/tests/, not the core suite: it checks THIS experiment's wiring, not a reusable mechanism.",
-  "status": "CONTRACT ONLY. No D1 launcher exists and none is authorized. Nothing here is implemented or validated."
+  "status": "IMPLEMENTED AND CHECKED AT $0. Every requirement below is discharged in `d1_session.build_session`, in one function rather than left to a driver to remember, and `d1_session.assert_session_contract` verifies the result against THIS DESIGN before the first expansion -- so a miswired session costs nothing instead of producing records that look valid and are scientifically unusable. The experiment suite drives the checker through every requirement broken on its own, and a separate test constructs the REAL SessionRunner to prove the authorization interface is satisfied before any provider work. NOT a launch authorization: see `open_blockers` and the one-use artifact.",
+  "the_test_that_was_owed": "a small D1 EXPERIMENT-suite contract test, written when the driver is \u2014 asserting the evaluator receives the frozen content hash, the declared policy and environment, and that the search's declared protocol id is non-null and equals the evaluator's before any expansion. It belongs in scripts/experiments/stage-1/phase_d1/tests/, not the core suite: it checks THIS experiment's wiring, not a reusable mechanism."
  },
  "experiment_id": "phase_d1",
  "gpu_validation_owed": {

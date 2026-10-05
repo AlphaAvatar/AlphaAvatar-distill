@@ -1,7 +1,7 @@
 {
  "spec": "aadistill.artifact_spec/v1",
  "session": "autoinit_d1_search",
- "note": "success spec: every permanent artifact a D1 formal SEARCH session must not lose. Entries are ArtifactSpec kwargs -- artifact_class, pattern, required, min_matches, min_bytes, lifecycle -- loaded by scripts/pod/collect_artifacts.py. A key the dataclass does not take makes the whole collection fail at load. JSON AND LOGS ONLY: nothing on the dev box consumes search checkpoints, and pulling 9.1 GiB of them over a 0.72 MB/s uplink with the pod still billing is a mistake this project has already made once.",
+ "note": "success spec: every permanent artifact a D1 formal SEARCH session must not lose. Entries are ArtifactSpec kwargs -- artifact_class, pattern, required, min_matches, min_bytes, lifecycle -- loaded by scripts/pod/collect_artifacts.py. A key the dataclass does not take makes the whole collection fail at load. THE COMMITTED TOP-2 CHECKPOINTS ARE NOT HERE and are not meant to be: they are session PRODUCTS, secured by the launcher's fetch_products/products_secured pair, because the next D1 stage trains recovery probes from those initializations and the screening price does not fund rebuilding them. What this spec requires is the authoritative search EVIDENCE, which is JSON and small.",
  "entries": [
   {
    "artifact_class": "d1_search_record",
@@ -11,22 +11,29 @@
    "lifecycle": "final_required"
   },
   {
-   "artifact_class": "d1_search_journal",
-   "pattern": "audit/autoinit_d1/journal.jsonl",
+   "artifact_class": "d1_stage1_selection",
+   "pattern": "artifacts/stage1/d1/*/stage1_selection.json",
+   "required": true,
+   "min_bytes": 256,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_state_journal",
+   "pattern": "artifacts/stage1/d1/*/search/states.jsonl",
    "required": true,
    "lifecycle": "final_required"
   },
   {
    "artifact_class": "d1_search_telemetry",
    "pattern": "artifacts/stage1/d1/*/search/telemetry.jsonl",
-   "required": false,
-   "lifecycle": "evidence"
+   "required": true,
+   "lifecycle": "final_required"
   },
   {
-   "artifact_class": "d1_search_states",
-   "pattern": "artifacts/stage1/d1/*/search/**/*.json",
-   "required": false,
-   "lifecycle": "evidence"
+   "artifact_class": "d1_search_journal",
+   "pattern": "audit/autoinit_d1/journal.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
   }
  ]
 }

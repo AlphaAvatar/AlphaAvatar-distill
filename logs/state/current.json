@@ -78,7 +78,7 @@
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
   "blockers": "NONE OPEN. Evidence CLOSED. ENVELOPE RESOLVED_FITS on measurement. FUNDING AUTHORIZED by the 2026-10-05 phase amendment. Derived by open_blockers(); owner d1_design.json.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
-  "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
+  "execution_wiring": "IMPLEMENTED AND CHECKED AT $0: session, authorization, driver, launcher, SESSION_KIND=d1 dispatch; contract asserted before the first expansion. Owner: d1_design.json :: execution_wiring_required.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
@@ -127,7 +127,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "the FINAL FORMAL D1 LAUNCH REVIEW, then the first paid formal search session. The execution chain exists at $0 and nothing is launched. Reasons: d_series.blockers.",
+ "next": "the first paid formal D1 search session, after the launch review. The execution chain exists and nothing is launched. Reasons: d_series.blockers.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "maintainer launch review of the D1 execution chain -- session, authorization, driver, launcher, dispatch -- then the first paid formal search session.",
@@ -165,7 +165,7 @@
    "closure": "see the top-level `c2_closure`",
    "owner": "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
    "probes_owed": 0,
-   "status": "CLOSED WITHOUT PROMOTION (maintainer decision 2026-09-24). Search-1 DONE and FROZEN, the joint re-search complete with an accepted, frozen Top-5, all 12 behavioural probes trained and scored. No canonical verdict and no new incumbent; B stands. Every figure and its claim boundary: see `c2_closure`.",
+   "status": "CLOSED WITHOUT PROMOTION, Top-5 ACCEPTED and FROZEN. The incumbent remains B. No further C2 spend is authorized. Figures and chains: c2_closure.",
    "top_5": "5/5 exact and durable -- logs/stages/stage-1/phase_c2_replay/"
   },
   "c3": {
@@ -231,9 +231,10 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3148 passed / 14 skipped / 0 failed, 4m04s. GREEN. The boundary guard caught two experiment imports an earlier round of mine added.",
+  "core": "3148 passed / 14 skipped / 0 failed, 4m12s. GREEN.",
+  "d1_launch": "1029 passed / 13 skipped / 0 failed, 2m38s: phase_d1 + docs + integration. GREEN, and the accepted out-of-tree source-screen failure is NOT in it.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2. DONE 2026-10-05: main 4500d775 squashes prep/d-series-topk-tail, which is PRESERVED -- 637 cited commit hashes resolve only there. Ranges: decisions.md.",
-  "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core: phase_d_series test_source_evidence::test_it_regenerates_identically. Its near-duplicate SCREEN is nondeterministic across processes, so regenerating the record cannot fix it. Diagnosis: current.md.",
+  "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core and NOT in the D1 launch suite: phase_d_series test_source_evidence::test_it_regenerates_identically. Its screen is nondeterministic across processes. Diagnosis: current.md.",
   "next_work": "none owed; awaiting the formal launch review."
  }
 }
