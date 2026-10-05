@@ -42,6 +42,12 @@ from experiments.phase_d1 import d1_session as S  # noqa: E402
 
 GRANT = {"granted_by": "launch-review test", "covers": "one D1 formal search"}
 
+#: THE RUN THIS FIXTURE'S ARTIFACT IS ISSUED FOR, and the one the runner is
+#: built with. They must be the same string: `run_id` is a field of
+#: `SearchConfig.as_dict()` and therefore of the `config_hash` the artifact
+#: binds, so an authorization issued for one run id authorizes no other.
+RUN_ID = "runner_iface"
+
 
 def _commit() -> str:
     return subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
@@ -52,7 +58,7 @@ def _commit() -> str:
 def issued(tmp_path_factory):
     """A real authorization, issued at a FIXED rate so the test is offline."""
     out = tmp_path_factory.mktemp("gov") / "authorization.json"
-    payload = A.build_payload(grant=GRANT, session_commit=_commit(),
+    payload = A.build_payload(run_id=RUN_ID, grant=GRANT, session_commit=_commit(),
                              granted_utc="2026-10-06T00:00:00Z",
                              live_rate=1.09)
     out.write_text(json.dumps(payload, indent=1, sort_keys=True))
@@ -70,7 +76,7 @@ def runner(issued, tmp_path_factory):
     args = L.build_parser().parse_args([
         "--scr", str(scr), "--session-commit", payload[
             "authorized_session_commit"],
-        "--bundle", "b.bundle", "--run-id", "runner_iface"])
+        "--bundle", "b.bundle", "--run-id", RUN_ID])
     spec = L.spec(args)
     #: THE AUTHORIZATION PATH POINTS AT THE ISSUED ARTIFACT. The runner reads
     #: `repo_root / spec.authorization_path`, so the artifact is placed there.
@@ -244,7 +250,7 @@ class TestTheFormalSearchIsTreatmentOnly:
 
     def test_the_control_arm_cannot_be_issued(self):
         with pytest.raises(A.D1AuthorizationRefused, match="may not be issued"):
-            A.build_payload(grant=GRANT, session_commit=_commit(),
+            A.build_payload(run_id=RUN_ID, grant=GRANT, session_commit=_commit(),
                             granted_utc="2026-10-06T00:00:00Z",
                             arm=S.CONTROL_ARM, live_rate=1.09)
 
@@ -291,7 +297,7 @@ class TestTheLivePriceIsQueriedBeforeIssuance:
         """And the refusal says the science does not change to absorb it."""
         with pytest.raises(A.D1AuthorizationRefused,
                            match="does not change to absorb"):
-            A.build_payload(grant=GRANT, session_commit=_commit(),
+            A.build_payload(run_id=RUN_ID, grant=GRANT, session_commit=_commit(),
                             granted_utc="2026-10-06T00:00:00Z",
                             live_rate=99.0)
 

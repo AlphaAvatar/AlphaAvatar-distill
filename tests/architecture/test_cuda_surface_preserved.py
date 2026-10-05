@@ -1380,6 +1380,38 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "byte-identical to the one a8 timed -- which is why a8 stands without "
             "a rerun.",
      }),
+    ("b342861f0771084c5191210cede553cced139c7c",
+     "the session record is written where it is filed",
+     {
+        "src/aadistill/infrastructure/session_runner.py":
+            "`save()` creates its parent directory before writing. THIS IS A "
+            "DECLARED SEMANTIC CHANGE to the evidence path, and it is two "
+            "lines: `out.parent.mkdir(parents=True, exist_ok=True)` before the "
+            "existing `write_text`. Nothing else in the method moved, no "
+            "caller changed, and the bytes written are the same bytes. "
+            "WHY IT IS NOT COSMETIC: `save()` is the only thing that puts the "
+            "session record on the dev box and it runs on every path -- "
+            "immediately after `create()` registers a pod id, after each draw, "
+            "at the dry-run stop, from `teardown_now`, and from "
+            "`run_session`'s closeout. With no `mkdir` a missing parent did "
+            "not fail where `--out` was configured; it raised "
+            "`FileNotFoundError` out of the FIRST save after a pod started "
+            "billing, which is the one moment the record matters most and the "
+            "one place an exception costs money rather than time. It held "
+            "only because every launcher so far passed an `--out` whose parent "
+            "happened to exist. D1's first real pre-provider dry run reached "
+            "`DRY_RUN_GATES_PASSED` with all six gates green and then died "
+            "here, because its record is filed at "
+            "`runs/<run_id>/runtime/session.json` -- where the shared run "
+            "layout puts a session record, and which nothing creates in "
+            "advance. "
+            "NO CUDA SURFACE: this is a filesystem call on the dev box. It "
+            "issues no kernel, touches no device, reaches no provider and "
+            "changes no identity, so no GPU validation is owed. "
+            "`tests/infrastructure/test_session_record_is_writable.py` pins "
+            "it, including a mutation check that removing the `mkdir` restores "
+            "the `FileNotFoundError`.",
+     }),
 )
 
 
@@ -1774,6 +1806,13 @@ NAMED_SEMANTIC_CHANGES = (
     #: arithmetic alone would be reporting a numerics change as a no-op.
     ("src/aadistill/initialization/statistics/contribution.py",
      "7b376424f45924b8745184b4bc9bf98fe5463d4b"),
+    #: The one whose executable diff is TWO LINES under a docstring that grew
+    #: by fifteen -- `save()` gaining the `mkdir` for its own parent. That is
+    #: precisely the shape this file exists to catch, so it is named: a round
+    #: reporting it as prose would be reporting an evidence-path change, on the
+    #: save that runs right after a pod starts billing, as a no-op.
+    ("src/aadistill/infrastructure/session_runner.py",
+     "b342861f0771084c5191210cede553cced139c7c"),
 )
 
 

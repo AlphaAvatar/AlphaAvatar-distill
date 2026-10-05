@@ -245,69 +245,211 @@ class TestTheRealSelectionPath:
         assert "must not be marked done" in src
 
 
-class TestTheProductGate:
-    """`products_secured` must require BOTH selected leaves."""
+#: THE LAYOUT `SessionRunner` ACTUALLY CREATES. Every context below is built
+#: through this helper, which writes the reports where the runner's
+#: `collect_and_teardown` scp's them -- `<scr>/store/<report_name>` -- and
+#: nowhere else.
+#:
+#: The previous fixture wrote `<scr>/d1_search.json`, a path the runner never
+#: creates, so the whole class tested a layout that does not exist. It passed,
+#: and on a real session `committed_selection` would have found nothing and
+#: `products_secured` would have read that as "no products were owed".
+def _store_ctx(scr: Path, *, selection: dict | None = None,
+               evidence: dict | None = None):
+    import types
 
-    @staticmethod
-    def _ctx(scr: Path, rows: list[dict]):
-        import types
+    store = scr / "store"
+    store.mkdir(parents=True, exist_ok=True)
+    if selection is not None:
+        (store / "stage1_selection.json").write_text(json.dumps(selection))
+    if evidence is not None:
+        (store / "d1_search.json").write_text(json.dumps(evidence))
+    return types.SimpleNamespace(
+        args=types.SimpleNamespace(scr=str(scr), ckpt_store=str(scr / "p"),
+                                   ckpt_fetch_limit_min=1),
+        products_eligible=True, host="127.0.0.1", evidence={},
+        target=types.SimpleNamespace(port=22), say=lambda *a, **k: None)
 
-        record = {"commit": {"selected_rows": rows}}
-        (scr / "d1_search.json").write_text(json.dumps(record))
-        return types.SimpleNamespace(
-            args=types.SimpleNamespace(scr=str(scr), ckpt_store=str(scr / "p"),
-                                      ckpt_fetch_limit_min=1),
-            products_eligible=True, host="127.0.0.1",
-            target=types.SimpleNamespace(port=22), say=lambda *a, **k: None)
 
-    def test_it_reads_the_rows_the_driver_writes(self, tmp_path):
-        """A launcher consuming a field the driver never writes is silent: no rows
-        means no products, and the pod is deleted with the checkpoints on it."""
+def _committed(rows: list[dict]) -> dict:
+    """A selection record that passes `stage1_selection.load`'s own hash check."""
+    from aadistill.infrastructure.manifest import sha256_json
+
+    body = {"schema": "aadistill.stage1_selection/v1", "selected": rows,
+            "n_selected": len(rows), "decisions": []}
+    body["selection_sha256"] = sha256_json(body)
+    body["generated_utc"] = "2026-10-05T00:00:00Z"
+    return body
+
+
+def _ok_evidence(rows: list[dict]) -> dict:
+    return {"status": "COMPLETE", "commit": {"selected_rows": rows},
+            "stages": [{"stage": "D", "name": "commit_top_k", "status": "ok"}]}
+
+
+ROWS = [{"state_id": "s1", "checkpoint_path": "/x/s1"},
+        {"state_id": "s2", "checkpoint_path": "/x/s2"}]
+
+
+class TestTheProductGateOnTheRealStoreLayout:
+    """`products_secured` must require BOTH selected leaves, and must never read
+    a path miss as "nothing was owed"."""
+
+    def test_it_reads_the_authoritative_record_from_the_runners_store(self,
+                                                                     tmp_path):
+        """From `<scr>/store/stage1_selection.json`, which is what the committer
+        writes and what the runner fetches -- not the driver's summary and not
+        `<scr>/`."""
         import autoinit_d1_launch as L
 
-        rows = [{"state_id": "s1", "checkpoint_path": "/x/s1"},
-                {"state_id": "s2", "checkpoint_path": "/x/s2"}]
-        assert L.committed_selection(self._ctx(tmp_path, rows)) == rows
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(ROWS))
+        assert L.committed_selection(ctx) == ROWS
+
+    def test_a_selection_in_the_old_place_is_not_found(self, tmp_path):
+        """The regression. A record at `<scr>/` is invisible to the real runner
+        layout, and that must REFUSE rather than report nothing owed."""
+        import autoinit_d1_launch as L
+
+        (tmp_path / "d1_search.json").write_text(
+            json.dumps(_ok_evidence(ROWS)))
+        ctx = _store_ctx(tmp_path)
+        with pytest.raises(L.SelectionUnreadable):
+            L.committed_selection(ctx)
+
+    def test_success_with_a_missing_selection_fails_the_gate(self, tmp_path):
+        """`success + missing selection -> False`. The driver reached
+        commit_top_k and the record did not come home: the checkpoints exist and
+        this launcher cannot name them."""
+        import autoinit_d1_launch as L
+
+        ctx = _store_ctx(tmp_path, evidence=_ok_evidence(ROWS))
+        ok, why = L.both_selected_leaves_secured(ctx, [])
+        assert ok is False
+        assert "PRODUCT GATE FAILURE" in why
+        #: It must name the real condition -- the record was not fetched -- and
+        #: not the "search did not complete" verdict that would allow teardown.
+        #: Asserted on the OUTCOME rather than on the absence of a phrase: the
+        #: message deliberately quotes that verdict in order to reject it.
+        assert "reached commit_top_k" in why
+        assert "stage1_selection.json" in why
+
+    def test_an_unparseable_selection_fails_the_gate(self, tmp_path):
+        import autoinit_d1_launch as L
+
+        store = tmp_path / "store"
+        store.mkdir()
+        (store / "stage1_selection.json").write_text("{not json")
+        (store / "d1_search.json").write_text(json.dumps(_ok_evidence(ROWS)))
+        ok, why = L.both_selected_leaves_secured(_store_ctx(tmp_path), [])
+        assert ok is False and "PRODUCT GATE FAILURE" in why
+
+    def test_a_selection_failing_its_own_hash_fails_the_gate(self, tmp_path):
+        """`stage1_selection.load` verifies `selection_sha256`. An edited record
+        is not a selection."""
+        import autoinit_d1_launch as L
+
+        doc = _committed(ROWS)
+        doc["selected"] = [{**ROWS[0], "state_id": "tampered"}, ROWS[1]]
+        ctx = _store_ctx(tmp_path, selection=doc, evidence=_ok_evidence(ROWS))
+        ok, why = L.both_selected_leaves_secured(ctx, [])
+        assert ok is False and "PRODUCT GATE FAILURE" in why
+
+    def test_the_two_records_must_agree_about_which_leaves(self, tmp_path):
+        """Two records of one decision that name different leaves settle
+        nothing, and neither may be used to decide which bytes are products."""
+        import autoinit_d1_launch as L
+
+        other = [{"state_id": "zz1", "checkpoint_path": "/x/zz1"},
+                 {"state_id": "zz2", "checkpoint_path": "/x/zz2"}]
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(other))
+        with pytest.raises(L.SelectionUnreadable, match="disagree"):
+            L.committed_selection(ctx)
 
     def test_an_empty_fetch_does_not_pass_the_gate(self, tmp_path):
-        """`all([])` is True. A fetch that secured NOTHING must not pass."""
+        """`success + 0/2 -> False`. `all([])` is True; a fetch that secured
+        NOTHING must not pass."""
         import autoinit_d1_launch as L
 
-        ctx = self._ctx(tmp_path, [{"state_id": "s1", "checkpoint_path": "/x/s1"},
-                                   {"state_id": "s2", "checkpoint_path": "/x/s2"}])
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(ctx, [])
         assert ok is False
         assert "0 of 2" in why
 
     def test_one_of_two_does_not_pass_either(self, tmp_path):
+        """`success + 1/2 -> False`."""
         import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
-        ctx = self._ctx(tmp_path, [{"state_id": "s1", "checkpoint_path": "/x/s1"},
-                                   {"state_id": "s2", "checkpoint_path": "/x/s2"}])
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(
             ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1"),
                   ProductFetchResult(kind="transfer", rc=1, detail="s2 failed")])
         assert ok is False and "1 of 2" in why
 
     def test_both_secured_passes(self, tmp_path):
+        """`2 rows exist and both verify -> PASS`."""
         import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
-        ctx = self._ctx(tmp_path, [{"state_id": "s1", "checkpoint_path": "/x/s1"},
-                                   {"state_id": "s2", "checkpoint_path": "/x/s2"}])
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(
             ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1"),
                   ProductFetchResult(kind="transfer", rc=0, detail="s2")])
         assert ok is True and "both selected checkpoints secured" in why
 
-    def test_no_selection_means_no_product_bytes_to_owe(self, tmp_path):
-        """A search that did not complete has no products; teardown is not blocked
-        by bytes that were never produced, and the evidence is what matters."""
+    def test_a_selection_of_the_wrong_size_fails_the_gate(self, tmp_path):
+        """`commit_top_k exists with != 2 selected rows -> PRODUCT GATE
+        FAILURE`. One leaf secured out of one would otherwise read as complete."""
+        import autoinit_d1_launch as L
+        from aadistill.infrastructure.session import ProductFetchResult
+
+        one = [ROWS[0]]
+        ctx = _store_ctx(tmp_path, selection=_committed(one),
+                         evidence=_ok_evidence(one))
+        ok, why = L.both_selected_leaves_secured(
+            ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1")])
+        assert ok is False
+        assert "PRODUCT GATE FAILURE" in why and "design commits 2" in why
+
+    def test_failure_before_commit_owes_no_checkpoint_products(self, tmp_path):
+        """`failure before commit -> no checkpoint product obligation`.
+
+        Established from the driver's OWN evidence showing it never reached
+        stage D -- not inferred from a missing file, which is the distinction
+        this whole class turns on.
+        """
         import autoinit_d1_launch as L
 
-        ok, why = L.both_selected_leaves_secured(self._ctx(tmp_path, []), [])
-        assert ok is True and "did not complete" in why
+        ctx = _store_ctx(tmp_path, evidence={
+            "status": "FAILED",
+            "stages": [{"stage": "A", "name": "environment", "status": "failed"}]})
+        ok, why = L.both_selected_leaves_secured(ctx, [])
+        assert ok is True
+        assert "did not reach commit_top_k" in why
+
+    def test_no_evidence_at_all_is_an_unknown_not_a_pass(self, tmp_path):
+        """Nothing came home, so whether products are owed is UNKNOWN. An
+        unknown must not be reported as 'nothing was owed'."""
+        import autoinit_d1_launch as L
+
+        ok, why = L.both_selected_leaves_secured(_store_ctx(tmp_path), [])
+        assert ok is False and "PRODUCT GATE FAILURE" in why
+
+    def test_the_fetcher_reports_a_failure_when_it_cannot_read(self, tmp_path):
+        """`fetch_products` must not swallow it: the runner's
+        `checkpoint_hashes_matched` reads these entries."""
+        import autoinit_d1_launch as L
+
+        ctx = _store_ctx(tmp_path, evidence=_ok_evidence(ROWS))
+        fetched = L.fetch_selected_checkpoints(ctx)
+        assert len(fetched) == 1
+        assert fetched[0].ok is False
+        assert "d1_selection_unreadable" in ctx.evidence
 
     def test_the_spec_declares_the_pair(self):
         """Not at their defaults: the default answers 'this session owes no

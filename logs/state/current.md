@@ -13,6 +13,72 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 provider-confirmed gone and an account-wide re-query returns **0 pods and 0
 network volumes**.
 
+**The D1 launch chain was REPAIRED, and the 2026-10-05 prepared run is
+SUPERSEDED without ever launching.** An independent review drove the prepared
+chain through the real generic `SessionRunner` instead of reading it, and found
+that it could not have produced a valid search. Eleven defects; three of them
+unconditionally fatal, and each would have been discovered on a billing pod.
+Owner:
+[`runs/d1_search_20261005_173304/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261005_173304/closeout/superseded.json),
+which carries every measured value rather than restating one.
+
+The sharpest was an identity nothing could satisfy. `run_id` **and** `device`
+are both members of `SearchConfig.as_dict()` and therefore of `config_hash`,
+and the grant was built with `run_id="authorization-probe"` on `cpu` while the
+driver builds with the real run id on `cuda`:
+
+```text
+grant bound                6301e12e…   run_id=authorization-probe, device=cpu
+driver would compute       cb03a959…   run_id=<the run>,           device=cuda
+```
+
+Stage A compares the two and refuses — **after** the pod exists, after setup,
+after the pod test gate and after the authorization dispatch branch. Every `$0`
+gate passed. Beside it: the canonical bundle
+`transfer/aad_autoinit_6c1dd8d9.bundle` **did not exist on the relay** (563
+`transfer/` objects, 100+ sibling bundles, not that one) and D1 had no bundle
+gate to notice; and `--max-price`, `--disk-gb` and `--out` all defaulted to
+`None` with nothing resolving them, so `make_plan` aborted on a `TypeError`
+before any gate ran — unobserved because `--dry-run` returned before
+`SessionRunner` was ever constructed.
+
+**What changed, and what did not.** The frozen science is untouched: same design
+hash, same `K=200`, `bsz=3`, `length_sorted_v1`, same width-6 beam with one
+warmup level, same four frozen operators, same two profiles, same
+`supervised_target` arm, same Top-2, same accepted 1125.55-minute bound at the
+same live `$1.09/h` repriced to the same `$21.4897`. No budget is widened and no
+maintainer decision is reopened; the grant at
+[`autoinit_d1_grant.json`](../budget/approvals/autoinit_d1_grant.json) stands as
+written. What changed is the engineering that executes it, which under AGENTS.md
+P12.1 is a repair inside the already-approved phase envelope.
+
+The executable closure moved in **membership**, not only in content — the
+launcher now imports the shared session prechecks, the shared bundle transport
+and the shared run layout — so `require_harness` refuses the old grant by
+construction and a new authorization is required rather than optional. **93
+files before, 96 after.** The digests are not restated here: the superseded
+grant owns the first and the new run's `governance/authorization.json` owns the
+second, and `d1_current_executable()` derives it live from the tree on every
+launch.
+
+Three governance artifacts now have generators, which is the reason the old ones
+could drift unnoticed: the readiness record had **no** generator at all and the
+authorization had no issuing script.
+
+```text
+scripts/autoinit/issue_d1_authorization.py        the one-use grant
+scripts/autoinit/stage_d1_bundle.py               the relay object the pod fetches
+scripts/autoinit/write_d1_launch_readiness.py     the launch-bound admission record
+```
+
+`SessionSpec.precheck` was `()` and is now six gates, every one of them refusing
+at `$0`: the run's own identity, the session contract the tree builds, the staged
+science inputs against their own pins, the readiness record against the live
+invocation, the shared session-commit/lineage gate, and the read-only bundle
+round trip. The evidence layout is one directory —
+`artifacts/audit/autoinit_d1/` — named by the driver's `--out`, the relay, the
+report fetch and both artifact specs.
+
 **The D1 engineering GPU qualification is COMPLETE.** Authorized by the
 maintainer on 2026-10-03 as an **ENGINEERING qualification and explicitly NOT
 formal D1 authorization**; it closed no blocker and funded nothing. Its subruns,
@@ -160,28 +226,35 @@ independent review — without launching. Two further `$0` rounds then closed th
 materialization-ownership gaps, corrected the behavioural-selection rationale
 and the pricing claims, and **built and bound** the D-series battery family.
 
-The remaining blockers, each of which alone prevents D1 from executing. Owner:
-`open_blockers()` in
+**All three design blockers are CLOSED.** Owner: `open_blockers()` in
 [`write_d1_design.py`](../../scripts/autoinit/write_d1_design.py), which DERIVES
-them rather than restating them:
+them from the design rather than restating them, and which returns `[]` on this
+tree. The text below records how each closed; it is history, not status, and
+`open_blockers()` remains the only thing to read for status.
 
 ```text
 EVIDENCE   CLOSED. Six disjoint batteries exist, allocation rule
            f6047343c1c1ad2172f500e979c704c1, family_content_id
            1e3445f1b676...74cd58 binding 42 output files. Closing this
            blocker authorized nothing.
-FUNDING    OPEN, and CATEGORICAL rather than arithmetic: `phase_d1` is not in
-           the C1 package's funds_formal_sessions_of, so no existing
-           allowance covers it at any amount. The 2026-10-03 amendment raised
-           the ENGINEERING allowance to $20.0000 and the package to
-           $96.6523 and deliberately did NOT add phase_d1 -- those books do
-           not transfer into the formal one.
-ENVELOPE   OPEN and UNRESOLVED. The SEARCH session's provisional $31.1577 is
-           over the $30.00 per-session envelope, and "unresolved" is the
-           honest state: nothing had measured the batched search, so it is
-           not established as incompatible either. This is what the
-           qualification's timing is for.
+FUNDING    CLOSED by the 2026-10-05 maintainer amendment, which was
+           CATEGORICAL and not arithmetic: `phase_d1` was absent from the C1
+           package's funds_formal_sessions_of, so no existing allowance
+           covered it at any amount. The amendment added it and raised the
+           formal allowance to $131.6523, the package to $151.6523 and the
+           project cap to $465.0000. The $30.00 per-session envelope and the
+           GPU engineering allowance are UNCHANGED.
+ENVELOPE   CLOSED by measurement, not by narrowing the science. The
+           provisional $31.1577 came from an unbatched full-vocabulary table;
+           the paid qualification measured the batched Top-K search and the
+           chain reprices to $21.4897, which fits the unchanged $30.00
+           envelope. The beam was not narrowed to make it fit.
 ```
+
+**Both money gates still bind at launch, and both are checked at `$0`.** The
+four conditions are re-derived against the live ledger at issuance
+(`check_the_four_conditions`), and the launcher's own gates re-check the
+authorization against the live invocation before a provider is contacted.
 
 **The owed GPU qualification has RUN, and the design derives that** from
 `gpu-qualification/v1/closeout.json` rather than carrying a sentence —

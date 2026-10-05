@@ -93,15 +93,23 @@ class TestEveryDeferredImportResolves:
 
 class TestTheArgumentSurface:
 
-    @pytest.mark.parametrize("flags", [
+    #: EVERY FLAG THE LAUNCH CHAIN EMITS. `--run-id` and `--status` joined it
+    #: when the evidence layout moved: the run id is no longer derivable from
+    #: the output directory's basename, and the status file is where the
+    #: terminal marker the launcher polls for is appended.
+    LAUNCH_FLAGS = [
         ["--check-only"],
         ["--authorization", "/tmp/a.json"],
         ["--arm", "all_positions"],
         ["--arm", "supervised_target"],
         ["--deadline-s", "60"],
         ["--device", "cuda"],
-    ])
-    def test_each_flag_the_launch_chain_passes_is_known(self, driver, flags):
+        ["--status", "/tmp/d1-flag-probe.status"],
+    ]
+
+    @pytest.mark.parametrize("flags", LAUNCH_FLAGS)
+    def test_each_flag_the_launch_chain_passes_is_known(self, driver, flags,
+                                                        tmp_path):
         """A flag the shell passes and the parser does not know is an immediate
         exit 2 on the pod, after setup has already run.
 
@@ -109,16 +117,41 @@ class TestTheArgumentSurface:
         which proves the parser was reached and that the known flag was accepted on
         the way. A flag the parser rejected would exit 2 as well -- so the control
         below asserts that a wholly valid set does NOT exit at parse time.
+
+        `--run-id` is supplied because it is REQUIRED: without it argparse exits
+        2 for the missing argument instead of for the unknown flag, and the
+        probe would then pass even for a flag the parser rejects.
         """
         with pytest.raises(SystemExit) as exc:
-            driver.main(["--out", "/tmp/d1-flag-probe", *flags,
+            driver.main(["--out", str(tmp_path / "probe"),
+                         "--run-id", "flag_probe", *flags,
                          "--nonexistent-flag"])
         assert exc.value.code == 2, flags
+
+    def test_every_launch_chain_flag_is_covered(self):
+        """The list above must be the flags the launcher really emits. A flag
+        added to the command and not to this list is untested at the exact point
+        argparse would reject it."""
+        import shlex
+        import types
+
+        import autoinit_d1_launch as L
+
+        args = L.build_parser().parse_args(
+            ["--scr", "/tmp/x", "--session-commit", "d" * 40,
+             "--bundle", "aad_autoinit_dddddddd.bundle", "--run-id", "probe"])
+        cmd = L.driver_command(types.SimpleNamespace(args=args),
+                               types.SimpleNamespace(soft_stop_seconds=600.0))
+        emitted = {t for t in shlex.split(cmd) if t.startswith("--")}
+        covered = {f[0] for f in self.LAUNCH_FLAGS} | {"--out", "--run-id"}
+        assert emitted <= covered, emitted - covered
 
     def test_a_valid_flag_set_reaches_past_the_parser(self, driver, tmp_path):
         """The control for the probe above: these flags are accepted, and the
         driver proceeds to its first real check rather than exiting 2."""
         rc = driver.main(["--out", str(tmp_path / "r"), "--check-only",
+                          "--run-id", "flag_probe",
+                          "--status", str(tmp_path / "s"),
                           "--arm", "supervised_target", "--deadline-s", "60",
                           "--device", "cuda"])
         #: 1, not 2: the CUDA probe refused on this host, which is past parsing.
@@ -127,7 +160,15 @@ class TestTheArgumentSurface:
 
     def test_an_unknown_arm_is_refused_by_the_parser(self, driver):
         with pytest.raises(SystemExit):
-            driver.main(["--out", "/tmp/x", "--arm", "whatever"])
+            driver.main(["--out", "/tmp/x", "--run-id", "p",
+                         "--arm", "whatever"])
+
+    def test_a_run_id_is_required(self, driver, tmp_path):
+        """It enters `SearchConfig.config_hash`, so a session that cannot name
+        its run cannot be checked against the identity its grant binds."""
+        with pytest.raises(SystemExit) as exc:
+            driver.main(["--out", str(tmp_path / "r"), "--check-only"])
+        assert exc.value.code == 2
 
 
 class TestTheRefusalsThatMustFireBeforeMoney:
@@ -139,7 +180,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         cannot name its authorization is unauthorized work."""
         monkeypatch.setattr(driver, "probe_environment",
                             lambda: {"gpu_name": "fake", "capability": "8.9"})
-        rc = driver.main(["--out", str(tmp_path / "run"), "--device", "cpu"])
+        rc = driver.main(["--out", str(tmp_path / "run"), "--run-id", "dispatch_probe",
+                    "--status", str(tmp_path / "s"), "--device", "cpu"])
         assert rc == 1
         record = json.loads((tmp_path / "run" / "d1_search.json").read_text())
         assert record["status"] == "FAILED"
@@ -147,7 +189,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
 
     def test_the_cuda_probe_refuses_a_host_run(self, driver, tmp_path):
         """And the refusal is EVIDENCE, written on the failure path."""
-        rc = driver.main(["--out", str(tmp_path / "run"), "--check-only"])
+        rc = driver.main(["--out", str(tmp_path / "run"), "--run-id", "dispatch_probe",
+                    "--status", str(tmp_path / "s"), "--check-only"])
         assert rc == 1
         record = json.loads((tmp_path / "run" / "d1_search.json").read_text())
         assert record["status"] == "FAILED"
@@ -165,7 +208,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         from experiments.phase_d1 import d1_session as S
 
         with pytest.raises(A.D1AuthorizationRefused, match="may not be issued"):
-            A.build_payload(grant={"granted_by": "test"},
+            A.build_payload(run_id="dispatch_probe", grant={"granted_by": "test"},
                             session_commit="b" * 40,
                             granted_utc="2026-10-06T00:00:00Z",
                             arm=S.CONTROL_ARM, live_rate=1.09)
@@ -180,7 +223,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         from experiments.phase_d1 import d1_session as S
 
         payload = A.build_payload(
-            grant={"granted_by": "test"}, session_commit="b" * 40,
+            run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
             granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
         payload["arm"] = S.CONTROL_ARM
         path = tmp_path / "edited.json"
@@ -205,7 +248,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         from experiments.phase_d1 import d1_session as S
 
         payload = A.build_payload(
-            grant={"granted_by": "test"}, session_commit="b" * 40,
+            run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
             granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
         path = tmp_path / "authorization.json"
         path.write_text(json.dumps(payload))
@@ -219,7 +262,7 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         from experiments.phase_d1 import d1_session as S
 
         payload = A.build_payload(
-            grant={"granted_by": "test"}, session_commit="b" * 40,
+            run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
             granted_utc="2026-10-06T00:00:00Z", live_rate=1.09)
         path = tmp_path / "authorization.json"
         path.write_text(json.dumps(payload))

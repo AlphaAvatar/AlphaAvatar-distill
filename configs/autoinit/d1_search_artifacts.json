@@ -1,7 +1,9 @@
 {
  "spec": "aadistill.artifact_spec/v1",
  "session": "autoinit_d1_search",
- "note": "success spec: every permanent artifact a D1 formal SEARCH session must not lose. Entries are ArtifactSpec kwargs -- artifact_class, pattern, required, min_matches, min_bytes, lifecycle -- loaded by scripts/pod/collect_artifacts.py. A key the dataclass does not take makes the whole collection fail at load. THE COMMITTED TOP-2 CHECKPOINTS ARE NOT HERE and are not meant to be: they are session PRODUCTS, secured by the launcher's fetch_products/products_secured pair, because the next D1 stage trains recovery probes from those initializations and the screening price does not fund rebuilding them. What this spec requires is the authoritative search EVIDENCE, which is JSON and small.",
+ "note": "success spec: every permanent artifact a D1 formal SEARCH session must not lose. Entries are ArtifactSpec kwargs -- artifact_class, pattern, required, min_matches, min_bytes, lifecycle -- loaded by scripts/pod/collect_artifacts.py. THE COMMITTED TOP-2 CHECKPOINTS ARE NOT HERE and are not meant to be: they are session PRODUCTS, secured by the launcher's fetch_products/products_secured pair, because the next D1 stage trains recovery probes from those initializations and the screening price does not fund rebuilding them. What this spec requires is the authoritative search EVIDENCE, which is JSON and small.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. So `audit/autoinit_d1/x` is <checkout>/artifacts/audit/autoinit_d1/x. Three entries here used to begin `artifacts/stage1/d1/*/`, which under that root resolved to <checkout>/artifacts/artifacts/stage1/... and could never match: build_manifest globs root.glob(pattern), so a pattern carrying the root's own name is a required artifact reported missing on a session that produced it.",
+ "one_authoritative_layout": "artifacts/audit/autoinit_d1/ is where the driver writes and where the relay, the report fetch and this spec all read. The driver's --out is that directory; its run identity comes from --run-id and no longer from the directory's basename.",
  "entries": [
   {
    "artifact_class": "d1_search_record",
@@ -12,20 +14,20 @@
   },
   {
    "artifact_class": "d1_stage1_selection",
-   "pattern": "artifacts/stage1/d1/*/stage1_selection.json",
+   "pattern": "audit/autoinit_d1/stage1_selection.json",
    "required": true,
    "min_bytes": 256,
    "lifecycle": "final_required"
   },
   {
    "artifact_class": "d1_state_journal",
-   "pattern": "artifacts/stage1/d1/*/search/states.jsonl",
+   "pattern": "audit/autoinit_d1/search/states.jsonl",
    "required": true,
    "lifecycle": "final_required"
   },
   {
    "artifact_class": "d1_search_telemetry",
-   "pattern": "artifacts/stage1/d1/*/search/telemetry.jsonl",
+   "pattern": "audit/autoinit_d1/search/telemetry.jsonl",
    "required": true,
    "lifecycle": "final_required"
   },

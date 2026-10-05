@@ -38,6 +38,13 @@ SCHEMA = "aadistill.phase_d1.authorization/v1"
 #: A FORMAL D1 search is treatment-only. The control arm stays constructible at
 #: `$0` for protocol-identity checks and is not issuable for a paid beam.
 FORMAL_ARM = "supervised_target"
+
+#: THE DEVICE A FORMAL D1 SEARCH EXECUTES ON, and therefore the device the
+#: authorized `config_hash` must be computed with: `device` is a field of
+#: `SearchConfig.as_dict()`. One constant, so the issuer, the launcher's $0
+#: contract gate and the driver cannot disagree about it -- which they did, at
+#: `cpu` / `cpu` / `cuda`.
+FORMAL_DEVICE = "cuda"
 #: WHAT A D1 SEARCH AUTHORIZATION MAY EXPRESS. Absence is denial.
 #:
 #: `beam_search` is ALLOWED and is the only one: D1 is the first of these
@@ -197,6 +204,20 @@ class D1Authorization(SpendAuthorization):
     #: D1's own, beyond the base's.
     design_hash: str = ""
     arm: str = ""
+    #: THE RUN THIS GRANT WAS ISSUED FOR. Bound because `config_hash` below is a
+    #: function of it: `run_id` is a field of `SearchConfig.as_dict()`, so the
+    #: identity the money is authorized against is specific to one run id and
+    #: carries no meaning without it.
+    #:
+    #: `build_payload` used to build its probe session with
+    #: `run_id="authorization-probe"` while the driver built its own with the
+    #: real run id, so the bound `config_hash` could never equal the session's
+    #: and stage A's equality check would have refused EVERY launch -- after
+    #: setup, the registries, the frozen assets and the contract had all been
+    #: paid for. Verified: the committed grant bound
+    #: 6301e12e2fd0738e… and run `d1_search_20261005_173304` computes
+    #: b6a1806dca6dae9d….
+    run_id: str = ""
     measurement_protocol_id: str = ""
     config_hash: str = ""
     suite_content_sha256: str = ""
@@ -285,6 +306,25 @@ class D1Authorization(SpendAuthorization):
                 f"{self.authorized_session_commit[:12]} and the session declares "
                 f"{commit[:12]}")
 
+    def require_run_id(self, run_id: str) -> None:
+        """The launch must be the run this grant priced and hashed.
+
+        Cheap, and it is the only place the mismatch is cheap. `config_hash`
+        includes `run_id`, so a launch under a different run id carries a
+        different config hash and stage A's equality check refuses it -- on a
+        pod, after setup. Asked here, at `$0`, before a provider is contacted.
+        """
+        if not self.run_id:
+            raise D1AuthorizationRefused(
+                "this authorization binds no run_id, so the config_hash it "
+                "carries cannot be attributed to any run")
+        if run_id != self.run_id:
+            raise D1AuthorizationRefused(
+                f"this authorization was issued for run {self.run_id!r} and the "
+                f"session declares {run_id!r}. `run_id` is a field of "
+                "SearchConfig.config_hash, so the bound identity belongs to the "
+                "other run and the driver would refuse it after setup.")
+
     def require_treatment_arm(self) -> None:
         """A FORMAL D1 search is treatment-only. The control is a $0 check.
 
@@ -309,6 +349,7 @@ class D1Authorization(SpendAuthorization):
         payload.update({
             "design_hash": self.design_hash,
             "arm": self.arm,
+            "run_id": self.run_id,
             "measurement_protocol_id": self.measurement_protocol_id,
             "config_hash": self.config_hash,
             "suite_content_sha256": self.suite_content_sha256,
@@ -352,6 +393,10 @@ class D1Authorization(SpendAuthorization):
         missing = [f for f in (
             "authorization_id", "granted_utc", "hard_cap_usd",
             "authorized_session_commit", "design_hash", "arm",
+            #: `run_id` is REQUIRED, because `config_hash` is a function of it.
+            #: An artifact that binds a config hash without saying which run it
+            #: belongs to binds a number nothing can be compared against.
+            "run_id",
             "measurement_protocol_id", "config_hash", "suite_content_sha256",
             "authorized_stages", "harness_source_digest") if not raw.get(f)]
         if missing:
@@ -379,6 +424,7 @@ class D1Authorization(SpendAuthorization):
                                  if raw.get("per_launch_hard_usd") else None),
             provenance_commit=raw.get("provenance_commit"),
             design_hash=raw["design_hash"], arm=raw["arm"],
+            run_id=raw["run_id"],
             measurement_protocol_id=raw["measurement_protocol_id"],
             config_hash=raw["config_hash"],
             suite_content_sha256=raw["suite_content_sha256"],
@@ -573,7 +619,7 @@ def check_the_four_conditions(*, ceiling: float,
 
 
 def build_payload(*, grant: Mapping[str, Any], session_commit: str,
-                  granted_utc: str, arm: str = FORMAL_ARM,
+                  granted_utc: str, run_id: str, arm: str = FORMAL_ARM,
                   repo_root: str | Path = REPO,
                   workdir: Path | None = None,
                   live_rate: float | None = None) -> dict[str, Any]:
@@ -582,6 +628,14 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     `live_rate` is quoted here by default, immediately before issuance, which is
     what the package contract requires. Passing one is for tests: a round that
     reads a committed rate is not re-querying it.
+
+    `run_id` is REQUIRED and is not cosmetic. It is the run id the probe session
+    below is built with, and therefore the run id the bound `config_hash`
+    describes. This function used to pass the literal `"authorization-probe"`
+    while the driver passed the real one, which made the bound config hash a
+    value no launch could ever reproduce -- the single most expensive defect in
+    the prepared chain, because every $0 gate passed and the refusal landed in
+    stage A on a billing pod.
     """
     import tempfile
 
@@ -608,6 +662,11 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         raise D1AuthorizationRefused(
             f"session_commit {session_commit!r} is not a full commit id; the pod "
             "checks out this tree and the authorization must bind which one")
+    if not str(run_id or "").strip():
+        raise D1AuthorizationRefused(
+            "no run_id: the config_hash this authorization binds is computed "
+            "with the run id, so an unnamed run produces an identity the "
+            "launching session cannot match")
 
     design = json.loads((root / DESIGN_REL).read_text())
     blockers = list(design["open_blockers"])
@@ -660,8 +719,24 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     #: authorization binds the identities the run will actually carry.
     S._register_frozen_operators()
     tmp = Path(workdir or tempfile.mkdtemp(prefix="d1-auth-"))
-    session = S.build_session(arm=arm, workdir=tmp, run_id="authorization-probe",
-                              device="cpu", repo_root=root)
+    #: THE RUN'S OWN ID AND THE DEVICE THE POD WILL USE.
+    #:
+    #: Both are fields of `SearchConfig.as_dict()` and therefore of
+    #: `config_hash`, and this call got both wrong: `run_id="authorization-probe"`
+    #: against the driver's real run id, and `device="cpu"` against the driver's
+    #: `cuda`. Either alone made the bound `config_hash` unmatchable, so stage A's
+    #: equality check would have refused every launch after setup was paid for.
+    #:
+    #: `cuda` is not a guess about this machine. It is what the FORMAL session
+    #: runs on -- the driver refuses without a CUDA device, and `numerics()`
+    #: declares `device_type="cuda"` unconditionally -- so a config built on
+    #: `cpu` described a session this experiment cannot execute. Constructing it
+    #: allocates nothing and needs no GPU on the issuing box.
+    #:
+    #: `workdir` stays a throwaway directory because it is NOT in `as_dict()`
+    #: and so cannot move the identity.
+    session = S.build_session(arm=arm, workdir=tmp, run_id=str(run_id).strip(),
+                              device=FORMAL_DEVICE, repo_root=root)
     contract = S.assert_session_contract(session, root)
 
     #: THE HARNESS, derived live and bound BY MEMBERSHIP AND DIGEST.
@@ -686,6 +761,7 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         provenance_commit=session_commit,
         design_hash=design["design_hash"],
         arm=arm,
+        run_id=str(run_id).strip(),
         measurement_protocol_id=contract["measurement_protocol_id"],
         config_hash=contract["config_hash"],
         suite_content_sha256=contract["suite_content_sha256"],

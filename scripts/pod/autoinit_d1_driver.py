@@ -47,6 +47,35 @@ def say(message: str) -> None:
     print(message, flush=True)
 
 
+def mark(status_path: Path, name: str) -> None:
+    """Append `<utc> MARKER:<name>` to the status file. THE RUNNER'S PROTOCOL.
+
+    `SessionRunner` polls `tail -1 <status_path>` for `MARKER:<success>` and
+    `MARKER:<failure>`; those strings are what end a session cleanly. This driver
+    wrote only `status` into its JSON record, which no poller reads — so a
+    search that had committed its Top-2 would have been observed as
+    `DRIVER_EXITED` after the process ended, taken the blocking-failure branch,
+    collected under the REDUCED spec and reported a failed session with a
+    complete candidate set on the pod.
+
+    Same one-line form every other driver in this repository uses
+    (`autoinit_c1_driver.mark`, `autoinit_phase_c2_driver.mark`), because the
+    poller greps for the substring and two spellings of one convention is how a
+    marker stops being seen.
+    """
+    line = f"{time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())} MARKER:{name}"
+    print(line, flush=True)
+    try:
+        status_path.parent.mkdir(parents=True, exist_ok=True)
+        with status_path.open("a") as fh:
+            fh.write(line + "\n")
+    except OSError as exc:                                        # noqa: BLE001
+        #: Never fatal. A driver that dies writing a marker loses the evidence
+        #: it was about to announce, which is strictly worse than an unmarked
+        #: terminal state the poller resolves by other means.
+        say(f"could not write MARKER:{name} to {status_path}: {exc}")
+
+
 class Journal:
     """Append-only stage events. The record of a failed run, not a log."""
 
@@ -134,16 +163,72 @@ def load_authorization(path: str, *, arm: str, design_hash: str):
     return auth
 
 
+#: THE SUCCESS TERMINAL the launcher's `MarkerPolicy` declares, and the failure
+#: one. Named here so the driver and the launcher cannot drift: a test asserts
+#: these equal `spec.markers.success` and `spec.markers.failure`.
+SUCCESS_MARKER = "ALL_DONE"
+FAILURE_MARKER = "RUN_FAILED"
+CHECK_ONLY_MARKER = "CHECK_ONLY_OK"
+
+
+def terminal_marker(*, check_only: bool, status: str,
+                    evidence_written: bool) -> str:
+    """Which terminal marker this run earned. A function, so it can be TABLED.
+
+    The whole decision in one place, over the three facts that determine it:
+
+    * `--check-only` never emits the paid session's success terminal. A
+      preflight that loads no teacher and runs no expansion must not be
+      observable as a completed formal search.
+    * `ALL_DONE` requires `status == "COMPLETE"`, which stage D only reaches
+      after the beam finished and the ranking committed exactly `k`
+      recovery-admissible leaves -- it RAISES otherwise -- and
+    * `evidence_written`, because the launcher collects under the SUCCESS
+      artifact spec when it sees this marker, and that spec requires
+      `d1_search.json`. Announcing a success whose evidence failed to write
+      would send the collector looking for a required file that does not exist.
+
+    Anything else is `RUN_FAILED`.
+    """
+    if check_only:
+        return CHECK_ONLY_MARKER
+    if status == "COMPLETE" and evidence_written:
+        return SUCCESS_MARKER
+    return FAILURE_MARKER
+
+
 def main(argv: list[str] | None = None) -> int:
     from experiments.phase_d1 import d1_session as S
 
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", required=True)
+    #: THE RUN'S SCIENTIFIC IDENTITY, passed explicitly and NOT derived from
+    #: `--out`.
+    #:
+    #: This was `run_id=out.name`, which made the config hash a function of the
+    #: output directory's basename. `run_id` is a field of
+    #: `SearchConfig.as_dict()` and therefore of `config_hash`, and the
+    #: authorization binds `config_hash` -- so the two could only ever agree
+    #: while the evidence happened to live in a directory named after the run.
+    #: Moving the evidence to the audit layout every other driver here uses
+    #: would silently have moved the identity the grant was issued against, and
+    #: stage A would have refused on a billing pod. A scientific identity must
+    #: not be a property of where its bytes are filed.
+    ap.add_argument("--run-id", required=True,
+                    help="the run id the authorization was issued against; it "
+                         "enters SearchConfig.config_hash")
     ap.add_argument("--authorization", default=None,
                     help="the one-use artifact; omitted only by --check-only")
     ap.add_argument("--arm", default=S.TREATMENT_ARM, choices=list(S.ARMS))
     ap.add_argument("--deadline-s", type=int, default=0)
     ap.add_argument("--device", default="cuda")
+    #: WHERE THE TERMINAL MARKER GOES. Defaults to the path the session module
+    #: declares and the launcher's `SessionSpec.status_path` carries, so one
+    #: declaration has one owner and two readers; overridable so a $0 test can
+    #: observe the protocol without writing to the pod's absolute workspace.
+    ap.add_argument("--status", default=S.STATUS_PATH,
+                    help="append-only status file the launcher polls for "
+                         "MARKER:ALL_DONE / MARKER:RUN_FAILED")
     ap.add_argument("--check-only", action="store_true",
                     help="stages A alone: the registries, the frozen assets, the "
                          "session and its contract, on THIS interpreter. Seconds, "
@@ -152,16 +237,20 @@ def main(argv: list[str] | None = None) -> int:
 
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    status = Path(args.status)
     journal = Journal(out / "journal.jsonl")
     record: dict[str, Any] = {
         "schema": "aadistill.phase_d1.search_session/v1",
         "experiment_id": S.EXPERIMENT_ID,
         "stage_id": S.STAGE_ID,
         "arm": args.arm,
+        "run_id": args.run_id,
         "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "status": "STARTED",
     }
     session = None
+    evidence_written = False
+    mark(status, "DRIVER_START")
     try:
         with journal.stage("A", "environment") as st:
             record["environment"] = probe_environment()
@@ -179,7 +268,7 @@ def main(argv: list[str] | None = None) -> int:
 
         with journal.stage("A", "session_and_contract") as st:
             session = S.build_session(
-                arm=args.arm, workdir=out / "search", run_id=out.name,
+                arm=args.arm, workdir=out / "search", run_id=args.run_id,
                 device=args.device)
             #: BEFORE ANYTHING EXPENSIVE. Each requirement the core permits a
             #: caller to omit is checked against the DESIGN, not against this
@@ -269,30 +358,114 @@ def main(argv: list[str] | None = None) -> int:
         record["elapsed_seconds"] = round(time.time() - journal.started, 3)
         record["ended_utc"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
         #: WRITTEN ON EVERY PATH. A failed session's evidence is the point.
-        (out / "d1_search.json").write_text(
-            json.dumps(record, indent=1, sort_keys=True, default=str) + "\n")
-        say(f"\nwrote {out}/d1_search.json  status={record['status']}")
-    return 0 if record["status"] in ("COMPLETE", "CHECK_ONLY_OK") else 1
+        try:
+            (out / "d1_search.json").write_text(
+                json.dumps(record, indent=1, sort_keys=True, default=str) + "\n")
+            evidence_written = True
+            say(f"\nwrote {out}/d1_search.json  status={record['status']}")
+        except OSError as exc:                                    # noqa: BLE001
+            say(f"\nCOULD NOT WRITE {out}/d1_search.json: {exc}")
+
+        #: THE TERMINAL MARKER, LAST, and only over what actually happened.
+        #:
+        #: `ALL_DONE` is the success terminal the launcher's `MarkerPolicy`
+        #: declares, and it means every one of: the beam finished, the Top-2
+        #: ranking selected exactly k recovery-admissible leaves,
+        #: `stage1_selection` committed them, and this record reached disk.
+        #: Stage D raises if the ranking is short, so `status == "COMPLETE"`
+        #: already carries the first three; `evidence_written` is the fourth and
+        #: is checked rather than assumed, because a marker announcing evidence
+        #: that failed to write would be the launcher's cue to collect under the
+        #: SUCCESS spec and find nothing.
+        #:
+        #: `--check-only` gets its own marker. Emitting the paid session's
+        #: success terminal from a preflight that loads no teacher and runs no
+        #: expansion would let a $0 contract check be observed as a completed
+        #: formal search.
+        #: Not written back into `record`: the evidence file is already on disk
+        #: by this point, so a field assigned here would live only in memory.
+        mark(status, terminal_marker(check_only=bool(args.check_only),
+                                     status=str(record["status"]),
+                                     evidence_written=evidence_written))
+    if args.check_only:
+        return 0 if record["status"] == "CHECK_ONLY_OK" else 1
+    return 0 if record["status"] == "COMPLETE" and evidence_written else 1
+
+
+def resolve_root_teacher_path() -> dict[str, Any]:
+    """WHERE the staged root teacher is, from the cache SETUP filled. Never a fetch.
+
+    An explicit `D1_TEACHER_PATH` wins, because a $0 test and a local
+    reproduction need to point at a directory of their own. Otherwise the
+    snapshot is resolved out of the Hugging Face cache at the frozen revision
+    with `local_files_only=True` -- which is a LOOKUP, not a download: it
+    raises if the bytes are absent instead of fetching ~8 GB on the meter.
+
+    This replaces a hard requirement for `D1_TEACHER_PATH` that nothing set.
+    The launcher's driver command did not export it, `start_detached` passes
+    only `PYTHONPATH`, and the setup script's teacher step was not even
+    declared -- so the variable was always unset, and stage B would have raised
+    "no teacher path" after the pod had paid for setup and the whole of stage A.
+    The repair is on both sides: `SetupManifest` now declares `TEACHER_READY`
+    and the pinned revision so the download happens in setup, and this resolves
+    what setup left in the cache. The docstring's rule is kept exactly --
+    nothing here reaches the network -- but it is now a rule about a path that
+    can be found rather than a variable nobody assigns.
+    """
+    from experiments.phase_a3 import a3_session as A3S
+
+    spec = A3S.path_spec(workdir_device="cuda")
+    identity = {"repo_id": spec.root_repo_id, "revision": spec.root_revision,
+                "family": spec.family}
+    explicit = os.environ.get("D1_TEACHER_PATH") or os.environ.get("TEACHER_PATH")
+    if explicit:
+        if not Path(explicit).is_dir():
+            raise D1DriverError(
+                f"D1_TEACHER_PATH={explicit!r} is not a directory")
+        return {**identity, "path": str(explicit), "_resolved_by": "environment"}
+
+    #: THE CACHE IS FOUND AT THE HUB DEFAULT, deliberately and not by luck.
+    #:
+    #: A detached driver inherits no environment: `start_detached` passes
+    #: `PYTHONPATH` and nothing else, so the `HF_HOME` setup exported is NOT
+    #: visible here. That is safe because the value setup exports --
+    #: `/root/.cache/huggingface` -- is exactly what `huggingface_hub` resolves
+    #: to on its own for `HOME=/root`, which is what the pod runs as. So setup
+    #: fills the default cache and this reads the default cache, with no
+    #: variable crossing the detachment boundary. `HF_HOME` is still honoured
+    #: when something does set it, which is how a $0 test points this at a
+    #: fixture.
+    from huggingface_hub import snapshot_download
+
+    try:
+        local = snapshot_download(
+            spec.root_repo_id, revision=spec.root_revision,
+            #: THE SAME PATTERNS SETUP FETCHED. A resolve asking for files the
+            #: staging step never requested would raise on a complete cache.
+            allow_patterns=["*.json", "*.safetensors", "*.jinja", "*.txt"],
+            local_files_only=True)
+    except Exception as exc:                                      # noqa: BLE001
+        raise D1DriverError(
+            f"the root teacher {spec.root_repo_id}@{spec.root_revision[:12]} is "
+            f"not in this machine's Hugging Face cache ({type(exc).__name__}: "
+            f"{exc}). Setup's TEACHER_READY step is what stages it; a driver "
+            "that downloaded it here would spend its first paid minutes on a "
+            "network transfer. Set D1_TEACHER_PATH to point at a staged copy, "
+            "or declare TEACHER_READY in the session's setup manifest."
+        ) from exc
+    return {**identity, "path": str(local), "_resolved_by": "hf cache lookup"}
 
 
 def _load_root_teacher():
     """The frozen root teacher, at the revision the path spec pins."""
-    from experiments.phase_a3 import a3_session as A3S
     from aadistill.initialization.specs.arch import get_adapter
 
-    spec = A3S.path_spec(workdir_device="cuda")
-    local = os.environ.get("D1_TEACHER_PATH") or os.environ.get("TEACHER_PATH")
-    if not local:
-        raise D1DriverError(
-            "no teacher path: set D1_TEACHER_PATH to the staged root teacher. A "
-            "driver that downloads it mid-session is a driver whose first paid "
-            "minute is a network transfer.")
-    adapter = get_adapter(spec.family)
-    model = adapter.load(local, dtype="bfloat16", device="cuda")
+    teacher_id = resolve_root_teacher_path()
+    adapter = get_adapter(teacher_id["family"])
+    model = adapter.load(teacher_id["path"], dtype="bfloat16", device="cuda")
     if getattr(model.config, "use_cache", False):
         model.config.use_cache = False
-    return model, {"repo_id": spec.root_repo_id, "revision": spec.root_revision,
-                   "path": str(local), "family": spec.family}
+    return model, teacher_id
 
 
 def _run_search(session, teacher, args, journal) -> dict[str, Any]:

@@ -33,6 +33,9 @@ COMMIT = "a" * 40
 #: A FIXED RATE, so these are offline and deterministic. The live quote is
 #: exercised by `test_d1_runner_interface.py`, which is where that contract lives.
 RATE = 1.09
+#: THE RUN THE GRANT IS ISSUED FOR. Required since `config_hash` carries it:
+#: a payload built without a run id binds an identity no launch reproduces.
+RUN_ID = "d1_search_test"
 
 
 @pytest.fixture(scope="module")
@@ -124,7 +127,7 @@ class TestWhatTheIssuerRefuses:
         for field in ("authorization_id", "authorized_stages", "plan_hash",
                       "expected_usd", "design_hash", "config_hash"):
             with pytest.raises(A.D1AuthorizationRefused, match="DERIVES"):
-                A.build_payload(live_rate=RATE, grant={**GRANT, field: "anything"},
+                A.build_payload(run_id=RUN_ID, live_rate=RATE, grant={**GRANT, field: "anything"},
                                 session_commit=COMMIT, granted_utc=UTC,
                                 arm=S.TREATMENT_ARM)
 
@@ -132,20 +135,20 @@ class TestWhatTheIssuerRefuses:
         """The envelope is not the grant: asking for $30 when the session prices
         at $21.4897 would authorize nine dollars nothing measured."""
         with pytest.raises(A.D1AuthorizationRefused, match="DERIVED"):
-            A.build_payload(live_rate=RATE, grant={**GRANT, "hard_cap_usd": 30.0},
+            A.build_payload(run_id=RUN_ID, live_rate=RATE, grant={**GRANT, "hard_cap_usd": 30.0},
                             session_commit=COMMIT, granted_utc=UTC)
         #: And the figure the LIVE rate derives is accepted, so this is not
         #: refusing everything. Asked of `reprice_at`, because the grant must match
         #: what the rate produces -- which is the whole point of re-querying it.
         at_rate = A.reprice_at(RATE)["hard_ceiling_usd"]
-        ok = A.build_payload(live_rate=RATE,
+        ok = A.build_payload(run_id=RUN_ID, live_rate=RATE,
                             grant={**GRANT, "hard_cap_usd": at_rate},
                             session_commit=COMMIT, granted_utc=UTC)
         assert ok["hard_cap_usd"] == pytest.approx(at_rate)
 
     def test_a_grant_naming_the_wrong_project_cap(self):
         with pytest.raises(A.D1AuthorizationRefused, match="names cap"):
-            A.build_payload(live_rate=RATE, grant={**GRANT, "cumulative_cap_usd": 410.0},
+            A.build_payload(run_id=RUN_ID, live_rate=RATE, grant={**GRANT, "cumulative_cap_usd": 410.0},
                             session_commit=COMMIT, granted_utc=UTC,
                             arm=S.TREATMENT_ARM)
 
@@ -153,7 +156,7 @@ class TestWhatTheIssuerRefuses:
         """Refused at ISSUANCE now, not by the session builder: a formal search is
         treatment-only, so any other arm -- known or not -- cannot be issued."""
         with pytest.raises(A.D1AuthorizationRefused, match="may not be issued"):
-            A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT,
+            A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT,
                             granted_utc=UTC, arm="whatever")
 
     def test_an_open_design_blocker(self, monkeypatch, tmp_path):
@@ -166,7 +169,7 @@ class TestWhatTheIssuerRefuses:
         monkeypatch.setattr(A, "DESIGN_REL", str(fake))
         monkeypatch.setattr(A, "REPO", Path("/"))
         with pytest.raises(A.D1AuthorizationRefused, match="open blockers"):
-            A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT, granted_utc=UTC,
+            A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT, granted_utc=UTC,
                             arm=S.TREATMENT_ARM, repo_root="/")
 
     def test_an_experiment_outside_the_funded_list(self, monkeypatch):
@@ -182,7 +185,7 @@ class TestWhatTheIssuerRefuses:
         monkeypatch.setattr(A, "live_money", unfunded)
         with pytest.raises(A.D1AuthorizationRefused,
                            match="funds_formal_sessions_of"):
-            A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT, granted_utc=UTC,
+            A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT, granted_utc=UTC,
                             arm=S.TREATMENT_ARM)
 
 
@@ -191,7 +194,7 @@ class TestTheIssuedArtifactRoundTrips:
     after the money is committed."""
 
     def test_it_loads_back_with_every_identity(self, tmp_path):
-        payload = A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT,
+        payload = A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT,
                                   granted_utc=UTC, arm=S.TREATMENT_ARM)
         path = tmp_path / "authorization.json"
         path.write_text(json.dumps(payload, indent=1, sort_keys=True))
@@ -205,7 +208,7 @@ class TestTheIssuedArtifactRoundTrips:
         assert back.authorized_stages == tuple(A.AUTHORIZED_STAGES)
 
     def test_it_states_what_it_does_not_authorize(self):
-        payload = A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT,
+        payload = A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT,
                                   granted_utc=UTC, arm=S.TREATMENT_ARM)
         for forbidden in ("recovery", "behavioural", "promotion", "D2", "D3",
                           "repetition"):
@@ -213,7 +216,7 @@ class TestTheIssuedArtifactRoundTrips:
         assert "ONE grant, ONE issuance, ONE launcher session" in payload["one_use"]
 
     def test_the_stages_stop_at_commit_top_k(self):
-        payload = A.build_payload(live_rate=RATE, grant=GRANT, session_commit=COMMIT,
+        payload = A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT, session_commit=COMMIT,
                                   granted_utc=UTC, arm=S.TREATMENT_ARM)
         assert tuple(payload["authorized_stages"]) == ("A", "B", "C", "D")
         assert "commit_top_k" in payload["stage_conditions"]["D"]
@@ -229,7 +232,7 @@ class TestTheIssuedArtifactRoundTrips:
         Re-hashing after the edit then reaches the field check, so both fire."""
         from aadistill.infrastructure.manifest import sha256_json
 
-        payload = A.build_payload(live_rate=RATE, grant=GRANT,
+        payload = A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT,
                                   session_commit=COMMIT, granted_utc=UTC)
         payload.pop(drop)
         path = tmp_path / "a.json"
@@ -267,7 +270,7 @@ class TestTheIssuedArtifactRoundTrips:
 
         for claim in ("allows_recovery", "allows_behavioural",
                       "automatic_followon_start"):
-            payload = A.build_payload(live_rate=RATE, grant=GRANT,
+            payload = A.build_payload(run_id=RUN_ID, live_rate=RATE, grant=GRANT,
                                       session_commit=COMMIT, granted_utc=UTC)
             payload[claim] = True
             payload.pop("authorization_sha256")

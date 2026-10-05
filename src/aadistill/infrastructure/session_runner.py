@@ -237,8 +237,25 @@ class SessionRunner:
         return self.elapsed() / 60 * (self.price or self.a.max_price)
 
     def save(self) -> None:
-        (self.repo_root / self.a.out).write_text(
-            json.dumps(self.ev, indent=2, default=str) + "\n")
+        """Write the session record. THE DIRECTORY IS CREATED, not assumed.
+
+        `save()` is the only thing that puts the session record on the dev box,
+        and it is called on every path: immediately after `create()` registers a
+        pod id, after each draw, at the dry-run stop, from `teardown_now`, and
+        from `run_session`'s closeout. A missing parent directory therefore does
+        not fail where it is configured -- it raises a `FileNotFoundError` out
+        of the first `save()` after a pod starts billing, which is the one
+        moment the record matters most.
+
+        It held only because every launcher so far passed an `--out` whose
+        parent happened to exist. A session that files its record in its own run
+        directory -- `runs/<run_id>/runtime/session.json`, which is where the
+        shared run layout puts it -- has no such directory until something
+        creates it, and nothing did.
+        """
+        out = self.repo_root / self.a.out
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(self.ev, indent=2, default=str) + "\n")
 
     def context(self, **over) -> SessionContext:
         """What a spec callable may see. Never the runner itself."""

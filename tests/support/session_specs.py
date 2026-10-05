@@ -30,6 +30,13 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: it needs no `extra` any more, because `session_args` now fills every
     #: required option from the parser itself -- `--max-price` included.
     ("autoinit_a3_launch", ()),
+    #: D1. Absent until 2026-10-05, so none of the four structural modules that
+    #: read this list covered it: not the declared-vs-read `required_env` check,
+    #: not the local-asset install-root check, not the setup-env forwarding
+    #: check. D1 declares `TEACHER_REVISION` and three local assets, and both of
+    #: those declarations are exactly what those modules exist to verify against
+    #: the shell that consumes them.
+    ("autoinit_d1_launch", ()),
 )
 
 

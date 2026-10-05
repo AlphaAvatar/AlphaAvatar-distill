@@ -109,14 +109,84 @@ def execution():
         calibration_batch_packing=SP.D_SERIES_BATCH_PACKING)
 
 
+def verify_state_eval_bytes(repo_root: str | Path = REPO) -> dict[str, Any]:
+    """Do the staged state-eval BYTES match the pins the asset itself ships?
+
+    Not a second definition of any identity: the manifest already records
+    `outputs.items.sha256` for its own items file, and this reads that pin and
+    checks it. The shared loader deliberately does not -- its docstring says
+    what it owes is that `content_sha256` EXISTS and comes from the asset's
+    record rather than being recomputed -- so nothing anywhere confirmed that
+    the items file beside that record is the one it describes.
+
+    That gap matters because this asset does not travel in the bundle. It is
+    untracked in git and is scp'd onto the pod as a declared local asset, and
+    `LocalAsset` carries no digest field: a truncated or half-copied
+    `items.jsonl` would yield a SMALLER suite while the session still bound the
+    full `content_sha256` and every record claimed the frozen suite. A
+    measurement bound to a content hash its own prompts do not produce is
+    exactly the failure `suite_content_sha256` exists to prevent.
+
+    Checked on the pod at stage A, before the teacher is resident, and again at
+    `$0` on the dev box by the launcher's precheck over the bytes it is about
+    to send.
+    """
+    from aadistill.infrastructure.manifest import sha256_file, sha256_json
+
+    root = Path(repo_root) / STATE_EVAL_ROOT
+    manifest_path = root / "manifest.json"
+    if not manifest_path.is_file():
+        raise D1SessionError(
+            f"the frozen state-eval asset is not staged at {STATE_EVAL_ROOT}. A "
+            "formal session may not run against a suite it cannot bind.")
+    doc = json.loads(manifest_path.read_text())
+
+    #: THE MANIFEST'S OWN SELF-HASH first, so the pins below are read from a
+    #: record that has not been edited since the builder wrote it.
+    stated_manifest = doc.get("manifest_sha256")
+    if stated_manifest:
+        recomputed = sha256_json(
+            {k: v for k, v in doc.items() if k != "manifest_sha256"})
+        if recomputed != stated_manifest:
+            raise D1SessionError(
+                f"{STATE_EVAL_ROOT}/manifest.json does not match its own "
+                f"manifest_sha256 ({recomputed[:12]} vs {stated_manifest[:12]}); "
+                "it has been edited since the builder wrote it")
+
+    pinned = ((doc.get("outputs") or {}).get("items") or {}).get("sha256")
+    if not pinned:
+        raise D1SessionError(
+            f"{STATE_EVAL_ROOT}/manifest.json pins no sha256 for its items "
+            "file, so the staged prompts cannot be checked against the record "
+            "that describes them")
+    items_file = root / "items.jsonl"
+    if not items_file.is_file():
+        raise D1SessionError(f"{STATE_EVAL_ROOT}/items.jsonl is absent")
+    got = sha256_file(items_file)
+    if got != pinned:
+        raise D1SessionError(
+            f"{STATE_EVAL_ROOT}/items.jsonl hashes to {got[:12]} and the "
+            f"asset's manifest pins {pinned[:12]}. The staged prompts are not "
+            "the frozen suite; a measurement taken on them would be recorded "
+            "under a content hash they do not produce.")
+    return {"manifest_sha256": stated_manifest,
+            "items_sha256": got,
+            "content_sha256": doc.get("content_sha256"),
+            "n_items": (doc.get("counts") or {}).get("n_items")}
+
+
 def load_state_eval_suite(repo_root: str | Path = REPO):
     """`(suite, items, content_sha256)` from the frozen asset.
 
     The content hash comes from the asset's own manifest through the shared
     loader, which refuses an asset that carries none. Recomputing it here would
-    be a second definition of the same identity.
+    be a second definition of the same identity -- but the BYTES beside the
+    record are checked against the pin the record carries for them; see
+    `verify_state_eval_bytes`.
     """
     import sys
+
+    verify_state_eval_bytes(repo_root)
 
     sys.path.insert(0, str(Path(repo_root) / "scripts/autoinit"))
     from load_state_eval import load as load_suite

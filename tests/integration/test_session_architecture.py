@@ -393,7 +393,28 @@ def test_every_staged_input_declares_a_destination_and_the_env_carries_it(name, 
     spec = mod.spec(session_args(mod, extra))
     env = spec.setup_environment(session_commit="0" * 40, bundle="aad.bundle")
     staged = spec.setup.staged_relay_inputs()
-    assert staged, f"{name} stages no science input at all"
+    if not staged:
+        #: A SESSION MAY LEGITIMATELY STAGE NOTHING THROUGH THE RELAY.
+        #:
+        #: The relay exists because an input can be too large for the dev-box
+        #: uplink; a session whose whole non-source input set is a couple of
+        #: MiB sends it by scp as `local_assets` instead, which this runner's
+        #: own comment recommends ("the frozen search assets are ~3 s and need
+        #: no relay round trip"). D1 is the first such session.
+        #:
+        #: What must still hold is the property this test is named for: setup
+        #: is told exactly what to fetch and never left to infer it. An empty
+        #: declaration must therefore reach setup as an empty list -- not as an
+        #: absent variable the shell could fall back from -- and the session
+        #: must stage its inputs by SOME declared route.
+        assert json.loads(env["SESSION_RELAY_INPUTS"]) == [], (
+            f"{name} stages no relay input but hands setup a non-empty "
+            "SESSION_RELAY_INPUTS")
+        assert spec.setup.local_assets, (
+            f"{name} declares neither a relay input nor a local asset, so no "
+            "non-source input reaches the pod by any declared route. A pod "
+            "clones a bundle and has nothing else.")
+        return
     carried = json.loads(env["SESSION_RELAY_INPUTS"])
     assert [r["path"] for r in carried] == [r.path for r in staged], (
         f"{name}'s SESSION_RELAY_INPUTS is not its staged declaration")
@@ -405,6 +426,23 @@ def test_every_staged_input_declares_a_destination_and_the_env_carries_it(name, 
     assert unstaged.isdisjoint({r["path"] for r in carried}), (
         f"{name} hands setup {unstaged & {r['path'] for r in carried}}, which "
         "the driver stages by another route")
+
+
+def test_the_relay_staging_path_is_exercised_by_some_session():
+    """The non-vacuity guard for the early return above.
+
+    `assert staged` used to be per-session, which both checked that the relay
+    path is exercised AND forbade a session from staging everything locally.
+    Those are two different claims, and only the first is true of every
+    session. This keeps the first: if no session stages anything through the
+    relay, the assertions above run for nobody and the whole test is decorative.
+    """
+    staged_by = {name: len(spec.setup.staged_relay_inputs())
+                 for name, _m, _a, spec in all_specs()}
+    assert any(staged_by.values()), (
+        "no session stages a single relay input, so "
+        "test_every_staged_input_declares_a_destination_and_the_env_carries_it "
+        f"asserts nothing for anyone: {staged_by}")
 
 
 @pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,

@@ -74,24 +74,56 @@ def test_the_verifier_actually_declares_roots():
     assert all(r.startswith("artifacts/") for r in roots), roots
 
 
+#: WHICH SESSIONS THE FROZEN-ASSET GATE ACTUALLY RUNS FOR.
+#:
+#: `verify_frozen_assets.py` is not run unconditionally any more, and the shell
+#: says so at the branch itself:
+#:
+#:     # DECLARED, or not run at all. A session that does not declare
+#:     # ASSETS_READY has no frozen assets to verify and must not be asked
+#:     # another experiment's historical question -- which is the $0.0552
+#:     # Phase-C2 abort, exactly.
+#:     if step_declared ASSETS_READY; then
+#:
+#: So the requirement below belongs to the sessions that DECLARE the step. For
+#: them it is unchanged and still absolute. For a session that does not declare
+#: it, demanding another experiment's frozen roots is the $0.0552 failure the
+#: shell's own comment names -- the stricter reading, not the safer one.
+#:
+#: Read from the manifest rather than hardcoded, so a session that starts
+#: declaring `ASSETS_READY` is held to the full set from that moment.
+def runs_the_frozen_asset_gate(spec) -> bool:
+    return "ASSETS_READY" in set(spec.setup.setup_markers)
+
+
 @pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
                          ids=lambda v: v if isinstance(v, str) else "")
 def test_every_session_installs_every_root_the_shared_setup_verifies(name, extra):
-    """`verifier_required_local_roots ⊆ session_installed_local_roots`.
+    """`verifier_required_local_roots ⊆ session_installed_local_roots`, for every
+    session whose setup actually runs the verifier.
 
     The invariant the two failures violated, checked against declarations so it
     gives the same answer on the dev box, in the simulator and on a pod.
     """
     spec = dict((n, s) for n, _m, _a, s in all_specs())[name]
+    if not runs_the_frozen_asset_gate(spec):
+        #: It does not declare ASSETS_READY, so the verifier never runs and its
+        #: roots are not this session's requirement. What such a session owes
+        #: instead -- that every input its driver reads reaches the pod by some
+        #: declared route -- is checked by its own suite, from an empty
+        #: simulated pod filesystem.
+        pytest.skip(f"{name} does not declare ASSETS_READY; the shared setup "
+                    "does not run verify_frozen_assets.py for it")
     required = verifier_required_local_roots()
     installed = installed_local_roots(spec)
     missing = sorted(required - installed)
     assert not missing, (
         f"{name} does not install {missing}, which "
-        "scripts/autoinit/verify_frozen_assets.py checks unconditionally at the "
-        "shared setup's ASSETS_READY gate. A session declares what the SETUP "
-        "requires, not what the session reads — declaring only what it needs is "
-        "what cost the device-canary retry $0.0637 and the measurement $0.0700.")
+        "scripts/autoinit/verify_frozen_assets.py checks at the shared setup's "
+        "ASSETS_READY gate, which this session DECLARES. A session declares "
+        "what the SETUP requires, not what the session reads — declaring only "
+        "what it needs is what cost the device-canary retry $0.0637 and the "
+        "measurement $0.0700.")
 
 
 def test_the_contract_holds_for_every_session_at_once():
@@ -99,7 +131,45 @@ def test_the_contract_holds_for_every_session_at_once():
     one line it is rather than inferred from a parametrized sweep."""
     required = verifier_required_local_roots()
     for name, _m, _a, spec in all_specs():
+        if not runs_the_frozen_asset_gate(spec):
+            continue
         assert required <= installed_local_roots(spec), name
+
+
+def test_the_gate_still_binds_some_session():
+    """The non-vacuity guard for the skip above. If no session declares
+    `ASSETS_READY`, the requirement is enforced for nobody and the two tests
+    above are decorative rather than narrowed."""
+    declaring = {name for name, _m, _a, spec in all_specs()
+                 if runs_the_frozen_asset_gate(spec)}
+    assert declaring, (
+        "no session declares ASSETS_READY, so the frozen-root requirement is "
+        "enforced for nobody; re-derive this contract rather than deleting it")
+
+
+def test_a_session_that_declares_the_gate_cannot_drop_a_root():
+    """The narrowing must not have weakened the guard where it applies.
+
+    Mutates a DECLARING session's manifest to drop one required root and
+    asserts the contract rejects it -- so the skip above is a change of scope
+    and not of strength.
+    """
+    import dataclasses
+
+    required = verifier_required_local_roots()
+    declaring = [spec for _n, _m, _a, spec in all_specs()
+                 if runs_the_frozen_asset_gate(spec)]
+    spec = declaring[0]
+    dropped = sorted(required)[0]
+    kept = tuple(a for a in spec.setup.local_assets
+                 if f"{a.install_to.strip('/')}/{a.dest_name}" != dropped)
+    assert len(kept) < len(spec.setup.local_assets), dropped
+    crippled = dataclasses.replace(
+        spec, setup=dataclasses.replace(spec.setup, local_assets=kept))
+    assert runs_the_frozen_asset_gate(crippled)
+    assert not (required <= installed_local_roots(crippled)), (
+        "a declaring session that drops a required frozen root still satisfies "
+        "the contract; the narrowing weakened it")
 
 
 def test_a_session_may_install_more_than_the_verifier_requires():

@@ -1,0 +1,75 @@
+{
+ "schema": "aadistill.phase_d1.run_superseded/v1",
+ "run_id": "d1_search_20261005_173304",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "outcome": "SUPERSEDED BEFORE LAUNCH. Never launched, never consumed, $0.",
+ "recorded_utc": "2026-10-05T18:40:00Z",
+ "_what_this_is": "This run was prepared at $0 and is retired without executing. Its governance artifacts are PRESERVED as the evidence of what was prepared; they are NOT rewritten, because they would then claim to have authorized code they never measured. The replacement run carries a new id, a new one-use authorization and a fresh readiness record.",
+ "money": {
+  "provider_resources_created": 0,
+  "actual_usd": 0.0,
+  "one_use_grant_consumed": false,
+  "note": "no pod existed at any point. The authorization was issued and never presented to a launcher that reached provider creation, so the grant is retired unconsumed rather than spent."
+ },
+ "why_superseded": {
+  "summary": "An independent review of the prepared chain through the REAL generic SessionRunner found that the chain could not have produced a valid D1 search. Eleven defects, of which three were unconditionally fatal and would each have been discovered on a billing pod.",
+  "fatal": [
+   {
+    "defect": "the bound config_hash was unreachable",
+    "detail": "d1_authorization.build_payload built its probe session with run_id='authorization-probe' and device='cpu', while the driver built its session with the real run id on cuda. Both fields are members of SearchConfig.as_dict() and therefore of config_hash, so the grant bound an identity no launch could reproduce.",
+    "measured": {
+     "grant_bound": "6301e12e2fd0738e2a5710eeffb78b706b4dec20d833e98b3ce86f5cc5597266",
+     "grant_bound_built_with": "run_id='authorization-probe', device='cpu'",
+     "driver_would_have_computed": "cb03a95942e5e0e37a8e5e145f48b1be1cfd86e02d48c9551537fe8b0b76a008",
+     "driver_built_with": "run_id='d1_search_20261005_173304', device='cuda'",
+     "run_id_alone_moves_it_to": "b6a1806dca6dae9de438ba65833ee751e4f2e2919e5d87e3597efdf690267931"
+    },
+    "consequence": "autoinit_d1_driver stage A compares the two and raises D1DriverError. The refusal lands AFTER the pod is created, after setup, after the pod test gate and after the authorization dispatch branch -- so every $0 gate would have passed and the session would have died having paid for its whole startup."
+   },
+   {
+    "defect": "the canonical bundle did not exist",
+    "detail": "launch_readiness.json named transfer/aad_autoinit_6c1dd8d9.bundle as a verified fact. The relay holds 563 transfer/ objects and over a hundred aad_autoinit_*.bundle files; that was not one of them. D1 also had no bundle_staged_gate, so nothing asked.",
+    "consequence": "SETUP_RC=1 on a 404 while the pod billed -- C1 attempt 1 exactly."
+   },
+   {
+    "defect": "the launcher could not reach its own gates",
+    "detail": "--max-price, --disk-gb and --out all defaulted to None and nothing resolved them. SessionRunner.make_plan aborted with TypeError: '<=' not supported between instances of 'NoneType' and 'int'. It was never observed because --dry-run returned before SessionRunner was constructed.",
+    "consequence": "no launch was possible at all; the dry run that reported the chain ready had validated the declaration only."
+   }
+  ],
+  "also_found": [
+   "the driver wrote its evidence to artifacts/stage1/d1/<run_id>/ while the relay, the report fetch and two artifact-spec entries read artifacts/audit/autoinit_d1/; three of the five spec patterns additionally repeated the collector's own root and could never match",
+   "the driver wrote no MARKER:ALL_DONE / MARKER:RUN_FAILED, so a completed search would have been observed as DRIVER_EXITED and collected under the reduced failure spec",
+   "the product selector read <scr>/d1_search.json, a path SessionRunner never creates, and an absent file was read as 'no selection was committed' -- which permits teardown",
+   "SessionSpec.precheck was empty: no session-commit gate, no lineage check, no readiness consumption, no bundle verification",
+   "relay_inputs and local_assets were both empty while the driver consumes three untracked assets (state_eval_v1, both calibration mixtures) and a teacher that no setup step downloaded and no variable pointed at",
+   "main returned a bare bool, so SystemExit mapped a completed session to exit status 1, and launcher-level errors bypassed run_session's teardown wrapper",
+   "launch_readiness.json had no generator at all, and there was no issuing script for the authorization"
+  ],
+  "timestamp_defect": {
+   "granted_utc": "2026-10-06T00:00:00Z",
+   "actual_utc_at_preparation": "2026-10-05",
+   "why_it_matters": "the stated time is in the future of the moment the artifact was written, so it cannot support the package contract's claim that the secure rate was quoted live immediately before issuance. No datetime.now() produces it."
+  }
+ },
+ "what_is_preserved": {
+  "governance/authorization.json": "the issued one-use artifact, unmodified. Retired unconsumed.",
+  "governance/launch_readiness.json": "the readiness record as written, unmodified.",
+  "note": "both remain readable as the record of what was prepared on 2026-10-05. Neither authorizes anything now: the replacement run's authorization is a different artifact against a different executable closure."
+ },
+ "what_changed_in_the_tree": {
+  "executable_closure_before": {
+   "digest": "f4fbc8b5a90fea8a2c9291a2986896969cf3a6cf32b48bd537f5c43a2002b230",
+   "n_files": 93
+  },
+  "note": "the repairs changed the closure's MEMBERSHIP as well as its contents -- the launcher now imports the shared session prechecks, the shared bundle transport and the shared run layout -- which is precisely the drift D1Authorization.require_harness refuses by membership. A new authorization is therefore required rather than optional."
+ },
+ "retry_policy": {
+  "is_this_a_retried_experiment": false,
+  "why": "no formal training or measurement began, and no provider resource existed. Under AGENTS.md P12.1 this is an engineering repair inside an already-approved phase envelope: the maintainer's grant at logs/budget/approvals/autoinit_d1_grant.json is unchanged, no budget is widened, and no frozen science is altered.",
+  "frozen_science_unchanged": "K=200, bsz=3, length_sorted_v1, beam width 6 with one warmup level, the four frozen operators, both calibration profiles, the supervised_target arm, Top-2. The design hash is unchanged at 3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff.",
+  "budget_unchanged": "the same accepted 1125.55-minute bound at the same live $1.09/h secure rate, repriced to the same $21.4897 ceiling."
+ },
+ "successor_run": "see the sibling run directory under logs/stages/stage-1/phase_d1/runs/ whose governance/authorization.json carries a granted_utc from the real clock and a run_id equal to its own directory name."
+}

@@ -2,6 +2,7 @@
  "spec": "aadistill.artifact_spec/v1",
  "session": "autoinit_d1_search",
  "note": "FAILURE spec: what a stopped D1 search still owes. Nothing is `required`, deliberately -- an early failure may legitimately have produced none of it, and demanding an artifact on the failure path would block the collection of what the run DOES have. The driver writes `d1_search.json` on every path out, so there is normally something here even when stage A refused.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. See the success spec for what a doubled `artifacts/` prefix cost.",
  "entries": [
   {
    "artifact_class": "d1_search_record",
@@ -11,19 +12,19 @@
   },
   {
    "artifact_class": "d1_stage1_selection",
-   "pattern": "artifacts/stage1/d1/*/stage1_selection.json",
+   "pattern": "audit/autoinit_d1/stage1_selection.json",
    "required": false,
    "lifecycle": "evidence"
   },
   {
    "artifact_class": "d1_state_journal",
-   "pattern": "artifacts/stage1/d1/*/search/states.jsonl",
+   "pattern": "audit/autoinit_d1/search/states.jsonl",
    "required": false,
    "lifecycle": "evidence"
   },
   {
    "artifact_class": "d1_search_telemetry",
-   "pattern": "artifacts/stage1/d1/*/search/telemetry.jsonl",
+   "pattern": "audit/autoinit_d1/search/telemetry.jsonl",
    "required": false,
    "lifecycle": "evidence"
   },
