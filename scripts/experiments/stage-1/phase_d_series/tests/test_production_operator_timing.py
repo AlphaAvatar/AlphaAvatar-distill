@@ -476,3 +476,80 @@ class TestThePricingGateRefusesEveryRecordThatCannotPrice:
             "the committed production record prices, so the envelope would "
             "resolve on a measurement of the shadow loop")
 
+
+
+class TestTheCloseoutAndTheDesignCannotDisagreeAboutThePrice:
+    """One cross-record invariant, because keeping them aligned by hand failed.
+
+    The closeout stated a production cost and a `$23.0738` repricing while the
+    design's own gate refused that record as a pricing basis. Nothing checked the
+    pair, so the contradiction lived in two committed files at once and had to be
+    found by reading them.
+
+    What must hold, in both directions: a closeout answer that presents a live
+    production cost requires the design to have a basis, and a design with a basis
+    requires the closeout's cited price to be the design's.
+    """
+
+    @staticmethod
+    def _records():
+        import json
+
+        import write_d1_design as w
+
+        closeout = json.loads(
+            (REPO / "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1"
+                    "/closeout.json").read_text())
+        design = json.loads(
+            (REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json").read_text())
+        return closeout, design, w._topk_production_basis()
+
+    def test_a_withdrawn_cost_answer_says_so_where_a_reader_lands(self):
+        closeout, design, basis = self._records()
+        answers = closeout.get("answers") or {}
+        cost = answers.get("E_production_cost")
+        if basis is not None:
+            return  # covered by the next test
+        assert "_REOPENED_BY_REVIEW" in closeout, (
+            "the design has no valid production basis, so the closeout's cost "
+            "answer is withdrawn -- and the closeout must say that at its top "
+            "level, not leave a reader to infer it from the design")
+        withdrawn = closeout["_REOPENED_BY_REVIEW"]
+        assert "what_was_withdrawn" in withdrawn and withdrawn["what_was_withdrawn"]
+        assert "why" in withdrawn and len(withdrawn["why"]) > 80, (
+            "a withdrawn answer must carry the reason; 'superseded' is not one")
+        #: And the figures it withdrew must be named, not just alluded to.
+        assert cost is None or any(
+            str(k).startswith("_") or k in ("from", "operator_seconds_max",
+                                            "operator_invocation_seconds_max")
+            for k in cost), sorted(cost)
+
+    def test_when_a_basis_exists_the_two_records_cite_the_same_price(self):
+        closeout, design, basis = self._records()
+        if basis is None:
+            pytest.skip("no production basis; the previous test owns this state")
+        priced = design["budget"]["topk_production_basis"]["search_session"][
+            "hard_ceiling_usd"]
+        repricing = (closeout.get("answers") or {}).get("D1_repricing") or {}
+        cited = repricing.get("search_session_hard_ceiling_usd")
+        assert cited is not None, (
+            "a production basis exists and the closeout's D1_repricing cites no "
+            "session price under `search_session_hard_ceiling_usd`; a reader "
+            "would have to go to the design to learn what the round concluded")
+        assert float(cited) == pytest.approx(float(priced)), (
+            f"the closeout cites ${float(cited):.4f} and the design prices "
+            f"${float(priced):.4f}; one of them is stale")
+        #: And the operator term, which is the thing this round re-measured.
+        cited_op = repricing.get("operator_invocation_seconds_max")
+        if cited_op is not None:
+            assert float(cited_op) == pytest.approx(
+                float(basis["operator_invocation_seconds_max"]))
+
+    def test_the_closeouts_scientific_answers_survive_a_withdrawn_cost(self):
+        """Withdrawing the price must not withdraw the science."""
+        closeout, _, _ = self._records()
+        answers = closeout.get("answers") or {}
+        for key in ("A_reference_top200_mass", "B_full_vs_k_plus_1",
+                    "C_depth_decisions", "D_state_evaluation", "lower_bound"):
+            assert key in answers, f"{key} went missing from the closeout"
+        assert answers["lower_bound"], "the lower-bound answer is the verdict"
