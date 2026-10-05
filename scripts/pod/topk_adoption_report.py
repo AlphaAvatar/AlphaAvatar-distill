@@ -69,6 +69,63 @@ def lines(doc: dict) -> list[str]:
                    f"peak={_gib(cd.get('peak_memory_bytes'))} "
                    f"observer={cd.get('observer_seconds')}s "
                    f"cache_mode={rc.get('mode')}")
+    pm = doc.get("P_premises") or {}
+    if pm:
+        out.append(f"P premises: {pm.get('impl_id')} "
+                   f"sig={pm.get('impl_signature_hash')} "
+                   f"ceiling_arm={pm.get('ceiling_arm')}")
+        for prof, v in sorted((pm.get("per_profile") or {}).items()):
+            w = (v.get("weights") or {}).get("treatment") or {}
+            out.append(f"   {prof}: {v.get('n_items')} items / "
+                       f"{v.get('n_groups')} groups; treatment weights "
+                       f"{w.get('shape')} nonzero={w.get('nonzero')}"
+                       f"/{w.get('positions')}; control="
+                       f"{(v.get('weights') or {}).get('control')}")
+    pt = doc.get("P_production_timing") or {}
+    #: A SUPERSEDED-SHAPE RECORD SAYS SO, in one line, and prints no pricing
+    #: fields. a5's, a6's and a7's records carry `operator_seconds_max` -- a
+    #: per-candidate figure from a reimplemented inner loop -- and rendering those
+    #: through the fields below produced a column of `None`s beside
+    #: `valid_for_pricing=True`, which reads exactly like a basis.
+    if pt and not pt.get("measurement_path"):
+        out.append(
+            "P timing: SUPERSEDED SHAPE (no `measurement_path`). This is a "
+            f"per-candidate measurement -- max {pt.get('operator_seconds_max')}s "
+            f"over {pt.get('candidates_per_profile')} candidates per profile, "
+            f"sync_split={pt.get('sync_split_enabled')} -- from a loop that was "
+            "not the production scorer. DIAGNOSTIC ONLY; it prices nothing.")
+        pt = {}
+    if pt:
+        #: THE PRICING INPUT FIRST, and whether it may price at all. A reader who
+        #: sees only a number cannot tell a diagnostic run from a basis.
+        out.append(f"P timing: path={pt.get('measurement_path')} "
+                   f"valid_for_pricing={pt.get('_valid_for_pricing')} "
+                   f"sync_split={pt.get('sync_split_enabled')}")
+        out.append(f"   invocation MAX {pt.get('operator_invocation_seconds_max')}s "
+                   f"= {float(pt.get('operator_invocation_seconds_max') or 0)/60:.3f} min "
+                   f"(mean {pt.get('operator_invocation_seconds_mean')}s)")
+        for prof, v in sorted((pt.get("per_profile") or {}).items()):
+            att = v.get("attribution") or {}
+            dist = v.get("per_candidate_distribution") or {}
+            out.append(f"   {prof}: {v.get('operator_invocation_seconds')}s over "
+                       f"{v.get('candidate_subsets')} candidates / "
+                       f"{v.get('rounds')} rounds; "
+                       f"peak={_gib(v.get('peak_memory_bytes'))}")
+            out.append(f"      scoring_loop={att.get('scoring_loop_seconds')}s "
+                       f"outside={att.get('outside_scoring_loop_seconds')}s "
+                       f"(ref={att.get('reference_seconds')} "
+                       f"abl={att.get('ablated_seconds')} "
+                       f"red={att.get('distortion_seconds')})")
+            if dist:
+                out.append(f"      per-candidate (diagnostic): "
+                           f"max={dist.get('max')} p95={dist.get('p95')} "
+                           f"p50={dist.get('p50')} min={dist.get('min')}")
+            out.append(f"      removed: {v.get('removed')}")
+        wt = pt.get("position_weighting_cost") or {}
+        if wt:
+            out.append(f"   weighting setup: treatment "
+                       f"{(wt.get('treatment') or {}).get('setup_seconds')}s vs "
+                       f"control {(wt.get('control') or {}).get('setup_seconds')}s")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "
