@@ -526,7 +526,7 @@
   "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $44.8188 is the gap between the chain hard ceiling of $51.0829 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
   "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "SATISFIED ON MEASUREMENT: the corrected production Top-K search session prices at $21.4897 against the $30.00 envelope, so this is no longer a blocker. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
   "_per_session_envelope_compatibility": "DERIVED from the measured production Top-K session price against $30.00. RESOLVED_FITS means the measured session ceiling is inside the envelope; RESOLVED_NEEDS_RAISE means it is outside and the envelope would have to move; UNRESOLVED means no production Top-K timing exists yet, which blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven.\n\nTHE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They are historical planning evidence from UNBATCHED telemetry for a protocol D1 will not run. `open_blockers` used to require both this field AND that the provisional basis fit, so a measurement proving D1 fits would have stayed blocked by an estimate it supersedes.",
-  "_price_status": "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a finalized authorization price. What has changed and what has not:\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field used to call UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table that means it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nSTILL NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion minutes come from FULL-VOCABULARY telemetry, and D1 will run reference_topk_tail_v1. The adoption validation's wall clock is not a substitute: it deliberately computes BOTH reducers from the same forwards and therefore includes work the formal path will not do.\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nWHAT MUST REFRESH IT: a Top-K-only representative expansion timing. Until that exists these numbers size a grant request; they do not price one.",
+  "_price_status": "MIXED, and the dominant cell is MEASURED. The Top-K protocol owes nothing: its production cost is settled evidence.\n\nMEASURED, under the production protocol: depth.causal_kl_greedy_v1. One real `impl.execute` invocation of 1194.2624 s over 260 candidate subsets -- the max over both DEPTH calibration profiles -- rebuilt end to end into 22.9759 min at the root with the committed non-operator MAX. This is the same quantity `BeamSearch._expand_one` records as `operator_seconds`, so it is comparable with the frozen table it replaces.\n\nA PLANNING BASIS, deliberately left alone: the three non-KL structural cells keep their committed UNBATCHED whole-expansion figures. They reduce activation statistics rather than KL, so the distribution support cannot move them, and an unbatched basis OVERSTATES -- which is the safe direction for a ceiling.\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field once called UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nSO: the search session's figure is a BOUND rather than a plan. The chain total remains provisional in SIZE because three cells are unmeasured, and it is not a finalized authorization price -- what the project cap should become is a maintainer decision this document does not take.",
   "_why_three_sessions": "the search commits a candidate set and stops; the screening rung cannot be bound until that set exists, and the confirmation rung cannot be bound until screening names the one candidate that advances. Each is separately priced and separately authorized.",
   "chain": {
    "expected_usd": 36.1923,
@@ -896,7 +896,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "e3bdc78329589dc56c25da3cd89812a2157bb9bdae5f1c50f6d56ae47612c618",
+ "design_hash": "72faa307ba31a74b9328f95d89898226d469239f3b34321ab18ac6521ff38140",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -985,7 +985,7 @@
     "THE CALIBRATION BATCH SIZE moved it"
    ]
   },
-  "status": "full-vocab qualification RUN -- PASSED; Top-K adoption: {'_prior': 'COMPLETE -- zero lower-bound violations; the protocol is sound', '_status': 'CLOSED. The science was GO throughout; the production cost is now measured and the envelope resolves.'}",
+  "status": "full-vocab qualification RUN -- PASSED; Top-K adoption: CLOSED. The production operator cost is MEASURED -- one real `impl.execute` invocation of 1194.2624 s (19.9044 min), the max over both DEPTH calibration profiles -- and the per-session envelope resolves on it. Nothing about the Top-K protocol is owed or in flight.",
   "surface_that_owes_it": {
    "_what": "files on the historically CUDA-validated surface that this round changed, so the 2026-09-10 evidence does not cover them. Owner: tests/architecture/test_cuda_surface_preserved.py :: HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION.",
    "files": [
@@ -994,9 +994,9 @@
     "src/aadistill/initialization/operators/attention/gqa/activation_importance.py"
    ]
   },
-  "what_is_STILL_not_priced": [
-   "the PRODUCTION Top-K D1 search cost. The adoption validation deliberately computes BOTH reducers from the same forwards, so its wall clock includes work the formal Top-K path will not do and must NOT be used as a production timing.",
-   "and therefore the per-session envelope, which stays UNRESOLVED until a Top-K-only representative timing exists. The full-vocab provisional basis is NOT the Top-K price."
+  "what_is_not_priced": [
+   "nothing on the DEPTH path: its cell is a measured whole invocation under the production protocol, and the per-session envelope resolves on it.",
+   "the three non-KL structural cells keep their committed UNBATCHED basis. That OVERSTATES, which is the safe direction for a ceiling, so no GPU time is owed for them -- refreshing them would lower a bound that is already satisfied."
   ],
   "what_the_cpu_round_ALREADY_settled": [
    "the incumbent policy is numerically inert: a four-operator toy chain rebuilt against the pre-change tree produces the same artifact digest and the same four structural decisions",
@@ -1018,9 +1018,18 @@
     "status": "COMPLETE -- baseline engineering evidence"
    },
    "topk_adoption": {
+    "_status_owner": "derived from logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.json and the production basis it names; nothing here is typed",
+    "closeout_status": "CLOSED. The science was GO throughout; the production cost is now measured and the envelope resolves.",
+    "measured_basis": {
+     "candidate_subsets_measured": 260,
+     "operator_invocation_seconds_max": 1194.2624,
+     "owner": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8/adoption.json"
+    },
     "owner": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.json",
-    "status": "UNDER CORRECTIVE REVIEW -- an independent review reopened it because the tail arithmetic was invalid at the numerical edge",
-    "what_is_being_corrected": "the tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- the measured support mass reached 1.000001 -- and one coarse KL consequently exceeded the full-vocabulary KL, which a coarsening cannot do. Repaired to compute the tail from the complement's own logits; the adoption evidence is being re-measured."
+    "remaining_blockers_it_names": [
+     "funding authorization"
+    ],
+    "status": "CLOSED. The production operator cost is MEASURED -- one real `impl.execute` invocation of 1194.2624 s (19.9044 min), the max over both DEPTH calibration profiles -- and the per-session envelope resolves on it. Nothing about the Top-K protocol is owed or in flight."
    }
   },
   "why_a_gpu_is_required": "the questions are CUDA numerical behaviour and real memory, which no CPU substitute reaches. AGENTS.md P8.2: a CPU rehearsal that cannot reach the behaviour under test is a more expensive way of learning nothing."

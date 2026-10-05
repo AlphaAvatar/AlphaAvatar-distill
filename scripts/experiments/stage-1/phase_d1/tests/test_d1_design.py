@@ -718,3 +718,97 @@ class TestMeasuredEnvelopeCompatibilityIsAuthoritative:
         """A typo must fail closed."""
         for value in ("RESOLVED", "FITS", "", None, "resolved_fits"):
             assert "per-session envelope" in self._blockers(value, True), value
+
+
+class TestNoLiveFieldClaimsTheTopKCostIsOwed:
+    """The sweep an independent review had to run by hand, twice.
+
+    The writer kept emitting live fields that said the production Top-K cost was
+    unmeasured, under corrective review or being re-measured — once in the SAME
+    `budget` object as a `price_status` reading "MEASURED PRODUCTION TOP-K BASIS".
+    One object, two answers, and the detailed field was the stale one.
+
+    Keyed on the production-basis predicate, so it holds in both directions: while
+    no basis exists these phrases are the honest state and are REQUIRED somewhere;
+    once one exists no live field may carry them.
+    """
+
+    #: Phrases that assert the Top-K cost is still owed. A negation containing one
+    #: trips this too, deliberately: prose that happens to contain the stale claim
+    #: cannot be distinguished from the claim by any sweep, including a reviewer's.
+    OWED_PHRASES = (
+        "STILL NOT MEASURED",
+        "being re-measured",
+        "UNDER CORRECTIVE REVIEW",
+        "stays UNRESOLVED",
+        "representative timing exists",
+        "representative expansion timing",
+        "the production Top-K cost is not",
+        "owed GPU qualification",
+    )
+
+    @staticmethod
+    def _strings(obj, path=""):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                yield f"{path}.{k}", str(k)
+                yield from TestNoLiveFieldClaimsTheTopKCostIsOwed._strings(
+                    v, f"{path}.{k}")
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                yield from TestNoLiveFieldClaimsTheTopKCostIsOwed._strings(
+                    v, f"{path}[{i}]")
+        elif isinstance(obj, str):
+            yield path, obj
+
+    @staticmethod
+    def _basis():
+        import write_d1_design as w
+
+        return w._topk_production_basis()
+
+    def test_the_live_design_carries_none_of_them_once_the_cost_is_measured(self):
+        doc = json.loads(DESIGN.read_text())
+        if self._basis() is None:
+            pytest.skip("no production basis; the next test owns that state")
+        hits = [(path, phrase)
+                for path, text in self._strings(doc)
+                for phrase in self.OWED_PHRASES if phrase in text]
+        assert not hits, (
+            "the production Top-K cost is MEASURED and these live fields say "
+            f"otherwise: {hits}. A reader taking any one of them concludes the "
+            "evidence is in flight.")
+
+    def test_they_would_be_required_if_no_basis_existed(self, monkeypatch):
+        """The other direction, so this is not a test that only ever passes.
+
+        With the basis removed, the writer must go back to saying the cost is
+        unmeasured -- in the detailed status, in the envelope note and in what a
+        GPU still owes. A writer that said "measured" either way would pass the
+        test above for the wrong reason.
+        """
+        import write_d1_design as w
+
+        monkeypatch.setattr(w, "TOPK_PRODUCTION", "logs/does/not/exist.json")
+        assert w._topk_production_basis() is None
+        rebuilt = w.build()
+        blob = json.dumps(rebuilt)
+        assert any(p in blob for p in self.OWED_PHRASES), (
+            "with no production basis the design claims nothing is owed; the "
+            "narratives are not derived from the basis at all")
+        assert rebuilt["budget"]["per_session_envelope_compatibility"] == \
+            "UNRESOLVED"
+        assert "per-session envelope" in rebuilt["open_blockers"]
+
+    def test_the_four_fields_that_must_agree_do(self):
+        """`price_status`, `_price_status`, the envelope state and the blockers."""
+        doc = json.loads(DESIGN.read_text())
+        budget = doc["budget"]
+        measured = self._basis() is not None
+        assert ("MEASURED PRODUCTION TOP-K BASIS" in budget["price_status"]) \
+            is measured
+        assert ("the dominant cell is MEASURED" in budget["_price_status"]) \
+            is measured
+        assert (budget["per_session_envelope_compatibility"] != "UNRESOLVED") \
+            is measured
+        assert ("per-session envelope" not in doc["open_blockers"]) is measured

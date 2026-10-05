@@ -634,9 +634,9 @@ def _qualification_state() -> dict[str, Any]:
     #: reopened by an independent review over the tail arithmetic. A bare
     #: "RUN -- PASSED" here would be the kind of status that is true of one thing
     #: and read as true of everything.
-    topk = REPO / TOPK_ADOPTION
-    topk_state = ("ADOPTION UNDER CORRECTIVE REVIEW" if not topk.is_file()
-                  else json.loads(topk.read_text()).get("verdict", "unknown"))
+    #: DERIVED, through the one function that owns the adoption's live state, so
+    #: this line cannot say "under corrective review" after the review closed.
+    topk_state = _topk_adoption_state()["status"]
     answers = doc.get("answers") or {}
     recon = answers.get("incumbent_reconstruction") or {}
     decisions = answers.get("discrete_decisions") or {}
@@ -672,6 +672,84 @@ def _qualification_state() -> dict[str, Any]:
                             "open blockers: see `open_blockers`."),
         },
     }
+
+
+def _topk_adoption_state() -> dict[str, Any]:
+    """The Top-K adoption's live state, from its closeout and the priced basis.
+
+    This was typed, and it said "UNDER CORRECTIVE REVIEW ... the adoption evidence
+    is being re-measured" for two rounds after the re-measurement finished. A
+    status that outlives its own subject is worse than no status: a reader
+    concludes the evidence is in flight.
+
+    Derived from the same predicate that drives
+    `per_session_envelope_compatibility`, `price_status` and `open_blockers`, so
+    the four cannot disagree.
+    """
+    path = REPO / TOPK_ADOPTION
+    if not path.is_file():
+        return {"status": "NOT RUN -- no adoption closeout exists",
+                "owner": TOPK_ADOPTION,
+                "_status_owner": "derived: the closeout's absence"}
+    doc = json.loads(path.read_text())
+    verdict = doc.get("verdict")
+    verdict = verdict if isinstance(verdict, dict) else {"_status": str(verdict)}
+    basis = _topk_production_basis()
+    out = {
+        "owner": TOPK_ADOPTION,
+        "_status_owner": (f"derived from {TOPK_ADOPTION} and the production basis "
+                          "it names; nothing here is typed"),
+        "closeout_status": verdict.get("_status") or verdict.get("_prior"),
+        "remaining_blockers_it_names": doc.get("remaining_blockers"),
+    }
+    if basis is None:
+        out["status"] = (
+            "RUN, and the production cost is NOT yet a valid pricing basis: the "
+            "closeout exists but no record carries a whole-invocation measurement "
+            "under the production path.")
+        return out
+    out["status"] = (
+        f"CLOSED. The production operator cost is MEASURED -- one real "
+        f"`impl.execute` invocation of {basis['operator_invocation_seconds_max']} s "
+        f"({basis['operator_minutes_at_max']} min), the max over both DEPTH "
+        f"calibration profiles -- and the per-session envelope resolves on it. "
+        "Nothing about the Top-K protocol is owed or in flight.")
+    out["measured_basis"] = {
+        "owner": basis["owner"],
+        "operator_invocation_seconds_max":
+            basis["operator_invocation_seconds_max"],
+        "candidate_subsets_measured": basis["candidate_subsets_measured"],
+    }
+    return out
+
+
+def _what_is_not_priced() -> list[str]:
+    """What a GPU still owes a price for. Derived, and EMPTY is a valid answer.
+
+    It used to be a typed list headed "the PRODUCTION Top-K D1 search cost ... and
+    therefore the per-session envelope, which stays UNRESOLVED until a Top-K-only
+    representative timing exists". Both entries were satisfied by a8 and neither
+    knew it.
+    """
+    basis = _topk_production_basis()
+    if basis is None:
+        return [
+            "the PRODUCTION Top-K D1 search cost. An adoption validation that "
+            "computes BOTH reducers from the same forwards includes work the "
+            "formal path will not do, and a per-candidate figure is not the "
+            "whole-invocation quantity the cost table holds.",
+            "and therefore the per-session envelope, which stays UNRESOLVED until "
+            "a whole-invocation production measurement exists. The full-vocab "
+            "provisional basis is NOT the Top-K price.",
+        ]
+    return [
+        "nothing on the DEPTH path: its cell is a measured whole invocation under "
+        "the production protocol, and the per-session envelope resolves on it.",
+        "the three non-KL structural cells keep their committed UNBATCHED basis. "
+        "That OVERSTATES, which is the safe direction for a ceiling, so no GPU "
+        "time is owed for them -- refreshing them would lower a bound that is "
+        "already satisfied.",
+    ]
 
 
 def gpu_validation_owed() -> dict[str, Any]:
@@ -727,30 +805,9 @@ def gpu_validation_owed() -> dict[str, Any]:
                     "reduction very nearly cancels the batching penalty",
                 ],
             },
-            "topk_adoption": {
-                "status": ("UNDER CORRECTIVE REVIEW -- an independent review "
-                           "reopened it because the tail arithmetic was invalid "
-                           "at the numerical edge"),
-                "owner": TOPK_ADOPTION,
-                "what_is_being_corrected": (
-                    "the tail was reconstructed as `1 - sum(support)`, which "
-                    "crosses float32 resolution once the support holds nearly all "
-                    "the mass -- the measured support mass reached 1.000001 -- and "
-                    "one coarse KL consequently exceeded the full-vocabulary KL, "
-                    "which a coarsening cannot do. Repaired to compute the tail "
-                    "from the complement's own logits; the adoption evidence is "
-                    "being re-measured."),
-            },
+            "topk_adoption": _topk_adoption_state(),
         },
-        "what_is_STILL_not_priced": [
-            "the PRODUCTION Top-K D1 search cost. The adoption validation "
-            "deliberately computes BOTH reducers from the same forwards, so its "
-            "wall clock includes work the formal Top-K path will not do and must "
-            "NOT be used as a production timing.",
-            "and therefore the per-session envelope, which stays UNRESOLVED "
-            "until a Top-K-only representative timing exists. The full-vocab "
-            "provisional basis is NOT the Top-K price.",
-        ],
+        "what_is_not_priced": _what_is_not_priced(),
         "surface_that_owes_it": {
             "_what": ("files on the historically CUDA-validated surface that "
                       "this round changed, so the 2026-09-10 evidence does not "
@@ -995,6 +1052,63 @@ def a_deeper_parent_is_a_smaller_model() -> dict[str, Any]:
 
 
 import contextlib
+
+
+def _price_status_detail() -> str:
+    """Cell by cell: what is measured, what is a planning basis, what is owed.
+
+    DERIVED from the production basis, like the three fields it has to agree with.
+    It used to end "STILL NOT MEASURED: the PRODUCTION Top-K cost ... WHAT MUST
+    REFRESH IT: a Top-K-only representative expansion timing. Until that exists
+    these numbers size a grant request; they do not price one" -- in the same
+    `budget` object as a `price_status` reading "MEASURED PRODUCTION TOP-K BASIS".
+    One object, two answers, and the detailed one was the stale one.
+    """
+    batched = (
+        "MEASURED, by the full-vocabulary GPU qualification: the batched "
+        "direction, which this field once called UNKNOWN. Batching costs x1.97 on "
+        "the dominant DEPTH operator at all positions and x1.08 at the "
+        "target-aware policy, so the policy's smaller reduction very nearly "
+        "cancels the penalty. Against the frozen per-cell table it does NOT bound "
+        "the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES "
+        "bound the protocol D1 runs (21.420 under a 29.248 mean).")
+    live_quote = (
+        "AND `securePrice` is re-queried live at authorization, so every dollar "
+        "figure here is a derived consequence of an hour-old quote.")
+    basis = _topk_production_basis()
+    if basis is None:
+        return (
+            "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
+            f"finalized authorization price.\n\n{batched}\n\n"
+            "NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion minutes "
+            "come from FULL-VOCABULARY telemetry and D1 runs "
+            "reference_topk_tail_v1. An adoption validation's wall clock is not a "
+            "substitute -- it computes BOTH reducers from the same forwards -- and "
+            "neither is a per-candidate figure, because the cost table holds "
+            f"whole-invocation `operator_seconds`.\n\n{live_quote}\n\n"
+            "WHAT WOULD REFRESH IT: one timed `impl.execute` invocation per DEPTH "
+            "calibration profile under the production protocol. Until that exists "
+            "these numbers size a grant request; they do not price one.")
+    return (
+        "MIXED, and the dominant cell is MEASURED. The Top-K protocol owes "
+        "nothing: its production cost is settled evidence.\n\n"
+        f"MEASURED, under the production protocol: {DEPTH_IMPL}. One real "
+        f"`impl.execute` invocation of {basis['operator_invocation_seconds_max']} s "
+        f"over {basis['candidate_subsets_measured']} candidate subsets -- the max "
+        f"over both DEPTH calibration profiles -- rebuilt end to end into "
+        f"{basis['root_max_minutes']} min at the root with the committed "
+        f"non-operator MAX. This is the same quantity `BeamSearch._expand_one` "
+        f"records as `operator_seconds`, so it is comparable with the frozen "
+        f"table it replaces.\n\n"
+        "A PLANNING BASIS, deliberately left alone: the three non-KL structural "
+        "cells keep their committed UNBATCHED whole-expansion figures. They reduce "
+        "activation statistics rather than KL, so the distribution support cannot "
+        "move them, and an unbatched basis OVERSTATES -- which is the safe "
+        f"direction for a ceiling.\n\n{batched}\n\n{live_quote}\n\n"
+        "SO: the search session's figure is a BOUND rather than a plan. The chain "
+        "total remains provisional in SIZE because three cells are unmeasured, and "
+        "it is not a finalized authorization price -- what the project cap should "
+        "become is a maintainer decision this document does not take.")
 
 
 def _measured_depth_cell() -> dict[str, Any] | None:
@@ -1383,27 +1497,7 @@ def budget() -> dict[str, Any]:
             "direction is now MEASURED; the production Top-K cost is not. A "
             "per-candidate measurement does not supply it: the cost table holds "
             "whole-invocation `operator_seconds`."),
-        "_price_status": (
-            "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
-            "finalized authorization price. What has changed and what has not:\n\n"
-            "MEASURED, by the full-vocabulary GPU qualification: the batched "
-            "direction, which this field used to call UNKNOWN. Batching costs "
-            "x1.97 on the dominant DEPTH operator at all positions and x1.08 at "
-            "the target-aware policy, so the policy's smaller reduction very "
-            "nearly cancels the penalty. Against the frozen per-cell table that "
-            "means it does NOT bound the all-positions bsz=3 case (39.117 over a "
-            "34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a "
-            "29.248 mean).\n\n"
-            "STILL NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion "
-            "minutes come from FULL-VOCABULARY telemetry, and D1 will run "
-            "reference_topk_tail_v1. The adoption validation's wall clock is not "
-            "a substitute: it deliberately computes BOTH reducers from the same "
-            "forwards and therefore includes work the formal path will not do.\n\n"
-            "AND `securePrice` is re-queried live at authorization, so every "
-            "dollar figure here is a derived consequence of an hour-old quote.\n\n"
-            "WHAT MUST REFRESH IT: a Top-K-only representative expansion timing. "
-            "Until that exists these numbers size a grant request; they do not "
-            "price one."),
+        "_price_status": _price_status_detail(),
         "sessions": 3,
         "_why_three_sessions": (
             "the search commits a candidate set and stops; the screening rung "
