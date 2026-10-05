@@ -1,70 +1,53 @@
 {
- "schema": "aadistill.experiment_authorization_config/v1",
  "_contract": "The Phase-C1 INSTANCE data the authorization assembler needs: which committed objects to read, which money figures to refuse a mis-priced session against, and what the session's stage conditions say. Every value here was a literal inside src/aadistill until 2026-09-08. Moving it out is what lets the core be reused by another experiment. AUTHORIZES NOTHING: this is configuration, not a grant.",
- "experiment_id": "phase_c1",
- "stage_id": "1",
  "_stage_id_meaning": "Which PIPELINE STAGE this experiment belongs to, DECLARED by the maintainer rather than inferred from a name or from which code the pod happens to execute. C1 is Stage 1 -- projection and structural initialization. Its two arms are two Stage-1 initializations that differ in exactly one operator of DEPTH->FFN->RESIDUAL_WIDTH->ATTENTION, and the question it answers is which ATTENTION initialization to keep. The six 0.86M recovery probes it trains are the measuring INSTRUMENT for that question, not the subject: grouping the runs by the instrument would file an initialization experiment next to Stage-3 recovery work and lose what it is for. The PHASE is C, carried by experiment_id 'phase_c1'; the ATTEMPT is the run_id. Stage, phase and attempt are three dimensions and this field is only the first. Consumed by scripts/experiments/run_layout.py to place runs at logs/runs/stage-1/phase_c1/<run_id>/.",
- "authorization_id": "autoinit.v1.phase_c1",
- "plan_id": "autoinit.v1.phase_c1",
- "inputs": {
-  "preregistration": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
-  "pricing": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
-  "battery_identity": "logs/stages/stage-1/phase_c1/plans/battery.json",
-  "teacher_binding": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
-  "scoring_equivalence": "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json"
- },
- "output": "logs/budget/approvals/autoinit_c1_authorization.json",
- "grant_contract": {
-  "contract_id": "phase_c1.grant/v1",
-  "stated_fields": [
-   "granted_by",
-   "covers",
-   "cumulative_spend_at_approval_usd",
-   "cumulative_cap_usd",
-   "does_not_authorize"
-  ],
-  "derived_fields": [
-   "granted_utc",
-   "authorized_session_commit",
-   "harness_source_digest",
-   "plan_hash",
-   "science_plan_hash",
-   "preregistration_sha256",
-   "battery_content_sha256",
-   "scoring_contract_digest",
-   "teacher_revision"
-  ]
- },
+ "_superseded_wording_note": "Until 2026-09-11 these two fields read 'no replacement pod' and 'ONE provider resource'. That was the rule attempts 1-12 ran under and it is preserved in their issued authorizations, which are not rewritten. It stopped describing the generation source when the package permitted bounded acquisition draws, and an authorization that contradicts the package it is issued under is a governance defect even when nothing reads the prose.",
  "accepted_pricing": {
+  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. AMENDED AGAIN 2026-09-17: 320.00 -> 370.00 (+50.00), on the maintainer decision closing the Phase-C2 preparation round. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger. AMENDED AGAIN 2026-09-28: 370.00 -> 400.00 (+30.00), on the maintainer decision funding the complete 3-arm x 3-seed formal C3. The per-session envelope moved in the same decision, 15.1475 -> 30.00; see execution_package._amendment_2026_09_28. AMENDED AGAIN 2026-10-02: 400.00 -> 410.00 (+10.00), on the review of fe2db4c8, as part of the A3 PHASE envelope; the per-session envelope did NOT move and no minute assumption changed. AMENDED AGAIN 2026-10-05: 410.00 -> 465.00 (+55.00), on the maintainer decision funding the complete D1 phase. The per-session envelope did NOT move and no minute assumption changed; see execution_package._amendment_2026_10_05.",
+  "_floor_and_soft_stop_are_c1_instance": "hard_ceiling_usd 15.1475, planning_floor_usd 13.4401 and soft_stop_usd 14.7841 are C1's OWN accepted session pricing, derived for C1's $1.09/h session and cross-checked against phase_c1_pricing.json by the grant issuer -- which refused a $30.00 value here with 'pricing ceiling $15.1475 != $30.0000'. They are NOT the package's per-session envelope. That envelope is execution_package.per_attempt_hard_ceiling_usd, raised to $30.00 on 2026-09-28, and it is what derive_budget.py reports. C1 is COMPLETE/GO so nothing will re-issue against this triple; every NEW formal session derives its own ceiling from live pricing at issuance.",
+  "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
   "_why_restated": "so a mis-priced session is REFUSED rather than mirrored. A ceiling that only echoes its source is not an independent check, and this is the last place a mis-priced session can be stopped before a grant exists. Amended 2026-09-04 for the approved repricing to the secure L40S rate of $1.09/h; every minute assumption is unchanged. The superseded triple at $0.99/h was 13.7578 / 12.2070 / 13.4277.",
+  "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
+  "cumulative_cap_usd": 465.0,
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
-  "soft_stop_usd": 14.7841,
-  "cumulative_cap_usd": 410.0,
-  "_cap_amendment": "2026-09-11: the PROJECT cumulative cap rose from 283.76 to 320.00 (+36.24) with the approved execution package below. AMENDED AGAIN 2026-09-17: 320.00 -> 370.00 (+50.00), on the maintainer decision closing the Phase-C2 preparation round. The per-attempt ceiling did NOT move and no minute assumption changed. The issuer refuses a grant naming any other cap, which is why this value lives here rather than being inferred from the ledger. AMENDED AGAIN 2026-09-28: 370.00 -> 400.00 (+30.00), on the maintainer decision funding the complete 3-arm x 3-seed formal C3. The per-session envelope moved in the same decision, 15.1475 -> 30.00; see execution_package._amendment_2026_09_28. AMENDED AGAIN 2026-10-02: 400.00 -> 410.00 (+10.00), on the review of fe2db4c8, as part of the A3 PHASE envelope; the per-session envelope did NOT move and no minute assumption changed.",
-  "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
-  "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
-  "_floor_and_soft_stop_are_c1_instance": "hard_ceiling_usd 15.1475, planning_floor_usd 13.4401 and soft_stop_usd 14.7841 are C1's OWN accepted session pricing, derived for C1's $1.09/h session and cross-checked against phase_c1_pricing.json by the grant issuer -- which refused a $30.00 value here with 'pricing ceiling $15.1475 != $30.0000'. They are NOT the package's per-session envelope. That envelope is execution_package.per_attempt_hard_ceiling_usd, raised to $30.00 on 2026-09-28, and it is what derive_budget.py reports. C1 is COMPLETE/GO so nothing will re-issue against this triple; every NEW formal session derives its own ceiling from live pricing at issuance."
+  "soft_stop_usd": 14.7841
  },
+ "authorization_id": "autoinit.v1.phase_c1",
+ "authorized_stages": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "authorizes": "nothing",
  "execution_package": {
+  "_amendment_2026_09_28": "MAINTAINER DECISION 2026-09-28, on the review of b937aebb, which stopped formal C3 for funding rather than reducing the science. Funding is declared not to be the limiting factor. PROSPECTIVE, current-only: project cumulative cap 370.00 -> 400.00; per-session hard ceiling 15.1475 -> 30.00 (an ENVELOPE, not an automatic grant); formal allowance 45.4425 -> 55.00; GPU engineering allowance unchanged at 10.00; package total 55.4425 -> 65.00, which is 55 + 10 by construction. Historical issued authorizations and historical run records are UNCHANGED. C3's own one-use authorization receives the ceiling derived from live securePrice immediately before issuance, and proceeds only if that derived ceiling <= 30.00 AND cumulative spend + derived ceiling <= 400.00 AND remaining formal allowance >= derived ceiling.",
+  "_amendment_2026_10_01": "MAINTAINER DECISION 2026-10-01, authorizing the COMPLETE A3 chain as ONE end-to-end experiment -- initialization, recovery, evaluation, aggregation, closeout -- rather than as a step-1/step-2 split needing intermediate approvals. PROSPECTIVE AND CURRENT-ONLY. formal allowance 55.0000 -> 65.6523 (+10.6523); package total 65.0000 -> 75.6523 (+10.6523, which is the same raise: the package total REMAINS formal + engineering by construction, because package.spent is derived as that same sum and a cap computed on a different basis from its spend is a cap nobody can reconcile); GPU engineering allowance UNCHANGED at 10.0000; per-session envelope UNCHANGED at 30.0000; project cumulative cap UNCHANGED at 400.0000, because the derived chain fits it with headroom. NO NEW SPENDABLE HEADROOM BEYOND THE FORMAL RAISE: A3 is charged to the formal book, the books do not transfer, and the unspent 1.9395 of engineering allowance was already authorized and cannot fund a formal probe. DERIVED, NOT CHOSEN: scripts/experiments/stage-1/phase_c3/a3_pricing.py prices the full chain at a live L40S securePrice of 1.09/h as 5.8680 expected and 8.2525 hard over 450.82 minutes, on a 60 GB container disk derived from a 36.06 GiB peak local residency and a 6.664 GiB durable requirement. The amendment funds that ceiling plus ONE pre-science restart of 1.4506 -- the chain up to the first scientific probe, at hard rates, from the same component table -- because this decision also requires autonomous rerun of failed engineering and setup stages, and an allowance sized to exactly one flawless run cannot execute that instruction. Total funded on the formal book: 9.7031. Nothing else is added. THE HISTORICAL OVERSPEND STANDS AS FACT: attempt75 was issued against a formal allowance it exceeded by 0.9492, the authorization-gate defect that permitted it is recorded in logs/stages/stage-1/phase_c3/analyses/formal_allowance_audit.json, and nothing here rewrites attempt75, its grant, its authorization or its closeout into compliance. Raising a forward-looking allowance is not retroactive permission, and the 55.9492 already spent is still 55.9492.",
+  "_amendment_2026_10_02": "MAINTAINER DECISION 2026-10-02, on the review of fe2db4c8. A PHASE-LEVEL envelope for A3, explicitly sized so the whole experimental stage can complete WITHOUT repeated micro-budget approvals -- the maintainer's words: do not size another amendment merely to the next flawless run. PROSPECTIVE AND CURRENT-ONLY. formal allowance 65.6523 -> 76.6523 (+11.0000); package total 75.6523 -> 86.6523 (+11.0000, the same raise, because the package total REMAINS formal + engineering by construction); project cumulative cap 400.0000 -> 410.0000 (+10.0000); GPU engineering allowance UNCHANGED at 10.0000; per-session envelope UNCHANGED at 30.0000. WHAT IT BUYS, at the measured A3 pricing: one full chain at the 8.2525 hard ceiling plus about six corrected pre-science restarts at 1.4506 each = 16.9561, inside the resulting 17.9631 formal balance with roughly 1.00 of headroom. THAT IS A PHASE ENVELOPE, NOT PERMISSION TO REPEAT THE SAME FAILURE SIX TIMES: the same-failure rule in aadistill.infrastructure.session_prechecks refuses a provider resource when the preceding paid attempt ended with the same normalized deterministic failure signature and nothing corrective changed. IT REWRITES NOTHING: attempt75's historical 0.9492 formal overspend stands, the 2.7400 A3 has already spent stands, and no previous grant, authorization or closeout is excused. Before each paid retry, settled plus outstanding plus active spend and the live securePrice are re-derived as usual.",
+  "_amendment_2026_10_03": "MAINTAINER DECISION 2026-10-03, authorizing the D1 ENGINEERING GPU QUALIFICATION. PROSPECTIVE AND CURRENT-ONLY. GPU engineering allowance 10.0000 -> 20.0000; package total 86.6523 -> 96.6523 (+10.0000, the same raise, because the package total REMAINS formal + engineering by construction -- package.spent is derived as that same sum, and a cap computed on a different basis from its spend is a cap nobody can reconcile). UNCHANGED: formal allowance 76.6523, project cumulative cap 410.0000, per-session envelope 30.0000, and funds_formal_sessions_of -- phase_d1 is NOT added to it. ENGINEERING ONLY, AND THE BOOKS DO NOT TRANSFER: this adds no formal headroom and authorizes no D1 science. The qualification performs no recovery training, no behavioural screening, no confirmation, no formal search, no promotion and no GO/NO-GO. Its questions are engineering: does the incumbent fixed path reconstruct the frozen incumbent artifact on real CUDA, does the target-aware bsz=3 path execute correctly under CUDA/bf16 through the real evaluator, does any discrete selection decision move, what is the real state-eval peak memory against the derived budget, and what does a representative expansion actually cost. A PHASE-LEVEL ENGINEERING ENVELOPE, NOT A MICRO-BUDGET: the maintainer's instruction is that ordinary setup, provider, environment, device, dtype and OOM failures are repaired and retried autonomously inside it, which an allowance sized to one flawless run cannot execute. Every cost still counts, the four limits still bind separately, and the same-failure rule in aadistill.infrastructure.session_prechecks still refuses a provider resource when the preceding paid attempt ended with the same normalized deterministic failure signature and nothing corrective changed. IT REWRITES NOTHING: every historical authorization, run record and overspend stands, including attempt75's 0.9492 formal overspend.",
+  "_amendment_2026_10_05": "MAINTAINER DECISION 2026-10-05, on the review of the completed D-series Top-K round at 16585a73. A PHASE-LEVEL envelope for the COMPLETE D1 experiment -- formal search, screening, confirmation, closeout -- explicitly sized so the stage can finish WITHOUT returning for micro-budget approvals after an ordinary setup or provider failure. PROSPECTIVE AND CURRENT-ONLY.\n\nformal allowance        76.6523 -> 131.6523  (+55.0000)\npackage total           96.6523 -> 151.6523  (+55.0000)\nproject cumulative cap 410.0000 -> 465.0000  (+55.0000)\nGPU engineering          20.0000 -> 20.0000   UNCHANGED\nper-session envelope     30.0000 -> 30.0000   UNCHANGED\n\n`phase_d1` is added to funds_formal_sessions_of.experiment_ids, so D1's formal sessions spend THIS package's formal allowance and are gated on it.\n\nWHAT IT FUNDS: the complete currently-derived D1 hard chain -- formal search, screening and confirmation, three separately-authorized sessions, priced by experiments.phase_d1.search_space.chain_cost through search_cost_model.bound. The headroom beyond that chain is INTENTIONAL and is what makes this a phase envelope rather than a session budget.\n\nWHAT IT DOES NOT AUTHORIZE: scientific repetition. Re-running a valid GO, NO-GO or INCONCLUSIVE, splicing probes across sessions, substituting a seed, selectively retaining outputs, or changing arms, seeds, recipe, battery, statistics or decision rules remains forbidden by `never` above. D2 and D3 are NOT authorized. No K sweep, extra seed, wider candidate field, new operator, changed beam breadth, changed recovery recipe, changed battery or changed decision rule is authorized.\n\nFROZEN SCOPE: reference_topk_tail_v1 at K=200; micro_batch_size 3; length_sorted_v1; beam width 6; 1 warmup level; the four frozen operators; both calibration profiles; recovery E1_KD_HEAVY_0860K; Top-2 candidates with 2 screening and 3 confirmation seeds over 12 probes. The incumbent remains B.\n\nNOT RETROSPECTIVE: no historical grant, authorization, closeout or recorded spend is rewritten. Earlier amendments keep their figures, which is how a reader checks what each session ran under.",
+  "_attempts_amendment_2026_09_11b": "The three-attempt cap and the one-provider-resource-per-invocation rule are WITHDRAWN, prospectively, by a maintainer decision of 2026-09-11 taken after attempt 11. Ordinary infrastructure failures, setup failures and $0 pre-provider refusals -- where it is CONFIRMED that no formal probe training has started -- are now diagnosed, handled and retried autonomously inside the remaining budget, with no package-level cap on the number of launcher invocations. Attempts 10 and 11 keep their records, costs, numbering and the authorization semantics they actually ran under; what is withdrawn is a future constraint, not a record.",
   "_contract": "The maintainer decision this experiment's attempts run under. INSTANCE POLICY, which is why it is configuration and not core: the core knows nothing about attempts, packages, dollars or retries. AUTHORIZES NOTHING BY ITSELF -- a launch still needs a grant, an authorization, a launch-bound readiness record and a bundle.",
-  "package_id": "phase_c1.execution_package.2026-09-11",
-  "approved_utc": "2026-09-11",
+  "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY.",
+  "_issuance_conditions_superseded_2026_10_01": "The 2026-09-28 amendment listed THREE issuance conditions: derived ceiling <= envelope, cumulative + derived <= project cap, and remaining formal allowance >= derived ceiling. There are FOUR: the PACKAGE TOTAL binds too. It looked implied because it equals formal + engineering, and that is exactly why nothing evaluated it -- an identity is not a check, and a future amendment that moved one side would break it silently. It is now the fourth condition in formal_pricing.evaluate_limits, which RAISES on a missing envelope rather than treating an absent limit as a satisfied one. The historical text of the 2026-09-28 amendment is left exactly as it was decided.",
+  "acquisition": {
+   "between_batches": "after a batch is exhausted, inspect the failure mode and supply before continuing. Low stock is a reason to back off at $0 and pick a better moment, not a proven cause -- one Medium success and one Low failure is not a finding, and nothing about it is written into src/aadistill.",
+   "create_attempts": 1,
+   "host_draws_max": 3,
+   "release_rule": "a returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence that a resource stopped billing. Only the provider saying so is. If it cannot be confirmed, no further resource is created and the state is reconciled first.",
+   "what_a_draw_is": "replacing a host that never became usable -- cold, or no endpoint -- inside ONE session and inside its one ceiling. A draw is not an attempt and not a way to chase stock.",
+   "why_create_attempts_stays_one": "a create-attempt sleeps and asks the same market again. Draws replace an unusable host; that is the authorized mechanism, price chasing is not."
+  },
   "approved_by": "maintainer decision, 2026-09-11, after independent engineering review of 55bb324a..199711af",
-  "formal_attempts_max": null,
-  "formal_attempts_include_the_first": true,
-  "per_attempt_hard_ceiling_usd": 30.0,
-  "formal_allowance_usd": 76.6523,
-  "gpu_engineering_allowance_usd": 20.0,
-  "package_total_usd": 96.6523,
-  "cumulative_spend_at_approval_usd": 267.8998,
-  "reconciliation_margin_usd": 0.6577,
-  "limits_do_not_transfer": "the engineering allowance, the per-session ceiling, the package total and the project cap bind SEPARATELY. An unspent engineering allowance does not raise the per-session ceiling, and the $0.6577 margin is for real accounting corrections, not spending. The attempt COUNT is no longer one of these limits -- see _attempts_amendment_2026_09_11b -- but the money is unchanged, and money is what now bounds how many sessions are possible.",
+  "approved_utc": "2026-09-11",
   "attempt_counting": {
-   "rule": "invoking the formal launcher under a NEW one-use authorization is one formal SESSION. Sessions are still numbered, recorded and ledgered individually; what was withdrawn on 2026-09-11 is the CAP on how many there may be, not the counting.",
+   "no_hidden_retries": "one provider-create call per DRAW, at most three draws per session, at most one billing resource at any instant, and every draw recorded with its own pod id, cost and watchdog. A redraw is not a hidden retry; an unrecorded one would be.",
    "not_counted": "read-only checks, code repair and GPU engineering validation before an authorization is issued.",
    "prospective_only": "this governs THIS package. It does not rewrite the 2026-09-04 ruling, under which attempt 3 was not consumed because no provider resource was created, nor the counting attempts 10 and 11 ran under.",
-   "no_hidden_retries": "one provider-create call per DRAW, at most three draws per session, at most one billing resource at any instant, and every draw recorded with its own pod id, cost and watchdog. A redraw is not a hidden retry; an unrecorded one would be."
+   "rule": "invoking the formal launcher under a NEW one-use authorization is one formal SESSION. Sessions are still numbered, recorded and ledgered individually; what was withdrawn on 2026-09-11 is the CAP on how many there may be, not the counting."
   },
   "autonomous_formal_retry_requires_all_of": [
    "it can be CONFIRMED that no formal probe training has started",
@@ -75,13 +58,31 @@
    "the remaining package balance funds the planned session plus evidence recovery and teardown",
    "the new session uses a new run identity and a complete, valid one-use authorization chain"
   ],
-  "stop_and_report": [
-   "formal probe training has STARTED and a failure follows -- peripheral engineering may be repaired and the SAME experiment resumed only where the existing protocol already supports it and state, identity and continuity verify; resume semantics are never invented, and model weights alone are not assumed sufficient",
-   "it cannot be confirmed whether training started -- absence of confirmation is not confirmation of absence",
-   "a real replay mismatch, a frozen-science conflict, or evidence whose provenance cannot be verified",
-   "any complete, valid GO / NO-GO / INCONCLUSIVE -- all three END this round's formal execution, and re-running a valid result for a better one is forbidden",
-   "budget, resource scope or a rerun that cannot preserve scientific validity"
+  "cumulative_spend_at_approval_usd": 267.8998,
+  "engineering_allowance_does_not_authorize": [
+   "complete formal probes",
+   "consuming the frozen confirmation battery for an endpoint",
+   "formal execution -- that comes from the $55.0000 formal allowance, and the two do not transfer"
   ],
+  "formal_allowance_usd": 131.6523,
+  "formal_attempts_include_the_first": true,
+  "formal_attempts_max": null,
+  "funds_formal_sessions_of": {
+   "_authority": "_amendment_2026_09_28, in this same block",
+   "_contract": "Which experiments' formal sessions spend THIS package's formal allowance. Instance policy, which is why it is configuration: the deriver must not carry a hardcoded phase name, and it did -- `FORMAL_EXPERIMENT = \"phase_c1\"` -- so formal C3 sessions reached the project cumulative and never touched the $55.00 formal allowance they are funded from. A run whose own records state a `package_id` is attributed by that instead; this list is what covers runs predating that field, and historical authorizations are NOT rewritten to add one.",
+   "experiment_ids": [
+    "phase_c1",
+    "phase_c3",
+    "phase_a3",
+    "phase_d1"
+   ],
+   "phase_a3": "the 2026-10-02 PHASE amendment funds A3 from this allowance, and A3's own pricing gate makes `remaining formal allowance >= derived session ceiling` one of four conditions its authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends it -- and until this line existed, A3's $2.7400 of pre-science pods reached the project cumulative while the formal book reported them as never having happened, which is the exact defect the phase_c3 entry above was added to fix.",
+   "phase_c1": "the package was approved for it on 2026-09-11",
+   "phase_c3": "the 2026-09-28 amendment funds formal C3 from this allowance and makes `remaining formal allowance >= derived session ceiling` one of the three conditions a C3 authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends the formal allowance.",
+   "phase_d1": "the 2026-10-05 PHASE amendment funds D1's formal sessions from this allowance. D1's issuance gate makes `remaining formal allowance >= derived session ceiling` one of its four conditions, and a session that must pass a formal-allowance gate is a session that spends it. Without this line D1's formal spend would reach the project cumulative while the formal book reported it as never having happened -- the defect the phase_c3 and phase_a3 entries were added to fix."
+  },
+  "gpu_engineering_allowance_usd": 20.0,
+  "limits_do_not_transfer": "the engineering allowance, the per-session ceiling, the package total and the project cap bind SEPARATELY. An unspent engineering allowance does not raise the per-session ceiling, and the $0.6577 margin is for real accounting corrections, not spending. The attempt COUNT is no longer one of these limits -- see _attempts_amendment_2026_09_11b -- but the money is unchanged, and money is what now bounds how many sessions are possible.",
   "never": [
    "re-running a valid INCONCLUSIVE in pursuit of a GO",
    "splicing probes across attempts",
@@ -89,12 +90,18 @@
    "selectively retaining outputs",
    "changing arms, seeds, recipe, battery, statistics or the behavioural vetoes"
   ],
-  "engineering_allowance_does_not_authorize": [
-   "complete formal probes",
-   "consuming the frozen confirmation battery for an endpoint",
-   "formal execution -- that comes from the $55.0000 formal allowance, and the two do not transfer"
+  "package_id": "phase_c1.execution_package.2026-09-11",
+  "package_total_usd": 151.6523,
+  "per_attempt_hard_ceiling_usd": 30.0,
+  "reconciliation_margin_usd": 0.6577,
+  "stop_and_report": [
+   "formal probe training has STARTED and a failure follows -- peripheral engineering may be repaired and the SAME experiment resumed only where the existing protocol already supports it and state, identity and continuity verify; resume semantics are never invented, and model weights alone are not assumed sufficient",
+   "it cannot be confirmed whether training started -- absence of confirmation is not confirmation of absence",
+   "a real replay mismatch, a frozen-science conflict, or evidence whose provenance cannot be verified",
+   "any complete, valid GO / NO-GO / INCONCLUSIVE -- all three END this round's formal execution, and re-running a valid result for a better one is forbidden",
+   "budget, resource scope or a rerun that cannot preserve scientific validity"
   ],
-  "_attempts_amendment_2026_09_11b": "The three-attempt cap and the one-provider-resource-per-invocation rule are WITHDRAWN, prospectively, by a maintainer decision of 2026-09-11 taken after attempt 11. Ordinary infrastructure failures, setup failures and $0 pre-provider refusals -- where it is CONFIRMED that no formal probe training has started -- are now diagnosed, handled and retried autonomously inside the remaining budget, with no package-level cap on the number of launcher invocations. Attempts 10 and 11 keep their records, costs, numbering and the authorization semantics they actually ran under; what is withdrawn is a future constraint, not a record.",
+  "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much.",
   "what_still_binds": [
    "the money: $65.6523 formal, $10.0000 engineering, $75.6523 package -- amended 2026-10-01 for the complete A3 chain; these package allowances are what this document authorizes and they bind SEPARATELY. The package total is their sum, and it is still CHECKED separately at issuance: an amendment that raised one without the other would otherwise authorize a session the package cannot fund",
    "the CURRENT project cumulative cap is deliberately not restated here. It was $320.0000 when this package was approved and has since been amended; its canonical owner is accepted_pricing.cumulative_cap_usd in this same file, which derive_budget reads. Do not read a current cap from this list -- restating it is exactly how one live file came to state two different current caps",
@@ -103,52 +110,48 @@
    "secure L40S; no other GPU and no price chasing, but securePrice is re-queried LIVE immediately before each authorization and the session's ceiling is derived from it. $1.09/h is a historical observation, not a frozen bound -- a different live price is re-priced, not refused",
    "every cost counts: a failure, a new run_id, a new pod or a new authorization resets nothing",
    "the science: arms, seeds, recipe, battery, statistic and behavioural vetoes are frozen"
-  ],
-  "acquisition": {
-   "host_draws_max": 3,
-   "what_a_draw_is": "replacing a host that never became usable -- cold, or no endpoint -- inside ONE session and inside its one ceiling. A draw is not an attempt and not a way to chase stock.",
-   "create_attempts": 1,
-   "why_create_attempts_stays_one": "a create-attempt sleeps and asks the same market again. Draws replace an unusable host; that is the authorized mechanism, price chasing is not.",
-   "between_batches": "after a batch is exhausted, inspect the failure mode and supply before continuing. Low stock is a reason to back off at $0 and pick a better moment, not a proven cause -- one Medium success and one Low failure is not a finding, and nothing about it is written into src/aadistill.",
-   "release_rule": "a returncode, a null runtime, a failed query or a cleared local pod_id are NOT evidence that a resource stopped billing. Only the provider saying so is. If it cannot be confirmed, no further resource is created and the state is reconciled first."
-  },
-  "success_is": "one complete, valid, fully evidenced C1 result. GO is not required: a valid NO-GO or INCONCLUSIVE ends the round just as much.",
-  "_engineering_allowance_amendment_2026_09_27": "MAINTAINER DECISION 2026-09-27, in the packing-optimization v2 review: the GPU ENGINEERING allowance rises $6.00 -> $10.00, and the package total therefore $51.4425 -> $55.4425. ENGINEERING ONLY. `formal_allowance_usd` stays $45.4425, `per_attempt_hard_ceiling_usd` stays $15.1475 and `cumulative_cap_usd` stays $370.00 -- none of them moved and this transfers no money into formal C3, which remains NOT STARTED and separately unauthorized. The reason is arithmetic: engineering remaining had fallen to $0.6443, so granting a new campaign without this would have been granting a ceiling nothing could be spent under. The four limits still bind SEPARATELY.",
-  "_amendment_2026_09_28": "MAINTAINER DECISION 2026-09-28, on the review of b937aebb, which stopped formal C3 for funding rather than reducing the science. Funding is declared not to be the limiting factor. PROSPECTIVE, current-only: project cumulative cap 370.00 -> 400.00; per-session hard ceiling 15.1475 -> 30.00 (an ENVELOPE, not an automatic grant); formal allowance 45.4425 -> 55.00; GPU engineering allowance unchanged at 10.00; package total 55.4425 -> 65.00, which is 55 + 10 by construction. Historical issued authorizations and historical run records are UNCHANGED. C3's own one-use authorization receives the ceiling derived from live securePrice immediately before issuance, and proceeds only if that derived ceiling <= 30.00 AND cumulative spend + derived ceiling <= 400.00 AND remaining formal allowance >= derived ceiling.",
-  "funds_formal_sessions_of": {
-   "_contract": "Which experiments' formal sessions spend THIS package's formal allowance. Instance policy, which is why it is configuration: the deriver must not carry a hardcoded phase name, and it did -- `FORMAL_EXPERIMENT = \"phase_c1\"` -- so formal C3 sessions reached the project cumulative and never touched the $55.00 formal allowance they are funded from. A run whose own records state a `package_id` is attributed by that instead; this list is what covers runs predating that field, and historical authorizations are NOT rewritten to add one.",
-   "experiment_ids": [
-    "phase_c1",
-    "phase_c3",
-    "phase_a3"
-   ],
-   "phase_c1": "the package was approved for it on 2026-09-11",
-   "phase_c3": "the 2026-09-28 amendment funds formal C3 from this allowance and makes `remaining formal allowance >= derived session ceiling` one of the three conditions a C3 authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends the formal allowance.",
-   "_authority": "_amendment_2026_09_28, in this same block",
-   "phase_a3": "the 2026-10-02 PHASE amendment funds A3 from this allowance, and A3's own pricing gate makes `remaining formal allowance >= derived session ceiling` one of four conditions its authorization must satisfy. A session that must pass a formal-allowance gate is a session that spends it -- and until this line existed, A3's $2.7400 of pre-science pods reached the project cumulative while the formal book reported them as never having happened, which is the exact defect the phase_c3 entry above was added to fix."
-  },
-  "_amendment_2026_10_01": "MAINTAINER DECISION 2026-10-01, authorizing the COMPLETE A3 chain as ONE end-to-end experiment -- initialization, recovery, evaluation, aggregation, closeout -- rather than as a step-1/step-2 split needing intermediate approvals. PROSPECTIVE AND CURRENT-ONLY. formal allowance 55.0000 -> 65.6523 (+10.6523); package total 65.0000 -> 75.6523 (+10.6523, which is the same raise: the package total REMAINS formal + engineering by construction, because package.spent is derived as that same sum and a cap computed on a different basis from its spend is a cap nobody can reconcile); GPU engineering allowance UNCHANGED at 10.0000; per-session envelope UNCHANGED at 30.0000; project cumulative cap UNCHANGED at 400.0000, because the derived chain fits it with headroom. NO NEW SPENDABLE HEADROOM BEYOND THE FORMAL RAISE: A3 is charged to the formal book, the books do not transfer, and the unspent 1.9395 of engineering allowance was already authorized and cannot fund a formal probe. DERIVED, NOT CHOSEN: scripts/experiments/stage-1/phase_c3/a3_pricing.py prices the full chain at a live L40S securePrice of 1.09/h as 5.8680 expected and 8.2525 hard over 450.82 minutes, on a 60 GB container disk derived from a 36.06 GiB peak local residency and a 6.664 GiB durable requirement. The amendment funds that ceiling plus ONE pre-science restart of 1.4506 -- the chain up to the first scientific probe, at hard rates, from the same component table -- because this decision also requires autonomous rerun of failed engineering and setup stages, and an allowance sized to exactly one flawless run cannot execute that instruction. Total funded on the formal book: 9.7031. Nothing else is added. THE HISTORICAL OVERSPEND STANDS AS FACT: attempt75 was issued against a formal allowance it exceeded by 0.9492, the authorization-gate defect that permitted it is recorded in logs/stages/stage-1/phase_c3/analyses/formal_allowance_audit.json, and nothing here rewrites attempt75, its grant, its authorization or its closeout into compliance. Raising a forward-looking allowance is not retroactive permission, and the 55.9492 already spent is still 55.9492.",
-  "_issuance_conditions_superseded_2026_10_01": "The 2026-09-28 amendment listed THREE issuance conditions: derived ceiling <= envelope, cumulative + derived <= project cap, and remaining formal allowance >= derived ceiling. There are FOUR: the PACKAGE TOTAL binds too. It looked implied because it equals formal + engineering, and that is exactly why nothing evaluated it -- an identity is not a check, and a future amendment that moved one side would break it silently. It is now the fourth condition in formal_pricing.evaluate_limits, which RAISES on a missing envelope rather than treating an absent limit as a satisfied one. The historical text of the 2026-09-28 amendment is left exactly as it was decided.",
-  "_amendment_2026_10_02": "MAINTAINER DECISION 2026-10-02, on the review of fe2db4c8. A PHASE-LEVEL envelope for A3, explicitly sized so the whole experimental stage can complete WITHOUT repeated micro-budget approvals -- the maintainer's words: do not size another amendment merely to the next flawless run. PROSPECTIVE AND CURRENT-ONLY. formal allowance 65.6523 -> 76.6523 (+11.0000); package total 75.6523 -> 86.6523 (+11.0000, the same raise, because the package total REMAINS formal + engineering by construction); project cumulative cap 400.0000 -> 410.0000 (+10.0000); GPU engineering allowance UNCHANGED at 10.0000; per-session envelope UNCHANGED at 30.0000. WHAT IT BUYS, at the measured A3 pricing: one full chain at the 8.2525 hard ceiling plus about six corrected pre-science restarts at 1.4506 each = 16.9561, inside the resulting 17.9631 formal balance with roughly 1.00 of headroom. THAT IS A PHASE ENVELOPE, NOT PERMISSION TO REPEAT THE SAME FAILURE SIX TIMES: the same-failure rule in aadistill.infrastructure.session_prechecks refuses a provider resource when the preceding paid attempt ended with the same normalized deterministic failure signature and nothing corrective changed. IT REWRITES NOTHING: attempt75's historical 0.9492 formal overspend stands, the 2.7400 A3 has already spent stands, and no previous grant, authorization or closeout is excused. Before each paid retry, settled plus outstanding plus active spend and the live securePrice are re-derived as usual.",
-  "_amendment_2026_10_03": "MAINTAINER DECISION 2026-10-03, authorizing the D1 ENGINEERING GPU QUALIFICATION. PROSPECTIVE AND CURRENT-ONLY. GPU engineering allowance 10.0000 -> 20.0000; package total 86.6523 -> 96.6523 (+10.0000, the same raise, because the package total REMAINS formal + engineering by construction -- package.spent is derived as that same sum, and a cap computed on a different basis from its spend is a cap nobody can reconcile). UNCHANGED: formal allowance 76.6523, project cumulative cap 410.0000, per-session envelope 30.0000, and funds_formal_sessions_of -- phase_d1 is NOT added to it. ENGINEERING ONLY, AND THE BOOKS DO NOT TRANSFER: this adds no formal headroom and authorizes no D1 science. The qualification performs no recovery training, no behavioural screening, no confirmation, no formal search, no promotion and no GO/NO-GO. Its questions are engineering: does the incumbent fixed path reconstruct the frozen incumbent artifact on real CUDA, does the target-aware bsz=3 path execute correctly under CUDA/bf16 through the real evaluator, does any discrete selection decision move, what is the real state-eval peak memory against the derived budget, and what does a representative expansion actually cost. A PHASE-LEVEL ENGINEERING ENVELOPE, NOT A MICRO-BUDGET: the maintainer's instruction is that ordinary setup, provider, environment, device, dtype and OOM failures are repaired and retried autonomously inside it, which an allowance sized to one flawless run cannot execute. Every cost still counts, the four limits still bind separately, and the same-failure rule in aadistill.infrastructure.session_prechecks still refuses a provider resource when the preceding paid attempt ended with the same normalized deterministic failure signature and nothing corrective changed. IT REWRITES NOTHING: every historical authorization, run record and overspend stands, including attempt75's 0.9492 formal overspend."
+  ]
  },
- "authorized_stages": [
-  0,
-  1,
-  2,
-  3,
-  4,
-  5
- ],
- "stage_conditions": {
-  "replay": "stop before any recovery training on a parent or incumbent digest mismatch; preserve the evidence and treat it as the attempt's result",
-  "device_handoff": "stop before recovery if the card is not released",
-  "training": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment",
-  "generation_admission": "no probe is scored unless the generation protocol observed from its own raw summaries is comparable to the attested C1 protocol",
-  "decision": "stage I requires six complete admitted and scored probes",
-  "retry": "THIS authorization funds exactly ONE launcher session. Inside that session the launcher may take up to the approved number of acquisition draws, replacing a host that was created and never became usable; at most ONE resource may be billing at any instant, enforced by SessionRunner.release_and_confirm, and every draw shares this session's single ceiling. A FURTHER session needs a new grant, a new launch-bound readiness record, a new authorization and a new bundle -- see execution_package for when that is permitted without a further maintainer decision."
+ "experiment_id": "phase_c1",
+ "grant_contract": {
+  "contract_id": "phase_c1.grant/v1",
+  "derived_fields": [
+   "granted_utc",
+   "authorized_session_commit",
+   "harness_source_digest",
+   "plan_hash",
+   "science_plan_hash",
+   "preregistration_sha256",
+   "battery_content_sha256",
+   "scoring_contract_digest",
+   "teacher_revision"
+  ],
+  "stated_fields": [
+   "granted_by",
+   "covers",
+   "cumulative_spend_at_approval_usd",
+   "cumulative_cap_usd",
+   "does_not_authorize"
+  ]
+ },
+ "inputs": {
+  "battery_identity": "logs/stages/stage-1/phase_c1/plans/battery.json",
+  "preregistration": "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
+  "pricing": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
+  "scoring_equivalence": "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json",
+  "teacher_binding": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
  },
  "one_use": "ONE grant, ONE issuance, ONE launcher session. Within the session, acquisition draws are bounded by execution_package.acquisition and never exceed one BILLING resource at a time. A failure is this session's result; a new session always uses a complete new one-use chain and never reuses a consumed one.",
- "authorizes": "nothing",
- "_superseded_wording_note": "Until 2026-09-11 these two fields read 'no replacement pod' and 'ONE provider resource'. That was the rule attempts 1-12 ran under and it is preserved in their issued authorizations, which are not rewritten. It stopped describing the generation source when the package permitted bounded acquisition draws, and an authorization that contradicts the package it is issued under is a governance defect even when nothing reads the prose."
+ "output": "logs/budget/approvals/autoinit_c1_authorization.json",
+ "plan_id": "autoinit.v1.phase_c1",
+ "schema": "aadistill.experiment_authorization_config/v1",
+ "stage_conditions": {
+  "decision": "stage I requires six complete admitted and scored probes",
+  "device_handoff": "stop before recovery if the card is not released",
+  "generation_admission": "no probe is scored unless the generation protocol observed from its own raw summaries is comparable to the attested C1 protocol",
+  "replay": "stop before any recovery training on a parent or incumbent digest mismatch; preserve the evidence and treat it as the attempt's result",
+  "retry": "THIS authorization funds exactly ONE launcher session. Inside that session the launcher may take up to the approved number of acquisition draws, replacing a host that was created and never became usable; at most ONE resource may be billing at any instant, enforced by SessionRunner.release_and_confirm, and every draw shares this session's single ceiling. A FURTHER session needs a new grant, a new launch-bound readiness record, a new authorization and a new bundle -- see execution_package for when that is permitted without a further maintainer decision.",
+  "training": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment"
+ },
+ "stage_id": "1"
 }

@@ -437,12 +437,23 @@ class TestTheCommittedRecords:
             evidence["roles_available"])
         assert len(evidence["family_content_id"]) == 64
         assert evidence["_authorizes"].startswith("nothing")
-        #: funding — definite for a reason needing no cost estimate.
-        assert doc["budget"]["d1_is_in_the_funded_list"] is False
+        #: funding -- whichever side of the funded list D1 is on, the predicate
+        #: above checks the blocker against it. This used to pin `is False`, which
+        #: was the state for every round until the 2026-10-05 amendment added
+        #: `phase_d1` to `funds_formal_sessions_of` -- and then the test asserted
+        #: that the maintainer decision had not been taken.
+        assert isinstance(doc["budget"]["d1_is_in_the_funded_list"], bool)
         #: per-session envelope -- whichever state it is in, the test above
         #: checks the blocker against it rather than pinning one value.
         assert doc["budget"]["per_session_envelope_compatibility"] in (
             "UNRESOLVED", "RESOLVED_FITS", "RESOLVED_NEEDS_RAISE")
+        #: AND THE TWO PREDICATES AGREE WITH THE WRITER'S OWN, which is the thing
+        #: that must not drift: this test and `open_blockers()` must compute the
+        #: same answer from the same fields.
+        import write_d1_design as w
+
+        assert set(w.open_blockers(doc["budget"],
+                                   doc["contamination_protection"])) == open_
 
     def test_the_old_capacity_analysis_no_longer_drives_a_blocker(self):
         """It is kept as the reasoning that prompted the source decision, and it
@@ -812,3 +823,135 @@ class TestNoLiveFieldClaimsTheTopKCostIsOwed:
         assert (budget["per_session_envelope_compatibility"] != "UNRESOLVED") \
             is measured
         assert ("per-session envelope" not in doc["open_blockers"]) is measured
+
+
+class TestOneCurrentSearchCost:
+    """`search_stage.cost` and `budget.chain.sessions.search` are one session.
+
+    They disagreed in the same document: `search_stage.cost.hard_ceiling_usd` was
+    $31.1577, the superseded full-vocabulary planning figure, while the budget
+    chain carried the measured $21.4897. Two generic current-cost fields for one
+    session, and the one a reader reaches first held the stale number.
+    """
+
+    @staticmethod
+    def _parts():
+        import write_d1_design as w
+
+        doc = json.loads(DESIGN.read_text())
+        return doc, w._topk_production_basis()
+
+    def test_both_fields_price_the_same_session(self):
+        doc, _ = self._parts()
+        stage = doc["search_stage"]["cost"]
+        chain = doc["budget"]["chain"]["sessions"]["search"]
+        shared = sorted(set(stage) & set(chain) - {"_cost_basis"})
+        assert len(shared) >= 8, f"only {shared} are comparable; expected the "\
+            "whole priced session"
+        differing = {k: (stage[k], chain[k]) for k in shared
+                     if stage[k] != chain[k]}
+        assert not differing, (
+            f"the same session is priced two ways: {differing}. One of them is "
+            "what a reader takes as the current cost.")
+
+    def test_with_a_measured_basis_both_are_the_measured_figure(self):
+        doc, basis = self._parts()
+        if basis is None:
+            pytest.skip("no production basis; the frozen figure is correct then")
+        measured_minutes = basis["root_max_minutes"]
+        stage = doc["search_stage"]["cost"]
+        #: The measured DEPTH cell has to be IN it: equality with the chain is not
+        #: enough on its own, since two stale figures would also be equal.
+        assert stage["hard_ceiling_minutes"] < \
+            doc["search_stage"]["superseded_full_vocab_planning_cost"][
+                "hard_ceiling_minutes"], (
+            "the live cost is not below the full-vocab planning basis, so the "
+            "measured cell did not reach it")
+        assert str(round(measured_minutes, 2))[:4] in stage["_cost_basis"] \
+            or "MEASURED" in stage["_cost_basis"], stage["_cost_basis"][:200]
+
+    def test_the_superseded_figure_is_named_historical_not_generic(self):
+        doc, basis = self._parts()
+        if basis is None:
+            pytest.skip("nothing is superseded while nothing is measured")
+        stage = doc["search_stage"]
+        old = stage["superseded_full_vocab_planning_cost"]
+        assert "HISTORICAL" in json.dumps(old), (
+            "a retained superseded price must say so in its own content")
+        assert old["hard_ceiling_usd"] != stage["cost"]["hard_ceiling_usd"], (
+            "the superseded entry equals the live one, so it proves nothing and "
+            "should be removed rather than kept as provenance")
+        #: And no OTHER generic cost key may appear beside `cost`.
+        generic = [k for k in stage
+                   if k.endswith("_cost") and not k.startswith("superseded")]
+        assert not generic, f"{generic} are second generic cost fields"
+
+
+class TestThePhaseFundingAmendment:
+    """The 2026-10-05 maintainer decision, asserted as a decision not a balance.
+
+    A test on a remaining balance expires the next time anything spends. These
+    assert the GRANTED figures and the funded list, which only a maintainer moves.
+    """
+
+    AUTH = Path("configs/experiments/phase_c1/authorization.json")
+
+    @staticmethod
+    def _terms():
+        doc = json.loads((REPO / "configs/experiments/phase_c1"
+                                 "/authorization.json").read_text())
+        return doc["execution_package"], doc["accepted_pricing"]
+
+    def test_the_five_figures_are_what_was_decided(self):
+        ep, ap = self._terms()
+        assert ep["formal_allowance_usd"] == 131.6523
+        assert ep["package_total_usd"] == 151.6523
+        assert ap["cumulative_cap_usd"] == 465.0
+        #: UNCHANGED by this amendment, and that is half of what it decided.
+        assert ep["gpu_engineering_allowance_usd"] == 20.0
+        assert ep["per_attempt_hard_ceiling_usd"] == 30.0
+
+    def test_the_package_total_is_still_the_sum_of_its_parts(self):
+        """It is not an independent number; a drift here hides a real raise."""
+        ep, _ = self._terms()
+        assert ep["package_total_usd"] == pytest.approx(
+            ep["formal_allowance_usd"] + ep["gpu_engineering_allowance_usd"])
+
+    def test_d1_is_funded_and_says_by_what_authority(self):
+        ep, _ = self._terms()
+        funded = ep["funds_formal_sessions_of"]
+        assert "phase_d1" in funded["experiment_ids"]
+        assert "2026-10-05" in funded["phase_d1"]
+        #: Without this line D1's formal spend reaches the project cumulative while
+        #: the formal book reports it as never having happened.
+        assert "formal allowance" in funded["phase_d1"]
+
+    def test_the_amendment_states_what_it_does_not_authorize(self):
+        ep, _ = self._terms()
+        note = ep["_amendment_2026_10_05"]
+        for required in ("PROSPECTIVE AND CURRENT-ONLY", "scientific repetition",
+                         "D2 and D3 are NOT authorized", "K sweep",
+                         "UNCHANGED", "no historical grant"):
+            assert required in note, f"the amendment does not say {required!r}"
+
+    def test_the_earlier_amendments_keep_their_figures(self):
+        """Not retrospective: a reader checks what each session ran under."""
+        ep, _ = self._terms()
+        assert "76.6523" in ep["_amendment_2026_10_05"], (
+            "the amendment must name the figure it raised FROM")
+        for older, figure in (("_amendment_2026_10_03", "96.6523"),
+                              ("_amendment_2026_10_02", None),
+                              ("_amendment_2026_10_01", None),
+                              ("_engineering_allowance_amendment_2026_09_27",
+                               "55.4425")):
+            assert older in ep, f"{older} was removed"
+            if figure:
+                assert figure in ep[older], (
+                    f"{older} no longer names {figure}; a historical amendment "
+                    "was rewritten")
+
+    def test_the_cap_amendment_history_is_append_only(self):
+        _, ap = self._terms()
+        history = ap["_cap_amendment"]
+        for cap in ("283.76", "320.00", "370.00", "400.00", "465.00"):
+            assert cap in history, f"the cap history dropped {cap}"

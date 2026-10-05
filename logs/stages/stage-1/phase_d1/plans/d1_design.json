@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records one independent blocker: funding authorization, sufficient on its own to prevent a launch. Live causes: `phase_d1` is outside the package's `funds_formal_sessions_of`, so no allowance covers it at any price.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records no open blocker.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
@@ -523,7 +523,7 @@
   "total_probes": 12
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $44.8188 is the gap between the chain hard ceiling of $51.0829 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $-10.1812 is the gap between the chain hard ceiling of $51.0829 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
   "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "SATISFIED ON MEASUREMENT: the corrected production Top-K search session prices at $21.4897 against the $30.00 envelope, so this is no longer a blocker. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
   "_per_session_envelope_compatibility": "DERIVED from the measured production Top-K session price against $30.00. RESOLVED_FITS means the measured session ceiling is inside the envelope; RESOLVED_NEEDS_RAISE means it is outside and the envelope would have to move; UNRESOLVED means no production Top-K timing exists yet, which blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven.\n\nTHE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They are historical planning evidence from UNBATCHED telemetry for a protocol D1 will not run. `open_blockers` used to require both this field AND that the provisional basis fit, so a measurement proving D1 fits would have stayed blocked by an estimate it supersedes.",
   "_price_status": "MIXED, and the dominant cell is MEASURED. The Top-K protocol owes nothing: its production cost is settled evidence.\n\nMEASURED, under the production protocol: depth.causal_kl_greedy_v1. One real `impl.execute` invocation of 1194.2624 s over 260 candidate subsets -- the max over both DEPTH calibration profiles -- rebuilt end to end into 22.9759 min at the root with the committed non-operator MAX. This is the same quantity `BeamSearch._expand_one` records as `operator_seconds`, so it is comparable with the frozen table it replaces.\n\nA PLANNING BASIS, deliberately left alone: the three non-KL structural cells keep their committed UNBATCHED whole-expansion figures. They reduce activation statistics rather than KL, so the distribution support cannot move them, and an unbatched basis OVERSTATES -- which is the safe direction for a ceiling.\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field once called UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nSO: the search session's figure is a BOUND rather than a plan. The chain total remains provisional in SIZE because three cells are unmeasured, and it is not a finalized authorization price -- what the project cap should become is a maintainer decision this document does not take.",
@@ -585,7 +585,7 @@
    },
    "total_probes": 12
   },
-  "d1_is_in_the_funded_list": false,
+  "d1_is_in_the_funded_list": true,
   "d_series_extrapolation": {
    "_caveat": "an extrapolation, not a price. D2 adds a reference forward per operator-local comparison and D3 adds a student-confidence component; neither is measured, so neither is priced here. The figure is the floor of the D-series, not its cost.",
    "_what": "D2 and D3 repeat this shape by the maintainer's instruction \u2014 each a full search, freeze, recovery, behavioural evaluation and promotion decision.",
@@ -594,19 +594,20 @@
   "funds_formal_sessions_of": [
    "phase_c1",
    "phase_c3",
-   "phase_a3"
+   "phase_a3",
+   "phase_d1"
   ],
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "per_session_envelope_usd": 30.0,
   "position": {
-   "_cap_cross_check": 410.0,
+   "_cap_cross_check": 465.0,
    "_derived_by": "scripts/consolidate/derive_budget.py, CALLED by this writer rather than copied from it. A hand-copied balance expires the next time anything spends, and this document is regenerated often enough that it would expire quietly.",
    "engineering_remaining_usd": 5.0259,
-   "formal_remaining_usd": 7.2431,
-   "full_ceiling_sessions_fundable": 0,
-   "package_remaining_usd": 12.269,
-   "project_cap_usd": 410.0,
-   "project_remaining_usd": 6.2641
+   "formal_remaining_usd": 62.2431,
+   "full_ceiling_sessions_fundable": 2,
+   "package_remaining_usd": 67.269,
+   "project_cap_usd": 465.0,
+   "project_remaining_usd": 61.2641
   },
   "price_basis": {
    "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
@@ -616,7 +617,7 @@
   "price_status": "MEASURED PRODUCTION TOP-K BASIS for the search session: $21.4897 hard ceiling from an END-TO-END DEPTH cell whose operator term is ONE MEASURED `impl.execute` invocation (19.9044 min, the max of both DEPTH profiles) plus the committed non-operator MAX. The chain's other sessions keep their full-vocab basis.",
   "provisional_basis_fits_per_session_envelope": true,
   "provisional_per_session_excess_usd": -8.5103,
-  "provisional_shortfall_usd": 44.8188,
+  "provisional_shortfall_usd": -10.1812,
   "sessions": 3,
   "topk_production_basis": {
    "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",
@@ -896,7 +897,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "72faa307ba31a74b9328f95d89898226d469239f3b34321ab18ac6521ff38140",
+ "design_hash": "4da9af37d6b1ce30f78513097824821e57dbc844b648c467f61c22bf68ad1e2c",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -1126,9 +1127,7 @@
   },
   "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
  },
- "open_blockers": [
-  "funding authorization"
- ],
+ "open_blockers": [],
  "recovery_recipe": "E1_KD_HEAVY_0860K",
  "schema": "aadistill.autoinit.phase_d1_design/v1",
  "scoring_policy": {
@@ -1163,6 +1162,7 @@
  },
  "search_stage": {
   "_cost_basis_status": "MIXED, and the dominant cell is MEASURED. depth.causal_kl_greedy_v1 is 22.9759 min at the root, rebuilt from one real batched `impl.execute` invocation under the production protocol. The other three cells keep their UNBATCHED committed basis: they are a planning basis that overstates, which is the safe direction for a ceiling. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 on three separate pods with the sign never flipping, at +29.6% peak VRAM, while length-sorted packing won 1.1884x on causal-KL. Batching moves different operators in different directions, so no cell is adjusted on a predicted speed-up: a ceiling derived from a prediction is a prediction.",
+  "_cost_is_the_budget_chains": "`cost` is the same session `budget.chain.sessions.search` carries: both come from `search_cost` on the SAME cost model, measured when a production Top-K basis exists and frozen when none does. Two generic current-cost fields for one session is how this document came to state $31.1577 and $21.4897 at the same time.",
   "_why_calibration_assignment_stays_free": "the incumbent assignments were chosen by searches that scored over every position. Pinning them would inherit a choice made under the semantics D1 is testing, which is the same mistake C2b records about Search-1's pinned mixtures.",
   "beam": {
    "_why_unchanged": "the standing declared schedule. D1/D2/D3 share a beam width so the BREADTH is not a variable between them, and adopting a different one here would be a new breadth decision taken for no measured reason.",
@@ -1171,22 +1171,22 @@
    "width": 6
   },
   "cost": {
-   "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead.",
+   "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead. -- with depth.causal_kl_greedy_v1 REBUILT END TO END as ONE MEASURED production Top-K operator invocation (1194.2624 s over 260 candidate subsets, the max of both DEPTH profiles) PLUS the committed non-operator MAX for the scope, from logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8/adoption.json",
    "beam_width": 6,
    "container_disk_gb": 400,
-   "container_disk_usd": 1.511,
+   "container_disk_usd": 1.0422,
    "expansions_max": 92,
    "expansions_min": 92,
-   "expected_minutes": 840.92,
+   "expected_minutes": 656.95,
    "expected_trajectory_expansions": 92,
-   "expected_trajectory_minutes": 745.92,
-   "gpu_usd": 29.6467,
-   "hard_ceiling_minutes": 1631.93,
-   "hard_ceiling_usd": 31.1577,
+   "expected_trajectory_minutes": 561.95,
+   "gpu_usd": 20.4475,
+   "hard_ceiling_minutes": 1125.55,
+   "hard_ceiling_usd": 21.4897,
    "price_per_hour": 1.09,
    "session_overhead_minutes": 95.0,
-   "structural_minutes_max": 1536.93,
-   "structural_minutes_min": 740.9,
+   "structural_minutes_max": 1030.55,
+   "structural_minutes_min": 556.94,
    "unmeasured_inputs": [],
    "warmup_levels": 1
   },
@@ -1252,13 +1252,34 @@
    "warmup_levels": 1,
    "width": 6
   },
-  "stops_at": "commit_top_k. The search trains nothing, measures no behaviour and has no code path into a behavioural stage \u2014 the same boundary C2's driver holds."
+  "stops_at": "commit_top_k. The search trains nothing, measures no behaviour and has no code path into a behavioural stage \u2014 the same boundary C2's driver holds.",
+  "superseded_full_vocab_planning_cost": {
+   "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead.",
+   "_this_is_HISTORICAL": "the superseded FULL-VOCABULARY planning basis for this session, retained so the measured cell can be compared against what it replaced. It is NOT the current price and must not be read as one; `cost` above and `budget.chain.sessions.search` are, and a regression asserts those two agree.",
+   "beam_width": 6,
+   "container_disk_gb": 400,
+   "container_disk_usd": 1.511,
+   "expansions_max": 92,
+   "expansions_min": 92,
+   "expected_minutes": 840.92,
+   "expected_trajectory_expansions": 92,
+   "expected_trajectory_minutes": 745.92,
+   "gpu_usd": 29.6467,
+   "hard_ceiling_minutes": 1631.93,
+   "hard_ceiling_usd": 31.1577,
+   "price_per_hour": 1.09,
+   "session_overhead_minutes": 95.0,
+   "structural_minutes_max": 1536.93,
+   "structural_minutes_min": 740.9,
+   "unmeasured_inputs": [],
+   "warmup_levels": 1
+  }
  },
  "stage_id": "1",
- "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- ONE INDEPENDENT BLOCKER: funding authorization",
+ "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- NO OPEN BLOCKER",
  "what_this_may_not_be_used_to_claim": [
   "that target-aware scoring is better. Nothing has been measured; this is a design.",
-  "that D1 is ready to launch. ONE INDEPENDENT BLOCKER: funding authorization, and it prevents it.",
+  "that D1 is ready to launch. NO OPEN BLOCKER, and any one of them alone prevents it.",
   "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION and no figure of its is restated, re-analysed or revised here."
  ]
 }

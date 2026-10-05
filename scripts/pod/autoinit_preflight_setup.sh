@@ -832,6 +832,42 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'hard \${a.hard_cap_usd:.4f}, A3 {a.authorizes_a3}, '
       f'search {a.allows_beam_search}, controls_retrained {a.allows_control_retraining}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d1" ]; then
+  # D1. Its grant measures a harness containing the D1 launcher, driver, session
+  # and authorization, none of which appear in any earlier file set, and it
+  # carries a ceiling DERIVED from the MEASURED production Top-K cost -- not from
+  # a committed full-vocabulary planning record, which priced $31.1577 for the
+  # same session.
+  #
+  # D1 IS THE FIRST OF THESE THAT ACTUALLY RUNS A BEAM SEARCH, so
+  # `allows_beam_search` is asserted TRUE here where every other dedicated
+  # branch asserts it False. That is why the flag is stated rather than inferred
+  # from family resemblance: a branch copied from C1 or A3 would refuse the one
+  # artifact that is supposed to search.
+  #
+  # `allows_recovery` and `allows_behavioural` are False BY TYPE: the search
+  # commits a candidate set and stops, and neither behavioural rung can be bound
+  # until that set exists. They are separately authorized sessions.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from experiments.phase_d1.d1_authorization import D1Authorization
+a = D1Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d1_search is True, 'a D1 session needs a D1 authorization'
+assert a.allows_beam_search is True, 'a D1 search session must authorize the search'
+assert a.allows_recovery is False, 'D1 search commits a candidate set and trains nothing'
+assert a.allows_behavioural is False, 'the behavioural rungs are separate sessions'
+assert a.automatic_followon_start is False, 'nothing chains off the D1 search'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, D1 {a.authorizes_d1_search}, '
+      f'search {a.allows_beam_search}, arm {a.arm}, '
+      f'protocol {a.measurement_protocol_id[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

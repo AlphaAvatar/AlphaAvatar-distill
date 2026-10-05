@@ -399,7 +399,30 @@ def search_stage() -> dict[str, Any]:
 
     _ensure_the_frozen_operators_are_registered()
     size = d1.size_report()
-    cost = d1.search_cost()
+    #: ONE CURRENT SEARCH COST. `d1.search_cost()` on the FROZEN model is the
+    #: full-vocabulary planning figure -- $31.1577 -- and `budget.chain.sessions
+    #: .search` carries the measured production Top-K one. Both lived here under
+    #: generic names, so the live design stated two current prices for one session
+    #: and this field held the superseded one.
+    adjusted = _rebuilt_cost_model()
+    if adjusted is None:
+        cost = d1.search_cost()
+        historical = None
+    else:
+        with _measured_cost_model(adjusted):
+            cost = d1.search_cost()
+        #: Kept for PROVENANCE under a name that cannot be mistaken for the live
+        #: price: a reader comparing the measured cell against what it replaced
+        #: needs the old figure, and deleting it would lose the comparison.
+        historical = {
+            **d1.search_cost(),
+            "_this_is_HISTORICAL": (
+                "the superseded FULL-VOCABULARY planning basis for this session, "
+                "retained so the measured cell can be compared against what it "
+                "replaced. It is NOT the current price and must not be read as "
+                "one; `cost` above and `budget.chain.sessions.search` are, and a "
+                "regression asserts those two agree."),
+        }
     return {
         "coverage": d1.coverage(),
         "frozen_implementations": size["frozen_implementations"],
@@ -424,6 +447,14 @@ def search_stage() -> dict[str, Any]:
                      "width": SCHEDULE_V1.width,
                      "warmup_levels": SCHEDULE_V1.warmup_levels},
         "cost": cost,
+        **({} if historical is None
+           else {"superseded_full_vocab_planning_cost": historical}),
+        "_cost_is_the_budget_chains": (
+            "`cost` is the same session `budget.chain.sessions.search` carries: "
+            "both come from `search_cost` on the SAME cost model, measured when a "
+            "production Top-K basis exists and frozen when none does. Two "
+            "generic current-cost fields for one session is how this document came "
+            "to state $31.1577 and $21.4897 at the same time."),
         "_cost_basis_status": _cost_basis_status(),
         "stops_at": (
             "commit_top_k. The search trains nothing, measures no behaviour and "

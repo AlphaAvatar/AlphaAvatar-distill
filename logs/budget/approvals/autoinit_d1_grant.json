@@ -1,0 +1,20 @@
+{
+ "_contract": "WHAT A MAINTAINER DECIDED, and only that. Every other field of an authorization -- the identities, the stages, the plan hash, the expected cost -- is DERIVED by d1_authorization.build_payload from the tree the authorization will bind, and this grant is REFUSED if it states one. A grant that can state its own identity can over-authorize itself.",
+ "_one_use": "ONE grant, ONE issuance, ONE launcher session. A failure is this session's result; a retry is a new grant and a new authorization.",
+ "_the_price_is_derived_not_asked": "$21.4897 is the figure search_space.search_cost derives through search_cost_model.bound from the MEASURED production Top-K DEPTH cell. The issuer refuses a grant asking for a different number, and refuses one asking for the $30.00 envelope: the envelope is not the grant.",
+ "authorizes": "nothing by itself. A launch needs the issued one-use authorization, and the pod's dispatch branch refuses an artifact that does not bind this session's plan hash.",
+ "covers": "ONE D1 formal SEARCH session on the frozen design: the beam over the frozen four-operator space at width 6 with one warmup level, under reference_topk_tail_v1 at K=200, bsz=3, length_sorted_v1, on one arm's declared position policy. It commits a candidate set and stops.",
+ "cumulative_cap_usd": 465.0,
+ "cumulative_spend_at_approval_usd": 403.7359,
+ "does_not_authorize": [
+  "recovery training of any candidate",
+  "behavioural screening or confirmation -- separately authorized sessions",
+  "a promotion decision, a GO/NO-GO or any claim about the incumbent",
+  "D2 or D3",
+  "repeating a completed measurement, splicing probes, substituting a seed, or changing arms, seeds, recipe, battery, statistics or decision rules",
+  "any change to the frozen design: K, the batch size, the packing, the beam breadth, the operator set, the profiles, the recovery recipe or the behavioural design"
+ ],
+ "granted_by": "maintainer decision 2026-10-05, on the review of 16585a73: a PHASE-LEVEL envelope for the complete D1 experiment. formal 76.6523 -> 131.6523, package 96.6523 -> 151.6523, project cap 410.0000 -> 465.0000; GPU engineering and the $30.00 per-session envelope UNCHANGED. phase_d1 added to funds_formal_sessions_of. See configs/experiments/phase_c1/authorization.json :: execution_package._amendment_2026_10_05.",
+ "hard_cap_usd": 21.4897,
+ "schema": "aadistill.phase_d1.grant/v1"
+}

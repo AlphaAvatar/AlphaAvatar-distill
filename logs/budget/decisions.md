@@ -10224,6 +10224,56 @@ on a paid pod.
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
 
+## 2026-10-05 — APPROVED: a PHASE envelope for the complete D1 experiment
+
+- **Context:** the Top-K round is integrated, the production cost is measured and
+  the per-session envelope resolves at `$21.4897` against `$30.00`. The only
+  remaining blocker was categorical: `phase_d1` was outside the C1 package's
+  `funds_formal_sessions_of`, so no allowance covered it at any price.
+- **Decision, PROSPECTIVE AND CURRENT-ONLY:**
+
+  ```text
+  formal allowance         76.6523 -> 131.6523   (+55.0000)
+  package total            96.6523 -> 151.6523   (+55.0000)
+  project cumulative cap  410.0000 -> 465.0000   (+55.0000)
+  GPU engineering           20.0000 -> 20.0000    UNCHANGED
+  per-session envelope      30.0000 -> 30.0000    UNCHANGED
+  ```
+
+  and `phase_d1` joins `funds_formal_sessions_of.experiment_ids`, so D1's formal
+  sessions spend THIS package's formal allowance and are gated on it.
+- **What it funds:** the complete currently-derived D1 chain — `$21.4897` search,
+  `$14.7966` screening, `$14.7966` confirmation, **`$51.0829`** — three separately
+  authorized sessions, priced by `chain_cost` through `search_cost_model.bound`.
+  Derived after the amendment: formal `$62.2431`, package `$67.2690`, project
+  `$61.2641`; after reserving the chain, `$11.1602` / `$16.1861` / `$10.1812`.
+- **The headroom is intentional.** This is a PHASE envelope: D1 is not sized to one
+  flawless path and then sent back for a micro-budget approval after an ordinary
+  setup or provider failure.
+- **It does NOT authorize scientific repetition.** Re-running a valid GO, NO-GO or
+  INCONCLUSIVE, splicing probes, substituting a seed, selectively retaining
+  outputs, or changing arms, seeds, recipe, battery, statistics or decision rules
+  remains forbidden. D2 and D3 are not authorized. No K sweep, extra seed, wider
+  candidate field, new operator, changed beam breadth, changed recovery recipe,
+  changed battery or changed decision rule is authorized.
+- **Frozen scope:** `reference_topk_tail_v1` at K=200; `micro_batch_size=3`;
+  `length_sorted_v1`; beam width 6; 1 warmup level; the four frozen operators; both
+  calibration profiles; recovery `E1_KD_HEAVY_0860K`; Top-2 candidates with 2
+  screening and 3 confirmation seeds over 12 probes. The incumbent remains B.
+- **Not retrospective:** no historical grant, authorization, closeout or recorded
+  spend is rewritten. Each earlier amendment keeps its figures, which is how a
+  reader checks what each session ran under.
+- **Alternatives considered:** funding the search session alone (rejected — it
+  returns for approval twice more and the behavioural rungs are already priced);
+  raising the per-session envelope (rejected and unnecessary: the measured session
+  fits inside `$30.00`).
+- **Risks:** three of four cost cells are still unbatched planning figures. They
+  OVERSTATE, which is the safe direction for a ceiling, so the chain total is a
+  bound whose SIZE is provisional rather than a figure of unknown direction.
+- **Revisit when:** a valid GO, NO-GO or INCONCLUSIVE ends D1 — any of the three is
+  terminal — or a session reprice exceeds `$30.00`, or the remaining chain stops
+  fitting the formal, package or project limits.
+
 ## 2026-10-05 — Integration: the D-series Top-K protocol lands on `main`
 
 - **Context:** the Top-K round is complete and reviewed. P12.2 requires one commit

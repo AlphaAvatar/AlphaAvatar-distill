@@ -1,0 +1,32 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d1_search",
+ "note": "success spec: every permanent artifact a D1 formal SEARCH session must not lose. Entries are ArtifactSpec kwargs -- artifact_class, pattern, required, min_matches, min_bytes, lifecycle -- loaded by scripts/pod/collect_artifacts.py. A key the dataclass does not take makes the whole collection fail at load. JSON AND LOGS ONLY: nothing on the dev box consumes search checkpoints, and pulling 9.1 GiB of them over a 0.72 MB/s uplink with the pod still billing is a mistake this project has already made once.",
+ "entries": [
+  {
+   "artifact_class": "d1_search_record",
+   "pattern": "audit/autoinit_d1/d1_search.json",
+   "required": true,
+   "min_bytes": 512,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_search_journal",
+   "pattern": "audit/autoinit_d1/journal.jsonl",
+   "required": true,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_search_telemetry",
+   "pattern": "artifacts/stage1/d1/*/search/telemetry.jsonl",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_search_states",
+   "pattern": "artifacts/stage1/d1/*/search/**/*.json",
+   "required": false,
+   "lifecycle": "evidence"
+  }
+ ]
+}
