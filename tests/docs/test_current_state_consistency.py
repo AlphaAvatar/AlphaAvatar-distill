@@ -540,8 +540,20 @@ class TestTheSnapshotStatesTheRequiredFacts:
             assert any(v in text for v in TERMINAL), (
                 f"{key} states no terminal verdict; one of {TERMINAL} is "
                 "expected, and which one is a matter of what happened")
-            assert "CLOSED" in text or "campaign CLOSED" in text, (
-                f"{key} does not state that its campaign is closed")
+            #: CLOSED, or REOPENED with the reason. A campaign can legitimately
+            #: come back to life -- a review withdrew one of this one's answers
+            #: and another subrun is owed -- and demanding the word CLOSED then
+            #: makes the honest state the failing one. What still has to hold is
+            #: that a live campaign says WHY it is live, so that "reopened"
+            #: cannot be where a campaign quietly goes to be forgotten.
+            if "REOPENED" in text:
+                assert len(text.split("REOPENED", 1)[1].strip(" -:.")) > 20, (
+                    f"{key} says REOPENED and gives no reason; a campaign that "
+                    "is live again must say what put it back")
+            else:
+                assert "CLOSED" in text or "campaign CLOSED" in text, (
+                    f"{key} states neither that its campaign is closed nor that "
+                    "it was reopened")
             #: A dollar figure, so a campaign cannot be named without being
             #: priced -- the condition under which spend goes uncounted.
             assert re.search(r"\$\d+\.\d{4}", text), (
@@ -835,3 +847,53 @@ class TestTheNarrativeAgreesWithTheDerivedBudget:
         assert "COMPLETE" not in ladder[nxt], (
             f"the ladder points at {nxt!r} as next while describing it as "
             "complete")
+
+
+class TestTheBlockerFieldsAgreeWithTheirOwner:
+    """`current.json` is hand-maintained, so the design is its guard.
+
+    Two fields name D1's blockers -- the top-level `blocker` line and
+    `d_series.blockers` -- and `d1_design.json :: open_blockers` DERIVES them. They
+    disagreed: one said the envelope was RESOLVED_FITS on measurement while the
+    design said UNRESOLVED. A hand-maintained copy of a derived fact needs
+    something that reads the owner.
+    """
+
+    @staticmethod
+    def _design():
+        import json
+        from pathlib import Path
+
+        repo = Path(__file__).resolve().parents[2]
+        return json.loads(
+            (repo / "logs/stages/stage-1/phase_d1/plans/d1_design.json").read_text())
+
+    def test_both_fields_name_exactly_the_designs_open_blockers(self):
+        design = self._design()
+        open_ = set(design["open_blockers"])
+        snap = snapshot()
+        for field, text in (("blocker", snap["blocker"]),
+                            ("d_series.blockers", snap["d_series"]["blockers"])):
+            for name in ("funding authorization", "per-session envelope",
+                         "evidence"):
+                #: `evidence` is the closed one and is named as CLOSED, so only
+                #: the two fundable blockers are checked for presence.
+                if name == "evidence":
+                    continue
+                assert (name in text) is (name in open_), (
+                    f"{field} {'omits' if name in open_ else 'still names'} "
+                    f"{name!r} while the design says open_blockers={sorted(open_)}")
+
+    def test_the_count_word_matches(self):
+        design = self._design()
+        n = len(design["open_blockers"])
+        word = {0: "NO", 1: "ONCE", 2: "TWICE", 3: "THREE TIMES"}[n]
+        assert f"BLOCKED {word}" in snapshot()["blocker"], (
+            f"the blocker line does not say BLOCKED {word} for "
+            f"{n} open blocker(s)")
+
+    def test_the_envelope_state_is_the_designs(self):
+        design = self._design()
+        compat = design["budget"]["per_session_envelope_compatibility"]
+        assert f"ENVELOPE {compat}" in snapshot()["d_series"]["blockers"], (
+            f"d_series.blockers does not carry the design's {compat}")

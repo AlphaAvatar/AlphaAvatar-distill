@@ -105,11 +105,27 @@ class ReductionSemantics:
     chunk: int
     reference_strategy: str
     aggregation_rule: str = AGGREGATION_RULE
+    #: WHICH VOCABULARY ENTRIES THE DIVERGENCE IS REDUCED OVER. Optional, and
+    #: ABSENT from `as_dict` when it is `None` or full-vocabulary — which is the
+    #: whole design. `reference_topk_tail_v1` is not mathematically identical to
+    #: full-vocabulary KL, so a measurement taken under it must not be comparable
+    #: with one taken under the other; but 785 committed records cite protocol
+    #: ids computed before this field existed, and a key added unconditionally —
+    #: even carrying `"full_vocab_v1"` — would change every one of their hashes.
+    #:
+    #: So the serialization is VERSIONED BY ABSENCE: the historical contract
+    #: serializes exactly as it did before this field, and only the new contract
+    #: adds a key. See `support.DistributionSupport.as_dict`.
+    distribution_support: Any | None = None
 
     def as_dict(self) -> dict[str, Any]:
-        return {"chunk": int(self.chunk),
-                "reference_strategy": str(self.reference_strategy),
-                "aggregation_rule": str(self.aggregation_rule)}
+        out = {"chunk": int(self.chunk),
+               "reference_strategy": str(self.reference_strategy),
+               "aggregation_rule": str(self.aggregation_rule)}
+        support = self.distribution_support
+        if support is not None and not getattr(support, "is_full_vocab", False):
+            out["distribution_support"] = support.as_dict()
+        return out
 
 
 def measurement_protocol_id(*, suite_structural_identity: str,

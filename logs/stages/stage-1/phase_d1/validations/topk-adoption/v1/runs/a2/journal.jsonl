@@ -1,0 +1,17 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.849, "stage": "environment", "status": "ok", "t": 1.849}
+{"stage": "register_and_policy", "status": "start", "t": 1.849}
+{"seconds": 0.04, "stage": "register_and_policy", "status": "ok", "t": 1.889}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.89}
+{"seconds": 0.047, "stage": "bind_full_vocab", "status": "ok", "t": 1.937}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.937}
+{"seconds": 0.043, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.98}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.981}
+{"seconds": 8.25, "stage": "teacher_fetch_verify", "status": "ok", "t": 10.231}
+{"stage": "C_depth_dual_scores", "status": "start", "t": 10.232}
+{"seconds": 1967.695, "stage": "C_depth_dual_scores", "status": "ok", "t": 1977.927}
+{"stage": "analyse_ABC", "status": "start", "t": 1977.928}
+{"seconds": 2.704, "stage": "analyse_ABC", "status": "ok", "t": 1980.632}
+{"stage": "D_state_eval_both_supports", "status": "start", "t": 1980.632}
+{"error": "KeyError: \"no scoring position policy 'positions.supervised_target_v1'; shipped: ['positions.all_v1@v1', 'positions.supervised_target_v1@v1']; registered: []\"", "seconds": 6.425, "stage": "D_state_eval_both_supports", "status": "failed", "t": 1987.058}
+{"error": "\"no scoring position policy 'positions.supervised_target_v1'; shipped: ['positions.all_v1@v1', 'positions.supervised_target_v1@v1']; registered: []\"", "stage": "driver", "status": "failed", "t": 1987.06}

@@ -1,0 +1,16 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.816, "stage": "environment", "status": "ok", "t": 1.816}
+{"stage": "register_and_policy", "status": "start", "t": 1.816}
+{"seconds": 0.04, "stage": "register_and_policy", "status": "ok", "t": 1.856}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.857}
+{"seconds": 0.047, "stage": "bind_full_vocab", "status": "ok", "t": 1.904}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.905}
+{"seconds": 0.042, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.947}
+{"stage": "depth_operator_and_policy", "status": "start", "t": 1.947}
+{"seconds": 0.169, "stage": "depth_operator_and_policy", "status": "ok", "t": 2.116}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.116}
+{"seconds": 8.676, "stage": "teacher_fetch_verify", "status": "ok", "t": 10.793}
+{"stage": "P_production_operator_invocation", "status": "start", "t": 10.797}
+{"candidates": 260, "invocation_s": 1194.26, "outside_loop_s": 29.2, "stage": "P.calib.domain_balanced@v1", "status": "ok", "t": 1210.189}
+{"candidates": 260, "invocation_s": 1188.77, "outside_loop_s": 30.32, "stage": "P.calib.reasoning_heavy@v2", "status": "ok", "t": 2401.25}
+{"seconds": 2391.278, "stage": "P_production_operator_invocation", "status": "ok", "t": 2402.075}

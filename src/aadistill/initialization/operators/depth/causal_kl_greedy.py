@@ -27,6 +27,10 @@ from typing import Any
 
 import torch
 
+from aadistill.initialization.scoring.support import (
+    SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
+    sketch_forward_kl_mean, sketch_forward_kl_mean_batch, sketch_reference,
+)
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
     domain_balanced_score,
@@ -122,7 +126,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         # -- "a host target would drag the whole reduction back to the host" --
         # was correct and is now enforced one level down, where `distortion` and
         # `forward_kl_mean` both keep their accumulators wherever the logits are.
-        reference = _ReferenceLogits(model, items, compute)
+        #: WHICH REFERENCE STATE, decided by the run's declared support. The
+        #: full-vocabulary path is unchanged and is what produced every frozen
+        #: DEPTH decision; the sketch path holds O(T*K) instead of O(T*V).
+        support = ctx.distribution_support
+        if support.is_full_vocab:
+            reference = _ReferenceLogits(model, items, compute)
+            sketches = None
+        else:
+            sketches = _ReferenceSketches(model, items, compute,
+                                          top_k=support.top_k)
+            reference = None
 
         #: The micro-batch grouping, built ONCE and reused for every candidate
         #: subset. Two reasons it is not rebuilt per candidate: the padded id
@@ -189,7 +203,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
-                if batch_size > 1:
+                if sketches is not None:
+                    refs = (sketches.sketch_block(group) if batch_size > 1
+                            else sketches.sketch_item(group.items[0]))
+                elif batch_size > 1:
                     refs = reference.reference_block(group)
                 else:
                     refs = reference.get(group.items[0])
@@ -223,15 +240,46 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                 #: one KL to exactly one subtype, and the subtype/domain
                 #: aggregation below is untouched.
                 if batch_size > 1:
-                    values = forward_kl_mean_batch(
-                        refs, abls, group.prediction_mask().to(abls.device),
-                        weights=(None if active is None else
-                                 active.prediction_weights_for(group, indices)),
-                        chunk=512)
+                    #: SAME estimand, same per-item weighting, same aggregation
+                    #: whichever support ran. Only the partition the KL is reduced
+                    #: over differs, and that difference is carried in the state
+                    #: identity rather than in how the result is recorded -- which
+                    #: is why the recording below is SHARED. Branching it per
+                    #: support once left the sketch path computing its values and
+                    #: never recording them, and the failure surfaced as a missing
+                    #: subtype in the domain aggregation.
+                    batch_weights = (None if active is None else
+                                     active.prediction_weights_for(group, indices))
+                    mask = group.prediction_mask().to(abls.device)
+                    if sketches is not None:
+                        idx, lp, tail = refs
+                        values = sketch_forward_kl_mean_batch(
+                            idx, lp, tail, abls, mask,
+                            has_tail=sketches.has_tail, weights=batch_weights)
+                    else:
+                        values = forward_kl_mean_batch(
+                            refs, abls, mask, weights=batch_weights, chunk=512)
                     #: ONE host transfer for the whole batch.
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
+                    if ctx.score_observer is not None:
+                        #: The SAME `refs` and `abls` this round already paid for.
+                        #: Execution only -- the return value is ignored and this
+                        #: cannot reach a score, a config or an identity.
+                        ctx.score_observer(
+                            skip=frozenset(skip), group=group, indices=indices,
+                            refs=refs, abls=abls, mask=mask,
+                            weights=batch_weights, values=values,
+                            support=support)
+                elif sketches is not None:
+                    per_subtype.setdefault(group.items[0]["subtype"], []).append(
+                        sketch_forward_kl_mean(
+                            refs, abls,
+                            weights=(None if active is None else
+                                     active.prediction_weights_for_item(
+                                         indices[0]))))
+                    timing["distortion_calls"] += 1
                 else:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         forward_kl_mean(
@@ -321,14 +369,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             # have free. The numbers are identical either way, so the decision
             # belongs with the byproducts.
             artifacts={"search_rounds": result["rounds"],
-                       "reference_cache": reference.decision(),
+                       "reference_cache": (reference or sketches).decision(),
                        # Operational only. `artifacts` is already excluded from
                        # the trace and from state identity — see the note above
                        # — which is exactly why the timings belong here and in
                        # no other field the operator returns.
                        "timing": {k: (round(v, 4) if isinstance(v, float) else v)
                                   for k, v in timing.items()},
-                       "reference_counters": reference.counters()},
+                       "reference_counters": (reference or sketches).counters()},
         )
 
 
@@ -416,6 +464,161 @@ def _forward_logits(model, item, device: str, skip=frozenset()):
         return model(ids).logits[0, :-1]
     with bypassed_blocks(model, skip):
         return model(ids).logits[0, :-1]
+
+
+class _ReferenceSketches:
+    """The intact parent's reference as ``O(T*K)`` sketches, not ``O(T*V)`` logits.
+
+    This is the whole point of ``reference_topk_tail_v1`` for DEPTH. The
+    full-logit sibling below sizes its cache at ``positions * V * itemsize`` --
+    **33.8 GiB** for the frozen ``calib.domain_balanced@v1`` mixture at a 151,936
+    vocabulary -- and when that does not fit it falls back to recomputing the
+    reference for every one of 260 candidates, roughly doubling the forwards for
+    the whole expansion. A sketch holds ``positions * K`` log probabilities and
+    indices plus three per-position vectors, so at a few hundred K it is megabytes
+    and the fallback never triggers.
+
+    **The forward's composition still does not depend on what is cached.** The
+    sketches are built from the SAME canonical padded batches the candidate
+    forwards use, so the reference is computed under the same kernel shapes as
+    the thing it is compared against. Building them from a sub-batch of the
+    missing rows would put the boundary between cached and recomputed inside a
+    scientific measurement, which is the mistake the full-logit sibling's
+    docstring records having already been made once.
+    """
+
+    def __init__(self, model, items, device: str, *, top_k: int) -> None:
+        self.model = model
+        self.device = device
+        self.top_k = int(top_k)
+        self.vocab = int(model.config.vocab_size)
+        self._cache: dict[str, tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
+        items = list(items)
+        positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
+        self.positions = positions
+        k = max(1, min(self.top_k, self.vocab))
+        self.effective_top_k = k
+        #: float32 log probabilities + int64 indices + three float32 per-position
+        #: vectors. Stated rather than guessed: the full-logit cache's budget
+        #: being wrong once cost a 33.8 GiB overrun and an OOM kill.
+        self.estimate_bytes = positions * (k * 4 + k * 8) + positions * 4 * 3
+        self.full_vocab_estimate_bytes = (
+            positions * self.vocab
+            * next(model.parameters()).dtype.itemsize)
+        self.memory_before = memory_snapshot(device)
+        self.available_bytes, self.headroom_source = _available_memory_bytes(device)
+        budget = (None if self.available_bytes is None
+                  else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
+        self.enabled = budget is None or self.estimate_bytes <= budget
+        self.mode = "cached" if self.enabled else "recomputed"
+        self.hits = 0
+        self.recomputes = 0
+        self.fills = 0
+        self.has_tail = k < self.vocab
+
+    def sketch_block(self, batch):
+        """``([B, T, K] indices, [B, T, K] log probs, [B, T] tail)`` for a batch."""
+        rows = list(batch.items)
+        cached = [self._cache.get(item["item_id"]) for item in rows]
+        if all(c is not None for c in cached):
+            self.hits += len(rows)
+            return self._assemble(batch, cached)
+
+        block = _forward_logit_block(self.model, batch, self.device)
+        width = int(batch.input_ids.shape[1]) - 1
+        for index, item in enumerate(rows):
+            if cached[index] is not None:
+                self.hits += 1
+                continue
+            length = int(batch.lengths[index])
+            #: The item's VALID PREDICTION SLICE only, reduced immediately. The
+            #: `[B, T, V]` block dies at the end of this call -- that is the
+            #: memory this protocol exists to stop holding.
+            sk = sketch_reference(
+                block[index, :length - 1],
+                torch.zeros(length - 1, dtype=torch.long, device=block.device),
+                top_k=self.top_k, chunk=512)
+            cached[index] = (sk.support_indices, sk.support_log_probs,
+                             sk.tail_log_prob)
+            if self.enabled:
+                self._cache[item["item_id"]] = cached[index]
+                self.fills += 1
+            else:
+                self.recomputes += 1
+        del block
+        return self._assemble(batch, cached)
+
+    def _assemble(self, batch, rows):
+        """Cached per-item sketches back into the canonical padded shapes.
+
+        Padding is left at zero and never read: the caller masks it out, exactly
+        as it does for a padded logit block.
+        """
+        width = int(batch.input_ids.shape[1]) - 1
+        k = rows[0][0].shape[-1]
+        dev = rows[0][0].device
+        idx = torch.zeros(len(rows), width, k, dtype=torch.long, device=dev)
+        lp = torch.zeros(len(rows), width, k, dtype=torch.float32, device=dev)
+        tail = torch.zeros(len(rows), width, dtype=torch.float32, device=dev)
+        for i, (a, b, c) in enumerate(rows):
+            idx[i, :a.shape[0]] = a
+            lp[i, :b.shape[0]] = b
+            tail[i, :c.shape[0]] = c
+        return idx, lp, tail
+
+    def sketch_item(self, item) -> ReferenceDistributionSketch:
+        """One item's sketch, for the ``batch_size == 1`` path."""
+        item_id = item["item_id"]
+        hit = self._cache.get(item_id)
+        if hit is None:
+            logits = _forward_logits(self.model, item, self.device)
+            n = int(logits.shape[0])
+            sk = sketch_reference(
+                logits, torch.zeros(n, dtype=torch.long, device=logits.device),
+                top_k=self.top_k, chunk=512)
+            hit = (sk.support_indices, sk.support_log_probs, sk.tail_log_prob)
+            if self.enabled:
+                self._cache[item_id] = hit
+                self.fills += 1
+            else:
+                self.recomputes += 1
+            del logits
+        else:
+            self.hits += 1
+        return ReferenceDistributionSketch(
+            support_indices=hit[0], support_log_probs=hit[1],
+            tail_log_prob=hit[2],
+            #: Neither is read by the forward-KL reducer; the sketch type carries
+            #: them for the six-quantity path and they are not recomputed here.
+            top1_token=torch.zeros(hit[0].shape[0], dtype=torch.long,
+                                   device=hit[0].device),
+            target_log_prob=torch.zeros(hit[0].shape[0], dtype=torch.float32,
+                                        device=hit[0].device),
+            top_k=self.effective_top_k, vocab_size=self.vocab)
+
+    def counters(self) -> dict[str, int]:
+        """Telemetry only, and the same three names the full-logit cache uses so
+        a reader comparing two expansions does not have to know which ran."""
+        return {"reference_hits": self.hits, "reference_fills": self.fills,
+                "reference_recomputes": self.recomputes}
+
+    def decision(self) -> dict[str, Any]:
+        return {
+            "mode": self.mode,
+            "cached": self.enabled,
+            "distribution_support": SUPPORT_REFERENCE_TOPK_TAIL_V1,
+            "top_k": self.effective_top_k,
+            "has_tail": self.has_tail,
+            "items_total": len(self._cache) or None,
+            "positions": self.positions,
+            "sketch_bytes": self.estimate_bytes,
+            "full_vocab_bytes_avoided": self.full_vocab_estimate_bytes,
+            "bytes_ratio_vs_full_vocab": round(
+                self.estimate_bytes / max(self.full_vocab_estimate_bytes, 1), 8),
+            "available_bytes": self.available_bytes,
+            "headroom_source": self.headroom_source,
+            "memory_before": self.memory_before,
+        }
 
 
 class _ReferenceLogits:

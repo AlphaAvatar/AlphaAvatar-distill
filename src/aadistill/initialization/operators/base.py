@@ -46,6 +46,9 @@ from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfi
 from aadistill.initialization.specs.arch import ArchitectureAdapter, ArchSpec
 from aadistill.initialization.calibration.profiles import CalibrationProfile
 from aadistill.initialization.calibration.profiles import CalibrationNeed
+from aadistill.initialization.scoring.support import (
+    FULL_VOCAB_V1, DistributionSupport,
+)
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     ScoringPositionPolicy,
@@ -156,6 +159,29 @@ class OperatorContext:
     #: `aadistill.initialization.scoring.positions`.
     position_policy: ScoringPositionPolicy = field(
         default_factory=lambda: ALL_POSITIONS_V1)
+    #: WHICH VOCABULARY ENTRIES a divergence is reduced over. Same shape of
+    #: contract as `position_policy` above and for the same reason: one support
+    #: per invocation, handed down from the run, so an operator and the beam
+    #: metric that prunes it cannot disagree about what a KL means.
+    #:
+    #: The default is the historical full-vocabulary contract and is numerically
+    #: a no-op. `reference_topk_tail_v1` is NOT the same measurement, so a run
+    #: that chooses it must declare it in `config` too -- see the agreement check
+    #: in `apply_checked`.
+    distribution_support: DistributionSupport = field(
+        default_factory=lambda: FULL_VOCAB_V1)
+    #: OPTIONAL OBSERVER, called with each reduction's inputs as it happens.
+    #: EXECUTION ONLY and it cannot change a score: the operator ignores whatever
+    #: it returns, and it is excluded from every config, hash and identity. It
+    #: exists so a validation can compute a SECOND reduction from the SAME model
+    #: forwards -- paying for a duplicate set of forwards to compare two reducers
+    #: would buy nothing -- without the operator knowing what is being compared.
+    #:
+    #: Signature: `observer(**fields)`, keyword-only, so a new field can be added
+    #: without breaking an existing observer. An observer that raises is NOT
+    #: caught: a validation whose measurement silently stopped recording would be
+    #: worse than one that failed.
+    score_observer: Any = None
     #: The search's wall-clock budget, or None. An operator whose work is
     #: measured in hours is expected to call `deadline.check(...)` inside its own
     #: loop: `depth.causal_kl_greedy_v1` ran 10.78 h against a 3.0 h budget
@@ -314,6 +340,24 @@ class OperatorImplementation(ABC):
                 f"({ctx.position_policy.policy_hash[:12]}). The declared hash is "
                 "what the state id is derived from, so a mismatch records a "
                 "scoring rule that did not run")
+        #: THE SUPPORT HAS TWO SIDES TOO, and the same failure is available: a
+        #: caller that passed `reference_topk_tail_v1` to the operator while
+        #: `config` still declared full vocabulary would record a state id
+        #: describing a KL that was never computed. `config` omits the key
+        #: entirely under the historical contract, so an absent declaration means
+        #: full vocabulary rather than "unchecked" -- which is why the comparison
+        #: is against `as_dict()` on both sides rather than against `None`.
+        declared_support = (ctx.config or {}).get("distribution_support")
+        actual_support = (None if ctx.distribution_support.is_full_vocab
+                          else ctx.distribution_support.as_dict())
+        if declared_support != actual_support:
+            raise ContractViolation(
+                f"{self.impl_id}: config declares distribution support "
+                f"{declared_support!r} but was handed "
+                f"{ctx.distribution_support}. The declared value is what the "
+                "state id is derived from, so a mismatch records a divergence "
+                "that was not the one computed. Under the full-vocabulary "
+                "contract the config key is ABSENT, not null.")
         outcome = self.apply(ctx)
         if outcome.model is ctx.model:
             raise ContractViolation(

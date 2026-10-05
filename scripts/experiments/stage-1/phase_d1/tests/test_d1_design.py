@@ -399,20 +399,36 @@ class TestTheCommittedRecords:
         assert "NOT AUTHORIZED" in doc["status"]
         assert doc["search_stage"]["cost"]["hard_ceiling_usd"] > 0
 
-    def test_the_open_blockers_are_exactly_the_two_that_remain(self):
-        """Not as caveats. Either alone prevents execution.
+    def test_every_open_blocker_is_backed_by_the_field_it_derives_from(self):
+        """Not a count, and not a membership list.
 
-        **The count has now been wrong in both directions**, which is why neither
-        the number nor the membership is written here as a constant: it read TWO
-        after the per-session ceiling became the third, then THREE after the
-        realized D-series family closed the evidence one. Each entry is checked
-        against the field it is derived from, and the evidence entry's ABSENCE is
-        checked against the realized family.
+        **The count has been wrong in both directions and has now moved a third
+        time** -- TWO, then THREE, then TWO again, now ONE after the production
+        Top-K measurement resolved the envelope. So neither the number nor the
+        membership is written here. Each POSSIBLE entry is checked against the
+        field it derives from, in both directions: present when the field says
+        open, absent when the field says closed.
         """
         doc = json.loads(DESIGN.read_text())
         assert "BLOCKER" in doc["budget"]
-        assert set(doc["open_blockers"]) == {
-            "funding authorization", "per-session envelope"}
+        open_ = set(doc["open_blockers"])
+        budget = doc["budget"]
+
+        #: funding -- open iff D1 is outside the funded list OR the provisional
+        #: shortfall is positive.
+        funding_open = (not budget["d1_is_in_the_funded_list"]
+                        or budget["provisional_shortfall_usd"] > 0)
+        assert ("funding authorization" in open_) is funding_open
+
+        #: envelope -- open iff measured compatibility is not RESOLVED_FITS. The
+        #: provisional basis does NOT enter this, deliberately.
+        envelope_open = (budget["per_session_envelope_compatibility"]
+                         != "RESOLVED_FITS")
+        assert ("per-session envelope" in open_) is envelope_open
+
+        #: and nothing else may appear.
+        assert open_ <= {"evidence", "funding authorization",
+                         "per-session envelope"}, open_
 
         #: evidence — CLOSED, and the design says so from the realized family
         evidence = doc["evidence"]
@@ -423,8 +439,10 @@ class TestTheCommittedRecords:
         assert evidence["_authorizes"].startswith("nothing")
         #: funding — definite for a reason needing no cost estimate.
         assert doc["budget"]["d1_is_in_the_funded_list"] is False
-        #: per-session envelope — open because UNRESOLVED, not proven to fail.
-        assert doc["budget"]["per_session_envelope_compatibility"] == "UNRESOLVED"
+        #: per-session envelope -- whichever state it is in, the test above
+        #: checks the blocker against it rather than pinning one value.
+        assert doc["budget"]["per_session_envelope_compatibility"] in (
+            "UNRESOLVED", "RESOLVED_FITS", "RESOLVED_NEEDS_RAISE")
 
     def test_the_old_capacity_analysis_no_longer_drives_a_blocker(self):
         """It is kept as the reasoning that prompted the source decision, and it
@@ -441,8 +459,8 @@ class TestTheCommittedRecords:
         """A planning figure must not be readable as finalized authorization
         pricing, and the name is where that is enforced.
 
-        Both come from UNBATCHED telemetry whose direction relative to batched
-        D1 is unknown, so neither bounds the real cost. `shortfall_usd` and
+        Both come from FULL-VOCABULARY telemetry for a protocol D1 will not run,
+        so neither bounds the real cost. `shortfall_usd` and
         `fits_per_session_envelope` were exactly the names a later reader would
         have taken for settled figures.
         """
@@ -456,10 +474,78 @@ class TestTheCommittedRecords:
             assert retired not in budget, (
                 f"{retired} is back; a cost-derived field whose direction is "
                 "unknown must say so in its name")
-        #: and the claim boundary is in the prose, not only the field names
-        assert "NOT the finalized amount" in budget["BLOCKER"]
-        assert "NOT ESTABLISHED" in budget[
-            "_SECOND_BLOCKER_THE_PER_SESSION_CEILING"]
+        #: AND THE CLAIM BOUNDARY IS IN THE PROSE, not only the field names --
+        #: asserted as the boundary rather than as one sentence. It used to demand
+        #: the exact phrase "NOT the finalized amount", which held only while the
+        #: shortfall was a planning figure of unknown direction; the measured
+        #: DEPTH cell made the direction known and rewrote the sentence around a
+        #: claim boundary that had not changed at all.
+        note = budget["BLOCKER"]
+        assert "PROVISIONAL" in note, (
+            "the shortfall must say it is not a settled figure; three of four "
+            "cost cells are still unmeasured")
+        assert "does not claim what the cap should become" in note \
+            or "does not claim the cap must move" in note, (
+            "the design must not name the amount the project cap should become; "
+            "that is a maintainer decision and this field is where it is "
+            "disclaimed")
+
+    def test_the_second_blocker_note_is_a_function_of_the_measured_status(self):
+        """The ceiling note must say what the DERIVED status says, in all three
+        directions.
+
+        It used to be locked to the phrase `NOT ESTABLISHED`, which was true only
+        while no production Top-K timing existed. A measurement then made that
+        prose false, and the lock made the measurement look like the regression.
+        So this exercises the writer's own branch function over every state
+        instead: the note is derived, and no state may leave prose that
+        contradicts it.
+        """
+        import write_d1_design as w
+
+        budget = json.loads(DESIGN.read_text())["budget"]
+        topk = budget["topk_production_basis"]
+        envelope = budget["per_session_envelope_usd"]
+        status = budget["per_session_envelope_compatibility"]
+        notes = {s: w._envelope_blocker_note(budget_section_compatibility=s,
+                                            envelope_usd=envelope, topk=topk)
+                 for s in (("UNRESOLVED",) if topk is None else
+                           ("UNRESOLVED", "RESOLVED_FITS",
+                            "RESOLVED_NEEDS_RAISE"))}
+        #: The committed note is the one its own status produces.
+        assert budget["_SECOND_BLOCKER_THE_PER_SESSION_CEILING"] == notes[status]
+        if topk is None:
+            #: No valid production measurement exists, so UNRESOLVED is the ONLY
+            #: reachable state and there is no price for a note to name. The
+            #: resolved branches are exercised whenever a basis is present, which
+            #: is the state this file's `TestThePricingGate...` sibling in the
+            #: D-series suite drives through all three with synthetic records.
+            assert status == "UNRESOLVED", (
+                f"the design says {status} with no valid production basis, so a "
+                "sentence is resolving the envelope that no measurement can")
+            assert "SEPARATE constraint from the project-level cap" in \
+                notes["UNRESOLVED"]
+            return
+        #: Each note names its own state and no other, and only a resolved one
+        #: may name a price -- keyed on the state tokens the writer must use,
+        #: not on a phrase it happens to use today.
+        priced = f"${topk['search_session']['hard_ceiling_usd']:.4f}"
+        assert "UNRESOLVED" in notes["UNRESOLVED"]
+        assert priced not in notes["UNRESOLVED"], (
+            "an unresolved ceiling must not quote a price as though it were "
+            "bound")
+        for resolved in ("RESOLVED_FITS", "RESOLVED_NEEDS_RAISE"):
+            assert "UNRESOLVED" not in notes[resolved], (
+                f"{resolved} prose still calls the ceiling unresolved, which "
+                "would let a sentence outvote a measurement")
+            assert priced in notes[resolved], (
+                f"{resolved} must name the price it was resolved at")
+        assert "no longer a blocker" in notes["RESOLVED_FITS"]
+        assert "would have to move" in notes["RESOLVED_NEEDS_RAISE"]
+        #: And every state keeps the distinction the field exists to make: this
+        #: ceiling binds one session, the project cap is cumulative.
+        for note in notes.values():
+            assert "SEPARATE constraint from the project-level cap" in note
 
     def test_the_budget_position_is_derived_not_restated(self):
         """The writer calls `derive_budget.derive()`; a hand-copied balance
@@ -564,7 +650,11 @@ class TestTheOwedGpuValidationStatusIsDerived:
         monkeypatch.setattr(w, "REPO", tmp_path)
         state = w._qualification_state()
 
-        assert state["status"] == "RUN -- PASSED"
+        #: TWO ROUNDS now, and the status names each: a bare "RUN -- PASSED" was
+        #: true of the full-vocab qualification and would read as true of the
+        #: Top-K adoption too.
+        assert "full-vocab qualification RUN -- PASSED" in state["status"]
+        assert "Top-K adoption" in state["status"]
         assert state["_status_owner"] == w.QUALIFICATION_CLOSEOUT
         assert state["ran"]["cost_usd"] == 1.23
         #: The design carries the closeout's PATH and CONTENT HASH plus the
@@ -588,3 +678,43 @@ class TestTheOwedGpuValidationStatusIsDerived:
                         "than now",
                         "It is not requested here"):
             assert retired not in source, retired
+
+
+class TestMeasuredEnvelopeCompatibilityIsAuthoritative:
+    """A superseded planning figure must not veto a measurement.
+
+    `open_blockers` used to require BOTH `RESOLVED_FITS` and that the provisional
+    FULL-VOCABULARY basis fit. So a future Top-K measurement proving D1 fits
+    inside the envelope would have stayed blocked by an estimate it supersedes --
+    an estimate outvoting a measurement.
+    """
+
+    FUNDED = {"d1_is_in_the_funded_list": True,
+              "provisional_shortfall_usd": 0.0}
+
+    def _blockers(self, compatibility, provisional_fits):
+        import write_d1_design
+
+        return write_d1_design.open_blockers(
+            {**self.FUNDED,
+             "per_session_envelope_compatibility": compatibility,
+             "provisional_basis_fits_per_session_envelope": provisional_fits},
+            {})
+
+    def test_resolved_fits_closes_it_even_when_the_provisional_basis_does_not(self):
+        """THE REGRESSION."""
+        assert self._blockers("RESOLVED_FITS", False) == ()
+
+    def test_resolved_needs_raise_keeps_it_open(self):
+        assert "per-session envelope" in self._blockers("RESOLVED_NEEDS_RAISE",
+                                                       True)
+
+    def test_unresolved_keeps_it_open_whatever_the_provisional_basis_says(self):
+        for provisional in (True, False):
+            assert "per-session envelope" in self._blockers("UNRESOLVED",
+                                                            provisional)
+
+    def test_an_unknown_compatibility_value_does_not_silently_close_it(self):
+        """A typo must fail closed."""
+        for value in ("RESOLVED", "FITS", "", None, "resolved_fits"):
+            assert "per-session envelope" in self._blockers(value, True), value

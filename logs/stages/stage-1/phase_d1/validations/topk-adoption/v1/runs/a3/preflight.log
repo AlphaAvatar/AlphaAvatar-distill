@@ -1,0 +1,15 @@
+[    0.000] environment start {}
+/opt/train/lib/python3.12/site-packages/huggingface_hub/constants.py:298: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+[    1.922] environment ok {"seconds": 1.922}
+[    1.923] register_and_policy start {}
+[    2.031] register_and_policy ok {"seconds": 0.108}
+[    2.032] bind_full_vocab start {}
+[    2.091] bind_full_vocab ok {"seconds": 0.059}
+[    2.092] bind_reference_topk_tail start {}
+[    2.134] bind_reference_topk_tail ok {"seconds": 0.042}
+[    2.134] teacher_fetch_verify start {}
+Fetching 13 files:   0%|          | 0/13 [00:00<?, ?it/s]Fetching 13 files:   8%|▊         | 1/13 [00:00<00:04,  2.44it/s]Fetching 13 files: 100%|██████████| 13/13 [00:00<00:00, 31.69it/s]
+[   10.303] teacher_fetch_verify ok {"seconds": 8.169}
+
+wrote /workspace/out/preflight/adoption.json  status=CHECK_ONLY_OK

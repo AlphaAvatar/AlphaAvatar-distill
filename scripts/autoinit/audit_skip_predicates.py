@@ -427,6 +427,13 @@ DEPENDENCY_EVIDENCE: dict[str, str] = {
         "/workspace/autoinit_preflight_setup.sh` by SessionRunner, and the "
         "simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both "
         "machines bash is present by construction before pytest starts"),
+    'importorskip("torch")': (
+        "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] "
+        "dependencies, not an extra: the dev box resolves it through the "
+        "`pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` "
+        "image that ships it, into whose interpreter setup installs the project. "
+        "A machine where this import fails cannot run the project at all, so the "
+        "skip fires on neither"),
 }
 
 

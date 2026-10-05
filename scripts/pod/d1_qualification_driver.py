@@ -176,13 +176,21 @@ def environment(repo: Path) -> dict[str, Any]:
 
 # --- stage 2: bind the protocol BEFORE anything expensive -----------------
 
-def bind_protocol(repo: Path, *, policy_id: str, execution, numerics) -> dict[str, Any]:
+def bind_protocol(repo: Path, *, policy_id: str, execution, numerics,
+                  distribution_support=None) -> dict[str, Any]:
     """Build the real evaluator and return its bound identity.
 
     Refuses `unbound` suite content. The whole point of binding here rather than
     after the first measurement is that by then the expensive work has been done
     under an identity nothing recorded.
     """
+    #: Defaulting to the HISTORICAL full-vocabulary contract keeps the five
+    #: already-closed qualification subruns' bound ids exactly what they were: a
+    #: caller that does not ask for a support gets the one those runs used.
+    if distribution_support is None:
+        from aadistill.initialization.scoring.support import FULL_VOCAB_V1
+
+        distribution_support = FULL_VOCAB_V1
     from aadistill.initialization.scoring.protocol_identity import (
         UNBOUND_SUITE_CONTENT,
     )
@@ -205,13 +213,15 @@ def bind_protocol(repo: Path, *, policy_id: str, execution, numerics) -> dict[st
     evaluator = StateEvaluator(
         suite, items, device="cuda", position_policy=policy,
         execution=execution, numerics=numerics,
-        suite_content_sha256=content_sha256)
+        suite_content_sha256=content_sha256,
+        distribution_support=distribution_support)
     bound = {
         "measurement_protocol_id": evaluator.measurement_protocol_id,
         "suite_content_sha256": content_sha256,
         "suite_structural_hash": suite.suite_hash,
         "position_policy": policy.policy_id,
         "position_policy_hash": policy.policy_hash,
+        "distribution_support": str(distribution_support),
         "n_items": len(items),
         "reduction": {"chunk": evaluator.chunk,
                       "reference_strategy": str(evaluator.reference_strategy)},

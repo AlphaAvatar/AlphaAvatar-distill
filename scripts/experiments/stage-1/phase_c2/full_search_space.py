@@ -119,15 +119,18 @@ def _phase_seconds(row: dict, key: str) -> float:
             else float(value or 0))
 
 
-def _observations(repo_root: Path) -> dict[tuple[str, str], list[float]]:
-    """`(impl_id, root|deeper) -> minutes`, pooled over every committed run.
+def _rows_with_scope(repo_root: Path):
+    """`(impl_id, "root"|"deeper", row)` for every committed expansion.
 
     Whether a parent is the ROOT is resolved from the run's own level record
     when it has one, and otherwise from the telemetry's parent/child structure:
     a parent id that never appears as a state id is a root. Both answers are
     derived from the record rather than assumed from ordering.
+
+    Extracted so the whole-expansion minutes and the NON-OPERATOR minutes come
+    from ONE traversal with ONE root resolution. A second copy of this walk is how
+    two pricing inputs come to disagree about which observations are roots.
     """
-    pooled: dict[tuple[str, str], list[float]] = collections.defaultdict(list)
     for name, telemetry, result in TELEMETRY_SOURCES:
         path = repo_root / telemetry
         if not path.is_file():
@@ -140,20 +143,57 @@ def _observations(repo_root: Path) -> dict[tuple[str, str], list[float]]:
         if result is not None:
             levels = json.loads((repo_root / result).read_text())["levels"]
             level_of = {sid: L["level"] for L in levels for sid in L["generated"]}
+
             def is_root(row, _level_of=level_of):
                 return _level_of.get(row["state_id"]) == 0
         else:
             state_ids = {r["state_id"] for r in rows}
             roots = {r["parent_id"] for r in rows
                      if r["parent_id"] not in state_ids}
+
             def is_root(row, _roots=roots):
                 return row["parent_id"] in _roots
+
         for row in rows:
-            minutes = (row["operator_seconds"] + row["parent_load_seconds"]
-                       + sum(_phase_seconds(row, k)
-                             for k in EXPANSION_PHASES)) / 60
-            pooled[(row["impl_id"], "root" if is_root(row) else "deeper")
-                   ].append(minutes)
+            yield row["impl_id"], ("root" if is_root(row) else "deeper"), row
+
+
+def _expansion_minutes(row: Mapping[str, Any]) -> float:
+    """One expansion, end to end: operator + parent load + every phase."""
+    return (row["operator_seconds"] + row["parent_load_seconds"]
+            + sum(_phase_seconds(row, k) for k in EXPANSION_PHASES)) / 60
+
+
+def _non_operator_minutes(row: Mapping[str, Any]) -> float:
+    """One expansion MINUS its operator: what an operator-only figure omits.
+
+    `parent_load` plus every phase in :data:`EXPANSION_PHASES`. This is the part
+    that cannot disappear because an operator's KL implementation changed, and
+    leaving it out of a substituted cell deletes real cost from a ceiling.
+    """
+    return (row["parent_load_seconds"]
+            + sum(_phase_seconds(row, k) for k in EXPANSION_PHASES)) / 60
+
+
+def _observations(repo_root: Path) -> dict[tuple[str, str], list[float]]:
+    """`(impl_id, root|deeper) -> whole-expansion minutes`, pooled."""
+    pooled: dict[tuple[str, str], list[float]] = collections.defaultdict(list)
+    for impl_id, scope, row in _rows_with_scope(repo_root):
+        pooled[(impl_id, scope)].append(_expansion_minutes(row))
+    return dict(pooled)
+
+
+def non_operator_observations(repo_root: str | Path = REPO_ROOT,
+                              ) -> dict[tuple[str, str], list[float]]:
+    """`(impl_id, root|deeper) -> NON-OPERATOR minutes`, pooled.
+
+    The same traversal and the same root resolution as :func:`_observations`, so a
+    caller rebuilding one cell's operator term can add back exactly the overhead
+    the committed telemetry recorded for that scope.
+    """
+    pooled: dict[tuple[str, str], list[float]] = collections.defaultdict(list)
+    for impl_id, scope, row in _rows_with_scope(Path(repo_root)):
+        pooled[(impl_id, scope)].append(_non_operator_minutes(row))
     return dict(pooled)
 
 

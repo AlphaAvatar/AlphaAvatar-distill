@@ -1,0 +1,158 @@
+{
+ "_authorizes": "nothing. ENGINEERING evidence from the engineering book, which does not transfer into the formal one. Formal D1 remains NOT AUTHORIZED, phase_d1 is not in funds_formal_sessions_of, and the per-session envelope is unchanged.",
+ "_does_not_move_the_batteries": "family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands. Top-K changes structural scoring and evaluation, not prompt content.",
+ "_replaced_by": "closeout.json, once the corrective measurement completes",
+ "_superseded": "An independent review of prep/d-series-topk-tail@bd70a165 reopened this adoption. The single lower-bound violation I had recorded as a 'bounded open numerical observation' was a real defect: the tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- our own measured support mass reached 1.000001 -- and the code then DROPPED the tail term whenever either mass rounded to zero, when only a zero REFERENCE mass may make a forward-KL term vanish. The findings below were computed under that arithmetic and are NOT the adopted evidence. They are kept because a1/a2/a3 are real paid measurements and because the superseded numbers are what the repair has to be judged against.",
+ "_verdict_is_across_subruns": "NO SINGLE SUBRUN answered everything. a1 produced A/B/C and the DEPTH half of E; a2 independently CONFIRMED C with the corrected in-run analysis but lost stage D to a bare policy id and its record arrived truncated; a3 measured D. Every answer below names the subrun that produced it.",
+ "answers": {
+  "A_reference_top200_mass": {
+   "_reading": "the median position is essentially fully covered and the TAIL is the finding: at the 1st percentile the Top-200 holds 86% of the mass, and somewhere in the mixture a position holds 2.3%. A mean of 0.994 hides both, which is why the distribution was asked for.",
+   "from": "a1",
+   "mean": 0.9940048497456154,
+   "min": 0.022924339398741722,
+   "over_valid_positions": 14375660,
+   "p1": 0.8618628978729248,
+   "p5": 0.9800642728805542,
+   "p50": 0.999999463558197,
+   "p95": 1.000001311302185
+  },
+  "B_full_vs_k_plus_1": {
+   "_the_one_violation": "one of 17,420 per-item scores had the K+1 KL exceed the full one by 2.968e-04 absolute / 2.2e-03 relative. A coarsening cannot do that. It is NOT reproducible: synthetic float32, float64 and bf16 checks across six distribution shapes show zero violations. It affects no per-candidate score and no decision. Recorded as a bounded open numerical observation -- not claimed as float noise, which is unproven, nor as a defect, which the evidence does not support.",
+   "from": "a1",
+   "lower_bound_violations_per_candidate": 0,
+   "lower_bound_violations_per_item": 1,
+   "per_candidate_abs_max": 0.04803305706885652,
+   "per_candidate_spearman": 0.9999822482581102,
+   "per_item_abs_max": 0.41952487441801267,
+   "per_item_abs_mean": 0.006441935768266333,
+   "per_item_rel_mean": 0.010344907479765577,
+   "per_item_spearman": 0.9998969825285937
+  },
+  "C_depth_decisions": {
+   "_how_it_is_trustworthy": "the in-run analysis was WRONG and said so: it aggregated candidates by a pooled mean where the operator uses domain_balanced_score, and its own reconstruction check flagged rounds 4 and 5 as disagreeing with the operator. Corrected by importing the operator's aggregation and re-analysing OFFLINE from the recorded per-item scores -- no GPU time repaid. The reconstruction now matches the operator in every round, and the driver RAISES if it ever does not.",
+   "_reading": "ZERO of 8 rounds move. The Top-200 protocol would choose the same layer every round, so the removal orders are identical and nothing in the comparison is counterfactual.",
+   "comparison_is_exact_through_round": 7,
+   "from": "a1, CONFIRMED independently by a2",
+   "full_vocab_removal_order": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ],
+   "rounds": 8,
+   "rounds_where_winners_disagree": 0,
+   "topk_removal_order_would_be": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ]
+  },
+  "D_state_evaluation": {
+   "candidate": "depth.positional_v0, 30.7 s",
+   "exact_metrics": {
+    "_reading": "CE and top-1 are EXACT under the coarse partition by construction, and the measurement confirms it: every .nll metric moves by at most 1.4e-07 and top-1 is bit-identical.",
+    "top1_agreement_relative_move": 0.0,
+    "worst_nll_relative_move": 1.387e-07
+   },
+   "forward_kl_moves": {
+    "_reading": "the headline equal-domain mean moves 1.8e-03 relative and the worst-domain identity agrees. `general` moves most (1.0e-02), consistent with its flatter distributions holding less mass in the Top-200.",
+    "critical_token_kl": {
+     "absolute": -5.1347320805028573e-05,
+     "full_vocab": 5.145334515710836,
+     "reference_topk_tail": 5.145283168390031,
+     "relative": -9.979394079868656e-06
+    },
+    "teacher_kl.equal_domain_mean": {
+     "absolute": -0.003390027339637891,
+     "full_vocab": 1.8444246002572544,
+     "reference_topk_tail": 1.8410345729176165,
+     "relative": -0.0018379864046299647
+    },
+    "teacher_kl.general": {
+     "absolute": -0.01690441000392484,
+     "full_vocab": 1.6509756036932832,
+     "reference_topk_tail": 1.6340711936893584,
+     "relative": -0.010239042882347357
+    },
+    "teacher_kl.worst_domain": {
+     "absolute": -4.445393332108694e-06,
+     "full_vocab": 1.9367944587417691,
+     "reference_topk_tail": 1.936790013348437,
+     "relative": -2.2952323681247135e-06
+    },
+    "worst_domain_identity_agrees": true
+   },
+   "from": "a3",
+   "protocol_ids_differ": true,
+   "reverse_kl_move": {
+    "_reading": "THE ONE METRIC MATERIALLY CHANGED: -18.7% relative. Reverse KL weights by the CANDIDATE's mass, much of which lies outside the reference's Top-200 and collapses into the single tail bucket. It is a genuinely different quantity under this protocol, and that is exactly why item 7 required it on the SAME reference-defined partition rather than a candidate-defined one -- two partitions in one evaluation would have made this invisible.",
+    "absolute": -1.6170065533342122,
+    "full_vocab": 8.635600558936444,
+    "reference_topk_tail": 7.018594005602232,
+    "relative": -0.18724888237921947
+   }
+  },
+  "E_performance": {
+   "depth_reduction": {
+    "_upper_bound": "the Top-K figure is an UPPER bound: the observer rebuilt the sketch on every call, where a real Top-K run caches it per item.",
+    "full_vocab_ms_each": 45.4,
+    "full_vocab_seconds": 790.8,
+    "reductions": 17420,
+    "speedup": 1.585,
+    "topk_ms_each": 28.6,
+    "topk_seconds": 498.9
+   },
+   "depth_reference_state": {
+    "_reading": "the reference state is the real saving: 16.91 GiB of cached full-vocabulary logits against 144 MB of sketches over the same 59,763 positions, a factor of 120.",
+    "full_vocab_bytes": 18160302336,
+    "full_vocab_gib": 16.913,
+    "positions": 59763,
+    "ratio": 126.0,
+    "topk_sketch_bytes": 144148356,
+    "topk_sketch_mib": 137.5
+   },
+   "from": "a1 (DEPTH), a3 (state evaluation)",
+   "state_evaluation": {
+    "_reading": "only 5.7% faster and 2% MORE peak memory at this scale, and that is the honest result: the candidate's full [B,T,V] logits still dominate because the output head's O(V) compute is NOT removed. The saving is in the reference state. No claim of O(K) output-head memory is made and none is supported until a chunked output path exists.",
+    "full_vocab_peak_gib": 20.341,
+    "full_vocab_seconds": 11.058,
+    "speed_ratio": 0.9425,
+    "topk_peak_gib": 20.492,
+    "topk_reference_sketch_mib": 170.6,
+    "topk_seconds": 10.422
+   }
+  }
+ },
+ "cost": {
+  "booked_usd": 1.5919,
+  "ceiling_usd": 8.0,
+  "subruns": 3,
+  "teardown": "all three pods provider-confirmed gone"
+ },
+ "identity": {
+  "bound_full_vocab": "d463a1dc6afbd778123a128f4ed46e16",
+  "bound_reference_topk_tail": "9c9b0b43dc00b695",
+  "d1_design_hash": "d44c62e8750e67f6f3a7dcd3",
+  "legacy_compatibility": "ReductionSemantics.distribution_support is OPTIONAL and omitted from as_dict() under the full-vocabulary contract, so every protocol id computed before the field existed recomputes byte-identically. Asserted both ways in tests/initialization/test_distribution_support.py.",
+  "they_differ": true
+ },
+ "protocol": {
+  "k_is_maintainer_selected": "2026-10-04. No sweep was run; K must never be tuned against D1/D2/D3 results.",
+  "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "protocol_id": "reference_topk_tail_v1",
+  "support": "the Top-200 entries of the REFERENCE distribution per position",
+  "tail": "every entry outside that support, in one aggregate K+1 bucket",
+  "top_k": 200
+ },
+ "schema": "aadistill.d_series.topk_adoption_closeout/v1",
+ "verdict": "SUPERSEDED BY REVIEW -- the tail arithmetic was invalid"
+}

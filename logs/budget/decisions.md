@@ -10224,6 +10224,88 @@ on a paid pod.
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
 
+## 2026-10-05 — Integration: the D-series Top-K protocol lands on `main`
+
+- **Context:** the Top-K round is complete and reviewed. P12.2 requires one commit
+  on `main` per integration and requires the range it collapses to be named, so a
+  reader holding a commit hash from an experiment log can find which integration
+  carried it.
+- **The range:** source branch `prep/d-series-topk-tail`, merge base
+  `df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e`. The exact tip and commit count
+  are named by the squash commit on `main`, not here: a record cannot pin the
+  commit that contains it without being false by one commit, and then two.
+- **The source branch is NOT deleted.** 637 distinct commit hashes are cited by
+  1,074 record files and resolve only through this branch's history;
+  `cited_commits_are_reachable()` resolved all 637 in 0.28 s before the merge. The
+  host's offer to delete the branch after a squash would silently invalidate every
+  one of them.
+- **What lands:** `reference_topk_tail_v1` at `K = 200` as the D-series KL
+  protocol, wired from `SearchConfig.distribution_support` through `_expand_one`
+  into every operator invocation and checked per measurement against the partition
+  the state evaluator actually reduced over. Historical full-vocabulary identity is
+  preserved by the field being absent at its default. Zero lower-bound violations,
+  zero of eight DEPTH decisions moved, reference state 16.91 GiB → 137.5 MiB, the
+  production DEPTH invocation measured at 19.9044 min, a `$21.4897` search session
+  inside the `$30.00` envelope and a derived `$51.0829` D1 chain.
+- **What it authorizes:** nothing. `phase_d1` remains outside
+  `funds_formal_sessions_of`; no allowance, package cap, project cap or
+  per-session envelope moved in this integration; formal D1 has not started.
+- **Operational consequence:** a squash commit does not have the branch's commits
+  as ancestors, so a fresh working branch is cut from `main` afterwards. Continuing
+  on the old branch would re-apply the whole range at the next integration.
+- **Revisit when:** preserving a cited branch becomes impractical — at which point
+  how commit-bound evidence is re-anchored is a maintainer decision with its own
+  record, taken BEFORE any branch a record cites is deleted.
+
+## 2026-10-05 — A DEPTH cost cell is one MEASURED operator invocation
+
+- **Context:** three successive attempts to price the Top-K DEPTH cell were
+  rejected on review, each for a different reason, and the third is the one that
+  changes a rule rather than a number. a5 substituted an operator-only figure for
+  a whole end-to-end cell and promoted a 12-candidate **mean** into `root_max`.
+  a6 inserted two `cuda synchronize()` calls per group to split forward from
+  reduction and measured its own instrument, 53% high. a7 removed the extra syncs
+  but timed a **shadow** of the production scorer: the driver had reimplemented
+  the candidate inner loop, so it never paid `active.prediction_weights_for`, the
+  weighted reduction, the `values.tolist()` host transfer that IS production's
+  synchronization, the per-subtype collection, `domain_balanced_score`, or the
+  reference-sketch cache fill — and it synchronized once per candidate where
+  production synchronizes once per group.
+- **Decision:** a DEPTH cost cell's operator term is measured by timing **one real
+  `impl.execute(ctx)` invocation** per calibration profile, at the max over
+  profiles, and never by multiplying a per-candidate figure by a candidate count.
+  The timing context is built by the same helpers `BeamSearch._expand_one` uses,
+  and a test reads core's own keyword set by AST so a field added to the
+  production path cannot be missed in the timing path.
+- **Why this is a rule and not a repair:** `_expand_one` records
+  `operator_seconds` around `impl.execute(ctx)`. That number already contains the
+  packing, the reference-cache fill, every candidate of every round, the greedy
+  bookkeeping and the child construction. `candidates × per-candidate` is a
+  different quantity from the one the committed cost table holds, so it cannot be
+  compared against it however carefully it is measured.
+- **A diagnostic split may never price.** `AADISTILL_DEPTH_SYNC_TELEMETRY=1` and
+  the driver's own split remain available for attribution and are refused as a
+  pricing basis by `_topk_production_basis`, which also requires
+  `measurement_path == "operator_execute_v1"` — so a5's, a6's and a7's records
+  all yield no basis and the envelope reads `UNRESOLVED` by mechanism.
+- **Alternatives considered:** interpolating between a6 and a7 (rejected: a6 has
+  more synchronizations than production and a7 fewer, so the true value is not
+  between them by construction); extracting the operator's scoring closure into a
+  shared callable (rejected for now: it edits a frozen operator's hot path to
+  obtain a measurement that timing the whole invocation already gives); measuring
+  round 0 and adding a separately measured fixed term (rejected: two measurements
+  and an addition where one measurement is available).
+- **Consequence for an accepted derivation:** `round_zero_is_the_compute_ceiling`
+  shrank to `a_deeper_parent_is_a_smaller_model`. Two of its three premises were
+  load-bearing only while the operator term was extrapolated from round 0; they
+  remain true and remain tested, and they no longer price anything.
+- **Risks:** one invocation per profile is a single observation per cell rather
+  than a distribution. The per-candidate spans are still recorded, from a
+  timestamp in the execution-only observer rather than a synchronization, so the
+  dispersion remains visible — as description, not as the ceiling.
+- **Revisit when:** a DEPTH operator changes its fixed setup materially, or a cell
+  is needed for a parent that is not bounded by the root.
+
 ## 2026-10-04 — Replace the D-series full-vocabulary KL with reference-Top-K + tail
 
 - **Context:** the D-series scoring contract reduced KL over the full 151,936-token

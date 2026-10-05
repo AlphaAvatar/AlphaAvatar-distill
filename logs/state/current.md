@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-04. The human view. Every number here has an owner named
+**Updated:** 2026-10-05. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -50,15 +50,105 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**NEXT: the D-series reference-topK-tail protocol, before formal D1.** Maintainer
-decision **2026-10-04** replaces the full-vocabulary KL contract with
-`reference_topk_tail_v1` at **K = 200** for D1, D2 and D3 — a scientific protocol
-amendment, not an execution optimization. The full-vocab qualification above is
-retained as the **baseline engineering measurement** against which the new
-protocol is qualified, and its repricing is explicitly **NOT** the final D1
-authorization price: the per-session envelope stays UNRESOLVED until Top-K is
-measured. K is a maintainer-selected protocol parameter and must never be tuned
-against D1/D2/D3 outcomes. Branch: `prep/d-series-topk-tail`.
+**TOP-K IS GO, THE PRICE IS MEASURED, AND THE BEAM CAN NOW RUN THE PROTOCOL.**
+Review reopened this round four times — the tail arithmetic, the cost cell, what
+the cell was a measurement *of*, and then whether anything could execute the
+protocol that was measured. All four are closed. One blocker remains and it is a
+maintainer decision.
+
+```text
+lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
+DEPTH decisions moved    0 of 8; removal orders identical
+reference state          16.91 GiB -> 137.5 MiB (0.794% of full vocabulary)
+operator invocation      1194.26 s and 1188.77 s  ->  MAX 19.9044 min
+DEPTH cell (END TO END)  22.976 min root   (frozen full-vocab was 34.354)
+search session           MEASURED $21.4897  vs the $30.00 envelope  ->  FITS
+D1 chain (derived)       $51.0829  =  21.4897 + 14.7966 + 14.7966
+```
+
+**The fourth defect was the sharpest.** `reference_topk_tail_v1` was implemented
+in the operator, in the state evaluator, in the protocol identity and in a driver
+that injected it by hand — and `SearchConfig` had **no field for it**, so the only
+path a formal D1 search could take fell back to `FULL_VOCAB_V1`. a8 timed the
+intended operator path faithfully for forty minutes while that path was
+unreachable through `BeamSearch`.
+
+**My parity test could not have seen it.** It asked whether the timing builder was
+a *superset* of core's context keywords — it caught a field core had and the
+builder forgot. This was the opposite: a field the builder had and core could not
+express. The check is bidirectional now, with a justified-extras set, and the
+reverse direction was verified against the pre-wiring source.
+
+```text
+SearchConfig.distribution_support = FULL_VOCAB_V1   (absent from as_dict)
+  -> _expand_one declares it in the hashed operator config
+  -> and passes the object in OperatorContext
+  -> operator refuses a declaration/object disagreement (already did)
+  -> every measurement is checked against what it actually REDUCED OVER
+```
+
+That last check is the load-bearing one: every driver wraps its evaluator in a
+`lambda`, so asking the measurer for its support at construction usually sees
+nothing. Reading `detail.reduction` per measurement cannot be hidden by wrapping,
+and it makes "Top-K operators, full-vocabulary beam metric" unexpressible rather
+than merely discouraged. Five mutations of the wiring, all caught — including the
+original defect and the one where the support is absent from the hash.
+
+**Three earlier defects, for the record.** The tail was reconstructed as
+`1 - sum(support)` and the measured support mass reached **1.000001**, so one
+coarse KL exceeded the full-vocabulary KL it must bound. The pricing then replaced
+the **whole** `CostModel` cell with the operator term and promoted a 12-candidate
+**mean** into `root_max`. Then the "production" timing turned out to be a shadow
+loop that never paid the position weights, the `values.tolist()` host transfer,
+the aggregation or the reference-cache fill — and `candidates × per-candidate` is
+not the quantity `_expand_one` records as `operator_seconds` at all.
+
+```text
+measured              19.904 min
+a7  max x 260         22.088 min   +11.0%   omitted work, then over-counted more
+a7  mean x 260        20.101 min    +1.0%   luck, not a method
+a6  max x 260         33.813 min   +69.9%   its own 1,656 synchronizations
+```
+
+**The core suite was not green, and I had said it was.** Running it for the first
+time in three rounds found that `tests/initialization/test_operators_only_shrink.py`
+— which I added two rounds ago — imports `experiments.phase_a3` and
+`experiments.phase_c2` from the core suite, which §2.8a forbids. The generic claim
+stayed in core and swept the whole builtin registry; the frozen-set and
+committed-record halves moved to `phase_d1`'s own suite. Two rounds of "do not
+rerun core" is how a red suite stays invisible.
+
+**And a cross-module leak that cost a debugging round.**
+`monkeypatch.setattr(impl, "execute", spy)` on an implementation whose `execute`
+is *inherited* records the bound method as the old value and, on undo, writes it
+back as an **instance** attribute. The registry holds singletons, so it outlives
+the module and shadows the class permanently — and any later class-level patch of
+the same name is silently ignored. The symptom was "no expansion ran". The
+module-boundary fixture strips these now, the leaking test cleans up after itself,
+and the boundary suite asserts the state the fixture maintains.
+
+**a8 stands without a rerun.** The wiring produces the same `OperatorContext` the
+measurement timed and changes no operator and no hot path; it passes a declaration
+and an object. The per-candidate diagnostic in a8's record is still defective — its
+span baseline mixed `time.time()` with `perf_counter()`, so min/p1/p5/mean are the
+unix epoch negated while max/p95/p50 and the invocation total stand — and the
+report names it rather than printing it.
+
+**The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
+`funds_formal_sessions_of`. No measurement reaches it.
+
+**An incidental observation, and it is not a D1 result.** Timed under D1's
+treatment positions, DEPTH removed `[2, 3, 32, 16, 26, 15, 17, 27]` and
+`[2, 3, 32, 16, 15, 26, 17, 27]`, against a4's incumbent-position
+`[2, 16, 3, 32, 20, 26, 15, 21]` — six of eight layers shared, different order,
+two different choices. One unreplicated engineering invocation per profile, no
+frozen protocol, no seeds, no registered decision rule.
+
+**D1's claim boundary.** It differs from incumbent B on three axes — distribution
+support, numerical execution, scoring positions — and the qualification measured
+that the batch size, not the position policy, moved three of four fixed-path
+selections. D1 is a **challenger** experiment against B, not a causal isolation
+of position weighting.
 
 **A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
 TWICE** — the evidence blocker is closed; funding and the per-session envelope
@@ -3179,18 +3269,38 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 
 <!-- readiness:end -->
 
-## The full suite is not green: 11 failures, and the count is trustworthy
+## Three suites, and the core one is green
 
-**Closing measurement, D1 design round: 11 failed, 5683 passed, 229 skipped,
-ZERO errors** in 42m54s, on the clean tree at `fc73c09a`. Exactly the eleven
-documented failures, as an **identical node-id set** to the previous run — no
-new ones, and none of the eleven fixed. `5555 → 5683` passed is the 128 tests
-the round added. The set was diffed against the `<details>` list below
-programmatically rather than read off, which is how the unlisted eleventh
-below was found.
+AGENTS.md 2.8a split what used to be one 43-minute run into three, because a
+default `pytest` that spent most of its time on experiments closed weeks earlier
+told a developer almost nothing about the framework.
 
-*Earlier closeouts measured the same eleven at 5555 and 5392 passed. Not
-restated beyond that: a count belongs to the tree it was taken on.*
+```text
+core full suite   3019 passed / 14 skipped / 0 failed   4m06s
+D1 + D-series     targeted, run per round
+historical        run on request, never part of core completion
+```
+
+**The eleven documented failures below are HISTORY.** Every one was a closed
+experiment's state assertion — C1/C2 closure and preregistration gates, a
+consumed proposal tracking a balance it can never spend — and they now live with
+the experiments that own them. `N passed + 11 expected failures` is no longer an
+acceptable normal state for core, and none of the eleven was repaired to get
+there: a closed phase's records still refuse, in the refusing direction, where
+their own suite can see it.
+
+**One known red, and it is not core.** `phase_d_series`
+`test_source_evidence::test_it_regenerates_identically`, pre-existing at
+`bc31175f` and gated on out-of-tree assets. The near-duplicate **screen** is
+nondeterministic across processes — gsm8k `with_any_neighbour` measured at
+6461/6484/6488 on three runs of the same tree — so **regenerating the record
+cannot fix it**; the generator has to become deterministic first. Review ruled it
+non-blocking: the record is evidence for a maintainer source decision and admits
+no row anywhere. Whoever picks it up should fix the ordering, not the number.
+
+The counts that follow belong to the trees they were taken on, kept because a
+suite result that was wrong for a knowable reason is worth more than one quietly
+replaced.
 
 **THE FIRST FULL SUITE OF THIS ROUND READ 28, AND 17 WERE MINE.** Five causes,
 not seventeen — and three were records the round owed rather than code defects:
@@ -3348,9 +3458,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$7.2431` of `$76.6523` |
-| GPU engineering | `$8.7137` of `$20.0000` |
-| package | `$15.9568` of `$96.6523` |
-| project cap | `$400.0481` spent of `$410.0000`, leaving `$9.9519` |
+| GPU engineering | `$5.0259` of `$20.0000` |
+| package | `$12.2690` of `$96.6523` |
+| project cap | `$403.7359` spent of `$410.0000`, leaving `$6.2641` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 
@@ -3487,6 +3597,44 @@ Full terms — attempt counting, the six retry conditions, the stop list:
 Those terms are C1's. A C2 session would need its own grant and its own ceiling;
 neither the project headroom above nor C1's unused formal allowance is
 authorization for one.
+
+## What `main` carries after this integration
+
+Written here BEFORE the merge, so `main` lands on a tree that describes itself
+rather than trailing the record of its own contents (P12.2).
+
+```text
+source branch   prep/d-series-topk-tail
+merge base      df41bee031f1fc2b46f4c9f7fe7a8bf00c998c3e
+tip and count   named by the squash commit on main
+```
+
+The tip is NOT pinned here: a record cannot name the commit that contains it without
+being false by one commit, and then by two. The branch and the merge base are
+stable, and P12.2 asks the squash commit for the exact range — which is written
+after the tip exists.
+
+**What it adds.** `reference_topk_tail_v1` at `K=200` as the D-series KL protocol —
+reference-defined Top-K support plus one aggregate tail bucket, the tail computed
+from the complement's own logits — carried end to end:
+`SearchConfig.distribution_support` → `_expand_one` → `OperatorContext`, with the
+state evaluator checked per measurement against the partition it actually reduced
+over. Historical full-vocabulary identity is preserved by the field being absent at
+its default. The full-vocabulary reducer stays as the oracle.
+
+**What it settles.** Zero lower-bound violations; zero of eight DEPTH decisions
+moved; the reference state down from 16.91 GiB to 137.5 MiB; the production DEPTH
+operator invocation measured at 19.9044 min, giving a `$21.4897` search session
+inside the `$30.00` per-session envelope and a derived `$51.0829` D1 chain.
+
+**What it does NOT do.** It authorizes nothing. `phase_d1` is still absent from
+`funds_formal_sessions_of`, no allowance or cap moved, and formal D1 has not
+started. The one remaining blocker is a maintainer funding decision.
+
+**Why the source branch is kept.** 637 distinct commit hashes are cited by 1,074
+record files and resolve only through this branch's history. Deleting it would
+invalidate every one of them; the reachability check that says so runs in
+`scripts/consolidate/converge_before_sweep.py` and resolved all 637 in 0.28 s.
 
 ## What ends a round
 

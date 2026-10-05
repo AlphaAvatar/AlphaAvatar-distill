@@ -54,6 +54,10 @@ from aadistill.initialization.scoring.protocol_identity import (
     UNDECLARED_EXECUTION,
     measurement_protocol_id,
 )
+from aadistill.initialization.scoring.support import (
+    FULL_VOCAB_V1, DistributionSupport, ReferenceDistributionSketch,
+    distortion_on_reference_support, sketch_reference,
+)
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     PREDICTION_AXIS,
@@ -116,6 +120,11 @@ class StateEvaluator:
         batch_budget_bytes: int = DEFAULT_STATE_EVAL_BATCH_BUDGET_BYTES,
         numerics: NumericalEnvironment | None = None,
         suite_content_sha256: str | None = None,
+        #: WHICH VOCABULARY ENTRIES the divergence is reduced over. The default
+        #: is the historical full-vocabulary contract, which keeps every existing
+        #: `measurement_protocol_id` byte-identical -- see `ReductionSemantics`.
+        #: `reference_topk_tail_v1` is a different measurement and moves the id.
+        distribution_support: DistributionSupport = FULL_VOCAB_V1,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -182,8 +191,18 @@ class StateEvaluator:
         #: every term is fixed for the evaluator's lifetime, and stamped into
         #: every evaluation so a consumer asks ONE question instead of
         #: comparing a growing list of fields.
+        self.distribution_support = distribution_support
+        #: Per-item reference sketches, and the bytes they hold. Separate from
+        #: `_ref_logits` because they are a different object with a different
+        #: budget: a strategy that declines to hold `[T, V]` can still hold
+        #: `[T, K]`, and conflating the two would inherit a refusal that does not
+        #: apply.
+        self._ref_sketches: dict[str, ReferenceDistributionSketch] = {}
+        self._sketch_cache_bytes = 0
+        self.cache_budget_bytes = int(cache_budget_bytes)
         self.reduction = ReductionSemantics(
-            chunk=int(chunk), reference_strategy=reference_strategy.value)
+            chunk=int(chunk), reference_strategy=reference_strategy.value,
+            distribution_support=distribution_support)
         self.measurement_protocol_id = measurement_protocol_id(
             suite_structural_identity=suite.suite_hash,
             suite_content_identity=(suite_content_sha256
@@ -249,6 +268,40 @@ class StateEvaluator:
                 self._ref_logits[item.item_id] = (
                     teacher(ids).logits[0, :-1].float())
         self._ref_ready = True
+
+    @torch.no_grad()
+    def _sketch_for(self, item: SuiteItem,
+                    ref_logits: torch.Tensor) -> ReferenceDistributionSketch:
+        """This item's reference sketch, cached when the strategy says to.
+
+        **The sketch definition is science; the caching policy is execution**, and
+        the boundary is kept explicit here. The sketch is a function of the
+        reference logits, the positions and ``top_k`` -- nothing about whether it
+        was cached can reach a number. So caching follows the same
+        ``reference_strategy`` that governs the full-logit reference, and the
+        values are identical either way.
+
+        Caching the sketch is the cheap half of this protocol. The ORIGINAL
+        TEACHER is unchanged across every candidate a search evaluates, so its
+        sketches are computed once and reused; the full-logit path could not do
+        this at the frozen suite because ``[T, V]`` for both models is 33.8 GiB,
+        which is exactly why `DEFAULT_REFERENCE_CACHE_BUDGET_BYTES` refuses it and
+        every candidate recomputes. At ``O(T*K)`` the refusal does not arise.
+        """
+        hit = self._ref_sketches.get(item.item_id)
+        if hit is not None:
+            return hit
+        sketch = sketch_reference(
+            ref_logits, item.input_ids[0, 1:].to(ref_logits.device),
+            top_k=int(self.distribution_support.top_k), chunk=self.chunk)
+        #: Cached under the same policy as the logits it was built from. A
+        #: strategy that declines to hold `[T, V]` may still hold `[T, K]`, so
+        #: this is not merely inherited -- the sketch is ~3 orders of magnitude
+        #: smaller and the budget it is checked against is its own.
+        if self._sketch_cache_bytes + sketch.bytes_held() <= self.cache_budget_bytes:
+            self._ref_sketches[item.item_id] = sketch
+            self._sketch_cache_bytes += sketch.bytes_held()
+        return sketch
 
     @torch.no_grad()
     def _reference_for(self, item: SuiteItem) -> torch.Tensor:
@@ -449,8 +502,17 @@ class StateEvaluator:
             #: host float vector meeting a CUDA tensor raises.
             weights = (None if self._weights is None
                        else self._weights[item.item_id].to(ref.device))
-            sums = distortion(ref, cand, targets, tags=tags, weights=weights,
-                              chunk=self.chunk)
+            if self.distribution_support.is_full_vocab:
+                sums = distortion(ref, cand, targets, tags=tags,
+                                  weights=weights, chunk=self.chunk)
+            else:
+                #: The SKETCH is the science; whether it is cached is execution.
+                #: `_sketch_for` honours that split -- it caches when the
+                #: reference strategy says to and recomputes otherwise, and the
+                #: numbers are identical either way.
+                sums = distortion_on_reference_support(
+                    self._sketch_for(item, ref), cand, targets, tags=tags,
+                    weights=weights, chunk=self.chunk)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand

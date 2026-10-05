@@ -62,6 +62,9 @@ from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
     measurement_is_comparable,
 )
+from aadistill.initialization.scoring.support import (
+    FULL_VOCAB_V1, DistributionSupport,
+)
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     ScoringPositionPolicy,
@@ -239,6 +242,25 @@ class SearchConfig:
     #: then be pruned by a full-sequence beam metric. One policy, consumed by the
     #: operators and by the measurer, makes that disagreement unexpressible.
     position_policy: ScoringPositionPolicy = ALL_POSITIONS_V1
+    #: WHICH VOCABULARY PARTITION every calibrated KL objective and the global
+    #: state metrics are reduced over. A `SearchConfig` field for exactly the
+    #: reasons `position_policy` is one: it changes the ESTIMAND rather than the
+    #: schedule, so the same path scored over the full vocabulary and over a
+    #: reference-defined Top-K plus a tail bucket are two different hypotheses
+    #: and must not share a `config_hash`.
+    #:
+    #: It lives on the RUN rather than per operator because of what the
+    #: alternative permits, which is the same hazard again: a candidate chosen by
+    #: Top-K operators must not then be pruned by a full-vocabulary beam metric.
+    #: One support, consumed by the operators AND by the measurer, makes that
+    #: disagreement unexpressible -- and the measurer is asked for its own support
+    #: at construction, below, rather than trusted to match.
+    #:
+    #: `FULL_VOCAB_V1` is the historical default and is OMITTED from `as_dict`, so
+    #: every committed search keeps the `config_hash` its own record carries.
+    #: `src/aadistill` holds no `top_k` value: a campaign's K is the experiment
+    #: layer's, supplied as a `DistributionSupport`.
+    distribution_support: DistributionSupport = FULL_VOCAB_V1
     #: The measurement protocol the injected measurer takes its numbers under,
     #: as declared by the driver that built it — `StateEvaluator` exposes it as
     #: `measurement_protocol_id`. ONE field covering the suite's content, the
@@ -291,6 +313,14 @@ class SearchConfig:
                 "position_policy_hash": self.position_policy.policy_hash}
                if self.position_policy.policy_hash
                != ALL_POSITIONS_V1.policy_hash else {}),
+            #: ABSENT at the full vocabulary, present otherwise -- the same rule
+            #: and the same reason as `position_policy` above. A search recorded
+            #: before this field existed reduced over the whole vocabulary, so it
+            #: must still hash to the value its own record carries; a search that
+            #: coarsens the partition gets a different `config_hash`, which is the
+            #: point of putting it here.
+            **({} if self.distribution_support.is_full_vocab else
+               {"distribution_support": self.distribution_support.as_dict()}),
             #: ABSENT when undeclared, for the same compatibility reason: a
             #: search recorded before measurement-protocol identity existed must
             #: still hash to the value its own record carries.
@@ -429,6 +459,34 @@ class BeamSearch:
                 f"its measurer reports {str(measurer_protocol)[:12]}. Refused at "
                 "construction rather than at the first measurement, because "
                 "every state measured in between would have to be discarded.")
+        #: ONE PARTITION FOR THE OPERATORS AND THE MEASURER, checked rather than
+        #: assumed. The protocol id above is a hash and cannot be decoded, so
+        #: agreeing on it proves nothing about the support when a driver declares
+        #: neither. This is the hazard `position_policy` was given a run-level home
+        #: to prevent, in its other half: candidates chosen by a Top-K objective
+        #: and then pruned by a full-vocabulary beam metric would be one
+        #: experiment in name and two in fact.
+        #:
+        #: A COURTESY, NOT THE GUARANTEE. Every driver in this repository wraps
+        #: its evaluator in a `lambda model, digest: ...`, so this attribute is
+        #: invisible on the usual path and this check usually does nothing. The
+        #: load-bearing one is per measurement, in `_materialize_and_measure`,
+        #: which reads what the measurer actually REDUCED OVER out of its own
+        #: detail and therefore cannot be hidden by wrapping. This one exists
+        #: because when it CAN see the measurer it fails before the first
+        #: expensive measurement rather than after it.
+        #:
+        #: A measurer that exposes no support is historical and is taken to be
+        #: full-vocabulary, which is what it was.
+        measurer_support = getattr(measurer, "distribution_support", None)
+        if measurer_support is not None:
+            mine = self.config.distribution_support
+            if measurer_support.support_id != mine.support_id:
+                raise SearchError(
+                    f"this search reduces over {mine.support_id} and its measurer "
+                    f"reduces over {measurer_support.support_id}. The operators "
+                    "would choose candidates under one partition and the beam "
+                    "would prune them under another. Refused at construction.")
         self.measurement_protocol_id = (
             declared or (str(measurer_protocol) if measurer_protocol else None))
 
@@ -638,6 +696,29 @@ class BeamSearch:
                 "beam metric must consume ONE policy; a candidate selected on "
                 "supervised positions and pruned on all of them is two "
                 "experiments reported as one.")
+        #: AND THE SAME VOCABULARY PARTITION, per measurement. The construction
+        #: check above asks the measurer what support it holds; this reads what it
+        #: actually REDUCED OVER, which is the thing a candidate was pruned on. A
+        #: measurer whose support changed mid-run -- a second evaluator, a rebuilt
+        #: one, a cache restored from another protocol -- passes construction and
+        #: fails here.
+        #:
+        #: Absent means the full vocabulary, for the same reason the policy check
+        #: reads an absent policy as the incumbent: every evaluation written before
+        #: this field existed reduced over every entry. `ReductionSemantics`
+        #: serializes the key only under a coarsened partition.
+        measured_support = ((evaluation.detail or {}).get("reduction") or {}).get(
+            "distribution_support") or {"support_id": FULL_VOCAB_V1.support_id}
+        expected_support = self.config.distribution_support.as_dict()
+        if measured_support != expected_support:
+            state.mark_invalid(
+                f"the measurer reduced over {measured_support} but this search "
+                f"runs {expected_support}")
+            raise SearchError(
+                f"{state.state_id}: {state.invalid_reason}. The operators and the "
+                "beam metric must reduce over ONE partition; a candidate selected "
+                "on a Top-K objective and pruned on a full-vocabulary metric is "
+                "two experiments reported as one.")
         #: AND THE WHOLE PROTOCOL, not only the policy. The check above catches
         #: a measurer scoring other POSITIONS; this catches the rest of the list
         #: — a measurer whose suite content, scoring content, reduction semantics
@@ -710,7 +791,8 @@ class BeamSearch:
     def _expand_one(self, parent: InitializationState, impl: OperatorImplementation,
                     profile: CalibrationProfile) -> InitializationState:
         operator_config = {"n_calibration_items": len(self.calibration_for(profile)),
-                           **self._position_policy_config(impl, profile)}
+                           **self._position_policy_config(impl, profile),
+                           **self._distribution_support_config()}
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
         config_hash = sha256_json(
             {k: v for k, v in operator_config.items() if k != "n_calibration_items"})
@@ -742,6 +824,10 @@ class BeamSearch:
             stats_cache_key=self._stats_key(parent, profile),
             execution=self.execution,
             position_policy=self.config.position_policy,
+            #: THE OBJECT, whose declaration went into `operator_config` above.
+            #: `OperatorImplementation.execute` refuses a disagreement between the
+            #: two, so passing one without the other fails closed.
+            distribution_support=self.config.distribution_support,
             deadline=self.deadline)
 
         # Before the expansion, so a budget already spent does not buy one more
@@ -813,6 +899,31 @@ class BeamSearch:
             return {}
         items = self.calibration_for(profile)
         return {**named, **scoring_content_config(items, policy)}
+
+    def _distribution_support_config(self) -> dict[str, Any]:
+        """The vocabulary partition as HASHED operator config, or `{}`.
+
+        In `operator_config` rather than in `ctx.execution` for the same reason as
+        the position policy: it changes what is computed, so two searches whose
+        operators reduce over different partitions reach different leaves and must
+        not share a `config_hash`.
+
+        **Omitted at the full vocabulary**, which preserves a recorded identity
+        rather than tidying one away: every committed state hashed an operator
+        config without this key, and emitting it now -- even as
+        `{"support": "full_vocab_v1"}` -- would change 785 historical
+        `measurement_protocol_id`s and every `config_hash` beside them.
+
+        Not restricted to calibrated operators, unlike the position policy. A
+        support reaches an operator through `OperatorContext` whether or not that
+        operator consumes calibration items, and an operator that ignores it is
+        free to; what must not happen is a declaration that disagrees with the
+        object, which `execute` refuses.
+        """
+        support = self.config.distribution_support
+        if support.is_full_vocab:
+            return {}
+        return {"distribution_support": support.as_dict()}
 
     def _materialization_for(self, semantic_state_id: str,
                              parent: InitializationState,

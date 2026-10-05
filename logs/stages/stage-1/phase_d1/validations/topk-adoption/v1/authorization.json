@@ -1,0 +1,28 @@
+{
+ "_authorizes": "engineering execution only, inside the existing engineering allowance and project cap. Formal D1 remains NOT AUTHORIZED and phase_d1 is not added to funds_formal_sessions_of.",
+ "_book_does_not_transfer": "the engineering allowance is a different book from the formal one and does not transfer into it. Spending this closes none of D1's blockers.",
+ "all_in_ceiling_usd": 8.0,
+ "authorization_id": "d_series_topk_adoption",
+ "baseline": "the completed full-vocabulary GPU qualification, logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json",
+ "book": "ENGINEERING",
+ "covers": [
+  "the reference Top-200 probability mass distribution on the real calibration mixture (item 10A)",
+  "full-vocabulary vs K+1 KL on the same logits: absolute, relative, rank, worst observed (10B)",
+  "one real target-aware batched DEPTH path with BOTH scores per candidate from the same forwards (10C)",
+  "state evaluation under both supports: equal-domain KL, worst domain, critical-token KL, candidate ordering (10D)",
+  "performance: sketch bytes, reference recomputes, DEPTH wall clock, state-eval peak memory and wall clock (10E)"
+ ],
+ "decision_record": "logs/budget/decisions.md 2026-10-04",
+ "does_not_cover": [
+  "any formal D1/D2/D3 measurement",
+  "recovery training",
+  "behavioural screening or confirmation",
+  "a formal search",
+  "promotion of any candidate",
+  "a scientific GO/NO-GO",
+  "any K other than 200 -- there is NO sweep and K must not be tuned against outcomes",
+  "rebuilding the frozen behavioural family"
+ ],
+ "granted_utc": "2026-10-04T00:00:00Z",
+ "schema": "aadistill.engineering_authorization/v1"
+}

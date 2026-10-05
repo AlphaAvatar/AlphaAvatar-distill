@@ -1,0 +1,21 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 1.868, "stage": "environment", "status": "ok", "t": 1.868}
+{"stage": "register_and_policy", "status": "start", "t": 1.869}
+{"seconds": 0.042, "stage": "register_and_policy", "status": "ok", "t": 1.911}
+{"stage": "bind_full_vocab", "status": "start", "t": 1.911}
+{"seconds": 0.045, "stage": "bind_full_vocab", "status": "ok", "t": 1.956}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 1.956}
+{"seconds": 0.041, "stage": "bind_reference_topk_tail", "status": "ok", "t": 1.998}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 1.998}
+{"seconds": 7.786, "stage": "teacher_fetch_verify", "status": "ok", "t": 9.785}
+{"stage": "C_depth_dual_scores", "status": "start", "t": 9.786}
+{"seconds": 1712.979, "stage": "C_depth_dual_scores", "status": "ok", "t": 1722.765}
+{"stage": "analyse_ABC", "status": "start", "t": 1722.773}
+{"seconds": 0.063, "stage": "analyse_ABC", "status": "ok", "t": 1722.836}
+{"stage": "D_state_eval_both_supports", "status": "start", "t": 1722.839}
+{"peak_gib": 20.339, "protocol": "d463a1dc6afbd778", "seconds": 10.729, "stage": "state_eval.full_vocab_v1", "status": "ok", "t": 1735.348}
+{"peak_gib": 20.492, "protocol": "9c9b0b43dc00b695", "seconds": 10.864, "stage": "state_eval.reference_topk_tail_v1", "status": "ok", "t": 1746.291}
+{"seconds": 24.122, "stage": "D_state_eval_both_supports", "status": "ok", "t": 1746.961}
+{"stage": "P_production_topk_timing", "status": "start", "t": 1746.962}
+{"error": "TypeError: tuple indices must be integers or slices, not str", "seconds": 5.84, "stage": "P_production_topk_timing", "status": "failed", "t": 1752.802}
+{"error": "tuple indices must be integers or slices, not str", "stage": "driver", "status": "failed", "t": 1752.803}

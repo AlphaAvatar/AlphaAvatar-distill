@@ -84,13 +84,54 @@ def _load(rel: str) -> dict[str, Any]:
     return json.loads(path.read_text())
 
 
+def _d_series_protocol() -> dict[str, Any]:
+    """The D-series scoring protocol, from its owner rather than retyped."""
+    from experiments.phase_d_series.scoring_protocol import describe
+
+    return describe()
+
+
 def hypothesis() -> dict[str, Any]:
     return {
+        #: CORRECTED 2026-10-04, and the correction narrows what D1 may claim.
+        #:
+        #: The full-vocabulary GPU qualification measured that
+        #: `all_v1 @ bsz=1` vs `all_v1 @ bsz=3` moves THREE of four fixed-path
+        #: operator selections, while `all_v1 @ bsz=3` vs
+        #: `supervised_target_v1 @ bsz=3` moved none of that path's selected
+        #: digests. So the position policy is not D1's only changed axis relative
+        #: to the historical incumbent -- the adopted bsz=3 execution protocol is
+        #: another, and it is the one that moved those selections. The maintainer
+        #: decision of 2026-10-04 adds a third: `reference_topk_tail_v1` at K=200.
+        #:
+        #: D1 is therefore an OPTIMIZATION/CHALLENGER experiment against incumbent
+        #: B over the combined protocol. It is NOT a clean causal attribution of
+        #: any improvement to position weighting, and a reading that treats it as
+        #: one would be attributing to the policy an effect three changes could
+        #: have produced.
         "question": (
-            "Does making structural scoring and global candidate evaluation "
-            "SUPERVISED-TARGET-AWARE produce a better initialization than the "
-            "incumbent full-sequence scoring, under the same operator set, the "
-            "same calibration data, the same beam and the same recovery recipe?"),
+            "Does the scalable D-series scoring protocol -- "
+            "reference_topk_tail_v1 at K=200, the adopted bsz=3 / "
+            "length_sorted_v1 execution protocol, and supervised-target-aware "
+            "scoring -- produce an initialization that, after the frozen recovery "
+            "recipe, outperforms the incoming incumbent B?"),
+        "claim_boundary": {
+            "it_is": ("an optimization/challenger experiment against incumbent B "
+                      "over the combined protocol"),
+            "it_is_NOT": ("a causal attribution of any improvement to position "
+                          "weighting alone"),
+            "why": ("three axes differ from the historical incumbent at once: the "
+                    "distribution support, the calibration batch size and the "
+                    "position policy. The qualification measured that the BATCH "
+                    "SIZE moves three of four fixed-path selections and the "
+                    "position policy moved none of them, so the policy is "
+                    "demonstrably not the dominant axis."),
+            "evidence": ("logs/stages/stage-1/phase_d1/validations/"
+                         "gpu-qualification/v1/closeout.json"),
+            "_what_would_be_needed_for_attribution": (
+                "a design that varies ONE axis at a time against a common "
+                "baseline. D1 does not do that and must not be read as if it did."),
+        },
         "why_it_might": (
             "every calibration-derived objective in the incumbent search is an "
             "expectation over EVERY token position of the mixture. For the 51 of "
@@ -101,7 +142,10 @@ def hypothesis() -> dict[str, Any]:
             "care about, which is a plausible misallocation of a fixed capacity "
             "budget — and it has never been varied, so there is no evidence "
             "either way."),
+        "scoring_protocol": _d_series_protocol(),
         "what_D1_changes": [
+            "DISTRIBUTION SUPPORT: KL is reduced over the reference's Top-200 "
+            "entries plus one aggregate tail bucket, not the full vocabulary",
             "DEPTH: the causal-KL mean is taken over supervised target "
             "positions only",
             "FFN: E[|a_j|] is an expectation with respect to supervised target "
@@ -286,22 +330,7 @@ def execution_protocol() -> dict[str, Any]:
     return {
         "micro_batch_size": 3,
         "calibration_batch_packing": "length_sorted_v1",
-        "_decision": (
-            "maintainer engineering decision after A3: batched execution is "
-            "adopted across every batchable path from D1 onward, not only "
-            "ATTENTION. A3 measured that it is NOT an optimization on "
-            "attention.activation_importance_v1 — 8-10% slower on the scorer "
-            "with no detectable correctness effect — so this is a uniformity "
-            "decision rather than a performance claim. The search ceiling below "
-            "is derived from UNBATCHED telemetry, which makes it a PROVISIONAL "
-            "PLANNING BASIS and NOT a bound: unbatched timing does not "
-            "upper-bound the batched implementation in either direction. A3 "
-            "measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 while "
-            "causal-KL's length-sorted packing won 1.1884x, and the net effect "
-            "on an expansion running all four operators is unmeasured. The "
-            "direction of the correction is unknown, so the figure sizes a "
-            "grant request rather than capping one; only the owed GPU "
-            "qualification can turn it into a price."),
+        "_decision": _batching_decision(),
         "_the_value_is_config_not_core": (
             "`3` is an experiment-policy number carried by ExecutionConfig. The "
             "core accepts 2, 4, 8 or a future token-budget batching policy with "
@@ -395,20 +424,7 @@ def search_stage() -> dict[str, Any]:
                      "width": SCHEDULE_V1.width,
                      "warmup_levels": SCHEDULE_V1.warmup_levels},
         "cost": cost,
-        "_cost_is_PROVISIONAL": (
-            "every cell of the per-expansion table was measured with an "
-            "UNBATCHED state evaluation and a one-item-per-forward statistics "
-            "pass. D1 runs both batched, and batching does NOT reliably reduce "
-            "the time per expansion: A3 measured the ATTENTION scorer 8.2-10.0% "
-            "SLOWER at batch 3 on three separate pods with the sign never "
-            "flipping, at +29.6% peak VRAM, while length-sorted packing won "
-            "1.1884x on causal-KL, whose 60,099 forwards each carry a fixed "
-            "ablation setup to amortize. Batching moves different operators in "
-            "different directions and the net effect on a D1 expansion is "
-            "UNMEASURED. These minutes are a planning ceiling to be refreshed "
-            "by the owed short GPU qualification, not a finalized authorization "
-            "price; no cell is adjusted on a predicted speed-up, because a "
-            "ceiling derived from a prediction is a prediction."),
+        "_cost_basis_status": _cost_basis_status(),
         "stops_at": (
             "commit_top_k. The search trains nothing, measures no behaviour and "
             "has no code path into a behavioural stage — the same boundary C2's "
@@ -597,6 +613,9 @@ def behavioural_design() -> dict[str, Any]:
 #: succeeds — the one moment a reader is most likely to trust it.
 QUALIFICATION_CLOSEOUT = ("logs/stages/stage-1/phase_d1/validations/"
                           "gpu-qualification/v1/closeout.json")
+#: The Top-K adoption validation, whose closeout is under corrective review.
+TOPK_ADOPTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
+                 "closeout.json")
 
 
 def _qualification_state() -> dict[str, Any]:
@@ -610,11 +629,20 @@ def _qualification_state() -> dict[str, Any]:
         }
     raw = path.read_bytes()
     doc = json.loads(raw)
+    #: TWO GPU ROUNDS NOW, and the status must not read as though both were
+    #: settled. The full-vocabulary qualification passed; the Top-K adoption was
+    #: reopened by an independent review over the tail arithmetic. A bare
+    #: "RUN -- PASSED" here would be the kind of status that is true of one thing
+    #: and read as true of everything.
+    topk = REPO / TOPK_ADOPTION
+    topk_state = ("ADOPTION UNDER CORRECTIVE REVIEW" if not topk.is_file()
+                  else json.loads(topk.read_text()).get("verdict", "unknown"))
     answers = doc.get("answers") or {}
     recon = answers.get("incumbent_reconstruction") or {}
     decisions = answers.get("discrete_decisions") or {}
     return {
-        "status": f"RUN -- {doc['verdict']}",
+        "status": (f"full-vocab qualification RUN -- {doc['verdict']}; "
+                   f"Top-K adoption: {topk_state}"),
         "_status_owner": QUALIFICATION_CLOSEOUT,
         "ran": {
             #: The closeout's PATH and CONTENT HASH, so this design is bound to
@@ -681,21 +709,47 @@ def gpu_validation_owed() -> dict[str, Any]:
             "host. Meta performs no arithmetic, so it answers placement and "
             "nothing else — which is the only question it is asked.",
         ],
-        "what_only_a_GPU_can_answer": [
-            "whether the batched state evaluation's measured peak matches the "
-            "derived `peak_logit_bytes` at the real 151,936 vocabulary, and "
-            "whether `batch_plan`'s budget is the right bound",
-            "whether the bf16 reductions move a SELECTION under the "
-            "target-aware policy, as they were measured to do under the "
-            "batching protocol — the operator decisions are integer choices "
-            "over float scores and a near-tie can flip",
-            "the real per-expansion time under batched statistics and batched "
-            "state evaluation. The unbatched cost table is a PROVISIONAL "
-            "PLANNING ESTIMATE whose direction relative to the batched "
-            "implementation is UNKNOWN -- it neither bounds nor describes it, "
-            "because A3 measured batching slower on the ATTENTION scorer and "
-            "packing faster on causal-KL, and the net across four operators "
-            "has never been measured",
+        "what_the_gpu_rounds_ANSWERED": {
+            "full_vocab_qualification": {
+                "status": "COMPLETE -- baseline engineering evidence",
+                "owner": QUALIFICATION_CLOSEOUT,
+                "answered": [
+                    "the incumbent fixed path reconstructs the frozen incumbent "
+                    "artifact identity on real CUDA, agreed across three pods",
+                    "the real state-eval peak memory at the real 151,936 "
+                    "vocabulary, and that the derived logit bound holds for what "
+                    "it claims while understating the reduction's transients",
+                    "that the CALIBRATION BATCH SIZE, not the position policy, "
+                    "moves three of four fixed-path operator selections",
+                    "the batched direction, which was UNKNOWN: batching costs "
+                    "x1.97 on the dominant DEPTH operator at all positions and "
+                    "x1.08 at the target-aware policy, so the policy's smaller "
+                    "reduction very nearly cancels the batching penalty",
+                ],
+            },
+            "topk_adoption": {
+                "status": ("UNDER CORRECTIVE REVIEW -- an independent review "
+                           "reopened it because the tail arithmetic was invalid "
+                           "at the numerical edge"),
+                "owner": TOPK_ADOPTION,
+                "what_is_being_corrected": (
+                    "the tail was reconstructed as `1 - sum(support)`, which "
+                    "crosses float32 resolution once the support holds nearly all "
+                    "the mass -- the measured support mass reached 1.000001 -- and "
+                    "one coarse KL consequently exceeded the full-vocabulary KL, "
+                    "which a coarsening cannot do. Repaired to compute the tail "
+                    "from the complement's own logits; the adoption evidence is "
+                    "being re-measured."),
+            },
+        },
+        "what_is_STILL_not_priced": [
+            "the PRODUCTION Top-K D1 search cost. The adoption validation "
+            "deliberately computes BOTH reducers from the same forwards, so its "
+            "wall clock includes work the formal Top-K path will not do and must "
+            "NOT be used as a production timing.",
+            "and therefore the per-session envelope, which stays UNRESOLVED "
+            "until a Top-K-only representative timing exists. The full-vocab "
+            "provisional basis is NOT the Top-K price.",
         ],
         "surface_that_owes_it": {
             "_what": ("files on the historically CUDA-validated surface that "
@@ -851,6 +905,430 @@ def _derived_budget() -> dict[str, Any]:
     return module.derive()
 
 
+#: The DEPTH implementation whose cell is rebuilt.
+DEPTH_IMPL = "depth.causal_kl_greedy_v1"
+
+#: The two calibration profiles D1's DEPTH step may run under. Both must be timed
+#: before a MAX exists: historical full-vocab evidence showed materially different
+#: DEPTH timings between them, so one profile's max is not the cell's max.
+D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
+
+#: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
+#:
+#: a8, which timed ONE REAL `impl.execute` invocation per DEPTH profile. a7 is NOT
+#: this pointer: it timed a reimplemented candidate loop that omitted the position
+#: weights, the `values.tolist()` host transfer, the per-subtype aggregation,
+#: `domain_balanced_score` and the reference-cache fill, and `candidates x
+#: per-candidate` is not the quantity `_expand_one` records as `operator_seconds`.
+#: `_topk_production_basis` refuses a record without `measurement_path`, so
+#: repointing this at a5, a6 or a7 yields no basis rather than a wrong price.
+TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
+                   "runs/a8/adoption.json")
+
+
+def non_operator_expansion_overhead() -> dict[str, Any] | None:
+    """The non-operator part of one DEPTH expansion, at its committed MAX.
+
+    Derived from the SAME telemetry and the SAME root/deeper resolution the
+    published cost table uses -- `full_search_space.non_operator_observations` --
+    so a rebuilt cell cannot disagree with the table about which observations are
+    roots. No GPU time is spent on phases already in committed telemetry.
+
+    MAX, not mean: the cell this feeds is a ceiling, and `CostModel`'s own
+    docstring says a ceiling built on a mean is not a ceiling.
+    """
+    from experiments.phase_c2.full_search_space import non_operator_observations
+
+    obs = non_operator_observations(REPO)
+    out: dict[str, Any] = {"_derived_from": ("the committed search telemetry, via "
+                                            "full_search_space."
+                                            "non_operator_observations")}
+    for scope in ("root", "deeper"):
+        values = obs.get((DEPTH_IMPL, scope)) or []
+        if not values:
+            return None
+        out[f"{scope}_max"] = round(max(values), 4)
+        out[f"{scope}_n"] = len(values)
+        out[f"{scope}_mean"] = round(sum(values) / len(values), 4)
+    out["_phases"] = ("parent_load, materialize, identify, canonical_reload, "
+                      "validation, state_evaluation -- everything an "
+                      "operator-only figure omits")
+    return out
+
+
+def a_deeper_parent_is_a_smaller_model() -> dict[str, Any]:
+    """Why a ROOT invocation prices the deeper DEPTH cell too.
+
+    MECHANICAL, not asserted, and generic -- no model family appears in it. A
+    deeper parent has already had other structural operators applied, and every
+    operator in the frozen set only SHRINKS the geometry it modifies, so its DEPTH
+    invocation runs a smaller model than the root's.
+
+    This needs establishing rather than reasoning about, because it is a property
+    of the operator/adapter contract rather than of this operator.
+    `tests/initialization/test_operators_only_shrink.py` applies every frozen
+    operator to a toy parent and asserts no structural field increases.
+
+    **It used to claim more than this, and no longer needs to.** While the
+    operator term was `candidates x per-candidate-max` measured in round 0, two
+    further premises were load-bearing -- that a growing skip set executes
+    non-increasingly many blocks, and that round 0 evaluates the most candidates.
+    The operator term is now ONE MEASURED INVOCATION covering every round, so
+    those two premises price nothing. They remain true and remain tested; they are
+    simply no longer part of this claim. Keeping them here would be a derivation
+    asserting more than its consumer needs.
+    """
+    return {
+        "claim": ("an invocation measured at the ROOT parent bounds the same "
+                  "operator at any deeper parent"),
+        "because": ("every frozen operator only shrinks the geometry it "
+                    "modifies, so a deeper parent runs a smaller model"),
+        "established_by": "tests/initialization/test_operators_only_shrink.py",
+        "_not_a_family_shortcut": (
+            "checked against the operator/adapter contract on a toy geometry, not "
+            "asserted for one model family, and nothing about it lives in "
+            "src/aadistill."),
+        "_no_longer_claimed_because_nothing_needs_it": (
+            "that round 0 bounds the later rounds. The priced operator term is a "
+            "whole invocation over all rounds, measured."),
+    }
+
+
+import contextlib
+
+
+def _measured_depth_cell() -> dict[str, Any] | None:
+    """The rebuilt DEPTH cell, or None while no production measurement exists."""
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    return {"root_max": basis["root_max_minutes"],
+            "deeper_max": basis["deeper_max_minutes"],
+            "operator_minutes": basis["operator_minutes_at_max"],
+            "invocation_seconds": basis["operator_invocation_seconds_max"]}
+
+
+def _batching_decision() -> str:
+    """The batching decision, with its measurement status DERIVED.
+
+    This used to end "the direction of the correction is unknown, so the figure
+    sizes a grant request rather than capping one; only the owed GPU qualification
+    can turn it into a price". Both halves became false — the qualification ran and
+    the DEPTH cell is now a measured invocation — and a sentence that describes an
+    owed measurement after it has been taken is how a reader concludes a design is
+    less ready than it is.
+    """
+    head = (
+        "maintainer engineering decision after A3: batched execution is adopted "
+        "across every batchable path from D1 onward, not only ATTENTION. A3 "
+        "measured that it is NOT an optimization on "
+        "attention.activation_importance_v1 -- 8-10% slower on the scorer with no "
+        "detectable correctness effect -- so this is a uniformity decision rather "
+        "than a performance claim. ")
+    cell = _measured_depth_cell()
+    if cell is None:
+        return head + (
+            "The search ceiling below is derived from UNBATCHED telemetry, which "
+            "makes it a PROVISIONAL PLANNING BASIS and NOT a bound: unbatched "
+            "timing does not upper-bound the batched implementation in either "
+            "direction, and the net effect on an expansion running all four "
+            "operators is unmeasured. The figure sizes a grant request rather "
+            "than capping one until a production measurement exists.")
+    return head + (
+        f"THE DEPTH CELL IS NOW MEASURED, batched and under the production "
+        f"protocol: one real `impl.execute` invocation of "
+        f"{cell['invocation_seconds']} s ({cell['operator_minutes']} min), the max "
+        f"of both calibration profiles, rebuilt end to end into "
+        f"{cell['root_max']} min at the root. The other three cells keep their "
+        "unbatched committed basis, which overstates rather than understates, so "
+        "the search session's price is a bound and not a plan.")
+
+
+def _cost_basis_status() -> str:
+    """Which cells are measured and which are a planning basis. Derived."""
+    cell = _measured_depth_cell()
+    tail = (
+        "A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 on three "
+        "separate pods with the sign never flipping, at +29.6% peak VRAM, while "
+        "length-sorted packing won 1.1884x on causal-KL. Batching moves different "
+        "operators in different directions, so no cell is adjusted on a predicted "
+        "speed-up: a ceiling derived from a prediction is a prediction.")
+    if cell is None:
+        return ("PROVISIONAL. Every cell of the per-expansion table was measured "
+                "with an UNBATCHED state evaluation and a one-item-per-forward "
+                "statistics pass, and D1 runs both batched. " + tail)
+    return (f"MIXED, and the dominant cell is MEASURED. {DEPTH_IMPL} is "
+            f"{cell['root_max']} min at the root, rebuilt from one real batched "
+            f"`impl.execute` invocation under the production protocol. The other "
+            f"three cells keep their UNBATCHED committed basis: they are a "
+            f"planning basis that overstates, which is the safe direction for a "
+            f"ceiling. " + tail)
+
+
+def _rebuilt_cost_model():
+    """The frozen cost model with the DEPTH cell rebuilt, or None if unmeasured.
+
+    One builder, called by the session price and by the whole-chain price, so the
+    two cannot be computed from different models. It is deliberately NOT a record
+    field: a `CostModel` is not serializable, and what a reader needs -- the cell
+    before, the cell after and which cells were left alone -- is recorded already.
+    """
+    import dataclasses
+
+    from experiments.phase_d1 import search_space as d1
+
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    _ensure_the_frozen_operators_are_registered()
+    frozen = d1.cost_model()
+    minutes = {k: dict(v) for k, v in frozen.minutes.items()}
+    before = dict(minutes[DEPTH_IMPL])
+    rebuilt = {"root_max": basis["root_max_minutes"],
+               "deeper_max": basis["deeper_max_minutes"],
+               #: THE MAX IN BOTH SLOTS: an expected figure must not weaken a
+               #: ceiling, and two invocations is not a distribution.
+               "root_mean": basis["root_max_minutes"],
+               "deeper_mean": basis["deeper_max_minutes"]}
+    minutes[DEPTH_IMPL] = {k: rebuilt[k] for k in before if k in rebuilt}
+    return dataclasses.replace(
+        frozen, minutes=minutes,
+        source=(f"{frozen.source} -- with {DEPTH_IMPL} REBUILT END TO END as ONE "
+                f"MEASURED production Top-K operator invocation "
+                f"({basis['operator_invocation_seconds_max']} s over "
+                f"{basis['candidate_subsets_measured']} candidate subsets, the max "
+                f"of both DEPTH profiles) PLUS the committed non-operator MAX for "
+                f"the scope, from {TOPK_PRODUCTION}"))
+
+
+def _evidence_authorizes_note() -> str:
+    """What the behavioural evidence does and does not settle.
+
+    It said "the funding scope and the per-session envelope are separate and still
+    open" -- true when both were. The envelope resolved on measurement, so the
+    sentence survived its own subject and described a blocker that had closed.
+    """
+    #: NO `budget()` CALL HERE. `budget()` reaches `evidence()`, so asking it what
+    #: is open is a cycle -- it hung the writer for ten minutes before a
+    #: faulthandler dump named it. The derived list already exists, once, in
+    #: `open_blockers`; this field points at it instead of restating it, which is
+    #: how it came to describe a blocker that had closed.
+    return ("nothing. The evidence exists and settles only that the behavioural "
+            "family can be built. Every other precondition is separate and is "
+            "listed, derived, in `open_blockers`.")
+
+
+def _shortfall_note(chain: dict[str, Any], project_remaining: float) -> str:
+    """The gap between the chain ceiling and the live balance, and WHAT it is.
+
+    Derived, because the answer changed. While every cell came from unbatched
+    telemetry the gap was a planning figure whose direction was unknown. The DEPTH
+    cell is now a measured batched invocation and the other three keep a basis that
+    OVERSTATES, so the chain ceiling is a bound -- and the gap is the minimum a
+    grant would have to cover, not a number whose sign is unknown.
+    """
+    gap = round(chain["hard_ceiling_usd"] - project_remaining, 4)
+    cell = _measured_depth_cell()
+    if cell is None:
+        return (f"THE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = "
+                f"${gap} is the gap between a planning basis derived from "
+                "UNBATCHED telemetry and the live balance. It is NOT the "
+                "finalized amount by which the project cap must increase: the "
+                "direction of the batched correction is unknown. This document "
+                "does not claim the cap must move by that amount.")
+    return (f"THE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL "
+            f"PROVISIONAL. `provisional_shortfall_usd` = ${gap} is the gap between "
+            f"the chain hard ceiling of ${chain['hard_ceiling_usd']} and the live "
+            f"balance. The dominant cell is MEASURED -- {DEPTH_IMPL} at "
+            f"{cell['root_max']} min from one real batched invocation -- and the "
+            "three unmeasured cells keep an unbatched basis that OVERSTATES, so "
+            "the ceiling is a bound and a grant smaller than this gap cannot fund "
+            "the chain. It remains PROVISIONAL because those three cells are not "
+            "measured, so it is NOT the finalized amount by which the project cap "
+            "must increase: this document does not claim what the cap should "
+            "become, which is a maintainer decision.")
+
+
+@contextlib.contextmanager
+def _measured_cost_model(adjusted):
+    """Price through the EXISTING machinery with the rebuilt DEPTH cell in place.
+
+    A context manager rather than two copies of the swap, because the search
+    session and the whole chain must be priced on ONE cost model: a chain summed
+    from a frozen-model screening rung and a measured-model search session is
+    still one number, and nothing would say which model produced it.
+    """
+    from experiments.phase_d1 import search_space as d1
+
+    original = d1.cost_model
+    d1.cost_model = lambda *a, **k: adjusted
+    try:
+        yield
+    finally:
+        d1.cost_model = original
+
+
+def _topk_production_basis() -> dict[str, Any] | None:
+    """The measured Top-K DEPTH cell, END TO END, or None if not yet valid.
+
+    **An operator-only number is not an expansion cell, and a mean is not a
+    ceiling.** Both of those were wrong here and an independent review caught
+    them:
+
+    * `CostModel` defines every cell as ONE EXPANSION end to end -- operator,
+      parent load, materialize, identify, canonical reload, validation and state
+      evaluation. The first version of this function replaced the whole DEPTH cell
+      with the operator's candidate work alone, which DELETED about 3.07 min of
+      non-operator cost per expansion. The comment claiming those phases stayed in
+      the frozen cell was false: the cell was replaced entire.
+    * `CostModel`'s own docstring says a ceiling built on `mean` is not a ceiling.
+      a5 timed 12 round-0 candidates and stored `total / 12`, and that mean was
+      promoted into `root_max` and `deeper_max`.
+
+    So this now REFUSES to produce a basis unless the record carries what a
+    ceiling needs: a per-candidate MAX, measured for BOTH D1 DEPTH calibration
+    profiles, plus the non-operator overhead derived from committed telemetry. Any
+    older record -- a5's included -- yields None, and the envelope is therefore
+    UNRESOLVED rather than resolved on an invalid figure.
+    """
+    path = REPO / TOPK_PRODUCTION
+    if not path.is_file():
+        return None
+    doc = json.loads(path.read_text())
+    P = doc.get("P_production_timing") or {}
+    profiles = P.get("per_profile") or {}
+    #: WHAT A VALID CEILING NEEDS, and the marker is the first of them. A record
+    #: without `measurement_path == "operator_execute_v1"` came from the
+    #: superseded shadow loop, which reimplemented the candidate inner loop and so
+    #: never paid the position weights, the `values.tolist()` host transfer, the
+    #: per-subtype aggregation, `domain_balanced_score` or the reference-cache
+    #: fill. Those records -- a5's, a6's and a7's -- yield None here, and the
+    #: envelope is therefore UNRESOLVED rather than resolved on a shadow.
+    required = {"per_profile", "measurement_path",
+                "operator_invocation_seconds_max"}
+    if not required <= set(P) or not profiles:
+        return None
+    if P.get("measurement_path") != "operator_execute_v1":
+        return None
+    #: A SYNCED RUN CANNOT PRICE. Splitting forward from reduction needs a
+    #: synchronize after each phase, which inflates the per-candidate totals --
+    #: the DEPTH operator's own source says so. Such a record describes the split
+    #: and must not reach a ceiling.
+    #: FAIL CLOSED: the field must be PRESENT and true. A record that does not
+    #: say whether it synced cannot be trusted to price -- a6's does not say, and
+    #: a6 synced unconditionally.
+    if P.get("_valid_for_pricing") is not True or P.get("sync_split_enabled"):
+        return None
+    if set(profiles) != set(D1_DEPTH_PROFILES):
+        return None
+    overhead = non_operator_expansion_overhead()
+    if overhead is None:
+        return None
+
+    #: ONE MEASURED INVOCATION, not a candidate count times a per-candidate max.
+    #: `BeamSearch._expand_one` records `operator_seconds` around
+    #: `impl.execute(ctx)`, so a whole invocation IS the quantity the committed
+    #: cost table holds -- packing, the reference-cache fill, every candidate of
+    #: every round, the greedy bookkeeping and the child construction. Nothing is
+    #: extrapolated and no fixed term has to be added back.
+    operator_minutes = float(P["operator_invocation_seconds_max"]) / 60.0
+    per_profile_invocations = {
+        k: v.get("operator_invocation_seconds") for k, v in profiles.items()}
+    candidates = max((int(v.get("candidate_subsets") or 0)
+                      for v in profiles.values()), default=0)
+    if not candidates:
+        return None
+    return {
+        "owner": TOPK_PRODUCTION,
+        "operator_invocation_seconds_max": float(
+            P["operator_invocation_seconds_max"]),
+        "operator_invocation_seconds_per_profile": per_profile_invocations,
+        "candidate_subsets_measured": candidates,
+        "per_profile": profiles,
+        "operator_minutes_at_max": round(operator_minutes, 4),
+        "non_operator_overhead_minutes": overhead,
+        "root_max_minutes": round(operator_minutes + overhead["root_max"], 4),
+        "deeper_max_minutes": round(operator_minutes + overhead["deeper_max"], 4),
+        "_the_cell_is_END_TO_END": (
+            "ONE MEASURED OPERATOR INVOCATION at the max over both DEPTH "
+            "calibration profiles, plus the non-operator phases of one expansion "
+            "at their committed-telemetry MAX. The operator term is not "
+            "`candidates x per-candidate`: that product omits the reference-cache "
+            "fill, the packing, the greedy bookkeeping and the child "
+            "construction, all of which historical `operator_seconds` includes."),
+        "_why_the_root_bounds_the_deeper_cell": (
+            "see `bounds_the_deeper_parents`. The whole invocation is measured, "
+            "so nothing rests on round 0 bounding the later rounds any more."),
+    }
+
+
+def _envelope_compatibility(topk: dict[str, Any] | None,
+                            envelope_usd: float) -> str:
+    """`RESOLVED_FITS` / `RESOLVED_NEEDS_RAISE` / `UNRESOLVED`, from measurement.
+
+    Three states and no fourth. A measured session price inside the envelope
+    resolves it; outside, the envelope would have to move; and with no production
+    Top-K timing there is nothing to resolve it with.
+    """
+    if topk is None:
+        return "UNRESOLVED"
+    priced = topk["search_session"]["hard_ceiling_usd"]
+    return "RESOLVED_FITS" if priced <= envelope_usd else "RESOLVED_NEEDS_RAISE"
+
+
+def topk_search_cost() -> dict[str, Any] | None:
+    """The SEARCH session priced with a correctly rebuilt END-TO-END DEPTH cell.
+
+    Runs the EXISTING cost machinery -- `search_space.search_cost`, which calls
+    `search_cost_model.bound` -- against a cost model whose DEPTH cell is
+    rebuilt, and implements no second pricing formula.
+
+    THE CELL IS END TO END, which is the correction an independent review
+    required. `CostModel` defines a cell as one whole expansion: operator, parent
+    load, materialize, identify, canonical reload, validation, state evaluation.
+    So the rebuilt cell is
+
+        measured Top-K operator MAX  +  committed non-operator MAX for that scope
+
+    and the earlier version -- which replaced the whole cell with the operator
+    term alone -- deleted about 3.07 min of real cost from every root expansion.
+
+    The other three cells are untouched. They reduce activation statistics rather
+    than KL, so the distribution support cannot move them, and keeping their
+    frozen values overstates rather than understates.
+
+    EXPECTED pricing uses the MAX too. An expected-cost figure is not allowed to
+    weaken an authorization ceiling, and no justified Top-K mean exists: the
+    measured distribution is over round-0 candidates at the root, which is the
+    bound rather than the average case.
+    """
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
+    from experiments.phase_d1 import search_space as d1
+
+    _ensure_the_frozen_operators_are_registered()
+    before = dict(d1.cost_model().minutes[DEPTH_IMPL])
+    adjusted = _rebuilt_cost_model()
+    with _measured_cost_model(adjusted):
+        priced = d1.search_cost(price_per_hour=PRICE_PER_HOUR_LAST_QUOTED)
+    return {
+        "basis": basis,
+        "bounds_the_deeper_parents": a_deeper_parent_is_a_smaller_model(),
+        "depth_cell_before": before,
+        "depth_cell_after": dict(adjusted.minutes[DEPTH_IMPL]),
+        "search_session": priced,
+        "_priced_by": ("experiments.phase_d1.search_space.search_cost, which "
+                       "calls search_cost_model.bound. No second pricing formula "
+                       "exists here."),
+        "_other_three_cells_unchanged": (
+            "ffn.activation_importance_v0, width.global_pca_v0 and "
+            "attention.activation_importance_v1 reduce activation statistics, "
+            "not KL, so the distribution support cannot move them."),
+    }
+
+
 def budget() -> dict[str, Any]:
     from experiments.phase_d1 import search_space as d1
     from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
@@ -859,9 +1337,23 @@ def budget() -> dict[str, Any]:
     _ensure_the_frozen_operators_are_registered()
 
     design = behavioural_design()
-    chain = d1.chain_cost(
-        screening_probes=design["screening_probes"],
-        confirmation_probes=design["confirmation_probes"])
+    #: The measured production Top-K basis, or None before it is measured.
+    topk = topk_search_cost()
+    #: THE WHOLE CHAIN ON THE MEASURED MODEL, through `chain_cost` -- which calls
+    #: the same `search_cost` the session price came from, and leaves the screening
+    #: and confirmation rungs exactly as they were, since a behavioural probe
+    #: reduces no KL and a distribution support cannot move it. Derived, never
+    #: typed: the chain total is `sum(session hard ceilings)` computed by
+    #: `chain_cost`, not a figure restated here.
+    if topk is not None:
+        with _measured_cost_model(_rebuilt_cost_model()):
+            chain = d1.chain_cost(
+                screening_probes=design["screening_probes"],
+                confirmation_probes=design["confirmation_probes"])
+    else:
+        chain = d1.chain_cost(
+            screening_probes=design["screening_probes"],
+            confirmation_probes=design["confirmation_probes"])
     terms = _load(BUDGET_TERMS)["execution_package"]
     pricing = _load(BUDGET_TERMS)["accepted_pricing"]
     live = _derived_budget()
@@ -878,26 +1370,40 @@ def budget() -> dict[str, Any]:
                 "re-derived from it."),
         },
         "chain": chain,
-        "price_status": "PROVISIONAL PLANNING BASIS -- DIRECTION UNKNOWN",
+        "price_status": (
+            "MEASURED PRODUCTION TOP-K BASIS for the search session: "
+            f"${topk['search_session']['hard_ceiling_usd']:.4f} hard ceiling from "
+            f"an END-TO-END DEPTH cell whose operator term is ONE MEASURED "
+            f"`impl.execute` invocation "
+            f"({topk['basis']['operator_minutes_at_max']:.4f} min, the max of both "
+            f"DEPTH profiles) plus the committed non-operator MAX. The chain's "
+            "other sessions keep their full-vocab basis."
+            if topk else
+            "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched "
+            "direction is now MEASURED; the production Top-K cost is not. A "
+            "per-candidate measurement does not supply it: the cost table holds "
+            "whole-invocation `operator_seconds`."),
         "_price_status": (
             "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a "
-            "finalized authorization price and NOT a proven upper bound on "
-            "the batched implementation. Two reasons, and the first is the "
-            "one that matters:\n\n"
-            "1. the per-expansion minutes were measured on an UNBATCHED state "
-            "evaluation and a one-item-per-forward statistics pass, and D1 runs "
-            "both batched. A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at "
-            "batch 3; causal-KL's length-sorted packing won 1.1884x. The net "
-            "effect on a D1 expansion running all four operators is UNMEASURED, "
-            "so the direction of the correction is unknown, not merely its "
-            "size.\n"
-            "2. `securePrice` is re-queried live at authorization, so every "
+            "finalized authorization price. What has changed and what has not:\n\n"
+            "MEASURED, by the full-vocabulary GPU qualification: the batched "
+            "direction, which this field used to call UNKNOWN. Batching costs "
+            "x1.97 on the dominant DEPTH operator at all positions and x1.08 at "
+            "the target-aware policy, so the policy's smaller reduction very "
+            "nearly cancels the penalty. Against the frozen per-cell table that "
+            "means it does NOT bound the all-positions bsz=3 case (39.117 over a "
+            "34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a "
+            "29.248 mean).\n\n"
+            "STILL NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion "
+            "minutes come from FULL-VOCABULARY telemetry, and D1 will run "
+            "reference_topk_tail_v1. The adoption validation's wall clock is not "
+            "a substitute: it deliberately computes BOTH reducers from the same "
+            "forwards and therefore includes work the formal path will not do.\n\n"
+            "AND `securePrice` is re-queried live at authorization, so every "
             "dollar figure here is a derived consequence of an hour-old quote.\n\n"
-            "WHAT MUST REFRESH IT: a short GPU qualification measuring real "
-            "CUDA/bf16 execution, the real state-eval memory peak, the "
-            "target-aware batched path's correctness, and the actual timing of "
-            "a representative expansion. Until that runs, these numbers size a "
-            "grant request; they do not price one."),
+            "WHAT MUST REFRESH IT: a Top-K-only representative expansion timing. "
+            "Until that exists these numbers size a grant request; they do not "
+            "price one."),
         "sessions": 3,
         "_why_three_sessions": (
             "the search commits a candidate set and stops; the screening rung "
@@ -906,55 +1412,41 @@ def budget() -> dict[str, Any]:
             "advances. Each is separately priced and separately authorized."),
         "per_session_envelope_usd": terms["per_attempt_hard_ceiling_usd"],
         #: PROVISIONAL IN THE NAME, not only in a docstring. These compare a
-        #: planning basis derived from UNBATCHED telemetry against a real
-        #: envelope, and the comparison's direction relative to measured batched
-        #: D1 is unknown. A field called `fits_per_session_envelope` would be
-        #: read later as a finalized authorization fact; this one cannot be.
+        #: planning basis derived from FULL-VOCABULARY telemetry against a real
+        #: envelope, while D1 will run `reference_topk_tail_v1` -- so the
+        #: comparison is against the wrong protocol, not merely an unmeasured
+        #: direction. A field called `fits_per_session_envelope` would be read
+        #: later as a finalized authorization fact; this one cannot be.
         "provisional_basis_fits_per_session_envelope":
             chain["max_session_hard_ceiling_usd"]
             <= terms["per_attempt_hard_ceiling_usd"],
         "provisional_per_session_excess_usd": round(
             chain["max_session_hard_ceiling_usd"]
             - terms["per_attempt_hard_ceiling_usd"], 4),
-        "per_session_envelope_compatibility": "UNRESOLVED",
+        "per_session_envelope_compatibility": _envelope_compatibility(
+            topk, terms["per_attempt_hard_ceiling_usd"]),
+        "topk_production_basis": topk,
         "_per_session_envelope_compatibility": (
-            "UNRESOLVED, and it BLOCKS AUTHORIZATION while it is. It is not "
-            "RESOLVED-INCOMPATIBLE: nothing has measured the batched D1 search, "
-            "so it is NOT established that the real session exceeds "
-            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
-            "basis says it would, by "
-            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
-            "and an unresolved compatibility is a blocker because authorization "
-            "needs a figure it can bind — not because the incompatibility is "
-            "proven. THE OWED GPU QUALIFICATION IS WHAT RESOLVES THIS — this "
-            "one it genuinely can, because the question is a price. It does NOT "
-            "resolve the funding AUTHORIZATION blocker, which is a scope fact "
-            "no measurement reaches."),
-        "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": (
-            "WHAT IS DEFINITE: per-session envelope compatibility is "
-            "UNRESOLVED, and an unresolved compatibility blocks authorization. "
-            "This is a SEPARATE constraint from the project-level cap — "
-            "`per_attempt_hard_ceiling_usd` binds each session independently, "
-            "and the C1 authorization shows the grant issuer refusing a session "
-            "price that disagreed with its pricing file — so a D1 grant that "
-            "moved only the cumulative cap would still not authorize the search "
-            "session.\n\n"
-            "WHAT IS NOT ESTABLISHED: that the real batched D1 search exceeds "
-            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. The provisional "
-            "basis puts the search session at "
-            f"${chain['max_session_hard_ceiling_usd']:.4f}, over by "
-            f"${round(chain['max_session_hard_ceiling_usd'] - terms['per_attempt_hard_ceiling_usd'], 4)}, "
-            "but that basis comes from UNBATCHED telemetry whose direction "
-            "relative to the batched implementation is unknown. The measured "
-            "session could land either side of the envelope, so this document "
-            "does NOT claim the search has been shown not to fit.\n\n"
-            "WHAT RESOLVES IT: the owed short GPU qualification, which prices a "
-            "representative batched expansion. ONLY THEN is the envelope "
-            "question answerable, and only then can a grant choose between "
-            "raising the per-session envelope for the phase, splitting the "
-            "search into sessions that each fit, or a cheaper search protocol. "
-            "That resolution is a maintainer decision recorded as one, never "
-            "inferred from a cap change."),
+            "DERIVED from the measured production Top-K session price against "
+            f"${terms['per_attempt_hard_ceiling_usd']:.2f}. RESOLVED_FITS means "
+            "the measured session ceiling is inside the envelope; "
+            "RESOLVED_NEEDS_RAISE means it is outside and the envelope would have "
+            "to move; UNRESOLVED means no production Top-K timing exists yet, "
+            "which blocks authorization because authorization needs a figure it "
+            "can bind -- not because incompatibility is proven.\n\n"
+            "THE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They "
+            "are historical planning evidence from UNBATCHED telemetry for a "
+            "protocol D1 will not run. `open_blockers` used to require both this "
+            "field AND that the provisional basis fit, so a measurement proving "
+            "D1 fits would have stayed blocked by an estimate it supersedes."),
+        #: DERIVED from the live compatibility state. It used to assert
+        #: UNRESOLVED unconditionally, which contradicts the measured value
+        #: whenever one exists.
+        "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": _envelope_blocker_note(
+            budget_section_compatibility=_envelope_compatibility(
+                topk, terms["per_attempt_hard_ceiling_usd"]),
+            envelope_usd=terms["per_attempt_hard_ceiling_usd"],
+            topk=topk),
         "position": {
             "project_cap_usd": float(live["project"]["cap_usd"]),
             "project_remaining_usd": project_remaining,
@@ -987,14 +1479,7 @@ def budget() -> dict[str, Any]:
             "allowance covers it at any price. A maintainer grant is required "
             "for the phase. That alone blocks D1 and does not depend on any "
             "cost estimate.\n\n"
-            "THE SHORTFALL IS PROVISIONAL. "
-            f"`provisional_shortfall_usd` = ${round(chain['hard_ceiling_usd'] - project_remaining, 4)} "
-            "is the gap between a planning basis derived from UNBATCHED "
-            "telemetry and the live balance. It is NOT the finalized amount by "
-            "which the project cap must increase: the direction of the batched "
-            "correction is unknown, so the real figure is unknown until the "
-            "owed GPU qualification reprices the chain. This document does not "
-            "claim the cap must move by that amount."),
+            + _shortfall_note(chain, project_remaining)),
         "d_series_extrapolation": {
             "_what": ("D2 and D3 repeat this shape by the maintainer's "
                       "instruction — each a full search, freeze, recovery, "
@@ -1068,8 +1553,7 @@ def d_series_evidence() -> dict[str, Any]:
         "family_content_id": doc.get("family_content_id"),
         "construction_commit": (doc.get("code_state") or {}).get("git_commit"),
         "owner": FAMILY_MANIFEST,
-        "_authorizes": ("nothing. The evidence exists; the funding scope and the "
-                        "per-session envelope are separate and still open."),
+        "_authorizes": _evidence_authorizes_note(),
     }
 
 
@@ -1095,12 +1579,19 @@ def open_blockers(budget_section: dict[str, Any],
     the package's `funds_formal_sessions_of`, so no allowance covers it at any
     price — while the shortfall figure beside it is provisional. The per-session
     envelope is open because compatibility is UNRESOLVED, not because
-    incompatibility is proven: the comparison rests on unbatched telemetry whose
-    direction relative to batched D1 is unknown.
+    incompatibility is proven: the only comparison available rests on
+    FULL-VOCABULARY telemetry, and D1 will run `reference_topk_tail_v1`.
 
-    **What the GPU qualification can and cannot settle.** It settles the
-    cost-dependent figures: real batched timing, the resulting project funding
-    requirement, and the per-session envelope compatibility. It CANNOT settle
+    **Once measured compatibility exists it is authoritative.** The envelope test
+    reads `per_session_envelope_compatibility` and nothing else. It used to ALSO
+    require that the provisional full-vocab basis fit, which would have let a
+    superseded planning figure veto a measurement proving D1 fits.
+
+    **What a GPU round can and cannot settle.** It settles the cost-dependent
+    figures: real timing, the resulting project funding requirement, and the
+    per-session envelope compatibility -- and for D1 that timing must come from a
+    PRODUCTION Top-K path, not from the adoption validation's dual-reducer wall
+    clock, which includes work the formal path will not do. It CANNOT settle
     the funding AUTHORIZATION blocker — `phase_d1` being outside
     `funds_formal_sessions_of` is a scope fact, not a price, and no measurement
     puts an experiment inside a package's funded list. That needs an explicit
@@ -1121,13 +1612,88 @@ def open_blockers(budget_section: dict[str, Any],
     if (not budget_section["d1_is_in_the_funded_list"]
             or budget_section["provisional_shortfall_usd"] > 0):
         open_.append("funding authorization")
-    #: Open while compatibility is unresolved. Under the provisional basis it
-    #: does not fit; a resolved-and-fits answer needs the qualification, so the
-    #: condition is deliberately "not proven to fit" rather than "proven not to".
-    if (budget_section["per_session_envelope_compatibility"] != "RESOLVED_FITS"
-            or not budget_section["provisional_basis_fits_per_session_envelope"]):
+    #: MEASURED COMPATIBILITY IS AUTHORITATIVE, and the provisional comparison
+    #: does not get a veto over it.
+    #:
+    #: This used to require BOTH `RESOLVED_FITS` and that the provisional basis
+    #: fit -- so a future Top-K measurement proving D1 fits would have stayed
+    #: blocked by a FULL-VOCABULARY planning figure it supersedes. That is a
+    #: superseded estimate outvoting a measurement, which is backwards.
+    #:
+    #: The provisional field remains historical planning evidence and is still
+    #: reported beside the resolution; it simply no longer decides. While
+    #: compatibility is UNRESOLVED it is the only thing there is, so the blocker
+    #: is open then -- "not proven to fit" rather than "proven not to".
+    compatibility = budget_section["per_session_envelope_compatibility"]
+    if compatibility == "RESOLVED_FITS":
+        pass
+    elif compatibility == "RESOLVED_NEEDS_RAISE":
+        open_.append("per-session envelope")
+    else:
         open_.append("per-session envelope")
     return tuple(open_)
+
+
+def _envelope_blocker_note(*, budget_section_compatibility: str,
+                           envelope_usd: float,
+                           topk: dict[str, Any] | None) -> str:
+    """The per-session-envelope note, written from the live state.
+
+    Three states, three notes. The constraint it describes -- that
+    `per_attempt_hard_ceiling_usd` binds each session independently of the
+    cumulative cap -- is true in all three and is stated in all three; what
+    changes is whether it is satisfied, unknown, or violated.
+    """
+    separate = (
+        "This is a SEPARATE constraint from the project-level cap: "
+        "`per_attempt_hard_ceiling_usd` binds each session independently, and "
+        "the C1 authorization shows the grant issuer refusing a session price "
+        "that disagreed with its pricing file -- so a D1 grant that moved only "
+        "the cumulative cap would still not authorize the search session.")
+    if budget_section_compatibility == "RESOLVED_FITS":
+        priced = topk["search_session"]["hard_ceiling_usd"]
+        return (f"SATISFIED ON MEASUREMENT: the corrected production Top-K search "
+                f"session prices at ${priced:.4f} against the ${envelope_usd:.2f} "
+                f"envelope, so this is no longer a blocker. " + separate)
+    if budget_section_compatibility == "RESOLVED_NEEDS_RAISE":
+        priced = topk["search_session"]["hard_ceiling_usd"]
+        return (f"VIOLATED ON MEASUREMENT: the corrected production Top-K search "
+                f"session prices at ${priced:.4f} against the ${envelope_usd:.2f} "
+                f"envelope, so the envelope would have to move -- a maintainer "
+                f"decision, not something this design may take. " + separate)
+    return ("WHAT IS DEFINITE: per-session envelope compatibility is UNRESOLVED, "
+            "and an unresolved compatibility blocks authorization because "
+            "authorization needs a figure it can bind -- not because "
+            "incompatibility is proven. What resolves it is a PRODUCTION Top-K "
+            "measurement: an un-synced per-candidate MAX over both DEPTH "
+            "calibration profiles, rebuilt into an END-TO-END cell with the "
+            "committed non-operator overhead. " + separate)
+
+
+def _blocker_causes(open_: tuple[str, ...],
+                    budget_section: dict[str, Any]) -> str:
+    """One clause per LIVE blocker, in the contract line.
+
+    Each clause states the live reason rather than a historical one, so a closed
+    blocker cannot leave its cause behind as prose.
+    """
+    clauses = []
+    if "evidence" in open_:
+        clauses.append("the behavioural evidence does not exist")
+    if "funding authorization" in open_:
+        clauses.append(
+            "`phase_d1` is outside the package's `funds_formal_sessions_of`, so "
+            "no allowance covers it at any price")
+    if "per-session envelope" in open_:
+        state = budget_section["per_session_envelope_compatibility"]
+        clauses.append(
+            "the search session's envelope compatibility is "
+            f"{state}, and authorization needs a figure it can bind"
+            if state == "UNRESOLVED" else
+            f"the measured search session does not fit the package's "
+            f"per-session envelope ({state}), which binds separately from the "
+            "cumulative cap")
+    return "Live causes: " + "; ".join(clauses) + "."
 
 
 def _blocker_phrase(open_: tuple[str, ...]) -> str:
@@ -1149,14 +1715,21 @@ def build() -> dict[str, Any]:
                else "any one of them alone")
     doc = {
         "schema": SCHEMA,
+        #: DERIVED, clause by clause. This used to state all three causes
+        #: unconditionally -- including "the behavioural evidence cannot be built
+        #: under the frozen mixture", which is false since the family was built,
+        #: and "the search session alone exceeds the envelope", which contradicts
+        #: measured compatibility whenever that resolves. A contract that
+        #: enumerates causes must enumerate the LIVE ones.
         "_contract": (
-            "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and "
-            f"{phrase.lower()} are recorded below, each independently "
-            "sufficient to prevent a launch. The behavioural evidence cannot "
-            "be built under the frozen mixture; the chain is not fundable at "
-            "the current balance; and the search session alone exceeds the "
-            "package's per-session envelope, which binds separately from the "
-            "cumulative cap."),
+            "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it "
+            f"records {phrase.lower()}"
+            + (" -- each independently sufficient to prevent a launch."
+               if len(open_) > 1 else
+               ", sufficient on its own to prevent a launch."
+               if open_ else ".")
+            + (
+                "" if not open_ else " " + _blocker_causes(open_, budget_section))),
         "open_blockers": list(open_),
         "_open_blockers": (
             "DERIVED by `open_blockers()` from the figures in `budget` and "

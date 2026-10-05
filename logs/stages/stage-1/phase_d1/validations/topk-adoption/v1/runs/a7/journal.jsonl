@@ -1,0 +1,14 @@
+{"stage": "environment", "status": "start", "t": 0.0}
+{"seconds": 2.634, "stage": "environment", "status": "ok", "t": 2.634}
+{"stage": "register_and_policy", "status": "start", "t": 2.635}
+{"seconds": 0.051, "stage": "register_and_policy", "status": "ok", "t": 2.686}
+{"stage": "bind_full_vocab", "status": "start", "t": 2.686}
+{"seconds": 0.063, "stage": "bind_full_vocab", "status": "ok", "t": 2.749}
+{"stage": "bind_reference_topk_tail", "status": "start", "t": 2.75}
+{"seconds": 0.056, "stage": "bind_reference_topk_tail", "status": "ok", "t": 2.806}
+{"stage": "teacher_fetch_verify", "status": "start", "t": 2.807}
+{"seconds": 11.934, "stage": "teacher_fetch_verify", "status": "ok", "t": 14.741}
+{"stage": "P_production_topk_timing", "status": "start", "t": 14.748}
+{"candidates": 36, "max_s": 4.834, "mean_s": 4.6216, "stage": "P.calib.domain_balanced@v1", "status": "ok", "t": 193.131}
+{"candidates": 36, "max_s": 5.0972, "mean_s": 4.656, "stage": "P.calib.reasoning_heavy@v2", "status": "ok", "t": 365.592}
+{"seconds": 351.156, "stage": "P_production_topk_timing", "status": "ok", "t": 365.904}

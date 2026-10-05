@@ -1,0 +1,228 @@
+{
+ "_REVIEW_REOPENED_AND_CLOSED_THIS": {
+  "_and_a_third_defect_a8_carries": "a8's PER-CANDIDATE diagnostic distribution is defective: the span baseline came from time.time() while the observer stamped perf_counter(), so the first span of each profile reads about -1.79e9 s and min/p1/p5/mean are that number in a plausible shape. The PRICE is unaffected -- it is a time.time() interval around execute, which is exactly what search.py records -- and max/p95/p50 are unaffected too. `_candidate_spans` now refuses an impossible duration and the per-candidate seconds are recorded individually; a8 was not re-run, because re-paying for a diagnostic buys nothing.",
+  "a6_and_a7_both_stand_as_diagnostics": "a6 has MORE synchronizations than production (two per group, inserted by me) and a7 has FEWER (one per candidate, where production has one per group via tolist). The production value is not between them by construction -- it has to be measured, and a8 measures it by running the real invocation.",
+  "closed_by": "runs/a8",
+  "closed_how": "a8 measured the real invocation: 19.9044 min MAX, cell 22.9759 min root, search session $21.4897 against the $30.00 envelope -> RESOLVED_FITS.",
+  "superseded_by": "runs/a8, and the aggregate tool rewrites this file from it",
+  "what_stands": "the scientific verdict. reference_topk_tail_v1 / K=200 is GO, zero lower-bound violations, zero of 8 DEPTH decisions move, removal order identical, the complement-logsumexp repair, the infinity/masking/fp32 ownership repairs, and reverse KL at -1.07% as a diagnostic.",
+  "what_was_withdrawn": "answer E, the production Top-K cost, and every figure derived from it: the rebuilt DEPTH cell, the $23.0738 search session and the RESOLVED_FITS envelope.",
+  "when": "2026-10-05",
+  "why": "a7 timed a SHADOW of the production scorer. Its loop called sketch_forward_kl_mean_batch without weights and discarded the result, so it omitted active.prediction_weights_for, the weighted reduction, the values.tolist() host transfer that IS production's synchronization, the per-subtype collection and domain_balanced_score. It also prebuilt the reference sketches before timing, so the cache fill -- operator work inside every real apply() -- was priced at zero. And `260 x per-candidate` was never the quantity the cost table holds: BeamSearch._expand_one records operator_seconds around impl.execute(ctx), the WHOLE invocation."
+ },
+ "_authorizes": "nothing. ENGINEERING evidence from the engineering book, which does not transfer into the formal one. Formal D1 remains NOT AUTHORIZED, phase_d1 is not in funds_formal_sessions_of, and neither the formal allowance, the project cap nor the $30.00 envelope was changed.",
+ "_does_not_move_the_batteries": "family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+ "_review_reopened_this": "An independent review of prep/d-series-topk-tail@bd70a165 reopened the adoption because the old tail arithmetic was invalid at the numerical edge. The tail was reconstructed as `1 - sum(support)`, which crosses float32 resolution once the support holds nearly all the mass -- the measured support mass reached 1.000001 -- and the code then DROPPED the tail term whenever either mass rounded to zero, when only a zero REFERENCE mass may make a forward-KL term vanish. I had classified the resulting single violation as a 'bounded open numerical observation'; it was a defect, and the 1.000001 in my own report was the evidence. The superseded findings are preserved at closeout.SUPERSEDED_BY_REVIEW.json and in runs/a1..a3.",
+ "answers": {
+  "A_reference_top200_mass": {
+   "_sample_changed": "a1 recorded the first 4,096 valid positions of each reduction, which weights early positions; a4 strides across them, capped at 200,000. Same min (0.022924). a1's p1 of 0.861863 should NOT be cited -- the strided p1 is 0.025284 and is the better estimate.",
+   "from": "a4",
+   "over_all_valid_positions": {
+    "max": 1.000002145767212,
+    "mean": 0.9942112026020448,
+    "min": 0.022924339398741722,
+    "n": 15538380
+   },
+   "sampled_distribution": {
+    "max": 1.0000020265579224,
+    "mean": 0.9783449189796113,
+    "min": 0.022924339398741722,
+    "n": 200000,
+    "p1": 0.02528420463204384,
+    "p5": 0.9467403292655945,
+    "p50": 0.9999991059303284,
+    "p95": 1.000001311302185,
+    "p99": 1.0000017881393433
+   }
+  },
+  "B_full_vs_k_plus_1": {
+   "from": "a4",
+   "per_candidate_abs_max": 0.048031295256523165,
+   "per_candidate_spearman": 0.9999849792953239,
+   "per_item_rel_mean": 0.01025947811101314,
+   "per_item_spearman": 0.9998978246607836
+  },
+  "C_depth_decisions": {
+   "_reading": "ZERO of 8 rounds move; the removal orders are identical and nothing is counterfactual. Unchanged by the repair, which is what it should be: the repair fixed the tail's magnitude at the edge, not the ordering.",
+   "comparison_is_exact_through_round": 7,
+   "from": "a4, and a1/a2 agreed before the repair",
+   "full_vocab_removal_order": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ],
+   "rounds_where_winners_disagree": 0,
+   "topk_removal_order_would_be": [
+    2,
+    16,
+    3,
+    32,
+    20,
+    26,
+    15,
+    21
+   ]
+  },
+  "D1_repricing": {
+   "_authorizes": "nothing. It resolves the per-session envelope blocker on measurement. The funding blocker is untouched and is a maintainer decision.",
+   "_max_in_the_mean_slots": "deliberate. An expected-cost figure must not weaken an authorization ceiling, and there is no justified Top-K mean: two invocations is not a distribution over expansions.",
+   "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",
+   "_priced_by": "experiments.phase_d1.search_space.search_cost -> search_cost_model.bound, via write_d1_design.topk_search_cost. No second pricing formula exists.",
+   "_the_cell_is_END_TO_END": "ONE MEASURED OPERATOR INVOCATION at the max over both DEPTH calibration profiles, plus the non-operator phases of one expansion at their committed-telemetry MAX. The operator term is not `candidates x per-candidate`: that product omits the reference-cache fill, the packing, the greedy bookkeeping and the child construction, all of which historical `operator_seconds` includes.",
+   "depth_cell_after": {
+    "deeper_max": 22.6361,
+    "deeper_mean": 22.6361,
+    "root_max": 22.9759,
+    "root_mean": 22.9759
+   },
+   "depth_cell_before": {
+    "deeper_max": 36.07,
+    "deeper_mean": 27.5781,
+    "root_max": 34.3539,
+    "root_mean": 29.2482
+   },
+   "non_operator_overhead_minutes": {
+    "_derived_from": "the committed search telemetry, via full_search_space.non_operator_observations",
+    "_phases": "parent_load, materialize, identify, canonical_reload, validation, state_evaluation -- everything an operator-only figure omits",
+    "deeper_max": 2.7317,
+    "deeper_mean": 1.5388,
+    "deeper_n": 16,
+    "root_max": 3.0715,
+    "root_mean": 2.881,
+    "root_n": 3
+   },
+   "operator_invocation_seconds_max": 1194.2624,
+   "per_session_envelope_compatibility": "RESOLVED_FITS",
+   "per_session_envelope_usd": 30.0,
+   "search_session_hard_ceiling_minutes": 1125.55,
+   "search_session_hard_ceiling_usd": 21.4897
+  },
+  "D_state_evaluation": {
+   "exact": {
+    "top1_relative": 0.0,
+    "worst_nll_relative": 9.561014157640786e-08
+   },
+   "forward_kl": {
+    "state.critical_token_kl": {
+     "absolute": -1.943137904292236e-05,
+     "full_vocab": 1.0567343017820117,
+     "reference_topk_tail": 1.0567148704029687,
+     "relative": -1.8388140718205586e-05
+    },
+    "state.teacher_kl.equal_domain_mean": {
+     "absolute": -0.001358514205028083,
+     "full_vocab": 0.5577435467924972,
+     "reference_topk_tail": 0.5563850325874691,
+     "relative": -0.002435732717735064
+    },
+    "state.teacher_kl.worst_domain": {
+     "absolute": -0.006772422498881769,
+     "full_vocab": 0.5982456077223615,
+     "reference_topk_tail": 0.5914731852234797,
+     "relative": -0.011320471745151146
+    }
+   },
+   "from": "a4",
+   "protocol_ids_differ": true,
+   "reverse_kl": {
+    "_figure_provenance": "-1.07% is the POST-REPAIR figure and is the authoritative one. The -18.7% that appeared in earlier reporting is from the PRE-REPAIR closeout and must not be propagated. The gap is itself informative: the broken tail was hitting reverse KL hardest, which fits, since reverse KL weights by the candidate's mass and the candidate's tail was the mis-computed one.",
+    "_not_a_blocker": "confirmed by review: the live beam ranking objectives are state.teacher_kl.equal_domain_mean, state.teacher_kl.worst_domain and state.critical_token_kl -- all forward/reference-weighted. state.reverse_kl.token_mean is DIAGNOSTIC and is not a pruning or ranking objective. It is still recorded.",
+    "_not_comparable": "reverse KL under reference_topk_tail_v1 is NOT numerically comparable with historical full-vocab reverse KL. It must not be made to match by choosing a candidate-defined support.",
+    "absolute": -0.014069289683168229,
+    "full_vocab": 1.3128704457430096,
+    "reference_topk_tail": 1.2988011560598414,
+    "relative": -0.01071643415295697
+   },
+   "worst_domain_identity_agrees": true
+  },
+  "E_production_cost": {
+   "_outside_is": "packing, the cache object, the position-policy setup, greedy bookkeeping and the child construction -- 29.20 s and 30.32 s, every bit of it inside operator_seconds and none of it in a per-candidate number",
+   "_superseded_extrapolations": {
+    "_meaning": "the two withdrawn figures bracket the truth in OPPOSITE directions, which is why neither could be reasoned about without measuring. a7 omitted real work AND multiplied by a tail-outlier max; the over-count won by 11.0%. a6 was 69.9% high from its own synchronizations. a7's MEAN happened to land within 1.0%, which is luck and not a method.",
+    "a6_max_x_260_minutes": 33.8135,
+    "a7_max_x_260_minutes": 22.0881,
+    "a7_mean_x_260_minutes": 20.1015,
+    "measured_minutes": 19.9044
+   },
+   "_the_phase_split_is_NOT_attributed": "`split_is_attributed` is False in both profiles' operator timing, which is correct and deliberate: no synchronizations were inserted. The consequence is that `ablated_seconds` and `distortion_seconds` are NOT a clean forward/reduction split -- without a sync the asynchronous forward's tail is billed to whichever phase forces the next synchronization, which here is the reduction's host transfer. Their SUM is sound; neither alone may be quoted as that phase's cost. a6 is the record of the attributed split and it prices nothing.",
+   "_what_is_measured": "the quantity `BeamSearch._expand_one` records as `operator_seconds`: a wall clock around `impl.execute(ctx)`, covering packing, the reference-sketch cache fill, all 260 candidate subsets over 8 rounds, the greedy bookkeeping and the child construction. Nothing is extrapolated from a per-candidate figure and no fixed term is added back, because one invocation already contains both.",
+   "_why_the_treatment_arm": "both D1 arms reach the same weighted reducer, and a $0 preflight MEASURED that only the treatment hands it a weight tensor on the real mixtures ([3, 308] with 665/924 positions nonzero; the control's prediction_weights_for returns None). So the treatment is the more expensive arm and bounds both, and the driver refuses to spend if that ever stops being true.",
+   "candidate_subsets_per_profile": 260,
+   "from": "a8 -- ONE REAL `impl.execute` invocation per DEPTH profile",
+   "operator_invocation_minutes_max": 19.9044,
+   "operator_invocation_seconds_max": 1194.2624,
+   "outside_scoring_loop_seconds": {
+    "calib.domain_balanced@v1": 29.1952,
+    "calib.reasoning_heavy@v2": 30.3218
+   },
+   "peak_memory_bytes": {
+    "calib.domain_balanced@v1": 17486630912,
+    "calib.reasoning_heavy@v2": 17447649792
+   },
+   "per_profile_seconds": {
+    "calib.domain_balanced@v1": 1194.2624,
+    "calib.reasoning_heavy@v2": 1188.7712
+   },
+   "position_policy": "positions.supervised_target_v1@v1 (D1's TREATMENT arm)",
+   "reference_bytes_ratio_vs_full_vocab": 0.00793755,
+   "reference_sketch_bytes": 144148356
+  },
+  "lower_bound": {
+   "_reading": "ZERO, and zero even at the looser 1e-6 threshold rather than merely inside the predeclared tolerance. The driver now RAISES on any violation outside tolerance rather than reporting one.",
+   "any_excess_at_1e-6_per_item": 0,
+   "before_the_repair": "1 violation, +2.968e-04 absolute / +2.2e-03 relative",
+   "from": "a4",
+   "tolerance": {
+    "absolute": 1e-05,
+    "relative": 1e-05
+   },
+   "violations_per_candidate": 0,
+   "violations_per_item": 0
+  }
+ },
+ "cost": {
+  "_owner": "campaign.json, which owns every paid draw. These are READ from its subrun list, not typed: this block once carried `booked_usd` and `subruns` at their pre-a8 values beside `campaign_booked_usd` and `paid_subruns` at their current ones, so the generic names held the stale pair.",
+  "booked_usd": 3.6878,
+  "ceiling_usd": 8.0,
+  "paid_subruns": 8,
+  "teardown": "every pod provider-confirmed gone"
+ },
+ "identity": {
+  "_design_hash_semantics": "`design_hash_at_measurement` is the D1 design hash AS IT WAS when this measurement was taken, and it is deliberately not updated: a closeout records what it measured against. The CURRENT hash has ONE owner, logs/stages/stage-1/phase_d1/plans/d1_design.json, which is regenerated and whose `design_hash` is authoritative. Carrying a copy of the current hash here created a second owner that silently went stale.",
+  "bound_full_vocab": "d463a1dc6afbd778",
+  "bound_reference_topk_tail": "9c9b0b43dc00b695",
+  "current_design_owner": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: design_hash",
+  "design_hash_at_measurement": "8d5cdf902e691ac7705a5ee0",
+  "they_differ": true
+ },
+ "live_budget": {
+  "_derived_by": "scripts/consolidate/derive_budget.py",
+  "engineering_remaining_usd": 5.0259,
+  "formal_remaining_usd": 7.2431,
+  "project_remaining_usd": 6.2641
+ },
+ "protocol": {
+  "k_is_maintainer_selected": "2026-10-04, no sweep, never tuned against D1/D2/D3 results",
+  "protocol_id": "reference_topk_tail_v1",
+  "top_k": 200
+ },
+ "remaining_blockers": [
+  "funding authorization"
+ ],
+ "repair": {
+  "infinities": "a zero candidate tail against a non-zero reference tail is +inf and is PRESERVED; the dynamic 'degenerate' branch is gone and `has_tail` is structural (K < V)",
+  "masking": "`nan_to_num(posinf=0)` removed from the batched mean; masking happens before the multiply, so a padded position contributes zero and a VALID +inf survives",
+  "ownership": "the reducers own the fp32 tensor they mask -- `.float()` aliases an fp32 input and would have destroyed the caller's cached reference block",
+  "tail": "computed from the COMPLEMENT's own logits -- mask the support to -inf and reduce the rest against the same log_z -- so no cancellation exists to lose and the partition's two masses sum to one by construction"
+ },
+ "schema": "aadistill.d_series.topk_adoption_closeout/v2",
+ "verdict": {
+  "_prior": "COMPLETE -- zero lower-bound violations; the protocol is sound",
+  "_status": "CLOSED. The science was GO throughout; the production cost is now measured and the envelope resolves."
+ }
+}

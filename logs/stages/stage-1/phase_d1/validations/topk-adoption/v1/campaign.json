@@ -1,0 +1,144 @@
+{
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 + 0.3057 + 0.2675 = 2.8741",
+ "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
+ "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
+ "_status_is_derived_by": "filed per paid subrun against this ledger, which owns every draw; booked_usd is recomputed from the components. CLOSED when the round's answers are complete and a closeout states them; REOPENED when a review withdraws one, which is this state and its reason is in the status.",
+ "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
+ "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
+ "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
+ "booked_usd": 3.6878,
+ "campaign_id": "d_series_topk_adoption",
+ "ceiling_usd": 8.0,
+ "inherited_spend": [],
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "schema": "aadistill.engineering_campaign/v1",
+ "status": "CLOSED -- 8 paid subruns, $3.6878 of $8.0000. The production cost is MEASURED (a8) and the search session prices at $21.4897 against the $30.00 envelope; the verdict and every answer's provenance are in closeout.json",
+ "subruns": [
+  {
+   "cost_usd": 0.6382,
+   "elapsed_minutes": 34.867,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a1",
+   "gpu": "NVIDIA L40S",
+   "notes": "stage D was DEFINED AND NEVER CALLED in the driver this subrun ran, so items A/B/C/E only. The in-run analysis of C was also defective -- it aggregated candidates by a POOLED mean where the operator uses domain_balanced_score -- and its own reconstruction check caught that, disagreeing with the operator at rounds 4 and 5. Re-analysed OFFLINE from the recorded per-item scores with the corrected aggregation: the reconstruction then matches the operator in every round. No GPU time was repaid for the fix.",
+   "outcome": "COMPLETE for items A, B, C and the DEPTH half of E",
+   "pod_id": "d3zrira2zl98kd",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "39a1013d010f490ecfd32ac33c49a677e2bf7924",
+   "stages_run": [
+    "C",
+    "analyse"
+   ],
+   "subrun_id": "a1"
+  },
+  {
+   "cost_usd": 0.8552,
+   "elapsed_minutes": 46.717,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a2",
+   "gpu": "NVIDIA L40S",
+   "notes": "see WHY_NO_RECORD.md. Two defects repaired after it: the policy id is now resolved the qualified way `d1_qualification_driver` already documented, and the per-position mass is reduced ON THE POD so a 300 MB record cannot recur.",
+   "outcome": "INCOMPLETE -- stage C and its analysis succeeded and CONFIRM a1; stage D failed on a bare position-policy id; the JSON record arrived truncated and the journal is the evidence",
+   "pod_id": "rtrdbu3wi6sfrv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "0a6fe379ddd0e3b3985739ca1f9b5183dca2d31e",
+   "stages_run": [
+    "C",
+    "analyse"
+   ],
+   "subrun_id": "a2"
+  },
+  {
+   "cost_usd": 0.0985,
+   "elapsed_minutes": 5.383,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a3",
+   "gpu": "NVIDIA L40S",
+   "notes": "70.8 s. Candidate built by depth.positional_v0 in 30.7 s rather than repeating the half-hour search, because stage D compares two REDUCERS and the candidate's selection rule does not enter that comparison.",
+   "outcome": "COMPLETE -- stage D measured under both supports",
+   "pod_id": "5db8r0r06vd5k5",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "5c64afc83e5f17f4fe4c21f6a496624e0abc604b",
+   "stages_run": [
+    "D"
+   ],
+   "subrun_id": "a3"
+  },
+  {
+   "cost_usd": 0.6105,
+   "elapsed_minutes": 33.35,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a4",
+   "gpu": "NVIDIA L40S",
+   "notes": "the repair is CONFIRMED on real logits: 0 violations of KL(topK+tail) <= KL(full) across 17,420 per-item and 260 per-candidate scores, against 1 before, and zero even at the looser 1e-6 threshold. C unchanged: 0 of 8 rounds disagree. Stage P died 5.84 s in on `spec.fields[\"num_hidden_layers\"]` -- `fields` is a tuple of pairs, not a mapping.",
+   "outcome": "CORRECTIVE -- A/B/C/D re-measured under the repaired tail with ZERO lower-bound violations; stage P failed on a shape bug",
+   "pod_id": "6g42msvfrzemos",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "b2b1bb7fbf643692f0b8f74930eb3c3f1f6ebb23",
+   "stages_run": [
+    "C",
+    "analyse",
+    "D",
+    "P(failed)"
+   ],
+   "subrun_id": "a4"
+  },
+  {
+   "cost_usd": 0.0985,
+   "elapsed_minutes": 5.383,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a5",
+   "gpu": "NVIDIA L40S",
+   "notes": "82.3 s. 4.6048 s per candidate over 12 candidates and 23 groups at bsz=3 / length_sorted_v1, forward 83% and reduction 17%. Reference sketch 137.5 MiB against 16.91 GiB of full-vocabulary logits (126x), peak 16.282 GiB against a4's 34.774 GiB. Top-K reduction only -- no dual reduction -- so this is a production cost.",
+   "outcome": "COMPLETE -- the PRODUCTION Top-K-only expansion timing",
+   "pod_id": "9rmme5u9yd68g5",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "a84af127a7767f3867b34dec4507859a8b13ec89",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a5"
+  },
+  {
+   "cost_usd": 0.3057,
+   "elapsed_minutes": 16.7,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a6",
+   "gpu": "NVIDIA L40S",
+   "notes": "490 s. All 36 round-0 candidates per profile, 72 observations. MAX 7.8031 s/candidate, which is 1.695x a5's 12-candidate mean of 4.6048 -- the gap a mean-as-ceiling hides. The profiles differ materially (reasoning_heavy@v2 mean 7.3741 against domain_balanced@v1 5.4474), so timing one would have understated the max. NOT VALID FOR PRICING: 1,656 synchronize() calls in the timed region. It establishes the phase split and the profile difference; the ceiling needs an un-synced run.",
+   "outcome": "SPLIT MEASURED, NOT A PRICE -- the timed region synchronized twice per group and is inflated",
+   "pod_id": "x8gh0lwxlujxcv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "eb02372f6fa3d127c3fa7e9babddf5be4aaf2062",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a6"
+  },
+  {
+   "cost_usd": 0.2675,
+   "elapsed_minutes": 14.617,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a7",
+   "gpu": "NVIDIA L40S",
+   "notes": "366 s. 72 observations, both profiles, one synchronize per CANDIDATE. MAX 5.0972 s/candidate against a6's synced 7.8031 -- a6 was 53% inflated by its own instrument. Un-synced the two profiles are nearly identical (means 4.6216 and 4.6560), so a6's apparent profile gap was largely the syncs as well. WITHDRAWN AS A PRICE: the loop omitted the position weights, the weighted reduction, the values.tolist() host transfer, the per-subtype aggregation, domain_balanced_score and the reference-cache fill, and it synced once per CANDIDATE where production syncs once per group. See closeout.json :: _REOPENED_BY_REVIEW.",
+   "outcome": "COMPLETE -- the UN-SYNCED per-candidate MAX. DIAGNOSTIC ONLY: review established it does not price, because the loop it timed was not the production scorer",
+   "pod_id": "8v4jc1c5mwnipb",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "7c3cabe2930f1745b4bf3e832d3f70d35d1e89de",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a7"
+  },
+  {
+   "cost_usd": 0.8137,
+   "elapsed_minutes": 44.45,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8",
+   "gpu": "NVIDIA L40S",
+   "notes": "1194.2624 s and 1188.7712 s, 260 candidate subsets over 8 rounds each, the production scorer throughout: target-aware weights, the weighted Top-K reduction, the values.tolist() host transfer, per-subtype aggregation and domain_balanced_score, plus the reference-cache fill and the child construction. MAX 19.9044 min. Outside the scoring loop: 29.20 and 30.32 s. Peak 16.29 GiB; sketch cache 137.5 MiB at 0.794% of the full-vocabulary reference. The two superseded extrapolations bracket it in opposite directions: a7's max x 260 = 22.088 min (+11.0%), a6's = 33.813 min (+69.9%), while a7's MEAN x 260 = 20.101 min (+1.0%).",
+   "outcome": "COMPLETE -- ONE REAL `impl.execute` invocation per DEPTH profile, the quantity `_expand_one` records as `operator_seconds`. VALID FOR PRICING",
+   "pod_id": "l11v5n0wc2pc7p",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "e61eba70629225aff6e1bccf4100847a296a43e1",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a8"
+  }
+ ],
+ "teardown_reserve_usd": 0.3
+}

@@ -1,0 +1,481 @@
+{
+ "P_production_timing": {
+  "_if_split_was_enabled": "the per-candidate totals include two cuda synchronize() calls per group and are INFLATED by the instrument. Such a run describes the phase split and must not price anything.",
+  "_max_not_mean": "a ceiling built on a mean is not a ceiling. The max over both profiles is the pricing input; mean/p50/p95 are reported as description.",
+  "_round_0_at_the_root": "bounds the later rounds: the skip set only grows so the executed block count is non-increasing, round 0 has the most candidates, and every frozen operator only shrinks the geometry. Established by tests/initialization/test_operators_only_shrink.py.",
+  "_this_is_the_operator_term_only": "the DEPTH operator's per-candidate work. A cost-model CELL is one EXPANSION end to end, so the non-operator phases -- parent load, materialize, identify, canonical reload, validation, state evaluation -- must be ADDED from committed telemetry. Substituting this number for a whole cell deletes them, which is the defect an independent review caught.",
+  "_valid_for_pricing": true,
+  "candidates_per_profile": 36,
+  "micro_batch_size": 3,
+  "operator_seconds_max": 5.0972,
+  "operator_seconds_mean": 4.6388,
+  "overall_distribution": {
+   "max": 5.0972373485565186,
+   "mean": 4.6387895411915245,
+   "min": 4.520792007446289,
+   "n": 72,
+   "p1": 4.530153036117554,
+   "p5": 4.555751800537109,
+   "p50": 4.640181064605713,
+   "p95": 4.669371843338013,
+   "p99": 4.834033966064453
+  },
+  "packing": "length_sorted_v1",
+  "per_profile": {
+   "calib.domain_balanced@v1": {
+    "distribution": {
+     "max": 4.834,
+     "mean": 4.621613888888889,
+     "min": 4.5208,
+     "n": 36,
+     "p1": 4.5208,
+     "p5": 4.5383,
+     "p50": 4.639,
+     "p95": 4.6694,
+     "p99": 4.834
+    },
+    "forward_share": null,
+    "full_vocab_bytes_avoided": 18160302336,
+    "n_candidates": 36,
+    "n_groups": 23,
+    "n_items": 67,
+    "peak_memory_bytes": 17482989568,
+    "per_candidate": [
+     {
+      "layer": 0,
+      "total_seconds": 4.834
+     },
+     {
+      "layer": 1,
+      "total_seconds": 4.5208
+     },
+     {
+      "layer": 2,
+      "total_seconds": 4.5302
+     },
+     {
+      "layer": 3,
+      "total_seconds": 4.5383
+     },
+     {
+      "layer": 4,
+      "total_seconds": 4.545
+     },
+     {
+      "layer": 5,
+      "total_seconds": 4.5558
+     },
+     {
+      "layer": 6,
+      "total_seconds": 4.5607
+     },
+     {
+      "layer": 7,
+      "total_seconds": 4.5671
+     },
+     {
+      "layer": 8,
+      "total_seconds": 4.5733
+     },
+     {
+      "layer": 9,
+      "total_seconds": 4.5749
+     },
+     {
+      "layer": 10,
+      "total_seconds": 4.576
+     },
+     {
+      "layer": 11,
+      "total_seconds": 4.5886
+     },
+     {
+      "layer": 12,
+      "total_seconds": 4.5995
+     },
+     {
+      "layer": 13,
+      "total_seconds": 4.6049
+     },
+     {
+      "layer": 14,
+      "total_seconds": 4.6144
+     },
+     {
+      "layer": 15,
+      "total_seconds": 4.6091
+     },
+     {
+      "layer": 16,
+      "total_seconds": 4.619
+     },
+     {
+      "layer": 17,
+      "total_seconds": 4.6204
+     },
+     {
+      "layer": 18,
+      "total_seconds": 4.6402
+     },
+     {
+      "layer": 19,
+      "total_seconds": 4.6461
+     },
+     {
+      "layer": 20,
+      "total_seconds": 4.639
+     },
+     {
+      "layer": 21,
+      "total_seconds": 4.645
+     },
+     {
+      "layer": 22,
+      "total_seconds": 4.6341
+     },
+     {
+      "layer": 23,
+      "total_seconds": 4.6502
+     },
+     {
+      "layer": 24,
+      "total_seconds": 4.6467
+     },
+     {
+      "layer": 25,
+      "total_seconds": 4.6473
+     },
+     {
+      "layer": 26,
+      "total_seconds": 4.6531
+     },
+     {
+      "layer": 27,
+      "total_seconds": 4.6525
+     },
+     {
+      "layer": 28,
+      "total_seconds": 4.6642
+     },
+     {
+      "layer": 29,
+      "total_seconds": 4.6577
+     },
+     {
+      "layer": 30,
+      "total_seconds": 4.6695
+     },
+     {
+      "layer": 31,
+      "total_seconds": 4.6527
+     },
+     {
+      "layer": 32,
+      "total_seconds": 4.6558
+     },
+     {
+      "layer": 33,
+      "total_seconds": 4.6588
+     },
+     {
+      "layer": 34,
+      "total_seconds": 4.6694
+     },
+     {
+      "layer": 35,
+      "total_seconds": 4.6638
+     }
+    ],
+    "reference_sketch_bytes": 144148356,
+    "reference_sketch_seconds": 5.401
+   },
+   "calib.reasoning_heavy@v2": {
+    "distribution": {
+     "max": 5.0972,
+     "mean": 4.655966666666667,
+     "min": 4.6219,
+     "n": 36,
+     "p1": 4.6219,
+     "p5": 4.6288,
+     "p50": 4.6434,
+     "p95": 4.6584,
+     "p99": 5.0972
+    },
+    "forward_share": null,
+    "full_vocab_bytes_avoided": 18160302336,
+    "n_candidates": 36,
+    "n_groups": 21,
+    "n_items": 62,
+    "peak_memory_bytes": 17444042240,
+    "per_candidate": [
+     {
+      "layer": 0,
+      "total_seconds": 5.0972
+     },
+     {
+      "layer": 1,
+      "total_seconds": 4.6506
+     },
+     {
+      "layer": 2,
+      "total_seconds": 4.6219
+     },
+     {
+      "layer": 3,
+      "total_seconds": 4.6331
+     },
+     {
+      "layer": 4,
+      "total_seconds": 4.6584
+     },
+     {
+      "layer": 5,
+      "total_seconds": 4.6526
+     },
+     {
+      "layer": 6,
+      "total_seconds": 4.6474
+     },
+     {
+      "layer": 7,
+      "total_seconds": 4.639
+     },
+     {
+      "layer": 8,
+      "total_seconds": 4.6373
+     },
+     {
+      "layer": 9,
+      "total_seconds": 4.6576
+     },
+     {
+      "layer": 10,
+      "total_seconds": 4.6347
+     },
+     {
+      "layer": 11,
+      "total_seconds": 4.6363
+     },
+     {
+      "layer": 12,
+      "total_seconds": 4.6516
+     },
+     {
+      "layer": 13,
+      "total_seconds": 4.6452
+     },
+     {
+      "layer": 14,
+      "total_seconds": 4.644
+     },
+     {
+      "layer": 15,
+      "total_seconds": 4.6583
+     },
+     {
+      "layer": 16,
+      "total_seconds": 4.6368
+     },
+     {
+      "layer": 17,
+      "total_seconds": 4.6294
+     },
+     {
+      "layer": 18,
+      "total_seconds": 4.6288
+     },
+     {
+      "layer": 19,
+      "total_seconds": 4.6384
+     },
+     {
+      "layer": 20,
+      "total_seconds": 4.6434
+     },
+     {
+      "layer": 21,
+      "total_seconds": 4.6512
+     },
+     {
+      "layer": 22,
+      "total_seconds": 4.6346
+     },
+     {
+      "layer": 23,
+      "total_seconds": 4.6525
+     },
+     {
+      "layer": 24,
+      "total_seconds": 4.6353
+     },
+     {
+      "layer": 25,
+      "total_seconds": 4.6416
+     },
+     {
+      "layer": 26,
+      "total_seconds": 4.6357
+     },
+     {
+      "layer": 27,
+      "total_seconds": 4.6578
+     },
+     {
+      "layer": 28,
+      "total_seconds": 4.6465
+     },
+     {
+      "layer": 29,
+      "total_seconds": 4.6357
+     },
+     {
+      "layer": 30,
+      "total_seconds": 4.6336
+     },
+     {
+      "layer": 31,
+      "total_seconds": 4.6354
+     },
+     {
+      "layer": 32,
+      "total_seconds": 4.6711
+     },
+     {
+      "layer": 33,
+      "total_seconds": 4.658
+     },
+     {
+      "layer": 34,
+      "total_seconds": 4.655
+     },
+     {
+      "layer": 35,
+      "total_seconds": 4.6288
+     }
+    ],
+    "reference_sketch_bytes": 144148356,
+    "reference_sketch_seconds": 4.727
+   }
+  },
+  "profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "sync_split_enabled": false,
+  "top_k": 200
+ },
+ "_contract": "ENGINEERING EVIDENCE ONLY, for the maintainer decision of 2026-10-04. No recovery training, no behavioural screening, no confirmation, no formal search, no promotion, no GO/NO-GO. No D-series behavioural prompt is read. AUTHORIZES NOTHING.",
+ "bound_full_vocab": {
+  "distribution_support": "full_vocab_v1",
+  "measurement_protocol_id": "d463a1dc6afbd778123a128f4ed46e16",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "bound_reference_topk_tail": {
+  "distribution_support": "reference_topk_tail_v1(top_k=200)",
+  "measurement_protocol_id": "9c9b0b43dc00b695c185982b8b0a18e7",
+  "n_items": 80,
+  "position_policy": "positions.supervised_target_v1",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "reduction": {
+   "chunk": 512,
+   "reference_strategy": "ReferenceStrategy.RECOMPUTE"
+  },
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+  "suite_structural_hash": "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
+ },
+ "elapsed_seconds": 365.905,
+ "ended_utc": "2026-10-05T06:10:08Z",
+ "environment": {
+  "_device_count": 1,
+  "_no_ordinal_is_hardcoded": "the index comes from torch.cuda.current_device(), so the record describes whichever device the runtime selected",
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "cudnn_tf32": true,
+  "device": "cuda",
+  "gpu_name": "NVIDIA L40S",
+  "gpu_total_memory_bytes": 47677177856,
+  "matmul_tf32": false,
+  "torch": "2.11.0+cu128",
+  "transformers": "5.13.1"
+ },
+ "schema": "aadistill.d_series.topk_adoption/v1",
+ "scoring_protocol": {
+  "_does_not_move_the_batteries": "Top-K changes structural scoring and evaluation, not prompt content. family_content_id 1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58 stands.",
+  "coarsened_under_this_protocol": [
+   "forward KL",
+   "reverse KL",
+   "critical-token KL"
+  ],
+  "critical_tokens": "critical tags identify prediction POSITIONS, not vocabulary entries, so those positions use this same KL and need no separate support rule",
+  "decision_record": "logs/budget/decisions.md 2026-10-04",
+  "exact_under_this_protocol": [
+   "target-token CE/NLL",
+   "top-1 agreement"
+  ],
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "k_is_not_outcome_selected": "maintainer-selected 2026-10-04. No sweep was run and K must not be tuned against D1/D2/D3 results.",
+  "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "protocol_id": "reference_topk_tail_v1",
+  "reference_for_depth": "the intact current parent; the candidate is that parent with the candidate block bypassed. NOT the original teacher -- DEPTH's objective is local and parent-relative, and forcing the teacher's support onto it would score a different question",
+  "reference_for_state_evaluation": "the original teacher",
+  "reverse_kl_partition": "the SAME reference-defined K+1 partition as the forward direction. One state evaluation must not carry two incompatible partitions",
+  "support": "the Top-200 entries of the REFERENCE distribution at each prediction position",
+  "tail": "every vocabulary entry outside that support, aggregated into one K+1 bucket",
+  "top_k": 200
+ },
+ "stages": [
+  {
+   "gpu": "NVIDIA L40S",
+   "seconds": 2.634,
+   "stage": "environment",
+   "status": "ok"
+  },
+  {
+   "seconds": 0.051,
+   "stage": "register_and_policy",
+   "status": "ok",
+   "top_k": 200
+  },
+  {
+   "protocol": "d463a1dc6afbd778",
+   "seconds": 0.063,
+   "stage": "bind_full_vocab",
+   "status": "ok"
+  },
+  {
+   "protocol": "9c9b0b43dc00b695",
+   "seconds": 0.056,
+   "stage": "bind_reference_topk_tail",
+   "status": "ok"
+  },
+  {
+   "path": "/workspace/hf/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+   "seconds": 11.934,
+   "stage": "teacher_fetch_verify",
+   "status": "ok"
+  },
+  {
+   "operator_s_max": 5.0972,
+   "seconds": 351.156,
+   "stage": "P_production_topk_timing",
+   "status": "ok"
+  }
+ ],
+ "stages_requested": [
+  "P"
+ ],
+ "started_utc": "2026-10-05T06:04:02Z",
+ "status": "COMPLETE"
+}
