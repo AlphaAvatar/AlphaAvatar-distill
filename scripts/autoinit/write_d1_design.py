@@ -933,53 +933,160 @@ def _derived_budget() -> dict[str, Any]:
     return module.derive()
 
 
+#: The DEPTH implementation whose cell is rebuilt.
+DEPTH_IMPL = "depth.causal_kl_greedy_v1"
+
+#: The two calibration profiles D1's DEPTH step may run under. Both must be timed
+#: before a MAX exists: historical full-vocab evidence showed materially different
+#: DEPTH timings between them, so one profile's max is not the cell's max.
+D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
+
 #: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
 TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
                    "runs/a5/adoption.json")
 
 
+def non_operator_expansion_overhead() -> dict[str, Any] | None:
+    """The non-operator part of one DEPTH expansion, at its committed MAX.
+
+    Derived from the SAME telemetry and the SAME root/deeper resolution the
+    published cost table uses -- `full_search_space.non_operator_observations` --
+    so a rebuilt cell cannot disagree with the table about which observations are
+    roots. No GPU time is spent on phases already in committed telemetry.
+
+    MAX, not mean: the cell this feeds is a ceiling, and `CostModel`'s own
+    docstring says a ceiling built on a mean is not a ceiling.
+    """
+    from experiments.phase_c2.full_search_space import non_operator_observations
+
+    obs = non_operator_observations(REPO)
+    out: dict[str, Any] = {"_derived_from": ("the committed search telemetry, via "
+                                            "full_search_space."
+                                            "non_operator_observations")}
+    for scope in ("root", "deeper"):
+        values = obs.get((DEPTH_IMPL, scope)) or []
+        if not values:
+            return None
+        out[f"{scope}_max"] = round(max(values), 4)
+        out[f"{scope}_n"] = len(values)
+        out[f"{scope}_mean"] = round(sum(values) / len(values), 4)
+    out["_phases"] = ("parent_load, materialize, identify, canonical_reload, "
+                      "validation, state_evaluation -- everything an "
+                      "operator-only figure omits")
+    return out
+
+
+def round_zero_is_the_compute_ceiling() -> dict[str, Any]:
+    """Why a round-0 measurement conservatively prices the later rounds.
+
+    MECHANICAL, not asserted, and generic -- no model family appears in it.
+
+    1. `depth.causal_kl_greedy_v1` holds ONE reference for the whole invocation
+       (the intact parent, built before the round loop) and scores each candidate
+       as `KL(parent || parent with `skip` bypassed)`. Round `r` evaluates skip
+       sets of size `r + 1`, and a skip set only GROWS, so the number of
+       transformer blocks the ablated forward executes is non-increasing in `r`.
+       Round 0 bypasses exactly one block and therefore executes the most.
+    2. Round 0 also evaluates the MOST candidates -- `parent_depth - r` of them --
+       so both the per-candidate cost and the candidate count peak there.
+    3. A DEEPER parent has already had other structural operators applied, and
+       every operator in the frozen set only SHRINKS the geometry it modifies.
+       So a deeper parent's DEPTH invocation runs a smaller model than the root's.
+
+    (3) is the one that needs establishing rather than reasoning about, because it
+    is a property of the operator/adapter contract rather than of this operator.
+    `tests/initialization/test_operators_only_shrink.py` applies every frozen
+    operator to a toy parent and asserts no structural field increases.
+    """
+    return {
+        "claim": ("a round-0 measurement at the ROOT parent conservatively "
+                  "bounds every later DEPTH round and every deeper parent"),
+        "because": [
+            "the skip set only grows, so the ablated forward's executed block "
+            "count is non-increasing in the round index",
+            "round 0 evaluates the most candidates",
+            "every frozen operator only shrinks the geometry it modifies, so a "
+            "deeper parent runs a smaller model",
+        ],
+        "established_by": "tests/initialization/test_operators_only_shrink.py",
+        "_not_a_family_shortcut": (
+            "the third premise is checked against the operator/adapter contract "
+            "on a toy geometry, not asserted for one model family, and nothing "
+            "about it lives in src/aadistill."),
+    }
+
+
 def _topk_production_basis() -> dict[str, Any] | None:
-    """The measured Top-K-only per-candidate cost, or None if not yet measured."""
+    """The measured Top-K DEPTH cell, END TO END, or None if not yet valid.
+
+    **An operator-only number is not an expansion cell, and a mean is not a
+    ceiling.** Both of those were wrong here and an independent review caught
+    them:
+
+    * `CostModel` defines every cell as ONE EXPANSION end to end -- operator,
+      parent load, materialize, identify, canonical reload, validation and state
+      evaluation. The first version of this function replaced the whole DEPTH cell
+      with the operator's candidate work alone, which DELETED about 3.07 min of
+      non-operator cost per expansion. The comment claiming those phases stayed in
+      the frozen cell was false: the cell was replaced entire.
+    * `CostModel`'s own docstring says a ceiling built on `mean` is not a ceiling.
+      a5 timed 12 round-0 candidates and stored `total / 12`, and that mean was
+      promoted into `root_max` and `deeper_max`.
+
+    So this now REFUSES to produce a basis unless the record carries what a
+    ceiling needs: a per-candidate MAX, measured for BOTH D1 DEPTH calibration
+    profiles, plus the non-operator overhead derived from committed telemetry. Any
+    older record -- a5's included -- yields None, and the envelope is therefore
+    UNRESOLVED rather than resolved on an invalid figure.
+    """
     path = REPO / TOPK_PRODUCTION
     if not path.is_file():
         return None
-    P = (json.loads(path.read_text()).get("P_production_timing") or {})
-    if not P.get("seconds_per_candidate"):
+    doc = json.loads(path.read_text())
+    P = doc.get("P_production_timing") or {}
+    profiles = P.get("per_profile") or {}
+    #: The three things a valid ceiling needs. A record lacking any of them is a
+    #: point estimate, and a point estimate must not price an authorization.
+    required = {"per_profile", "operator_seconds_max", "candidates_per_profile"}
+    if not required <= set(P) or not profiles:
         return None
-    #: DEPTH's whole greedy under the production protocol. The candidate count is
-    #: the greedy's own: one layer removed per round from the parent depth down to
-    #: the target, so sum(parent-i) over the rounds. Derived, not typed.
-    #:
-    #: REGISTER FIRST. `path_spec` resolves every step's implementation, and the
-    #: four registries are empty in a fresh interpreter -- the ordering that cost
-    #: paid subrun s1 $0.1098.
-    _ensure_the_frozen_operators_are_registered()
+    if set(profiles) != set(D1_DEPTH_PROFILES):
+        return None
+    overhead = non_operator_expansion_overhead()
+    if overhead is None:
+        return None
+
     from experiments.phase_a3 import a3_session as A3S
 
+    _ensure_the_frozen_operators_are_registered()
     spec = A3S.path_spec(workdir_device="cpu")
     parent_depth = 36
     target_depth = int(spec.target_spec["num_hidden_layers"])
     rounds = parent_depth - target_depth
     candidates = sum(parent_depth - i for i in range(rounds))
-    minutes = candidates * float(P["seconds_per_candidate"]) / 60.0
+    #: THE MAX, over every candidate of every profile. Not a mean.
+    op_max_s = float(P["operator_seconds_max"])
+    operator_minutes = candidates * op_max_s / 60.0
     return {
         "owner": TOPK_PRODUCTION,
-        "seconds_per_candidate": P["seconds_per_candidate"],
-        "candidates_timed": P["n_candidates_timed"],
-        "greedy_candidates": candidates,
+        "operator_seconds_max_per_candidate": op_max_s,
+        "per_profile": profiles,
+        "candidates_per_profile": P["candidates_per_profile"],
         "greedy_rounds": rounds,
-        "depth_minutes": round(minutes, 3),
-        "reference_sketch_bytes": P["reference_sketch_bytes"],
-        "full_vocab_bytes_avoided": P["full_vocab_bytes_avoided"],
-        "peak_memory_bytes": P["peak_memory_bytes"],
-        "_what_it_is": (
-            "Top-K reduction only, no dual reduction and no full-vocabulary "
-            "reference cache -- so it is a PRODUCTION cost, unlike the adoption "
-            "validation's wall clock, which computes both reducers."),
-        "_what_it_omits": (
-            "the per-expansion canonical reload, validation and global state "
-            "evaluation. Those keep their frozen full-vocabulary cells below, "
-            "which is CONSERVATIVE: the measured batched figures were faster."),
+        "greedy_candidates": candidates,
+        "operator_minutes_at_max": round(operator_minutes, 4),
+        "non_operator_overhead_minutes": overhead,
+        "root_max_minutes": round(operator_minutes + overhead["root_max"], 4),
+        "deeper_max_minutes": round(operator_minutes + overhead["deeper_max"], 4),
+        "_the_cell_is_END_TO_END": (
+            "operator work at the measured MAX per candidate, plus the "
+            "non-operator phases of one expansion at their committed-telemetry "
+            "MAX. Replacing an end-to-end cell with an operator-only number "
+            "deletes parent load, materialize, identify, canonical reload, "
+            "validation and state evaluation."),
+        "_why_round_0_bounds_the_later_rounds": (
+            "established mechanically, not asserted -- see "
+            "`round_zero_is_the_compute_ceiling` and its test."),
     }
 
 
@@ -998,18 +1105,30 @@ def _envelope_compatibility(topk: dict[str, Any] | None,
 
 
 def topk_search_cost() -> dict[str, Any] | None:
-    """The SEARCH session priced with the measured Top-K DEPTH cell.
+    """The SEARCH session priced with a correctly rebuilt END-TO-END DEPTH cell.
 
-    Runs the PRODUCTION cost path -- `search_space.search_cost` -- against a cost
-    model whose DEPTH cell is the measured Top-K figure and whose other three
-    cells are unchanged. The other three do not reduce KL at all (activation
-    importance, PCA, attention activation importance), so the distribution
-    support cannot touch them; leaving them at their frozen UNBATCHED values is
-    conservative, because every batched figure measured so far was faster.
+    Runs the EXISTING cost machinery -- `search_space.search_cost`, which calls
+    `search_cost_model.bound` -- against a cost model whose DEPTH cell is
+    rebuilt, and implements no second pricing formula.
 
-    The substitution is explicit and temporary rather than a second copy of the
-    pricing arithmetic: a reimplementation here could disagree with the model the
-    design actually publishes.
+    THE CELL IS END TO END, which is the correction an independent review
+    required. `CostModel` defines a cell as one whole expansion: operator, parent
+    load, materialize, identify, canonical reload, validation, state evaluation.
+    So the rebuilt cell is
+
+        measured Top-K operator MAX  +  committed non-operator MAX for that scope
+
+    and the earlier version -- which replaced the whole cell with the operator
+    term alone -- deleted about 3.07 min of real cost from every root expansion.
+
+    The other three cells are untouched. They reduce activation statistics rather
+    than KL, so the distribution support cannot move them, and keeping their
+    frozen values overstates rather than understates.
+
+    EXPECTED pricing uses the MAX too. An expected-cost figure is not allowed to
+    weaken an authorization ceiling, and no justified Top-K mean exists: the
+    measured distribution is over round-0 candidates at the root, which is the
+    bound rather than the average case.
     """
     basis = _topk_production_basis()
     if basis is None:
@@ -1021,17 +1140,25 @@ def topk_search_cost() -> dict[str, Any] | None:
 
     _ensure_the_frozen_operators_are_registered()
     frozen = d1.cost_model()
-    depth_id = "depth.causal_kl_greedy_v1"
     minutes = {k: dict(v) for k, v in frozen.minutes.items()}
-    before = dict(minutes[depth_id])
-    for key in ("root_max", "root_mean", "deeper_max", "deeper_mean"):
-        if key in minutes[depth_id]:
-            minutes[depth_id][key] = basis["depth_minutes"]
+    before = dict(minutes[DEPTH_IMPL])
+    rebuilt = {
+        "root_max": basis["root_max_minutes"],
+        "deeper_max": basis["deeper_max_minutes"],
+        #: THE MAX IN BOTH SLOTS, deliberately. See the docstring: an expected
+        #: figure must not weaken the ceiling, and there is no justified Top-K
+        #: mean to put here.
+        "root_mean": basis["root_max_minutes"],
+        "deeper_mean": basis["deeper_max_minutes"],
+    }
+    minutes[DEPTH_IMPL] = {k: rebuilt[k] for k in before if k in rebuilt}
     adjusted = dataclasses.replace(
         frozen, minutes=minutes,
-        source=(f"{frozen.source} -- with {depth_id} REPLACED by the measured "
-                f"production Top-K figure {basis['depth_minutes']} min from "
-                f"{TOPK_PRODUCTION}"))
+        source=(f"{frozen.source} -- with {DEPTH_IMPL} REBUILT END TO END as the "
+                f"measured production Top-K operator MAX "
+                f"({basis['operator_seconds_max_per_candidate']} s/candidate x "
+                f"{basis['greedy_candidates']} candidates) PLUS the committed "
+                f"non-operator MAX for the scope, from {TOPK_PRODUCTION}"))
     original = d1.cost_model
     try:
         d1.cost_model = lambda *a, **k: adjusted
@@ -1040,14 +1167,17 @@ def topk_search_cost() -> dict[str, Any] | None:
         d1.cost_model = original
     return {
         "basis": basis,
+        "bounds_later_rounds": round_zero_is_the_compute_ceiling(),
         "depth_cell_before": before,
-        "depth_cell_after": dict(minutes[depth_id]),
+        "depth_cell_after": dict(minutes[DEPTH_IMPL]),
         "search_session": priced,
+        "_priced_by": ("experiments.phase_d1.search_space.search_cost, which "
+                       "calls search_cost_model.bound. No second pricing formula "
+                       "exists here."),
         "_other_three_cells_unchanged": (
             "ffn.activation_importance_v0, width.global_pca_v0 and "
             "attention.activation_importance_v1 reduce activation statistics, "
-            "not KL, so the distribution support cannot move them. Their frozen "
-            "UNBATCHED cells are kept, which overstates rather than understates."),
+            "not KL, so the distribution support cannot move them."),
     }
 
 

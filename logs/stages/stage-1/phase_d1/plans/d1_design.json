@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and one independent blocker: funding authorization are recorded below, each independently sufficient to prevent a launch. The behavioural evidence cannot be built under the frozen mixture; the chain is not fundable at the current balance; and the search session alone exceeds the package's per-session envelope, which binds separately from the cumulative cap.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and two independent blockers: funding authorization, per-session envelope are recorded below, each independently sufficient to prevent a launch. The behavioural evidence cannot be built under the frozen mixture; the chain is not fundable at the current balance; and the search session alone exceeds the package's per-session envelope, which binds separately from the cumulative cap.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
@@ -596,7 +596,7 @@
    "phase_c3",
    "phase_a3"
   ],
-  "per_session_envelope_compatibility": "RESOLVED_FITS",
+  "per_session_envelope_compatibility": "UNRESOLVED",
   "per_session_envelope_usd": 30.0,
   "position": {
    "_cap_cross_check": 410.0,
@@ -618,54 +618,7 @@
   "provisional_per_session_excess_usd": 1.1577,
   "provisional_shortfall_usd": 53.0999,
   "sessions": 3,
-  "topk_production_basis": {
-   "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them. Their frozen UNBATCHED cells are kept, which overstates rather than understates.",
-   "basis": {
-    "_what_it_is": "Top-K reduction only, no dual reduction and no full-vocabulary reference cache -- so it is a PRODUCTION cost, unlike the adoption validation's wall clock, which computes both reducers.",
-    "_what_it_omits": "the per-expansion canonical reload, validation and global state evaluation. Those keep their frozen full-vocabulary cells below, which is CONSERVATIVE: the measured batched figures were faster.",
-    "candidates_timed": 12,
-    "depth_minutes": 19.954,
-    "full_vocab_bytes_avoided": 18160302336,
-    "greedy_candidates": 260,
-    "greedy_rounds": 8,
-    "owner": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a5/adoption.json",
-    "peak_memory_bytes": 17482989568,
-    "reference_sketch_bytes": 144148356,
-    "seconds_per_candidate": 4.6048
-   },
-   "depth_cell_after": {
-    "deeper_max": 19.954,
-    "deeper_mean": 19.954,
-    "root_max": 19.954,
-    "root_mean": 19.954
-   },
-   "depth_cell_before": {
-    "deeper_max": 36.07,
-    "deeper_mean": 27.5781,
-    "root_max": 34.3539,
-    "root_mean": 29.2482
-   },
-   "search_session": {
-    "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead. -- with depth.causal_kl_greedy_v1 REPLACED by the measured production Top-K figure 19.954 min from logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a5/adoption.json",
-    "beam_width": 6,
-    "container_disk_gb": 400,
-    "container_disk_usd": 0.9472,
-    "expansions_max": 92,
-    "expansions_min": 92,
-    "expected_minutes": 618.72,
-    "expected_trajectory_expansions": 92,
-    "expected_trajectory_minutes": 523.72,
-    "gpu_usd": 18.5836,
-    "hard_ceiling_minutes": 1022.95,
-    "hard_ceiling_usd": 19.5308,
-    "price_per_hour": 1.09,
-    "session_overhead_minutes": 95.0,
-    "structural_minutes_max": 927.95,
-    "structural_minutes_min": 518.71,
-    "unmeasured_inputs": [],
-    "warmup_levels": 1
-   }
-  }
+  "topk_production_basis": null
  },
  "contamination_protection": {
   "BLOCKER": "ZERO further disjoint batteries can be drawn under the frozen C1 mixture. math_verified holds 70 eligible items of the 150 a battery needs: MATH-500's 500 rows are already committed to the five isolation roles, c1_confirmation_v1 and c2_screening_v1. D1 cannot be executed as designed until this is resolved, and neither can D2 or D3.",
@@ -707,7 +660,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "7677404092cbd6d8af569f4f5aa1c35060d23881ffe2c4ee8567933725bfeaa7",
+ "design_hash": "2b1b7da00daccadc0c7ba5b01e9ce6a0022631f09cbdd2c2429c07a8545bf7c3",
  "evidence": {
   "_authorizes": "nothing. The evidence exists; the funding scope and the per-session envelope are separate and still open.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -929,7 +882,8 @@
   "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
  },
  "open_blockers": [
-  "funding authorization"
+  "funding authorization",
+  "per-session envelope"
  ],
  "recovery_recipe": "E1_KD_HEAVY_0860K",
  "schema": "aadistill.autoinit.phase_d1_design/v1",
@@ -1057,10 +1011,10 @@
   "stops_at": "commit_top_k. The search trains nothing, measures no behaviour and has no code path into a behavioural stage \u2014 the same boundary C2's driver holds."
  },
  "stage_id": "1",
- "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- ONE INDEPENDENT BLOCKER: funding authorization",
+ "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- TWO INDEPENDENT BLOCKERS: funding authorization, per-session envelope",
  "what_this_may_not_be_used_to_claim": [
   "that target-aware scoring is better. Nothing has been measured; this is a design.",
-  "that D1 is ready to launch. ONE INDEPENDENT BLOCKER: funding authorization, and it prevents it.",
+  "that D1 is ready to launch. TWO INDEPENDENT BLOCKERS: funding authorization, per-session envelope, and any one of them alone prevents it.",
   "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION and no figure of its is restated, re-analysed or revised here."
  ]
 }

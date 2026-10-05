@@ -49,6 +49,10 @@ STATE_EVAL = "artifacts/stage1/state_eval_v1"
 POLICY_ID = "positions.supervised_target_v1"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 
+#: Both calibration profiles D1's DEPTH step may run under. Timing one is not a
+#: max: historical full-vocab evidence showed materially different DEPTH timings.
+D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
+
 #: PREDECLARED, before the measurement, and not to be widened to admit a
 #: violation. `KL(topK+tail) <= KL(full)` is mathematics; two independent float32
 #: implementations summing V against K+1 terms agree to about this much. The
@@ -413,123 +417,148 @@ def candidate_scores(pairs: list[dict[str, Any]],
 def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
                                    n_candidates: int, journal: Journal,
                                    ) -> dict[str, Any]:
-    """A PRODUCTION Top-K-only expansion cost. No dual reduction.
+    """PRODUCTION Top-K operator cost per candidate. Both profiles. A MAX.
 
-    The adoption validation deliberately computes BOTH reducers from the same
-    forwards, so its wall clock includes work the formal Top-K path will not do.
-    Using it to price D1 would overstate the cost. This measures the real thing:
-    the reference sketched ONCE, then `n_candidates` candidate evaluations with
-    the Top-K reduction and nothing else.
+    No dual reduction, no full-vocabulary reference cache: this is the cost the
+    formal path will pay, which the adoption validation's wall clock is not.
 
-    A representative expansion rather than the whole greedy, which is sufficient
-    to price a session and costs minutes instead of half an hour: the greedy's
-    cost is `rounds x candidates x (forward + reduction)`, and this measures the
-    per-candidate term that the round count multiplies.
+    **A MEAN IS NOT A CEILING**, and the first version of this stage timed 12
+    candidates and reported `total / 12`, which was then promoted into `root_max`.
+    It now times EVERY round-0 single-layer candidate and reports the
+    distribution -- mean, p50, p95 and max -- with the MAX as the pricing input.
+
+    **BOTH D1 DEPTH calibration profiles.** D1 permits either, and historical
+    full-vocab evidence showed materially different DEPTH timings between them, so
+    one profile's max is not the cell's max.
+
+    Round 0 at the root parent suffices to bound the later rounds, and that is
+    established mechanically rather than assumed -- see
+    `tests/initialization/test_operators_only_shrink.py`: the skip set only grows
+    so the executed block count is non-increasing, round 0 has the most
+    candidates, and every frozen operator only shrinks the geometry.
     """
     import torch
 
     from aadistill.initialization.calibration.items import (
         prepare_calibration_items,
     )
+    from aadistill.initialization.calibration.packing import packed_batches
     from aadistill.initialization.calibration.profiles import get_profile
-    from aadistill.initialization.execution import ExecutionConfig
+    from aadistill.initialization.operators._common import resolve_pad_id
     from aadistill.initialization.operators.depth.causal_kl_greedy import (
         _ReferenceSketches, _forward_logit_block,
-    )
-    from aadistill.initialization.calibration.packing import (
-        packed_batches,
     )
     from aadistill.initialization.scoring.support import (
         sketch_forward_kl_mean_batch,
     )
     from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_a3 import a3_session as A3S
     from experiments.phase_d_series.scoring_protocol import (
         D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
     )
 
     adapter = get_adapter("qwen3")
-    spec = A3S.path_spec(workdir_device="cuda")
-    profile = get_profile(spec.steps[0].profile_id)
-    items = prepare_calibration_items(profile.resolve(repo),
-                                      profile_id=profile.qualified_id)
     model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
     if getattr(model.config, "use_cache", False):
         model.config.use_cache = False
-
-    from aadistill.initialization.operators._common import resolve_pad_id
-
-    groups = [(pk.batch, pk.original_indices) for pk in packed_batches(
-        items, D_SERIES_MICRO_BATCH_SIZE, packing=D_SERIES_BATCH_PACKING,
-        pad_id=resolve_pad_id(model), device="cuda")]
-
-    torch.cuda.reset_peak_memory_stats()
-    sketches = _ReferenceSketches(model, items, "cuda",
-                                  top_k=int(D_SERIES_SUPPORT.top_k))
-    t0 = time.time()
-    for group, _ in groups:
-        sketches.sketch_block(group)
-    sketch_seconds = round(time.time() - t0, 3)
-    sketch_peak = int(torch.cuda.max_memory_allocated())
-
-    #: Candidate evaluations. The skip sets are the first `n_candidates` single
-    #: layers, which is exactly what a greedy round 0 evaluates.
-    #: `ArchSpec.__getitem__`, not `.fields[...]`. `fields` is a TUPLE of
-    #: (name, value) pairs -- indexing it by string is a TypeError, which is what
-    #: ended this stage 5.84 s in. The subscript is what `operators/base.py`
-    #: already uses, and a $0 probe of module SYMBOLS does not catch a wrong
-    #: assumption about the SHAPE of what one returns.
+    #: ROUND 0 AT THE ROOT: one candidate per block of the intact parent.
     depth = int(adapter.spec_of(model)["num_hidden_layers"])
-    skips = [frozenset({i}) for i in range(min(n_candidates, depth))]
-    torch.cuda.reset_peak_memory_stats()
-    forward_s, reduce_s = 0.0, 0.0
-    t_all = time.time()
-    for skip in skips:
+    layers = list(range(depth))[:max(1, int(n_candidates))] \
+        if n_candidates and int(n_candidates) < depth else list(range(depth))
+
+    per_profile: dict[str, Any] = {}
+    all_totals: list[float] = []
+    for profile_id in D1_DEPTH_PROFILES:
+        profile = get_profile(profile_id)
+        items = prepare_calibration_items(profile.resolve(repo),
+                                          profile_id=profile.qualified_id)
+        groups = [(pk.batch, pk.original_indices) for pk in packed_batches(
+            items, D_SERIES_MICRO_BATCH_SIZE, packing=D_SERIES_BATCH_PACKING,
+            pad_id=resolve_pad_id(model), device="cuda")]
+        torch.cuda.reset_peak_memory_stats()
+        sketches = _ReferenceSketches(model, items, "cuda",
+                                     top_k=int(D_SERIES_SUPPORT.top_k))
+        t0 = time.time()
         for group, _ in groups:
-            idx, lp, tail = sketches.sketch_block(group)
-            t1 = time.time()
-            abls = _forward_logit_block(model, group, "cuda", skip)
-            torch.cuda.synchronize()
-            t2 = time.time()
-            sketch_forward_kl_mean_batch(
-                idx, lp, tail, abls, group.prediction_mask().to(abls.device),
-                has_tail=sketches.has_tail)
-            torch.cuda.synchronize()
-            t3 = time.time()
-            forward_s += t2 - t1
-            reduce_s += t3 - t2
-            del abls
-    total = round(time.time() - t_all, 3)
-    peak = int(torch.cuda.max_memory_allocated())
-    decision = sketches.decision()
+            sketches.sketch_block(group)
+        sketch_seconds = round(time.time() - t0, 3)
+
+        rows = []
+        for layer in layers:
+            skip = frozenset({layer})
+            fwd = red = 0.0
+            t_c = time.time()
+            for group, _ in groups:
+                idx, lp, tail = sketches.sketch_block(group)
+                t1 = time.time()
+                abls = _forward_logit_block(model, group, "cuda", skip)
+                torch.cuda.synchronize()
+                t2 = time.time()
+                sketch_forward_kl_mean_batch(
+                    idx, lp, tail, abls,
+                    group.prediction_mask().to(abls.device),
+                    has_tail=sketches.has_tail)
+                torch.cuda.synchronize()
+                t3 = time.time()
+                fwd += t2 - t1
+                red += t3 - t2
+                del abls
+            total = time.time() - t_c
+            rows.append({"layer": layer, "forward_seconds": round(fwd, 4),
+                         "reduction_seconds": round(red, 4),
+                         "total_seconds": round(total, 4)})
+            all_totals.append(total)
+        decision = sketches.decision()
+        totals = [r["total_seconds"] for r in rows]
+        per_profile[profile_id] = {
+            "n_candidates": len(rows),
+            "n_groups": len(groups),
+            "n_items": len(items),
+            "reference_sketch_seconds": sketch_seconds,
+            "reference_sketch_bytes": decision["sketch_bytes"],
+            "full_vocab_bytes_avoided": decision["full_vocab_bytes_avoided"],
+            "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
+            "per_candidate": rows,
+            "distribution": quantiles(totals),
+            "forward_share": round(
+                sum(r["forward_seconds"] for r in rows) / sum(totals), 4),
+        }
+        journal.event(stage=f"P.{profile_id}", status="ok",
+                      candidates=len(rows),
+                      max_s=round(max(totals), 4),
+                      mean_s=round(sum(totals) / len(totals), 4))
+        del sketches
+        torch.cuda.empty_cache()
+
     del model
     torch.cuda.empty_cache()
-
-    per_candidate = total / max(len(skips), 1)
+    overall = quantiles(all_totals)
     return {
-        "n_candidates_timed": len(skips),
-        "n_groups": len(groups),
+        "candidates_per_profile": len(layers),
+        "profiles": list(D1_DEPTH_PROFILES),
+        "per_profile": per_profile,
+        "overall_distribution": overall,
+        #: THE PRICING INPUT. The max over every candidate of every profile.
+        "operator_seconds_max": round(overall["max"], 4),
+        "operator_seconds_mean": round(overall["mean"], 4),
         "micro_batch_size": D_SERIES_MICRO_BATCH_SIZE,
         "packing": D_SERIES_BATCH_PACKING,
         "top_k": int(D_SERIES_SUPPORT.top_k),
-        "reference_sketch_seconds": sketch_seconds,
-        "reference_sketch_peak_bytes": sketch_peak,
-        "reference_sketch_bytes": decision["sketch_bytes"],
-        "full_vocab_bytes_avoided": decision["full_vocab_bytes_avoided"],
-        "candidate_seconds_total": total,
-        "candidate_forward_seconds": round(forward_s, 3),
-        "candidate_reduce_seconds": round(reduce_s, 3),
-        "seconds_per_candidate": round(per_candidate, 4),
-        "minutes_per_candidate": round(per_candidate / 60.0, 5),
-        "peak_memory_bytes": peak,
-        "_this_is_the_production_cost": (
-            "Top-K reduction only, no dual reduction, no full-vocabulary "
-            "reference cache. This is the per-candidate term a D1 round "
-            "multiplies, and it is what may be used to price a session."),
-        "_what_it_omits": (
-            "the per-round overheads a whole expansion also pays -- canonical "
-            "reload, validation and the global state evaluation. Those are "
-            "priced from the frozen per-cell table and from stage D, not here."),
+        "_this_is_the_operator_term_only": (
+            "the DEPTH operator's per-candidate work. A cost-model CELL is one "
+            "EXPANSION end to end, so the non-operator phases -- parent load, "
+            "materialize, identify, canonical reload, validation, state "
+            "evaluation -- must be ADDED from committed telemetry. Substituting "
+            "this number for a whole cell deletes them, which is the defect an "
+            "independent review caught."),
+        "_max_not_mean": (
+            "a ceiling built on a mean is not a ceiling. The max over both "
+            "profiles is the pricing input; mean/p50/p95 are reported as "
+            "description."),
+        "_round_0_at_the_root": (
+            "bounds the later rounds: the skip set only grows so the executed "
+            "block count is non-increasing, round 0 has the most candidates, and "
+            "every frozen operator only shrinks the geometry. Established by "
+            "tests/initialization/test_operators_only_shrink.py."),
     }
 
 
@@ -870,10 +899,11 @@ def main(argv: list[str] | None = None) -> int:
                          "PRODUCTION Top-K-only expansion timing, minutes). A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
-    ap.add_argument("--timing-candidates", type=int, default=6,
-                    help="how many candidate evaluations stage P times. A "
-                         "representative sample, not the whole round: the "
-                         "per-candidate cost is what a round multiplies.")
+    ap.add_argument("--timing-candidates", type=int, default=0,
+                    help="how many round-0 candidates stage P times per profile. "
+                         "0 means ALL of them, which is what a MAX requires -- a "
+                         "subset gives a point estimate, and a point estimate "
+                         "cannot price an authorization ceiling.")
     ap.add_argument("--check-only", action="store_true",
                     help="every stage except the two expensive ones: the CUDA "
                          "probe, the four process-global registries, the frozen "
@@ -1058,9 +1088,9 @@ def main(argv: list[str] | None = None) -> int:
                 record["P_production_timing"] = stage_P_production_topk_timing(
                     repo=repo, teacher_path=teacher_path,
                     n_candidates=args.timing_candidates, journal=journal)
-                st.result = {"s_per_candidate":
+                st.result = {"operator_s_max":
                              record["P_production_timing"][
-                                 "seconds_per_candidate"]}
+                                 "operator_seconds_max"]}
 
         record["status"] = "COMPLETE"
     except BaseException as exc:                      # noqa: BLE001
