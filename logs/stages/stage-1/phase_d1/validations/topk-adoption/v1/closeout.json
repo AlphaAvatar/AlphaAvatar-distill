@@ -186,12 +186,10 @@
   }
  },
  "cost": {
-  "booked_usd": 2.8741,
-  "campaign_booked_usd": 3.6878,
-  "campaign_ceiling_usd": 8.0,
+  "_owner": "campaign.json, which owns every paid draw. These are READ from its subrun list, not typed: this block once carried `booked_usd` and `subruns` at their pre-a8 values beside `campaign_booked_usd` and `paid_subruns` at their current ones, so the generic names held the stale pair.",
+  "booked_usd": 3.6878,
   "ceiling_usd": 8.0,
   "paid_subruns": 8,
-  "subruns": 7,
   "teardown": "every pod provider-confirmed gone"
  },
  "identity": {

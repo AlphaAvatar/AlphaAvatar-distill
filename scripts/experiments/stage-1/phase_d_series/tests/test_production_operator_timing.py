@@ -691,3 +691,52 @@ class TestTheCloseoutAndTheDesignCannotDisagreeAboutThePrice:
                     "C_depth_decisions", "D_state_evaluation", "lower_bound"):
             assert key in answers, f"{key} went missing from the closeout"
         assert answers["lower_bound"], "the lower-bound answer is the verdict"
+
+
+class TestTheCloseoutsCostBlockIsTheLedgers:
+    """One owner for the campaign total, checked rather than maintained by hand.
+
+    The closeout carried FOUR fields for TWO facts: `booked_usd`/`subruns` at their
+    pre-a8 values beside `campaign_booked_usd`/`paid_subruns` at their current
+    ones. The generic names held the stale pair, so a reader taking the obvious
+    field got a seven-subrun total for an eight-subrun campaign. Review caught it.
+    """
+
+    @staticmethod
+    def _pair():
+        import json
+
+        base = (REPO / "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1")
+        return (json.loads((base / "campaign.json").read_text()),
+                json.loads((base / "closeout.json").read_text()))
+
+    def test_the_total_and_the_count_are_the_ledgers(self):
+        camp, closeout = self._pair()
+        cost = closeout["cost"]
+        assert cost["paid_subruns"] == len(camp["subruns"])
+        assert float(cost["booked_usd"]) == pytest.approx(
+            float(camp["booked_usd"]))
+        assert float(cost["ceiling_usd"]) == pytest.approx(
+            float(camp["ceiling_usd"]))
+
+    def test_the_ledgers_total_is_the_sum_of_its_own_components(self):
+        """So agreeing with the ledger is not agreeing with another typed figure."""
+        camp, _ = self._pair()
+        assert float(camp["booked_usd"]) == pytest.approx(
+            round(sum(float(s["cost_usd"]) for s in camp["subruns"]), 4))
+
+    def test_no_second_name_for_either_fact(self):
+        """A duplicate under a different name is how the stale pair survived."""
+        _, closeout = self._pair()
+        cost = closeout["cost"]
+        for retired in ("campaign_booked_usd", "campaign_ceiling_usd", "subruns"):
+            assert retired not in cost, (
+                f"{retired} is back; it is a second name for a fact the ledger "
+                "owns, and the last time two names existed they disagreed")
+
+    def test_every_filed_subrun_has_a_cost_and_an_evidence_path(self):
+        """An unpriced draw is how engineering spend stops reaching the book."""
+        camp, _ = self._pair()
+        for s in camp["subruns"]:
+            assert float(s["cost_usd"]) >= 0.0, s["subrun_id"]
+            assert (REPO / s["evidence"]).is_dir(), s["evidence"]
