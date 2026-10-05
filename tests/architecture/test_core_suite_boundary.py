@@ -293,3 +293,36 @@ def test_no_core_file_reads_a_concrete_historical_run():
         + "\n\nBuild the input under `tmp_path`, or move the verification to the "
         "experiment that owns the run. Discovering runs through `logs/index.json` "
         "is still fine. AGENTS.md 2.8a.")
+
+
+def test_no_registered_implementation_carries_a_patched_method():
+    """A spied operator must not outlive its module, and the registry mapping
+    being unchanged does not prove it did not.
+
+    `monkeypatch.setattr(impl, "execute", spy)` on an implementation whose
+    `execute` is INHERITED records the bound method as the old value and, on undo,
+    writes it back as an INSTANCE attribute. The registry holds singletons, so
+    that attribute outlives the module and shadows the class permanently — and a
+    later class-level patch of the same name is silently ignored. The symptom was
+    "no expansion ran", which names nothing about patching.
+
+    The module-boundary fixture in the root `conftest.py` strips these. This
+    asserts the state that fixture exists to maintain, so a suite in which the
+    fixture stopped running fails here rather than in whichever test happened to
+    patch a class next.
+    """
+    from aadistill.initialization.operators import base as ops
+    from aadistill.initialization.operators.register import (
+        register_builtin_operators,
+    )
+
+    register_builtin_operators()
+    leaked = {
+        impl_id: sorted(n for n in ("plan", "apply", "execute") if n in vars(impl))
+        for impl_id, impl in ops._IMPLEMENTATIONS.items()
+        if any(n in vars(impl) for n in ("plan", "apply", "execute"))
+    }
+    assert not leaked, (
+        f"these registered implementations carry per-instance methods: {leaked}. "
+        "An earlier module patched them and the restore wrote an inherited "
+        "attribute back onto the instance; every later test sees the patch.")

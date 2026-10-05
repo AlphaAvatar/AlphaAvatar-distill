@@ -43,6 +43,20 @@ GEOMETRY = dict(hidden_size=32, intermediate_size=64, num_hidden_layers=6,
                 num_attention_heads=4, num_key_value_heads=2, head_dim=8,
                 vocab_size=64, tie_word_embeddings=True)
 
+#: Keywords the timing builder passes that `_expand_one` does not, each with the
+#: reason. ANYTHING ELSE IS A DEFECT, and in the direction that actually bit: the
+#: timing builder injected `distribution_support` while `SearchConfig` had no such
+#: field, so a paid 40-minute measurement timed an operator path that no search
+#: could reach. The one-directional check could not see it -- it asked only whether
+#: the builder was a SUPERSET of core's keywords, and a superset it was.
+JUSTIFIED_EXTRAS = {
+    #: An execution-only hook. The search has no use for it and must not: it
+    #: exists so a validation can reduce a second time from forwards already paid
+    #: for, its return value is ignored, and a test asserts watching cannot change
+    #: a decision. It is not scientific context.
+    "score_observer",
+}
+
 #: Keywords `_expand_one` passes that ONE operator invocation has no use for,
 #: each with the reason. Anything else it passes must be passed here too.
 JUSTIFIED_OMISSIONS = {
@@ -82,6 +96,18 @@ def missing_context_keywords(production: set[str], mine: set[str]) -> set[str]:
     return production - mine - JUSTIFIED_OMISSIONS
 
 
+def extra_context_keywords(production: set[str], mine: set[str]) -> set[str]:
+    """What a timing builder sets and production does NOT, less the excused.
+
+    The other direction, and the one that cost a round. A field the timing path
+    injects and the production path cannot express means the measurement describes
+    a path nothing can execute -- which is worse than a missing field, because the
+    number looks right.
+    """
+    assert mine, "the builder does not construct an OperatorContext at all"
+    return mine - production - JUSTIFIED_EXTRAS
+
+
 def _expand_one_context_keywords() -> set[str]:
     return context_keywords_of(
         (REPO / "src/aadistill/initialization/planning/search.py").read_text(),
@@ -99,15 +125,35 @@ def _toy_items(n=4, vocab=64):
 
 class TestTheBuilderMatchesTheProductionExpansion:
 
+    @staticmethod
+    def _both() -> tuple[set[str], set[str]]:
+        return (_expand_one_context_keywords(),
+                context_keywords_of(
+                    (REPO / "scripts/pod/topk_adoption_driver.py").read_text(),
+                    "production_operator_context"))
+
     def test_it_passes_every_keyword_production_passes(self):
-        assert not missing_context_keywords(
-            _expand_one_context_keywords(),
-            context_keywords_of(
-                (REPO / "scripts/pod/topk_adoption_driver.py").read_text(),
-                "production_operator_context")), (
+        production, mine = self._both()
+        assert not missing_context_keywords(production, mine), (
             "the production expansion passes a context field the timing builder "
             "does not. A timing run that omits a field production sets is not "
             "timing production.")
+
+    def test_it_passes_no_scientific_field_production_cannot_express(self):
+        """The direction that cost a round.
+
+        The builder injected `distribution_support` while `SearchConfig` had no
+        such field, so the measured operator path was unreachable through
+        `BeamSearch`. A field here that core cannot carry means the timing
+        describes a path nothing can run — and the number looks right.
+        """
+        production, mine = self._both()
+        extra = extra_context_keywords(production, mine)
+        assert not extra, (
+            f"the timing builder passes {sorted(extra)} and the production "
+            "expansion does not. Either core must carry it or the builder must "
+            "stop injecting it; a measurement of an unreachable path prices "
+            "nothing.")
 
     def test_every_omission_is_one_core_actually_passes(self):
         """So the exclusion list cannot quietly accumulate dead entries."""
@@ -185,6 +231,35 @@ def _expand_one(self):
         mine = context_keywords_of(self.CORE, "_expand_one") - {excused}
         assert missing_context_keywords(
             context_keywords_of(self.CORE, "_expand_one"), mine) == set()
+
+    @pytest.mark.parametrize("injected", [
+        "distribution_support", "position_policy", "numerics", "reduction",
+    ])
+    def test_a_field_the_timing_path_invents_is_caught(self, injected):
+        """The real defect, simulated: core lacks it, the timing builder has it."""
+        core = context_keywords_of(self.CORE, "_expand_one") - {injected}
+        mine = context_keywords_of(self.CORE, "_expand_one") | {injected}
+        assert extra_context_keywords(core, mine) == {injected}
+
+    @pytest.mark.parametrize("excused", sorted(JUSTIFIED_EXTRAS))
+    def test_an_excused_extra_is_allowed(self, excused):
+        core = context_keywords_of(self.CORE, "_expand_one")
+        assert extra_context_keywords(core, core | {excused}) == set()
+
+    def test_every_excused_extra_is_one_the_builder_actually_passes(self):
+        """So the extras list cannot rot into a blanket exemption."""
+        mine = context_keywords_of(
+            (REPO / "scripts/pod/topk_adoption_driver.py").read_text(),
+            "production_operator_context")
+        stale = JUSTIFIED_EXTRAS - mine
+        assert not stale, (
+            f"{sorted(stale)} is excused as an extra and the builder does not "
+            "pass it; an exemption that outlives its reason hides the next gap")
+
+    def test_an_identical_pair_has_neither_missing_nor_extra(self):
+        core = context_keywords_of(self.CORE, "_expand_one")
+        assert missing_context_keywords(core, core) == set()
+        assert extra_context_keywords(core, core) == set()
 
     def test_a_new_core_field_is_caught(self):
         """The failure mode this exists for: core grows a field, nobody notices."""

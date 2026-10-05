@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED ONCE: funding authorization. Envelope RESOLVED_FITS at a MEASURED $21.4897 vs $30.00. Owner: d1_design.json :: open_blockers.",
+ "blocker": "NOTHING IS RUNNING AND NOTHING MAY START. D1 BLOCKED ONCE: funding authorization. Envelope RESOLVED_FITS on measurement. Owner: d1_design.json :: open_blockers.",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
@@ -73,13 +73,13 @@
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
-  "blockers": "EVIDENCE CLOSED. ENVELOPE RESOLVED_FITS on one MEASURED operator invocation. OPEN: funding authorization (CATEGORICAL -- no measurement reaches it). Derived by open_blockers(); owner d1_design.json.",
+  "blockers": "EVIDENCE CLOSED. ENVELOPE RESOLVED_FITS on one MEASURED operator invocation, and BeamSearch can now execute that protocol. OPEN: funding authorization (CATEGORICAL). Derived by open_blockers(); owner d1_design.json.",
   "d2_owed_engineering": "the collectors implement only the BINARY position form; D2's continuous c_ref(t) needs a weighted denominator. Owner: StatsSpec's docstring.",
   "execution_wiring": "CONTRACT ONLY, no driver. No frozen D1 run may carry suite_content_identity 'unbound'. Owner: d1_design.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
-  "scoring_protocol": "reference_topk_tail_v1, K=200, reference-defined support + one K+1 tail bucket computed from the COMPLEMENT's logits. Maintainer-selected 2026-10-04, no sweep. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "scoring_protocol": "reference_topk_tail_v1, K=200, reference-defined support + one K+1 tail bucket from the COMPLEMENT's logits. Carried by SearchConfig.distribution_support. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
   "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
@@ -114,19 +114,19 @@
  "latest_verification": {
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
+   "describes_head": false,
    "kind": "launch_bound",
-   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
+   "verdict": "PASS"
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "the formal D1 funding authorization -- a MAINTAINER decision, now fully defined. Top-K adoption CLOSED and the envelope resolved on a measured invocation. Reasons: d_series.blockers.",
+ "next": "the formal D1 funding authorization -- a MAINTAINER decision. Top-K adoption CLOSED, envelope resolved, chain $51.0829 derived. Reasons: d_series.blockers.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "maintainer review of the measured pricing, then the formal D1 funding decision. No engineering work is owed.",
+  "next_work": "maintainer review of the wiring correction and the measured pricing, then the formal D1 funding decision.",
   "not_next": "no retry/resume/pooling of any complete measurement; no C4; no C2 spend; no FFN experiment; no formal D1 while any d_series.blockers entry stands; no K sweep (K=200 is a maintainer-selected protocol parameter, never tuned against outcomes); no rerun of C1/C2/C3/A3 under Top-K; no rebuild of the frozen behavioural family. Owner: decisions.md.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 DESIGNED and BLOCKED.",
   "then": "the formal D1 funding authorization; reasons in d_series.blockers."
@@ -227,7 +227,7 @@
  "test_suites": {
   "boundary_guard": "tests/architecture/test_core_suite_boundary.py, four rules in its docstring. Specific-experiment imports from core: 0.",
   "contract": "AGENTS.md 2.8a owns it: THREE suites, reported separately. core = `pytest` (testpaths=['tests']); experiment trees mirror logs/stages/, ownership from its index.json.",
-  "core": "3019 passed / 14 skipped, 0 failed, 4m06s on b0ca0fec (the D1 source lineage). No skip depends on historical evidence.",
+  "core": "3146 passed / 14 skipped / 0 failed, 4m00s. GREEN. The boundary guard caught two experiment imports an earlier round of mine added.",
   "integration": "SQUASH AND MERGE, AGENTS.md P12.2, every integration from 2026-10-03 onward. Source branches are NOT deleted: records bind commit hashes that exist only there. Ranges: logs/budget/decisions.md.",
   "known_red": "ONE, pre-existing (bc31175f), out-of-tree, NOT core: phase_d_series test_source_evidence::test_it_regenerates_identically. Its near-duplicate SCREEN is nondeterministic across processes, so regenerating the record cannot fix it. Diagnosis: current.md.",
   "next_work": "none owed; awaiting a maintainer decision."

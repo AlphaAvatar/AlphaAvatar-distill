@@ -1352,6 +1352,34 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "SEMANTIC CHANGE under the Top-K support and a no-op under full "
             "vocabulary. CUDA SURFACE: a GPU validation IS owed.",
      }),
+    ("908064ce9e741f8341dd0bdb22fc0cb51a154680",
+     "BeamSearch can express a distribution support at all",
+     {
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchConfig` gains `distribution_support`, defaulting to "
+            "`FULL_VOCAB_V1`, and `_expand_one` now DECLARES it in the hashed "
+            "operator config and PASSES the object in `OperatorContext`. Without "
+            "this the Top-K protocol was implemented in the operator, the state "
+            "evaluator, the protocol identity and a driver -- and the only path a "
+            "formal search could take fell back to the full vocabulary, so a paid "
+            "40-minute measurement timed an operator path `BeamSearch` could not "
+            "reach. An independent review caught it. "
+            "IDENTITY: `as_dict` OMITS the key at the default, so every committed "
+            "search keeps the `config_hash` its own record carries; a coarsened "
+            "partition changes the hash, which is the point of putting it there. "
+            "ONE PARTITION FOR OPERATORS AND MEASURER: the constructor asks an "
+            "unwrapped measurer for its support, and -- the load-bearing half, "
+            "since every driver wraps its evaluator in a lambda -- every "
+            "measurement is checked against what it actually REDUCED OVER, read "
+            "out of `detail.reduction`. A candidate selected on a Top-K objective "
+            "and pruned on a full-vocabulary metric is now unexpressible. "
+            "NO CUDA SURFACE: this file issues no kernel and performs no "
+            "reduction; it passes a declaration and an object, and the arithmetic "
+            "it reaches was validated by the Top-K adoption qualification. No new "
+            "GPU validation is owed, and the measured operator context is "
+            "byte-identical to the one a8 timed -- which is why a8 stands without "
+            "a rerun.",
+     }),
 )
 
 

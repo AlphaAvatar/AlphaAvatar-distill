@@ -474,8 +474,21 @@ class TestTheCommittedRecords:
             assert retired not in budget, (
                 f"{retired} is back; a cost-derived field whose direction is "
                 "unknown must say so in its name")
-        #: and the claim boundary is in the prose, not only the field names
-        assert "NOT the finalized amount" in budget["BLOCKER"]
+        #: AND THE CLAIM BOUNDARY IS IN THE PROSE, not only the field names --
+        #: asserted as the boundary rather than as one sentence. It used to demand
+        #: the exact phrase "NOT the finalized amount", which held only while the
+        #: shortfall was a planning figure of unknown direction; the measured
+        #: DEPTH cell made the direction known and rewrote the sentence around a
+        #: claim boundary that had not changed at all.
+        note = budget["BLOCKER"]
+        assert "PROVISIONAL" in note, (
+            "the shortfall must say it is not a settled figure; three of four "
+            "cost cells are still unmeasured")
+        assert "does not claim what the cap should become" in note \
+            or "does not claim the cap must move" in note, (
+            "the design must not name the amount the project cap should become; "
+            "that is a maintainer decision and this field is where it is "
+            "disclaimed")
 
     def test_the_second_blocker_note_is_a_function_of_the_measured_status(self):
         """The ceiling note must say what the DERIVED status says, in all three

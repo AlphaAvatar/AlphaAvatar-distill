@@ -50,51 +50,58 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**TOP-K IS GO AND THE PRICE IS NOW MEASURED. One blocker left, and it is a
-maintainer decision.** Review reopened this round three times — the tail
-arithmetic, the cost cell, and what the cost cell was a measurement *of*. All
-three are closed.
+**TOP-K IS GO, THE PRICE IS MEASURED, AND THE BEAM CAN NOW RUN THE PROTOCOL.**
+Review reopened this round four times — the tail arithmetic, the cost cell, what
+the cell was a measurement *of*, and then whether anything could execute the
+protocol that was measured. All four are closed. One blocker remains and it is a
+maintainer decision.
 
 ```text
 lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
 DEPTH decisions moved    0 of 8; removal orders identical
-CE / NLL                 exact to 1.4e-07;  top-1 bit-identical
-forward teacher KL       -1.8e-03 equal-domain mean; worst domain agrees
-reverse KL               -1.07%, DIAGNOSTIC only, not a ranking objective
 reference state          16.91 GiB -> 137.5 MiB (0.794% of full vocabulary)
 operator invocation      1194.26 s and 1188.77 s  ->  MAX 19.9044 min
 DEPTH cell (END TO END)  22.976 min root   (frozen full-vocab was 34.354)
 search session           MEASURED $21.4897  vs the $30.00 envelope  ->  FITS
+D1 chain (derived)       $51.0829  =  21.4897 + 14.7966 + 14.7966
 ```
 
-**Three defects review caught, all mine, each one layer deeper.** The tail was
-reconstructed as `1 - sum(support)` and the measured support mass reached
-**1.000001**, so one coarse KL exceeded the full-vocabulary KL it must bound.
-Then the pricing replaced the **whole** `CostModel` cell with the operator term,
-deleting ~3.07 min per expansion, and promoted a 12-candidate **mean** into
-`root_max`. Then the "production" timing turned out to be a **shadow loop** — the
-driver had reimplemented the candidate inner body, so it never paid
+**The fourth defect was the sharpest.** `reference_topk_tail_v1` was implemented
+in the operator, in the state evaluator, in the protocol identity and in a driver
+that injected it by hand — and `SearchConfig` had **no field for it**, so the only
+path a formal D1 search could take fell back to `FULL_VOCAB_V1`. a8 timed the
+intended operator path faithfully for forty minutes while that path was
+unreachable through `BeamSearch`.
+
+**My parity test could not have seen it.** It asked whether the timing builder was
+a *superset* of core's context keywords — it caught a field core had and the
+builder forgot. This was the opposite: a field the builder had and core could not
+express. The check is bidirectional now, with a justified-extras set, and the
+reverse direction was verified against the pre-wiring source.
 
 ```text
-active.prediction_weights_for(group, indices)   a real [3, 308] tensor on the
-                                                real mixture, 665/924 nonzero
-the weighted reduction                          weights= was simply omitted
-values.tolist()                                 production's OWN sync, per group
-per-subtype collection, domain_balanced_score   the aggregation
-_ReferenceSketches fill                         prebuilt before the clock started
+SearchConfig.distribution_support = FULL_VOCAB_V1   (absent from as_dict)
+  -> _expand_one declares it in the hashed operator config
+  -> and passes the object in OperatorContext
+  -> operator refuses a declaration/object disagreement (already did)
+  -> every measurement is checked against what it actually REDUCED OVER
 ```
 
-**The fix was a rule, not a number.** `BeamSearch._expand_one` records
-`operator_seconds` around `impl.execute(ctx)` — the whole invocation, including
-packing, the cache fill, all 260 candidates over 8 rounds, the greedy bookkeeping
-and the child construction. So `candidates × per-candidate` is a different
-quantity from the one the cost table holds, however carefully it is measured.
-Stage P now times one real invocation per profile, through a context built by the
-same helpers `_expand_one` uses, with a test that reads core's own keyword set by
-AST so a new field cannot be missed in silence.
+That last check is the load-bearing one: every driver wraps its evaluator in a
+`lambda`, so asking the measurer for its support at construction usually sees
+nothing. Reading `detail.reduction` per measurement cannot be hidden by wrapping,
+and it makes "Top-K operators, full-vocabulary beam metric" unexpressible rather
+than merely discouraged. Five mutations of the wiring, all caught — including the
+original defect and the one where the support is absent from the hash.
 
-**The two withdrawn figures bracket the truth in opposite directions**, which is
-why neither could be reasoned about:
+**Three earlier defects, for the record.** The tail was reconstructed as
+`1 - sum(support)` and the measured support mass reached **1.000001**, so one
+coarse KL exceeded the full-vocabulary KL it must bound. The pricing then replaced
+the **whole** `CostModel` cell with the operator term and promoted a 12-candidate
+**mean** into `root_max`. Then the "production" timing turned out to be a shadow
+loop that never paid the position weights, the `values.tolist()` host transfer,
+the aggregation or the reference-cache fill — and `candidates × per-candidate` is
+not the quantity `_expand_one` records as `operator_seconds` at all.
 
 ```text
 measured              19.904 min
@@ -103,35 +110,39 @@ a7  mean x 260        20.101 min    +1.0%   luck, not a method
 a6  max x 260         33.813 min   +69.9%   its own 1,656 synchronizations
 ```
 
-**a8 carries a defect of its own, and the price does not.** Its per-candidate
-diagnostic span baseline came from `time.time()` while the observer stamped
-`perf_counter()`, so the first span of each profile reads about `-1.79e9 s` and
-the distribution's min/p1/p5/mean are that number wearing a plausible shape. The
-invocation total is a `time.time()` interval around `execute` — production's own
-definition — so the ceiling is unaffected, and so are max/p95/p50. That is the
-worst shape for such a bug: a correct ceiling beside a diagnostic that lied.
-`_candidate_spans` now refuses an impossible duration and per-candidate seconds
-are recorded individually. a8 was not re-run: re-paying for a diagnostic buys
-nothing.
+**The core suite was not green, and I had said it was.** Running it for the first
+time in three rounds found that `tests/initialization/test_operators_only_shrink.py`
+— which I added two rounds ago — imports `experiments.phase_a3` and
+`experiments.phase_c2` from the core suite, which §2.8a forbids. The generic claim
+stayed in core and swept the whole builtin registry; the frozen-set and
+committed-record halves moved to `phase_d1`'s own suite. Two rounds of "do not
+rerun core" is how a red suite stays invisible.
 
-**One more caveat on a8's attribution.** `split_is_attributed` is `False` in both
-profiles, correctly — no synchronizations were inserted — so `ablated_seconds`
-and `distortion_seconds` are *not* a clean forward/reduction split: without a
-sync the asynchronous forward's tail is billed to whatever forces the next one,
-here the reduction's host transfer. Their sum is sound; neither alone is that
-phase's cost.
+**And a cross-module leak that cost a debugging round.**
+`monkeypatch.setattr(impl, "execute", spy)` on an implementation whose `execute`
+is *inherited* records the bound method as the old value and, on undo, writes it
+back as an **instance** attribute. The registry holds singletons, so it outlives
+the module and shadows the class permanently — and any later class-level patch of
+the same name is silently ignored. The symptom was "no expansion ran". The
+module-boundary fixture strips these now, the leaking test cleans up after itself,
+and the boundary suite asserts the state the fixture maintains.
+
+**a8 stands without a rerun.** The wiring produces the same `OperatorContext` the
+measurement timed and changes no operator and no hot path; it passes a declaration
+and an object. The per-candidate diagnostic in a8's record is still defective — its
+span baseline mixed `time.time()` with `perf_counter()`, so min/p1/p5/mean are the
+unix epoch negated while max/p95/p50 and the invocation total stand — and the
+report names it rather than printing it.
 
 **The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
 `funds_formal_sessions_of`. No measurement reaches it.
 
 **An incidental observation, and it is not a D1 result.** Timed under D1's
-treatment positions, DEPTH removed `[2, 3, 32, 16, 26, 15, 17, 27]`
-(domain-balanced) and `[2, 3, 32, 16, 15, 26, 17, 27]` (reasoning-heavy), against
-a4's incumbent-position `[2, 16, 3, 32, 20, 26, 15, 21]` — six of eight layers
-shared, different order, two different choices. This is one unreplicated
-engineering invocation per profile with no frozen protocol, no seeds and no
-registered decision rule. It is the kind of thing D1 exists to measure properly
-and it is **not** evidence for D1's hypothesis.
+treatment positions, DEPTH removed `[2, 3, 32, 16, 26, 15, 17, 27]` and
+`[2, 3, 32, 16, 15, 26, 17, 27]`, against a4's incumbent-position
+`[2, 16, 3, 32, 20, 26, 15, 21]` — six of eight layers shared, different order,
+two different choices. One unreplicated engineering invocation per profile, no
+frozen protocol, no seeds, no registered decision rule.
 
 **D1's claim boundary.** It differs from incumbent B on three axes — distribution
 support, numerical execution, scoring positions — and the qualification measured

@@ -118,3 +118,19 @@ def _operator_registry_is_module_local():
         for impl_id in sorted(set(_ops._IMPLEMENTATIONS) - before):
             _ops.unregister_implementation(impl_id)
         register_builtin_operators()
+        #: AND NO IMPLEMENTATION KEEPS A PATCHED METHOD. The registry mapping
+        #: being unchanged is not the same as the implementations being unchanged,
+        #: which this fixture originally assumed.
+        #:
+        #: `monkeypatch.setattr(impl, "execute", spy)` on an implementation whose
+        #: `execute` is INHERITED records the bound method as the old value and,
+        #: on undo, writes it back as an INSTANCE attribute. The registry holds
+        #: singletons, so that attribute outlives the module and permanently
+        #: shadows the class -- and any later class-level patch of the same name
+        #: is silently ignored. Measured: a search test that passed alone observed
+        #: nothing at all when one earlier module had spied on an operator, and
+        #: the symptom was "no expansion ran" rather than anything about patching.
+        for impl in list(_ops._IMPLEMENTATIONS.values()):
+            for name in ("plan", "apply", "execute"):
+                if name in vars(impl):
+                    del vars(impl)[name]

@@ -270,7 +270,8 @@ def test_the_fixed_path_resolves_and_prepares_without_any_override(tiny_mixture)
 
 
 def test_every_calibrated_operator_sees_the_same_prepared_tokens(tiny_mixture,
-                                                                 monkeypatch):
+                                                                 monkeypatch,
+                                                                 request):
     """One boundary, four operators — and they get identical tokens.
 
     Recorded from inside `execute`, so this is what the operators actually
@@ -291,7 +292,12 @@ def test_every_calibrated_operator_sees_the_same_prepared_tokens(tiny_mixture,
                        for i in ctx.calibration_items)
             return _real(ctx)
 
+        #: Patched on the INSTANCE, and the instance is a registry singleton, so
+        #: the cleanup is explicit: monkeypatch's undo writes an inherited
+        #: attribute back as an instance attribute, which then shadows the class
+        #: for every later module. Deleting it restores inheritance exactly.
         monkeypatch.setattr(impl, "execute", spy)
+        request.addfinalizer(lambda i=impl: vars(i).pop("execute", None))
 
     materialize_fixed_path(
         path_spec(c1_shaped_steps(profile.qualified_id)), adapter=QWEN3_ADAPTER,

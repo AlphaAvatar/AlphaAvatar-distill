@@ -330,22 +330,7 @@ def execution_protocol() -> dict[str, Any]:
     return {
         "micro_batch_size": 3,
         "calibration_batch_packing": "length_sorted_v1",
-        "_decision": (
-            "maintainer engineering decision after A3: batched execution is "
-            "adopted across every batchable path from D1 onward, not only "
-            "ATTENTION. A3 measured that it is NOT an optimization on "
-            "attention.activation_importance_v1 — 8-10% slower on the scorer "
-            "with no detectable correctness effect — so this is a uniformity "
-            "decision rather than a performance claim. The search ceiling below "
-            "is derived from UNBATCHED telemetry, which makes it a PROVISIONAL "
-            "PLANNING BASIS and NOT a bound: unbatched timing does not "
-            "upper-bound the batched implementation in either direction. A3 "
-            "measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 while "
-            "causal-KL's length-sorted packing won 1.1884x, and the net effect "
-            "on an expansion running all four operators is unmeasured. The "
-            "direction of the correction is unknown, so the figure sizes a "
-            "grant request rather than capping one; only the owed GPU "
-            "qualification can turn it into a price."),
+        "_decision": _batching_decision(),
         "_the_value_is_config_not_core": (
             "`3` is an experiment-policy number carried by ExecutionConfig. The "
             "core accepts 2, 4, 8 or a future token-budget batching policy with "
@@ -439,20 +424,7 @@ def search_stage() -> dict[str, Any]:
                      "width": SCHEDULE_V1.width,
                      "warmup_levels": SCHEDULE_V1.warmup_levels},
         "cost": cost,
-        "_cost_is_PROVISIONAL": (
-            "every cell of the per-expansion table was measured with an "
-            "UNBATCHED state evaluation and a one-item-per-forward statistics "
-            "pass. D1 runs both batched, and batching does NOT reliably reduce "
-            "the time per expansion: A3 measured the ATTENTION scorer 8.2-10.0% "
-            "SLOWER at batch 3 on three separate pods with the sign never "
-            "flipping, at +29.6% peak VRAM, while length-sorted packing won "
-            "1.1884x on causal-KL, whose 60,099 forwards each carry a fixed "
-            "ablation setup to amortize. Batching moves different operators in "
-            "different directions and the net effect on a D1 expansion is "
-            "UNMEASURED. These minutes are a planning ceiling to be refreshed "
-            "by the owed short GPU qualification, not a finalized authorization "
-            "price; no cell is adjusted on a predicted speed-up, because a "
-            "ceiling derived from a prediction is a prediction."),
+        "_cost_basis_status": _cost_basis_status(),
         "stops_at": (
             "commit_top_k. The search trains nothing, measures no behaviour and "
             "has no code path into a behavioural stage — the same boundary C2's "
@@ -1022,6 +994,180 @@ def a_deeper_parent_is_a_smaller_model() -> dict[str, Any]:
     }
 
 
+import contextlib
+
+
+def _measured_depth_cell() -> dict[str, Any] | None:
+    """The rebuilt DEPTH cell, or None while no production measurement exists."""
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    return {"root_max": basis["root_max_minutes"],
+            "deeper_max": basis["deeper_max_minutes"],
+            "operator_minutes": basis["operator_minutes_at_max"],
+            "invocation_seconds": basis["operator_invocation_seconds_max"]}
+
+
+def _batching_decision() -> str:
+    """The batching decision, with its measurement status DERIVED.
+
+    This used to end "the direction of the correction is unknown, so the figure
+    sizes a grant request rather than capping one; only the owed GPU qualification
+    can turn it into a price". Both halves became false — the qualification ran and
+    the DEPTH cell is now a measured invocation — and a sentence that describes an
+    owed measurement after it has been taken is how a reader concludes a design is
+    less ready than it is.
+    """
+    head = (
+        "maintainer engineering decision after A3: batched execution is adopted "
+        "across every batchable path from D1 onward, not only ATTENTION. A3 "
+        "measured that it is NOT an optimization on "
+        "attention.activation_importance_v1 -- 8-10% slower on the scorer with no "
+        "detectable correctness effect -- so this is a uniformity decision rather "
+        "than a performance claim. ")
+    cell = _measured_depth_cell()
+    if cell is None:
+        return head + (
+            "The search ceiling below is derived from UNBATCHED telemetry, which "
+            "makes it a PROVISIONAL PLANNING BASIS and NOT a bound: unbatched "
+            "timing does not upper-bound the batched implementation in either "
+            "direction, and the net effect on an expansion running all four "
+            "operators is unmeasured. The figure sizes a grant request rather "
+            "than capping one until a production measurement exists.")
+    return head + (
+        f"THE DEPTH CELL IS NOW MEASURED, batched and under the production "
+        f"protocol: one real `impl.execute` invocation of "
+        f"{cell['invocation_seconds']} s ({cell['operator_minutes']} min), the max "
+        f"of both calibration profiles, rebuilt end to end into "
+        f"{cell['root_max']} min at the root. The other three cells keep their "
+        "unbatched committed basis, which overstates rather than understates, so "
+        "the search session's price is a bound and not a plan.")
+
+
+def _cost_basis_status() -> str:
+    """Which cells are measured and which are a planning basis. Derived."""
+    cell = _measured_depth_cell()
+    tail = (
+        "A3 measured the ATTENTION scorer 8.2-10.0% SLOWER at batch 3 on three "
+        "separate pods with the sign never flipping, at +29.6% peak VRAM, while "
+        "length-sorted packing won 1.1884x on causal-KL. Batching moves different "
+        "operators in different directions, so no cell is adjusted on a predicted "
+        "speed-up: a ceiling derived from a prediction is a prediction.")
+    if cell is None:
+        return ("PROVISIONAL. Every cell of the per-expansion table was measured "
+                "with an UNBATCHED state evaluation and a one-item-per-forward "
+                "statistics pass, and D1 runs both batched. " + tail)
+    return (f"MIXED, and the dominant cell is MEASURED. {DEPTH_IMPL} is "
+            f"{cell['root_max']} min at the root, rebuilt from one real batched "
+            f"`impl.execute` invocation under the production protocol. The other "
+            f"three cells keep their UNBATCHED committed basis: they are a "
+            f"planning basis that overstates, which is the safe direction for a "
+            f"ceiling. " + tail)
+
+
+def _rebuilt_cost_model():
+    """The frozen cost model with the DEPTH cell rebuilt, or None if unmeasured.
+
+    One builder, called by the session price and by the whole-chain price, so the
+    two cannot be computed from different models. It is deliberately NOT a record
+    field: a `CostModel` is not serializable, and what a reader needs -- the cell
+    before, the cell after and which cells were left alone -- is recorded already.
+    """
+    import dataclasses
+
+    from experiments.phase_d1 import search_space as d1
+
+    basis = _topk_production_basis()
+    if basis is None:
+        return None
+    _ensure_the_frozen_operators_are_registered()
+    frozen = d1.cost_model()
+    minutes = {k: dict(v) for k, v in frozen.minutes.items()}
+    before = dict(minutes[DEPTH_IMPL])
+    rebuilt = {"root_max": basis["root_max_minutes"],
+               "deeper_max": basis["deeper_max_minutes"],
+               #: THE MAX IN BOTH SLOTS: an expected figure must not weaken a
+               #: ceiling, and two invocations is not a distribution.
+               "root_mean": basis["root_max_minutes"],
+               "deeper_mean": basis["deeper_max_minutes"]}
+    minutes[DEPTH_IMPL] = {k: rebuilt[k] for k in before if k in rebuilt}
+    return dataclasses.replace(
+        frozen, minutes=minutes,
+        source=(f"{frozen.source} -- with {DEPTH_IMPL} REBUILT END TO END as ONE "
+                f"MEASURED production Top-K operator invocation "
+                f"({basis['operator_invocation_seconds_max']} s over "
+                f"{basis['candidate_subsets_measured']} candidate subsets, the max "
+                f"of both DEPTH profiles) PLUS the committed non-operator MAX for "
+                f"the scope, from {TOPK_PRODUCTION}"))
+
+
+def _evidence_authorizes_note() -> str:
+    """What the behavioural evidence does and does not settle.
+
+    It said "the funding scope and the per-session envelope are separate and still
+    open" -- true when both were. The envelope resolved on measurement, so the
+    sentence survived its own subject and described a blocker that had closed.
+    """
+    #: NO `budget()` CALL HERE. `budget()` reaches `evidence()`, so asking it what
+    #: is open is a cycle -- it hung the writer for ten minutes before a
+    #: faulthandler dump named it. The derived list already exists, once, in
+    #: `open_blockers`; this field points at it instead of restating it, which is
+    #: how it came to describe a blocker that had closed.
+    return ("nothing. The evidence exists and settles only that the behavioural "
+            "family can be built. Every other precondition is separate and is "
+            "listed, derived, in `open_blockers`.")
+
+
+def _shortfall_note(chain: dict[str, Any], project_remaining: float) -> str:
+    """The gap between the chain ceiling and the live balance, and WHAT it is.
+
+    Derived, because the answer changed. While every cell came from unbatched
+    telemetry the gap was a planning figure whose direction was unknown. The DEPTH
+    cell is now a measured batched invocation and the other three keep a basis that
+    OVERSTATES, so the chain ceiling is a bound -- and the gap is the minimum a
+    grant would have to cover, not a number whose sign is unknown.
+    """
+    gap = round(chain["hard_ceiling_usd"] - project_remaining, 4)
+    cell = _measured_depth_cell()
+    if cell is None:
+        return (f"THE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = "
+                f"${gap} is the gap between a planning basis derived from "
+                "UNBATCHED telemetry and the live balance. It is NOT the "
+                "finalized amount by which the project cap must increase: the "
+                "direction of the batched correction is unknown. This document "
+                "does not claim the cap must move by that amount.")
+    return (f"THE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL "
+            f"PROVISIONAL. `provisional_shortfall_usd` = ${gap} is the gap between "
+            f"the chain hard ceiling of ${chain['hard_ceiling_usd']} and the live "
+            f"balance. The dominant cell is MEASURED -- {DEPTH_IMPL} at "
+            f"{cell['root_max']} min from one real batched invocation -- and the "
+            "three unmeasured cells keep an unbatched basis that OVERSTATES, so "
+            "the ceiling is a bound and a grant smaller than this gap cannot fund "
+            "the chain. It remains PROVISIONAL because those three cells are not "
+            "measured, so it is NOT the finalized amount by which the project cap "
+            "must increase: this document does not claim what the cap should "
+            "become, which is a maintainer decision.")
+
+
+@contextlib.contextmanager
+def _measured_cost_model(adjusted):
+    """Price through the EXISTING machinery with the rebuilt DEPTH cell in place.
+
+    A context manager rather than two copies of the swap, because the search
+    session and the whole chain must be priced on ONE cost model: a chain summed
+    from a frozen-model screening rung and a measured-model search session is
+    still one number, and nothing would say which model produced it.
+    """
+    from experiments.phase_d1 import search_space as d1
+
+    original = d1.cost_model
+    d1.cost_model = lambda *a, **k: adjusted
+    try:
+        yield
+    finally:
+        d1.cost_model = original
+
+
 def _topk_production_basis() -> dict[str, Any] | None:
     """The measured Top-K DEPTH cell, END TO END, or None if not yet valid.
 
@@ -1159,44 +1305,19 @@ def topk_search_cost() -> dict[str, Any] | None:
     basis = _topk_production_basis()
     if basis is None:
         return None
-    import dataclasses
-
     from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
     from experiments.phase_d1 import search_space as d1
 
     _ensure_the_frozen_operators_are_registered()
-    frozen = d1.cost_model()
-    minutes = {k: dict(v) for k, v in frozen.minutes.items()}
-    before = dict(minutes[DEPTH_IMPL])
-    rebuilt = {
-        "root_max": basis["root_max_minutes"],
-        "deeper_max": basis["deeper_max_minutes"],
-        #: THE MAX IN BOTH SLOTS, deliberately. See the docstring: an expected
-        #: figure must not weaken the ceiling, and there is no justified Top-K
-        #: mean to put here.
-        "root_mean": basis["root_max_minutes"],
-        "deeper_mean": basis["deeper_max_minutes"],
-    }
-    minutes[DEPTH_IMPL] = {k: rebuilt[k] for k in before if k in rebuilt}
-    adjusted = dataclasses.replace(
-        frozen, minutes=minutes,
-        source=(f"{frozen.source} -- with {DEPTH_IMPL} REBUILT END TO END as ONE "
-                f"MEASURED production Top-K operator invocation "
-                f"({basis['operator_invocation_seconds_max']} s over "
-                f"{basis['candidate_subsets_measured']} candidate subsets, the max "
-                f"of both DEPTH profiles) PLUS the committed non-operator MAX for "
-                f"the scope, from {TOPK_PRODUCTION}"))
-    original = d1.cost_model
-    try:
-        d1.cost_model = lambda *a, **k: adjusted
+    before = dict(d1.cost_model().minutes[DEPTH_IMPL])
+    adjusted = _rebuilt_cost_model()
+    with _measured_cost_model(adjusted):
         priced = d1.search_cost(price_per_hour=PRICE_PER_HOUR_LAST_QUOTED)
-    finally:
-        d1.cost_model = original
     return {
         "basis": basis,
         "bounds_the_deeper_parents": a_deeper_parent_is_a_smaller_model(),
         "depth_cell_before": before,
-        "depth_cell_after": dict(minutes[DEPTH_IMPL]),
+        "depth_cell_after": dict(adjusted.minutes[DEPTH_IMPL]),
         "search_session": priced,
         "_priced_by": ("experiments.phase_d1.search_space.search_cost, which "
                        "calls search_cost_model.bound. No second pricing formula "
@@ -1218,9 +1339,21 @@ def budget() -> dict[str, Any]:
     design = behavioural_design()
     #: The measured production Top-K basis, or None before it is measured.
     topk = topk_search_cost()
-    chain = d1.chain_cost(
-        screening_probes=design["screening_probes"],
-        confirmation_probes=design["confirmation_probes"])
+    #: THE WHOLE CHAIN ON THE MEASURED MODEL, through `chain_cost` -- which calls
+    #: the same `search_cost` the session price came from, and leaves the screening
+    #: and confirmation rungs exactly as they were, since a behavioural probe
+    #: reduces no KL and a distribution support cannot move it. Derived, never
+    #: typed: the chain total is `sum(session hard ceilings)` computed by
+    #: `chain_cost`, not a figure restated here.
+    if topk is not None:
+        with _measured_cost_model(_rebuilt_cost_model()):
+            chain = d1.chain_cost(
+                screening_probes=design["screening_probes"],
+                confirmation_probes=design["confirmation_probes"])
+    else:
+        chain = d1.chain_cost(
+            screening_probes=design["screening_probes"],
+            confirmation_probes=design["confirmation_probes"])
     terms = _load(BUDGET_TERMS)["execution_package"]
     pricing = _load(BUDGET_TERMS)["accepted_pricing"]
     live = _derived_budget()
@@ -1346,14 +1479,7 @@ def budget() -> dict[str, Any]:
             "allowance covers it at any price. A maintainer grant is required "
             "for the phase. That alone blocks D1 and does not depend on any "
             "cost estimate.\n\n"
-            "THE SHORTFALL IS PROVISIONAL. "
-            f"`provisional_shortfall_usd` = ${round(chain['hard_ceiling_usd'] - project_remaining, 4)} "
-            "is the gap between a planning basis derived from UNBATCHED "
-            "telemetry and the live balance. It is NOT the finalized amount by "
-            "which the project cap must increase: the direction of the batched "
-            "correction is unknown, so the real figure is unknown until the "
-            "owed GPU qualification reprices the chain. This document does not "
-            "claim the cap must move by that amount."),
+            + _shortfall_note(chain, project_remaining)),
         "d_series_extrapolation": {
             "_what": ("D2 and D3 repeat this shape by the maintainer's "
                       "instruction — each a full search, freeze, recovery, "
@@ -1427,8 +1553,7 @@ def d_series_evidence() -> dict[str, Any]:
         "family_content_id": doc.get("family_content_id"),
         "construction_commit": (doc.get("code_state") or {}).get("git_commit"),
         "owner": FAMILY_MANIFEST,
-        "_authorizes": ("nothing. The evidence exists; the funding scope and the "
-                        "per-session envelope are separate and still open."),
+        "_authorizes": _evidence_authorizes_note(),
     }
 
 
