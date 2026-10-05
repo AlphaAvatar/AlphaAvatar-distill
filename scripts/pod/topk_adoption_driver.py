@@ -679,6 +679,19 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
                 "_distortion_includes": ("the weighted Top-K reduction, the "
                                          "values.tolist() host transfer and the "
                                          "per-subtype collection"),
+                #: THE SPLIT IS ONLY A SPLIT WHEN IT IS ATTRIBUTED. Without the
+                #: opt-in syncs the forwards are asynchronous, so the tail of each
+                #: lands on whichever phase forces the next synchronization --
+                #: here the reduction's host transfer. The SUM is sound; quoting
+                #: `distortion_seconds` as the reduction's cost is not.
+                "split_is_attributed": timing.get("split_is_attributed"),
+                "_if_split_is_not_attributed": (
+                    "`ablated_seconds` and `distortion_seconds` are NOT a clean "
+                    "forward/reduction split: no synchronization separates them, "
+                    "so the asynchronous forward's tail is billed to the phase "
+                    "that forces the next one. Their sum is the scoring loop; "
+                    "neither alone is that phase's cost. This is deliberate -- "
+                    "inserting the syncs is what made a6 unusable for pricing."),
             },
             #: DIAGNOSTIC ONLY.
             "per_candidate_distribution": quantiles(totals) if totals else None,

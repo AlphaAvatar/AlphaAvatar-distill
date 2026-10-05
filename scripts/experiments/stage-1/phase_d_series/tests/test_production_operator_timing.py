@@ -493,13 +493,51 @@ class TestThePricingGateRefusesEveryRecordThatCannotPrice:
         assert self._basis(tmp_path, record, monkeypatch) is None, (
             f"the gate accepted a record that {why}")
 
-    def test_the_committed_a7_record_does_not_price(self):
-        """The live one, not a synthetic: this is what UNRESOLVED rests on."""
+    @pytest.mark.parametrize("subrun", ["a5", "a6", "a7"])
+    def test_no_superseded_committed_record_can_price(self, subrun, monkeypatch):
+        """The real files, not synthetics. Each of these was once the pointer.
+
+        Named by path rather than read through the live pointer: this used to
+        assert `_topk_production_basis() is None` while the pointer happened to be
+        a7, so it silently became an assertion that the CURRENT basis is absent
+        and failed the moment a valid one existed.
+        """
         import write_d1_design as w
 
+        path = (REPO / "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1"
+                / "runs" / subrun / "adoption.json")
+        if not path.is_file():
+            pytest.skip(f"{subrun} has no committed record")
+        monkeypatch.setattr(w, "TOPK_PRODUCTION", str(path))
         assert w._topk_production_basis() is None, (
-            "the committed production record prices, so the envelope would "
-            "resolve on a measurement of the shadow loop")
+            f"{subrun} prices, so the envelope could resolve on a measurement of "
+            "the shadow loop")
+
+    def test_the_live_pointer_names_a_record_that_can_price(self):
+        """The complement, and the thing the resolved envelope rests on."""
+        import write_d1_design as w
+
+        path = REPO / w.TOPK_PRODUCTION
+        assert path.is_file(), f"the pointer names {w.TOPK_PRODUCTION}, absent"
+        basis = w._topk_production_basis()
+        if basis is None:
+            #: A legitimate state -- it is what UNRESOLVED means -- so this
+            #: asserts the PAIR agrees rather than demanding a basis exist.
+            import json
+            design = json.loads(
+                (REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+                 ).read_text())
+            assert design["budget"]["per_session_envelope_compatibility"] == \
+                "UNRESOLVED"
+            return
+        assert basis["operator_invocation_seconds_max"] > 0
+        assert basis["candidate_subsets_measured"] > 0
+        #: And it is a WHOLE invocation, not a per-candidate product: the minutes
+        #: must equal the seconds over sixty, with nothing multiplied in. The
+        #: tolerance bounds exactly one thing -- the basis rounds minutes to four
+        #: decimals, so half of the last digit is the whole permitted difference.
+        assert basis["operator_minutes_at_max"] == pytest.approx(
+            basis["operator_invocation_seconds_max"] / 60.0, abs=5e-5)
 
 
 

@@ -942,8 +942,16 @@ DEPTH_IMPL = "depth.causal_kl_greedy_v1"
 D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
 
 #: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
+#:
+#: a8, which timed ONE REAL `impl.execute` invocation per DEPTH profile. a7 is NOT
+#: this pointer: it timed a reimplemented candidate loop that omitted the position
+#: weights, the `values.tolist()` host transfer, the per-subtype aggregation,
+#: `domain_balanced_score` and the reference-cache fill, and `candidates x
+#: per-candidate` is not the quantity `_expand_one` records as `operator_seconds`.
+#: `_topk_production_basis` refuses a record without `measurement_path`, so
+#: repointing this at a5, a6 or a7 yields no basis rather than a wrong price.
 TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
-                   "runs/a7/adoption.json")
+                   "runs/a8/adoption.json")
 
 
 def non_operator_expansion_overhead() -> dict[str, Any] | None:

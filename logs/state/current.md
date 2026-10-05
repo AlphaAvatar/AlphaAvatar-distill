@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-04. The human view. Every number here has an owner named
+**Updated:** 2026-10-05. The human view. Every number here has an owner named
 beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -50,10 +50,10 @@ which very nearly cancels it; and the derived logit bound holds for what it
 claims while understating the reduction's transients by **4.13×** at `bsz=1` and
 **1.99×** at `bsz=3`.
 
-**TOP-K IS GO. THE PRICE IS NOT MEASURED YET, and the envelope is back to
-UNRESOLVED.** Review reopened this round three times — the tail arithmetic, then
-the cost cell, then what the cost cell was a measurement *of*. The science is
-settled; the pricing is not.
+**TOP-K IS GO AND THE PRICE IS NOW MEASURED. One blocker left, and it is a
+maintainer decision.** Review reopened this round three times — the tail
+arithmetic, the cost cell, and what the cost cell was a measurement *of*. All
+three are closed.
 
 ```text
 lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
@@ -61,19 +61,19 @@ DEPTH decisions moved    0 of 8; removal orders identical
 CE / NLL                 exact to 1.4e-07;  top-1 bit-identical
 forward teacher KL       -1.8e-03 equal-domain mean; worst domain agrees
 reverse KL               -1.07%, DIAGNOSTIC only, not a ranking objective
-reference state          16.91 GiB -> 137.5 MiB (126x);  peak 34.8 -> 16.3 GiB
-production cost          NOT MEASURED -- a7 timed a shadow of the real scorer
-envelope                 UNRESOLVED
+reference state          16.91 GiB -> 137.5 MiB (0.794% of full vocabulary)
+operator invocation      1194.26 s and 1188.77 s  ->  MAX 19.9044 min
+DEPTH cell (END TO END)  22.976 min root   (frozen full-vocab was 34.354)
+search session           MEASURED $21.4897  vs the $30.00 envelope  ->  FITS
 ```
 
 **Three defects review caught, all mine, each one layer deeper.** The tail was
 reconstructed as `1 - sum(support)` and the measured support mass reached
 **1.000001**, so one coarse KL exceeded the full-vocabulary KL it must bound.
 Then the pricing replaced the **whole** `CostModel` cell with the operator term,
-deleting ~3.07 min of non-operator cost per expansion, and promoted a
-12-candidate **mean** into `root_max`. Then — the one that matters now — the
-"production" timing was a **shadow loop**: the driver reimplemented the candidate
-inner body and so never paid
+deleting ~3.07 min per expansion, and promoted a 12-candidate **mean** into
+`root_max`. Then the "production" timing turned out to be a **shadow loop** — the
+driver had reimplemented the candidate inner body, so it never paid
 
 ```text
 active.prediction_weights_for(group, indices)   a real [3, 308] tensor on the
@@ -84,21 +84,54 @@ per-subtype collection, domain_balanced_score   the aggregation
 _ReferenceSketches fill                         prebuilt before the clock started
 ```
 
-and it synchronized **once per candidate** where production synchronizes once per
-group. a6 had *more* syncs than production, a7 *fewer*; the true value is not
-between them by construction. `a6 7.8031 s → ~$31.58 → NEEDS_RAISE` and
-`a7 5.0972 s → $23.0738 → FITS` straddle the decision, so it has to be measured.
+**The fix was a rule, not a number.** `BeamSearch._expand_one` records
+`operator_seconds` around `impl.execute(ctx)` — the whole invocation, including
+packing, the cache fill, all 260 candidates over 8 rounds, the greedy bookkeeping
+and the child construction. So `candidates × per-candidate` is a different
+quantity from the one the cost table holds, however carefully it is measured.
+Stage P now times one real invocation per profile, through a context built by the
+same helpers `_expand_one` uses, with a test that reads core's own keyword set by
+AST so a new field cannot be missed in silence.
 
-**What historical `operator_seconds` actually is** settles the shape of the fix.
-`BeamSearch._expand_one` records it around `impl.execute(ctx)` — the whole
-invocation: packing, the reference-cache fill, all 260 candidates over 8 rounds,
-the greedy bookkeeping and the child construction. So `260 × per-candidate` was
-never the quantity the cost table holds, and the measurement is one timed real
-invocation per DEPTH profile. Nothing extrapolated, no fixed term added back.
+**The two withdrawn figures bracket the truth in opposite directions**, which is
+why neither could be reasoned about:
 
-The envelope returned to `UNRESOLVED` **by mechanism**: `_topk_production_basis`
-requires `measurement_path == "operator_execute_v1"`, so a5's, a6's and a7's
-records all yield `None`.
+```text
+measured              19.904 min
+a7  max x 260         22.088 min   +11.0%   omitted work, then over-counted more
+a7  mean x 260        20.101 min    +1.0%   luck, not a method
+a6  max x 260         33.813 min   +69.9%   its own 1,656 synchronizations
+```
+
+**a8 carries a defect of its own, and the price does not.** Its per-candidate
+diagnostic span baseline came from `time.time()` while the observer stamped
+`perf_counter()`, so the first span of each profile reads about `-1.79e9 s` and
+the distribution's min/p1/p5/mean are that number wearing a plausible shape. The
+invocation total is a `time.time()` interval around `execute` — production's own
+definition — so the ceiling is unaffected, and so are max/p95/p50. That is the
+worst shape for such a bug: a correct ceiling beside a diagnostic that lied.
+`_candidate_spans` now refuses an impossible duration and per-candidate seconds
+are recorded individually. a8 was not re-run: re-paying for a diagnostic buys
+nothing.
+
+**One more caveat on a8's attribution.** `split_is_attributed` is `False` in both
+profiles, correctly — no synchronizations were inserted — so `ablated_seconds`
+and `distortion_seconds` are *not* a clean forward/reduction split: without a
+sync the asynchronous forward's tail is billed to whatever forces the next one,
+here the reduction's host transfer. Their sum is sound; neither alone is that
+phase's cost.
+
+**The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
+`funds_formal_sessions_of`. No measurement reaches it.
+
+**An incidental observation, and it is not a D1 result.** Timed under D1's
+treatment positions, DEPTH removed `[2, 3, 32, 16, 26, 15, 17, 27]`
+(domain-balanced) and `[2, 3, 32, 16, 15, 26, 17, 27]` (reasoning-heavy), against
+a4's incumbent-position `[2, 16, 3, 32, 20, 26, 15, 21]` — six of eight layers
+shared, different order, two different choices. This is one unreplicated
+engineering invocation per profile with no frozen protocol, no seeds and no
+registered decision rule. It is the kind of thing D1 exists to measure properly
+and it is **not** evidence for D1's hypothesis.
 
 **D1's claim boundary.** It differs from incumbent B on three axes — distribution
 support, numerical execution, scoring positions — and the qualification measured
@@ -3414,9 +3447,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$7.2431` of `$76.6523` |
-| GPU engineering | `$5.8396` of `$20.0000` |
-| package | `$13.0827` of `$96.6523` |
-| project cap | `$402.9222` spent of `$410.0000`, leaving `$7.0778` |
+| GPU engineering | `$5.0259` of `$20.0000` |
+| package | `$12.2690` of `$96.6523` |
+| project cap | `$403.7359` spent of `$410.0000`, leaving `$6.2641` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 0.** 1 ceilings cost `$30.0000` and the formal allowance has `$7.2431`. Dividing the PACKAGE balance instead gives 0, which is the error: the engineering allowance cannot pay for a formal probe.
 

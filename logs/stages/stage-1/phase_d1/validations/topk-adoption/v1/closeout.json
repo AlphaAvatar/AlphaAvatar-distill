@@ -1,6 +1,9 @@
 {
- "_REOPENED_BY_REVIEW": {
+ "_REVIEW_REOPENED_AND_CLOSED_THIS": {
+  "_and_a_third_defect_a8_carries": "a8's PER-CANDIDATE diagnostic distribution is defective: the span baseline came from time.time() while the observer stamped perf_counter(), so the first span of each profile reads about -1.79e9 s and min/p1/p5/mean are that number in a plausible shape. The PRICE is unaffected -- it is a time.time() interval around execute, which is exactly what search.py records -- and max/p95/p50 are unaffected too. `_candidate_spans` now refuses an impossible duration and the per-candidate seconds are recorded individually; a8 was not re-run, because re-paying for a diagnostic buys nothing.",
   "a6_and_a7_both_stand_as_diagnostics": "a6 has MORE synchronizations than production (two per group, inserted by me) and a7 has FEWER (one per candidate, where production has one per group via tolist). The production value is not between them by construction -- it has to be measured, and a8 measures it by running the real invocation.",
+  "closed_by": "runs/a8",
+  "closed_how": "a8 measured the real invocation: 19.9044 min MAX, cell 22.9759 min root, search session $21.4897 against the $30.00 envelope -> RESOLVED_FITS.",
   "superseded_by": "runs/a8, and the aggregate tool rewrites this file from it",
   "what_stands": "the scientific verdict. reference_topk_tail_v1 / K=200 is GO, zero lower-bound violations, zero of 8 DEPTH decisions move, removal order identical, the complement-logsumexp repair, the infinity/masking/fp32 ownership repairs, and reverse KL at -1.07% as a diagnostic.",
   "what_was_withdrawn": "answer E, the production Top-K cost, and every figure derived from it: the rebuilt DEPTH cell, the $23.0738 search session and the RESOLVED_FITS envelope.",
@@ -66,17 +69,16 @@
    ]
   },
   "D1_repricing": {
-   "_priced_by": "experiments.phase_d1.search_space.search_cost, which calls search_cost_model.bound. No second pricing formula exists here.",
-   "_what_was_corrected": "the first substitution replaced the WHOLE DEPTH cell with the operator term, deleting the non-operator phases -- about 3.07 min per root expansion -- and promoted a 12-candidate MEAN into `root_max`. A `CostModel` cell is one expansion end to end and a ceiling built on a mean is not a ceiling.",
-   "bounds_later_rounds": {
-    "_not_a_family_shortcut": "the third premise is checked against the operator/adapter contract on a toy geometry, not asserted for one model family, and nothing about it lives in src/aadistill.",
-    "because": [
-     "the skip set only grows, so the ablated forward's executed block count is non-increasing in the round index",
-     "round 0 evaluates the most candidates",
-     "every frozen operator only shrinks the geometry it modifies, so a deeper parent runs a smaller model"
-    ],
-    "claim": "a round-0 measurement at the ROOT parent conservatively bounds every later DEPTH round and every deeper parent",
-    "established_by": "tests/initialization/test_operators_only_shrink.py"
+   "_authorizes": "nothing. It resolves the per-session envelope blocker on measurement. The funding blocker is untouched and is a maintainer decision.",
+   "_max_in_the_mean_slots": "deliberate. An expected-cost figure must not weaken an authorization ceiling, and there is no justified Top-K mean: two invocations is not a distribution over expansions.",
+   "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",
+   "_priced_by": "experiments.phase_d1.search_space.search_cost -> search_cost_model.bound, via write_d1_design.topk_search_cost. No second pricing formula exists.",
+   "_the_cell_is_END_TO_END": "ONE MEASURED OPERATOR INVOCATION at the max over both DEPTH calibration profiles, plus the non-operator phases of one expansion at their committed-telemetry MAX. The operator term is not `candidates x per-candidate`: that product omits the reference-cache fill, the packing, the greedy bookkeeping and the child construction, all of which historical `operator_seconds` includes.",
+   "depth_cell_after": {
+    "deeper_max": 22.6361,
+    "deeper_mean": 22.6361,
+    "root_max": 22.9759,
+    "root_mean": 22.9759
    },
    "depth_cell_before": {
     "deeper_max": 36.07,
@@ -84,9 +86,6 @@
     "root_max": 34.3539,
     "root_mean": 29.2482
    },
-   "depth_cell_is_END_TO_END": true,
-   "depth_deeper_max_minutes": 24.8196,
-   "depth_root_max_minutes": 25.1594,
    "non_operator_overhead_minutes": {
     "_derived_from": "the committed search telemetry, via full_search_space.non_operator_observations",
     "_phases": "parent_load, materialize, identify, canonical_reload, validation, state_evaluation -- everything an operator-only figure omits",
@@ -97,11 +96,11 @@
     "root_mean": 2.881,
     "root_n": 3
    },
-   "operator_minutes_at_max": 22.0879,
+   "operator_invocation_seconds_max": 1194.2624,
    "per_session_envelope_compatibility": "RESOLVED_FITS",
    "per_session_envelope_usd": 30.0,
-   "search_session_hard_ceiling_minutes": 1208.52,
-   "search_session_hard_ceiling_usd": 23.0738
+   "search_session_hard_ceiling_minutes": 1125.55,
+   "search_session_hard_ceiling_usd": 21.4897
   },
   "D_state_evaluation": {
    "exact": {
@@ -142,31 +141,36 @@
    "worst_domain_identity_agrees": true
   },
   "E_production_cost": {
-   "_max_not_mean": "a ceiling built on a mean is not a ceiling. 72 observations, both profiles, every round-0 candidate.",
-   "_why_a6_is_superseded": "a6 synchronized twice per group to split forward from reduction -- 1,656 calls -- and the DEPTH operator's own source says inserting syncs perturbs the hot path. Its max of 7.8031 s/candidate was 53% instrument inflation against a7's 5.0972, and un-synced the two profiles are nearly identical, so a6's apparent profile gap was largely the syncs too. a6 remains the record of the phase split; it prices nothing.",
-   "candidates_per_profile": 36,
-   "from": "a7 (un-synced, valid for pricing); a6 superseded",
-   "operator_seconds_max": 5.0972,
-   "overall_distribution": {
-    "max": 5.0972373485565186,
-    "mean": 4.6387895411915245,
-    "min": 4.520792007446289,
-    "n": 72,
-    "p1": 4.530153036117554,
-    "p5": 4.555751800537109,
-    "p50": 4.640181064605713,
-    "p95": 4.669371843338013,
-    "p99": 4.834033966064453
+   "_outside_is": "packing, the cache object, the position-policy setup, greedy bookkeeping and the child construction -- 29.20 s and 30.32 s, every bit of it inside operator_seconds and none of it in a per-candidate number",
+   "_superseded_extrapolations": {
+    "_meaning": "the two withdrawn figures bracket the truth in OPPOSITE directions, which is why neither could be reasoned about without measuring. a7 omitted real work AND multiplied by a tail-outlier max; the over-count won by 11.0%. a6 was 69.9% high from its own synchronizations. a7's MEAN happened to land within 1.0%, which is luck and not a method.",
+    "a6_max_x_260_minutes": 33.8135,
+    "a7_max_x_260_minutes": 22.0881,
+    "a7_mean_x_260_minutes": 20.1015,
+    "measured_minutes": 19.9044
    },
-   "per_profile_means": {
-    "calib.domain_balanced@v1": 4.621613888888889,
-    "calib.reasoning_heavy@v2": 4.655966666666667
+   "_the_phase_split_is_NOT_attributed": "`split_is_attributed` is False in both profiles' operator timing, which is correct and deliberate: no synchronizations were inserted. The consequence is that `ablated_seconds` and `distortion_seconds` are NOT a clean forward/reduction split -- without a sync the asynchronous forward's tail is billed to whichever phase forces the next synchronization, which here is the reduction's host transfer. Their SUM is sound; neither alone may be quoted as that phase's cost. a6 is the record of the attributed split and it prices nothing.",
+   "_what_is_measured": "the quantity `BeamSearch._expand_one` records as `operator_seconds`: a wall clock around `impl.execute(ctx)`, covering packing, the reference-sketch cache fill, all 260 candidate subsets over 8 rounds, the greedy bookkeeping and the child construction. Nothing is extrapolated from a per-candidate figure and no fixed term is added back, because one invocation already contains both.",
+   "_why_the_treatment_arm": "both D1 arms reach the same weighted reducer, and a $0 preflight MEASURED that only the treatment hands it a weight tensor on the real mixtures ([3, 308] with 665/924 positions nonzero; the control's prediction_weights_for returns None). So the treatment is the more expensive arm and bounds both, and the driver refuses to spend if that ever stops being true.",
+   "candidate_subsets_per_profile": 260,
+   "from": "a8 -- ONE REAL `impl.execute` invocation per DEPTH profile",
+   "operator_invocation_minutes_max": 19.9044,
+   "operator_invocation_seconds_max": 1194.2624,
+   "outside_scoring_loop_seconds": {
+    "calib.domain_balanced@v1": 29.1952,
+    "calib.reasoning_heavy@v2": 30.3218
    },
-   "profiles": [
-    "calib.domain_balanced@v1",
-    "calib.reasoning_heavy@v2"
-   ],
-   "sync_split_enabled": false
+   "peak_memory_bytes": {
+    "calib.domain_balanced@v1": 17486630912,
+    "calib.reasoning_heavy@v2": 17447649792
+   },
+   "per_profile_seconds": {
+    "calib.domain_balanced@v1": 1194.2624,
+    "calib.reasoning_heavy@v2": 1188.7712
+   },
+   "position_policy": "positions.supervised_target_v1@v1 (D1's TREATMENT arm)",
+   "reference_bytes_ratio_vs_full_vocab": 0.00793755,
+   "reference_sketch_bytes": 144148356
   },
   "lower_bound": {
    "_reading": "ZERO, and zero even at the looser 1e-6 threshold rather than merely inside the predeclared tolerance. The driver now RAISES on any violation outside tolerance rather than reporting one.",
@@ -183,7 +187,10 @@
  },
  "cost": {
   "booked_usd": 2.8741,
+  "campaign_booked_usd": 3.6878,
+  "campaign_ceiling_usd": 8.0,
   "ceiling_usd": 8.0,
+  "paid_subruns": 8,
   "subruns": 7,
   "teardown": "every pod provider-confirmed gone"
  },
@@ -197,9 +204,9 @@
  },
  "live_budget": {
   "_derived_by": "scripts/consolidate/derive_budget.py",
-  "engineering_remaining_usd": 5.8396,
+  "engineering_remaining_usd": 5.0259,
   "formal_remaining_usd": 7.2431,
-  "project_remaining_usd": 7.0778
+  "project_remaining_usd": 6.2641
  },
  "protocol": {
   "k_is_maintainer_selected": "2026-10-04, no sweep, never tuned against D1/D2/D3 results",
@@ -218,6 +225,6 @@
  "schema": "aadistill.d_series.topk_adoption_closeout/v2",
  "verdict": {
   "_prior": "COMPLETE -- zero lower-bound violations; the protocol is sound",
-  "_status": "REOPENED -- see _REOPENED_BY_REVIEW"
+  "_status": "CLOSED. The science was GO throughout; the production cost is now measured and the envelope resolves."
  }
 }

@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records two independent blockers: funding authorization, per-session envelope -- each independently sufficient to prevent a launch. Live causes: `phase_d1` is outside the package's `funds_formal_sessions_of`, so no allowance covers it at any price; the search session's envelope compatibility is UNRESOLVED, and authorization needs a figure it can bind.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records one independent blocker: funding authorization, sufficient on its own to prevent a launch. Live causes: `phase_d1` is outside the package's `funds_formal_sessions_of`, so no allowance covers it at any price.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
@@ -523,8 +523,8 @@
   "total_probes": 12
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = $53.6731 is the gap between a planning basis derived from UNBATCHED telemetry and the live balance. It is NOT the finalized amount by which the project cap must increase: the direction of the batched correction is unknown, so the real figure is unknown until the owed GPU qualification reprices the chain. This document does not claim the cap must move by that amount.",
-  "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "WHAT IS DEFINITE: per-session envelope compatibility is UNRESOLVED, and an unresolved compatibility blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven. What resolves it is a PRODUCTION Top-K measurement: an un-synced per-candidate MAX over both DEPTH calibration profiles, rebuilt into an END-TO-END cell with the committed non-operator overhead. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL IS PROVISIONAL. `provisional_shortfall_usd` = $54.4868 is the gap between a planning basis derived from UNBATCHED telemetry and the live balance. It is NOT the finalized amount by which the project cap must increase: the direction of the batched correction is unknown, so the real figure is unknown until the owed GPU qualification reprices the chain. This document does not claim the cap must move by that amount.",
+  "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "SATISFIED ON MEASUREMENT: the corrected production Top-K search session prices at $21.4897 against the $30.00 envelope, so this is no longer a blocker. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
   "_per_session_envelope_compatibility": "DERIVED from the measured production Top-K session price against $30.00. RESOLVED_FITS means the measured session ceiling is inside the envelope; RESOLVED_NEEDS_RAISE means it is outside and the envelope would have to move; UNRESOLVED means no production Top-K timing exists yet, which blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven.\n\nTHE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They are historical planning evidence from UNBATCHED telemetry for a protocol D1 will not run. `open_blockers` used to require both this field AND that the provisional basis fit, so a measurement proving D1 fits would have stayed blocked by an estimate it supersedes.",
   "_price_status": "every figure in `chain` is a PROVISIONAL PLANNING BASIS, NOT a finalized authorization price. What has changed and what has not:\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field used to call UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table that means it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nSTILL NOT MEASURED: the PRODUCTION Top-K cost. These per-expansion minutes come from FULL-VOCABULARY telemetry, and D1 will run reference_topk_tail_v1. The adoption validation's wall clock is not a substitute: it deliberately computes BOTH reducers from the same forwards and therefore includes work the formal path will not do.\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nWHAT MUST REFRESH IT: a Top-K-only representative expansion timing. Until that exists these numbers size a grant request; they do not price one.",
   "_why_three_sessions": "the search commits a candidate set and stops; the screening rung cannot be bound until that set exists, and the confirmation rung cannot be bound until screening names the one candidate that advances. Each is separately priced and separately authorized.",
@@ -596,29 +596,265 @@
    "phase_c3",
    "phase_a3"
   ],
-  "per_session_envelope_compatibility": "UNRESOLVED",
+  "per_session_envelope_compatibility": "RESOLVED_FITS",
   "per_session_envelope_usd": 30.0,
   "position": {
    "_cap_cross_check": 410.0,
    "_derived_by": "scripts/consolidate/derive_budget.py, CALLED by this writer rather than copied from it. A hand-copied balance expires the next time anything spends, and this document is regenerated often enough that it would expire quietly.",
-   "engineering_remaining_usd": 5.8396,
+   "engineering_remaining_usd": 5.0259,
    "formal_remaining_usd": 7.2431,
    "full_ceiling_sessions_fundable": 0,
-   "package_remaining_usd": 13.0827,
+   "package_remaining_usd": 12.269,
    "project_cap_usd": 410.0,
-   "project_remaining_usd": 7.0778
+   "project_remaining_usd": 6.2641
   },
   "price_basis": {
    "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
    "gpu": "NVIDIA L40S securePrice",
    "usd_per_hour": 1.09
   },
-  "price_status": "PROVISIONAL FULL-VOCAB BASIS -- NOT THE TOP-K PRICE. The batched direction is now MEASURED; the production Top-K cost is not. A per-candidate measurement does not supply it: the cost table holds whole-invocation `operator_seconds`.",
+  "price_status": "MEASURED PRODUCTION TOP-K BASIS for the search session: $21.4897 hard ceiling from an END-TO-END DEPTH cell whose operator term is ONE MEASURED `impl.execute` invocation (19.9044 min, the max of both DEPTH profiles) plus the committed non-operator MAX. The chain's other sessions keep their full-vocab basis.",
   "provisional_basis_fits_per_session_envelope": false,
   "provisional_per_session_excess_usd": 1.1577,
-  "provisional_shortfall_usd": 53.6731,
+  "provisional_shortfall_usd": 54.4868,
   "sessions": 3,
-  "topk_production_basis": null
+  "topk_production_basis": {
+   "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",
+   "_priced_by": "experiments.phase_d1.search_space.search_cost, which calls search_cost_model.bound. No second pricing formula exists here.",
+   "basis": {
+    "_the_cell_is_END_TO_END": "ONE MEASURED OPERATOR INVOCATION at the max over both DEPTH calibration profiles, plus the non-operator phases of one expansion at their committed-telemetry MAX. The operator term is not `candidates x per-candidate`: that product omits the reference-cache fill, the packing, the greedy bookkeeping and the child construction, all of which historical `operator_seconds` includes.",
+    "_why_the_root_bounds_the_deeper_cell": "see `bounds_the_deeper_parents`. The whole invocation is measured, so nothing rests on round 0 bounding the later rounds any more.",
+    "candidate_subsets_measured": 260,
+    "deeper_max_minutes": 22.6361,
+    "non_operator_overhead_minutes": {
+     "_derived_from": "the committed search telemetry, via full_search_space.non_operator_observations",
+     "_phases": "parent_load, materialize, identify, canonical_reload, validation, state_evaluation -- everything an operator-only figure omits",
+     "deeper_max": 2.7317,
+     "deeper_mean": 1.5388,
+     "deeper_n": 16,
+     "root_max": 3.0715,
+     "root_mean": 2.881,
+     "root_n": 3
+    },
+    "operator_invocation_seconds_max": 1194.2624,
+    "operator_invocation_seconds_per_profile": {
+     "calib.domain_balanced@v1": 1194.2624,
+     "calib.reasoning_heavy@v2": 1188.7712
+    },
+    "operator_minutes_at_max": 19.9044,
+    "owner": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8/adoption.json",
+    "per_profile": {
+     "calib.domain_balanced@v1": {
+      "_extrapolation_cross_check": {
+       "_meaning": "`candidates x max` is what the superseded stage would have priced, BEFORE adding any fixed term. Reported so the direction of the old error is visible, not to price anything.",
+       "candidates_times_max_seconds": 1251.666,
+       "measured_invocation_seconds": 1194.2624
+      },
+      "attribution": {
+       "_distortion_includes": "the weighted Top-K reduction, the values.tolist() host transfer and the per-subtype collection",
+       "_outside_is": "packing, the reference-sketch cache object, the position-policy setup, greedy bookkeeping and the CHILD CONSTRUCTION -- all of it inside operator_seconds and none of it in a per-candidate number",
+       "ablated_seconds": 428.8652,
+       "distortion_seconds": 731.9527,
+       "outside_scoring_loop_seconds": 29.1952,
+       "reference_seconds": 4.2155,
+       "scoring_loop_seconds": 1165.0672
+      },
+      "candidate_subsets": 260,
+      "n_items": 67,
+      "operator_invocation_seconds": 1194.2624,
+      "operator_timing": {
+       "ablated_forwards": 5980,
+       "ablated_items": 17420,
+       "ablated_seconds": 428.8652,
+       "calibration_batch_packing": "length_sorted_v1",
+       "candidate_subsets": 260,
+       "distortion_calls": 17420,
+       "distortion_seconds": 731.9527,
+       "item_seconds": 1165.0672,
+       "micro_batch_size": 3,
+       "reference_seconds": 4.2155,
+       "split_is_attributed": false
+      },
+      "peak_memory_bytes": 17486630912,
+      "per_candidate_distribution": {
+       "max": 4.8141,
+       "mean": -6878319.958425385,
+       "min": -1788364343.9637,
+       "n": 260,
+       "p1": 4.0582,
+       "p5": 4.0651,
+       "p50": 4.5032,
+       "p95": 4.796,
+       "p99": 4.8054
+      },
+      "per_candidate_n": 260,
+      "reference_cache": {
+       "available_bytes": 39109066752,
+       "bytes_ratio_vs_full_vocab": 0.00793755,
+       "cached": true,
+       "distribution_support": "reference_topk_tail_v1",
+       "full_vocab_bytes_avoided": 18160302336,
+       "has_tail": true,
+       "headroom_source": "cuda.mem_get_info:cuda:0",
+       "items_total": 67,
+       "memory_before": {
+        "allocator_allocated_bytes": 8101709824,
+        "allocator_allocated_gib": 7.545,
+        "allocator_reserved_bytes": 8103395328,
+        "allocator_reserved_gib": 7.547,
+        "allocator_reserved_not_allocated_bytes": 1685504,
+        "device": "cuda:0",
+        "driver_free_bytes": 39109066752,
+        "driver_free_gib": 36.423,
+        "driver_total_bytes": 47667740672,
+        "kind": "cuda",
+        "reclaimable_by_empty_cache_gib": 0.002,
+        "unaccounted_gib": 0.424
+       },
+       "mode": "cached",
+       "positions": 59763,
+       "sketch_bytes": 144148356,
+       "top_k": 200
+      },
+      "removed": [
+       2,
+       3,
+       32,
+       16,
+       26,
+       15,
+       17,
+       27
+      ],
+      "rounds": 8
+     },
+     "calib.reasoning_heavy@v2": {
+      "_extrapolation_cross_check": {
+       "_meaning": "`candidates x max` is what the superseded stage would have priced, BEFORE adding any fixed term. Reported so the direction of the old error is visible, not to price anything.",
+       "candidates_times_max_seconds": 1251.328,
+       "measured_invocation_seconds": 1188.7712
+      },
+      "attribution": {
+       "_distortion_includes": "the weighted Top-K reduction, the values.tolist() host transfer and the per-subtype collection",
+       "_outside_is": "packing, the reference-sketch cache object, the position-policy setup, greedy bookkeeping and the CHILD CONSTRUCTION -- all of it inside operator_seconds and none of it in a per-candidate number",
+       "ablated_seconds": 427.2954,
+       "distortion_seconds": 727.4914,
+       "outside_scoring_loop_seconds": 30.3218,
+       "reference_seconds": 3.632,
+       "scoring_loop_seconds": 1158.4494
+      },
+      "candidate_subsets": 260,
+      "n_items": 62,
+      "operator_invocation_seconds": 1188.7712,
+      "operator_timing": {
+       "ablated_forwards": 5460,
+       "ablated_items": 16120,
+       "ablated_seconds": 427.2954,
+       "calibration_batch_packing": "length_sorted_v1",
+       "candidate_subsets": 260,
+       "distortion_calls": 16120,
+       "distortion_seconds": 727.4914,
+       "item_seconds": 1158.4494,
+       "micro_batch_size": 3,
+       "reference_seconds": 3.632,
+       "split_is_attributed": false
+      },
+      "peak_memory_bytes": 17447649792,
+      "per_candidate_distribution": {
+       "max": 4.8128,
+       "mean": -6878319.983922307,
+       "min": -1788364344.4264,
+       "n": 260,
+       "p1": 4.0257,
+       "p5": 4.037,
+       "p50": 4.4713,
+       "p95": 4.796,
+       "p99": 4.8089
+      },
+      "per_candidate_n": 260,
+      "reference_cache": {
+       "available_bytes": 39000014848,
+       "bytes_ratio_vs_full_vocab": 0.00793755,
+       "cached": true,
+       "distribution_support": "reference_topk_tail_v1",
+       "full_vocab_bytes_avoided": 18160302336,
+       "has_tail": true,
+       "headroom_source": "cuda.mem_get_info:cuda:0",
+       "items_total": 51,
+       "memory_before": {
+        "allocator_allocated_bytes": 8110229504,
+        "allocator_allocated_gib": 7.553,
+        "allocator_reserved_bytes": 8124366848,
+        "allocator_reserved_gib": 7.566,
+        "allocator_reserved_not_allocated_bytes": 14137344,
+        "device": "cuda:0",
+        "driver_free_bytes": 39000014848,
+        "driver_free_gib": 36.322,
+        "driver_total_bytes": 47667740672,
+        "kind": "cuda",
+        "reclaimable_by_empty_cache_gib": 0.013,
+        "unaccounted_gib": 0.506
+       },
+       "mode": "cached",
+       "positions": 59763,
+       "sketch_bytes": 144148356,
+       "top_k": 200
+      },
+      "removed": [
+       2,
+       3,
+       32,
+       16,
+       15,
+       26,
+       17,
+       27
+      ],
+      "rounds": 8
+     }
+    },
+    "root_max_minutes": 22.9759
+   },
+   "bounds_the_deeper_parents": {
+    "_no_longer_claimed_because_nothing_needs_it": "that round 0 bounds the later rounds. The priced operator term is a whole invocation over all rounds, measured.",
+    "_not_a_family_shortcut": "checked against the operator/adapter contract on a toy geometry, not asserted for one model family, and nothing about it lives in src/aadistill.",
+    "because": "every frozen operator only shrinks the geometry it modifies, so a deeper parent runs a smaller model",
+    "claim": "an invocation measured at the ROOT parent bounds the same operator at any deeper parent",
+    "established_by": "tests/initialization/test_operators_only_shrink.py"
+   },
+   "depth_cell_after": {
+    "deeper_max": 22.6361,
+    "deeper_mean": 22.6361,
+    "root_max": 22.9759,
+    "root_mean": 22.9759
+   },
+   "depth_cell_before": {
+    "deeper_max": 36.07,
+    "deeper_mean": 27.5781,
+    "root_max": 34.3539,
+    "root_mean": 29.2482
+   },
+   "search_session": {
+    "_cost_basis": "derived at import from phase_b_attempt5, phase_c2_attempt4; per-cell max across both. No proxied rows: every implementation in this space has run inside a real search. NOT adjusted by the measured 2026-09-18 component speedups: this is the conservative authorization basis, and optimized_planning_estimate() carries that adjustment as an estimate instead. -- with depth.causal_kl_greedy_v1 REBUILT END TO END as ONE MEASURED production Top-K operator invocation (1194.2624 s over 260 candidate subsets, the max of both DEPTH profiles) PLUS the committed non-operator MAX for the scope, from logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8/adoption.json",
+    "beam_width": 6,
+    "container_disk_gb": 400,
+    "container_disk_usd": 1.0422,
+    "expansions_max": 92,
+    "expansions_min": 92,
+    "expected_minutes": 656.95,
+    "expected_trajectory_expansions": 92,
+    "expected_trajectory_minutes": 561.95,
+    "gpu_usd": 20.4475,
+    "hard_ceiling_minutes": 1125.55,
+    "hard_ceiling_usd": 21.4897,
+    "price_per_hour": 1.09,
+    "session_overhead_minutes": 95.0,
+    "structural_minutes_max": 1030.55,
+    "structural_minutes_min": 556.94,
+    "unmeasured_inputs": [],
+    "warmup_levels": 1
+   }
+  }
  },
  "contamination_protection": {
   "BLOCKER": "ZERO further disjoint batteries can be drawn under the frozen C1 mixture. math_verified holds 70 eligible items of the 150 a battery needs: MATH-500's 500 rows are already committed to the five isolation roles, c1_confirmation_v1 and c2_screening_v1. D1 cannot be executed as designed until this is resolved, and neither can D2 or D3.",
@@ -660,7 +896,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "2cc793d0ff5491e5c1d7d2368d9b52b8150065f47f6e401743c15c00cf1b629a",
+ "design_hash": "ae0502cf6a6cb15b5ba9f94e21f3458dde314d2c7b170afb2a2041099c3a1845",
  "evidence": {
   "_authorizes": "nothing. The evidence exists; the funding scope and the per-session envelope are separate and still open.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -749,7 +985,7 @@
     "THE CALIBRATION BATCH SIZE moved it"
    ]
   },
-  "status": "full-vocab qualification RUN -- PASSED; Top-K adoption: {'_prior': 'COMPLETE -- zero lower-bound violations; the protocol is sound', '_status': 'REOPENED -- see _REOPENED_BY_REVIEW'}",
+  "status": "full-vocab qualification RUN -- PASSED; Top-K adoption: {'_prior': 'COMPLETE -- zero lower-bound violations; the protocol is sound', '_status': 'CLOSED. The science was GO throughout; the production cost is now measured and the envelope resolves.'}",
   "surface_that_owes_it": {
    "_what": "files on the historically CUDA-validated surface that this round changed, so the 2026-09-10 evidence does not cover them. Owner: tests/architecture/test_cuda_surface_preserved.py :: HISTORICAL_SURFACE_CHANGED_PENDING_REVALIDATION.",
    "files": [
@@ -882,8 +1118,7 @@
   "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
  },
  "open_blockers": [
-  "funding authorization",
-  "per-session envelope"
+  "funding authorization"
  ],
  "recovery_recipe": "E1_KD_HEAVY_0860K",
  "schema": "aadistill.autoinit.phase_d1_design/v1",
@@ -1011,10 +1246,10 @@
   "stops_at": "commit_top_k. The search trains nothing, measures no behaviour and has no code path into a behavioural stage \u2014 the same boundary C2's driver holds."
  },
  "stage_id": "1",
- "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- TWO INDEPENDENT BLOCKERS: funding authorization, per-session envelope",
+ "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- ONE INDEPENDENT BLOCKER: funding authorization",
  "what_this_may_not_be_used_to_claim": [
   "that target-aware scoring is better. Nothing has been measured; this is a design.",
-  "that D1 is ready to launch. TWO INDEPENDENT BLOCKERS: funding authorization, per-session envelope, and any one of them alone prevents it.",
+  "that D1 is ready to launch. ONE INDEPENDENT BLOCKER: funding authorization, and it prevents it.",
   "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION and no figure of its is restated, re-analysed or revised here."
  ]
 }

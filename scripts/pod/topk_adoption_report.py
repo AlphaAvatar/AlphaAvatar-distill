@@ -111,15 +111,33 @@ def lines(doc: dict) -> list[str]:
                        f"{v.get('candidate_subsets')} candidates / "
                        f"{v.get('rounds')} rounds; "
                        f"peak={_gib(v.get('peak_memory_bytes'))}")
+            attributed = att.get("split_is_attributed")
             out.append(f"      scoring_loop={att.get('scoring_loop_seconds')}s "
                        f"outside={att.get('outside_scoring_loop_seconds')}s "
                        f"(ref={att.get('reference_seconds')} "
                        f"abl={att.get('ablated_seconds')} "
-                       f"red={att.get('distortion_seconds')})")
-            if dist:
+                       f"red={att.get('distortion_seconds')}"
+                       + ("" if attributed else "; NOT a clean split -- no sync, "
+                          "so the async forward's tail is billed to the reduction")
+                       + ")")
+            if v.get("_per_candidate_unavailable"):
+                out.append(f"      per-candidate: UNAVAILABLE -- "
+                           f"{v['_per_candidate_unavailable']}")
+            elif dist:
+                #: A NEGATIVE DURATION IS IMPOSSIBLE, so a record that carries one
+                #: is read as defective rather than printed as a measurement. a8's
+                #: span baseline came from `time.time()` while the observer
+                #: stamped `perf_counter()`, which puts the unix epoch in the first
+                #: span; the INVOCATION total is unaffected, and so is the price.
+                broken = (dist.get("min") or 0) < 0
                 out.append(f"      per-candidate (diagnostic): "
                            f"max={dist.get('max')} p95={dist.get('p95')} "
-                           f"p50={dist.get('p50')} min={dist.get('min')}")
+                           f"p50={dist.get('p50')} min={dist.get('min')}"
+                           + ("  <- DEFECTIVE: a negative duration means the span "
+                              "baseline and the stamps came from different clocks. "
+                              "max/p95/p50 stand; min/p1/p5/mean do not. The "
+                              "invocation total and the price are unaffected."
+                              if broken else ""))
             out.append(f"      removed: {v.get('removed')}")
         wt = pt.get("position_weighting_cost") or {}
         if wt:

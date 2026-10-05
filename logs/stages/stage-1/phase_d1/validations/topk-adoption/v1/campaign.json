@@ -6,13 +6,13 @@
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.8741,
+ "booked_usd": 3.6878,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "REOPENED -- 7 paid subruns, $2.8741 of $8.0000. Review withdrew the production-cost answer: a7 timed a shadow of the production scorer. One more P-only subrun measures the real invocation.",
+ "status": "CLOSED -- 8 paid subruns, $3.6878 of $8.0000. The production cost is MEASURED (a8) and the search session prices at $21.4897 against the $30.00 envelope; the verdict and every answer's provenance are in closeout.json",
  "subruns": [
   {
    "cost_usd": 0.6382,
@@ -123,6 +123,21 @@
     "P"
    ],
    "subrun_id": "a7"
+  },
+  {
+   "cost_usd": 0.8137,
+   "elapsed_minutes": 44.45,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a8",
+   "gpu": "NVIDIA L40S",
+   "notes": "1194.2624 s and 1188.7712 s, 260 candidate subsets over 8 rounds each, the production scorer throughout: target-aware weights, the weighted Top-K reduction, the values.tolist() host transfer, per-subtype aggregation and domain_balanced_score, plus the reference-cache fill and the child construction. MAX 19.9044 min. Outside the scoring loop: 29.20 and 30.32 s. Peak 16.29 GiB; sketch cache 137.5 MiB at 0.794% of the full-vocabulary reference. The two superseded extrapolations bracket it in opposite directions: a7's max x 260 = 22.088 min (+11.0%), a6's = 33.813 min (+69.9%), while a7's MEAN x 260 = 20.101 min (+1.0%).",
+   "outcome": "COMPLETE -- ONE REAL `impl.execute` invocation per DEPTH profile, the quantity `_expand_one` records as `operator_seconds`. VALID FOR PRICING",
+   "pod_id": "l11v5n0wc2pc7p",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "e61eba70629225aff6e1bccf4100847a296a43e1",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a8"
   }
  ],
  "teardown_reserve_usd": 0.3
