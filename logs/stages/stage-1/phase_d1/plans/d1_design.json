@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and two independent blockers: funding authorization, per-session envelope recorded below, each independently sufficient to prevent a launch. Live causes: `phase_d1` is outside the package's `funds_formal_sessions_of`, so no allowance covers it at any price; the search session's envelope compatibility is UNRESOLVED, and authorization needs a figure it can bind.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records two independent blockers: funding authorization, per-session envelope -- each independently sufficient to prevent a launch. Live causes: `phase_d1` is outside the package's `funds_formal_sessions_of`, so no allowance covers it at any price; the search session's envelope compatibility is UNRESOLVED, and authorization needs a figure it can bind.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {

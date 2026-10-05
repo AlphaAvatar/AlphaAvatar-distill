@@ -1589,9 +1589,9 @@ def build() -> dict[str, Any]:
         #: measured compatibility whenever that resolves. A contract that
         #: enumerates causes must enumerate the LIVE ones.
         "_contract": (
-            "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and "
-            f"{phrase.lower()} recorded below"
-            + (", each independently sufficient to prevent a launch."
+            "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it "
+            f"records {phrase.lower()}"
+            + (" -- each independently sufficient to prevent a launch."
                if len(open_) > 1 else
                ", sufficient on its own to prevent a launch."
                if open_ else ".")
