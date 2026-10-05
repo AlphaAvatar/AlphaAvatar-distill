@@ -456,6 +456,16 @@ def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
         D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
     )
 
+    #: THE FORWARD/REDUCTION SPLIT IS OPT-IN, and pricing must never use a run
+    #: that enabled it. Splitting needs a `synchronize()` after each phase, which
+    #: is 1,656 of them across 23 groups and 36 candidates -- and the DEPTH
+    #: operator's own source says in as many words that inserting syncs "perturbs
+    #: the hot path this pass exists to make faster". My first version of this
+    #: stage did exactly that and measured 5.45-7.37 s/candidate where the
+    #: operator's own un-synced loop gives ~3.42, so the ceiling it produced was
+    #: inflated by its instrument. Same discipline as the operator: opt-in, and
+    #: recorded in the output so a synced run cannot be mistaken for a price.
+    split = os.environ.get("AADISTILL_P_SYNC_SPLIT") == "1"
     adapter = get_adapter("qwen3")
     model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
     if getattr(model.config, "use_cache", False):
@@ -491,21 +501,28 @@ def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
                 idx, lp, tail = sketches.sketch_block(group)
                 t1 = time.time()
                 abls = _forward_logit_block(model, group, "cuda", skip)
-                torch.cuda.synchronize()
+                if split:
+                    torch.cuda.synchronize()
                 t2 = time.time()
                 sketch_forward_kl_mean_batch(
                     idx, lp, tail, abls,
                     group.prediction_mask().to(abls.device),
                     has_tail=sketches.has_tail)
-                torch.cuda.synchronize()
+                if split:
+                    torch.cuda.synchronize()
                 t3 = time.time()
                 fwd += t2 - t1
                 red += t3 - t2
                 del abls
+            #: ONE synchronize per candidate, at the end. The per-candidate TOTAL
+            #: is then exact, and the hot path is not perturbed.
+            torch.cuda.synchronize()
             total = time.time() - t_c
-            rows.append({"layer": layer, "forward_seconds": round(fwd, 4),
-                         "reduction_seconds": round(red, 4),
-                         "total_seconds": round(total, 4)})
+            row = {"layer": layer, "total_seconds": round(total, 4)}
+            if split:
+                row["forward_seconds"] = round(fwd, 4)
+                row["reduction_seconds"] = round(red, 4)
+            rows.append(row)
             all_totals.append(total)
         decision = sketches.decision()
         totals = [r["total_seconds"] for r in rows]
@@ -519,8 +536,8 @@ def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
             "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
             "per_candidate": rows,
             "distribution": quantiles(totals),
-            "forward_share": round(
-                sum(r["forward_seconds"] for r in rows) / sum(totals), 4),
+            "forward_share": (round(sum(r["forward_seconds"] for r in rows)
+                                    / sum(totals), 4) if split else None),
         }
         journal.event(stage=f"P.{profile_id}", status="ok",
                       candidates=len(rows),
@@ -539,6 +556,12 @@ def stage_P_production_topk_timing(*, repo: Path, teacher_path: str,
         "overall_distribution": overall,
         #: THE PRICING INPUT. The max over every candidate of every profile.
         "operator_seconds_max": round(overall["max"], 4),
+        "sync_split_enabled": split,
+        "_valid_for_pricing": not split,
+        "_if_split_was_enabled": (
+            "the per-candidate totals include two cuda synchronize() calls per "
+            "group and are INFLATED by the instrument. Such a run describes the "
+            "phase split and must not price anything."),
         "operator_seconds_mean": round(overall["mean"], 4),
         "micro_batch_size": D_SERIES_MICRO_BATCH_SIZE,
         "packing": D_SERIES_BATCH_PACKING,

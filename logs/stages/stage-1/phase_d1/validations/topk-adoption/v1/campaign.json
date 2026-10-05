@@ -1,12 +1,12 @@
 {
- "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 = 2.3009",
+ "_booked_recomputed_from_components": "0.6382 + 0.8552 + 0.0985 + 0.6105 + 0.0985 + 0.3057 = 2.6066",
  "_contract": "Cumulative cost of the D-series Top-K adoption validation, across every resource and subrun. A rerun does NOT reset it.",
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance -- the book the 2026-10-03 amendment raised and the 2026-10-04 decision draws on.",
  "_status_is_derived_by": "the closeout step, from the filed subruns. It is CLOSED when a closeout exists, because that is the only condition under which one is written.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "authorization": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the limit checks and the same-failure gate to pass",
- "booked_usd": 2.3009,
+ "booked_usd": 2.6066,
  "campaign_id": "d_series_topk_adoption",
  "ceiling_usd": 8.0,
  "inherited_spend": [],
@@ -93,6 +93,21 @@
     "P"
    ],
    "subrun_id": "a5"
+  },
+  {
+   "cost_usd": 0.3057,
+   "elapsed_minutes": 16.7,
+   "evidence": "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/runs/a6",
+   "gpu": "NVIDIA L40S",
+   "notes": "490 s. All 36 round-0 candidates per profile, 72 observations. MAX 7.8031 s/candidate, which is 1.695x a5's 12-candidate mean of 4.6048 -- the gap a mean-as-ceiling hides. The profiles differ materially (reasoning_heavy@v2 mean 7.3741 against domain_balanced@v1 5.4474), so timing one would have understated the max. NOT VALID FOR PRICING: 1,656 synchronize() calls in the timed region. It establishes the phase split and the profile difference; the ceiling needs an un-synced run.",
+   "outcome": "SPLIT MEASURED, NOT A PRICE -- the timed region synchronized twice per group and is inflated",
+   "pod_id": "x8gh0lwxlujxcv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "eb02372f6fa3d127c3fa7e9babddf5be4aaf2062",
+   "stages_run": [
+    "P"
+   ],
+   "subrun_id": "a6"
   }
  ],
  "teardown_reserve_usd": 0.3

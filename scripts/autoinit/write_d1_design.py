@@ -943,7 +943,7 @@ D1_DEPTH_PROFILES = ("calib.domain_balanced@v1", "calib.reasoning_heavy@v2")
 
 #: The measured PRODUCTION Top-K evidence. One owner, read not retyped.
 TOPK_PRODUCTION = ("logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/"
-                   "runs/a5/adoption.json")
+                   "runs/a6/adoption.json")
 
 
 def non_operator_expansion_overhead() -> dict[str, Any] | None:
@@ -1049,6 +1049,15 @@ def _topk_production_basis() -> dict[str, Any] | None:
     #: point estimate, and a point estimate must not price an authorization.
     required = {"per_profile", "operator_seconds_max", "candidates_per_profile"}
     if not required <= set(P) or not profiles:
+        return None
+    #: A SYNCED RUN CANNOT PRICE. Splitting forward from reduction needs a
+    #: synchronize after each phase, which inflates the per-candidate totals --
+    #: the DEPTH operator's own source says so. Such a record describes the split
+    #: and must not reach a ceiling.
+    #: FAIL CLOSED: the field must be PRESENT and true. A record that does not
+    #: say whether it synced cannot be trusted to price -- a6's does not say, and
+    #: a6 synced unconditionally.
+    if P.get("_valid_for_pricing") is not True or P.get("sync_split_enabled"):
         return None
     if set(profiles) != set(D1_DEPTH_PROFILES):
         return None
