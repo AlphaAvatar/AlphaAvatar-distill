@@ -4,8 +4,8 @@
  "_the_price_is_derived_not_asked": "$21.4897 is the figure search_space.search_cost derives through search_cost_model.bound from the MEASURED production Top-K DEPTH cell. The issuer refuses a grant asking for a different number, and refuses one asking for the $30.00 envelope: the envelope is not the grant.",
  "authorizes": "nothing by itself. A launch needs the issued one-use authorization, and the pod's dispatch branch refuses an artifact that does not bind this session's plan hash.",
  "covers": "ONE D1 formal SEARCH session on the frozen design: the beam over the frozen four-operator space at width 6 with one warmup level, under reference_topk_tail_v1 at K=200, bsz=3, length_sorted_v1, on one arm's declared position policy. It commits a candidate set and stops.",
- "cumulative_cap_usd": 465.0,
- "cumulative_spend_at_approval_usd": 403.7359,
+ "cumulative_cap_usd": 490.0,
+ "cumulative_spend_at_approval_usd": 412.1588,
  "does_not_authorize": [
   "recovery training of any candidate",
   "behavioural screening or confirmation -- separately authorized sessions",
@@ -14,7 +14,9 @@
   "repeating a completed measurement, splicing probes, substituting a seed, or changing arms, seeds, recipe, battery, statistics or decision rules",
   "any change to the frozen design: K, the batch size, the packing, the beam breadth, the operator set, the profiles, the recovery recipe or the behavioural design"
  ],
- "granted_by": "maintainer decision 2026-10-05, on the review of 16585a73: a PHASE-LEVEL envelope for the complete D1 experiment. formal 76.6523 -> 131.6523, package 96.6523 -> 151.6523, project cap 410.0000 -> 465.0000; GPU engineering and the $30.00 per-session envelope UNCHANGED. phase_d1 added to funds_formal_sessions_of. See configs/experiments/phase_c1/authorization.json :: execution_package._amendment_2026_10_05.",
+ "granted_by": "maintainer decision 2026-10-07, AMENDING the phase-level envelope of 2026-10-05 after the formal search was stopped mid-beam by an exhausted RunPod account balance: formal 131.6523 -> 156.6523, package 151.6523 -> 176.6523, project cap 465.0000 -> 490.0000 (+$25.0000); GPU engineering and the $30.00 per-session envelope UNCHANGED; phase_d1 remains in funds_formal_sessions_of. The prior decision of 2026-10-05, on the review of 16585a73, raised formal 76.6523 -> 131.6523, package 96.6523 -> 151.6523 and the project cap 410.0000 -> 465.0000 and added phase_d1. See configs/experiments/phase_c1/authorization.json :: execution_package._amendment_2026_10_07, which owns both.",
  "hard_cap_usd": 21.4897,
- "schema": "aadistill.phase_d1.grant/v1"
+ "schema": "aadistill.phase_d1.grant/v1",
+ "_why_this_grant_was_amended": "The run this grant's predecessor funded, d1_search_20261006_101725, spent $8.1716 of $21.4897 and produced NO endpoint: RunPod stopped the pod at 449.8 of 1125.55 authorized minutes with 39 of 92 expansions complete and 0 complete leaves, and the host was removed outright so the beam's workdir went with it. That spend is real and is booked. Nothing in this grant's own limits was reached -- the cause was the provider account, which this repository had never gated and now does, at $0, before pod creation.\n\nThe DOWNSTREAM policy is also amended on the same date: Top-2 -> Top-4 finalists, with 2 screening seeds and 3 confirmation seeds unchanged. The FROZEN SEARCH DESIGN this grant covers is untouched, which is why `covers` below still reads as written.",
+ "cumulative_spend_at_approval_note": "derived from scripts/consolidate/derive_budget.py at amendment, not transcribed. Was $403.7359 when the cap was $465.0000; the difference is the D1 formal spend booked since."
 }
