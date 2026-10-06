@@ -1,0 +1,17 @@
+{
+ "schema": "aadistill.phase_d1.bundle/v1",
+ "run_id": "d1_search_20261006_210210",
+ "stage_id": "1",
+ "session_commit": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f",
+ "canonical_bundle_name": "aad_autoinit_77aedc90.bundle",
+ "relay_repo": "AlphaAvatar/aadistill-artifacts",
+ "relay_path": "transfer/aad_autoinit_77aedc90.bundle",
+ "sha256": "c44ff349c3739aace95b2dc06e1d08ba4ac062b63666d8b3cf2cb549fb7b671a",
+ "bytes": 29052777,
+ "heads": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f refs/heads/_bundle_77aedc90f93f",
+ "carries_authorization": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json",
+ "upload": "uploaded to AlphaAvatar/aadistill-artifacts:transfer/aad_autoinit_77aedc90.bundle",
+ "verify": "The bundle contains this ref:\n77aedc90f93f7f8b69e62bdf03de4dcc22ca273f refs/heads/_bundle_77aedc90f93f\nThe bundle records a complete history.\nThe bundle uses this hash algorithm: sha1",
+ "transport": "Phase-D1 formal search",
+ "note": "the pre-provider bundle_staged_gate downloads this exact object, verifies its sha256 against the value here, checks out the session commit from it, confirms it carries this run's authorization bytes and re-digests the AUTHORIZED executable set inside the checkout. This record is the local half; the gate is the remote half. It stays UNCOMMITTED inside a launch window: committing it adds a path to the session lineage diff and session_commit_gate refuses."
+}
