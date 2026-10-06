@@ -192,7 +192,11 @@ def main(argv=None) -> int:
           "ceiling minutes)")
     print(f"  four conditions    {payload['money']['four_conditions']}")
     print(f"  stages             {'/'.join(payload['authorized_stages'])}")
-    print("  authorizes ONE D1 formal beam and a committed Top-2; NOT recovery, "
+    #: READ from the design, not typed. This line said "Top-2" for a round
+    #: after the maintainer widened the finalist set to 4.
+    top_k = int(D1S.design()["behavioural_design"]["top_k"])
+    print(f"  authorizes ONE D1 formal beam and a committed Top-{top_k}; "
+          "NOT recovery, "
           "NOT behavioural work, NOT a promotion decision.")
     print("  ISSUING IS NOT LAUNCHING.")
     return 0

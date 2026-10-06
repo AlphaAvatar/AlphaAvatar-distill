@@ -77,8 +77,11 @@ D1_SEARCH_POLICY = ActionPolicy(
                         "sessions; neither can be bound until the search has "
                         "committed its candidate set."),
         "automatic_followon_start": (
-            "nothing chains off the D1 search. The committed Top-2 is reviewed "
-            "before any probe is trained."),
+            "nothing chains off the D1 search. The committed candidate set is "
+            "reviewed before any probe is trained. The SIZE of that set is the "
+            "design's `behavioural_design.top_k` and is deliberately not named "
+            "here: it moved 2 -> 4 on 2026-10-07 and a width written into this "
+            "note would have gone stale while reading as current."),
     },
 )
 
