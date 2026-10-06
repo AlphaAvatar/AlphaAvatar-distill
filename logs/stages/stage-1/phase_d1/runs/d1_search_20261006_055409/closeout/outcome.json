@@ -7,7 +7,6 @@
  "recorded_utc": "2026-10-06T09:40:00Z",
  "session_commit": "dff810e8a896f28ec826633377a1781fbb7aca36",
  "authorized_base_commit": "35be7dadfa6887166c32cf44961444787f54519c",
-
  "money": {
   "provider_resources_created": 1,
   "pod_id": "mm8hn1191xldel",
@@ -20,7 +19,15 @@
   "one_use_grant_consumed": true,
   "note": "the grant is spent even though no science ran. A one-use chain is consumed by presentation, not by success."
  },
-
+ "cost": {
+  "actual_usd": 0.2513,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 13.83,
+  "authorized_usd": 21.4897,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost, written by the shared SessionRunner. Restated here ONLY because scripts/consolidate/derive_budget.py books a formal session from closeout/outcome.json :: cost.actual_usd, and a paid subrun that books nowhere is spent but not counted."
+ },
+ "package_id": "phase_c1.execution_package.2026-09-11",
  "teardown": {
   "pod_deleted": true,
   "provider_confirms_gone": true,
@@ -30,7 +37,6 @@
   "gate": "EMERGENCY teardown over a failed training_complete check. The products of stages that did not run do not exist and were correctly not demanded.",
   "watchdog": "runtime/watchdog_mm8hn1191xldel.jsonl -- 14 polls, action none throughout, never over the hard limit."
  },
-
  "failure": {
   "stage": "A / authorization",
   "type": "AttributeError",
@@ -45,7 +51,6 @@
    "the preceding round's driver-contract tests resolved every DEFERRED IMPORT in the unreachable stages -- the same hazard through a different hole -- but nothing resolved attribute reads."
   ]
  },
-
  "repair": {
   "fix": "scripts/pod/autoinit_d1_driver.py -- the read is now `auth.authorized_session_commit` and the record key matches the authorization's own vocabulary. Nothing consumed the old key.",
   "regression": "scripts/experiments/stage-1/phase_d1/tests/test_d1_driver_dispatch.py :: TestEveryAuthorizationAttributeTheDriverReadsExists -- AST-extracts every `auth.<name>` read in the driver and checks each against D1Authorization's real attribute surface (dataclass fields UNION public dir, because fields without defaults are not class attributes and methods are not fields). Closed as a CLASS, not as one name.",
@@ -54,7 +59,6 @@
   "frozen_science_unchanged": "design hash 3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff. K=200, bsz=3, length_sorted_v1, width 6 with one warmup level, the four frozen operators, both calibration profiles, the supervised_target arm, Top-2. Unchanged.",
   "budget_unchanged": "the same accepted 1125.55-minute bound. The successor is repriced at a fresh live secure quote; the cumulative envelope is unchanged and this attempt's $0.2513 counts against it."
  },
-
  "what_this_attempt_established": {
   "the_bound_identity_reproduces_on_real_cuda": {
    "claim": "the single assumption no $0 gate could verify, and the previous review's first fatal defect: the authorization binds a config_hash computed from a probe session, and the driver recomputes it on the pod from the real run id on the real device.",
@@ -84,7 +88,6 @@
   },
   "the_failure_path_collected_correctly": "the reduced failed-run spec fetched the two reports that exist (d1_search.json, journal.jsonl -- preserved under evidence/), the product gate correctly reported 'the search did not reach commit_top_k, so there are no product bytes to secure' rather than treating an absent selection as nothing owed, and the manifest's rc=1 is explained: the driver's own closeout never ran."
  },
-
  "retry_policy": {
   "is_this_a_retried_experiment": false,
   "why": "no formal training or measurement began. Under AGENTS.md P12.1 a formal launcher invocation that aborts before measurement is an engineering subrun: it consumed its one-use chain, so it is preserved and closed here, and the successor gets a fresh chain under a new attempt identity. No budget is widened and no frozen protocol is altered.",
@@ -95,7 +98,6 @@
    "a new run-owned launch_bound sweep against that exact session tree"
   ]
  },
-
  "what_is_preserved": {
   "governance/authorization.json": "the issued one-use artifact, unmodified. Consumed.",
   "governance/readiness.json": "the launch_bound sweep record for dff810e8, unmodified. It described the tree that launched, and it did.",
