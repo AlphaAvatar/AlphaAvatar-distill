@@ -9,38 +9,60 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** All five D1-qualification pods are
-provider-confirmed gone and an account-wide re-query returns **0 pods and 0
-network volumes**.
-
-**The D1 launch chain was REPAIRED, and the 2026-10-05 prepared run is
-SUPERSEDED without ever launching.** An independent review drove the prepared
-chain through the real generic `SessionRunner` instead of reading it, and found
-that it could not have produced a valid search. Eleven defects; three of them
-unconditionally fatal, and each would have been discovered on a billing pod.
-Owner:
-[`runs/d1_search_20261005_173304/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261005_173304/closeout/superseded.json),
-which carries every measured value rather than restating one.
-
-The sharpest was an identity nothing could satisfy. `run_id` **and** `device`
-are both members of `SearchConfig.as_dict()` and therefore of `config_hash`,
-and the grant was built with `run_id="authorization-probe"` on `cpu` while the
-driver builds with the real run id on `cuda`:
+**THE FORMAL D1 SEARCH LAUNCHED, AND FAILED BEFORE SCIENCE.** The maintainer
+gave GO on 2026-10-06. Run `d1_search_20261006_055409` acquired a secure L40S at
+the live `$1.09/h`, passed all six pre-provider gates, completed setup with all
+eight markers and its own 338-test pod gate, started the driver — and **stage A
+aborted 1.694 s in** on a one-word vocabulary mismatch. **`$0.2513` of
+`$21.4897`.** Nothing was measured; no beam expanded; no selection was
+committed. Owner:
+[`runs/d1_search_20261006_055409/closeout/attempt_failed.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_055409/closeout/attempt_failed.json).
 
 ```text
-grant bound                6301e12e…   run_id=authorization-probe, device=cpu
-driver would compute       cb03a959…   run_id=<the run>,           device=cuda
+AttributeError: 'D1Authorization' object has no attribute 'session_commit'
+  autoinit_d1_driver.py:290   "session_commit": auth.session_commit,
+  the authorization declares it as            authorized_session_commit
 ```
 
-Stage A compares the two and refuses — **after** the pod exists, after setup,
-after the pod test gate and after the authorization dispatch branch. Every `$0`
-gate passed. Beside it: the canonical bundle
-`transfer/aad_autoinit_6c1dd8d9.bundle` **did not exist on the relay** (563
-`transfer/` objects, 100+ sibling bundles, not that one) and D1 had no bundle
-gate to notice; and `--max-price`, `--disk-gb` and `--out` all defaulted to
-`None` with nothing resolving them, so `make_plan` aborted on a `TypeError`
-before any gate ran — unobserved because `--dry-run` returned before
-`SessionRunner` was ever constructed.
+**No `$0` gate could have caught it.** The six gates load the same
+authorization through the same loader and not one reads this attribute; the only
+code that does sits behind `if args.authorization`, which a `--check-only`
+rehearsal is explicitly permitted to skip; and a CPU rehearsal that *did* pass
+one could not have continued past the identity comparison three lines later,
+because `config_hash` binds `device` and the grant was issued on `cuda`. Fixed,
+and closed as a **class** rather than as one name:
+`TestEveryAuthorizationAttributeTheDriverReadsExists` extracts every
+`auth.<name>` read from the driver and checks each against `D1Authorization`'s
+real attribute surface. Reverting the word turns exactly that test red.
+
+**`$0.2513` bought the one thing no `$0` gate could establish.** Stage A's
+contract check ran to completion on real CUDA *before* the failure, so the
+identity the previous round could only argue about is now measured:
+
+```text
+authorization binds        662dc65c0d0a8ae9…  protocol ac23798a4572fab5…
+pod recomputed             662dc65c0d0a8ae9…  protocol ac23798a4572fab5…
+```
+
+That was the prepared-chain review's **first fatal defect** — a grant bound to a
+`config_hash` built on `cpu` under a placeholder run id. The repaired issuer
+builds its probe session with the real run id on `FORMAL_DEVICE`, and the pod
+agrees.
+
+**Nothing is running and nothing is billing.** The pod was torn down by its own
+launcher and the provider confirms it gone; an account-wide re-query returns
+**0 pods and 0 network volumes**. Under AGENTS.md P12.1 this is an engineering
+subrun, not a retried experiment: no measurement began, so it is preserved and
+closed, and the successor gets a new base commit, a new run id, a fresh one-use
+authorization, a new bundle and a new run-owned `launch_bound` sweep. The
+`$0.2513` counts against the unchanged cumulative envelope.
+
+**Two prepared runs before it never launched at all.**
+[`runs/d1_search_20261005_173304/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261005_173304/closeout/superseded.json)
+owns the eleven defects an independent review found by driving the chain through
+the real generic `SessionRunner` instead of reading it — three unconditionally
+fatal — and `d1_search_20261005_193733` is superseded, unconsumed `$0` evidence
+from the round that added D1's sweep contract.
 
 **What changed, and what did not.** The frozen science is untouched: same design
 hash, same `K=200`, `bsz=3`, `length_sorted_v1`, same width-6 beam with one

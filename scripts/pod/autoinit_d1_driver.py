@@ -287,7 +287,15 @@ def main(argv: list[str] | None = None) -> int:
                 record["authorization"] = {
                     "authorization_id": auth.authorization_id,
                     "hard_cap_usd": auth.hard_cap_usd,
-                    "session_commit": auth.session_commit,
+                    #: `authorized_session_commit`, which is what the
+                    #: authorization CALLS it. This read was `auth.session_commit`
+                    #: and raised `AttributeError` on the first real pod, 1.69 s
+                    #: into stage A, after $0.24 of setup had already been paid
+                    #: for -- the $0 chain loads the same object and never
+                    #: touches this attribute, and the only code that does sits
+                    #: behind `if args.authorization`, which a `--check-only`
+                    #: rehearsal is explicitly allowed to skip.
+                    "authorized_session_commit": auth.authorized_session_commit,
                     "authorized_stages": list(auth.authorized_stages),
                     "measurement_protocol_id": auth.measurement_protocol_id,
                     "config_hash": auth.config_hash,

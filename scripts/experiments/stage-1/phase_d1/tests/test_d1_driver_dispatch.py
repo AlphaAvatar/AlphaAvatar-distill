@@ -298,3 +298,95 @@ class TestTheDriverOwnsNoScience:
         for forbidden in ("promote", "GO", "NO-GO", "verdict"):
             assert f'"{forbidden}"' not in source, forbidden
         assert "_commit" in dir(driver)
+
+
+def _authorization_attributes(source: str) -> list[str]:
+    """Every attribute this driver reads off the LOADED authorization.
+
+    `auth` is the only name the driver binds to a `D1Authorization`, in
+    `load_authorization` and in stage A. So an `auth.<name>` read is a
+    cross-module vocabulary claim: it asserts that the authorization module
+    calls a field by the name this driver typed.
+    """
+    return sorted({
+        node.attr
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.Attribute)
+        and isinstance(node.value, ast.Name)
+        and node.value.id == "auth"
+    })
+
+
+class TestEveryAuthorizationAttributeTheDriverReadsExists:
+    """THE $0.24 DEFECT, closed as a class rather than as one name.
+
+    `TestEveryDeferredImportResolves` above resolved every deferred *import*,
+    because an unresolvable import inside stage C would first appear at
+    $1.09/h. An attribute read is the same hazard through a different hole and
+    was not covered: stage A built its audit record from
+    `auth.session_commit`, the authorization declares that field as
+    `authorized_session_commit`, and the first real pod raised
+
+        AttributeError: 'D1Authorization' object has no attribute
+                        'session_commit'
+
+    1.69 s into stage A -- after setup had passed all eight markers, D1's own
+    338-test pod gate had passed, and $0.24 was spent.
+
+    Nothing at $0 could have caught it. The six pre-provider gates load the
+    same authorization through the same loader, but none of them reads this
+    attribute; the only code that does sits behind `if args.authorization`,
+    and a `--check-only` rehearsal is explicitly permitted to omit
+    `--authorization` and skip the whole stage. A CPU rehearsal that DID pass
+    one could not have got past the identity comparison either, because
+    `config_hash` binds `device` and the authorization was issued on `cuda`.
+
+    So the check is static, against the real class's real attribute surface.
+    """
+
+    @staticmethod
+    def _surface() -> set[str]:
+        """The authorization's REAL attribute surface, from the real class.
+
+        `dataclasses.fields` alone is not it -- `authorizes_d1_search` is a
+        field and `require_harness` is a method, and the driver legitimately
+        reads both kinds. `hasattr` on the class alone is not it either: a
+        dataclass field with no default is not a class attribute, which makes
+        `authorization_id`, `hard_cap_usd` and `authorized_stages` look absent
+        when they are declared. Both halves, or the probe reports the wrong
+        three names and misses the real one.
+        """
+        import dataclasses
+
+        from experiments.phase_d1.d1_authorization import D1Authorization
+
+        return ({f.name for f in dataclasses.fields(D1Authorization)}
+                | {n for n in dir(D1Authorization) if not n.startswith("_")})
+
+    def test_the_parser_sees_the_reads(self):
+        found = _authorization_attributes(DRIVER.read_text())
+        assert len(found) >= 8, (
+            f"only {found} authorization reads found; a parser that cannot see "
+            "a real read is the same hazard as no check at all")
+
+    def test_every_read_name_is_declared_by_the_authorization(self):
+        surface = self._surface()
+        missing = [n for n in _authorization_attributes(DRIVER.read_text())
+                   if n not in surface]
+        assert not missing, (
+            f"the driver reads auth.{missing} and D1Authorization declares no "
+            "such attribute. Stage A runs only on a billing pod, so this first "
+            "appears after setup is paid for")
+
+    def test_the_probe_bites_on_the_name_that_cost_the_money(self):
+        """Non-vacuity, against the exact text that failed."""
+        surface = self._surface()
+        assert "authorized_session_commit" in surface
+        assert "session_commit" not in surface, (
+            "the authorization now declares a bare `session_commit` too, so "
+            "this probe can no longer distinguish the two vocabularies and the "
+            "test above has stopped protecting anything")
+        hypothetical = _authorization_attributes(
+            "record = {'c': auth.session_commit}")
+        assert [n for n in hypothetical if n not in surface] == [
+            "session_commit"]

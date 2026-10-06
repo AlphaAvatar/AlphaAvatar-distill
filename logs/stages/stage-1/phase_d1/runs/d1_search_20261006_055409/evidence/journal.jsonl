@@ -1,0 +1,9 @@
+{"t": 0.0, "stage": "A", "name": "environment", "status": "start"}
+{"t": 1.517, "stage": "A", "name": "environment", "seconds": 1.517, "status": "ok", "result": {"gpu": "NVIDIA L40S"}}
+{"t": 1.518, "stage": "A", "name": "registries_and_design", "status": "start"}
+{"t": 1.578, "stage": "A", "name": "registries_and_design", "seconds": 0.061, "status": "ok", "result": {"design_hash": "3affe2c65c57f405"}}
+{"t": 1.578, "stage": "A", "name": "session_and_contract", "status": "start"}
+{"t": 1.686, "stage": "A", "name": "session_and_contract", "seconds": 0.108, "status": "ok", "result": {"protocol": "ac23798a4572fab5", "config_hash": "662dc65c0d0a8ae9"}}
+{"t": 1.687, "stage": "A", "name": "authorization", "status": "start"}
+{"t": 1.692, "stage": "A", "name": "authorization", "seconds": 0.005, "status": "failed", "error": "AttributeError: 'D1Authorization' object has no attribute 'session_commit'"}
+{"t": 1.694, "stage": "driver", "status": "failed", "error": "'D1Authorization' object has no attribute 'session_commit'"}
