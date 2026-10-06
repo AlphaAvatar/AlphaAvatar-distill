@@ -122,6 +122,49 @@ def ignores_for_selection(selection: str,
     return tuple(out)
 
 
+def pod_pytest_command(setup: Any, *, python: str = "python") -> str:
+    """The pod gate's OWN pytest invocation, in one place.
+
+    The shell runs exactly this shape:
+
+        pytest ${SESSION_TEST_PATHS:-tests/} -q ${SESSION_TEST_IGNORES:-}
+
+    so a selection has TWO halves and the simulation must reproduce both. The
+    contract and the recorder each built this string themselves and both built
+    it as `pytest tests/ -q <ignores>`, hardcoding the base path and dropping
+    `test_paths` on the floor.
+
+    That was invisible while every session expressed its selection as a
+    COMPLEMENT -- `test_ignores` over siblings inside `tests/` -- which is how
+    `ignores_for_selection` above describes the old mechanism. The 2026-10-03
+    boundary decision moved experiment tests OUT of `tests/` and made
+    `test_paths` the positive declaration, and the sweep was never taught the
+    new half. Every session that has since declared `test_paths` with no
+    ignores -- C1, A3 and now D1 -- therefore had its sweep run
+    `pytest tests/ -q`, the whole core suite, while its pod gate runs only its
+    own preflight directory. A simulation that runs a different command from
+    the pod is not a simulation, which is this machinery's own standard.
+
+    One owner, parameterized by interpreter: the contract records it under
+    `python` and the recorder invokes it with the repository venv, and
+    `check_invocation_matches` refuses if the two disagree about anything but
+    that word.
+    """
+    paths = " ".join(setup.test_paths) if setup.test_paths else "tests/"
+    ignores = [f"--ignore={p}" for p in setup.test_ignores]
+    return " ".join([python, "-m", "pytest", paths, "-q", *ignores])
+
+
+def pytest_arguments(command: str) -> list[str] | None:
+    """The arguments after `-m pytest`, or `None` if that is not this command.
+
+    Lets one equality compare a declared selection with an invoked one without
+    caring which interpreter ran it -- the only part that legitimately differs.
+    """
+    head, sep, tail = command.partition(" -m pytest ")
+    return tail.split() if sep else None
+
+
 def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
     """The staged view, read straight off the `SetupManifest` the runner uses.
 
@@ -164,10 +207,16 @@ def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
         "required_env": list(setup.required_env),
         "relay_inputs": relay,
         "local_assets": local,
+        #: BOTH HALVES OF THE SELECTION. `test_paths` was absent from this
+        #: contract, so it was absent from `digest` too -- a session could
+        #: change which suite its pod gate runs without invalidating a single
+        #: readiness record. It is hashed now, which is why every session's
+        #: staging digest moves once: the contract now describes something it
+        #: previously omitted, and a sweep that ran the wrong selection is
+        #: owed again rather than grandfathered.
+        "test_paths": list(setup.test_paths),
         "test_ignores": list(setup.test_ignores),
-        "pytest_selection": (
-            "python -m pytest tests/ -q "
-            + " ".join(f"--ignore={p}" for p in setup.test_ignores)),
+        "pytest_selection": pod_pytest_command(setup),
         "cpu_affinity_contract": (
             "the pod derives NCPU from its cgroup quota (never bare nproc, which "
             "reports the host's CPUs inside a container and also honours "

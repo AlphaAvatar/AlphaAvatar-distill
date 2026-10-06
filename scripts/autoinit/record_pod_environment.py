@@ -70,6 +70,8 @@ from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract,
     describe,
     hidden_files,
+    pod_pytest_command,
+    pytest_arguments,
 )
 
 SIMULATOR = "scripts/pod/simulate_pod_env.sh"
@@ -145,6 +147,28 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: so no other record can satisfy its verifier or it theirs.
     "phase_a3": (
         "experiments.phase_a3.a3_pod_environment",
+        "sweep_contract"),
+    #: AN EIGHTH, and the warning five entries above came true a third time.
+    #: AGENTS.md P8.3 requires one `launch_bound` sweep when implementation,
+    #: metadata and grant are final and an experiment is about to launch, and
+    #: `--experiment phase_d1 --kind launch_bound` was refused as an unknown
+    #: experiment — so D1's sweep was not "not yet run", it was NOT EXPRESSIBLE
+    #: through this repository's canonical mechanism. The six-gate
+    #: pre-provider dry run is not a substitute: it validates the orchestration
+    #: before a provider is contacted, while this validates the session's
+    #: BLOCKING TEST GATE under the pod-like environment.
+    #:
+    #: It binds its own launcher, its own session id (read off the real spec,
+    #: not typed), its own executable closure, its own canonical bundle
+    #: deriver and its own pod selection — `scripts/experiments/stage-1/phase_d1/tests`,
+    #: which none of the other seven would run — and its record declares its
+    #: own schema, so no other record can satisfy its verifier or it theirs.
+    #:
+    #: RUN-OWNED: `pointer_path=None`. It maintains no global pointer, and in
+    #: particular does not touch the Phase-C1 readiness pointer that
+    #: `logs/state/current.json :: latest_verification` is derived from.
+    "phase_d1": (
+        "experiments.phase_d1.pod_environment",
         "sweep_contract"),
 }
 
@@ -386,7 +410,25 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
 
     declared_ignores = list(contract["test_ignores"])
     invoked_ignores = re.findall(r"--ignore=(\S+)", pytest_cmd)
-    if invoked_ignores != declared_ignores:
+
+    #: THE WHOLE SELECTION, both halves, in one equality. Comparing only the
+    #: `--ignore` flags left the BASE PATHS unchecked, and that is exactly
+    #: where the mismatch was: the manifest declared
+    #: `test_paths=('scripts/experiments/stage-1/phase_d1/tests',)` and the
+    #: invocation passed `tests/`, with an empty ignore list on both sides -- so
+    #: this check was satisfied, `[] == []`, while the sweep ran a different
+    #: suite from the pod. The interpreter is the only part allowed to differ,
+    #: which is why the comparison is over the arguments after `-m pytest`.
+    declared_selection = contract.get("pytest_selection") or ""
+    want = pytest_arguments(declared_selection)
+    got = pytest_arguments(pytest_cmd)
+    if want is None or got is None or want != got:
+        problems.append(
+            f"test selection mismatch: the manifest declares {want} and the "
+            f"invocation passes {got}. The pod runs "
+            "`pytest ${SESSION_TEST_PATHS:-tests/} -q ${SESSION_TEST_IGNORES:-}`, "
+            "so a sweep must reproduce the paths as well as the ignores.")
+    elif invoked_ignores != declared_ignores:
         problems.append(
             f"test selection mismatch: the manifest declares {declared_ignores} "
             f"and the invocation passes {invoked_ignores}")
@@ -405,8 +447,11 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
         problems.append("PODSIM_CMD is not the command this record describes")
 
     return {
+        "declared_test_paths": list(contract.get("test_paths") or []),
         "declared_test_ignores": declared_ignores,
         "invoked_test_ignores": invoked_ignores,
+        "declared_pytest_arguments": want,
+        "invoked_pytest_arguments": got,
         "setup_environment_keys": sorted(setup_env),
         "setup_environment_realized": not env_mismatch,
         "staging_contract_digest": contract["digest"],
@@ -627,8 +672,12 @@ def main() -> int:
     host_local = host_local_stores(launcher_module(sweep.launcher_module),
                                    REPO_ROOT)
     hidden = [*in_tree, *host_local]
-    pytest_cmd = (".venv/bin/python -m pytest tests/ -q "
-                  + " ".join(f"--ignore={i}" for i in contract["test_ignores"]))
+    #: THE POD'S OWN COMMAND, from the one owner that builds it. This was
+    #: assembled here as `pytest tests/ -q <ignores>`, which drops
+    #: `SetupManifest.test_paths` -- so a session declaring its selection
+    #: POSITIVELY (C1, A3, D1) had its sweep run the whole core suite while its
+    #: pod gate runs only its own preflight directory.
+    pytest_cmd = pod_pytest_command(spec.setup, python=".venv/bin/python")
     # The production setup environment is MERGED IN, so the child pytest runs
     # under SESSION_KIND=c1 and the rest of what the pod is given.
     env = {**os.environ, **setup_env,
