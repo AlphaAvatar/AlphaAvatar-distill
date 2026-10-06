@@ -9,320 +9,123 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**THE FORMAL D1 SEARCH LAUNCHED, AND FAILED BEFORE SCIENCE.** The maintainer
-gave GO on 2026-10-06. Run `d1_search_20261006_055409` acquired a secure L40S at
-the live `$1.09/h`, passed all six pre-provider gates, completed setup with all
-eight markers and its own 338-test pod gate, started the driver — and **stage A
-aborted 1.694 s in** on a one-word vocabulary mismatch. **`$0.2513` of
-`$21.4897`.** Nothing was measured; no beam expanded; no selection was
-committed. Owner:
-[`runs/d1_search_20261006_055409/closeout/attempt_failed.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_055409/closeout/attempt_failed.json).
+**Nothing is running and nothing is billing.** An account-wide query returns
+**0 pods and 0 network volumes**, and the RunPod balance is restored to
+`$199.9506` with a spend rate of `$0/h`.
+
+**THE SECOND FORMAL D1 SEARCH RAN ITS BEAM FOR 449.8 MINUTES AND WAS STOPPED
+BY AN EXHAUSTED RUNPOD ACCOUNT BALANCE.** Run `d1_search_20261006_101725` cleared every gate,
+cleared stages A and B on real CUDA, and was 39 of 92 expansions into the beam
+when the provider removed the pod. **`$8.1716` of `$21.4897`, 0 complete leaves,
+no scientific endpoint.** Owner:
+[`runs/d1_search_20261006_101725/closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_101725/closeout/outcome.json).
+
+**It was not any limit in this project**, and four things say so:
 
 ```text
-AttributeError: 'D1Authorization' object has no attribute 'session_commit'
-  autoinit_d1_driver.py:290   "session_commit": auth.session_commit,
-  the authorization declares it as            authorized_session_commit
+watchdog journal   action `none` on all 446 polls, over_hard_limit false
+terminate_after    2026-10-07T05:09:29Z -- 11 h 20 min AFTER the pod stopped
+elapsed            449.81 of 1125.55 authorized minutes (40% of the bound)
+pod disk           176 of 400 GB used, 225 GB free
 ```
 
-**No `$0` gate could have caught it.** The six gates load the same
-authorization through the same loader and not one reads this attribute; the only
-code that does sits behind `if args.authorization`, which a `--check-only`
-rehearsal is explicitly permitted to skip; and a CPU rehearsal that *did* pass
-one could not have continued past the identity comparison three lines later,
-because `config_hash` binds `device` and the grant was issued on `cuda`. Fixed,
-and closed as a **class** rather than as one name:
-`TestEveryAuthorizationAttributeTheDriverReadsExists` extracts every
-`auth.<name>` read from the driver and checks each against `D1Authorization`'s
-real attribute surface. Reverting the word turns exactly that test red.
+**The workdir is irrecoverable and the next search starts from zero.** The pod
+was DELETED, not stopped — GraphQL `pod(podId)` returns null, REST returns `404
+pod not found`, REST `/v1/pods` over all states returns `[]`, and the watchdog's
+own independent poll recorded `pod_exists false` at `17:53:03`, 43 seconds
+*before* this project's own delete call. So RunPod removed it outright and the
+launcher's error path did not cost the recovery. About 147 GB of materialized
+checkpoints is gone. **`search.py::_restore()` was NOT weakened**: it still
+requires checkpoint bytes whose digest matches the journal.
 
-**`$0.2513` bought the one thing no `$0` gate could establish.** Stage A's
-contract check ran to completion on real CUDA *before* the failure, so the
-identity the previous round could only argue about is now measured:
+What survived is luck. The launcher's collection never ran, so the only record
+of the minutes this run paid for is the out-of-band snapshots taken while
+diagnosing the transfer link — 38 parseable `measured` state records, all under
+one measurement protocol, and 39 expansions of telemetry, filed under
+`evidence/` with `_partial_oob_` in their names and labelled **evidence only**.
+
+**Five repairs came out of it, all generic, none D1-specific.**
 
 ```text
-authorization binds        662dc65c0d0a8ae9…  protocol ac23798a4572fab5…
-pod recomputed             662dc65c0d0a8ae9…  protocol ac23798a4572fab5…
+check_account_funds()    the gate nobody had: the PROVIDER ACCOUNT balance is
+                         verified against a session-declared requirement at $0,
+                         before create() and before the dry-run stop
+finish_emergency()       now passes streams_at_risk(None, streams). It never
+                         had, so a session declaring no event streams could not
+                         satisfy "name the streams you are truncating" -- there
+                         was none -- and the closeout threw instead of recording
+observed_stop_cause()    classifies from the watchdog journal on disk:
+                         watchdog_hard_termination / provider_stopped_or_
+                         terminated / provider_stopped_pod_still_exists /
+                         unknown. The log and the closeout had both ASSERTED a
+                         watchdog termination that never happened
+balance accounting       `hard_ceiling_usd` already contains container disk --
+                         gpu 20.4475 + disk 1.0422 = 21.4897 exactly -- so a
+                         derivation that re-adds it double-counts. A session
+                         ceiling owns which components it contains
+waiter liveness          a product fetcher kept polling the deleted host every
+                         60 s for a file that could never appear; waiters now
+                         stop on consecutive unreachability
 ```
 
-That was the prepared-chain review's **first fatal defect** — a grant bound to a
-`config_hash` built on `cpu` under a placeholder run id. The repaired issuer
-builds its probe session with the real run id on `FORMAL_DEVICE`, and the pod
-agrees.
+The core-ownership guard then caught the campaign's own numbers in those core
+docstrings and was right to — `$21.4897` and `449.8` are instance facts and
+belong here and in the closeout, not in `src/aadistill`. The core prose is
+generic; the specifics are in this file.
 
-**Nothing is running and nothing is billing.** The pod was torn down by its own
-launcher and the provider confirms it gone; an account-wide re-query returns
-**0 pods and 0 network volumes**. Under AGENTS.md P12.1 this is an engineering
-subrun, not a retried experiment: no measurement began, so it is preserved and
-closed, and the successor gets a new base commit, a new run id, a fresh one-use
-authorization, a new bundle and a new run-owned `launch_bound` sweep. The
-`$0.2513` counts against the unchanged cumulative envelope.
-
-**Then the launch-bound sweep refused the first successor, and it was right.**
-Booking that `$0.2513` moved the project balance, and
-`plans/d1_design.json` derives its `budget` section **live** — so the design
-record stopped regenerating byte-identically and two tests in the suite D1
-declares as its **pod test gate** went red. Unswept, that would have been
-discovered on an L40S at `TESTS_OK`. Owner:
-[`runs/d1_search_20261006_095623/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_095623/closeout/superseded.json),
-kept with its `FAIL` readiness record because a sweep catching a stale derived
-record is the mechanism working.
-
-The science is **bit-identical** across the regeneration: 23 of 25 top-level
-keys compare equal as sorted JSON, including `hypothesis`,
-`execution_protocol`, `scoring_policy`, `search_stage`, `incumbent` and
-`recovery_recipe`, and `open_blockers` is `[]` on both sides. Only `budget` and
-`design_hash` move.
+**TOP-4 IS THE DOWNSTREAM POLICY NOW.** A maintainer decision of 2026-10-07,
+after the historical full-search records were re-read: Phase-B attempt5 and C2
+attempt4 both committed `n_selected = 5`, so Top-2 was never an inherited
+retention convention. It gave elimination power to the quantity the design
+itself marks UNKNOWN — `P(a behaviourally good candidate is in the Top-K)` —
+and C2 measured the cheap state-eval ranking to be a weak predictor of recovered
+behaviour.
 
 ```text
-provisional_shortfall_usd   -10.1812 -> -9.9299      (exactly the $0.2513)
-design_hash                 3affe2c65c57… -> a0babe43ba0a…
+full target-aware search      UNCHANGED
+  -> complete-leaf Pareto ranking
+  -> retain Top-4             (was Top-2)
+  -> durably secure Top-4 checkpoint products
+  -> Top-4 x 2 screening seeds
+  -> advance one candidate
+  -> fresh 3-seed confirmation vs incumbent B
 ```
 
-**A frozen scientific plan identity should not be a function of the project's
-wallet,** and this one is: `design_hash` is a sha over every non-underscore key
-*including* the live `budget` block, so it has taken **eleven distinct values in
-the four days the record has existed**. Regenerating it is therefore routine
-practice here, not an exception — and the frozen science is asserted directly
-and separately by `assert_session_contract`. The recommendation to narrow the
-preimage is recorded in the closeout above and is a maintainer's call; the
-preregistered screening and confirmation rungs will each pay this cycle until
-it is taken. `converge_before_sweep.py` did not catch it because
-`write_d1_design.py` is not among the generators it regenerates.
+Both directions are recorded, because only one is an improvement: a wider field
+raises the unmeasured P(it contains the good candidate) and, at a fixed two
+screening seeds, LOWERS P(ordering it correctly) from `0.7808` to `0.5839`.
+Screening inflation rises `0.005149` to `0.009394`. The search science is
+untouched — width 6, one warmup level, `K=200 reference_topk_tail_v1`, `bsz=3`,
+`length_sorted_v1`, the four operators, both profiles, the `supervised_target`
+policy, the state-eval metrics. With 0 complete leaves there is no endpoint to
+reinterpret.
 
-**Two prepared runs before all of this never launched at all.**
-[`runs/d1_search_20261005_173304/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261005_173304/closeout/superseded.json)
-owns the eleven defects an independent review found by driving the chain through
-the real generic `SessionRunner` instead of reading it — three unconditionally
-fatal — and `d1_search_20261005_193733` is superseded, unconsumed `$0` evidence
-from the round that added D1's sweep contract.
-
-**What changed, and what did not.** The frozen science is untouched: same design
-hash, same `K=200`, `bsz=3`, `length_sorted_v1`, same width-6 beam with one
-warmup level, same four frozen operators, same two profiles, same
-`supervised_target` arm, same Top-2, same accepted 1125.55-minute bound at the
-same live `$1.09/h` repriced to the same `$21.4897`. No budget is widened and no
-maintainer decision is reopened; the grant at
-[`autoinit_d1_grant.json`](../budget/approvals/autoinit_d1_grant.json) stands as
-written. What changed is the engineering that executes it, which under AGENTS.md
-P12.1 is a repair inside the already-approved phase envelope.
-
-The executable closure moved in **membership**, not only in content — the
-launcher now imports the shared session prechecks, the shared bundle transport
-and the shared run layout — so `require_harness` refuses the old grant by
-construction and a new authorization is required rather than optional. **93
-files before, 96 after.** The digests are not restated here: the superseded
-grant owns the first and the new run's `governance/authorization.json` owns the
-second, and `d1_current_executable()` derives it live from the tree on every
-launch.
-
-Three governance artifacts now have generators, which is the reason the old ones
-could drift unnoticed: the readiness record had **no** generator at all and the
-authorization had no issuing script.
+**The canonical Top-4 chain price**, owned by `d1_design.json :: budget.chain`:
 
 ```text
-scripts/autoinit/issue_d1_authorization.py        the one-use grant
-scripts/autoinit/stage_d1_bundle.py               the relay object the pod fetches
-scripts/autoinit/write_d1_launch_readiness.py     the launch-bound admission record
+search        $21.4897   1125.55 min
+screening     $23.3822   1267.71 min   10 probes
+confirmation  $14.7966    802.23 min    6 probes
+chain total   $59.6685   expected $42.7965
 ```
 
-`SessionSpec.precheck` was `()` and is now six gates, every one of them refusing
-at `$0`: the run's own identity, the session contract the tree builds, the staged
-science inputs against their own pins, the readiness record against the live
-invocation, the shared session-commit/lineage gate, and the read-only bundle
-round trip. The evidence layout is one directory —
-`artifacts/audit/autoinit_d1/` — named by the driver's `--out`, the relay, the
-report fetch and both artifact specs.
+Every session fits the unchanged `$30` per-session envelope; the largest is
+screening. The `priced_grid` row for (4, 2) says `$69.3365` because it prices
+the search on the conservative unbatched basis — the `$9.6680` gap is exactly
+that one cell. The grid is planning analysis; the chain is the price.
 
-**The D1 engineering GPU qualification is COMPLETE.** Authorized by the
-maintainer on 2026-10-03 as an **ENGINEERING qualification and explicitly NOT
-formal D1 authorization**; it closed no blocker and funded nothing. Its subruns,
-every one of them paid, ran on a secure **L40S at the live `$1.09/h`** for
-`$3.2258` of an `$8.0000` ceiling. The campaign ledger at
-[`gpu-qualification/v1/campaign.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/campaign.json)
-owns every dollar and recomputes its total from components; the verdict and every
-answer's provenance live in
-[`gpu-qualification/v1/closeout.json`](../stages/stage-1/phase_d1/validations/gpu-qualification/v1/closeout.json).
+**NETWORK VOLUMES ARE NOT BEING BUILT.** The requirement was withdrawn on
+2026-10-07: the failure was an account balance, not demonstrated host
+instability. Local-workdir execution stands.
 
-```text
-s1   $0.1098   FAILED  the calibration-profile registry was empty -- three of
-                       FOUR process-global registries were filled
-s2   $0.9006   PARTIAL arm A passed its hard gate; arm B hit A3's
-                       pre-ATTENTION pin, which was doing its job
-s3   $1.6808   PARTIAL all three arms; stage D lost to a signature contract
-s4   $0.0632   FAILED  UnboundLocalError 15 s in, from an edit's ordering
-s5   $0.4714   PARTIAL arm A again, and stage D MEASURED
-```
-
-**No single subrun is complete and the closeout says so.** Every answer is from a
-real paid measurement and names the subruns that produced it. The incumbent
-reconstruction agreed across **three independent pods** on
-`53e30566c5f795f1` — that agreement is the cross-environment determinism
-evidence, and the aggregation refuses to write a closeout if the digests
-disagree.
-
-What it found, each owned by the closeout rather than restated here: the
-incumbent path rebuilds the frozen incumbent on real CUDA; the target-aware path
-executes at `bsz=3`; **the calibration batch size, not the position policy,
-moves three of four operator selections**, attributed by an arm that holds the
-policy and moves only the batch size; batching costs **×1.97** on the dominant
-DEPTH operator at all positions but only **×1.08** at the target-aware policy,
-which very nearly cancels it; and the derived logit bound holds for what it
-claims while understating the reduction's transients by **4.13×** at `bsz=1` and
-**1.99×** at `bsz=3`.
-
-**TOP-K IS GO, THE PRICE IS MEASURED, AND THE BEAM CAN NOW RUN THE PROTOCOL.**
-Review reopened this round four times — the tail arithmetic, the cost cell, what
-the cell was a measurement *of*, and then whether anything could execute the
-protocol that was measured. All four are closed. One blocker remains and it is a
-maintainer decision.
-
-```text
-lower-bound violations   0   (was 1; zero even at the looser 1e-6 threshold)
-DEPTH decisions moved    0 of 8; removal orders identical
-reference state          16.91 GiB -> 137.5 MiB (0.794% of full vocabulary)
-operator invocation      1194.26 s and 1188.77 s  ->  MAX 19.9044 min
-DEPTH cell (END TO END)  22.976 min root   (frozen full-vocab was 34.354)
-search session           MEASURED $21.4897  vs the $30.00 envelope  ->  FITS
-D1 chain (derived)       $51.0829  =  21.4897 + 14.7966 + 14.7966
-```
-
-**The fourth defect was the sharpest.** `reference_topk_tail_v1` was implemented
-in the operator, in the state evaluator, in the protocol identity and in a driver
-that injected it by hand — and `SearchConfig` had **no field for it**, so the only
-path a formal D1 search could take fell back to `FULL_VOCAB_V1`. a8 timed the
-intended operator path faithfully for forty minutes while that path was
-unreachable through `BeamSearch`.
-
-**My parity test could not have seen it.** It asked whether the timing builder was
-a *superset* of core's context keywords — it caught a field core had and the
-builder forgot. This was the opposite: a field the builder had and core could not
-express. The check is bidirectional now, with a justified-extras set, and the
-reverse direction was verified against the pre-wiring source.
-
-```text
-SearchConfig.distribution_support = FULL_VOCAB_V1   (absent from as_dict)
-  -> _expand_one declares it in the hashed operator config
-  -> and passes the object in OperatorContext
-  -> operator refuses a declaration/object disagreement (already did)
-  -> every measurement is checked against what it actually REDUCED OVER
-```
-
-That last check is the load-bearing one: every driver wraps its evaluator in a
-`lambda`, so asking the measurer for its support at construction usually sees
-nothing. Reading `detail.reduction` per measurement cannot be hidden by wrapping,
-and it makes "Top-K operators, full-vocabulary beam metric" unexpressible rather
-than merely discouraged. Five mutations of the wiring, all caught — including the
-original defect and the one where the support is absent from the hash.
-
-**Three earlier defects, for the record.** The tail was reconstructed as
-`1 - sum(support)` and the measured support mass reached **1.000001**, so one
-coarse KL exceeded the full-vocabulary KL it must bound. The pricing then replaced
-the **whole** `CostModel` cell with the operator term and promoted a 12-candidate
-**mean** into `root_max`. Then the "production" timing turned out to be a shadow
-loop that never paid the position weights, the `values.tolist()` host transfer,
-the aggregation or the reference-cache fill — and `candidates × per-candidate` is
-not the quantity `_expand_one` records as `operator_seconds` at all.
-
-```text
-measured              19.904 min
-a7  max x 260         22.088 min   +11.0%   omitted work, then over-counted more
-a7  mean x 260        20.101 min    +1.0%   luck, not a method
-a6  max x 260         33.813 min   +69.9%   its own 1,656 synchronizations
-```
-
-**The core suite was not green, and I had said it was.** Running it for the first
-time in three rounds found that `tests/initialization/test_operators_only_shrink.py`
-— which I added two rounds ago — imports `experiments.phase_a3` and
-`experiments.phase_c2` from the core suite, which §2.8a forbids. The generic claim
-stayed in core and swept the whole builtin registry; the frozen-set and
-committed-record halves moved to `phase_d1`'s own suite. Two rounds of "do not
-rerun core" is how a red suite stays invisible.
-
-**And a cross-module leak that cost a debugging round.**
-`monkeypatch.setattr(impl, "execute", spy)` on an implementation whose `execute`
-is *inherited* records the bound method as the old value and, on undo, writes it
-back as an **instance** attribute. The registry holds singletons, so it outlives
-the module and shadows the class permanently — and any later class-level patch of
-the same name is silently ignored. The symptom was "no expansion ran". The
-module-boundary fixture strips these now, the leaking test cleans up after itself,
-and the boundary suite asserts the state the fixture maintains.
-
-**a8 stands without a rerun.** The wiring produces the same `OperatorContext` the
-measurement timed and changes no operator and no hot path; it passes a declaration
-and an object. The per-candidate diagnostic in a8's record is still defective — its
-span baseline mixed `time.time()` with `perf_counter()`, so min/p1/p5/mean are the
-unix epoch negated while max/p95/p50 and the invocation total stand — and the
-report names it rather than printing it.
-
-**The remaining blocker is CATEGORICAL:** `phase_d1` is not in the C1 package's
-`funds_formal_sessions_of`. No measurement reaches it.
-
-**An incidental observation, and it is not a D1 result.** Timed under D1's
-treatment positions, DEPTH removed `[2, 3, 32, 16, 26, 15, 17, 27]` and
-`[2, 3, 32, 16, 15, 26, 17, 27]`, against a4's incumbent-position
-`[2, 16, 3, 32, 20, 26, 15, 21]` — six of eight layers shared, different order,
-two different choices. One unreplicated engineering invocation per profile, no
-frozen protocol, no seeds, no registered decision rule.
-
-**D1's claim boundary.** It differs from incumbent B on three axes — distribution
-support, numerical execution, scoring positions — and the qualification measured
-that the batch size, not the position policy, moved three of four fixed-path
-selections. D1 is a **challenger** experiment against B, not a causal isolation
-of position weighting.
-
-**A3 is TERMINAL. D1 is DESIGNED, IMPLEMENTED at `$0`, PRICED and BLOCKED
-TWICE** — the evidence blocker is closed; funding and the per-session envelope
-are not. The maintainer's order of **2026-10-03** superseded the 2026-10-01
-stop: skip the FFN-specific F1 experiment, carry
-`ffn.activation_importance_v0` forward as the current best FFN, and take D1
-through design, implementation, validation, pricing and preparation for
-independent review — without launching. Two further `$0` rounds then closed the
-materialization-ownership gaps, corrected the behavioural-selection rationale
-and the pricing claims, and **built and bound** the D-series battery family.
-
-**All three design blockers are CLOSED.** Owner: `open_blockers()` in
-[`write_d1_design.py`](../../scripts/autoinit/write_d1_design.py), which DERIVES
-them from the design rather than restating them, and which returns `[]` on this
-tree. The text below records how each closed; it is history, not status, and
-`open_blockers()` remains the only thing to read for status.
-
-```text
-EVIDENCE   CLOSED. Six disjoint batteries exist, allocation rule
-           f6047343c1c1ad2172f500e979c704c1, family_content_id
-           1e3445f1b676...74cd58 binding 42 output files. Closing this
-           blocker authorized nothing.
-FUNDING    CLOSED by the 2026-10-05 maintainer amendment, which was
-           CATEGORICAL and not arithmetic: `phase_d1` was absent from the C1
-           package's funds_formal_sessions_of, so no existing allowance
-           covered it at any amount. The amendment added it and raised the
-           formal allowance to $131.6523, the package to $151.6523 and the
-           project cap to $465.0000. The $30.00 per-session envelope and the
-           GPU engineering allowance are UNCHANGED.
-ENVELOPE   CLOSED by measurement, not by narrowing the science. The
-           provisional $31.1577 came from an unbatched full-vocabulary table;
-           the paid qualification measured the batched Top-K search and the
-           chain reprices to $21.4897, which fits the unchanged $30.00
-           envelope. The beam was not narrowed to make it fit.
-```
-
-**Both money gates still bind at launch, and both are checked at `$0`.** The
-four conditions are re-derived against the live ledger at issuance
-(`check_the_four_conditions`), and the launcher's own gates re-check the
-authorization against the live invocation before a provider is contacted.
-
-**The owed GPU qualification has RUN, and the design derives that** from
-`gpu-qualification/v1/closeout.json` rather than carrying a sentence —
-`gpu_validation_owed.status` reads `RUN -- PASSED` and still says it authorizes
-nothing. The direction D1's design called UNKNOWN is now measured, so the chain
-figures rest on measurement rather than on an unbatched table; they are still
-PROVISIONAL until a maintainer prices them, and the funding and envelope
-blockers are untouched by the spend.
-
-Start at [`d1_design.json`](../stages/stage-1/phase_d1/plans/d1_design.json),
-which owns every D1 figure and its claim boundary;
-[`d1_evidence_capacity.json`](../stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json)
-owns the battery arithmetic. The phase `README.md` beside them is generated from
-the index and carries no narrative.
+**A measured cost finding, scoped.** The non-root DEPTH operator runs at
+**1.3949x** its priced cell — `32.0492` min against `22.9759`, over 9
+observations, max `1.8024x` — with the candidate workload identical to the root
+measurement, so it is a per-state cost difference and not a workload one. It
+applies to **D2/D3 full-search pricing** and any future non-root DEPTH path. It
+does **not** apply to recovery screening or behavioural confirmation, which
+never execute that operator. The `1125.55`-minute search bound is RETAINED:
+projections of 829-943 min still fit it.
 
 ## The test suite has a boundary now, and the trees line up
 
@@ -3584,12 +3387,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$61.9918` of `$131.6523` |
+| formal sessions | `$78.8202` of `$156.6523` |
 | GPU engineering | `$5.0259` of `$20.0000` |
-| package | `$67.0177` of `$151.6523` |
-| project cap | `$403.9872` spent of `$465.0000`, leaving `$61.0128` |
+| package | `$83.8461` of `$176.6523` |
+| project cap | `$412.1588` spent of `$490.0000`, leaving `$77.8412` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$61.9918`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$78.8202`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

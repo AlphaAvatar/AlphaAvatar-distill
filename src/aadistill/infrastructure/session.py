@@ -586,6 +586,36 @@ class BudgetSpec:
     soft_stop_reserves: tuple[Phase, ...] = ()
     artifact_recovery_reserve_minutes: float = 30.0
     below_floor_reason: str = ""
+    #: WHAT THE PROVIDER ACCOUNT MUST HOLD before a pod is created, in dollars,
+    #: or a callable taking the priced `BudgetPlan` and returning it.
+    #:
+    #: Separate from `authorized_usd`, which says what this project PERMITS.
+    #: This says whether the provider will keep the pod alive long enough to
+    #: reach an endpoint. A session has been stopped by its provider part-way
+    #: through, short of its own authorized bound, because the ACCOUNT had run
+    #: out of money while every internal gate reported the run permitted. The
+    #: spend was real and the run produced no endpoint.
+    #:
+    #: THE SHAPE A SESSION SHOULD DERIVE, stated here because the gate reads
+    #: this field and nothing else:
+    #:
+    #:     required = max(
+    #:         per_attempt_envelope,
+    #:         authorized_session_hard_ceiling
+    #:         + account_balance_reserve
+    #:         + other active obligations NOT already inside that ceiling)
+    #:
+    #: **A session ceiling owns which priced components it already contains.**
+    #: A derivation that re-adds a component the ceiling already includes
+    #: double-counts it, and a caller that does so is asserting a cost model it
+    #: does not own. Nothing about which components exist is encoded here: this
+    #: field takes one number and the session decides what went into it.
+    #:
+    #: `None` means ungated, so every session written before this keeps its
+    #: behaviour. The AMOUNT belongs to the campaign and is declared by the
+    #: launcher -- a dollar figure here would be the same defect as a hardcoded
+    #: experiment id in reusable core.
+    account_balance_required_usd: float | Callable[[BudgetPlan], float] | None = None
 
     def plan(self, *, price_per_hour: float, authorized_usd: float) -> BudgetPlan:
         return plan_session(

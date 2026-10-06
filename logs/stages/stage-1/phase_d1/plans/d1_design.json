@@ -6,8 +6,8 @@
  "behavioural_design": {
   "_claim_boundary": "a GO confirms THE ADVANCING CANDIDATE against B, conditional on the three confirmation seeds, having been selected on disjoint screening prompts and disjoint seeds. It is not a statement about the other Top-K candidate, about the leaves the beam did not visit, about a population of recovery seeds, or about target-aware scoring in general \u2014 only about this path under this policy.",
   "_claim_boundary_of_the_noise_model": "The inflation figures describe the winner's curse on the SCREENING estimate only. They are not a validity condition for the confirmation rung: with fresh disjoint prompts and fresh seeds the confirmation estimate is unbiased under the global null whatever the screening inflation was, and no design here is admitted or rejected by comparing inflation to the SESOI. advance_probability is conditional on the good candidate being in the Top-K; the unconditional probability also needs P(good candidate in Top-K), which is UNKNOWN and which C2's negative result argues is not close to 1. The per-seed standard deviation comes from three A3 deltas, so every probability is planning and sensitivity analysis, not a power calculation.",
-  "_how_these_three_numbers_were_chosen": "as a pragmatic balance, not as the optimum of a formula. Top-K=2 buys some behavioural breadth over the search's own ranking while keeping the screening field small enough that two seeds per arm give a stable ordering; two screening seeds make the ordering stable rather than a single-draw coin flip, which is the specific weakness of C2's one-seed rung; three confirmation seeds are the same count A3 used, on a FRESH disjoint battery, which keeps the confirmation estimate independent of everything the screening rung saw. The cost of the whole chain is what caps all three.\n\nNOT claimed: that this is a formally demonstrated optimum, or that it was derived from a bias-versus-SESOI comparison. The numbers below describe the design; they did not select it.",
-  "_what_the_arithmetic_says_about_it": "the winner's curse on the screening estimate is 0.005149 \u2014 a property of the screening number, which is never reported as D1's effect estimate and never promotes anything by itself. The probability of advancing a candidate that is better by the SESOI, GIVEN that it is among the two, is 0.7808 at the point estimate of the per-seed spread \u2014 and 0.5488 to 0.9316 across that spread's own 95% sampling interval, because it was estimated from THREE A3 deltas. The interval is wider than the differences between the candidate designs, which is why no design was selected by maximizing it.",
+  "_how_these_three_numbers_were_chosen": "as a pragmatic balance, not as the optimum of a formula. Top-K=4 keeps the recovery field wide enough that the search's own cheap ranking is not the thing that eliminates a candidate it cannot reliably rank -- see `_why_top_k_is_4`; two screening seeds make the ordering stable rather than a single-draw coin flip, which is the specific weakness of C2's one-seed rung; three confirmation seeds are the same count A3 used, on a FRESH disjoint battery, which keeps the confirmation estimate independent of everything the screening rung saw. The cost of the whole chain is what caps all three.\n\nNOT claimed: that this is a formally demonstrated optimum, or that it was derived from a bias-versus-SESOI comparison. The numbers below describe the design; they did not select it.",
+  "_what_the_arithmetic_says_about_it": "the winner's curse on the screening estimate is 0.009394 \u2014 a property of the screening number, which is never reported as D1's effect estimate and never promotes anything by itself. The probability of advancing a candidate that is better by the SESOI, GIVEN that it is among the two, is 0.5839 at the point estimate of the per-seed spread \u2014 and 0.2950 to 0.8450 across that spread's own 95% sampling interval, because it was estimated from THREE A3 deltas. The interval is wider than the differences between the candidate designs, which is why no design was selected by maximizing it.",
   "_what_the_derivation_does_NOT_cover": "WHETHER A GOOD CANDIDATE IS IN THE TOP-K AT ALL. Both figures above condition on the better candidate being inside the screened field; neither says how often the search's own cheap metric puts it there. C2's evidence is that the cheap metric predicts behaviour poorly \u2014 four of its five committed candidates sat in a better eps-Pareto front than the incumbent and two dominated it on all three ranked objectives, and the behavioural confirmation came back negative \u2014 so for D1 the probability that the top 2 of the ~12 leaves the beam visits contains the behaviourally best one is UNKNOWN and is not claimed to be high.\n\nThat is a real limitation and it is not repairable by widening K. Widening it worsens both the bias and the discrimination, so the screening rung cannot be made simultaneously broad and reliable at this noise level. The levers that would actually address it are reducing the noise (more seeds per screened candidate, which costs probes linearly) or improving the search metric's correlation with recovered behaviour (which is a research question, not a design parameter). D1 takes neither: it screens narrowly and reliably, and the claim boundary records that a candidate the cheap metric ranked third is never behaviourally tested.",
   "_what_this_replaces": {
    "c2_advance_probability": 0.4201,
@@ -15,11 +15,12 @@
    "c2_screening_estimate_inflation": 0.015009,
    "reading": "C2's screening rung reported a screening delta inflated by about 1.5x the effect it was looking for, and at one seed it was more likely to advance a candidate that was NOT the better one (0.42 conditional on the better one being in the field). The design above trades breadth for a more stable ordering at the same noise level. This is a diagnosis of C2's SCREENING rung's discriminating power, derived from the project's own measurements \u2014 it is NOT a re-analysis of C2's result, it changes no C2 figure, and it does not say C2's confirmation estimate was biased: C2's confirmation ran on its own disjoint battery."
   },
-  "advance_probability": 0.7808,
+  "_why_top_k_is_4": "MAINTAINER DECISION 2026-10-07, amending the downstream finalist/recovery policy only. The beam search, its measurement protocol and every frozen scientific term are unchanged.\n\nTop-2 was not an inherited full-search retention convention: Phase-B attempt5 and C2 attempt4 each committed n_selected=5. It was a later D1 screening-cost choice, and it gave elimination power to the exact quantity this design marks UNKNOWN -- P(a behaviourally good candidate is in the Top-K). C2 measured the cheap state-eval ranking to be a weak predictor of recovered behavioural quality, so a candidate the proxy ranks 3rd or 4th may still be the best after recovery, and a field of 2 lets the proxy decide that on its own.\n\nBOTH DIRECTIONS, because only one of them is an improvement: a wider field raises the unmeasured P(it contains the good candidate); at a fixed two screening seeds it LOWERS the probability of ordering that field correctly once it does, from 0.7808 to 0.5839. Screening-estimate inflation rises 0.005149 to 0.009394. The chain hard ceiling moves $60.7509 to $69.3365 and the probe count 12 to 16. The trade was accepted knowing all of it; the arithmetic below reports the losses as well as the gain.\n\nNOT changed: the search, the beam, K=200, bsz=3, length_sorted_v1, the operator space, both calibration profiles, the position policy, the state-eval metrics, the screening seed count, the confirmation seed count, or the per-session envelope. Already measured search states remain valid, because none of this touches the search's measurement protocol.",
+  "advance_probability": 0.5839,
   "advance_probability_sensitivity": {
-   "p_at_sd_high": 0.5488,
-   "p_at_sd_low": 0.9316,
-   "p_at_sd_point": 0.7808,
+   "p_at_sd_high": 0.295,
+   "p_at_sd_low": 0.845,
+   "p_at_sd_point": 0.5839,
    "sd_high": 0.081108,
    "sd_low": 0.006719,
    "sd_point": 0.012906
@@ -337,10 +338,10 @@
    }
   },
   "pipeline_probability_at_assumed_values": {
-   "0.25": 0.1952,
-   "0.5": 0.3904,
-   "0.75": 0.5856,
-   "1.0": 0.7808
+   "0.25": 0.146,
+   "0.5": 0.2919,
+   "0.75": 0.4379,
+   "1.0": 0.5839
   },
   "priced_grid": [
    {
@@ -509,8 +510,8 @@
    "how": "all probes of a rung are trained and evaluated in ONE session on one host, under one image digest, one engine version and one scoring contract; the comparison verifies each probe's own admission record asserts comparability under generation_runtime_comparability@v2 and serializes the verdict.",
    "requirement": "every probe in one comparison field is GENERATED and EVALUATED under one protocol identity. C2's confirmation field mixed them, which is the limitation its closure records."
   },
-  "screening_estimate_inflation": 0.005149,
-  "screening_probes": 6,
+  "screening_estimate_inflation": 0.009394,
+  "screening_probes": 10,
   "screening_seeds": 2,
   "seed_sd": 0.012906,
   "seed_sd_interval_95": [
@@ -519,19 +520,19 @@
   ],
   "seed_sd_n": 3,
   "sesoi": 0.01,
-  "top_k": 2,
-  "total_probes": 12
+  "top_k": 4,
+  "total_probes": 16
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $-9.9299 is the gap between the chain hard ceiling of $51.0829 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $-18.1727 is the gap between the chain hard ceiling of $59.6685 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
   "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "SATISFIED ON MEASUREMENT: the corrected production Top-K search session prices at $21.4897 against the $30.00 envelope, so this is no longer a blocker. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
   "_per_session_envelope_compatibility": "DERIVED from the measured production Top-K session price against $30.00. RESOLVED_FITS means the measured session ceiling is inside the envelope; RESOLVED_NEEDS_RAISE means it is outside and the envelope would have to move; UNRESOLVED means no production Top-K timing exists yet, which blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven.\n\nTHE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They are historical planning evidence from UNBATCHED telemetry for a protocol D1 will not run. `open_blockers` used to require both this field AND that the provisional basis fit, so a measurement proving D1 fits would have stayed blocked by an estimate it supersedes.",
   "_price_status": "MIXED, and the dominant cell is MEASURED. The Top-K protocol owes nothing: its production cost is settled evidence.\n\nMEASURED, under the production protocol: depth.causal_kl_greedy_v1. One real `impl.execute` invocation of 1194.2624 s over 260 candidate subsets -- the max over both DEPTH calibration profiles -- rebuilt end to end into 22.9759 min at the root with the committed non-operator MAX. This is the same quantity `BeamSearch._expand_one` records as `operator_seconds`, so it is comparable with the frozen table it replaces.\n\nA PLANNING BASIS, deliberately left alone: the three non-KL structural cells keep their committed UNBATCHED whole-expansion figures. They reduce activation statistics rather than KL, so the distribution support cannot move them, and an unbatched basis OVERSTATES -- which is the safe direction for a ceiling.\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field once called UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nSO: the search session's figure is a BOUND rather than a plan. The chain total remains provisional in SIZE because three cells are unmeasured, and it is not a finalized authorization price -- what the project cap should become is a maintainer decision this document does not take.",
   "_why_three_sessions": "the search commits a candidate set and stops; the screening rung cannot be bound until that set exists, and the confirmation rung cannot be bound until screening names the one candidate that advances. Each is separately priced and separately authorized.",
   "chain": {
-   "expected_usd": 36.1923,
-   "hard_ceiling_usd": 51.0829,
-   "max_session_hard_ceiling_usd": 21.4897,
+   "expected_usd": 42.7965,
+   "hard_ceiling_usd": 59.6685,
+   "max_session_hard_ceiling_usd": 23.3822,
    "price_per_hour": 1.09,
    "sessions": {
     "confirmation": {
@@ -550,16 +551,16 @@
     },
     "screening": {
      "container_disk_gb": 120,
-     "container_disk_usd": 0.2228,
-     "expected_minutes": 641.1,
-     "gpu_usd": 14.5738,
-     "hard_ceiling_minutes": 802.23,
-     "hard_ceiling_usd": 14.7966,
+     "container_disk_usd": 0.3521,
+     "expected_minutes": 999.16,
+     "gpu_usd": 23.0301,
+     "hard_ceiling_minutes": 1267.71,
+     "hard_ceiling_usd": 23.3822,
      "minutes_per_probe_bounding": 89.516,
-     "n_probes": 6,
+     "n_probes": 10,
      "overrun_factor": 1.3,
      "price_per_hour": 1.09,
-     "probe_minutes": 537.1,
+     "probe_minutes": 895.16,
      "session_overhead_minutes": 104.0
     },
     "search": {
@@ -583,13 +584,13 @@
      "warmup_levels": 1
     }
    },
-   "total_probes": 12
+   "total_probes": 16
   },
   "d1_is_in_the_funded_list": true,
   "d_series_extrapolation": {
    "_caveat": "an extrapolation, not a price. D2 adds a reference forward per operator-local comparison and D3 adds a student-confidence component; neither is measured, so neither is priced here. The figure is the floor of the D-series, not its cost.",
    "_what": "D2 and D3 repeat this shape by the maintainer's instruction \u2014 each a full search, freeze, recovery, behavioural evaluation and promotion decision.",
-   "three_chains_hard_ceiling_usd": 153.2487
+   "three_chains_hard_ceiling_usd": 179.0055
   },
   "funds_formal_sessions_of": [
    "phase_c1",
@@ -600,14 +601,14 @@
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "per_session_envelope_usd": 30.0,
   "position": {
-   "_cap_cross_check": 465.0,
+   "_cap_cross_check": 490.0,
    "_derived_by": "scripts/consolidate/derive_budget.py, CALLED by this writer rather than copied from it. A hand-copied balance expires the next time anything spends, and this document is regenerated often enough that it would expire quietly.",
    "engineering_remaining_usd": 5.0259,
-   "formal_remaining_usd": 61.9918,
+   "formal_remaining_usd": 78.8202,
    "full_ceiling_sessions_fundable": 2,
-   "package_remaining_usd": 67.0177,
-   "project_cap_usd": 465.0,
-   "project_remaining_usd": 61.0128
+   "package_remaining_usd": 83.8461,
+   "project_cap_usd": 490.0,
+   "project_remaining_usd": 77.8412
   },
   "price_basis": {
    "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
@@ -616,8 +617,8 @@
   },
   "price_status": "MEASURED PRODUCTION TOP-K BASIS for the search session: $21.4897 hard ceiling from an END-TO-END DEPTH cell whose operator term is ONE MEASURED `impl.execute` invocation (19.9044 min, the max of both DEPTH profiles) plus the committed non-operator MAX. The chain's other sessions keep their full-vocab basis.",
   "provisional_basis_fits_per_session_envelope": true,
-  "provisional_per_session_excess_usd": -8.5103,
-  "provisional_shortfall_usd": -9.9299,
+  "provisional_per_session_excess_usd": -6.6178,
+  "provisional_shortfall_usd": -18.1727,
   "sessions": 3,
   "topk_production_basis": {
    "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",
@@ -897,7 +898,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "a0babe43ba0a5dfbbf7276bf0c2e082375342e88e5cda9fc8e4b3acea7e4a12a",
+ "design_hash": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",

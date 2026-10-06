@@ -287,13 +287,31 @@ def _ok_evidence(rows: list[dict]) -> dict:
             "stages": [{"stage": "D", "name": "commit_top_k", "status": "ok"}]}
 
 
-ROWS = [{"state_id": "s1", "checkpoint_path": "/x/s1"},
-        {"state_id": "s2", "checkpoint_path": "/x/s2"}]
+def _top_k() -> int:
+    """THE DESIGN'S width, read rather than typed.
+
+    This was a two-element literal, and the Top-2 -> Top-4 widening of
+    2026-10-07 turned four of these tests red for the right reason: the gate
+    reads `design.behavioural_design.top_k` and the fixture had its own copy.
+    One owner.
+    """
+    from experiments.phase_d1 import d1_session as D1S
+
+    return int(D1S.design()["behavioural_design"]["top_k"])
+
+
+K = _top_k()
+ROWS = [{"state_id": f"s{i}", "checkpoint_path": f"/x/s{i}"}
+        for i in range(1, K + 1)]
 
 
 class TestTheProductGateOnTheRealStoreLayout:
-    """`products_secured` must require BOTH selected leaves, and must never read
-    a path miss as "nothing was owed"."""
+    """`products_secured` must require EVERY selected leaf, and must never read
+    a path miss as "nothing was owed".
+
+    The count comes from the design, so this class follows a retention-width
+    decision instead of pinning one.
+    """
 
     def test_it_reads_the_authoritative_record_from_the_runners_store(self,
                                                                      tmp_path):
@@ -368,7 +386,7 @@ class TestTheProductGateOnTheRealStoreLayout:
             L.committed_selection(ctx)
 
     def test_an_empty_fetch_does_not_pass_the_gate(self, tmp_path):
-        """`success + 0/2 -> False`. `all([])` is True; a fetch that secured
+        """`success + 0/K -> False`. `all([])` is True; a fetch that secured
         NOTHING must not pass."""
         import autoinit_d1_launch as L
 
@@ -376,34 +394,36 @@ class TestTheProductGateOnTheRealStoreLayout:
                          evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(ctx, [])
         assert ok is False
-        assert "0 of 2" in why
+        assert f"0 of {K}" in why
 
-    def test_one_of_two_does_not_pass_either(self, tmp_path):
-        """`success + 1/2 -> False`."""
+    def test_one_short_does_not_pass_either(self, tmp_path):
+        """`success + (K-1)/K -> False`."""
+        import autoinit_d1_launch as L
+        from aadistill.infrastructure.session import ProductFetchResult
+
+        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
+                         evidence=_ok_evidence(ROWS))
+        fetched = [ProductFetchResult(kind="transfer", rc=0, detail=r["state_id"])
+                   for r in ROWS[:-1]]
+        fetched.append(ProductFetchResult(kind="transfer", rc=1,
+                                          detail=f"{ROWS[-1]['state_id']} failed"))
+        ok, why = L.both_selected_leaves_secured(ctx, fetched)
+        assert ok is False and f"{K - 1} of {K}" in why
+
+    def test_every_selected_leaf_secured_passes(self, tmp_path):
+        """`K rows exist and all verify -> PASS`."""
         import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
         ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
                          evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(
-            ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1"),
-                  ProductFetchResult(kind="transfer", rc=1, detail="s2 failed")])
-        assert ok is False and "1 of 2" in why
-
-    def test_both_secured_passes(self, tmp_path):
-        """`2 rows exist and both verify -> PASS`."""
-        import autoinit_d1_launch as L
-        from aadistill.infrastructure.session import ProductFetchResult
-
-        ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
-                         evidence=_ok_evidence(ROWS))
-        ok, why = L.both_selected_leaves_secured(
-            ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1"),
-                  ProductFetchResult(kind="transfer", rc=0, detail="s2")])
-        assert ok is True and "both selected checkpoints secured" in why
+            ctx, [ProductFetchResult(kind="transfer", rc=0,
+                                     detail=r["state_id"]) for r in ROWS])
+        assert ok is True
 
     def test_a_selection_of_the_wrong_size_fails_the_gate(self, tmp_path):
-        """`commit_top_k exists with != 2 selected rows -> PRODUCT GATE
+        """`commit_top_k exists with != K selected rows -> PRODUCT GATE
         FAILURE`. One leaf secured out of one would otherwise read as complete."""
         import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
@@ -414,7 +434,8 @@ class TestTheProductGateOnTheRealStoreLayout:
         ok, why = L.both_selected_leaves_secured(
             ctx, [ProductFetchResult(kind="transfer", rc=0, detail="s1")])
         assert ok is False
-        assert "PRODUCT GATE FAILURE" in why and "design commits 2" in why
+        assert "PRODUCT GATE FAILURE" in why
+        assert f"design commits {K}" in why
 
     def test_failure_before_commit_owes_no_checkpoint_products(self, tmp_path):
         """`failure before commit -> no checkpoint product obligation`.

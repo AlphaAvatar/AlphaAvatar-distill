@@ -50,6 +50,13 @@ from experiments.run_layout import rel_run_dir  # noqa: E402
 #: DECLARED, and the shell has a branch for it. See the module docstring.
 SESSION_KIND = "d1"
 
+#: THE OPERATIONAL RESERVE in this session's provider-account requirement. Small,
+#: and deliberately not a second budget: the point is only that a session must
+#: not launch against an account that covers it to the last cent, because a pod
+#: stopped for an exhausted balance spends money and produces no endpoint. The
+#: 2026-10-06 search lost $8.1716 and 39 of 92 expansions to exactly that.
+ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
+
 #: THE POD'S BLOCKING TEST GATE runs D1's OWN suite, positively declared. The
 #: 2026-10-03 boundary decision made `tests/` reusable-framework behaviour only, so
 #: a session that declares nothing gets the framework checked on its machine and no
@@ -849,6 +856,45 @@ def budget_spec(repo_root: Path) -> BudgetSpec:
             f"{accepted_hard:.2f} min by search_space.search_cost; this spec "
             "DECOMPOSES that bound and does not add to it. See d1_design.json :: "
             "budget.chain.sessions.search"),
+        #: WHAT THE RUNPOD ACCOUNT MUST HOLD, derived here because the amount is
+        #: this campaign's and not reusable core's.
+        #:
+        #: On 2026-10-06 the formal search passed all six $0 gates, was
+        #: authorized to $21.4897 over 1125.55 minutes, and RunPod stopped it at
+        #: 449.8 minutes with 39 of 92 expansions complete because the ACCOUNT
+        #: balance had run out. $8.1716 bought no endpoint. Every gate asked
+        #: whether the experiment was permitted to spend; none asked whether the
+        #: provider would still be paid.
+        #:
+        #: Two terms, and NOT three. The first version added
+        #: `container_disk_usd` to `hard_ceiling_usd` and double-counted it:
+        #:
+        #:     gpu_usd 20.4475 + container_disk_usd 1.0422 = 21.4897 = ceiling
+        #:
+        #: The ceiling ALREADY CONTAINS the disk, exactly. A session's ceiling
+        #: owns which priced components it contains, and a caller that re-adds
+        #: one is asserting a cost model it does not own -- the same defect as
+        #: restating any derived figure. So:
+        #:
+        #:   * the authorized session hard ceiling -- every priced component of
+        #:     what this run may cost, the disk included;
+        #:   * a small operational reserve, so a session does not launch against
+        #:     a balance that covers it to the last cent;
+        #:   * plus any OTHER active obligation not already inside that ceiling.
+        #:     There are none for a D1 search: it holds no network volume and no
+        #:     concurrent resource, and the package permits one billing resource
+        #:     at a time. A term is not added for a hypothetical.
+        #:
+        #: Floored at the package's per-attempt envelope, READ from the
+        #: authorization config rather than typed: an account holding less than
+        #: one full envelope cannot fund an attempt this package permits. That
+        #: floor is what makes the requirement $30 today, and it is why
+        #: correcting the double count does not move the D1 figure --
+        #: max(30.0000, 26.4897) is still 30.0000.
+        account_balance_required_usd=round(max(
+            float(A.live_money(repo_root)["per_session_envelope_usd"]),
+            float(priced["hard_ceiling_usd"])
+            + ACCOUNT_OPERATIONAL_RESERVE_USD), 4),
     )
 
 

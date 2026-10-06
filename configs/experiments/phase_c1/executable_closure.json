@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 112,
- "digest": "9f375ca9bcd61bb5a89b63fd8ac66bce7ed3575c5f520447a74a69cc6ac435d4",
+ "digest": "44d133b09aea2a1bec9b128a78f78348fd7d12b5ddfba08a6cb92c42cda3f74f",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,8 +39,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "35a9a2f86d1ce375ce9916ce7acb88c7d3d6850f47945cc864017e5c65eeefe9",
-   "bytes": 27920
+   "sha256": "2a620b32f908c63f1cea364a0305cdecb7e36457586501069cc85f8bbf2061c9",
+   "bytes": 30349
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
@@ -304,8 +304,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/provider.py",
-   "sha256": "31245e59bc0160082ce2e0a220a659c96a6aa9fb72ccc628ec9bdef03abd7781",
-   "bytes": 15745
+   "sha256": "813a59f1d9b962009e007720d837ecf44d2ceafd0e68e34b1caedf8b300bb7d8",
+   "bytes": 21239
   },
   {
    "path": "src/aadistill/infrastructure/remote.py",
@@ -314,8 +314,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session.py",
-   "sha256": "17ed25962fdc10c36bebd9263f599e693a4d851769d6a6937cbe8a0c07f5daf7",
-   "bytes": 46634
+   "sha256": "dbaf82250e7909313636836d09925f2bb565cdbcf5b480d1a8df5767afba5e3c",
+   "bytes": 48347
   },
   {
    "path": "src/aadistill/infrastructure/session_prechecks.py",
@@ -324,8 +324,8 @@
   },
   {
    "path": "src/aadistill/infrastructure/session_runner.py",
-   "sha256": "e9abdd48cb133366834645385819dad49313882379fe338cad89c0fdb651ea58",
-   "bytes": 72815
+   "sha256": "ec326a4f3566980a39e2b7855302939ee5ed0a5c6b08b425697d30b380bfa042",
+   "bytes": 80990
   },
   {
    "path": "src/aadistill/infrastructure/watchdog.py",

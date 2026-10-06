@@ -8,7 +8,7 @@
   "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
   "_why_restated": "so a mis-priced session is REFUSED rather than mirrored. A ceiling that only echoes its source is not an independent check, and this is the last place a mis-priced session can be stopped before a grant exists. Amended 2026-09-04 for the approved repricing to the secure L40S rate of $1.09/h; every minute assumption is unchanged. The superseded triple at $0.99/h was 13.7578 / 12.2070 / 13.4277.",
   "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
-  "cumulative_cap_usd": 465.0,
+  "cumulative_cap_usd": 490.0,
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841
@@ -64,7 +64,7 @@
    "consuming the frozen confirmation battery for an endpoint",
    "formal execution -- that comes from the $55.0000 formal allowance, and the two do not transfer"
   ],
-  "formal_allowance_usd": 131.6523,
+  "formal_allowance_usd": 156.6523,
   "formal_attempts_include_the_first": true,
   "formal_attempts_max": null,
   "funds_formal_sessions_of": {
@@ -91,7 +91,7 @@
    "changing arms, seeds, recipe, battery, statistics or the behavioural vetoes"
   ],
   "package_id": "phase_c1.execution_package.2026-09-11",
-  "package_total_usd": 151.6523,
+  "package_total_usd": 176.6523,
   "per_attempt_hard_ceiling_usd": 30.0,
   "reconciliation_margin_usd": 0.6577,
   "stop_and_report": [
@@ -110,7 +110,8 @@
    "secure L40S; no other GPU and no price chasing, but securePrice is re-queried LIVE immediately before each authorization and the session's ceiling is derived from it. $1.09/h is a historical observation, not a frozen bound -- a different live price is re-priced, not refused",
    "every cost counts: a failure, a new run_id, a new pod or a new authorization resets nothing",
    "the science: arms, seeds, recipe, battery, statistic and behavioural vetoes are frozen"
-  ]
+  ],
+  "_amendment_2026_10_07": "MAINTAINER DECISION 2026-10-07, after the formal D1 search was stopped mid-beam by an exhausted RUNPOD ACCOUNT BALANCE -- not by any limit in this package. PROSPECTIVE AND CURRENT-ONLY.\n\nformal allowance       131.6523 -> 156.6523  (+25.0000)\npackage total          151.6523 -> 176.6523  (+25.0000)\nproject cumulative cap 465.0000 -> 490.0000  (+25.0000)\nGPU engineering         20.0000 -> 20.0000   UNCHANGED\nper-session envelope    30.0000 -> 30.0000   UNCHANGED\n\n`phase_d1` remains in funds_formal_sessions_of.experiment_ids.\n\nWHY. Run d1_search_20261006_101725 spent $8.1716 of its $21.4897 authorization and produced NO endpoint: RunPod stopped the pod at 449.8 of 1125.55 authorized minutes with 39 of 92 expansions complete, the host was removed outright, and the beam's workdir went with it. That spend is real and is booked; the $25 restores room for a replacement search plus the amended downstream chain.\n\nWHAT IT FUNDS: the Top-4 chain at its REGENERATED CANONICAL price,\n  search        $21.4897   1125.55 min\n  screening     $23.3822   1267.71 min   10 probes\n  confirmation  $14.7966    802.23 min    6 probes\n  chain total   $59.6685   expected $42.7965\nthree separately authorized sessions, owned by d1_design.json :: budget.chain. EVERY SESSION FITS the unchanged $30 per-session envelope; the largest is screening at $23.3822. The envelope binds per session and never the chain total.\n\nThe $69.3365 quoted when this amendment was requested is the `priced_grid` row for (top_k=4, seeds=2), which prices the search on the conservative UNBATCHED basis; `budget.chain` prices it on the MEASURED production Top-K basis, and the $9.6680 difference is exactly that one cell. The grid is planning and sensitivity analysis; the chain is the price. The canonical figure is used rather than forcing the older number to remain true. The Top-4 widening is a maintainer decision of the same date and changes the downstream finalist/recovery policy only; the search science is untouched.\n\nWHAT IT DOES NOT AUTHORIZE: any change to the frozen search protocol, the per-session envelope, the GPU engineering allowance, persistent-storage spending, or network-volume infrastructure. A provider account balance and this package's allowances are different things and both must be sufficient; the balance half is now gated before pod creation by SessionRunner.check_account_funds."
  },
  "experiment_id": "phase_c1",
  "grant_contract": {

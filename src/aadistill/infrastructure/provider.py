@@ -146,10 +146,65 @@ class TerminationAttempt:
         }
 
 
+@dataclass(frozen=True)
+class AccountBalance:
+    """What the provider says the ACCOUNT can still pay for.
+
+    A separate thing from an AlphaAvatar-distill authorization. The repository's
+    allowances say what an experiment is PERMITTED to spend; this says whether
+    the provider will keep a pod running at all. Both must be sufficient, and a
+    formal session has already been stopped part-way through by a provider whose
+    account had run out of money, short of its authorized bound, with every
+    internal gate passed.
+
+    `known` is False for an unreadable control plane. As everywhere else here an
+    unknown answer is not a negative one -- but a balance that cannot be read
+    also cannot be shown to cover a session, so `covers` refuses either way. It
+    refuses at $0, which is the difference that matters.
+    """
+
+    known: bool
+    client_balance_usd: float | None = None
+    current_spend_per_hr: float | None = None
+    min_balance_usd: float | None = None
+    under_balance: bool | None = None
+    error: str | None = None
+
+    def as_dict(self) -> dict:
+        return {"known": self.known,
+                "client_balance_usd": self.client_balance_usd,
+                "current_spend_per_hr": self.current_spend_per_hr,
+                "min_balance_usd": self.min_balance_usd,
+                "under_balance": self.under_balance,
+                "error": self.error}
+
+    def covers(self, required_usd: float) -> tuple[bool, str]:
+        """Can the account fund `required_usd` of further work?"""
+        if not self.known:
+            return False, (
+                f"the provider account balance could not be read ({self.error}); "
+                f"a launch cannot be shown to be fundable, and the one time this "
+                f"went unchecked a formal search was stopped mid-beam")
+        bal = float(self.client_balance_usd or 0.0)
+        if self.under_balance:
+            return False, (
+                f"the provider reports the account UNDER its minimum balance "
+                f"(${bal:.4f}); a pod created now may be stopped without notice")
+        if bal < required_usd:
+            return False, (
+                f"the provider account holds ${bal:.4f} and this session must be "
+                f"fundable to ${required_usd:.4f}; a pod created now would be "
+                f"stopped part-way, which spends money and produces no endpoint")
+        return True, (f"the provider account holds ${bal:.4f} against the "
+                      f"${required_usd:.4f} this session must be able to fund")
+
+
 class PodProvider(Protocol):
     """The whole surface the watchdog is allowed to depend on."""
 
     def get(self, pod_id: str) -> PodState: ...
+
+    def account_balance(self) -> AccountBalance: ...
 
     def observe(self, query: str) -> Observation: ...
 
@@ -204,6 +259,44 @@ class RunPodProvider:
         return Observation(ok=True, data=body.get("data") or {})
 
     # -- state -------------------------------------------------------------
+    def account_balance(self) -> AccountBalance:
+        """The ACCOUNT's spendable balance. Never raises, same as `get`.
+
+        `myself` is the documented place for it. `underBalance` is RunPod's own
+        judgement and is preferred over comparing the two numbers here, because
+        the provider decides when it stops a pod, not this code.
+        """
+        obs = self.observe(
+            "query { myself { clientBalance currentSpendPerHr minBalance } }")
+        if not obs.ok:
+            return AccountBalance(known=False, error=obs.error)
+        me = ((obs.data or {}).get("myself")) or {}
+        if not me:
+            return AccountBalance(
+                known=False,
+                error="the control plane answered without a `myself` block")
+
+        def num(key: str) -> float | None:
+            v = me.get(key)
+            try:
+                return None if v is None else float(v)
+            except (TypeError, ValueError):
+                return None
+
+        bal, floor = num("clientBalance"), num("minBalance")
+        under = me.get("underBalance")
+        if under is None and bal is not None and floor is not None:
+            #: DERIVED only when the provider did not say. `minBalance` is 0 on
+            #: this account, so the derivation must not read "0 means no floor"
+            #: as "any balance is fine": it compares, and an empty account is
+            #: under a floor of zero only when it is below it.
+            under = bal < floor
+        return AccountBalance(
+            known=True, client_balance_usd=bal,
+            current_spend_per_hr=num("currentSpendPerHr"),
+            min_balance_usd=floor,
+            under_balance=None if under is None else bool(under))
+
     def get(self, pod_id: str) -> PodState:
         """Never raises. A watchdog that dies on a transient 502 is not a backstop."""
         query = (
@@ -293,11 +386,19 @@ class SimulatedProvider:
     def __init__(self, pod_id: str, *, exists: bool = True,
                  desired_status: str = "RUNNING", cost_per_hr: float = 0.99,
                  terminate_failures: int = 0, ignored_terminations: int = 0,
-                 poll_errors: int = 0) -> None:
+                 poll_errors: int = 0,
+                 client_balance_usd: float | None = 1000.0,
+                 under_balance: bool = False) -> None:
         self.pod_id = pod_id
         self.exists = exists
         self.desired_status = desired_status
         self.cost_per_hr = cost_per_hr
+        #: THE KNOB THAT REHEARSES AN UNFUNDED ACCOUNT: one that cannot fund the
+        #: session. `None` rehearses an unreadable balance, which the gate must
+        #: also refuse. Default generous, so every existing rehearsal keeps
+        #: meaning what it meant.
+        self.client_balance_usd = client_balance_usd
+        self.under_balance = under_balance
         self.terminate_failures = terminate_failures
         # Terminations the provider accepts and then does not act on.
         self.ignored_terminations = ignored_terminations
@@ -316,6 +417,20 @@ class SimulatedProvider:
         return PodState(pod_id=pod_id, exists=True,
                         desired_status=self.desired_status, runtime_ready=True,
                         cost_per_hr=self.cost_per_hr)
+
+    def account_balance(self) -> AccountBalance:
+        self.calls.append("account_balance")
+        if self.poll_errors > 0:
+            self.poll_errors -= 1
+            return AccountBalance(
+                known=False, error="SimulatedError: control plane unreachable")
+        if self.client_balance_usd is None:
+            return AccountBalance(
+                known=False, error="SimulatedError: balance not reported")
+        return AccountBalance(known=True,
+                              client_balance_usd=self.client_balance_usd,
+                              current_spend_per_hr=0.0, min_balance_usd=0.0,
+                              under_balance=self.under_balance)
 
     def observe(self, query: str) -> Observation:
         """Shares `poll_errors` with `get`, so one knob rehearses a control

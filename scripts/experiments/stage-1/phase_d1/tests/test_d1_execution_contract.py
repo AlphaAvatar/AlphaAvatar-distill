@@ -188,11 +188,19 @@ class TestTheFrozenScopeIsWhatRuns:
     def test_the_recovery_recipe_is_the_frozen_one(self, design):
         assert design["recovery_recipe"] == "E1_KD_HEAVY_0860K"
 
-    def test_the_behavioural_design_is_top_2_with_2_and_3_seeds(self, design):
+    def test_the_behavioural_design_is_top_4_with_2_and_3_seeds(self, design):
+        """WIDENED 2 -> 4 by a maintainer decision of 2026-10-07, downstream
+        only. `screening_probes` is `(top_k + 1) * seeds` -- the candidates plus
+        the incumbent anchor -- so 10, and the confirmation rung is unchanged at
+        6, for 16 probes."""
         b = design["behavioural_design"]
         assert (b["top_k"], b["screening_seeds"], b["confirmation_seeds"]) == \
-            (2, 2, 3)
-        assert b["screening_probes"] + b["confirmation_probes"] == 12
+            (4, 2, 3)
+        assert b["screening_probes"] == (b["top_k"] + 1) * b["screening_seeds"]
+        assert b["screening_probes"] + b["confirmation_probes"] == 16
+        #: The widening's COST is recorded, not only its benefit.
+        assert "_why_top_k_is_4" in b
+        assert "0.5839" in b["_why_top_k_is_4"]
 
 
 class TestTheContractCheckerItself:

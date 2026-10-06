@@ -91,57 +91,142 @@
   },
   "timeline": [
     {
-      "utc": "2026-10-06T10:22:30+00:00",
+      "utc": "2026-10-06T10:23:50+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 657 min $11.93 \u00b7 soft $19.90 \u00b7 hard $20.45 (authorized $21.49)"
     },
     {
-      "utc": "2026-10-06T10:22:31+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $1.09/h, stock Low"
     },
     {
-      "utc": "2026-10-06T10:22:31+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "run d1_search_20261006_101725 on the supervised_target arm, design a0babe43ba0a, config 59b63de3455a, no open blockers"
     },
     {
-      "utc": "2026-10-06T10:22:31+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "session contract verified at $0: protocol ac23798a4572, config 59b63de3455a, suite a1197205e43a"
     },
     {
-      "utc": "2026-10-06T10:22:31+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1"
     },
     {
-      "utc": "2026-10-06T10:22:31+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers"
     },
     {
-      "utc": "2026-10-06T10:22:32+00:00",
+      "utc": "2026-10-06T10:23:51+00:00",
       "elapsed_min": 0.0,
       "msg": "session commit 6c9ea7580227 verified: harness digests to 403a621c4062\u2026, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-10-06T10:22:37+00:00",
+      "utc": "2026-10-06T10:23:56+00:00",
       "elapsed_min": 0.0,
       "msg": "aad_autoinit_6c9ea758.bundle (25538842 bytes, 9a82a133a872) round-trips to 6c9ea7580227 carrying this authorization and harness 403a621c4062"
     },
     {
-      "utc": "2026-10-06T10:22:37+00:00",
+      "utc": "2026-10-06T10:23:56+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 0 relay inputs (), 3 local assets"
     },
     {
-      "utc": "2026-10-06T10:22:37+00:00",
+      "utc": "2026-10-06T10:23:57+00:00",
       "elapsed_min": 0.0,
-      "msg": "DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills."
+      "msg": "watchdog detached \u2014 hard 1126 min = $20.45"
+    },
+    {
+      "utc": "2026-10-06T10:23:57+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created zhk120whedjsg9 at $1.09/h"
+    },
+    {
+      "utc": "2026-10-06T10:24:50+00:00",
+      "elapsed_min": 0.88,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-06T10:25:53+00:00",
+      "elapsed_min": 1.93,
+      "msg": "TCP 22 at 64.247.206.209:18519 after 1.9 min"
+    },
+    {
+      "utc": "2026-10-06T10:25:57+00:00",
+      "elapsed_min": 1.99,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-06T10:26:42+00:00",
+      "elapsed_min": 2.75,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.167.08"
+    },
+    {
+      "utc": "2026-10-06T10:26:42+00:00",
+      "elapsed_min": 2.75,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-06T10:32:23+00:00",
+      "elapsed_min": 8.43,
+      "msg": "draw 1: setup complete \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-06T10:32:31+00:00",
+      "elapsed_min": 8.56,
+      "msg": "driver detached, pid 1457, confirmed by descriptor_probe \u2014 $0.16"
+    },
+    {
+      "utc": "2026-10-06T10:34:45+00:00",
+      "elapsed_min": 10.8,
+      "msg": "  2026-10-06T10:32:27Z MARKER:DRIVER_START \u2014 $0.20"
+    },
+    {
+      "utc": "2026-10-06T17:53:34+00:00",
+      "elapsed_min": 449.61,
+      "msg": "  relay errors: ['/workspace/autoinit_d1_run.log', '/workspace/autoinit_d1.status']"
+    },
+    {
+      "utc": "2026-10-06T17:53:35+00:00",
+      "elapsed_min": 449.62,
+      "msg": "the pod is gone \u2014 the watchdog acted"
+    },
+    {
+      "utc": "2026-10-06T17:53:35+00:00",
+      "elapsed_min": 449.62,
+      "msg": "polling ended: POD_GONE \u2014 $8.17"
+    },
+    {
+      "utc": "2026-10-06T17:53:35+00:00",
+      "elapsed_min": 449.63,
+      "msg": "LAUNCHER ERROR: ArtifactError: an emergency teardown over a non-quiescent event stream must name the streams it is truncating; 'the final event stream is incomplete' has to be in the record, not inferred from it later"
+    },
+    {
+      "utc": "2026-10-06T17:53:35+00:00",
+      "elapsed_min": 449.63,
+      "msg": "deleting pod (launcher error)"
+    },
+    {
+      "utc": "2026-10-06T17:53:46+00:00",
+      "elapsed_min": 449.81,
+      "msg": "pod deleted \u2014 449.8 min, $8.17; provider confirms gone: True"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
   "authorization": {
     "schema": "aadistill.phase_d1.authorization/v1",
     "authorization_id": "autoinit.v1.phase_d1",
@@ -620,9 +705,68 @@
     ],
     "local_missing": []
   },
-  "dry_run": true,
-  "provider_resource_created": false,
-  "terminal": "DRY_RUN_GATES_PASSED",
-  "_dry_run_is_not_a_pass": "every pre-provider gate passed and nothing was created. That is evidence the chain is launchable, not evidence the session succeeded: no pod existed, no stage ran and nothing was measured.",
-  "passed": false
+  "pod_id": "zhk120whedjsg9",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-07T05:09:29Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/d1_search_20261006_101725/watchdog_zhk120whedjsg9.jsonl"
+  ],
+  "watchdog_owns_pod": "zhk120whedjsg9",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.167.08"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.167.08"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_6c9ea758.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/authorization.json",
+    "SESSION_COMMIT": "6c9ea75802277dd95fee9a8480bdf18d18d2d1e2",
+    "SESSION_KIND": "d1",
+    "SESSION_PLAN_HASH": "a0babe43ba0a5dfbbf7276bf0c2e082375342e88e5cda9fc8e4b3acea7e4a12a",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/experiments/stage-1/phase_d1/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d1",
+    "pid": 1457,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_d1_driver.py --out '/workspace/aad/artifacts/audit/autoinit_d1' --run-id 'd1_search_20261006_101725' --authorization '/workspace/aad/logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/authorization.json' --arm 'supervised_target' --status '/workspace/autoinit_d1.status' --device cuda",
+    "log_path": "/workspace/autoinit_d1_run.log",
+    "status_path": "/workspace/autoinit_d1.status",
+    "pid_path": "/workspace/jobs/autoinit_d1.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d1.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d1.exit",
+    "started_utc": "2026-10-06T10:32:27Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "POD_GONE",
+  "launcher_error": "ArtifactError: an emergency teardown over a non-quiescent event stream must name the streams it is truncating; 'the final event stream is incomplete' has to be in the record, not inferred from it later",
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 449.81,
+    "actual_usd": 8.1716,
+    "authorized_usd": 21.4897,
+    "within_authorization": true
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-06T17:53:46+00:00"
 }

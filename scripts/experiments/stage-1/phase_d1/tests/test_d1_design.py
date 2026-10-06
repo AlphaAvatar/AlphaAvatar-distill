@@ -152,9 +152,14 @@ class TestTheClaimBoundaryOfTheNoiseModel:
         )
 
         design = behavioural_design()
+        #: Top-K widened 2 -> 4 on 2026-10-07 (downstream policy only); the two
+        #: seed counts are unchanged. The point of this test is that the three
+        #: numbers come from the DECLARED constants and that perturbing the
+        #: grid's probabilities cannot move them -- not that any particular
+        #: width is frozen forever.
         assert (design["top_k"], design["screening_seeds"],
                 design["confirmation_seeds"]) == \
-            (D1_TOP_K, D1_SCREENING_SEEDS, D1_CONFIRMATION_SEEDS) == (2, 2, 3)
+            (D1_TOP_K, D1_SCREENING_SEEDS, D1_CONFIRMATION_SEEDS) == (4, 2, 3)
 
     def test_the_design_records_how_the_numbers_were_chosen(self):
         from autoinit.write_d1_design import behavioural_design
@@ -904,9 +909,13 @@ class TestThePhaseFundingAmendment:
 
     def test_the_five_figures_are_what_was_decided(self):
         ep, ap = self._terms()
-        assert ep["formal_allowance_usd"] == 131.6523
-        assert ep["package_total_usd"] == 151.6523
-        assert ap["cumulative_cap_usd"] == 465.0
+        #: +$25.0000, maintainer decision 2026-10-07, after the formal search
+        #: was stopped mid-beam by an exhausted RunPod account balance and its
+        #: $8.1716 bought no endpoint. The per-session and engineering limits
+        #: are UNCHANGED, which is half of what the amendment decided.
+        assert ep["formal_allowance_usd"] == 156.6523
+        assert ep["package_total_usd"] == 176.6523
+        assert ap["cumulative_cap_usd"] == 490.0
         #: UNCHANGED by this amendment, and that is half of what it decided.
         assert ep["gpu_engineering_allowance_usd"] == 20.0
         assert ep["per_attempt_hard_ceiling_usd"] == 30.0

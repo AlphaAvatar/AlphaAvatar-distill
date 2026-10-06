@@ -1383,6 +1383,45 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
     ("b342861f0771084c5191210cede553cced139c7c",
      "the session record is written where it is filed",
      {
+        "src/aadistill/infrastructure/session.py":
+            "`BudgetSpec.account_balance_required_usd` -- what the PROVIDER "
+            "ACCOUNT must hold before a pod is created, as a number or as a "
+            "callable over the priced `BudgetPlan`. THIS IS A DECLARED SEMANTIC "
+            "CHANGE to the budget surface, and it defaults to `None`, so a "
+            "session that declares nothing is not gated and every launcher "
+            "written before it keeps its behaviour exactly. "
+            "WHY IT IS A FIELD and not a constant: the AMOUNT belongs to a "
+            "campaign. D1 derives its own from the per-attempt envelope read "
+            "out of the authorization config, the priced container disk RunPod "
+            "bills separately, and a named operational reserve. A dollar figure "
+            "in reusable core would be the same defect as a hardcoded "
+            "experiment id (P3), and the 2026-10-06 loss was not that the "
+            "number was wrong -- it was that nobody asked.",
+        "src/aadistill/infrastructure/provider.py":
+            "THE PROVIDER ACCOUNT BALANCE becomes a thing this project can ask "
+            "about. THIS IS A DECLARED SEMANTIC CHANGE: a new `AccountBalance` "
+            "type, `PodProvider.account_balance()` on the protocol, a RunPod "
+            "implementation over `myself { clientBalance currentSpendPerHr "
+            "minBalance }`, and two `SimulatedProvider` knobs that rehearse an "
+            "account which cannot fund a session. "
+            "WHAT WAS WRONG: nothing in the project asked. Every gate asked "
+            "whether an experiment was PERMITTED to spend -- identity, session "
+            "contract, staged inputs, readiness, commit lineage, bundle, and "
+            "four authorization limits -- and none asked whether the provider "
+            "would still be paid. On 2026-10-06 D1's formal search passed all "
+            "six $0 gates, was authorized to $21.4897 over 1125.55 minutes, and "
+            "RunPod stopped it at 449.8 minutes with 39 of 92 expansions "
+            "complete because the ACCOUNT had run out of money. $8.1716 bought "
+            "no endpoint and the beam's whole workdir went with the host. "
+            "WHAT CHANGED: `AccountBalance.covers(required_usd)` answers one "
+            "question and refuses in three distinct ways -- short balance, the "
+            "provider's own `underBalance` judgement, and an unreadable "
+            "control plane. The last is deliberate: unknown is not a negative "
+            "answer anywhere else in this module, but a balance that cannot be "
+            "read also cannot be shown to cover the session, and the refusal is "
+            "free. No dollar figure lives here; the amount is an argument, "
+            "because $30 is this campaign's per-session envelope and not a "
+            "property of the session machinery.",
         "src/aadistill/runtime/staging_contract.py":
             "`test_paths` enters the staging contract, and the pod's pytest "
             "command gets ONE owner. THIS IS A DECLARED SEMANTIC CHANGE to the "

@@ -1026,3 +1026,103 @@ class TestTheLaunchCommitIsCheckedByLineageNotEquality:
         #: Backwards: the base does not descend from the later commit.
         assert lineage_from_authorized_base(repo, good, base, auth_rel)["ok"] \
             is False
+
+
+class TestTheProviderAccountRequirement:
+    """D1 declares what the RUNPOD ACCOUNT must hold, and derives the amount.
+
+    The 2026-10-06 search passed all six $0 gates and was stopped by RunPod at
+    449.8 of 1125.55 authorized minutes, mid-beam, for an exhausted account
+    balance: $8.1716 and 39 of 92 expansions, no endpoint. The gate is generic
+    (`BudgetSpec.account_balance_required_usd`); the AMOUNT is this campaign's
+    and belongs here.
+    """
+
+    def test_the_session_declares_a_requirement(self):
+        L = _launcher()
+        spec = L.budget_spec(L.REPO_ROOT)
+        assert spec.account_balance_required_usd is not None, (
+            "a formal paid session that does not declare what the provider "
+            "account must hold is the 2026-10-06 configuration exactly")
+
+    def test_it_is_at_least_the_per_attempt_envelope(self):
+        """An account holding less than one full envelope cannot fund an attempt
+        this package permits, whatever this session's own ceiling is."""
+        L = _launcher()
+        from experiments.phase_d1 import d1_authorization as A
+
+        envelope = float(
+            A.live_money(L.REPO_ROOT)["per_session_envelope_usd"])
+        assert float(L.budget_spec(L.REPO_ROOT).account_balance_required_usd) \
+            >= envelope
+
+    def test_it_covers_the_ceiling_and_a_reserve(self):
+        L = _launcher()
+        from experiments.phase_d1 import d1_authorization as A
+
+        priced = A.session_ceiling(L.REPO_ROOT)
+        floor = (float(priced["hard_ceiling_usd"])
+                 + L.ACCOUNT_OPERATIONAL_RESERVE_USD)
+        assert float(L.budget_spec(L.REPO_ROOT).account_balance_required_usd) \
+            >= floor, (
+            "the requirement must cover the authorized ceiling and an "
+            "operational reserve")
+
+    def test_the_container_disk_is_not_counted_twice(self):
+        """THE ACCOUNTING BUG. The first derivation was
+
+            hard_ceiling 21.4897 + container_disk 1.0422 + reserve 5.0 = 27.5319
+
+        and `hard_ceiling_usd` ALREADY CONTAINS the disk: gpu_usd 20.4475 plus
+        container_disk_usd 1.0422 is 21.4897 exactly. A session ceiling owns
+        which priced components it contains, and a caller that re-adds one is
+        asserting a cost model it does not own.
+
+        It did not change D1's answer -- the $30 envelope floor dominates
+        either way -- which is exactly why it needed a test rather than a
+        passing run to find it.
+        """
+        L = _launcher()
+        from experiments.phase_d1 import d1_authorization as A
+
+        priced = A.session_ceiling(L.REPO_ROOT)
+        #: `gpu_usd` is a term of the DESIGN's cost cell, which is where the
+        #: decomposition lives; `session_ceiling()` returns the bound and the
+        #: disk but not the GPU half.
+        cost = D1S.design(L.REPO_ROOT)["search_stage"]["cost"]
+        gpu = float(cost["gpu_usd"])
+        disk = float(cost["container_disk_usd"])
+        ceiling = float(priced["hard_ceiling_usd"])
+        assert gpu + disk == pytest.approx(ceiling, abs=5e-4), (
+            "this test's premise is that the ceiling contains the disk; the "
+            "pricing record no longer decomposes that way, so re-derive the "
+            "rule rather than trusting this assertion")
+
+        derived = float(L.budget_spec(L.REPO_ROOT).account_balance_required_usd)
+        envelope = float(A.live_money(L.REPO_ROOT)["per_session_envelope_usd"])
+        correct = max(envelope, ceiling + L.ACCOUNT_OPERATIONAL_RESERVE_USD)
+        double = max(envelope, ceiling + disk + L.ACCOUNT_OPERATIONAL_RESERVE_USD)
+        assert derived == pytest.approx(correct, abs=5e-4)
+        #: Non-vacuity: the probe only bites while the two differ. Today the
+        #: envelope floor hides the difference, so assert on the SUM the rule
+        #: computes rather than only on its clamped result.
+        assert ceiling + L.ACCOUNT_OPERATIONAL_RESERVE_USD < \
+            ceiling + disk + L.ACCOUNT_OPERATIONAL_RESERVE_USD
+        src = (L.REPO_ROOT / "scripts/pod/autoinit_d1_launch.py").read_text()
+        i = src.index("account_balance_required_usd=round(max(")
+        rule = src[i:src.index("), 4),", i)]
+        assert "container_disk_usd" not in rule, (
+            "the derivation re-adds a component the ceiling already contains")
+        assert double >= correct       # the bug was always >=, never <
+
+    def test_the_amount_is_derived_and_not_typed(self):
+        """No dollar figure for the requirement is written into the launcher:
+        the envelope is read from the authorization config and the ceiling from
+        the cost model. Only the small reserve is a declared constant, and it is
+        named as one."""
+        L = _launcher()
+        src = (L.REPO_ROOT / "scripts/pod/autoinit_d1_launch.py").read_text()
+        assert "account_balance_required_usd=round(max(" in src
+        assert 'live_money(repo_root)["per_session_envelope_usd"]' in src
+        for typed in ("= 30.0", "= 30\n", "30.0)"):
+            assert f"account_balance_required_usd{typed}" not in src

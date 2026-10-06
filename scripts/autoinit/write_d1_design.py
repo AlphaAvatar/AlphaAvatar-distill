@@ -516,7 +516,27 @@ def search_stage() -> dict[str, Any]:
 #: So the three numbers are stated as a judgement, with the reasons recorded,
 #: and the arithmetic is reported beside them as planning and sensitivity
 #: analysis rather than as the thing that picked them.
-D1_TOP_K = 2
+#: WIDENED FROM 2 TO 4 by a maintainer decision of 2026-10-07, after the
+#: historical full-search records were re-read. The search science is untouched;
+#: this is the downstream finalist/recovery policy and nothing else.
+#:
+#: WHY. Top-2 was never an inherited retention convention -- Phase-B attempt5
+#: and C2 attempt4 both committed `n_selected = 5` -- it was a later D1
+#: screening-cost choice. And the quantity it gives elimination power to is the
+#: one this design itself marks UNKNOWN: `P(a behaviourally good candidate is in
+#: the Top-K)`. C2's evidence is that the cheap state-eval ranking is a weak
+#: predictor of recovered behavioural quality, so a candidate ranked 3rd or 4th
+#: by the proxy may still be the best after recovery. Shrinking the recovery
+#: field to 2 hands the proxy a decision the proxy has not earned.
+#:
+#: WHAT IT COSTS, both directions, because only one of them is an improvement:
+#: a wider field raises the unmeasured P(the good candidate is in it), and at a
+#: FIXED two screening seeds it lowers the probability of ordering the field
+#: correctly once it is in -- `advance_probability` 0.7808 -> 0.5839. The chain
+#: hard ceiling moves $60.7509 -> $69.3365. The trade was accepted knowing
+#: both; see `_what_the_arithmetic_says_about_it` below, which reports the
+#: second number rather than only the first.
+D1_TOP_K = 4
 D1_SCREENING_SEEDS = 2
 D1_CONFIRMATION_SEEDS = 3
 
@@ -563,11 +583,39 @@ def behavioural_design() -> dict[str, Any]:
                                 round(SEED_SD_INTERVAL[1], 6)],
         "noise_model": noise(),
         "priced_grid": grid,
+        "_why_top_k_is_4": (
+            "MAINTAINER DECISION 2026-10-07, amending the downstream "
+            "finalist/recovery policy only. The beam search, its measurement "
+            "protocol and every frozen scientific term are unchanged.\n\n"
+            "Top-2 was not an inherited full-search retention convention: "
+            "Phase-B attempt5 and C2 attempt4 each committed n_selected=5. It "
+            "was a later D1 screening-cost choice, and it gave elimination "
+            "power to the exact quantity this design marks UNKNOWN -- "
+            "P(a behaviourally good candidate is in the Top-K). C2 measured the "
+            "cheap state-eval ranking to be a weak predictor of recovered "
+            "behavioural quality, so a candidate the proxy ranks 3rd or 4th may "
+            "still be the best after recovery, and a field of 2 lets the proxy "
+            "decide that on its own.\n\n"
+            "BOTH DIRECTIONS, because only one of them is an improvement: a "
+            "wider field raises the unmeasured P(it contains the good "
+            "candidate); at a fixed two screening seeds it LOWERS the "
+            "probability of ordering that field correctly once it does, from "
+            "0.7808 to 0.5839. Screening-estimate inflation rises 0.005149 to "
+            "0.009394. The chain hard ceiling moves $60.7509 to $69.3365 and "
+            "the probe count 12 to 16. The trade was accepted knowing all of "
+            "it; the arithmetic below reports the losses as well as the gain.\n\n"
+            "NOT changed: the search, the beam, K=200, bsz=3, "
+            "length_sorted_v1, the operator space, both calibration profiles, "
+            "the position policy, the state-eval metrics, the screening seed "
+            "count, the confirmation seed count, or the per-session envelope. "
+            "Already measured search states remain valid, because none of this "
+            "touches the search's measurement protocol."),
         "_how_these_three_numbers_were_chosen": (
-            "as a pragmatic balance, not as the optimum of a formula. Top-K=2 "
-            "buys some behavioural breadth over the search's own ranking while "
-            "keeping the screening field small enough that two seeds per arm "
-            "give a stable ordering; two screening seeds make the ordering "
+            "as a pragmatic balance, not as the optimum of a formula. Top-K=4 "
+            "keeps the recovery field wide enough that the search's own cheap "
+            "ranking is not the thing that eliminates a candidate it cannot "
+            "reliably rank -- see `_why_top_k_is_4`; two screening seeds make "
+            "the ordering "
             "stable rather than a single-draw coin flip, which is the specific "
             "weakness of C2's one-seed rung; three confirmation seeds are the "
             "same count A3 used, on a FRESH disjoint battery, which keeps the "

@@ -4,6 +4,7 @@
  "stage_id": "1",
  "experiment_id": "phase_d1",
  "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE. Stage A aborted 1.694 s in; no beam expanded, nothing was measured, no selection was committed.",
+ "classification": "PRE-SCIENCE ENGINEERING ABORT: stage A failed on a driver attribute name 1.694 s in; no beam expanded, nothing measured, no selection committed",
  "recorded_utc": "2026-10-06T09:40:00Z",
  "session_commit": "dff810e8a896f28ec826633377a1781fbb7aca36",
  "authorized_base_commit": "35be7dadfa6887166c32cf44961444787f54519c",
