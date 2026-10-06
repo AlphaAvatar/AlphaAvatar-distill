@@ -29,21 +29,21 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 84.3833,
+  "_package_spent_usd": 84.6346,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 465.0,
-  "cumulative_spend_usd": 403.7359,
+  "cumulative_spend_usd": 403.9872,
   "engineering_remaining_usd": 5.0259,
-  "formal_remaining_usd": 62.2431,
+  "formal_remaining_usd": 61.9918,
   "full_ceiling_sessions_fundable": 2,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 67.269,
+  "package_remaining_usd": 67.0177,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "project_cap_usd": 465.0,
   "remaining_is_not_permission": true,
-  "remaining_usd": 61.2641,
+  "remaining_usd": 61.0128,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -118,10 +118,10 @@
  "latest_verification": {
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
-   "describes_head": false,
    "kind": "launch_bound",
+   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "verdict": "PASS"
+   "describes_head": false
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,

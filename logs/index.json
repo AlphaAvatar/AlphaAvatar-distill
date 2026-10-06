@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 71,
+  "runs_unrecorded": 70,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -368,8 +368,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 4,
-    "total": 4
+    "unrecorded": 3,
+    "total": 3
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2841,14 +2841,6 @@
    "n_files": 9,
    "digest": "4f42e93751679caedf7b35f948f5795c45c77744dd9aed59f7d89bf0b654ca37",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
-  },
-  {
-   "experiment_id": "phase_d1",
-   "run_id": "d1_search_20261006_093747",
-   "root": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_093747",
-   "n_files": 1,
-   "digest": "b817d067d2b0fbaed08b1fa91f221ed78ec8aaf2a8c6d982ccd8113d3dd5922a",
-   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   }
  ],
  "authorizes": "nothing"

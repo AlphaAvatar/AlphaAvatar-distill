@@ -11,7 +11,9 @@ Everything this experiment produced, in one place.
 
 ## Runs
 
-* none recorded
+* [`d1_search_20261005_173304`](runs/d1_search_20261005_173304/)
+* [`d1_search_20261005_193733`](runs/d1_search_20261005_193733/)
+* [`d1_search_20261006_055409`](runs/d1_search_20261006_055409/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.

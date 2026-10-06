@@ -1,21 +1,21 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 143,
+ "modules_scanned": 145,
  "test_ignores": [],
  "n_predicates": 45,
  "by_signal": {
-  "filesystem_premise_onpod": 12,
+  "filesystem_premise_onpod": 11,
   "filesystem_premise_unresolved": 1,
   "gpu": 1,
   "optional_dependency": 10,
   "repository_content": 2,
-  "unrecognised": 13,
+  "unrecognised": 14,
   "unstaged_artifact": 6
  },
  "n_differs_on_pod": 17,
- "n_unrecognised": 14,
- "n_registered": 50,
+ "n_unrecognised": 15,
+ "n_registered": 51,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
@@ -65,7 +65,8 @@
    "tests/integration/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
    "tests/integration/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file",
    "tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
-   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it"
+   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
+   "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies"
   ],
   "pinned_snapshot_source": [
    "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::require_role",
@@ -198,6 +199,7 @@
   "tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
   "tests/integration/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
+  "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies",
   "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so",
   "tests/training/test_train.py::teacher_tokenizer"
  ],
@@ -524,7 +526,7 @@
   },
   {
    "file": "tests/initialization/test_operators_only_shrink.py",
-   "line": 25,
+   "line": 28,
    "kind": "importorskip",
    "function": "<module>",
    "condition": "pytest.importorskip(\"torch\")",
@@ -537,22 +539,6 @@
    "registered_as": null,
    "parity": "guaranteed_dependency",
    "parity_why": "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] dependencies, not an extra: the dev box resolves it through the `pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` image that ships it, into whose interpreter setup installs the project. A machine where this import fails cannot run the project at all, so the skip fires on neither"
-  },
-  {
-   "file": "tests/initialization/test_operators_only_shrink.py",
-   "line": 147,
-   "kind": "pytest.skip",
-   "function": "test_each_round_bypasses_one_more_block_than_the_last",
-   "condition": "not record.is_file()",
-   "expanded": "not record.is_file() | record=REPO / \"logs/stages/stage-1/phase_d1/validations\"\n                  \"/topk-adoption/v1/runs/a4/adoption.slim.json\" | REPO=Path(__file__).resolve().parents[2]",
-   "signal": "filesystem_premise_onpod",
-   "verdict": "same_on_pod",
-   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
-   "nodeid": "tests/initialization/test_operators_only_shrink.py::test_each_round_bypasses_one_more_block_than_the_last",
-   "readiness_group": null,
-   "registered_as": null,
-   "parity": "same_on_pod",
-   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/initialization/test_scoring_content_identity.py",
@@ -700,7 +686,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 430,
+   "line": 468,
    "kind": "pytest.skip",
    "function": "test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
    "condition": "\"model.safetensors\" not in staged",
@@ -716,7 +702,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 460,
+   "line": 498,
    "kind": "pytest.skip",
    "function": "test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
    "condition": "\"ROPE_OK\" not in tuple(spec.setup.setup_markers)",
@@ -732,7 +718,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 795,
+   "line": 833,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_accepts_the_canonical_config",
    "condition": "not src.is_file()",
@@ -748,7 +734,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 818,
+   "line": 856,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_refuses_a_wrong_stored_base",
    "condition": "not src.is_file()",
@@ -761,6 +747,22 @@
    "registered_as": null,
    "parity": "same_on_pod",
    "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/integration/test_session_setup_contract.py",
+   "line": 115,
+   "kind": "pytest.skip",
+   "function": "test_every_session_installs_every_root_the_shared_setup_verifies",
+   "condition": "not runs_the_frozen_asset_gate(spec)",
+   "expanded": "not runs_the_frozen_asset_gate(spec) | spec=dict((n, s) for n, _m, _a, s in all_specs())[name]",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies",
+   "readiness_group": null,
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -974,5 +976,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "c26f1d8ade52a623db6fa0360ab9130133f7d3c2bc4ee3aef2b6403f32371aaf"
+ "digest": "32a36d789cd799c3df5f1186f35a92d1dd3774baadb5adee2c841f6e784080e7"
 }
