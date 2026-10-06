@@ -57,7 +57,39 @@ closed, and the successor gets a new base commit, a new run id, a fresh one-use
 authorization, a new bundle and a new run-owned `launch_bound` sweep. The
 `$0.2513` counts against the unchanged cumulative envelope.
 
-**Two prepared runs before it never launched at all.**
+**Then the launch-bound sweep refused the first successor, and it was right.**
+Booking that `$0.2513` moved the project balance, and
+`plans/d1_design.json` derives its `budget` section **live** — so the design
+record stopped regenerating byte-identically and two tests in the suite D1
+declares as its **pod test gate** went red. Unswept, that would have been
+discovered on an L40S at `TESTS_OK`. Owner:
+[`runs/d1_search_20261006_095623/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_095623/closeout/superseded.json),
+kept with its `FAIL` readiness record because a sweep catching a stale derived
+record is the mechanism working.
+
+The science is **bit-identical** across the regeneration: 23 of 25 top-level
+keys compare equal as sorted JSON, including `hypothesis`,
+`execution_protocol`, `scoring_policy`, `search_stage`, `incumbent` and
+`recovery_recipe`, and `open_blockers` is `[]` on both sides. Only `budget` and
+`design_hash` move.
+
+```text
+provisional_shortfall_usd   -10.1812 -> -9.9299      (exactly the $0.2513)
+design_hash                 3affe2c65c57… -> a0babe43ba0a…
+```
+
+**A frozen scientific plan identity should not be a function of the project's
+wallet,** and this one is: `design_hash` is a sha over every non-underscore key
+*including* the live `budget` block, so it has taken **eleven distinct values in
+the four days the record has existed**. Regenerating it is therefore routine
+practice here, not an exception — and the frozen science is asserted directly
+and separately by `assert_session_contract`. The recommendation to narrow the
+preimage is recorded in the closeout above and is a maintainer's call; the
+preregistered screening and confirmation rungs will each pay this cycle until
+it is taken. `converge_before_sweep.py` did not catch it because
+`write_d1_design.py` is not among the generators it regenerates.
+
+**Two prepared runs before all of this never launched at all.**
 [`runs/d1_search_20261005_173304/closeout/superseded.json`](../stages/stage-1/phase_d1/runs/d1_search_20261005_173304/closeout/superseded.json)
 owns the eleven defects an independent review found by driving the chain through
 the real generic `SessionRunner` instead of reading it — three unconditionally
