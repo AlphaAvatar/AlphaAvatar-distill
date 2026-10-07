@@ -68,11 +68,29 @@ TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 PLAN_NAME = "d1_replay_plan.json"
 PLAN_REL = f"artifacts/stage1/{PLAN_NAME}"
 
-#: WHAT THE OPERATORS READ. Both calibration mixtures, because the eight steps
-#: between them use both profiles. The state-eval suite is NOT staged: this
-#: session evaluates nothing, and a declared asset it does not read would be the
-#: same undeclared-inheritance defect in reverse.
+#: WHAT THE POD REQUIRES -- which is not the same question as what this session
+#: reads, and getting those two confused cost $0.1506.
+#:
+#: The first version staged only the two calibration mixtures, on the reasoning
+#: that the eight operator steps use both profiles and that the replay evaluates
+#: nothing, so staging the state-eval suite "would be undeclared inheritance in
+#: reverse". That inverted the rule. A SESSION DECLARES WHAT THE SETUP REQUIRES,
+#: not what it reads: this session's `test_paths` points the pod's blocking gate
+#: at D1's own suite, and that suite loads the frozen state-eval asset. Setup
+#: reached TESTS_OK with `rc=1` and
+#:
+#:     D1SessionError: the frozen state-eval asset is not staged at
+#:     artifacts/stage1/state_eval_v1
+#:
+#: on a billing pod. It is the same shape as the device canary's $0.0637: a
+#: session that honestly declared it wanted an asset it did not read, and a
+#: shared setup step that required it anyway.
+#:
+#: THE SET IS NOW THE SEARCH SESSION'S, which is the proven one: these exact
+#: three made this exact suite pass its pod gate, 346 tests, on the run that
+#: produced the leaves this session rebuilds. 2.4 MiB total, seconds over scp.
 SCIENCE_ASSETS: tuple[LocalAsset, ...] = (
+    LocalAsset(D1S.STATE_EVAL_ROOT, "state_eval_v1", "artifacts/stage1"),
     LocalAsset("artifacts/stage1/e8_calibration_v1", "e8_calibration_v1",
                "artifacts/stage1"),
     LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
