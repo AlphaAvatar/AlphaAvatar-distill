@@ -403,7 +403,18 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
     from experiments.phase_d1 import d1_session as D1S
     from experiments.phase_d1 import search_space as space
 
-    space.register_c2_operators()
+    #: EVERY REGISTRY A D1 SESSION NEEDS, through the one function that owns
+    #: that list. A replay built its own partial registration -- adapters and
+    #: the C2 operators -- and the pod died five seconds into step 0 with
+    #:
+    #:     KeyError: no calibration profile 'calib.domain_balanced@v1';
+    #:               registered: []
+    #:
+    #: because calibration profiles are a SEPARATE process-global registry. The
+    #: GPU qualification's first subrun failed the same way: three of four
+    #: registries filled. A replay must reproduce the search's registry state,
+    #: and the search fills it here, in this order.
+    D1S._register_frozen_operators()
     target = space._target_spec()
     if target.spec_hash != leaf.target_spec_hash:
         raise ReplaySourceError(

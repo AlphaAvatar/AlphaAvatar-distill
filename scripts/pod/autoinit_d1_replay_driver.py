@@ -121,9 +121,6 @@ def main(argv: list[str] | None = None) -> int:
     mark(status, "DRIVER_START")
     mismatch = False
     try:
-        from aadistill.initialization.adapters import (
-            register_builtin_adapters,
-        )
         from aadistill.initialization.specs.arch import get_adapter
         from aadistill.initialization.planning.fixed_path import (
             FixedPathDigestMismatch, materialize_fixed_path,
@@ -163,7 +160,10 @@ def main(argv: list[str] | None = None) -> int:
             save()
             return 0
 
-        register_builtin_adapters()
+        #: All four process-global registries, via D1's own single owner. This
+        #: registered adapters alone and step 0 raised on an empty calibration
+        #: registry after setup had been paid for.
+        D1S._register_frozen_operators()
         adapter = get_adapter(R.FAMILY)
 
         def load_root(spec):

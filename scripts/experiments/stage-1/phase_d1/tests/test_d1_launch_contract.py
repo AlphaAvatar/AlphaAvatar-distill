@@ -1126,3 +1126,82 @@ class TestTheProviderAccountRequirement:
         assert 'live_money(repo_root)["per_session_envelope_usd"]' in src
         for typed in ("= 30.0", "= 30\n", "30.0)"):
             assert f"account_balance_required_usd{typed}" not in src
+
+
+class TestTheReplayFillsEveryRegistryItNeeds:
+    """A replay must reproduce the SEARCH's process-global registry state.
+
+    The replay's first paid attempt died five seconds into step 0 with
+
+        KeyError: no calibration profile 'calib.domain_balanced@v1';
+                  registered: []
+
+    after setup, the teacher download and a 266-second pod test gate had all
+    been paid for. It had registered adapters and the C2 operators and not the
+    calibration PROFILES, which are a separate registry. The GPU qualification's
+    first subrun failed the same way -- three of four registries filled -- so
+    this is the second time one partial registration has cost a pod.
+
+    `d1_session._register_frozen_operators` is the single owner of that list,
+    in the order the search fills it. These assert the replay goes through it
+    rather than assembling its own subset.
+    """
+
+    def test_the_spec_builder_calls_the_single_registry_owner(self):
+        import ast
+
+        L = _launcher()
+        src = (L.REPO_ROOT /
+               "scripts/experiments/stage-1/phase_d1/replay_specs.py").read_text()
+        calls = {
+            node.func.attr
+            for node in ast.walk(ast.parse(src))
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        }
+        assert "_register_frozen_operators" in calls, (
+            "replay_specs builds its own registry subset; a replay must "
+            "reproduce the search's registry state through its one owner")
+        assert "register_c2_operators" not in calls, (
+            "a partial registration is back alongside the owner, which is how "
+            "the two can disagree again")
+
+    def test_the_driver_calls_it_too(self):
+        import ast
+
+        L = _launcher()
+        src = (L.REPO_ROOT /
+               "scripts/pod/autoinit_d1_replay_driver.py").read_text()
+        calls = {
+            node.func.attr
+            for node in ast.walk(ast.parse(src))
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+        }
+        assert "_register_frozen_operators" in calls
+
+    def test_every_profile_and_operator_the_plan_names_resolves(self):
+        """The check the pod made at $1.09/h, made here for nothing.
+
+        Resolves EVERY profile and implementation the two pinned paths name,
+        after the single owner has run -- so an empty or partial registry is a
+        local failure instead of a paid one.
+        """
+        from aadistill.initialization.calibration.profiles import get_profile
+        from aadistill.initialization.operators.base import get_implementation
+        from aadistill.initialization.specs.arch import get_adapter
+        from experiments.phase_d1 import d1_session as D1S
+        from experiments.phase_d1 import replay_specs as R
+
+        D1S._register_frozen_operators()
+        leaves = R.replay_plan(D1S.REPO)
+        assert leaves, "the plan resolved no leaf to replay"
+        seen_profiles, seen_impls = set(), set()
+        for leaf in leaves:
+            for step in leaf.steps:
+                assert get_profile(step.profile_id).qualified_id == step.profile_id
+                assert get_implementation(step.impl_id).kind == step.kind
+                seen_profiles.add(step.profile_id)
+                seen_impls.add(step.impl_id)
+        assert len(seen_profiles) >= 2 and len(seen_impls) == 4, (
+            f"the probe exercised {sorted(seen_profiles)} and {sorted(seen_impls)}; "
+            "a plan that named fewer would make this test vacuous")
+        assert get_adapter(R.FAMILY).family == R.FAMILY
