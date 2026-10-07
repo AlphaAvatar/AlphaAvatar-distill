@@ -57,6 +57,7 @@ from aadistill.initialization.specs.materialization import (
 from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
+from aadistill.initialization.planning.isolation import isolate_parent_config
 from aadistill.initialization.scoring.content import scoring_content_config
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -837,7 +838,22 @@ class BeamSearch:
             self.deadline.check(f"before {impl.impl_id} on {parent.spec.spec_hash[:12]}")
 
         started = time.time()
-        outcome = impl.execute(ctx)
+        #: SIBLING ISOLATION. The root model is CACHED and shared across every
+        #: level-0 expansion, so a mutation an operator makes to the object it
+        #: is handed outlives its own expansion -- and a mutated config is not
+        #: transient, because `build_config` carries a parent's whole
+        #: `to_dict()` into its child's `config.json` and therefore into its
+        #: `config_sha256` and `artifact_digest`. Without this, two searches
+        #: with identical science could produce different child digests purely
+        #: by enumerating their operators in a different order.
+        #:
+        #: It does NOT stop the mutation: an operator may need the field for
+        #: its own forwards, and a frozen operator whose historical identities
+        #: depend on its behaviour must not be altered to satisfy a later
+        #: rule. It contains it. `isolation` knows no field names.
+        config_touched: dict[str, Any] = {}
+        with isolate_parent_config(parent_model, config_touched):
+            outcome = impl.execute(ctx)
         elapsed = time.time() - started
 
         state.steps = (*parent.steps, replace(
@@ -860,6 +876,11 @@ class BeamSearch:
             operator_timing=dict(outcome.artifacts.get("timing", {})),
             reference_cache=dict(outcome.artifacts.get("reference_cache", {})),
             reference_counters=dict(outcome.artifacts.get("reference_counters", {})),
+            #: Recorded, not just undone. A mutation silently restored is a
+            #: mutation nobody knows about, and the next reader wondering why a
+            #: historical digest depends on execution order deserves to find
+            #: the answer in the telemetry rather than re-derive it.
+            parent_config_restored=dict(config_touched),
             **self.telemetry.drain_phases())
         del outcome
         self.store.append(state)
