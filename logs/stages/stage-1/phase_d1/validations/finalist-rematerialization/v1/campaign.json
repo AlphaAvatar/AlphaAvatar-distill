@@ -1,0 +1,83 @@
+{
+ "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 = 0.8144",
+ "_cheapest_first_saved_the_fourth": "the driver orders paths by the cost of their FIRST operator, so the wrong root state surfaced after a 64-second FFN step rather than after a 41-minute DEPTH step. Evidence was pulled off-pod and the pod removed before q4's DEPTH began, which is about $0.75 the ordering did not spend.",
+ "_contract": "Cumulative cost of rematerializing D1's two unretained quality-order finalists, across every resource and subrun. A rerun does NOT reset it (AGENTS.md P12.1), so the ceiling a new attempt may be issued against is this ceiling MINUS the settled spend MINUS the teardown reserve.",
+ "_cost_derivation": "each subrun is (pod deletion or observed-gone timestamp - create timestamp) at the accepted $1.09/h, read from the launcher's own per-attempt log. The launcher's running figures agree to the cent where it printed them ($0.20 and $0.26 for subruns 2 and 4); subruns 1 and 3 aborted in setup before a final figure was printed, so theirs are derived from the timestamps the same way.",
+ "_each_subrun_is_its_own_commit": "four attempts, four trees: each repair was committed, swept and bound into its own authorization before the next pod. A corrected attempt is an explicit new subrun (P12.1), never an invisible provider retry.",
+ "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance. This session trains nothing, measures nothing and selects nothing -- it reconstructs two checkpoints the completed search already measured -- so it is engineering, not formal science.",
+ "_status_is_derived_by": "filed per paid subrun against this ledger, which owns every draw; booked_usd is recomputed from the components.",
+ "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
+ "_what_the_four_failures_have_in_common": "every one was in the replay HARNESS and none was in the science. No candidate was selected, no measurement was taken, no frozen protocol moved, and the completed search's 92 expansions, 12 leaves, committed ranking and frozen Top-4 are untouched by all of it. Two leaves (quality positions 1 and 3) were already secured and identity-verified off-pod by the search session itself and are unaffected.",
+ "authorization": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+ "authorizes": "nothing by itself; a session still needs the live price, the four limit checks, the account-balance gate and the same-failure gate to pass",
+ "booked_usd": 0.8144,
+ "campaign_id": "d1_finalist_rematerialization",
+ "ceiling_usd": 3.5,
+ "inherited_spend": [],
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "schema": "aadistill.engineering_campaign/v1",
+ "status": "OPEN -- 4 paid subruns, $0.8144 of $3.5000, none of which reconstructed a leaf. Every one was an ordinary engineering failure in the replay harness, root-caused and repaired; the fifth attempt is issued against the remainder.",
+ "subruns": [
+  {
+   "cost_usd": 0.155,
+   "elapsed_minutes": 8.53,
+   "gpu": "NVIDIA L40S",
+   "notes": "`D1SessionError: the frozen state-eval asset is not staged at artifacts/stage1/state_eval_v1`, at TESTS_OK. The session had declared only the two calibration mixtures on the reasoning that it evaluates nothing. That inverted the rule: a session declares what the SETUP requires, not what it reads, and this session's `test_paths` points the pod's blocking gate at D1's own suite, which loads that asset. Repaired by declaring the search session's proven three.",
+   "outcome": "SETUP FAILED -- the frozen state-eval asset was not staged",
+   "pod_id": "psl88q7qgqu44t",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "ca97e4e6f42ca8b1ad08ac1f9445f2f995518b80",
+   "stages_run": [
+    "setup(failed)"
+   ],
+   "subrun_id": "r1"
+  },
+  {
+   "cost_usd": 0.2116,
+   "elapsed_minutes": 11.65,
+   "gpu": "NVIDIA L40S",
+   "notes": "`KeyError: no calibration profile 'calib.domain_balanced@v1'; registered: []`. The driver had registered adapters and the C2 operators; calibration profiles are a SEPARATE registry, and `d1_session._register_frozen_operators` is the single owner of the list in the order the search fills it. The GPU qualification's first subrun failed the same way -- three of four registries filled -- so this was the second time one partial registration cost a pod. Repaired at both sites, with a regression that mutation-fails without it.",
+   "outcome": "DRIVER FAILED 5 s into step 0 -- an unfilled process-global registry",
+   "pod_id": "02oef2ib958x6j",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "1a8c3d40d1624f0d78af4c788031ec2e70cbf1f1",
+   "stages_run": [
+    "setup",
+    "driver(failed)"
+   ],
+   "subrun_id": "r2"
+  },
+  {
+   "cost_usd": 0.1844,
+   "elapsed_minutes": 10.15,
+   "gpu": "NVIDIA L40S",
+   "notes": "`ReplaySourceError: the state journal is not at /home/ecs-user/aad-scratch/.../states.jsonl`. The r2 repair's own regression called `replay_plan()`, which reads the 67 MB journal from an out-of-tree dev-box path, and the pod test gate ran it where that path does not exist. A pod for a test of mine. Repaired by reading the design's `frozen_implementations` mapping and the two declared profiles from the committed tree instead -- which is what a pod can actually answer.",
+   "outcome": "SETUP FAILED -- a regression of mine that could not run on a pod",
+   "pod_id": "29l0qxxx1i6906",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "7efa59c5982f75d02c3855b56171ce6cf218940f",
+   "stages_run": [
+    "setup(failed)"
+   ],
+   "subrun_id": "r3"
+  },
+  {
+   "cost_usd": 0.2634,
+   "elapsed_minutes": 14.5,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001",
+   "gpu": "NVIDIA L40S",
+   "notes": "`ffn.activation_importance_v0` ran for 64 s and produced 524493fde06f... against the pinned 292e36f13829.... NOT a finding about the checkpoint: the reconstruction never reproduced the historical execution state, so there was nothing to compare. The driver's `load_root` was a bare `AutoModelForCausalLM.from_pretrained`, inheriting the teacher's published `use_cache: true`; the search's driver sets `use_cache = False` on the root before the beam runs, and `adapter.build_config` carries the parent's whole `to_dict()` into every child's `config.json` and therefore its `config_sha256`. The pre-launch check behind the comment asserting 'one root state, no reconstruction needed' had compared each level-0 expansion's OPERATOR `config_hash` -- uniform by construction, one value per calibration profile -- and not the MODEL config. Repaired by deriving the root state from the mechanism and resolving it against the recorded identities at $0; see evidence/root_state_derivation.json.",
+   "outcome": "DIGEST MISMATCH at q2 step 0 -- the replay started from the wrong ROOT STATE",
+   "pod_id": "0tjfzjnmpf64pn",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "fd2fb13da2944430cbc34a712dd7ae119f065530",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0"
+   ],
+   "subrun_id": "r4"
+  }
+ ],
+ "teardown_reserve_usd": 0.1
+}

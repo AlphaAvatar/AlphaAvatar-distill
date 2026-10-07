@@ -1,7 +1,7 @@
 # Current state
 
-**Updated:** 2026-10-05. The human view. Every number here has an owner named
-beside it, and this file restates none of them from memory — a second
+**Updated:** 2026-10-07 (UTC). The human view. Every number here has an owner
+named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
 
@@ -10,8 +10,57 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **Nothing is running and nothing is billing.** An account-wide query returns
-**0 pods and 0 network volumes**; the RunPod balance is `$190.0766` at a spend
-rate of `$0/h`.
+**0 pods and 0 network volumes** at a spend rate of `$0/h`.
+
+**The next paid action is the FIFTH attempt at rematerializing D1's two
+unretained finalists.** Four paid subruns have settled `$0.8144` of a `$3.5000`
+engineering campaign, none of them reconstructing a leaf and every one an
+ordinary failure in the replay harness. Owner:
+[`validations/finalist-rematerialization/v1/campaign.json`](../stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json).
+
+```text
+r1  psl88q7qgqu44t  $0.1550  setup: the state-eval asset was not staged
+r2  02oef2ib958x6j  $0.2116  driver: the calibration-profile registry was empty
+r3  29l0qxxx1i6906  $0.1844  setup: a regression of mine read a dev-box path
+r4  0tjfzjnmpf64pn  $0.2634  q2 step 0 DIGEST MISMATCH — the wrong ROOT STATE
+```
+
+**r4 is not a finding about the checkpoint.** The reconstruction never
+reproduced the historical execution state, so there was nothing to compare.
+`adapter.build_config` builds a child config from its parent's whole
+`to_dict()`, so every field of the root's live config reaches every
+descendant's `config_sha256` and therefore its `artifact_digest` — and the
+replay loaded the teacher as published, with `use_cache: true`, while the
+search's own driver sets `use_cache = False` on the root before the beam runs.
+The pre-launch check behind the comment asserting "one root state, no
+reconstruction needed" had compared the *operator* `config_hash`, which is
+uniform by construction, and not the model config.
+
+The root state is now **derived from the mechanism and resolved against the
+search's own records**, at `$0` in 2.6 s, before any weights load. Two
+candidates, one chosen, all eight level-0 identities agreeing and all six later
+ones confirming it:
+
+```text
+candidate                        step-0 configs explained
+teacher_as_published             0 of 8
+session_driver_use_cache_false   8 of 8     <- chosen
+```
+
+Owner:
+[`d1_replay_001/evidence/root_state_derivation.json`](../stages/stage-1/phase_d1_replay/runs/d1_replay_001/evidence/root_state_derivation.json).
+What remains unverified is the **weights** half of each identity, which is what
+the digest-pinned replay on the GPU measures; a mismatch after this derivation
+holds would be material.
+
+**The fifth attempt is priced against the REMAINDER, not the ceiling.** P12.1
+makes the budget cumulative across subruns, so `$2.5856` is available and the
+session prices at `139.4` min / `$2.5332` hard. The phases moved because four
+attempts produced observations the first estimate did not have, and the
+transfer moved because a single scp connection to a pod measures `0.486 MB/s` —
+44 minutes per 1.2 GiB leaf, which the previous path could not have completed
+inside its own cap. Owner:
+[`issue_d1_replay_authorization.py`](../../scripts/autoinit/issue_d1_replay_authorization.py).
 
 **THE D1 FORMAL TARGET-AWARE SEARCH IS COMPLETE.** Run
 `d1_search_20261006_210210` ran its full trajectory, produced **12 complete
@@ -57,18 +106,40 @@ that were not selected. The widening was adopted so the cheap ranking could not
 eliminate a candidate it cannot reliably rank, meaning the ones at ranks 2 and 4
 (`7.65`, `8.31`); those are **still excluded**, because they share lineages with
 the states already kept. Retention WIDTH and retention CRITERION are different
-choices and widening the first did not change the second. Nothing here says
-lineage diversity is the wrong criterion — only that it, not score, is what
-Top-4 actually bought.
+choices and widening the first did not change the second.
 
 The complete 12-leaf ranking is preserved in full at
 `evidence/complete_leaf_ranking.json` with every objective value, operator path,
 calibration profile and digest, precisely because only four are products: a
 retention-width decision must not destroy the ranking that informed it.
 
-**Behavioural screening is NOT started.** The maintainer reserved the
-Top-2-versus-Top-4 retention decision for before screening begins; the finding
-above is the evidence that decision now has.
+**THE MAINTAINER ANSWERED IT ON 2026-10-07, AS A STANDING RULE.** From D1
+onward and for every future full search, lineage diversity is used only during
+search-time beam **pruning**; final post-search Top-K selection is **quality
+order alone** — the ε-Pareto fronts, best to worst, with the deterministic
+within-front tie-break, concatenated, first K. No new scalar score, and the
+completed search is **not** rerun. Owner:
+[`decisions/post_search_finalist_retention.json`](../stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json).
+
+So D1's behavioural finalists are quality positions 1–4:
+
+```text
+q1  e5e3edb0477b25147de952153da8fc21   RETAINED, secured, identity-verified
+q2  afd50c9ff0e3d20542bb5473ea745b55   NOT RETAINED — rematerializing
+q3  56388d47b6a71e1b49e44929e48d4061   RETAINED, secured, identity-verified
+q4  3fcaf42eaa91b3ed02eab6c2f3213bfc   NOT RETAINED — rematerializing
+```
+
+The lineage-diverse 1/3/5/11 selection above remains **historical evidence of
+what the search actually committed** and is not rewritten; Phase-B and C2 keep
+the selection semantics they ran under. `a2b2f04ae642ac69…` and
+`ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
+bytes are retired once q2 and q4 are secured.
+
+**Behavioural screening is NOT started.** It needs q2 and q4 to exist: four
+candidates at two recovery seeds plus the incumbent at two matched seeds is ten
+screening probes, then one advancing candidate, then a fresh three-seed
+confirmation against B.
 
 **Three attempts, and the two failures bought the gates the third needed.**
 

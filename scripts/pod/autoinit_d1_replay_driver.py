@@ -136,8 +136,27 @@ def main(argv: list[str] | None = None) -> int:
             #: Only reachable where the journal is present, which is the dev
             #: box. A pod always receives `--plan`.
             leaves = R.replay_plan(REPO_ROOT)
-            record["plan"] = R.describe(leaves)
+            plan_doc = R.describe(leaves)
+            record["plan"] = plan_doc
             record["plan_source"] = R.DEFAULT_JOURNAL
+        save()
+
+        #: THE ROOT STATE, BEFORE ANY WEIGHTS LOAD. `config.json` and two
+        #: hashes per path: no GPU, no teacher weights, about a second. The
+        #: first version of this driver asserted in a comment that D1 had one
+        #: root state needing no reconstruction, loaded the teacher as
+        #: published, and diverged at step 0 after 64 s of L40S time. The
+        #: assertion was right and the state was wrong, which is why this is
+        #: now a computation against the recorded identities instead.
+        root = D1S.root_teacher_identity(REPO_ROOT)
+        root_state = R.root_state_from_plan(
+            plan_doc, leaves,
+            base_config=R.teacher_config(root["repo_id"], root["revision"]))
+        record["root_state"] = root_state
+        overrides = dict(root_state["config_overrides"])
+        print(f"root state: {root_state['chosen_candidate']} "
+              f"{overrides or '{}'} — reproduces every recorded step-0 config",
+              flush=True)
         save()
 
         from aadistill.initialization.specs.materialization import (
@@ -167,34 +186,19 @@ def main(argv: list[str] | None = None) -> int:
         adapter = get_adapter(R.FAMILY)
 
         def load_root(spec):
-            """The teacher THIS path is pinned to, reloaded per path.
+            """The root state derived above, reloaded per path.
 
-            Reloaded rather than shared because operators MUTATE the module
-            they are given: a second path starting from the first path's root
-            would begin from an already-compressed model and diverge at step
-            one. After the first load the weights are in the local cache, so
-            this is a disk read; the alternative is wrong.
-
-            No config overrides. D1's search produced ONE root state for every
-            level-0 expansion -- all eight operator x profile combinations
-            recorded a single config hash per profile -- so unlike the C2
-            replay there is no historical root mutation to reconstruct. If that
-            reading is wrong, step 0 of the cheapest path says so in under a
-            minute; see the ordering below.
+            `replay_specs.load_root_model` owns this, so the loader and the
+            derivation that decides what to override cannot drift apart.
             """
-            import torch
-            from transformers import AutoModelForCausalLM
+            return R.load_root_model(spec, config_overrides=overrides,
+                                     device=args.device)
 
-            return AutoModelForCausalLM.from_pretrained(
-                spec.root_repo_id, dtype=torch.bfloat16,
-                revision=spec.root_revision).to(args.device).eval()
-
-        #: CHEAPEST FIRST STEP FIRST. If the root state is not what the search
-        #: expanded from, every digest diverges at step 0 -- and the cost of
-        #: learning that depends entirely on which operator sits there. The
-        #: search measured `depth.causal_kl_greedy_v1` at up to 41 min and the
-        #: other three at under 50 s, so a path whose first step is FFN reports
-        #: a wrong root for about a minute of GPU time instead of forty.
+        #: CHEAPEST FIRST STEP FIRST. The root state is now checked before any
+        #: weights load, so this no longer bounds the cost of a wrong root --
+        #: but it still bounds the cost of anything else that diverges at step
+        #: 0. The search measured `depth.causal_kl_greedy_v1` at up to 41 min
+        #: and the other three at under 50 s.
         _first_cost = {"depth.causal_kl_greedy_v1": 2}
         specs.sort(key=lambda ls: _first_cost.get(ls[1].steps[0].impl_id, 1))
         record["leaf_order"] = [leaf.state_id for leaf, _ in specs]

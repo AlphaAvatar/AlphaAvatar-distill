@@ -806,8 +806,75 @@ billing and cannot be reconciled, when continuation would require changing
 frozen science or permissions, or when the validation passes. Do not stop
 merely because another ordinary engineering test failed.
 
+**A WRONG ASSUMPTION IN YOUR OWN IMPLEMENTATION IS AN ORDINARY FAILURE.**
+**MAINTAINER DECISION 2026-10-07.** This is the clause that was missing, and
+the one most often read backwards. An instruction to stop on an identity
+mismatch, a verification failure, a digest divergence or a comparison that
+disagrees exists to prevent **adopting a wrong result**. It does not ask for a
+maintainer review every time the *harness that produced the comparison* is
+itself wrong. Those are different events and they get different handling:
+
+```text
+the mechanism is wrong        → ordinary engineering failure → repair, retry
+the mechanism is right and
+the RESULT still disagrees    → material → preserve, report, do not adopt
+```
+
+So do **not** return merely because:
+
+* an asset was not staged, or was staged under the wrong name;
+* a registry, adapter or process-global was not initialized;
+* a path, journal, config or artifact lookup was wrong;
+* **a reconstruction, replay or reproduction assumption was wrong** — including
+  an assumption about historical execution state;
+* a launcher, driver, collector or pod harness had an ordinary implementation
+  bug;
+* the check you wrote read an adjacent field instead of the one the consumer
+  reads.
+
+Diagnose, repair and retry inside the existing budget. The stop condition is
+narrower than "the comparison failed": it is **the comparison failed after the
+mechanism demonstrably reproduced the conditions it claims to reproduce.**
+Until that is true, a mismatch is evidence about the harness, not about the
+science, and must not be reported as a finding about the artifact.
+
+**Reproducing a historical execution state is reconstruction, not search.**
+When a replay must start from state that an earlier run held in memory rather
+than on disk, derive the finite set of candidate states **from the execution
+mechanism** — the loader, the documented in-place mutations, the deterministic
+expansion order, the committed identities — and let the recorded identity pick
+which one was actually used. Record the derivation. Do **not** sweep
+configuration values until one happens to match: a root fitted to an outcome
+proves nothing about the outcome, and a derivation that cannot name its
+candidate set is a search wearing a replay's name.
+
+**Operator-internal measurement required to reproduce a fixed path is part of
+rematerialization**, not a new experiment. Re-running a causal-KL sweep inside
+a DEPTH operator because that is how the operator decides what to remove is
+replaying the operator, and it does not reopen any selection the search made.
+
 **Each task's dollar amounts live in that task's governance artifact, never in
 reusable core.**
+
+### P12.3. Close a run's observers in its own terminal path
+
+When a run reaches a terminal state — success, failure, teardown, abort — close
+its monitors, tails, pollers and background watchers **in the same code path
+that handles the terminal state**. Not in the next status report, not when
+someone notices them later.
+
+An observer left armed on a finished run is not harmless. It keeps producing
+output that reads as live, it re-invokes the agent on a run that has nothing
+left to say, and it hides whether anything is actually still executing — which
+is precisely the question a session must be able to answer before it creates
+another paid resource. In this programme the maintainer has had to point out
+leftover watchers on a completed run more than once; each time the terminal
+handling had already run and simply did not include this step.
+
+Terminal handling owes, together and in one place: the terminal marker or
+status, the evidence write, the resource teardown, **and the observer
+shutdown**. A report that says a run is finished must be able to say that its
+watch set is empty.
 
 ### P12.2. Integration to `main` is SQUASH AND MERGE
 

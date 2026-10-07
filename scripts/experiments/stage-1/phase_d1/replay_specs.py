@@ -84,6 +84,13 @@ class ReplayStep:
     state_id: str
     expected_artifact_digest: str
     expected_single_shard_sha256: str
+    #: The recorded identity of the checkpoint's `config.json`, and the geometry
+    #: it describes. Carried because together they make the ROOT STATE checkable
+    #: without a GPU: a child's config is built from its parent's `to_dict()`
+    #: plus the spec, so a step-0 config sha is a fingerprint of the root the
+    #: search expanded from. See `derive_root_state`.
+    expected_config_sha256: str = ""
+    arch_spec: tuple[tuple[str, Any], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -124,7 +131,9 @@ class ReplayLeaf:
                 {"index": s.index, "kind": s.kind, "impl_id": s.impl_id,
                  "profile_id": s.profile_id, "seed": s.seed,
                  "state_id": s.state_id,
-                 "expected_artifact_digest": s.expected_artifact_digest}
+                 "expected_artifact_digest": s.expected_artifact_digest,
+                 "expected_config_sha256": s.expected_config_sha256,
+                 "arch_spec": dict(s.arch_spec)}
                 for s in self.steps
             ],
         }
@@ -267,6 +276,12 @@ def build_leaf(states: Mapping[str, Mapping[str, Any]],
                 f"{leaf_id} ancestry position {position} ({step.get('impl_id')}) "
                 "records no artifact digest; an unpinned intermediate would let "
                 "a compensating pair of errors pass as a correct replay")
+        config_sha = (row.get("artifact") or {}).get("config_sha256")
+        if not config_sha:
+            raise ReplaySourceError(
+                f"{leaf_id} ancestry position {position} records no "
+                "artifact.config_sha256, so the root state this path expanded "
+                "from cannot be checked without a GPU")
         steps.append(ReplayStep(
             index=position, kind=str(step.get("kind")),
             impl_id=str(step.get("impl_id")),
@@ -274,7 +289,10 @@ def build_leaf(states: Mapping[str, Mapping[str, Any]],
             seed=int(step.get("seed")),
             state_id=str(row["state_id"]),
             expected_artifact_digest=str(digest),
-            expected_single_shard_sha256=str(shard)))
+            expected_single_shard_sha256=str(shard),
+            expected_config_sha256=str(config_sha),
+            arch_spec=tuple(sorted((str(k), v) for k, v in
+                                   (row.get("arch_spec") or {}).items()))))
     got = [s.impl_id for s in steps]
     if got != declared:
         raise ReplaySourceError(
@@ -351,8 +369,16 @@ def worst_seconds_by_impl(journal_dir: str | Path | None = None
     return worst
 
 
-def describe(leaves: Sequence[ReplayLeaf]) -> dict[str, Any]:
-    """The whole plan as a record, for a $0 preflight and for the session."""
+def describe(leaves: Sequence[ReplayLeaf],
+             root_state: Mapping[str, Any] | None = None) -> dict[str, Any]:
+    """The whole plan as a record, for a $0 preflight and for the session.
+
+    `root_state` is `derive_root_state`'s output. It travels with the plan so the
+    pod does not re-derive it from a 67 MB journal it does not have -- but the
+    pod still RE-CHECKS it, against the `expected_config_sha256` the plan's own
+    steps carry, so the plan is a shipped derivation rather than a shipped
+    assertion.
+    """
     return {
         "schema": "aadistill.phase_d1.replay_plan/v1",
         "_what_this_is": (
@@ -373,8 +399,31 @@ def describe(leaves: Sequence[ReplayLeaf]) -> dict[str, Any]:
             "reconstruction is a deterministic-materialization defect to "
             "diagnose, not a reason to substitute a near-equivalent checkpoint "
             "or to weaken an identity check."),
+        "root_state": dict(root_state) if root_state else None,
         "leaves": [leaf.as_dict() for leaf in leaves],
     }
+
+
+def root_state_from_plan(doc: Mapping[str, Any],
+                         leaves: Sequence[ReplayLeaf], *,
+                         base_config: Any,
+                         family: str = "qwen3") -> dict[str, Any]:
+    """The plan's root state, RE-DERIVED here and required to agree.
+
+    The pod does not take the plan's word for it. `derive_root_state` runs again
+    against the step-0 config identities the plan carries, and the result must
+    name the same candidate the plan shipped. A plan written against a different
+    tree, or hand-edited, fails here for the price of two config hashes instead
+    of a GPU minute per path.
+    """
+    here = derive_root_state(leaves, base_config=base_config, family=family)
+    shipped = doc.get("root_state") or {}
+    if shipped and shipped.get("chosen_candidate") != here["chosen_candidate"]:
+        raise RootStateUndetermined(
+            f"the plan ships root state {shipped.get('chosen_candidate')!r} and "
+            f"the recorded step-0 configs derive {here['chosen_candidate']!r}")
+    here["agreed_with_plan"] = bool(shipped)
+    return here
 
 
 #: The pod's GPU. PINNED, not chosen. This session's success criterion IS digest
@@ -451,6 +500,204 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
     )
 
 
+#: ---------------------------------------------------------------------------
+#: THE HISTORICAL ROOT STATE
+#: ---------------------------------------------------------------------------
+#: A replay starts from a model object, and the search's root object was not the
+#: teacher as published. `ChildBuilder` builds a child config with
+#: `adapter.build_config(parent.config, new_spec)`, which starts from
+#: `parent.config.to_dict()` -- so EVERY field of the root's live config reaches
+#: every descendant's `config.json`, and therefore its `config_sha256`, its
+#: `artifact_digest`, and the four identities adoption requires.
+#:
+#: This replay's first version loaded the teacher with a bare `from_pretrained`
+#: and inherited the published `use_cache: true`. The search's root had
+#: `use_cache: False`. Step 0 of q2 produced `524493fd...` against the pinned
+#: `292e36f1...` after 64 s of L40S time, and the cause was one unset field.
+#:
+#: THE CANDIDATE SET IS DERIVED FROM THE MECHANISM, NOT SWEPT. Two things can
+#: put the root in a state other than as-published, and they are the only two:
+#:
+#:   1. the session driver, which sets `use_cache = False` on the loaded teacher
+#:      before handing it to the beam;
+#:   2. an operator mutating the model it is handed IN PLACE, which the root
+#:      survives because `BeamSearch` caches it (`_root_model`) and shares it
+#:      across every level-0 expansion. `depth.causal_kl_greedy_v1` does exactly
+#:      this, with the same field.
+#:
+#: Non-root parents are immune: `_load_state_model` reloads each one from its
+#: checkpoint, so each expansion gets a fresh object. And `use_cache` is the
+#: only in-place config mutation any shipped operator performs.
+#:
+#: Both mechanisms reach the same field and the same value, so the candidate set
+#: is of size two, and the recorded `config_sha256` of each path's step 0 says
+#: which one ran. `derive_root_state` requires exactly one candidate to explain
+#: every step 0 -- zero is a material failure, more than one means the check
+#: does not discriminate and must not be trusted.
+ROOT_CANDIDATES: tuple[tuple[str, dict[str, Any]], ...] = (
+    ("teacher_as_published", {}),
+    ("session_driver_use_cache_false", {"use_cache": False}),
+)
+
+
+class RootStateUndetermined(ReplaySourceError):
+    """No single candidate root state explains the recorded step-0 configs."""
+
+
+def teacher_config(repo_id: str, revision: str) -> Any:
+    """The published teacher config. `config.json` only -- no weights, no GPU."""
+    from transformers import AutoConfig
+
+    return AutoConfig.from_pretrained(repo_id, revision=revision)
+
+
+def _child_config_sha256(base_config: Any, *, overrides: Mapping[str, Any],
+                         arch_fields: Mapping[str, Any],
+                         family: str) -> str:
+    """The `config_sha256` a child of this root at this geometry would carry.
+
+    Goes through the real `build_config` and the real `save_pretrained`, so this
+    is not a model of the writer -- it IS the writer, and a serialization change
+    in transformers moves this value exactly as it would move a checkpoint's.
+    """
+    import copy
+    import tempfile
+
+    from aadistill.infrastructure.manifest import sha256_json
+    from aadistill.initialization.specs.arch import ArchSpec, get_adapter
+
+    root = copy.deepcopy(base_config)
+    for key, value in overrides.items():
+        setattr(root, key, value)
+    config = get_adapter(family).build_config(
+        root, ArchSpec.of(family, dict(arch_fields)))
+    with tempfile.TemporaryDirectory() as tmp:
+        config.save_pretrained(tmp)
+        return sha256_json(json.loads((Path(tmp) / "config.json").read_text()))
+
+
+def derive_root_state(leaves: Sequence[ReplayLeaf], *, base_config: Any,
+                      family: str = "qwen3") -> dict[str, Any]:
+    """Which candidate root state the search actually expanded from.
+
+    Costs nothing: `config.json`, two hashes per path, no weights and no device.
+    Every candidate's result is recorded, including the losers, so the record
+    shows a derivation rather than an assertion.
+
+    Raises `RootStateUndetermined` when no candidate explains every step 0. That
+    is MATERIAL -- it would mean the search's own records do not describe a
+    reproducible path -- and is not repaired by widening the candidate set until
+    something fits.
+    """
+    from aadistill.initialization.adapters import register_builtin_adapters
+
+    register_builtin_adapters()
+    targets = [(leaf, leaf.steps[0]) for leaf in leaves if leaf.steps]
+    if not targets:
+        raise ReplaySourceError("no path to derive a root state from")
+
+    evidence: list[dict[str, Any]] = []
+    explains: list[str] = []
+    for name, overrides in ROOT_CANDIDATES:
+        per_step = []
+        for leaf, step in targets:
+            got = _child_config_sha256(base_config, overrides=overrides,
+                                       arch_fields=dict(step.arch_spec),
+                                       family=family)
+            per_step.append({
+                "state_id": step.state_id,
+                "leaf": leaf.state_id,
+                "impl_id": step.impl_id,
+                "recorded_config_sha256": step.expected_config_sha256,
+                "reconstructed_config_sha256": got,
+                "matches": got == step.expected_config_sha256,
+            })
+        ok = all(s["matches"] for s in per_step)
+        evidence.append({"candidate": name, "overrides": dict(overrides),
+                         "explains_every_step_0": ok, "steps": per_step})
+        if ok:
+            explains.append(name)
+
+    if not explains:
+        raise RootStateUndetermined(
+            "no derived root state reproduces the recorded step-0 config "
+            f"identities: {json.dumps(evidence)}")
+    if len(explains) > 1:
+        raise RootStateUndetermined(
+            f"{explains} all reproduce the recorded step-0 configs, so the "
+            "recorded identity does not pick one and this check cannot be "
+            "trusted to have determined the historical root state")
+    chosen = dict(next(o for n, o in ROOT_CANDIDATES if n == explains[0]))
+
+    #: EVERY REMAINING STEP, under the chosen root. Step 0 picks the candidate;
+    #: this checks that the pick explains the whole lineage. It can, because a
+    #: child config is the parent's `to_dict()` with the spec applied, so a
+    #: path's config at position i is the root's config plus that position's
+    #: geometry -- and if some operator mutated a config field the candidate set
+    #: does not know about, that position fails here. For free, before the GPU.
+    lineage: list[dict[str, Any]] = []
+    for leaf in leaves:
+        for step in leaf.steps[1:]:
+            got = _child_config_sha256(base_config, overrides=chosen,
+                                       arch_fields=dict(step.arch_spec),
+                                       family=family)
+            lineage.append({
+                "leaf": leaf.state_id, "index": step.index,
+                "impl_id": step.impl_id,
+                "recorded_config_sha256": step.expected_config_sha256,
+                "reconstructed_config_sha256": got,
+                "matches": got == step.expected_config_sha256,
+            })
+    broken = [s for s in lineage if not s["matches"]]
+    if broken:
+        raise RootStateUndetermined(
+            f"the derived root state {explains[0]!r} reproduces every recorded "
+            f"step-0 config but not {len(broken)} later one(s): "
+            f"{json.dumps(broken)}. Some execution state beyond the derived "
+            "candidate set reached those checkpoints' configs.")
+
+    return {
+        "schema": "aadistill.phase_d1.root_state_derivation/v1",
+        "candidate_set": [n for n, _ in ROOT_CANDIDATES],
+        "derived_from": (
+            "the session driver's root loader and the one in-place config "
+            "mutation a shipped operator performs; non-root parents reload from "
+            "disk and cannot carry sibling state"),
+        "chosen_candidate": explains[0],
+        "config_overrides": chosen,
+        "evidence": evidence,
+        "lineage_verified": lineage,
+        "_lineage_scope": (
+            f"{len(targets)} step-0 identities discriminate the candidate; "
+            f"{len(lineage)} later identities confirm it explains the whole "
+            "config lineage. WEIGHTS are not checked here -- that is what the "
+            "digest-pinned replay on the GPU is for."),
+    }
+
+
+def load_root_model(spec: Any, *, config_overrides: Mapping[str, Any],
+                    device: str | None = None) -> Any:
+    """The root the search expanded from, reloaded per path.
+
+    Reloaded rather than shared because operators MUTATE the module they are
+    given -- which is the whole subject of `ROOT_CANDIDATES`. A second path
+    starting from the first path's root would begin from an already-compressed
+    model and diverge at step one. After the first load the weights are in the
+    local cache, so this is a disk read.
+
+    `config_overrides` comes from `derive_root_state` and is applied before any
+    operator runs, because `build_config` reads the live config.
+    """
+    import torch
+    from transformers import AutoModelForCausalLM
+
+    model = AutoModelForCausalLM.from_pretrained(
+        spec.root_repo_id, dtype=torch.bfloat16, revision=spec.root_revision)
+    for key, value in config_overrides.items():
+        setattr(model.config, key, value)
+    return model.to(device or spec.device).eval()
+
+
 def adoption_matches(leaf: ReplayLeaf, artifact: Any) -> tuple[bool, dict]:
     """All FOUR identities, exactly. No approximate equivalence.
 
@@ -495,7 +742,11 @@ def leaves_from_plan(doc: Mapping[str, Any]) -> list[ReplayLeaf]:
                        impl_id=str(s["impl_id"]), profile_id=str(s["profile_id"]),
                        seed=int(s["seed"]), state_id=str(s["state_id"]),
                        expected_artifact_digest=str(s["expected_artifact_digest"]),
-                       expected_single_shard_sha256="")
+                       expected_single_shard_sha256="",
+                       expected_config_sha256=str(s.get("expected_config_sha256", "")),
+                       arch_spec=tuple(sorted(
+                           (str(k), v) for k, v in
+                           (s.get("arch_spec") or {}).items())))
             for s in row["steps"])
         if not steps:
             raise ReplaySourceError(f"{row['state_id']}: the plan carries no steps")
@@ -505,6 +756,17 @@ def leaves_from_plan(doc: Mapping[str, Any]) -> list[ReplayLeaf]:
                 f"{row['state_id']}: plan steps {missing} carry no expected "
                 "digest; an unpinned intermediate would let a compensating pair "
                 "of errors pass as a correct replay")
+        #: The ROOT-STATE fingerprint, required on step 0 of every path. A plan
+        #: without it would let a pod start from a root whose config nothing
+        #: checked -- which is exactly how 64 s of L40S time and $0.21 were
+        #: spent discovering a divergence a hash comparison answers for free.
+        blind = [s.index for s in steps
+                 if s.index == 0 and (len(s.expected_config_sha256) != 64
+                                      or not s.arch_spec)]
+        if blind:
+            raise ReplaySourceError(
+                f"{row['state_id']}: step 0 carries no recorded config sha256 "
+                "and geometry, so the root state cannot be derived or checked")
         for key in ("artifact_digest", "weights_digest", "single_shard_sha256",
                     "arch_signature"):
             if len(str(want.get(key, ""))) != 64:

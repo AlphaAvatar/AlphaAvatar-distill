@@ -103,8 +103,18 @@ def run_dir_for(run_id: str | None) -> str:
 
 
 def write_plan(repo_root: Path) -> dict[str, Any]:
-    """Resolve the plan at $0 and stage it where the launcher ships assets."""
-    plan = R.describe(R.replay_plan(repo_root))
+    """Resolve the plan at $0 and stage it where the launcher ships assets.
+
+    THE ROOT STATE IS DERIVED HERE, on the host that has the journal, and it is
+    derived rather than declared: every candidate's reconstructed step-0 config
+    hash goes into the plan next to the recorded one. The pod re-derives it from
+    the plan's own step-0 identities before it loads any weights.
+    """
+    leaves = R.replay_plan(repo_root)
+    root = D1S.root_teacher_identity(repo_root)
+    root_state = R.derive_root_state(
+        leaves, base_config=R.teacher_config(root["repo_id"], root["revision"]))
+    plan = R.describe(leaves, root_state)
     dest = repo_root / PLAN_REL
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(plan, indent=1) + "\n")
@@ -122,88 +132,150 @@ def driver_command(ctx: Any, plan: Any) -> str:
         f"--status {STATUS} --device {R.REPLAY_DEVICE}")
 
 
-def _reconstructed(ctx) -> list[dict[str, Any]]:
-    """Leaves the driver's own evidence says it rebuilt. Read, never inferred."""
-    store = Path(ctx.args.scr) / "store"
-    doc = store / "d1_replay.json"
-    if not doc.is_file():
+def _reconstructed(ctx, *, quiet: bool = False) -> list[dict[str, Any]]:
+    """Leaves the driver's own evidence says it rebuilt. Read, never inferred.
+
+    TWO PLACES, because this is asked at two times. During the run the runner
+    relays the evidence document whole-file into `scr/relay/` on every poll --
+    which is the only copy that exists while the driver is still working, and
+    therefore the only one `on_poll` can act on. After collection the extracted
+    archive puts it in `scr/store/`. `store` wins when both exist: it is the
+    collected artifact rather than a snapshot of a run in progress.
+
+    Looking only in `store` is what would have made the poll hook dead code:
+    it would have found no evidence on every poll, said so, and secured
+    nothing until closeout -- the behaviour it exists to replace.
+    """
+    scr = Path(ctx.args.scr)
+    for where in (scr / "store", scr / "relay"):
+        doc = where / "d1_replay.json"
+        if not doc.is_file():
+            continue
+        try:
+            record = json.loads(doc.read_text())
+        except ValueError as exc:
+            #: A relayed snapshot can be mid-write. Not an error during the
+            #: run; the next poll reads a complete one.
+            if not quiet:
+                ctx.say(f"  replay evidence at {doc.name} is unparseable ({exc})")
+            continue
+        return [e for e in (record.get("leaves") or [])
+                if e.get("reconstructed")]
+    if not quiet:
         ctx.say("  no replay evidence came home; nothing to fetch")
-        return []
-    try:
-        record = json.loads(doc.read_text())
-    except ValueError as exc:
-        ctx.say(f"  replay evidence is unparseable ({exc})")
-        return []
-    return [e for e in (record.get("leaves") or []) if e.get("reconstructed")]
+    return []
 
 
-def fetch_leaves(ctx) -> list:
+#: Files a qwen3 checkpoint directory carries beside its weights. Named here
+#: because which files a format writes is this session's knowledge, not the
+#: transport's.
+WEIGHTS_NAME = "model.safetensors"
+SIDECARS = ("config.json", "generation_config.json")
+
+
+#: Leaves already brought home in THIS process, keyed by state id. The fetch is
+#: called from two places -- every poll, and once at collection -- and must do
+#: the work once. A re-fetch would be correct and would cost another 1.2 GiB of
+#: billed transfer per poll.
+_SECURED: dict[str, dict] = {}
+
+
+def secure_finished_leaves(ctx) -> None:
+    """`on_poll`: bring a leaf home THE MOMENT the driver says it reconstructed.
+
+    WHY NOT AT COLLECTION. q2 finishes around minute 60 of a session whose
+    deadline is at 147; q4 finishes around 110. Everything that can go wrong in
+    those 50 minutes -- a digest mismatch on q4, a provider stop, the deadline
+    firing, this session's cumulative cap -- destroys a checkpoint that already
+    reproduces exactly and already cost its GPU time. C1 attempt 17 lost six
+    probes and ten hours that way, which is why AGENTS.md asks for durability
+    at the moment of completion rather than collection at closeout.
+
+    The transfer overlaps the next leaf's compute on a pod that is billing
+    regardless, so it is close to free in dollars; what it buys is that the
+    expensive completed unit is off the pod before anything else can fail.
+
+    Never allowed to disturb the run: the runner already swallows and records
+    an exception from this hook, and a leaf that fails here is simply retried
+    at collection.
+    """
+    fetch_leaves(ctx, quiet=True)
+
+
+def fetch_leaves(ctx, *, quiet: bool = False) -> list:
     """Bring every RECONSTRUCTED leaf home and re-identify it here.
 
     Gated on reconstruction, not on session success: a mismatch on the second
     leaf leaves the first one reproducing exactly and costing real GPU time.
+
+    MULTI-STREAM, BECAUSE THE BUDGET REQUIRES IT. A single scp connection to a
+    pod in this programme measured 0.486 MB/s, so a 1.2 GiB leaf is 44 minutes
+    of billing -- two of them is $1.60 of transfer against this session's
+    remaining cap, and the previous single-stream path would have hit its own
+    45-minute limit on the first one. `infrastructure.transfer` fetches the
+    weights in parallel byte ranges at a measured 4.5-8 MB/s; the same bytes,
+    an eighth of the clock.
+
+    The digest is re-derived from the bytes that ARRIVED. A product verified
+    only where it was produced is a product whose transfer was never checked.
     """
+    from aadistill.infrastructure.transfer import (
+        TransferError, fetch_checkpoint_dir,
+    )
+
     fetched: list = []
     if not ctx.products_eligible:
         return fetched
-    rows = _reconstructed(ctx)
+    rows = _reconstructed(ctx, quiet=quiet)
     if not rows:
-        ctx.say("  no reconstructed leaf to secure")
-        return fetched
+        return list(_SECURED.values())
     store = Path(getattr(ctx.args, "ckpt_store", None)
                  or Path(ctx.args.scr) / "products")
     store.mkdir(parents=True, exist_ok=True)
     plan = {leaf.state_id: leaf for leaf in R.replay_plan(REPO_ROOT)}
     for row in rows:
         sid = row.get("state_id") or "unknown"
+        if sid in _SECURED:
+            fetched.append(_SECURED[sid])
+            continue
         remote = row.get("checkpoint_path")
-        if not remote:
+        leaf = plan.get(sid)
+        if not remote or leaf is None:
             fetched.append(ProductFetchResult(
-                kind="transfer", rc=1, detail=f"{sid} names no checkpoint_path"))
+                kind="transfer", rc=1,
+                detail=(f"{sid}: " + ("names no checkpoint_path" if not remote
+                                      else "has no plan entry to verify against"))))
             continue
         dest = store / sid
-        rc = subprocess.run(
-            ["timeout", f"{getattr(ctx.args, 'ckpt_fetch_limit_min', 45)}m",
-             "scp", "-r", "-P", str(ctx.target.port),
-             "-o", "StrictHostKeyChecking=no",
-             "-o", "UserKnownHostsFile=/dev/null",
-             f"root@{ctx.host}:{remote}", str(dest)],
-            capture_output=True, timeout=None).returncode
-        size = (sum(f.stat().st_size for f in dest.rglob("*") if f.is_file())
-                if dest.exists() else 0)
-        ok, why = _verify_here(dest, plan.get(sid))
-        fetched.append(ProductFetchResult(
-            kind="transfer", rc=(0 if rc == 0 and ok else 1),
-            detail=(f"{sid}: rc={rc}, {size / 2**30:.2f} GiB -> {dest}; "
-                    f"identity {'MATCHED' if ok else 'NOT MATCHED'} ({why})")))
-        ctx.say(f"  leaf {sid}: rc={rc}, {size / 2**30:.2f} GiB, "
-                f"identity {'MATCHED' if ok else 'NOT MATCHED'}")
+        try:
+            record = fetch_checkpoint_dir(
+                f"root@{ctx.host}", ctx.target.port, remote, dest,
+                weights_name=WEIGHTS_NAME, sidecars=SIDECARS,
+                expect_sha256=leaf.expected_single_shard_sha256,
+                on_log=lambda line: ctx.say(f"    {line}"))
+        except TransferError as exc:
+            fetched.append(ProductFetchResult(
+                kind="transfer", rc=1, detail=f"{sid}: {exc}"))
+            ctx.say(f"  leaf {sid}: TRANSFER FAILED — {exc}")
+            continue
+        ok = bool(record["verified"])
+        result = ProductFetchResult(
+            kind="transfer", rc=(0 if ok else 1),
+            detail=(f"{sid}: {record['bytes'] / 2**30:.2f} GiB -> {dest} in "
+                    f"{record['seconds'] / 60:.1f} min "
+                    f"({record['mb_per_s']} MB/s, {record['streams']} streams); "
+                    f"single_shard_sha256 {record['sha256'][:12]} "
+                    f"{'MATCHED' if ok else 'DID NOT MATCH '}"
+                    f"{leaf.expected_single_shard_sha256[:12]}"))
+        fetched.append(result)
+        if ok:
+            #: Cached only on SUCCESS, so a failed transfer is retried at
+            #: collection instead of being remembered as done.
+            _SECURED[sid] = result
+        ctx.say(f"  leaf {sid}: {record['bytes'] / 2**30:.2f} GiB, "
+                f"{record['mb_per_s']} MB/s, identity "
+                f"{'MATCHED' if ok else 'NOT MATCHED'}")
     return fetched
-
-
-def _verify_here(dest: Path, leaf) -> tuple[bool, str]:
-    """Re-derive the identity from the bytes that ARRIVED, on this machine.
-
-    The driver already gated every step against its pin on the pod. This asks
-    the same question of the transferred copy, because a product verified only
-    where it was produced is a product whose transfer was never checked.
-    """
-    import hashlib
-
-    if leaf is None:
-        return False, "no plan entry for this state id"
-    shard = next((p for p in dest.rglob("model.safetensors")), None)
-    if shard is None:
-        return False, f"no model.safetensors under {dest}"
-    h = hashlib.sha256()
-    with shard.open("rb") as fh:
-        for block in iter(lambda: fh.read(1 << 20), b""):
-            h.update(block)
-    got = h.hexdigest()
-    if got != leaf.expected_single_shard_sha256:
-        return False, (f"single_shard_sha256 {got[:12]} != "
-                       f"{leaf.expected_single_shard_sha256[:12]}")
-    return True, f"single_shard_sha256 {got[:12]} as the search recorded"
 
 
 def leaves_secured(ctx, fetched) -> tuple[bool, str]:
@@ -291,18 +363,47 @@ def spec(args) -> SessionSpec:
             artifact_collector="scripts/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=plan.plan_id, plan_hash=plan.plan_hash,
+        #: RE-PRICED AGAINST THE CAMPAIGN REMAINDER, not re-estimated to fit.
+        #: Four paid subruns have settled $0.8144 of the $3.5000 ceiling, and
+        #: P12.1 makes the budget cumulative, so $2.5856 remains -- 142.3 min
+        #: at $1.09/h. The first version priced at 174 min / $3.15, which was
+        #: correct when nothing had been spent and is now unauthorizable.
+        #:
+        #: Every phase below is MEASURED, and two of them moved because four
+        #: attempts produced observations the first estimate did not have:
         budget=BudgetSpec(
             arms=0, steps_per_arm=0, step_seconds=4.15,
             step_source="unused; the replay trains nothing",
-            setup_minutes=12.0, transfer_minutes=8.0,
+            #: Four observed setups: 7.7, 9.0, 8.4 and 10.1 min. 11 bounds them.
+            setup_minutes=11.0,
+            #: 2.4 GiB over the MULTI-STREAM transport at a measured 4.5-8
+            #: MB/s is 5-9 min, and one of the two leaves moves during the
+            #: next leaf's compute (see `secure_finished_leaves`), so only the
+            #: last one is serial. Was 8.0 for single-stream scp, which could
+            #: not have moved either leaf inside its own 45-min cap.
+            transfer_minutes=6.0,
             other_phases=(
-                #: From the SEARCH's own telemetry, worst observed per operator:
-                #: DEPTH 41.44 min and the other three under 50 s each, twice.
-                Phase("teacher_load_twice", 12.0),
+                #: Observed at about 2 min per load in subrun r4, not 6.
+                Phase("teacher_load_twice", 5.0),
+                #: From the SEARCH's own telemetry, worst observed per
+                #: operator: DEPTH 41.44 min twice -- both of these paths run
+                #: it once, and the closeout's n=9 non-root sample maxes at
+                #: 41.41, so the root figure bounds both -- plus six steps at
+                #: the 0.78 min worst of the other three operators.
                 Phase("eight_pinned_operator_steps", 88.0),
+                #: 1.02 min per expansion, measured, times eight.
                 Phase("materialize_and_reload", 8.0)),
-            eval_minutes_per_arm=0.0, contingency_fraction=0.20,
-            artifact_recovery_reserve_minutes=20.0),
+            eval_minutes_per_arm=0.0,
+            #: 0.08, not 0.20. The phases above are worst-observed rather than
+            #: means, so the contingency is absorbing variance that is already
+            #: priced at its maximum; and the campaign remainder will not fund
+            #: a 20% band on top of a worst-case bound.
+            contingency_fraction=0.08,
+            #: 12, not 20. The reserve exists so products can be recovered
+            #: after the soft stop, and `on_poll` now secures each leaf the
+            #: moment it reconstructs -- so the exposure this covers is one
+            #: leaf at 8 streams (about 4 min) plus collection, not two.
+            artifact_recovery_reserve_minutes=12.0),
         setup=SetupManifest(
             relay_inputs=(),
             local_assets=(*SCIENCE_ASSETS,
@@ -332,7 +433,16 @@ def spec(args) -> SessionSpec:
             failure=("RUN_FAILED", "DIGEST_MISMATCH"),
             failure_note=("the replay stopped -- collecting its evidence, then "
                           "tearing down. A digest mismatch is deterministic "
-                          "and is NOT retried.")),
+                          "and is NOT retried."),
+            #: A LEAF'S PRODUCTS EXIST OR THEY DO NOT, and the terminal does
+            #: not decide it. The generic rule is `terminal == success or
+            #: is_incomplete(terminal)`, and this session declares no
+            #: incomplete terminals -- so a DIGEST_MISMATCH on the second leaf
+            #: would have fetched NOTHING, deleting a first leaf that
+            #: reproduced exactly and cost its GPU time. `fetch_leaves` reads
+            #: the driver's own per-leaf `reconstructed` flag and returns
+            #: nothing when none did, so the gate belongs there and not here.
+            products_eligible=lambda terminal, stages: True),
         artifacts=ArtifactPolicy(
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="d1_replay.json",
@@ -340,6 +450,7 @@ def spec(args) -> SessionSpec:
             spec_success="configs/autoinit/d1_replay_artifacts.json",
             spec_failed="configs/autoinit/d1_replay_artifacts_failed.json",
             report_names=("d1_replay.json",),
+            on_poll=secure_finished_leaves,
             fetch_products=fetch_leaves,
             products_secured=leaves_secured),
         teardown=TeardownPolicy(),
