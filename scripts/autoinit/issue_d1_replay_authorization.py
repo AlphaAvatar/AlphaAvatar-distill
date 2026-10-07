@@ -38,6 +38,9 @@ for _extra in ("src", "scripts", "scripts/experiments/stage-1"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
+from aadistill.governance.authorization import (  # noqa: E402
+    harness_source_digest,
+)
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 AUTH_REL = "logs/budget/approvals/autoinit_d1_replay_authorization.json"
@@ -123,14 +126,23 @@ def priced_session(rate: float) -> dict[str, float]:
 def build_record(*, rate: float, commit: str, money: dict[str, float],
                  priced: dict[str, float], version: int,
                  granted_by: str) -> dict:
-    files = []
-    for rel in HARNESS_FILES:
-        path = REPO_ROOT / rel
-        if not path.is_file():
-            raise SystemExit(f"declared harness file is missing: {rel}")
-        files.append(rel)
-    digest = sha256_json({rel: sha256_json(
-        {"bytes": (REPO_ROOT / rel).read_bytes().hex()}) for rel in files})
+    #: THE DIGEST COMES FROM THE FUNCTION THAT VERIFIES IT, not from a formula
+    #: written here. The first version of this issuer computed its own --
+    #: `sha256_json({rel: sha256_json({"bytes": hex})})` -- which is a perfectly
+    #: deterministic hash of the same bytes and is NOT the hash
+    #: `SpendAuthorization.require_harness` computes. So the runner refused
+    #: before the dry run had reached a single gate:
+    #:
+    #:     the harness on disk digests to 246c846cddac… but this authorization
+    #:     was granted against e436d89ea23d…
+    #:
+    #: Caught at $0 by the gate whose entire job this is, which is the right
+    #: place -- but it is the "import the contract, do not describe it" failure
+    #: exactly: a hand-written restatement of a hash agrees with itself and
+    #: with nothing else.
+    harness = harness_source_digest(REPO_ROOT, files=HARNESS_FILES)
+    files = [entry["path"] for entry in harness["files"]]
+    digest = harness["digest"]
 
     from aadistill.initialization.planning.recovery import (
         PreflightPlan, PreflightStage,
