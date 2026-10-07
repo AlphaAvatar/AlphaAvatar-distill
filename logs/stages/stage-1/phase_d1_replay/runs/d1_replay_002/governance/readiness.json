@@ -4,10 +4,10 @@
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 413,
+    "passed": 415,
     "skipped": 0
   },
-  "d1_replay_harness_digest": "8491478736f8dd9aafe055e5f82e8d51dba5e732c5ba93ddd29f12e03418c963",
+  "d1_replay_harness_digest": "b5b45ee735a33798decfc6b12bc1cfc9e309b61bf78df8228cd47167c54cc805",
   "d1_replay_harness_n_files": 9,
   "environment": {
     "artifact_hiding": "manifest-derived positive staged view: 12 files visible from the C1 SetupManifest, 1850 hidden as the computed complement and 0 host-local store(s) hidden as well. NOT the simulator's generic default.",
@@ -23,12 +23,12 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-b0a0bf8d6f92/exec-001/junit.xml",
-    "junit_sha256": "ba1665922fe57307067901e6c32de0fd948a45985e76d23c9abdf1ee9634d883",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-b0a0bf8d6f92/exec-001/pytest.log",
-    "pytest_log_sha256": "8bea986f6c2cbd08db8de0f767e4a15ca988ee50b44b4be01b6da25b4b2e3121"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-33ef9d3c20dd/exec-001/junit.xml",
+    "junit_sha256": "760d1c5c7fb97a5dc97d0f54e24edf3684dbea8e0d8acba1db5522ba6f4160a0",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-33ef9d3c20dd/exec-001/pytest.log",
+    "pytest_log_sha256": "079385b1666ddd95306c78afd3da86a52afd69387ccf4a06553a0fb589b2f692"
   },
-  "execution_id": "sweep-b0a0bf8d6f92/exec-001",
+  "execution_id": "sweep-33ef9d3c20dd/exec-001",
   "expected_environment_skips": [],
   "failed_nodeids": [],
   "findings": {
@@ -38,7 +38,7 @@
     "counts": {
       "error": 0,
       "failed": 0,
-      "passed": 413,
+      "passed": 415,
       "skipped": 0
     },
     "expected_environment_skips": [],
@@ -87,8 +87,8 @@
     "setup_environment_realized": true,
     "staging_contract_digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5"
   },
-  "n_tests": 413,
-  "pod_test_environment_digest": "24499b3278d13c37c8feeaa29631369004a359b167718c83f9e0353aca7cb304",
+  "n_tests": 415,
+  "pod_test_environment_digest": "c7ae8fcef6e02f779ce24ffb845daf8a9d477a122e6c3c820406cfa77b6b831b",
   "pod_test_environment_n_files": 179,
   "pod_test_environment_named_files": [
     "conftest.py",
@@ -114,13 +114,13 @@
   "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
   "schema": "aadistill.autoinit.d1_replay_pod_environment/v1",
-  "seconds": 232.2,
-  "self_sha256": "e7059219616d5ac5853d9af2d6d93c8936896928d8a143d55110940ec26def58",
+  "seconds": 233.1,
+  "self_sha256": "9980af212e626a262ae247a0d574c4cb22afeb346b5b365c2e3d0bbefe7c244e",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_b0a0bf8d.bundle",
+    "BUNDLE_NAME": "aad_autoinit_33ef9d3c.bundle",
     "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1,d1_replay_plan.json:artifacts/stage1",
     "SESSION_AUTH_PATH": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
-    "SESSION_COMMIT": "b0a0bf8d6f92f81f68539c872f9e750b9049b986",
+    "SESSION_COMMIT": "33ef9d3c20ddf9abfdb30410cd1255b377ded009",
     "SESSION_PLAN_HASH": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
     "SESSION_RELAY_INPUTS": "[]",
     "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
@@ -133,7 +133,7 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1850 derived paths, contract 9cbadfc0dd8f> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-b0a0bf8d6f92/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-b0a0bf8d6f92/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1850 derived paths, contract 9cbadfc0dd8f> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-33ef9d3c20dd/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-33ef9d3c20dd/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 0,
   "staging_contract": {
     "digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5",
@@ -151,7 +151,7 @@
   },
   "staging_contract_digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "b0a0bf8d6f92f81f68539c872f9e750b9049b986",
+  "swept_base_commit": "33ef9d3c20ddf9abfdb30410cd1255b377ded009",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
