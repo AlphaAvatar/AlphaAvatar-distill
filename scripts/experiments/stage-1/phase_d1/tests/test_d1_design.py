@@ -908,17 +908,63 @@ class TestThePhaseFundingAmendment:
         return doc["execution_package"], doc["accepted_pricing"]
 
     def test_the_five_figures_are_what_was_decided(self):
+        """TWO decisions now, and the second one moved a figure the first had
+        deliberately left alone -- so this asserts the current grant and the
+        comment records which decision set which number.
+
+        2026-10-07, +$25.0000 formal, after the formal search was stopped
+        mid-beam by an exhausted RunPod account balance and its $8.1716 bought
+        no endpoint. That amendment explicitly left the per-session and
+        engineering limits untouched.
+
+        2026-10-08, the GPU engineering allowance only, raised by exactly the
+        shortfall between it and the rematerialization campaign's own approved
+        remaining dollars. NOT a new grant: the hard limit on that work is the
+        campaign's $10.0000 ceiling, and this removed an older accounting bound
+        that would otherwise have refused the campaign's approved spend. The
+        derivation is in the authorization's own amendment block.
+        """
         ep, ap = self._terms()
-        #: +$25.0000, maintainer decision 2026-10-07, after the formal search
-        #: was stopped mid-beam by an exhausted RunPod account balance and its
-        #: $8.1716 bought no endpoint. The per-session and engineering limits
-        #: are UNCHANGED, which is half of what the amendment decided.
+        #: 2026-10-07.
         assert ep["formal_allowance_usd"] == 156.6523
-        assert ep["package_total_usd"] == 176.6523
         assert ap["cumulative_cap_usd"] == 490.0
-        #: UNCHANGED by this amendment, and that is half of what it decided.
-        assert ep["gpu_engineering_allowance_usd"] == 20.0
+        #: 2026-10-08: +$5.0741, the derived shortfall and nothing more.
+        assert ep["gpu_engineering_allowance_usd"] == 25.0741
+        #: Derived, not independently granted -- see the test below.
+        assert ep["package_total_usd"] == 181.7264
+        #: UNCHANGED by BOTH amendments.
         assert ep["per_attempt_hard_ceiling_usd"] == 30.0
+
+    def test_the_engineering_raise_is_exactly_the_derived_shortfall(self):
+        """A raise bigger than the shortfall would be a new grant wearing a
+        bookkeeping amendment's name. The authorization carries its own
+        derivation; this checks the arithmetic closes."""
+        ep, _ = self._terms()
+        a = ep["_amendment_2026_10_08_engineering_allowance"]
+        d = a["derivation"]
+        assert d["required_engineering_remaining_usd"] == round(
+            d["campaign_remaining_usd"] + d["campaign_teardown_reserve_usd"], 4)
+        assert d["shortfall_usd"] == round(
+            d["required_engineering_remaining_usd"]
+            - d["engineering_remaining_before_usd"], 4)
+        assert ep["gpu_engineering_allowance_usd"] == round(
+            a["gpu_engineering_allowance_usd"]["from"] + d["shortfall_usd"], 4)
+        #: And the campaign ceiling it serves is NOT raised by it.
+        assert d["campaign_ceiling_usd"] == 10.0
+
+    def test_the_project_cap_was_verified_rather_than_raised(self):
+        """The instruction was to derive whether existing headroom covers the
+        campaign, not to raise the cap by default."""
+        ep, ap = self._terms()
+        cap = ep["_amendment_2026_10_08_engineering_allowance"]["project_cap"]
+        assert cap["cap_usd"] == ap["cumulative_cap_usd"] == 490.0
+        assert cap["remaining_usd"] >= cap["cap_usd"] - cap[
+            "cumulative_spend_usd"] - 1e-9
+        assert cap["remaining_usd"] > ep[
+            "_amendment_2026_10_08_engineering_allowance"][
+            "derivation"]["campaign_remaining_usd"], (
+            "the amendment claims existing headroom covers the campaign; it "
+            "does not")
 
     def test_the_package_total_is_still_the_sum_of_its_parts(self):
         """It is not an independent number; a drift here hides a real raise."""

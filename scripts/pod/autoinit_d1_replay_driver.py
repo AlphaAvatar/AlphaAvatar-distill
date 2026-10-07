@@ -154,6 +154,19 @@ def main(argv: list[str] | None = None) -> int:
             base_config=R.teacher_config(root["repo_id"], root["revision"]))
         record["root_state"] = root_state
         overrides = dict(root_state["config_overrides"])
+        #: THE EXECUTION KNOBS, which no hash covers. `config_hash` excludes
+        #: `micro_batch_size` and `calibration_batch_packing` by design, so
+        #: the pinned digests cannot detect a wrong reduction order -- and
+        #: `ffn.activation_importance_v0` keeps the top 3072 of 9728 neurons,
+        #: where a different order flips the kept set. The search ran (3,
+        #: length_sorted_v1); `materialize_fixed_path` defaults to (4,
+        #: original_order_v1).
+        execution = R.replay_execution()
+        record["execution_agreement"] = R.verify_execution_config(
+            leaves, execution=execution)
+        print(f"execution: {record['execution_agreement']['using']} — agrees "
+              f"with all {record['execution_agreement']['n_steps']} recorded "
+              "steps", flush=True)
         print(f"root state: {root_state['chosen_candidate']} "
               f"{overrides or '{}'} — reproduces every recorded step-0 config",
               flush=True)
@@ -239,7 +252,8 @@ def main(argv: list[str] | None = None) -> int:
                 results = materialize_fixed_path(
                     spec, adapter=adapter,
                     root_loader=lambda _s=spec: load_root(_s),
-                    workdir=leaf_dir, repo_root=REPO_ROOT, on_step=on_step)
+                    workdir=leaf_dir, repo_root=REPO_ROOT, on_step=on_step,
+                    execution=execution)
             except FixedPathDigestMismatch as exc:
                 #: TERMINAL for this leaf. A deterministic replay that diverges
                 #: is a finding: not retried, not substituted.

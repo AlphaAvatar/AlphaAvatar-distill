@@ -1,5 +1,5 @@
 {
- "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 = 1.53",
+ "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 + 0.8400 = 2.37",
  "_ceiling_amendment_2026_10_07": {
   "_the_binding_constraint_is_now_the_allowance_not_this_ceiling": "the GPU ENGINEERING allowance this campaign is charged to has $3.4959 remaining of $20.0000 after the five settled subruns. So the $10.0000 ceiling is headroom rather than available money, and the real bound on the next attempt is the allowance. The session prices at $2.0820 hard, which fits in both. Stated here because a ceiling that exceeds its own funding source is exactly the kind of number that reads as available.",
   "from_usd": 3.5,
@@ -18,13 +18,13 @@
  "_what_the_four_failures_have_in_common": "every one was in the replay HARNESS and none was in the science. No candidate was selected, no measurement was taken, no frozen protocol moved, and the completed search's 92 expansions, 12 leaves, committed ranking and frozen Top-4 are untouched by all of it. Two leaves (quality positions 1 and 3) were already secured and identity-verified off-pod by the search session itself and are unaffected.",
  "authorization": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the four limit checks, the account-balance gate and the same-failure gate to pass",
- "booked_usd": 1.53,
+ "booked_usd": 2.37,
  "campaign_id": "d1_finalist_rematerialization",
  "ceiling_usd": 10.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- 5 paid subruns, $1.5300 of $10.0000 after the 2026-10-07 amendment. None reconstructed a leaf; every one was an ordinary engineering failure in the replay harness, root-caused and repaired. The replay now reproduces both halves of the historical execution state, verified at $0: 8/8 model-config identities and 8/8 operator config hashes.",
+ "status": "OPEN -- 6 paid subruns, $2.3700 of $10.0000. r6 reproduced the DEPTH operator byte-exactly, which no earlier attempt reached; FFN remains, on a single identified cause.",
  "subruns": [
   {
    "cost_usd": 0.155,
@@ -103,6 +103,24 @@
     "q4 step 0"
    ],
    "subrun_id": "r5"
+  },
+  {
+   "cost_usd": 0.84,
+   "elapsed_minutes": 46.3,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "The operator-config repair held: every expected_config_hash check passed, and q4 step 0 -- the DEPTH operator, 1610.35 s of greedy causal-KL search -- matched its pinned digest e63a36e4e03b exactly. That is the first operator this programme has reproduced bit-for-bit across hosts. FFN mismatched at q2 step 0 (expected 292e36f13829, got 702e1e497d49) and q4 step 1 (expected 1bfd91c76373, got c12faacf5b54). CAUSE, single and specific: the two EXECUTION knobs. All eight recorded steps carry micro_batch_size=3 and calibration_batch_packing=length_sorted_v1; `materialize_fixed_path` defaults to DEFAULT_EXECUTION, which is 4 and original_order_v1, and the driver never passed D1's. These are deliberately NOT hashed -- they are runtime knobs -- so the config_hash pin could not see them. WHY FFN AND NOT DEPTH: DEPTH's greedy block choice compares KL gaps far larger than batch-order float noise; FFN selects the top 3072 of 9728 neurons, and near that cutoff the importance scores are dense enough that a different reduction order flips which neurons are kept. This is the documented sensitivity FixedPathStep.config was added for -- attention.causal_kl_v1 selects a different head map at a different calibration forward batch size. NOT MATERIAL: an input the search recorded and the replay did not carry, which is the fourth instance of that one class. A near-miss worth recording: the trace also carries stats_spec=4dd0e23a, against DEFAULT_STATS_SPEC's 08b0dffb -- but only on the two ATTENTION steps, because that operator declares its own required spec. Checking per-step rather than in aggregate stopped a repair to something that was not broken.",
+   "outcome": "PARTIAL REPRODUCTION. depth.causal_kl_greedy_v1 reproduced BYTE-EXACTLY; ffn.activation_importance_v0 did not, in both leaves",
+   "pod_id": "m0p1decj1an2mc",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "9dd6bc019ffbcaddb96ea966c6fd708bb3709c83",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0",
+    "q4 steps 0-1"
+   ],
+   "subrun_id": "r6"
   }
  ],
  "teardown_reserve_usd": 0.1

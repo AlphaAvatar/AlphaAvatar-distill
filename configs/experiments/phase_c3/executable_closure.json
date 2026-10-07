@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 123,
- "digest": "f537b8994094366ccbe4594e8e3b3cb675888328ea2b5ffa9d993e46a620bf6e",
+ "digest": "37e558ec319564e7d2097b9373873e5eb5148c6db89e1ec85353886f98b07e22",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -39,8 +39,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/authorization.json",
-   "sha256": "2a620b32f908c63f1cea364a0305cdecb7e36457586501069cc85f8bbf2061c9",
-   "bytes": 30349
+   "sha256": "fee711971d68e0055db1a395f0b617259ff37b84bd289e805420b64c8204a90a",
+   "bytes": 32551
   },
   {
    "path": "scripts/architecture/record_run_index.py",

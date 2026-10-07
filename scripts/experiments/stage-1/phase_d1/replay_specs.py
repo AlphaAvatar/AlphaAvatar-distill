@@ -98,6 +98,13 @@ class ReplayStep:
     #: search's hashed to 464cb782ea8095, and the only symptom was a digest
     #: mismatch reported after the operator had run.
     expected_config_hash: str = ""
+    #: The EXECUTION knobs the search recorded for this step. Deliberately not
+    #: part of any hash -- they are runtime choices -- which is exactly why
+    #: they have to be carried and checked separately: `config_hash` cannot
+    #: see them, and the FFN operator's top-k flips when the reduction order
+    #: does. Read from the step's own trace.
+    expected_micro_batch_size: int = 0
+    expected_batch_packing: str = ""
 
 
 @dataclass(frozen=True)
@@ -141,6 +148,8 @@ class ReplayLeaf:
                  "expected_artifact_digest": s.expected_artifact_digest,
                  "expected_config_sha256": s.expected_config_sha256,
                  "expected_config_hash": s.expected_config_hash,
+                 "expected_micro_batch_size": s.expected_micro_batch_size,
+                 "expected_batch_packing": s.expected_batch_packing,
                  "arch_spec": dict(s.arch_spec)}
                 for s in self.steps
             ],
@@ -300,6 +309,10 @@ def build_leaf(states: Mapping[str, Mapping[str, Any]],
             expected_single_shard_sha256=str(shard),
             expected_config_sha256=str(config_sha),
             expected_config_hash=str(step.get("config_hash") or ""),
+            expected_micro_batch_size=int(
+                (step.get("trace") or {}).get("micro_batch_size") or 0),
+            expected_batch_packing=str(
+                (step.get("trace") or {}).get("calibration_batch_packing") or ""),
             arch_spec=tuple(sorted((str(k), v) for k, v in
                                    (row.get("arch_spec") or {}).items()))))
     got = [s.impl_id for s in steps]
@@ -776,6 +789,85 @@ def verify_operator_configs(leaves: Sequence[ReplayLeaf], *,
     }
 
 
+REPLAY_EXECUTION_OWNER = "experiments.phase_d1.d1_session.execution"
+
+
+def replay_execution():
+    """The EXECUTION CONFIG the search ran, from the session that owns it.
+
+    The third input this replay failed to carry, and the one no hash covers.
+    `micro_batch_size` and `calibration_batch_packing` are deliberately
+    runtime-only -- they do not change the estimand, so they are excluded from
+    `config_hash` on purpose. For most operators that is correct. For one it is
+    not: `ffn.activation_importance_v0` keeps the top 3072 of 9728 neurons, and
+    near that cutoff the importance scores are dense enough that a different
+    reduction order flips the kept set, which changes the weights and
+    therefore the artifact digest.
+
+    `materialize_fixed_path` defaults to `DEFAULT_EXECUTION` (4,
+    `original_order_v1`) and the search ran (3, `length_sorted_v1`). DEPTH
+    reproduced byte-exactly anyway, because its greedy block choice compares KL
+    gaps far larger than batch-order float noise; FFN did not.
+    """
+    from experiments.phase_d1 import d1_session as D1S
+
+    return D1S.execution()
+
+
+def verify_execution_config(leaves: Sequence[ReplayLeaf], *,
+                            execution: Any = None) -> dict[str, Any]:
+    """Every step's recorded execution knobs, against the ones to be used. $0.
+
+    The third of the three agreement checks, and the one that exists because a
+    hash deliberately omits what it checks. `derive_root_state` covers the
+    parent the operators start from, `verify_operator_configs` covers the
+    protocol they run under, and this covers the runtime shape they reduce in.
+
+    Raises `ReplaySourceError` naming every disagreeing step, because a replay
+    that reduces in a different order is not reproducing the run it replays --
+    whatever the hashes say.
+    """
+    live = execution if execution is not None else replay_execution()
+    mine = {"micro_batch_size": int(live.micro_batch_size),
+            "calibration_batch_packing": str(live.calibration_batch_packing)}
+    checked: list[dict[str, Any]] = []
+    for leaf in leaves:
+        for step in leaf.steps:
+            recorded = {
+                "micro_batch_size": step.expected_micro_batch_size,
+                "calibration_batch_packing": step.expected_batch_packing,
+            }
+            #: A step whose trace recorded nothing cannot be checked, and
+            #: SILENTLY PASSING it is how the fourth defect of this class
+            #: would become the fifth.
+            unknown = [k for k, v in recorded.items() if not v]
+            checked.append({
+                "leaf": leaf.state_id, "index": step.index,
+                "impl_id": step.impl_id, "recorded": recorded, "using": mine,
+                "matches": not unknown and recorded == mine,
+                "unrecorded": unknown or None,
+            })
+    wrong = [c for c in checked if not c["matches"]]
+    if wrong:
+        raise ReplaySourceError(
+            f"{len(wrong)} of {len(checked)} steps would run under execution "
+            "knobs the search did not record. No hash covers these, which is "
+            "why they are checked here: "
+            f"{json.dumps(wrong)}")
+    return {
+        "schema": "aadistill.phase_d1.execution_agreement/v1",
+        "n_steps": len(checked), "all_match": True,
+        "using": mine, "owner": REPLAY_EXECUTION_OWNER,
+        "steps": checked,
+        "_why_a_separate_check": (
+            "micro_batch_size and calibration_batch_packing are excluded from "
+            "`config_hash` by design, because they do not change the "
+            "estimand. They DO change which neurons a top-k keeps when the "
+            "scores near the cutoff are dense, so a replay must carry them "
+            "even though no identity does."),
+    }
+
+
 def load_root_model(spec: Any, *, config_overrides: Mapping[str, Any],
                     device: str | None = None) -> Any:
     """The root the search expanded from, reloaded per path.
@@ -846,6 +938,10 @@ def leaves_from_plan(doc: Mapping[str, Any]) -> list[ReplayLeaf]:
                        expected_single_shard_sha256="",
                        expected_config_sha256=str(s.get("expected_config_sha256", "")),
                        expected_config_hash=str(s.get("expected_config_hash", "")),
+                       expected_micro_batch_size=int(
+                           s.get("expected_micro_batch_size") or 0),
+                       expected_batch_packing=str(
+                           s.get("expected_batch_packing") or ""),
                        arch_spec=tuple(sorted(
                            (str(k), v) for k, v in
                            (s.get("arch_spec") or {}).items())))

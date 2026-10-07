@@ -2899,8 +2899,8 @@
    "experiment_id": "phase_d1_replay",
    "run_id": "d1_replay_002",
    "root": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
-   "n_files": 3,
-   "digest": "649cea7d5cdaa3541504ec9f7238b6c8236237a43eeeb35075397617fe5fb219",
+   "n_files": 4,
+   "digest": "f2b90b89ece04b88eee8fd4d7f0657133063b75667144324e4e664b4c2d60880",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],

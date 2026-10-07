@@ -128,6 +128,8 @@ def write_plan(repo_root: Path) -> dict[str, Any]:
     configs = R.verify_operator_configs(leaves, repo_root=repo_root)
     plan = R.describe(leaves, root_state)
     plan["operator_config_agreement"] = configs
+    #: AND the execution knobs, which no hash covers.
+    plan["execution_agreement"] = R.verify_execution_config(leaves)
     dest = repo_root / PLAN_REL
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(plan, indent=1) + "\n")
