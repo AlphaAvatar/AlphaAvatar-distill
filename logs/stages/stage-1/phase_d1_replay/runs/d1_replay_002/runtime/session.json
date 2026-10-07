@@ -89,32 +89,92 @@
   },
   "timeline": [
     {
-      "utc": "2026-10-07T20:31:49+00:00",
+      "utc": "2026-10-07T20:32:06+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 118 min $2.14 \u00b7 soft $2.32 \u00b7 hard $2.53 (authorized $7.53)"
     },
     {
-      "utc": "2026-10-07T20:31:49+00:00",
+      "utc": "2026-10-07T20:32:07+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $1.09/h, stock Low"
     },
     {
-      "utc": "2026-10-07T20:31:50+00:00",
+      "utc": "2026-10-07T20:32:07+00:00",
       "elapsed_min": 0.0,
       "msg": "account funds OK: the provider account holds $187.6971 against the $7.5332 this session must be able to fund"
     },
     {
-      "utc": "2026-10-07T20:31:50+00:00",
+      "utc": "2026-10-07T20:32:07+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 0 relay inputs (), 4 local assets"
     },
     {
-      "utc": "2026-10-07T20:31:50+00:00",
+      "utc": "2026-10-07T20:32:08+00:00",
       "elapsed_min": 0.0,
-      "msg": "DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills."
+      "msg": "watchdog detached \u2014 hard 139 min = $2.53"
+    },
+    {
+      "utc": "2026-10-07T20:32:08+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created mq4hnmcvkdbfgl at $1.09/h"
+    },
+    {
+      "utc": "2026-10-07T20:33:02+00:00",
+      "elapsed_min": 0.91,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-07T20:34:06+00:00",
+      "elapsed_min": 1.97,
+      "msg": "  starting (120s) \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-07T20:35:10+00:00",
+      "elapsed_min": 3.04,
+      "msg": "  starting (180s) \u2014 $0.06"
+    },
+    {
+      "utc": "2026-10-07T20:35:42+00:00",
+      "elapsed_min": 3.58,
+      "msg": "TCP 22 at 81.27.69.177:23935 after 3.6 min"
+    },
+    {
+      "utc": "2026-10-07T20:35:45+00:00",
+      "elapsed_min": 3.62,
+      "msg": "draw 1: ssh reachable \u2014 $0.07"
+    },
+    {
+      "utc": "2026-10-07T20:36:21+00:00",
+      "elapsed_min": 4.22,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+    },
+    {
+      "utc": "2026-10-07T20:36:21+00:00",
+      "elapsed_min": 4.22,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-07T20:47:22+00:00",
+      "elapsed_min": 15.23,
+      "msg": "draw 1: setup complete \u2014 $0.28"
+    },
+    {
+      "utc": "2026-10-07T20:47:28+00:00",
+      "elapsed_min": 15.33,
+      "msg": "driver detached, pid 1585, confirmed by descriptor_probe \u2014 $0.28"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
   "authorization": {
     "schema": "aadistill.autoinit.spend_authorization/v1",
     "authorization_id": "autoinit.v1.d1_replay",
@@ -242,9 +302,49 @@
     ],
     "local_missing": []
   },
-  "dry_run": true,
-  "provider_resource_created": false,
-  "terminal": "DRY_RUN_GATES_PASSED",
-  "_dry_run_is_not_a_pass": "every pre-provider gate passed and nothing was created. That is evidence the chain is launchable, not evidence the session succeeded: no pod existed, no stage ran and nothing was measured.",
-  "passed": false
+  "pod_id": "mq4hnmcvkdbfgl",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-07T22:51:33Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/d1_replay_002/watchdog_mq4hnmcvkdbfgl.jsonl"
+  ],
+  "watchdog_owns_pod": "mq4hnmcvkdbfgl",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "595.91.07"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_1301a297.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1,d1_replay_plan.json:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+    "SESSION_COMMIT": "1301a297a0f10e5a7a559d7576bcbbab56bcf3da",
+    "SESSION_PLAN_HASH": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1_replay.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/experiments/stage-1/phase_d1/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d1_replay",
+    "pid": 1585,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_d1_replay_driver.py --out artifacts/audit/autoinit_d1_replay --run-id d1_replay_002 --plan /workspace/aad/artifacts/stage1/d1_replay_plan.json --products /workspace/aad/artifacts/audit/autoinit_d1_replay/products --status /workspace/autoinit_d1_replay.status --device cuda",
+    "log_path": "/workspace/autoinit_d1_replay_run.log",
+    "status_path": "/workspace/autoinit_d1_replay.status",
+    "pid_path": "/workspace/jobs/autoinit_d1_replay.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d1_replay.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d1_replay.exit",
+    "started_utc": "2026-10-07T20:47:25Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  }
 }

@@ -12,6 +12,14 @@
  "_contract": "Cumulative cost of rematerializing D1's two unretained quality-order finalists, across every resource and subrun. A rerun does NOT reset it (AGENTS.md P12.1), so the ceiling a new attempt may be issued against is this ceiling MINUS the settled spend MINUS the teardown reserve.",
  "_cost_derivation": "each subrun is (pod deletion or observed-gone timestamp - create timestamp) at the accepted $1.09/h, read from the launcher's own per-attempt log. The launcher's running figures agree to the cent where it printed them ($0.20 and $0.26 for subruns 2 and 4); subruns 1 and 3 aborted in setup before a final figure was printed, so theirs are derived from the timestamps the same way.",
  "_each_subrun_is_its_own_commit": "four attempts, four trees: each repair was committed, swept and bound into its own authorization before the next pod. A corrected attempt is an explicit new subrun (P12.1), never an invisible provider retry.",
+ "_host_driver_versions_observed": {
+  "_why_this_is_recorded": "The GPU TYPE is pinned -- success here is digest equality, so an architecture substitution would manufacture a finding -- but the host DRIVER version is not selectable on this provider. r6 reproduced depth.causal_kl_greedy_v1 byte-exactly on 580.126.09, the same driver the search ran, so that result is driver-matched. r7 drew 595.91.07, which makes it informative either way: if DEPTH matches there too, the driver is not the discriminator and an FFN outcome stands on its own; if DEPTH stops matching, the driver is a confound that has to be controlled before any mismatch can be called material.",
+  "r4": "580.159.04",
+  "r5": "580.126.09",
+  "r6": "580.126.09",
+  "r7": "595.91.07",
+  "search d1_search_20261006_210210": "580.126.09"
+ },
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance. This session trains nothing, measures nothing and selects nothing -- it reconstructs two checkpoints the completed search already measured -- so it is engineering, not formal science.",
  "_status_is_derived_by": "filed per paid subrun against this ledger, which owns every draw; booked_usd is recomputed from the components.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",

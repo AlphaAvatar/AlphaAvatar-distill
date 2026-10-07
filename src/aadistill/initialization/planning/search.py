@@ -57,7 +57,11 @@ from aadistill.initialization.specs.materialization import (
 from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
-from aadistill.initialization.planning.isolation import isolate_parent_config
+from aadistill.initialization.planning.isolation import (
+    isolate_parent_config,
+    parameter_fingerprint,
+    weights_disturbed,
+)
 from aadistill.initialization.planning.operator_config import (
     hashed_operator_config,
     operator_config_hash,
@@ -860,8 +864,18 @@ class BeamSearch:
         #: depend on its behaviour must not be altered to satisfy a later
         #: rule. It contains it. `isolation` knows no field names.
         config_touched: dict[str, Any] = {}
+        #: THE SECOND CHANNEL. Config is what a child inherits through
+        #: `build_config`; WEIGHTS are what it is built from. An operator that
+        #: scores by temporarily ablating its parent -- zeroing a head's output
+        #: columns, bypassing a block -- and fails to restore it would leave
+        #: every later sibling expanding a damaged parent, and the shared root
+        #: is where that persists. Per-parameter float64 sums on-device, so
+        #: this is milliseconds rather than a hash of 8 GiB.
+        weights_before = parameter_fingerprint(parent_model)
         with isolate_parent_config(parent_model, config_touched):
             outcome = impl.execute(ctx)
+        parent_weights_disturbed = weights_disturbed(
+            weights_before, parameter_fingerprint(parent_model))
         elapsed = time.time() - started
 
         state.steps = (*parent.steps, replace(
@@ -889,6 +903,13 @@ class BeamSearch:
             #: historical digest depends on execution order deserves to find
             #: the answer in the telemetry rather than re-derive it.
             parent_config_restored=dict(config_touched),
+            #: RECORDED, NOT RAISED. An operator that leaves its parent
+            #: altered is a defect, but discovering it mid-search by throwing
+            #: away hours of paid expansions would be a worse outcome than
+            #: recording it and letting the ranking be reviewed. It lands in
+            #: the expansion's telemetry, where a reader asking why two
+            #: searches disagree will find it.
+            parent_weights_disturbed=parent_weights_disturbed,
             **self.telemetry.drain_phases())
         del outcome
         self.store.append(state)

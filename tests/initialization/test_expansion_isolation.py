@@ -26,7 +26,8 @@ from __future__ import annotations
 import pytest
 
 from aadistill.initialization.planning.isolation import (
-    config_snapshot, isolate_parent_config, restore_config,
+    config_snapshot, isolate_parent_config, parameter_fingerprint,
+    restore_config, weights_disturbed,
 )
 
 
@@ -253,3 +254,115 @@ class TestTheSearchActuallyUsesIt:
         assert "parent_config_restored=dict(config_touched)" in src, (
             "the diff is undone but not recorded; a silently restored "
             "mutation is one nobody knows about")
+
+
+class TestTheWeightsChannel:
+    """Config is what a child INHERITS; weights are what it is BUILT from. The
+    invariant needs both, and `isolate_parent_config` alone covers one.
+
+    The concrete failure this guards: an operator that scores by temporarily
+    ablating its parent -- `attention.causal_kl_v1` zeroes a head's `o_proj`
+    columns, `bypassed_blocks` swaps the decoder layer list -- and fails to
+    restore it. Every later sibling off the SHARED root would then expand a
+    damaged parent, silently, and the search's own digests would be the only
+    evidence that anything happened.
+    """
+
+    def _lin(self):
+        import torch
+
+        return torch.nn.Linear(4, 3)
+
+    def test_an_undisturbed_parent_reports_nothing(self):
+        m = self._lin()
+        before = parameter_fingerprint(m)
+        assert weights_disturbed(before, parameter_fingerprint(m)) == []
+
+    def test_a_single_element_write_is_caught(self):
+        import torch
+
+        m = self._lin()
+        before = parameter_fingerprint(m)
+        with torch.no_grad():
+            m.weight[0, 0] += 1.0
+        found = weights_disturbed(before, parameter_fingerprint(m))
+        assert [d["parameter"] for d in found] == ["weight"]
+        assert found[0]["was"] != found[0]["became"]
+
+    def test_a_zeroed_column_is_caught(self):
+        """The ablation shape an attention scorer really uses."""
+        import torch
+
+        m = self._lin()
+        before = parameter_fingerprint(m)
+        with torch.no_grad():
+            m.weight[:, 1] = 0.0
+        assert weights_disturbed(before, parameter_fingerprint(m))
+
+    def test_a_restore_to_the_ORIGINAL_values_reports_nothing(self):
+        """The good path: an operator that ablates and restores correctly must
+        not be reported, or the signal is noise."""
+        import torch
+
+        m = self._lin()
+        before = parameter_fingerprint(m)
+        with torch.no_grad():
+            saved = m.weight[:, 1].detach().clone()
+            m.weight[:, 1] = 0.0
+            m.weight[:, 1] = saved
+        assert weights_disturbed(before, parameter_fingerprint(m)) == []
+
+    def test_what_it_cannot_catch_is_stated_rather_than_implied(self):
+        """A sum-preserving permutation slips through. Asserted so the limit is
+        a known property instead of a surprise -- a guard that reads as
+        protection without being it is worse than none."""
+        import torch
+
+        m = self._lin()
+        before = parameter_fingerprint(m)
+        with torch.no_grad():
+            m.weight[0, 0], m.weight[0, 1] = (
+                m.weight[0, 1].clone(), m.weight[0, 0].clone())
+        assert weights_disturbed(before, parameter_fingerprint(m)) == []
+        from pathlib import Path
+
+        from aadistill.initialization.planning import isolation
+
+        assert "does NOT catch" in Path(isolation.__file__).read_text()
+
+    def test_it_survives_an_object_with_no_parameters(self):
+        class _Bare:
+            pass
+
+        assert parameter_fingerprint(_Bare()) is None
+        assert weights_disturbed(None, None) == []
+
+    def test_the_search_records_it_per_expansion(self):
+        """A mechanism with no production caller protects nothing."""
+        import ast
+        from pathlib import Path
+
+        from aadistill.initialization.planning import search
+
+        src = Path(search.__file__).read_text()
+        assert "parameter_fingerprint(parent_model)" in src
+        assert "parent_weights_disturbed=parent_weights_disturbed" in src
+        #: Taken BEFORE the operator and compared AFTER, in that order.
+        tree = ast.parse(src)
+        fn = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)
+                  and n.name == "_expand_one")
+        body = ast.unparse(fn)
+        assert body.index("weights_before = parameter_fingerprint") < \
+            body.index("impl.execute(ctx)") < body.index("weights_disturbed(")
+
+    def test_it_is_recorded_and_not_raised(self):
+        """Throwing mid-search would discard hours of paid expansions over a
+        defect a reader can act on afterwards."""
+        from pathlib import Path
+
+        from aadistill.initialization.planning import search
+
+        src = Path(search.__file__).read_text()
+        i = src.index("parent_weights_disturbed = weights_disturbed(")
+        window = src[i:i + 600]
+        assert "raise" not in window

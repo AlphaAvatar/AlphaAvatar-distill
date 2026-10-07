@@ -43,6 +43,12 @@ about, and the next person to wonder why a digest moved deserves the evidence.
 It knows no field names, no model family and no operator. The quantity it
 protects is "whatever `config.to_dict()` said before", because that is exactly
 the quantity a child inherits.
+
+THE SECOND CHANNEL is weights, and `parameter_fingerprint` covers it. An
+operator that scores by temporarily ablating part of its parent -- zeroing a
+head's output columns, bypassing a block -- and fails to restore it leaves
+every later sibling expanding a damaged parent. Config and weights are the two
+things a child is built from, so the invariant above needs both.
 """
 from __future__ import annotations
 
@@ -139,3 +145,60 @@ def isolate_parent_config(model: Any, record: dict[str, Any] | None = None
         yield touched
     finally:
         touched.update(restore_config(model, snapshot))
+
+
+def parameter_fingerprint(model: Any) -> tuple[tuple[str, float], ...] | None:
+    """A per-parameter float64 sum, computed on whatever device holds it.
+
+    THE OTHER CHANNEL. `config_snapshot` covers what an operator assigns to a
+    parent's config; this covers what it writes into a parent's WEIGHTS. An
+    operator that scores by temporarily ablating part of the parent -- zeroing
+    a head's output columns, bypassing a block -- and fails to restore it would
+    leave every later sibling expanding a damaged parent, and the shared root
+    is exactly where that persists.
+
+    WHAT IT CAN AND CANNOT CATCH, stated because a guard that reads as
+    protection without being it is worse than none. A per-parameter sum changes
+    under any realistic in-place write: a zeroed column, a scaled row, a
+    restored-to-the-wrong-value tensor. It does NOT catch a change that
+    preserves every parameter's sum exactly -- swapping two elements of one
+    tensor, or a compensating pair of edits. No operator does that, and a
+    cryptographic hash of 8 GiB of GPU-resident weights per expansion would
+    cost more than the search it protects.
+
+    `None` when the object exposes no parameters, which keeps this usable from
+    a test handed a bare module.
+    """
+    named = getattr(model, "named_parameters", None)
+    if not callable(named):
+        return None
+    try:
+        import torch
+    except Exception:                                             # noqa: BLE001
+        return None
+    out: list[tuple[str, float]] = []
+    with torch.no_grad():
+        for name, param in named():
+            try:
+                out.append((name, float(param.detach().to(torch.float64).sum())))
+            except Exception:                                     # noqa: BLE001
+                return None
+    return tuple(out)
+
+
+def weights_disturbed(before: tuple[tuple[str, float], ...] | None,
+                      after: tuple[tuple[str, float], ...] | None
+                      ) -> list[dict[str, Any]]:
+    """Which parameters an expansion left different. Empty is the good case."""
+    if before is None or after is None:
+        return []
+    seen = dict(after)
+    out: list[dict[str, Any]] = []
+    for name, was in before:
+        became = seen.get(name)
+        if became is None:
+            out.append({"parameter": name, "was": was, "became": None,
+                        "note": "absent afterwards"})
+        elif became != was:
+            out.append({"parameter": name, "was": was, "became": became})
+    return out
