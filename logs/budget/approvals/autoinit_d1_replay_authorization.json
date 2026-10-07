@@ -1,13 +1,13 @@
 {
  "schema": "aadistill.autoinit.spend_authorization/v1",
  "authorization_id": "autoinit.v1.d1_replay",
- "version": 5,
- "granted_utc": "2026-10-07T16:44:59.130936+00:00",
+ "version": 6,
+ "granted_utc": "2026-10-07T18:37:58.511904+00:00",
  "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
  "plan_id": "autoinit.d1_replay",
  "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
  "expected_usd": 2.1437,
- "hard_cap_usd": 2.5856,
+ "hard_cap_usd": 3.3959,
  "authorized_stages": [
   0
  ],
@@ -17,8 +17,8 @@
  "scope_note": "ONE pod, two digest-pinned fixed paths, each leaf fetched and re-identified off-pod the moment it reconstructs. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
  "phase_a_authorized": false,
  "automatic_phase_a_start": false,
- "authorized_session_commit": "a4ee0683756c6ec40777974e6088c714873d8c2d",
- "harness_source_digest": "246c846cddac72a6e19201c748c09cc06c258b447313b2b9bea00e69aa84983f",
+ "authorized_session_commit": "20b1282f6bde6aec0ea872e7c792005632fa915b",
+ "harness_source_digest": "0abecca69041da12f05b2c6ebde257e3b43fb4dfa185c008063890a8440698a5",
  "harness_source_files": [
   "configs/autoinit/d1_replay_artifacts.json",
   "configs/autoinit/d1_replay_artifacts_failed.json",
@@ -30,17 +30,21 @@
   "scripts/pod/autoinit_preflight_setup.sh",
   "scripts/pod/collect_artifacts.py"
  ],
- "per_launch_hard_usd": 2.5856,
- "provenance_commit": "a4ee0683756c6ec40777974e6088c714873d8c2d",
+ "per_launch_hard_usd": 3.3959,
+ "provenance_commit": "20b1282f6bde6aec0ea872e7c792005632fa915b",
  "rate_usd_per_hour": 1.09,
  "one_use": true,
  "max_provider_resources": 1,
  "money": {
-  "ceiling_usd": 3.5,
-  "settled_usd": 0.8144,
+  "ceiling_usd": 10.0,
+  "settled_usd": 1.53,
   "teardown_reserve_usd": 0.1,
-  "available_usd": 2.5856,
-  "n_prior_subruns": 4,
+  "available_from_campaign_usd": 8.37,
+  "allowance_remaining_usd": 3.4959,
+  "available_from_allowance_usd": 3.3959,
+  "available_usd": 3.3959,
+  "bound_by": "GPU engineering allowance",
+  "n_prior_subruns": 5,
   "priced": {
    "expected_minutes": 118.0,
    "soft_minutes": 127.44,
@@ -48,10 +52,10 @@
    "expected_usd": 2.1437,
    "hard_usd": 2.5332
   },
-  "_why_the_cap_is_not_the_ceiling": "4 paid subruns have settled $0.8144 of the $3.5 campaign ceiling. P12.1: the budget is cumulative across every resource and subrun and a rerun does not reset it, so this attempt is capped at ceiling - settled - teardown reserve = $2.5856.",
-  "_the_priced_hard_fits": "$2.5332 hard against $2.5856 available"
+  "_why_the_cap_is_not_the_ceiling": "5 paid subruns have settled $1.53 of the $10.0 campaign ceiling. P12.1: the budget is cumulative across every resource and subrun and a rerun does not reset it, so this attempt is capped at ceiling - settled - teardown reserve = $3.3959.",
+  "_the_priced_hard_fits": "$2.5332 hard against $3.3959 available"
  },
  "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, verifies the provider account balance before creating anything, and has no code path to Phase A",
- "authorization_sha256": "1c26f3e02412a912375ebe4821ec70ff668b62b7ff704c54a738b5cd9f51deae"
+ "authorization_sha256": "200759bb8e1592bc4b6d95f4dad4eb82f4e9f7c675f4d6d31a3556cc5a89174f"
 }
