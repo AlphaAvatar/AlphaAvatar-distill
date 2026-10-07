@@ -1,0 +1,82 @@
+{
+ "schema": "aadistill.phase_d1_replay.run_complete/v1",
+ "run_id": "d1_replay_002",
+ "stage_id": "1",
+ "experiment_id": "phase_d1_replay",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "outcome": "COMPLETE. Both of D1's unretained quality-order finalists were reproduced EXACTLY from the completed search's own records and secured off-pod, identity-verified three times: on the pod against each step's pinned digest, on arrival from the bytes that transferred, and again independently on the development host.",
+ "classification": "ENGINEERING COMPLETE -- a digest-pinned rematerialization, not a measurement. It decided nothing, ranked nothing and selected nothing.",
+ "recorded_utc": "2026-10-07T21:40:00Z",
+ "session_commit": "1301a297a0f10e5a7a559d7576bcbbab56bcf3da",
+ "cost": {
+  "actual_usd": 1.079,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 59.4,
+  "authorized_usd": 7.53,
+  "within_authorization": true,
+  "_owner": "the campaign ledger at validations/finalist-rematerialization/v1/campaign.json owns every draw; this restates only this subrun's.",
+  "campaign_settled_usd": 3.449,
+  "campaign_ceiling_usd": 10.0
+ },
+ "result": {
+  "q2": {
+   "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+   "quality_position": 2,
+   "adopted": true,
+   "seconds": 963.2,
+   "steps": [
+    "ffn.activation_importance_v0 59.92",
+    "depth.causal_kl_greedy_v1 843.53",
+    "width.global_pca_v0 31.74",
+    "attention.activation_importance_v1 10.82"
+   ]
+  },
+  "q4": {
+   "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+   "quality_position": 4,
+   "adopted": true,
+   "seconds": 1280.3,
+   "steps": [
+    "depth.causal_kl_greedy_v1 1155.7",
+    "ffn.activation_importance_v0 48.15",
+    "attention.activation_importance_v1 26.39",
+    "width.global_pca_v0 29.16"
+   ]
+  },
+  "identities_required": [
+   "artifact_digest",
+   "weights_digest",
+   "single_shard_sha256",
+   "arch_signature"
+  ],
+  "differ": [],
+  "n_adopted": 2,
+  "terminal": "ALL_DONE"
+ },
+ "why_it_took_four_failed_subruns": {
+  "the_one_class": "every failure was an INPUT the completed search recorded and the replay did not carry. Not one was a property of the checkpoints, and not one was a scientific finding.",
+  "r4": "the ROOT STATE -- use_cache on the loaded teacher, which reaches every descendant's config.json through build_config",
+  "r5": "the OPERATOR CONFIG -- the Top-200 reference support and the supervised-target position policy; the replay's config hashed to sha256({})",
+  "r6": "the two EXECUTION KNOBS -- micro_batch_size=3 and length_sorted_v1 packing, which `config_hash` excludes by design because they do not change the estimand",
+  "_why_r6_was_the_hard_one": "DEPTH reproduced byte-exactly in r6 while FFN did not, and that asymmetry is what identified the cause: DEPTH's greedy block choice compares KL gaps far larger than batch-order float noise, while FFN keeps the top 3072 of 9728 neurons and near that cutoff a different reduction order flips the kept set.",
+  "the_three_checks_that_now_exist": {
+   "derive_root_state": "the parent the operators start from",
+   "verify_operator_configs": "the protocol they run under",
+   "verify_execution_config": "the runtime shape they reduce in -- which exists precisely because a hash deliberately omits it",
+   "_all_at_zero_dollars": "all three run before launch on the development host and again on the pod before any weights load; all three are mutation-verified."
+  }
+ },
+ "the_driver_was_never_the_discriminator": "r7 ran on host driver 595.91.07 where the completed search and r6 both ran 580.126.09, and reproduced exactly across that difference. The GPU TYPE is pinned because success here IS digest equality, but the driver version is not selectable on this provider -- so this result also establishes that it did not need to be.",
+ "teardown": {
+  "gate": "BLOCKED: allowed=False failed=artifact_manifest_created",
+  "what_happened": "the collector's manifest step returned rc=1, so the launcher retained the pod for evidence and exited 11 with ownership verified. Both products were already secured and identity-verified off-pod, so the pod was pure cost and was removed with runpodctl; the provider confirms gone.",
+  "provider_confirms_gone": true,
+  "next_action": "repair the collector's manifest step. An ordinary defect: the gate was right to refuse a teardown whose manifest it could not create, and wrong only in that nothing distinguishes `products are secured` from `evidence is incomplete` when deciding whether to keep paying."
+ },
+ "products": {
+  "location": "/home/ecs-user/aad-scratch/d1_replay_002/products",
+  "transport": "aadistill.infrastructure.transfer, 8 streams, 11.19 and 11.35 MB/s -- about 23x the 0.486 MB/s a single scp connection measured on this provider, which is why the previous single-stream path could not have moved either leaf inside its own 45-minute cap",
+  "verified_locally": true
+ },
+ "next": "LEAVE REPLAY MODE. The frozen behavioural screening pipeline: q1/q2/q3/q4 at 2 recovery seeds each plus B at 2 matched seeds = 10 probes, under the frozen recovery recipe, fresh battery, scoring contract and decision rule; then exactly one advancing candidate and a fresh 3-seed confirmation against B."
+}

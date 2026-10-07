@@ -162,6 +162,66 @@
       "utc": "2026-10-07T20:47:28+00:00",
       "elapsed_min": 15.33,
       "msg": "driver detached, pid 1585, confirmed by descriptor_probe \u2014 $0.28"
+    },
+    {
+      "utc": "2026-10-07T20:49:39+00:00",
+      "elapsed_min": 17.52,
+      "msg": "  2026-10-07T20:47:25Z MARKER:DRIVER_START \u2014 $0.32"
+    },
+    {
+      "utc": "2026-10-07T21:25:41+00:00",
+      "elapsed_min": 53.54,
+      "msg": "  2026-10-07T21:24:53Z MARKER:ALL_DONE \u2014 $0.97"
+    },
+    {
+      "utc": "2026-10-07T21:25:41+00:00",
+      "elapsed_min": 53.54,
+      "msg": "polling ended: ALL_DONE \u2014 $0.97"
+    },
+    {
+      "utc": "2026-10-07T21:25:54+00:00",
+      "elapsed_min": 53.77,
+      "msg": "  manifest rc=1\n"
+    },
+    {
+      "utc": "2026-10-07T21:26:12+00:00",
+      "elapsed_min": 54.07,
+      "msg": "    model.safetensors: 1192135096 bytes over 8 streams (27.2 GiB free)"
+    },
+    {
+      "utc": "2026-10-07T21:27:55+00:00",
+      "elapsed_min": 55.78,
+      "msg": "    model.safetensors: 1192135096 bytes in 1.7 min (11.19 MB/s) sha256 ca2d7368e3adce3e MATCHES"
+    },
+    {
+      "utc": "2026-10-07T21:28:00+00:00",
+      "elapsed_min": 55.87,
+      "msg": "  leaf afd50c9ff0e3d20542bb5473ea745b55: 1.11 GiB, 11.191 MB/s, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T21:28:03+00:00",
+      "elapsed_min": 55.92,
+      "msg": "    model.safetensors: 1192135096 bytes over 8 streams (26.1 GiB free)"
+    },
+    {
+      "utc": "2026-10-07T21:29:44+00:00",
+      "elapsed_min": 57.6,
+      "msg": "    model.safetensors: 1192135096 bytes in 1.7 min (11.35 MB/s) sha256 973d40e93f784eed MATCHES"
+    },
+    {
+      "utc": "2026-10-07T21:29:49+00:00",
+      "elapsed_min": 57.69,
+      "msg": "  leaf 3fcaf42eaa91b3ed02eab6c2f3213bfc: 1.11 GiB, 11.353 MB/s, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T21:29:49+00:00",
+      "elapsed_min": 57.69,
+      "msg": "teardown gate: allowed=False failed=artifact_manifest_created"
+    },
+    {
+      "utc": "2026-10-07T21:29:49+00:00",
+      "elapsed_min": 57.69,
+      "msg": "GATE BLOCKED \u2014 pod retained for evidence; ownership VERIFIED: watchdog pid 1376924 is live and holds mq4hnmcvkdbfgl to a 139 min hard cap"
     }
   ],
   "stages": {
@@ -346,5 +406,49 @@
     "started_utc": "2026-10-07T20:47:25Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
-  }
+  },
+  "terminal": "ALL_DONE",
+  "fetched_reports": [
+    "d1_replay.json"
+  ],
+  "checkpoints_fetched": [
+    "ProductFetchResult(kind='transfer', detail='afd50c9ff0e3d20542bb5473ea745b55: 1.11 GiB -> /home/ecs-user/aad-scratch/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55 in 1.7 min (11.191 MB/s, 8 streams); single_shard_sha256 ca2d7368e3ad MATCHEDca2d7368e3ad', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='3fcaf42eaa91b3ed02eab6c2f3213bfc: 1.11 GiB -> /home/ecs-user/aad-scratch/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc in 1.7 min (11.353 MB/s, 8 streams); single_shard_sha256 973d40e93f78 MATCHED973d40e93f78', rc=0)"
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "all 2 reconstructed leaves secured off-pod and re-identified against the search's own digests"
+  },
+  "teardown_gate": {
+    "allowed": false,
+    "emergency": false,
+    "failed_check": "artifact_manifest_created",
+    "reason": "teardown blocked at 'artifact_manifest_created'; the pod must not be deleted while a required artifact is only on it",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": false,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": null,
+  "blocked_teardown_ownership": {
+    "pod_id": "mq4hnmcvkdbfgl",
+    "pid": 1376924,
+    "owned": true,
+    "why": "watchdog pid 1376924 is live and names mq4hnmcvkdbfgl",
+    "hard_minutes": 139.44
+  },
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-07T21:29:49+00:00"
 }

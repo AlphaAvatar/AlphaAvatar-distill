@@ -1,5 +1,5 @@
 {
- "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 + 0.8400 = 2.37",
+ "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 + 0.8400 + 1.0790 = 3.449",
  "_ceiling_amendment_2026_10_07": {
   "_the_binding_constraint_is_now_the_allowance_not_this_ceiling": "the GPU ENGINEERING allowance this campaign is charged to has $3.4959 remaining of $20.0000 after the five settled subruns. So the $10.0000 ceiling is headroom rather than available money, and the real bound on the next attempt is the allowance. The session prices at $2.0820 hard, which fits in both. Stated here because a ceiling that exceeds its own funding source is exactly the kind of number that reads as available.",
   "from_usd": 3.5,
@@ -21,18 +21,41 @@
   "search d1_search_20261006_210210": "580.126.09"
  },
  "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance. This session trains nothing, measures nothing and selects nothing -- it reconstructs two checkpoints the completed search already measured -- so it is engineering, not formal science.",
+ "_result": {
+  "_four_inputs_one_per_failed_subrun": "r4 the root state; r5 the operator config (Top-200 reference support and the supervised-target position policy, against sha256({})); r6 the two execution knobs that no hash covers (micro_batch_size=3, length_sorted_v1). Every one was an input the search recorded and the replay did not carry. None was a property of the checkpoints.",
+  "_the_driver_was_never_the_discriminator": "r7 ran on host driver 595.91.07 where the search and r6 both ran 580.126.09, and reproduced exactly across that difference. So r6's byte-exact DEPTH was not a driver-matched artefact, and the execution configuration was the whole cause.",
+  "differ": [],
+  "identities_required": [
+   "artifact_digest",
+   "weights_digest",
+   "single_shard_sha256",
+   "arch_signature"
+  ],
+  "q2": {
+   "adopted": true,
+   "seconds": 963.2,
+   "single_shard_sha256": "ca2d7368e3adce3e\u2026",
+   "state_id": "afd50c9ff0e3d20542bb5473ea745b55"
+  },
+  "q4": {
+   "adopted": true,
+   "seconds": 1280.3,
+   "single_shard_sha256": "973d40e93f784eed\u2026",
+   "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc"
+  }
+ },
  "_status_is_derived_by": "filed per paid subrun against this ledger, which owns every draw; booked_usd is recomputed from the components.",
  "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
  "_what_the_four_failures_have_in_common": "every one was in the replay HARNESS and none was in the science. No candidate was selected, no measurement was taken, no frozen protocol moved, and the completed search's 92 expansions, 12 leaves, committed ranking and frozen Top-4 are untouched by all of it. Two leaves (quality positions 1 and 3) were already secured and identity-verified off-pod by the search session itself and are unaffected.",
  "authorization": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the four limit checks, the account-balance gate and the same-failure gate to pass",
- "booked_usd": 2.37,
+ "booked_usd": 3.449,
  "campaign_id": "d1_finalist_rematerialization",
  "ceiling_usd": 10.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- 6 paid subruns, $2.3700 of $10.0000. r6 reproduced the DEPTH operator byte-exactly, which no earlier attempt reached; FFN remains, on a single identified cause.",
+ "status": "CLOSED -- 7 paid subruns, $3.4490 of $10.0000. Both unretained quality-order finalists reproduced EXACTLY and are secured off-pod with their digests re-derived from the arrived bytes and again independently on the development host.",
  "subruns": [
   {
    "cost_usd": 0.155,
@@ -129,6 +152,27 @@
     "q4 steps 0-1"
    ],
    "subrun_id": "r6"
+  },
+  {
+   "_teardown": "THE GATE BLOCKED and the pod was removed by hand. `teardown gate: allowed=False failed=artifact_manifest_created` -- the collector's manifest step had returned rc=1 earlier -- so the launcher retained the pod for evidence and exited 11, with ownership VERIFIED (watchdog pid 1376924 live, 139 min hard cap). That is the gate behaving correctly: it refuses to delete a pod whose artifact manifest it could not create. But both products were ALREADY secured and identity-verified off-pod at that point, so the pod was pure cost; it was removed with `runpodctl` and the provider confirms gone, pods []. The manifest failure is an ordinary collector defect to repair, not a reason to hold a billing resource.",
+   "cost_usd": 1.079,
+   "elapsed_minutes": 59.4,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "q2 afd50c9f: 963.2 s, steps [FFN 59.92, DEPTH 843.53, WIDTH 31.74, ATTENTION 10.82]. q4 3fcaf42e: 1280.3 s, steps [DEPTH 1155.7, FFN 48.15, ATTENTION 26.39, WIDTH 29.16]. n_adopted 2, MARKER:ALL_DONE. What made the difference: the execution configuration. FFN had failed in r5 and r6 and reproduced here at micro_batch_size=3 with length_sorted_v1 packing, the values all eight recorded steps carry. ACROSS A DIFFERENT DRIVER: this pod reported 595.91.07 where the search and r6 both ran 580.126.09, so the host driver was never the discriminator -- the execution configuration was. That also means r6's byte-exact DEPTH was not a driver-matched artefact. Four inputs had to be carried, one per failed subrun: the root state (r4), the operator config -- Top-200 reference support and the supervised-target position policy (r5), and the two execution knobs that no hash covers (r6). All three agreement checks now run at $0 before launch and again on the pod.",
+   "outcome": "COMPLETE. Both finalists reproduced EXACTLY -- all eight pinned steps, all four identities, differ: [] on both",
+   "pod_id": "mq4hnmcvkdbfgl",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "1301a297a0f10e5a7a559d7576bcbbab56bcf3da",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 all 4 steps",
+    "q4 all 4 steps",
+    "fetch",
+    "teardown"
+   ],
+   "subrun_id": "r7"
   }
  ],
  "teardown_reserve_usd": 0.1
