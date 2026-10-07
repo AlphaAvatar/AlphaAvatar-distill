@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.autoinit.spend_authorization/v1",
  "authorization_id": "autoinit.v1.d1_replay",
- "version": 4,
- "granted_utc": "2026-10-07T16:40:05.723973+00:00",
+ "version": 5,
+ "granted_utc": "2026-10-07T16:44:59.130936+00:00",
  "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
  "plan_id": "autoinit.d1_replay",
  "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
@@ -17,7 +17,7 @@
  "scope_note": "ONE pod, two digest-pinned fixed paths, each leaf fetched and re-identified off-pod the moment it reconstructs. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
  "phase_a_authorized": false,
  "automatic_phase_a_start": false,
- "authorized_session_commit": "47a9fa8c17b73cd3493809b56b550430b94937bf",
+ "authorized_session_commit": "a4ee0683756c6ec40777974e6088c714873d8c2d",
  "harness_source_digest": "246c846cddac72a6e19201c748c09cc06c258b447313b2b9bea00e69aa84983f",
  "harness_source_files": [
   "configs/autoinit/d1_replay_artifacts.json",
@@ -31,7 +31,7 @@
   "scripts/pod/collect_artifacts.py"
  ],
  "per_launch_hard_usd": 2.5856,
- "provenance_commit": "47a9fa8c17b73cd3493809b56b550430b94937bf",
+ "provenance_commit": "a4ee0683756c6ec40777974e6088c714873d8c2d",
  "rate_usd_per_hour": 1.09,
  "one_use": true,
  "max_provider_resources": 1,
@@ -53,5 +53,5 @@
  },
  "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, verifies the provider account balance before creating anything, and has no code path to Phase A",
- "authorization_sha256": "b1c1e955f48bae69f9002253455eed1f09942de8d11c3001f8a00d062396df0b"
+ "authorization_sha256": "1c26f3e02412a912375ebe4821ec70ff668b62b7ff704c54a738b5cd9f51deae"
 }
