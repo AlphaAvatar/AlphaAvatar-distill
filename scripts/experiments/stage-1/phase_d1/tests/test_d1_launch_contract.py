@@ -1178,12 +1178,21 @@ class TestTheReplayFillsEveryRegistryItNeeds:
         }
         assert "_register_frozen_operators" in calls
 
-    def test_every_profile_and_operator_the_plan_names_resolves(self):
+    def test_every_frozen_profile_and_operator_resolves(self):
         """The check the pod made at $1.09/h, made here for nothing.
 
-        Resolves EVERY profile and implementation the two pinned paths name,
-        after the single owner has run -- so an empty or partial registry is a
-        local failure instead of a paid one.
+        Reads the frozen space and the design -- NOT the replay plan. The first
+        version called `replay_plan()`, which reads the 67 MB state journal from
+        an out-of-tree dev-box path, and the pod test gate ran it where that
+        path does not exist:
+
+            ReplaySourceError: the state journal is not at
+            /home/ecs-user/aad-scratch/.../states.jsonl
+
+        A third pod, $0.1849, for a test of mine that could not run on a pod.
+        The journal belongs to plan RESOLUTION, which happens on the dev box;
+        what a pod needs is that the registries fill, and that is answerable
+        from the committed tree alone.
         """
         from aadistill.initialization.calibration.profiles import get_profile
         from aadistill.initialization.operators.base import get_implementation
@@ -1192,16 +1201,16 @@ class TestTheReplayFillsEveryRegistryItNeeds:
         from experiments.phase_d1 import replay_specs as R
 
         D1S._register_frozen_operators()
-        leaves = R.replay_plan(D1S.REPO)
-        assert leaves, "the plan resolved no leaf to replay"
-        seen_profiles, seen_impls = set(), set()
-        for leaf in leaves:
-            for step in leaf.steps:
-                assert get_profile(step.profile_id).qualified_id == step.profile_id
-                assert get_implementation(step.impl_id).kind == step.kind
-                seen_profiles.add(step.profile_id)
-                seen_impls.add(step.impl_id)
-        assert len(seen_profiles) >= 2 and len(seen_impls) == 4, (
-            f"the probe exercised {sorted(seen_profiles)} and {sorted(seen_impls)}; "
-            "a plan that named fewer would make this test vacuous")
+        stage = D1S.design()["search_stage"]
+        #: KIND -> impl_id, so the VALUES are the implementations. Iterating the
+        #: mapping yields four plausible-looking kind strings that resolve to
+        #: nothing -- a mistake this repository has already made once.
+        impls = tuple(stage["frozen_implementations"].values())
+        profiles = tuple(stage["profiles"])
+        assert len(impls) == 4, impls
+        assert len(profiles) >= 2, profiles
+        for impl_id in impls:
+            assert get_implementation(impl_id).impl_id == impl_id
+        for qualified in profiles:
+            assert get_profile(qualified).qualified_id == qualified
         assert get_adapter(R.FAMILY).family == R.FAMILY
