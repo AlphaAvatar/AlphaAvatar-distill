@@ -1,0 +1,14 @@
+{"t": 0.0, "stage": "A", "name": "environment", "status": "start"}
+{"t": 1.181, "stage": "A", "name": "environment", "seconds": 1.18, "status": "ok", "result": {"gpu": "NVIDIA L40S"}}
+{"t": 1.181, "stage": "A", "name": "registries_and_design", "status": "start"}
+{"t": 1.218, "stage": "A", "name": "registries_and_design", "seconds": 0.037, "status": "ok", "result": {"design_hash": "83cd49ff2e833909"}}
+{"t": 1.218, "stage": "A", "name": "session_and_contract", "status": "start"}
+{"t": 1.288, "stage": "A", "name": "session_and_contract", "seconds": 0.07, "status": "ok", "result": {"protocol": "ac23798a4572fab5", "config_hash": "8fa0a2c91079b24a"}}
+{"t": 1.289, "stage": "A", "name": "authorization", "status": "start"}
+{"t": 1.292, "stage": "A", "name": "authorization", "seconds": 0.004, "status": "ok", "result": {"hard_cap_usd": 21.4897}}
+{"t": 1.292, "stage": "B", "name": "teacher_and_reference", "status": "start"}
+{"t": 8.264, "stage": "B", "name": "teacher_and_reference", "seconds": 6.971, "status": "ok", "result": {"revision": "768f209d9ea8", "root_sha256": "6de20cc746dd"}}
+{"t": 8.264, "stage": "C", "name": "beam_search", "status": "start"}
+{"t": 31690.8, "stage": "C", "name": "beam_search", "seconds": 31682.536, "status": "ok", "result": {"states": 93, "leaves": 12}}
+{"t": 31690.801, "stage": "D", "name": "commit_top_k", "status": "start"}
+{"t": 31690.84, "stage": "D", "name": "commit_top_k", "seconds": 0.04, "status": "ok", "result": {"committed": 4, "state_ids": ["e5e3edb0477b25147de952153da8fc21", "56388d47b6a71e1b49e44929e48d4061", "a2b2f04ae642ac69d278c20feb42d52f", "ea4fe4d356b8c8f40f048256df6b8999"]}}

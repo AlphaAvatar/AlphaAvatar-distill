@@ -91,62 +91,167 @@
   },
   "timeline": [
     {
-      "utc": "2026-10-06T21:07:29+00:00",
+      "utc": "2026-10-06T21:10:44+00:00",
       "elapsed_min": 0.0,
       "msg": "budget: expected 657 min $11.93 \u00b7 soft $19.90 \u00b7 hard $20.45 (authorized $21.49)"
     },
     {
-      "utc": "2026-10-06T21:07:30+00:00",
+      "utc": "2026-10-06T21:10:45+00:00",
       "elapsed_min": 0.0,
       "msg": "NVIDIA L40S $1.09/h, stock Low"
     },
     {
-      "utc": "2026-10-06T21:07:30+00:00",
+      "utc": "2026-10-06T21:10:45+00:00",
       "elapsed_min": 0.0,
       "msg": "account funds OK: the provider account holds $199.9506 against the $30.0000 this session must be able to fund"
     },
     {
-      "utc": "2026-10-06T21:07:30+00:00",
+      "utc": "2026-10-06T21:10:45+00:00",
       "elapsed_min": 0.0,
       "msg": "run d1_search_20261006_210210 on the supervised_target arm, design 83cd49ff2e83, config 8fa0a2c91079, no open blockers"
     },
     {
-      "utc": "2026-10-06T21:07:30+00:00",
+      "utc": "2026-10-06T21:10:45+00:00",
       "elapsed_min": 0.0,
       "msg": "session contract verified at $0: protocol ac23798a4572, config 8fa0a2c91079, suite a1197205e43a"
     },
     {
-      "utc": "2026-10-06T21:07:30+00:00",
+      "utc": "2026-10-06T21:10:45+00:00",
       "elapsed_min": 0.0,
       "msg": "science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1"
     },
     {
-      "utc": "2026-10-06T21:07:31+00:00",
+      "utc": "2026-10-06T21:10:46+00:00",
       "elapsed_min": 0.0,
       "msg": "launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers"
     },
     {
-      "utc": "2026-10-06T21:07:31+00:00",
+      "utc": "2026-10-06T21:10:46+00:00",
       "elapsed_min": 0.0,
       "msg": "session commit 77aedc90f93f verified: harness digests to 3b59b9480015\u2026, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json differs from the authorized base"
     },
     {
-      "utc": "2026-10-06T21:07:37+00:00",
+      "utc": "2026-10-06T21:10:51+00:00",
       "elapsed_min": 0.0,
       "msg": "aad_autoinit_77aedc90.bundle (29052777 bytes, c44ff349c373) round-trips to 77aedc90f93f carrying this authorization and harness 3b59b9480015"
     },
     {
-      "utc": "2026-10-06T21:07:37+00:00",
+      "utc": "2026-10-06T21:10:51+00:00",
       "elapsed_min": 0.0,
       "msg": "precheck OK: 0 relay inputs (), 3 local assets"
     },
     {
-      "utc": "2026-10-06T21:07:37+00:00",
+      "utc": "2026-10-06T21:10:52+00:00",
       "elapsed_min": 0.0,
-      "msg": "DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills."
+      "msg": "watchdog detached \u2014 hard 1126 min = $20.45"
+    },
+    {
+      "utc": "2026-10-06T21:10:52+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created gw4ofgfphr07ea at $1.09/h"
+    },
+    {
+      "utc": "2026-10-06T21:11:46+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-06T21:12:49+00:00",
+      "elapsed_min": 1.96,
+      "msg": "TCP 22 at 202.181.159.240:15117 after 2.0 min"
+    },
+    {
+      "utc": "2026-10-06T21:12:52+00:00",
+      "elapsed_min": 2.0,
+      "msg": "draw 1: ssh reachable \u2014 $0.04"
+    },
+    {
+      "utc": "2026-10-06T21:13:22+00:00",
+      "elapsed_min": 2.5,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+    },
+    {
+      "utc": "2026-10-06T21:13:22+00:00",
+      "elapsed_min": 2.5,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-06T21:19:21+00:00",
+      "elapsed_min": 8.49,
+      "msg": "draw 1: setup complete \u2014 $0.15"
+    },
+    {
+      "utc": "2026-10-06T21:19:26+00:00",
+      "elapsed_min": 8.57,
+      "msg": "driver detached, pid 1532, confirmed by descriptor_probe \u2014 $0.16"
+    },
+    {
+      "utc": "2026-10-06T21:21:36+00:00",
+      "elapsed_min": 10.74,
+      "msg": "  2026-10-06T21:19:24Z MARKER:DRIVER_START \u2014 $0.20"
+    },
+    {
+      "utc": "2026-10-07T06:09:44+00:00",
+      "elapsed_min": 538.86,
+      "msg": "  2026-10-07T06:07:35Z MARKER:ALL_DONE \u2014 $9.79"
+    },
+    {
+      "utc": "2026-10-07T06:09:44+00:00",
+      "elapsed_min": 538.86,
+      "msg": "polling ended: ALL_DONE \u2014 $9.79"
+    },
+    {
+      "utc": "2026-10-07T06:11:37+00:00",
+      "elapsed_min": 540.75,
+      "msg": "  manifest rc=0\n5 file(s) across 5 class(es) -> /workspace/manifest.json\n  final_required: 5 \u00b7 mutable_snapshot: 0 \u00b7 final_streams_quiescent: True"
+    },
+    {
+      "utc": "2026-10-07T06:17:00+00:00",
+      "elapsed_min": 546.14,
+      "msg": "  product e5e3edb0477b25147de952153da8fc21: rc=0, 1.11 GiB, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T06:18:51+00:00",
+      "elapsed_min": 547.98,
+      "msg": "  product 56388d47b6a71e1b49e44929e48d4061: rc=0, 1.11 GiB, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T06:20:43+00:00",
+      "elapsed_min": 549.85,
+      "msg": "  product a2b2f04ae642ac69d278c20feb42d52f: rc=0, 1.11 GiB, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T06:22:40+00:00",
+      "elapsed_min": 551.8,
+      "msg": "  product ea4fe4d356b8c8f40f048256df6b8999: rc=0, 1.11 GiB, identity MATCHED"
+    },
+    {
+      "utc": "2026-10-07T06:22:40+00:00",
+      "elapsed_min": 551.8,
+      "msg": "teardown gate: allowed=True failed=None"
+    },
+    {
+      "utc": "2026-10-07T06:22:40+00:00",
+      "elapsed_min": 551.8,
+      "msg": "deleting pod (gate passed)"
+    },
+    {
+      "utc": "2026-10-07T06:22:51+00:00",
+      "elapsed_min": 551.99,
+      "msg": "pod deleted \u2014 552.0 min, $10.03; provider confirms gone: True"
     }
   ],
-  "stages": {},
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
   "authorization": {
     "schema": "aadistill.phase_d1.authorization/v1",
     "authorization_id": "autoinit.v1.phase_d1",
@@ -637,9 +742,110 @@
     ],
     "local_missing": []
   },
-  "dry_run": true,
-  "provider_resource_created": false,
-  "terminal": "DRY_RUN_GATES_PASSED",
-  "_dry_run_is_not_a_pass": "every pre-provider gate passed and nothing was created. That is evidence the chain is launchable, not evidence the session succeeded: no pod existed, no stage ran and nothing was measured.",
-  "passed": false
+  "pod_id": "gw4ofgfphr07ea",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-07T15:56:24Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/d1_search_20261006_210210/watchdog_gw4ofgfphr07ea.jsonl"
+  ],
+  "watchdog_owns_pod": "gw4ofgfphr07ea",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.126.09"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_77aedc90.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json",
+    "SESSION_COMMIT": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f",
+    "SESSION_KIND": "d1",
+    "SESSION_PLAN_HASH": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/experiments/stage-1/phase_d1/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d1",
+    "pid": 1532,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_d1_driver.py --out '/workspace/aad/artifacts/audit/autoinit_d1' --run-id 'd1_search_20261006_210210' --authorization '/workspace/aad/logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json' --arm 'supervised_target' --status '/workspace/autoinit_d1.status' --device cuda",
+    "log_path": "/workspace/autoinit_d1_run.log",
+    "status_path": "/workspace/autoinit_d1.status",
+    "pid_path": "/workspace/jobs/autoinit_d1.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d1.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d1.exit",
+    "started_utc": "2026-10-06T21:19:24Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "terminal": "ALL_DONE",
+  "local_hash_problems": [],
+  "fetched_reports": [
+    "d1_search.json",
+    "journal.jsonl",
+    "stage1_selection.json"
+  ],
+  "checkpoints_fetched": [
+    "ProductFetchResult(kind='transfer', detail='e5e3edb0477b25147de952153da8fc21: rc=0, 1.11 GiB -> /home/ecs-user/aad-scratch/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21; identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='56388d47b6a71e1b49e44929e48d4061: rc=0, 1.11 GiB -> /home/ecs-user/aad-scratch/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061; identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='a2b2f04ae642ac69d278c20feb42d52f: rc=0, 1.11 GiB -> /home/ecs-user/aad-scratch/d1_search_20261006_210210/products/a2b2f04ae642ac69d278c20feb42d52f; identity MATCHED (re-identified)', rc=0)",
+    "ProductFetchResult(kind='transfer', detail='ea4fe4d356b8c8f40f048256df6b8999: rc=0, 1.11 GiB -> /home/ecs-user/aad-scratch/d1_search_20261006_210210/products/ea4fe4d356b8c8f40f048256df6b8999; identity MATCHED (re-identified)', rc=0)"
+  ],
+  "required_products_secured": {
+    "ok": true,
+    "why": "both selected checkpoints secured off-pod and identity-verified (4 of 4)"
+  },
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": false,
+    "failed_check": null,
+    "reason": "every teardown check passed",
+    "checks": {
+      "training_complete": true,
+      "evaluation_complete": true,
+      "artifact_manifest_created": true,
+      "required_files_present": true,
+      "final_streams_quiescent": true,
+      "archive_created": true,
+      "archive_contents_verified": true,
+      "transfer_complete": true,
+      "local_hashes_verified": true,
+      "checkpoint_hashes_matched": true,
+      "required_products_secured": true,
+      "report_inputs_verified": true
+    },
+    "incomplete_event_streams": []
+  },
+  "manifest_summary": {
+    "ok": true,
+    "entries": 5,
+    "missing": [],
+    "still_being_written": []
+  },
+  "final_pod_state": {
+    "exists": false,
+    "desired_status": "TERMINATED",
+    "billing": false
+  },
+  "provider_confirms_gone": true,
+  "cost": {
+    "price_per_hour": 1.09,
+    "elapsed_minutes": 551.99,
+    "actual_usd": 10.0277,
+    "authorized_usd": 21.4897,
+    "within_authorization": true
+  },
+  "passed": true,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-07T06:22:51+00:00"
 }

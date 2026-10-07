@@ -10,122 +10,92 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 ## Right now
 
 **Nothing is running and nothing is billing.** An account-wide query returns
-**0 pods and 0 network volumes**, and the RunPod balance is restored to
-`$199.9506` with a spend rate of `$0/h`.
+**0 pods and 0 network volumes**; the RunPod balance is `$190.0766` at a spend
+rate of `$0/h`.
 
-**THE SECOND FORMAL D1 SEARCH RAN ITS BEAM FOR 449.8 MINUTES AND WAS STOPPED
-BY AN EXHAUSTED RUNPOD ACCOUNT BALANCE.** Run `d1_search_20261006_101725` cleared every gate,
-cleared stages A and B on real CUDA, and was 39 of 92 expansions into the beam
-when the provider removed the pod. **`$8.1716` of `$21.4897`, 0 complete leaves,
-no scientific endpoint.** Owner:
-[`runs/d1_search_20261006_101725/closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_101725/closeout/outcome.json).
-
-**It was not any limit in this project**, and four things say so:
+**THE D1 FORMAL TARGET-AWARE SEARCH IS COMPLETE.** Run
+`d1_search_20261006_210210` ran its full trajectory, produced **12 complete
+leaves**, committed a **Top-4** candidate set, and secured all four checkpoints
+off-pod with every digest matching what the search itself recorded. `$10.0277`
+of `$21.4897`, 552 of 1125.55 authorized minutes. Owner:
+[`runs/d1_search_20261006_210210/closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_search_20261006_210210/closeout/outcome.json).
 
 ```text
-watchdog journal   action `none` on all 446 polls, over_hard_limit false
-terminate_after    2026-10-07T05:09:29Z -- 11 h 20 min AFTER the pod stopped
-elapsed            449.81 of 1125.55 authorized minutes (40% of the bound)
-pod disk           176 of 400 GB used, 225 GB free
+terminal          ALL_DONE            92/92 expansions · 172 states · 12 leaves
+teardown gate     allowed, NOT emergency, 11 of 11 checks true, failed_check null
+products          4 of 4 secured and identity-verified, 1.11 GiB each
+manifest          5 of 5 required, nothing missing, streams quiescent
+pod               gw4ofgfphr07ea deleted, provider-confirmed gone
 ```
 
-**The workdir is irrecoverable and the next search starts from zero.** The pod
-was DELETED, not stopped — GraphQL `pod(podId)` returns null, REST returns `404
-pod not found`, REST `/v1/pods` over all states returns `[]`, and the watchdog's
-own independent poll recorded `pod_exists false` at `17:53:03`, 43 seconds
-*before* this project's own delete call. So RunPod removed it outright and the
-launcher's error path did not cost the recovery. About 147 GB of materialized
-checkpoints is gone. **`search.py::_restore()` was NOT weakened**: it still
-requires checkpoint bytes whose digest matches the journal.
+It is the first of three attempts to reach a clean, non-emergency teardown
+gate. The pod recomputed `design_hash 83cd49ff2e833909` and `config_hash
+8fa0a2c91079b24a` and both match the authorization, so the Top-4 design is
+confirmed on the device rather than argued about.
 
-What survived is luck. The launcher's collection never ran, so the only record
-of the minutes this run paid for is the out-of-band snapshots taken while
-diagnosing the transfer link — 38 parseable `measured` state records, all under
-one measurement protocol, and 39 expansions of telemetry, filed under
-`evidence/` with `_partial_oob_` in their names and labelled **evidence only**.
-
-**Five repairs came out of it, all generic, none D1-specific.**
+**AND THE RANKING CARRIES A FINDING THE RETENTION DECISION NEEDS.** Top-4 is
+**not** the four best leaves by the proxy. `beam.pareto_multi_objective@v2`
+rotates selection over distinct **lineages** across Pareto fronts, so widening
+2 to 4 bought structural diversity and not score breadth:
 
 ```text
-check_account_funds()    the gate nobody had: the PROVIDER ACCOUNT balance is
-                         verified against a session-declared requirement at $0,
-                         before create() and before the dry-run stop
-finish_emergency()       now passes streams_at_risk(None, streams). It never
-                         had, so a session declaring no event streams could not
-                         satisfy "name the streams you are truncating" -- there
-                         was none -- and the closeout threw instead of recording
-observed_stop_cause()    classifies from the watchdog journal on disk:
-                         watchdog_hard_termination / provider_stopped_or_
-                         terminated / provider_stopped_pod_still_exists /
-                         unknown. The log and the closeout had both ASSERTED a
-                         watchdog termination that never happened
-balance accounting       `hard_ceiling_usd` already contains container disk --
-                         gpu 20.4475 + disk 1.0422 = 21.4897 exactly -- so a
-                         derivation that re-adds it double-counts. A session
-                         ceiling owns which components it contains
-waiter liveness          a product fetcher kept polling the deleted host every
-                         60 s for a file that could never appear; waiters now
-                         stop on consecutive unreachability
+dom  SEL   equal_mean   state_id            why
+  1  TOP4    7.434143   e5e3edb0477b2514…   front 0, ffn-first lineage
+  2    -     7.650625   afd50c9ff0e3d205…   shares a selected lineage
+  3  TOP4    8.233053   56388d47b6a71e1b…   front 2, depth-first lineage
+  4    -     8.310306   3fcaf42eaa91b3ed…   shares a selected lineage
+  5  TOP4    9.682548   a2b2f04ae642ac69…   front 2, attention-first lineage
+  6    -     8.322881   46875b77689f2acc…   shares a selected lineage
+ ...
+ 11  TOP4   15.226753   ea4fe4d356b8c8f4…   front 6, the ONLY width-first leaf
+ 12    -    18.393698   e2b84a6d1c935d66…
 ```
 
-The core-ownership guard then caught the campaign's own numbers in those core
-docstrings and was right to — `$21.4897` and `449.8` are instance facts and
-belong here and in the closeout, not in `src/aadistill`. The core prose is
-generic; the specifics are in this file.
+The fourth finalist is **dominance rank 11 of 12**, at `15.226753` against
+`7.434143` for the first — **2.05x** the teacher KL, and worse than seven leaves
+that were not selected. The widening was adopted so the cheap ranking could not
+eliminate a candidate it cannot reliably rank, meaning the ones at ranks 2 and 4
+(`7.65`, `8.31`); those are **still excluded**, because they share lineages with
+the states already kept. Retention WIDTH and retention CRITERION are different
+choices and widening the first did not change the second. Nothing here says
+lineage diversity is the wrong criterion — only that it, not score, is what
+Top-4 actually bought.
 
-**TOP-4 IS THE DOWNSTREAM POLICY NOW.** A maintainer decision of 2026-10-07,
-after the historical full-search records were re-read: Phase-B attempt5 and C2
-attempt4 both committed `n_selected = 5`, so Top-2 was never an inherited
-retention convention. It gave elimination power to the quantity the design
-itself marks UNKNOWN — `P(a behaviourally good candidate is in the Top-K)` —
-and C2 measured the cheap state-eval ranking to be a weak predictor of recovered
-behaviour.
+The complete 12-leaf ranking is preserved in full at
+`evidence/complete_leaf_ranking.json` with every objective value, operator path,
+calibration profile and digest, precisely because only four are products: a
+retention-width decision must not destroy the ranking that informed it.
+
+**Behavioural screening is NOT started.** The maintainer reserved the
+Top-2-versus-Top-4 retention decision for before screening begins; the finding
+above is the evidence that decision now has.
+
+**Three attempts, and the two failures bought the gates the third needed.**
 
 ```text
-full target-aware search      UNCHANGED
-  -> complete-leaf Pareto ranking
-  -> retain Top-4             (was Top-2)
-  -> durably secure Top-4 checkpoint products
-  -> Top-4 x 2 screening seeds
-  -> advance one candidate
-  -> fresh 3-seed confirmation vs incumbent B
+d1_search_20261006_055409   $0.2513   stage A, driver attribute name
+d1_search_20261006_101725   $8.1716   RunPod account balance exhausted mid-beam
+d1_search_20261006_210210  $10.0277   COMPLETE
+TOTAL                      $18.4506
+formal remaining  $68.7925 of $156.6523   ·   package $73.8184 of $176.6523
 ```
 
-Both directions are recorded, because only one is an improvement: a wider field
-raises the unmeasured P(it contains the good candidate) and, at a fixed two
-screening seeds, LOWERS P(ordering it correctly) from `0.7808` to `0.5839`.
-Screening inflation rises `0.005149` to `0.009394`. The search science is
-untouched — width 6, one warmup level, `K=200 reference_topk_tail_v1`, `bsz=3`,
-`length_sorted_v1`, the four operators, both profiles, the `supervised_target`
-policy, the state-eval metrics. With 0 complete leaves there is no endpoint to
-reinterpret.
+The second failure produced `SessionRunner.check_account_funds`, which this run
+reports passing: *the provider account holds `$199.9506` against the `$30.0000`
+this session must be able to fund*. It also produced the generic
+emergency-closeout repair — `finish_emergency` now passes
+`streams_at_risk(None, streams)`, and `observed_stop_cause` classifies a stop
+from the watchdog journal instead of asserting a watchdog termination that never
+happened.
 
-**The canonical Top-4 chain price**, owned by `d1_design.json :: budget.chain`:
-
-```text
-search        $21.4897   1125.55 min
-screening     $23.3822   1267.71 min   10 probes
-confirmation  $14.7966    802.23 min    6 probes
-chain total   $59.6685   expected $42.7965
-```
-
-Every session fits the unchanged `$30` per-session envelope; the largest is
-screening. The `priced_grid` row for (4, 2) says `$69.3365` because it prices
-the search on the conservative unbatched basis — the `$9.6680` gap is exactly
-that one cell. The grid is planning analysis; the chain is the price.
-
-**NETWORK VOLUMES ARE NOT BEING BUILT.** The requirement was withdrawn on
-2026-10-07: the failure was an account balance, not demonstrated host
-instability. Local-workdir execution stands.
-
-**A measured cost finding, scoped.** The non-root DEPTH operator runs at
-**1.3949x** its priced cell — `32.0492` min against `22.9759`, over 9
-observations, max `1.8024x` — with the candidate workload identical to the root
-measurement, so it is a per-state cost difference and not a workload one. It
-applies to **D2/D3 full-search pricing** and any future non-root DEPTH path. It
-does **not** apply to recovery screening or behavioural confirmation, which
-never execute that operator. The `1125.55`-minute search bound is RETAINED:
-projections of 829-943 min still fit it.
+**The non-root DEPTH finding is corroborated across two hosts.** `31.1` min here
+against `32.0` on the previous host, both against a `22.9759`-min priced cell —
+agreeing to within 3% because the operator is GPU-bound. **1.36x**, applicable to
+D2/D3 full-search pricing and to any future non-root `depth.causal_kl_greedy_v1`,
+and NOT to screening or confirmation, which never execute it. CPU-bound work did
+vary with the host — other operators `0.45` vs `0.77` min, materialization
+overhead `0.26` vs `1.02` min per expansion — which is why stage C finished in
+528 min against a 778-876 min projection built from the slower host.
 
 ## The test suite has a boundary now, and the trees line up
 
@@ -3387,12 +3357,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$78.8202` of `$156.6523` |
+| formal sessions | `$68.7925` of `$156.6523` |
 | GPU engineering | `$5.0259` of `$20.0000` |
-| package | `$83.8461` of `$176.6523` |
-| project cap | `$412.1588` spent of `$490.0000`, leaving `$77.8412` |
+| package | `$73.8184` of `$176.6523` |
+| project cap | `$422.1865` spent of `$490.0000`, leaving `$67.8135` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$78.8202`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

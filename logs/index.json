@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 72,
+  "runs_unrecorded": 73,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -368,8 +368,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 5,
-    "total": 5
+    "unrecorded": 6,
+    "total": 6
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2857,6 +2857,14 @@
    "n_files": 10,
    "digest": "08f735eaeab0c6b489ca3c4be03e71b8370442735190da99e1354ff712a6d2e9",
    "why": "no run manifest; its closeout states: PROVIDER / ACCOUNT-BALANCE INFRASTRUCTURE ABORT: stopped mid-beam at 449.8 of 1125.55 authorized minutes with 39 of 92 expansions and 0 complete leaves; no scientific endpoint"
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_search_20261006_210210",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210",
+   "n_files": 14,
+   "digest": "c95ab4a0990e1513eec2d44d046b93113e95f1158169a3a17f729e08366da160",
+   "why": "no run manifest; its closeout states: COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
   }
  ],
  "authorizes": "nothing"

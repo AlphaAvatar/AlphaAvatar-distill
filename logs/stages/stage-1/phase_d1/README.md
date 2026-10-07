@@ -16,6 +16,7 @@ Everything this experiment produced, in one place.
 * [`d1_search_20261006_055409`](runs/d1_search_20261006_055409/)
 * [`d1_search_20261006_095623`](runs/d1_search_20261006_095623/)
 * [`d1_search_20261006_101725`](runs/d1_search_20261006_101725/)
+* [`d1_search_20261006_210210`](runs/d1_search_20261006_210210/)
 
 Canonical list, always the index rather than this file.
 Nothing here authorizes anything.
