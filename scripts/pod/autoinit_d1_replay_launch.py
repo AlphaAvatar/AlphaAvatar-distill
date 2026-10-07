@@ -122,7 +122,12 @@ def write_plan(repo_root: Path) -> dict[str, Any]:
     root = D1S.root_teacher_identity(repo_root)
     root_state = R.derive_root_state(
         leaves, base_config=R.teacher_config(root["repo_id"], root["revision"]))
+    #: THE OTHER HALF OF THE HISTORICAL EXECUTION STATE. The root state says
+    #: what the operators started from; this says what protocol they ran
+    #: under. Both are checked here at $0 and again on the pod.
+    configs = R.verify_operator_configs(leaves, repo_root=repo_root)
     plan = R.describe(leaves, root_state)
+    plan["operator_config_agreement"] = configs
     dest = repo_root / PLAN_REL
     dest.parent.mkdir(parents=True, exist_ok=True)
     dest.write_text(json.dumps(plan, indent=1) + "\n")

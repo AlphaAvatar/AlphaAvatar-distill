@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 76,
+  "runs_unrecorded": 77,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -373,8 +373,8 @@
    },
    "phase_d1_replay": {
     "recorded": 0,
-    "unrecorded": 1,
-    "total": 1
+    "unrecorded": 2,
+    "total": 2
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2836,7 +2836,7 @@
    "run_id": "d1_replay_002",
    "root": "logs/stages/stage-1/phase_d1/runs/d1_replay_002",
    "n_files": 2,
-   "digest": "33d73df6736bd122f17c2b18656756d471ec42e82bf805bbc4279bfb068d779a",
+   "digest": "f392b418553139c236e04128450662ccc281f1d5fc4afc74d22b76e65ee34c5c",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {
@@ -2893,6 +2893,14 @@
    "root": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001",
    "n_files": 2,
    "digest": "35a8d944c1c4410c63b827f981950bdd89cde404acdd8ed392400a5c6ced39c0",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+  },
+  {
+   "experiment_id": "phase_d1_replay",
+   "run_id": "d1_replay_002",
+   "root": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "n_files": 3,
+   "digest": "649cea7d5cdaa3541504ec9f7238b6c8236237a43eeeb35075397617fe5fb219",
    "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],

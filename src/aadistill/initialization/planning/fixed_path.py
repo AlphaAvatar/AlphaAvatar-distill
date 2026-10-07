@@ -57,6 +57,10 @@ from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfi
 from aadistill.initialization.device import model_device
 from aadistill.initialization.operators.base import OperatorContext, get_implementation
 from aadistill.initialization.scoring.content import scoring_content_report
+from aadistill.initialization.planning.operator_config import (
+    hashed_operator_config,
+    operator_config_hash,
+)
 from aadistill.initialization.scoring.positions import resolve_position_policy
 from aadistill.initialization.statistics.spec import (
     DEFAULT_STATS_SPEC,
@@ -120,6 +124,37 @@ class FixedPathDigestMismatch(FixedPathError):
             "do not continue to any recovery or behavioural measurement.")
 
 
+class FixedPathConfigMismatch(FixedPathError):
+    """The operator config this path derives is not the one the run recorded.
+
+    THE INPUT PIN, and it is deliberately a different exception from
+    `FixedPathDigestMismatch` because the two mean opposite things. A digest
+    mismatch says the mechanism reproduced the inputs and the OUTPUT still
+    differs -- material, and a stop condition. This says the mechanism did not
+    reproduce the inputs, so there is nothing to conclude about any output: it
+    is an ordinary engineering failure in the replay, to be repaired.
+
+    Conflating them cost two paid subruns. The executor derived
+    `{"n_calibration_items": n}` and nothing else, so every operator ran under
+    the full-vocabulary default and the incumbent position policy while the
+    search that recorded the pinned digests ran under a Top-200 reference
+    support and a supervised-target policy. Both subruns reported a digest
+    mismatch -- the wording of which says "this is a replay mismatch, not a
+    recoverable condition" -- and that reading was wrong both times.
+
+    Raised BEFORE the operator runs. The check is a dictionary comparison; the
+    DEPTH operator it precedes takes half an hour.
+    """
+
+    def __init__(self, message: str, *, step_index: int, label: str,
+                 expected: str, actual: str):
+        self.step_index = step_index
+        self.label = label
+        self.expected = expected
+        self.actual = actual
+        super().__init__(message)
+
+
 @dataclass(frozen=True)
 class FixedPathStep:
     """One operator application. Both ids are resolved, never inferred."""
@@ -143,6 +178,23 @@ class FixedPathStep:
     #: that at the STEP rather than repository-wide is the narrow form -- no
     #: other operator's identity moves.
     config: Mapping[str, Any] | None = None
+    #: The `config_hash` the run being replayed recorded for this step. Pinned
+    #: for the same reason `expected_artifact_digest` is -- except that this one
+    #: is checkable in MICROSECONDS, BEFORE the operator runs.
+    #:
+    #: A digest pin says afterwards that the output differed. It cost two paid
+    #: subruns and $0.98 to learn what this would have said instantly: the
+    #: executor derived `{"n_calibration_items": n}` and nothing else, so every
+    #: operator ran under the full-vocabulary default and the incumbent position
+    #: policy while the search that recorded those digests ran under a Top-200
+    #: reference support and a supervised-target policy. The search's config
+    #: hashed to 464cb782ea8095; the replay's hashed to 44136fa355b367, which is
+    #: sha256 of `{}`.
+    #:
+    #: ABSENT FROM `as_dict` when unset, like `config`, so a step that pins
+    #: nothing serializes exactly as it did before this field existed and no
+    #: historical `spec_hash` moves.
+    expected_config_hash: str | None = None
 
     def __post_init__(self) -> None:
         #: FROZEN MEANS FROZEN. The dataclass is frozen but a `dict` handed in
@@ -167,6 +219,8 @@ class FixedPathStep:
             #: `ArchSpec` relies on. Copied out as a plain dict so callers
             #: cannot reach the stored mapping through the serialization.
             out["config"] = dict(self.config)
+        if self.expected_config_hash:
+            out["expected_config_hash"] = self.expected_config_hash
         return out
 
 
@@ -188,6 +242,20 @@ class FixedPathSpec:
     device: str = "cpu"
     seed: int = 0
     max_shard_size: str | int | None = None
+    #: THE SCORING PROTOCOL THE PATH WAS PRODUCED UNDER, and therefore the one
+    #: it must be replayed under. Both default to the incumbent, so every
+    #: caller written before this keeps its behaviour and no historical
+    #: `spec_hash` moves -- `as_dict` omits them at the incumbent for the same
+    #: reason the search's `config_hash` omits them.
+    #:
+    #: They are NOT execution knobs. Both change what is computed: two
+    #: operators that reduce over different vocabulary partitions, or protect
+    #: different scoring positions, reach different children. Omitting them was
+    #: not a smaller configuration, it was a different one, and the executor's
+    #: own agreement check could not see it because context and config agreed
+    #: with each other and with nothing else.
+    position_policy: Any = None
+    distribution_support: Any = None
 
     def __post_init__(self) -> None:
         if not self.steps:
@@ -227,6 +295,14 @@ class FixedPathSpec:
             "device": self.device,
             "seed": self.seed,
             "max_shard_size": self.max_shard_size,
+            #: OMITTED AT THE INCUMBENT, so no historical `spec_hash` moves --
+            #: the same rule the search applies to `config_hash`.
+            **({} if self.distribution_support is None
+                     or self.distribution_support.is_full_vocab
+               else {"distribution_support":
+                     self.distribution_support.as_dict()}),
+            **({} if self.position_policy is None
+               else {"position_policy": self.position_policy.policy_hash}),
         }
 
     @property
@@ -544,7 +620,33 @@ def _run_steps(
                 f"{spec.path_id} step {i} ({impl.impl_id}): not applicable to "
                 f"{parent_spec.describe()} — {reason}")
 
-        operator_config = step_operator_config(step, len(items))
+        #: THROUGH THE SHARED OWNER, so the config this step runs under is
+        #: built by the same function `BeamSearch` built it with. This was
+        #: `step_operator_config(step, len(items))` -- the derived part being
+        #: `n_calibration_items` and nothing else -- which meant every operator
+        #: ran under the full-vocabulary default and the incumbent position
+        #: policy, whatever the run being replayed had used.
+        operator_config = hashed_operator_config(
+            implementation=impl, policy=spec.position_policy,
+            support=spec.distribution_support, items=items,
+            declared=step.config)
+        #: PINNED INPUTS, CHECKED BEFORE THE OPERATOR RUNS. The output pin is
+        #: what the path exists for, but it only speaks afterwards: the DEPTH
+        #: operator takes half an hour to tell you its inputs were wrong. This
+        #: is a dictionary comparison.
+        derived_config_hash = operator_config_hash(operator_config)
+        if (step.expected_config_hash
+                and derived_config_hash != step.expected_config_hash):
+            raise FixedPathConfigMismatch(
+                f"{spec.path_id} step {i} ({impl.impl_id}): the operator "
+                f"config derives to {derived_config_hash} and the run being "
+                f"replayed recorded {step.expected_config_hash}. The operator "
+                "would compute something the pinned digest was not produced "
+                "by, so this is refused before it runs rather than after. "
+                f"Derived from: {sorted(operator_config)}",
+                step_index=i, label=step.label or impl.impl_id,
+                expected=step.expected_config_hash,
+                actual=derived_config_hash)
         plan = impl.plan(parent_spec, spec.target_spec, adapter, operator_config)
         #: RESOLVED from what the step declared, never handed in. The declared id
         #: is inside `config_hash` and therefore inside the identity of whatever
@@ -570,6 +672,14 @@ def _run_steps(
             workdir=work, config=dict(operator_config),
             execution=execution,
             position_policy=position_policy,
+            #: THE OBJECT, whose declaration went into `operator_config`
+            #: above. `OperatorImplementation.execute` refuses a disagreement
+            #: between the two -- and that check passed for two paid subruns
+            #: because neither side was set, so both consistently said "full
+            #: vocabulary" while the recorded digests came from a Top-200
+            #: reference support.
+            **({} if spec.distribution_support is None
+               else {"distribution_support": spec.distribution_support}),
             stats_cache=cache,
             stats_cache_key=(
                 None if parent_digest is None else stats_cache_key(

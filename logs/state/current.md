@@ -53,14 +53,62 @@ What remains unverified is the **weights** half of each identity, which is what
 the digest-pinned replay on the GPU measures; a mismatch after this derivation
 holds would be material.
 
-**The fifth attempt is priced against the REMAINDER, not the ceiling.** P12.1
-makes the budget cumulative across subruns, so `$2.5856` is available and the
-session prices at `139.4` min / `$2.5332` hard. The phases moved because four
-attempts produced observations the first estimate did not have, and the
-transfer moved because a single scp connection to a pod measures `0.486 MB/s` —
-44 minutes per 1.2 GiB leaf, which the previous path could not have completed
-inside its own cap. Owner:
-[`issue_d1_replay_authorization.py`](../../scripts/autoinit/issue_d1_replay_authorization.py).
+**r5 ALSO MISMATCHED, and the cause was the operator INPUTS.** Both leaves
+diverged at step 0. The root-state repair held — q2 produced a different digest
+from r4's, so the derived root was in force — but
+`materialize_fixed_path` built its hashed operator config as
+`{"n_calibration_items": n, **step.config}`, with no position policy and no
+distribution support:
+
+```text
+                           search            replay as it ran
+calib.domain_balanced@v1   464cb782ea8095    44136fa355b367  = sha256({})
+calib.reasoning_heavy@v2   3a0f151e3f44b6    44136fa355b367
+```
+
+So every operator reduced over the full vocabulary under the incumbent policy,
+while the search ran under `reference_topk_tail_v1` (Top-200) and
+`supervised_target`. Two things hid it: `apply_checked` compares the config's
+support declaration against the context's support object, and with neither set
+both consistently said "full vocabulary"; and the only symptom was a digest
+mismatch, whose own message reads *"this is a replay mismatch, not a
+recoverable condition"*. That reading was wrong both times. The timing gave it
+away — the same DEPTH operator, same profile, same L40S, same image and driver
+`580.126.09` as the search, took `1178.6 s` there and `1732.5 s` here, because
+full vocabulary holds O(T·V) where the sketch holds O(T·K).
+
+**NOT MATERIAL.** The mechanism did not reproduce the historical execution
+state, so the mismatch says nothing about the checkpoints.
+
+**Both halves are now verified at `$0`, with no GPU:**
+
+```text
+config_sha256   the model config each operator started from   8/8 + 6/6 exact
+config_hash     the protocol each operator ran under          8/8 exact
+```
+
+`planning/operator_config.py` is the one owner of the hashed config, used by
+`BeamSearch` and the fixed path alike; it reproduces the recorded
+`464cb782ea8095` exactly, so no committed hash moved, and the beam's two
+private copies are deleted. `FixedPathStep.expected_config_hash` pins the
+INPUTS and is checked before the operator runs — microseconds in front of an
+operator that took 1732 s.
+
+**MAINTAINER DECISION 2026-10-07: the replay campaign ceiling is `$10.0000`**,
+from `$3.5000`, because the session priced at `$2.0856` hard against `$1.8700`
+remaining and `plan_session` refused rather than shrinking the run to fit. The
+binding constraint is now the **GPU engineering allowance**, not the ceiling:
+
+```text
+campaign    $10.0000 ceiling   settled $1.5300   ->   $8.3700
+allowance   $3.4959 remaining                    ->   $3.3959   <- binds
+session     expected 118.0 min $2.1437 · hard 139.4 min $2.5332
+```
+
+The issuer takes the minimum of both bounds, because a ceiling that exceeds
+its own funding source is exactly the kind of number that reads as available.
+Owner:
+[`validations/finalist-rematerialization/v1/campaign.json`](../stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json).
 
 **THE D1 FORMAL TARGET-AWARE SEARCH IS COMPLETE.** Run
 `d1_search_20261006_210210` ran its full trajectory, produced **12 complete
@@ -3429,9 +3477,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$68.7925` of `$156.6523` |
-| GPU engineering | `$4.2115` of `$20.0000` |
-| package | `$73.0040` of `$176.6523` |
-| project cap | `$423.0009` spent of `$490.0000`, leaving `$66.9991` |
+| GPU engineering | `$3.4959` of `$20.0000` |
+| package | `$72.2884` of `$176.6523` |
+| project cap | `$423.7165` spent of `$490.0000`, leaving `$66.2835` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 

@@ -23,8 +23,8 @@
   "scripts/autoinit"
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
- "n_files": 112,
- "digest": "1abebfc2e10b022ab3371c86116945048b72263cf66e461124cfa740cf0bcc7b",
+ "n_files": 113,
+ "digest": "1722b5985a9f8a439c56b2dff844ff76bdb16caa9208f0801159e614ac95b27e",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -454,13 +454,18 @@
   },
   {
    "path": "src/aadistill/initialization/planning/fixed_path.py",
-   "sha256": "ed5cb7016db7992447c19259102510183150bcc50cafbe03f7ca537d6ce97c11",
-   "bytes": 41813
+   "sha256": "973eb125ea4cd8bb8dd7834fc77bea579a0715ab9fd800e1574c122a9abede7c",
+   "bytes": 48180
   },
   {
    "path": "src/aadistill/initialization/planning/generation.py",
    "sha256": "c7e30e6bf813d6b52c04c4abd7812c273b8b668f6548140eceeafaa82461fe2f",
    "bytes": 27768
+  },
+  {
+   "path": "src/aadistill/initialization/planning/operator_config.py",
+   "sha256": "c3849bf5525cfb34135223d54a866321f9e33f15f04f0a867d7371bc67a6d66d",
+   "bytes": 6911
   },
   {
    "path": "src/aadistill/initialization/planning/recovery.py",

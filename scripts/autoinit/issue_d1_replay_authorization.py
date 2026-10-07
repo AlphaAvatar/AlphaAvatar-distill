@@ -85,9 +85,30 @@ def campaign_money(repo_root: Path) -> dict[str, float]:
             "has accounted for.")
     ceiling = float(doc["ceiling_usd"])
     reserve = float(doc.get("teardown_reserve_usd", 0.0))
-    available = round(ceiling - settled - reserve, 4)
+    from_campaign = round(ceiling - settled - reserve, 4)
+
+    #: AND THE ALLOWANCE THAT ACTUALLY FUNDS IT. A campaign ceiling is a bound
+    #: this task accepted; it is not money. The 2026-10-07 amendment raised
+    #: this ceiling to $10.0000 while the GPU engineering allowance it is
+    #: charged to held $3.4959, so the ceiling now EXCEEDS its own funding
+    #: source -- and a cap derived from the ceiling alone would authorize more
+    #: than the book can pay. Taking the minimum is the whole point: whichever
+    #: bound binds, binds.
+    import sys as _sys
+    _sys.path.insert(0, str(REPO_ROOT / "scripts"))
+    from consolidate.derive_budget import derive
+
+    allowance = derive(REPO_ROOT)["engineering"]
+    from_allowance = round(float(allowance["remaining_usd"]) - reserve, 4)
+    available = min(from_campaign, from_allowance)
     return {"ceiling_usd": ceiling, "settled_usd": settled,
-            "teardown_reserve_usd": reserve, "available_usd": available,
+            "teardown_reserve_usd": reserve,
+            "available_from_campaign_usd": from_campaign,
+            "allowance_remaining_usd": round(float(allowance["remaining_usd"]), 4),
+            "available_from_allowance_usd": from_allowance,
+            "available_usd": available,
+            "bound_by": ("campaign ceiling" if from_campaign <= from_allowance
+                         else "GPU engineering allowance"),
             "n_prior_subruns": len(subruns)}
 
 
@@ -243,8 +264,12 @@ def main(argv=None) -> int:
     priced = priced_session(args.rate)
     print(f"campaign  ceiling ${money['ceiling_usd']:.4f}  settled "
           f"${money['settled_usd']:.4f}  reserve "
-          f"${money['teardown_reserve_usd']:.4f}  ->  available "
-          f"${money['available_usd']:.4f}")
+          f"${money['teardown_reserve_usd']:.4f}  ->  "
+          f"${money['available_from_campaign_usd']:.4f}")
+    print(f"allowance remaining ${money['allowance_remaining_usd']:.4f}  ->  "
+          f"${money['available_from_allowance_usd']:.4f}")
+    print(f"available ${money['available_usd']:.4f}  "
+          f"(bound by the {money['bound_by']})")
     print(f"session   expected {priced['expected_minutes']:.1f} min "
           f"${priced['expected_usd']:.4f}  ·  soft "
           f"{priced['soft_minutes']:.1f} min  ·  hard "

@@ -91,6 +91,13 @@ class ReplayStep:
     #: search expanded from. See `derive_root_state`.
     expected_config_sha256: str = ""
     arch_spec: tuple[tuple[str, Any], ...] = ()
+    #: The `config_hash` the search recorded for this step -- the identity of
+    #: the OPERATOR INPUTS, as distinct from `expected_config_sha256`, which is
+    #: the identity of the child model's config.json. Two paid subruns were
+    #: spent on a replay whose inputs hashed to sha256 of `{}` while the
+    #: search's hashed to 464cb782ea8095, and the only symptom was a digest
+    #: mismatch reported after the operator had run.
+    expected_config_hash: str = ""
 
 
 @dataclass(frozen=True)
@@ -133,6 +140,7 @@ class ReplayLeaf:
                  "state_id": s.state_id,
                  "expected_artifact_digest": s.expected_artifact_digest,
                  "expected_config_sha256": s.expected_config_sha256,
+                 "expected_config_hash": s.expected_config_hash,
                  "arch_spec": dict(s.arch_spec)}
                 for s in self.steps
             ],
@@ -291,6 +299,7 @@ def build_leaf(states: Mapping[str, Mapping[str, Any]],
             expected_artifact_digest=str(digest),
             expected_single_shard_sha256=str(shard),
             expected_config_sha256=str(config_sha),
+            expected_config_hash=str(step.get("config_hash") or ""),
             arch_spec=tuple(sorted((str(k), v) for k, v in
                                    (row.get("arch_spec") or {}).items()))))
     got = [s.impl_id for s in steps]
@@ -432,6 +441,12 @@ def root_state_from_plan(doc: Mapping[str, Any],
 #: surface as a FixedPathDigestMismatch -- a scientific stop condition -- and
 #: manufacture a finding out of an infrastructure substitution.
 REPLAY_DEVICE = "cuda"
+
+#: THE ARM the search ran. It reaches the scoring-position policy and therefore
+#: `config_hash`, so it is part of what a replay must reproduce -- not an
+#: execution choice. Read from the frozen design rather than typed, and the
+#: per-step `expected_config_hash` is what proves the pair is right.
+ARM = "supervised_target"
 FAMILY = "qwen3"
 
 
@@ -485,8 +500,19 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
     steps = tuple(
         FixedPathStep(impl_id=s.impl_id, profile_id=s.profile_id,
                       expected_artifact_digest=s.expected_artifact_digest,
+                      #: THE INPUTS, pinned alongside the output. Checked
+                      #: before the operator runs, which is the difference
+                      #: between a dictionary comparison and 29 minutes of
+                      #: DEPTH.
+                      expected_config_hash=s.expected_config_hash,
                       label=f"{s.kind}({s.profile_id})")
         for s in leaf.steps)
+    #: THE SCORING PROTOCOL THE SEARCH RAN UNDER, from the modules that own it
+    #: rather than from this one. Omitting it made every operator reduce over
+    #: the full vocabulary under the incumbent position policy, which is not a
+    #: subset of what the search did -- it is a different computation, and the
+    #: pinned digests were produced by the other one.
+    from experiments.phase_d_series import scoring_protocol as SP
     return FixedPathSpec(
         path_id=f"d1_replay.{leaf.state_id}",
         family=FAMILY,
@@ -497,6 +523,8 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
         device=device,
         seed=leaf.seed,
         max_shard_size=max_shard_size,
+        position_policy=D1S.position_policy(ARM),
+        distribution_support=SP.D_SERIES_SUPPORT,
     )
 
 
@@ -675,6 +703,79 @@ def derive_root_state(leaves: Sequence[ReplayLeaf], *, base_config: Any,
     }
 
 
+def verify_operator_configs(leaves: Sequence[ReplayLeaf], *,
+                            repo_root: str | Path = REPO_ROOT,
+                            device: str = "cpu") -> dict[str, Any]:
+    """Every step's OPERATOR INPUTS, against the hash the search recorded. $0.
+
+    The sibling of `derive_root_state`, for the other half of the historical
+    execution state. That one answers "which model config did the search expand
+    from"; this answers "under which scoring protocol did its operators run".
+    Both are inputs to a digest, both were wrong, and both are checkable from
+    `config.json` and a calibration mixture with no GPU and no weights.
+
+    It is also enforced ON the pod, by `FixedPathStep.expected_config_hash`,
+    before each operator runs. This runs it here as well because here it costs
+    nothing and there it costs a pod.
+
+    Raises `ReplaySourceError` listing every disagreeing step. A replay whose
+    operators run under a different protocol is not a replay, and the digest
+    mismatch it produces says nothing about the checkpoint.
+    """
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+    from aadistill.initialization.operators.base import get_implementation
+    from aadistill.initialization.planning.operator_config import (
+        hashed_operator_config, operator_config_hash,
+    )
+
+    root = Path(repo_root)
+    checked: list[dict[str, Any]] = []
+    items_by_profile: dict[str, Any] = {}
+    for leaf in leaves:
+        spec = fixed_path_spec(leaf, device=device, repo_root=root)
+        for recorded, step in zip(leaf.steps, spec.steps):
+            if step.profile_id not in items_by_profile:
+                profile = get_profile(step.profile_id)
+                items_by_profile[step.profile_id] = prepare_calibration_items(
+                    profile.resolve(root), profile_id=profile.qualified_id)
+            items = items_by_profile[step.profile_id]
+            derived = operator_config_hash(hashed_operator_config(
+                implementation=get_implementation(step.impl_id),
+                policy=spec.position_policy,
+                support=spec.distribution_support,
+                items=items, declared=step.config))
+            checked.append({
+                "leaf": leaf.state_id, "index": recorded.index,
+                "impl_id": step.impl_id, "profile_id": step.profile_id,
+                "recorded_config_hash": recorded.expected_config_hash,
+                "derived_config_hash": derived,
+                "matches": derived == recorded.expected_config_hash,
+            })
+    wrong = [c for c in checked if not c["matches"]]
+    if wrong:
+        raise ReplaySourceError(
+            f"{len(wrong)} of {len(checked)} steps would run under an operator "
+            "config the search did not record. The operators would compute "
+            "something the pinned digests were not produced by: "
+            f"{json.dumps(wrong)}")
+    return {
+        "schema": "aadistill.phase_d1.operator_config_agreement/v1",
+        "n_steps": len(checked),
+        "all_match": True,
+        "position_policy_arm": ARM,
+        "distribution_support": sorted(
+            {c["derived_config_hash"] for c in checked}),
+        "steps": checked,
+        "_what_this_answers": (
+            "under which scoring protocol did the search's operators run, and "
+            "will this replay's run under the same one. The sibling of the "
+            "root-state derivation, for the inputs rather than the parent."),
+    }
+
+
 def load_root_model(spec: Any, *, config_overrides: Mapping[str, Any],
                     device: str | None = None) -> Any:
     """The root the search expanded from, reloaded per path.
@@ -744,6 +845,7 @@ def leaves_from_plan(doc: Mapping[str, Any]) -> list[ReplayLeaf]:
                        expected_artifact_digest=str(s["expected_artifact_digest"]),
                        expected_single_shard_sha256="",
                        expected_config_sha256=str(s.get("expected_config_sha256", "")),
+                       expected_config_hash=str(s.get("expected_config_hash", "")),
                        arch_spec=tuple(sorted(
                            (str(k), v) for k, v in
                            (s.get("arch_spec") or {}).items())))

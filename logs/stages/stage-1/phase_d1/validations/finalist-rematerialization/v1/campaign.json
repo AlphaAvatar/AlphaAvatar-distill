@@ -1,5 +1,13 @@
 {
- "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 = 0.8144",
+ "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 = 1.53",
+ "_ceiling_amendment_2026_10_07": {
+  "_the_binding_constraint_is_now_the_allowance_not_this_ceiling": "the GPU ENGINEERING allowance this campaign is charged to has $3.4959 remaining of $20.0000 after the five settled subruns. So the $10.0000 ceiling is headroom rather than available money, and the real bound on the next attempt is the allowance. The session prices at $2.0820 hard, which fits in both. Stated here because a ceiling that exceeds its own funding source is exactly the kind of number that reads as available.",
+  "from_usd": 3.5,
+  "granted_by": "MAINTAINER DECISION 2026-10-07, in response to a reported budget boundary: the $3.5000 ceiling had $1.8700 left and the session priced at $2.0856 hard, so both leaves did not fit and `plan_session` refused rather than shrinking the run to fit.",
+  "to_usd": 10.0,
+  "what_it_does_not_change": "the science. No protocol, no candidate set, no adoption criterion and no measurement moves. The session still decides nothing.",
+  "what_it_funds": "both leaves in one session at honest margins, plus headroom for a corrected attempt if one is needed."
+ },
  "_cheapest_first_saved_the_fourth": "the driver orders paths by the cost of their FIRST operator, so the wrong root state surfaced after a 64-second FFN step rather than after a 41-minute DEPTH step. Evidence was pulled off-pod and the pod removed before q4's DEPTH began, which is about $0.75 the ordering did not spend.",
  "_contract": "Cumulative cost of rematerializing D1's two unretained quality-order finalists, across every resource and subrun. A rerun does NOT reset it (AGENTS.md P12.1), so the ceiling a new attempt may be issued against is this ceiling MINUS the settled spend MINUS the teardown reserve.",
  "_cost_derivation": "each subrun is (pod deletion or observed-gone timestamp - create timestamp) at the accepted $1.09/h, read from the launcher's own per-attempt log. The launcher's running figures agree to the cent where it printed them ($0.20 and $0.26 for subruns 2 and 4); subruns 1 and 3 aborted in setup before a final figure was printed, so theirs are derived from the timestamps the same way.",
@@ -10,13 +18,13 @@
  "_what_the_four_failures_have_in_common": "every one was in the replay HARNESS and none was in the science. No candidate was selected, no measurement was taken, no frozen protocol moved, and the completed search's 92 expansions, 12 leaves, committed ranking and frozen Top-4 are untouched by all of it. Two leaves (quality positions 1 and 3) were already secured and identity-verified off-pod by the search session itself and are unaffected.",
  "authorization": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
  "authorizes": "nothing by itself; a session still needs the live price, the four limit checks, the account-balance gate and the same-failure gate to pass",
- "booked_usd": 0.8144,
+ "booked_usd": 1.53,
  "campaign_id": "d1_finalist_rematerialization",
- "ceiling_usd": 3.5,
+ "ceiling_usd": 10.0,
  "inherited_spend": [],
  "package_id": "phase_c1.execution_package.2026-09-11",
  "schema": "aadistill.engineering_campaign/v1",
- "status": "OPEN -- 4 paid subruns, $0.8144 of $3.5000, none of which reconstructed a leaf. Every one was an ordinary engineering failure in the replay harness, root-caused and repaired; the fifth attempt is issued against the remainder.",
+ "status": "OPEN -- 5 paid subruns, $1.5300 of $10.0000 after the 2026-10-07 amendment. None reconstructed a leaf; every one was an ordinary engineering failure in the replay harness, root-caused and repaired. The replay now reproduces both halves of the historical execution state, verified at $0: 8/8 model-config identities and 8/8 operator config hashes.",
  "subruns": [
   {
    "cost_usd": 0.155,
@@ -77,6 +85,24 @@
     "q2 step 0"
    ],
    "subrun_id": "r4"
+  },
+  {
+   "cost_usd": 0.7156,
+   "elapsed_minutes": 39.4,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "The root-state repair held: q2's step 0 produced 0e49d105..., a different value from r4's 524493fd..., so the derived root was in force. But `materialize_fixed_path` built its hashed operator config as `{\"n_calibration_items\": n, **step.config}` -- no position policy, no distribution support -- so every operator ran under the full-vocabulary default and the incumbent policy. The search ran under reference_topk_tail_v1 (Top-200) and supervised_target. Recorded config_hash 464cb782ea8095 / 3a0f151e3f44b6; the replay's was 44136fa355b367, which is sha256 of {}. CORROBORATED BY TIMING BEFORE IT WAS DIAGNOSED: the same DEPTH operator, same profile, same L40S, same image and driver 580.126.09 as the search, took 1178.6 s in the search and 1732.5 s here -- full vocabulary holds O(T*V) where the sketch holds O(T*K). NOT MATERIAL. The mechanism did not reproduce the historical execution state, so the mismatch says nothing about the checkpoints. Repaired by one shared owner for the hashed config (planning/operator_config.py, used by both BeamSearch and the fixed path, reproducing the recorded hash exactly) plus FixedPathStep.expected_config_hash, which pins the INPUTS and is checked before the operator runs -- microseconds instead of 29 minutes. All 8 of 8 steps now agree at $0.",
+   "outcome": "DIGEST MISMATCH on both leaves at step 0 -- the operators ran under a DIFFERENT SCORING PROTOCOL from the search",
+   "pod_id": "1mgt50aapad7hv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "ef1aac412eab640af20add9a923a463bdd948fd6",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0",
+    "q4 step 0"
+   ],
+   "subrun_id": "r5"
   }
  ],
  "teardown_reserve_usd": 0.1

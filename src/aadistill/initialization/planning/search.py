@@ -58,6 +58,10 @@ from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluati
 from aadistill.initialization.device import model_device
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
 from aadistill.initialization.planning.isolation import isolate_parent_config
+from aadistill.initialization.planning.operator_config import (
+    hashed_operator_config,
+    operator_config_hash,
+)
 from aadistill.initialization.scoring.content import scoring_content_config
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -791,12 +795,16 @@ class BeamSearch:
 
     def _expand_one(self, parent: InitializationState, impl: OperatorImplementation,
                     profile: CalibrationProfile) -> InitializationState:
-        operator_config = {"n_calibration_items": len(self.calibration_for(profile)),
-                           **self._position_policy_config(impl, profile),
-                           **self._distribution_support_config()}
+        #: THROUGH THE SHARED OWNER. These were two private methods here, and
+        #: `materialize_fixed_path` -- which exists to replay a path this
+        #: produces -- built its own config with neither contributor in it. The
+        #: beam's behaviour is unchanged; the duplication is gone.
+        operator_config = hashed_operator_config(
+            implementation=impl, policy=self.config.position_policy,
+            support=self.config.distribution_support,
+            items=self.calibration_for(profile))
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
-        config_hash = sha256_json(
-            {k: v for k, v in operator_config.items() if k != "n_calibration_items"})
+        config_hash = operator_config_hash(operator_config)
 
         step = OperatorStep(
             index=len(parent.steps), kind=impl.kind, impl_id=impl.impl_id,
@@ -886,65 +894,14 @@ class BeamSearch:
         self.store.append(state)
         return state
 
-    def _position_policy_config(self, impl: OperatorImplementation,
-                                profile: CalibrationProfile) -> dict[str, Any]:
-        """The scoring-position policy AND its content, as HASHED operator config.
-
-        In `operator_config` rather than in `ctx.execution` because it changes
-        what is computed: two searches whose operators protect different
-        positions reach different leaves and must not share a state id. It is
-        therefore read by `config_hash`, which is what forks the whole subtree.
-
-        **The policy id alone was not enough**, and that is the gap this closes.
-        A policy that reads positions consumes metadata no other identity
-        covers: `profile_hash` pins the profile's SPEC, which pins one
-        `content_sha256`, which hashes only item ids and token ids. Two assets
-        with identical tokens and different supervised masks therefore agreed on
-        every term above — the policy hash included — while producing different
-        operator decisions. `scoring_content_config` binds what the policy
-        actually reads, so the mask is part of the scientific path identity.
-
-        **Omitted at the incumbent policy**, and omitted for an implementation
-        that consumes no calibration data. Both omissions preserve a recorded
-        identity rather than tidying one away: every committed state hashed an
-        operator config of `{}`, and a weight-only operator has no mechanism by
-        which a position policy could change its output — branching it would
-        manufacture byte-identical states, which is the same argument
-        `profile_for` already makes about the no-calibration sentinel.
-        """
-        if not consumes_calibration(impl):
-            return {}
-        policy = self.config.position_policy
-        named = policy_config(policy)
-        if not named:
-            return {}
-        items = self.calibration_for(profile)
-        return {**named, **scoring_content_config(items, policy)}
-
-    def _distribution_support_config(self) -> dict[str, Any]:
-        """The vocabulary partition as HASHED operator config, or `{}`.
-
-        In `operator_config` rather than in `ctx.execution` for the same reason as
-        the position policy: it changes what is computed, so two searches whose
-        operators reduce over different partitions reach different leaves and must
-        not share a `config_hash`.
-
-        **Omitted at the full vocabulary**, which preserves a recorded identity
-        rather than tidying one away: every committed state hashed an operator
-        config without this key, and emitting it now -- even as
-        `{"support": "full_vocab_v1"}` -- would change 785 historical
-        `measurement_protocol_id`s and every `config_hash` beside them.
-
-        Not restricted to calibrated operators, unlike the position policy. A
-        support reaches an operator through `OperatorContext` whether or not that
-        operator consumes calibration items, and an operator that ignores it is
-        free to; what must not happen is a declaration that disagrees with the
-        object, which `execute` refuses.
-        """
-        support = self.config.distribution_support
-        if support.is_full_vocab:
-            return {}
-        return {"distribution_support": support.as_dict()}
+    #: `_position_policy_config` and `_distribution_support_config` LIVED HERE
+    #: and are gone. Both are now
+    #: `aadistill.initialization.planning.operator_config`, because
+    #: `materialize_fixed_path` -- whose whole job is to replay a path this
+    #: produces -- had its own config builder with neither contributor in it,
+    #: and no mechanism could notice. Two implementations of one identity
+    #: disagree immediately; AGENTS.md's complexity ratchet says remove the
+    #: redundant one rather than keep both in step.
 
     def _materialization_for(self, semantic_state_id: str,
                              parent: InitializationState,

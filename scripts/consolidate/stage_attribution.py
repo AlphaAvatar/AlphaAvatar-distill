@@ -795,8 +795,9 @@ STAGE_1 = [
         id="phase_d1_replay",
         kind="engineering",
         stage_id="1",
-        status=("4 paid subruns, $0.8144 of $3.5000; the fifth is issued "
-                "against the remainder"),
+        status=("5 paid subruns, $1.5300 of $10.0000 after the 2026-10-07 "
+                "ceiling amendment; the sixth is issued against the "
+                "remainder, capped by the engineering allowance"),
         title=("D1 finalist rematerialization — the two quality-order "
                "finalists the search measured and did not retain"),
         question=(
@@ -819,8 +820,10 @@ STAGE_1 = [
               "finalist-rematerialization/v1/campaign.json",
               "cumulative cost across every resource and subrun; a rerun does "
               "not reset it, so the next attempt's ceiling is this ceiling "
-              "minus the settled spend minus the teardown reserve",
-              field="ceiling_usd", equals=3.5),
+              "minus the settled spend minus the teardown reserve -- and, "
+              "since the 2026-10-07 amendment raised it above its own funding "
+              "source, capped by the GPU engineering allowance as well",
+              field="ceiling_usd", equals=10.0),
             E("logs/stages/stage-1/phase_d1/decisions/"
               "post_search_finalist_retention.json",
               "which two leaves this session rebuilds -- READ from the "
