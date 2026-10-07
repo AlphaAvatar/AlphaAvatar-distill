@@ -187,3 +187,141 @@ def test_a_state_missing_a_required_metric_is_rejected_not_defaulted(
     result = PARETO_V1.rank([partial], beam_width=1)
     assert result.selected_ids == ()
     assert "missing required metrics" in result.decisions[0]["reason"]
+
+
+# ---------------------------------------------------------------------------
+# diversity is an EXPLORATION mechanism, not a winner-selection mechanism
+#
+# Standing maintainer policy, 2026-10-07, for every full-search experiment:
+# during intermediate beam levels, retain with lineage diversity so one early
+# proxy measurement cannot extinguish a structural family; once complete leaves
+# exist, retain by the scientific quality ordering ALONE.
+#
+# Measured, not theoretical. A completed 12-leaf search committed a finalist at
+# quality position 11 of 12 -- over twice the best leaf's objective value, and
+# worse than seven leaves it excluded -- because that leaf was the sole member of
+# its lineage, while the candidates at quality positions 2 and 4 were excluded
+# for sharing one. The widening meant to admit near-misses excluded exactly them.
+# ---------------------------------------------------------------------------
+
+def _lineaged(teacher_spec, target_spec):
+    """Two lineages, where one dominates the other at every position.
+
+    `a1` and `a2` are the two best states overall and share a lineage; `b1` is
+    worse than both and is the only member of its own. This is the shape that
+    makes the two retention rules disagree, and it is the shape the real search
+    produced.
+    """
+    a1 = make_state(teacher_spec, target_spec, "a1", kl=1.0, crit=1.0, nll=9.0,
+                    parent_impl="depth.causal_kl_greedy_v1")
+    a2 = make_state(teacher_spec, target_spec, "a2", kl=2.0, crit=2.0, nll=9.0,
+                    parent_impl="depth.causal_kl_greedy_v1")
+    b1 = make_state(teacher_spec, target_spec, "b1", kl=9.0, crit=9.0, nll=9.0,
+                    parent_impl="width.global_pca_v0")
+    return a1, a2, b1
+
+
+class TestQualityOrderIsOneSharedOrdering:
+
+    def test_it_is_fronts_best_first_with_the_tie_break_inside(
+            self, teacher_spec, target_spec):
+        a1, a2, b1 = _lineaged(teacher_spec, target_spec)
+        order = PARETO_V1.quality_order([b1, a2, a1])
+        assert [s.state_id for s in order.ordered] == \
+            [a1.state_id, a2.state_id, b1.state_id]
+        assert order.front_of(a1.state_id) == 0
+
+    def test_it_carries_no_width_and_no_selection(self, teacher_spec, target_spec):
+        """K is the caller's. A quality order that embedded one would be a
+        retention rule wearing an ordering's name."""
+        order = PARETO_V1.quality_order(list(_lineaged(teacher_spec, target_spec)))
+        assert len(order.ordered) == 3
+        assert [s.state_id for s in order.take(2)] == list(order.ordered_ids[:2])
+        with pytest.raises(RankingError):
+            order.take(0)
+
+    def test_it_is_deterministic_across_input_orderings(
+            self, teacher_spec, target_spec):
+        a1, a2, b1 = _lineaged(teacher_spec, target_spec)
+        first = PARETO_V1.quality_order([a1, a2, b1]).ordered_ids
+        second = PARETO_V1.quality_order([b1, a1, a2]).ordered_ids
+        third = PARETO_V1.quality_order([a2, b1, a1]).ordered_ids
+        assert first == second == third
+
+    def test_it_is_not_a_sort_by_any_single_objective(
+            self, teacher_spec, target_spec):
+        """Collapsing a multi-objective search into one scalar is the failure the
+        fronts exist to avoid, so a state that leads on one axis and trails on
+        another must share a front rather than be ordered by either."""
+        x = make_state(teacher_spec, target_spec, "x", kl=1.0, crit=9.0, nll=9.0)
+        y = make_state(teacher_spec, target_spec, "y", kl=9.0, crit=1.0, nll=9.0)
+        order = PARETO_V1.quality_order([x, y])
+        assert len(order.fronts) == 1 and len(order.fronts[0]) == 2
+
+
+class TestTheTwoRetentionRulesDiffer:
+
+    def test_beam_retention_may_take_a_worse_state_to_keep_a_lineage(
+            self, teacher_spec, target_spec):
+        a1, a2, b1 = _lineaged(teacher_spec, target_spec)
+        beam = PARETO_V1.rank([a1, a2, b1], 2)
+        assert set(beam.selected_ids) == {a1.state_id, b1.state_id}
+        assert a2.state_id not in beam.selected_ids, (
+            "the beam must give the second lineage a slot before the first "
+            "lineage gets two -- that is what preserves exploration")
+        assert beam.retention == PARETO_V1.RETENTION_WITH_DIVERSITY
+
+    def test_finalist_retention_never_skips_a_better_state_for_diversity(
+            self, teacher_spec, target_spec):
+        a1, a2, b1 = _lineaged(teacher_spec, target_spec)
+        final = PARETO_V1.rank([a1, a2, b1], 2, diversity=False)
+        assert list(final.selected_ids) == [a1.state_id, a2.state_id]
+        assert b1.state_id not in final.selected_ids
+        assert final.retention == PARETO_V1.RETENTION_QUALITY_ONLY
+
+    def test_the_same_states_and_k_legitimately_give_different_sets(
+            self, teacher_spec, target_spec):
+        """Not a contradiction: the two rules answer different questions."""
+        states = list(_lineaged(teacher_spec, target_spec))
+        beam = PARETO_V1.rank(states, 2)
+        final = PARETO_V1.rank(states, 2, diversity=False)
+        assert set(beam.selected_ids) != set(final.selected_ids)
+        assert beam.selected_ids[0] == final.selected_ids[0]
+
+    def test_the_ordering_underneath_is_identical(self, teacher_spec, target_spec):
+        """Only retention differs. If the fronts differed, a finalist selection
+        would be ranking on a different notion of quality than the beam did."""
+        states = list(_lineaged(teacher_spec, target_spec))
+        beam = PARETO_V1.rank(states, 2)
+        final = PARETO_V1.rank(states, 2, diversity=False)
+        assert beam.fronts == final.fronts
+
+    def test_beam_retention_is_the_default(self, teacher_spec, target_spec):
+        """Every search written before this policy keeps its behaviour."""
+        states = list(_lineaged(teacher_spec, target_spec))
+        assert PARETO_V1.rank(states, 2).selected_ids == \
+            PARETO_V1.rank(states, 2, diversity=True).selected_ids
+
+    def test_k_is_supplied_by_the_caller(self, teacher_spec, target_spec):
+        states = list(_lineaged(teacher_spec, target_spec))
+        for k in (1, 2, 3):
+            assert len(PARETO_V1.rank(states, k, diversity=False).selected) == k
+
+    def test_a_record_says_which_rule_produced_it(self, teacher_spec, target_spec):
+        states = list(_lineaged(teacher_spec, target_spec))
+        assert PARETO_V1.rank(states, 2).as_dict()["retention"] == \
+            "quality_with_lineage_diversity"
+        assert PARETO_V1.rank(states, 2, diversity=False).as_dict()["retention"] == \
+            "quality_only"
+
+    def test_every_decision_records_its_quality_position(
+            self, teacher_spec, target_spec):
+        """A finalist record's whole claim is about this number, so it is written
+        rather than left for a reader to reconstruct from (front, position)."""
+        states = list(_lineaged(teacher_spec, target_spec))
+        final = PARETO_V1.rank(states, 2, diversity=False)
+        ranked = {d["state_id"]: d["quality_order"]
+                  for d in final.decisions if d["front"] is not None}
+        assert sorted(ranked.values()) == [1, 2, 3]
+        kept = [d for d in final.decisions if d["selected"]]
+        assert all("lineage diversity NOT applied" in d["reason"] for d in kept)

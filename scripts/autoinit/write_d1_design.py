@@ -541,6 +541,90 @@ D1_SCREENING_SEEDS = 2
 D1_CONFIRMATION_SEEDS = 3
 
 
+#: THE SCIENTIFIC PREIMAGE: a POSITIVE list of what `design_hash` covers.
+#:
+#: It was `{k: v for k, v in doc.items() if not k.startswith("_")}` -- every
+#: non-underscore key, which swept in `budget`. So the "frozen scientific design
+#: identity" was a function of the project's wallet: booking a session's spend
+#: moved `budget.position` and `provisional_shortfall_usd`, which moved the hash,
+#: which invalidated the committed record, which reddened two tests in D1's own
+#: pod gate and blocked every launch until the record was regenerated and the
+#: authorization re-issued against a new hash. That cycle was paid three times in
+#: one round. A scientific design does not change because money was spent.
+#:
+#: A BLACKLIST WOULD HAVE BEEN THE WRONG FIX. `budget` is not the only
+#: money-bearing key -- `search_stage.cost` and `behavioural_design.priced_grid`
+#: are priced too, and `open_blockers` is partly derived from funding -- and the
+#: next money-bearing field added anywhere in this document would silently join
+#: the preimage. A positive list fails the other way: a new SCIENTIFIC field is
+#: absent from the hash until somebody adds it here, which is visible in review
+#: rather than invisible in a digest.
+#:
+#: MOVES THE HASH: the hypothesis; the scoring protocol; the search objectives,
+#: space, exclusions and free variables; the position policy and distribution
+#: support (inside `scoring_policy`); beam semantics (schedule, ranking policy);
+#: the finalist-retention rule; Top-K; the recovery recipe; screening and
+#: confirmation seeds; the decision rule; the contamination/evidence protocol;
+#: the incumbent being challenged; the materialization prerequisite.
+#:
+#: MUST NOT MOVE IT: spent dollars, remaining balance, live GPU price, project /
+#: formal / package headroom, resource state, run status, ledger position. Money
+#: stays independently hash-bound where it belongs -- in each run's one-use
+#: authorization, whose own self-hash covers its `money` block, its live quote
+#: and its derived ceiling.
+SCIENTIFIC_TOP_LEVEL: tuple[str, ...] = (
+    "schema", "experiment_id", "stage_id",
+    "hypothesis", "scoring_policy", "incumbent", "recovery_recipe",
+    "contamination_protection", "evidence", "execution_protocol",
+    "materialization_prerequisite", "what_this_may_not_be_used_to_claim",
+)
+
+#: Scientific sub-keys of `search_stage`. `cost` and
+#: `superseded_full_vocab_planning_cost` are priced and are deliberately out.
+SCIENTIFIC_SEARCH_STAGE: tuple[str, ...] = (
+    "beam", "schedule", "ranking_policy", "frozen_implementations", "profiles",
+    "free_variables", "exclusions", "stops_at", "coverage", "reachable_leaves",
+    "leaves_if_nothing_excluded",
+)
+
+#: Scientific sub-keys of `behavioural_design`. `priced_grid` is priced and is
+#: deliberately out; every probe count, seed count, retention rule and decision
+#: rule is in.
+SCIENTIFIC_BEHAVIOURAL: tuple[str, ...] = (
+    "top_k", "finalist_retention", "screening_seeds", "confirmation_seeds",
+    "screening_probes", "confirmation_probes", "total_probes", "decision_rule",
+    "protocol_uniformity", "sesoi", "seed_sd", "seed_sd_n",
+    "seed_sd_interval_95", "noise_model", "screening_estimate_inflation",
+    "advance_probability", "advance_probability_sensitivity",
+    "pipeline_probability_at_assumed_values",
+)
+
+
+def scientific_preimage(doc: dict[str, Any]) -> dict[str, Any]:
+    """What `design_hash` covers: the science and the protocol, never the money.
+
+    Raises if a declared scientific key is absent, because a preimage that
+    silently skips a missing field hashes a smaller document and still looks
+    like a valid identity.
+    """
+    out: dict[str, Any] = {}
+    for key in SCIENTIFIC_TOP_LEVEL:
+        if key not in doc:
+            raise KeyError(
+                f"scientific_preimage declares {key!r} and the design does not "
+                "carry it; a preimage that skips a missing scientific field "
+                "hashes a smaller document and still reads as an identity")
+        out[key] = doc[key]
+    for parent, keys in (("search_stage", SCIENTIFIC_SEARCH_STAGE),
+                         ("behavioural_design", SCIENTIFIC_BEHAVIOURAL)):
+        block = doc[parent]
+        missing = [k for k in keys if k not in block]
+        if missing:
+            raise KeyError(f"{parent} is missing scientific keys {missing}")
+        out[parent] = {k: block[k] for k in keys}
+    return out
+
+
 def behavioural_design() -> dict[str, Any]:
     """Top-K, screening seeds and confirmation seeds, with their rationale."""
     from experiments.phase_d1 import search_space as d1
@@ -563,6 +647,28 @@ def behavioural_design() -> dict[str, Any]:
                   and row["screening_seeds"] == D1_SCREENING_SEEDS)
     return {
         "top_k": D1_TOP_K,
+        #: THE POST-SEARCH RETENTION RULE, hash-bound because changing it changes
+        #: which candidates reach behavioural recovery. Standing maintainer
+        #: policy of 2026-10-07 for every full-search experiment: lineage
+        #: diversity is an EXPLORATION mechanism used during beam pruning, and
+        #: the final Top-K is the search objectives' own quality ordering alone.
+        #:
+        #: The completed 2026-10-06 search reused the beam's rule for Stage D and
+        #: committed a finalist at quality position 11 of 12 -- over twice the
+        #: best leaf's objective value, worse than seven leaves it excluded --
+        #: because that leaf was the sole member of its lineage, while the
+        #: candidates at quality positions 2 and 4 were excluded for sharing one.
+        #: That run stays valid under the semantics it ran; this changes the rule
+        #: prospectively.
+        "finalist_retention": PARETO_V1.RETENTION_QUALITY_ONLY,
+        "finalist_retention_note": (
+            "post-search Top-K is epsilon-Pareto fronts, best first, with the "
+            "policy's deterministic tie-break inside each front, concatenated, "
+            "first K taken. NO lineage rotation. Diversity remains in force "
+            "during intermediate beam levels, where a state is a partial "
+            "hypothesis and one early proxy measurement must not extinguish a "
+            "structural family. It is NOT a new scalar score: the three "
+            "objectives and the epsilon are unchanged."),
         "screening_seeds": D1_SCREENING_SEEDS,
         "confirmation_seeds": D1_CONFIRMATION_SEEDS,
         "screening_probes": chosen["screening_probes"],
@@ -2002,8 +2108,14 @@ def build() -> dict[str, Any]:
         ],
         "_authorizes": "nothing",
     }
-    doc["design_hash"] = sha256_json(
-        {k: v for k, v in doc.items() if not k.startswith("_")})
+    doc["design_hash"] = sha256_json(scientific_preimage(doc))
+    doc["_design_hash_covers"] = (
+        "THE SCIENCE AND THE PROTOCOL, and nothing about money or run state. "
+        "Composed by `scientific_preimage` as an explicit POSITIVE list rather "
+        "than by excluding underscore keys, which used to sweep in `budget` and "
+        "made a frozen scientific identity a function of the project's wallet. "
+        "See that function's docstring for what moves this hash and what must "
+        "not. Money stays hash-bound in each run's one-use authorization.")
     return doc
 
 

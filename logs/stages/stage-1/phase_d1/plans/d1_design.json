@@ -1,6 +1,7 @@
 {
  "_authorizes": "nothing",
  "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records no open blocker. A launch still needs the one-use authorization, which is issued against the live rate and the derived harness, and which this document does not grant.",
+ "_design_hash_covers": "THE SCIENCE AND THE PROTOCOL, and nothing about money or run state. Composed by `scientific_preimage` as an explicit POSITIVE list rather than by excluding underscore keys, which used to sweep in `budget` and made a frozen scientific identity a function of the project's wallet. See that function's docstring for what moves this hash and what must not. Money stays hash-bound in each run's one-use authorization.",
  "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
@@ -35,6 +36,8 @@
    "primary_endpoint": "correct_overall",
    "rule": "three-way GO / NO-GO / INCONCLUSIVE, no forced winner"
   },
+  "finalist_retention": "quality_only",
+  "finalist_retention_note": "post-search Top-K is epsilon-Pareto fronts, best first, with the policy's deterministic tie-break inside each front, concatenated, first K taken. NO lineage rotation. Diversity remains in force during intermediate beam levels, where a state is a partial hypothesis and one early proxy measurement must not extinguish a structural family. It is NOT a new scalar score: the three objectives and the epsilon are unchanged.",
   "noise_model": {
    "claim_boundary": "The inflation figures describe the winner's curse on the SCREENING estimate only. They are not a validity condition for the confirmation rung: with fresh disjoint prompts and fresh seeds the confirmation estimate is unbiased under the global null whatever the screening inflation was, and no design here is admitted or rejected by comparing inflation to the SESOI. advance_probability is conditional on the good candidate being in the Top-K; the unconditional probability also needs P(good candidate in Top-K), which is UNKNOWN and which C2's negative result argues is not close to 1. The per-seed standard deviation comes from three A3 deltas, so every probability is planning and sensitivity analysis, not a power calculation.",
    "independence_assumption": "candidates from one search share prompts and a parent, so their errors are positively correlated and the true spread of the maximum is SMALLER. The inflation figures are upper bounds.",
@@ -898,7 +901,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "7a94190232bca83c5f91fe3968d8a768a9d1dd679d124783f4fc35b0069204eb",
+ "design_hash": "31a3dcba342115bf5fb2909215cbf9d0dc68aa1acab10776ee698f6da92d0359",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",

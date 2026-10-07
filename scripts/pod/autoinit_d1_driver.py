@@ -544,7 +544,17 @@ def _commit(session, record, out: Path) -> dict[str, Any]:
     doc = S.design()
     k = int(doc["behavioural_design"]["top_k"])
     result = record["_search_result"]
-    ranking = result.top_n(PARETO_V1, k)
+    #: FINALISTS, not a beam. Lineage diversity is an exploration mechanism and
+    #: its job ends when complete leaves exist; the post-search question is only
+    #: which complete candidates the search objectives rank highest. Standing
+    #: maintainer policy of 2026-10-07 for every full-search experiment.
+    #:
+    #: Measured, not theoretical: the 2026-10-06 search committed a finalist at
+    #: quality position 11 of 12 -- more than twice the best leaf's objective
+    #: value, worse than seven leaves it excluded -- because that leaf was the
+    #: only member of its lineage, while the candidates at quality positions 2
+    #: and 4 were excluded for sharing one.
+    ranking = result.finalists(PARETO_V1, k)
     if len(ranking.selected) != k:
         raise D1DriverError(
             f"the ranking selected {len(ranking.selected)} recovery-admissible "
@@ -591,6 +601,7 @@ def _commit(session, record, out: Path) -> dict[str, Any]:
         "checkpoint_paths": [r["checkpoint_path"] for r in selected],
         "artifact_digests": [r["artifact_digest"] for r in selected],
         "ranking_policy": PARETO_V1.qualified_id,
+        "retention": ranking.retention,
         "_what_this_is": (
             "the committed candidate set the behavioural rungs will screen. This "
             "session ranks and commits; it trains nothing and evaluates no "

@@ -5,6 +5,7 @@ Everything this experiment produced, in one place.
 | area | what it holds |
 | --- | --- |
 | [`analyses/`](analyses/) | working analyses and audits |
+| [`decisions/`](decisions/) | material |
 | [`plans/`](plans/) | protocol, preregistration, pricing — what was registered before running |
 | [`validations/`](validations/) | engineering evidence supporting this experiment |
 | [`runs/`](runs/) | one directory per execution attempt |

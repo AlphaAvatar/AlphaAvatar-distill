@@ -1281,13 +1281,18 @@ class SearchResult:
     def complete_leaves(self) -> list[InitializationState]:
         return [s for s in self.leaves if s.is_complete_leaf()]
 
-    def top_n(self, policy: BeamRankingPolicy, n: int) -> RankingResult:
+    def top_n(self, policy: BeamRankingPolicy, n: int, *,
+              diversity: bool = True) -> RankingResult:
         """Rank the complete target-size leaves. Intermediates cannot appear here.
 
         The guard is not decorative: ``require_recovery_admissible`` is what stops
         a 3.2B depth-only intermediate — which will often score *better* on
         teacher KL than any fully compressed leaf — from being promoted into a
         recovery probe it could never be a candidate for.
+
+        ``diversity`` is forwarded to the policy and defaults to ``True`` so this
+        method's historical behaviour is unchanged. For FINALIST retention call
+        :meth:`finalists`, which is the same computation with the rule named.
         """
         # Deliberately iterates `self.leaves` rather than the filtered
         # `complete_leaves`: silently dropping an inadmissible candidate would
@@ -1295,7 +1300,22 @@ class SearchResult:
         # this boundary is loud.
         for leaf in self.leaves:
             leaf.require_recovery_admissible()
-        return policy.rank(self.leaves, n)
+        return policy.rank(self.leaves, n, diversity=diversity)
+
+    def finalists(self, policy: BeamRankingPolicy, k: int) -> RankingResult:
+        """The best `k` complete leaves by QUALITY ORDER ALONE.
+
+        The post-search retention rule. Lineage diversity is an exploration
+        mechanism: while the search runs, a state is a partial hypothesis and one
+        early proxy measurement must not extinguish a structural family. Once
+        complete leaves exist that job is done, and the only remaining question
+        is which complete candidates the search objectives rank highest.
+
+        Separate from :meth:`top_n` by NAME rather than by a boolean at every
+        call site, because the two answer different questions and a record should
+        say which one it asked. The ordering is identical; only retention differs.
+        """
+        return self.top_n(policy, k, diversity=False)
 
     def summary(self) -> dict[str, Any]:
         pruned = [s for s in self.states.values() if s.validity is StateValidity.PRUNED]

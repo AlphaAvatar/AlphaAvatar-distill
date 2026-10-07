@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-07T06:41:12+00:00",
+  "created_utc": "2026-10-07T09:29:27+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3288,
-    "bytes": 120528790,
+    "files": 3289,
+    "bytes": 120541212,
     "by_disposition": {
       "keep_canonical": 221,
-      "keep_immutable": 2837,
+      "keep_immutable": 2838,
       "keep_referenced": 215,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1491,
+      "immutable_record": 1492,
       "index": 8,
       "narrative": 931,
       "raw_execution_artifact": 837,
@@ -50260,8 +50260,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/README.md",
-      "size_bytes": 896,
-      "sha256": "726475ae3abe017f530017b4a619bc251bef0cb37794d5842cd6ebf031550511",
+      "size_bytes": 938,
+      "sha256": "e7136ebb6c452e27cf933fba16939a081e59738dd396c98f0eb61a59b0c748d1",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50300,9 +50300,23 @@
       "disposition_reason": "named by scripts/autoinit/write_d1_design.py, scripts/consolidate/stage_attribution.py, scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py"
     },
     {
+      "path": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "size_bytes": 11448,
+      "sha256": "f43a41ea891f1623c952a7ba864e415a451e3958be77ce321f8351db7839f036",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-      "size_bytes": 77203,
-      "sha256": "f08c86643aec1c783b6c1156c9ef1d0fc27c0501df74947ef97812a6a27b45de",
+      "size_bytes": 78135,
+      "sha256": "b9e5dd245520d05bf8f02748ba9d88d3962691a1b034ed9cb486e4c1f2e40e6d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50778,7 +50792,8 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,

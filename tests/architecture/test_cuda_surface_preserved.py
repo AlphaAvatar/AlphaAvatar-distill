@@ -1383,6 +1383,46 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
     ("b342861f0771084c5191210cede553cced139c7c",
      "the session record is written where it is filed",
      {
+        "src/aadistill/initialization/planning/ranking.py":
+            "DIVERSITY BECOMES AN EXPLORATION MECHANISM ONLY. THIS IS A DECLARED "
+            "SEMANTIC CHANGE to selection: `quality_order()` is extracted as the "
+            "one shared epsilon-Pareto ordering, `rank()` takes a `diversity` "
+            "keyword, `RankingResult` records which retention rule produced it, "
+            "and every decision carries its position in the quality order. "
+            "WHAT WAS WRONG: one policy did two jobs at once -- quality ranking "
+            "(epsilon-Pareto fronts plus a deterministic tie-break) and search "
+            "diversity (one slot per lineage before any lineage gets two) -- and "
+            "the second was reused for post-search finalist retention, where it "
+            "does not belong. During a search a state is a PARTIAL hypothesis "
+            "and one early proxy measurement must not extinguish a structural "
+            "family, so the beam is right to rotate. Once complete leaves exist "
+            "that job is finished and the only remaining question is which "
+            "complete candidates the objectives themselves rank highest. "
+            "Measured rather than argued: a completed 12-leaf search committed a "
+            "finalist at quality position 11 of 12 -- over twice the best leaf's "
+            "objective value, worse than seven leaves it excluded -- because "
+            "that leaf was the sole member of its lineage, while the candidates "
+            "at quality positions 2 and 4 were excluded for sharing one. The "
+            "retention WIDTH had been widened specifically to admit those two. "
+            "WHAT CHANGED: `PARETO_V1` is untouched and beam pruning keeps its "
+            "diversity, so every existing search behaves exactly as before -- "
+            "`diversity` defaults to True. There is still exactly ONE "
+            "implementation of the Pareto algorithm, so a finalist selection "
+            "cannot drift from the beam's notion of quality. No scalar score was "
+            "introduced: collapsing a multi-objective search into one number is "
+            "the failure the fronts exist to prevent. `K` is the caller's and "
+            "appears nowhere in core.",
+        "src/aadistill/initialization/planning/search.py":
+            "`SearchResult.finalists(policy, k)` -- post-search retention by "
+            "quality order alone, and `top_n` gains the same `diversity` "
+            "keyword with its historical default. THIS IS A DECLARED SEMANTIC "
+            "CHANGE to what a completed search offers its caller. "
+            "WHY A SECOND NAME rather than a boolean at every call site: the two "
+            "answer different questions -- 'what should the beam carry forward' "
+            "and 'which complete candidates are best' -- and a committed record "
+            "should say which one it asked. The admissibility guard is unchanged "
+            "and still runs first, so a depth-only intermediate cannot be "
+            "promoted into a recovery probe it could never be a candidate for.",
         "src/aadistill/infrastructure/session.py":
             "`BudgetSpec.account_balance_required_usd` -- what the PROVIDER "
             "ACCOUNT must hold before a pod is created, as a number or as a "

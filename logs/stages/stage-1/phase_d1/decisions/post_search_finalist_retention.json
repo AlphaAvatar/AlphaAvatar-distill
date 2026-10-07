@@ -1,0 +1,154 @@
+{
+ "schema": "aadistill.phase_d1.post_search_finalist_decision/v1",
+ "decision_utc": "2026-10-07T07:00:00Z",
+ "decided_by": "maintainer decision 2026-10-07",
+ "experiment_id": "phase_d1",
+ "stage_id": "1",
+ "_what_this_is": "A POST-SEARCH / PRE-BEHAVIOUR protocol decision. The formal search is complete and no behavioural recovery result has been observed, so this is not outcome-driven candidate selection. It derives the behavioural screening set prospectively from the already-completed 12-leaf ranking under a new standing retention rule.",
+ "_authorizes": "nothing. Behavioural screening is a separately authorized session.",
+ "the_standing_policy": {
+  "rule": "Diversity is used only during search-time beam pruning. Final post-search Top-K must NOT use lineage diversity.",
+  "scope": "D1/D2/D3 and all future full-search experiments, across Stage 0-6, model sizes, compression ratios, operator spaces and model families. The objectives may differ per experiment; the structural rule does not.",
+  "why": "During a search a state is a PARTIAL hypothesis, and one early proxy measurement must not extinguish an entire structural family -- so beam pruning keeps a slot per lineage. Once complete leaves exist that job is finished. The remaining question is only which complete candidates the search objectives themselves rank highest.",
+  "search_time": "epsilon-Pareto quality + lineage diversity -> preserve exploration",
+  "post_search": "epsilon-Pareto quality order + deterministic tie-break -> NO lineage diversity",
+  "_not_a_new_scalar_score": "the three objectives and the epsilon are unchanged. Quality order means: compute the epsilon-Pareto fronts, order them best to worst, use the policy's deterministic tie-break inside each front, concatenate, take the first K. It is NOT a sort by equal_domain_mean or by any single objective -- collapsing a multi-objective search into one number is the failure the fronts exist to prevent.",
+  "_if_diversity_after_recovery_is_wanted": "it must be declared as a separate scientific objective or experiment, not inherited implicitly from the beam's exploration policy."
+ },
+ "what_prompted_it": {
+  "observed_in": "d1_search_20261006_210210, the completed formal search",
+  "finding": "the search's Stage D reused the beam's retention rule, so the committed Top-4 was not the four best complete leaves. The policy rotates over operator-order lineages, keeping one state per lineage before any lineage gets a second.",
+  "the_committed_set_by_quality_position": [
+   1,
+   3,
+   5,
+   11
+  ],
+  "the_fourth_committed_finalist": {
+   "state_id": "ea4fe4d356b8c8f40f048256df6b8999",
+   "quality_position": 11,
+   "of_total_complete_leaves": 12,
+   "equal_domain_mean": 15.226753,
+   "best_leaf_equal_domain_mean": 7.434143,
+   "ratio": 2.05,
+   "why_it_was_in": "the only width-first lineage that produced a complete leaf",
+   "worse_than": "seven leaves that were not committed"
+  },
+  "the_candidates_the_widening_was_meant_to_admit": [
+   {
+    "quality_position": 2,
+    "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+    "equal_domain_mean": 7.650625,
+    "was_committed": false
+   },
+   {
+    "quality_position": 4,
+    "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+    "equal_domain_mean": 8.310306,
+    "was_committed": false
+   }
+  ],
+  "_so": "retention WIDTH and retention CRITERION are independent choices. Widening Top-2 to Top-4 did not change the criterion, and the two candidates it was adopted to admit were exactly the ones it still excluded."
+ },
+ "the_frozen_behavioural_finalists": {
+  "rule_applied": "quality_only",
+  "k": 4,
+  "derived_from": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/evidence/complete_leaf_ranking.json -- the completed search's own 12-leaf ranking, unmodified",
+  "_derivation_is_checked": "the first four of the completed search's quality order equal this set exactly; the equality is asserted rather than asserted-by-hand.",
+  "members": [
+   {
+    "finalist": 1,
+    "quality_position": 1,
+    "front": 0,
+    "state_id": "e5e3edb0477b25147de952153da8fc21",
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+    "objectives": {
+     "state.teacher_kl.equal_domain_mean": 7.434143,
+     "state.teacher_kl.worst_domain": 8.258449,
+     "state.critical_token_kl": 12.32069
+    },
+    "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+    "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+    "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+    "availability": "SECURED. The completed search retained it as a product; identity-verified off-pod.",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+   },
+   {
+    "finalist": 2,
+    "quality_position": 2,
+    "front": 1,
+    "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+    "objectives": {
+     "state.teacher_kl.equal_domain_mean": 7.650625,
+     "state.teacher_kl.worst_domain": 8.447009,
+     "state.critical_token_kl": 12.528386
+    },
+    "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+    "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+    "availability": "NOT RETAINED. Requires rematerialization from the committed search record, with exact identity equality before adoption.",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+   },
+   {
+    "finalist": 3,
+    "quality_position": 3,
+    "front": 2,
+    "state_id": "56388d47b6a71e1b49e44929e48d4061",
+    "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+    "objectives": {
+     "state.teacher_kl.equal_domain_mean": 8.233053,
+     "state.teacher_kl.worst_domain": 9.700518,
+     "state.critical_token_kl": 15.013472
+    },
+    "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+    "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+    "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+    "availability": "SECURED. The completed search retained it as a product; identity-verified off-pod.",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+   },
+   {
+    "finalist": 4,
+    "quality_position": 4,
+    "front": 2,
+    "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+    "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "objectives": {
+     "state.teacher_kl.equal_domain_mean": 8.310306,
+     "state.teacher_kl.worst_domain": 9.489576,
+     "state.critical_token_kl": 14.619843
+    },
+    "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+    "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+    "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+    "availability": "NOT RETAINED. Requires rematerialization from the committed search record, with exact identity equality before adoption.",
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+   }
+  ],
+  "_digests_are_full": "every digest here is the full 64-hex value read from the completed search's own ranking record. Adoption still compares against that record rather than against this file, but a decision document carrying truncated identities would be a trap for anyone who read it as authoritative."
+ },
+ "what_is_NOT_being_rewritten": {
+  "the_completed_search": "d1_search_20261006_210210 remains valid and accepted. It is NOT rerun. Its Stage-D selection -- quality positions 1, 3, 5 and 11 -- remains the historical record of what its own policy committed, unmodified, in its closeout and in stage1_selection.json.",
+  "the_search_semantics": "beam width 6, one warmup level, the epsilon-Pareto objectives, lineage diversity DURING beam pruning, K=200 reference_topk_tail_v1, bsz=3, length_sorted_v1, the operator space, both calibration profiles, the supervised_target position policy and the state-eval semantics are all unchanged. The search used diversity correctly for exploration.",
+  "phase_b_and_c2": "their historical final selections used the same lineage-diverse policy and their evidence remains valid under the protocol they actually ran. They are NOT revised and NOT called invalid -- they answered a different candidate-selection protocol. Nor should their Top-K be described as 'the best K by proxy score': it was not, and under lineage rotation it never was."
+ },
+ "consequences": {
+  "rematerialize": [
+   "afd50c9ff0e3d20542bb5473ea745b55",
+   "3fcaf42eaa91b3ed02eab6c2f3213bfc"
+  ],
+  "rematerialization_contract": "from the committed search records, using the recorded operator implementations, operator order, calibration profiles, target geometry, teacher/tokenizer/input identities and frozen execution configuration. Adoption requires EXACT equality on artifact_digest, weights_digest, single_shard_sha256 and arch_signature. An approximately equivalent checkpoint is not substituted, and no core identity check is weakened; a mismatch is a deterministic-materialization defect to diagnose.",
+  "retire_after_the_above_is_verified": [
+   "a2b2f04ae642ac69d278c20feb42d52f",
+   "ea4fe4d356b8c8f40f048256df6b8999"
+  ],
+  "retirement_contract": "heavy checkpoint bytes only, and only once #2 and #4 are secured and identity-verified. Their measurement, ranking position, operator path, every digest, manifest and provenance are RETAINED. Both remain in the 12-leaf ranking as the leaves they are; what goes is weight bytes with no remaining downstream consumer.",
+  "screening": "4 candidate initializations x 2 screening seeds = 8 probes, plus incumbent B x 2 matched seeds = 2, for 10 screening probes. Then exactly one advancing candidate, then 3 fresh confirmation seeds against B on matched seeds. Candidate membership does not change after screening begins."
+ },
+ "implementation": {
+  "generic_mechanism": "aadistill.initialization.planning.ranking -- `BeamRankingPolicy.quality_order()` is the one shared epsilon-Pareto ordering; `rank(..., diversity=False)` and `SearchResult.finalists(policy, k)` are the quality-only retention path. PARETO_V1 is unchanged and beam pruning keeps its diversity, so every existing search behaves exactly as before.",
+  "no_experiment_hardcode_in_core": "no phase id, no model name or geometry, no stage id, no K, no candidate id. K and the choice of quality-only retention belong to experiment configuration.",
+  "d1_wiring": "the D1 driver's Stage D now commits via `result.finalists(PARETO_V1, k)`, so a future D1-family search retains by quality order natively.",
+  "hash_bound": "`behavioural_design.finalist_retention` is part of the design's scientific preimage, so changing the retention rule moves the scientific design hash."
+ }
+}

@@ -964,3 +964,151 @@ class TestThePhaseFundingAmendment:
         history = ap["_cap_amendment"]
         for cap in ("283.76", "320.00", "370.00", "400.00", "465.00"):
             assert cap in history, f"the cap history dropped {cap}"
+
+
+class TestTheScientificDesignHashIsNotAFunctionOfMoney:
+    """`design_hash` must move on protocol and never on the ledger.
+
+    It was a sha over every non-underscore key, which swept in `budget`. So
+    booking a session's spend moved `budget.position` and
+    `provisional_shortfall_usd`, moved the hash, invalidated the committed
+    record, reddened two tests in D1's own pod gate and blocked every launch
+    until the record was regenerated and the authorization re-issued against a
+    new hash. That cycle was paid THREE TIMES in one round before the preimage
+    was narrowed. A scientific design does not change because money was spent.
+    """
+
+    @staticmethod
+    def _hash(doc):
+        from aadistill.infrastructure.manifest import sha256_json
+        from autoinit.write_d1_design import scientific_preimage
+
+        return sha256_json(scientific_preimage(doc))
+
+    @pytest.fixture(scope="class")
+    def doc(self):
+        from autoinit.write_d1_design import build
+
+        return build()
+
+    def test_the_committed_hash_is_the_scientific_preimage_hash(self, doc):
+        assert doc["design_hash"] == self._hash(doc)
+
+    @pytest.mark.parametrize("label,mutate", [
+        ("remaining formal balance",
+         lambda d: d["budget"]["position"].update(formal_remaining_usd=1.0)),
+        ("provisional shortfall",
+         lambda d: d["budget"].update(provisional_shortfall_usd=-999.0)),
+        ("chain hard ceiling",
+         lambda d: d["budget"]["chain"].update(hard_ceiling_usd=123.0)),
+        ("live GPU price",
+         lambda d: d["search_stage"]["cost"].update(price_per_hour=9.99)),
+        ("search session ceiling",
+         lambda d: d["search_stage"]["cost"].update(hard_ceiling_usd=99.0)),
+        ("the priced design grid",
+         lambda d: d["behavioural_design"]["priced_grid"].clear()),
+        ("run status", lambda d: d.update(status="anything")),
+        ("open blockers", lambda d: d.update(open_blockers=["x"])),
+        ("owed GPU validation state",
+         lambda d: d.update(gpu_validation_owed={"status": "x"})),
+    ])
+    def test_money_and_run_state_do_not_move_it(self, doc, label, mutate):
+        import copy
+
+        moved = copy.deepcopy(doc)
+        mutate(moved)
+        assert self._hash(moved) == self._hash(doc), (
+            f"{label} moved the scientific design hash; money and run state "
+            "are bound by the run's authorization, not by the science")
+
+    @pytest.mark.parametrize("label,mutate", [
+        ("Top-K", lambda d: d["behavioural_design"].update(top_k=5)),
+        ("the finalist-retention rule",
+         lambda d: d["behavioural_design"].update(
+             finalist_retention="quality_with_lineage_diversity")),
+        ("screening seeds",
+         lambda d: d["behavioural_design"].update(screening_seeds=3)),
+        ("confirmation seeds",
+         lambda d: d["behavioural_design"].update(confirmation_seeds=5)),
+        ("the decision rule",
+         lambda d: d["behavioural_design"].update(decision_rule="other")),
+        ("the recovery recipe", lambda d: d.update(recovery_recipe={"r": 1})),
+        ("the scoring protocol", lambda d: d.update(scoring_policy={"s": 1})),
+        ("the hypothesis", lambda d: d.update(hypothesis="other")),
+        ("beam width", lambda d: d["search_stage"]["beam"].update(width=8)),
+        ("the ranking policy",
+         lambda d: d["search_stage"]["ranking_policy"].update(id="other")),
+        ("the contamination protocol",
+         lambda d: d.update(contamination_protection={"c": 1})),
+    ])
+    def test_protocol_changes_do_move_it(self, doc, label, mutate):
+        import copy
+
+        moved = copy.deepcopy(doc)
+        mutate(moved)
+        assert self._hash(moved) != self._hash(doc), (
+            f"{label} did NOT move the scientific design hash; a protocol "
+            "change that leaves the identity alone is a change nothing records")
+
+    def test_a_missing_scientific_key_is_refused_not_skipped(self, doc):
+        """A preimage that drops an absent field hashes a smaller document and
+        still reads as a valid identity."""
+        import copy
+
+        from autoinit.write_d1_design import scientific_preimage
+
+        broken = copy.deepcopy(doc)
+        del broken["recovery_recipe"]
+        with pytest.raises(KeyError, match="recovery_recipe"):
+            scientific_preimage(broken)
+        broken = copy.deepcopy(doc)
+        del broken["behavioural_design"]["top_k"]
+        with pytest.raises(KeyError, match="top_k"):
+            scientific_preimage(broken)
+
+    def test_the_preimage_is_a_positive_list_not_an_exclusion(self):
+        """A blacklist would silently admit the next money-bearing field added
+        anywhere in the document.
+
+        Asserted on the AST rather than by grepping for the old expression's
+        absence: the comment that explains WHY the exclusion was wrong quotes
+        it, and a text probe matched its own documentation.
+        """
+        import ast
+
+        from autoinit import write_d1_design as W
+
+        tree = ast.parse(Path(W.__file__).read_text())
+        assigned = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Assign):
+                continue
+            for target in node.targets:
+                if (isinstance(target, ast.Subscript)
+                        and isinstance(target.slice, ast.Constant)
+                        and target.slice.value == "design_hash"):
+                    assigned.append(node.value)
+        assert len(assigned) == 1, (
+            f"expected exactly one assignment to doc['design_hash'], found "
+            f"{len(assigned)}")
+        call = assigned[0]
+        assert isinstance(call, ast.Call)
+        assert getattr(call.func, "id", None) == "sha256_json"
+        inner = call.args[0]
+        assert isinstance(inner, ast.Call), (
+            "design_hash is computed from an expression rather than from the "
+            "declared preimage")
+        assert getattr(inner.func, "id", None) == "scientific_preimage"
+        #: And the positive lists exclude every money-bearing block.
+        assert "budget" not in W.SCIENTIFIC_TOP_LEVEL
+        assert "cost" not in W.SCIENTIFIC_SEARCH_STAGE
+        assert "priced_grid" not in W.SCIENTIFIC_BEHAVIOURAL
+
+    def test_the_finalist_retention_rule_is_quality_only_and_hash_bound(self, doc):
+        from aadistill.initialization.planning.ranking import PARETO_V1
+
+        from autoinit.write_d1_design import SCIENTIFIC_BEHAVIOURAL
+
+        assert doc["behavioural_design"]["finalist_retention"] == \
+            PARETO_V1.RETENTION_QUALITY_ONLY
+        assert "finalist_retention" in SCIENTIFIC_BEHAVIOURAL
