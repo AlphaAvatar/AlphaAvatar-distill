@@ -4,7 +4,7 @@
   "counts": {
     "error": 0,
     "failed": 0,
-    "passed": 409,
+    "passed": 413,
     "skipped": 0
   },
   "d1_replay_harness_digest": "2a6f95acb45621bc3cbcfb8d8839a3fec044e4db096e00d762a22e0e62c2a6c7",
@@ -23,12 +23,12 @@
     "executions_of_this_tree": [
       "exec-001"
     ],
-    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-85e311a026d4/exec-001/junit.xml",
-    "junit_sha256": "d076742eeb00de7aef9ad8af282788d4b68ef024b339e24a859e94f9d7581b1f",
-    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-85e311a026d4/exec-001/pytest.log",
-    "pytest_log_sha256": "12d1e5fc04166f183df0e27c998ae6637867b46bb624e142f57b2ff0104a9db3"
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-dc6ef91f4018/exec-001/junit.xml",
+    "junit_sha256": "dd8be49c8761a99ada1862a5d8edbe00f938f387877c03725883a2c5507eab09",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-dc6ef91f4018/exec-001/pytest.log",
+    "pytest_log_sha256": "ac07815481d8656c4039126273335372bd3a8ef4039404b88d194a404ca86942"
   },
-  "execution_id": "sweep-85e311a026d4/exec-001",
+  "execution_id": "sweep-dc6ef91f4018/exec-001",
   "expected_environment_skips": [],
   "failed_nodeids": [],
   "findings": {
@@ -38,7 +38,7 @@
     "counts": {
       "error": 0,
       "failed": 0,
-      "passed": 409,
+      "passed": 413,
       "skipped": 0
     },
     "expected_environment_skips": [],
@@ -87,8 +87,8 @@
     "setup_environment_realized": true,
     "staging_contract_digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5"
   },
-  "n_tests": 409,
-  "pod_test_environment_digest": "e5f8963bbcd3c7c87d627a5560956ef5b8504ddf894ad7d918783b51e802830f",
+  "n_tests": 413,
+  "pod_test_environment_digest": "16153928608ceb145f2fed60a65628a1038566db65f9b42f0abee36e5f3078cd",
   "pod_test_environment_n_files": 178,
   "pod_test_environment_named_files": [
     "conftest.py",
@@ -114,13 +114,13 @@
   "record_kind": "diagnostic",
   "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
   "schema": "aadistill.autoinit.d1_replay_pod_environment/v1",
-  "seconds": 232.8,
-  "self_sha256": "65b62317e35b60cd9ba7bc889922612ac5a27a6d02c9d79f5e03b5dc4f7a70b7",
+  "seconds": 231.4,
+  "self_sha256": "f9c00a9174d8c095fb3b08df0fd08b842ee910bd0408472187dc43beb043f304",
   "setup_environment": {
-    "BUNDLE_NAME": "aad_autoinit_85e311a0.bundle",
+    "BUNDLE_NAME": "aad_autoinit_dc6ef91f.bundle",
     "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1,d1_replay_plan.json:artifacts/stage1",
     "SESSION_AUTH_PATH": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
-    "SESSION_COMMIT": "85e311a026d47a3486e7c8fc72fb2259d456ce10",
+    "SESSION_COMMIT": "dc6ef91f401815f7b8a2a7f1b04540cb5e43dd21",
     "SESSION_PLAN_HASH": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
     "SESSION_RELAY_INPUTS": "[]",
     "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
@@ -133,7 +133,7 @@
   },
   "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
   "simulator": "scripts/pod/simulate_pod_env.sh",
-  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1850 derived paths, contract 9cbadfc0dd8f> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-85e311a026d4/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-85e311a026d4/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 13 keys> HIDDEN_PATHS=<1850 derived paths, contract 9cbadfc0dd8f> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-dc6ef91f4018/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-dc6ef91f4018/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
   "simulator_exit_code": 0,
   "staging_contract": {
     "digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5",
@@ -151,7 +151,7 @@
   },
   "staging_contract_digest": "9cbadfc0dd8f4765ebe92b0efc9f3d289fbaf96c6886fa99422472bfb879e0d5",
   "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
-  "swept_base_commit": "85e311a026d47a3486e7c8fc72fb2259d456ce10",
+  "swept_base_commit": "dc6ef91f401815f7b8a2a7f1b04540cb5e43dd21",
   "tree_clean": true,
   "unexpected_environment_skips": [],
   "verdict": "PASS"
