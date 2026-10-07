@@ -1,0 +1,250 @@
+{
+  "schema": "aadistill.autoinit.d1_replay_session/v1",
+  "session_id": "autoinit-d1-replay",
+  "session_spec": {
+    "session_id": "autoinit-d1-replay",
+    "schema": "aadistill.autoinit.d1_replay_session/v1",
+    "description": "D1: reconstruct two unretained quality-order finalists, eight digest-pinned operator steps. Decides nothing, measures nothing, trains nothing.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+    "authorization_type": "SpendAuthorization.load",
+    "plan_id": "autoinit.d1_replay",
+    "plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "status_path": "/workspace/autoinit_d1_replay.status",
+    "run_log_path": "/workspace/autoinit_d1_replay_run.log",
+    "driver_job_id": "autoinit_d1_replay",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED",
+        "DIGEST_MISMATCH"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d1_replay",
+      "evidence_filename": "d1_replay.json",
+      "archive_basename": "d1_replay_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/d1_replay_artifacts.json",
+      "spec_failed": "configs/autoinit/d1_replay_artifacts_failed.json",
+      "report_names": [
+        "d1_replay.json"
+      ]
+    },
+    "setup": {
+      "env": {},
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "state_eval_v1:artifacts/stage1",
+        "e8_calibration_v1:artifacts/stage1",
+        "reasoning_heavy_v2:artifacts/stage1",
+        "d1_replay_plan.json:artifacts/stage1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/experiments/stage-1/phase_d1/tests"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-07T16:40:06+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 118 min $2.14 \u00b7 soft $2.32 \u00b7 hard $2.53 (authorized $2.59)"
+    },
+    {
+      "utc": "2026-10-07T16:40:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-07T16:40:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "account funds OK: the provider account holds $189.2703 against the $7.5332 this session must be able to fund"
+    },
+    {
+      "utc": "2026-10-07T16:40:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 4 local assets"
+    },
+    {
+      "utc": "2026-10-07T16:40:07+00:00",
+      "elapsed_min": 0.0,
+      "msg": "DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills."
+    }
+  ],
+  "stages": {},
+  "authorization": {
+    "schema": "aadistill.autoinit.spend_authorization/v1",
+    "authorization_id": "autoinit.v1.d1_replay",
+    "version": 4,
+    "granted_utc": "2026-10-07T16:40:05.723973+00:00",
+    "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
+    "plan_id": "autoinit.d1_replay",
+    "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "expected_usd": 2.1437,
+    "hard_cap_usd": 2.5856,
+    "authorized_stages": [
+      0
+    ],
+    "stage_conditions": {
+      "0": "all eight operator steps are pinned to the digest the search recorded; the ROOT STATE is derived from the mechanism and resolved against the recorded step-0 configs before any weights load; a mismatch after that derivation holds is terminal for that leaf and is NOT retried"
+    },
+    "scope_note": "ONE pod, two digest-pinned fixed paths, each leaf fetched and re-identified off-pod the moment it reconstructs. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
+    "phase_a_authorized": false,
+    "automatic_phase_a_start": false,
+    "authorized_session_commit": "47a9fa8c17b73cd3493809b56b550430b94937bf",
+    "harness_source_digest": "246c846cddac72a6e19201c748c09cc06c258b447313b2b9bea00e69aa84983f",
+    "harness_source_files": [
+      "configs/autoinit/d1_replay_artifacts.json",
+      "configs/autoinit/d1_replay_artifacts_failed.json",
+      "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "scripts/experiments/stage-1/phase_d1/d1_session.py",
+      "scripts/experiments/stage-1/phase_d1/replay_specs.py",
+      "scripts/pod/autoinit_d1_replay_driver.py",
+      "scripts/pod/autoinit_d1_replay_launch.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/collect_artifacts.py"
+    ],
+    "per_launch_hard_usd": 2.5856,
+    "provenance_commit": "47a9fa8c17b73cd3493809b56b550430b94937bf",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+    "authorization_sha256": "0e6b080a1c8c43c751584b071de64b346baa139f3c6a5d5c3a9f213890656b53"
+  },
+  "session_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+  "harness_source_digest": "246c846cddac72a6e19201c748c09cc06c258b447313b2b9bea00e69aa84983f",
+  "harness_source_files": [
+    "configs/autoinit/d1_replay_artifacts.json",
+    "configs/autoinit/d1_replay_artifacts_failed.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "scripts/experiments/stage-1/phase_d1/d1_session.py",
+    "scripts/experiments/stage-1/phase_d1/replay_specs.py",
+    "scripts/pod/autoinit_d1_replay_driver.py",
+    "scripts/pod/autoinit_d1_replay_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/collect_artifacts.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 2.5856,
+    "expected_minutes": 118.0,
+    "soft_stop_minutes": 127.44000000000001,
+    "artifact_recovery_reserve_minutes": 12.0,
+    "hard_terminate_minutes": 139.44,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; the replay trains nothing",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 11.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 6.0
+      },
+      {
+        "name": "teacher_load_twice",
+        "minutes": 5.0
+      },
+      {
+        "name": "eight_pinned_operator_steps",
+        "minutes": 88.0
+      },
+      {
+        "name": "materialize_and_reload",
+        "minutes": 8.0
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 2.1437,
+    "soft_stop_usd": 2.3152,
+    "artifact_recovery_reserve_usd": 0.218,
+    "hard_terminate_usd": 2.5332
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "account_balance": {
+    "known": true,
+    "client_balance_usd": 189.2702514206,
+    "current_spend_per_hr": 0.0,
+    "min_balance_usd": 0.0,
+    "under_balance": false,
+    "error": null,
+    "required_usd": 7.5332,
+    "ok": true,
+    "why": "the provider account holds $189.2703 against the $7.5332 this session must be able to fund",
+    "_rule": "the provider account and this repository's allowances are different things and both must be sufficient; this is the provider half"
+  },
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/d1_replay_plan.json"
+    ],
+    "local_missing": []
+  },
+  "dry_run": true,
+  "provider_resource_created": false,
+  "terminal": "DRY_RUN_GATES_PASSED",
+  "_dry_run_is_not_a_pass": "every pre-provider gate passed and nothing was created. That is evidence the chain is launchable, not evidence the session succeeded: no pod existed, no stage ran and nothing was measured.",
+  "passed": false
+}
