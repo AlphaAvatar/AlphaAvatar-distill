@@ -792,6 +792,60 @@ STAGE_1 = [
             "evidence and retrains none of them."),
     ),
     dict(
+        id="phase_d1_replay",
+        kind="engineering",
+        stage_id="1",
+        status=("4 paid subruns, $0.8144 of $3.5000; the fifth is issued "
+                "against the remainder"),
+        title=("D1 finalist rematerialization — the two quality-order "
+               "finalists the search measured and did not retain"),
+        question=(
+            "Can the checkpoints behind D1's quality positions 2 and 4 be "
+            "rebuilt byte-for-byte from the completed search's own evidence? "
+            "The search ranked all twelve complete leaves and retained the "
+            "four its Stage-D policy committed, which under lineage rotation "
+            "were quality positions 1, 3, 5 and 11; the standing retention "
+            "rule of 2026-10-07 makes the behavioural finalists positions 1 to "
+            "4, and two of those were discarded with the pod. This session "
+            "replays each of those two paths with every one of its four steps "
+            "pinned to the artifact digest the search recorded, starting from "
+            "the ROOT STATE derived from the search's own records, and either "
+            "reproduces each leaf's exact identity or stops. It decides "
+            "nothing: no beam, no ranking, no selection, no measurement and no "
+            "behavioural work."),
+        canonical_config="configs/autoinit/d1_replay_artifacts.json",
+        evidence=[
+            E("logs/stages/stage-1/phase_d1/validations/"
+              "finalist-rematerialization/v1/campaign.json",
+              "cumulative cost across every resource and subrun; a rerun does "
+              "not reset it, so the next attempt's ceiling is this ceiling "
+              "minus the settled spend minus the teardown reserve",
+              field="ceiling_usd", equals=3.5),
+            E("logs/stages/stage-1/phase_d1/decisions/"
+              "post_search_finalist_retention.json",
+              "which two leaves this session rebuilds -- READ from the "
+              "maintainer's retention decision, never recomputed, so a replay "
+              "cannot quietly re-select"),
+            E("logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001/"
+              "evidence/root_state_derivation.json",
+              "the historical root state, derived from the execution mechanism "
+              "and resolved against all eight recorded level-0 config "
+              "identities at $0"),
+        ],
+        external_material=[],
+        decisions=[],
+        canonical_log_destination="logs/stages/stage-1/phase_d1_replay",
+        classification_reason=(
+            "Stage 1 because it reconstructs Stage-1 initialization "
+            "artifacts. `engineering`, not an experiment: it trains nothing, "
+            "measures nothing and ranks nothing, which is why it is booked "
+            "against the GPU engineering allowance rather than D1's formal "
+            "sessions. It is SEPARATE from `phase_d1` and must never be "
+            "counted as one of its attempts -- the search is complete, its "
+            "ranking is frozen and accepted, and there is no fourth D1 search. "
+            "It produces only the weights behind a decision already made."),
+    ),
+    dict(
         id="phase_d1",
         kind="experiment",
         stage_id="1",

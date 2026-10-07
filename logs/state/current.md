@@ -13,9 +13,9 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **0 pods and 0 network volumes** at a spend rate of `$0/h`.
 
 **The next paid action is the FIFTH attempt at rematerializing D1's two
-unretained finalists.** Four paid subruns have settled `$0.8144` of a `$3.5000`
-engineering campaign, none of them reconstructing a leaf and every one an
-ordinary failure in the replay harness. Owner:
+unretained finalists.** Its engineering campaign has settled `$0.8144` of
+`$3.5000` over four subruns, none of which reconstructed a leaf and every one
+an ordinary failure in the replay harness. Owner:
 [`validations/finalist-rematerialization/v1/campaign.json`](../stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json).
 
 ```text

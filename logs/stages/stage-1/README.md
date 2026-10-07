@@ -86,7 +86,7 @@ What each one asked of this stage.
 
 ## Runs
 
-**212** run(s) are registered for this stage's
+**213** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -98,6 +98,7 @@ canonical run list, across every stage, is
 the config path and hash it ran under.
 
 * `configs/autoinit/c2_replay_artifacts.json`
+* `configs/autoinit/d1_replay_artifacts.json`
 * `configs/experiments/phase_a/source_sets.json`
 * `configs/experiments/phase_c1/authorization.json`
 * `configs/experiments/phase_c2/baseline_completion_authorization.json`
