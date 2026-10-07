@@ -151,7 +151,8 @@ STOP_STOPPED_NOT_GONE = "provider_stopped_pod_still_exists"
 STOP_UNKNOWN = "unknown_pod_not_billing"
 
 
-def observed_stop_cause(state: "PodState", *, watchdog_journal: Path | None,
+def observed_stop_cause(state: "PodState", *,
+                        watchdog_journal: Path | str | None,
                         elapsed_minutes: float,
                         hard_terminate_minutes: float) -> dict:
     """Why did this pod stop billing? Classified from evidence, never asserted.
@@ -171,8 +172,16 @@ def observed_stop_cause(state: "PodState", *, watchdog_journal: Path | None,
     """
     acted = False
     ticks = 0
-    if watchdog_journal is not None and watchdog_journal.is_file():
-        for line in watchdog_journal.read_text().splitlines():
+    #: COERCED, because a `str` here raised `AttributeError: 'str' object has
+    #: no attribute 'is_file'` -- and the one place this runs is the emergency
+    #: closeout, where an exception costs money rather than time. The
+    #: production caller passes a `Path`, so this never fired; a journal path
+    #: that reaches a session as a string from a config or a record would have
+    #: turned "classify why the pod stopped" into "lose the closeout", which is
+    #: the failure this whole function exists to stop making.
+    journal = Path(watchdog_journal) if watchdog_journal is not None else None
+    if journal is not None and journal.is_file():
+        for line in journal.read_text().splitlines():
             if not line.strip():
                 continue
             try:
@@ -191,7 +200,7 @@ def observed_stop_cause(state: "PodState", *, watchdog_journal: Path | None,
         cause = STOP_BY_WATCHDOG
     elif state.exists:
         cause = STOP_STOPPED_NOT_GONE
-    elif watchdog_journal is None or not watchdog_journal.is_file():
+    elif journal is None or not journal.is_file():
         cause = STOP_UNKNOWN
     else:
         cause = STOP_BY_PROVIDER

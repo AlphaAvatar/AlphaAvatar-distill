@@ -283,7 +283,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 73,
+  "runs_unrecorded": 75,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -368,8 +368,13 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 6,
-    "total": 6
+    "unrecorded": 7,
+    "total": 7
+   },
+   "phase_d1_replay": {
+    "recorded": 0,
+    "unrecorded": 1,
+    "total": 1
    },
    "recovery_continuation": {
     "recorded": 8,
@@ -2820,6 +2825,14 @@
   },
   {
    "experiment_id": "phase_d1",
+   "run_id": "d1_replay_001",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_replay_001",
+   "n_files": 1,
+   "digest": "630385f1e4f321001f5a6c50624b801760b372158c825227432c8a3c392773ac",
+   "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
+  },
+  {
+   "experiment_id": "phase_d1",
    "run_id": "d1_search_20261005_173304",
    "root": "logs/stages/stage-1/phase_d1/runs/d1_search_20261005_173304",
    "n_files": 3,
@@ -2865,6 +2878,14 @@
    "n_files": 14,
    "digest": "c95ab4a0990e1513eec2d44d046b93113e95f1158169a3a17f729e08366da160",
    "why": "no run manifest; its closeout states: COMPLETE FORMAL SEARCH: 92/92 expansions, 12 complete leaves, Top-4 committed and secured"
+  },
+  {
+   "experiment_id": "phase_d1_replay",
+   "run_id": "d1_replay_001",
+   "root": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001",
+   "n_files": 2,
+   "digest": "35a8d944c1c4410c63b827f981950bdd89cde404acdd8ed392400a5c6ced39c0",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   }
  ],
  "authorizes": "nothing"

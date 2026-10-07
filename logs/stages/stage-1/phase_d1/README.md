@@ -12,6 +12,7 @@ Everything this experiment produced, in one place.
 
 ## Runs
 
+* [`d1_replay_001`](runs/d1_replay_001/)
 * [`d1_search_20261005_173304`](runs/d1_search_20261005_173304/)
 * [`d1_search_20261005_193733`](runs/d1_search_20261005_193733/)
 * [`d1_search_20261006_055409`](runs/d1_search_20261006_055409/)

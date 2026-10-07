@@ -15,7 +15,8 @@ while the watchdog's own journal recorded `action: none` on all 446 ticks with
 account balance. Two records asserted a cause neither had checked, and the
 closeout then threw instead of recording the loss.
 
-Both halves are regressed here, against the REAL journal that run left behind.
+The generic classifier is regressed here. The 2026-10-06 journal itself is
+D1's evidence and its assertion lives with D1 (AGENTS.md 2.8a).
 """
 
 from __future__ import annotations
@@ -37,35 +38,22 @@ from aadistill.infrastructure.session_runner import (  # noqa: E402
     SessionRunner, observed_stop_cause,
 )
 
-#: The journal that run actually wrote. Kept as the fixture because a
-#: hand-built one would only ever prove the classifier agrees with its author.
-REAL_JOURNAL = ROOT / (
-    "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/"
-    "runtime/watchdog_zhk120whedjsg9.jsonl")
+#: The incident that produced this classifier is regressed against the REAL
+#: journal it left behind -- but that journal lives under `logs/.../runs/`,
+#: which is gitignored, so the assertion SKIPPED silently on a pod and on any
+#: fresh checkout. The skip-predicate audit flagged it as the suite's one
+#: unaccounted predicate: "nothing says the two machines must decide it the
+#: same way". Under AGENTS.md 2.8a a closed run's own journal is that
+#: experiment's state, so the historical assertion moved to
+#: `scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py`
+#: where the fixture exists and the skip disappears. What stays here is the
+#: generic behaviour: four causes, decided from what the journal says.
 
 GONE = PodState(pod_id="p", exists=False, desired_status="TERMINATED")
-
-
 def _journal(tmp_path: Path, rows: list[dict]) -> Path:
     p = tmp_path / "watchdog_p.jsonl"
     p.write_text("\n".join(json.dumps(r) for r in rows) + "\n")
     return p
-
-
-class TestTheRealIncident:
-
-    @pytest.mark.skipif(not REAL_JOURNAL.is_file(),
-                        reason="the 2026-10-06 journal is not in this checkout")
-    def test_the_2026_10_06_stop_is_not_attributed_to_the_watchdog(self):
-        got = observed_stop_cause(GONE, watchdog_journal=REAL_JOURNAL,
-                                  elapsed_minutes=449.81,
-                                  hard_terminate_minutes=1125.545)
-        assert got["cause"] == STOP_BY_PROVIDER
-        assert got["watchdog_took_an_action"] is False
-        assert got["over_hard_limit"] is False
-        #: The journal is READ, not assumed: a classifier that never opened it
-        #: would report zero ticks and still reach the same verdict here.
-        assert got["watchdog_ticks"] > 400
 
 
 class TestTheThreeCauses:
