@@ -25,9 +25,20 @@ directory; it does not stage the directory. C1 puts four files into
 visible. Modelling that destination as "present" would hide precisely the class of
 error that has now cost four paid aborts.
 
-**Local assets are whole trees.** A `LocalAsset` is scp'd and installed as a
-directory, so every file beneath it is staged, and that difference from
-`RelayInput` is part of the contract rather than an implementation detail.
+**A local asset stages whatever its source IS.** A `LocalAsset` naming a
+directory is scp'd and installed as a tree, so every file beneath it is staged;
+one naming a single FILE stages that file. The difference from `RelayInput` —
+which stages one named file into a destination it does not otherwise populate —
+is part of the contract rather than an implementation detail.
+
+This said "local assets are whole trees", and `staged_files` implemented
+exactly that: it collected an asset's contents `if tree.is_dir()` and dropped
+anything else. True until a session staged a resolved plan as one file, at
+which point the simulator hid a file the pod demonstrably had — its driver had
+loaded that plan and reached its first operator — and reported the test that
+reads it as an unexpected skip. A simulation that hides what the pod receives
+is not conservative; it is wrong in the direction that matters, because a
+launch-bound record would then describe a pod that does not exist.
 
 **Tooling is not an artifact.** `.venv`, `__pycache__` and the pytest caches are
 gitignored but are not session inputs — the pod has its own interpreter at
@@ -230,8 +241,11 @@ def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
         "tests_max_seconds": setup.tests_max_seconds,
         "granularity": (
             "RelayInput stages ONE NAMED FILE into its dest directory, not the "
-            "directory. LocalAsset installs a whole tree. Modelling a relay dest "
-            "as wholly present is the error this contract exists to prevent."),
+            "directory. LocalAsset installs whatever its source IS -- a whole "
+            "tree when it names a directory, one file when it names a file. "
+            "Modelling a relay dest as wholly present is the error this "
+            "contract exists to prevent; modelling a FILE asset as absent is "
+            "the error that made a sweep hide a plan the pod had loaded."),
     }
     contract["digest"] = contract_digest(contract)
     return contract
@@ -258,8 +272,19 @@ def staged_files(contract: dict[str, Any], repo_root: str | Path = ".") -> set[s
             out.add(r["staged_path"])
     for a in contract["local_assets"]:
         tree = root / a["staged_tree"]
+        #: A FILE ASSET IS STAGED TOO. This read `if tree.is_dir()` only, so a
+        #: `LocalAsset` whose target is a single file contributed NOTHING to the
+        #: staged set and fell into the hidden complement -- hiding, from the
+        #: simulator, a file the pod demonstrably has. The replay's resolved
+        #: plan is one file, the pod's driver loaded it and reached its first
+        #: operator, and the sweep still reported the test that reads it as an
+        #: unexpected skip. A simulation that hides what the pod receives is
+        #: not conservative, it is wrong in the direction that matters: a
+        #: launch-bound record would describe a pod that does not exist.
         if tree.is_dir():
             out |= {str(p.relative_to(root)) for p in tree.rglob("*") if p.is_file()}
+        elif tree.is_file():
+            out.add(str(tree.relative_to(root)))
     return out
 
 

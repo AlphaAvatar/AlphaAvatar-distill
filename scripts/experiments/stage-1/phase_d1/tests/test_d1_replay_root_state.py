@@ -376,15 +376,32 @@ class TestTheDriverUsesTheDerivedRootAndNothingElse:
 
 
 class TestTheRealD1DerivationIsCommittedAndUnique:
-    """The staged plan, if this host has it. Skipped where it is not -- a pod's
-    test gate runs before the plan is staged, and a regression that fails for
-    the absence of an out-of-tree asset is how $0.1849 was spent once already.
-    The mechanism above is what is asserted unconditionally."""
+    """The staged plan. ASSERTED, not skipped.
+
+    This began as `if not path.is_file(): pytest.skip(...)`, reasoning that a
+    pod's gate might run before the plan was staged. The pod-like sweep then
+    reported it as an **unexpected environment skip** -- and the sweep was
+    right twice over. The plan is a declared `LocalAsset`, the pod's driver had
+    already loaded it and reached its first operator, and what actually
+    produced the skip was a defect in the SIMULATOR: `staged_files` collected a
+    local asset's contents only `if tree.is_dir()`, so a one-file asset
+    contributed nothing and fell into the hidden complement.
+
+    The skip was therefore load-bearing in the worst way: it made a wrong
+    model of the pod look fine. Asserting instead means the next session that
+    stages a file and cannot see it gets told, rather than passing quietly.
+    """
+
+    def test_the_plan_is_staged_where_the_driver_reads_it(self):
+        path = REPO / "artifacts/stage1/d1_replay_plan.json"
+        assert path.is_file(), (
+            f"{path.relative_to(REPO)} is not here. The driver is invoked with "
+            "`--plan` pointing at exactly this path, so a pod without it dies "
+            "after setup has been paid for; resolve it with "
+            "`autoinit_d1_replay_launch.py --write-plan`, which costs $0.")
 
     def test_the_plan_carries_a_unique_derivation(self):
         path = REPO / "artifacts/stage1/d1_replay_plan.json"
-        if not path.is_file():
-            pytest.skip("the replay plan is not staged on this host")
         state = json.loads(path.read_text())["root_state"]
         assert state is not None, "the plan ships no root-state derivation"
         explain = [c for c in state["evidence"] if c["explains_every_step_0"]]

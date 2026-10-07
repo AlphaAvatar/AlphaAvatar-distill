@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 122,
- "digest": "78b060b2d5b2930f72d0cafc65c2f47c23d6a8a039dbc9dadea8939112f6b754",
+ "digest": "051cbbc30ff8a48c445a5d7e7b0ed663b490628310f22a072eea11b67bab4355",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -624,8 +624,8 @@
   },
   {
    "path": "src/aadistill/runtime/staging_contract.py",
-   "sha256": "8498ac59ba9b5e4ecbff502ee39b5efaefa5a9ec659a9e00c3a3ddba0c7a54a2",
-   "bytes": 16801
+   "sha256": "f8f7dbeaefa803ba7b7df3a51ac556b9372d492794a5776512fe8428b88fe3d8",
+   "bytes": 18558
   },
   {
    "path": "src/aadistill/training/lora.py",
