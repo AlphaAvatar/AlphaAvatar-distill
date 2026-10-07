@@ -39,15 +39,20 @@ from aadistill.infrastructure.session_runner import (  # noqa: E402
 )
 
 #: The incident that produced this classifier is regressed against the REAL
-#: journal it left behind -- but that journal lives under `logs/.../runs/`,
-#: which is gitignored, so the assertion SKIPPED silently on a pod and on any
-#: fresh checkout. The skip-predicate audit flagged it as the suite's one
-#: unaccounted predicate: "nothing says the two machines must decide it the
-#: same way". Under AGENTS.md 2.8a a closed run's own journal is that
-#: experiment's state, so the historical assertion moved to
-#: `scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py`
-#: where the fixture exists and the skip disappears. What stays here is the
-#: generic behaviour: four causes, decided from what the journal says.
+#: journal it left behind, and that assertion used to live here behind a
+#: `skipif(not REAL_JOURNAL.is_file())`. The skip-predicate audit flagged it as
+#: this suite's one UNACCOUNTED predicate -- the signal is classified and
+#: nothing said the two machines must decide it the same way -- and the guard
+#: turned out to be dead: the journal is tracked, so it never fired. A dead
+#: guard on a premise nobody asserts is one `git rm` away from disabling the
+#: only evidence that the watchdog did not act, silently.
+#:
+#: Under AGENTS.md 2.8a a closed run's own journal is that experiment's state,
+#: so the historical assertion moved to
+#: `scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py`,
+#: where it asserts the fixture's PRESENCE rather than conditioning on it.
+#: What stays here is the generic behaviour: four causes, decided from what the
+#: journal says, over journals these tests write themselves.
 
 GONE = PodState(pod_id="p", exists=False, desired_status="TERMINATED")
 def _journal(tmp_path: Path, rows: list[dict]) -> Path:

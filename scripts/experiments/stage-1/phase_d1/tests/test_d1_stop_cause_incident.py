@@ -22,13 +22,18 @@ WHY IT MOVED HERE. The assertion used to sit in core behind
 
     @pytest.mark.skipif(not REAL_JOURNAL.is_file(), ...)
 
-and the journal lives under `logs/.../runs/`, which is gitignored. So on a pod
-and on any fresh checkout it skipped silently — and the skip-predicate audit
-flagged it as the core suite's one unaccounted predicate: the signal is
-classified, and nothing says the two machines must decide it the same way. A
-regression that can vanish without anyone noticing is not a regression.
-AGENTS.md §2.8a puts a closed run's own state with its experiment, which is
-also where the fixture exists.
+and the skip-predicate audit flagged it as the core suite's one **unaccounted**
+predicate: the signal `filesystem_premise_offpod` is classified, and nothing
+said the two machines must decide it the same way.
+
+The guard was in fact DEAD — the journal has been tracked since the
+account-balance gate landed, so it is present on every checkout and the skip
+never fired. That is worse than it sounds rather than better: a dead guard on
+a premise nobody asserts is one `git rm` or one `.gitignore` line away from
+silently disabling the only evidence that the watchdog did not kill that pod,
+and nothing would have reported it. Hence an assertion on the fixture's
+presence instead of a condition on it, and AGENTS.md §2.8a puts a closed run's
+own state with its experiment, which is where the fixture's own run lives.
 
 The journal is kept as the fixture rather than hand-built because a synthetic
 one would only ever prove the classifier agrees with its author.
