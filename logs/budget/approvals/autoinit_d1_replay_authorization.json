@@ -2,7 +2,7 @@
  "schema": "aadistill.autoinit.spend_authorization/v1",
  "authorization_id": "autoinit.v1.d1_replay",
  "version": 1,
- "granted_utc": "2026-10-07T13:26:59+00:00",
+ "granted_utc": "2026-10-07T13:44:53+00:00",
  "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
  "plan_id": "autoinit.d1_replay",
  "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
@@ -17,7 +17,7 @@
  "scope_note": "ONE pod, two digest-pinned fixed paths, two checkpoints fetched and re-identified off-pod. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
  "phase_a_authorized": false,
  "automatic_phase_a_start": false,
- "authorized_session_commit": "c124f856c36eef256b5f68890d5098a5550454e6",
+ "authorized_session_commit": "f0633ec02f91cf5da6d94cc64b0ab6c9b7007c19",
  "harness_source_digest": "2f085638e2ba68ab67421564bb060aea6b7c2ef9b97b2c1f77321addcae54d84",
  "harness_source_files": [
   "scripts/pod/autoinit_d1_replay_launch.py",
@@ -31,7 +31,7 @@
   "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json"
  ],
  "per_launch_hard_usd": 3.5,
- "provenance_commit": "c124f856c36eef256b5f68890d5098a5550454e6",
+ "provenance_commit": "f0633ec02f91cf5da6d94cc64b0ab6c9b7007c19",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
- "authorization_sha256": "2733b288b0710d55b72654368963a97881191a10fffcd95e0c1644dd9bd6d8df"
+ "authorization_sha256": "cb1dc1c1926af3af808e9d9bdf92829a684650926a951b23ecfafbd43c787710"
 }
