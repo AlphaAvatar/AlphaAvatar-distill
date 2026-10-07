@@ -45,8 +45,9 @@ from experiments.phase_d1 import d1_session as D1S  # noqa: E402
 from experiments.run_layout import rel_run_dir  # noqa: E402
 
 
-def governance_path(run_id: str, name: str) -> str:
-    return (f"{rel_run_dir(D1S.EXPERIMENT_ID, run_id, D1S.STAGE_ID)}"
+def governance_path(run_id: str, name: str,
+                    experiment_id: str | None = None) -> str:
+    return (f"{rel_run_dir(experiment_id or D1S.EXPERIMENT_ID, run_id, D1S.STAGE_ID)}"
             f"/governance/{name}")
 
 
@@ -61,6 +62,34 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--out", default=None,
                     help="explicit output path; defaults to this run's "
                          "governance/bundle.json")
+    #: WHICH AUTHORIZATION THE BUNDLE MUST CARRY, because that is a property of
+    #: the SESSION and not of this script. The default is the formal search's
+    #: convention -- a per-run `governance/authorization.json` -- and every
+    #: existing invocation keeps meaning exactly what it meant.
+    #:
+    #: The D1 REPLAY's authorization is a single canonical artifact under
+    #: `logs/budget/approvals/`, named by its launcher's own `AUTH_PATH`, so
+    #: this script refused to stage a commit that carried it:
+    #:
+    #:     refusing to stage: 2e5ee7fcd742 does not carry
+    #:     logs/stages/.../runs/d1_replay_002/governance/authorization.json
+    #:
+    #: Four replay bundles were therefore staged by an ad-hoc `build_bundle`
+    #: plus upload instead -- which is precisely the undocumented preparation
+    #: step whose absence let a readiness record name
+    #: `transfer/aad_autoinit_6c1dd8d9.bundle` as a verified fact when the
+    #: relay did not hold it, and would have died at SETUP_RC=1 on a 404 after
+    #: paying for startup. The CHECK is right and is kept; what was wrong was
+    #: assuming one session's filing convention.
+    ap.add_argument("--auth-path", default=None,
+                    help="repository-relative path to the authorization the "
+                         "bundle must carry. Defaults to the run's "
+                         "governance/authorization.json. Pass the launcher's "
+                         "own AUTH_PATH for a session whose authorization is a "
+                         "single canonical artifact.")
+    ap.add_argument("--experiment-id", default=None,
+                    help="the experiment whose run layout holds this run. "
+                         "Defaults to the formal search's.")
     return ap
 
 
@@ -74,8 +103,10 @@ def main(argv=None) -> int:
     if known.returncode != 0:
         raise SystemExit(f"{commit} is not a commit in this repository")
 
-    auth_rel = governance_path(args.run_id, "authorization.json")
-    out_rel = args.out or governance_path(args.run_id, "bundle.json")
+    auth_rel = args.auth_path or governance_path(
+        args.run_id, "authorization.json", args.experiment_id)
+    out_rel = args.out or governance_path(
+        args.run_id, "bundle.json", args.experiment_id)
 
     #: THE BUNDLE MUST CARRY THE AUTHORIZATION, checked against the COMMIT and
     #: not the worktree: a file present locally and uncommitted is not in the

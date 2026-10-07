@@ -145,3 +145,62 @@ class TestTheReplaySessionArmsTheAccountGate:
         plan = spec.budget.plan(price_per_hour=1.09, authorized_usd=2.5856)
         assert spec.budget.account_balance_required_usd(plan) > \
             plan.hard_terminate_usd
+
+
+class TestTheBundleStagerCanCarryThisSessionsAuthorization:
+    """`stage_d1_bundle.py` asserts that the staged commit carries the
+    authorization the pod will load -- a check whose absence let a readiness
+    record name `transfer/aad_autoinit_6c1dd8d9.bundle` as a verified fact
+    while the relay did not hold it, which is a 404 at SETUP_RC=1 after
+    startup has been paid for.
+
+    It located that authorization at the formal search's convention, a per-run
+    `governance/authorization.json`. The replay's is a single canonical
+    artifact named by its launcher's own `AUTH_PATH`, so the script refused to
+    stage a commit that carried it -- and four replay bundles were staged by an
+    ad-hoc `build_bundle` plus upload instead, which is the undocumented
+    preparation step the check exists to make unnecessary.
+
+    The check is right and is kept. What was wrong was assuming one session's
+    filing convention, so the path is now a parameter.
+    """
+
+    def _stager(self):
+        import importlib.util
+
+        path = REPO / "scripts/autoinit/stage_d1_bundle.py"
+        spec = importlib.util.spec_from_file_location("stage_d1_bundle", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_authorization_path_is_a_parameter(self):
+        mod = self._stager()
+        flags = {s for a in mod.build_parser()._actions
+                 for s in (a.option_strings or ())}
+        assert "--auth-path" in flags
+        assert "--experiment-id" in flags
+
+    def test_the_default_is_still_the_formal_searchs_convention(self):
+        """Every existing invocation keeps meaning what it meant."""
+        mod = self._stager()
+        assert mod.governance_path("some_run", "authorization.json") == (
+            "logs/stages/stage-1/phase_d1/runs/some_run/governance/"
+            "authorization.json")
+
+    def test_an_experiment_id_redirects_the_run_layout(self):
+        mod = self._stager()
+        assert mod.governance_path("d1_replay_002", "bundle.json",
+                                   "phase_d1_replay") == (
+            "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/"
+            "governance/bundle.json")
+
+    def test_the_replays_declared_authorization_is_what_a_launch_would_pass(self):
+        """Non-vacuity: the parameter is only useful if the launcher's own
+        AUTH_PATH is in fact somewhere this script's default would not look."""
+        import autoinit_d1_replay_launch as L
+
+        mod = self._stager()
+        assert L.AUTH_PATH != mod.governance_path(
+            "d1_replay_002", "authorization.json", "phase_d1_replay")
+        assert (REPO / L.AUTH_PATH).is_file()
