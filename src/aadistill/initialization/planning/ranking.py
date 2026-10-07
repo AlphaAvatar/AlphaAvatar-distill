@@ -315,12 +315,13 @@ class BeamRankingPolicy:
     #: finished, and the remaining question is only which complete candidates the
     #: search objectives themselves rank highest.
     #:
-    #: Conflating the two is measurable rather than theoretical: a completed
-    #: 12-leaf search committed a finalist at quality position 11 of 12 -- more
-    #: than twice the best state's objective value, and worse than seven leaves
-    #: it excluded -- because that leaf was the only member of its lineage. The
-    #: candidates the widened retention was meant to admit, at quality positions
-    #: 2 and 4, were the ones it still excluded.
+    #: Conflating the two has a specific consequence: with rotation in force, a
+    #: sole-member lineage is retained ahead of better-ranked candidates that
+    #: share an already-represented lineage, so a finalist set is not the
+    #: prefix of the quality order and widening K does not admit the next-best
+    #: candidates. Which retention rule an experiment wants after its search
+    #: completes is an experiment's decision; it is recorded with that
+    #: experiment, not here.
     RETENTION_QUALITY_ONLY = "quality_only"
     RETENTION_WITH_DIVERSITY = "quality_with_lineage_diversity"
 
