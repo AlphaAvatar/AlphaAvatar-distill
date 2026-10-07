@@ -37,6 +37,14 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: those declarations are exactly what those modules exist to verify against
     #: the shell that consumes them.
     ("autoinit_d1_launch", ()),
+    #: D1's REPLAY, and the same omission as the entry above, found the same
+    #: way: the four structural modules that read this list -- the
+    #: declared-vs-read `required_env` check, the local-asset install-root
+    #: check, the setup-env forwarding check, and the sweep-registry check --
+    #: covered every session except this one. Its FIRST paid subrun died in
+    #: setup on an asset it had not declared, which is precisely the class the
+    #: local-asset check exists to catch at $0.
+    ("autoinit_d1_replay_launch", ()),
 )
 
 

@@ -2835,8 +2835,8 @@
    "experiment_id": "phase_d1",
    "run_id": "d1_replay_002",
    "root": "logs/stages/stage-1/phase_d1/runs/d1_replay_002",
-   "n_files": 1,
-   "digest": "9140b04c1180094f74d204a591d90dd7b10a20bc94201957ca3bedd7164a50d8",
+   "n_files": 2,
+   "digest": "33d73df6736bd122f17c2b18656756d471ec42e82bf805bbc4279bfb068d779a",
    "why": "no run manifest, and only governance inputs are present: PREPARED but not executed"
   },
   {

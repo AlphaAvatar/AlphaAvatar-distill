@@ -68,6 +68,14 @@ TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 PLAN_NAME = "d1_replay_plan.json"
 PLAN_REL = f"artifacts/stage1/{PLAN_NAME}"
 
+#: How much the provider account must hold BEYOND this session's own hard
+#: ceiling before a pod is created. An absolute floor, named here because the
+#: amount belongs to the campaign and not to the budget machinery (P3). Same
+#: value the formal search uses: its job is that the account is not running on
+#: fumes when a resource is created, which does not get cheaper because this
+#: session is.
+ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
+
 #: WHAT THE POD REQUIRES -- which is not the same question as what this session
 #: reads, and getting those two confused cost $0.1506.
 #:
@@ -403,7 +411,32 @@ def spec(args) -> SessionSpec:
             #: after the soft stop, and `on_poll` now secures each leaf the
             #: moment it reconstructs -- so the exposure this covers is one
             #: leaf at 8 streams (about 4 min) plus collection, not two.
-            artifact_recovery_reserve_minutes=12.0),
+            artifact_recovery_reserve_minutes=12.0,
+            #: THE GATE THIS SESSION HAD NOT ARMED. Every $0 gate in this
+            #: project asks whether an experiment is PERMITTED to spend;
+            #: `check_account_funds` is the only one that asks whether the
+            #: provider will still be paid, and it exists because on
+            #: 2026-10-06 D1's formal search passed six of them, was
+            #: authorized to $21.4897, and RunPod stopped it at 449.8 minutes
+            #: with 39 of 92 expansions because the ACCOUNT had run dry.
+            #: $8.1716 bought no endpoint and the beam's whole workdir went
+            #: with the host.
+            #:
+            #: The replay declared nothing here, so the field defaulted to
+            #: `None` and the gate did not run -- for four paid subruns. The
+            #: exposure is smaller than the search's but the same shape: an
+            #: account exhausted mid-run kills the pod, and while `on_poll`
+            #: now gets the first leaf off at about minute 60, the second is
+            #: unrecoverable.
+            #:
+            #: DERIVED FROM THIS SESSION'S OWN PLAN, as a callable, so no
+            #: dollar figure enters the budget machinery and the requirement
+            #: tracks a re-pricing automatically. The reserve is an ABSOLUTE
+            #: floor rather than a fraction: its job is that the account is
+            #: not running on fumes when a resource is created, which does not
+            #: get cheaper because the session is.
+            account_balance_required_usd=lambda plan: round(
+                plan.hard_terminate_usd + ACCOUNT_OPERATIONAL_RESERVE_USD, 4)),
         setup=SetupManifest(
             relay_inputs=(),
             local_assets=(*SCIENCE_ASSETS,

@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-07T15:56:40+00:00",
+  "created_utc": "2026-10-07T16:21:44+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3296,
-    "bytes": 120609865,
+    "files": 3297,
+    "bytes": 120621377,
     "by_disposition": {
       "keep_canonical": 222,
-      "keep_immutable": 2842,
+      "keep_immutable": 2843,
       "keep_referenced": 217,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1497,
+      "immutable_record": 1498,
       "index": 8,
       "narrative": 932,
       "raw_execution_artifact": 838,
@@ -6691,6 +6691,7 @@
         "scripts/experiments/stage-1/phase_d1/pod_environment.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_launch_contract.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_pod_environment.py",
+        "scripts/experiments/stage-1/phase_d1/tests/test_d1_replay_sweep_contract.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_frozen_path_monotonicity.py",
         "scripts/experiments/stage-1/phase_d_series/build_batteries.py",
@@ -6732,6 +6733,7 @@
         "tests/architecture/test_core_ownership.py",
         "tests/architecture/test_core_suite_boundary.py",
         "tests/architecture/test_cuda_surface_preserved.py",
+        "tests/architecture/test_sweep_registry_models_its_own_session.py",
         "tests/data/test_cleaning.py",
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
@@ -6789,6 +6791,7 @@
         "scripts/experiments/stage-1/phase_d1/pod_environment.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_launch_contract.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_pod_environment.py",
+        "scripts/experiments/stage-1/phase_d1/tests/test_d1_replay_sweep_contract.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_frozen_path_monotonicity.py",
         "scripts/experiments/stage-1/phase_d_series/build_batteries.py",
@@ -6830,6 +6833,7 @@
         "tests/architecture/test_core_ownership.py",
         "tests/architecture/test_core_suite_boundary.py",
         "tests/architecture/test_cuda_surface_preserved.py",
+        "tests/architecture/test_sweep_registry_models_its_own_session.py",
         "tests/data/test_cleaning.py",
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
@@ -8039,7 +8043,7 @@
     {
       "path": "logs/index.json",
       "size_bytes": 124004,
-      "sha256": "349f187bf3f6c1dd88ac10885e8355cd2301c31b4fc9fc904db015d69e0ae375",
+      "sha256": "ff98594fd6eb0134f1780e95b80ed06adfbcc95bfeaaf6ff43f66285219e2c41",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22063,7 +22067,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 56017,
-      "sha256": "b334db386c55ef61e93c0ce6b491cfd2848bbc5010b721ec07cc7aadb24c4afa",
+      "sha256": "a39a19800c6fc1d142c10acc85af454d869c88299adcd462b31b12ba6d3a59c2",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50403,8 +50407,22 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/runs/d1_replay_002/governance/readiness.json",
-      "size_bytes": 10785,
-      "sha256": "e282cfb7c77d86ed9589adc4dec7ae2b8529eee31257c73a4b7001e1f4150bf5",
+      "size_bytes": 11063,
+      "sha256": "b850593c6a2c2da13469ab7ca4adb7fe395b45c728a57aa0a04c9cf84d7f93f9",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_replay_002/governance/readiness_sweep_dbdd88d1_FAIL.json",
+      "size_bytes": 11234,
+      "sha256": "1c1ba9e0f9d21650e7d8cecccdcdb20ead8984f590a5a307b5de6f8fa431e990",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56538,6 +56556,7 @@
         "scripts/experiments/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py",
         "scripts/experiments/stage-1/phase_c3/tests/test_c3_preregistration.py",
         "scripts/experiments/stage-1/phase_d1/pod_environment.py",
+        "scripts/experiments/stage-1/phase_d1/replay_pod_environment.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_pod_environment.py",
         "scripts/experiments/stage-1/phase_d_series/battery_family.py",
         "tests/docs/test_budget_arithmetic.py",
@@ -56556,6 +56575,7 @@
         "scripts/experiments/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py",
         "scripts/experiments/stage-1/phase_c3/tests/test_c3_preregistration.py",
         "scripts/experiments/stage-1/phase_d1/pod_environment.py",
+        "scripts/experiments/stage-1/phase_d1/replay_pod_environment.py",
         "scripts/experiments/stage-1/phase_d1/tests/test_d1_pod_environment.py",
         "scripts/experiments/stage-1/phase_d_series/battery_family.py",
         "tests/docs/test_budget_arithmetic.py",

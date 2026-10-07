@@ -170,6 +170,31 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_d1": (
         "experiments.phase_d1.pod_environment",
         "sweep_contract"),
+    #: A NINTH, and this one was not a missing registration -- it was a WRONG
+    #: one, which is worse, because a wrong entry sweeps successfully.
+    #:
+    #: The D1 replay was swept FOUR TIMES through `--experiment phase_d1`, and
+    #: that entry binds `autoinit_d1_launch`: the SEARCH's launcher. So each of
+    #: those sweeps derived the staged view of a different session. The search
+    #: stages three frozen assets; the replay stages those three PLUS the
+    #: resolved plan its driver is invoked with via `--plan`. Every one of
+    #: those records therefore certified a pod that lacked the one file this
+    #: session cannot start without.
+    #:
+    #: It cost nothing while no test in the selection read the plan. The moment
+    #: one did, the sweep reported an unexpected environment skip -- which
+    #: reads as "the test's guard is wrong" and sent the repair one level too
+    #: shallow: a real file-granularity bug in `staged_files` was found and
+    #: fixed, and the sweep STILL hid the plan, because the session being
+    #: modelled does not stage it.
+    #:
+    #: Eight entries above say a session binding its own launcher, session id,
+    #: closure and staged view needs its own contract. The replay binds all
+    #: four, and its record is filed under `phase_d1_replay/` where its run
+    #: directory, session record and stage attribution already live.
+    "phase_d1_replay": (
+        "experiments.phase_d1.replay_pod_environment",
+        "sweep_contract"),
 }
 
 
