@@ -1,8 +1,8 @@
 {
  "schema": "aadistill.autoinit.spend_authorization/v1",
  "authorization_id": "autoinit.v1.d1_replay",
- "version": 2,
- "granted_utc": "2026-10-07T16:28:08.654643+00:00",
+ "version": 3,
+ "granted_utc": "2026-10-07T16:37:30.546205+00:00",
  "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
  "plan_id": "autoinit.d1_replay",
  "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
@@ -17,7 +17,7 @@
  "scope_note": "ONE pod, two digest-pinned fixed paths, each leaf fetched and re-identified off-pod the moment it reconstructs. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
  "phase_a_authorized": false,
  "automatic_phase_a_start": false,
- "authorized_session_commit": "b1db212ea9912d786bd7b0d24a9b091a846f76b3",
+ "authorized_session_commit": "1ca56bc71d52fba949f049550ed95be96d0d043b",
  "harness_source_digest": "e436d89ea23df59eba3250c766bbeea641ade76a7e48cd00816ee62dbaac4bf6",
  "harness_source_files": [
   "scripts/pod/autoinit_d1_replay_launch.py",
@@ -31,7 +31,7 @@
   "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json"
  ],
  "per_launch_hard_usd": 2.5856,
- "provenance_commit": "b1db212ea9912d786bd7b0d24a9b091a846f76b3",
+ "provenance_commit": "1ca56bc71d52fba949f049550ed95be96d0d043b",
  "rate_usd_per_hour": 1.09,
  "one_use": true,
  "max_provider_resources": 1,
@@ -53,5 +53,5 @@
  },
  "campaign": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
  "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, verifies the provider account balance before creating anything, and has no code path to Phase A",
- "authorization_sha256": "25cbcd44a4b380196be13aaafd6ec043d2f6c12b60999885aade027e8e22e7cb"
+ "authorization_sha256": "6b606812d2ed5fcc7fa06e58df26993ab296f9ba94d9fdbfd4bc5bd5cc8fa106"
 }
