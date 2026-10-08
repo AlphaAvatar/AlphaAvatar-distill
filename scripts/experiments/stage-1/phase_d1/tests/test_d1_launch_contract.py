@@ -45,6 +45,27 @@ for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit", "tests"):
 
 from experiments.phase_d1 import d1_authorization as A  # noqa: E402
 from experiments.phase_d1 import d1_session as D1S  # noqa: E402
+from support.design_blockers import (  # noqa: E402
+    autouse_blocker_free_design,
+)
+
+#: EVERY TEST HERE IS ABOUT SOMETHING OTHER THAN AN OPEN DESIGN BLOCKER.
+#: `build_payload` refuses one first -- correctly, it is the cheapest and most
+#: categorical refusal -- so while a blocker is open every assertion in this
+#: file reports the blocker's message instead of the thing it was written for.
+#: 41 tests across four files did, the moment a fourth blocker opened. The
+#: design is redirected to a blocker-free copy, identical in every identity the
+#: artifact binds, `design_hash` included; the blocker check still runs.
+#: BOTH DESIGN READERS, because the blocker is checked twice through two
+#: owners: `build_payload` reads `d1_authorization.DESIGN_REL` and
+#: `run_identity_gate` reads `d1_session.open_blockers`, which resolves
+#: `d1_session.DESIGN_PATH`. Redirecting one left the other refusing, so a
+#: test about an absent authorization reported a blocker instead.
+reach_past_the_blocker_refusal = autouse_blocker_free_design(A)
+reach_past_the_blocker_refusal_in_the_session = autouse_blocker_free_design(
+    D1S, attribute="DESIGN_PATH")
+
+
 
 RUN_ID = "d1_search_contract_probe"
 

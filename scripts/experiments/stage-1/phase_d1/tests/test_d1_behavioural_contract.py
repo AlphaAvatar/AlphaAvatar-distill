@@ -49,6 +49,50 @@ def _auth(**over):
     return D1BehaviouralAuthorization(**base)
 
 
+class TestTheControlArmMustBeTheOneThatActuallyStands:
+    """Why the rest of this file is red, stated once, as its own assertion.
+
+    `arms()` refuses to assemble the field while the design's declared control
+    is not the arm C1's verdict selected. Every test below that touches the
+    field therefore fails, and they should: the field cannot be built. This
+    test is here so the suite says WHY rather than only failing, and so the
+    refusal itself is covered rather than being an incidental side effect.
+
+    The finding: the design declares `fe9683e6` / `c313d1b4`, which is C1's
+    `attention.weight_proxy_v0` arm. C1 returned GO at +0.013725 against a
+    SESOI of 0.010, so the checkpoint that stands is C1's treatment at
+    `53e30566` -- and C1's delta between the two EXCEEDS the SESOI the D1
+    decision rule tests against, so the error can manufacture a GO rather than
+    merely add noise. See
+    `logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json`.
+
+    Correcting it changes the ARMS and, through `design_hash`, the derived
+    SEEDS, which AGENTS.md P12.1 makes a maintainer decision rather than an
+    autonomous repair.
+    """
+
+    def test_the_field_refuses_to_assemble_against_a_control_that_was_beaten(self):
+        from experiments.phase_d_series.incumbent import (
+            disagreements, standing_incumbent,
+        )
+
+        declared = json.loads(
+            (REPO / B.DESIGN_REL).read_text())["incumbent"]
+        differ = disagreements(declared, REPO)
+        if not differ:
+            #: The decision has been made and the design corrected. The refusal
+            #: must then NOT fire -- a guard that kept refusing after its cause
+            #: was removed would block the corrected launch forever.
+            B.arms(REPO)
+            return
+        with pytest.raises(B.D1BehaviouralError,
+                           match="not the standing incumbent"):
+            B.arms(REPO)
+        standing = standing_incumbent(REPO)
+        assert standing["c1_arm"] == "treatment"
+        assert declared["artifact_digest"] != standing["artifact_digest"]
+
+
 class TestTheArmsAreTheFrozenFieldAndNothingElse:
 
     def test_five_arms_four_candidates_one_incumbent(self):

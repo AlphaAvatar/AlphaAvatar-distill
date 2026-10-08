@@ -26,6 +26,9 @@ for extra in ("src", "scripts", "scripts/autoinit"):
 
 from experiments.phase_d1 import d1_authorization as A  # noqa: E402
 from experiments.phase_d1 import d1_session as S  # noqa: E402
+from support.design_blockers import (  # noqa: E402
+    autouse_blocker_free_design,
+)
 
 GRANT = {"granted_by": "maintainer decision 2026-10-05, D1 phase envelope"}
 UTC = "2026-10-05T12:00:00Z"
@@ -36,6 +39,18 @@ RATE = 1.09
 #: THE RUN THE GRANT IS ISSUED FOR. Required since `config_hash` carries it:
 #: a payload built without a run id binds an identity no launch reproduces.
 RUN_ID = "d1_search_test"
+
+
+#: EVERY TEST HERE IS ABOUT SOMETHING OTHER THAN AN OPEN DESIGN BLOCKER.
+#: `build_payload` refuses one first -- correctly, it is the cheapest and most
+#: categorical refusal -- so while a blocker is open all fourteen assertions
+#: here reported the blocker's message instead of the refusal each was written
+#: for. Asserting on whichever message came out would have retired fourteen
+#: checks and left fourteen copies of the blocker test.
+#:
+#: `test_an_open_design_blocker` sets `DESIGN_REL` itself and so overrides
+#: this: it is the one test whose subject IS the refusal.
+reach_past_the_blocker_refusal = autouse_blocker_free_design(A)
 
 
 @pytest.fixture(scope="module")

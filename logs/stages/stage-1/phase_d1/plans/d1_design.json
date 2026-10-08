@@ -1,8 +1,36 @@
 {
  "_authorizes": "nothing",
- "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records no open blocker. A launch still needs the one-use authorization, which is issued against the live rate and the derived harness, and which this document does not grant.",
+ "_contract": "The derived D1 protocol. AUTHORIZES NOTHING: it is a design, and it records one independent blocker: incumbent identity, sufficient on its own to prevent a launch. Live causes: .",
  "_design_hash_covers": "THE SCIENCE AND THE PROTOCOL, and nothing about money or run state. Composed by `scientific_preimage` as an explicit POSITIVE list rather than by excluding underscore keys, which used to sweep in `budget` and made a frozen scientific identity a function of the project's wallet. See that function's docstring for what moves this hash and what must not. Money stays hash-bound in each run's one-use authorization.",
- "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING",
+ "_incumbent_identity_check": {
+  "_corroborated_by": [
+   "phase_c2.baseline.B_ARTIFACT_DIGEST and its three sibling constants, all four equal to the derived standing identity",
+   "the C3 stage-E gate, `GATE: incumbent == 53e30566...`",
+   "logs/state/current.json :: accepted_incumbent, 'B = frozen C1 treatment'"
+  ],
+  "declared": {
+   "artifact_digest": "c313d1b4081b",
+   "state_id": "fe9683e6a9c783bbc6fe276a78c851c6"
+  },
+  "disagreements": [
+   "artifact_digest: declared c313d1b4081b and the standing incumbent is 53e30566c5f7"
+  ],
+  "finding": "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json",
+  "owner": "scripts/experiments/stage-1/phase_d_series/incumbent.py",
+  "standing": {
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "c1_arm": "treatment",
+   "impl_id": "attention.activation_importance_v1",
+   "profile_id": "calib.domain_balanced@v1",
+   "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+   "verdict": "GO",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335"
+  },
+  "status": "DISAGREES",
+  "why_it_matters": "C1's measured delta between these two arms is +0.013725 and the D-series SESOI is 0.010. A candidate compared against the arm C1 beat is credited with that delta on top of its own effect, which is more than the amount the decision rule tests for -- so the error does not merely add noise, it can manufacture a GO."
+ },
+ "_open_blockers": "DERIVED by `open_blockers()` from the figures in `budget` and `contamination_protection`, not transcribed. Owners: evidence -> d_series_evidence; funding authorization -> budget.BLOCKER; per-session envelope -> budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING; incumbent identity -> phase_d_series.incumbent.standing_incumbent",
  "_stage_id_meaning": "Stage 1 \u2014 projection and structural initialization. D1 varies how a Stage-1 initialization is SCORED; the 0.86M recovery probes it trains are the measuring instrument for that question, not the subject.",
  "behavioural_design": {
   "_claim_boundary": "a GO confirms THE ADVANCING CANDIDATE against B, conditional on the three confirmation seeds, having been selected on disjoint screening prompts and disjoint seeds. It is not a statement about the other Top-K candidate, about the leaves the beam did not visit, about a population of recovery seeds, or about target-aware scoring in general \u2014 only about this path under this policy.",
@@ -901,7 +929,7 @@
   "short_by_items": 80,
   "why_disjoint_seeds_are_not_enough": "C0's inferential unit is the PROMPT and C0 measured substantial same-prompt cross-seed dependence: ICC 0.25 +/- 0.095, and P(correct | correct on another seed) = 0.257 against a 0.022 marginal, an 11.7x lift. Screening and confirming on the same prompts would let the selection leak into the confirmation through that dependence."
  },
- "design_hash": "31a3dcba342115bf5fb2909215cbf9d0dc68aa1acab10776ee698f6da92d0359",
+ "design_hash": "bc811dc027faf874fa976d4593768b4fa9e0741bc8a3b457c0bdb0f576e85c20",
  "evidence": {
   "_authorizes": "nothing. The evidence exists and settles only that the behavioural family can be built. Every other precondition is separate and is listed, derived, in `open_blockers`.",
   "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
@@ -1134,7 +1162,9 @@
   },
   "why": "A3 built 7dd2f6f6980b where the bsz=1 protocol built 53e30566c5f7 \u2014 reproducibly, on three machines, with an identical result_spec_hash. `compute_state_id` binds neither the ExecutionConfig nor the artifact digest, so two differing artifacts collided on one resumable, deduplicable state id."
  },
- "open_blockers": [],
+ "open_blockers": [
+  "incumbent identity"
+ ],
  "recovery_recipe": "E1_KD_HEAVY_0860K",
  "schema": "aadistill.autoinit.phase_d1_design/v1",
  "scoring_policy": {
@@ -1283,10 +1313,10 @@
   }
  },
  "stage_id": "1",
- "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- NO OPEN BLOCKER",
+ "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- ONE INDEPENDENT BLOCKER: incumbent identity",
  "what_this_may_not_be_used_to_claim": [
   "that target-aware scoring is better. Nothing has been measured; this is a design.",
-  "that D1 is ready to launch. NO OPEN BLOCKER, and any one of them alone prevents it.",
+  "that D1 is ready to launch. `open_blockers` is the live list and any open blocker alone prevents it; an empty list is still not an authorization, which the one-use artifact grants and this document does not.",
   "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION and no figure of its is restated, re-analysed or revised here."
  ]
 }

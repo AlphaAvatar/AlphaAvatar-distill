@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-07 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-08 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -12,46 +12,60 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **Nothing is running and nothing is billing.** An account-wide query returns
 **0 pods and 0 network volumes** at a spend rate of `$0/h`.
 
-**The next paid action is the FIFTH attempt at rematerializing D1's two
-unretained finalists.** Its engineering campaign has settled `$0.8144` of
-`$3.5000` over four subruns, none of which reconstructed a leaf and every one
-an ordinary failure in the replay harness. Owner:
-[`validations/finalist-rematerialization/v1/campaign.json`](../stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json).
+**D1 BEHAVIOURAL SCREENING IS BLOCKED ON A MAINTAINER DECISION, and the blocker
+is scientific.** The design declares its control arm to be the arm C1 measured
+and **beat**:
 
 ```text
-r1  psl88q7qgqu44t  $0.1550  setup: the state-eval asset was not staged
-r2  02oef2ib958x6j  $0.2116  driver: the calibration-profile registry was empty
-r3  29l0qxxx1i6906  $0.1844  setup: a regression of mine read a dev-box path
-r4  0tjfzjnmpf64pn  $0.2634  q2 step 0 DIGEST MISMATCH — the wrong ROOT STATE
+declared by d1_design.json :: incumbent
+    state_id         fe9683e6a9c783bbc6fe276a78c851c6
+    artifact_digest  c313d1b4081b
+    which is         C1's INCUMBENT arm, attention.weight_proxy_v0
+
+the arm that actually stands, DERIVED from C1's own verdict
+    artifact_digest  53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab…
+    which is         C1's TREATMENT arm, attention.activation_importance_v1
+    because          C1 returned GO at +0.013725 against a SESOI of 0.010
 ```
 
-**r4 is not a finding about the checkpoint.** The reconstruction never
-reproduced the historical execution state, so there was nothing to compare.
-`adapter.build_config` builds a child config from its parent's whole
-`to_dict()`, so every field of the root's live config reaches every
-descendant's `config_sha256` and therefore its `artifact_digest` — and the
-replay loaded the teacher as published, with `use_cache: true`, while the
-search's own driver sets `use_cache = False` on the root before the beam runs.
-The pre-launch check behind the comment asserting "one root state, no
-reconstruction needed" had compared the *operator* `config_hash`, which is
-uniform by construction, and not the model config.
+**The arithmetic is why it matters.** C1's own measured delta between those two
+arms is `+0.013725` and the D-series SESOI is `0.010`. A candidate compared
+against the beaten arm is credited with an effect **larger than the amount the
+decision rule tests for** — the error does not add noise, it can manufacture a
+GO, and it would do so identically for all four candidates. Owner:
+[`analyses/d1_control_arm_identity.json`](../stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json).
 
-The root state is now **derived from the mechanism and resolved against the
-search's own records**, at `$0` in 2.6 s, before any weights load. Two
-candidates, one chosen, all eight level-0 identities agreeing and all six later
-ones confirming it:
+Three independent records agree with the derivation and disagree with the
+design: C1's own measured `c1_arm_identities.json`, C2's four frozen `B_*`
+constants, and the C3 stage-E gate. So does the prose in the design's own
+`incumbent` block — `"B, the frozen C1 treatment"` — which is why nothing caught
+it: every statement was a sentence rather than a comparison.
+
+**It is enforced now, in four places, and none of them is prose.**
 
 ```text
-candidate                        step-0 configs explained
-teacher_as_published             0 of 8
-session_driver_use_cache_false   8 of 8     <- chosen
+phase_d_series/incumbent.py      DERIVES the standing arm from C1's verdict
+d1_design.json :: open_blockers  ["incumbent identity"] — refuses the issuer
+behavioural.py :: arms()         refuses to assemble the field
+test_standing_incumbent.py       16 regressions; the one red test is the finding
 ```
 
-Owner:
-[`d1_replay_001/evidence/root_state_derivation.json`](../stages/stage-1/phase_d1_replay/runs/d1_replay_001/evidence/root_state_derivation.json).
-What remains unverified is the **weights** half of each identity, which is what
-the digest-pinned replay on the GPU measures; a mismatch after this derivation
-holds would be material.
+**Why it was not repaired autonomously.** Correcting the control changes the
+**arms**, and because `incumbent` is inside `scientific_preimage` it also moves
+`design_hash` and therefore the derived screening and confirmation **seeds**.
+AGENTS.md P12.1 stops autonomous continuation at exactly that. `design_hash`
+would move `bc811dc027faf874` → `bd4c7d4a38833234`; the seeds have never been
+used, and C0 requires them bound before any candidate result exists, so moving
+them is harmless now and only now.
+
+**A second finding rides on the same decision.** The screening session as priced
+funds **one** arm materialization (`parent_replay_and_incumbent_rebuild: 22.0`
+min, modelled on C3, which had one) and D1 screening has **five**. The four
+candidates' 1.2 GiB checkpoints fit neither transport to a pod, so they are
+materialized on the pod along digest-pinned fixed paths — the mechanism the
+rematerialization campaign just proved. A re-price from the design's own cost
+model is owed before the screening authorization is issued; the `$30` envelope
+and the `$68.7925` remaining formal allowance both have room.
 
 **BOTH UNRETAINED FINALISTS ARE REPRODUCED AND SECURED.** The
 rematerialization campaign is CLOSED.
@@ -193,10 +207,23 @@ the selection semantics they ran under. `a2b2f04ae642ac69…` and
 `ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
 bytes are retired once q2 and q4 are secured.
 
-**Behavioural screening is NOT started.** It needs q2 and q4 to exist: four
-candidates at two recovery seeds plus the incumbent at two matched seeds is ten
-screening probes, then one advancing candidate, then a fresh three-seed
-confirmation against B.
+**Behavioural screening is BUILT and BLOCKED.** Four candidates at two recovery
+seeds plus the incumbent at two matched seeds is ten screening probes, then one
+advancing candidate, then a fresh three-seed confirmation against B. q2 and q4
+now exist, so the input it was waiting on is satisfied — what blocks it is the
+control-arm identity at the top of this file.
+
+What exists and is verified at `$0`: the probe schedule and its agreement with
+the priced design; the `d1_screening` role re-hashed against the realized family
+(950/850, 7 of 7 files, both roles disjoint); the preregistered seeds, derived
+from the design hash and disjoint from every excluded one; the frozen recovery
+recipe and the refusal of any config that differs outside C1's override set; the
+mechanical ranking across its five decision cases; the scorer, pinned to the
+role with no `--battery` flag; and the driver, which asserts the whole contract
+before any weights load. What does not exist: the launcher, the authorization
+issuer and the sweep contract — all three were in progress when the control-arm
+finding stopped the round, because `WHICH` checkpoint B is decides how B reaches
+the pod and therefore what the session stages and what it costs.
 
 **Three attempts, and the two failures bought the gates the third needed.**
 

@@ -1883,7 +1883,76 @@ BLOCKER_SPECS: tuple[tuple[str, str], ...] = (
     ("evidence", "d_series_evidence"),
     ("funding authorization", "budget.BLOCKER"),
     ("per-session envelope", "budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING"),
+    #: A FOURTH, and it is the only one about the SCIENCE rather than the money
+    #: or the evidence supply. `INCUMBENT_STATE_ID`/`INCUMBENT_DIGEST` above are
+    #: hand-typed and they name C1's INCUMBENT arm -- `attention.weight_proxy_v0`
+    #: at `c313d1b4` -- which is the arm C1 measured and BEAT. C1's verdict was
+    #: GO at +0.013725 against a SESOI of 0.010, so the checkpoint that stands
+    #: is C1's TREATMENT at `53e30566`, and C2's four frozen B constants and
+    #: C3's stage-E gate both say so.
+    #:
+    #: Open while the two disagree, because the consequence is not cosmetic: a
+    #: D1 candidate measured against `c313d1b4` carries C1's already-banked
+    #: effect on top of its own, and that effect is LARGER than the SESOI the
+    #: decision rule tests against. Every candidate would look better than it
+    #: is, by more than the amount that decides.
+    ("incumbent identity", "phase_d_series.incumbent.standing_incumbent"),
 )
+
+
+def declared_incumbent() -> dict[str, Any]:
+    """What this design declares its control arm to be. The typed constants."""
+    return {"state_id": INCUMBENT_STATE_ID, "artifact_digest": INCUMBENT_DIGEST}
+
+
+def incumbent_identity_check() -> dict[str, Any]:
+    """Does the declared control arm agree with the one C1's verdict selected?
+
+    DERIVED on both sides. The standing incumbent comes from C1's recorded
+    verdict and C1's MEASURED arm identities, so this closes when the design is
+    corrected and not when someone edits a sentence -- and it cannot be closed
+    by restating the identity, which is how the wrong one got here.
+    """
+    try:
+        from experiments.phase_d_series.incumbent import (
+            IncumbentUndetermined, disagreements, standing_incumbent,
+        )
+    except ImportError as exc:                                 # noqa: BLE001
+        return {"status": "UNRESOLVED",
+                "why": f"the standing-incumbent owner is not importable: {exc}"}
+    declared = declared_incumbent()
+    try:
+        standing = standing_incumbent()
+        differ = disagreements(declared)
+    except IncumbentUndetermined as exc:
+        #: UNRESOLVED, not AGREES. "Which arm stands cannot be derived" is a
+        #: different finding from "the declared arm is right", and defaulting
+        #: the first to the second is exactly how an unchecked identity passes.
+        return {"status": "UNRESOLVED", "why": str(exc), "declared": declared}
+    return {
+        "status": "AGREES" if not differ else "DISAGREES",
+        "declared": declared,
+        "standing": {k: standing[k] for k in (
+            "c1_arm", "verdict", "impl_id", "profile_id", "artifact_digest",
+            "weights_digest", "single_shard_sha256", "arch_signature")},
+        "disagreements": differ,
+        "owner": "scripts/experiments/stage-1/phase_d_series/incumbent.py",
+        "finding": ("logs/stages/stage-1/phase_d1/analyses/"
+                    "d1_control_arm_identity.json"),
+        "why_it_matters": (
+            "C1's measured delta between these two arms is +0.013725 and the "
+            "D-series SESOI is 0.010. A candidate compared against the arm C1 "
+            "beat is credited with that delta on top of its own effect, which "
+            "is more than the amount the decision rule tests for -- so the "
+            "error does not merely add noise, it can manufacture a GO."),
+        "_corroborated_by": [
+            "phase_c2.baseline.B_ARTIFACT_DIGEST and its three sibling "
+            "constants, all four equal to the derived standing identity",
+            "the C3 stage-E gate, `GATE: incumbent == 53e30566...`",
+            "logs/state/current.json :: accepted_incumbent, 'B = frozen C1 "
+            "treatment'",
+        ],
+    }
 
 
 def open_blockers(budget_section: dict[str, Any],
@@ -1953,6 +2022,12 @@ def open_blockers(budget_section: dict[str, Any],
         open_.append("per-session envelope")
     else:
         open_.append("per-session envelope")
+    #: THE CONTROL ARM. `AGREES` is the only state that closes it: a
+    #: `DISAGREES` names the wrong checkpoint and an `UNRESOLVED` cannot say
+    #: whether it does, and a challenger round must not run against a control
+    #: nobody can show was selected.
+    if incumbent_identity_check()["status"] != "AGREES":
+        open_.append("incumbent identity")
     return tuple(open_)
 
 
@@ -2061,6 +2136,15 @@ def build() -> dict[str, Any]:
             "DERIVED by `open_blockers()` from the figures in `budget` and "
             "`contamination_protection`, not transcribed. Owners: "
             + "; ".join(f"{name} -> {owner}" for name, owner in BLOCKER_SPECS)),
+        #: OUTSIDE THE HASH PREIMAGE, deliberately, and the placement is the
+        #: point. `incumbent` IS in the preimage, so putting this check inside
+        #: that block would move `design_hash` -- and `design_hash` is the
+        #: preimage the behavioural seeds are derived from. Recording the
+        #: DISAGREEMENT would then have moved the seeds by itself, before anyone
+        #: decided whether to correct the identity, and the correction would
+        #: arrive at a design whose seeds had already changed for an unrelated
+        #: reason. The finding is reported here; only the fix moves the hash.
+        "_incumbent_identity_check": incumbent_identity_check(),
         "experiment_id": "phase_d1",
         "stage_id": "1",
         "_stage_id_meaning": (
@@ -2119,11 +2203,25 @@ def build() -> dict[str, Any]:
                        "provenance showing why the D-series family was "
                        "necessary. It is NOT the live evidence owner; "
                        "`evidence` above is, and it is CLOSED.")},
+        #: HASHED, so no entry here may carry RUN STATE.
+        #:
+        #: The launch-readiness entry used to interpolate `phrase` -- the live
+        #: blocker list -- into a field inside `scientific_preimage`. So
+        #: `design_hash` moved every time a blocker opened or closed, and the
+        #: behavioural seeds are `SHA256(design_hash + ...)`: opening a FUNDING
+        #: blocker silently redrew the scientific seeds. That is the same defect
+        #: `_design_hash_covers` describes having fixed for `budget`, surviving
+        #: through a derived sentence. The live list stays in `open_blockers`
+        #: and in the unhashed `_contract`, where run state belongs; this entry
+        #: states the standing rule, which is what is actually scientific about
+        #: it and does not move.
         "what_this_may_not_be_used_to_claim": [
             "that target-aware scoring is better. Nothing has been measured; "
             "this is a design.",
-            "that D1 is ready to launch. " + phrase + ", and " + any_one + " "
-            "prevents it.",
+            "that D1 is ready to launch. `open_blockers` is the live list and "
+            "any open blocker alone prevents it; an empty list is still not an "
+            "authorization, which the one-use artifact grants and this document "
+            "does not.",
             "that the C2 diagnosis re-opens C2. C2 is CLOSED WITHOUT PROMOTION "
             "and no figure of its is restated, re-analysed or revised here.",
         ],

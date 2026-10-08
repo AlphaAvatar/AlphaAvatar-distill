@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 IS FUNDED AND BLOCKED NO TIMES: the 2026-10-05 phase amendment closed the last one. NOTHING IS RUNNING and no paid resource may be created before the final formal launch review. Owner: d1_design.json :: open_blockers.",
+ "blocker": "D1 IS FUNDED AND BLOCKED ONCE: incumbent identity -- the declared control arm is the arm C1 BEAT. NOTHING IS RUNNING. Owners: d1_design.json :: open_blockers, phase_d1/analyses/d1_control_arm_identity.json.",
  "branch": "prep/d1-funding-decision",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -76,9 +76,9 @@
   "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
   "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
-  "blockers": "NONE OPEN. Evidence CLOSED. ENVELOPE RESOLVED_FITS on measurement. FUNDING AUTHORIZED by the 2026-10-05 phase amendment. Derived by open_blockers(); owner d1_design.json.",
+  "blockers": "ONE OPEN: incumbent identity, derived by phase_d_series/incumbent.py. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
   "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
-  "execution_wiring": "IMPLEMENTED AND VERIFIED AT $0: session, authorization (real SessionRunner protocol, derived closure, self-hashed), driver, launcher, SESSION_KIND=d1. A run is prepared; see `next`. Owner: d1_design.json.",
+  "execution_wiring": "SEARCH complete, verified at $0. SCREENING: contract, seeds, battery role, scorer, ranking, driver verify at $0; launcher, issuer, sweep contract do NOT exist. Owner: d1_design.json.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
@@ -118,10 +118,10 @@
  "latest_verification": {
   "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
   "latest_sweep": {
+   "describes_head": false,
    "kind": "launch_bound",
-   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
+   "verdict": "PASS"
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,

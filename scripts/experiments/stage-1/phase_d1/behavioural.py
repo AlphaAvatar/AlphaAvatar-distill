@@ -261,6 +261,43 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
                        checkpoint_dir=str(Path(source) / member["state_id"]),
                        role="candidate"))
     incumbent = design(repo_root)["incumbent"]
+    #: THE CONTROL MUST BE THE ARM THAT ACTUALLY STANDS, and that is derived
+    #: from C1's verdict rather than read from a typed identity beside it.
+    #:
+    #: The design declared `fe9683e6` / `c313d1b4`, which is C1's
+    #: `attention.weight_proxy_v0` arm -- the arm C1 measured and BEAT. C1
+    #: returned GO at +0.013725 against a SESOI of 0.010, so a candidate
+    #: measured against that arm inherits an effect LARGER than the amount the
+    #: decision rule tests for: the error does not add noise, it manufactures a
+    #: GO. Refused here, where the field is assembled, so no rung can be built
+    #: against it whatever else is wired correctly.
+    from experiments.phase_d_series.incumbent import (
+        disagreements, standing_incumbent,
+    )
+
+    differ = disagreements(incumbent, repo_root)
+    if differ:
+        standing = standing_incumbent(repo_root)
+        raise D1BehaviouralError(
+            "the design's control arm is not the standing incumbent: "
+            + "; ".join(differ)
+            + f". {standing['selected_because']}, built by "
+            f"{standing['impl_id']} on {standing['profile_id']}. Correcting "
+            "which checkpoint B is changes the arms AND -- through "
+            "`design_hash` -- the derived seeds, so it is a maintainer "
+            "decision and not an autonomous repair.")
+    if not incumbent.get("state_id"):
+        #: The promoted arm was built as a FIXED PATH and `c1_arm_identities`
+        #: records `state_id: null` for it, so there is no search state id to
+        #: name a directory with. Its bytes are materialized on the pod from
+        #: the frozen construction spec, which is what C2's and C3's
+        #: behavioural sessions did and what their session overhead prices.
+        raise D1BehaviouralError(
+            "the standing incumbent has no search state_id -- it was built as "
+            "a fixed path -- so it cannot be sourced from a state-id directory "
+            "under ARM_SOURCES['B']. It is materialized on the pod from its "
+            "frozen construction spec; see `phase_c2.baseline."
+            "frozen_baseline_spec`, the one owner of that construction.")
     out.append(Arm(
         arm_id="B", state_id=incumbent["state_id"],
         artifact_digest=incumbent["artifact_digest"],

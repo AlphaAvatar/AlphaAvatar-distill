@@ -431,9 +431,23 @@ class TestTheCommittedRecords:
                          != "RESOLVED_FITS")
         assert ("per-session envelope" in open_) is envelope_open
 
-        #: and nothing else may appear.
-        assert open_ <= {"evidence", "funding authorization",
-                         "per-session envelope"}, open_
+        #: incumbent identity -- open iff the declared control arm is not the
+        #: one C1's verdict selected. Both sides DERIVED: the design's typed
+        #: identity named C1's beaten arm for a round, and C1's measured delta
+        #: between the two arms exceeds the SESOI the decision rule tests
+        #: against, so the error can manufacture a GO rather than merely add
+        #: noise.
+        import write_d1_design as w
+
+        identity_open = w.incumbent_identity_check()["status"] != "AGREES"
+        assert ("incumbent identity" in open_) is identity_open
+
+        #: and nothing else may appear. DERIVED from the writer's own specs
+        #: rather than typed: this set was a hand-written membership list, so
+        #: a fourth blocker -- the one above -- failed here as an unexpected
+        #: entry instead of being checked. The docstring says neither the
+        #: number nor the membership is written here; the membership was.
+        assert open_ <= {name for name, _ in w.BLOCKER_SPECS}, open_
 
         #: evidence — CLOSED, and the design says so from the realized family
         evidence = doc["evidence"]
@@ -718,8 +732,15 @@ class TestMeasuredEnvelopeCompatibilityIsAuthoritative:
             {})
 
     def test_resolved_fits_closes_it_even_when_the_provisional_basis_does_not(self):
-        """THE REGRESSION."""
-        assert self._blockers("RESOLVED_FITS", False) == ()
+        """THE REGRESSION.
+
+        Asserted on THIS blocker, not on the whole tuple. It was
+        `== ()`, which made a test about the envelope fail whenever any
+        unrelated blocker was open -- and one was, the moment a fourth was
+        added. One assertion, one quantity.
+        """
+        assert "per-session envelope" not in self._blockers("RESOLVED_FITS",
+                                                            False)
 
     def test_resolved_needs_raise_keeps_it_open(self):
         assert "per-session envelope" in self._blockers("RESOLVED_NEEDS_RAISE",

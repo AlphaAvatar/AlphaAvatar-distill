@@ -39,6 +39,9 @@ for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit"):
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from experiments.phase_d1 import d1_authorization as A  # noqa: E402
 from experiments.phase_d1 import d1_session as S  # noqa: E402
+from support.design_blockers import (  # noqa: E402
+    autouse_blocker_free_design,
+)
 
 GRANT = {"granted_by": "launch-review test", "covers": "one D1 formal search"}
 
@@ -52,6 +55,13 @@ RUN_ID = "runner_iface"
 def _commit() -> str:
     return subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
                           capture_output=True, text=True).stdout.strip()
+
+
+#: THIS FILE'S SUBJECT IS THE RUNNER INTERFACE, not the blocker refusal.
+#: `build_payload` refuses an open design blocker before anything else, so
+#: while one is open the `issued` fixture below raises and every test here
+#: errors out -- eleven errors and one failure, none of them about the runner.
+reach_past_the_blocker_refusal = autouse_blocker_free_design(A)
 
 
 @pytest.fixture(scope="module")

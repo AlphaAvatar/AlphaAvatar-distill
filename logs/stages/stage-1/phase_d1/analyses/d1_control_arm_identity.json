@@ -1,0 +1,127 @@
+{
+ "schema": "aadistill.phase_d1.control_arm_identity_finding/v1",
+ "found_utc": "2026-10-08",
+ "found_by": "agent, at $0, while building the screening session's launcher",
+ "status": "OPEN / MAINTAINER DECISION REQUIRED",
+ "severity": "scientific. It is not an engineering failure and was not repaired autonomously.",
+ "_one_line": "D1's design declares its control arm to be the arm C1 measured and BEAT, and C1's measured delta between the two arms is larger than the SESOI D1's decision rule tests against.",
+ "the_finding": {
+  "declared_by_the_design": {
+   "where": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: incumbent",
+   "written_by": "scripts/autoinit/write_d1_design.py :: INCUMBENT_STATE_ID / INCUMBENT_DIGEST, hand-typed",
+   "state_id": "fe9683e6a9c783bbc6fe276a78c851c6",
+   "artifact_digest": "c313d1b4081b",
+   "what_it_actually_is": "C1's INCUMBENT arm \u2014 attention.weight_proxy_v0 on calib.none@v1 \u2014 which is the Phase-A/B winner C1 was testing a replacement for"
+  },
+  "the_arm_that_actually_stands": {
+   "derived_by": "scripts/experiments/stage-1/phase_d_series/incumbent.py :: standing_incumbent",
+   "c1_arm": "treatment",
+   "impl_id": "attention.activation_importance_v1",
+   "profile_id": "calib.domain_balanced@v1",
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+   "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+   "num_parameters": 596049920,
+   "state_id": null,
+   "why": "C1's verdict was GO at a pooled delta of +0.013725490196078431 against a SESOI of 0.010, which promotes the treatment arm"
+  }
+ },
+ "why_it_matters": {
+  "the_arithmetic": "C1's own measured delta between these two arms is +0.013725. The D-series SESOI is 0.010. A candidate measured against the beaten arm is therefore credited with an effect LARGER than the amount the decision rule tests for.",
+  "the_consequence": "This does not add noise to a D1 result; it lowers the bar by more than the bar. All four candidates could clear a SESOI they do not reach, and the screening rung would rank them on a quantity inflated identically for every arm \u2014 so even the RANKING's claim to be a paired comparison against the incumbent would be false.",
+  "the_estimand_it_breaks": "the frozen decision rule's estimand is the prompt-mean of the seed-mean paired difference (candidate - B). If the control is not B, that difference estimates nothing the design named."
+ },
+ "corroboration": [
+  {
+   "source": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_arm_identities.json",
+   "says": "treatment.artifact_digest = 53e30566..., incumbent.artifact_digest = c313d1b4...; these are C1's MEASURED identities, not pinned expectations"
+  },
+  {
+   "source": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json",
+   "says": "verdict GO, delta +0.013725, lcb_one_sided +0.005490, sesoi 0.010, no_forced_winner true"
+  },
+  {
+   "source": "scripts/experiments/stage-1/phase_c2/baseline.py",
+   "says": "B_ARTIFACT_DIGEST, B_WEIGHTS_DIGEST, B_SINGLE_SHARD_SHA256 and B_ARCH_SIGNATURE are all four equal to the standing identity, and B_PATH ends in ATTENTION / attention.activation_importance_v1"
+  },
+  {
+   "source": "scripts/experiments/stage-1/phase_c3/session.py :: expected_incumbent_digest()",
+   "says": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342 \u2014 the value C3's stage E gated on"
+  },
+  {
+   "source": "logs/state/current.json",
+   "says": "accepted_incumbent: 'B = frozen C1 treatment' \u2014 and, two keys away, incumbent: 'fe9683e6a9c7..., digest c313d1b4081b'. The repository's own state document carries both answers."
+  },
+  {
+   "source": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: incumbent._what_it_is",
+   "says": "'B, the frozen C1 treatment' \u2014 the PROSE in the same block is right and the identity fields beside it are wrong, which is why nothing caught it: every statement was a sentence rather than a comparison"
+  }
+ ],
+ "what_has_been_done_at_zero_dollars": [
+  "scripts/experiments/stage-1/phase_d_series/incumbent.py \u2014 a new owner that DERIVES the standing incumbent from C1's verdict and C1's measured arm identities. No round types the identity any more.",
+  "write_d1_design.py \u2014 a fourth blocker, `incumbent identity`, derived by comparing the declared identity against that owner. The design now reports it OPEN, which refuses the authorization issuer and the launcher.",
+  "write_d1_design.py \u2014 the hashed launch-readiness claim no longer interpolates the live blocker list. `design_hash` is the preimage the behavioural seeds are derived from, so opening a FUNDING blocker was silently redrawing the scientific seeds. One hash move now, stable thereafter.",
+  "phase_d1/behavioural.py :: arms() \u2014 refuses to assemble the field while the declared control is not the standing one, so no rung can be built against the wrong arm whatever else is wired correctly.",
+  "phase_d_series/tests/test_standing_incumbent.py \u2014 16 regressions. Fifteen pass; the one that fails is this finding, stated with its arithmetic."
+ ],
+ "the_decision_required": {
+  "question": "Is D1's control arm the standing incumbent (C1's treatment, 53e30566) \u2014 correcting the design \u2014 or was the pre-C1 arm (c313d1b4) deliberately chosen?",
+  "why_it_is_not_an_autonomous_repair": "AGENTS.md P12.1 stops autonomous continuation at 'changing arms, seeds, datasets, scoring or decision rules'. Correcting the control changes the ARMS, and because `incumbent` is inside `scientific_preimage` it also moves `design_hash` and therefore the derived screening and confirmation SEEDS.",
+  "what_moves_if_it_is_corrected": {
+   "design_hash": {
+    "now": "bc811dc027faf874...",
+    "if_corrected": "bd4c7d4a38833234...",
+    "note": "both differ from the 83cd49ff... the completed search ran under; design_hash has already moved three times across D1's own runs and no committed record is invalidated by another move"
+   },
+   "seeds": "the screening and confirmation seeds are SHA256(design_hash + ':phase-d1:<rung>-seed:' + i), so they are redrawn. This is harmless NOW and only now: C0 requires them materialized and hash-bound in an execution preregistration BEFORE any candidate behavioural result exists, and none exists.",
+   "how_B_is_sourced": "the promoted arm has NO search state id \u2014 it was built as a fixed path \u2014 so it cannot come from a state-id directory, and its bytes are not on the development host. It is materialized ON THE POD from `phase_c2.baseline.frozen_baseline_spec`, the one owner of that construction, which is what C2's and C3's behavioural sessions did and what the screening cell's `parent_replay_and_incumbent_rebuild` overhead already prices.",
+   "what_does_NOT_move": [
+    "the candidate field \u2014 the Top-4 retention decision is unaffected, B was never a search candidate",
+    "the completed search and every record of it",
+    "the battery family, its roles and their disjointness",
+    "the recovery recipe",
+    "the decision rule, the SESOI and the guardrail thresholds",
+    "the probe counts"
+   ]
+  }
+ },
+ "a_second_finding_in_the_same_decision": {
+  "what": "the screening session as priced does not fund materializing the four CANDIDATES on the pod.",
+  "detail": "budget.chain.sessions.screening is 10 probes x 89.516 min plus a 104-minute overhead whose arm term is `parent_replay_and_incumbent_rebuild: 22.0` \u2014 one rebuild, modelled on C3, which had one. D1 screening has five arms. The four candidates' 1.2 GiB checkpoints cannot be shipped to a pod (scp has a hardcoded 600 s per-asset timeout against a 0.72 MB/s uplink; the hub relay has ~1.756 GiB of private-storage headroom), so they are materialized on the pod along digest-pinned fixed paths \u2014 the mechanism the finalist rematerialization campaign proved by reproducing q2 and q4 byte-for-byte, at 963.2 s and 1280.3 s on an L40S.",
+  "consequence": "a re-price is owed before the screening authorization is issued. It is a derivation from the design's own cost model, not a new estimate, and the $30 per-session envelope and the $68.7925 remaining formal allowance both have room \u2014 but the priced figure the authorization binds must be the one that covers the work.",
+  "why_it_is_recorded_here": "it touches the same decision: WHICH checkpoint B is determines whether B is one of the materializations or a staged input.",
+  "the_arithmetic": {
+   "priced_now": {
+    "hard_ceiling_usd": 23.3822,
+    "hard_ceiling_minutes": 1267.71,
+    "arm_term_in_the_overhead": "parent_replay_and_incumbent_rebuild: 22.0 min \u2014 ONE rebuild, from C3's component table, and C3 had one arm to rebuild",
+    "owner": "d1_design.json :: budget.chain.sessions.screening, from search_space.behavioural_cost"
+   },
+   "arms_that_must_be_materialized": 5,
+   "measured_basis": {
+    "what": "the finalist rematerialization campaign's r7, on the same L40S, along the same digest-pinned fixed paths",
+    "q2_seconds": 963.2,
+    "q4_seconds": 1280.3,
+    "per_leaf_minutes_bounding": 21.34,
+    "five_arms_minutes": 106.7,
+    "note": "q1 and q3 carry the same operator multiset in a different order, so the same per-leaf figure bounds them"
+   },
+   "worst_observation_bound": {
+    "what": "the search's own worst `operator_seconds` per IMPLEMENTATION, the basis the design's cost model uses",
+    "per_impl_minutes": {
+     "depth.causal_kl_greedy_v1": 41.44,
+     "width.global_pca_v0": 0.78,
+     "ffn.activation_importance_v0": 0.75,
+     "attention.activation_importance_v1": 0.65
+    },
+    "per_leaf_minutes": 43.61,
+    "four_candidates_minutes": 174.44,
+    "why_it_overstates_here": "it is dominated by DEPTH's worst observation, which was at the ROOT; all four candidate paths run DEPTH at a non-root position, which is why the two MEASURED leaves came in at 16.05 and 21.34 min against a 43.61-min bound"
+   },
+   "the_delta_to_price": "+85 min on the measured basis, +196 min at the worst-observation bound, against a 1267.71-min ceiling. At $1.09/h plus the disk term that is roughly +$1.55 to +$3.60, moving the screening ceiling to about $25-$27 \u2014 inside the $30 per-session envelope, and inside the $68.7925 remaining formal allowance.",
+   "not_a_re_estimate": "every figure above is READ from a record: the priced cell from the design, the per-leaf measurement from the replay campaign's closeout, the per-implementation worsts from the search's own telemetry via replay_specs.worst_seconds_by_impl(). The re-price is a derivation through search_space.behavioural_cost, not a new estimate."
+  }
+ },
+ "_authorizes": "nothing. This is a finding."
+}
