@@ -56,19 +56,19 @@ ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 EXPECTED_UNIQUE_CE = 2_960_507
 EXPECTED_CUMULATIVE_CE = 8_881_521
 EXPECTED_EXPOSURES = 3.0
-BASELINE_INIT = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
-BASELINE_NLL = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/init_nll.json"
-TREATMENT_INIT = "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint"
-TREATMENT_NLL = "artifacts/stages/stage-1/e8_contribution_init_v1/init_nll.json"
-DEPTH_MAP = "artifacts/stages/stage-1/e8_depth_search/depth_map.json"
-CALIBRATION = "artifacts/stages/stage-1/e8_calibration_v1"
+BASELINE_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+BASELINE_NLL = "artifacts/stage1/qwen3_0p6b_init_v0/init_nll.json"
+TREATMENT_INIT = "artifacts/stage1/e8_contribution_init_v1/checkpoint"
+TREATMENT_NLL = "artifacts/stage1/e8_contribution_init_v1/init_nll.json"
+DEPTH_MAP = "artifacts/stage1/e8_depth_search/depth_map.json"
+CALIBRATION = "artifacts/stage1/e8_calibration_v1"
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--arms", default="configs/stage3/e8/arms.json")
-    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
+    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
     ap.add_argument("--require-init", action="store_true",
                     help="require the initialization checkpoints and their NLL "
                          "records to exist (the pre-training gate). Without it "

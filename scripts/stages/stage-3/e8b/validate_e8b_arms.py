@@ -56,13 +56,13 @@ EXPECTED_EXPOSURES = 3.0
 EXPECTED_BLOCKS = 1174
 
 INITS = {
-    "DP": ("artifacts/stages/stage-1/e8b_dp_init", 3_215_021_568,
+    "DP": ("artifacts/stage1/e8b_dp_init", 3_215_021_568,
            "d4db65eb8f7ae6d8a847c2db9a9e5e307e449f50f3bd129e07a1b20f6ec5f3cd"),
-    "DC": ("artifacts/stages/stage-1/e8b_dc_init", 3_215_021_568,
+    "DC": ("artifacts/stage1/e8b_dc_init", 3_215_021_568,
            "eb9e95481988b296a77c30d7b4754069f1874330fca9ad198f4457029e11e182"),
-    "FP": ("artifacts/stages/stage-1/qwen3_0p6b_init_v0", 596_049_920,
+    "FP": ("artifacts/stage1/qwen3_0p6b_init_v0", 596_049_920,
            "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"),
-    "FC": ("artifacts/stages/stage-1/e8_contribution_init_v1", 596_049_920,
+    "FC": ("artifacts/stage1/e8_contribution_init_v1", 596_049_920,
            "7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb"),
 }
 SESSION_INITS = {"s1": ("DP", "DC", "FP", "FC"), "s2": ("DP", "DC"),
@@ -82,7 +82,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--session", required=True, choices=sorted(SESSION_INITS))
     ap.add_argument("--arms", default="configs/stage3/e8b/arms.json")
-    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
+    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
     ap.add_argument("--require-init", action="store_true",
                     help="also require each initialization's own hash-bound NLL "
                          "record — the pre-training half of the gate")

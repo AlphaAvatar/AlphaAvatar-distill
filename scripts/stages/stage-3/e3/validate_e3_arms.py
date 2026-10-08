@@ -41,7 +41,7 @@ from aadistill.training.lora import (  # noqa: E402
 )
 from aadistill.training.train import select_trainable, validate_train_config  # noqa: E402
 
-INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
+INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 
 ARMS = {

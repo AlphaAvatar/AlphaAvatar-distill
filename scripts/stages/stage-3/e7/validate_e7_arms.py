@@ -46,7 +46,7 @@ ALLOWED_VS_E1 = {"extra_stream", "run_name", "out_dir", "_purpose"}
 # Permitted to differ between B and C: only where the extra text comes from.
 ALLOWED_EXTRA_BC = {"data_dir", "kind"}
 
-INIT_PATH = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
+INIT_PATH = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 BASE = "configs/stage3/e1/e1_r1600k_{seed}_pca.json"
 
 
@@ -61,7 +61,7 @@ def main() -> int:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--configs", default="configs/stage3/e7/e7_configs.json")
-    ap.add_argument("--disjointness", default="artifacts/stages/stage-3/e7_disjointness.json")
+    ap.add_argument("--disjointness", default="artifacts/stage3/e7_disjointness.json")
     ap.add_argument("--out", required=True)
     ap.add_argument("--require-streams", action="store_true",
                     help="also verify the packed streams on disk; omit before "

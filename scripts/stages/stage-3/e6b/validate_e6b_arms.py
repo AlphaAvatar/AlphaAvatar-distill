@@ -105,7 +105,7 @@ def main() -> None:
             failures.append(f"{alias}: objective is not the registered CE-heavy one")
         report["arms"][alias] = row
 
-    init = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+    init = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
     if init.is_file():
         got = sha256_file(init)
         report["stage1_init_sha256"] = got
@@ -117,7 +117,7 @@ def main() -> None:
         report["stage1_init_matches"] = None
 
     # Realized data, recomputed here rather than trusted from the registration.
-    pack = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+    pack = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
     if (pack / "blocks.npz").is_file():
         import torch
         from aadistill.data.ladder import ladder_blocks
