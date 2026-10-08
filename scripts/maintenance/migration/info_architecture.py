@@ -284,6 +284,10 @@ _POD: dict[str, str] = {
     "start_job.py": f"{SH}/pod",
     "summarize_pytest_outcomes.py": f"{SH}/pod",
     "throughput_gate.py": f"{SH}/pod",
+    "topk_adoption_driver.py": f"{S1}/phase_d1",
+    "topk_adoption_launch.sh": f"{S1}/phase_d1",
+    "topk_adoption_remote.sh": f"{S1}/phase_d1",
+    "topk_adoption_report.py": f"{S1}/phase_d1",
     "train.sh": f"{SH}/pod",
     "verify_and_report.py": f"{SH}/pod",
     "watchdog.py": f"{SH}/pod",
@@ -548,11 +552,13 @@ def _git_mv(old: Path, new: Path) -> None:
 
 
 def _apply_scripts() -> None:
-    for rel_old, rel_new in script_file_moves().items():
+    # Directory moves FIRST: a per-file move may create a destination directory
+    # that a later whole-directory move would then nest itself inside.
+    for rel_old, rel_new in SCRIPT_DIR_MOVES:
         old = REPO / rel_old
         if old.exists():
             _git_mv(old, REPO / rel_new)
-    for rel_old, rel_new in SCRIPT_DIR_MOVES:
+    for rel_old, rel_new in script_file_moves().items():
         old = REPO / rel_old
         if old.exists():
             _git_mv(old, REPO / rel_new)
