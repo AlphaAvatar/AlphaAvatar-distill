@@ -147,6 +147,7 @@ class TestTheClosureIsDerivedNotListed:
         work = tmp_path / "work"
         shutil.copytree(scratch_repo, work)
         target = work / "scripts/pod/only_mentioned.py"
+        target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text("print('hi')\n")
         before = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
                       roots=C1_SOURCE_ROOTS)

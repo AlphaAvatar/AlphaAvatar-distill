@@ -241,6 +241,10 @@ def test_the_legacy_setup_script_is_executed_by_nothing():
         #: should not count. The question is whether anything RUNS it.
         if "/tests/" in str(path.relative_to(REPO)):
             continue
+        #: The migration move map is DATA about where files went, not an
+        #: execution path; its table necessarily names every moved script.
+        if "maintenance/migration" in str(path.relative_to(REPO)):
+            continue
         for line in path.read_text(errors="ignore").splitlines():
             stripped = line.strip()
             if stripped.startswith("#"):

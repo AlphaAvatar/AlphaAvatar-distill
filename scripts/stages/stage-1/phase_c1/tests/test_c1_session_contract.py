@@ -757,8 +757,10 @@ def test_the_preregistration_describes_the_standalone_driver():
     assert d["standalone"] is True
     assert d["subclasses_phase_a_driver"] is False
     assert d["imports_phase_a_driver_or_launcher"] is False
+    #: frozen-record content: the preregistration spells the paths of its
+    #: own era (the 2026-10-08 migration moved the objects, not the record)
     assert d["owns_paths"] == ["artifacts/audit/autoinit_c1",
-                               "artifacts/stages/stage-3/c1", "artifacts/stages/stage-3/eval/c1"]
+                               "artifacts/stage3/c1", "artifacts/eval/c1"]
     for key in ("stage_g_h_separation", "generation_admission",
                 "attested_evaluation_protocol", "scoring", "device_handoff"):
         assert d[key], key

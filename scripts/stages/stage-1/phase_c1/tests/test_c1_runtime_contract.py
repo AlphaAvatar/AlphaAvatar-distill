@@ -207,7 +207,7 @@ def test_importing_the_driver_registers_what_stage_d_resolves():
 
     probe = (
         "import sys; sys.path[:0] = ['src', 'scripts', 'scripts/pod']\n"
-        "import autoinit_c1_driver\n"
+        "from stages.phase_c1 import autoinit_c1_driver\n"
         "from aadistill.initialization.specs.arch import get_adapter\n"
         f"print(get_adapter({family!r}).family)\n")
     out = subprocess.run([sys.executable, "-c", probe], cwd=REPO,

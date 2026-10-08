@@ -205,7 +205,9 @@ def test_the_pod_setup_script_is_measured_by_the_harness_not_by_this_record():
     """
     from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
 
-    assert "scripts/shared/pod/autoinit_preflight_setup.sh" in C1_HARNESS_SOURCE_FILES_V1
+    #: the frozen harness tuple keeps its freeze-time spelling; the live
+    #: environment list speaks the owner tree — both statements hold.
+    assert "scripts/pod/autoinit_preflight_setup.sh" in C1_HARNESS_SOURCE_FILES_V1
     assert "scripts/shared/pod/autoinit_preflight_setup.sh" \
         not in pe.POD_TEST_ENVIRONMENT_FILES_V1
 

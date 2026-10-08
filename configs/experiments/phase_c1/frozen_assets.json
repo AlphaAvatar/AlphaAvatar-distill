@@ -19,15 +19,15 @@
  },
  "assets_note": "UNCHANGED from the historical block, and attempt 10's own report confirms it: the only problem it raised was the scoring contract. The migration moved source files, not data assets.",
  "scoring_contract": {
-  "contract": "recovery_search_scoring@v3",
-  "digest": "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04",
+  "contract": "recovery_search_scoring@v4",
+  "digest": "9f0cbfa4d57204c33d37dfc6e0a1924534c4664deef48365f70aa7545f47c6c9",
   "supersedes": {
-   "contract": "recovery_search_scoring@v2",
-   "digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be"
+   "contract": "recovery_search_scoring@v3",
+   "digest": "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04"
   },
-  "why_it_moved": "the contract is a digest over sorted 'path:sha256' lines and the initialization cutover relocated two of its six declared files -- src/aadistill/autoinit/recovery.py is now src/aadistill/initialization/planning/recovery.py. A relocation MUST move this digest; it is the intended post-migration identity, not a drift.",
+  "why_it_moved": "the contract is a digest over sorted 'path:sha256' lines. The 2026-10-08 information-architecture migration relocated the scorer script (scripts/autoinit/score_recovery_search.py -> scripts/shared/evaluation/score_recovery_search.py), and the same round added a caller-supplied path resolver to src/aadistill/initialization/planning/recovery.py so frozen run manifests keep their spellings while access follows the tree. A relocation MUST move this digest; it is the intended post-migration identity, not a drift. v2 remains the record of the completed attempts; v3 of the 2026-09-10..2026-10-08 window.",
   "why_that_is_safe": "measured, not assumed. logs/maintenance/inventories/architecture_scoring_equivalence.json re-scored frozen Phase-A generations through the pre- and post-migration trees and reports every score, count, rate and per-sample record identical, with only contract and provenance fields differing. logs/stages/stage-1/phase_c1/results/scoring_equivalence.json separately shows c1_confirmation_scoring@v1 reproducing the frozen scorer on 15 retained probes: IDENTICAL, 0 differences, no tolerance.",
-  "what_this_is_not": "a change to frozen science. No metric, threshold, rule or number moved. The v2 identity remains the record of what the completed attempts executed."
+  "what_this_is_not": "a change to frozen science. No metric, threshold, rule or number moved; the scorer bytes are identical and the resolver seam only changes where a recorded pack path is read from."
  },
  "authorizes": "nothing"
 }
