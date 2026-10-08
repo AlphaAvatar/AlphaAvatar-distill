@@ -38,6 +38,7 @@ difference, not as a re-measurement on the new population.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -507,9 +508,210 @@ def session_contract(rung: str, repo_root: str | Path = REPO_ROOT
     }
 
 
-__all__ = ["ARM_SOURCES", "Arm", "D1BehaviouralError", "FROZEN_STRATA",
+__all__ = ["ARM_SOURCES", "Arm", "D1BehaviouralError", "D1RankingError",
+           "FROZEN_STRATA", "advance_one", "pool_arm", "rank_screening",
            "Probe", "arms", "battery_role", "behavioural_design",
            "confirmation_seeds", "derive_seeds", "design", "excluded_seeds",
            "probes",
            "require_arms_present", "roles_are_disjoint", "screening_seeds",
            "session_contract"]
+
+
+# --- the screening ranking, and the one candidate that advances -------------
+
+#: The usable-rollout veto thresholds, READ from C0 rather than typed, and
+#: applied as a VETO ONLY. The decision rule is explicit that usable_rollout
+#: "vetoes only, reported with every component and never positive ranking
+#: credit": a candidate cannot rank higher for being more usable, it can only
+#: be removed for being materially less usable than the incumbent.
+#:
+#: C0 records these as "practical preregistered promotion boundaries, NOT a
+#: claim of precise statistical non-inferiority", because usable_rollout
+#: carries a real seed-level variance component that three seeds cannot bound
+#: tightly. Screening has two, so the same caveat applies with more force --
+#: which is why they veto rather than score.
+GUARDRAIL_POOLED_MIN_DELTA = -0.05
+GUARDRAIL_PER_SEED_MIN_DELTA = -0.10
+
+
+class D1RankingError(D1BehaviouralError):
+    """A screening field cannot be ranked on the evidence it has."""
+
+
+def pool_arm(rows: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """One arm's seeds, pooled by the SEED MEAN.
+
+    The seed mean, because the confirmation estimand is the "prompt-mean of the
+    seed-mean paired difference" and a screening statistic computed a different
+    way would rank on a quantity the confirmation does not estimate.
+
+    Seeds are FIXED BLOCKS, not a sample: the mean is over this rung's
+    preregistered seeds and carries no claim about a seed superpopulation.
+    """
+    if not rows:
+        raise D1RankingError("an arm with no scored seeds cannot be pooled")
+    n = len(rows)
+    return {
+        "n_seeds": n,
+        "seeds": sorted(int(r["seed"]) for r in rows),
+        "correct_overall": sum(float(r["correct_overall"]) for r in rows) / n,
+        "usable_rollout_rate": sum(
+            float(r["usable_rollout_rate"]) for r in rows) / n,
+        "per_seed": {int(r["seed"]): {
+            "correct_overall": float(r["correct_overall"]),
+            "usable_rollout_rate": float(r["usable_rollout_rate"]),
+        } for r in rows},
+    }
+
+
+def rank_screening(scored: Sequence[Mapping[str, Any]],
+                   repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+    """Order the candidates by pooled paired delta against B. RANKING ONLY.
+
+    `scored` is one row per probe, carrying `arm`, `seed`, `correct_overall`
+    and `usable_rollout_rate`. Every arm must have every seed: ranking a
+    partial field would select on who happened to finish.
+
+    The delta is against B on the same rung and the same battery, which is
+    what makes it paired. Ties break by the frozen QUALITY POSITION and then by
+    state id -- both fixed before any behavioural datum existed, which is what
+    makes the tie-break a rule rather than a choice.
+
+    The guardrail is applied here as a veto and recorded with every component,
+    never as positive credit.
+    """
+    field = arms(repo_root)
+    seeds = set(screening_seeds(repo_root))
+    by_arm: dict[str, list[Mapping[str, Any]]] = {}
+    for row in scored:
+        by_arm.setdefault(str(row["arm"]), []).append(row)
+
+    missing = []
+    for arm in field:
+        got = {int(r["seed"]) for r in by_arm.get(arm.arm_id, ())}
+        if got != seeds:
+            missing.append({"arm": arm.arm_id,
+                            "have": sorted(got), "want": sorted(seeds)})
+    if missing:
+        raise D1RankingError(
+            f"the screening field is incomplete: {missing}. Ranking it would "
+            "select on who happened to finish rather than on the measurement.")
+
+    pooled = {arm.arm_id: pool_arm(by_arm[arm.arm_id]) for arm in field}
+    incumbent = next(a for a in field if a.is_incumbent)
+    b = pooled[incumbent.arm_id]
+
+    rows: list[dict[str, Any]] = []
+    for arm in field:
+        if arm.is_incumbent:
+            continue
+        mine = pooled[arm.arm_id]
+        delta_usable = mine["usable_rollout_rate"] - b["usable_rollout_rate"]
+        per_seed_usable = {
+            seed: mine["per_seed"][seed]["usable_rollout_rate"]
+                  - b["per_seed"][seed]["usable_rollout_rate"]
+            for seed in sorted(seeds)
+        }
+        vetoes: list[str] = []
+        if delta_usable <= GUARDRAIL_POOLED_MIN_DELTA:
+            vetoes.append(
+                f"pooled usable_rollout delta {delta_usable:+.4f} is not "
+                f"> {GUARDRAIL_POOLED_MIN_DELTA}")
+        for seed, value in per_seed_usable.items():
+            if value <= GUARDRAIL_PER_SEED_MIN_DELTA:
+                vetoes.append(
+                    f"seed {seed} usable_rollout delta {value:+.4f} is not "
+                    f"> {GUARDRAIL_PER_SEED_MIN_DELTA}")
+        rows.append({
+            "arm": arm.arm_id,
+            "state_id": arm.state_id,
+            "quality_position": arm.quality_position,
+            "correct_overall": mine["correct_overall"],
+            "incumbent_correct_overall": b["correct_overall"],
+            "delta_vs_b": round(mine["correct_overall"]
+                                - b["correct_overall"], 10),
+            "usable_rollout_rate": mine["usable_rollout_rate"],
+            "incumbent_usable_rollout_rate": b["usable_rollout_rate"],
+            "delta_usable_pooled": round(delta_usable, 10),
+            "delta_usable_per_seed": {str(k): round(v, 10)
+                                      for k, v in per_seed_usable.items()},
+            "vetoed": bool(vetoes),
+            "vetoes": vetoes,
+            "per_seed": mine["per_seed"],
+        })
+
+    #: Vetoed candidates sort last whatever their delta, because a veto is not
+    #: a penalty to be outweighed. Within each group: delta descending, then
+    #: the frozen quality position, then the state id.
+    rows.sort(key=lambda r: (r["vetoed"], -r["delta_vs_b"],
+                             r["quality_position"], r["state_id"]))
+    for position, row in enumerate(rows):
+        row["screening_position"] = position
+    return {
+        "schema": "aadistill.phase_d1.screening_ranking/v1",
+        "endpoint": behavioural_design(repo_root)["decision_rule"][
+            "primary_endpoint"],
+        "pooling": "seed mean over this rung's preregistered seeds",
+        "seeds": sorted(seeds),
+        "incumbent": {"arm": incumbent.arm_id,
+                      "state_id": incumbent.state_id, **b},
+        "ranked": rows,
+        "_guardrail_is_a_veto_only": (
+            "usable_rollout never earns positive ranking credit. A candidate "
+            "cannot rank higher for being more usable; it can only be removed "
+            "for being materially less usable than the incumbent. Thresholds "
+            f"are C0's: pooled > {GUARDRAIL_POOLED_MIN_DELTA}, every seed > "
+            f"{GUARDRAIL_PER_SEED_MIN_DELTA}."),
+        "_tie_break": (
+            "the frozen quality position, then the state id. Both were fixed "
+            "before any behavioural datum existed."),
+        "_this_is_not_a_verdict": (
+            "a RANKING. The advancing candidate's screening estimate is "
+            "inflated by the winner's curse by construction; the design "
+            "records the inflation and the confirmation rung on disjoint "
+            "prompts and disjoint seeds is what estimates the effect."),
+    }
+
+
+def advance_one(ranking: Mapping[str, Any]) -> dict[str, Any]:
+    """Exactly one candidate advances, and it is never the incumbent.
+
+    Advancing one is what makes the confirmation a single hypothesis needing no
+    multiplicity correction -- the design records that as a deliberate trade of
+    breadth for a clean bound, and this is where it is enforced.
+
+    NO FORCED WINNER. If every candidate is vetoed, none advances and the rung
+    says so. A selection made to avoid an empty result is not a selection, and
+    the decision rule is explicitly three-way.
+    """
+    rows = list(ranking.get("ranked") or ())
+    if not rows:
+        raise D1RankingError("nothing was ranked, so nothing can advance")
+    survivors = [r for r in rows if not r["vetoed"]]
+    if not survivors:
+        return {
+            "advanced": None,
+            "outcome": "NO_CANDIDATE_ADVANCES",
+            "why": ("every candidate was vetoed by the usable-rollout "
+                    "guardrail. The decision rule is three-way and this rung "
+                    "does not force a winner: advancing a vetoed candidate to "
+                    "confirmation would spend six probes on an arm the "
+                    "guardrail already removed."),
+            "vetoed": [{"arm": r["arm"], "vetoes": r["vetoes"]} for r in rows],
+        }
+    winner = dict(survivors[0])
+    runner_up = survivors[1] if len(survivors) > 1 else None
+    winner["advanced"] = True
+    winner["outcome"] = "ONE_CANDIDATE_ADVANCES"
+    winner["margin_over_runner_up"] = (
+        None if runner_up is None
+        else round(winner["delta_vs_b"] - runner_up["delta_vs_b"], 10))
+    winner["runner_up"] = None if runner_up is None else runner_up["arm"]
+    winner["tie_broken"] = bool(
+        runner_up is not None
+        and winner["delta_vs_b"] == runner_up["delta_vs_b"])
+    winner["n_vetoed"] = sum(1 for r in rows if r["vetoed"])
+    winner["_the_confirmation_is_a_single_hypothesis"] = (
+        "one candidate advances, so the confirmation needs no multiplicity "
+        "correction. That is a deliberate trade of breadth for a clean bound.")
+    return winner

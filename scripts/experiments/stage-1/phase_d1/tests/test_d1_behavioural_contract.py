@@ -424,3 +424,191 @@ class TestTheScorerIsPinnedToTheRealizedRole:
     def test_it_states_the_absolute_score_limitation(self):
         src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
         assert "_absolute_scores_are_not_interchangeable_with_c1s" in src
+
+
+class TestTheRankingIsMechanicalAndNeverForcesAWinner:
+    """Five decision cases, because the one that matters is the one where the
+    leader on correctness is removed by the guardrail."""
+
+    @staticmethod
+    def _rows(table):
+        seeds = B.screening_seeds(REPO)
+        out = []
+        for arm, (correct, usable) in table.items():
+            for i, seed in enumerate(seeds):
+                out.append({"arm": arm, "seed": seed,
+                            "correct_overall": correct[i],
+                            "usable_rollout_rate": usable[i]})
+        return out
+
+    CLEAN = {"q1": ([0.40, 0.41], [0.90, 0.91]),
+             "q2": ([0.45, 0.46], [0.90, 0.90]),
+             "q3": ([0.42, 0.42], [0.89, 0.90]),
+             "q4": ([0.38, 0.39], [0.91, 0.90]),
+             "B": ([0.40, 0.40], [0.90, 0.90])}
+
+    def test_the_best_pooled_delta_advances(self):
+        ranking = B.rank_screening(self._rows(self.CLEAN), REPO)
+        assert [r["arm"] for r in ranking["ranked"]] == ["q2", "q3", "q1", "q4"]
+        winner = B.advance_one(ranking)
+        assert winner["arm"] == "q2" and winner["advanced"] is True
+        assert winner["margin_over_runner_up"] == pytest.approx(0.035)
+
+    def test_the_delta_is_against_the_incumbent_on_the_same_rung(self):
+        ranking = B.rank_screening(self._rows(self.CLEAN), REPO)
+        q2 = next(r for r in ranking["ranked"] if r["arm"] == "q2")
+        assert q2["delta_vs_b"] == pytest.approx(0.455 - 0.400)
+        assert q2["incumbent_correct_overall"] == pytest.approx(0.400)
+
+    def test_pooling_is_the_seed_mean(self):
+        """Because the confirmation estimand is the prompt-mean of the
+        SEED-MEAN paired difference. A screening statistic computed another way
+        would rank on a quantity the confirmation does not estimate."""
+        pooled = B.pool_arm([{"seed": 1, "correct_overall": 0.4,
+                              "usable_rollout_rate": 0.9},
+                             {"seed": 2, "correct_overall": 0.5,
+                              "usable_rollout_rate": 0.8}])
+        assert pooled["correct_overall"] == pytest.approx(0.45)
+        assert pooled["usable_rollout_rate"] == pytest.approx(0.85)
+        assert pooled["n_seeds"] == 2
+
+    def test_a_vetoed_leader_sorts_last_despite_the_best_delta(self):
+        """THE CASE THAT MATTERS. A veto is not a penalty to be outweighed:
+        usable_rollout never earns positive credit and a candidate removed by
+        the guardrail cannot win on correctness."""
+        table = dict(self.CLEAN)
+        table["q2"] = ([0.50, 0.50], [0.80, 0.80])
+        ranking = B.rank_screening(self._rows(table), REPO)
+        q2 = next(r for r in ranking["ranked"] if r["arm"] == "q2")
+        assert q2["vetoed"] is True
+        assert q2["delta_vs_b"] == pytest.approx(0.10)
+        assert q2["screening_position"] == len(ranking["ranked"]) - 1
+        assert B.advance_one(ranking)["arm"] == "q3"
+
+    def test_the_per_seed_guardrail_bites_independently(self):
+        """A candidate can pass pooled and fail a single seed."""
+        table = dict(self.CLEAN)
+        table["q2"] = ([0.50, 0.50], [0.98, 0.78])
+        ranking = B.rank_screening(self._rows(table), REPO)
+        q2 = next(r for r in ranking["ranked"] if r["arm"] == "q2")
+        assert q2["delta_usable_pooled"] > B.GUARDRAIL_POOLED_MIN_DELTA
+        assert q2["vetoed"] is True
+        assert any("seed" in v for v in q2["vetoes"])
+
+    def test_an_all_vetoed_field_advances_nobody(self):
+        """No forced winner. The decision rule is three-way, and advancing a
+        vetoed candidate would spend six confirmation probes on an arm the
+        guardrail already removed."""
+        table = {k: (v[0], [0.70, 0.70]) for k, v in self.CLEAN.items()}
+        table["B"] = ([0.40, 0.40], [0.90, 0.90])
+        out = B.advance_one(B.rank_screening(self._rows(table), REPO))
+        assert out["advanced"] is None
+        assert out["outcome"] == "NO_CANDIDATE_ADVANCES"
+        assert len(out["vetoed"]) == 4
+
+    def test_a_tie_breaks_on_the_frozen_quality_position(self):
+        """Fixed before any behavioural datum existed, which is what makes the
+        tie-break a rule rather than a choice."""
+        table = dict(self.CLEAN)
+        table["q1"] = ([0.45, 0.46], [0.90, 0.90])
+        winner = B.advance_one(B.rank_screening(self._rows(table), REPO))
+        assert winner["arm"] == "q1"
+        assert winner["tie_broken"] is True
+
+    def test_an_incomplete_field_is_refused(self):
+        """Ranking it would select on who happened to finish."""
+        rows = self._rows(self.CLEAN)
+        partial = [r for r in rows
+                   if not (r["arm"] == "q3" and r["seed"] == B.screening_seeds(REPO)[1])]
+        with pytest.raises(B.D1RankingError) as exc:
+            B.rank_screening(partial, REPO)
+        assert "incomplete" in str(exc.value)
+
+    def test_the_incumbent_is_never_ranked_as_a_candidate(self):
+        ranking = B.rank_screening(self._rows(self.CLEAN), REPO)
+        assert "B" not in [r["arm"] for r in ranking["ranked"]]
+        assert ranking["incumbent"]["arm"] == "B"
+
+    def test_the_record_says_it_is_not_a_verdict(self):
+        ranking = B.rank_screening(self._rows(self.CLEAN), REPO)
+        assert "winner's curse" in ranking["_this_is_not_a_verdict"]
+        assert "removed" in ranking["_guardrail_is_a_veto_only"]
+
+    def test_the_guardrail_thresholds_are_c0s(self):
+        prereg = json.loads(
+            (REPO / "logs/stages/stage-1/phase_c1/plans/"
+                    "phase_c0_preregistration.json").read_text())
+        veto = prereg["behavioural_guardrails"]["usable_rollout_veto"]
+        assert "-0.05" in veto["pooled"]
+        assert "-0.10" in veto["per_seed"]
+        assert B.GUARDRAIL_POOLED_MIN_DELTA == -0.05
+        assert B.GUARDRAIL_PER_SEED_MIN_DELTA == -0.10
+
+
+class TestTheDriverAssertsBeforeItTrains:
+
+    @staticmethod
+    def _driver():
+        import importlib.util
+
+        for extra in ("scripts/pod", "scripts/autoinit"):
+            if str(REPO / extra) not in sys.path:
+                sys.path.insert(0, str(REPO / extra))
+        path = REPO / "scripts/pod/autoinit_d1_behavioural_driver.py"
+        spec = importlib.util.spec_from_file_location("d1b_driver", path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_parser_builds_and_every_required_option_is_a_string(self):
+        """So the shared dispatch probe can build it. A launcher invisible to
+        that probe is one whose missing branch falls through."""
+        parser = self._driver().build_parser()
+        for action in parser._actions:
+            if action.required:
+                assert action.type in (None, str), action.option_strings
+
+    def test_the_contract_is_asserted_before_the_trainer_is_reached(self):
+        import ast
+
+        src = (REPO / "scripts/pod/autoinit_d1_behavioural_driver.py").read_text()
+        assert src.index("session_contract(") < src.index("str(TRAINER)")
+        tree = ast.parse(src)
+        assert tree is not None
+
+    def test_the_probe_config_refuses_an_override_outside_the_allowed_set(self):
+        """The mechanical form of "identical recovery". A config free to differ
+        elsewhere would make a paired difference uninterpretable."""
+        mod = self._driver()
+        import tempfile
+        from types import SimpleNamespace
+
+        with tempfile.TemporaryDirectory() as tmp:
+            recipe = Path(tmp) / "recipe.json"
+            recipe.write_text(json.dumps({"lr": 1e-4, "seed": 0,
+                                          "run_name": "x", "out_dir": "o",
+                                          "data_dir": "d", "student_path": "s"}))
+            probe = SimpleNamespace(probe_id="p", arm_id="q1", seed=7,
+                                    rung="screening", checkpoint_dir="/ckpt")
+            #: The allowed set omits `lr`, so a run that changed it is refused.
+            with pytest.raises(mod.D1BehaviouralDriverError) as exc:
+                mod.probe_config(probe, audit=Path(tmp),
+                                 frozen_recipe=recipe, pack_dir="pack",
+                                 overrides=frozenset({"run_name"}))
+            assert "outside the allowed override set" in str(exc.value)
+
+    def test_the_terminal_marker_is_one_predicate(self):
+        mod = self._driver()
+        assert mod.terminal_marker(check_only=False, status="COMPLETE",
+                                   evidence_written=True) == "ALL_DONE"
+        assert mod.terminal_marker(check_only=False, status="COMPLETE",
+                                   evidence_written=False) == "RUN_FAILED"
+        assert mod.terminal_marker(check_only=True, status="CHECK_ONLY_OK",
+                                   evidence_written=True) == "CHECK_ONLY_OK"
+        assert mod.terminal_marker(check_only=True, status="FAILED",
+                                   evidence_written=True) == "RUN_FAILED"
+
+    def test_the_scorer_it_calls_is_the_pinned_one(self):
+        mod = self._driver()
+        assert mod.SCORER.name == "score_d1_screening.py"
+        assert mod.SCORER.is_file()
