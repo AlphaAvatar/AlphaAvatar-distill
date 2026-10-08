@@ -77,7 +77,7 @@ def test_the_frozen_assets_are_untouched():
     #: changing a byte of it; the digest hashes path:sha256 lines, so the
     #: path spelling alone moved it (v3 = 4102513cd6f7…, kept historical).
     assert contract["digest"] == (
-        "9f0cbfa4d57204c33d37dfc6e0a1924534c4664deef48365f70aa7545f47c6c9")
+        "442e435e9ea42160eb24d43a75d76d0dd27e50af09847263cb8bbdc2cdab1879")
 
     # The four scoring modules are byte-identical to the base commit this
     # branch left. Read from git, not asserted: the whole point of the pin

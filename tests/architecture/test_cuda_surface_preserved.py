@@ -1773,6 +1773,16 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "it is the static walker grants derive executable identity from, "
             "and both executable-closure snapshots were regenerated and "
             "verified against the new tree in the same round.",
+        "src/aadistill/initialization/planning/recovery.py":
+            "observe_recovery_protocol gains an optional `resolve_path` "
+            "callable (default None = identity), the P3 seam through which "
+            "an application layer tells the reusable observer where prior "
+            "attempts' evidence lives after a repository relocation. The "
+            "core names no path and no relocation table; the caller supplies "
+            "the resolution. With the parameter omitted the function is "
+            "byte-for-byte the old behaviour. "
+            "NO CUDA SURFACE: filesystem reads and JSON parsing only; it "
+            "issues no kernel and performs no reduction.",
      }),
 )
 

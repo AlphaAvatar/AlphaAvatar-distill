@@ -277,7 +277,25 @@ def test_the_frozen_recipe_pins_the_protocols_tokenizer():
     different one, probes would be comparable to nothing."""
     cfg = json.loads((REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json").read_text())
     assert cfg["tokenizer_sha256"] == FROZEN_SHA
-    assert cfg["tokenizer_source"] == "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
-    # And it is NOT the student path, which for a searched leaf carries nothing.
+    # The recipe is FROZEN: its bytes carry the spelling from when it was
+    # written, and the 2026-10-08 relocation resolves it rather than edits it.
+    assert cfg["tokenizer_source"] == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    # And it is NOT the student path — or, as here, it is, and the student
+    # path carries a real tokenizer. The spelling is frozen; the bytes moved
+    # in the 2026-10-08 relocation, so ACCESS goes through the relocation
+    # registry (a committed data file, not a scripts import).
+    reloc = json.loads((REPO / "logs/index.json").read_text())
+    mapping = reloc["historical_paths"]["map"]
+
+    def _resolve(rel: str) -> str:
+        probe = rel
+        suffix = ""
+        while probe:
+            if probe in mapping:
+                return mapping[probe] + suffix
+            probe, _, tail = probe.rpartition("/")
+            suffix = "/" + tail + suffix
+        return rel
+
     assert cfg["tokenizer_source"] != cfg["student_path"] or (
-        REPO / cfg["student_path"] / "tokenizer.json").is_file()
+        REPO / _resolve(cfg["student_path"]) / "tokenizer.json").is_file()
