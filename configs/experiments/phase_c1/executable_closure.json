@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 114,
- "digest": "f0d84fd30d7867eb21faa3e17fe78ccd89b034292ed0659a9d11318d715b2b02",
+ "digest": "a78680a79d0b446229bd5d26befe48145fc51efcc5ae87e28d9fd1b57cede273",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -44,8 +44,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
-   "sha256": "d9a19f88888e8fb14e8362596c5200c9a50e3c6759db0a7dd7a23093432050d4",
-   "bytes": 3676
+   "sha256": "21b10070859944eb9ead0b6930498a1366ee1d9bf230cad0adc7c299c781ba28",
+   "bytes": 3799
   },
   {
    "path": "scripts/shared/calibration.py",
@@ -474,8 +474,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "sha256": "3336bb1c8bd11668e3b8ff22f2eef0090544ddc7bb807948b65f79a22e065dc3",
-   "bytes": 111273
+   "sha256": "db85fd96dba1b1a3fc0e9c2c438c73b8df6a900268df6b76c3b7401210c49ed6",
+   "bytes": 111291
   },
   {
    "path": "src/aadistill/initialization/scoring/batches.py",
