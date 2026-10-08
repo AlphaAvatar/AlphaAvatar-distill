@@ -10,8 +10,8 @@
  "design_note": "scripts/maintenance/migration/README.md",
  "totals": {
   "tracked_files_relocated": 645,
-  "rename_pure": 44,
-  "rename_modified": 601,
+  "rename_pure": 46,
+  "rename_modified": 599,
   "artifact_subtrees_relocated_untracked": 18,
   "log_records_relocated": 8,
   "relocation_pairs_added_to_historical_paths": 385
@@ -809,7 +809,7 @@
    "new": "scripts/stages/stage-1/phase_a3/write_a3_design.py",
    "kind": "rename_modified",
    "sha256_at_base": "0d2007d533028b0a3e7e91e6ab455dd4be26d57e21d8189ab87dbe0d6e957dc8",
-   "sha256_now": "8e7c58b2954b00463ab3d52927b5dca7efff22e69c529cc8165a83d163a79d84"
+   "sha256_now": "f43ecc86b01543637db40f56635ba36889c4c27f60da20d9b1db17222dd2fb8e"
   },
   {
    "old": "scripts/autoinit/write_c1_execution_preregistration.py",
@@ -1628,7 +1628,7 @@
    "new": "scripts/stages/stage-1/phase_a/plan.py",
    "kind": "rename_modified",
    "sha256_at_base": "afef4f8c5b9cd8fbe77924d9d5539895781c90db5a440522284f36c8d4dc4346",
-   "sha256_now": "b6ab7a2599c347db1e9f36954dbb199ea8185ad36ce8577edc1b9f1d3a962319"
+   "sha256_now": "cf787002791da62c677a0dfd782d0d5e366e5a2a7f9781c8c84f4a9f32944aad"
   },
   {
    "old": "scripts/experiments/stage-1/phase_a/tests/test_phase_a_attempt12_import.py",
@@ -1677,7 +1677,7 @@
    "new": "scripts/stages/stage-1/phase_a/tests/test_phase_a_stage0_executes.py",
    "kind": "rename_modified",
    "sha256_at_base": "be59c23bec3e6cc8496fbf3e055e023d7153475f3b9e2bb3b49e49425f6e5af4",
-   "sha256_now": "0049b9b9e60d1aaf69555a68e67aa9875c376350f02f8584d3b7d7955a950e35"
+   "sha256_now": "b40d354945c9ccdddddfcb274661734c68dc2ba12f48df8b2df3f5ed02d258a8"
   },
   {
    "old": "scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py",
@@ -1775,7 +1775,7 @@
    "new": "scripts/stages/stage-1/phase_a3/tests/test_a3_launch_contract.py",
    "kind": "rename_modified",
    "sha256_at_base": "19115c818fb2751ee2cdd6016466683d0e80771b0277b5ebbb22317aa1ec0a6e",
-   "sha256_now": "e3ef4b37a04d13de374d566ad6df04690afe29e5028ab89cbc9e0c571538ef16"
+   "sha256_now": "076f9689d2b55af2e0f6bf06dffe8e6963e4a2107f4fa9857f5431e61d6e2319"
   },
   {
    "old": "scripts/experiments/stage-1/phase_a3/tests/test_a3_production_rehearsal.py",
@@ -2006,7 +2006,7 @@
    "new": "scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py",
    "kind": "rename_modified",
    "sha256_at_base": "bb4b9806814266c61bdfa28e583c314dbad080230851a4ce09a20e31dc2e7647",
-   "sha256_now": "6bdb38b4ab53b606e610129571c7db1832439c128ab3a1f0f08b08e1bf262d4d"
+   "sha256_now": "08852e9dda048956c7daac54aee004b96df4499b448551d8c1ee6d51d87179ee"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c1/tests/test_c1_cpu_gate_evidence.py",
@@ -2069,7 +2069,7 @@
    "new": "scripts/stages/stage-1/phase_c1/tests/test_c1_measures_the_summariser.py",
    "kind": "rename_modified",
    "sha256_at_base": "ff107c13d843579f357fc55e2243102d1572ea491026360928c5e3b68a33a5a1",
-   "sha256_now": "62b79e2e994be9844a95bb5fb17902cafb54e8e109f02f58fcbeb98564d30bd9"
+   "sha256_now": "e17283b305e44e8a2130d0b4800cadafe21b697e7af18d0f82f88d795efab2e6"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c1/tests/test_c1_one_provider_resource.py",
@@ -2202,7 +2202,7 @@
    "new": "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py",
    "kind": "rename_modified",
    "sha256_at_base": "e8226f75cbb367a48c45b0f4c090ad74271097fdad697fed715ad1cbe5505e65",
-   "sha256_now": "e3032470c2f0d699f9eb0f173d46c8e3ceada9242d0355f8cfff2957a44ae5c5"
+   "sha256_now": "7a0b8508eef476c4848167f0d055ef14ecaea7304daf326c3f35bb900f34e370"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2/__init__.py",
@@ -2237,7 +2237,7 @@
    "new": "scripts/stages/stage-1/phase_c2/baseline_completion_authorization.py",
    "kind": "rename_modified",
    "sha256_at_base": "b50485deefa16970f897bdf29a230dc9af50af49c3501d374ebdb0e57437ce57",
-   "sha256_now": "3f8d59ccb3204b6d7280a3fdd22570c39aa0601435138bfbd22ec3f761fa9699"
+   "sha256_now": "7a7b09f1a1d980ddcfe043173e8259cce6d865e7bca84f1367e5f271f958ad7f"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2/baseline_completion_bundle.py",
@@ -2461,7 +2461,7 @@
    "new": "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_governance.py",
    "kind": "rename_modified",
    "sha256_at_base": "4ed12b3153d9fd346250db369da627943d00c201c576145e1e8a58b76a237ee9",
-   "sha256_now": "bbafbb11e75c751ab5a0c0b7cd6947d7f88a366a9718165833486cbcc2419764"
+   "sha256_now": "d46a2def3b1c7160bfe3e4323b94aa88b5a84c0758080a5cb531b8bc94ad5d41"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_reserve_partition.py",
@@ -2489,7 +2489,7 @@
    "new": "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_session.py",
    "kind": "rename_modified",
    "sha256_at_base": "bab861aba5dd9fc12418dc03e6f2bba41896a6e47315fe3f21c510d17da0f15a",
-   "sha256_now": "12c1d06a06a368f5cbc8432098deb690004ad934ac7a2440416222699cfc4404"
+   "sha256_now": "7711ee3d2a35750e596669a99d7d23e40bc1ab60289ff90fe7f7b3dc844b662f"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_setup_contract.py",
@@ -2629,14 +2629,14 @@
    "new": "scripts/stages/stage-1/phase_c2_full_search/tests/test_full_search_execution_preflight.py",
    "kind": "rename_modified",
    "sha256_at_base": "bf273fcf0b2650aff269b5713deb5983ad46c2b2f443c91f8acc768ef0ce854f",
-   "sha256_now": "7452d69de1d1d073c71816854adc3b6ecb0ea01e1f9aae2272756c58d7c058b2"
+   "sha256_now": "790c4fbc5d1d55138ce94f3b3c5f7948ca9892d7157ef923d79099b3a45a5604"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2_full_search/tests/test_phase_c2_full_search.py",
    "new": "scripts/stages/stage-1/phase_c2_full_search/tests/test_phase_c2_full_search.py",
    "kind": "rename_modified",
    "sha256_at_base": "5ac504692bd12f6cfa31c3fbc5b881b110fb5571179e6619b7f57baa38dfd25b",
-   "sha256_now": "1a86053a56ea459ea60ab53a46366881b0e12c4ff9db9ffd6b669fc31c8e7d83"
+   "sha256_now": "5b4bf02f06d74a2cb2121e3c81def01480dd905431a5d4f9bbb181f60d342bd8"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2_full_search/tests/test_phase_c2_full_search_chain.py",
@@ -2657,7 +2657,7 @@
    "new": "scripts/stages/stage-1/phase_c2_replay/tests/test_c2_replay_driver_executes.py",
    "kind": "rename_modified",
    "sha256_at_base": "cc0958080555411ea8fcc7eed25c4e2c0e9f84d4e5279de27828b912a00d6476",
-   "sha256_now": "942acce4bca96dbee0f43273c8b8652549b0a0fac07578c31cb757840b691ef9"
+   "sha256_now": "5fb635abf2f3d5a1dd369efd90e8c06c4479b1fb8e6aa2a528d4886cb53bf6dc"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c2_replay/tests/test_c2_replay_specs.py",
@@ -2790,14 +2790,14 @@
    "new": "scripts/stages/stage-1/phase_c3/tests/test_c3_packing_pilot.py",
    "kind": "rename_modified",
    "sha256_at_base": "50ba8506a0fc7cf5e0c4492b6807f47a48a2aa9b925fc3b7a3ff35c11b520a25",
-   "sha256_now": "c0fdc695cfe79da0fd7568608beac2a2d76143c05622dba31b165b52bf21b2e6"
+   "sha256_now": "4b156a17c34a1009e647ae712b213fb58a203e454594fb8e53b97edcb9236b7f"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c3/tests/test_c3_packing_v2.py",
    "new": "scripts/stages/stage-1/phase_c3/tests/test_c3_packing_v2.py",
    "kind": "rename_modified",
    "sha256_at_base": "8c9c7da0a8ae8dec9684b5bd08880b9f3ad0c3443eac53c83490bfa58c68b6ba",
-   "sha256_now": "f64eb0abee7db54686428e6fe5bf0bb7c18bcf5db2f04cfeada1dfe4006a01da"
+   "sha256_now": "e7023096794dd504b9972918aa995952df9a40f79179ace448feb6f42c53f95b"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c3/tests/test_c3_preregistration.py",
@@ -2825,7 +2825,7 @@
    "new": "scripts/stages/stage-1/phase_c3/tests/test_engineering_campaign_budget.py",
    "kind": "rename_modified",
    "sha256_at_base": "36701a43712c95b4144de82174251930877b4880212a9821f1ab91378b821780",
-   "sha256_now": "98098d0bec92d8c9ac0e486fe87c344dd8aab01592452719af5e820816e75df5"
+   "sha256_now": "cbd6628a98ad520b603c475cfe0e14fdb090bffdd829432bacdbd7e1c921e156"
   },
   {
    "old": "scripts/experiments/stage-1/phase_c3/tests/test_pilot_comparison.py",
@@ -3168,21 +3168,21 @@
    "new": "scripts/stages/stage-1/recovery_continuation/plan.py",
    "kind": "rename_modified",
    "sha256_at_base": "93f420ed53d441fcdb356036ef18b97f5cf8dc4b3b302d8714f4a9063d1fe8b0",
-   "sha256_now": "0c3299b4fe9238b5ca36e70bc678554a41b169ba93507e9cc09ef9595be0cd4e"
+   "sha256_now": "6eb0764057d51f3e41f76f558791525f319d68bbadde98df8cb6cec9858c5a96"
   },
   {
    "old": "scripts/experiments/stage-1/recovery_continuation/session.py",
    "new": "scripts/stages/stage-1/recovery_continuation/session.py",
    "kind": "rename_modified",
    "sha256_at_base": "b25dc1e7b35f0ff6973c150aed33b6cbd491186c58b4cfa8211ae48d656abb48",
-   "sha256_now": "397c35c01b3041c658099f708e78df4cf465e58d799bea5557e052d84e07408f"
+   "sha256_now": "035253b87d57f970721f8c55c3c374fcc81434a329f96ccec2817e1eb9a8dda8"
   },
   {
    "old": "scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
    "new": "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
    "kind": "rename_modified",
    "sha256_at_base": "6117922f4ad9c4ba038c9a1d354c65b7f3fd55933d2a2b7af60147910429baaa",
-   "sha256_now": "6576ed686abb3dcfe829c7a0c7984077bf6fe379a8f670bba239f2b558dc2505"
+   "sha256_now": "536b8d8cd475695358bbbfef5f16d18c124918acabb3f29c2a34fed50d9b8d20"
   },
   {
    "old": "scripts/experiments/stage-1/recovery_continuation/tests/test_it_shares_phase_as_science.py",
@@ -3215,16 +3215,16 @@
   {
    "old": "scripts/experiments/stage-3/e3/tests/test_e3_configs.py",
    "new": "scripts/stages/stage-3/e3/tests/test_e3_configs.py",
-   "kind": "rename_modified",
+   "kind": "rename_pure",
    "sha256_at_base": "d17d3ce6ff637f5c20125bb9524648626da154f514a887320e52b105a1356844",
-   "sha256_now": "a995dbc8229ee92adeb50ed694af1105e79b37d4dc799fbb06efacb9adc51fc0"
+   "sha256_now": "d17d3ce6ff637f5c20125bb9524648626da154f514a887320e52b105a1356844"
   },
   {
    "old": "scripts/experiments/stage-3/e4/tests/test_e4_configs.py",
    "new": "scripts/stages/stage-3/e4/tests/test_e4_configs.py",
-   "kind": "rename_modified",
+   "kind": "rename_pure",
    "sha256_at_base": "b184fdf8f355c955660a9417500eb8cf60307931da945a448415a18f778e629d",
-   "sha256_now": "5214868d29a8604bed59f9cd37fef3944b15b0852f6f7e089d9b48edf7978a26"
+   "sha256_now": "b184fdf8f355c955660a9417500eb8cf60307931da945a448415a18f778e629d"
   },
   {
    "old": "scripts/experiments/stage-3/e6/tests/test_e6_analysis.py",
@@ -3259,7 +3259,7 @@
    "new": "scripts/stages/stage-3/e6b/tests/test_e6b_pod.py",
    "kind": "rename_modified",
    "sha256_at_base": "928668a26d98441fcc7e64d3af0a0fbc13b5de1c5262bb2d62b6fb2c516516c9",
-   "sha256_now": "7a888d9ec1dfac036987ffed0e0609eeb4fff7eec1f1e7f0e5a28ea8c39549c2"
+   "sha256_now": "1922f27e46e68fafe00040827bb5472fbc04193ee6b89c3688aa6c3fa929ddea"
   },
   {
    "old": "scripts/experiments/stage-3/e7/tests/test_e7_streams.py",
@@ -3273,7 +3273,7 @@
    "new": "scripts/stages/stage-3/e8/tests/test_e8_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "cbbdab92944dee4de140b893dbb55e54fd4ecfbe092cf0a8b358c29d8cff3d9a",
-   "sha256_now": "0315d8cda966ab468e660938752902f6cf9093b2153fba13bef6a67b58b36671"
+   "sha256_now": "f44430e518cfc2ebf59db1046bb8350258a0344c263b55f58c5436c03019fa0a"
   },
   {
    "old": "scripts/experiments/stage-3/e8/tests/test_frozen_records.py",
@@ -3385,7 +3385,7 @@
    "new": "scripts/stages/stage-1/phase_a3/a3_acquire.sh",
    "kind": "rename_modified",
    "sha256_at_base": "f11377f0c9bdafb7462067b4b473c91581b1c8d61f1a8cebb5a908fb7af6fc86",
-   "sha256_now": "4986a70e038dfd884cf57da5d4dc4c3044b959b16186da497c3431b5c0371c2f"
+   "sha256_now": "c5e213c1c0cd315ce91c24b0f6f7809291b21dc58247e94e683f6ba2c0e50881"
   },
   {
    "old": "scripts/pod/autoinit_a3_driver.py",
@@ -3399,7 +3399,7 @@
    "new": "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py",
    "kind": "rename_modified",
    "sha256_at_base": "faaccdb1d12815984f26f5f4a31b8c80c043f65d3569a9b21e8d1ee8ebb11368",
-   "sha256_now": "2a3cb1c3b86868a9a2d1935d1eedfd03850d6c778b7ec0a5a55f22f0f21ba1ee"
+   "sha256_now": "cec31ee8d48ea02742dfd9550ea1a3aacaad33f01c06f1c770685a519e2d04b3"
   },
   {
    "old": "scripts/pod/autoinit_c1_driver.py",
@@ -3413,7 +3413,7 @@
    "new": "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
    "kind": "rename_modified",
    "sha256_at_base": "79af15a391a94d4e2eac3e140c38a3ecc488040bf08dda1e2d7c62a0b55d3a2a",
-   "sha256_now": "4bcd5f93f22af2852d00270f130012188d569556a194b3fb7bdf3913c830e142"
+   "sha256_now": "08db8ca7e02eb3f703b3819cdcf2ae83c3f05ae27a11160bf89f1c899f15e761"
   },
   {
    "old": "scripts/pod/autoinit_c2_behavioural_driver.py",
@@ -3427,7 +3427,7 @@
    "new": "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py",
    "kind": "rename_modified",
    "sha256_at_base": "cf5c52fdc00922c1c282c27d8b8450346f54d84e73e2e51d1dd54285699dbd1e",
-   "sha256_now": "5eccbd1cc740c364cb3281ea74f8f11120cd82d251e71c6ce15533a98c43d11b"
+   "sha256_now": "2491c13527e45839ee0fbe934bb05681abb2c2d00065fb154e28638ae578e3d2"
   },
   {
    "old": "scripts/pod/autoinit_c2_replay_driver.py",
@@ -3455,7 +3455,7 @@
    "new": "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py",
    "kind": "rename_modified",
    "sha256_at_base": "12814e5f3e377a461432e98b45a0c3fd035592ee1495df5e5c0f56db89c56ddf",
-   "sha256_now": "9cc6bed913a40717a1c724447489c8a84e2586477af178b13353371e9340f5a7"
+   "sha256_now": "9e04ed3f73679767b8c910ba490b5fea555b7624dd681257f0b18bb6c2e8e6cb"
   },
   {
    "old": "scripts/pod/autoinit_continuation_b_driver.py",
@@ -3637,7 +3637,7 @@
    "new": "scripts/shared/pod/autoinit_preflight_setup.sh",
    "kind": "rename_modified",
    "sha256_at_base": "c85344a9b9b8e619d8d338ba0de83112fd3e84b33dc7ab135fb8670f819adaf6",
-   "sha256_now": "873d3286ddfcddb05484a0ae79215565de521007894a0a13155ba6134ba3ddf8"
+   "sha256_now": "4df4e579b05347260a1278a564e5ab9b397f88bd9ae1203516b1f6f3df9de5ac"
   },
   {
    "old": "scripts/pod/autoinit_recovery_continuation_driver.py",
@@ -3700,7 +3700,7 @@
    "new": "scripts/stages/stage-1/phase_c3/c3_acquire.sh",
    "kind": "rename_modified",
    "sha256_at_base": "0fcb483bf5a8a545cd367d43fc18816db5b46988fb714a24ca7d67d869543859",
-   "sha256_now": "5bc9de07dbdf5413aa33780463a12302241813ed396de14e8c4366ff0f3d4d69"
+   "sha256_now": "5255710b33353011f6048e1b7722742e2461d29959b177a270a5440f16d5efdc"
   },
   {
    "old": "scripts/pod/c3_batching_pilot_driver.py",
@@ -4540,35 +4540,35 @@
    "new": "scripts/stages/stage-3/e3/validate_e3_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "61aa515d6e9dc0ac1b65cc058fe2c02c945f4482045f4d3e020d270cb6403ffe",
-   "sha256_now": "ec7566da60b8b72393f3c4b4c0a811eb68a1d3b9268142d3d9e9430c1042b295"
+   "sha256_now": "e3aec24bdcecb827643c46625bd7372a76c9b6315b9c59fb7c4a916e70c243bc"
   },
   {
    "old": "scripts/training/validate_e6b_arms.py",
    "new": "scripts/stages/stage-3/e6b/validate_e6b_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "f50a93c02212396355d50382530fda2e1327feb282038de4a15c023318533f63",
-   "sha256_now": "ac8787f57106b2b9535929f15bcdfeb4cb4753e5fbb74552b05f3aa99de7251e"
+   "sha256_now": "15a4f70883f3a69c00ff5e29c888771b57919d4a90782fcba25956fe00efdd2a"
   },
   {
    "old": "scripts/training/validate_e7_arms.py",
    "new": "scripts/stages/stage-3/e7/validate_e7_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "a3e33cb492990ae84b505079cec888d3a5e729d4945728d9ce265acaa68bfd6e",
-   "sha256_now": "786463e2974f914509d654e8d1315fd1667916c1c68bfa7db8fc0c3d9784181d"
+   "sha256_now": "27000435849af38a4a32a4b26ca9dd0ca680a4e1ee4a005aef69aa94acf4f9df"
   },
   {
    "old": "scripts/training/validate_e8_arms.py",
    "new": "scripts/stages/stage-3/e8/validate_e8_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "fc17b1ed9e29f232bc667ec3d82b83304fd3dfc89ea02f59722803e65735715e",
-   "sha256_now": "1f55e1e48503a853db14dce6b038fe1a8beeb1c015f2aeb51d01d69a12685c69"
+   "sha256_now": "7e1fd91c4286e773de8900cb40eb4e7b4356dd58f10dd01faeb45bdc2af7e24b"
   },
   {
    "old": "scripts/training/validate_e8b_arms.py",
    "new": "scripts/stages/stage-3/e8b/validate_e8b_arms.py",
    "kind": "rename_modified",
    "sha256_at_base": "b956fd6d4019fd0f8ed47c114d00bcfd3ea9990c5fdcd830d7b922a6e776cdd0",
-   "sha256_now": "2735fb93601b817f604130d6fb4673efe6f502de7b554edc44864f19ec0eafd3"
+   "sha256_now": "bfa35196dc7c9926cf84523c5b96ff1d2cf3a7070611493fbfc0ba6c31ffac07"
   },
   {
    "old": "scripts/training/validate_padding_truncation.py",
