@@ -373,11 +373,46 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     recorded three times above, at the one block where it would break several
     at once. The next place to look is `d_series` once D1 is authorized or
     abandoned, because then its blockers stop being decisions anyone acts on.
+
+    16_500 -> 18_000 on 2026-10-08, and the reclamation came first and did NOT
+    cover the growth — which is the honest reading and is why the raise is
+    recorded rather than the facts trimmed.
+
+    What it buys is three live subjects in `d_series`, each one a decision a
+    reader acts on now, and the first of them is why the other two exist:
+
+    * **which checkpoint B is.** The design named C1's BEATEN arm (`c313d1b4`,
+      `attention.weight_proxy_v0`) as its control for the whole of its design
+      and search. C1 returned GO, so B is the TREATMENT at `53e30566` — and
+      C1's delta between the two arms EXCEEDS the SESOI the D1 decision rule
+      tests against, so the error could manufacture a GO rather than merely add
+      noise. A reader who does not find this in the snapshot repeats it.
+    * **what the behavioural rungs cost.** Arm materialization was one rebuild
+      inside a FIXED session overhead — C3's figure, for a session with one
+      arm — against D1 screening's five, so the priced session funded a fifth
+      of the work. It is now a per-arm term.
+    * **which seeds are bound.** They are `SHA256(design_hash + ...)` and the
+      correction moved `design_hash`, so they were rebound prospectively. C0
+      requires them bound before any candidate result exists.
+
+    Reclaimed in the same round, each checked for readers BY NAME first — the
+    paragraphs above record that claim being made wrongly twice, once because
+    the grep was piped into `head`: `d_series.a3_precondition` (a closed
+    precondition `a_bsz3.blocks` already owns), `d_series.scoring_identity`
+    (folded into `scoring_protocol`, which three tests read and which owns the
+    subject), and `d_series.family_and_sources` lost a construction commit the
+    manifest owns. `prepared_launch.note` was also STALE — it spoke about C3
+    while D1's search had since completed — and a stale note is worse than a
+    long one.
+
+    **The next place to look is still `d_series`, and the trigger is now
+    explicit:** when D1 resumes and is authorized, its pricing and seeds move
+    into the authorization that binds them and stop being snapshot facts.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 16_500, (
+    assert len(SNAPSHOT.read_bytes()) < 18_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")

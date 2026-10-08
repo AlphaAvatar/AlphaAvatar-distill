@@ -176,16 +176,27 @@ class TestTheD1DesignDeclaresTheRightControl:
         else:
             assert "incumbent identity" in open_
 
-    def test_the_declared_identity_matches_what_the_writer_emits(self):
-        """The constants and the document cannot drift apart silently."""
+    def test_the_committed_document_matches_what_the_writer_emits(self):
+        """The document and its writer cannot drift apart silently.
+
+        This compared the document against two hand-typed CONSTANTS until
+        2026-10-08 -- and it passed for the whole of D1's design and search,
+        because both sides named the same wrong arm. Two copies of one value
+        agree with each other and with nothing else.
+        """
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
         import write_d1_design as w
 
         declared = _design()["incumbent"]
-        assert declared["artifact_digest"] == w.INCUMBENT_DIGEST
-        assert declared.get("state_id") == w.INCUMBENT_STATE_ID
+        emitted = w.incumbent()
+        assert declared == emitted, (
+            "the committed design's incumbent block is not what the writer "
+            "emits; regenerate it with write_d1_design.py --write")
+        #: And there are no constants left to drift: the identity is derived.
+        assert not hasattr(w, "INCUMBENT_DIGEST")
+        assert not hasattr(w, "INCUMBENT_STATE_ID")
 
 
 class TestTheDesignHashCarriesNoRunState:

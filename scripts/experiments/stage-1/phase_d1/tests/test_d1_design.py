@@ -378,18 +378,104 @@ class TestTheSpace:
         assert coverage()["states_produced"] == \
             search_cost()["expected_trajectory_expansions"]
 
-    def test_a_behavioural_session_needs_probes(self):
+    def test_a_behavioural_session_needs_probes_and_arms(self):
         from experiments.phase_d1.search_space import D1SpaceError, behavioural_cost
 
-        with pytest.raises(D1SpaceError):
-            behavioural_cost(n_probes=0)
+        with pytest.raises(D1SpaceError, match="probes"):
+            behavioural_cost(n_probes=0, n_arms=5)
+        with pytest.raises(D1SpaceError, match="arms"):
+            behavioural_cost(n_probes=10, n_arms=0)
+
+    def test_n_arms_is_required_rather_than_defaulted(self):
+        """A default of 1 would have reproduced the defect it repairs.
+
+        The arm-materialization cost used to sit inside a FIXED session
+        overhead as one rebuild -- C3's figure, for a session that had one arm.
+        D1 screening has five, so the priced session funded a fifth of the work
+        it requires. A defaulted `n_arms` would make that mistake again while
+        looking considered, so the parameter is keyword-only and required.
+        """
+        import inspect
+
+        from experiments.phase_d1.search_space import behavioural_cost
+
+        param = inspect.signature(behavioural_cost).parameters["n_arms"]
+        assert param.default is inspect.Parameter.empty
+        assert param.kind is inspect.Parameter.KEYWORD_ONLY
 
     def test_the_hard_ceiling_bounds_the_expected_cost(self):
         from experiments.phase_d1.search_space import behavioural_cost
 
-        cost = behavioural_cost(n_probes=12)
+        cost = behavioural_cost(n_probes=12, n_arms=5)
         assert cost["hard_ceiling_minutes"] > cost["expected_minutes"]
         assert cost["overrun_factor"] > 1.0
+
+    def test_the_cost_scales_with_arms_and_not_only_with_probes(self):
+        """The repair, as an inequality rather than a figure.
+
+        Every arm's checkpoint has to be materialized on the pod before any
+        probe can train from it, so a five-arm session costs more than a
+        one-arm session at the SAME probe count. Before the split those two
+        priced identically.
+        """
+        from experiments.phase_d1.search_space import (
+            ARM_MATERIALIZATION_MINUTES, behavioural_cost,
+        )
+
+        one = behavioural_cost(n_probes=10, n_arms=1)
+        five = behavioural_cost(n_probes=10, n_arms=5)
+        assert five["hard_ceiling_minutes"] > one["hard_ceiling_minutes"]
+        assert (five["hard_ceiling_minutes"] - one["hard_ceiling_minutes"]
+                == pytest.approx(4 * ARM_MATERIALIZATION_MINUTES))
+        #: And the probe block is untouched by the arm count, so the two terms
+        #: are genuinely separate rather than one absorbed into the other.
+        assert one["probe_minutes"] == five["probe_minutes"]
+
+    def test_the_overrun_factor_does_not_multiply_the_materialization(self):
+        """It was measured on the train+eval block, and that is where it stays.
+
+        Materialization is a digest-pinned replay already carried at a bound,
+        so multiplying it again would charge a contingency on a worst case.
+        """
+        from experiments.phase_d1.search_space import behavioural_cost
+
+        cost = behavioural_cost(n_probes=10, n_arms=5)
+        #: `abs=0.01`, because the reported figure is rounded to the cent-hour
+        #: the pricing uses. A tighter tolerance here would be asserting the
+        #: rounding rather than the composition.
+        assert cost["hard_ceiling_minutes"] == pytest.approx(
+            cost["probe_minutes"] * cost["overrun_factor"]
+            + cost["fixed_minutes"], abs=0.01)
+        assert cost["fixed_minutes"] == pytest.approx(
+            cost["session_overhead_minutes"]
+            + cost["arm_materialization_minutes"])
+
+    def test_the_screening_cell_prices_five_arms_and_fits_the_envelope(self):
+        """The corrected figure, derived both ways and bounded by the envelope.
+
+        The design's own chain cell must agree with `behavioural_cost` at the
+        declared probe and arm counts -- two derivations of one number is how
+        they drift -- and the result must still fit the $30.00 per-session
+        envelope, which is what makes this a repair rather than a new funding
+        question.
+        """
+        from experiments.phase_d1.search_space import behavioural_cost
+
+        doc = json.loads(DESIGN.read_text())
+        bd = doc["behavioural_design"]
+        cell = doc["budget"]["chain"]["sessions"]["screening"]
+        assert (cell["n_probes"], cell["n_arms"]) == (
+            bd["screening_probes"], bd["screening_arms"]) == (10, 5)
+        rebuilt = behavioural_cost(
+            n_probes=cell["n_probes"], n_arms=cell["n_arms"],
+            price_per_hour=cell["price_per_hour"],
+            container_disk_gb=cell["container_disk_gb"])
+        assert rebuilt["hard_ceiling_usd"] == pytest.approx(
+            cell["hard_ceiling_usd"])
+        envelope = json.loads(
+            (REPO / "configs/experiments/phase_c1/authorization.json").read_text()
+        )["execution_package"]["per_attempt_hard_ceiling_usd"]
+        assert cell["hard_ceiling_usd"] <= envelope
 
 
 class TestTheCommittedRecords:

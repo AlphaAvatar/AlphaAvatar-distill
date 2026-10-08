@@ -9,63 +9,98 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**Nothing is running and nothing is billing.** An account-wide query returns
-**0 pods and 0 network volumes** at a spend rate of `$0/h`.
+**D1 IS PAUSED BEFORE BEHAVIOURAL SCREENING.** Maintainer instruction of
+2026-10-08: the control-arm decision is resolved, the two corrections it implies
+are made, and D1 does not resume until the repository information-architecture
+migration has been independently reviewed.
 
-**D1 BEHAVIOURAL SCREENING IS BLOCKED ON A MAINTAINER DECISION, and the blocker
-is scientific.** The design declares its control arm to be the arm C1 measured
-and **beat**:
+**Nothing is running and nothing is billing.** An account-wide provider query
+returns **0 pods and 0 network volumes** at a spend rate of `$0/h`, against a
+balance of `$186.6019`. No behavioural authorization was issued, no pod was
+created, and no screening or confirmation work ran.
+
+**THE CONTROL ARM WAS THE ARM C1 BEAT, and that is now corrected.** The design
+declared `fe9683e6` / `c313d1b4` — C1's `attention.weight_proxy_v0` arm. C1
+returned GO, so the checkpoint that stands is C1's **treatment**:
 
 ```text
-declared by d1_design.json :: incumbent
-    state_id         fe9683e6a9c783bbc6fe276a78c851c6
-    artifact_digest  c313d1b4081b
-    which is         C1's INCUMBENT arm, attention.weight_proxy_v0
+standing incumbent B   53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ff…
+                       attention.activation_importance_v1, calib.domain_balanced@v1
+NOT                    c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d7612…
 
-the arm that actually stands, DERIVED from C1's own verdict
-    artifact_digest  53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab…
-    which is         C1's TREATMENT arm, attention.activation_importance_v1
-    because          C1 returned GO at +0.013725 against a SESOI of 0.010
+C1's delta between the two arms   +0.013725
+the D-series SESOI                 0.010
 ```
 
-**The arithmetic is why it matters.** C1's own measured delta between those two
-arms is `+0.013725` and the D-series SESOI is `0.010`. A candidate compared
-against the beaten arm is credited with an effect **larger than the amount the
-decision rule tests for** — the error does not add noise, it can manufacture a
-GO, and it would do so identically for all four candidates. Owner:
+The margin exceeds the bar, so the error could not merely add noise — it lowered
+the bar by more than the bar, identically for every candidate.
+
+**It was not a new scientific choice and the maintainer's decision says so.**
+Repository evidence already established it: `c1_arm_identities.json` names which
+arm is which, C1 returned GO, and Phase-C2 defines `B_ARTIFACT_DIGEST =
+53e30566…` while describing B as "the frozen C1 treatment". The old D1 identity
+was a defect. Owner of the finding and its resolution:
 [`analyses/d1_control_arm_identity.json`](../stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json).
 
-Three independent records agree with the derivation and disagree with the
-design: C1's own measured `c1_arm_identities.json`, C2's four frozen `B_*`
-constants, and the C3 stage-E gate. So does the prose in the design's own
-`incumbent` block — `"B, the frozen C1 treatment"` — which is why nothing caught
-it: every statement was a sentence rather than a comparison.
+**The identity is DERIVED now, not typed.** `write_d1_design.py`'s two constants
+are gone; `phase_d_series/incumbent.py` reads C1's recorded verdict and C1's
+measured arm identities. The design block carries all four content identities
+and `state_id: null` — the arm's own shape, since the promoted arm was built as
+a fixed path.
 
-**It is enforced now, in four places, and none of them is prose.**
+**The blocker and the refusal are KEPT.** The design is a file and the
+derivation is code, so `incumbent identity` stays in `BLOCKER_SPECS` and
+`arms()` still refuses a design that disagrees. The regression drives that
+refusal through the exact historical value, so it stays exercised now that the
+live design passes.
+
+**THE SEEDS ARE REBOUND, prospectively.**
 
 ```text
-phase_d_series/incumbent.py      DERIVES the standing arm from C1's verdict
-d1_design.json :: open_blockers  ["incumbent identity"] — refuses the issuer
-behavioural.py :: arms()         refuses to assemble the field
-test_standing_incumbent.py       16 regressions; the one red test is the finding
+design_hash    f9c6688f91dc9d47…      (was bc811dc027faf874…)
+screening      614923639, 516448251
+confirmation   396880939, 766527341, 1004399678
+excluded       20260726, 20260801, 20260813, 696460635, 1635674081, 1656475568
 ```
 
-**Why it was not repaired autonomously.** Correcting the control changes the
-**arms**, and because `incumbent` is inside `scientific_preimage` it also moves
-`design_hash` and therefore the derived screening and confirmation **seeds**.
-AGENTS.md P12.1 stops autonomous continuation at exactly that. `design_hash`
-would move `bc811dc027faf874` → `bd4c7d4a38833234`; the seeds have never been
-used, and C0 requires them bound before any candidate result exists, so moving
-them is harmless now and only now.
+C0 requires the seeds materialized and hash-bound **before** any candidate
+behavioural result exists, and none does: no probe trained, no authorization
+issued, no pod created. **Still owed before any launch:** an execution
+preregistration that hash-binds these values. It does not exist yet.
 
-**A second finding rides on the same decision.** The screening session as priced
-funds **one** arm materialization (`parent_replay_and_incumbent_rebuild: 22.0`
-min, modelled on C3, which had one) and D1 screening has **five**. The four
-candidates' 1.2 GiB checkpoints fit neither transport to a pod, so they are
-materialized on the pod along digest-pinned fixed paths — the mechanism the
-rematerialization campaign just proved. A re-price from the design's own cost
-model is owed before the screening authorization is issued; the `$30` envelope
-and the `$68.7925` remaining formal allowance both have room.
+**AND THE ARM-MATERIALIZATION COST WAS PRICED ONCE FOR FIVE ARMS.**
+`parent_replay_and_incumbent_rebuild: 22.0` sat in the *fixed* session
+overhead — C3's figure, for a session that had one arm to rebuild. It is now a
+per-arm term against a **required** `n_arms`:
+
+```text
+screening     10 probes · 5 arms   110.0 mat + 82.0 overhead   1355.71 min  $25.0053
+confirmation   6 probes · 2 arms    44.0 mat + 82.0 overhead    824.23 min  $15.2025
+chain                                                                       $61.6975
+```
+
+22.0 min is C3's own component figure, and the rematerialization campaign then
+measured two of these four candidate paths end to end on the same L40S at
+**16.05** and **21.34** min — both inside it, so the bound that contains the
+measurements is what is priced. Screening fits the `$30.0000` per-session
+envelope and the chain fits `$68.7925` of remaining formal allowance. Pricing
+repair, not execution: nothing was authorized.
+
+**AND A THIRD REPAIR, FOUND WHILE CLOSING THE ROUND.**
+`phase_d_series/source_evidence.py` produced a **hash-seed dependent** record,
+so `autoinit_d_series_source_evidence.json` could not regenerate identically
+and its test passed only when the ambient `PYTHONHASHSEED` matched the one in
+use when it was last written. Two causes, both ties broken by set iteration
+order: the rare-token choice in `near_duplicate_screen`, and the first-strict-
+maximum partner scan in `bare_problem_screen` — which returned `17` at one seed
+and `458` at another as "the consumed problem this candidate resembles". Total
+orders fixed both; verified one digest across seeds 1, 7 and 13.
+
+What moved in the record: two descriptive `with_any_neighbour` counts and the
+review list's partner choice and tie order. What did **not**: every
+`at_or_above` band, `n_to_review`, and every eligibility, survivor, admitted
+count, content hash, status and blocker. The screen declares itself
+`_not_an_acceptance_criterion` and nothing a decision rests on changed.
 
 **BOTH UNRETAINED FINALISTS ARE REPRODUCED AND SECURED.** The
 rematerialization campaign is CLOSED.
@@ -207,23 +242,31 @@ the selection semantics they ran under. `a2b2f04ae642ac69…` and
 `ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
 bytes are retired once q2 and q4 are secured.
 
-**Behavioural screening is BUILT and BLOCKED.** Four candidates at two recovery
+**Behavioural screening is BUILT and PAUSED.** Four candidates at two recovery
 seeds plus the incumbent at two matched seeds is ten screening probes, then one
-advancing candidate, then a fresh three-seed confirmation against B. q2 and q4
-now exist, so the input it was waiting on is satisfied — what blocks it is the
-control-arm identity at the top of this file.
+advancing candidate, then a fresh three-seed confirmation against B.
 
-What exists and is verified at `$0`: the probe schedule and its agreement with
-the priced design; the `d1_screening` role re-hashed against the realized family
-(950/850, 7 of 7 files, both roles disjoint); the preregistered seeds, derived
-from the design hash and disjoint from every excluded one; the frozen recovery
-recipe and the refusal of any config that differs outside C1's override set; the
-mechanical ranking across its five decision cases; the scorer, pinned to the
-role with no `--battery` flag; and the driver, which asserts the whole contract
-before any weights load. What does not exist: the launcher, the authorization
-issuer and the sweep contract — all three were in progress when the control-arm
-finding stopped the round, because `WHICH` checkpoint B is decides how B reaches
-the pod and therefore what the session stages and what it costs.
+What exists and is verified at `$0`: the five-arm field, with the four
+candidates' secured bytes hashed against all four recorded identities and the
+incumbent's construction spec checked to pin the same four the design binds; the
+probe schedule and its agreement with the priced design; the `d1_screening` role
+re-hashed against the realized family (950/850, 7 of 7 files, both roles
+disjoint); the rebound seeds; the frozen recovery recipe and the refusal of any
+config that differs outside C1's override set; the mechanical ranking across its
+five decision cases; the scorer, pinned to the role with no `--battery` flag; and
+the driver, which asserts the whole contract before any weights load.
+
+**All five arms are materialized ON THE POD** along digest-pinned paths. The
+candidates' local copies are evidence for the `$0` identity check, not the
+execution path: a 1.19 GiB checkpoint fits neither transport — scp has a
+hardcoded 600 s per-asset timeout against a 0.72 MB/s uplink, and the relay has
+about 1.756 GiB of private-storage headroom. B has no local bytes at all and is
+rebuilt from `phase_c2.baseline.frozen_baseline_spec`, the one owner of that
+construction, as C2's and C3's behavioural sessions did.
+
+**What does not exist, deliberately:** the launcher, the authorization issuer,
+the sweep contract and the execution preregistration. Building them is
+experimental execution, and D1 is paused before it.
 
 **Three attempts, and the two failures bought the gates the third needed.**
 

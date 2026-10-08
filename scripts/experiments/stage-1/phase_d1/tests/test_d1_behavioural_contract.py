@@ -50,47 +50,57 @@ def _auth(**over):
 
 
 class TestTheControlArmMustBeTheOneThatActuallyStands:
-    """Why the rest of this file is red, stated once, as its own assertion.
+    """The refusal that found a real defect, kept armed after it was fixed.
 
-    `arms()` refuses to assemble the field while the design's declared control
-    is not the arm C1's verdict selected. Every test below that touches the
-    field therefore fails, and they should: the field cannot be built. This
-    test is here so the suite says WHY rather than only failing, and so the
-    refusal itself is covered rather than being an incidental side effect.
-
-    The finding: the design declares `fe9683e6` / `c313d1b4`, which is C1's
-    `attention.weight_proxy_v0` arm. C1 returned GO at +0.013725 against a
-    SESOI of 0.010, so the checkpoint that stands is C1's treatment at
-    `53e30566` -- and C1's delta between the two EXCEEDS the SESOI the D1
-    decision rule tests against, so the error can manufacture a GO rather than
-    merely add noise. See
+    Until 2026-10-08 the design stated its control as `fe9683e6` / `c313d1b4`,
+    which is C1's `attention.weight_proxy_v0` arm -- the arm C1 measured and
+    BEAT. C1 returned GO at +0.013725 against a SESOI of 0.010, so the
+    checkpoint that stands is C1's treatment at `53e30566`, and the delta
+    EXCEEDS the amount the decision rule tests for: the error could manufacture
+    a GO rather than merely add noise. Corrected on the maintainer decision of
+    2026-10-08; owner of the finding
     `logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json`.
 
-    Correcting it changes the ARMS and, through `design_hash`, the derived
-    SEEDS, which AGENTS.md P12.1 makes a maintainer decision rather than an
-    autonomous repair.
+    `arms()` still refuses a design that disagrees with the derivation, and
+    these tests still drive that refusal, because the design is a FILE and the
+    derivation is code: an edited design, or a later round that promoted
+    something else without this document following, must still be refused.
     """
 
-    def test_the_field_refuses_to_assemble_against_a_control_that_was_beaten(self):
-        from experiments.phase_d_series.incumbent import (
-            disagreements, standing_incumbent,
-        )
+    def test_the_live_design_agrees_with_the_derivation(self):
+        from experiments.phase_d_series.incumbent import disagreements
 
-        declared = json.loads(
-            (REPO / B.DESIGN_REL).read_text())["incumbent"]
-        differ = disagreements(declared, REPO)
-        if not differ:
-            #: The decision has been made and the design corrected. The refusal
-            #: must then NOT fire -- a guard that kept refusing after its cause
-            #: was removed would block the corrected launch forever.
-            B.arms(REPO)
-            return
+        declared = json.loads((REPO / B.DESIGN_REL).read_text())["incumbent"]
+        assert disagreements(declared, REPO) == [], (
+            "the design's control arm is not the standing incumbent; "
+            "see d1_control_arm_identity.json")
+        #: And the field assembles, which is the other half: a guard that kept
+        #: refusing after its cause was removed would block every launch.
+        assert len(B.arms(REPO)) == 5
+
+    def test_a_design_naming_the_beaten_arm_is_refused(self, tmp_path,
+                                                        monkeypatch):
+        """Non-vacuity, driven through the EXACT historical defect.
+
+        The design is copied with `c313d1b4...` -- C1's beaten arm, the value
+        that was really there -- put back, and the field must refuse to
+        assemble. Without this the refusal is unexercised the moment the design
+        is correct, which is precisely when it stops being tested and starts
+        being decoration.
+        """
+        beaten = ("c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c"
+                  "1743a2a6")
+        doc = json.loads((REPO / B.DESIGN_REL).read_text())
+        doc["incumbent"]["artifact_digest"] = beaten
+        fake = tmp_path / "d1_design.json"
+        fake.write_text(json.dumps(doc))
+        monkeypatch.setattr(B, "DESIGN_REL", str(fake))
         with pytest.raises(B.D1BehaviouralError,
-                           match="not the standing incumbent"):
+                           match="not the standing incumbent") as exc:
             B.arms(REPO)
-        standing = standing_incumbent(REPO)
-        assert standing["c1_arm"] == "treatment"
-        assert declared["artifact_digest"] != standing["artifact_digest"]
+        #: The refusal names the DECISION, not just the mismatch: which
+        #: checkpoint B is moves the arms and the seeds.
+        assert "maintainer decision" in str(exc.value)
 
 
 class TestTheArmsAreTheFrozenFieldAndNothingElse:
@@ -115,40 +125,140 @@ class TestTheArmsAreTheFrozenFieldAndNothingElse:
                 continue
             assert recorded[arm.quality_position] == arm.state_id
 
-    def test_the_incumbent_has_no_quality_position(self):
-        """B is not a candidate of the D1 search. Giving it a position would
-        make it look like a fifth one."""
-        b = next(a for a in B.arms(REPO) if a.is_incumbent)
-        assert b.quality_position is None
-        assert b.state_id == json.loads(
-            (REPO / B.DESIGN_REL).read_text())["incumbent"]["state_id"]
+    def test_the_incumbent_has_no_quality_position_and_no_state_id(self):
+        """B is not a candidate of the D1 search, and it has no search state id.
 
-    def test_every_arm_has_verified_bytes_at_the_recorded_identity(self):
-        """The $0 check that stops a probe being trained from the wrong
-        checkpoint -- which costs its full training time to discover."""
+        Both are properties of the arm rather than gaps. Giving it a position
+        would make it look like a fifth candidate; giving it a state id would
+        claim it came out of a search, when it was built as a FIXED PATH and
+        `c1_arm_identities.json` records `state_id: null` for it.
+
+        The identity is asserted on the four CONTENT fields instead -- which is
+        the only thing the promoted arm actually has, and the reason the design
+        block carries four digests rather than a directory name.
+        """
+        b = next(a for a in B.arms(REPO) if a.is_incumbent)
+        declared = json.loads(
+            (REPO / B.DESIGN_REL).read_text())["incumbent"]
+        assert b.quality_position is None
+        assert b.state_id is None and declared["state_id"] is None
+        assert b.checkpoint_dir is None
+        assert b.is_materialized_from_a_spec
+        assert b.construction == B.INCUMBENT_CONSTRUCTION
+        for field in ("artifact_digest", "weights_digest",
+                      "single_shard_sha256", "arch_signature"):
+            assert b.identities[field] == declared[field]
+            assert len(b.identities[field]) == 64
+
+    def test_the_incumbent_is_the_arm_c1_promoted(self):
+        """Derived from C1's verdict, not read from a constant beside it.
+
+        The design stated C1's BEATEN arm until 2026-10-08 -- and C1's delta
+        between the two arms exceeds the SESOI the decision rule tests against,
+        so the error could manufacture a GO. Owner of the finding:
+        `logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json`.
+        """
+        from experiments.phase_d_series.incumbent import (
+            disagreements, standing_incumbent,
+        )
+
+        declared = json.loads(
+            (REPO / B.DESIGN_REL).read_text())["incumbent"]
+        assert disagreements(declared, REPO) == []
+        standing = standing_incumbent(REPO)
+        assert standing["c1_arm"] == "treatment"
+        assert declared["impl_id"] == "attention.activation_importance_v1"
+        b = next(a for a in B.arms(REPO) if a.is_incumbent)
+        assert b.artifact_digest == standing["artifact_digest"]
+
+    def test_every_arm_is_obtainable_at_the_recorded_identity(self):
+        """The `$0` check that stops a probe training from the wrong checkpoint.
+
+        TWO KINDS OF ARM, and the rows differ because the questions do: a
+        candidate has secured bytes on this host and they are hashed; the
+        incumbent has none and its construction spec's pins are compared
+        against the design instead. Asserting `checkpoint_dir` on every row
+        would have required the incumbent to have a directory it cannot have.
+        """
         out = B.require_arms_present(REPO)
         assert out["n_arms"] == 5
-        for row in out["arms"]:
-            assert row["artifact_digest"].startswith(row["recorded_prefix"])
+        by_arm = {r["arm"]: r for r in out["arms"]}
+        assert sorted(by_arm) == ["B", "q1", "q2", "q3", "q4"]
+        for arm_id in ("q1", "q2", "q3", "q4"):
+            row = by_arm[arm_id]
             assert Path(row["checkpoint_dir"]).is_dir()
+            assert len(row["identities_checked"]) == 4
+            assert "hashed here" in row["obtained_by"]
+        b = by_arm["B"]
+        assert b["checkpoint_dir"] is None
+        assert b["construction"] == B.INCUMBENT_CONSTRUCTION
+        assert b["construction_is_callable"]
+        assert len(b["identities_checked"]) == 4
+        assert "materialized on the pod" in b["obtained_by"]
+        #: And it says what it does NOT prove, because a CPU box cannot prove
+        #: the bytes match and a check that implied it would be worse than none.
+        assert "can claim that" in b["_what_this_does_not_claim"]
+        assert "digest gate proves it" in b["_what_this_does_not_claim"]
 
-    def test_a_wrong_checkpoint_is_refused(self, tmp_path, monkeypatch):
-        """Non-vacuity: point an arm at another arm's bytes and the identity
-        check must catch it."""
+    def test_a_wrong_checkpoint_is_refused(self, monkeypatch):
+        """Non-vacuity: point an arm at another arm's bytes and be refused.
+
+        The stub carries q1's `identities`, which is the field the check
+        actually reads. An earlier version omitted it, and because every check
+        is "all declared identities agree", the stub passed -- a stub that
+        omits the field under test proves the opposite of what it looks like.
+        `test_an_arm_that_declares_no_identities_is_refused` closes that hole
+        in the production code rather than only in this fixture.
+        """
         arms = B.arms(REPO)
         q1, q2 = arms[0], arms[1]
-        monkeypatch.setitem(B.ARM_SOURCES, "q1",
-                            str(Path(q2.checkpoint_dir).parent))
-        #: q1 now resolves to <q2's parent>/<q1's state id>, which does not
-        #: exist -- so the refusal is the missing-checkpoint one. Point it at
-        #: q2's actual directory to get the identity refusal instead.
         monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
             B.Arm(arm_id="q1", state_id=q1.state_id,
                   artifact_digest=q1.artifact_digest, quality_position=1,
-                  checkpoint_dir=q2.checkpoint_dir, role="candidate"),))
+                  checkpoint_dir=q2.checkpoint_dir, role="candidate",
+                  identities=dict(q1.identities)),))
         with pytest.raises(B.D1BehaviouralError) as exc:
             B.require_arms_present(REPO)
         assert "not the checkpoint that was selected" in str(exc.value)
+
+    def test_an_arm_that_declares_no_identities_is_refused(self, monkeypatch):
+        """`all([])` is True, so an arm binding nothing would pass everything.
+
+        Both branches of the check are "every declared identity agrees", which
+        is vacuously satisfied by an empty set -- and silently. Refused in
+        `require_arms_present` for both kinds of arm.
+        """
+        q1 = B.arms(REPO)[0]
+        monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
+            B.Arm(arm_id="q1", state_id=q1.state_id,
+                  artifact_digest=q1.artifact_digest, quality_position=1,
+                  checkpoint_dir=q1.checkpoint_dir, role="candidate",
+                  identities={}),))
+        with pytest.raises(B.D1BehaviouralError, match="binds nothing"):
+            B.require_arms_present(REPO)
+
+    def test_the_incumbents_construction_spec_must_agree_with_the_design(
+            self, monkeypatch):
+        """Non-vacuity for the other branch: move the design's digest.
+
+        The spec's pins and the design's identities are two records of one
+        fact. If they disagree, the arm the pod builds is not the arm the
+        design binds, and that is the whole failure this round found -- caught
+        on the dev box rather than by a digest gate after the pod has paid for
+        four candidate materializations.
+        """
+        q1 = B.arms(REPO)[0]
+        b = next(a for a in B.arms(REPO) if a.is_incumbent)
+        monkeypatch.setattr(B, "arms", lambda repo_root=REPO: (
+            B.Arm(arm_id="B", state_id=None,
+                  artifact_digest="f" * 64, quality_position=None,
+                  checkpoint_dir=None, role="incumbent",
+                  identities={**b.identities, "artifact_digest": "f" * 64},
+                  construction=b.construction),))
+        with pytest.raises(B.D1BehaviouralError,
+                           match="name different checkpoints"):
+            B.require_arms_present(REPO)
+        assert q1.identities  # the real field is non-empty, so the stub is apt
 
 
 class TestTheSeedsAreMaterializedNotChosen:

@@ -23,7 +23,7 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 IS FUNDED AND BLOCKED ONCE: incumbent identity -- the declared control arm is the arm C1 BEAT. NOTHING IS RUNNING. Owners: d1_design.json :: open_blockers, phase_d1/analyses/d1_control_arm_identity.json.",
+ "blocker": "D1 IS FUNDED AND BLOCKED NO TIMES, and PAUSED BEFORE BEHAVIOURAL SCREENING by maintainer instruction 2026-10-08: the control-arm defect is corrected and the arm-materialization pricing repaired. It resumes only after the repository information-architecture migration is independently reviewed. NOTHING IS RUNNING. Owners: d1_design.json, phase_d1/analyses/d1_control_arm_identity.json.",
  "branch": "prep/d1-funding-decision",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
@@ -73,17 +73,18 @@
   "stage_f": "PASS 2026-09-10, SHA 7027a8f4, RTX 2000 Ada; the device repair is CONFIRMED ON REAL CUDA. $0.0400, CLOSED. Owner: logs/stages/stage-1/phase_c1/validations/cuda-stage-f/"
  },
  "d_series": {
-  "a3_precondition": "MET, ownership closed, ACCEPTED on review. Owner: d1_design.json.",
   "authorizes": "nothing",
-  "behavioural_design": "Top-K CANDIDATES 2 (not the KL vocabulary K) / 2 screening / 3 confirmation seeds. Owner: d1_design.json.",
-  "blockers": "ONE OPEN: incumbent identity, derived by phase_d_series/incumbent.py. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
+  "behavioural_design": "Top-4 candidates / 2 screening seeds / 3 confirmation seeds = 10 + 6 probes over 5 and 2 arms. Owner: d1_design.json.",
+  "behavioural_pricing": "screening $25.0053, confirmation $15.2025, chain $61.6975. Arm materialization became a PER-ARM term 2026-10-08 (22.0 min, containing the campaign's measured 16.05 and 21.34); it had been one rebuild in the fixed overhead. Owner: d1_design.json :: budget.chain.",
+  "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
   "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
-  "execution_wiring": "SEARCH complete, verified at $0. SCREENING: contract, seeds, battery role, scorer, ranking, driver verify at $0; launcher, issuer, sweep contract do NOT exist. Owner: d1_design.json.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED from a clean tree (29f99b9a). Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "execution_wiring": "SEARCH complete, verified at $0. SCREENING built and PAUSED: field, schedule, seeds, battery role, scorer, ranking, driver verify at $0. Launcher, issuer, sweep contract and execution preregistration do NOT exist. Owner: d1_design.json.",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "scoring_identity": "bound in scoring/content.py and folded into one measurement_protocol_id. The distribution support is an OPTIONAL term, absent under the historical full-vocab contract.",
-  "scoring_protocol": "reference_topk_tail_v1, K=200, reference-defined support + one K+1 tail bucket from the COMPLEMENT's logits. Carried by SearchConfig.distribution_support. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
-  "state": "D1 DESIGNED; its behavioural family built. D2 and D3 NOT STARTED."
+  "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "seeds": "REBOUND 2026-10-08 with the corrected design_hash, prospectively -- nothing measured. screening 614923639, 516448251; confirmation 396880939, 766527341, 1004399678. An execution preregistration hash-binding them is still owed.",
+  "state": "D1 PAUSED BEFORE BEHAVIOURAL SCREENING 2026-10-08; its search is complete and its family built. D2 and D3 NOT STARTED."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -127,7 +128,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "the first paid formal D1 search session. A run is PREPARED at $0 -- authorization, readiness and bundle bound, pre-provider chain verified, NO resource created. Owner: the run's governance/ dir.",
+ "next": "the repository information-architecture migration. D1 does NOT resume until that migration is independently reviewed; it is paused before behavioural screening with no authorization issued and no resource created.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "maintainer launch review of the prepared run named in `next`, then the launcher. The chain is verified at $0 and no provider resource exists.",
@@ -193,7 +194,7 @@
  },
  "prepared_launch": {
   "any": false,
-  "note": "No chain is prepared and none may be built for C3: the measurement completed and returned NO_GO, which ends formal execution for this round.",
+  "note": "No chain is prepared and none may be built: D1 is PAUSED BEFORE BEHAVIOURAL SCREENING by maintainer instruction 2026-10-08, pending the repository information-architecture migration.",
   "run": null
  },
  "read_order": [

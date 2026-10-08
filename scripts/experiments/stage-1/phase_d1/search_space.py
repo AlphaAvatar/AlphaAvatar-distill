@@ -160,15 +160,43 @@ PROBE_MINUTES: dict[str, float] = {
     "eval_max": 27.633,
 }
 
-#: Stage overheads a behavioural session pays once, from C3's own component
-#: table: setup, gates, the parent replay that proves the incumbent rebuilds,
-#: and the decide/bootstrap/closeout tail.
+#: Stage overheads a behavioural session pays ONCE, from C3's own component
+#: table: setup, gates and the decide/bootstrap/closeout tail.
+#:
+#: `parent_replay_and_incumbent_rebuild: 22.0` used to sit here, and that is the
+#: defect this split repairs. It is not a fixed session overhead -- it is the
+#: cost of materializing ONE arm, which is what C3 needed because C3 had one
+#: arm to rebuild. D1 screening has FIVE: four candidates and the incumbent.
+#: Left in the overhead, the priced screening session funded a fifth of the arm
+#: materialization it requires. See `ARM_MATERIALIZATION_MINUTES`.
 BEHAVIOURAL_SESSION_MINUTES: tuple[tuple[str, float], ...] = (
     ("setup", 45.0),
     ("machine_gates", 22.0),
-    ("parent_replay_and_incumbent_rebuild", 22.0),
     ("decide_bootstrap_closeout", 15.0),
 )
+
+#: BOUNDED minutes to materialize ONE arm on the pod along its digest-pinned
+#: fixed path, and it is per ARM rather than per session for the reason above.
+#:
+#: Why the arms are built on the pod rather than shipped: a 1.19 GiB checkpoint
+#: fits neither transport. `local_assets` go by scp with a hardcoded 600 s
+#: per-asset timeout against a dev-box uplink measured at 0.44-0.79 MB/s, and
+#: the hub relay has roughly 1.756 GiB of private-storage headroom against five
+#: arms. Phase-C2's behavioural session reached the same conclusion for its six.
+#:
+#: 22.0 is C3's own component figure for exactly this operation, and the D1
+#: finalist rematerialization campaign then MEASURED two of these four candidate
+#: paths end to end on the same L40S: 963.2 s (16.05 min) and 1280.3 s
+#: (21.34 min), both inside it. The campaign's figure is the better evidence and
+#: C3's is the bound that contains it, so the bound is what is priced -- a
+#: ceiling built on the better of two measurements is not a ceiling.
+#:
+#: The search's own worst-per-implementation table would charge 43.61 min a leaf
+#: (174.44 for four), because it is dominated by DEPTH's worst observation,
+#: which was at the ROOT. All four candidate paths run DEPTH at a non-root
+#: position, which is why the two measured leaves came in at less than half of
+#: it. That table remains correct for pricing a SEARCH and overstates this.
+ARM_MATERIALIZATION_MINUTES = 22.0
 
 #: Hard-ceiling multiplier on the train+eval block, C3's own figure.
 TRAIN_EVAL_OVERRUN_FACTOR = 1.3
@@ -342,32 +370,61 @@ def search_cost(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED,
     }
 
 
-def behavioural_cost(*, n_probes: int,
+def behavioural_cost(*, n_probes: int, n_arms: int,
                      price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED,
                      container_disk_gb: int = 120) -> dict[str, Any]:
     """Minutes and dollars for a behavioural session of ``n_probes`` probes.
 
     `n_probes` is an ARGUMENT, not a constant: how many probes there are is the
     design's decision and it is made in the plan against the evidence, not here.
+
+    `n_arms` is an argument for the same reason and is REQUIRED rather than
+    defaulted. It drives the arm-materialization term, and every arm's bytes
+    have to exist on the pod before any probe can train from them. A default of
+    1 would have reproduced the exact defect this parameter repairs -- a
+    screening session priced for one materialization and needing five -- while
+    looking like it had been considered.
+
+    The two counts are independent: screening is 5 arms x 2 seeds and
+    confirmation is 2 arms x 3 seeds, so neither can be derived from the other.
     """
     if n_probes < 1:
         raise D1SpaceError(f"a behavioural session needs probes, got {n_probes}")
+    if n_arms < 1:
+        raise D1SpaceError(
+            f"a behavioural session needs arms, got {n_arms}; a probe trains "
+            "from an arm's checkpoint and those bytes do not exist on the pod "
+            "until the arm is materialized")
     per_probe = PROBE_MINUTES["train_max"] + PROBE_MINUTES["eval_max"]
     probe_minutes = round(per_probe * n_probes, 2)
+    #: NOT inside `session_overhead_minutes`: it scales with the arm count and
+    #: a term that scales does not belong in a fixed overhead. See
+    #: `ARM_MATERIALIZATION_MINUTES`.
+    materialization_minutes = round(ARM_MATERIALIZATION_MINUTES * n_arms, 2)
     overhead = sum(minutes for _, minutes in BEHAVIOURAL_SESSION_MINUTES)
-    expected_minutes = round(probe_minutes + overhead, 2)
-    hard_minutes = round(probe_minutes * TRAIN_EVAL_OVERRUN_FACTOR + overhead, 2)
+    fixed = round(overhead + materialization_minutes, 2)
+    expected_minutes = round(probe_minutes + fixed, 2)
+    #: The overrun factor applies to the TRAIN+EVAL block only, which is what
+    #: C3 measured it on. Materialization is a digest-pinned replay whose cost
+    #: is already carried at a bound, so multiplying it again would be charging
+    #: a contingency on a worst case.
+    hard_minutes = round(probe_minutes * TRAIN_EVAL_OVERRUN_FACTOR + fixed, 2)
     gpu = round(hard_minutes / 60.0 * price_per_hour, 4)
     disk = round(hard_minutes / 60.0 * container_disk_gb
                  * DISK_USD_PER_GB_MONTH / HOURS_PER_MONTH, 4)
     return {
         "n_probes": n_probes,
+        "n_arms": n_arms,
         "minutes_per_probe_bounding": round(per_probe, 3),
         "probe_minutes": probe_minutes,
+        "minutes_per_arm_materialization": ARM_MATERIALIZATION_MINUTES,
+        "arm_materialization_minutes": materialization_minutes,
         "session_overhead_minutes": overhead,
+        "fixed_minutes": fixed,
         "expected_minutes": expected_minutes,
         "hard_ceiling_minutes": hard_minutes,
         "overrun_factor": TRAIN_EVAL_OVERRUN_FACTOR,
+        "_overrun_factor_applies_to": "the train+eval block only",
         "price_per_hour": price_per_hour,
         "gpu_usd": gpu,
         "container_disk_gb": container_disk_gb,
@@ -377,6 +434,7 @@ def behavioural_cost(*, n_probes: int,
 
 
 def chain_cost(*, screening_probes: int, confirmation_probes: int,
+               screening_arms: int, confirmation_arms: int,
                price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED,
                ) -> dict[str, Any]:
     """The complete D1 chain: search, then screening, then confirmation.
@@ -384,11 +442,17 @@ def chain_cost(*, screening_probes: int, confirmation_probes: int,
     THREE SESSIONS, priced separately and summed, because that is how they are
     authorized and because a search that commits its candidate set stops — the
     behavioural rungs cannot be bound until the set it produced exists.
+
+    The arm counts are passed in rather than derived from the probe counts: the
+    two rungs have different shapes (5 arms x 2 seeds against 2 arms x 3 seeds),
+    so a rung's probe count determines neither its arms nor its seeds.
     """
     search = search_cost(price_per_hour=price_per_hour)
     screening = behavioural_cost(n_probes=screening_probes,
+                                 n_arms=screening_arms,
                                  price_per_hour=price_per_hour)
     confirmation = behavioural_cost(n_probes=confirmation_probes,
+                                    n_arms=confirmation_arms,
                                     price_per_hour=price_per_hour)
     sessions = {"search": search, "screening": screening,
                 "confirmation": confirmation}
@@ -440,15 +504,24 @@ def designs(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED
         #: `top_k + 1` arms per screening seed: the candidates plus the incumbent
         #: anchor, which is never an advancing candidate and is re-measured on
         #: the screening battery so the ranking is paired.
-        screening_probes = (top_k + 1) * screen_seeds if screen_seeds else 0
-        confirmation_probes = 2 * 3            # one candidate + B, three seeds
+        #: THE ARM COUNTS, named rather than folded into the probe arithmetic,
+        #: because each arm's checkpoint has to be materialized on the pod
+        #: before any probe can train from it and that cost scales with arms
+        #: rather than with probes.
+        screening_arms = top_k + 1 if screen_seeds else 0
+        confirmation_arms = 2                  # one candidate + B
+        screening_probes = screening_arms * screen_seeds if screen_seeds else 0
+        confirmation_probes = confirmation_arms * 3          # three seeds
         cost = chain_cost(screening_probes=max(screening_probes, 0),
                           confirmation_probes=confirmation_probes,
+                          screening_arms=screening_arms,
+                          confirmation_arms=confirmation_arms,
                           price_per_hour=price_per_hour) \
             if screening_probes else None
         if cost is None:
             search = search_cost(price_per_hour=price_per_hour)
             confirmation = behavioural_cost(n_probes=confirmation_probes,
+                                            n_arms=confirmation_arms,
                                             price_per_hour=price_per_hour)
             cost = {"sessions": {"search": search,
                                  "confirmation": confirmation},
@@ -458,6 +531,8 @@ def designs(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED
         out.append({
             "top_k": top_k,
             "screening_seeds": screen_seeds,
+            "screening_arms": screening_arms,
+            "confirmation_arms": confirmation_arms,
             "screening_probes": screening_probes,
             "confirmation_probes": confirmation_probes,
             "total_probes": cost["total_probes"],

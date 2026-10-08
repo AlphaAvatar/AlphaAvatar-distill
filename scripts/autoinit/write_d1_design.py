@@ -67,10 +67,67 @@ D_SERIES_FAMILY = "logs/shared/analyses/autoinit_d_series_battery_family.json"
 D_SERIES_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
 BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
 
-#: The incumbent the comparison is against, carried forward from C1. C2 closed
-#: without promotion and C3 returned NO_GO, so B still stands.
-INCUMBENT_STATE_ID = "fe9683e6a9c783bbc6fe276a78c851c6"
-INCUMBENT_DIGEST = "c313d1b4081b"
+#: THE INCUMBENT IS DERIVED, NOT TYPED. MAINTAINER DECISION 2026-10-08.
+#:
+#: These were hand-typed as `fe9683e6a9c783bbc6fe276a78c851c6` / `c313d1b4081b`
+#: for the whole of D1's design and search. That is C1's INCUMBENT arm,
+#: `attention.weight_proxy_v0` -- the arm C1 measured and BEAT. C1 returned GO
+#: at +0.013725 against a SESOI of 0.010, so the checkpoint that stands is C1's
+#: TREATMENT, `53e30566...`, exactly as `phase_c2.baseline.B_ARTIFACT_DIGEST`
+#: and the C3 stage-E gate have said all along.
+#:
+#: The error was larger than its subject: C1's delta between the two arms
+#: EXCEEDS the SESOI the D1 decision rule tests against, so a candidate measured
+#: against the beaten arm is credited with more than the amount that decides --
+#: identically for every arm. Owner of the finding:
+#: `logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json`.
+#:
+#: So nothing here states the identity. `standing_incumbent()` derives it from
+#: C1's recorded verdict and C1's MEASURED arm identities, which is the only
+#: form that cannot go stale: if a later round promotes something else, the
+#: answer moves because the record moved.
+def incumbent() -> dict[str, Any]:
+    """The arm every D-series round challenges, DERIVED from C1's verdict.
+
+    The promoted arm was built as a FIXED PATH and has no search state id --
+    `c1_arm_identities.json` records `state_id: null` for it -- so the block
+    carries the four CONTENT identities instead. A round that keyed its control
+    on a state id would be keying on something the promoted arm does not have.
+    """
+    from experiments.phase_d_series.incumbent import (
+        IDENTITY_FIELDS, standing_incumbent,
+    )
+
+    standing = standing_incumbent(REPO)
+    return {
+        "label": "B",
+        #: null, and that is a fact about the arm rather than a gap. See the
+        #: docstring: a fixed-path arm has no search state id.
+        "state_id": standing.get("state_id"),
+        **{f: standing[f] for f in IDENTITY_FIELDS},
+        "c1_arm": standing["c1_arm"],
+        "impl_id": standing["impl_id"],
+        "profile_id": standing["profile_id"],
+        "num_parameters": standing["num_parameters"],
+        "config_sha256": standing["config_sha256"],
+        "_what_it_is": (
+            "B, the frozen C1 TREATMENT -- the arm C1's GO verdict promoted. C2 "
+            "closed without promotion and C3 returned NO_GO, so B still stands."),
+        "_derived_not_declared": (
+            "from C1's recorded verdict and C1's measured arm identities, by "
+            "scripts/experiments/stage-1/phase_d_series/incumbent.py. This "
+            "block was hand-typed until 2026-10-08 and named the arm C1 BEAT; "
+            "see logs/stages/stage-1/phase_d1/analyses/"
+            "d1_control_arm_identity.json."),
+        "_how_it_reaches_a_pod": (
+            "materialized ON THE POD from its frozen construction spec -- "
+            "`phase_c2.baseline.frozen_baseline_spec`, the one owner of that "
+            "construction -- because a fixed-path arm has no state-id directory "
+            "and a 1.19 GiB checkpoint fits neither transport to a pod."),
+        "_not_recovered": (
+            "B is an INITIALIZATION. No formal Stage-2/Stage-3 recovery "
+            "evidence exists for it or for anything else."),
+    }
 
 #: The recovery recipe every behavioural probe uses, unchanged from C1/C2/C3 so
 #: a D1 delta is comparable with the deltas those rounds measured.
@@ -676,6 +733,18 @@ def behavioural_design() -> dict[str, Any]:
         "confirmation_seeds": D1_CONFIRMATION_SEEDS,
         "screening_probes": chosen["screening_probes"],
         "confirmation_probes": chosen["confirmation_probes"],
+        #: THE ARM COUNTS. Carried because every arm's checkpoint must be
+        #: materialized on the pod before any probe can train from it, and that
+        #: cost scales with ARMS rather than with probes -- it sat inside a
+        #: fixed session overhead as one rebuild until 2026-10-08, so the
+        #: screening session was priced for a fifth of the work it requires.
+        #:
+        #: Not in `SCIENTIFIC_BEHAVIOURAL`: `screening_arms` is `top_k + 1` and
+        #: `top_k` is hashed, so the identity already covers it. A derived
+        #: quantity in a hash preimage adds nothing and is one more thing to
+        #: keep in step.
+        "screening_arms": chosen["screening_arms"],
+        "confirmation_arms": chosen["confirmation_arms"],
         "total_probes": chosen["total_probes"],
         "screening_estimate_inflation": chosen["screening_estimate_inflation"],
         "advance_probability": chosen["advance_probability"],
@@ -1691,11 +1760,15 @@ def budget() -> dict[str, Any]:
         with _measured_cost_model(_rebuilt_cost_model()):
             chain = d1.chain_cost(
                 screening_probes=design["screening_probes"],
-                confirmation_probes=design["confirmation_probes"])
+                confirmation_probes=design["confirmation_probes"],
+                screening_arms=design["screening_arms"],
+                confirmation_arms=design["confirmation_arms"])
     else:
         chain = d1.chain_cost(
             screening_probes=design["screening_probes"],
-            confirmation_probes=design["confirmation_probes"])
+            confirmation_probes=design["confirmation_probes"],
+            screening_arms=design["screening_arms"],
+            confirmation_arms=design["confirmation_arms"])
     terms = _load(BUDGET_TERMS)["execution_package"]
     pricing = _load(BUDGET_TERMS)["accepted_pricing"]
     live = _derived_budget()
@@ -1884,25 +1957,40 @@ BLOCKER_SPECS: tuple[tuple[str, str], ...] = (
     ("funding authorization", "budget.BLOCKER"),
     ("per-session envelope", "budget._SECOND_BLOCKER_THE_PER_SESSION_CEILING"),
     #: A FOURTH, and it is the only one about the SCIENCE rather than the money
-    #: or the evidence supply. `INCUMBENT_STATE_ID`/`INCUMBENT_DIGEST` above are
-    #: hand-typed and they name C1's INCUMBENT arm -- `attention.weight_proxy_v0`
-    #: at `c313d1b4` -- which is the arm C1 measured and BEAT. C1's verdict was
-    #: GO at +0.013725 against a SESOI of 0.010, so the checkpoint that stands
-    #: is C1's TREATMENT at `53e30566`, and C2's four frozen B constants and
-    #: C3's stage-E gate both say so.
+    #: or the evidence supply.
     #:
-    #: Open while the two disagree, because the consequence is not cosmetic: a
-    #: D1 candidate measured against `c313d1b4` carries C1's already-banked
-    #: effect on top of its own, and that effect is LARGER than the SESOI the
-    #: decision rule tests against. Every candidate would look better than it
-    #: is, by more than the amount that decides.
+    #: The design's control identity was HAND-TYPED until 2026-10-08 and named
+    #: C1's INCUMBENT arm -- `attention.weight_proxy_v0` at `c313d1b4` -- which
+    #: is the arm C1 measured and BEAT. C1 returned GO at +0.013725 against a
+    #: SESOI of 0.010, so the checkpoint that stands is C1's TREATMENT at
+    #: `53e30566`, and C2's four frozen B constants and C3's stage-E gate both
+    #: said so throughout. The consequence was not cosmetic: a candidate
+    #: measured against the beaten arm carries C1's already-banked effect on top
+    #: of its own, and that effect is LARGER than the SESOI the decision rule
+    #: tests against -- every candidate looks better than it is, by more than
+    #: the amount that decides.
+    #:
+    #: CORRECTED on the maintainer decision of 2026-10-08, and the blocker is
+    #: KEPT rather than deleted. `incumbent()` now derives the identity, so this
+    #: check compares a derivation against the same derivation and should stay
+    #: closed -- which is exactly why it is worth leaving armed: it is the thing
+    #: that would notice if the design ever went back to stating the identity,
+    #: or if a later round promoted something else and this document did not
+    #: follow.
     ("incumbent identity", "phase_d_series.incumbent.standing_incumbent"),
 )
 
 
 def declared_incumbent() -> dict[str, Any]:
-    """What this design declares its control arm to be. The typed constants."""
-    return {"state_id": INCUMBENT_STATE_ID, "artifact_digest": INCUMBENT_DIGEST}
+    """What this design declares its control arm to be.
+
+    Read from the emitted block rather than from constants, because there are
+    no constants any more: `incumbent()` derives it. Kept as a separate
+    function so `incumbent_identity_check` compares the DOCUMENT against the
+    owner rather than comparing the owner with itself -- a committed design can
+    be edited after it is written, and the check should notice.
+    """
+    return {k: v for k, v in incumbent().items() if not k.startswith("_")}
 
 
 def incumbent_identity_check() -> dict[str, Any]:
@@ -2153,14 +2241,7 @@ def build() -> dict[str, Any]:
             "trains are the measuring instrument for that question, not the "
             "subject."),
         "status": f"DESIGNED / NOT AUTHORIZED / BLOCKED -- {phrase}",
-        "incumbent": {"state_id": INCUMBENT_STATE_ID,
-                      "artifact_digest": INCUMBENT_DIGEST,
-                      "_what_it_is": "B, the frozen C1 treatment. C2 closed "
-                                     "without promotion and C3 returned NO_GO, "
-                                     "so B still stands.",
-                      "_not_recovered": "B is an INITIALIZATION. No formal "
-                                        "Stage-2/Stage-3 recovery evidence "
-                                        "exists for it or for anything else."},
+        "incumbent": incumbent(),
         "recovery_recipe": RECOVERY_RECIPE,
         "hypothesis": hypothesis(),
         "scoring_policy": scoring_policy(),

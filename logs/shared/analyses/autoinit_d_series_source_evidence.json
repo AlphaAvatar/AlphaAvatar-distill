@@ -178,6 +178,14 @@
        "resembles_consumed_task_id": 145
       },
       {
+       "candidate_problem": "Write a function to find the difference of first even and odd number of a given list.",
+       "candidate_task_id": 594,
+       "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
+       "identical_problem_text": false,
+       "jaccard": 0.875,
+       "resembles_consumed_task_id": 38
+      },
+      {
        "candidate_problem": "Write a function to find the product of first even and odd number of a given list.",
        "candidate_task_id": 784,
        "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
@@ -218,20 +226,12 @@
        "resembles_consumed_task_id": 38
       },
       {
-       "candidate_problem": "Write a function to find the difference of first even and odd number of a given list.",
-       "candidate_task_id": 594,
-       "consumed_problem": "Write a function to find the division of first even and odd number of a given list.",
-       "identical_problem_text": false,
-       "jaccard": 0.875,
-       "resembles_consumed_task_id": 38
-      },
-      {
-       "candidate_problem": "Write a python function to find the sum of non-repeated elements in a given array.",
-       "candidate_task_id": 777,
-       "consumed_problem": "Write a python function to find the product of non-repeated elements in a given array.",
+       "candidate_problem": "Write a function to find squares of individual elements in a list using lambda function.",
+       "candidate_task_id": 8,
+       "consumed_problem": "Write a function to find cubes of individual elements in a list using lambda function.",
        "identical_problem_text": false,
        "jaccard": 0.8667,
-       "resembles_consumed_task_id": 25
+       "resembles_consumed_task_id": 447
       },
       {
        "candidate_problem": "Write a function to find the ration of negative numbers in an array of integers.",
@@ -242,28 +242,12 @@
        "resembles_consumed_task_id": 442
       },
       {
-       "candidate_problem": "Write a function to find squares of individual elements in a list using lambda function.",
-       "candidate_task_id": 8,
-       "consumed_problem": "Write a function to find cubes of individual elements in a list using lambda function.",
+       "candidate_problem": "Write a python function to find the sum of non-repeated elements in a given array.",
+       "candidate_task_id": 777,
+       "consumed_problem": "Write a python function to find the product of non-repeated elements in a given array.",
        "identical_problem_text": false,
        "jaccard": 0.8667,
-       "resembles_consumed_task_id": 447
-      },
-      {
-       "candidate_problem": "Write a python function to count the number of digits in factorial of a given number.",
-       "candidate_task_id": 845,
-       "consumed_problem": "Write a python function to count the number of digits of a given number.",
-       "identical_problem_text": false,
-       "jaccard": 0.8571,
-       "resembles_consumed_task_id": 365
-      },
-      {
-       "candidate_problem": "Write a function to find the minimum total path sum in the given triangle.",
-       "candidate_task_id": 974,
-       "consumed_problem": "Write a function to find the maximum total path sum in the given triangle.",
-       "identical_problem_text": false,
-       "jaccard": 0.8571,
-       "resembles_consumed_task_id": 147
+       "resembles_consumed_task_id": 25
       },
       {
        "candidate_problem": "Write a function to print check if the triangle is scalene or not.",
@@ -290,6 +274,30 @@
        "resembles_consumed_task_id": 179
       },
       {
+       "candidate_problem": "Write a python function to count the number of digits in factorial of a given number.",
+       "candidate_task_id": 845,
+       "consumed_problem": "Write a python function to count the number of digits of a given number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 365
+      },
+      {
+       "candidate_problem": "Write a function to find the minimum total path sum in the given triangle.",
+       "candidate_task_id": 974,
+       "consumed_problem": "Write a function to find the maximum total path sum in the given triangle.",
+       "identical_problem_text": false,
+       "jaccard": 0.8571,
+       "resembles_consumed_task_id": 147
+      },
+      {
+       "candidate_problem": "Write a function to find the list of lists with minimum length.",
+       "candidate_task_id": 528,
+       "consumed_problem": "Write a function to find the list of lists with maximum length.",
+       "identical_problem_text": false,
+       "jaccard": 0.8462,
+       "resembles_consumed_task_id": 290
+      },
+      {
        "candidate_problem": "Write a function to divide two lists using map and lambda function.",
        "candidate_task_id": 618,
        "consumed_problem": "Write a function to substaract two lists using map and lambda function.",
@@ -314,12 +322,20 @@
        "resembles_consumed_task_id": 282
       },
       {
-       "candidate_problem": "Write a function to find the list of lists with minimum length.",
-       "candidate_task_id": 528,
-       "consumed_problem": "Write a function to find the list of lists with maximum length.",
+       "candidate_problem": "Write a function to sort a list of elements using radix sort.",
+       "candidate_task_id": 516,
+       "consumed_problem": "Write a function to sort a list of elements using comb sort.",
        "identical_problem_text": false,
-       "jaccard": 0.8462,
-       "resembles_consumed_task_id": 290
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 71
+      },
+      {
+       "candidate_problem": "Write a python function to find the maximum length of sublist.",
+       "candidate_task_id": 562,
+       "consumed_problem": "Write a python function to find the minimum length of sublist.",
+       "identical_problem_text": false,
+       "jaccard": 0.8333,
+       "resembles_consumed_task_id": 95
       },
       {
        "candidate_problem": "Write a python function to set the right most unset bit.",
@@ -346,28 +362,20 @@
        "resembles_consumed_task_id": 90
       },
       {
-       "candidate_problem": "Write a function to sort a list of elements using radix sort.",
-       "candidate_task_id": 516,
-       "consumed_problem": "Write a function to sort a list of elements using comb sort.",
-       "identical_problem_text": false,
-       "jaccard": 0.8333,
-       "resembles_consumed_task_id": 71
-      },
-      {
-       "candidate_problem": "Write a python function to find the maximum length of sublist.",
-       "candidate_task_id": 562,
-       "consumed_problem": "Write a python function to find the minimum length of sublist.",
-       "identical_problem_text": false,
-       "jaccard": 0.8333,
-       "resembles_consumed_task_id": 95
-      },
-      {
        "candidate_problem": "Write a python function to find the sum of fourth power of first n even natural numbers.",
        "candidate_task_id": 634,
        "consumed_problem": "Write a python function to find the cube sum of first n even natural numbers.",
        "identical_problem_text": false,
        "jaccard": 0.8235,
        "resembles_consumed_task_id": 420
+      },
+      {
+       "candidate_problem": "Write a function to find the surface area of a cylinder.",
+       "candidate_task_id": 574,
+       "consumed_problem": "Write a function to find the surface area of a cone.",
+       "identical_problem_text": false,
+       "jaccard": 0.8182,
+       "resembles_consumed_task_id": 497
       },
       {
        "candidate_problem": "Write a function to calculate the perimeter of a regular polygon.",
@@ -378,19 +386,27 @@
        "resembles_consumed_task_id": 163
       },
       {
-       "candidate_problem": "Write a function to find the surface area of a cylinder.",
-       "candidate_task_id": 574,
-       "consumed_problem": "Write a function to find the surface area of a cuboid.",
-       "identical_problem_text": false,
-       "jaccard": 0.8182,
-       "resembles_consumed_task_id": 379
-      },
-      {
        "candidate_problem": "Write a python function to check whether the given number is a perfect square or not.",
        "candidate_task_id": 803,
        "consumed_problem": "Write a python function to check whether the given number is co-prime or not.",
        "identical_problem_text": false,
        "jaccard": 0.8125,
+       "resembles_consumed_task_id": 151
+      },
+      {
+       "candidate_problem": "Write a function to find the nth jacobsthal-lucas number.",
+       "candidate_task_id": 529,
+       "consumed_problem": "Write a function to find the nth hexagonal number.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
+       "resembles_consumed_task_id": 135
+      },
+      {
+       "candidate_problem": "Write a function to check whether the given number is armstrong or not.",
+       "candidate_task_id": 598,
+       "consumed_problem": "Write a python function to check whether the given number is co-prime or not.",
+       "identical_problem_text": false,
+       "jaccard": 0.8,
        "resembles_consumed_task_id": 151
       },
       {
@@ -428,10 +444,10 @@
       {
        "candidate_problem": "Write a function to find the perimeter of a rombus.",
        "candidate_task_id": 716,
-       "consumed_problem": "Write a function to find the perimeter of a square.",
+       "consumed_problem": "Write a function to find the perimeter of a pentagon.",
        "identical_problem_text": false,
        "jaccard": 0.8,
-       "resembles_consumed_task_id": 17
+       "resembles_consumed_task_id": 171
       },
       {
        "candidate_problem": "Write a function to find the nth jacobsthal number.",
@@ -472,22 +488,6 @@
        "identical_problem_text": false,
        "jaccard": 0.8,
        "resembles_consumed_task_id": 227
-      },
-      {
-       "candidate_problem": "Write a function to find the nth jacobsthal-lucas number.",
-       "candidate_task_id": 529,
-       "consumed_problem": "Write a function to find the nth hexagonal number.",
-       "identical_problem_text": false,
-       "jaccard": 0.8,
-       "resembles_consumed_task_id": 135
-      },
-      {
-       "candidate_problem": "Write a function to check whether the given number is armstrong or not.",
-       "candidate_task_id": 598,
-       "consumed_problem": "Write a python function to check whether the given number is co-prime or not.",
-       "identical_problem_text": false,
-       "jaccard": 0.8,
-       "resembles_consumed_task_id": 151
       }
      ]
     },
@@ -580,7 +580,7 @@
     "compared": 474,
     "exact_matches": 0,
     "highest": 0.8333,
-    "with_any_neighbour": 378
+    "with_any_neighbour": 379
    },
    "pinned_file_in_use": "full/test-00000-of-00001.parquet",
    "renderer": {
@@ -782,7 +782,7 @@
     "compared": 7473,
     "exact_matches": 0,
     "highest": 0.9651,
-    "with_any_neighbour": 6483
+    "with_any_neighbour": 6443
    },
    "pinned_file_in_use": "main/test-00000-of-00001.parquet",
    "renderer": {

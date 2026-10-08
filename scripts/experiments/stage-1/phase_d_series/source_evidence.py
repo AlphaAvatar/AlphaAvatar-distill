@@ -868,15 +868,32 @@ def near_duplicate_screen(candidates: list[str], reserved: set[str],
     numbers and names in a word problem, say -- is invisible to it. The
     thresholds below are descriptive and are NOT acceptance criteria.
     """
+    #: SORTED, and the keys below are PAIRS, because this screen was
+    #: hash-seed dependent and therefore unregenerable.
+    #:
+    #: `reserved` is a set and `t` a frozenset, so `sorted(t, key=df.__getitem__)`
+    #: breaks ties in document frequency by the set's ITERATION order -- which
+    #: PYTHONHASHSEED decides. Different seeds indexed and queried different
+    #: "rarest" tokens, so different candidates were compared at all:
+    #: `with_any_neighbour` measured 375 at one seed and 377 at another, and
+    #: `test_it_regenerates_identically` could only pass when the ambient seed
+    #: happened to match the one in use when the record was last written.
+    #:
+    #: `(df[w], w)` is a total order over the tokens, and iterating `reserved`
+    #: in sorted order makes `tokens` insertion-stable, so the index is built
+    #: the same way every time. The screen's VALUES move once, to the ones a
+    #: total order produces; it is descriptive and not an acceptance criterion,
+    #: and a descriptive number that changes with an environment variable is
+    #: not a measurement of anything.
     df: collections.Counter = collections.Counter()
     tokens = {}
-    for s in reserved:
+    for s in sorted(reserved):
         t = frozenset(s.split())
         tokens[s] = t
         df.update(t)
     index: dict[str, list[str]] = collections.defaultdict(list)
     for s, t in tokens.items():
-        for w in sorted(t, key=lambda w: df[w])[:rare_tokens]:
+        for w in sorted(t, key=lambda w: (df[w], w))[:rare_tokens]:
             index[w].append(s)
 
     exact = 0
@@ -888,7 +905,7 @@ def near_duplicate_screen(candidates: list[str], reserved: set[str],
         tq = frozenset(q.split())
         seen: set[str] = set()
         best = 0.0
-        for w in sorted(tq, key=lambda w: df.get(w, 0))[:rare_tokens]:
+        for w in sorted(tq, key=lambda w: (df.get(w, 0), w))[:rare_tokens]:
             for c in index.get(w, ()):
                 if c in seen:
                     continue
@@ -952,12 +969,29 @@ def bare_problem_screen(group: str, cand_rows: list[dict]) -> dict[str, Any] | N
     #: to rule on before the source is frozen, with the reserved problem it
     #: resembles and the native ids of both so the pair can be read side by side.
     #: `REVIEW_TRIGGER_JACCARD` selects what gets looked at; it decides nothing.
-    by_hash = {norm(pinned[k][field]): k for k in keys if k in pinned}
+    #: SORTED, twice, and for two distinct reasons -- this list was hash-seed
+    #: dependent and a review surface that names a different partner on every
+    #: run is not reviewable.
+    #:
+    #: `keys` is a set, so when two consumed task ids normalise to the SAME
+    #: problem text the last writer won and WHICH one won was decided by
+    #: PYTHONHASHSEED. And the scan below takes the first strict maximum, so
+    #: among equally-similar partners it returned whichever the dict happened
+    #: to yield first: `resembles_consumed_task_id` for one candidate came back
+    #: as 17 at one seed and 458 at another, naming two different prompts as
+    #: "the problem it resembles".
+    #:
+    #: Building from `sorted(keys)` makes the collision resolution defined, and
+    #: scanning `sorted(by_hash.items())` makes the tie go to the
+    #: lexicographically first problem text. Neither is more correct as a
+    #: similarity judgement -- the point is that there IS an answer, and that a
+    #: human ruling recorded against this list still describes it tomorrow.
+    by_hash = {norm(pinned[k][field]): k for k in sorted(keys) if k in pinned}
     pairs = []
     for row, q in zip(cand_rows, cand_norm):
         hi, partner = 0.0, None
         tq = frozenset(q.split())
-        for text, key in by_hash.items():
+        for text, key in sorted(by_hash.items()):
             tr = frozenset(text.split())
             j = len(tq & tr) / max(1, len(tq | tr))
             if j > hi:
@@ -971,7 +1005,11 @@ def bare_problem_screen(group: str, cand_rows: list[dict]) -> dict[str, Any] | N
                 "jaccard": round(hi, 4),
                 "identical_problem_text": hi == 1.0,
             })
-    pairs.sort(key=lambda d: -d["jaccard"])
+    #: A TOTAL ORDER. `-jaccard` alone leaves ties in the input order, which is
+    #: `cand_rows` and is deterministic today -- but the sort key is where a
+    #: future unordered input would surface as a reordered record, so the tie
+    #: is broken on the candidate's own id rather than on how it arrived.
+    pairs.sort(key=lambda d: (-d["jaccard"], d["candidate_task_id"]))
     screen["review_list"] = {
         "_what": (
             f"candidates at Jaccard >= {REVIEW_TRIGGER_JACCARD} against a "

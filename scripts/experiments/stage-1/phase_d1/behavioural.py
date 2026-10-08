@@ -39,7 +39,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Mapping, Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -61,18 +61,37 @@ FROZEN_STRATA: dict[str, int] = {
     "multihop": 150, "rag": 150, "tool": 100,
 }
 
-#: Where each arm's identity-verified bytes live on the development host. The
-#: search secured q1 and q3 itself; q2 and q4 were rematerialized and verified
-#: three times (on the pod against each step's pin, on arrival, and again
-#: here). B is C1's frozen treatment, still standing after C2 closed without
-#: promotion and C3 returned NO_GO.
+#: Where each CANDIDATE's identity-verified bytes live on the development host.
+#: The search secured q1 and q3 itself; q2 and q4 were rematerialized and
+#: verified three times (on the pod against each step's pin, on arrival, and
+#: again here).
+#:
+#: B IS DELIBERATELY ABSENT. The standing incumbent is C1's promoted treatment,
+#: which was built as a FIXED PATH and has no search state id, so there is no
+#: state-id directory to name -- and its bytes are not on this host at all. It
+#: is materialized on the pod from its frozen construction spec; see
+#: `INCUMBENT_CONSTRUCTION`. An entry here would be a path that cannot exist.
 ARM_SOURCES: dict[str, str] = {
     "q1": "/home/ecs-user/aad-scratch/d1_search_20261006_210210/products",
     "q3": "/home/ecs-user/aad-scratch/d1_search_20261006_210210/products",
     "q2": "/home/ecs-user/aad-scratch/d1_replay_002/products",
     "q4": "/home/ecs-user/aad-scratch/d1_replay_002/products",
-    "B": "/home/ecs-user/aad-artifacts/autoinit/phase_a",
 }
+
+#: HOW B REACHES A POD, and it is the same answer for every arm in the end.
+#:
+#: All five arms are materialized on the pod along digest-pinned paths, because
+#: a 1.19 GiB checkpoint fits neither transport: `local_assets` go by scp with a
+#: hardcoded 600 s per-asset timeout against a dev-box uplink measured at
+#: 0.44-0.79 MB/s, and the hub relay holds about 1.756 GiB of private-storage
+#: headroom. The candidates' local copies above are therefore EVIDENCE -- they
+#: are what the `$0` identity check reads -- and not the execution path.
+#:
+#: B's construction has ONE owner, `phase_c2.baseline.frozen_baseline_spec`:
+#: the same four-step fixed path C2's and C3's behavioural sessions rebuilt it
+#: from. A second copy of it here would be a second thing that can disagree
+#: about which checkpoint the incumbent is.
+INCUMBENT_CONSTRUCTION = "experiments.phase_c2.baseline.frozen_baseline_spec"
 
 
 class D1BehaviouralError(RuntimeError):
@@ -90,23 +109,41 @@ def _read(rel: str, repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 
 @dataclass(frozen=True)
 class Arm:
-    """One initialization under test, and where its verified bytes are.
+    """One initialization under test, and how its bytes are obtained.
 
     `quality_position` is `None` for the incumbent: B is not a candidate of the
     D1 search and has no position in its quality order. Conflating the two
     would make the incumbent look like a fifth candidate.
+
+    `state_id` and `checkpoint_dir` are `None` for the incumbent too, and both
+    for the same reason: the promoted arm was built as a FIXED PATH, so it has
+    no search state id and no state-id directory. `construction` names the spec
+    that builds it instead. Three `None`s describing one fact, rather than a
+    placeholder path that cannot exist.
     """
 
     arm_id: str
-    state_id: str
+    state_id: str | None
     artifact_digest: str
     quality_position: int | None
-    checkpoint_dir: str
+    checkpoint_dir: str | None
     role: str
+    #: The identities a consumer may bind this arm by. Four for the incumbent,
+    #: whose record carries all of them; the candidates' retention record
+    #: carries the same four and they are checked in `require_arms_present`.
+    identities: Mapping[str, str] = field(default_factory=dict)
+    #: Set only when the arm has no checkpoint directory: the dotted path of
+    #: the spec that constructs it on the pod.
+    construction: str | None = None
 
     @property
     def is_incumbent(self) -> bool:
         return self.role == "incumbent"
+
+    @property
+    def is_materialized_from_a_spec(self) -> bool:
+        """True when there are no bytes to read and a path must be replayed."""
+        return self.checkpoint_dir is None
 
 
 @dataclass(frozen=True)
@@ -255,22 +292,33 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
             raise D1BehaviouralError(
                 f"{arm_id} has no declared checkpoint source; a probe cannot "
                 "be trained from a checkpoint nobody can name")
-        out.append(Arm(arm_id=arm_id, state_id=member["state_id"],
-                       artifact_digest=member["artifact_digest"],
-                       quality_position=position,
-                       checkpoint_dir=str(Path(source) / member["state_id"]),
-                       role="candidate"))
+        out.append(Arm(
+            arm_id=arm_id, state_id=member["state_id"],
+            artifact_digest=member["artifact_digest"],
+            quality_position=position,
+            checkpoint_dir=str(Path(source) / member["state_id"]),
+            role="candidate",
+            #: All four, from the retention decision, so a consumer can bind
+            #: the arm by content and not only by its construction identity --
+            #: A3 showed two differing artifacts sharing one state id.
+            identities={k: member[k] for k in (
+                "artifact_digest", "weights_digest", "single_shard_sha256",
+                "arch_signature")}))
     incumbent = design(repo_root)["incumbent"]
-    #: THE CONTROL MUST BE THE ARM THAT ACTUALLY STANDS, and that is derived
-    #: from C1's verdict rather than read from a typed identity beside it.
+    #: THE CONTROL MUST BE THE ARM THAT ACTUALLY STANDS, and the check stays
+    #: armed even though the design now DERIVES it.
     #:
-    #: The design declared `fe9683e6` / `c313d1b4`, which is C1's
-    #: `attention.weight_proxy_v0` arm -- the arm C1 measured and BEAT. C1
+    #: The design stated `fe9683e6` / `c313d1b4` until 2026-10-08, which is
+    #: C1's `attention.weight_proxy_v0` arm -- the arm C1 measured and BEAT. C1
     #: returned GO at +0.013725 against a SESOI of 0.010, so a candidate
     #: measured against that arm inherits an effect LARGER than the amount the
     #: decision rule tests for: the error does not add noise, it manufactures a
-    #: GO. Refused here, where the field is assembled, so no rung can be built
-    #: against it whatever else is wired correctly.
+    #: GO. Corrected on the maintainer decision of 2026-10-08.
+    #:
+    #: Kept rather than deleted because the committed design is a FILE and the
+    #: derivation is code: this compares the document against the owner, so an
+    #: edited design or a later promotion that this document did not follow is
+    #: still refused here, where the field is assembled.
     from experiments.phase_d_series.incumbent import (
         disagreements, standing_incumbent,
     )
@@ -282,28 +330,25 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
             "the design's control arm is not the standing incumbent: "
             + "; ".join(differ)
             + f". {standing['selected_because']}, built by "
-            f"{standing['impl_id']} on {standing['profile_id']}. Correcting "
-            "which checkpoint B is changes the arms AND -- through "
-            "`design_hash` -- the derived seeds, so it is a maintainer "
-            "decision and not an autonomous repair.")
-    if not incumbent.get("state_id"):
-        #: The promoted arm was built as a FIXED PATH and `c1_arm_identities`
-        #: records `state_id: null` for it, so there is no search state id to
-        #: name a directory with. Its bytes are materialized on the pod from
-        #: the frozen construction spec, which is what C2's and C3's
-        #: behavioural sessions did and what their session overhead prices.
-        raise D1BehaviouralError(
-            "the standing incumbent has no search state_id -- it was built as "
-            "a fixed path -- so it cannot be sourced from a state-id directory "
-            "under ARM_SOURCES['B']. It is materialized on the pod from its "
-            "frozen construction spec; see `phase_c2.baseline."
-            "frozen_baseline_spec`, the one owner of that construction.")
+            f"{standing['impl_id']} on {standing['profile_id']}. Which "
+            "checkpoint B is changes the arms AND -- through `design_hash` -- "
+            "the derived seeds, so it is a maintainer decision and not an "
+            "autonomous repair.")
     out.append(Arm(
-        arm_id="B", state_id=incumbent["state_id"],
+        arm_id="B",
+        #: `None`, and that is the arm's own shape rather than a gap: a
+        #: fixed-path arm has no search state id.
+        state_id=incumbent.get("state_id"),
         artifact_digest=incumbent["artifact_digest"],
         quality_position=None,
-        checkpoint_dir=str(Path(ARM_SOURCES["B"]) / incumbent["state_id"]),
-        role="incumbent"))
+        #: No directory. Its bytes do not exist on this host and are built on
+        #: the pod from the spec named below.
+        checkpoint_dir=None,
+        role="incumbent",
+        identities={k: incumbent[k] for k in (
+            "artifact_digest", "weights_digest", "single_shard_sha256",
+            "arch_signature")},
+        construction=INCUMBENT_CONSTRUCTION))
     out.sort(key=lambda a: (a.is_incumbent, a.quality_position or 0))
     return tuple(out)
 
@@ -440,11 +485,27 @@ def roles_are_disjoint(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 
 
 def require_arms_present(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
-    """Every arm's bytes exist and carry the identity the frozen record names.
+    """Every arm is OBTAINABLE and carries the identity the frozen record names.
 
     At `$0`, before anything is priced. A probe trained from the wrong
     checkpoint is a measurement of something nobody asked about, and it costs
     its full training time to discover.
+
+    TWO KINDS OF ARM, two different questions, and conflating them is what the
+    second branch exists to prevent:
+
+    * a CANDIDATE has secured bytes on this host, so the question is whether
+      those bytes carry the recorded identity. Asked by hashing them.
+    * the INCUMBENT has none -- it was built as a fixed path and is rebuilt on
+      the pod -- so the question is whether the spec that will build it names
+      the identity the design binds. Asked of the spec, which allocates nothing
+      and loads no model.
+
+    What this does NOT claim about the incumbent: that the bytes it will
+    produce match. Nothing on a CPU box can claim that. The pod's digest gate
+    is what proves it, exactly as it did for C2's and C3's rebuilds of the same
+    path, and a check here that pretended otherwise would be the CPU rehearsal
+    AGENTS.md P8.2 warns about -- a more expensive way of learning nothing.
     """
     from aadistill.initialization.adapters import register_builtin_adapters
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
@@ -454,6 +515,18 @@ def require_arms_present(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     adapter = get_adapter("qwen3")
     out: list[dict[str, Any]] = []
     for arm in arms(repo_root):
+        #: AN ARM WITH NO IDENTITIES VERIFIES NOTHING. Both checks below are
+        #: "every declared identity agrees", and `all([])` is True -- so an arm
+        #: that declared none would pass every check while binding nothing, and
+        #: pass it silently. Refused here, once, for both kinds of arm.
+        if not any(arm.identities.values()):
+            raise D1BehaviouralError(
+                f"{arm.arm_id} declares no checkpoint identities, so there is "
+                "nothing to verify it against. An arm that binds nothing is "
+                "satisfied by any checkpoint.")
+        if arm.is_materialized_from_a_spec:
+            out.append(_incumbent_construction_row(arm, repo_root))
+            continue
         directory = Path(arm.checkpoint_dir)
         if not directory.is_dir():
             raise D1BehaviouralError(
@@ -467,24 +540,88 @@ def require_arms_present(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
         identity = identify_checkpoint(
             directory, adapter=adapter, spec=spec,
             num_parameters=adapter.param_count(spec))
-        #: The frozen record carries a 12-hex prefix for the incumbent and a
-        #: full digest for the candidates, so the comparison is by prefix --
-        #: on the RECORDED value's own length, never truncated to make a
-        #: mismatch pass.
-        want = arm.artifact_digest
-        if not identity.artifact_digest.startswith(want):
+        #: Compared on the RECORDED value's own length, never truncated to the
+        #: shorter of the two -- which would let a short declaration pass
+        #: against any digest sharing its prefix.
+        problems = [f"{field}: have {getattr(identity, field, None)}, "
+                    f"recorded {want}"
+                    for field, want in sorted(arm.identities.items())
+                    if want and not str(
+                        getattr(identity, field, "") or "").startswith(want)]
+        if problems:
             raise D1BehaviouralError(
-                f"{arm.arm_id} at {directory} has artifact_digest "
-                f"{identity.artifact_digest[:len(want)]} and the frozen record "
-                f"names {want}. This is not the checkpoint that was selected.")
+                f"{arm.arm_id} at {directory} is not the checkpoint that was "
+                "selected: " + "; ".join(problems))
         out.append({"arm": arm.arm_id, "role": arm.role,
+                    "obtained_by": "secured bytes on this host, hashed here",
                     "quality_position": arm.quality_position,
                     "state_id": arm.state_id,
                     "artifact_digest": identity.artifact_digest,
-                    "recorded_prefix": want,
+                    "identities_checked": sorted(
+                        k for k, v in arm.identities.items() if v),
                     "checkpoint_dir": str(directory),
                     "num_parameters": identity.num_parameters})
     return {"n_arms": len(out), "arms": out}
+
+
+def _incumbent_construction_row(arm: Arm,
+                                repo_root: str | Path) -> dict[str, Any]:
+    """The incumbent's `$0` check: does its spec name the bound identity?
+
+    Resolved through the spec's own module rather than by restating its path,
+    so a change to how the frozen B is constructed moves this check with it.
+    """
+    import importlib
+
+    module_path, _, attribute = (arm.construction or "").rpartition(".")
+    if not module_path or not attribute:
+        raise D1BehaviouralError(
+            f"{arm.arm_id} has no checkpoint and names no construction spec, "
+            "so there is no way to obtain it and nothing to verify")
+    try:
+        module = importlib.import_module(module_path)
+        build = getattr(module, attribute)
+    except Exception as exc:                                   # noqa: BLE001
+        raise D1BehaviouralError(
+            f"{arm.arm_id}: its construction spec {arm.construction} is not "
+            f"importable, so the arm cannot be built: "
+            f"{type(exc).__name__}: {exc}") from exc
+
+    #: The DECLARED identities the spec's module pins, by the names that module
+    #: uses. Read rather than rebuilt: constructing the path needs the frozen
+    #: operators registered and a device, and the question here is only whether
+    #: the pins agree with the design.
+    pinned = {
+        "artifact_digest": getattr(module, "B_ARTIFACT_DIGEST", None),
+        "weights_digest": getattr(module, "B_WEIGHTS_DIGEST", None),
+        "single_shard_sha256": getattr(module, "B_SINGLE_SHARD_SHA256", None),
+        "arch_signature": getattr(module, "B_ARCH_SIGNATURE", None),
+    }
+    problems = [f"{field}: the spec pins {pinned.get(field)}, the design binds "
+                f"{want}"
+                for field, want in sorted(arm.identities.items())
+                if want and pinned.get(field) != want]
+    if problems:
+        raise D1BehaviouralError(
+            f"{arm.arm_id}: the construction spec and the design name different "
+            "checkpoints: " + "; ".join(problems))
+    return {
+        "arm": arm.arm_id, "role": arm.role,
+        "obtained_by": (
+            f"materialized on the pod from {arm.construction}; its four pinned "
+            "identities equal the ones the design binds"),
+        "quality_position": arm.quality_position,
+        "state_id": arm.state_id,
+        "artifact_digest": arm.artifact_digest,
+        "identities_checked": sorted(k for k, v in arm.identities.items() if v),
+        "checkpoint_dir": None,
+        "construction": arm.construction,
+        "construction_is_callable": callable(build),
+        "_what_this_does_not_claim": (
+            "that the bytes the spec will produce match. Nothing on a CPU box "
+            "can claim that; the pod's digest gate proves it, as it did for "
+            "C2's and C3's rebuilds of this same path."),
+    }
 
 
 def session_contract(rung: str, repo_root: str | Path = REPO_ROOT

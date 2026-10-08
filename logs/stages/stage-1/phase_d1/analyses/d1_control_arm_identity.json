@@ -2,7 +2,7 @@
  "schema": "aadistill.phase_d1.control_arm_identity_finding/v1",
  "found_utc": "2026-10-08",
  "found_by": "agent, at $0, while building the screening session's launcher",
- "status": "OPEN / MAINTAINER DECISION REQUIRED",
+ "status": "RESOLVED / CORRECTED \u2014 MAINTAINER DECISION 2026-10-08",
  "severity": "scientific. It is not an engineering failure and was not repaired autonomously.",
  "_one_line": "D1's design declares its control arm to be the arm C1 measured and BEAT, and C1's measured delta between the two arms is larger than the SESOI D1's decision rule tests against.",
  "the_finding": {
@@ -123,5 +123,104 @@
    "not_a_re_estimate": "every figure above is READ from a record: the priced cell from the design, the per-leaf measurement from the replay campaign's closeout, the per-implementation worsts from the search's own telemetry via replay_specs.worst_seconds_by_impl(). The re-price is a derivation through search_space.behavioural_cost, not a new estimate."
   }
  },
- "_authorizes": "nothing. This is a finding."
+ "_authorizes": "nothing. The corrections are recorded; a behavioural launch still needs an execution preregistration, a launcher, a one-use authorization and a maintainer decision to resume, and D1 is PAUSED before behavioural screening pending the repository information-architecture migration.",
+ "resolution": {
+  "decided_utc": "2026-10-08",
+  "decision": "The standing incumbent B is C1's PROMOTED TREATMENT, artifact_digest 53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342. NOT c313d1b4081b9a3b410dddf7a29ebcaad8dd0759179d51e1d761238c1743a2a6.",
+  "_not_a_new_scientific_choice": "the maintainer's decision states this explicitly: repository evidence already established it. c1_arm_identities.json identifies c313d1b4... as C1's incumbent/weight-proxy arm and 53e30566... as its treatment/activation-importance arm; C1 returned GO; Phase-C2 defines B_ARTIFACT_DIGEST = 53e30566... and describes B as 'the frozen C1 treatment'. The old D1 identity is therefore a DEFECT, and this is its mechanical correction rather than a protocol change.",
+  "what_was_changed": [
+   "write_d1_design.py :: the typed INCUMBENT_STATE_ID/INCUMBENT_DIGEST constants are DELETED. `incumbent()` derives the block from phase_d_series.incumbent.standing_incumbent, which reads C1's verdict and C1's measured arm identities, and emits all four content identities plus the construction facts.",
+   "the design's `incumbent.state_id` is now null, which is the arm's own shape: the promoted arm was built as a FIXED PATH and c1_arm_identities records state_id: null for it.",
+   "behavioural.py :: ARM_SOURCES no longer carries a B entry (there is no state-id directory and its bytes are not on this host); `Arm` gained `identities` and `construction`; `arms()` assembles B as a spec-materialized arm; `require_arms_present` verifies candidates by hashing their bytes and B by comparing its construction spec's four pins against the design.",
+   "search_space.py :: the arm-materialization cost left the FIXED session overhead and became a per-arm term. See `the_second_finding_resolution`."
+  ],
+  "the_blocker_is_kept_not_deleted": "`incumbent identity` stays in BLOCKER_SPECS and `arms()` keeps its refusal. The design is a FILE and the derivation is code, so the check compares the document against the owner: an edited design, or a later round that promoted something else without this document following, is still refused. The regression drives the refusal through the exact historical value rather than leaving it unexercised now that it passes.",
+  "identities_after_the_correction": {
+   "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+   "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+   "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+   "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+  },
+  "design_hash": {
+   "before_the_correction": "bc811dc027faf874...",
+   "after": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+   "note": "the shape of the `incumbent` block changed as well as its value -- four content identities and the construction facts replace a state id and a 12-hex prefix -- so the hash is not the bd4c7d4a... projected from a value-only change."
+  },
+  "seeds_rebound": {
+   "rule": "SHA256(design_hash + ':phase-d1:<rung>-seed:' + i) mod 2**31, advancing past every excluded seed",
+   "screening": [
+    614923639,
+    516448251
+   ],
+   "confirmation": [
+    396880939,
+    766527341,
+    1004399678
+   ],
+   "excluded": [
+    20260726,
+    20260801,
+    20260813,
+    696460635,
+    1635674081,
+    1656475568
+   ],
+   "_why_this_is_valid": "C0 requires the seeds materialized and hash-bound BEFORE any candidate behavioural result exists, and none exists: no D1 probe has been trained, no authorization has been issued and no pod has been created. The rebinding is prospective.",
+   "_still_owed": "an execution preregistration that hash-binds these values must be written before the first behavioural launch. It does not exist yet and this record does not stand in for it."
+  }
+ },
+ "the_second_finding_resolution": {
+  "what_was_wrong": "`parent_replay_and_incumbent_rebuild: 22.0` sat in BEHAVIOURAL_SESSION_MINUTES, a FIXED per-session overhead. It is the cost of materializing ONE arm -- C3's figure, for a session that had one arm. D1 screening has five, so the priced session funded a fifth of the arm materialization it requires.",
+  "what_was_changed": "the term left the overhead and became ARM_MATERIALIZATION_MINUTES = 22.0, multiplied by a REQUIRED `n_arms` argument on `behavioural_cost`. `chain_cost` and `designs()` thread the two rungs' arm counts, and the overrun factor still applies to the train+eval block only -- materialization is a digest-pinned replay already carried at a bound.",
+  "why_22_minutes": "C3's own component figure for exactly this operation, and the D1 finalist rematerialization campaign then MEASURED two of these four candidate paths end to end on the same L40S at 963.2 s (16.05 min) and 1280.3 s (21.34 min), both inside it. The bound that contains the measurements is what is priced.",
+  "screening": {
+   "n_probes": 10,
+   "n_arms": 5,
+   "probe_minutes": 895.16,
+   "arm_materialization_minutes": 110.0,
+   "session_overhead_minutes": 82.0,
+   "fixed_minutes": 192.0,
+   "expected_minutes": 1087.16,
+   "hard_ceiling_minutes": 1355.71,
+   "hard_ceiling_usd": 25.0053
+  },
+  "confirmation": {
+   "n_probes": 6,
+   "n_arms": 2,
+   "probe_minutes": 537.1,
+   "arm_materialization_minutes": 44.0,
+   "session_overhead_minutes": 82.0,
+   "fixed_minutes": 126.0,
+   "expected_minutes": 663.1,
+   "hard_ceiling_minutes": 824.23,
+   "hard_ceiling_usd": 15.2025
+  },
+  "chain_hard_ceiling_usd": 61.6975,
+  "fits": "screening $25.0053 against the $30.0000 per-session envelope; chain $61.6975 against $68.7925 of remaining formal allowance. No limit is approached and no funding decision is implied.",
+  "_pricing_repair_not_execution": "no authorization was issued, no pod was created and no screening or confirmation work ran."
+ },
+ "a_third_repair_found_while_closing": {
+  "what": "`phase_d_series/source_evidence.py` produced a HASH-SEED DEPENDENT record, so `autoinit_d_series_source_evidence.json` could not regenerate identically and its own test could only pass when the ambient PYTHONHASHSEED matched the one in use when it was written.",
+  "found_by": "the test was red before this round and the red was attributed, not inherited: none of this round's files feeds that generator, so it was diagnosed rather than assumed related",
+  "the_two_causes": [
+   "`near_duplicate_screen` chose each prompt's `rare_tokens` rarest words with `sorted(t, key=df.__getitem__)` over a frozenset, so ties in document frequency were broken by SET ITERATION ORDER. Different seeds indexed and queried different tokens, so different candidates were compared at all.",
+   "`bare_problem_screen` built `by_hash` from a set and took the first STRICT maximum, so a candidate's `resembles_consumed_task_id` came back as 17 at one seed and 458 at another -- a review surface naming two different prompts as the thing a candidate resembles."
+  ],
+  "the_fix": "total orders: `(df[w], w)` for the rare-token choice, `sorted(reserved)` and `sorted(keys)` for the index builds, `sorted(by_hash.items())` for the partner scan, and `(-jaccard, candidate_task_id)` for the review-list sort. Verified stable across PYTHONHASHSEED 1, 7 and 13 -- one digest.",
+  "what_moved_in_the_record": {
+   "changed": [
+    "strata.code.near_duplicate_screen.with_any_neighbour 378 -> 379",
+    "strata.gsm8k.near_duplicate_screen.with_any_neighbour 6483 -> 6443",
+    "132 leaves of strata.code.bare_problem_screen.review_list.pairs, which is the partner choice and the tie order"
+   ],
+   "unchanged": [
+    "every `at_or_above` threshold band, both strata",
+    "`n_to_review` (44 for code)",
+    "every eligibility, survivor and admitted count",
+    "every content hash, status and blocker"
+   ],
+   "why_that_is_the_right_test": "the screen declares itself `_not_an_acceptance_criterion` and the review list declares its threshold `NOT an equivalence criterion`. Nothing any decision rests on moved; what moved is two descriptive counts and the order of a review surface."
+  },
+  "_unrelated_to_the_control_arm": "recorded here because it was found and fixed in the same round while leaving the suites green for the migration baseline, not because it shares a cause."
+ }
 }
