@@ -14,6 +14,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 are made, and D1 does not resume until the repository information-architecture
 migration has been independently reviewed.
 
+**THE INFORMATION-ARCHITECTURE MIGRATION IS IMPLEMENTED and awaits that
+review**, on branch `migration/info-architecture`. The three trees are
+owner-first now — `scripts/{stages,shared,maintenance}`,
+`logs/stages/stage-1/families/d_series/`, `artifacts/{stages,shared,audit}` —
+with one declarative move map
+(`scripts/maintenance/migration/info_architecture.py`), the old→new table
+extended in `logs/index.json :: historical_paths.map`, derived `current.json`
+live-state records for D1 and the D-series family, and the hash-anchored
+record at `logs/maintenance/source-relocations/info-architecture/v1/`. No
+scientific identity moved: the D1 design regenerates byte-identically
+(`design_hash f9c6688f…`), the allocation rule is still `f6047343…`, all 42
+battery digests and all four finalists re-verified after their physical moves
+— the finalists now in the durable store at
+`/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
+
 **Nothing is running and nothing is billing.** An account-wide provider query
 returns **0 pods and 0 network volumes** at a spend rate of `$0/h`, against a
 balance of `$186.6019`. No behavioural authorization was issued, no pod was
