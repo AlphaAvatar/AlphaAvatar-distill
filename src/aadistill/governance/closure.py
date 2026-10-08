@@ -39,7 +39,7 @@ DEFAULT_ROOTS = ("src", "scripts")
 
 #: Import roots that are ours. An unresolvable import outside these is a
 #: third-party or stdlib module and carries no repository identity.
-INTERNAL_ROOTS = ("aadistill", "experiments")
+INTERNAL_ROOTS = ("aadistill", "stages", "shared", "maintenance")
 
 
 class ClosureError(RuntimeError):
@@ -70,27 +70,42 @@ def _resolve_through_a_grouping_directory(repo: Path, mod: str,
     import the walk cannot resolve is reported as unresolved, which correctly
     refuses to derive a closure that would describe a smaller set than runs.
 
-    So one intervening level is searched, under the top-level package only.
-    Deliberately ONE: the point is to follow a package that groups its members,
-    not to search the tree for a matching filename.
+    So intervening PURE GROUPING levels are searched, under the top-level
+    package only. A grouping directory is one without `__init__.py`: a
+    directory that has one is a package, would appear in the import name, and
+    is already handled by the direct candidates above. The chain is bounded —
+    the point is to follow a package that groups its members, not to search
+    the tree for a matching filename.
 
     **This function knows nothing about what the grouping means.** It does not
-    read a directory name, match a pattern or recognise a convention — it globs
-    one level. Whatever an application chooses to group its experiment packages
-    by, core stays unaware of it, which is the rule that keeps this module
-    reusable across stages, families and campaigns.
+    read a directory name, match a pattern or recognise a convention — it
+    globs bounded levels and requires each intervening directory to be a
+    non-package. Whatever an application chooses to group its experiment
+    packages by — stages, families, campaigns — core stays unaware of it,
+    which is the rule that keeps this module reusable.
     """
     top, _, rest = mod.replace(".", "/").partition("/")
     if not rest:
         return None
+    n_rest = len(rest.split("/"))
     for root in roots:
         base = repo / root / top
         if not base.is_dir():
             continue
-        for suffix in (".py", "/__init__.py"):
-            for hit in sorted(base.glob(f"*/{rest}{suffix}")):
-                if hit.is_file():
-                    return str(hit.relative_to(repo))
+        for depth in ("*", "*/*"):
+            for suffix in (".py", "/__init__.py"):
+                for hit in sorted(base.glob(f"{depth}/{rest}{suffix}")):
+                    if not hit.is_file():
+                        continue
+                    rel = hit.relative_to(base)
+                    #: parts after the grouping chain: the module path itself,
+                    #: plus the trailing __init__.py when the hit is a package.
+                    n_module_parts = n_rest + (0 if suffix == ".py" else 1)
+                    grouping = rel.parts[:len(rel.parts) - n_module_parts]
+                    prefixes = (base.joinpath(*grouping[:i + 1])
+                                for i in range(len(grouping)))
+                    if all(not (d / "__init__.py").exists() for d in prefixes):
+                        return str(hit.relative_to(repo))
     return None
 
 
