@@ -71,7 +71,11 @@ def fixture_auth_payload() -> dict:
 
 
 def load(name: str):
-    path = REPO / f"scripts/pod/{name}.py"
+    #: launchers/drivers live with their owners now; basenames stay unique
+    hits = [p for p in sorted((REPO / "scripts").rglob(f"{name}.py"))
+            if "__pycache__" not in p.parts]
+    assert len(hits) == 1, f"{name}.py: expected one owner, found {hits}"
+    path = hits[0]
     spec = importlib.util.spec_from_file_location(f"{name}_wiring", path)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[f"{name}_wiring"] = mod

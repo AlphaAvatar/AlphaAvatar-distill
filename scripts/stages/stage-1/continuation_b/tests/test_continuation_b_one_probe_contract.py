@@ -42,7 +42,11 @@ SEED_SC = 20260813
 
 
 def load(name, filename):
-    spec = importlib.util.spec_from_file_location(name, REPO / "scripts/pod" / filename)
+    #: session executables live with their owners; basenames stay unique
+    hits = [p for p in sorted((REPO / "scripts").rglob(filename))
+            if "__pycache__" not in p.parts]
+    assert len(hits) == 1, f"{filename}: expected one owner, found {hits}"
+    spec = importlib.util.spec_from_file_location(name, hits[0])
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
@@ -171,9 +175,10 @@ def test_the_purchase_seam_is_the_only_route_to_training(drv):
     # own training loop, imports none of this, and is not in scope — an
     # unqualified scan over `scripts/pod` would make every future standalone
     # driver fail a continuation invariant it cannot violate.
-    lineage = [p for p in (REPO / "scripts/pod").glob("*.py")
-               if "autoinit_phase_a_driver" in p.read_text()
-               or p.name == "autoinit_phase_a_driver.py"]
+    lineage = [p for p in sorted((REPO / "scripts").rglob("*.py"))
+               if "__pycache__" not in p.parts and "tests" not in p.parts
+               and ("autoinit_phase_a_driver" in p.read_text()
+                    or p.name == "autoinit_phase_a_driver.py")]
     callers = [p for p in lineage if "self.probe_config(" in p.read_text()]
     assert [p.name for p in callers] == ["autoinit_phase_a_driver.py"], callers
     assert "autoinit_c1_driver.py" not in [p.name for p in lineage]

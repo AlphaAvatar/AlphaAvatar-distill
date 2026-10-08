@@ -850,7 +850,7 @@ def test_a_docs_only_change_does_not_move_the_trainer_digest():
 
 def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
     """v1 pinned `capability.py` alone, which is how the defect hid."""
-    from shared.source_sets import RECOVERY_SCORING_FILES_V3, recovery_scoring_contract
+    from shared.source_sets import RECOVERY_SCORING_FILES_V4, recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
     # v3 since the initialization migration: the same six files at current
@@ -858,7 +858,7 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
     # differ only in import lines, and 570 frozen samples re-scored through
     # both trees are byte-identical
     # (logs/maintenance/inventories/architecture_scoring_equivalence.json).
-    assert contract["contract"] == "recovery_search_scoring@v3"
+    assert contract["contract"] == "recovery_search_scoring@v4"
     assert len(contract["digest"]) == 64
     covered = {e["path"] for e in contract["files"]}
     for required in ("scripts/shared/evaluation/score_recovery_search.py",
@@ -869,8 +869,8 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
                      # the rule relating two numbers is part of the metric
                      "src/aadistill/initialization/planning/recovery.py"):
         assert required in covered, required
-    assert covered == set(RECOVERY_SCORING_FILES_V3)
-    assert contract["supersedes"]["contract"] == "recovery_search_scoring@v2"
+    assert covered == set(RECOVERY_SCORING_FILES_V4)
+    assert contract["supersedes"]["contract"] == "recovery_search_scoring@v3"
     # Same failure mode as the trainer digest: never a smaller contract.
     with pytest.raises(RecoveryAdmissionError, match="is missing"):
         recovery_scoring_contract(
@@ -878,7 +878,7 @@ def test_the_scoring_contract_covers_the_composition_not_one_scorer_file():
                          "src/aadistill/evaluation/does_not_exist.py"))
     # A change anywhere in the set moves the digest.
     subset = recovery_scoring_contract(
-        REPO, files=tuple(f for f in RECOVERY_SCORING_FILES_V3
+        REPO, files=tuple(f for f in RECOVERY_SCORING_FILES_V4
                           if not f.endswith("recovery.py")))
     assert subset["digest"] != contract["digest"]
 
@@ -893,7 +893,8 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
     claim that run executed the relocated implementation.
 
     So the assertion is inverted deliberately. The record still says v2; the
-    live contract says v3; they differ, and that difference is what makes an
+    live contract says v4 (v3 became historical when the 2026-10-08
+    information-architecture migration moved the scorer script); they differ, and that difference is what makes an
     old launch fail closed rather than proceed against thresholds measured
     under different code.
     """
@@ -906,7 +907,7 @@ def test_the_preregistration_binds_the_scoring_contract_and_supersession():
     contract = prereg["recovery_scoring_contract"]
     live = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v2"
-    assert live["contract"] == "recovery_search_scoring@v3"
+    assert live["contract"] == "recovery_search_scoring@v4"
     assert contract["digest"] != live["digest"], (
         "the historical record must keep the digest it recorded; matching the "
         "live one would mean it had been rewritten")

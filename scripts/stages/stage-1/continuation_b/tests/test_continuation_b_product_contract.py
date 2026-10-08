@@ -51,15 +51,17 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
-sys.path.insert(0, str(REPO / "scripts/pod"))
-sys.path.insert(0, str(REPO / "scripts/autoinit"))
+sys.path.insert(0, str(REPO / "scripts"))
 
 CAPACITY_RECORD = REPO / "logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_capacity.json"
 
 
 def load(name: str, filename: str):
-    spec = importlib.util.spec_from_file_location(
-        name, REPO / "scripts/pod" / filename)
+    #: session executables live with their owners; basenames stay unique
+    hits = [p for p in sorted((REPO / "scripts").rglob(filename))
+            if "__pycache__" not in p.parts]
+    assert len(hits) == 1, f"{filename}: expected one owner, found {hits}"
+    spec = importlib.util.spec_from_file_location(name, hits[0])
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod
     spec.loader.exec_module(mod)
@@ -392,8 +394,8 @@ def test_the_six_to_three_boundary_is_intact():
 
 #: The two modules that exercise machinery outside the continuation runtime.
 SEARCH_ONLY_MODULES = (
-    "tests/autoinit/test_causal_depth_measurement_job.py",
-    "tests/pod/test_phase_b_driver_and_launcher.py",
+    "tests/initialization/test_causal_depth_measurement_job.py",
+    "scripts/stages/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py",
 )
 
 #: The mixtures, and where their bytes would have to be for those modules to pass.
@@ -410,10 +412,11 @@ def test_the_search_only_modules_are_ignored_on_the_pod(cont, args):
             f"{module} runs in the pod gate; it reads a calibration mixture this "
             "session does not stage, and it cost attempt 1 $0.2513")
     # And the exclusions the session already had are still there.
-    for module in ("tests/pod/test_continuation_b_executes.py",
-                   "tests/autoinit/test_phase_b_reuse_hostlocal.py",
-                   "tests/pod/test_phase_b_stage1_executes.py",
-                   "tests/pod/test_phase_a_stages1_5_execute.py"):
+    for module in (
+            "scripts/stages/stage-1/phase_b/tests/test_continuation_b_executes.py",
+            "scripts/stages/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
+            "scripts/stages/stage-1/phase_b/tests/test_phase_b_stage1_executes.py",
+            "scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py"):
         assert module in ignores, module
 
 

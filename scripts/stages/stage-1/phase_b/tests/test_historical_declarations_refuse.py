@@ -34,8 +34,11 @@ from stages.phase_b.continuation import (  # noqa: E402
     continuation_source_digest,
 )
 
-#: Exactly what the migration moved, named here so a reader can see that the
-#: absences are the five flat operator modules and nothing else has drifted.
+#: Exactly what the 2026-09-25 topology migration moved — the five flat
+#: operator modules. Later relocations are explained differently: an absent
+#: member whose current address the historical-path table knows
+#: (`shared.run_layout.resolve_historical`) is a RECORDED move, and an absence
+#: with neither explanation is real drift and still fails.
 EXPECTED_MOVED = {
     "src/aadistill/initialization/operators/attention.py",
     "src/aadistill/initialization/operators/composite.py",
@@ -43,6 +46,15 @@ EXPECTED_MOVED = {
     "src/aadistill/initialization/operators/ffn.py",
     "src/aadistill/initialization/operators/width.py",
 }
+
+
+def _explained(path: str) -> bool:
+    from shared.run_layout import resolve_historical
+
+    if path in EXPECTED_MOVED:
+        return True
+    moved_to = resolve_historical(path, REPO)
+    return moved_to != path and (REPO / moved_to).is_file()
 
 CASES = (
     ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
@@ -58,9 +70,10 @@ def test_the_declaration_refuses_rather_than_hashing_what_survived(
         name, declared, digest_fn):
     gone = assert_declaration_refuses(digest_fn, declared,
                                       error_type=AuthorizationError)
-    assert set(gone) == EXPECTED_MOVED, (
-        f"{name} is missing paths beyond the five the migration moved: "
-        f"{sorted(set(gone) - EXPECTED_MOVED)}")
+    unexplained = sorted(p for p in gone if not _explained(p))
+    assert not unexplained, (
+        f"{name} is missing paths no recorded migration explains: "
+        f"{unexplained}")
 
 
 @pytest.mark.parametrize("name,declared,digest_fn", CASES,

@@ -545,11 +545,11 @@ def frozen_repo(tmp_path: Path) -> Path:
                     repo / "artifacts/stages/stage-1/state_eval_v1")
     shutil.copytree(REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2",
                     repo / "artifacts/stages/stage-1/batteries/recovery_search_v2")
-    # V3: the same six files at current paths. V2 is the historical
-    # declaration and names the pre-migration ones, so copying it into a
+    # V4: the same six files at current paths. V3 and V2 are historical
+    # declarations and name pre-migration ones, so copying either into a
     # scratch tree fails on the first file that no longer exists.
-    from shared.source_sets import RECOVERY_SCORING_FILES_V3
-    for rel in RECOVERY_SCORING_FILES_V3:
+    from shared.source_sets import RECOVERY_SCORING_FILES_V4
+    for rel in RECOVERY_SCORING_FILES_V4:
         dst = repo / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(REPO / rel, dst)

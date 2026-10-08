@@ -419,7 +419,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--teacher-revision", default=TEACHER_REVISION)
     ap.add_argument("--e8a-pairs", type=int, default=2,
                     help="skip sets scored by BOTH paths for the backend check")
-    ap.add_argument("--out", default="logs/autoinit_causal_depth_measured.json")
+    ap.add_argument("--out", default="logs/stages/stage-1/measurement/analyses/autoinit_causal_depth_measured.json")
     return ap
 
 

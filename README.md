@@ -402,50 +402,40 @@ AlphaAvatar-distill/
 ├── pyproject.toml          # uv-managed env; CPU torch index by default
 ├── src/aadistill/          # algorithm core — model-agnostic, config-driven
 │   ├── models/             #   teacher/student loading, INT8 fake-quant
-│   ├── init/               #   Stage 0/1: activation stats, projection, sandwich transplant
-│   ├── autoinit/           #   Teacher-Adaptive AutoInitializer: architecture adapters,
-│   │                       #   operator kind/implementation registry, versioned search
-│   │                       #   state, four-level metric taxonomy, Pareto beam ranking,
-│   │                       #   resumable beam search, search manifest, cost model
-│   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
-│   │                       #   session rendering + system-grouped packing (sessions.py),
-│   │                       #   diversity, per-slice correctness rules,
-│   │                       #   dense KD-only extra streams (extra_stream.py)
-│   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume,
-│   │                       #   optional second KD-only stream with its own cursor)
-│   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
-│   │                       #   snapshots + importance-ratio diagnostics
-│   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
-│   │                       #   answer/protocol scorers, degeneration, oracle prefix,
-│   │                       #   general-text NLL/KL diagnostics (general_text.py)
-│   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests ·
-│                           #   session budget thresholds · provider control plane ·
-│                           #   cost watchdog · detached remote launch · log relay ·
-│                           #   manifest-driven artifact collection + teardown gate
-├── scripts/                # entry points, one per responsibility
-│   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
-│   │                       #   validate_corpus_gate
-│   ├── training/           #   collect_stage0 · init_stage1 · train_stage3 ·
-│   │                       #   build/validate arm configs · budget planning · preflight
-│   ├── evaluation/         #   eval_ppl · eval_behavior · uncapped_eval (P18, vLLM) ·
-│   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
-│   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
-│   ├── rollout/            #   teacher generation · build_recovery_corpus
-│   ├── autoinit/           #   plan_search (branching + cost) · dry_run_search (zero cost)
-│   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh) ·
-│                           #   start_job · watchdog · collect_artifacts (session contract)
-├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
-│   └── autoinit/           #   frozen operator-implementation ledger (ids are immutable)
+│   ├── initialization/     #   Stage 0/1 + the Teacher-Adaptive AutoInitializer:
+│   │                       #   adapters, operator registry, versioned search state,
+│   │                       #   Pareto beam search, calibration, recovery planning
+│   ├── data/               #   mixture loader, session rendering, loss masks, packing
+│   ├── training/           #   Stage-3 recovery trainer (CE+KD, freeze policy, resume)
+│   ├── rollout/            #   engine adapters, hashed rollout snapshots
+│   ├── evaluation/         #   usable_rollout, strict answer/protocol scorers,
+│   │                       #   degeneration, general-text diagnostics
+│   ├── governance/         #   authorization types, derived executable closures
+│   ├── runtime/            #   run layout mechanism, pod environment, staging contract
+│   └── infrastructure/     #   session spec/runner, provider control plane, budget,
+│                           #   watchdog, log relay, artifact gate
+├── scripts/                # executables, ONE OWNER EACH (2026-10-08 architecture)
+│   ├── stages/             #   experiment-owned code: stages/stage-<n>/<experiment>/
+│   │   └── stage-1/families/d_series/   # material owned by D1/D2/D3 together
+│   ├── shared/             #   stage-neutral: the application layer (calibration,
+│   │                       #   run_layout, recipes, …) and capabilities
+│   │                       #   data/ evaluation/ training/ rollout/ validation/ pod/
+│   └── maintenance/        #   repository tooling: architecture/ consolidation/
+│                           #   migration/ (the declarative move map lives here)
+├── configs/                # stage recipes and frozen run configurations
 ├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
-│   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 1,415 CPU tests, mirroring the source areas
-├── logs/                   # project memory — read STATE.md first
-│   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
-│   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
-│   ├── PROPOSAL.md         #   the single active plan, costed, with stopping rules
-│   ├── decisions.md        #   decision records (why, alternatives, risks)
-│   ├── supported_models.md #   model status table
-│   └── artifact_manifests.md  # artifacts stored outside git (HF), with hashes
+├── tests/                  # the CORE suite; experiment suites live with their
+│                           # experiments under scripts/stages/.../tests/
+├── logs/                   # project memory — read logs/README.md first
+│   ├── state/              #   current.json + current.md (the live snapshot),
+│   │                       #   ownership.md, artifact_manifests.md
+│   ├── stages/             #   stage → experiment → run evidence; families/ for
+│   │                       #   experiment-family records; index.json is the
+│   │                       #   ownership index (scripts/logs/artifacts legs)
+│   ├── budget/             #   ledger, decisions, consumed approvals
+│   └── maintenance/        #   inventories, registries, source-relocations
+├── artifacts/              # durable local products, by owner (gitignored except
+│                           # README.md and the generated index.json)
 └── assets/                 # trend data + rendered figure
 ```
 

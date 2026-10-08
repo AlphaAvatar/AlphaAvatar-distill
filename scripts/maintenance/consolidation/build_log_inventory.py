@@ -121,7 +121,7 @@ SCRATCH_WITH_UNIQUE_EVIDENCE = {
 CATEGORY_RULES = (
     # (predicate on repo-relative posix path, category)
     (lambda p: p.name in ("poll.log", "monitor.log"), "scratch_debug"),
-    (lambda p: p.name in ("current_state.json", "STATE.md"), "living_state"),
+    (lambda p: str(p).endswith(("logs/state/current.json", "logs/state/current.md")), "living_state"),
     (lambda p: p.name in ("ownership.md", "experiment_index.md",
                           "phase_index.md", "supported_models.md",
                           "artifact_manifests.md", "checkpoint_registry.json",

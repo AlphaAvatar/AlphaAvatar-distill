@@ -132,10 +132,14 @@ def test_the_suite_pins_its_tokenizer_and_template():
 def test_the_recovery_battery_matches_its_frozen_hashes():
     from aadistill.infrastructure.manifest import sha256_file
 
+    from shared.run_layout import resolve_historical
+
     manifest = load(RECOVERY_SEARCH / "manifest.json")
     assert manifest["role"] == "RECOVERY_SEARCH"
     for name, entry in manifest["sets"].items():
-        path = REPO / entry["path"]
+        #: the frozen manifest spells each path as it was at build time;
+        #: the 2026-10-08 migration moved the bytes, so access resolves.
+        path = REPO / resolve_historical(entry["path"], REPO)
         assert sha256_file(path) == entry["sha256"], name
         assert len(items(RECOVERY_SEARCH, f"{name}.jsonl")) == entry["n"]
 

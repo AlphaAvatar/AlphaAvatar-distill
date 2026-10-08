@@ -97,7 +97,7 @@ def load_grant(path: Path) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="logs/autoinit_phase_b_authorization.json")
+    ap.add_argument("--out", default="logs/budget/approvals/autoinit_phase_b_authorization.json")
     ap.add_argument("--grant", required=True)
     ap.add_argument("--require-clean", action="store_true")
     args = ap.parse_args()

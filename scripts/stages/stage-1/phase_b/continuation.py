@@ -611,17 +611,25 @@ KNOWN_NEUTRALIZED_SEARCH_CALL_SITES = ("scripts/stages/stage-1/phase_a/autoinit_
 
 def search_call_site_owners(repo_root: str | Path = ".",
                             files: tuple[str, ...] | None = None) -> tuple[str, ...]:
-    """Which loaded files contain a search call site. Declaration excluded."""
+    """Which loaded files contain a search call site. Declaration excluded.
+
+    The declared set keeps its frozen spellings; each member is read at its
+    CURRENT address through the historical-path table, because this scan is a
+    live property of the code that would run, not of where it used to live.
+    """
+    from shared.run_layout import resolve_historical
+
     root = Path(repo_root)
     declarer = "scripts/stages/stage-1/phase_b/continuation.py"
     declared = tuple(files) if files is not None else CONTINUATION_SOURCE_FILES_V2
     out = []
     for rel in declared:
-        if rel == declarer or not (root / rel).is_file():
+        current = resolve_historical(rel, root)
+        if current == declarer or not (root / current).is_file():
             continue
-        text = (root / rel).read_text(errors="ignore")
+        text = (root / current).read_text(errors="ignore")
         if any(call in text for call in FORBIDDEN_CALLS):
-            out.append(rel)
+            out.append(current)
     return tuple(sorted(out))
 
 
