@@ -376,8 +376,11 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
         assert (REPO / path).is_file(), path
     #: The historical declaration is still a valid set of paths — it is what the
     #: superseded attempt-1 grant binds — and it is no longer what runs.
+    from shared.run_layout import resolve_historical
     for declared in C2_HARNESS_SOURCE_FILES_V1:
-        assert (REPO / declared).is_file(), declared
+        #: the historical set keeps freeze-time spellings; each member
+        #: still exists, at the address the relocation table knows
+        assert (REPO / resolve_historical(declared, REPO)).is_file(), declared
     assert digested != set(C2_HARNESS_SOURCE_FILES_V1)
     assert len(digested) > len(C2_HARNESS_SOURCE_FILES_V1)
     #: Everything that can create or bill a provider resource.

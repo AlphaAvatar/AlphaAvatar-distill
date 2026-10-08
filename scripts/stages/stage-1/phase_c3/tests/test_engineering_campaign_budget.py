@@ -63,7 +63,7 @@ def records(tmp_path):
 def test_the_ceiling_comes_from_the_authorization(mod, records, monkeypatch):
     build, root = records
     campaign = build(ceiling=7.77, reserve=0.25, inherited=(0.10, 0.20))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=99.0, rate_usd_per_hour=1.0)
     assert d["campaign_ceiling"] == 7.77
     assert d["spent"] == pytest.approx(0.30)
@@ -87,7 +87,7 @@ def test_a_ceiling_written_into_the_campaign_record_is_IGNORED(mod, records,
     doc = json.loads(campaign.read_text())
     doc["all_in_ceiling_usd"] = 99.0
     campaign.write_text(json.dumps(doc))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=50.0, rate_usd_per_hour=1.0)
     assert d["campaign_ceiling"] == 3.0
     assert d["session_ceiling"] == pytest.approx(2.90)
@@ -105,7 +105,7 @@ def test_spend_is_recomputed_from_both_lists(mod, records, monkeypatch):
     build, root = records
     campaign = build(ceiling=10.0, reserve=0.0,
                      inherited=(0.0205, 0.0214), subruns=(1.5, 0.25))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=99.0, rate_usd_per_hour=1.0)
     assert d["spent"] == pytest.approx(1.7919)
 
@@ -114,7 +114,7 @@ def test_the_session_limit_is_floored_not_rounded(mod, records, monkeypatch):
     """A limit handed downward rounds DOWN, or it is not a limit."""
     build, root = records
     campaign = build(ceiling=1.0, reserve=0.0, inherited=(0.001,))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=99.0, rate_usd_per_hour=1.0)
     assert d["remaining"] == pytest.approx(0.999)
     assert d["session_ceiling"] == 0.99          # not 1.00
@@ -123,7 +123,7 @@ def test_the_session_limit_is_floored_not_rounded(mod, records, monkeypatch):
 def test_the_session_cap_bounds_a_large_remainder(mod, records, monkeypatch):
     build, root = records
     campaign = build(ceiling=100.0, reserve=0.10)
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=2.50, rate_usd_per_hour=1.09)
     assert d["session_ceiling"] == 2.50
     assert d["max_seconds"] == int(2.50 / 1.09 * 3600)
@@ -132,7 +132,7 @@ def test_the_session_cap_bounds_a_large_remainder(mod, records, monkeypatch):
 def test_an_exhausted_campaign_is_refused(mod, records, monkeypatch):
     build, root = records
     campaign = build(ceiling=3.0, reserve=0.10, subruns=(2.95,))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=2.50, rate_usd_per_hour=1.09)
     assert d["ok"] is False
 
@@ -140,7 +140,7 @@ def test_an_exhausted_campaign_is_refused(mod, records, monkeypatch):
 def test_just_enough_is_allowed(mod, records, monkeypatch):
     build, root = records
     campaign = build(ceiling=0.70, reserve=0.10)
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     d = mod.derive(campaign, session_cap_usd=2.50, rate_usd_per_hour=1.09)
     assert d["session_ceiling"] == pytest.approx(mod.MIN_USEFUL_USD)
     assert d["ok"] is True
@@ -153,7 +153,7 @@ def test_an_unpriced_subrun_is_not_a_free_one(mod, records, monkeypatch):
     doc = json.loads(campaign.read_text())
     doc["subruns"] = [{"subrun_id": "s0"}]
     campaign.write_text(json.dumps(doc))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     with pytest.raises(mod.BudgetError, match="no cost_usd"):
         mod.derive(campaign, session_cap_usd=2.5, rate_usd_per_hour=1.09)
 
@@ -165,7 +165,7 @@ def test_an_inline_authorization_object_is_refused(mod, records, monkeypatch):
     doc = json.loads(campaign.read_text())
     doc["authorization"] = {"all_in_ceiling_usd": 3.0}
     campaign.write_text(json.dumps(doc))
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     with pytest.raises(mod.BudgetError, match="must be a PATH"):
         mod.derive(campaign, session_cap_usd=2.5, rate_usd_per_hour=1.09)
 
@@ -174,7 +174,7 @@ def test_a_missing_authorization_is_refused_not_defaulted(mod, records,
                                                           monkeypatch):
     build, root = records
     campaign = build(ceiling=3.0, authorization="nope.json")
-    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c.py"))
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/d.py"))
     with pytest.raises(mod.BudgetError, match="cannot read"):
         mod.derive(campaign, session_cap_usd=2.5, rate_usd_per_hour=1.09)
 

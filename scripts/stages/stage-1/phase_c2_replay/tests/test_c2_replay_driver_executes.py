@@ -59,7 +59,7 @@ build_tiny_model = _autoinit_fixtures.build_tiny_model
 make_items = _autoinit_fixtures.make_items
 make_profile = _autoinit_fixtures.make_profile
 
-driver_mod = importlib.import_module("pod.autoinit_c2_replay_driver")
+driver_mod = importlib.import_module("stages.phase_c2_replay.autoinit_c2_replay_driver")
 
 TARGET = dict(TEACHER_GEOMETRY, intermediate_size=24, num_attention_heads=2)
 PROFILE_ID = "test.balanced@v1"

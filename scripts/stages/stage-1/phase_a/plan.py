@@ -55,17 +55,17 @@ SCHEMA = "aadistill.autoinit.phase_a_authorization/v1"
 #: edited Phase-A driver without noticing. The shared infrastructure appears in
 #: both sets because both sessions execute it.
 PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
-    "scripts/pod/autoinit_phase_a_launch.py",
-    "scripts/pod/autoinit_phase_a_driver.py",
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+    "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     # What that script STAGES, since 2026-08-18: the relay sources, the
     # destinations and the four frozen digests it used to carry itself. A
     # harness digest that covered the shell but not its manifest would
     # certify the fetching and leave what is fetched unmeasured.
-    "scripts/pod/autoinit_science_inputs.py",
-    "scripts/pod/autoinit_engine_probe.py",
-    "scripts/pod/watchdog.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/shared/pod/autoinit_science_inputs.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/pod/collect_artifacts.py",
     # The session machinery, added 2026-08-18. It replaces
     # `autoinit_preflight_launch.py`, which used to be in this set because Phase
     # A SUBCLASSED it — an entry that recorded a dependency the composition
@@ -78,16 +78,20 @@ PHASE_A_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # "the executable" as the driver itself. `phase_a_search` runs the beam;
     # `write_preregistration` builds the plan the driver binds against, so an
     # edit to either changes what a paid run does.
-    "scripts/autoinit/phase_a_search.py",
-    "scripts/autoinit/write_preregistration.py",
+    "scripts/stages/stage-1/phase_a/phase_a_search.py",
+    "scripts/stages/stage-1/phase_a/write_preregistration.py",
     "src/aadistill/governance/authorization.py",
     "src/aadistill/initialization/planning/generation_compat.py",
-    "scripts/experiments/stage-1/phase_a/plan.py",
+    "scripts/stages/stage-1/phase_a/plan.py",
     "src/aadistill/initialization/planning/generation.py",
 )
-#: Bumped with the session machinery: a digest over set 1 (which named
-#: the launcher Phase A subclassed) and one over set 2 are not comparable.
-PHASE_A_HARNESS_SOURCE_SET_VERSION = 2
+#: Bumped with the session machinery (set 2), and again when the
+#: 2026-10-08 information-architecture migration moved ten members to
+#: their owner directories (set 3): the digest hashes path:sha256 lines,
+#: so a digest over set 2's spellings and one over set 3's are not
+#: comparable, and Phase A's set is MAINTAINED-LIVE -- it recomputes
+#: against a freshly issued authorization and names the tree that runs.
+PHASE_A_HARNESS_SOURCE_SET_VERSION = 3
 
 
 def phase_a_harness_digest(repo_root: str | Path = ".", *,

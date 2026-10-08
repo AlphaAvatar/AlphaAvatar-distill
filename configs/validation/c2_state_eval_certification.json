@@ -3,7 +3,7 @@
  "_contract": "Inputs for the full-suite certification of the device-resident state-eval reduction. ENGINEERING evidence: it answers 'on the COMPLETE frozen suite, do the two implementations produce the same metrics and the same PARETO_V1 decisions, and how long does each actually take'. It trains nothing, measures no behaviour, re-measures no frozen scientific checkpoint and AUTHORIZES NOTHING.",
  "validation_id": "c2_state_eval_certification_v1",
  "suite": {
-  "root": "artifacts/stage1/state_eval_v1",
+  "root": "artifacts/stages/stage-1/state_eval_v1",
   "_why_the_complete_suite": "the performance round used four calibration items and 2032 positions, which demonstrated the speedup and did NOT exercise the decision path: all five domains, all seven sub-types, all four critical-token classes, or the aggregates PARETO_V1 ranks on. Every count below is checked before any work, because a certification of a smaller suite would be a different claim wearing this one's name.",
   "items": 80,
   "prediction_positions": 74022,
@@ -36,11 +36,9 @@
  },
  "ship_paths": [
   "src",
-  "scripts/validation",
-  "scripts/experiments",
-  "scripts/autoinit",
+  "scripts",
   "configs/validation",
-  "artifacts/stage1/state_eval_v1"
+  "artifacts/stages/stage-1/state_eval_v1"
  ],
  "_ship_paths": "What the pod needs, DECLARED rather than remembered at launch time. The launcher's DEFAULT_SHIP is src, scripts/validation, scripts/experiments and configs/validation -- which does NOT include scripts/autoinit, where `load_state_eval` and `phase_a_frozen` live, and does not include the suite itself, which is in the gitignored artifact store. Two paid subruns of the CUDA validation died one per unshipped producer, so a test asserts that every module this check imports resolves under one of these roots."
 }

@@ -256,8 +256,14 @@ def import_permanent_control(name: str, *, record_path: str | Path,
         if (run_evidence_dir / "run_manifest.json").is_file():
             reconstruction["attempted"] = True
             try:
+                from shared.run_layout import resolve_historical
+
                 observed = observe_recovery_protocol(
-                    run_evidence_dir, repo_root=repo_root, strict=strict)
+                    run_evidence_dir, repo_root=repo_root,
+                    #: the run manifest spells the pack dir as it was when the
+                    #: run executed; the 2026-10-08 migration moved the pack,
+                    #: so access resolves through the historical-path table.
+                    resolve_path=resolve_historical, strict=strict)
             except RecoveryAdmissionError as exc:
                 problems.append(
                     f"the imported run evidence does not reconstruct: {exc}"[:400])
@@ -406,21 +412,24 @@ CONTINUATION_PLAN_V1 = PreflightPlan(
 #: an edited continuation driver without noticing. The shared infrastructure —
 #: setup script, engine probe, watchdog, collector, authorization, generation —
 #: is in both sets because both sessions execute it.
+#: MAINTAINED-LIVE (it recomputes against a freshly issued authorization
+#: and was repointed at the previous relocation too): members name their
+#: 2026-10-08 owner-tree addresses.
 CONTINUATION_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
-    "scripts/pod/autoinit_continuation_launch.py",
-    "scripts/pod/autoinit_continuation_driver.py",
-    "scripts/pod/autoinit_preflight_launch.py",   # the launcher it subclasses
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py",
+    "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py",
+    "scripts/shared/pod/autoinit_preflight_launch.py",   # the launcher it subclasses
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     # What that script STAGES, since 2026-08-18: the relay sources, the
     # destinations and the four frozen digests it used to carry itself. A
     # harness digest that covered the shell but not its manifest would
     # certify the fetching and leave what is fetched unmeasured.
-    "scripts/pod/autoinit_science_inputs.py",
-    "scripts/pod/autoinit_engine_probe.py",
-    "scripts/pod/watchdog.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/shared/pod/autoinit_science_inputs.py",
+    "scripts/shared/pod/autoinit_engine_probe.py",
+    "scripts/shared/pod/watchdog.py",
+    "scripts/shared/pod/collect_artifacts.py",
     "src/aadistill/governance/authorization.py",
-    "scripts/experiments/stage-1/recovery_continuation/plan.py",
+    "scripts/stages/stage-1/recovery_continuation/plan.py",
     "src/aadistill/initialization/planning/generation.py",
 )
 

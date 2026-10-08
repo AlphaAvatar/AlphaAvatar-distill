@@ -8,7 +8,7 @@
 # acquisition is about to happen, which is what keeps stock polling from
 # turning the C3 run tree into a log-count explosion.
 #
-# Selection is the fixed order in `experiments.phase_c3.hardware`:
+# Selection is the fixed order in `stages.phase_c3.hardware`:
 #
 #     NVIDIA L40S -> NVIDIA RTX 6000 Ada Generation -> NVIDIA L40
 #
@@ -80,7 +80,7 @@ usable_now() {
   .venv/bin/python - <<'PY' 2>/dev/null
 import sys
 sys.path.insert(0, "src"); sys.path.insert(0, "scripts")
-from experiments.phase_c3.hardware import query_offers, select
+from stages.phase_c3.hardware import query_offers, select
 try:
     chosen = select(query_offers())
 except Exception:
@@ -123,8 +123,8 @@ for ROUND in $(seq 1 40); do
   .venv/bin/python - "$GPU" >> "$LOG" 2>&1 <<'PY' || { say "attempt$N: repricing failed"; continue; }
 import sys, json, pathlib, subprocess, datetime
 sys.path.insert(0, "src"); sys.path.insert(0, "scripts")
-from experiments.phase_c3 import formal_pricing as P
-from experiments.phase_c3.hardware import GPU_DISPLAY_NAMES, require_approved
+from stages.phase_c3 import formal_pricing as P
+from stages.phase_c3.hardware import GPU_DISPLAY_NAMES, require_approved
 
 gpu = require_approved(sys.argv[1])
 rate = P.query_live_secure_price(gpu)

@@ -138,7 +138,7 @@ A3_ROPE_INPUT: tuple[RelayInput, ...] = (
 #: sessions their setup.
 A3_LOCAL_ASSETS = (
     LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/phase_c1/batteries"),
     LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
                "artifacts/stages/stage-1"),
     LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",

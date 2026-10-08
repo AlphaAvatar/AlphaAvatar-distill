@@ -381,6 +381,6 @@ def test_the_toy_root_honours_the_device_it_is_given():
 def test_every_toy_driver_forwards_the_run_device_to_its_root():
     for name in ("c3_packing_v2_driver.py", "c3_packing_pilot_driver.py",
                  "c3_batching_pilot_driver.py"):
-        src = (REPO / "scripts/pod" / name).read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c3" / name).read_text()
         assert "_toy_root(device)" in src, (
             f"{name} builds its toy root without the run device")

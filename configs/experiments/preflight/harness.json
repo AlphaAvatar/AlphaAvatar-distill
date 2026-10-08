@@ -4,8 +4,8 @@
  "harness_set_id": "preflight_harness",
  "set_version": 2,
  "files": [
-  "scripts/shared/preflight/autoinit_preflight_launch.py",
-  "scripts/shared/preflight/autoinit_preflight_driver.py",
+  "scripts/shared/pod/autoinit_preflight_launch.py",
+  "scripts/shared/pod/autoinit_preflight_driver.py",
   "scripts/shared/pod/autoinit_preflight_setup.sh",
   "scripts/shared/pod/autoinit_science_inputs.py",
   "scripts/shared/pod/autoinit_engine_probe.py",

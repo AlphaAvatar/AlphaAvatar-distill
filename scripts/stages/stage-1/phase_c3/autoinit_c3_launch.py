@@ -563,7 +563,7 @@ def require_bounded_acquisition(args) -> None:
 #: leaves became relay pulls after continuation attempt 2.
 LOCAL_ASSETS = (
     LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/phase_c1/batteries"),
     LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
                "artifacts/stages/stage-1"),
     #: C1 reads NEITHER of these. They are staged because the SHARED setup runs

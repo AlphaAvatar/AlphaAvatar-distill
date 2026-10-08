@@ -677,7 +677,7 @@ if [ "$SESSION_KIND" = "phase_a" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_a.plan import PhaseAAuthorization
+from stages.phase_a.plan import PhaseAAuthorization
 a = PhaseAAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.allows_phase_a is True, 'a Phase-A session needs a Phase-A authorization'
@@ -703,7 +703,7 @@ elif [ "$SESSION_KIND" = "phase_b" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_b.plan import PhaseBAuthorization
+from stages.phase_b.plan import PhaseBAuthorization
 a = PhaseBAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.allows_phase_b is True, 'a Phase-B session needs a Phase-B authorization'
@@ -727,7 +727,7 @@ elif [ "$SESSION_KIND" = "continuation_b" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_b.continuation import ContinuationAuthorization
+from stages.phase_b.continuation import ContinuationAuthorization
 a = ContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.runs_search is False, 'the continuation cannot purchase Stage 1 again'
@@ -752,7 +752,7 @@ elif [ "$SESSION_KIND" = "c1" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c1.authorization import C1Authorization
+from stages.phase_c1.authorization import C1Authorization
 a = C1Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c1_isolation is True, 'a C1 session needs a C1 authorization'
@@ -781,7 +781,7 @@ elif [ "$SESSION_KIND" = "c3" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c3.authorization import C3Authorization
+from stages.phase_c3.authorization import C3Authorization
 a = C3Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c3_isolation is True, 'a C3 session needs a C3 authorization'
@@ -816,7 +816,7 @@ elif [ "$SESSION_KIND" = "a3" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c3.a3_authorization import A3Authorization
+from stages.phase_c3.a3_authorization import A3Authorization
 a = A3Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_a3 is True, 'an A3 session needs an A3 authorization'
@@ -855,7 +855,7 @@ elif [ "$SESSION_KIND" = "d1" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_d1.d1_authorization import D1Authorization
+from stages.phase_d1.d1_authorization import D1Authorization
 a = D1Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_d1_search is True, 'a D1 session needs a D1 authorization'
@@ -883,7 +883,7 @@ elif [ "$SESSION_KIND" = "c2" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c2.session import C2Authorization
+from stages.phase_c2.session import C2Authorization
 a = C2Authorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c2_search1 is True, 'a C2 session needs a C2 authorization'
@@ -911,7 +911,7 @@ elif [ "$SESSION_KIND" = "c2_baseline_completion" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c2.baseline_completion import BaselineCompletionAuthorization
+from stages.phase_c2.baseline_completion import BaselineCompletionAuthorization
 a = BaselineCompletionAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c2_baseline_completion is True, 'this session needs a baseline-completion authorization'
@@ -942,7 +942,7 @@ elif [ "$SESSION_KIND" = "c2_full_search" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c2.full_search import FullSearchAuthorization
+from stages.phase_c2.full_search import FullSearchAuthorization
 a = FullSearchAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c2_full_search is True, 'this session needs a full-search authorization'
@@ -968,7 +968,7 @@ elif [ "$SESSION_KIND" = "c2_replay" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c2.replay import ReplayAuthorization
+from stages.phase_c2.replay import ReplayAuthorization
 a = ReplayAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_c2_replay is True, 'this session needs a replay authorization'
@@ -995,7 +995,7 @@ elif [ "$SESSION_KIND" = "c2_behavioural" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.phase_c2.behavioural_governance import BehaviouralAuthorization
+from stages.phase_c2.behavioural_governance import BehaviouralAuthorization
 a = BehaviouralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_behavioural_selection is True, 'this session needs a behavioural authorization'
@@ -1020,7 +1020,7 @@ elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.recovery_continuation.session import RecoveryContinuationAuthorization
+from stages.recovery_continuation.session import RecoveryContinuationAuthorization
 a = RecoveryContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert a.authorizes_recovery_continuation is True
@@ -1034,7 +1034,7 @@ else
   cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
     SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
 import os
-from experiments.preflight import PreflightAuthorization
+from shared.preflight import PreflightAuthorization
 a = PreflightAuthorization.load(os.environ['SESSION_AUTH_PATH'])
 a.require_plan(os.environ['SESSION_PLAN_HASH'])
 assert not a.allows('phase_a'), 'this artifact claims Phase A authorization'

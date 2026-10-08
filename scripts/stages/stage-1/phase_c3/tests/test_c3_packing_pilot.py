@@ -213,7 +213,7 @@ def test_both_drivers_answer_the_input_modes_their_launchers_call():
     rows = {}
     for name in ("c3_batching_pilot_driver.py", "c3_packing_pilot_driver.py"):
         done = subprocess.run(
-            [sys.executable, str(REPO / "scripts/pod" / name),
+            [sys.executable, str(REPO / "scripts/stages/stage-1/phase_c3" / name),
              "--required-inputs"],
             cwd=REPO, capture_output=True, text=True, timeout=300, env=env)
         assert done.returncode == 0, f"{name}: {done.stderr[-800:]}"
@@ -231,7 +231,7 @@ def test_each_launcher_asks_its_own_driver():
         "c3_packing_pilot_launch.sh": "c3_packing_pilot_driver.py",
     }
     for launcher, driver in pairs.items():
-        src = (REPO / "scripts/pod" / launcher).read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c3" / launcher).read_text()
         assert driver in src, f"{launcher} does not name {driver}"
         other = [d for d in pairs.values() if d != driver][0]
         assert other not in src, f"{launcher} names the other pilot's driver"
@@ -251,7 +251,7 @@ def test_no_pod_script_resolves_a_profile_without_preparing_it():
     import re
 
     offenders = []
-    for path in sorted((REPO / "scripts/pod").glob("c3_*.py")):
+    for path in sorted((REPO / "scripts/stages/stage-1/phase_c3").glob("c3_*.py")):
         for n, line in enumerate(path.read_text().splitlines(), 1):
             if re.search(r"\.resolve\((?:repo|repo_root)", line) and \
                     "prepare" not in line:
@@ -368,7 +368,7 @@ def test_both_drivers_hold_torch_to_the_cgroup_grant():
     """`nproc` reports the host. `apply_cpu_budget` reads the quota and has
     since E8b; nothing in these drivers had ever called it."""
     for name in ("c3_packing_pilot_driver.py", "c3_batching_pilot_driver.py"):
-        src = (REPO / "scripts/pod" / name).read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c3" / name).read_text()
         assert "apply_cpu_budget" in src, f"{name} never pins its CPU budget"
 
 

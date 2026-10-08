@@ -200,9 +200,9 @@ LOCAL_ASSETS = (
     *BG.staged_assets(REPO_ROOT),
     #: Both batteries. 3.26 MiB each, comfortably inside the scp timeout.
     LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/phase_c1/batteries"),
     LocalAsset("artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1", "c2_screening_v1",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/phase_c2/batteries"),
     #: Read by NEITHER rung. Staged because the SHARED setup runs
     #: `verify_frozen_assets.py` unconditionally at ASSETS_READY and that script
     #: checks both. A session declares what the SETUP requires, not only what it

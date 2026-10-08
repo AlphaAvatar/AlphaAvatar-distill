@@ -49,7 +49,7 @@ say() { echo "[$(date -u +%FT%TZ)] $*" | tee -a "$LOG"; }
 # The ONE owner of both paths. Hardcoding either is defect 2 above.
 read -r STATUS_PATH DRIVER_JOB < <(
   PYTHONPATH=src:scripts .venv/bin/python - <<'PY'
-from experiments.phase_c3 import a3_session as A3S
+from stages.phase_a3 import a3_session as A3S
 print(A3S.STATUS_PATH, A3S.DRIVER_JOB_ID)
 PY
 )
@@ -72,7 +72,7 @@ import pathlib
 import sys
 sys.path[:0] = ["src", "scripts"]
 try:
-    from experiments.phase_c3.hardware import query_offers
+    from stages.phase_c3.hardware import query_offers
     priced = json.loads(pathlib.Path(
         "logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json").read_text())
     want = priced["gpu"]

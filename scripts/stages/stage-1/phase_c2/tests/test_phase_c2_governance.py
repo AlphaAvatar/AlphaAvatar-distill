@@ -169,11 +169,17 @@ def test_the_historical_declaration_is_kept_and_no_longer_current():
         c2_historical_harness_digest,
     )
 
+    from aadistill.governance.authorization import AuthorizationError
+
     assert len(C2_HARNESS_SOURCE_FILES_V1) == 18
-    hist = c2_historical_harness_digest(REPO)
+    #: Since the 2026-10-08 migration moved its members, the historical
+    #: digest REFUSES rather than describing a tree that no longer
+    #: exists — which is a stronger form of "no longer current" than a
+    #: differing digest, and the designed one (historical_declarations).
+    with pytest.raises(AuthorizationError, match="is missing"):
+        c2_historical_harness_digest(REPO)
     live = c2_current_executable(REPO)
-    assert hist["n_files"] == 18 and live["n_files"] > 18
-    assert hist["digest"] != live["digest"]
+    assert live["n_files"] > 18
 
 
 def test_the_superseded_grant_is_preserved_byte_for_byte():
@@ -265,7 +271,7 @@ def test_every_registered_experiment_drives_the_same_recorder():
 
     assert {"phase_c1", "phase_c2"} <= set(REC.EXPERIMENTS)
     for experiment, (module, factory) in REC.EXPERIMENTS.items():
-        assert module.startswith("experiments."), (experiment, module)
+        assert module.startswith(("stages.", "shared.")), (experiment, module)
         assert factory, experiment
     #: The module docstring NAMES the strings it used to hardcode, because that
     #: is the change it is describing.

@@ -72,9 +72,12 @@ def test_the_frozen_assets_are_untouched():
     from shared.source_sets import recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
-    assert contract["contract"] == "recovery_search_scoring@v3"
+    assert contract["contract"] == "recovery_search_scoring@v4"
+    #: v4 digest: the 2026-10-08 migration moved the scorer script without
+    #: changing a byte of it; the digest hashes path:sha256 lines, so the
+    #: path spelling alone moved it (v3 = 4102513cd6f7…, kept historical).
     assert contract["digest"] == (
-        "4102513cd6f705e2cd3b2da6f818862142019042177837e54b941cde4f52de04")
+        "de42c2fb4653f658b93bcf36fc4142e72424848b50a56b44992da8d3acc7e3d9")
 
     # The four scoring modules are byte-identical to the base commit this
     # branch left. Read from git, not asserted: the whole point of the pin

@@ -27,6 +27,15 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
+
+
+def _resolve(rel: str) -> str:
+    """A frozen record spells its asset path as of its build; resolve it."""
+    import sys as _sys
+    _sys.path.insert(0, str(REPO / "scripts"))
+    from shared.run_layout import resolve_historical
+
+    return resolve_historical(rel, REPO)
 for extra in ("src", "scripts", "scripts/autoinit", "scripts/maintenance/consolidation"):
     if str(REPO / extra) not in sys.path:
         sys.path.insert(0, str(REPO / extra))
@@ -784,14 +793,14 @@ def test_the_screening_battery_record_matches_the_built_asset():
         (REPO / "logs/stages/stage-1/phase_c2/plans/"
                 "c2_screening_battery.json").read_text())
     manifest = json.loads(
-        (REPO / record["path"].split()[0] / "manifest.json").read_text())
+        (REPO / _resolve(record["path"].split()[0]) / "manifest.json").read_text())
     assert record["content_sha256"] == manifest["content_sha256"]
     assert record["n_prompts"] == manifest["n_prompts"]
     assert record["n_scorable_prompts"] == manifest["n_scorable_prompts"]
     assert record["mixture"] == manifest["mixture"]
     #: Every per-set hash, against the file it names.
     import hashlib
-    base = REPO / record["path"].split()[0]
+    base = REPO / _resolve(record["path"].split()[0])
     for name, digest in record["set_sha256"].items():
         assert hashlib.sha256(
             (base / f"{name}.jsonl").read_bytes()).hexdigest() == digest, name
@@ -815,9 +824,9 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
     """
     import importlib
 
-    sys.path.insert(0, str(REPO / "scripts/data"))
+    sys.path.insert(0, str(REPO / "scripts"))
     from shared.data.battery_render import RENDERERS, rank_take, read_rows
-    build = importlib.import_module("build_c2_screening_battery")
+    build = importlib.import_module("stages.phase_c2.build_c2_screening_battery")
     c1_builder = importlib.import_module("build_c1_confirmation_battery")
 
     record = json.loads(

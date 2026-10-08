@@ -18,5 +18,13 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 
 def test_the_summariser_is_inside_the_measured_harness():
+    """C1's measured harness included the summariser — a historical fact the
+    frozen declaration carries at its freeze-time spelling. The 2026-10-08
+    migration moved the file; the spelling stays, and its current address
+    resolves through the historical-path table."""
+    from shared.run_layout import resolve_historical
     from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
-    assert "scripts/shared/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
+
+    frozen = "scripts/pod/summarize_pytest_outcomes.py"
+    assert frozen in C1_HARNESS_SOURCE_FILES_V1
+    assert (REPO / resolve_historical(frozen, REPO)).is_file()

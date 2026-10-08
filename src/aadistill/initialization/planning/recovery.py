@@ -1285,6 +1285,7 @@ class ObservedRecoveryProtocol:
 def observe_recovery_protocol(run_dir: str | Path, *,
                               repo_root: str | Path | None = None,
                               pack_root: str | Path | None = None,
+                              resolve_path: Callable[[str], str] | None = None,
                               strict: bool = True) -> ObservedRecoveryProtocol:
     """Read a completed run's artifacts and reconstruct what it executed.
 
@@ -1357,7 +1358,13 @@ def observe_recovery_protocol(run_dir: str | Path, *,
                 "pack_blocks_sha256 (no repo_root given, so the pack the run "
                 "consumed cannot be re-hashed)")
         else:
-            blocks = root / data_dir / "blocks.npz"
+            #: The run's manifest spells `data_dir` as it was when the run
+            #: executed. A caller whose repository has since relocated the
+            #: pack supplies `resolve_path` (P3: an instance fact arrives as
+            #: a callable); the recorded spelling itself is evidence and is
+            #: never rewritten.
+            current_dir = resolve_path(data_dir) if resolve_path else data_dir
+            blocks = root / current_dir / "blocks.npz"
             if not blocks.is_file():
                 obs.missing.append(
                     f"pack_blocks_sha256 (the consumed pack {blocks} is not on "

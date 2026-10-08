@@ -1008,7 +1008,7 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     # v3 since the scorer relocation. The contract this run BINDS is the live
     # one; the historical records keep saying v2, which is what makes an old
     # result refuse rather than silently mix identities.
-    assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v3"
+    assert sa["scoring_contract"]["contract"] == "recovery_search_scoring@v4"
     assert {"artifact", "manifest_sha256", "content_sha256"} <= set(sa["battery"])
 
 
@@ -1302,7 +1302,8 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
                         ("autoinit_device_canary_launch", ())):
         import importlib.util
         s = importlib.util.spec_from_file_location(
-            name, REPO / f"scripts/pod/{name}.py")
+            name, next(q for q in sorted((REPO / "scripts").rglob(f"{name}.py"))
+                       if "__pycache__" not in q.parts))
         m = importlib.util.module_from_spec(s)
         sys.modules[name] = m
         s.loader.exec_module(m)
@@ -1406,8 +1407,11 @@ def test_each_launcher_names_its_own_authorization_to_setup():
     import importlib.util
 
     def spec_for(name, extra=()):
-        s = importlib.util.spec_from_file_location(
-            name, REPO / f"scripts/pod/{name}.py")
+        #: launchers live with their owners; basenames stay unique
+        hits = [p for p in sorted((REPO / "scripts").rglob(f"{name}.py"))
+                if "__pycache__" not in p.parts]
+        assert len(hits) == 1, f"{name}.py: expected one owner, found {hits}"
+        s = importlib.util.spec_from_file_location(name, hits[0])
         m = importlib.util.module_from_spec(s)
         sys.modules[name] = m
         s.loader.exec_module(m)

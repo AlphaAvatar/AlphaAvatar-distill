@@ -388,7 +388,7 @@ def test_the_driver_writes_only_into_its_own_workdir():
     to share a name with Search-1's. A filename is not a location, and a test
     that confuses the two refuses a correct session.
     """
-    text = (REPO / "scripts/pod/"
+    text = (REPO / "scripts/stages/stage-1/phase_c2_full_search/"
             "autoinit_phase_c2_full_search_driver.py").read_text()
     for frozen_run in ("phase_c2/runs/attempt4",
                        "phase_c2_baseline_completion/runs",

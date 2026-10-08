@@ -86,8 +86,22 @@ CONTINUATION_ONLY_HARNESS_FILES: tuple[str, ...] = (
 #: Deriving is not broadening. `PHASE_A_HARNESS_SOURCE_FILES_V1` is unchanged and
 #: does not mention this session; the two digests are different numbers over
 #: different sets, and each moves only when its own executable moves.
+def _current(rel: str) -> str:
+    """A Phase-A member at its CURRENT address.
+
+    `PHASE_A_HARNESS_SOURCE_FILES_V1` keeps its freeze-time spellings — it is
+    the record of what Phase A executed — while this derivation describes what
+    a continuation session would execute NOW, so each inherited member is
+    resolved through the historical-path table before entering the set.
+    """
+    from shared.run_layout import resolve_historical
+
+    return resolve_historical(rel)
+
+
 RECOVERY_CONTINUATION_HARNESS_FILES_V1: tuple[str, ...] = tuple(sorted(
-    (set(PHASE_A_HARNESS_SOURCE_FILES_V1) - set(SEARCH_ONLY_HARNESS_FILES))
+    ({_current(p) for p in PHASE_A_HARNESS_SOURCE_FILES_V1}
+     - set(SEARCH_ONLY_HARNESS_FILES))
     | set(CONTINUATION_ONLY_HARNESS_FILES)))
 
 

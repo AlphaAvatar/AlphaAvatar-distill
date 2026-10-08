@@ -318,7 +318,9 @@ def test_install_to_alone_would_over_stage(c1_setup):
     over-generous model being removed.
     """
     parents = {a.install_to for a in c1_setup.local_assets}
-    assert parents == {"artifacts/stages/stage-1", "artifacts/stages/stage-3"}
+    assert parents == {"artifacts/stages/stage-1",
+                       "artifacts/stages/stage-1/batteries",
+                       "artifacts/stages/stage-1/phase_c1/batteries"}
     for a in c1_setup.local_assets:
         assert a.repo_path == f"{a.install_to}/{a.dest_name}", (
             "the staged tree is install_to/dest_name; if that stops holding, "

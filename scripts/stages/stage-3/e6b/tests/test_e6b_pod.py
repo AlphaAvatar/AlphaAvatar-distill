@@ -15,7 +15,7 @@ import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[5]
-POD = REPO / "scripts/pod"
+POD = REPO / "scripts/stages/stage-3/e6b"
 SETUP = POD / "e6b_setup.sh"
 DRIVER = POD / "e6b_driver.py"
 LAUNCH = POD / "e6b_launch.sh"
