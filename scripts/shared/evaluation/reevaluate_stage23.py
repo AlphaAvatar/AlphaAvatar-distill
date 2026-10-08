@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Post-hoc re-analysis of every retained model under the clarified stage objectives.
 
-    PYTHONPATH=src python scripts/evaluation/reevaluate_stage23.py \
+    PYTHONPATH=src python scripts/shared/evaluation/reevaluate_stage23.py \
         --out artifacts/audit/stage23_reevaluation.json
 
 **Exploratory and post-hoc.** It re-reads retained artifacts under an evaluation
@@ -32,7 +32,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
@@ -41,12 +41,12 @@ from aadistill.evaluation import usable_rollout as ur          # noqa: E402
 from aadistill.evaluation.behavior import split_generation     # noqa: E402
 from aadistill.evaluation.strict_answer import score_numeric   # noqa: E402
 from aadistill.infrastructure.env import code_state            # noqa: E402
-from run_three_mode_diagnostic import score                    # noqa: E402
+from stages.d0.run_three_mode_diagnostic import score                    # noqa: E402
 
 AUDIT = REPO_ROOT / "artifacts/audit"
-E1 = REPO_ROOT / "artifacts/eval/e1"
-REF = REPO_ROOT / "artifacts/eval/e2diag_rescored_v2"
-STAGE1 = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0"
+E1 = REPO_ROOT / "artifacts/stages/stage-3/eval/e1"
+REF = REPO_ROOT / "artifacts/stages/stage-3/eval/e2diag_rescored_v2"
+STAGE1 = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0"
 
 # Stage 2/3 candidates that carry the full three-mode free-rollout schema.
 THREE_MODE = ["P0-real-sa", "P0-real-sb",
@@ -80,7 +80,7 @@ def three_mode_arm(alias: str) -> dict:
     # scorer at 0.1533 -- a 23x difference that would have made every arm
     # generated before the fix look catastrophically worse than the ones after.
     sessions = {}
-    sp = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
+    sp = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
     if sp.is_file():
         for line in sp.open():
             s_ = json.loads(line)

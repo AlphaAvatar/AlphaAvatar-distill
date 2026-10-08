@@ -98,16 +98,16 @@ from fetch import fetch
 # box (where the file happens to exist) and fails on the pod.
 fetch('stage3_recovery_corpus_v2/ladder_uniform',
       ['blocks.npz', 'ladder.json', 'audit.jsonl'],
-      '/workspace/aad/artifacts/stage3/ladder_uniform_probe')
+      '/workspace/aad/artifacts/shared/instruments/ladder_uniform_probe')
 fetch('stage3_recovery_corpus_v2', ['sessions.jsonl'],
-      '/workspace/aad/artifacts/stage3/corpus_v2')
+      '/workspace/aad/artifacts/stages/stage-3/corpus_v2')
 "
 python3 - <<'PYEOF'
 import hashlib, sys
 want = {
-    '/workspace/aad/artifacts/stage3/ladder_uniform_probe/blocks.npz':
+    '/workspace/aad/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz':
         '6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c',
-    '/workspace/aad/artifacts/stage3/corpus_v2/sessions.jsonl':
+    '/workspace/aad/artifacts/stages/stage-3/corpus_v2/sessions.jsonl':
         '2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd',
 }
 for p, sha in want.items():
@@ -117,7 +117,7 @@ for p, sha in want.items():
         sys.exit(f'FROZEN ASSET MISMATCH {p}: {got}')
 print('frozen evaluation assets verified')
 PYEOF
-test ! -d "$REPO/artifacts/stage3/ladder_uniform"   # no training pack, by design
+test ! -d "$REPO/artifacts/stages/stage-3/ladder_uniform"   # no training pack, by design
 mark DATA_READY
 
 say "training env via uv sync (needed for forced mode and the test suite)"
@@ -184,11 +184,11 @@ from fetch import fetch
 fetch('stage1/qwen3_0p6b_init_v0/checkpoint',
       ['config.json', 'generation_config.json', 'model.safetensors',
        'tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'],
-      '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
+      '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint')
 "
 python3 -c "
 import hashlib, sys
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
 h = hashlib.sha256(open(p,'rb').read()).hexdigest()
 want = '86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54'
 print('stage1 init sha256', h)
@@ -203,12 +203,12 @@ mark INIT_READY
 # so the launcher joins the upload and runs the same script again over all six.
 # `--stores relay` is what makes that split explicit rather than accidental.
 say "staging and hash-verifying the four relay checkpoints"
-/opt/train/bin/python "$REPO/scripts/pod/e6_stage_checkpoints.py" \
+/opt/train/bin/python "$REPO/scripts/stages/stage-3/e6/e6_stage_checkpoints.py" \
     --registration "$REPO/logs/stages/stage-3/e6/analyses/e6_registration.json" \
     --relay-dest /workspace/ckpt \
     --devbox-src /workspace/ckpt_local \
     --stores relay \
-    --init /workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+    --init /workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
     --out /workspace/aad/artifacts/audit/e6_checkpoint_manifest.json
 mark CKPT_READY
 
@@ -219,7 +219,7 @@ import sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
 from transformers import AutoConfig, AutoModelForCausalLM
 from aadistill.models.student import assert_rope_matches_config
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint'
 cfg = AutoConfig.from_pretrained(p)
 m = AutoModelForCausalLM.from_config(cfg)
 base = assert_rope_matches_config(m, cfg, p)
@@ -242,8 +242,8 @@ import hashlib, json, sys
 from pathlib import Path
 sys.path.insert(0, 'scripts/evaluation')
 from diagnose_training_recall import rung_session_ids, stratified_sample
-PACK = Path('artifacts/stage3/ladder_uniform_probe')
-SESS = Path('artifacts/stage3/corpus_v2/sessions.jsonl')
+PACK = Path('artifacts/shared/instruments/ladder_uniform_probe')
+SESS = Path('artifacts/stages/stage-3/corpus_v2/sessions.jsonl')
 want = set(rung_session_ids(PACK, 860000))
 rung = [json.loads(l) for l in SESS.open() if l.strip() and json.loads(l)['id'] in want]
 incl = [s for s in rung if s.get('correct') is True]

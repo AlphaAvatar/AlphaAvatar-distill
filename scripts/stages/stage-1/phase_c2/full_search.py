@@ -50,8 +50,8 @@ from aadistill.governance.closure import ClosureError, derive, digest_of
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import LocalAsset
 
-from experiments.phase_c2 import full_search_space as FS
-from experiments.phase_c2.session import C2Authorization, C2ResourceScope
+from stages.phase_c2 import full_search_space as FS
+from stages.phase_c2.session import C2Authorization, C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -69,15 +69,15 @@ AUTHORIZED_STAGES: tuple[str, ...] = ("bind_identities", "full_joint_search",
 
 #: What this session executes.
 ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_phase_c2_full_search_launch.py",
-    "scripts/pod/autoinit_phase_c2_full_search_driver.py",
+    "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py",
+    "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py",
     #: The assembler and the issuer, because the code that decides what the
     #: AUTHORIZATION says belongs to the executable identity that authorization
     #: binds. An issuer outside the digest could change what a grant means
     #: without changing the digest the grant commits to.
-    "scripts/experiments/stage-1/phase_c2/full_search_authorization.py",
-    "scripts/autoinit/issue_c2_full_search_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c2/full_search_authorization.py",
+    "scripts/stages/stage-1/phase_c2_full_search/issue_c2_full_search_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Non-python inputs whose BYTES decide what runs, and which travel in the
@@ -328,7 +328,7 @@ def peak_resident_gib(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     applied), so a newly generated child can never be confused with an ancestor
     of the same class when the pruned ones are subtracted.
     """
-    from experiments import search_cost_model as _M
+    from shared import search_cost_model as _M
 
     FS.register_c2_operators()
     space = FS.full_joint_space(repo_root)
@@ -667,7 +667,7 @@ def staged_assets(repo_root: str | Path = REPO_ROOT) -> tuple[LocalAsset, ...]:
     third profile is covered without anyone remembering.
     """
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     #: Registered HERE rather than assumed. `get_profile` raises on an empty
     #: registry and this project has already lost a paid pod to exactly that:
@@ -713,7 +713,7 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
         PROTOCOL, PRICING,
         "configs/experiments/phase_c2/frozen_assets.json",
         "configs/experiments/phase_c2/full_search_authorization.json",
-        "scripts/pod/autoinit_preflight_setup.sh",
+        "scripts/shared/pod/autoinit_preflight_setup.sh",
         *tracked_non_source_inputs(),
     )
 

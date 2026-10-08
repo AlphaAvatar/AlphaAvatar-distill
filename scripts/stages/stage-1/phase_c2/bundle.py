@@ -64,7 +64,7 @@ def c2_authorization_path(run_id: str | None = None,
     issuer, the launcher gate and the bundle check cannot disagree about which
     file the pod will load.
     """
-    from experiments.phase_c2.session import c2_authorization_path as declared
+    from stages.phase_c2.session import c2_authorization_path as declared
 
     return declared(run_id, stage_id)
 
@@ -77,7 +77,7 @@ def c2_executable_set(repo_root: str | Path = REPO) -> tuple[str, tuple[str, ...
     digest over another can never pass its own round-trip, because the gate
     re-digests the declared set.
     """
-    from experiments.phase_c2.session import c2_harness_digest
+    from stages.phase_c2.session import c2_harness_digest
 
     live = c2_harness_digest(repo_root)
     return live["digest"], tuple(f["path"] for f in live["files"])

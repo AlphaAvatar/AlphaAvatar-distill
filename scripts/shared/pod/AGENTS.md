@@ -20,11 +20,11 @@ correct `setsid nohup … < /dev/null & disown` form and blocked for 434 minutes
 anyway — byte-identical to E6's, which returned in 74 s. Start the driver with:
 
 ```bash
-JOB=$(python3 scripts/pod/start_job.py --host "$HOST" --port "$PORT" \
+JOB=$(python3 scripts/shared/pod/start_job.py --host "$HOST" --port "$PORT" \
         --job-id e7_driver --workdir /workspace/aad \
         --log /workspace/e7_run.log --status /workspace/e7.status \
         --env TEACHER_REVISION="$TEACHER_REVISION" \
-        --command "/opt/train/bin/python scripts/pod/e7_driver.py --stage all")
+        --command "/opt/train/bin/python scripts/stages/stage-3/e7/e7_driver.py --stage all")
 ```
 
 It returns within `start_timeout + verify` whether or not the channel closes,
@@ -35,7 +35,7 @@ prints a durable job descriptor (pid, log, status, marker paths), and exits 3 �
 the pod is created:
 
 ```bash
-setsid nohup python3 scripts/pod/watchdog.py \
+setsid nohup python3 scripts/shared/pod/watchdog.py \
   --pod-id "$POD_ID" --session-start-epoch "$(cat "$SCR/pod_start_epoch")" \
   --price-per-hour 0.99 --hard-minutes "$HARD_MINUTES" \
   --authorized-usd "$AUTHORIZED_USD" --journal "$SCR/watchdog.jsonl" \
@@ -56,13 +56,13 @@ has no verdict named `IDLE`.
 **4. Collect artifacts from a declared manifest, and gate teardown on it.**
 
 ```bash
-python3 scripts/pod/collect_artifacts.py manifest --root artifacts \
+python3 scripts/shared/pod/collect_artifacts.py manifest --root artifacts \
   --spec configs/<session>/artifacts.json --out /workspace/manifest.json
-python3 scripts/pod/collect_artifacts.py archive --manifest … --out …
-python3 scripts/pod/collect_artifacts.py verify-archive --manifest … --archive …
+python3 scripts/shared/pod/collect_artifacts.py archive --manifest … --out …
+python3 scripts/shared/pod/collect_artifacts.py verify-archive --manifest … --archive …
 # … transfer …
-python3 scripts/pod/collect_artifacts.py verify-local --manifest … --root "$STORE"
-python3 scripts/pod/collect_artifacts.py gate --state "$SCR/gate.json"
+python3 scripts/shared/pod/collect_artifacts.py verify-local --manifest … --root "$STORE"
+python3 scripts/shared/pod/collect_artifacts.py gate --state "$SCR/gate.json"
 ```
 
 The spec **must** declare `train_log.jsonl` and `run_manifest.json` as required
@@ -99,7 +99,7 @@ event stream may not exist only inside an ephemeral pod until teardown.
 | `score_refs.sh` | scores reference checkpoints on `eval_behavior_v0` **before training**, so every arm is comparable on one device and eval bugs surface in minutes, not after hours of training; marker `REFS_SCORED` |
 | `train.sh` | `train.sh <RUN_NAME> <CONFIG> [--resume]`; markers `TRAIN_DONE:<run>` / `TRAIN_FAILED:<run>` |
 | `post_run.sh` | `post_run.sh <RUN_NAME> <CONFIG> <STEP_TAG>`; gate evals (bf16 holdout, INT8 both scopes, `eval_behavior_v0`, gen smoke) + hashes + HF upload; marker `POST_DONE:<run>` |
-| `orchestrate.sh` | dev-box driver: `POD_ID=… HOST=… PORT=… bash scripts/pod/orchestrate.sh`; loops arms, fetches, verifies, reports, commits, tears down |
+| `orchestrate.sh` | dev-box driver: `POD_ID=… HOST=… PORT=… bash scripts/shared/pod/orchestrate.sh`; loops arms, fetches, verifies, reports, commits, tears down |
 | `verify_and_report.py` | `verify --run <name>` (independent HF upload check) and `report --run a,b` (multi-arm write-up + mechanical decision rules) |
 | `hashes_transfer.txt` / `hashes_ckpt.txt` | sha256 manifests, re-verified pod-side by `setup.sh` and again by the orchestrator |
 

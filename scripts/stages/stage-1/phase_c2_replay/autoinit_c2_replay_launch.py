@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Run the replay-only artifact reconstruction on one L40S, and bring the leaves home.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_c2_replay_launch.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py \
         --run-id attempt1 --max-price 1.09
 
 One pod, five digest-pinned paths, five checkpoints off the pod and verified on
@@ -34,7 +34,7 @@ import tempfile
 from collections.abc import Mapping
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -49,17 +49,17 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     ignores_for_selection)
 
-from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
-from experiments.deployment import deployment_commands  # noqa: E402
-from experiments.phase_c2 import replay as RG  # noqa: E402
-from experiments.phase_c2 import replay_bundle as RT  # noqa: E402
-from experiments.phase_c2 import replay_pod_environment as RPE  # noqa: E402
-from experiments.phase_c2 import replay_specs as RS  # noqa: E402
-from experiments.run_layout import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
+from shared.deployment import deployment_commands  # noqa: E402
+from stages.phase_c2 import replay as RG  # noqa: E402
+from stages.phase_c2 import replay_bundle as RT  # noqa: E402
+from stages.phase_c2 import replay_pod_environment as RPE  # noqa: E402
+from stages.phase_c2 import replay_specs as RS  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run,
     present_roles, record_run, rel_run_dir, write_run_readmes,
 )
-from phase_a_frozen import TEACHER_REVISION  # noqa: E402
+from stages.phase_a.phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
 EXPERIMENT_ID = "phase_c2_replay"
 STAGE_ID = "1"
@@ -422,7 +422,7 @@ def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
     the exact failure this session exists to repair, reproduced by the code
     meant to repair it.
     """
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     scr = Path(ctx.args.scr)
     out: list[Path] = []
@@ -633,7 +633,7 @@ def leaves_secured(ctx: SessionContext, fetched: list) -> tuple[bool, str]:
 
 
 def driver_command(ctx: SessionContext, plan) -> str:
-    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c2_replay_driver.py "
+    return (f"/opt/train/bin/python {REPO}/scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_driver.py "
             f"--workdir {WORKDIR} --leaf-dir {LEAF_DIR} "
             f"--audit-dir {AUDIT_DIR} --status-path {STATUS} "
             f"--image-digest '{ctx.image_digest}' "
@@ -716,9 +716,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", "")),
         authorization_loader=RG.ReplayAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=RG.PLAN_ID,
         plan_hash=RG.plan_hash(REPO_ROOT),
@@ -904,8 +904,8 @@ def main() -> int:
                       "reconstructs_selection": RS.SELECTION_SHA256,
                       "source_session_commit": RS.ATTEMPT3_SESSION_COMMIT},
                 implementation={
-                    "launcher": "scripts/pod/autoinit_c2_replay_launch.py",
-                    "driver": "scripts/pod/autoinit_c2_replay_driver.py"},
+                    "launcher": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py",
+                    "driver": "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_driver.py"},
                 status={"authorizes": "nothing",
                         "terminates_at": "reconstruct",
                         "decides": "nothing — it restores artifacts behind a "

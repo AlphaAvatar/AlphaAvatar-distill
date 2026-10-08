@@ -1,7 +1,7 @@
 """Build the frozen initializer-state evaluation suite (role STATE_EVALUATION).
 
-    PYTHONPATH=src python scripts/data/build_state_eval_suite.py \
-        --out artifacts/stage1/state_eval_v1
+    PYTHONPATH=src python scripts/shared/data/build_state_eval_suite.py \
+        --out artifacts/stages/stage-1/state_eval_v1
 
 Its **only** job is cheap step-0 scoring of materialized search states — every
 intermediate and every complete leaf — against the **original teacher**, for beam
@@ -43,7 +43,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
@@ -51,7 +51,7 @@ from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.data.sessions import render_session, render_system_block  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from build_e8_calibration import (  # noqa: E402
+from stages.e8.build_e8_calibration import (  # noqa: E402
     SPECIAL,
     prompt_text,
     rung_source_ids,
@@ -116,7 +116,7 @@ GENERAL_DOC_CHAR_MIN = 500
 TEACHER_ID = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 #: The Stage-1 checkpoint carries the teacher's tokenizer and chat template.
-TOKENIZER_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+TOKENIZER_DIR = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 #: Shingle size and threshold for near-duplicate rejection against the training
@@ -411,13 +411,13 @@ def build_general_items(docs_path: Path, tokenizer, used_indices: set[str]):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
-    ap.add_argument("--battery", default="artifacts/eval/battery_v2")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/state_eval_v1")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
+    ap.add_argument("--battery", default="artifacts/stages/stage-3/eval/battery_v2")
     ap.add_argument("--general-docs",
-                    default="artifacts/stage1/e8_calibration_v1/general_docs.jsonl")
+                    default="artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl")
     # 3.4x margin over the 0.86M probe rung. Wider than the probes need, narrower
     # than E8a's 5.5M: at 5.5M the surviving tool pool cannot reach the
     # `tool_close` floor, and the correct response to that is to widen the pool
@@ -552,7 +552,7 @@ def main() -> None:
                          "sha256": sha256_file(REPO_ROOT / args.sessions)},
             "general_docs": {"path": args.general_docs,
                              "sha256": sha256_file(REPO_ROOT / args.general_docs),
-                             "manifest": "artifacts/stage1/e8_calibration_v1/"
+                             "manifest": "artifacts/stages/stage-1/e8_calibration_v1/"
                                          "general_docs.manifest.json",
                              "note": ("same fetched FineWeb-Edu range as the operator "
                                       "calibration set, disjoint at document level; "

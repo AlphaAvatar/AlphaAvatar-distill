@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rewrite every import of the old packages to the new module map.
 
-    PYTHONPATH=src python scripts/architecture/rewrite_imports.py --apply
+    PYTHONPATH=src python scripts/maintenance/architecture/rewrite_imports.py --apply
 
 Two kinds of edit, and the distinction matters:
 
@@ -25,10 +25,10 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(REPO / "scripts/architecture"))
+REPO = Path(__file__).resolve().parents[3]
+sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
 
-from migration_map import MAP, module_map, module_of  # noqa: E402
+from maintenance.architecture.migration_map import MAP, module_map, module_of  # noqa: E402
 
 NEW_OF_OLD = module_map()
 #: new module -> its file, so relative imports can be re-levelled

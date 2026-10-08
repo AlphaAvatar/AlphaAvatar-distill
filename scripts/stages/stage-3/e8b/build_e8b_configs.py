@@ -3,9 +3,9 @@
 
 Three cells train, one is retained:
 
-    DP  depth-only positional      <- artifacts/stage1/e8b_dp_init/checkpoint
-    DC  depth-only contribution    <- artifacts/stage1/e8b_dc_init/checkpoint
-    FC  fully compressed contrib.  <- artifacts/stage1/e8_contribution_init_v1/checkpoint
+    DP  depth-only positional      <- artifacts/stages/stage-1/e8b_dp_init/checkpoint
+    DC  depth-only contribution    <- artifacts/stages/stage-1/e8b_dc_init/checkpoint
+    FC  fully compressed contrib.  <- artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint
     FP  fully compressed position.  RETAINED: e1_r1600k_{sa,sb}_pca @ step_001761
 
 Every arm is its cell's control config with **three keys changed** — `student_path`,
@@ -15,7 +15,7 @@ scheduler, warmup, batch and accumulation, trainable-parameter patterns, precisi
 evaluation intervals, checkpoint cadence and seeds are copied byte-for-byte, so a
 session split cannot alter token exposure or the schedule.
 
-    PYTHONPATH=src python scripts/training/build_e8b_configs.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/build_e8b_configs.py
 
 `save_every` is 880 of 1,761 steps in the canonical config, which is what makes exact
 mid-arm resume possible if a session is interrupted.
@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
@@ -38,9 +38,9 @@ ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 
 # cell -> (init path, regime, hardware class the cell trains on)
 CELLS = {
-    "dp": ("artifacts/stage1/e8b_dp_init/checkpoint", "depth_only", "A100_SXM_80GB"),
-    "dc": ("artifacts/stage1/e8b_dc_init/checkpoint", "depth_only", "A100_SXM_80GB"),
-    "fc": ("artifacts/stage1/e8_contribution_init_v1/checkpoint",
+    "dp": ("artifacts/stages/stage-1/e8b_dp_init/checkpoint", "depth_only", "A100_SXM_80GB"),
+    "dc": ("artifacts/stages/stage-1/e8b_dc_init/checkpoint", "depth_only", "A100_SXM_80GB"),
+    "fc": ("artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
            "fully_compressed", "L40S_48GB"),
 }
 # The preregistered KD chunk fallback, applied to the WHOLE depth-only regime after
@@ -80,7 +80,7 @@ def main() -> int:
             cfg = dict(control)
             cfg["student_path"] = init
             cfg["run_name"] = name
-            cfg["out_dir"] = f"artifacts/stage3/{name}"
+            cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
             chunk = KD_CHUNK_BY_REGIME.get(regime)
             if chunk is not None:
                 cfg["loss"] = {**control["loss"], "kd_chunk": chunk}

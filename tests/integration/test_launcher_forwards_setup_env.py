@@ -243,7 +243,7 @@ def test_forwarded_variables_have_a_launcher_side_default(launch, setup):
     # launcher-side default rather than a weaker one: the failure is immediate
     # and named, instead of an empty string flowing into a command. The unset
     # cases are executed, not assumed, in
-    # scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py.
+    # scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py.
     # `test_launcher_forwards_every_variable_the_setup_reads` still requires the
     # launcher to forward these; only the default requirement is lifted.
     needed -= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+):\?", setup.read_text()))

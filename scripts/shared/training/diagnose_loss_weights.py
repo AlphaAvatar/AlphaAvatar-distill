@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Pre-launch numerical-safety check for a loss-weight change. CPU, no updates.
 
-    PYTHONPATH=src python scripts/training/diagnose_loss_weights.py \
-        --student artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+    PYTHONPATH=src python scripts/shared/training/diagnose_loss_weights.py \
+        --student artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         --teacher Qwen/Qwen3-4B-Thinking-2507@<rev> \
-        --pack artifacts/stage3/ladder_uniform_probe --rung 860000 \
+        --pack artifacts/shared/instruments/ladder_uniform_probe --rung 860000 \
         --blocks 4 --out artifacts/audit/loss_weight_diagnostic.json
 
 Records, on **fixed hashed initial batches** and from the exact Stage 1
@@ -37,7 +37,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402

@@ -31,15 +31,15 @@ for p in ("src", "scripts/pod", "scripts/autoinit"):
     sys.path.insert(0, str(REPO / p))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from experiments.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
-from experiments.recovery_continuation.session import CONTINUATION_ONLY_HARNESS_FILES, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, SCHEMA, SEARCH_ONLY_HARNESS_FILES, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
+from stages.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
+from stages.recovery_continuation.session import CONTINUATION_ONLY_HARNESS_FILES, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, SCHEMA, SEARCH_ONLY_HARNESS_FILES, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
 
-ISSUER = REPO / "scripts/autoinit/issue_recovery_continuation_authorization.py"
-LAUNCH = "scripts/pod/autoinit_recovery_continuation_launch.py"
-DRIVER = "scripts/pod/autoinit_recovery_continuation_driver.py"
+ISSUER = REPO / "scripts/stages/stage-1/recovery_continuation/issue_recovery_continuation_authorization.py"
+LAUNCH = "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py"
+DRIVER = "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_driver.py"
 IMPORTER = "src/aadistill/initialization/planning/stage1_import.py"
 HANDOFF = "src/aadistill/runtime/device_handoff.py"
-SEARCH = "scripts/autoinit/phase_a_search.py"
+SEARCH = "scripts/stages/stage-1/phase_a/phase_a_search.py"
 
 
 def load_module(rel, name):
@@ -104,8 +104,8 @@ def test_the_continuation_set_is_the_phase_a_set_minus_search_plus_its_own():
 def test_the_continuation_set_covers_what_this_session_executes():
     for rel in (LAUNCH, DRIVER, IMPORTER, HANDOFF,
                 "src/aadistill/runtime/leaf_durability.py",
-                "scripts/autoinit/phase_a_frozen.py",
-                "scripts/experiments/stage-1/recovery_continuation/session.py"):
+                "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+                "scripts/stages/stage-1/recovery_continuation/session.py"):
         assert rel in RECOVERY_CONTINUATION_HARNESS_FILES_V1, rel
 
 
@@ -225,7 +225,7 @@ def test_the_schema_string_is_what_does_the_refusing(tmp_path):
     This payload is a valid continuation authorization in every respect except
     the schema string, so nothing else can refuse it.
     """
-    from experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
+    from stages.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
     from aadistill.infrastructure.manifest import sha256_json
 
     payload = issued(REPO).as_dict()
@@ -297,7 +297,7 @@ def test_the_artifact_round_trips_and_is_tamper_evident(tmp_path):
 
 
 def test_the_schema_string_is_distinct():
-    from experiments.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
+    from stages.phase_a.plan import SCHEMA as PHASE_A_SCHEMA
     assert SCHEMA != PHASE_A_SCHEMA
     assert RECOVERY_CONTINUATION_AUTHORIZATION.as_dict()["schema"] == SCHEMA
 
@@ -357,7 +357,7 @@ def test_the_pod_driver_loads_the_continuation_artifact_not_the_phase_a_one():
     silently wrong number, 38% too high.
     """
     drv = load_module(DRIVER, "rca_driver")
-    from experiments.phase_a.plan import PhaseAAuthorization as PA
+    from stages.phase_a.plan import PhaseAAuthorization as PA
 
     assert drv.RecoveryContinuationDriver.AUTHORIZATION_TYPE is (
         RecoveryContinuationAuthorization)
@@ -393,7 +393,7 @@ def test_the_setup_gate_has_a_branch_for_this_session(launcher):
     assert setup.env.get("SESSION_KIND") == "recovery_continuation"
     assert "SESSION_KIND" in setup.required_env
 
-    sh = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    sh = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert '"$SESSION_KIND" = "recovery_continuation"' in sh
     assert "RecoveryContinuationAuthorization.load" in sh
     # The branch must assert the two properties that distinguish this session.
@@ -415,7 +415,7 @@ def test_the_setup_gate_block_actually_runs_against_a_real_artifact(tmp_path):
     import os
     import tempfile
 
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     lines = setup.splitlines(keepends=True)
     start = next(i for i, l in enumerate(lines)
                  if l.startswith('SESSION_KIND="${SESSION_KIND:-spend}"'))
@@ -566,7 +566,7 @@ def test_the_issuer_defaults_to_the_continuation_artifact_path():
 def test_the_module_carries_no_grant_prose():
     """A grant is a one-use decision about a particular attempt at a particular
     cumulative spend; in executable source it goes stale silently."""
-    from experiments.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED
+    from stages.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED
     assert (RECOVERY_CONTINUATION_AUTHORIZATION.granted_by
             == CONTINUATION_GRANT_PROSE_REQUIRED)
     assert "NO GRANT" in CONTINUATION_GRANT_PROSE_REQUIRED

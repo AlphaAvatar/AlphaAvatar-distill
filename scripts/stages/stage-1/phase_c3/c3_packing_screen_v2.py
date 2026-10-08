@@ -42,7 +42,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -157,8 +157,8 @@ def run(parent_dir: str, out_dir: Path, *, repo: Path, device: str,
     from aadistill.initialization.operators.register import (
         register_builtin_operators)
 
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c3 import pilot
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c3 import pilot
 
     apply_cpu_budget()
     register_builtin_adapters()

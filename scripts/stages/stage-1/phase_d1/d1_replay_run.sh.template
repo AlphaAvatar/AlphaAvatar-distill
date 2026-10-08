@@ -4,7 +4,7 @@
 # append-mode log made one attempt's abort line decide another attempt's fate.
 cd /home/ecs-user/AlphaAvatar-distill
 LOG="${AAD_ATTEMPT_LOG:-/home/ecs-user/aad-scratch/d1_replay_001.launcher.log}"
-PYTHONPATH=src .venv/bin/python scripts/pod/autoinit_d1_replay_launch.py \
+PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_d1/autoinit_d1_replay_launch.py \
   --scr /home/ecs-user/aad-scratch/d1_replay_001 \
   --run-id d1_replay_001 \
   --session-commit SESSION_COMMIT_PLACEHOLDER \

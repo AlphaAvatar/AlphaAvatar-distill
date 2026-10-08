@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The admission gate for `c1_confirmation_scoring@v1`: prove the numbers did not move.
 
-    PYTHONPATH=src python scripts/autoinit/verify_c1_scoring_equivalence.py
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c1/verify_c1_scoring_equivalence.py
 
 C1 needs a new scoring *binding* because the frozen scorer's battery pins and its
 `manifest["metrics"]` requirement make it unable to run on `c1_confirmation_v1`.
@@ -35,19 +35,19 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from score_c1_confirmation import battery_manifest, score_battery  # noqa: E402
+from stages.phase_c1.score_c1_confirmation import battery_manifest, score_battery  # noqa: E402
 
-from experiments.phase_c1.scoring import C1_SCORING_SEMANTIC_PARENT, C1_SCORING_SEMANTIC_PARENT_DIGEST, c1_scoring_contract  # noqa: E402
-from experiments.source_sets import recovery_scoring_contract  # noqa: E402
+from stages.phase_c1.scoring import C1_SCORING_SEMANTIC_PARENT, C1_SCORING_SEMANTIC_PARENT_DIGEST, c1_scoring_contract  # noqa: E402
+from shared.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-HISTORICAL_BATTERY = REPO_ROOT / "artifacts/stage3/recovery_search_v2"
-FROZEN_SCORER = REPO_ROOT / "scripts/autoinit/score_recovery_search.py"
+HISTORICAL_BATTERY = REPO_ROOT / "artifacts/stages/stage-1/batteries/recovery_search_v2"
+FROZEN_SCORER = REPO_ROOT / "scripts/shared/evaluation/score_recovery_search.py"
 OUT = REPO_ROOT / "logs/stages/stage-1/phase_c1/results/scoring_equivalence.json"
 
 #: Where retained historical evidence lives on a dev box. Searched, not required:
@@ -208,7 +208,7 @@ def main() -> int:
             "NOT covered by this gate: correct_but_unusable is 0 on every "
             f"retained probe ({uncovered} of {len(record['cases'])} have any), so "
             "the implication never fires in historical evidence. Covered directly "
-            "in scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py against the frozen "
+            "in scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py against the frozen "
             "score_recovery_row, which C1 imports unmodified."),
         "c1_battery_rows": (
             "this gate runs on recovery_search_v2 by construction — it is the only "

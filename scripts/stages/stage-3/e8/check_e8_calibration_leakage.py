@@ -29,13 +29,13 @@ Four independent checks, all fail-closed:
    build of the set contained one, and it would have calibrated the depth map on
    the teacher-native held-out CE the step-0 comparison reports.
 
-    python3 scripts/data/check_e8_calibration_leakage.py \\
-        --calibration artifacts/stage1/e8_calibration_v1 \\
-        --pack artifacts/stage3/ladder_uniform_probe \\
-        --sessions artifacts/stage3/corpus_v2/sessions.jsonl \\
+    python3 scripts/stages/stage-3/e8/check_e8_calibration_leakage.py \\
+        --calibration artifacts/stages/stage-1/e8_calibration_v1 \\
+        --pack artifacts/shared/instruments/ladder_uniform_probe \\
+        --sessions artifacts/stages/stage-3/corpus_v2/sessions.jsonl \\
         --reserved data/eval_behavior_v0/prompts.jsonl \\
-        --reserved 'artifacts/eval/battery_v2/*.jsonl' \\
-        --out artifacts/stage1/e8_calibration_v1/leakage.json
+        --reserved 'artifacts/stages/stage-3/eval/battery_v2/*.jsonl' \\
+        --out artifacts/stages/stage-1/e8_calibration_v1/leakage.json
 
 Exit codes: 0 clean; 6 leakage, or an input that could not be read.
 """
@@ -50,7 +50,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
@@ -58,7 +58,7 @@ from aadistill.data.ladder import select_val_blocks  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
-from check_stream_disjointness import row_text  # noqa: E402
+from stages.e7.check_stream_disjointness import row_text  # noqa: E402
 
 
 def prompt_text(session: dict) -> str:
@@ -92,9 +92,9 @@ def consumed(audit_path: Path, n_blocks: int):
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
-    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
+    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--reserved", action="append", default=[])
     ap.add_argument("--out", default="")

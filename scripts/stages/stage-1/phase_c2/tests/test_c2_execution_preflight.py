@@ -79,7 +79,7 @@ def registered():
     the registry — so it is asked in a subprocess by
     `test_the_production_registration_is_sufficient_on_an_empty_registry`.
     """
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
     return True
@@ -88,11 +88,11 @@ def registered():
 @pytest.fixture(scope="module")
 def c2(registered):
     """Launcher, driver, session, plan, emitted command and parsed command."""
-    import autoinit_phase_c2_driver as driver
+    from stages.phase_c2 import autoinit_phase_c2_driver as driver
     from support.session_specs import load_session_launcher, session_args
 
     from aadistill.runtime.staging_contract import derive_contract
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         c2_hard_ceiling_usd, c2_price_per_hour_usd,
     )
 
@@ -128,7 +128,7 @@ def test_the_launcher_and_driver_modules_load(c2):
 
 def test_the_experiment_layer_loads():
     """Every module the driver imports at stage time, imported now instead."""
-    from experiments.phase_c2 import baseline, comparison, search_space, session
+    from stages.phase_c2 import baseline, comparison, search_space, session
 
     assert session.SCHEMA.startswith("aadistill.autoinit.c2_authorization/")
     assert comparison.FILENAME == "c2_baseline_comparison.json"
@@ -142,7 +142,7 @@ def test_the_search_seam_accepts_the_conditional_hook():
     them: the space would be the whole registry and B would never be resolved."""
     import inspect
 
-    import phase_a_search
+    from stages.phase_a import phase_a_search
 
     params = inspect.signature(phase_a_search.run_phase_a_search).parameters
     for needed in ("conditional_candidates", "allowed_impls", "impl_profiles",
@@ -160,7 +160,7 @@ def test_the_four_search_implementations_resolve(registered):
     from aadistill.initialization.operators.base import (
         get_implementation, registered_implementations,
     )
-    from experiments.phase_c2.search_space import C2_ALLOWED_IMPLS
+    from stages.phase_c2.search_space import C2_ALLOWED_IMPLS
 
     available = set(registered_implementations())
     for impl_id in C2_ALLOWED_IMPLS:
@@ -185,7 +185,7 @@ def test_the_production_registration_is_sufficient_on_an_empty_registry():
         "from aadistill.initialization.operators.base import "
         "registered_implementations\n"
         "assert not registered_implementations(), registered_implementations()\n"
-        "from experiments.phase_c2.search_space import ("
+        "from stages.phase_c2.search_space import ("
         "C2_ALLOWED_IMPLS, register_c2_operators)\n"
         "register_c2_operators()\n"
         "have = set(registered_implementations())\n"
@@ -202,7 +202,7 @@ def test_the_production_registration_is_sufficient_on_an_empty_registry():
 
 def test_both_calibration_profiles_are_registered_and_materialized(registered):
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2.search_space import C2_PROFILE_IDS
+    from stages.phase_c2.search_space import C2_PROFILE_IDS
 
     for qualified_id in C2_PROFILE_IDS:
         profile = get_profile(qualified_id)
@@ -276,7 +276,7 @@ def test_both_mixtures_resolve_against_their_content_hashes(registered):
     """`resolve()` re-hashes the items file, so a drifted or half-staged mixture
     refuses here rather than silently changing every operator's statistics."""
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2.search_space import C2_PROFILE_IDS
+    from stages.phase_c2.search_space import C2_PROFILE_IDS
 
     for qualified_id in C2_PROFILE_IDS:
         items = get_profile(qualified_id).resolve(REPO)
@@ -287,9 +287,9 @@ def test_both_mixtures_resolve_against_their_content_hashes(registered):
 def test_the_state_eval_suite_loads_from_its_staged_directory():
     """The one metric the whole search ranks on. Without it there is no ranking,
     and it travels as a local asset because it has never been uploaded."""
-    from load_state_eval import load as load_suite
+    from shared.evaluation.load_state_eval import load as load_suite
 
-    suite, items, manifest = load_suite(REPO / "artifacts/stage1/state_eval_v1")
+    suite, items, manifest = load_suite(REPO / "artifacts/stages/stage-1/state_eval_v1")
     assert suite.suite_hash and suite.domains
     assert items, "the state-eval suite loaded no items"
     assert manifest["suite_id"] == suite.suite_id
@@ -298,7 +298,7 @@ def test_the_state_eval_suite_loads_from_its_staged_directory():
 def test_the_canonical_control_checkpoint_is_readable():
     """`run_phase_a_search` injects it as the measured control and verifies its
     frozen single-file sha256; a missing config aborts after the search."""
-    from phase_a_frozen import CANONICAL_INIT
+    from stages.phase_a.phase_a_frozen import CANONICAL_INIT
 
     directory = REPO / CANONICAL_INIT
     assert (directory / "model.safetensors").is_file()
@@ -309,7 +309,7 @@ def test_the_canonical_control_checkpoint_is_readable():
 # --- E. the frozen space and the identity a grant binds ---------------------
 
 def test_the_space_is_the_frozen_four_operator_search(registered):
-    from experiments.phase_c2.search_space import (
+    from stages.phase_c2.search_space import (
         C2_ALLOWED_IMPLS, C2_IMPL_PROFILES, C2_PROFILE_IDS,
     )
 
@@ -343,7 +343,7 @@ def test_the_plan_hash_is_stable_and_is_what_the_launcher_binds(c2):
     """A grant binds this value and `plan_identity_gate` re-derives it at
     launch; if it moved between issuance and launch the session would search a
     space the authorization does not describe."""
-    from experiments.phase_c2.session import c2_plan_hash
+    from stages.phase_c2.session import c2_plan_hash
 
     live = c2_plan_hash()
     assert len(live) == 64 and live == c2_plan_hash()
@@ -356,7 +356,7 @@ def test_the_plan_hash_is_stable_and_is_what_the_launcher_binds(c2):
 def test_the_frozen_baseline_construction_reproduces(registered):
     """The cheapest gate in the session: a $0 refusal here beats a 27-minute
     rebuild of the wrong baseline."""
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     spec = B.frozen_baseline_spec(device="cuda")
     assert spec.spec_hash == B.B_SPEC_HASH
@@ -366,7 +366,7 @@ def test_the_frozen_baseline_construction_reproduces(registered):
 
 def test_the_baseline_identities_match_the_committed_c1_evidence():
     """Tracked records, so they travel in the bundle and are checkable here."""
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     prereg = load(B.PREREGISTRATION)
     arms = load(B.ARM_IDENTITIES)
@@ -405,7 +405,7 @@ def test_the_artifact_specs_name_the_paths_the_driver_writes(c2):
 def test_the_comparison_record_is_required_success_evidence(c2):
     """Without it a search winner has no B to be compared against, which is the
     evidence hole the record exists to close."""
-    from experiments.phase_c2 import comparison as C
+    from stages.phase_c2 import comparison as C
 
     entry = next(e for e in load(c2.spec.artifacts.spec_success)["entries"]
                  if e["artifact_class"] == "baseline_comparison")
@@ -418,7 +418,7 @@ def test_the_comparison_record_is_required_success_evidence(c2):
 def test_the_pricing_record_verifies_and_still_names_the_accepted_ceiling():
     """`load_pricing` refuses a record that does not match its own sha256, so a
     tampered or truncated envelope cannot reach a launch."""
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         c2_hard_ceiling_usd, c2_price_per_hour_usd, load_pricing,
     )
 

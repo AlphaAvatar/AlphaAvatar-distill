@@ -96,7 +96,7 @@ def test_the_repeatability_probe_runs_and_reports_the_beam_objectives(
     from aadistill.initialization.planning.ranking import PARETO_V1
 
     out = tmp_path / "rep.json"
-    run("scripts/autoinit/measure_state_repeatability.py",
+    run("scripts/stages/stage-1/phase_a/measure_state_repeatability.py",
         ["--checkpoint", str(tiny_teacher), "--suite", str(tiny_suite),
          "--teacher", str(tiny_teacher), "--repeats", "2", "--device", "cpu",
          "--out", str(out)])
@@ -122,7 +122,7 @@ def test_the_repeatability_probe_runs_and_reports_the_beam_objectives(
 def test_a_missing_objective_is_refused_rather_than_averaged_over(
         tiny_teacher, tiny_suite, tmp_path, monkeypatch):
     """A range over the objectives that happen to be present is a different number."""
-    source = (REPO / "scripts/autoinit/measure_state_repeatability.py").read_text()
+    source = (REPO / "scripts/stages/stage-1/phase_a/measure_state_repeatability.py").read_text()
     assert 'row = result.as_dict()["values"]' in source
     assert "the evaluation carries no" in source, (
         "a missing beam objective must raise; silently ranging over what is "
@@ -132,7 +132,7 @@ def test_a_missing_objective_is_refused_rather_than_averaged_over(
 def test_the_peak_memory_probe_runs_and_marks_a_cpu_run_as_not_the_gate(
         tiny_teacher, tmp_path):
     out = tmp_path / "peak.json"
-    run("scripts/autoinit/probe_peak_memory.py",
+    run("scripts/stages/stage-1/phase_a/probe_peak_memory.py",
         ["--teacher", str(tiny_teacher), "--device", "cpu", "--seq-len", "16",
          "--out", str(out)])
     report = json.loads(out.read_text())
@@ -144,7 +144,7 @@ def test_the_peak_memory_probe_runs_and_marks_a_cpu_run_as_not_the_gate(
 def test_the_statistics_profile_runs_and_marks_a_cpu_run_as_not_the_gate(
         tiny_teacher, tmp_path):
     out = tmp_path / "stats.json"
-    run("scripts/autoinit/profile_statistics_pass.py",
+    run("scripts/stages/stage-1/phase_a/profile_statistics_pass.py",
         ["--teacher", str(tiny_teacher), "--device", "cpu", "--tokens", "64",
          "--seq-len", "32", "--repeats", "1", "--out", str(out)])
     report = json.loads(out.read_text())
@@ -156,7 +156,7 @@ def test_the_statistics_profile_runs_and_marks_a_cpu_run_as_not_the_gate(
 
 def test_the_driver_refuses_a_smoke_artifact_as_a_gate_measurement():
     """A CPU or stand-in run must never satisfy the gate it informs."""
-    driver = (REPO / "scripts/pod/autoinit_preflight_driver.py").read_text()
+    driver = (REPO / "scripts/shared/preflight/autoinit_preflight_driver.py").read_text()
     stage1 = driver[driver.index("def stage1"):driver.index("def gate(")]
     assert '"is_gate_measurement"' in stage1 and '"is_real_teacher"' in stage1
     assert "this is a smoke artifact" in stage1
@@ -175,7 +175,7 @@ def test_the_generator_module_imports_and_its_identity_helpers_work(tiny_teacher
     both permanent controls had been paid for.
     """
     sys.path.insert(0, str(REPO / "scripts/evaluation"))
-    import uncapped_eval as ue
+    from shared.evaluation import uncapped_eval as ue
     from transformers import AutoConfig
 
     from aadistill.initialization.planning.generation import (
@@ -204,8 +204,8 @@ def test_the_generator_module_imports_and_its_identity_helpers_work(tiny_teacher
         assert key in engine
 
     # And the summary's sampling block carries the rule the protocol compares.
-    assert MAX_TOKENS_RULE in (REPO / "scripts/evaluation/uncapped_eval.py").read_text() \
-        or "MAX_TOKENS_RULE" in (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
+    assert MAX_TOKENS_RULE in (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text() \
+        or "MAX_TOKENS_RULE" in (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
 
 
 def test_the_disk_probe_runs_and_reports_both_directions(tmp_path):
@@ -213,7 +213,7 @@ def test_the_disk_probe_runs_and_reports_both_directions(tmp_path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "preflight_driver_disk", REPO / "scripts/pod/autoinit_preflight_driver.py")
+        "preflight_driver_disk", REPO / "scripts/shared/preflight/autoinit_preflight_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["preflight_driver_disk"] = mod
     spec.loader.exec_module(mod)

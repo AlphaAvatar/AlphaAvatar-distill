@@ -30,7 +30,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-BATTERY_PATH = "artifacts/stage3/c2_screening_v1"
+BATTERY_PATH = "artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1"
 IDENTITY_RECORD = "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json"
 
 #: What the screening rung may never do, from the frozen protocol. Carried into

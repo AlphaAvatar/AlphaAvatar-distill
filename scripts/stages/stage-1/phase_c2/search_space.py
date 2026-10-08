@@ -1,6 +1,6 @@
 """The Phase-C2 Search-1 space, and a structural bound on what it costs.
 
-    PYTHONPATH=src:scripts python -m experiments.phase_c2.search_space
+    PYTHONPATH=src:scripts python -m stages.phase_c2.search_space
 
 Zero cost. It loads no model, reads no checkpoint and needs no GPU: the
 branching comes from the real registry and the real `applicable_implementations`
@@ -52,19 +52,19 @@ from aadistill.initialization.planning.ranking import SCHEDULE_V1
 #: The branching-and-cost machinery, shared with every other search instance.
 #: Extracted when the C2 full joint re-search became a second consumer; the
 #: arithmetic is unchanged and this module keeps its own numbers.
-from experiments.search_cost_model import (
+from shared.search_cost_model import (
     Bound, CostModel, SearchSpace, compositions, decomposition, named_profiles,
     walk_leaves,
 )
-from experiments.search_cost_model import bound as _bound
-from experiments.search_cost_model import level_children as _level_children
-from experiments.search_cost_model import price as _price
-from experiments.search_cost_model import trajectory as _trajectory
+from shared.search_cost_model import bound as _bound
+from shared.search_cost_model import level_children as _level_children
+from shared.search_cost_model import price as _price
+from shared.search_cost_model import trajectory as _trajectory
 
 # --- identity ---------------------------------------------------------------
 #
 # Every value below is resolved from committed evidence, and
-# `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_search_space.py` re-derives each one rather than
+# `scripts/stages/stage-1/phase_c2/tests/test_phase_c2_search_space.py` re-derives each one rather than
 # restating it. Copying an identity out of a handoff message is how a search
 # gets configured for a path nobody ran.
 
@@ -185,7 +185,7 @@ ATTENTION_ACTIVATION_PROXY_FACTOR = 1.5
 
 #: This instance's cost model, handed to the shared machinery. The table and the
 #: proxy rule are Search-1's facts; the arithmetic over them is not, and lives in
-#: `experiments.search_cost_model`.
+#: `shared.search_cost_model`.
 COST = CostModel(
     minutes=MEASURED_MINUTES,
     proxies={"attention.activation_importance_v1": (
@@ -210,7 +210,7 @@ def minutes_for(impl_id: str, *, root: bool, statistic: str = "max") -> float:
 
 
 #: `Space` is `SearchSpace` with this instance's family bound. The type, the
-#: branching model and the bound all moved to `experiments.search_cost_model`
+#: branching model and the bound all moved to `shared.search_cost_model`
 #: unchanged; what stays here is which implementations, which mixtures and which
 #: measured minutes — the parts that are Search-1's rather than arithmetic.
 def Space(*, allowed_impls, profile_ids, impl_profiles, teacher, target,
@@ -272,7 +272,7 @@ def phase_b_space() -> Space:
 
 
 def _target_spec() -> ArchSpec:
-    from phase_a_frozen import TARGET_GEOMETRY
+    from stages.phase_a.phase_a_frozen import TARGET_GEOMETRY
 
     return ArchSpec.of("qwen3", TARGET_GEOMETRY)
 
@@ -280,7 +280,7 @@ def _target_spec() -> ArchSpec:
 DEPTH_IMPL = "depth.causal_kl_greedy_v1"
 
 #: Non-search pod time for a search session, in minutes. Each figure is the one
-#: this repository already plans with (`scripts/pod/autoinit_preflight_launch.py`
+#: this repository already plans with (`scripts/shared/preflight/autoinit_preflight_launch.py`
 #: uses `setup_minutes=45.0`, `transfer_minutes=6.0` and the same named phases),
 #: NOT the warm-image observations. C1 attempt 18 set up in 6 minutes; the same
 #: script on the same image and card has also taken 8.5 and over 150. Budgeting

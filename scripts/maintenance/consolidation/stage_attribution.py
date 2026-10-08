@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Which pipeline stage each experiment belongs to, and the evidence for it.
 
-    PYTHONPATH=src python scripts/consolidate/stage_attribution.py
-    PYTHONPATH=src python scripts/consolidate/stage_attribution.py --json
-    PYTHONPATH=src python scripts/consolidate/stage_attribution.py --write
+    PYTHONPATH=src python scripts/maintenance/consolidation/stage_attribution.py
+    PYTHONPATH=src python scripts/maintenance/consolidation/stage_attribution.py --json
+    PYTHONPATH=src python scripts/maintenance/consolidation/stage_attribution.py --write
 
 `--write` regenerates `logs/stages/index.json`, the machine-readable stage index
 every stage README and `logs/README.md` is rendered from. There is no second,
@@ -89,7 +89,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 STAGE_INDEX = "logs/stages/index.json"
 SCHEMA = "aadistill.logs.stage_index/v1"
@@ -162,7 +162,7 @@ STAGES = [
             "size can stand in for a corpus pass",
         ],
         outputs=[
-            E("artifacts/stage0/qwen3_4b_thinking_v1",
+            E("artifacts/stages/stage-0/qwen3_4b_thinking_v1",
               "the statistics cache Stage 1 initializes from. Outside git; "
               "regenerable from the config and the corpus"),
         ],
@@ -174,7 +174,7 @@ STAGES = [
               "the v1 recipe, which produced the cache now in use"),
         ],
         code=[
-            E("scripts/training/collect_stage0.py", "the collector"),
+            E("scripts/shared/training/collect_stage0.py", "the collector"),
         ],
         status=(
             "**Complete.** The v0 cache was lost and v1 was regenerated; the "
@@ -211,13 +211,13 @@ STAGES = [
             "rather than by rerunning the comparison",
         ],
         outputs=[
-            E("artifacts/stage1/qwen3_0p6b_init_v0",
+            E("artifacts/stages/stage-1/qwen3_0p6b_init_v0",
               "the pinned init checkpoint every Stage-3 recovery run forks "
               "from, plus the random baseline saved beside it for comparison"),
-            E("artifacts/stage1/state_eval_v1",
+            E("artifacts/stages/stage-1/state_eval_v1",
               "the state-evaluation suite the AutoInitializer search scores "
               "candidate initializations with"),
-            E("artifacts/stage1/e8_contribution_init_v1",
+            E("artifacts/stages/stage-1/e8_contribution_init_v1",
               "the contribution-guided depth variant, built for E8"),
         ],
         configs=[
@@ -294,9 +294,9 @@ STAGES = [
               "Untracked; rebuildable from the manifest and its builder"),
         ],
         code=[
-            E("scripts/data/build_stage2_v0.py", "the v0 builder"),
-            E("scripts/data/build_stage2_v1.py", "the v1 builder"),
-            E("scripts/data/build_stage3_pilot.py",
+            E("scripts/shared/data/build_stage2_v0.py", "the v0 builder"),
+            E("scripts/shared/data/build_stage2_v1.py", "the v1 builder"),
+            E("scripts/shared/data/build_stage3_pilot.py",
               "the teacher-target pilot builder"),
         ],
         status=(
@@ -317,7 +317,7 @@ STAGES = [
             "rollouts, which is what Stage 4/5 on-policy work needs from it."),
         inputs=[
             "the pinned Stage-1 init checkpoint "
-            "`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, which every arm "
+            "`artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint`, which every arm "
             "forks from so that arms differ only in what is under test",
             "the same pinned teacher, loaded to produce KD targets rather than "
             "to be imitated wholesale",
@@ -346,7 +346,7 @@ STAGES = [
             "swapping them is what several experiments below are about",
         ],
         outputs=[
-            "recovered checkpoints under `artifacts/stage3/<run_name>/`, each "
+            "recovered checkpoints under `artifacts/stages/stage-3/<run_name>/`, each "
             "with its own run manifest. Outside git; the checkpoint registry "
             "and the tombstones record which still exist and what was frozen "
             "before any were deleted",
@@ -388,16 +388,16 @@ STAGE_0 = [
               field="stage", equals="stage0_init_warmup_collection"),
             E("configs/stage0/qwen3_4b_thinking_v1.json",
               "the v1 collection config, after the cache-loss regeneration"),
-            E("scripts/training/collect_stage0.py", "the collector"),
+            E("scripts/shared/training/collect_stage0.py", "the collector"),
             E("data/warmup/warmup_v1.manifest.json",
               'purpose: "Stage 0 initialization warm-up statistics (not training data)"'),
-            E("artifacts/stage0/qwen3_4b_thinking_v1",
+            E("artifacts/stages/stage-0/qwen3_4b_thinking_v1",
               "the regenerated cache this stage produced"),
         ],
         external_material=[
             "configs/stage0/ — collection configs (source of truth; not copied here)",
             "data/warmup/ — dataset and manifests, beside the data they describe",
-            "artifacts/stage0/ — the activation cache itself, outside git",
+            "artifacts/stages/stage-0/ — the activation cache itself, outside git",
         ],
         decisions=[
             "logs/budget/decisions.md — 2026-07-12: Stage 0 caches streaming "
@@ -433,14 +433,14 @@ STAGE_1 = [
               "the initialization recipe"),
             E("configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
               "the contribution-guided depth variant E8 initialized from"),
-            E("artifacts/stage1/qwen3_0p6b_init_v0",
+            E("artifacts/stages/stage-1/qwen3_0p6b_init_v0",
               "the pinned init checkpoint every recovery run forks from"),
             E("data/warmup/holdout_v1.manifest.json",
               'purpose: "Held-out perplexity eval for Stage 1 gate"'),
         ],
         external_material=[
             "configs/stage1/ — initialization recipes",
-            "artifacts/stage1/ — init checkpoints and the state-eval suite",
+            "artifacts/stages/stage-1/ — init checkpoints and the state-eval suite",
         ],
         decisions=[],
         canonical_log_destination=None,
@@ -466,7 +466,7 @@ STAGE_1 = [
             E("configs/experiments/phase_a/recovery_policy.json",
               "the recovery battery it scores candidates with — the INSTRUMENT; "
               "the search does not produce a recovered checkpoint"),
-            E("artifacts/stage1/state_eval_v1",
+            E("artifacts/stages/stage-1/state_eval_v1",
               "the Stage-1 state-evaluation suite named by the preregistration"),
         ],
         external_material=[],
@@ -871,7 +871,7 @@ STAGE_1 = [
               "the search space and its coverage, the behavioural design "
               "derived from the measured per-seed noise, the owed GPU "
               "validation, and all three blockers. Generated by "
-              "scripts/autoinit/write_d1_design.py, which derives rather than "
+              "scripts/stages/stage-1/phase_d1/write_d1_design.py, which derives rather than "
               "transcribes",
               #: The COUNT is derived in the writer, so this pins the list
               #: rather than the sentence. `equals` on the prose would go stale
@@ -1034,7 +1034,7 @@ STAGE_1 = [
             E("logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
               "the Search-1 plan, its predicted size and its price. Authorizes "
               "nothing"),
-            E("scripts/experiments/stage-1/phase_c2/search_space.py",
+            E("scripts/stages/stage-1/phase_c2/search_space.py",
               "the configured space and the structural cost bound, both "
               "derived from committed evidence"),
         ],
@@ -1103,7 +1103,7 @@ STAGE_1 = [
               'harness includes the depth operator, recorded under its '
               'then-current path src/aadistill/autoinit/operators/depth.py',
               field="scientific_use", equals=False),
-            E("scripts/autoinit/measure_causal_depth_runtime.py", "the measurement"),
+            E("scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py", "the measurement"),
             E("src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
               "the Stage-1 structural operator whose runtime it prices — the "
               "same algorithm, cited at its LIVE path. It has moved twice: the "
@@ -1129,32 +1129,32 @@ STAGE_1 = [
         title="D-series family and source records, spanning D1/D2/D3",
         canonical_config=None,
         evidence=[
-            E("logs/shared/analyses/autoinit_d_series_battery_family.json",
+            E("logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
               "the six-role behavioural battery family: the allocation rule "
               "frozen before any outcome, the per-stratum requirement, and the "
               "shortfall. Generated by "
-              "scripts/experiments/stage-1/phase_d_series/battery_family.py",
+              "scripts/stages/stage-1/families/d_series/battery_family.py",
               #: `status` is now DERIVED from whether the realized manifest
               #: exists, so pinning its text would go stale the moment the
               #: family is built or removed. `_authorizes` is the enduring
               #: claim: this record never authorizes anything, built or not.
               field="_authorizes", equals="nothing"),
-            E("logs/shared/analyses/autoinit_d_series_family_manifest.json",
+            E("logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
               "the MANIFEST of the six built behavioural batteries: each role's "
               "realized item digest, the per-file source digests, the allocation "
               "rule id and the family_content_id. The 22 MB of items are "
               "gitignored artifacts; this record is what describes them and is "
               "enough to verify they are the ones it names. Generated by "
-              "scripts/experiments/stage-1/phase_d_series/build_batteries.py",
+              "scripts/stages/stage-1/families/d_series/build_batteries.py",
               field="allocation_rule_version", equals=3),
-            E("logs/shared/analyses/autoinit_d_series_source_evidence.json",
+            E("logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_source_evidence.json",
               "measured evidence for the candidate source extension of each "
               "short stratum: upstream row counts, overlap against the "
               "consumed pools and the recovery training corpus, renderer "
               "identity behaviour, and a near-duplicate screen of what the "
               "exact-match exclusion chain would miss. No row is called "
               "eligible. Generated by "
-              "scripts/experiments/stage-1/phase_d_series/source_evidence.py",
+              "scripts/stages/stage-1/families/d_series/source_evidence.py",
               field="_authorizes", equals="nothing"),
         ],
         external_material=[],
@@ -1184,7 +1184,7 @@ STAGE_1 = [
               "probe reuse across Phase-B and continuation-B attempts"),
             E("logs/shared/validations/depth-backend/autoinit_depth_backend_equivalence.json",
               "equivalence of the depth operator's backends"),
-            E("scripts/pod/autoinit_phase_b_driver.py",
+            E("scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py",
               "reads logs/shared/analyses/autoinit_historical_probe_reuse.json at "
               "a hard-coded path, and is named with a digest by consumed Phase-B "
               "authorizations"),
@@ -1193,8 +1193,8 @@ STAGE_1 = [
         decisions=[],
         canonical_log_destination="logs/shared/ (BLOCKED — pinned by frozen sources)",
         blocked_by=(
-            "scripts/pod/autoinit_phase_b_driver.py and "
-            "scripts/pod/autoinit_continuation_b_driver.py read these exact "
+            "scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py and "
+            "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py read these exact "
             "paths and are named with a digest by consumed Phase-B and "
             "continuation-B authorizations, now under each phase's own "
             "history/superseded_authorizations/"),
@@ -1229,16 +1229,16 @@ STAGE_2 = [
             E("data/stage2_v1/stage2_offline_v1.manifest.json",
               'purpose: "Stage 2 offline mixture v1: approved ~4.5x train '
               'scale-up for data-limited Stage 3 recovery"'),
-            E("scripts/data/build_stage2_v0.py", "the v0 builder"),
-            E("scripts/data/build_stage2_v1.py", "the v1 builder"),
-            E("artifacts/stage2/dry_run_v1_report.json", "its build gate"),
+            E("scripts/shared/data/build_stage2_v0.py", "the v0 builder"),
+            E("scripts/shared/data/build_stage2_v1.py", "the v1 builder"),
+            E("artifacts/stages/stage-2/v0/dry_run_v1_report.json", "its build gate"),
         ],
         external_material=[
             "data/stage2/, data/stage2_v1/ — mixtures and manifests, beside the "
             "data they describe",
-            "data/stage3_pilot/, artifacts/stage2_v2/ — the teacher-generated "
+            "data/stage3_pilot/, artifacts/stages/stage-2/v2/ — the teacher-generated "
             "corpus pilot",
-            "artifacts/stage2/ — build console and dry-run reports",
+            "artifacts/stages/stage-2/v0/ — build console and dry-run reports",
         ],
         decisions=[
             "logs/budget/decisions.md — 2026-07-21: Stage 2 offline mixture v0, "
@@ -1293,8 +1293,8 @@ STAGE_3 = [
             "about it. Every E-series experiment forks from its line.")),
     _s3("s2_ab", "pipeline-activity", "complete",
         "Stage-3 sub-stage 2 sizing — freeze-set A/B (`s1_ext_v0` vs `s2_blocks_v0`)", "§3",
-        evidence=[E("artifacts/stage3/s1_ext_v0/run_manifest.json", "arm A, the continuation control"),
-                  E("artifacts/stage3/s2_blocks_v0/run_manifest.json", "arm B, attention unfrozen"),
+        evidence=[E("artifacts/stages/stage-3/s1_ext_v0/run_manifest.json", "arm A, the continuation control"),
+                  E("artifacts/stages/stage-3/s2_blocks_v0/run_manifest.json", "arm B, attention unfrozen"),
                   E(INDEX, "§3: freeze-set sizing; attention-unfrozen adopted")],
         decisions=["logs/budget/decisions.md — 2026-07-25: Stage 3 sub-stage 2 "
                    "sizing, fixed-budget A/B from s1@660"],
@@ -1308,7 +1308,7 @@ STAGE_3 = [
         evidence=[E("configs/stage3/s2v1_from_init.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
-                  E("artifacts/stage3/s2v1_from_init/run_manifest.json", "its run"),
+                  E("artifacts/stages/stage-3/s2v1_from_init/run_manifest.json", "its run"),
                   E(INDEX, "§3: holdout 3.8285 at step_002700, the standing "
                            "branch point")],
         decisions=["logs/budget/decisions.md — 2026-07-27: Stage 3 sub-stage 2 "
@@ -1318,8 +1318,8 @@ STAGE_3 = [
             "input to later experiments, which does not make it one.")),
     _s3("ttb", "experiment", "complete — diagnostic, no route claim",
         "Teacher-native vs public target, 2x2 from the Stage-1 init", "§5",
-        evidence=[E("artifacts/stage3/ttb_ctrl_a/run_manifest.json", "control arm, seed a"),
-                  E("artifacts/stage3/ttb_treat_a/run_manifest.json", "treatment arm, seed a"),
+        evidence=[E("artifacts/stages/stage-3/ttb_ctrl_a/run_manifest.json", "control arm, seed a"),
+                  E("artifacts/stages/stage-3/ttb_treat_a/run_manifest.json", "treatment arm, seed a"),
                   E(INDEX, "§5.2: the corrected baseline forked from the pinned "
                            "Stage-1 init, and §5.3 the unrestricted pilot that "
                            "voided its apparent result")],
@@ -1355,8 +1355,8 @@ STAGE_3 = [
         evidence=[E("configs/stage3/p0/p0_assistant_sa.json",
                     'declares stage "stage3_recovery", run_name "p0_assistant_sa"',
                     field="stage", equals="stage3_recovery"),
-                  E("artifacts/stage3/p0_assistant_sa/run_manifest.json", "seed a run"),
-                  E("artifacts/stage3/p0_assistant_sb/run_manifest.json", "seed b run"),
+                  E("artifacts/stages/stage-3/p0_assistant_sa/run_manifest.json", "seed a run"),
+                  E("artifacts/stages/stage-3/p0_assistant_sb/run_manifest.json", "seed b run"),
                   E(INDEX, "§17: 2026-08-05, $2.75, no arm clears the P0-real "
                            "seed spread")],
         classification_reason=(
@@ -1369,7 +1369,7 @@ STAGE_3 = [
         evidence=[E("configs/stage3/p2/p2_ceheavy_sa.json",
                     'declares stage "stage3_recovery", run_name "p2_ceheavy_sa"',
                     field="stage", equals="stage3_recovery"),
-                  E("artifacts/stage3/p2_ceheavy_sa/run_manifest.json", "seed a run"),
+                  E("artifacts/stages/stage-3/p2_ceheavy_sa/run_manifest.json", "seed a run"),
                   E("configs/stage3/e4/e4_p2_r1600k_sa.json",
                     "E4 reuses the protocol this experiment established, at "
                     "another rung — a different experiment, same recipe"),
@@ -1396,10 +1396,10 @@ STAGE_3 = [
                     'declares stage "stage3_recovery", run_name "e2_d1_sa_pca"',
                     field="stage", equals="stage3_recovery"),
                   E("configs/stage3/e2/e2_d1_sb_pca.json", "the second seed arm"),
-                  E("artifacts/stage3/e2_d1_sa_pca/run_manifest.json",
+                  E("artifacts/stages/stage-3/e2_d1_sa_pca/run_manifest.json",
                     "D1 ran: its run manifest and train log are on disk"),
-                  E("artifacts/stage3/e2_d1_corpus_audit.json", "its corpus audit"),
-                  E("artifacts/stage3/e2_selection_rule_audit.json", "its selection-rule audit"),
+                  E("artifacts/stages/stage-3/e2_d1_corpus_audit.json", "its corpus audit"),
+                  E("artifacts/stages/stage-3/e2_selection_rule_audit.json", "its selection-rule audit"),
                   E("logs/stages/stage-3/e2/plans/PROPOSAL.md",
                     "its phases 2-3 proposal, registered and never authorized; "
                     "two builders name it as their pre-registration"),
@@ -1424,7 +1424,7 @@ STAGE_3 = [
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e3/analyses/e3_registration.json", "its registration"),
-                  E("artifacts/stage3/e3_a1_frozen_attn_sa/run_manifest.json", "A1 seed a")],
+                  E("artifacts/stages/stage-3/e3_a1_frozen_attn_sa/run_manifest.json", "A1 seed a")],
         canonical_log_destination="logs/stages/stage-3/e3",
         classification_reason="Config location; `a1`/`a2` are its arms."),
     _s3("e4", "experiment", "complete",
@@ -1434,7 +1434,7 @@ STAGE_3 = [
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e4/analyses/e4_registration.json", "its registration"),
-                  E("artifacts/stage3/e4_p2_r1600k_sa/run_manifest.json", "seed a run")],
+                  E("artifacts/stages/stage-3/e4_p2_r1600k_sa/run_manifest.json", "seed a run")],
         canonical_log_destination="logs/stages/stage-3/e4",
         classification_reason=(
             "Config location. It reuses the P2 protocol, which is a recipe it "
@@ -1887,7 +1887,7 @@ def document(root: Path = REPO_ROOT) -> dict:
         "_what_this_is": (
             "The stage index: which pipeline stage each experiment belongs to "
             "and the evidence for it, generated by "
-            "scripts/consolidate/stage_attribution.py. Every stage README and "
+            "scripts/maintenance/consolidation/stage_attribution.py. Every stage README and "
             "the logs/README.md stage section is rendered from this file; there "
             "is no second hand-maintained stage table. It states where an "
             "experiment belongs NOW; git history holds where its files used to "

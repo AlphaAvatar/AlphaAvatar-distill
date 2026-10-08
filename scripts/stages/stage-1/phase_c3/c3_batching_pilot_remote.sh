@@ -176,7 +176,7 @@ PY
 # passed on attempt a1 while the mixture the prefix needed was absent. A check
 # that cannot see the thing that is missing is not a check.
 say "checking the real calibration inputs resolve"
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_batching_pilot_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py \
     --check-inputs 2>&1 | tee "${OUTROOT}/check_inputs.log"
 CHK_RC=${PIPESTATUS[0]}
 if [ "$CHK_RC" -ne 0 ]; then
@@ -191,7 +191,7 @@ fi
 # found them -- each after the stage before it had succeeded. This costs
 # seconds and would have caught both before the root teacher was resident.
 say "preflight: the driver's own toy sequence, on this interpreter"
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_batching_pilot_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py \
     --toy --device cpu --out "${OUTROOT}/preflight" > "${OUTROOT}/preflight.log" 2>&1
 PRE_RC=$?
 if [ "$PRE_RC" -ne 0 ]; then
@@ -204,7 +204,7 @@ say "preflight ok: $(python3 -c "import json;print(json.load(open('${OUTROOT}/pr
 
 # --- the pilot ---------------------------------------------------------------
 say "PILOT: one prefix replay at B=1, then both arms from that one parent"
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_batching_pilot_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py \
     --out "${OUTROOT}/pilot" 2>&1 | tee "${OUTROOT}/pilot.log"
 RC=${PIPESTATUS[0]}
 say "pilot rc=${RC}"

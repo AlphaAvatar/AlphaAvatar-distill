@@ -25,7 +25,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-CHECK = REPO / "scripts/validation/c2_state_eval_certification_check.py"
+CHECK = REPO / "scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py"
 CONFIG = REPO / "configs/validation/c2_state_eval_certification.json"
 
 
@@ -486,7 +486,7 @@ def test_the_report_is_written_even_when_a_stage_raises(tmp_path, monkeypatch):
 
 
 def test_the_default_out_is_the_directory_the_launcher_collects(M):
-    """`cuda_engineering_launch.py` scp's `<repo>/artifacts/validation` back and
+    """`cuda_engineering_launch.py` scp's `<repo>/artifacts/shared/validation` back and
     passes no `--out`, so the default is what decides whether anything is
     collected at all."""
     import argparse
@@ -497,10 +497,10 @@ def test_the_default_out_is_the_directory_the_launcher_collects(M):
             parser_default = line
             break
     assert parser_default is not None
-    assert "artifacts/validation" in parser_default, (
+    assert "artifacts/shared/validation" in parser_default, (
         f"--out does not default to the collected directory: {parser_default!r}")
-    launcher = (REPO / "scripts/validation/cuda_engineering_launch.py").read_text()
-    assert "artifacts/validation" in launcher, (
+    launcher = (REPO / "scripts/shared/validation/cuda_engineering_launch.py").read_text()
+    assert "artifacts/shared/validation" in launcher, (
         "the launcher no longer collects that directory; the default is stale")
     assert "--out" not in launcher.split("def validate")[1].split("def ")[0], (
         "the launcher now passes --out itself, so the default is not what "

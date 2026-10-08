@@ -1,6 +1,6 @@
 """Preflight Stage 0: attest the runtime, materialize the protocol, freeze it.
 
-    PYTHONPATH=src python scripts/autoinit/attest_protocol.py \
+    PYTHONPATH=src python scripts/shared/preflight/attest_protocol.py \
         --image-digest sha256:... --out logs/autoinit_phase_a_protocol_attested.json
 
 Runs **on the pod**, first, before anything is measured or trained. It fills the
@@ -36,7 +36,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -47,21 +47,21 @@ from aadistill.initialization.planning.recovery import (
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
 )
-from experiments.recovery_policy import PREFLIGHT_PLAN_V1
-from experiments.source_sets import trainer_source_digest
+from shared.recovery_policy import PREFLIGHT_PLAN_V1
+from shared.source_sets import trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
-from compare_recovery_fingerprints import phase_a_protocol  # noqa: E402
+from stages.recovery_continuation.compare_recovery_fingerprints import phase_a_protocol  # noqa: E402
 
 #: Inputs whose bytes must be what the preregistration says they are. Paths are
 #: resolved on the pod; a missing file is a stop condition, not a skip.
 PINNED_INPUTS = {
     "canonical_init_weights": (
-        "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+        "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
         "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"),
     "recovery_pack_blocks": (
-        "artifacts/stage3/ladder_uniform_probe/blocks.npz",
+        "artifacts/shared/instruments/ladder_uniform_probe/blocks.npz",
         "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"),
 }
 

@@ -1,7 +1,7 @@
 """The Phase-C1 scoring identity: what `c1_confirmation_scoring@v1` binds.
 
 `recovery_search_scoring@v2` cannot score `c1_confirmation_v1`, in two
-independent places, both inside `scripts/autoinit/score_recovery_search.py`:
+independent places, both inside `scripts/shared/evaluation/score_recovery_search.py`:
 
 1. `BATTERY_MANIFEST_SHA256` / `BATTERY_CONTENT_SHA256` are module constants
    checked unconditionally, so `--battery` cannot reach a different asset;
@@ -22,9 +22,9 @@ asset that a future battery build could quietly reshape.
 
 **The numbers do not change.** Every correctness, usability, row-composition,
 aggregation and capability rule is imported from the frozen implementation, and
-`scripts/autoinit/score_c1_confirmation.py` restates only the *iteration* over
+`scripts/stages/stage-1/phase_c1/score_c1_confirmation.py` restates only the *iteration* over
 sets. That restatement is made safe by an admission gate rather than by review:
-`scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py` scores real retained
+`scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py` scores real retained
 `recovery_search_v2` generations through both paths and requires equality of
 every material numerical field. If any differed, C1 could not use this scorer,
 because the C0 power analysis and the SESOI were computed under the historical
@@ -72,7 +72,7 @@ class C1ScoringError(RuntimeError):
 
 # --- the frozen C1 battery, pinned here and nowhere else --------------------
 
-C1_BATTERY_PATH = "artifacts/stage3/c1_confirmation_v1"
+C1_BATTERY_PATH = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 C1_BATTERY_MANIFEST_SHA256 = (
     "e6ff5cf536d515e6b466f2fc945c4368c89637d481c8ce1993ef3f3cf0909e42")
 C1_BATTERY_CONTENT_SHA256 = (
@@ -134,17 +134,17 @@ C1_METRIC_CONTRACT: dict[str, Any] = {
 #: `result_sha256`, but cannot move any count or rate.
 C1_SCORING_FILES_V1: tuple[str, ...] = (
     # the C1 binding: pins, validation, result schema, this contract
-    "scripts/autoinit/score_c1_confirmation.py",
-    "scripts/experiments/stage-1/phase_c1/scoring.py",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+    "scripts/stages/stage-1/phase_c1/scoring.py",
     # the historical implementation whose rules it imports
-    "scripts/autoinit/score_recovery_search.py",
+    "scripts/shared/evaluation/score_recovery_search.py",
     "src/aadistill/initialization/planning/recovery.py",
     "src/aadistill/evaluation/usable_rollout.py",
     "src/aadistill/evaluation/strict_answer.py",
     "src/aadistill/evaluation/behavior.py",
     "src/aadistill/evaluation/capability.py",
     # the three V2 leaves out, each of which decides numbers
-    "scripts/autoinit/audit_tool_scoring.py",
+    "scripts/shared/evaluation/audit_tool_scoring.py",
     "src/aadistill/data/tools.py",
     "src/aadistill/data/verify.py",
 )

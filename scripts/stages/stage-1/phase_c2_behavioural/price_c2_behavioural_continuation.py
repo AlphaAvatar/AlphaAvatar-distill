@@ -2,7 +2,7 @@
 """Price the C2 behavioural continuation from the PRODUCTION path. Zero cost.
 
     PYTHONPATH=src:scripts python \
-        scripts/autoinit/price_c2_behavioural_continuation.py \
+        scripts/stages/stage-1/phase_c2_behavioural/price_c2_behavioural_continuation.py \
         --restore-mb-per-second 0.68 [--backend-usd 0] [--write]
 
 Exists because a continuation price was reported as `$18.7315` hard when that
@@ -21,16 +21,16 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _p in ("src", "scripts", "scripts/pod"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
 
-import autoinit_c2_behavioural_launch as L  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L  # noqa: E402
 
 ANALYSIS = ("logs/stages/stage-1/phase_c2_behavioural/analyses/"
             "continuation_price.json")
@@ -112,7 +112,7 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
 
     import subprocess
     proj = json.loads(subprocess.run(
-        [sys.executable, str(repo_root / "scripts/consolidate/derive_budget.py"),
+        [sys.executable, str(repo_root / "scripts/maintenance/consolidation/derive_budget.py"),
          "--json"], capture_output=True, text=True, cwd=str(repo_root),
         env={"PYTHONPATH": str(repo_root / "src"), "PATH": "/usr/bin:/bin"}
     ).stdout)["project"]
@@ -120,7 +120,7 @@ def price(repo_root: Path, *, backend_usd: float, rate: float,
     return {
         "schema": "aadistill.autoinit.c2_behavioural_continuation_price/v1",
         "authorizes": "nothing",
-        "_derived_by": ("scripts/autoinit/price_c2_behavioural_continuation.py "
+        "_derived_by": ("scripts/stages/stage-1/phase_c2_behavioural/price_c2_behavioural_continuation.py "
                         "-- every figure from the production functions the "
                         "launcher calls, never restated beside them"),
         "probe_availability": {

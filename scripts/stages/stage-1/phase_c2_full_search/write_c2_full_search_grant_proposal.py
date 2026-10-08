@@ -2,7 +2,7 @@
 """Generate the Phase-C2 full-search GRANT PROPOSAL from the live tree.
 
     PYTHONPATH=src:scripts python \
-      scripts/autoinit/write_c2_full_search_grant_proposal.py [--write]
+      scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_grant_proposal.py [--write]
 
 A PROPOSAL, not a grant. It states everything a maintainer would be approving
 for one formal full-joint-re-search session, with every machine identity derived
@@ -26,13 +26,13 @@ import math
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
-from experiments.phase_c2 import full_search as FSG  # noqa: E402
-from experiments.phase_c2 import full_search_authorization as FA  # noqa: E402
+from stages.phase_c2 import full_search as FSG  # noqa: E402
+from stages.phase_c2 import full_search_authorization as FA  # noqa: E402
 
 OUT = ("logs/stages/stage-1/phase_c2/plans/"
        "phase_c2_full_search_grant_proposal.json")
@@ -48,7 +48,7 @@ RATE_AT_GENERATION = 1.09
 def budget_position() -> dict:
     """The project's position, derived by the module that owns it."""
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
-    import consolidate.derive_budget as D
+    import maintenance.consolidation.derive_budget as D
 
     pkg_doc = D.load(D.PACKAGE, REPO_ROOT)
     return D.project_balance(
@@ -92,7 +92,7 @@ def proposal() -> dict:
             "`explicitly_not_authorized`, `approved_money` and `one_use`, and "
             "the result is committed as the run's grant.json under the real "
             "grant schema. Nothing here can be promoted by an agent."),
-        "_generated_by": ("scripts/autoinit/write_c2_full_search_grant_proposal.py, "
+        "_generated_by": ("scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_grant_proposal.py, "
                           "deterministically from the live tree. Re-run it: an "
                           "unchanged tree gives byte-identical output, so a diff "
                           "means a figure moved."),
@@ -197,7 +197,7 @@ def proposal() -> dict:
             "remaining_after_the_whole_chain_usd": round(
                 position["remaining_usd"] - chain_total, 4),
             "_derived_by": (
-                "scripts/consolidate/derive_budget.py :: project_balance, from "
+                "scripts/maintenance/consolidation/derive_budget.py :: project_balance, from "
                 "the package anchor plus every recorded run closeout. The cap's "
                 "canonical owner is configs/experiments/phase_c1/"
                 "authorization.json :: accepted_pricing.cumulative_cap_usd."),
@@ -330,7 +330,7 @@ def proposal() -> dict:
                 "effect": (
                     "bind_identities in the baseline-completion driver now "
                     "REFUSES, which is the gate working. Six tests in "
-                    "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py are red "
+                    "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py are red "
                     "for this single reason and were deliberately left red."),
                 "what_is_NOT_affected": (
                     "no completed result: both sides of every finished "

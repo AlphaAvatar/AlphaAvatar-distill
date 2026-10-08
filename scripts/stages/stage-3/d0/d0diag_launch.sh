@@ -12,7 +12,7 @@
 #   3. The launcher deletes the pod itself the moment ALL_DONE lands, so the
 #      backstop is a floor on failure, never the normal path (pods idle-bill).
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/d0diag_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/d0/d0diag_launch.sh
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -143,7 +143,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/d0diag_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/d0/d0diag_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
@@ -158,6 +158,6 @@ say "setup done — $(cost)"
 
 say "starting D0.3 and D0.4 (no optimizer step anywhere)"
 $SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python \
-  scripts/pod/d0diag_driver.py --stage all \
+  scripts/stages/stage-3/d0/d0diag_driver.py --stage all \
   --teacher-revision $TEACHER_REVISION > /workspace/d0diag_run.log 2>&1 &" >>"$LOG" 2>&1
 say "driver running; poller takes over — $(cost)"

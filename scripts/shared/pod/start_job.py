@@ -8,11 +8,11 @@ Replaces the launcher line that blocked E6b for 434 minutes:
 
 with a call whose return is bounded whether or not the ssh channel closes:
 
-    JOB=$(python3 scripts/pod/start_job.py --host "$HOST" --port "$PORT" \\
+    JOB=$(python3 scripts/shared/pod/start_job.py --host "$HOST" --port "$PORT" \\
             --job-id e7_driver --workdir /workspace/aad \\
             --log /workspace/e7_run.log --status /workspace/e7.status \\
             --env TEACHER_REVISION=$TEACHER_REVISION \\
-            --command "/opt/train/bin/python scripts/pod/e7_driver.py --stage all")
+            --command "/opt/train/bin/python scripts/stages/stage-3/e7/e7_driver.py --stage all")
     PID=$(python3 -c 'import json,sys; print(json.load(sys.stdin)["pid"])' <<<"$JOB")
 
 Exit codes: 0 job confirmed running (or already finished); 3 job could not be
@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from aadistill.infrastructure.remote import (  # noqa: E402
     JobSpec, RemoteLaunchError, SSHTarget, start_detached,

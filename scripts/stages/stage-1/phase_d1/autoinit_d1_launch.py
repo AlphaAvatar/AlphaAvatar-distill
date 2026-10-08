@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The D1 formal SEARCH launcher. One session, declared completely.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_d1_launch.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py \
         --run-id d1_search_001 --gpu "NVIDIA L40S" --arm supervised_target
 
 Everything a previous generation of launcher expressed by overriding a hook is a
@@ -29,7 +29,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/autoinit"):
     p = str(REPO_ROOT / extra)
     if p not in sys.path:
@@ -42,10 +42,10 @@ from aadistill.infrastructure.session import (  # noqa: E402
 from aadistill.infrastructure.session_prechecks import (  # noqa: E402
     session_commit_gate,
 )
-from experiments.deployment import deployment_commands  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
-from experiments.phase_d1.d1_authorization import D1Authorization  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from shared.deployment import deployment_commands  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
+from stages.phase_d1.d1_authorization import D1Authorization  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 #: DECLARED, and the shell has a branch for it. See the module docstring.
 SESSION_KIND = "d1"
@@ -62,7 +62,7 @@ ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
 #: a session that declares nothing gets the framework checked on its machine and no
 #: experiment's records. D1 wants its execution contract checked on the billing
 #: machine, because that is where a staging difference would show.
-TEST_PATHS = ("scripts/experiments/stage-1/phase_d1/tests",)
+TEST_PATHS = ("scripts/stages/stage-1/phase_d1/tests",)
 
 REPO = "/workspace/aad"
 
@@ -70,7 +70,7 @@ REPO = "/workspace/aad"
 #:
 #: The driver's `--out`, the relay's evidence spec, the report fetch and both
 #: artifact specs all name this directory. They did not: the driver wrote
-#: `artifacts/stage1/d1/<run_id>/` while `ArtifactPolicy.audit_dirname` sent the
+#: `artifacts/stages/stage-1/d1/<run_id>/` while `ArtifactPolicy.audit_dirname` sent the
 #: relay and the report fetch to `artifacts/audit/autoinit_d1/`, and three of the
 #: five artifact-spec patterns began `artifacts/` again under a collector root
 #: that is already `<checkout>/artifacts`. A successful beam would have reached
@@ -106,13 +106,13 @@ EVIDENCE_DIR = f"artifacts/audit/{AUDIT_DIRNAME}"
 SCIENCE_ASSETS: tuple[LocalAsset, ...] = (
     LocalAsset(repo_path=D1S.STATE_EVAL_ROOT,
                dest_name="state_eval_v1",
-               install_to="artifacts/stage1"),
-    LocalAsset(repo_path="artifacts/stage1/e8_calibration_v1",
+               install_to="artifacts/stages/stage-1"),
+    LocalAsset(repo_path="artifacts/stages/stage-1/e8_calibration_v1",
                dest_name="e8_calibration_v1",
-               install_to="artifacts/stage1"),
-    LocalAsset(repo_path="artifacts/stage1/reasoning_heavy_v2",
+               install_to="artifacts/stages/stage-1"),
+    LocalAsset(repo_path="artifacts/stages/stage-1/reasoning_heavy_v2",
                dest_name="reasoning_heavy_v2",
-               install_to="artifacts/stage1"),
+               install_to="artifacts/stages/stage-1"),
 )
 
 
@@ -125,7 +125,7 @@ def run_dir_for(run_id: str | None) -> str:
     """This run's directory, through the SHARED layout helper.
 
     Formatted by hand here once -- `f"logs/stages/stage-1/phase_d1/runs/{rid}"`
-    -- which is a second owner of a path `experiments.run_layout` already
+    -- which is a second owner of a path `shared.run_layout` already
     derives, and the readiness record, the bundle record and the authorization
     all have to agree about it.
     """
@@ -161,7 +161,7 @@ def driver_command(ctx: Any, plan: Any) -> str:
     #: THE AUDIT LAYOUT the relay, the report fetch and both artifact specs
     #: read. See `EVIDENCE_DIR`.
     out = f"{REPO}/{EVIDENCE_DIR}"
-    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_d1_driver.py "
+    return (f"/opt/train/bin/python {REPO}/scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py "
             f"--out '{out}' "
             #: EXPLICIT, because `run_id` enters `SearchConfig.config_hash` and
             #: the driver used to take it from the output directory's basename.
@@ -516,7 +516,7 @@ def session_contract_gate(ctx) -> tuple[bool, str]:
     """
     import tempfile
 
-    from experiments.phase_d1 import d1_authorization as A
+    from stages.phase_d1 import d1_authorization as A
 
     try:
         D1S._register_frozen_operators()
@@ -579,7 +579,7 @@ def staged_science_inputs_gate(ctx) -> tuple[bool, str]:
 
     try:
         from aadistill.initialization.calibration.profiles import get_profile
-        from experiments.calibration import register_builtin_profiles
+        from shared.calibration import register_builtin_profiles
 
         register_builtin_profiles()
         declared = list(D1S.design(REPO_ROOT)["search_stage"]["profiles"])
@@ -624,7 +624,7 @@ def launch_readiness_gate(ctx) -> tuple[bool, str]:
     path = REPO_ROOT / rel
     if not path.is_file():
         return False, (f"no launch-readiness record at {rel}; run "
-                       "scripts/autoinit/write_d1_launch_readiness.py "
+                       "scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py "
                        "immediately before launching")
     try:
         doc = json.loads(path.read_text())
@@ -688,7 +688,7 @@ def launch_readiness_gate(ctx) -> tuple[bool, str]:
 
 
 def _closure_digest() -> str:
-    from experiments.phase_d1 import d1_authorization as A
+    from stages.phase_d1 import d1_authorization as A
 
     return A.d1_current_executable(REPO_ROOT)["digest"]
 
@@ -713,7 +713,7 @@ def bundle_staged_gate(ctx) -> tuple[bool, str]:
     `SETUP_RC=1` on a 404 -- which is C1 attempt 1 exactly, the failure the
     shared `bundle_transport` module exists to make impossible.
 
-    Read-only. Preparation is `scripts/autoinit/stage_d1_bundle.py`, a separate
+    Read-only. Preparation is `scripts/stages/stage-1/phase_d1/stage_d1_bundle.py`, a separate
     command, so what this verifies is the relay's state and not a side effect of
     verifying it.
     """
@@ -733,7 +733,7 @@ def bundle_staged_gate(ctx) -> tuple[bool, str]:
     staged = REPO_ROOT / rel
     if not staged.is_file():
         return False, (
-            f"{rel} is missing; run scripts/autoinit/stage_d1_bundle.py "
+            f"{rel} is missing; run scripts/stages/stage-1/phase_d1/stage_d1_bundle.py "
             f"--session-commit {commit} --run-id "
             f"{getattr(ctx.args, 'run_id', '')} first. Without it nothing has "
             "built or uploaded the object the pod fetches.")
@@ -809,7 +809,7 @@ def budget_spec(repo_root: Path) -> BudgetSpec:
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
-    from experiments.phase_d1 import d1_authorization as A
+    from stages.phase_d1 import d1_authorization as A
 
     priced = A.session_ceiling(repo_root)
     session = _priced_session(repo_root)
@@ -905,12 +905,12 @@ def _priced_session(repo_root: Path) -> dict[str, Any]:
     `search_stage.cost` both read. A launcher that priced it again could disagree
     with the artifact it is about to run under.
     """
-    import write_d1_design as w
+    from stages.phase_d1 import write_d1_design as w
 
     priced = w.topk_search_cost()
     if priced is not None:
         return priced["search_session"]
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_d1 import search_space as d1
 
     w._ensure_the_frozen_operators_are_registered()
     return d1.search_cost()
@@ -929,9 +929,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", None)),
         authorization_loader=D1Authorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             #: THE DEPLOYMENT'S OWN IMAGE FACTS, read from the shared helper
             #: rather than retyped: the remote interpreter, the workspace and
             #: checkout roots and the minimum CUDA version are properties of the
@@ -966,7 +966,7 @@ def spec(args) -> SessionSpec:
             #:   step in the script (an offline wheelhouse install) and this
             #:   session has no rollout engine.
             #: * `ROPE_OK` -- it globs
-            #:   `artifacts/stage1/*/checkpoint/config.json` and `sys.exit`s
+            #:   `artifacts/stages/stage-1/*/checkpoint/config.json` and `sys.exit`s
             #:   with "no staged checkpoint to check" when it finds none. D1
             #:   stages no checkpoint, so DECLARING this step would fail setup
             #:   rather than check anything.
@@ -1142,7 +1142,7 @@ def resolve_operational_defaults(args) -> dict[str, Any]:
     `--max-price` has said something deliberate and the four authorization
     limits still bound the result.
     """
-    from experiments.phase_d1 import d1_authorization as A
+    from stages.phase_d1 import d1_authorization as A
 
     priced = A.session_ceiling(REPO_ROOT)
     resolved: dict[str, Any] = {}
@@ -1196,7 +1196,7 @@ def main(argv: list[str] | None = None) -> int:
         return 11
 
     if args.dry_run:
-        from experiments.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_authorization as A
         priced = A.session_ceiling(REPO_ROOT)
         print(f"session_id      {session.session_id}")
         print(f"plan_hash       {session.plan_hash[:24]}")

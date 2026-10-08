@@ -98,7 +98,7 @@ class C2DecisionRule:
 
 def decision_rule(repo_root: str | Path = REPO_ROOT) -> C2DecisionRule:
     """Read the rule out of the frozen protocol. Nothing here is a default."""
-    from experiments.phase_c2 import behavioural as BH
+    from stages.phase_c2 import behavioural as BH
 
     proto = BH.protocol(repo_root)
     beh = proto["behavioural_selection"]
@@ -215,11 +215,11 @@ def confirm(per_sample, *, rule: C2DecisionRule,
     `prompt_id`/`usable_rollout` for what the scorer writes as `id`/`usable`,
     which is the class of error that having one owner prevents.
     """
-    from experiments.phase_c1.isolation import (
+    from stages.phase_c1.isolation import (
         bootstrap_seed, decide, paired_differences,
         stratified_cluster_bootstrap,
     )
-    from experiments.phase_c1.probe_results import decision_inputs
+    from stages.phase_c1.probe_results import decision_inputs
 
     #: The fallback this function must not take. Asserted rather than assumed:
     #: if the two ever coincided, passing the seed explicitly would stop being a

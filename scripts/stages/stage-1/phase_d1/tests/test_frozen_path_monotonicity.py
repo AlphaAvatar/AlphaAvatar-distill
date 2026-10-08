@@ -49,9 +49,9 @@ def _frozen_operators():
         activation_importance,
     )
     from aadistill.initialization.operators.base import get_implementation
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_a3 import a3_session as a3
-    from experiments.phase_c2.search_space import register_c2_operators
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_a3 import a3_session as a3
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_builtin_adapters()
     register_builtin_profiles()

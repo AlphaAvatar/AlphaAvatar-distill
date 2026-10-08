@@ -12,7 +12,7 @@
 #   3. The launcher deletes the pod itself the moment ALL_DONE lands, so the
 #      backstop is a floor on failure, never the normal path (pods idle-bill).
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/p0asst_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/p0/p0asst_launch.sh
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -178,7 +178,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/p0asst_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/p0/p0asst_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
@@ -193,5 +193,5 @@ say "setup done — $(cost)"
 
 say "starting P0-assistant training then the D0.3 harness"
 $SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python \
-  scripts/pod/p0asst_driver.py --stage all > /workspace/p0asst_run.log 2>&1 &" >>"$LOG" 2>&1
+  scripts/stages/stage-3/p0/p0asst_driver.py --stage all > /workspace/p0asst_run.log 2>&1 &" >>"$LOG" 2>&1
 say "driver running; poller takes over — $(cost)"

@@ -66,11 +66,11 @@ def test_the_closure_derives_with_no_unresolved_internal_imports():
     "it did not raise" and "the unresolved list is empty" are different
     statements and only one of them is reportable."""
     from aadistill.governance.closure import walk
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_ENTRY_POINTS, C2_SOURCE_ROOTS, c2_current_executable,
     )
 
-    from experiments.phase_c2.session import C2_DECLARED_INPUTS
+    from stages.phase_c2.session import C2_DECLARED_INPUTS
 
     files, unresolved = walk(REPO, C2_ENTRY_POINTS, C2_SOURCE_ROOTS)
     assert unresolved == [], unresolved
@@ -87,29 +87,29 @@ def test_the_closure_contains_what_a_c2_session_actually_runs():
     """Named individually: each of these decides what the session does, and a
     closure that omitted one would bind a digest that could not detect its
     edit."""
-    from experiments.phase_c2.session import c2_current_executable
+    from stages.phase_c2.session import c2_current_executable
 
     paths = {f["path"] for f in c2_current_executable(REPO)["files"]}
     for rel in (
             #: the session, end to end
-            "scripts/pod/autoinit_phase_c2_launch.py",
-            "scripts/pod/autoinit_phase_c2_driver.py",
-            "scripts/pod/collect_artifacts.py",
-            "scripts/pod/watchdog.py",
+            "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py",
+            "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py",
+            "scripts/shared/pod/collect_artifacts.py",
+            "scripts/shared/pod/watchdog.py",
             #: the experiment layer
-            "scripts/experiments/stage-1/phase_c2/search_space.py",
-            "scripts/experiments/stage-1/phase_c2/baseline.py",
-            "scripts/experiments/stage-1/phase_c2/comparison.py",
-            "scripts/experiments/stage-1/phase_c2/session.py",
-            "scripts/experiments/stage-1/phase_c2/bundle.py",
-            "scripts/experiments/stage-1/phase_c2/pod_environment.py",
-            "scripts/experiments/stage-1/phase_c2/authorization_payload.py",
-            "scripts/autoinit/issue_c2_authorization.py",
+            "scripts/stages/stage-1/phase_c2/search_space.py",
+            "scripts/stages/stage-1/phase_c2/baseline.py",
+            "scripts/stages/stage-1/phase_c2/comparison.py",
+            "scripts/stages/stage-1/phase_c2/session.py",
+            "scripts/stages/stage-1/phase_c2/bundle.py",
+            "scripts/stages/stage-1/phase_c2/pod_environment.py",
+            "scripts/stages/stage-1/phase_c2/authorization_payload.py",
+            "scripts/stages/stage-1/phase_c2/issue_c2_authorization.py",
             #: the search seam and the frozen identities it resolves
-            "scripts/autoinit/phase_a_search.py",
-            "scripts/autoinit/phase_a_frozen.py",
-            "scripts/autoinit/load_state_eval.py",
-            "scripts/experiments/stage-1/phase_c1/session.py",
+            "scripts/stages/stage-1/phase_a/phase_a_search.py",
+            "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
+            "scripts/shared/evaluation/load_state_eval.py",
+            "scripts/stages/stage-1/phase_c1/session.py",
             #: everything that can spend money
             "src/aadistill/infrastructure/session_runner.py",
             "src/aadistill/infrastructure/provider.py",
@@ -125,7 +125,7 @@ def test_the_closure_contains_what_a_c2_session_actually_runs():
             "src/aadistill/initialization/operators/width/residual/global_pca.py",
             "src/aadistill/initialization/planning/ranking.py",
             #: the declared non-python inputs
-            "scripts/pod/autoinit_preflight_setup.sh",
+            "scripts/shared/pod/autoinit_preflight_setup.sh",
             "configs/autoinit/c2_artifacts.json",
             "configs/autoinit/c2_artifacts_failed.json",
             "configs/experiments/phase_c2/authorization.json"):
@@ -136,15 +136,15 @@ def test_the_closure_excludes_what_a_c2_session_does_not_run():
     """A closure is only useful if it is tight. C1's probe training, its
     isolation plan and Phase A's launcher are not on the C2 path, and a set
     that swept them in would move C2's digest for C1's reasons."""
-    from experiments.phase_c2.session import c2_current_executable
+    from stages.phase_c2.session import c2_current_executable
 
     paths = {f["path"] for f in c2_current_executable(REPO)["files"]}
-    for rel in ("scripts/pod/autoinit_c1_launch.py",
-                "scripts/pod/autoinit_c1_driver.py",
-                "scripts/pod/autoinit_phase_a_launch.py",
-                "scripts/experiments/stage-1/phase_c1/isolation.py",
-                "scripts/experiments/stage-1/phase_c1/scoring.py",
-                "scripts/pod/start_job.py"):
+    for rel in ("scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+                "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+                "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+                "scripts/stages/stage-1/phase_c1/isolation.py",
+                "scripts/stages/stage-1/phase_c1/scoring.py",
+                "scripts/shared/pod/start_job.py"):
         assert rel not in paths, rel
 
 
@@ -152,7 +152,7 @@ def test_the_derived_set_is_the_one_the_digest_covers():
     """The invariant C1 violated for two weeks: it declared 73 pre-migration
     paths while binding a digest over 97 real ones, and the only gate that reads
     the field was excluded from its candidate sweep."""
-    from experiments.phase_c2.session import c2_current_executable
+    from stages.phase_c2.session import c2_current_executable
 
     live = c2_current_executable(REPO)
     from aadistill.governance.closure import digest_of
@@ -164,7 +164,7 @@ def test_the_derived_set_is_the_one_the_digest_covers():
 def test_the_historical_declaration_is_kept_and_no_longer_current():
     """The 18-path set is preserved as the description of the superseded
     attempt-1 grant, and it is NOT what a session now executes."""
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_HARNESS_SOURCE_FILES_V1, c2_current_executable,
         c2_historical_harness_digest,
     )
@@ -181,7 +181,7 @@ def test_the_superseded_grant_is_preserved_byte_for_byte():
     it binds is no longer the one a session would run under — which is what
     makes attempt 1 superseded rather than merely old."""
     from aadistill.infrastructure.manifest import sha256_json
-    from experiments.phase_c2.session import c2_current_executable
+    from stages.phase_c2.session import c2_current_executable
 
     rel = "logs/stages/stage-1/phase_c2/runs/attempt1/governance/grant.json"
     doc = json.loads((REPO / rel).read_text())
@@ -211,7 +211,7 @@ def test_the_pod_test_gate_probe_is_preserved_byte_for_byte():
 
 def test_the_c2_readiness_contract_is_a_view_of_the_generic_runtime():
     from aadistill.runtime import pod_environment as generic
-    from experiments.phase_c2 import pod_environment as PE
+    from stages.phase_c2 import pod_environment as PE
 
     contract = PE.c2_record_contract(RUN_ID, STAGE_ID)
     assert isinstance(contract, generic.RecordContract)
@@ -225,7 +225,7 @@ def test_the_c2_readiness_contract_is_a_view_of_the_generic_runtime():
 
 
 def test_the_c2_readiness_record_must_belong_to_a_run():
-    from experiments.phase_c2 import pod_environment as PE
+    from stages.phase_c2 import pod_environment as PE
 
     with pytest.raises(PE.ReadinessError, match="belongs to a run"):
         PE.record_path_for(None)
@@ -237,7 +237,7 @@ def test_the_c2_readiness_groups_declare_zero_expected_skips():
     """Not an empty contract: `watched` carries the pod selection, so ANY skip
     inside it becomes an unexpected environment skip and the verdict FAILs."""
     from aadistill.runtime.pod_environment import evaluate_sweep
-    from experiments.phase_c2.pod_environment import (
+    from stages.phase_c2.pod_environment import (
         C2_READINESS_GROUPS as G, POD_TEST_SELECTION,
     )
 
@@ -261,7 +261,7 @@ def test_every_registered_experiment_drives_the_same_recorder():
     mechanism. What must stay true is that EVERY entry resolves to a contract
     built outside this file, and that the recorder names none of them.
     """
-    import record_pod_environment as REC
+    from shared.pod import record_pod_environment as REC
 
     assert {"phase_c1", "phase_c2"} <= set(REC.EXPERIMENTS)
     for experiment, (module, factory) in REC.EXPERIMENTS.items():
@@ -325,7 +325,7 @@ def test_the_recorder_assembles_a_c2_record_end_to_end(tmp_path):
     """
     import subprocess
 
-    from experiments.phase_c2 import pod_environment as PE
+    from stages.phase_c2 import pod_environment as PE
 
     junit = tmp_path / "junit.xml"
     junit.write_text(
@@ -348,7 +348,7 @@ def test_the_recorder_assembles_a_c2_record_end_to_end(tmp_path):
     existed = out.parent.is_dir()
     try:
         done = subprocess.run(
-            [sys.executable, "scripts/autoinit/record_pod_environment.py",
+            [sys.executable, "scripts/shared/pod/record_pod_environment.py",
              "--experiment", "phase_c2", "--kind", "diagnostic",
              "--from-existing", "--junit", str(junit)],
             cwd=REPO, capture_output=True, text=True, timeout=900,
@@ -383,7 +383,7 @@ def test_the_recorder_assembles_a_c2_record_end_to_end(tmp_path):
 
 
 def test_an_unknown_experiment_is_refused_by_name():
-    import record_pod_environment as REC
+    from shared.pod import record_pod_environment as REC
 
     with pytest.raises(SystemExit, match="not declared"):
         REC.sweep_contract("phase_c9", None, None)
@@ -397,7 +397,7 @@ def test_repoint_is_scoped_to_one_experiment(tmp_path):
     """The glob was `logs/stages/*/*/runs/*`, across every experiment. Harmless
     while one experiment had run-owned readiness records; wrong the moment a
     second did, because C2's newest record would become C1's pointer target."""
-    import record_pod_environment as REC
+    from shared.pod import record_pod_environment as REC
 
     for experiment in ("phase_c1", "phase_c2"):
         d = (tmp_path / "logs/stages/stage-1" / experiment
@@ -431,7 +431,7 @@ def candidate_grant(repo_root=REPO) -> dict:
     cannot be the reason a test passes: every identity is re-derived inside the
     builder and compared to what is written here.
     """
-    from experiments.phase_c2.authorization_payload import live_identities
+    from stages.phase_c2.authorization_payload import live_identities
 
     #: No commit argument: `live_identities` takes none, because no commit is a
     #: verified identity. See the chronology test at the end of this section.
@@ -462,7 +462,7 @@ def candidate_grant(repo_root=REPO) -> dict:
 
 
 def build(**over):
-    from experiments.phase_c2.authorization_payload import (
+    from stages.phase_c2.authorization_payload import (
         build_c2_authorization_payload,
     )
 
@@ -476,7 +476,7 @@ def build(**over):
 
 
 def test_the_payload_binds_the_live_derivation():
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_SESSION_CONTRACT, c2_current_executable, c2_plan_hash,
     )
 
@@ -509,7 +509,7 @@ def test_the_declared_set_is_the_set_the_digest_covers():
 
 
 def test_the_payload_round_trips_through_the_real_loader(tmp_path):
-    from experiments.phase_c2.session import C2Authorization
+    from stages.phase_c2.session import C2Authorization
 
     payload = build()
     path = tmp_path / "authorization.json"
@@ -542,7 +542,7 @@ def test_an_identity_that_no_longer_reproduces_is_refused(identity):
     file count, the plan hash, the session-contract hash, the pricing hash and
     B's spec hash and artifact digest. Each is a property of the TREE, so a
     grant written at any time before issuance can state it truthfully."""
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
     grant["bound_identities_the_issuer_must_reproduce"][identity] = "f" * 64
@@ -554,7 +554,7 @@ def test_an_identity_the_issuer_cannot_derive_is_refused():
     """The superseded grant's `c2_harness_set_version` is exactly this case: it
     names a mechanism that has been replaced. A binding nobody re-computes is
     not a binding, and a grant may not introduce one."""
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
     grant["bound_identities_the_issuer_must_reproduce"][
@@ -569,7 +569,7 @@ def test_the_superseded_attempt1_grant_is_refused_by_the_issuer():
     derived closure does not reproduce, a `c2_harness_set_version` naming a
     mechanism that no longer exists, and a `reviewed_commit` inside the
     identities block, which is no longer a machine-verified identity at all."""
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = json.loads((REPO / "logs/stages/stage-1/phase_c2/runs/attempt1/"
                         "governance/grant.json").read_text())
@@ -615,7 +615,7 @@ def test_the_real_grant_then_readiness_then_issuance_chronology_works():
     """
     import subprocess
 
-    from experiments.phase_c2.authorization_payload import (
+    from stages.phase_c2.authorization_payload import (
         build_c2_authorization_payload,
     )
 
@@ -651,7 +651,7 @@ def test_the_real_grant_then_readiness_then_issuance_chronology_works():
 
     #: It issued, and the tree identities — unchanged across all three commits —
     #: are what permitted it.
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_SESSION_CONTRACT, c2_current_executable, c2_plan_hash,
     )
 
@@ -685,7 +685,7 @@ def test_the_chronology_does_not_weaken_the_identities_that_do_bind():
     still the one the config declares — a repair that quietly emptied
     `verified_identities` would satisfy every test above.
     """
-    from experiments.phase_c2.authorization_payload import (
+    from stages.phase_c2.authorization_payload import (
         live_identities, load_config,
     )
 
@@ -711,7 +711,7 @@ def test_the_chronology_does_not_weaken_the_identities_that_do_bind():
 
 
 def test_a_grant_with_no_identities_block_is_refused():
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
     del grant["bound_identities_the_issuer_must_reproduce"]
@@ -720,7 +720,7 @@ def test_a_grant_with_no_identities_block_is_refused():
 
 
 def test_a_grant_whose_ceiling_would_exceed_the_cap_is_refused():
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
     grant["budget_context_at_approval"]["cumulative_spend_usd"] = 319.0
@@ -731,7 +731,7 @@ def test_a_grant_whose_ceiling_would_exceed_the_cap_is_refused():
 def test_a_grant_naming_another_ceiling_is_refused():
     """C1's $15.1475 belongs to a different package and a different experiment,
     and the maintainer forbade substituting it."""
-    from experiments.phase_c2.authorization_payload import C2AuthorizationRefused
+    from stages.phase_c2.authorization_payload import C2AuthorizationRefused
 
     grant = candidate_grant()
     grant["approved_money"]["hard_cap_usd"] = 15.1475
@@ -744,14 +744,14 @@ def test_the_issuer_requires_a_launch_bound_readiness_record():
     issuance may not."""
     import inspect
 
-    from experiments.phase_c2 import authorization_payload as AP
+    from stages.phase_c2 import authorization_payload as AP
 
     sig = inspect.signature(AP.build_c2_authorization_payload)
     assert sig.parameters["require_readiness_record"].default is True
     with pytest.raises(AP.C2AuthorizationRefused, match="readiness"):
         build(require_readiness_record=True)
     #: And the issuer never passes it.
-    issuer = (REPO / "scripts/autoinit/issue_c2_authorization.py").read_text()
+    issuer = (REPO / "scripts/stages/stage-1/phase_c2/issue_c2_authorization.py").read_text()
     assert "require_readiness_record" not in issuer
 
 
@@ -759,7 +759,7 @@ def test_the_issuer_requires_a_launch_bound_readiness_record():
 
 def test_the_transport_spec_derives_names_and_refuses_aliases():
     from aadistill.infrastructure.bundle_transport import BundleTransportError
-    from experiments.phase_c2.bundle import (
+    from stages.phase_c2.bundle import (
         C2_TRANSPORT, canonical_bundle_name, canonical_repo_path,
         require_canonical_bundle_arg,
     )
@@ -792,7 +792,7 @@ def test_an_empty_executable_set_cannot_pass_the_round_trip(tmp_path):
     """An empty set digests to a constant and would match a record that also
     computed it over nothing — a gate that passes vacuously."""
     from aadistill.infrastructure import bundle_transport as BT
-    from experiments.phase_c2.bundle import C2_TRANSPORT
+    from stages.phase_c2.bundle import C2_TRANSPORT
 
     with pytest.raises(BT.BundleTransportError, match="vacuously"):
         BT.roundtrip(C2_TRANSPORT, session_commit="0" * 40,
@@ -807,7 +807,7 @@ def local_bundle(tmp_path_factory):
     """A real bundle of this repository's HEAD, built by the real builder."""
     import subprocess
 
-    from experiments.phase_c2.bundle import C2_TRANSPORT, build_bundle
+    from stages.phase_c2.bundle import C2_TRANSPORT, build_bundle
 
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO,
                             capture_output=True, text=True).stdout.strip()
@@ -825,7 +825,7 @@ def test_the_round_trip_verifies_a_real_bundle_of_this_repository(
     superseded attempt-1 grant, because it needs any committed blob whose bytes
     it can compare, and the point of the check is the equality, not the file.
     """
-    from experiments.phase_c2.bundle import c2_executable_set, roundtrip
+    from stages.phase_c2.bundle import c2_executable_set, roundtrip
 
     auth_rel = ("logs/stages/stage-1/phase_c2/runs/attempt1/governance/"
                 "grant.json")
@@ -873,7 +873,7 @@ def test_the_round_trip_verifies_a_real_bundle_of_this_repository(
 def test_the_round_trip_refuses_the_wrong_authorization_bytes(
         local_bundle, tmp_path):
     from aadistill.infrastructure.bundle_transport import BundleTransportError
-    from experiments.phase_c2.bundle import roundtrip
+    from stages.phase_c2.bundle import roundtrip
 
     auth_rel = ("logs/stages/stage-1/phase_c2/runs/attempt1/governance/"
                 "grant.json")
@@ -894,7 +894,7 @@ def test_the_round_trip_refuses_the_wrong_authorization_bytes(
 def test_the_round_trip_refuses_bytes_that_are_not_the_staged_bundle(
         local_bundle, tmp_path):
     from aadistill.infrastructure.bundle_transport import BundleTransportError
-    from experiments.phase_c2.bundle import roundtrip
+    from stages.phase_c2.bundle import roundtrip
 
     def fake_download(repo_id, path_in_repo, dest_dir):
         return local_bundle.built["path"]
@@ -934,7 +934,7 @@ def test_every_gate_runs_before_a_provider_resource_exists(launcher):
 def test_the_executable_gate_refuses_an_artifact_declaring_another_set(launcher):
     """Every other check digests the set the ARTIFACT declares, so this is the
     only one that can catch an artifact declaring the wrong one."""
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_HARNESS_SOURCE_FILES_V1, c2_current_executable,
     )
 
@@ -980,7 +980,7 @@ def test_the_bundle_gate_refuses_an_alias_and_a_missing_record(launcher):
     assert not ok and "alias for nothing" in why
 
     commit = args.session_commit
-    from experiments.phase_c2.bundle import canonical_bundle_name
+    from stages.phase_c2.bundle import canonical_bundle_name
 
     args2 = session_args(launcher, bundle=canonical_bundle_name(commit))
     ok, why = launcher.bundle_staged_gate(
@@ -993,7 +993,7 @@ def test_every_governance_artifact_is_owned_by_the_run(launcher):
     record and bundle record were each one root file that every attempt
     overwrote, and unwinding that took a pointer, a history file and a
     migration."""
-    from experiments.phase_c2.session import C2_RUN_ROLES, c2_run_path
+    from stages.phase_c2.session import C2_RUN_ROLES, c2_run_path
 
     prefix = f"logs/stages/stage-{STAGE_ID}/phase_c2/runs/{RUN_ID}/"
     for role in C2_RUN_ROLES:
@@ -1002,7 +1002,7 @@ def test_every_governance_artifact_is_owned_by_the_run(launcher):
         prefix + "governance/authorization.json")
     assert launcher.bundle_record_for(RUN_ID) == prefix + "governance/bundle.json"
 
-    source = (REPO / "scripts/pod/autoinit_phase_c2_launch.py").read_text()
+    source = (REPO / "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py").read_text()
     assert "logs/budget/approvals" not in source, (
         "a repository-level authorization path is back in the C2 launcher")
 
@@ -1024,11 +1024,11 @@ def test_the_science_and_the_ceiling_are_unchanged():
     """The values the maintainer approved, asserted here so this session's
     engineering cannot have moved one of them unnoticed."""
     from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
-    from experiments.phase_c2 import baseline as B
-    from experiments.phase_c2.search_space import (
+    from stages.phase_c2 import baseline as B
+    from stages.phase_c2.search_space import (
         C2_ALLOWED_IMPLS, C2_PROFILE_IDS,
     )
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         c2_budget_spec, c2_hard_ceiling_usd, c2_price_per_hour_usd,
     )
 

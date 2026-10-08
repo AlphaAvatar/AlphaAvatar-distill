@@ -1,7 +1,7 @@
 """Stage 0: collect teacher activation statistics for student initialization.
 
 Usage:
-    uv run python scripts/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking.json [--limit N]
+    uv run python scripts/shared/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking.json [--limit N]
 
 Reads a JSON config, forwards the warm-up dataset through the teacher one
 sequence at a time, and writes:
@@ -23,7 +23,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.statistics.collect import (

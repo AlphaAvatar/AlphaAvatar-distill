@@ -15,7 +15,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2  # noqa: E402
 
 REAL_IDS = [p.qualified_id for p in (DOMAIN_BALANCED_V1, REASONING_HEAVY_V2)]
 
@@ -26,7 +26,7 @@ def test_the_c1_prefix_profiles_are_the_ones_this_covers():
     Otherwise this module could pass while the fixed path resolves something
     nobody prepared.
     """
-    from experiments.phase_c1.session import INCUMBENT_ATTENTION, PREFIX_STEPS, TREATMENT_ATTENTION
+    from stages.phase_c1.session import INCUMBENT_ATTENTION, PREFIX_STEPS, TREATMENT_ATTENTION
 
     named = {p for _, p in (*PREFIX_STEPS, INCUMBENT_ATTENTION,
                             TREATMENT_ATTENTION)}

@@ -2,7 +2,7 @@
 """A-bsz1 vs A-bsz3: the structural/numerical comparison. $0 half runs anywhere.
 
     # the $0 half, now
-    PYTHONPATH=src:scripts python scripts/autoinit/compare_a_bsz3.py --write
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/compare_a_bsz3.py --write
 
     # the STRUCTURAL half: `structural_half()`, called from a session that has
     # the verified frozen parent staged on an approved device.
@@ -62,11 +62,11 @@ import time
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_a3.a_bsz3 import (  # noqa: E402
+from stages.phase_a3.a_bsz3 import (  # noqa: E402
     ATTENTION_IMPL_ID, PROTOCOLS, execution_comparison, frozen_identities,
     item_token_counts,
 )
@@ -77,7 +77,7 @@ from experiments.phase_a3.a_bsz3 import (  # noqa: E402
 #: implementation would be a second place for it to be subtly different.
 #: This is NOT a dependency on `attention.causal_kl_v1`: no operator, no
 #: scorer and no identity crosses here.
-from experiments.phase_c3.compare import _distribution, _spearman  # noqa: E402
+from stages.phase_c3.compare import _distribution, _spearman  # noqa: E402
 
 OUT = "logs/stages/stage-1/phase_c3/analyses/a_bsz3_comparison.json"
 

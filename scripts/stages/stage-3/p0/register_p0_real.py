@@ -2,8 +2,8 @@
 """Verify the two existing 0.86M PCA runs against their immutable manifests and
 register them as `P0-real-sa` / `P0-real-sb`.
 
-    PYTHONPATH=src python scripts/pod/register_p0_real.py \
-        --runs artifacts/audit/p0_real --pack artifacts/stage3/ladder_uniform_probe \
+    PYTHONPATH=src python scripts/stages/stage-3/p0/register_p0_real.py \
+        --runs artifacts/audit/p0_real --pack artifacts/shared/instruments/ladder_uniform_probe \
         --out artifacts/audit/p0_real_registration.json
 
 This is an aliasing step, not a training step: nothing is retrained and no weight
@@ -27,7 +27,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402
@@ -42,7 +42,7 @@ TRAINABLE_PATTERNS = [
     "input_layernorm", "post_attention_layernorm", "model\\.norm\\.",
 ]
 EXPECTED = {
-    "init_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "init_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
     "init_sha256": "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54",
     "teacher": "Qwen/Qwen3-4B-Thinking-2507",
     "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",

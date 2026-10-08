@@ -1,6 +1,6 @@
 """Issue the narrow characterization-continuation authorization.
 
-    PYTHONPATH=src python scripts/autoinit/issue_continuation_authorization.py
+    PYTHONPATH=src python scripts/stages/stage-1/recovery_continuation/issue_continuation_authorization.py
 
 Run AFTER the continuation rehearsal passes and the harness is committed. It
 binds the authorization to the continuation plan hash, the CONTINUATION harness
@@ -20,12 +20,12 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.authorization import harness_source_digest  # noqa: E402
-from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1, CONTINUATION_PLAN_V1  # noqa: E402
+from stages.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1, CONTINUATION_PLAN_V1  # noqa: E402
 
 
 def main() -> None:

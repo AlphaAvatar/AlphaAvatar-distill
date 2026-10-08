@@ -10,8 +10,8 @@ single token:
 $11.19 and no measurement. The battery stores `tools` as a JSON string;
 `apply_chat_template` needs a list.
 
-Two renderers over one battery is what hid it. `scripts/data/battery_render.py`
-parses the string; `scripts/evaluation/uncapped_eval.py` did not. The
+Two renderers over one battery is what hid it. `scripts/shared/data/battery_render.py`
+parses the string; `scripts/shared/evaluation/uncapped_eval.py` did not. The
 pre-provider renderer-parity gate reported 7/7 groups PASS over 190 prompts and
 was telling the truth about the SCORING renderer — which is not the one that
 generates.
@@ -29,14 +29,14 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[5]
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
-TOKENIZER = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
+TOKENIZER = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 def evaluator():
     """The real module, loaded by path — it is a script, not a package member."""
     spec = importlib.util.spec_from_file_location(
-        "uncapped_eval", REPO / "scripts/evaluation/uncapped_eval.py")
+        "uncapped_eval", REPO / "scripts/shared/evaluation/uncapped_eval.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules.setdefault("uncapped_eval", mod)
     spec.loader.exec_module(mod)
@@ -133,7 +133,7 @@ def test_the_two_renderers_now_agree_on_what_a_tool_schema_is():
         battery_side = json.loads(raw) if isinstance(raw, str) else raw
         assert ev.tool_schemas(s) == battery_side, s["id"]
 
-    source = (REPO / "scripts/data/battery_render.py").read_text()
+    source = (REPO / "scripts/shared/data/battery_render.py").read_text()
     assert "json.loads(tools) if isinstance(tools, str) else tools" in source, (
         "the battery renderer's conversion moved; the generation path copied "
         "its semantics and must follow it")
@@ -141,7 +141,7 @@ def test_the_two_renderers_now_agree_on_what_a_tool_schema_is():
 
 def test_the_generation_path_no_longer_passes_the_raw_field():
     """Mutation guard: the exact line attempt 17 died on must not come back."""
-    source = (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
+    source = (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     assert 'tools=s.get("tools")' not in source, (
         "apply_chat_template is being handed the raw field again")
     assert "tools=tool_schemas(s)" in source

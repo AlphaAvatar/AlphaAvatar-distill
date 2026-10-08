@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price the Phase-C1 session. PRICING ONLY — this authorizes nothing.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/price_c1.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_c1/price_c1.py
 
 Every line item is labelled `measured`, `derived` or `unmeasured`, and the
 unmeasured ones carry the reasoning behind their bound. Two of them matter and
@@ -33,7 +33,7 @@ import math
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402

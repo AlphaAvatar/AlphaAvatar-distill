@@ -61,7 +61,7 @@ import os, shutil
 from pathlib import Path
 from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ["HF_TOKEN"]; repo = "AlphaAvatar/aadistill-artifacts"
-root = Path("/workspace/aad/artifacts/stage3")
+root = Path("/workspace/aad/artifacts/stages/stage-3")
 
 # The frozen capability battery. Omitting this cost a diag_a run: the glob for
 # prompt files silently returned nothing, so only behavior_v0 generated and the
@@ -69,7 +69,7 @@ root = Path("/workspace/aad/artifacts/stage3")
 d = snapshot_download(repo, repo_type="model", token=tok,
                       allow_patterns=["e2p1_20260803/battery_v2/*"])
 bsrc = Path(d) / "e2p1_20260803/battery_v2"
-bdest = Path("/workspace/aad/artifacts/eval/battery_v2")
+bdest = Path("/workspace/aad/artifacts/stages/stage-3/eval/battery_v2")
 bdest.mkdir(parents=True, exist_ok=True)
 for f in bsrc.iterdir():
     shutil.copy(f, bdest / f.name)
@@ -89,9 +89,9 @@ p = hf_hub_download(repo, "stage3_recovery_corpus_v2/sessions.jsonl",
 shutil.copy(p, root / "corpus_v2/sessions.jsonl")
 print("corpus staged")
 PY
-test -f "$REPO/artifacts/eval/battery_v2/manifest.json"
-test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
-test -f "$REPO/artifacts/stage3/corpus_v2/sessions.jsonl"
+test -f "$REPO/artifacts/stages/stage-3/eval/battery_v2/manifest.json"
+test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"
+test -f "$REPO/artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 mark DATA_READY
 
 # --- training env ---------------------------------------------------------
@@ -133,7 +133,7 @@ tok = os.environ["HF_TOKEN"]; repo = "AlphaAvatar/aadistill-artifacts"
 d = snapshot_download(repo, repo_type="model", token=tok,
                       allow_patterns=["stage1/qwen3_0p6b_init_v0/checkpoint/*"])
 src = Path(d) / "stage1/qwen3_0p6b_init_v0/checkpoint"
-dest = Path("/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint")
+dest = Path("/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
 dest.mkdir(parents=True, exist_ok=True)
 for f in src.iterdir():
     shutil.copy(f, dest / f.name)
@@ -152,7 +152,7 @@ print("reference and teacher downloaded")
 PY
 python3 - <<'PY'
 import hashlib, sys
-p = "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+p = "/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
 h = hashlib.sha256(open(p, "rb").read()).hexdigest()
 want = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 print("stage1 init sha256", h)
@@ -171,7 +171,7 @@ sys.path.insert(0, "/workspace/aad/src")
 from transformers import AutoConfig, AutoModelForCausalLM
 import transformers
 from aadistill.models.student import assert_rope_matches_config
-p = "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+p = "/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 cfg = AutoConfig.from_pretrained(p)
 m = AutoModelForCausalLM.from_config(cfg)
 base = assert_rope_matches_config(m, cfg, p)

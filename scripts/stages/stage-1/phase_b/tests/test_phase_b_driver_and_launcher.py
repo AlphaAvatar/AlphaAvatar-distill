@@ -25,7 +25,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import missing_from_tree as _missing  # noqa: E402
+from shared.historical_declarations import missing_from_tree as _missing  # noqa: E402
 
 _DECLARED_MOVED = _missing((
     "src/aadistill/initialization/operators/attention.py",
@@ -53,13 +53,13 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-import autoinit_phase_a_launch as pal  # noqa: E402
-import autoinit_phase_b_driver as pbd  # noqa: E402
-import autoinit_phase_b_launch as pbl  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
-from experiments.phase_b.plan import PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
-from autoinit_phase_a_driver import PhaseADriver  # noqa: E402
+from stages.phase_a import autoinit_phase_a_launch as pal  # noqa: E402
+from stages.phase_b import autoinit_phase_b_driver as pbd  # noqa: E402
+from stages.phase_b import autoinit_phase_b_launch as pbl  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from stages.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
+from stages.phase_b.plan import PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
+from stages.phase_a.autoinit_phase_a_driver import PhaseADriver  # noqa: E402
 from support.historical_contract_reuse import (  # noqa: E402
     NotOnlyTheContractCheck, under_historical_contract,
     write_historical_contract_record)
@@ -175,7 +175,7 @@ def test_it_is_governed_by_the_phase_b_plan_and_grant(driver):
 
 def test_a_phase_a_grant_cannot_govern_this_driver(tmp_path, monkeypatch):
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION
+    from stages.phase_a.plan import PHASE_A_AUTHORIZATION
 
     path = tmp_path / "phase_a.json"
     path.write_text(json.dumps(PHASE_A_AUTHORIZATION.as_dict()))
@@ -193,7 +193,7 @@ def test_the_constructor_leaves_no_inherited_contract_unset(driver, tmp_path,
     monkeypatch.setattr("autoinit_phase_a_driver.AUDIT", tmp_path / "audit_a")
     monkeypatch.setattr(PhaseADriver, "AUTHORIZATION_PATH",
                         str(_auth_file(tmp_path / "a" if False else tmp_path)))
-    from experiments.phase_a.plan import PhaseAAuthorization  # noqa: E402
+    from stages.phase_a.plan import PhaseAAuthorization  # noqa: E402
 
     parent_attrs = {"a", "t0", "results", "evaluation_protocol", "plan",
                     "search_result", "leaves", "control_state", "rung1",
@@ -205,7 +205,7 @@ def test_the_constructor_leaves_no_inherited_contract_unset(driver, tmp_path,
 def test_stage_ordering_advances_through_the_phase_b_plan(driver, tmp_path,
                                                           monkeypatch):
     """`enter` must consult Phase B's plan, not Phase A's."""
-    import autoinit_phase_a_driver as pad
+    from stages.phase_a import autoinit_phase_a_driver as pad
     from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     monkeypatch.setattr(pad, "STATUS", tmp_path / "phase_b.status")
@@ -222,7 +222,7 @@ def test_the_driver_writes_its_markers_where_the_LAUNCHER_polls():
     inherited stage calls it. A Phase-B run writing to `autoinit_phase_a.status`
     while the launcher polls `autoinit_phase_b.status` would look like a hung
     session for its whole duration and be killed."""
-    import autoinit_phase_a_driver as pad
+    from stages.phase_a import autoinit_phase_a_driver as pad
 
     assert str(pad.STATUS) == pbd.STATUS.as_posix(), (
         "the inherited mark() does not write to the Phase-B status file")
@@ -394,7 +394,7 @@ def test_the_v2_mixture_travels_a_path_the_pod_can_actually_read(spec):
     relay = [r.path for r in session.setup.relay_inputs]
     assert not any("reasoning_heavy" in p for p in relay)
     # And the file it points at exists to be copied.
-    assert (REPO / "artifacts/stage1/reasoning_heavy_v2/items.jsonl").is_file()
+    assert (REPO / "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl").is_file()
 
 
 def test_the_driver_command_launches_the_PHASE_B_driver(spec):
@@ -445,8 +445,8 @@ def test_the_preregistration_gate_refuses_a_tree_the_freeze_does_not_describe():
 
     Asserting `ok` again would mean the amendment had quietly become permission.
     """
-    from experiments.phase_b.plan import phase_b_source_digest
-    from experiments.phase_b.post_freeze import historical_accounted_for
+    from stages.phase_b.plan import phase_b_source_digest
+    from stages.phase_b.post_freeze import historical_accounted_for
 
     prereg = json.loads(
         (REPO / "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json").read_text())
@@ -695,7 +695,7 @@ def test_fetch_and_secure_speak_the_SAME_contract(monkeypatch, tmp_path):
     scientifically successful run, which is the most expensive moment to lose
     the bytes.
     """
-    import autoinit_phase_a_launch as pal
+    from stages.phase_a import autoinit_phase_a_launch as pal
 
     store = tmp_path / "store"
     store.mkdir()
@@ -767,7 +767,7 @@ def test_stage2_ITSELF_reads_the_universe_seam(driver, monkeypatch, tmp_path):
     """Asserting `candidate_universe()` returns eight proves nothing if stage 2
     does not call it. Reverting stage 2 to the hardcoded `leaves + control` was
     caught only by the digest cross-check, which is not a test of behaviour."""
-    import autoinit_phase_a_driver as pad
+    from stages.phase_a import autoinit_phase_a_driver as pad
 
     monkeypatch.setattr(pad, "STATUS", tmp_path / "s.status")
     driver.results[0] = {"passed": True}
@@ -793,7 +793,7 @@ class _Sentinel(Exception):
 def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
     """It must check the outcome, not merely the shape. A truncated leaf that
     reports `matched: False` is exactly what the digest re-check is for."""
-    import autoinit_phase_a_launch as pal
+    from stages.phase_a import autoinit_phase_a_launch as pal
 
     store = tmp_path / "store"
     store.mkdir()
@@ -837,7 +837,7 @@ def test_the_secured_gate_refuses_a_FAILED_or_UNMATCHED_transfer(tmp_path):
 
 def _issued(tmp_path, **over):
     """A real, self-verifying authorization artifact, loaded back off disk."""
-    from experiments.phase_b.plan import phase_b_source_digest
+    from stages.phase_b.plan import phase_b_source_digest
 
     fields = dict(
         authorization_id="seam-test", granted_utc="2026-08-27T00:00:00Z",
@@ -865,7 +865,7 @@ def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     """Not an alias returning a stored string: the real derivation, over the real
     60 files, failing closed when it disagrees."""
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_b.plan import phase_b_source_digest
+    from stages.phase_b.plan import phase_b_source_digest
 
     auth, _ = _issued(tmp_path)
     observed = auth.require_harness(REPO)
@@ -877,8 +877,8 @@ def test_require_harness_actually_RE_DERIVES_the_phase_b_digest(tmp_path):
     assert observed["not_yet_covered"] == []
     # It is the Phase-B set, not Phase A's.
     paths = {e["path"] for e in observed["files"]}
-    assert "scripts/pod/autoinit_phase_b_driver.py" in paths
-    assert "scripts/experiments/stage-1/phase_b/plan.py" in paths
+    assert "scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py" in paths
+    assert "scripts/stages/stage-1/phase_b/plan.py" in paths
 
     stale, _ = _issued(tmp_path / "stale", source_digest="0" * 64)
     with pytest.raises(AuthorizationError, match="Re-rehearse and re-issue"):
@@ -1083,12 +1083,12 @@ def test_the_required_citations_are_the_eight_the_budget_assumes():
 
 def test_the_verifier_is_inside_the_digest_the_grant_is_issued_against():
     """It decides whether a pod is created, so it is executable, not provenance."""
-    from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_SOURCE_SET_VERSION
-    assert "scripts/autoinit/verify_historical_probe_reuse.py" in \
+    from stages.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_SOURCE_SET_VERSION
+    assert "scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py" in \
         PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     # And the pricing module, for the same reason: the launcher imports it to
     # derive the Stage-1 deadline, so it decides how long a paid search may run.
-    assert "scripts/autoinit/price_phase_b.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
+    assert "scripts/stages/stage-1/phase_b/price_phase_b.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1
     # And the Stage-1 selection artifact: written inside the paid search, read by
     # the failed-run collector, so it decides what survives a failure.
     assert "src/aadistill/initialization/planning/stage1_selection.py" in PHASE_B_EXECUTABLE_SOURCE_FILES_V1

@@ -13,7 +13,7 @@ WHAT THIS SESSION'S STATE IS. The replay was swept four times through
 readiness records derived the staged view of a different session:
 
     SEARCH   staged 11   hidden 1851
-    REPLAY   staged 12   hidden 1850   + artifacts/stage1/d1_replay_plan.json
+    REPLAY   staged 12   hidden 1850   + artifacts/stages/stage-1/d1_replay_plan.json
 
 The missing file is the resolved plan the replay's driver is invoked with via
 `--plan`. A MISSING registry entry would have been loud -- the recorder refuses
@@ -33,19 +33,19 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[5]
 for _extra in ("src", "scripts", "scripts/pod", "scripts/autoinit",
-               "scripts/experiments/stage-1", "tests"):
+               "scripts/stages/stage-1", "tests"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
 
 def _registry() -> dict:
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     return dict(R.EXPERIMENTS)
 
 
 def _contract(experiment: str):
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     return R.sweep_contract(experiment, run_id="registry-probe", stage_id="1")
 
@@ -99,7 +99,7 @@ class TestTheD1ReplayModelsItsOwnPod:
     def test_the_replay_record_is_filed_under_its_own_experiment(self):
         """Not among the search's attempts. Its run directory, session record
         and stage attribution are all under `phase_d1_replay/`."""
-        from experiments.phase_d1 import replay_pod_environment as RPE
+        from stages.phase_d1 import replay_pod_environment as RPE
 
         path = RPE.record_path_for("d1_replay_002", "1")
         assert path.startswith("logs/stages/stage-1/phase_d1_replay/runs/")
@@ -107,8 +107,8 @@ class TestTheD1ReplayModelsItsOwnPod:
     def test_its_harness_is_the_one_the_authorization_binds(self):
         """One owner. A readiness record describing a different executable
         from the authorization is two identities for one session."""
-        from issue_d1_replay_authorization import HARNESS_FILES
-        from experiments.phase_d1 import replay_pod_environment as RPE
+        from stages.phase_d1.issue_d1_replay_authorization import HARNESS_FILES
+        from stages.phase_d1 import replay_pod_environment as RPE
 
         harness = RPE.harness(REPO)
         assert harness["n_files"] == len(HARNESS_FILES)
@@ -133,7 +133,7 @@ class TestTheReplaySessionArmsTheAccountGate:
             "a constant here would not track a re-pricing, and this session "
             "has already been re-priced once against its campaign remainder")
         plan = spec.budget.plan(price_per_hour=1.09, authorized_usd=2.5856)
-        import autoinit_d1_replay_launch as L
+        from stages.phase_d1 import autoinit_d1_replay_launch as L
 
         assert requirement(plan) == round(
             plan.hard_terminate_usd + L.ACCOUNT_OPERATIONAL_RESERVE_USD, 4)
@@ -168,7 +168,7 @@ class TestTheBundleStagerCanCarryThisSessionsAuthorization:
     def _stager(self):
         import importlib.util
 
-        path = REPO / "scripts/autoinit/stage_d1_bundle.py"
+        path = REPO / "scripts/stages/stage-1/phase_d1/stage_d1_bundle.py"
         spec = importlib.util.spec_from_file_location("stage_d1_bundle", path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -198,7 +198,7 @@ class TestTheBundleStagerCanCarryThisSessionsAuthorization:
     def test_the_replays_declared_authorization_is_what_a_launch_would_pass(self):
         """Non-vacuity: the parameter is only useful if the launcher's own
         AUTH_PATH is in fact somewhere this script's default would not look."""
-        import autoinit_d1_replay_launch as L
+        from stages.phase_d1 import autoinit_d1_replay_launch as L
 
         mod = self._stager()
         assert L.AUTH_PATH != mod.governance_path(

@@ -1,6 +1,6 @@
 """Emit the v2 generation-runtime compatibility artifact. Zero cost.
 
-    PYTHONPATH=src python scripts/autoinit/emit_protocol_compat_v2.py
+    PYTHONPATH=src python scripts/stages/stage-1/phase_a/emit_protocol_compat_v2.py
 
 Reconciles the Stage-3 evaluation protocol with a currently-drawable runtime
 **without touching either historical artifact**. It reconstructs the comparable
@@ -22,7 +22,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -33,14 +33,14 @@ from aadistill.initialization.planning.generation import (
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 from aadistill.initialization.planning.generation_compat import (  # noqa: E402
     GENERATION_RUNTIME_COMPARABILITY_V2,
     comparable_generation_identity,
     require_comparable,
     split_image_identity,
 )
-from experiments.source_sets import recovery_scoring_contract  # noqa: E402
+from shared.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 STAGE3_DIR = "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete"
@@ -64,7 +64,7 @@ def protocol_from_probe(probe: dict, repo: Path) -> RecoveryEvaluationProtocol:
         for k in OBSERVED_FIELDS})
     gen.require_materialized(context="compat reconstruction")
     battery = json.loads(
-        (repo / "artifacts/stage3/recovery_search_v2/manifest.json").read_text())
+        (repo / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").read_text())
     scoring = recovery_scoring_contract(repo)
     return RecoveryEvaluationProtocol(
         generation=gen, scoring_contract=scoring["contract"],

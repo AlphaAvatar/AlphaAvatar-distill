@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Are the per-step memory-driving shapes constant across the 1,761-step stream?
 
-    PYTHONPATH=src python scripts/training/audit_stream_shapes.py \
+    PYTHONPATH=src python scripts/shared/training/audit_stream_shapes.py \
         --out logs/stages/stage-3/e8b/analyses/e8b_stream_shape_audit.json
 
 Zero GPU cost. The block order is `stream_block_indices(n_blocks, seed, step*bps, bps)`
@@ -33,7 +33,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -81,7 +81,7 @@ def audit_arm(name: str, cfg_path: Path) -> dict:
     # e8b_setup.sh). Fall back to it rather than fail the audit for a naming artifact.
     pack = REPO_ROOT / cfg["data_dir"]
     if not (pack / "ladder.json").is_file():
-        pack = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
+        pack = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
     train, _, _ = ladder_blocks(pack, cfg["rung"], n_val=cfg["val_blocks"])
     ids_all, mask_all, content_all = (train + (None,))[:3] if len(train) == 2 else train
     n_blocks = int(ids_all.shape[0])

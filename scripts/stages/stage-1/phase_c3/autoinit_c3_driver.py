@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase C1: replay one frozen path under two digest gates, train six, then score.
 
-    /opt/train/bin/python scripts/pod/autoinit_c1_driver.py \
+    /opt/train/bin/python scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py \
         --image-digest <digest> --rate 0.99 --spent-usd 0.20 \
         --soft-stop-usd 13.4277 --authorized-usd 13.7578
 
@@ -52,24 +52,24 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-from experiments.phase_c3 import session as CS
+from stages.phase_c3 import session as CS
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from experiments.phase_c3.authorization import C3Authorization  # noqa: E402
+from stages.phase_c3.authorization import C3Authorization  # noqa: E402
 #: `derive_recovery_seeds` is deliberately NOT imported. It returns C1's
 #: three seeds, and importing it here is how the adapted driver came to be
 #: one line away from running C3's nine probes on the wrong replicates. C3's
 #: seeds come from C3's frozen plan, via `CS.recovery_seeds()`.
 #: `C0_PREREGISTRATION_SHA256` is deliberately NOT imported: it is C1's
 #: science-plan digest, and the C3 authorization binds C3's own.
-from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan, decide, paired_differences, stratified_cluster_bootstrap  # noqa: E402
-from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
-from experiments.phase_c1.probe_results import C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
-from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
+from stages.phase_c1.isolation import C1Arm, C1IsolationPlan, decide, paired_differences, stratified_cluster_bootstrap  # noqa: E402
+from stages.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from stages.phase_c1.probe_results import C1ProbeRecord, build_probe_results, decision_inputs  # noqa: E402
+from stages.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.runtime.device_handoff import (  # noqa: E402
     DeviceHandoffError,
     complete_release,
@@ -78,7 +78,7 @@ from aadistill.runtime.device_handoff import (  # noqa: E402
     require_released,
 )
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathDigestMismatch,
@@ -93,7 +93,7 @@ from aadistill.initialization.planning.generation import (
     declared_generation_protocol,
     observe_generation_protocol,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
@@ -143,14 +143,14 @@ STATUS = Path(CS.STATUS_PATH)
 #: tree: the launcher's ArtifactPolicy collects `audit/autoinit_c3`, and
 #: evidence scattered across a directory the collector does not walk is how a
 #: session loses it. C1's trees are NOT reused -- a C3 probe landing in
-#: `artifacts/stage3/c1` would be collected by C1's spec and attributed to a
+#: `artifacts/stages/stage-3/c1` would be collected by C1's spec and attributed to a
 #: completed experiment.
 AUDIT = REPO / "artifacts/audit/autoinit_c3"
-TRAIN = REPO / "artifacts/stage3/c3"
-EVAL = REPO / "artifacts/eval/c3"
+TRAIN = REPO / "artifacts/stages/stage-3/c3"
+EVAL = REPO / "artifacts/stages/stage-3/eval/c3"
 WORK = REPO / "artifacts/autoinit/c3_arms"
 
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 #: C1's frozen records, referenced rather than copied. C3's preregistration
 #: names `c1_confirmation_v1` and `c1_confirmation_scoring@v1` by those exact
 #: ids, and pins the same teacher revision -- these are shared FROZEN
@@ -161,18 +161,18 @@ BATTERY_IDENTITY = REPO / "logs/stages/stage-1/phase_c1/plans/battery.json"
 TEACHER_BINDING = REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 MEMORY_BASIS = REPO / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json"
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
-PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
-C1_SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
-UNCAPPED_EVAL = REPO / "scripts/evaluation/uncapped_eval.py"
-TRAINER = REPO / "scripts/training/train_stage3.py"
-ENGINE_PROBE = REPO / "scripts/pod/autoinit_engine_probe.py"
+PACK_DIR = "artifacts/shared/instruments/ladder_uniform_probe"
+C1_SCORER = REPO / "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py"
+UNCAPPED_EVAL = REPO / "scripts/shared/evaluation/uncapped_eval.py"
+TRAINER = REPO / "scripts/shared/training/train_stage3.py"
+ENGINE_PROBE = REPO / "scripts/shared/pod/autoinit_engine_probe.py"
 
 #: The frozen evaluation tokenizer, staged from the relay. Pinned by file hash:
 #: these exact bytes are what `chat_template_sha256 = 3802169b…` in the Stage-3
 #: attestation was observed over. The teacher's own tokenizer is a DIFFERENT
 #: artifact — 4 bytes larger, a different hash, a 10,834-byte config and no
 #: chat template — and cannot substitute.
-TOKENIZER_SOURCE = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+TOKENIZER_SOURCE = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 TOKENIZER_SIDECAR_SHA256 = {
     "tokenizer.json":
         "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
@@ -421,7 +421,7 @@ class C3Driver:
         """This run's authorization, or the pointer when no run is named."""
         run_id = getattr(self.a, "run_id", None)
         if run_id and run_id != "unrecorded":
-            from experiments.run_layout import rel_run_dir
+            from shared.run_layout import rel_run_dir
 
             candidate = (f"{rel_run_dir('phase_c3', run_id, '1')}"
                          "/governance/authorization.json")
@@ -436,7 +436,7 @@ class C3Driver:
         usable-rollout guardrails -- so `decide` read `C1IsolationPlan`'s
         defaults. Every one of them happens to equal C3's frozen value, which
         is exactly why the one that does NOT coincide -- the bootstrap seed --
-        went unnoticed. One owner: `experiments.phase_c3.session`.
+        went unnoticed. One owner: `stages.phase_c3.session`.
         """
         try:
             return CS.frozen_isolation_plan()
@@ -469,7 +469,7 @@ class C3Driver:
         replay -- and two copies of "which two arms is the primary" agree only
         until somebody reorders the arms, which is the exact failure the
         positional resolution exists to prevent. One owner:
-        `experiments.phase_c3.session.primary_operands`.
+        `stages.phase_c3.session.primary_operands`.
         """
         try:
             return CS.primary_operands()
@@ -995,7 +995,7 @@ class C3Driver:
         frozen = json.loads(FROZEN_RECIPE.read_text())
         name = d["probe_id"]
         derived = {**frozen, "run_name": name,
-                   "out_dir": f"artifacts/stage3/c3/{name}",
+                   "out_dir": f"artifacts/stages/stage-3/c3/{name}",
                    "data_dir": PACK_DIR, "seed": d["seed"],
                    "student_path": d["student_path"],
                    "_purpose": (

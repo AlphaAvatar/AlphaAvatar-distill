@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 3 comparison: A0 vs A1 vs A2, paired at the prompt level.
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e3.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e3/analyze_e3.py \
         --out artifacts/audit/e3_comparison.json
 
     A0  0.86M P2-ceheavy baseline — FFN + norms + attention projections, all
@@ -28,34 +28,34 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from reevaluate_stage23 import three_mode_arm  # noqa: E402
+from shared.evaluation.reevaluate_stage23 import three_mode_arm  # noqa: E402
 
 AUDIT = REPO_ROOT / "artifacts/audit"
 
 # alias -> (three-mode directory, training-log path, movement report)
 ARMS = {
     "A0-P2-sa": ("P2-ceheavy-sa",
-                 "artifacts/stage3/p2_ceheavy_sa/train_log.jsonl",
+                 "artifacts/stages/stage-3/p2_ceheavy_sa/train_log.jsonl",
                  "A0-P2-sa"),
     "A0-P2-sb": ("P2-ceheavy-sb",
-                 "artifacts/stage3/p2_ceheavy_sb/train_log.jsonl",
+                 "artifacts/stages/stage-3/p2_ceheavy_sb/train_log.jsonl",
                  "A0-P2-sb"),
     "A1-frozen-attn-sa": ("A1-frozen-attn-sa",
-                          "artifacts/stage3/e3_a1_frozen_attn_sa/train_log.jsonl",
+                          "artifacts/stages/stage-3/e3_a1_frozen_attn_sa/train_log.jsonl",
                           "A1-frozen-attn-sa"),
     "A1-frozen-attn-sb": ("A1-frozen-attn-sb",
-                          "artifacts/stage3/e3_a1_frozen_attn_sb/train_log.jsonl",
+                          "artifacts/stages/stage-3/e3_a1_frozen_attn_sb/train_log.jsonl",
                           "A1-frozen-attn-sb"),
     "A2-lora-attn-sa": ("A2-lora-attn-sa",
-                        "artifacts/stage3/e3_a2_lora_attn_sa/train_log.jsonl",
+                        "artifacts/stages/stage-3/e3_a2_lora_attn_sa/train_log.jsonl",
                         "A2-lora-attn-sa"),
     "A2-lora-attn-sb": ("A2-lora-attn-sb",
-                        "artifacts/stage3/e3_a2_lora_attn_sb/train_log.jsonl",
+                        "artifacts/stages/stage-3/e3_a2_lora_attn_sb/train_log.jsonl",
                         "A2-lora-attn-sb"),
 }
 FAMILIES = {"A0": ["A0-P2-sa", "A0-P2-sb"],

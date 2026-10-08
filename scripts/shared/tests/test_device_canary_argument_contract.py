@@ -176,12 +176,12 @@ def test_an_empty_local_asset_declaration_is_honoured_by_the_setup():
     env = specs["autoinit_preflight_launch"].setup_environment(
         session_commit="0" * 40, bundle="b.bundle")
     assert env["SESSION_ASSETS"], "no session declares a local asset"
-    assert "state_eval_v1:artifacts/stage1" in env["SESSION_ASSETS"]
+    assert "state_eval_v1:artifacts/stages/stage-1" in env["SESSION_ASSETS"]
 
 
 def test_the_canary_still_fetches_nothing_and_cannot_authorize_phase_a():
     """The two properties the session must not have quietly changed."""
-    from experiments.preflight import PreflightAuthorization as SpendAuthorization
+    from shared.preflight import PreflightAuthorization as SpendAuthorization
     from aadistill.infrastructure.session import SessionContext
 
     specs = {name: spec for name, _m, _a, spec in all_specs()}

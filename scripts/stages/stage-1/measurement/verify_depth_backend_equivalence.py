@@ -1,10 +1,10 @@
 """Prove the causal-depth runtime repair changed no decision.
 
-    PYTHONPATH=src python scripts/autoinit/verify_depth_backend_equivalence.py \
+    PYTHONPATH=src python scripts/stages/stage-1/measurement/verify_depth_backend_equivalence.py \
         --out logs/shared/validations/depth-backend/autoinit_depth_backend_equivalence.json
 
 `depth.causal_kl_greedy_v1` scored on the host until 2026-08-19 because the port
-of `scripts/training/search_depth_map.py` inserted `.cpu()` on the logits and the
+of `scripts/shared/training/search_depth_map.py` inserted `.cpu()` on the logits and the
 targets. The repair removes those and leaves the reduction where E8a left it: on
 the compute device. That is a **backend** change to a **frozen** operator, so it
 has to be shown not to move a single removal decision.
@@ -44,7 +44,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.statistics.contribution import (  # noqa: E402

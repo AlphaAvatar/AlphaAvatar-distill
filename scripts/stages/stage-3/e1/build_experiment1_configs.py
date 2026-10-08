@@ -1,6 +1,6 @@
 """Emit the 24 Experiment-1 run configs from the canonical recovery recipe.
 
-    uv run python scripts/data/build_experiment1_configs.py --out configs/stage3/e1
+    uv run python scripts/stages/stage-3/e1/build_experiment1_configs.py --out configs/stage3/e1
 
 Experiment 1 asks one question — does behavioural recovery scale with
 teacher-generated supervised tokens — so every arm is the canonical
@@ -27,7 +27,7 @@ import json
 import math
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 CANONICAL = REPO_ROOT / "configs/stage3/recovery.json"
 
 # (target supervised tokens, blocks) — measured from the uniform pack, not
@@ -46,8 +46,8 @@ RUNG_TAGS = {250_000: "0250k", 460_000: "0460k", 860_000: "0860k",
 # The pinned comparability seed first (every logged Stage 3 run used it).
 SEEDS = [("a", 20260726), ("b", 20260801)]
 INITS = [
-    ("pca", "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"),
-    ("rand", "artifacts/stage1/qwen3_0p6b_init_v0/random_baseline"),
+    ("pca", "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"),
+    ("rand", "artifacts/stages/stage-1/qwen3_0p6b_init_v0/random_baseline"),
 ]
 EPOCHS = 3
 
@@ -94,7 +94,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
         cfg["intervals"] = {"log_every": 10,
                             "eval_every": max(25, total_steps // 8),
                             "eval_blocks": val_blocks}
-        cfg["out_dir"] = f"artifacts/stage3/{name}"
+        cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
         path = out_dir / f"{name}.json"
         path.write_text(json.dumps(cfg, indent=2) + "\n")
         arms.append({"name": name, "config": str(path.relative_to(REPO_ROOT)),
@@ -107,7 +107,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="configs/stage3/e1")
-    ap.add_argument("--packed-dir", default="artifacts/stage3/ladder_uniform",
+    ap.add_argument("--packed-dir", default="artifacts/stages/stage-3/ladder_uniform",
                     help="the uniform token-ladder pack the arms read")
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--seconds-per-step", type=float, default=4.3,

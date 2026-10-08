@@ -132,11 +132,11 @@ class D1AuthorizationRefused(AuthorizationError):
 #: promise completeness and goes stale on the first edit while still reporting a
 #: confident identity for the wrong set.
 D1_ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_d1_launch.py",
-    "scripts/pod/autoinit_d1_driver.py",
-    "scripts/experiments/stage-1/phase_d1/d1_session.py",
-    "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+    "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+    "scripts/stages/stage-1/phase_d1/d1_session.py",
+    "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Files no import edge reaches, whose bytes still decide what runs or what is
@@ -146,11 +146,11 @@ D1_ENTRY_POINTS: tuple[str, ...] = (
 #: here: `plan_hash` is its hash, so including its bytes would be a fixed point
 #: with no solution. It is bound by `require_plan` instead.
 D1_DECLARED_INPUTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/d1_search_artifacts.json",
     "configs/autoinit/d1_search_artifacts_failed.json",
-    "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+    "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
 )
 
 D1_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
@@ -449,7 +449,7 @@ def live_money(repo_root: str | Path = REPO) -> dict[str, Any]:
 
     root = Path(repo_root)
     sys.path.insert(0, str(root / "scripts"))
-    from consolidate.derive_budget import derive
+    from maintenance.consolidation.derive_budget import derive
 
     terms = json.loads((root / BUDGET_TERMS).read_text())
     ep, ap = terms["execution_package"], terms["accepted_pricing"]
@@ -465,7 +465,7 @@ def live_money(repo_root: str | Path = REPO) -> dict[str, Any]:
         "cumulative_spend_usd": float(live["project"]["cumulative_spend_usd"]),
         "funds_formal_sessions_of": list(
             ep["funds_formal_sessions_of"]["experiment_ids"]),
-        "_derived_by": "scripts/consolidate/derive_budget.py",
+        "_derived_by": "scripts/maintenance/consolidation/derive_budget.py",
     }
 
 
@@ -483,11 +483,11 @@ def session_ceiling(repo_root: str | Path = REPO) -> dict[str, float]:
         p = str(root / extra)
         if p not in sys.path:
             sys.path.insert(0, p)
-    import write_d1_design as w
+    from stages.phase_d1 import write_d1_design as w
 
     priced = w.topk_search_cost()
     if priced is None:
-        from experiments.phase_d1 import search_space as d1
+        from stages.phase_d1 import search_space as d1
 
         w._ensure_the_frozen_operators_are_registered()
         session = d1.search_cost()
@@ -642,7 +642,7 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     """
     import tempfile
 
-    from experiments.phase_d1 import d1_session as S
+    from stages.phase_d1 import d1_session as S
 
     root = Path(repo_root)
     for f in GRANT_MAY_NOT_STATE:

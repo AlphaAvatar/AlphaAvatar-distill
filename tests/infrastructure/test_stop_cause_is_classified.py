@@ -49,7 +49,7 @@ from aadistill.infrastructure.session_runner import (  # noqa: E402
 #:
 #: Under AGENTS.md 2.8a a closed run's own journal is that experiment's state,
 #: so the historical assertion moved to
-#: `scripts/experiments/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py`,
+#: `scripts/stages/stage-1/phase_d1/tests/test_d1_stop_cause_incident.py`,
 #: where it asserts the fixture's PRESENCE rather than conditioning on it.
 #: What stays here is the generic behaviour: four causes, decided from what the
 #: journal says, over journals these tests write themselves.

@@ -1,6 +1,6 @@
 """Price the v1 AutoInitializer search space. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/plan_search.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_a/plan_search.py \
         --out logs/shared/analyses/autoinit_v1_search_space.json
 
 Emits the v1 search-space manifest: what the space contains, how many states a
@@ -25,7 +25,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -36,7 +36,7 @@ from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import profile_summary
-from experiments.calibration import V1_PROFILES
+from shared.calibration import V1_PROFILES
 from aadistill.runtime.cost import (  # noqa: E402
     A100_80GB_ESTIMATED,
     L40S_MEASURED,
@@ -53,7 +53,7 @@ from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
 )
-from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
+from shared.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 
 #: Explicit: importing an operator module no longer registers it.
 register_builtin_operators()
@@ -170,7 +170,7 @@ def main() -> None:
         "target": {
             "spec": TARGET.as_dict(), "spec_hash": TARGET.spec_hash,
             "num_parameters": ADAPTER.param_count(TARGET),
-            "reference_checkpoint": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+            "reference_checkpoint": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
             "reference_sha256": ("86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc"
                                  "952cabd5df2633e54"),
         },

@@ -33,9 +33,9 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import AuthorizationError
-from experiments.preflight import PreflightAuthorization
-from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
-from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
+from shared.preflight import PreflightAuthorization
+from shared.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
+from stages.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_harness_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
 
@@ -64,7 +64,7 @@ def test_a_rung_cannot_start_before_the_search_passes():
 
 def test_there_is_no_stage_six():
     assert max(s.stage for s in PHASE_A_PLAN_V1.stages) == 5
-    driver = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     assert 'choices=("all",)' in driver, "a stage outside the plan is expressible"
 
 
@@ -190,12 +190,12 @@ def test_an_edited_harness_is_refused():
 
 def test_the_harness_set_covers_the_code_that_actually_runs():
     """An authorization digesting the wrong files admits an edited driver."""
-    for required in ("scripts/pod/autoinit_phase_a_driver.py",
-                     "scripts/pod/autoinit_phase_a_launch.py",
+    for required in ("scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+                     "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
                      # Imported by the driver, so just as much the executable.
-                     "scripts/autoinit/phase_a_search.py",
-                     "scripts/autoinit/write_preregistration.py",
-                     "scripts/experiments/stage-1/phase_a/plan.py"):
+                     "scripts/stages/stage-1/phase_a/phase_a_search.py",
+                     "scripts/stages/stage-1/phase_a/write_preregistration.py",
+                     "scripts/stages/stage-1/phase_a/plan.py"):
         assert required in PHASE_A_HARNESS_SOURCE_FILES_V1, required
     for rel in PHASE_A_HARNESS_SOURCE_FILES_V1:
         assert (REPO / rel).is_file(), f"declared harness source {rel} is missing"
@@ -216,7 +216,7 @@ def test_the_executing_plan_reproduces_the_frozen_one():
     near-copy would fail the gate in a way that looks like tampering.
     """
     from aadistill.initialization.planning.recovery import assert_preregistered
-    from write_preregistration import build_frozen_plan
+    from stages.phase_a.write_preregistration import build_frozen_plan
 
     frozen = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
     assert frozen.is_file(), "no frozen science plan; Stage 0 has nothing to bind"
@@ -225,7 +225,7 @@ def test_the_executing_plan_reproduces_the_frozen_one():
 
 
 def test_the_frozen_plan_carries_materialized_thresholds():
-    from write_preregistration import build_frozen_plan
+    from stages.phase_a.write_preregistration import build_frozen_plan
     plan = build_frozen_plan(REPO)
     # Both must be real numbers: a selector with a pending rule raises by design,
     # and discovering that after nine probes would waste the session.
@@ -240,7 +240,7 @@ def test_the_frozen_plan_carries_materialized_thresholds():
 
 def load_driver(tmp_path: Path):
     spec = importlib.util.spec_from_file_location(
-        "phase_a_driver", REPO / "scripts/pod/autoinit_phase_a_driver.py")
+        "phase_a_driver", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_driver"] = mod
     spec.loader.exec_module(mod)
@@ -521,7 +521,7 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
     roughly seven hours of paid compute. Checked here against the REAL frozen
     schema rather than a hand-written shape.
     """
-    from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+    from shared.recovery_policy import CAPABILITY_SCHEMA_V1
 
     mod = load_driver(tmp_path)
     # The capability names and counts the real scorer emits, per the Stage-3
@@ -557,7 +557,7 @@ def test_a_pooled_row_satisfies_the_real_capability_schema(tmp_path):
 def test_a_pooled_row_missing_a_capability_is_refused(tmp_path):
     """Proves the check above is load-bearing rather than decorative."""
     from aadistill.initialization.planning.recovery import CapabilitySchemaError
-    from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+    from shared.recovery_policy import CAPABILITY_SCHEMA_V1
 
     mod = load_driver(tmp_path)
     short = {cap: {"n": 30, "usable": 10} for cap in
@@ -690,7 +690,7 @@ def test_the_launcher_fetches_finalists_not_only_a_winner(tmp_path):
 def test_relay_staging_is_off_by_default():
     """Measured 2026-08-15: 1.60 GiB of relay headroom against 5.61 GiB of
     leaves. A default that tried would fail on quota partway through."""
-    src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py").read_text()
     assert 'ap.add_argument("--stage-leaves-to-relay", action="store_true", ' \
            'default=False)' in src
 
@@ -700,7 +700,7 @@ def test_relay_staging_is_off_by_default():
 
 def load_launcher():
     spec = importlib.util.spec_from_file_location(
-        "phase_a_launch", REPO / "scripts/pod/autoinit_phase_a_launch.py")
+        "phase_a_launch", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_launch"] = mod
     spec.loader.exec_module(mod)
@@ -753,7 +753,7 @@ def test_the_authorization_constant_matches_what_make_plan_prices():
     """The runner calls `require_within_cap(plan.hard_terminate_usd)`. If the
     granted cap is below the priced threshold the launcher aborts at $0 — safe,
     but only discovered at launch. Checked here instead."""
-    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
+    from stages.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     plan = phase_a_plan(authorized_usd=A.hard_cap_usd)
     A.require_within_cap(plan.hard_terminate_usd, what="planned hard threshold")
@@ -780,7 +780,7 @@ def test_the_authorization_constant_still_carries_its_placeholders():
     """The constant is a template; the issuer fills identity and time. If these
     were pre-filled, an artifact could be issued with a back-dated grant or a
     stale science-plan hash."""
-    from experiments.phase_a.plan import PHASE_A_AUTHORIZATION as A
+    from stages.phase_a.plan import PHASE_A_AUTHORIZATION as A
 
     assert A.granted_utc == "PLACEHOLDER"
     assert A.science_plan_hash == "PLACEHOLDER"
@@ -944,7 +944,7 @@ def test_every_script_the_driver_invokes_gets_its_required_arguments():
     """
     import re
 
-    driver_src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    driver_src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
 
     def required_of(script: str) -> list[str]:
         src = (REPO / script).read_text()
@@ -960,11 +960,11 @@ def test_every_script_the_driver_invokes_gets_its_required_arguments():
         end = window.find("],")
         return re.findall(r'"(--[a-z0-9-]+)"', window[:end if end > 0 else 900])
 
-    invoked = ["scripts/pod/autoinit_engine_probe.py",
-               "scripts/training/train_stage3.py",
-               "scripts/evaluation/uncapped_eval.py",
-               "scripts/autoinit/score_recovery_search.py",
-               "scripts/autoinit/verify_frozen_assets.py"]
+    invoked = ["scripts/shared/pod/autoinit_engine_probe.py",
+               "scripts/shared/training/train_stage3.py",
+               "scripts/shared/evaluation/uncapped_eval.py",
+               "scripts/shared/evaluation/score_recovery_search.py",
+               "scripts/shared/pod/verify_frozen_assets.py"]
     problems = {}
     for script in invoked:
         assert script in driver_src, f"{script} is not invoked by the driver"
@@ -979,7 +979,7 @@ def test_every_script_the_driver_invokes_gets_its_required_arguments():
 def test_the_launcher_polls_for_the_markers_its_own_driver_emits():
     """The poll loop watched for PREFLIGHT_* while the driver emitted its own."""
     spec = phase_a_spec()
-    driver = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     for marker in spec.markers.failure:
         assert f'mark("{marker}")' in driver, (
             f"the launcher polls for {marker} but the driver never emits it")
@@ -990,7 +990,7 @@ def test_the_launcher_polls_for_the_markers_its_own_driver_emits():
 
 def test_the_launcher_and_driver_agree_on_where_artifacts_go():
     spec = phase_a_spec()
-    driver = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     assert f'artifacts/audit/{spec.artifacts.audit_dirname}' in driver
     assert spec.artifacts.evidence_filename in driver
     for name in spec.artifacts.report_names:
@@ -1007,7 +1007,7 @@ def test_the_launcher_declares_a_phase_a_authorization_not_a_spend_one():
     no module global to retarget now, and this asserts both halves: the right
     type is named, and the old mechanism is gone.
     """
-    from experiments.phase_a.plan import PHASE_A_PLAN_V1, PhaseAAuthorization
+    from stages.phase_a.plan import PHASE_A_PLAN_V1, PhaseAAuthorization
 
     spec = phase_a_spec()
     assert spec.authorization_loader.__self__ is PhaseAAuthorization
@@ -1017,7 +1017,7 @@ def test_the_launcher_declares_a_phase_a_authorization_not_a_spend_one():
     assert spec.setup.env.get("SESSION_KIND") == "phase_a", (
         "setup would load the type that always says no")
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py").read_text()
     assert "_preflight." not in src, (
         "the launcher mutates another module's globals again; that is the "
         "mechanism SESSION_KIND leaked through")
@@ -1038,7 +1038,7 @@ def test_phase_a_authorization_satisfies_everything_the_runner_calls_on_auth():
         (REPO / p).read_text() for p in (
             "src/aadistill/infrastructure/session_runner.py",
             "src/aadistill/infrastructure/session_prechecks.py",
-            "scripts/pod/autoinit_phase_a_launch.py"))
+            "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py"))
     used = set(re.findall(r"(?:self|ctx)\.auth\.([a-z_]+)", sources))
     assert used, "the detector found no auth usage; it is broken"
 
@@ -1058,7 +1058,7 @@ def test_phase_a_authorization_satisfies_everything_the_runner_calls_on_auth():
 
 
 def test_setup_routes_by_session_kind_and_defaults_to_the_narrow_type():
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert 'SESSION_KIND="${SESSION_KIND:-spend}"' in setup, (
         "an unset SESSION_KIND must mean the narrow type, so the preflight and "
         "the continuation are unaffected")
@@ -1073,7 +1073,7 @@ def test_setup_routes_by_session_kind_and_defaults_to_the_narrow_type():
 
 def _load_specs(path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
     return load_specs(str(path))
 
 
@@ -1378,7 +1378,7 @@ def test_the_driver_bounds_the_search_by_the_deadline_not_the_allowance():
     BASE allowance. Both are asserted, and against the real source rather than a
     fixture.
     """
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     run_search = src[src.index("def run_search(self"):src.index("def stage1(self)")]
     stage1 = src[src.index("def stage1(self)"):src.index("def stage2(self)")]
     assert "search_minutes=self.a.search_deadline_minutes" in run_search, (
@@ -1401,7 +1401,7 @@ def test_the_driver_declares_no_default_for_either_search_number():
     file that does not own it. The launcher always passes both, so a default is
     only ever a value that can drift from the one booking the money.
     """
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     main = src[src.index("def main() -> int:"):]
     for flag in ("--search-minutes", "--search-deadline-minutes"):
         line = next(ln for ln in main.splitlines() if flag in ln)
@@ -1421,7 +1421,7 @@ def test_the_deadline_derivation_moves_no_frozen_identity():
     """
     import json
 
-    from experiments.phase_a.plan import PHASE_A_PLAN_V1
+    from stages.phase_a.plan import PHASE_A_PLAN_V1
 
     SESSION = "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa"
     SCIENCE = "02be33b9a7a8e26bc8bfb75795351e8cdc9ffd441b47066cc81887cfc511b55c"
@@ -1505,7 +1505,7 @@ def test_the_continuation_carries_no_hard_coded_dollar_figure():
     """A written number would drift from the plan it claims to derive from."""
     import ast
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py").read_text()
     fn = next(n for n in ast.parse(src).body
               if isinstance(n, ast.FunctionDef) and n.name == "continuation_budget")
     body = ast.unparse(fn)

@@ -3,7 +3,7 @@
 A SEPARATE module rather than a mode of `pod_environment`, for the reason the
 recorder's own registry gives five times over: A3 binds its own launcher, its
 own session id, its own executable closure, its own pod test selection
-(`scripts/experiments/stage-1/phase_c3/tests`, which C3's sweep would not run) and its own record
+(`scripts/stages/stage-1/phase_c3/tests`, which C3's sweep would not run) and its own record
 schema. A C3 record cannot satisfy an A3 verifier or the reverse.
 
 **Without the registry entry the chain is unusable at exactly the step a
@@ -34,7 +34,7 @@ from aadistill.runtime.pod_environment import ReadinessGroups, RecordContract
 #: launcher/driver CLI seam in both directions, the two shelled-out seams, the
 #: imports stage H needs after three trainings and three evaluations, the
 #: asymmetric digest gates, the absent stage I, and a real GEMM.
-RUNTIME_CONTRACT_MODULE = "scripts/experiments/stage-1/phase_c3/tests/test_a3_runtime_contract.py"
+RUNTIME_CONTRACT_MODULE = "scripts/stages/stage-1/phase_c3/tests/test_a3_runtime_contract.py"
 
 A3_READINESS_GROUPS = ReadinessGroups(
     expected_skips={},
@@ -56,7 +56,7 @@ RECORD_PATH = RECORD_POINTER
 #: harness. Disjoint from it by construction, because `verify_record` checks
 #: both digests and a file in both would be measured twice.
 POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
-    "scripts/pod/simulate_pod_env.sh",
+    "scripts/shared/pod/simulate_pod_env.sh",
     "tests/conftest.py",
 )
 
@@ -71,7 +71,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
     """
     if not run_id:
         return RECORD_POINTER
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir('phase_a3', run_id, stage_id or '1')}"
             "/governance/readiness.json")
@@ -79,7 +79,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
 
 def a3_harness_digest_value(repo_root: str = ".") -> str:
     """A3's harness digest, as the contract's callable wants it."""
-    from experiments.phase_a3.a3_authorization import a3_harness_digest
+    from stages.phase_a3.a3_authorization import a3_harness_digest
 
     return a3_harness_digest(repo_root)["digest"]
 
@@ -124,12 +124,12 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
     from aadistill.runtime.pod_environment import SweepContract
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c1.bundle import canonical_bundle_name
+        from stages.phase_c1.bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 
     def harness(repo_root):
-        from experiments.phase_a3.a3_authorization import a3_harness_digest
+        from stages.phase_a3.a3_authorization import a3_harness_digest
 
         #: The recorder records a COUNT beside the digest, under the field
         #: named below. C3's harness comes from `closure.derive`, which

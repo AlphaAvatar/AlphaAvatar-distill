@@ -34,9 +34,9 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "pod",
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-import autoinit_a3_driver as D  # noqa: E402
+from stages.phase_a3 import autoinit_a3_driver as D  # noqa: E402
 
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
 
 SEEDS = list(A3S.recovery_seeds())
 SOURCE = "a3_attempt35"
@@ -81,7 +81,7 @@ def test_resuming_skips_the_stages_whose_only_consumer_was_training():
         assert keep in resumed, f"stage {keep} must not be skipped when resuming"
 
     #: And the driver selects that ladder rather than computing its own.
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     block = src[src.index("if self.a.resume_scoring_from:"):
                 src.index("        try:\n            for letter in letters:")]
     assert 'stages["F"] = self.stage_f_resume' in block
@@ -107,7 +107,7 @@ def test_the_default_is_a_full_chain():
 def test_the_resume_path_records_what_it_did_not_do():
     """A session that cites another's diagnostics must not read as having
     produced them."""
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     fn = src[src.index("def stage_f_resume"):src.index("def stage_f(self)")]
     assert '"training_started"] = False' in fn
     assert "_what_this_session_did_not_do" in fn
@@ -230,7 +230,7 @@ def test_the_cited_evidence_the_resume_run_carries_exists():
         "the spec no longer requires what stages D and E write; this check "
         "exists because a resume run does not run them")
 
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     fn = src[src.index("def stage_f_resume"):src.index("def stage_f(self)")]
     for name in produced_by_skipped_stages:
         assert name in fn, f"the resume path does not carry {name}"
@@ -282,13 +282,13 @@ def test_the_admission_is_satisfiable_on_the_host_class_admission_guarantees():
     from aadistill.initialization.planning.generation_compat import (
         comparable_generation_identity, require_comparable,
     )
-    from experiments.phase_c1.scoring import c1_scoring_contract
+    from stages.phase_c1.scoring import c1_scoring_contract
 
     summaries = [_json.loads(Path(f).read_text())
                  for f in sorted(glob.glob(str(GEN35 / "*.json")))]
     assert summaries, "no generation summaries to observe a protocol from"
     manifest = _json.loads(
-        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
     contract = c1_scoring_contract(REPO)
     observed = RecoveryEvaluationProtocol(
         generation=observe_generation_protocol(summaries).protocol,
@@ -314,7 +314,7 @@ def test_the_admission_is_satisfiable_on_the_host_class_admission_guarantees():
     assert cmp["driver_branch_equal"] is True
 
     #: And the driver reads the engine probe, not the attestation's runtime.
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     fn = src[src.index("def admit_generation"):src.index("def stage_h")]
     assert "CONTROL_ENGINE_PROBE" in fn, (
         "the historical runtime no longer comes from attempt75's engine "

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Verify the staged arm-R corpora independently, before anything trains on them.
 
-    PYTHONPATH=src python scripts/data/verify_staged_r.py \
-        --root artifacts/stage3 --teacher-revision <sha> \
+    PYTHONPATH=src python scripts/stages/stage-3/e1/verify_staged_r.py \
+        --root artifacts/stages/stage-3 --teacher-revision <sha> \
         --ckpt-dir /workspace/ckpt --out artifacts/audit/e5_staged_r_verify.json
 
 Attempt 5's R corpora are reused rather than regenerated: they are already-paid
@@ -29,7 +29,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.e5_pack import (  # noqa: E402
@@ -142,7 +142,7 @@ def verify_seed_derivation(results: list) -> None:
     stable across processes, which is the property that matters.
     """
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
-    from build_e5_arm_r import stable_seed
+    from stages.e5.build_e5_arm_r import stable_seed
 
     known = {("gsm8k-000001", "sa"), ("glaive-000300", "sb")}
     here = {k: stable_seed(*k) for k in known}
@@ -152,7 +152,7 @@ def verify_seed_derivation(results: list) -> None:
     # `hash()` is unsafe here, so a substring search for "hash(" flags the very
     # comment that documents the fix.
     import ast
-    tree = ast.parse((REPO_ROOT / "scripts/data/build_e5_arm_r.py").read_text())
+    tree = ast.parse((REPO_ROOT / "scripts/stages/stage-3/e5/build_e5_arm_r.py").read_text())
     fn_node = next(n for n in ast.walk(tree)
                    if isinstance(n, ast.FunctionDef) and n.name == "stable_seed")
     calls = {n.func.id for n in ast.walk(fn_node)
@@ -168,7 +168,7 @@ def verify_seed_derivation(results: list) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--root", type=Path, default=Path("artifacts/stage3"))
+    ap.add_argument("--root", type=Path, default=Path("artifacts/stages/stage-3"))
     ap.add_argument("--ckpt-dir", type=Path, default=Path("/workspace/ckpt"))
     ap.add_argument("--teacher-revision", required=True)
     ap.add_argument("--seeds", nargs="+", default=["sa", "sb"])

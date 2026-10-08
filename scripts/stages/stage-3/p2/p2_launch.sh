@@ -12,7 +12,7 @@
 #   3. The launcher deletes the pod itself the moment ALL_DONE lands, so the
 #      backstop is a floor on failure, never the normal path (pods idle-bill).
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/p2_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/p2/p2_launch.sh
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -178,7 +178,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/p2_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/p2/p2_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 # holdout_v1.jsonl is gitignored (data/, not manifests) so it is not in the
 # bundle. Ship it explicitly; setup asserts its sha256 before training.
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
@@ -199,5 +199,5 @@ say "setup done — $(cost)"
 
 say "starting p2_ceheavy training, then NLL and the three-mode harness"
 $SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python \
-  scripts/pod/p2_driver.py --stage all > /workspace/p2_run.log 2>&1 &" >>"$LOG" 2>&1
+  scripts/stages/stage-3/p2/p2_driver.py --stage all > /workspace/p2_run.log 2>&1 &" >>"$LOG" 2>&1
 say "driver running; poller takes over — $(cost)"

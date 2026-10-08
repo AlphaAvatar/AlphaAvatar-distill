@@ -77,8 +77,8 @@ subprocess.run(["tar", "--no-same-owner", "-I", "zstd", "-xf", p, "-C", str(root
                check=True)
 
 for prefix, dest in (
-    (os.environ["BATTERY_PREFIX"], root / "artifacts/eval/battery_v2"),
-    (os.environ["PACK_PREFIX"], root / "artifacts/stage3/rung_0860k_clean_median"),
+    (os.environ["BATTERY_PREFIX"], root / "artifacts/stages/stage-3/eval/battery_v2"),
+    (os.environ["PACK_PREFIX"], root / "artifacts/stages/stage-3/rung_0860k_clean_median"),
 ):
     d = snapshot_download(repo, repo_type="model", token=tok,
                           allow_patterns=[f"{prefix}/*"])
@@ -90,8 +90,8 @@ for prefix, dest in (
 PY
 test -f "$REPO/data/warmup/holdout_v1.jsonl"
 test -f "$REPO/data/eval_behavior_v0/prompts.jsonl"
-test -f "$REPO/artifacts/eval/battery_v2/manifest.json"
-test -f "$REPO/artifacts/stage3/rung_0860k_clean_median/blocks.npz"
+test -f "$REPO/artifacts/stages/stage-3/eval/battery_v2/manifest.json"
+test -f "$REPO/artifacts/stages/stage-3/rung_0860k_clean_median/blocks.npz"
 mark DATA_READY
 
 # --- training env: uv sync against the committed lockfile ------------------
@@ -137,7 +137,7 @@ want = {
   "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023/model":
       "/workspace/d0/e1_r0860k_sb_pca/step_001023/model",
   "stage1/qwen3_0p6b_init_v0/checkpoint":
-      "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+      "/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
 }
 for prefix, dest in want.items():
     d = snapshot_download(repo, repo_type="model", token=tok,
@@ -151,7 +151,7 @@ PY
 # The fork point every D1 arm starts from, verified before anything trains.
 python3 - <<'PY'
 import hashlib, sys
-p = "/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+p = "/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
 h = hashlib.sha256(open(p, "rb").read()).hexdigest()
 want = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 print("stage1 init sha256", h)

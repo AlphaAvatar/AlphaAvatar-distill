@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 3 pre-launch gate: prove the arms on the REAL student, on CPU.
 
-    PYTHONPATH=src python scripts/training/validate_e3_arms.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e3/validate_e3_arms.py \
         --out artifacts/audit/e3_prelaunch_validation.json
 
 Everything here is cheap and hardware-free (P8), and every check is one that
@@ -29,7 +29,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -41,7 +41,7 @@ from aadistill.training.lora import (  # noqa: E402
 )
 from aadistill.training.train import select_trainable, validate_train_config  # noqa: E402
 
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 
 ARMS = {

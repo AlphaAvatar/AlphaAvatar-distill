@@ -30,7 +30,7 @@ for _p in (REPO / "src", REPO / "scripts"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
+from stages.phase_c2 import behavioural_decision as BD  # noqa: E402
 
 SEEDS = (1936324010, 1916380711, 1523147638)
 BATTERY = {"artifact": "c1_confirmation_v1", "content_sha256": "a" * 64}

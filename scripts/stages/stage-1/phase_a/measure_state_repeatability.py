@@ -18,11 +18,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from load_state_eval import load  # noqa: E402
+from shared.evaluation.load_state_eval import load  # noqa: E402
 
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
@@ -41,7 +41,7 @@ REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--checkpoint", required=True)
-    ap.add_argument("--suite", default="artifacts/stage1/state_eval_v1")
+    ap.add_argument("--suite", default="artifacts/stages/stage-1/state_eval_v1")
     ap.add_argument("--repeats", type=int, default=10)
     ap.add_argument("--device", default="cuda")
     #: Overridable ONLY so the script itself can be executed end to end in a

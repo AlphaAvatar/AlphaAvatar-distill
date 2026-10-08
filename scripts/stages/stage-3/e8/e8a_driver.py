@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """E8 pod A: the contribution-guided depth search, and nothing else.
 
-    /opt/train/bin/python scripts/pod/e8a_driver.py --stage all \
+    /opt/train/bin/python scripts/stages/stage-3/e8/e8a_driver.py --stage all \
         --spent-usd 0.80 --soft-stop-usd 2.21 --authorized-usd 2.70
 
 One job: run the preregistered greedy search over the frozen calibration set and
@@ -38,8 +38,8 @@ REPO = Path("/workspace/aad")
 STATUS = Path("/workspace/e8a.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
-CALIBRATION = REPO / "artifacts/stage1/e8_calibration_v1"
-SEARCH_OUT = REPO / "artifacts/stage1/e8_depth_search"
+CALIBRATION = REPO / "artifacts/stages/stage-1/e8_calibration_v1"
+SEARCH_OUT = REPO / "artifacts/stages/stage-1/e8_depth_search"
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
@@ -84,7 +84,7 @@ def stage_search(args) -> None:
         raise SystemExit("not enough budget left to start the search")
     # `--resume` is implicit: the search replays any completed rounds it finds in
     # rounds.jsonl, so a restart costs the current round rather than the search.
-    run(["scripts/training/search_depth_map.py",
+    run(["scripts/shared/training/search_depth_map.py",
          "--calibration", CALIBRATION,
          "--teacher", TEACHER, "--teacher-revision", TEACHER_REVISION,
          "--student-layers", STUDENT_LAYERS,

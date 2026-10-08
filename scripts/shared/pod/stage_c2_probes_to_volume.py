@@ -60,7 +60,7 @@ import tomllib
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -154,7 +154,7 @@ def local_inventory(campaign_root: Path) -> dict[str, dict]:
     Hashing ~22 GiB takes a few minutes and is what the destination check
     compares against, so it happens once, before any resource exists.
     """
-    from experiments.phase_c2 import behavioural_continuation as BC
+    from stages.phase_c2 import behavioural_continuation as BC
 
     state = BC.campaign_state(campaign_root)
     if not state["probes"]:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue D1's ONE-USE formal search authorization. Reproducibly, from a command.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/issue_d1_authorization.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/issue_d1_authorization.py \
         --grant logs/budget/approvals/autoinit_d1_grant.json \
         --run-id d1_search_20261006_120000
 
@@ -32,15 +32,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/autoinit"):
     p = str(REPO_ROOT / extra)
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 
 def git(*args: str) -> str:

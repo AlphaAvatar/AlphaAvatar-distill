@@ -1,6 +1,6 @@
 """Are the historical 0.86M checkpoints recipe-matched to the Phase-A probes?
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/compare_recovery_fingerprints.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/recovery_continuation/compare_recovery_fingerprints.py
 
 Zero cost: reads the historical run manifests from the relay (small JSON, no LFS
 payload) and the frozen Phase-A probe config from this checkout, builds a
@@ -21,7 +21,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -35,7 +35,7 @@ from aadistill.initialization.planning.recovery import (
     RecoveryProtocolFingerprint,
     RuntimeEnvironmentFingerprint,
 )
-from experiments.source_sets import trainer_source_digest
+from shared.source_sets import trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 # The protocol's descriptive fields come from the module that implements them,
@@ -150,7 +150,7 @@ def phase_a_protocol(config_path: Path) -> RecoveryProtocolFingerprint:
     optim, sched, batch = cfg["optim"], cfg["schedule"], cfg["batch"]
     loss = cfg["loss"]
     ladder = json.loads(
-        (REPO_ROOT / "artifacts/stage3/ladder_uniform_probe/ladder.json").read_text())
+        (REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe/ladder.json").read_text())
     rung = next(r for r in ladder["rungs"]
                 if r["target_supervised_tokens"] == cfg["rung"])
     return RecoveryProtocolFingerprint(
@@ -269,7 +269,7 @@ def main() -> None:
     # Illustrative post-attestation state: the *shape* Stage 0 produces, using a
     # placeholder image digest. It is not an attestation and confers nothing; the
     # real one is written to logs/autoinit_phase_a_protocol_attested.json on the
-    # pod by scripts/autoinit/attest_protocol.py.
+    # pod by scripts/shared/preflight/attest_protocol.py.
     demo_runtime = RuntimeEnvironmentFingerprint.observe(
         image_digest="sha256:<attested-at-preflight-stage-0>")
     after = phase_a.materialized(runtime=demo_runtime,

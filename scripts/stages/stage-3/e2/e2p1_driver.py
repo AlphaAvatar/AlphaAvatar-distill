@@ -122,14 +122,14 @@ def evaluate_checkpoint(model: Path, label: str, out_dir: Path, battery: Path,
     if have:
         files = [f for f in files if Path(f).stem not in have]
         log(f"{label}: resuming, {len(have)} sets done, {len(files)} to go")
-    run([vllm_python, "scripts/evaluation/uncapped_eval.py",
+    run([vllm_python, "scripts/shared/evaluation/uncapped_eval.py",
          "--model", model, "--label", label,
          "--prompts", *files, "--out-dir", out_dir, "--diagnostics"])
 
 
 def score_checkpoint(label: str, gen_dir: Path, battery: Path, out: Path) -> None:
     """Offline, CPU, free. Capability sets only — behaviour keeps its own path."""
-    run([sys.executable, "scripts/evaluation/score_battery.py",
+    run([sys.executable, "scripts/shared/evaluation/score_battery.py",
          "--battery", battery, "--generations", gen_dir, "--label", label,
          "--out", out, "--per-sample", out.with_suffix(".per_sample.jsonl")])
 
@@ -174,7 +174,7 @@ def holdout_trajectory(run_dir: Path, holdout: Path, out: Path,
         ensure_tokenizer(c, tokenizer_source)
         args += ["--model", str(c)]
     tmp = out.with_suffix(".raw.json")
-    run([sys.executable, "scripts/evaluation/eval_ppl.py",
+    run([sys.executable, "scripts/shared/evaluation/eval_ppl.py",
          "--data", holdout, *args, "--out", tmp])
     payload = json.loads(tmp.read_text())
     with out.open("w") as f:
@@ -188,7 +188,7 @@ def holdout_trajectory(run_dir: Path, holdout: Path, out: Path,
 def retained_identities(run_dir: Path) -> dict:
     """The steps whose weights are kept — and therefore the ones evaluated."""
     out = run_dir / "retention.json"
-    run([sys.executable, "scripts/pod/retain_checkpoints.py",
+    run([sys.executable, "scripts/shared/pod/retain_checkpoints.py",
          "--run-dir", run_dir, "--out", out])
     return json.loads(out.read_text())
 
@@ -196,18 +196,18 @@ def retained_identities(run_dir: Path) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--battery", type=Path,
-                    default=REPO / "artifacts/eval/battery_v2")
+                    default=REPO / "artifacts/stages/stage-3/eval/battery_v2")
     ap.add_argument("--behavior-prompts", type=Path,
                     default=REPO / "data/eval_behavior_v0/prompts.jsonl")
     ap.add_argument("--holdout", type=Path,
                     default=REPO / "data/warmup/holdout_v1.jsonl")
-    ap.add_argument("--out-root", type=Path, default=REPO / "artifacts/eval/e2p1")
+    ap.add_argument("--out-root", type=Path, default=REPO / "artifacts/stages/stage-3/eval/e2p1")
     ap.add_argument("--d0-root", type=Path, default=Path("/workspace/d0"))
     ap.add_argument("--vllm-python", default="/opt/vllm/bin/python")
     ap.add_argument("--stage", default="all",
                     choices=["all", "d0_sa", "gate", "rest", "evals"])
     ap.add_argument("--tokenizer-source", type=Path,
-                    default=REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                    default=REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                     help="where to copy tokenizer files from into checkpoints "
                          "the trainer saved without one")
     args = ap.parse_args()
@@ -230,7 +230,7 @@ def main() -> int:
 
     # ---- 2. the throughput gate ---------------------------------------
     if args.stage in ("all", "gate"):
-        rc = run([sys.executable, "scripts/pod/throughput_gate.py",
+        rc = run([sys.executable, "scripts/shared/pod/throughput_gate.py",
                   "--eval-dir", args.out_root / "d0_sa",
                   "--out", args.out_root / "throughput_gate.json"], check=False)
         if rc != 0:
@@ -263,7 +263,7 @@ def main() -> int:
           arm = f"e2_d1_{seed}_pca"
           cfg = REPO / f"configs/stage3/e2/{arm}.json"
           log(f"training {arm}")
-          rc = run([sys.executable, "scripts/training/train_stage3.py",
+          rc = run([sys.executable, "scripts/shared/training/train_stage3.py",
                     "--config", cfg], check=False)
           if rc != 0:
               mark(f"TRAIN_FAILED:{seed}")
@@ -274,7 +274,7 @@ def main() -> int:
     # ---- 5. per-seed evaluation ----------------------------------------
     for seed in seeds:
         arm = f"e2_d1_{seed}_pca"
-        run_dir = REPO / f"artifacts/stage3/{arm}"
+        run_dir = REPO / f"artifacts/stages/stage-3/{arm}"
         holdout_trajectory(run_dir, args.holdout,
                            run_dir / "holdout_trajectory.jsonl",
                            args.tokenizer_source)
@@ -314,8 +314,8 @@ def main() -> int:
 
     # ---- 6. retention, hashes ------------------------------------------
     for seed in seeds:
-        run_dir = REPO / f"artifacts/stage3/e2_d1_{seed}_pca"
-        run([sys.executable, "scripts/pod/retain_checkpoints.py",
+        run_dir = REPO / f"artifacts/stages/stage-3/e2_d1_{seed}_pca"
+        run([sys.executable, "scripts/shared/pod/retain_checkpoints.py",
              "--run-dir", run_dir, "--apply"])
     mark("UPLOAD_DONE")
     mark("ALL_DONE")

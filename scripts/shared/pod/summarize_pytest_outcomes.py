@@ -26,7 +26,7 @@ BOTH, and they must not be conflated:
   SKIPPED on the pod. It has never been named, because the pod's skip list was
   not captured.
 
-    python scripts/pod/summarize_pytest_outcomes.py --junit X --out Y \
+    python scripts/shared/pod/summarize_pytest_outcomes.py --junit X --out Y \
         [--expected logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json] [--strict]
 
 The record compared against is the one that AUTHORIZED this session: the

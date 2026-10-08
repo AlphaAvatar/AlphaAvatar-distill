@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price the Phase-C2 baseline-completion session from Attempt-4's own measurements.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/price_c2_baseline_completion.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2_baseline_completion/price_c2_baseline_completion.py \
         --run-id attempt4 --stage-id 1 [--write]
 
 The session being priced does one thing: rebuild the frozen baseline B through
@@ -42,13 +42,13 @@ import math
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 SCHEMA = "aadistill.autoinit.c2_baseline_completion_pricing/v1"
 

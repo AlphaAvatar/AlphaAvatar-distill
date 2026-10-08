@@ -25,12 +25,12 @@ from aadistill.initialization.calibration.profiles import (
     buildable_profiles,
     mixture_content_sha256,
 )
-from experiments.calibration import (
+from shared.calibration import (
     PROFILES,
     REASONING_HEAVY_V2_SAMPLE_RULE,
     REASONING_HEAVY_V2_SEED,
 )
-from experiments.calibration import (
+from shared.calibration import (
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V1,
     REASONING_HEAVY_V2,
@@ -47,7 +47,7 @@ from aadistill.initialization.statistics.reweight import (  # noqa: E402
     summarize,
 )
 
-ITEMS = REPO / "artifacts/stage1/reasoning_heavy_v2/items.jsonl"
+ITEMS = REPO / "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl"
 needs_mixture = pytest.mark.skipif(
     not ITEMS.is_file(),
     reason="the v2 mixture is a local artifact, not tracked in git")
@@ -193,7 +193,7 @@ def test_multihop_qa_takes_the_APPROVED_support_choice_not_the_nearest_one():
 @needs_mixture
 def test_the_manifest_records_both_approximations_rather_than_absorbing_them():
     manifest = json.loads(
-        (REPO / "artifacts/stage1/reasoning_heavy_v2/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/reasoning_heavy_v2/manifest.json").read_text())
     assert [r["key"] for r in manifest["domain_repairs"]] == ["code"]
     assert manifest["domain_repairs"][0]["deviation"] == -1
     assert [r["key"] for r in manifest["sub_repairs"]] == ["multihop_qa"]
@@ -242,7 +242,7 @@ def test_on_THIS_pool_the_seed_does_not_reach_the_bytes_and_that_is_recorded():
     bind `content_sha256` and not `profile_hash` alone.
     """
     manifest = json.loads(
-        (REPO / "artifacts/stage1/reasoning_heavy_v2/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/reasoning_heavy_v2/manifest.json").read_text())
     unchanged = []
     for subtype, info in manifest["realization"].items():
         ids = sorted(info["multiplicity"])
@@ -274,7 +274,7 @@ def test_the_RULE_still_reproduces_the_pinned_mixture_from_the_pool():
     pool and re-derives the content hash, which is what P4 means by reproducible.
     """
     sys.path.insert(0, str(REPO / "scripts/data"))
-    from build_reasoning_heavy_calibration import build
+    from shared.data.build_reasoning_heavy_calibration import build
 
     built = build(DOMAIN_BALANCED_V1.resolve(REPO))
     assert mixture_content_sha256(built["draws"]) == REASONING_HEAVY_V2.content_sha256, (

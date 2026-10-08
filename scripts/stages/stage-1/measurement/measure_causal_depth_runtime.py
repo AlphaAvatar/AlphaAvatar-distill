@@ -1,6 +1,6 @@
 """Bounded runtime and backend validation for the repaired causal-depth path.
 
-    PYTHONPATH=src python scripts/autoinit/measure_causal_depth_runtime.py \
+    PYTHONPATH=src python scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py \
         --samples-per-cardinality 3 \
         --out logs/autoinit_causal_depth_measured.json
 
@@ -17,7 +17,7 @@ Three questions, none of which a CPU box can answer:
    actually decide** at the frozen mixture?
 3. does the repaired port compute the same numbers as **E8a** on the same GPU?
 
-The scientific reference is E8a — `scripts/training/search_depth_map.py` — which
+The scientific reference is E8a — `scripts/shared/training/search_depth_map.py` — which
 is the frozen ancestor and has always run the reduction on the accelerator. The
 failed CPU port is not a reference for anything.
 
@@ -60,7 +60,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -281,7 +281,7 @@ def run_measurement(model, items, device, *, n_layers: int,
         torch.cuda.reset_peak_memory_stats(device)
 
     # --- E8a, same process, same GPU, same teacher, same skip sets ---------
-    from search_depth_map import Searcher, prepare
+    from shared.training.search_depth_map import Searcher, prepare
 
     e8a_items = [{"item_id": i["item_id"], "subtype": i["subtype"],
                   "ids": i["input_ids"][0].tolist(),
@@ -394,7 +394,7 @@ def load_teacher(args, device):
 def resolve_calibration(repo_root):
     """The frozen profile and the items the operators consume.
 
-    `as_operator_items` lives in `scripts/autoinit/phase_a_search.py` and is
+    `as_operator_items` lives in `scripts/stages/stage-1/phase_a/phase_a_search.py` and is
     imported from its real owner. Attempt 2 spent $0.18 importing it from
     `aadistill.autoinit.datasets`, where it has never been.
 
@@ -404,8 +404,8 @@ def resolve_calibration(repo_root):
     ids and all, into a field labelled with a path. The path is
     `profile.items_path`, and it is 81 characters.
     """
-    from experiments.calibration import DOMAIN_BALANCED_V1
-    from phase_a_search import as_operator_items
+    from shared.calibration import DOMAIN_BALANCED_V1
+    from stages.phase_a.phase_a_search import as_operator_items
 
     rows = DOMAIN_BALANCED_V1.resolve(repo_root)
     path = Path(repo_root) / DOMAIN_BALANCED_V1.items_path
@@ -524,7 +524,7 @@ def run_entrypoint(args, *, hardware=None, teacher_loader=load_teacher,
         "reference_cache_decision": core["cache_decision"],
         "gpu_utilization": core["gpu"],
         "e8a_backend_comparison": {
-            "reference_implementation": "scripts/training/search_depth_map.py",
+            "reference_implementation": "scripts/shared/training/search_depth_map.py",
             "paired": core["paired"],
             "per_item_is_the_comparison": (
                 "E8a merges raw sums per subtype and normalizes once "

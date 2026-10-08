@@ -51,13 +51,13 @@ def test_the_recovery_continuation_shares_the_science_and_not_the_session():
         assert getattr(cont, field) != getattr(phase_a, field), field
 
     # Its own authorization TYPE and harness, not Phase A's.
-    from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization
-    from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization
+    from stages.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization
+    from stages.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PhaseAAuthorization
     assert cont.authorization_loader == RecoveryContinuationAuthorization.load
     assert phase_a.authorization_loader == PhaseAAuthorization.load
     assert (set(RECOVERY_CONTINUATION_HARNESS_FILES_V1)
             != set(PHASE_A_HARNESS_SOURCE_FILES_V1))
-    assert ("scripts/autoinit/phase_a_search.py"
+    assert ("scripts/stages/stage-1/phase_a/phase_a_search.py"
             not in RECOVERY_CONTINUATION_HARNESS_FILES_V1)
 
     # Its own budget: the Stage-1 search phase and both Stage-1 reserves are

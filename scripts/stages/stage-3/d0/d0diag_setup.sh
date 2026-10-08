@@ -57,7 +57,7 @@ import os, shutil
 from pathlib import Path
 from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
-root = Path('/workspace/aad/artifacts/stage3')
+root = Path('/workspace/aad/artifacts/stages/stage-3')
 d = snapshot_download(repo, repo_type='model', token=tok,
                       allow_patterns=['stage3_recovery_corpus_v2/ladder_uniform/*'])
 src = Path(d) / 'stage3_recovery_corpus_v2/ladder_uniform'
@@ -70,8 +70,8 @@ p = hf_hub_download(repo, 'stage3_recovery_corpus_v2/sessions.jsonl',
 shutil.copy(p, root / 'corpus_v2/sessions.jsonl')
 print('corpus staged')
 "
-test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
-test -f "$REPO/artifacts/stage3/corpus_v2/sessions.jsonl"
+test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"
+test -f "$REPO/artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 mark DATA_READY
 
 say "training env via uv sync"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The four conclusions about historical probe reuse, stated together.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/historical_reuse_position.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_b/historical_reuse_position.py \
         --out logs/shared/analyses/autoinit_historical_reuse_position.json
 
 Each of these is already established somewhere, and separately they read as
@@ -37,7 +37,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
@@ -65,7 +65,7 @@ def _rel(path: Path) -> str:
 def position(verify_fn=None, equivalence_path: Path = EQUIVALENCE) -> dict:
     """Derive all four conclusions. Nothing here is asserted from prose."""
     if verify_fn is None:
-        from verify_historical_probe_reuse import verify as verify_fn
+        from stages.phase_b.verify_historical_probe_reuse import verify as verify_fn
 
     r = verify_fn()
     probes = r["probes"]

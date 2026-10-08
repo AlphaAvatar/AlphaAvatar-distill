@@ -2,9 +2,9 @@
 """Do training and evaluation render the same prompt, and do the masks cover the
 tokens that carry the protocol?
 
-    PYTHONPATH=src python scripts/data/audit_render_and_masks.py \
-        --sessions artifacts/stage3/corpus_v2/sessions.jsonl \
-        --pack artifacts/stage3/ladder_uniform_probe --rung 250000 \
+    PYTHONPATH=src python scripts/shared/data/audit_render_and_masks.py \
+        --sessions artifacts/stages/stage-3/corpus_v2/sessions.jsonl \
+        --pack artifacts/shared/instruments/ladder_uniform_probe --rung 250000 \
         --out artifacts/audit/render_and_mask_audit.json
 
 Two questions, both of which would explain "trained on it 41 times and still
@@ -36,7 +36,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.sessions import (  # noqa: E402

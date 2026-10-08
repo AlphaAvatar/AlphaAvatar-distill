@@ -1,6 +1,6 @@
 """Derive the preregistered thresholds, before any candidate exists. Zero cost.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/characterize_thresholds.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_a/characterize_thresholds.py
 
 Two thresholds gate the pilot, and both must be fixed before the run they judge:
 
@@ -33,13 +33,13 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 #: This project's epsilon response rule. It lived in the core ranking module,
 #: whose payload named Phase A.
-from experiments.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
+from shared.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402

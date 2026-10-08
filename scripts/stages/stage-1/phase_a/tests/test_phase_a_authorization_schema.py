@@ -21,7 +21,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 
 def test_the_phase_a_authorization_schema_carries_no_grant():
-    from experiments.phase_a.plan import (
+    from stages.phase_a.plan import (
         GRANT_PROSE_REQUIRED,
         PHASE_A_AUTHORIZATION,
     )

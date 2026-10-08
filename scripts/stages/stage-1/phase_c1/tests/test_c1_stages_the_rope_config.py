@@ -31,7 +31,7 @@ def test_c1_stages_the_canonical_rope_config_specifically():
     assert want in staged, sorted(staged)
     assert staged[want].sha256 == (
         "a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054")
-    assert staged[want].dest == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    assert staged[want].dest == "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     #: and NOT the weights, which the RoPE gate never reads
     assert not [p for p in staged if p.endswith("model.safetensors")]
     assert not [p for p in staged if p.endswith("generation_config.json")]

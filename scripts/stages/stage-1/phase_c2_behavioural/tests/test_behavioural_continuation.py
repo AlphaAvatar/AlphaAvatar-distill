@@ -37,14 +37,14 @@ for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
-from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
-from experiments.phase_c2 import scoring as C2S  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from stages.phase_c2 import scoring as C2S  # noqa: E402
 
-import autoinit_c2_behavioural_launch as L  # noqa: E402
-import autoinit_c2_behavioural_driver as D  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_driver as D  # noqa: E402
 
 from _host_local_stores import needs_host_local_stores  # noqa: E402
 
@@ -235,7 +235,7 @@ def _prestage(pod: _Pod, store: Path, *, campaign_id: str = BG.CAMPAIGN_ID,
               only: set[str] | None = None) -> Path:
     """Put the destination's probes on this pod's attached volume.
 
-    What `scripts/autoinit/stage_c2_probes_to_volume.py` does to a real
+    What `scripts/shared/pod/stage_c2_probes_to_volume.py` does to a real
     volume, against this fixture's filesystem: the probe directories are
     COPIED — real bytes, at the flat per-probe layout the launcher derives —
     and a `staged_index.json` records which attempt each copy came from.
@@ -2088,7 +2088,7 @@ def test_a_mixed_campaign_state_buckets_every_probe_correctly(tmp_path, repo,
 
 def _readiness(repo_root: Path, run_id: str, **over) -> Path:
     """A readiness record in the shape the recorder actually writes."""
-    from experiments.phase_c2 import behavioural_pod_environment as BPE
+    from stages.phase_c2 import behavioural_pod_environment as BPE
 
     path = repo_root / BPE.record_path_for(run_id, L.STAGE_ID)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -2120,7 +2120,7 @@ def test_the_readiness_gate_reads_record_kind_and_the_verdict(
     behavioural sweep FAILED, and a gate that only asks "is this launch-bound"
     lets a failing tree through.
     """
-    from experiments.phase_c2 import behavioural_pod_environment as BPE
+    from stages.phase_c2 import behavioural_pod_environment as BPE
 
     root = _mirror_repo(tmp_path / "repo")
     monkeypatch.setattr(L, "REPO_ROOT", root)
@@ -2619,7 +2619,7 @@ def test_a_dry_run_writes_to_its_own_run_directory(tmp_path):
     from a different id would check a different chain and prove nothing about
     the one about to launch. Only the outputs move.
     """
-    src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py").read_text()
     body = src.split("def main(", 1)[1]
 
     #: The output locations are keyed on the dry-run id...
@@ -2652,8 +2652,8 @@ def test_the_dry_run_id_is_a_VALID_run_id(tmp_path):
     So this builds the layout FOR REAL, which is the only thing that would
     have caught it.
     """
-    import autoinit_c2_behavioural_launch as LL
-    from experiments.run_layout import layout_for
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as LL
+    from shared.run_layout import layout_for
 
     from aadistill.runtime.run_layout import RunLayoutError
 
@@ -3469,7 +3469,7 @@ def test_the_dry_run_suffix_has_one_owner():
     assert BG.is_dry_run_id("attempt7_dryrun")
     assert not BG.is_dry_run_id("attempt7")
     #: And it is a valid run id, which a hyphen was not.
-    from experiments.run_layout import layout_for
+    from shared.run_layout import layout_for
     import tempfile
     with tempfile.TemporaryDirectory() as tmp:
         layout_for(tmp, L.EXPERIMENT_ID, f"attempt7{BG.DRY_RUN_SUFFIX}",

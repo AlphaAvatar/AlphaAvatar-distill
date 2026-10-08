@@ -83,7 +83,7 @@ def describe() -> dict[str, Any]:
             "tuned against D1/D2/D3 results."),
         "execution": {"micro_batch_size": D_SERIES_MICRO_BATCH_SIZE,
                       "calibration_batch_packing": D_SERIES_BATCH_PACKING},
-        "owner": "scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+        "owner": "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
         "decision_record": "logs/budget/decisions.md 2026-10-04",
         "_does_not_move_the_batteries": (
             "Top-K changes structural scoring and evaluation, not prompt "

@@ -14,7 +14,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import missing_from_tree as _missing  # noqa: E402
+from shared.historical_declarations import missing_from_tree as _missing  # noqa: E402
 
 _DECLARED_MOVED = _missing((
     "src/aadistill/initialization/operators/attention.py",
@@ -103,7 +103,7 @@ PRICING = REPO / "logs/shared/analyses/autoinit_behavioural_continuation_pricing
 pytestmark = pytest.mark.skipif(
     not (STAGE3_PROBE.is_file() and FROZEN_PLAN.is_file() and REAL_SCORED.is_file()
          and REAL_AMENDMENT.is_file()
-         and (REPO / "artifacts/stage1/state_eval_v1/manifest.json").is_file()),
+         and (REPO / "artifacts/stages/stage-1/state_eval_v1/manifest.json").is_file()),
     reason="needs the frozen plan, a recorded engine probe, a real scored "
            "battery result and the identity-collapse amendment")
 
@@ -159,7 +159,7 @@ class Args:
 def load_continuation(tmp_path: Path):
     spec = importlib.util.spec_from_file_location(
         "continuation_b_driver_wf",
-        REPO / "scripts/pod/autoinit_continuation_b_driver.py")
+        REPO / "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["continuation_b_driver_wf"] = mod
     spec.loader.exec_module(mod)
@@ -390,8 +390,8 @@ def write_evidence(tmp_path: Path, ckpts: dict, *, tie: bool) -> dict:
 
 
 def make_auth(evidence: dict, tmp_path: Path):
-    from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest
+    from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+    from stages.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest
 
     frozen = json.loads(FROZEN_PLAN.read_text())
     science = frozen.get("plan_hash") or frozen["plan"]["plan_hash"]
@@ -427,9 +427,9 @@ class Detonator:
 
 def build(tmp_path, monkeypatch, *, tie: bool):
     """The real continuation driver with only the irreducible boundaries stubbed."""
-    import phase_a_search
+    from stages.phase_a import phase_a_search
 
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
     from support.fixture_categories import (
         current_tree_stage3_binding, use_current_tree_binding)
 
@@ -486,7 +486,7 @@ def build(tmp_path, monkeypatch, *, tie: bool):
     monkeypatch.setattr(phase_a_search, "BeamSearch", beam, raising=False)
 
     # -- the toy target geometry -------------------------------------------
-    import phase_a_frozen
+    from stages.phase_a import phase_a_frozen
     monkeypatch.setattr(phase_a_frozen, "TARGET_GEOMETRY", TARGET_GEOMETRY)
 
     # The CONSTRUCTOR loads this session's authorization, rather than a line
@@ -532,7 +532,7 @@ def build(tmp_path, monkeypatch, *, tie: bool):
         if any(a.endswith("train_stage3.py") for a in argv):
             config = json.loads(Path(argv[argv.index("--config") + 1]).read_text())
             trained.append(config["run_name"])
-            out = parent.REPO / f"artifacts/stage3/phase_a/{config['run_name']}"
+            out = parent.REPO / f"artifacts/stages/stage-3/phase_a/{config['run_name']}"
             ckpts_dir = out / "checkpoints"
             (ckpts_dir / "step000" / "model").mkdir(parents=True, exist_ok=True)
             (ckpts_dir / "latest.txt").write_text("step000\n")
@@ -582,7 +582,7 @@ def run_all(driver, mod, monkeypatch, tmp_path):
     codes = {}
     stages = {0: driver.stage_bind, 1: driver.stage_import, 3: driver.stage3,
               4: driver.stage4, 5: driver.stage5}
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
     for stage, fn in sorted(stages.items()):
         if stage == 3:
             monkeypatch.setattr(parent, "REPO", tmp_path / "pod_repo")
@@ -856,7 +856,7 @@ def test_the_authorization_cannot_be_made_to_permit_a_search(tmp_path, monkeypat
     """`runs_search` is False BY TYPE — there is no field to set."""
     from dataclasses import fields
 
-    from experiments.phase_b.continuation import ContinuationAuthorization
+    from stages.phase_b.continuation import ContinuationAuthorization
 
     driver, _, ev = build(tmp_path, monkeypatch, tie=False)
     assert driver.auth.runs_search is False
@@ -874,9 +874,9 @@ def test_the_parent_driver_contract_is_fully_satisfied():
     """
     import re
 
-    from experiments.phase_b.continuation import ContinuationAuthorization
+    from stages.phase_b.continuation import ContinuationAuthorization
 
-    source = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    source = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     required = set(re.findall(r"self\.auth\.([a-z_]+)", source))
     assert required, "the probe found no auth calls; it is broken"
     missing = sorted(required - set(dir(ContinuationAuthorization)))
@@ -959,8 +959,8 @@ def test_the_poll_lifetime_is_derived_from_THIS_sessions_plan():
     larger exposure. Asserted as a relation to the session's own hard-terminate
     bound rather than against a constant.
     """
-    import autoinit_continuation_b_launch as L
-    from autoinit_phase_b_launch import phase_b_poll_limit_minutes
+    from stages.continuation_b import autoinit_continuation_b_launch as L
+    from stages.phase_b.autoinit_phase_b_launch import phase_b_poll_limit_minutes
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40, "--bundle", "b.bundle"])
@@ -975,7 +975,7 @@ def test_the_poll_lifetime_is_derived_from_THIS_sessions_plan():
 
 
 def test_the_continuation_budget_strips_the_search_and_its_reserves():
-    import autoinit_continuation_b_launch as L
+    from stages.continuation_b import autoinit_continuation_b_launch as L
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40, "--bundle", "b.bundle"])
@@ -1006,7 +1006,7 @@ def test_the_frozen_source_set_IS_the_real_import_closure():
     Derived in a subprocess and compared, so adding an import without updating
     the set fails here rather than under a grant.
     """
-    from experiments.phase_b.continuation import CONTINUATION_RUNTIME_ONLY_FILES, CONTINUATION_SOURCE_FILES_V2, derive_continuation_closure
+    from stages.phase_b.continuation import CONTINUATION_RUNTIME_ONLY_FILES, CONTINUATION_SOURCE_FILES_V2, derive_continuation_closure
 
     derived = derive_continuation_closure(REPO)
     assert derived == tuple(sorted(CONTINUATION_SOURCE_FILES_V2)), (
@@ -1029,10 +1029,10 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
     smaller, and the guarantee correspondingly stronger: the module that defines
     `BeamSearch` is no longer even loaded.
     """
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
 
-    for loaded in ("scripts/pod/autoinit_phase_a_driver.py",
-                   "scripts/pod/autoinit_continuation_b_driver.py",
+    for loaded in ("scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+                   "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py",
                    "src/aadistill/initialization/planning/recovery.py",
                    "src/aadistill/initialization/planning/generation.py"):
         assert loaded in CONTINUATION_SOURCE_FILES_V2, loaded
@@ -1048,7 +1048,7 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
 
     for unreachable in ("src/aadistill/initialization/planning/search.py",
                         "src/aadistill/initialization/planning/ranking.py",
-                        "scripts/autoinit/phase_a_search.py"):
+                        "scripts/stages/stage-1/phase_a/phase_a_search.py"):
         assert unreachable not in CONTINUATION_SOURCE_FILES_V2, (
             f"{unreachable} is in the declared set but the continuation does "
             "not load it; a digest over files that cannot run overstates what "
@@ -1057,7 +1057,7 @@ def test_the_loaded_modules_a_search_lives_in_are_covered_by_the_digest():
 
 def test_only_the_known_neutralized_file_holds_a_search_call_site():
     """A call site appearing anywhere else fails, including in a library."""
-    from experiments.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
+    from stages.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
 
     assert search_call_site_owners(REPO, files=CONTINUATION_OWN_PATH_FILES) == ()
     assert search_call_site_owners(REPO) == tuple(
@@ -1082,12 +1082,12 @@ def test_importing_this_driver_does_not_rebind_the_shared_status_global():
     """
     import importlib.util
 
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
 
     before = parent.STATUS
     spec = importlib.util.spec_from_file_location(
         "continuation_b_import_probe",
-        REPO / "scripts/pod/autoinit_continuation_b_driver.py")
+        REPO / "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py")
     probe = importlib.util.module_from_spec(spec)
     sys.modules["continuation_b_import_probe"] = probe
     spec.loader.exec_module(probe)
@@ -1159,7 +1159,7 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
     the claim under test is the DIGEST contract, and the lineage half is
     exercised at the real launch commit.
     """
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     observed = continuation_source_digest(REPO)
     ok, why, record = _run_shared_gate(observed["digest"],
@@ -1180,8 +1180,8 @@ def test_the_SHARED_commit_gate_accepts_the_continuation_source_identity():
 def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
     """One formula, three producers. Asserted on VALUES, not on shared imports."""
     from aadistill.governance.authorization import harness_source_digest
-    from experiments.phase_b.plan import phase_b_source_digest
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
+    from stages.phase_b.plan import phase_b_source_digest
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
     from aadistill.infrastructure.source_identity import canonical_source_digest
 
     probe = ("README.md", "AGENTS.md")
@@ -1192,7 +1192,7 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
     # And the shared helper is that same value, so the six remaining inlined
     # copies are byte-equivalent rather than merely believed to be.
-    from experiments.phase_a.plan import sha256_file
+    from stages.phase_a.plan import sha256_file
     entries = [{"path": r, "sha256": sha256_file(REPO / r)} for r in probe]
     assert canonical_source_digest(entries) == a
 
@@ -1204,8 +1204,8 @@ def test_the_continuation_uses_the_same_formula_as_phase_a_and_phase_b():
 
 def test_the_shared_gate_refuses_a_digest_from_the_OLD_formula():
     """The exact defect, re-created. Must fail through the shared gate."""
-    from experiments.phase_a.plan import sha256_file
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from stages.phase_a.plan import sha256_file
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     from aadistill.infrastructure.manifest import sha256_json
 
     stale = sha256_json([{"path": r, "sha256": sha256_file(REPO / r),
@@ -1223,8 +1223,8 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
     A producer that preserved declaration order would agree only by luck, so the
     helper sorts rather than trusting the caller.
     """
-    from experiments.phase_a.plan import sha256_file
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
+    from stages.phase_a.plan import sha256_file
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2
     import hashlib
 
     reversed_files = tuple(reversed(sorted(CONTINUATION_SOURCE_FILES_V2)))
@@ -1239,7 +1239,7 @@ def test_the_shared_gate_refuses_a_reordered_file_set():
 
 def test_the_shared_gate_refuses_a_set_with_a_file_omitted():
     """A digest over a smaller executable than the one that runs."""
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     short = tuple(f for f in CONTINUATION_SOURCE_FILES_V2
                   if f != "src/aadistill/initialization/planning/recovery.py")
@@ -1255,7 +1255,7 @@ def test_the_shared_gate_refuses_a_stale_executable_digest():
     """A grant bound to an older tree cannot launch the current one."""
     ok, why, record = _run_shared_gate(
         "88e1ef576d810514e855c94f03dbc36a1d818a065c37ff5b6140da128e5e7e55",
-        __import__("experiments.phase_b.continuation", fromlist=["x"]
+        __import__("stages.phase_b.continuation", fromlist=["x"]
                    ).CONTINUATION_SOURCE_FILES_V2)
     assert record["harness_matches"] is False
     assert not ok
@@ -1263,7 +1263,7 @@ def test_the_shared_gate_refuses_a_stale_executable_digest():
 
 def test_the_gate_probe_itself_can_fail():
     """Guards the guard: a probe that always reports False proves nothing."""
-    from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
+    from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2, continuation_source_digest
 
     ok, _, record = _run_shared_gate(continuation_source_digest(REPO)["digest"],
                                      CONTINUATION_SOURCE_FILES_V2)

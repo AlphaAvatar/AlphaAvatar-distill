@@ -39,7 +39,7 @@ from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 def _issuer():
     """The real entry point, loaded by path — `scripts/autoinit/` is not a
     package, so an `import` would not find it."""
-    src = REPO / "scripts/autoinit/issue_c2_behavioural_authorization.py"
+    src = REPO / "scripts/stages/stage-1/phase_c2_behavioural/issue_c2_behavioural_authorization.py"
     spec = importlib.util.spec_from_file_location("_c2b_issuer", src)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -54,7 +54,7 @@ PROPOSAL = REPO / ISS.PROPOSAL_REL
 
 def test_the_issuer_checks_the_document_the_writer_actually_writes():
     """Two spellings of one path is how a checker verifies an unread file."""
-    src = REPO / "scripts/autoinit/write_c2_behavioural_proposal.py"
+    src = REPO / "scripts/stages/stage-1/phase_c2_behavioural/write_c2_behavioural_proposal.py"
     spec = importlib.util.spec_from_file_location("_c2b_writer", src)
     writer = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(writer)
@@ -181,7 +181,7 @@ def test_the_caller_raises_on_what_the_seam_returns():
     unexecuted code, so the wiring is asserted directly: `main` must call both
     helpers and refuse on a non-empty result.
     """
-    src = (REPO / "scripts/autoinit/issue_c2_behavioural_authorization.py"
+    src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/issue_c2_behavioural_authorization.py"
            ).read_text()
     body = src.split("def main(", 1)[1]
     assert "reviewed_proposal_hash(REPO_ROOT)" in body
@@ -202,7 +202,7 @@ def test_the_issuer_refuses_a_dirty_tree_before_reading_anything():
     """
     out = subprocess.run(
         [sys.executable,
-         str(REPO / "scripts/autoinit/issue_c2_behavioural_authorization.py"),
+         str(REPO / "scripts/stages/stage-1/phase_c2_behavioural/issue_c2_behavioural_authorization.py"),
          "--run-id", "attempt-does-not-exist", "--rate", "1.09"],
         capture_output=True, text=True, cwd=REPO,
         env={"PYTHONPATH": "src:scripts", "PATH": "/usr/bin:/bin",
@@ -228,7 +228,7 @@ class TestTheProposalIdentityIsReproducible:
     """
 
     def _writer(self):
-        src = REPO / "scripts/autoinit/write_c2_behavioural_proposal.py"
+        src = REPO / "scripts/stages/stage-1/phase_c2_behavioural/write_c2_behavioural_proposal.py"
         spec = importlib.util.spec_from_file_location("_c2b_writer2", src)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -302,7 +302,7 @@ class TestTheProposalIdentityIsReproducible:
         assert ISS.PROPOSAL_WRITER.proposal_identity is not None
         assert ISS.reviewed_proposal_hash(REPO) == w.proposal_identity(
             json.loads(PROPOSAL.read_text()))
-        src = (REPO / "scripts/autoinit/issue_c2_behavioural_authorization.py"
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/issue_c2_behavioural_authorization.py"
                ).read_text()
         body = src.split("def reviewed_proposal_hash(", 1)[1].split("\ndef ")[0]
         assert "PROPOSAL_WRITER.proposal_identity(doc)" in body

@@ -36,15 +36,15 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
-from collect_artifacts import load_specs  # noqa: E402
+from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from stages.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from shared.pod.collect_artifacts import load_specs  # noqa: E402
 
 SUCCESS = "configs/autoinit/c1_artifacts.json"
 FAILED = "configs/autoinit/c1_artifacts_failed.json"
-COLLECT = REPO / "scripts/pod/collect_artifacts.py"
+COLLECT = REPO / "scripts/shared/pod/collect_artifacts.py"
 BATTERY = json.loads(
-    (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+    (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
 SETS = sorted(BATTERY["sets"])
 PROBES = [f"autoinit.v1.phase_c1.{arm}.{seed}"
           for arm in ("incumbent", "treatment")
@@ -81,14 +81,14 @@ def test_patterns_stay_within_the_artifact_roots(rel):
 
 def test_patterns_match_the_producing_source_literals():
     """The spec's paths are the driver's own, and the driver is now C1's own."""
-    c1 = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
-    trainer = (REPO / "scripts/training/train_stage3.py").read_text()
-    ev = (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
+    c1 = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py").read_text()
+    trainer = (REPO / "scripts/shared/training/train_stage3.py").read_text()
+    ev = (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
 
     assert 'AUDIT = REPO / "artifacts/audit/autoinit_c1"' in c1
-    assert 'TRAIN = REPO / "artifacts/stage3/c1"' in c1
-    assert 'EVAL = REPO / "artifacts/eval/c1"' in c1
-    assert '"out_dir": f"artifacts/stage3/c1/{name}"' in c1
+    assert 'TRAIN = REPO / "artifacts/stages/stage-3/c1"' in c1
+    assert 'EVAL = REPO / "artifacts/stages/stage-3/eval/c1"' in c1
+    assert '"out_dir": f"artifacts/stages/stage-3/c1/{name}"' in c1
     assert 'AUDIT / f"{name}_per_sample.jsonl"' in c1
     assert 'AUDIT / f"{name}_c1_confirmation.json"' in c1
     assert 'AUDIT / "probes" / f"{name}.training.json"' in c1
@@ -313,7 +313,7 @@ def test_one_missing_generation_set_fails_the_manifest(tmp_path):
 # --- the gate itself --------------------------------------------------------
 
 def _gate():
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
     return L
 
 
@@ -405,14 +405,14 @@ def test_artifact_spec_gate_catches_a_missing_file(monkeypatch):
 
 def test_artifact_spec_gate_is_wired_into_the_launcher():
     L = _gate()
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert "artifact_spec_gate," in src.split("precheck=(", 1)[1]
     assert L.SPEC_SUCCESS == SUCCESS and L.SPEC_FAILED == FAILED
 
 
 def test_launcher_books_the_specs_the_gate_validates():
     """The gate cannot end up checking a different file than the pod is handed."""
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     policy = src.split("ArtifactPolicy(", 1)[1].split("teardown=", 1)[0]
     assert "spec_success=SPEC_SUCCESS" in policy
     assert "spec_failed=SPEC_FAILED" in policy
@@ -421,7 +421,7 @@ def test_launcher_books_the_specs_the_gate_validates():
 def test_writer_and_launcher_name_the_same_specs():
     """The preregistration writer restates the two paths; keep them in step."""
     L = _gate()
-    w = (REPO / "scripts/autoinit/write_c1_execution_preregistration.py").read_text()
+    w = (REPO / "scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py").read_text()
     ns: dict = {}
     for line in w.splitlines():
         if line.startswith(("SPEC_SUCCESS", "SPEC_FAILED")):

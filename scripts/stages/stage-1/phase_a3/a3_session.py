@@ -22,7 +22,7 @@ plan assert a seed the computation did not use.
 **Stage I is not here, and that is deliberate.** attempt75 trained, preserved
 and scored all nine of its probes and then lost its decision artifact to a
 stage-I crash on the pod. A3's comparison runs OFF POD at `$0` from preserved
-evidence, in `scripts/autoinit/aggregate_a3.py`. The driver's job ends at
+evidence, in `scripts/stages/stage-1/phase_a3/aggregate_a3.py`. The driver's job ends at
 evaluation and preservation, which removes that failure class instead of
 guarding against it.
 """
@@ -43,8 +43,8 @@ sys.path.insert(0, str(REPO / "scripts"))
 from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathSpec, FixedPathStep,
 )
-from experiments.phase_c3 import session as CS  # noqa: E402
-from experiments.phase_a3.a_bsz3 import (  # noqa: E402
+from stages.phase_c3 import session as CS  # noqa: E402
+from stages.phase_a3.a_bsz3 import (  # noqa: E402
     A_BSZ1, A_BSZ3, ATTENTION_IMPL_ID, frozen_identities,
 )
 
@@ -89,7 +89,7 @@ def design(repo_root: str | Path = REPO) -> dict[str, Any]:
     if not p.is_file():
         raise A3SessionError(
             f"no A3 design at {DESIGN_PATH}; run "
-            "scripts/autoinit/write_a3_design.py --write")
+            "scripts/stages/stage-1/phase_a3/write_a3_design.py --write")
     doc = json.loads(p.read_text())
     claimed = doc.get("design_sha256")
     if not claimed:
@@ -238,7 +238,7 @@ STAGES: tuple[A3Stage, ...] = (
             "durable preservation and the evidence manifest", True),
 )
 #: Stage I is ABSENT ON PURPOSE -- see the module docstring. The comparison is
-#: `scripts/autoinit/aggregate_a3.py`, off pod, at $0.
+#: `scripts/stages/stage-1/phase_a3/aggregate_a3.py`, off pod, at $0.
 AGGREGATION_IS_OFF_POD = True
 
 STAGE_LETTERS = tuple(s.letter for s in STAGES)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 7 analysis: does restored general language modelling reach behaviour?
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e7.py --bootstrap 10000
+    PYTHONPATH=src python scripts/stages/stage-3/e7/analyze_e7.py --bootstrap 10000
 
 Three arms, one frozen 150-prompt battery, every arm re-scored from its retained
 raw generations with the current scorer. Arm A is the **retained** E1/P1 KD-heavy
@@ -41,7 +41,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -49,7 +49,7 @@ from aadistill.evaluation.paired_stats import (  # noqa: E402
     mcnemar_counts, paired_bootstrap_ci,
 )
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from analyze_e6 import (  # noqa: E402  — one scorer, shared by both experiments
+from stages.e6.analyze_e6 import (  # noqa: E402  — one scorer, shared by both experiments
     arm_alias, load_sessions, rescore_arm, token_stream_sha256,
 )
 

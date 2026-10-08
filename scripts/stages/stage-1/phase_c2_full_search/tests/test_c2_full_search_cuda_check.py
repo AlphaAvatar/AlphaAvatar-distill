@@ -37,7 +37,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-CHECK = REPO / "scripts/validation/c2_full_search_cuda_check.py"
+CHECK = REPO / "scripts/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda_check.py"
 CONFIG = REPO / "configs/validation/c2_full_search_cuda.json"
 
 for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
@@ -238,7 +238,7 @@ def test_the_declared_inputs_cover_BOTH_producers_the_driver_reads_from():
     be short a third time.
     """
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     import importlib.util
     spec = importlib.util.spec_from_file_location("c2_inputs", CHECK)

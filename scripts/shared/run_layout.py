@@ -619,10 +619,48 @@ def write_run_readmes(layout: RunLayout, *, experiment_id: str, run_id: str,
     return written
 
 
+#: ---------------------------------------------------------------------------
+#: Historical-path resolution. A frozen record names the path an object had
+#: when it was written; that statement stays true and is never rewritten, so a
+#: consumer needs a way from that name to the current address. The table lives
+#: in `logs/index.json :: historical_paths.map` (carried forward by
+#: `record_run_index.py`, extended by hand at move time); this module owns the
+#: lookup because navigation is layout's job and three consumers were each
+#: re-implementing the load.
+
+HISTORICAL_PATHS_INDEX = "logs/index.json"
+
+
+def historical_paths(repo_root: Path = REPO) -> dict[str, str]:
+    """The old-path -> current-path table the run index carries."""
+    p = repo_root / HISTORICAL_PATHS_INDEX
+    if not p.is_file():
+        return {}
+    block = json.loads(p.read_text()).get("historical_paths") or {}
+    return dict(block.get("map") or {})
+
+
+def resolve_historical(rel: str, repo_root: Path = REPO) -> str:
+    """`rel` as it is addressed today; `rel` itself when nothing moved it.
+
+    Exact key first; otherwise the longest key that is a parent directory of
+    the query, with the remainder appended. No match means the path is
+    current, or names an object that no longer exists.
+    """
+    table = historical_paths(repo_root)
+    if rel in table:
+        return table[rel]
+    for old in sorted(table, key=len, reverse=True):
+        if rel.startswith(old + "/"):
+            return table[old] + rel[len(old):]
+    return rel
+
+
 __all__ = ["AREAS", "CLAIM_NAME", "CLAIM_SCHEMA", "MANIFEST_NAME",
            "RUNS_ROOT", "ArtifactSpec", "OutputOwnershipError",
            "RunConventionError", "RunLayout", "area_of", "check_roles",
-           "claim_output_root", "is_recorded", "layout_for", "manifest_path",
+           "claim_output_root", "historical_paths", "is_recorded",
+           "layout_for", "manifest_path",
            "open_run", "present_roles", "read_output_claim", "read_run",
            "rel_run_dir",
-           "record_run", "require_output_claim"]
+           "record_run", "require_output_claim", "resolve_historical"]

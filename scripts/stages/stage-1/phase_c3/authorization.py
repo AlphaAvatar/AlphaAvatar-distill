@@ -35,18 +35,18 @@ from aadistill.governance.authorization import AuthorizationError
 from aadistill.infrastructure.budget import Phase
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import BudgetSpec
-from experiments.phase_a.plan import PhaseAAuthorization
+from stages.phase_a.plan import PhaseAAuthorization
 
 SCHEMA = "aadistill.autoinit.c3_authorization/v1"
 
 #: The executables a paid C3 session runs. The closure walk starts here.
 C3_ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_c3_launch.py",
-    "scripts/pod/autoinit_c3_driver.py",
-    "scripts/experiments/stage-1/phase_c3/session.py",
-    "scripts/experiments/stage-1/phase_c3/formal_pricing.py",
-    "scripts/autoinit/issue_c3_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py",
+    "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py",
+    "scripts/stages/stage-1/phase_c3/session.py",
+    "scripts/stages/stage-1/phase_c3/formal_pricing.py",
+    "scripts/stages/stage-1/phase_c3/issue_c3_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Files no import edge reaches whose bytes still decide what runs.
@@ -68,7 +68,7 @@ C3_DECLARED_INPUTS: tuple[str, ...] = (
     #: per-session remote entrypoint, and declaring a file nothing executes
     #: is precisely the defect C1's harness list carried for months --
     #: it named a legacy script whose only remaining reference was that list.
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c3_artifacts.json",
     "configs/autoinit/c3_artifacts_failed.json",
@@ -84,7 +84,7 @@ CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_c3/executable_closure.json
 LIVE_PRICING_PATH = "logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json"
 
 #: 3 arms x 3 seeds. DERIVED nowhere else: the plan owns the arms and seeds,
-#: and `scripts/experiments/stage-1/phase_c3/tests/test_c3_session_contract.py` proves this equals what the
+#: and `scripts/stages/stage-1/phase_c3/tests/test_c3_session_contract.py` proves this equals what the
 #: session contract computes from them.
 C3_PROBES = 9
 
@@ -236,7 +236,7 @@ def load_live_pricing(repo_root: str | Path = ".") -> dict[str, Any]:
             f"no live pricing record at {LIVE_PRICING_PATH}. Section 2 of the "
             "2026-09-28 decision requires a LIVE securePrice re-query "
             "immediately before the C3 authorization; run "
-            "scripts/experiments/stage-1/phase_c3/formal_pricing.py first.")
+            "scripts/stages/stage-1/phase_c3/formal_pricing.py first.")
     doc = json.loads(p.read_text())
     if not doc.get("FUNDABLE"):
         raise AuthorizationError(

@@ -656,7 +656,7 @@ def test_the_resolver_does_not_call_int():
 
 #: The C3 pilot's own step constructor — which must refuse the same values the
 #: operator refuses — moved to
-#: `scripts/experiments/stage-1/phase_c3/tests/test_pilot_step_constructor.py`
+#: `scripts/stages/stage-1/phase_c3/tests/test_pilot_step_constructor.py`
 #: in the 2026-10-03 convergence round. The operator's refusal is core; which
 #: caller happens to build a step for it is that caller's business.
 
@@ -909,9 +909,9 @@ def test_the_domain_map_agrees_on_the_real_frozen_mixture():
     #: not built them. The skip is therefore on the TREE and the assertion on
     #: the FILE: where the artifact root exists, a missing mixture is a real
     #: failure rather than a quiet absence.
-    if not (REPO / "artifacts/stage1").is_dir():
+    if not (REPO / "artifacts/stages/stage-1").is_dir():
         pytest.skip("artifacts/ is gitignored and not built in this tree")
-    manifest = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
+    manifest = REPO / "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"
     assert manifest.is_file(), f"{manifest} is missing from a built artifact tree"
     import json
 

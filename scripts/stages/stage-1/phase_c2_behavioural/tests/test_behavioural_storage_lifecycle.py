@@ -33,11 +33,11 @@ for _p in ("src", "scripts", "scripts/pod"):
 
 from aadistill.runtime import cost as COST  # noqa: E402
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
 
-import autoinit_c2_behavioural_launch as L  # noqa: E402
-import autoinit_c2_behavioural_driver as D  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_driver as D  # noqa: E402
 
 from _host_local_stores import (  # noqa: E402
     host_local_stores_are_absent,
@@ -188,7 +188,7 @@ class TestTheDtypesAreRead:
         assert tr["n_moments"] == len(recipe["optim"]["betas"])
         assert tr["keep_last"] == recipe["checkpoint"]["keep_last"]
         #: and it is the SAME file the driver builds probe configs from
-        import autoinit_c1_driver as C1D
+        from stages.phase_c1 import autoinit_c1_driver as C1D
         assert Path(C1D.FROZEN_RECIPE).name == Path(BH.FROZEN_RECIPE_REL).name
 
     def test_a_recipe_with_an_unreadable_dtype_refuses(self, tmp_path):
@@ -241,7 +241,7 @@ def test_container_and_durable_are_separate_bounds():
 # --- 4. both gates charge the right resource -------------------------------
 
 def test_the_destination_gate_charges_the_derived_durable_requirement():
-    src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py").read_text()
     body = src.split("def destination_gate(", 1)[1].split("\ndef ")[0]
     assert "durable_backend" in body
     #: The old EXPRESSION, not the string "1.11" -- that appears in the comment
@@ -282,7 +282,7 @@ class TestTheContainerGate:
         assert big and not small
 
     def test_it_is_wired_into_the_prechecks(self):
-        src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py").read_text()
         assert "container_gate," in src.split("prechecks", 1)[-1][:900] or \
                "container_gate," in src
         #: and it sits beside the destination gate it complements
@@ -300,11 +300,11 @@ class TestTheReleaseBoundary:
         assert L.RELEASE_ACK_DIR.endswith(BC.RELEASE_ACK_REL), (
             "the launcher writes the ack somewhere the driver does not read; "
             "two spellings of one path is how a checker verifies nothing")
-        dsrc = (REPO / "scripts/pod/autoinit_c2_behavioural_driver.py").read_text()
+        dsrc = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py").read_text()
         assert "BC.RELEASE_ACK_REL" in dsrc
 
     def test_the_launcher_acks_only_after_destination_re_identification(self):
-        src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py").read_text()
         block = src.split("if matched:", 1)[1].split("\n    return fetched")[0]
         assert "durable_ack.json" in block and "release_ack(ctx" in block, (
             "the release ack is not inside the matched branch; it would permit "
@@ -394,7 +394,7 @@ class TestTheReleaseBoundary:
         assert drv.ev["probe_workdirs_released"][-1]["failed"]
 
     def test_the_release_runs_before_each_probe_is_trained(self):
-        src = (REPO / "scripts/pod/autoinit_c2_behavioural_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py").read_text()
         body = src.split("def run_rung(", 1)[1].split("\n    def ")[0]
         i = body.index("release_acked_probe_workdirs()")
         j = body.index("self.train_one(")
@@ -481,7 +481,7 @@ class TestTheRuntimeHeadroomRefusal:
         assert rec["free_gib"] > rec["need_gib"]
 
     def test_it_runs_before_training_and_after_the_release(self):
-        src = (REPO / "scripts/pod/autoinit_c2_behavioural_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py").read_text()
         body = src.split("def run_rung(", 1)[1].split("\n    def ")[0]
         assert (body.index("release_acked_probe_workdirs()")
                 < body.index("require_probe_headroom(")

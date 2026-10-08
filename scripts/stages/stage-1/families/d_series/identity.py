@@ -46,13 +46,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO_ROOT / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from battery_render import norm  # noqa: E402
+from shared.data.battery_render import norm  # noqa: E402
 
 #: The problem payload, per source. The ONE place a source-specific field name
 #: appears: everything downstream takes the hash and never the field.

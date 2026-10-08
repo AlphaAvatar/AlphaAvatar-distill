@@ -25,12 +25,12 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-import price_phase_b  # noqa: E402
-from price_phase_b import (  # noqa: E402
+from stages.phase_b import price_phase_b  # noqa: E402
+from stages.phase_b.price_phase_b import (  # noqa: E402
     CONTROL, PHASE_A_FINALISTS, PHASE_B_SEARCHED_LEAVES, SURVIVORS_AT_SB,
     observed_probes, price,
 )
-from verify_historical_probe_reuse import ADMITTED, CHECKPOINTS  # noqa: E402
+from stages.phase_b.verify_historical_probe_reuse import ADMITTED, CHECKPOINTS  # noqa: E402
 
 sys.path.insert(0, str(REPO / "tests/pod"))
 from support.historical_contract_reuse import (  # noqa: E402
@@ -221,7 +221,7 @@ def test_a_probe_that_EXISTS_but_is_not_verified_is_still_billed(monkeypatch, tm
     and a test comparing them proves nothing. This forces them apart: a record
     that withholds one admitted probe must raise the bill by exactly one probe.
     """
-    from verify_historical_probe_reuse import probes_dir_digest
+    from stages.phase_b.verify_historical_probe_reuse import probes_dir_digest
 
     full = price()["probes"]["total_low"]
     # The record the pricing is CURRENTLY reading, not the live one -- otherwise

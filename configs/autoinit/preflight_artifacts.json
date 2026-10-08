@@ -1,7 +1,7 @@
 {
   "spec": "aadistill.artifact_spec/v1",
   "session": "autoinit_micro_preflight",
-  "note": "success spec: every permanent artifact the preflight must not lose. Entries are ArtifactSpec kwargs \u2014 artifact_class, pattern, required, min_matches, min_bytes, lifecycle \u2014 and are loaded by scripts/pod/collect_artifacts.py. A key this dataclass does not take makes the whole collection fail at load.",
+  "note": "success spec: every permanent artifact the preflight must not lose. Entries are ArtifactSpec kwargs \u2014 artifact_class, pattern, required, min_matches, min_bytes, lifecycle \u2014 and are loaded by scripts/shared/pod/collect_artifacts.py. A key this dataclass does not take makes the whole collection fail at load.",
   "entries": [
     {
       "artifact_class": "preflight_evidence",

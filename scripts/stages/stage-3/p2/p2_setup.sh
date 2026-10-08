@@ -57,7 +57,7 @@ import os, shutil
 from pathlib import Path
 from huggingface_hub import hf_hub_download, snapshot_download
 tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
-root = Path('/workspace/aad/artifacts/stage3')
+root = Path('/workspace/aad/artifacts/stages/stage-3')
 d = snapshot_download(repo, repo_type='model', token=tok,
                       allow_patterns=['stage3_recovery_corpus_v2/ladder_uniform/*'])
 src = Path(d) / 'stage3_recovery_corpus_v2/ladder_uniform'
@@ -71,9 +71,9 @@ p = hf_hub_download(repo, 'stage3_recovery_corpus_v2/sessions.jsonl',
 shutil.copy(p, root / 'corpus_v2/sessions.jsonl')
 print('corpus staged')
 "
-test -f "$REPO/artifacts/stage3/ladder_uniform/blocks.npz"
-test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
-test -f "$REPO/artifacts/stage3/corpus_v2/sessions.jsonl"
+test -f "$REPO/artifacts/stages/stage-3/ladder_uniform/blocks.npz"
+test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"
+test -f "$REPO/artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 # holdout_v1.jsonl is gitignored so it does not ship in the bundle; the launcher
 # transfers it and the hash is asserted here, before anything trains.
 mkdir -p "$REPO/data/warmup"
@@ -122,7 +122,7 @@ tok = os.environ['HF_TOKEN']; repo = 'AlphaAvatar/aadistill-artifacts'
 d = snapshot_download(repo, repo_type='model', token=tok,
                       allow_patterns=['stage1/qwen3_0p6b_init_v0/checkpoint/*'])
 src = Path(d) / 'stage1/qwen3_0p6b_init_v0/checkpoint'
-dest = Path('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
+dest = Path('/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint')
 dest.mkdir(parents=True, exist_ok=True)
 for f in src.iterdir(): shutil.copy(f, dest / f.name)
 print('stage1 init staged')
@@ -138,7 +138,7 @@ print('teacher downloaded')
 # The fork point every arm starts from, verified before anything trains.
 python3 -c "
 import hashlib, sys
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
 h = hashlib.sha256(open(p,'rb').read()).hexdigest()
 want = '86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54'
 print('stage1 init sha256', h)
@@ -155,7 +155,7 @@ import sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
 from transformers import AutoConfig, AutoModelForCausalLM
 from aadistill.models.student import assert_rope_matches_config
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint'
 cfg = AutoConfig.from_pretrained(p)
 m = AutoModelForCausalLM.from_config(cfg)
 base = assert_rope_matches_config(m, cfg, p)

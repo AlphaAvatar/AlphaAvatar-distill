@@ -5,10 +5,10 @@ E8b's DP and DC cells. Depth is the *only* compression: teacher hidden width 256
 FFN 9728, 32 Q heads, 8 KV heads, embeddings, tied lm head, norms, vocabulary and
 tokenizer are all carried over untouched. 36 -> 28 layers and that is all.
 
-    PYTHONPATH=src python scripts/training/build_depth_only_init.py \\
-        --map positional --out artifacts/stage1/e8b_dp_init
-    PYTHONPATH=src python scripts/training/build_depth_only_init.py \\
-        --map contribution --out artifacts/stage1/e8b_dc_init
+    PYTHONPATH=src python scripts/shared/training/build_depth_only_init.py \\
+        --map positional --out artifacts/stages/stage-1/e8b_dp_init
+    PYTHONPATH=src python scripts/shared/training/build_depth_only_init.py \\
+        --map contribution --out artifacts/stages/stage-1/e8b_dc_init
 
 Verbatim copy, not re-projection
 --------------------------------
@@ -36,7 +36,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402

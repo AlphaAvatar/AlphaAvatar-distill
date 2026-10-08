@@ -41,7 +41,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import missing_from_tree as _missing  # noqa: E402
+from shared.historical_declarations import missing_from_tree as _missing  # noqa: E402
 
 _DECLARED_MOVED = _missing((
     "src/aadistill/initialization/operators/attention.py",
@@ -68,11 +68,11 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-import phase_a_search  # noqa: E402
+from stages.phase_a import phase_a_search  # noqa: E402
 from aadistill.initialization.planning import stage1_selection
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 
 ADAPTER = get_adapter("qwen3")
 
@@ -114,7 +114,7 @@ def suite_bundle():
     from aadistill.initialization.specs.metrics import StateEvalSuite
 
     suite, items, manifest = phase_a_search.load_suite(
-        REPO / "artifacts/stage1/state_eval_v1")
+        REPO / "artifacts/stages/stage-1/state_eval_v1")
     assert isinstance(suite, StateEvalSuite)
     # One item per (domain, sub-type) keeps the suite OBJECT real — so the
     # structural hash is the real one — while making a pass affordable.
@@ -162,7 +162,7 @@ def run_stage1(workdir, retained, *, top_n=5, n_items=2):
 
     return phase_a_search.run_phase_a_search(
         workdir=Path(workdir) / "search",
-        state_eval=REPO / "artifacts/stage1/state_eval_v1",
+        state_eval=REPO / "artifacts/stages/stage-1/state_eval_v1",
         top_n=top_n, device="cpu", repo_root=REPO,
         teacher_id="toy-phase-b-teacher",
         canonical_init=str(control_dir), canonical_sha256=None,

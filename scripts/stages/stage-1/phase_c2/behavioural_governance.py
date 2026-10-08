@@ -27,8 +27,8 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.governance.closure import ClosureError, derive, digest_of
 
-from experiments.phase_c2 import behavioural as BH
-from experiments.phase_c2.session import C2Authorization
+from stages.phase_c2 import behavioural as BH
+from stages.phase_c2.session import C2Authorization
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -73,16 +73,16 @@ AUTHORIZED_STAGES: tuple[str, ...] = (
 #: other C2 session includes its own: the code deciding what an authorization
 #: SAYS is part of the executable identity that authorization binds.
 ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_c2_behavioural_launch.py",
-    "scripts/pod/autoinit_c2_behavioural_driver.py",
-    "scripts/experiments/stage-1/phase_c2/behavioural.py",
-    "scripts/experiments/stage-1/phase_c2/behavioural_governance.py",
-    "scripts/experiments/stage-1/phase_c2/behavioural_schedule.py",
-    "scripts/experiments/stage-1/phase_c2/behavioural_decision.py",
-    "scripts/experiments/stage-1/phase_c2/scoring.py",
-    "scripts/autoinit/score_c2_screening.py",
-    "scripts/autoinit/score_c1_confirmation.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py",
+    "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py",
+    "scripts/stages/stage-1/phase_c2/behavioural.py",
+    "scripts/stages/stage-1/phase_c2/behavioural_governance.py",
+    "scripts/stages/stage-1/phase_c2/behavioural_schedule.py",
+    "scripts/stages/stage-1/phase_c2/behavioural_decision.py",
+    "scripts/stages/stage-1/phase_c2/scoring.py",
+    "scripts/stages/stage-1/phase_c2/score_c2_screening.py",
+    "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
@@ -113,7 +113,7 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
     Two paid pods in this programme died one per producer because a non-source
     input was shipped for one consumer and not the other.
     """
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import replay_specs as RS
 
     return (
         BH.PROTOCOL,
@@ -123,7 +123,7 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
         "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
         "configs/stage3/e1/e1_r0860k_sa_pca.json",
         BH.STORAGE_PRICING,
-        "scripts/pod/autoinit_preflight_setup.sh",
+        "scripts/shared/pod/autoinit_preflight_setup.sh",
         #: The runtime scientific inputs of the prepare stage.
         RS.SELECTION_REL,
         RS.JOURNAL_REL,
@@ -184,9 +184,9 @@ def candidate_leaves(repo_root: str | Path = REPO_ROOT, *, device: str = "cuda")
         register_builtin_operators,
     )
 
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c2.replay_specs import build_replay_leaves
-    from experiments.phase_c2.search_space import register_c2_operators
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c2.replay_specs import build_replay_leaves
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_builtin_profiles()
     register_builtin_operators()
@@ -196,7 +196,7 @@ def candidate_leaves(repo_root: str | Path = REPO_ROOT, *, device: str = "cuda")
 
 def arm_specs(repo_root: str | Path = REPO_ROOT, *, device: str = "cuda"):
     """The construction spec of every arm: five candidates, then B."""
-    from experiments.phase_c2 import baseline as BL
+    from stages.phase_c2 import baseline as BL
 
     return tuple([leaf.spec for leaf in candidate_leaves(repo_root, device=device)]
                  + [BL.frozen_baseline_spec(device=device)])
@@ -248,7 +248,7 @@ def staged_assets(repo_root: str | Path = REPO_ROOT):
     from aadistill.infrastructure.session import LocalAsset
     from aadistill.initialization.calibration.profiles import get_profile
 
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     #: Registered HERE rather than assumed: `get_profile` raises on an empty
     #: registry, and a governance function that asked a registry somebody else
@@ -442,7 +442,7 @@ def is_dry_run_id(run_id: str) -> bool:
 
 def campaign_runs_rel() -> str:
     """This campaign's run directories, repo-relative."""
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return str(Path(rel_run_dir(EXPERIMENT_ID, "_", STAGE_ID)).parent)
 
@@ -1031,7 +1031,7 @@ class BehaviouralAuthorization(C2Authorization):
         """
         from aadistill.governance.authorization import AuthorizationError
 
-        from experiments.phase_c2.session import C2ResourceScope
+        from stages.phase_c2.session import C2ResourceScope
 
         raw = json.loads(Path(path).read_text())
         stated = raw.get("authorization_sha256")

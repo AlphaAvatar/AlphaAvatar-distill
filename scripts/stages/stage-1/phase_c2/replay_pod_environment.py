@@ -5,7 +5,7 @@ contract and the group rules all live in `aadistill.runtime.pod_environment`.
 What differs is everything the record BINDS, which is the part that decides
 whether a launch may rest on it.
 
-The pod SELECTION is this session's own, `scripts/experiments/stage-1/phase_c2/tests`. Search-1's
+The pod SELECTION is this session's own, `scripts/stages/stage-1/phase_c2/tests`. Search-1's
 asserts the canonical 0.6B control this session does not stage; the full
 search's asserts that session's staged assets and its beam. Both would fail a
 correct replay tree, and narrowing either to fit would stop it guarding the
@@ -32,14 +32,14 @@ from aadistill.runtime.pod_environment import (  # noqa: E402,F401
     pod_test_environment_digest,
 )
 
-from experiments.phase_c2 import replay as RG
-from experiments.phase_c2.pod_environment import (  # noqa: F401
+from stages.phase_c2 import replay as RG
+from stages.phase_c2.pod_environment import (  # noqa: F401
     POD_TEST_ENVIRONMENT_FILES_V1, ReadinessError,
 )
 
 #: This session's OWN pod selection, named ONCE here and read by the launcher
 #: through this module.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c2/tests"
 
 #: Its OWN schema. This is the one-line check that makes a full-search,
 #: Search-1 or baseline-completion readiness record unusable here, and this one
@@ -77,7 +77,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
             "a replay readiness record has no location without a run id: it is "
             "evidence about one attempt, and a shared path is how one attempt's "
             "evidence comes to describe another's tree")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir(EXPERIMENT_ID, run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
@@ -114,7 +114,7 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
     """How to DRIVE a replay readiness sweep, for the generic recorder."""
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c2.replay_bundle import canonical_bundle_name
+        from stages.phase_c2.replay_bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 

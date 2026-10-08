@@ -34,8 +34,8 @@ for _extra in (".", "src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str((REPO / _extra).resolve()) not in sys.path:
         sys.path.insert(0, str((REPO / _extra).resolve()))
 
-LAUNCHER = REPO / "scripts/pod/autoinit_phase_c2_launch.py"
-DRIVER = REPO / "scripts/pod/autoinit_phase_c2_driver.py"
+LAUNCHER = REPO / "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py"
 
 
 def load(path: Path, name: str):
@@ -48,7 +48,7 @@ def load(path: Path, name: str):
 @pytest.fixture(scope="module")
 def registered():
     from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
     try:
@@ -69,7 +69,7 @@ def wired(registered):
     spec = launcher.spec(args).validate()
 
     from aadistill.infrastructure.budget import StepTime, plan_session
-    from experiments.phase_c2.session import c2_hard_ceiling_usd
+    from stages.phase_c2.session import c2_hard_ceiling_usd
 
     b = spec.budget
     plan = plan_session(
@@ -132,7 +132,7 @@ def test_the_beam_envelope_is_the_structural_search_bound(wired):
     space itself. If they ever disagree the price describes a different search.
     """
     _launcher, _driver, _spec, plan, parsed = wired
-    from experiments.phase_c2.search_space import bound, c2_search1_space
+    from stages.phase_c2.search_space import bound, c2_search1_space
 
     structural = bound(c2_search1_space(), statistic="max").max_minutes
     assert parsed.search_deadline_minutes == pytest.approx(structural, abs=0.01)
@@ -172,7 +172,7 @@ def test_the_artifact_recovery_reserve_is_unavailable_to_scientific_work(wired):
 def test_the_partition_does_not_move_the_accepted_ceiling(wired):
     """A partition repair adds no work, so it adds no money."""
     _launcher, _driver, _spec, plan, _parsed = wired
-    from experiments.phase_c2.session import c2_hard_ceiling_usd
+    from stages.phase_c2.session import c2_hard_ceiling_usd
 
     assert plan.hard_terminate_usd == pytest.approx(15.0446, abs=5e-5)
     assert c2_hard_ceiling_usd(REPO) == 15.0446
@@ -217,7 +217,7 @@ class Captured:
 def fallback_with_capture(monkeypatch, tmp_path, *, rebuild_minutes=27.665,
                           afford=None):
     """A real `BaselineFallback` whose executor records what it was handed."""
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
     from tests.autoinit.test_phase_c2_baseline import (  # noqa: F401
         b_identity, real_shaped_step,
     )
@@ -257,7 +257,7 @@ def test_the_fallback_takes_minutes_not_a_deadline(registered):
     The field is a NUMBER by design, and `rebuild_deadline` is None until the
     rebuild begins.
     """
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     fields = {f.name for f in B.BaselineFallback.__dataclass_fields__.values()}
     assert "rebuild_minutes" in fields
@@ -299,7 +299,7 @@ def test_a_beam_that_used_its_whole_envelope_still_gets_the_full_reserve(
     accept it, and proves the rebuild still runs on a full clock.
     """
     from aadistill.initialization.planning.search import Deadline
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     spent = Deadline(seconds=0.0)
     assert spent.expired()
@@ -316,7 +316,7 @@ def test_a_beam_that_used_its_whole_envelope_still_gets_the_full_reserve(
 def test_the_rebuild_is_afforded_before_anything_is_materialized(
         registered, tmp_path, monkeypatch):
     """Independently of the beam's check, and BEFORE the executor runs."""
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     order: list = []
 

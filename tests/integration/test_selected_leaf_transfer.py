@@ -29,7 +29,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 def load_launcher():
     spec = importlib.util.spec_from_file_location(
-        "phase_a_launch_leaf", REPO / "scripts/pod/autoinit_phase_a_launch.py")
+        "phase_a_launch_leaf", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_launch_leaf"] = mod
     spec.loader.exec_module(mod)

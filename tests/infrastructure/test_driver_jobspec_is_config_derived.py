@@ -15,7 +15,7 @@ moment in the session at which to discover a typo.
 Why nothing caught it: the removal was verified against the nineteen f-strings
 that build remote commands, and this is a keyword argument. And the tests that
 drive the real acquisition loop
-(`scripts/experiments/stage-1/phase_c1/tests/test_c1_one_provider_resource.py`) all stub `setup_on_draw` to a
+(`scripts/stages/stage-1/phase_c1/tests/test_c1_one_provider_resource.py`) all stub `setup_on_draw` to a
 *failure* outcome, so `run()` returns before reaching this line. The success
 path through `run()` had no execution coverage at all.
 
@@ -96,9 +96,9 @@ def _runner(monkeypatch, layout: dict, tmp_path: Path):
     #: The REAL `ExecutionCommands`, not a double: a stub that names only the
     #: fields it needs goes stale the moment the type gains one.
     commands = ExecutionCommands(
-        watchdog="scripts/pod/watchdog.py",
-        setup_script="scripts/pod/autoinit_preflight_setup.sh",
-        artifact_collector="scripts/pod/collect_artifacts.py", **layout)
+        watchdog="scripts/shared/pod/watchdog.py",
+        setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+        artifact_collector="scripts/shared/pod/collect_artifacts.py", **layout)
     ws = layout["workspace_root"]
     r.spec = types.SimpleNamespace(
         commands=commands, session_id="layout-probe",

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Real-CUDA engineering check of the Phase-C2 full-joint-search DRIVER.
 
-    PYTHONPATH=src:scripts python scripts/validation/c2_full_search_cuda_check.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda_check.py \
         --config configs/validation/c2_full_search_cuda.json --run-id <id>
 
 **What is already verified, and therefore not re-run here.** All six
@@ -60,7 +60,7 @@ from pathlib import Path
 
 REPO = Path(os.environ.get("AAD_REPO", "/workspace/aad"))
 if not (REPO / "src").is_dir():                     # local / toy execution
-    REPO = Path(__file__).resolve().parents[2]
+    REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -74,8 +74,8 @@ for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
 #: gone, and the reason would look like a missing model rather than a missing
 #: call. This project has already lost a paid pod to an empty registry.
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
-from experiments.calibration import register_builtin_profiles  # noqa: E402
-from experiments.phase_c2 import full_search_space as _FS  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
+from stages.phase_c2 import full_search_space as _FS  # noqa: E402
 
 register_builtin_adapters()
 register_builtin_profiles()
@@ -287,10 +287,10 @@ def toy_world(cfg: dict, device: str, dtype):
 def stage_driver(cfg: dict, device: str, dtype_name: str, work: Path) -> dict:
     """Drive the REAL driver, all three stages, on a real CUDA device."""
     import torch
-    import autoinit_phase_c2_full_search_driver as D
-    import phase_a_search
+    from stages.phase_c2_full_search import autoinit_phase_c2_full_search_driver as D
+    from stages.phase_a import phase_a_search
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     dtype = getattr(torch, dtype_name)
     world = toy_world({**cfg["driver"], "work": str(work),
@@ -441,7 +441,7 @@ def stage_geometry(cfg: dict, device: str, dtype_name: str, work: Path) -> dict:
     import torch
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
     from aadistill.models.student import stored_rope_base
-    from phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID, TEACHER_REVISION
     from transformers import AutoConfig
 
     dtype = getattr(torch, dtype_name)
@@ -536,7 +536,7 @@ def main() -> int:
                     default="configs/validation/c2_full_search_cuda.json")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--out", default="artifacts/validation")
+    ap.add_argument("--out", default="artifacts/shared/validation")
     a = ap.parse_args()
 
     cfg = json.loads((REPO / a.config).read_text()

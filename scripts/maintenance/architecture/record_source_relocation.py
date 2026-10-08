@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Account for the initialization cutover against every frozen source set.
 
-    PYTHONPATH=src:scripts python scripts/architecture/record_source_relocation.py --write
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/record_source_relocation.py --write
 
 A frozen source-set declaration lists the files a completed run executed, by
 path. The cutover moved most of those paths, so each historical set now names
@@ -42,13 +42,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
-sys.path.insert(0, str(REPO / "scripts/architecture"))
+sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from migration_map import MAP  # noqa: E402
+from maintenance.architecture.migration_map import MAP  # noqa: E402
 
 OUT = "logs/maintenance/inventories/architecture_source_relocation.json"
 SCHEMA = "aadistill.architecture_source_relocation/v1"
@@ -58,15 +58,15 @@ SCHEMA = "aadistill.architecture_source_relocation/v1"
 SETS = [
     ("HARNESS_SOURCE_FILES_V1", "aadistill.governance.authorization",
      "harness_source_digest"),
-    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "experiments.phase_a.plan",
+    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "stages.phase_a.plan",
      "phase_a_harness_digest"),
-    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "experiments.phase_b.plan",
+    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "stages.phase_b.plan",
      "phase_b_source_digest"),
-    ("CONTINUATION_SOURCE_FILES_V2", "experiments.phase_b.continuation",
+    ("CONTINUATION_SOURCE_FILES_V2", "stages.phase_b.continuation",
      "continuation_source_digest"),
-    ("CONTINUATION_HARNESS_SOURCE_FILES_V1", "experiments.recovery_continuation.plan",
+    ("CONTINUATION_HARNESS_SOURCE_FILES_V1", "stages.recovery_continuation.plan",
      None),
-    ("C1_HARNESS_SOURCE_FILES_V1", "experiments.phase_c1.authorization",
+    ("C1_HARNESS_SOURCE_FILES_V1", "stages.phase_c1.authorization",
      "c1_historical_harness_digest"),
     ("GENERATION_SOURCE_FILES_V1", "aadistill.initialization.planning.generation",
      None),

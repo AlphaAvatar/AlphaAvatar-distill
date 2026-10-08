@@ -7,13 +7,13 @@
 # killed. A pod that outlives its job is the failure this project has already
 # paid for more than once.
 #
-#   nohup bash scripts/pod/batching_refactor_cuda_launch.sh <run-id> > LOG 2>&1 &
+#   nohup bash scripts/stages/stage-1/phase_c3/batching_refactor_cuda_launch.sh <run-id> > LOG 2>&1 &
 #
 set -uo pipefail
 
 RUN_ID="${1:?usage: $0 <run-id>}"
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-OUT="${REPO_DIR}/artifacts/validation/${RUN_ID}"
+OUT="${REPO_DIR}/artifacts/shared/validation/${RUN_ID}"
 BRANCH="review/c3-operator-batching"
 COMMIT="${VALIDATION_COMMIT:?VALIDATION_COMMIT must name the exact source to run}"
 IMAGE="runpod/pytorch:1.0.3-cu1281-torch291-ubuntu2404"
@@ -162,7 +162,7 @@ pip install -q --break-system-packages --no-cache-dir \
     numpy transformers huggingface_hub safetensors 2>&1 | tail -3
 python -c "import numpy, transformers, safetensors, huggingface_hub as h; \
 print('deps ok: numpy', numpy.__version__, '| transformers', transformers.__version__)"
-PYTHONPATH=src:scripts python scripts/validation/batching_refactor_cuda_check.py \
+PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c3/batching_refactor_cuda_check.py \
   --run-id ${RUN_ID} --device cuda --out /workspace/out
 echo "CHECK_RC=\$?"
 REMOTE

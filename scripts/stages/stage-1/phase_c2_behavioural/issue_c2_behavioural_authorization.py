@@ -2,7 +2,7 @@
 """Issue the one-use authorization for the Phase-C2 behavioural campaign.
 
     PYTHONPATH=src:scripts python \
-        scripts/autoinit/issue_c2_behavioural_authorization.py \
+        scripts/stages/stage-1/phase_c2_behavioural/issue_c2_behavioural_authorization.py \
         --run-id attempt1 --rate 1.09
 
 Run this AFTER the grant is committed and the launch-bound readiness sweep has
@@ -33,17 +33,17 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
-from experiments.phase_c2.session import C2ResourceScope  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2.session import C2ResourceScope  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 EXPERIMENT_ID = "phase_c2_behavioural"
 STAGE_ID = "1"

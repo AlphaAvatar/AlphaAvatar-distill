@@ -27,13 +27,13 @@ import pytest
 
 torch = pytest.importorskip("torch")
 
-REPO = Path(__file__).resolve().parents[5]
+REPO = Path(__file__).resolve().parents[6]
 for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit", "tests"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-import topk_adoption_driver as drv  # noqa: E402
+from stages.phase_d1 import topk_adoption_driver as drv  # noqa: E402
 
 from support.toy import build_tiny_model  # noqa: E402
 
@@ -129,7 +129,7 @@ class TestTheBuilderMatchesTheProductionExpansion:
     def _both() -> tuple[set[str], set[str]]:
         return (_expand_one_context_keywords(),
                 context_keywords_of(
-                    (REPO / "scripts/pod/topk_adoption_driver.py").read_text(),
+                    (REPO / "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py").read_text(),
                     "production_operator_context"))
 
     def test_it_passes_every_keyword_production_passes(self):
@@ -169,7 +169,7 @@ class TestTheBuilderMatchesTheProductionExpansion:
             SUPERVISED_TARGET_V1, policy_config,
         )
         from aadistill.initialization.specs.arch import ArchSpec, get_adapter
-        from experiments.phase_d_series import scoring_protocol as SP
+        from stages.d_series import scoring_protocol as SP
 
         register_builtin_adapters()
         model = build_tiny_model(GEOMETRY)
@@ -249,7 +249,7 @@ def _expand_one(self):
     def test_every_excused_extra_is_one_the_builder_actually_passes(self):
         """So the extras list cannot rot into a blanket exemption."""
         mine = context_keywords_of(
-            (REPO / "scripts/pod/topk_adoption_driver.py").read_text(),
+            (REPO / "scripts/stages/stage-1/phase_d1/topk_adoption_driver.py").read_text(),
             "production_operator_context")
         stale = JUSTIFIED_EXTRAS - mine
         assert not stale, (
@@ -406,8 +406,8 @@ class TestTheCeilingArm:
         )
         from aadistill.initialization.calibration.packing import packed_batches
         from aadistill.initialization.calibration.profiles import get_profile
-        from experiments.calibration import register_builtin_profiles
-        from experiments.phase_d_series import scoring_protocol as SP
+        from shared.calibration import register_builtin_profiles
+        from stages.d_series import scoring_protocol as SP
 
         register_builtin_profiles()
         profile = get_profile(profile_id)
@@ -517,7 +517,7 @@ class TestThePricingGateRefusesEveryRecordThatCannotPrice:
     def _basis(self, tmp_path, record, monkeypatch):
         import json
 
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         path = tmp_path / "adoption.json"
         path.write_text(json.dumps(record))
@@ -577,7 +577,7 @@ class TestThePricingGateRefusesEveryRecordThatCannotPrice:
         a7, so it silently became an assertion that the CURRENT basis is absent
         and failed the moment a valid one existed.
         """
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         path = (REPO / "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1"
                 / "runs" / subrun / "adoption.json")
@@ -590,7 +590,7 @@ class TestThePricingGateRefusesEveryRecordThatCannotPrice:
 
     def test_the_live_pointer_names_a_record_that_can_price(self):
         """The complement, and the thing the resolved envelope rests on."""
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         path = REPO / w.TOPK_PRODUCTION
         assert path.is_file(), f"the pointer names {w.TOPK_PRODUCTION}, absent"
@@ -633,7 +633,7 @@ class TestTheCloseoutAndTheDesignCannotDisagreeAboutThePrice:
     def _records():
         import json
 
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         closeout = json.loads(
             (REPO / "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1"

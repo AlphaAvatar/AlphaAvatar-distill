@@ -20,7 +20,7 @@ from aadistill.initialization.calibration.profiles import (
     register_profile,
     unregister_profile,
 )
-from experiments.calibration import (
+from shared.calibration import (
     PROFILES,
     DOMAIN_BALANCED_V1,
     REASONING_HEAVY_V1,
@@ -42,7 +42,7 @@ from aadistill.initialization.calibration.datasets import (  # noqa: E402
 #: The E8a calibration mixture is a gitignored artifact. A pod session that does
 #: not stage it (the micro-preflight does not) must skip these rather than fail
 #: its setup test gate on inputs it was never given.
-CALIB_ITEMS = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
+CALIB_ITEMS = REPO / "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"
 needs_calibration = pytest.mark.skipif(
     not CALIB_ITEMS.is_file(),
     reason="E8a calibration mixture is a local artifact, not tracked in git")

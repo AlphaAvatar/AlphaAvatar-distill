@@ -96,7 +96,7 @@ def test_forks_from_the_stage1_init_and_not_from_p2_1600k(seed):
 def test_configs_are_generated_and_regenerate_identically():
     """Hand-editing a generated config must fail, not silently persist."""
     before = {p.name: sha256_json(cfg(p)) for p in sorted(E6B.glob("e6b_*.json"))}
-    subprocess.run([sys.executable, "scripts/training/build_e6b_configs.py"],
+    subprocess.run([sys.executable, "scripts/stages/stage-3/e6b/build_e6b_configs.py"],
                    cwd=REPO, check=True, capture_output=True,
                    env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin"})
     after = {p.name: sha256_json(cfg(p)) for p in sorted(E6B.glob("e6b_*.json"))}

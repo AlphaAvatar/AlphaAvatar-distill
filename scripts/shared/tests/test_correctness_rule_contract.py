@@ -44,7 +44,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     score_recovery_row,
     validate_scored_rows,
 )
-from experiments.recovery_policy import CORRECT_IN_USABLE_ROLLOUT as STRICT  # noqa: E402
+from shared.recovery_policy import CORRECT_IN_USABLE_ROLLOUT as STRICT  # noqa: E402
 
 #: A caller-supplied rule of the exact shape the maintainer named.
 INDEPENDENT = CorrectnessRule(

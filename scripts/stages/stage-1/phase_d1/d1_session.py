@@ -32,7 +32,7 @@ STAGE_ID = "1"
 DESIGN_PATH = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 #: The FROZEN state-eval asset. Its `manifest.json` carries the `content_sha256`
 #: that must reach `StateEvaluator`; the loader refuses an asset without one.
-STATE_EVAL_ROOT = "artifacts/stage1/state_eval_v1"
+STATE_EVAL_ROOT = "artifacts/stages/stage-1/state_eval_v1"
 
 POD_WORKSPACE = "/workspace"
 STATUS_PATH = f"{POD_WORKSPACE}/autoinit_d1.status"
@@ -102,7 +102,7 @@ def execution():
     the same decision as the support and must not be able to drift apart from it.
     """
     from aadistill.initialization.execution import ExecutionConfig
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.d_series import scoring_protocol as SP
 
     return ExecutionConfig(
         micro_batch_size=SP.D_SERIES_MICRO_BATCH_SIZE,
@@ -189,7 +189,7 @@ def load_state_eval_suite(repo_root: str | Path = REPO):
     verify_state_eval_bytes(repo_root)
 
     sys.path.insert(0, str(Path(repo_root) / "scripts/autoinit"))
-    from load_state_eval import load as load_suite
+    from shared.evaluation.load_state_eval import load as load_suite
 
     root = Path(repo_root) / STATE_EVAL_ROOT
     if not (root / "manifest.json").is_file():
@@ -214,7 +214,7 @@ def transport():
     global D1_TRANSPORT
     if D1_TRANSPORT is None:
         from aadistill.infrastructure.bundle_transport import TransportSpec
-        from experiments.deployment import MAIN_RELAY
+        from shared.deployment import MAIN_RELAY
 
         D1_TRANSPORT = TransportSpec(
             label="Phase-D1 formal search",
@@ -369,7 +369,7 @@ def teacher_vocab_size(repo_root: str | Path = REPO) -> int:
     The TARGET's, because no frozen operator modifies `vocab_size` -- the teacher
     and every child share it -- and the spec carries the target, not the parent.
     """
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     spec = A3S.path_spec(workdir_device="cpu")
     vocab = int(spec.target_spec["vocab_size"])
@@ -403,8 +403,8 @@ def build_session(*, arm: str, workdir: Path, run_id: str,
     from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
     from aadistill.initialization.planning.search import SearchConfig
     from aadistill.initialization.specs.metrics import ReferenceStrategy
-    from experiments.phase_a3 import a3_session as A3S
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.phase_a3 import a3_session as A3S
+    from stages.d_series import scoring_protocol as SP
 
     if arm not in ARMS:
         raise D1SessionError(f"unknown D1 arm {arm!r}; expected one of {ARMS}")
@@ -463,7 +463,7 @@ def build_session(*, arm: str, workdir: Path, run_id: str,
 def _profiles(doc: dict[str, Any]):
     """Both calibration profiles the design declares, as objects."""
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
     declared = (doc["search_stage"].get("profiles")
@@ -479,7 +479,7 @@ def _profiles(doc: dict[str, Any]):
 
 def _frozen_impl_ids() -> tuple[str, ...]:
     """D1's frozen operator set, from the space the design prices."""
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_d1 import search_space as d1
 
     _register_frozen_operators()
     #: KIND -> impl_id, so the VALUES are the implementations. Iterating the
@@ -497,8 +497,8 @@ def _register_frozen_operators() -> None:
     from aadistill.initialization.operators.register import (
         register_builtin_operators,
     )
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c2.search_space import register_c2_operators
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_builtin_adapters()
     register_builtin_profiles()
@@ -519,7 +519,7 @@ def assert_session_contract(session: D1Session,
     agreeing with itself is not a check.
     """
     from aadistill.initialization.scoring.positions import policy_config
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.d_series import scoring_protocol as SP
 
     doc = design(repo_root)
     cfg, ev = session.config, session.evaluator

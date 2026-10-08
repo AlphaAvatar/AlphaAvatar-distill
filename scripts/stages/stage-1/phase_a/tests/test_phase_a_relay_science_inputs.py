@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "tests"))
 
 from support.session_specs import load_session_launcher, session_args  # noqa: E402,F401
-from experiments.deployment import MAIN_RELAY  # noqa: E402
+from shared.deployment import MAIN_RELAY  # noqa: E402
 
 
 def test_the_ten_main_relay_science_inputs_are_unchanged(monkeypatch):

@@ -31,8 +31,8 @@ sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.runtime import cpu_test_env as CTE
-from experiments.phase_c1 import pod_environment as pe
-from renderer_parity_gate import (EXPECTED_GROUPS, gate_verdict,  # noqa: E402
+from stages.phase_c1 import pod_environment as pe
+from shared.validation.renderer_parity_gate import (EXPECTED_GROUPS, gate_verdict,  # noqa: E402
                                   run_parity)
 
 
@@ -105,7 +105,7 @@ def test_the_gate_runs_the_seven_real_groups_on_this_host():
 
 def _valid_record(tmp_path: Path, kind: str = "diagnostic") -> dict:
     """A record that binds the LIVE tree, so only the field under test differs."""
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1.authorization import c1_harness_digest
 
     rec = {
         "schema": pe.SCHEMA,
@@ -187,7 +187,7 @@ def test_the_two_measured_sets_are_disjoint():
     `renderer_parity_gate.py` were double-bound until 2026-09-04 and now live in
     the harness alone, where the paid session's own grant measures them.
     """
-    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
 
     overlap = sorted(set(pe.POD_TEST_ENVIRONMENT_FILES_V1)
                      & set(C1_HARNESS_SOURCE_FILES_V1))
@@ -203,10 +203,10 @@ def test_the_pod_setup_script_is_measured_by_the_harness_not_by_this_record():
     readiness record left a paid session whose own setup script could change
     without moving the digest the authorization checks.
     """
-    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
 
-    assert "scripts/pod/autoinit_preflight_setup.sh" in C1_HARNESS_SOURCE_FILES_V1
-    assert "scripts/pod/autoinit_preflight_setup.sh" \
+    assert "scripts/shared/pod/autoinit_preflight_setup.sh" in C1_HARNESS_SOURCE_FILES_V1
+    assert "scripts/shared/pod/autoinit_preflight_setup.sh" \
         not in pe.POD_TEST_ENVIRONMENT_FILES_V1
 
 
@@ -294,7 +294,7 @@ def test_the_pod_selection_is_exactly_the_preflight_directory():
     """
     import sys as _sys
     _sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_c1_launch as launcher
+    from stages.phase_c1 import autoinit_c1_launch as launcher
 
     siblings = {f"tests/{p.name}" for p in (REPO / "tests").iterdir()
                 if p.name not in ("__pycache__", "support", "conftest.py")
@@ -380,7 +380,7 @@ def test_the_pod_gate_names_every_failing_nodeid_before_it_exits():
     reconstruction attributed five of them to a cause that does not survive
     re-testing. One grep is free.
     """
-    text = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    text = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     block = text[text.index("CPU test suite"):]
     grep_at = block.index("grep -E '^(FAILED|ERROR) ' /workspace/pytest.log")
     tail_at = block.index("tail -4 /workspace/pytest.log")
@@ -473,7 +473,7 @@ def test_the_test_matches_the_paid_gate_argument_for_argument():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "L", REPO / "scripts/pod/autoinit_c1_launch.py")
+        "L", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
     L = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(L)
 
@@ -486,7 +486,7 @@ def test_the_test_matches_the_paid_gate_argument_for_argument():
     assert run_scoped != C1_AUTH_PATH
     assert run_scoped.endswith("governance/authorization.json")
 
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert "authorization_path=auth_path_for(" in src, (
         "the paid gate no longer permits this run's authorization path; this "
         "test would then be stricter than the gate rather than equal to it")
@@ -627,7 +627,7 @@ def test_the_only_conditional_exclusion_is_the_synthetic_credential():
 
 
 def test_the_simulator_announces_that_its_credential_is_synthetic():
-    sim = (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
+    sim = (REPO / "scripts/shared/pod/simulate_pod_env.sh").read_text()
     assert "export AAD_SYNTHETIC_HF_TOKEN=1" in sim
     # It must survive the PODSIM_* unset, or the suite never sees it.
     unset_line = sim[sim.index("unset PODSIM_JUNIT"):]
@@ -656,7 +656,7 @@ import subprocess
 #: `verify_record` no longer imports an experiment package to find this out --
 #: which harness a readiness record describes is the caller's fact.
 def c1_digest(repo_root):
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1.authorization import c1_harness_digest
     return c1_harness_digest(repo_root)["digest"]
 
 
@@ -698,7 +698,7 @@ def _swept_repo(tmp_path, monkeypatch):
     from aadistill.runtime import pod_environment as _runtime_pe
     monkeypatch.setattr(_runtime_pe, "pod_test_environment_digest",
                         lambda r=".", **kw: {"digest": "e" * 64, "n_files": 1})
-    from experiments.phase_c1 import authorization as ca
+    from stages.phase_c1 import authorization as ca
     monkeypatch.setattr(ca, "c1_harness_digest",
                         lambda r=".", files=None: {"digest": "h" * 64, "n_files": 1})
 
@@ -1006,7 +1006,7 @@ def test_promoting_the_kind_in_place_is_caught_as_tampering(tmp_path):
 
 def test_the_recorder_can_only_write_the_two_known_kinds():
     """`--kind` choices and RECORD_KINDS must not drift apart."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert 'choices=("diagnostic", "launch_bound")' in src
     assert pe.RECORD_KINDS == ("diagnostic", "launch_bound")
     assert pe.LAUNCH_BOUND in pe.RECORD_KINDS
@@ -1017,7 +1017,7 @@ def test_the_recorder_can_only_write_the_two_known_kinds():
 
 def test_the_paid_gate_requires_launch_bound():
     """Read from the launcher, so the requirement cannot quietly be dropped."""
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert "required_kind=LAUNCH_BOUND" in src, (
         "pod_environment_gate no longer requires a launch-bound record")
 
@@ -1034,7 +1034,7 @@ def test_the_max_price_default_comes_from_the_pricing_record():
     price lived in two places.
     """
     import sys as _sys
-    from experiments.phase_c1.authorization import c1_price_per_hour_usd
+    from stages.phase_c1.authorization import c1_price_per_hour_usd
 
     _sys.path.insert(0, str(REPO / "tests/pod"))
     from support.session_specs import load_session_launcher, session_args
@@ -1045,16 +1045,16 @@ def test_the_max_price_default_comes_from_the_pricing_record():
     assert args.max_price == rate, (
         f"--max-price defaults to {args.max_price}, the pricing record says {rate}")
 
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert "default=c1_price_per_hour_usd(REPO_ROOT)" in src
     assert "default=0.99" not in src, "the stale literal is back"
 
 
 def test_the_pricing_record_is_hash_verified_before_the_rate_is_used():
     """A rate read from a tampered record would be worse than a stale literal."""
-    from experiments.phase_c1.authorization import PRICING_PATH, load_pricing
+    from stages.phase_c1.authorization import PRICING_PATH, load_pricing
 
-    src = (REPO / "scripts/experiments/stage-1/phase_c1/authorization.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/authorization.py").read_text()
     assert "pricing_sha256" in src
     doc = load_pricing(REPO)
     assert doc["hardware"]["price_per_hour_usd"] == 1.09

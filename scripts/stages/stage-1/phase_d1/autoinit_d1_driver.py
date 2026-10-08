@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The D1 formal SEARCH driver. One session, four stages, evidence on every path.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_d1_driver.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py \
         --out DIR --authorization PATH [--arm supervised_target] [--deadline-s N]
 
 Stages, and what each is allowed to do:
@@ -32,7 +32,7 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/autoinit"):
     p = str(REPO / extra)
     if p not in sys.path:
@@ -143,7 +143,7 @@ def probe_environment() -> dict[str, Any]:
 
 def load_authorization(path: str, *, arm: str, design_hash: str):
     """The one-use artifact, read through its own loader and bound to this run."""
-    from experiments.phase_d1.d1_authorization import (
+    from stages.phase_d1.d1_authorization import (
         D1Authorization, D1AuthorizationRefused,
     )
 
@@ -198,7 +198,7 @@ def terminal_marker(*, check_only: bool, status: str,
 
 
 def main(argv: list[str] | None = None) -> int:
-    from experiments.phase_d1 import d1_session as S
+    from stages.phase_d1 import d1_session as S
 
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--out", required=True)
@@ -420,7 +420,7 @@ def resolve_root_teacher_path() -> dict[str, Any]:
     nothing here reaches the network -- but it is now a rule about a path that
     can be found rather than a variable nobody assigns.
     """
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     spec = A3S.path_spec(workdir_device="cuda")
     identity = {"repo_id": spec.root_repo_id, "revision": spec.root_revision,
@@ -479,7 +479,7 @@ def _load_root_teacher():
 def _run_search(session, teacher, args, journal) -> dict[str, Any]:
     """The real beam, with the authorized wall clock."""
     from aadistill.initialization.planning.search import BeamSearch, Deadline
-    from experiments.phase_d1 import d1_session as S
+    from stages.phase_d1 import d1_session as S
     from aadistill.initialization.specs.arch import get_adapter
     from aadistill.initialization.calibration.items import (
         prepare_calibration_items,
@@ -539,7 +539,7 @@ def _commit(session, record, out: Path) -> dict[str, Any]:
     """
     from aadistill.initialization.planning import stage1_selection
     from aadistill.initialization.planning.ranking import PARETO_V1
-    from experiments.phase_d1 import d1_session as S
+    from stages.phase_d1 import d1_session as S
 
     doc = S.design()
     k = int(doc["behavioural_design"]["top_k"])

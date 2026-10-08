@@ -36,9 +36,9 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3 import session as CS  # noqa: E402
+from stages.phase_c3 import session as CS  # noqa: E402
 
-DRIVER = REPO / "scripts/pod/autoinit_c3_driver.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py"
 SRC = DRIVER.read_text()
 
 
@@ -94,7 +94,7 @@ def test_the_driver_takes_its_seeds_from_the_frozen_c3_plan():
 
 def test_c1_and_c3_seeds_are_disjoint_so_the_mistake_is_detectable():
     """If they overlapped, the wrong-seed defect would be unfalsifiable."""
-    from experiments.phase_c1.isolation import derive_recovery_seeds
+    from stages.phase_c1.isolation import derive_recovery_seeds
 
     assert not set(CS.recovery_seeds()) & set(derive_recovery_seeds())
 
@@ -123,14 +123,14 @@ def test_stage_e_names_c3_s_incumbent_not_c1_s():
 
 
 def test_the_driver_writes_under_c3_s_own_roots():
-    """A C3 probe under artifacts/stage3/c1 is collected as C1's evidence."""
+    """A C3 probe under artifacts/stages/stage-3/c1 is collected as C1's evidence."""
     for wrong in ('REPO / "artifacts/audit/autoinit_c1"',
-                  'REPO / "artifacts/stage3/c1"',
-                  'REPO / "artifacts/eval/c1"',
+                  'REPO / "artifacts/stages/stage-3/c1"',
+                  'REPO / "artifacts/stages/stage-3/eval/c1"',
                   'REPO / "artifacts/autoinit/c1_arms"'):
         assert wrong not in SRC, f"the C3 driver still writes to {wrong}"
-    for right in ("artifacts/audit/autoinit_c3", "artifacts/stage3/c3",
-                  "artifacts/eval/c3", "artifacts/autoinit/c3_arms"):
+    for right in ("artifacts/audit/autoinit_c3", "artifacts/stages/stage-3/c3",
+                  "artifacts/stages/stage-3/eval/c3", "artifacts/autoinit/c3_arms"):
         assert right in SRC
 
 
@@ -186,7 +186,7 @@ def test_the_frozen_plan_is_built_by_iterating_the_plan_s_arms():
     """
     import copy
 
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c3 import session as CS
 
     real = CS.preregistration()
     assert CS.primary_operands() == ("A_incumbent", "B_causal_b1")

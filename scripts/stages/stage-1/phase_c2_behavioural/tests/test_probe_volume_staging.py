@@ -30,7 +30,7 @@ from aadistill.infrastructure.provider import (  # noqa: E402
     PodState, TerminationAttempt,
 )
 
-import stage_c2_probes_to_volume as S  # noqa: E402
+from shared.pod import stage_c2_probes_to_volume as S  # noqa: E402
 
 
 class _Args:
@@ -94,8 +94,8 @@ def test_the_load_limit_is_a_backstop_and_not_a_filter():
     catches the absurd.
     """
     assert S.main.__doc__ is None or True
-    import stage_c2_probes_to_volume as mod
-    src = (REPO / "scripts/autoinit/stage_c2_probes_to_volume.py").read_text()
+    from shared.pod import stage_c2_probes_to_volume as mod
+    src = (REPO / "scripts/shared/pod/stage_c2_probes_to_volume.py").read_text()
     assert '"--max-load-per-cpu", type=float, default=100.0' in src, (
         "the load limit is back to filtering draws that would have worked")
     #: A draw at the observed norm passes.
@@ -268,7 +268,7 @@ def test_a_resumed_draw_is_not_charged_for_the_probes_it_will_skip():
     `destination_gate` had on the launcher host, made again here an hour after
     it was fixed there — which is why both now carry the reason in the code.
     """
-    src = (REPO / "scripts/autoinit/stage_c2_probes_to_volume.py").read_text()
+    src = (REPO / "scripts/shared/pod/stage_c2_probes_to_volume.py").read_text()
     body = src[src.index("def main("):]
     block = body[body.index("capacity = a.volume_gb"):
                  body.index('say(f"volume mounted')]
@@ -287,7 +287,7 @@ def test_capacity_comes_from_the_provisioned_size_and_never_from_df():
     check built on that can never fail — and discovering the real limit by
     hitting it is how attempt5 died.
     """
-    src = (REPO / "scripts/autoinit/stage_c2_probes_to_volume.py").read_text()
+    src = (REPO / "scripts/shared/pod/stage_c2_probes_to_volume.py").read_text()
     body = src[src.index("def main("):]
     capacity = body[body.index("CAPACITY COMES FROM"):
                     body.index('say(f"volume mounted')]
@@ -314,7 +314,7 @@ def test_the_api_key_never_reaches_the_record(tmp_path):
     cfg = tmp_path / "config.toml"
     cfg.write_text('apikey = "SECRET-DO-NOT-LOG"\napiurl = "x"\n')
     assert S.api_key(cfg) == "SECRET-DO-NOT-LOG"
-    src = (REPO / "scripts/autoinit/stage_c2_probes_to_volume.py").read_text()
+    src = (REPO / "scripts/shared/pod/stage_c2_probes_to_volume.py").read_text()
     for sink in ('ev["api', "ev['api", 'ev["key', "say(key", "say(f\"{key"):
         assert sink not in src, sink
 
@@ -323,7 +323,7 @@ def test_the_volume_mount_is_one_constant():
     """Two processes disagreeing about the mount path is a failure that only
     shows up once a pod is billing."""
     assert S.MOUNT == "/durable"
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
     assert L.VOLUME_MOUNT == S.MOUNT, (
         "the staging tool and the launcher name different mount paths; the "
         "probes would be written where no later pod looks")

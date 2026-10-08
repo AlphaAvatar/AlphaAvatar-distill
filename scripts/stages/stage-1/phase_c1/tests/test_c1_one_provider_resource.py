@@ -57,7 +57,7 @@ sys.path.insert(0, str(REPO / "scripts" / "pod"))
 from aadistill.infrastructure import session_runner as SR  # noqa: E402
 from aadistill.infrastructure.provider import PodState  # noqa: E402
 
-LAUNCHER = REPO / "scripts/pod/autoinit_c1_launch.py"
+LAUNCHER = REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py"
 
 
 def _launcher():
@@ -176,9 +176,9 @@ def _runner(monkeypatch, *, outcome, create_ok=True, releases=True,
         #: `checkout_root` and `min_cuda_version` were added: twenty tests
         #: failed with AttributeError on a double, not on the code.
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
             workspace_root="/workspace", checkout_root="/workspace/aad",
             min_cuda_version="13.0"),

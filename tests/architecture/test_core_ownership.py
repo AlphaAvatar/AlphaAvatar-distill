@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parents[2]
 CORE = REPO / "src/aadistill"
 
 _spec = importlib.util.spec_from_file_location(
-    "core_ownership_under_test", REPO / "scripts/architecture/core_ownership.py")
+    "core_ownership_under_test", REPO / "scripts/maintenance/architecture/core_ownership.py")
 OWN = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(OWN)
 

@@ -13,7 +13,7 @@ Extracted from the launcher so it can be tested. The launcher used to carry the
 arithmetic inline in bash, where the only way to find out what it computed was
 to create a pod.
 
-    python scripts/pod/engineering_campaign_budget.py CAMPAIGN.json [--session-cap N]
+    python scripts/shared/pod/engineering_campaign_budget.py CAMPAIGN.json [--session-cap N]
 
 prints one line of shell-readable fields:
 
@@ -60,7 +60,7 @@ def derive(campaign_path: str | Path, *, session_cap_usd: float,
             f"that owns the ceiling, got {type(auth_rel).__name__}")
     #: Relative to the repository root, which is this file's grandparent --
     #: the same convention derive_budget.py resolves campaign records by.
-    root = Path(__file__).resolve().parents[2]
+    root = Path(__file__).resolve().parents[3]
     try:
         auth = json.loads((root / auth_rel).read_text())
     except (OSError, ValueError) as exc:

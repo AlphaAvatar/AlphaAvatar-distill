@@ -30,7 +30,7 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d1 import d1_session as S  # noqa: E402
+from stages.phase_d1 import d1_session as S  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -123,7 +123,7 @@ class TestTheSupportTheDesignDidNotHaveToName:
 
     def test_the_search_and_the_evaluator_reduce_over_the_d_series_partition(
             self, session):
-        from experiments.phase_d_series import scoring_protocol as SP
+        from stages.d_series import scoring_protocol as SP
 
         want = SP.D_SERIES_SUPPORT.as_dict()
         assert session.config.distribution_support.as_dict() == want
@@ -179,7 +179,7 @@ class TestTheFrozenScopeIsWhatRuns:
 
     def test_the_target_is_the_frozen_a3_path_target(self, session):
         """Not re-derived: a session must not invent the experiment's own shape."""
-        from experiments.phase_a3 import a3_session as A3S
+        from stages.phase_a3 import a3_session as A3S
 
         spec = A3S.path_spec(workdir_device="cpu")
         assert session.config.target_spec.spec_hash == spec.target_spec.spec_hash

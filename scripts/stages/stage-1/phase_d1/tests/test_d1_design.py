@@ -35,7 +35,7 @@ for extra in ("src", "scripts", "scripts/data", "scripts/autoinit"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d1 import selection_noise as noise  # noqa: E402
+from stages.phase_d1 import selection_noise as noise  # noqa: E402
 
 DESIGN = REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 CAPACITY = REPO / "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
@@ -133,7 +133,7 @@ class TestTheClaimBoundaryOfTheNoiseModel:
         """The structural guard. The filter that encoded the wrong rule read a
         boolean column off these rows, so the regression is that no such column
         exists — not merely that nothing currently reads one."""
-        from experiments.phase_d1 import search_space as d1
+        from stages.phase_d1 import search_space as d1
 
         for row in d1.designs():
             for key in row:
@@ -244,7 +244,7 @@ def _registered():
     whatever a module adds, which is what keeps this from leaking into an
     unrelated search's enumeration.
     """
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
     from aadistill.initialization.operators.attention.gqa import (
         activation_importance,
     )
@@ -256,7 +256,7 @@ def _registered():
 class TestTheSpace:
     def test_the_frozen_set_is_one_implementation_per_structural_kind(self):
         from aadistill.initialization.operators.base import get_implementation
-        from experiments.phase_d1.search_space import FROZEN_IMPLEMENTATIONS
+        from stages.phase_d1.search_space import FROZEN_IMPLEMENTATIONS
 
         for kind, impl_id in FROZEN_IMPLEMENTATIONS.items():
             assert get_implementation(impl_id).kind == kind
@@ -272,7 +272,7 @@ class TestTheSpace:
             consumes_calibration,
         )
         from aadistill.initialization.operators.base import get_implementation
-        from experiments.phase_d1.search_space import FROZEN_IMPLEMENTATIONS
+        from stages.phase_d1.search_space import FROZEN_IMPLEMENTATIONS
 
         for impl_id in FROZEN_IMPLEMENTATIONS.values():
             assert consumes_calibration(get_implementation(impl_id)), impl_id
@@ -287,7 +287,7 @@ class TestTheSpace:
         so in a clean process it is absent. An exclusion naming it is still
         meaningful, because the id is what a search would have to allow.
         """
-        from experiments.phase_d1.search_space import EXCLUSIONS, d1_space
+        from stages.phase_d1.search_space import EXCLUSIONS, d1_space
 
         allowed = set(d1_space().allowed_impls)
         for impl_id, why in EXCLUSIONS.items():
@@ -305,7 +305,7 @@ class TestTheSpace:
             applicable_implementations, get_implementation,
             registered_implementations,
         )
-        from experiments.phase_d1.search_space import EXCLUSIONS, d1_space
+        from stages.phase_d1.search_space import EXCLUSIONS, d1_space
 
         space = d1_space()
         registered = set(registered_implementations())
@@ -325,7 +325,7 @@ class TestTheSpace:
         """Four kinds in any order, each over two mixtures: 4! * 2^4 = 384. The
         assertion is on the arithmetic the registry produces, so a registry
         change moves it rather than leaving a stale literal in a plan."""
-        from experiments.phase_d1.search_space import d1_space, size_report
+        from stages.phase_d1.search_space import d1_space, size_report
 
         report = size_report()
         assert report["d1_frozen_set"]["total_leaves"] == 384
@@ -337,7 +337,7 @@ class TestTheSpace:
         assert len(d1_space().allowed_impls) == 4
 
     def test_the_search_is_priced_from_measured_telemetry(self):
-        from experiments.phase_d1.search_space import search_cost
+        from stages.phase_d1.search_space import search_cost
 
         cost = search_cost()
         assert cost["unmeasured_inputs"] == [], (
@@ -355,7 +355,7 @@ class TestTheSpace:
         that the warm-up level keeps every root child, so each structural
         kind / mixture pair is measured once before anything is eliminated.
         """
-        from experiments.phase_d1.search_space import coverage
+        from stages.phase_d1.search_space import coverage
 
         cov = coverage()
         assert cov["complete_leaves_visited"] > 0
@@ -373,13 +373,13 @@ class TestTheSpace:
     def test_the_coverage_and_the_price_walk_the_same_beam(self):
         """Two numbers from one walk. A coverage figure derived from a different
         beam than the price would describe a search nobody is paying for."""
-        from experiments.phase_d1.search_space import coverage, search_cost
+        from stages.phase_d1.search_space import coverage, search_cost
 
         assert coverage()["states_produced"] == \
             search_cost()["expected_trajectory_expansions"]
 
     def test_a_behavioural_session_needs_probes_and_arms(self):
-        from experiments.phase_d1.search_space import D1SpaceError, behavioural_cost
+        from stages.phase_d1.search_space import D1SpaceError, behavioural_cost
 
         with pytest.raises(D1SpaceError, match="probes"):
             behavioural_cost(n_probes=0, n_arms=5)
@@ -397,14 +397,14 @@ class TestTheSpace:
         """
         import inspect
 
-        from experiments.phase_d1.search_space import behavioural_cost
+        from stages.phase_d1.search_space import behavioural_cost
 
         param = inspect.signature(behavioural_cost).parameters["n_arms"]
         assert param.default is inspect.Parameter.empty
         assert param.kind is inspect.Parameter.KEYWORD_ONLY
 
     def test_the_hard_ceiling_bounds_the_expected_cost(self):
-        from experiments.phase_d1.search_space import behavioural_cost
+        from stages.phase_d1.search_space import behavioural_cost
 
         cost = behavioural_cost(n_probes=12, n_arms=5)
         assert cost["hard_ceiling_minutes"] > cost["expected_minutes"]
@@ -418,7 +418,7 @@ class TestTheSpace:
         one-arm session at the SAME probe count. Before the split those two
         priced identically.
         """
-        from experiments.phase_d1.search_space import (
+        from stages.phase_d1.search_space import (
             ARM_MATERIALIZATION_MINUTES, behavioural_cost,
         )
 
@@ -437,7 +437,7 @@ class TestTheSpace:
         Materialization is a digest-pinned replay already carried at a bound,
         so multiplying it again would charge a contingency on a worst case.
         """
-        from experiments.phase_d1.search_space import behavioural_cost
+        from stages.phase_d1.search_space import behavioural_cost
 
         cost = behavioural_cost(n_probes=10, n_arms=5)
         #: `abs=0.01`, because the reported figure is rounded to the cent-hour
@@ -459,7 +459,7 @@ class TestTheSpace:
         envelope, which is what makes this a repair rather than a new funding
         question.
         """
-        from experiments.phase_d1.search_space import behavioural_cost
+        from stages.phase_d1.search_space import behavioural_cost
 
         doc = json.loads(DESIGN.read_text())
         bd = doc["behavioural_design"]
@@ -523,7 +523,7 @@ class TestTheCommittedRecords:
         #: between the two arms exceeds the SESOI the decision rule tests
         #: against, so the error can manufacture a GO rather than merely add
         #: noise.
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         identity_open = w.incumbent_identity_check()["status"] != "AGREES"
         assert ("incumbent identity" in open_) is identity_open
@@ -555,7 +555,7 @@ class TestTheCommittedRecords:
         #: AND THE TWO PREDICATES AGREE WITH THE WRITER'S OWN, which is the thing
         #: that must not drift: this test and `open_blockers()` must compute the
         #: same answer from the same fields.
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         assert set(w.open_blockers(doc["budget"],
                                    doc["contamination_protection"])) == open_
@@ -617,7 +617,7 @@ class TestTheCommittedRecords:
         instead: the note is derived, and no state may leave prose that
         contradicts it.
         """
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         budget = json.loads(DESIGN.read_text())["budget"]
         topk = budget["topk_production_basis"]
@@ -670,7 +670,7 @@ class TestTheCommittedRecords:
         import importlib.util
 
         spec = importlib.util.spec_from_file_location(
-            "_derive_budget", REPO / "scripts/consolidate/derive_budget.py")
+            "_derive_budget", REPO / "scripts/maintenance/consolidation/derive_budget.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         live = module.derive()
@@ -713,7 +713,7 @@ class TestTheCommittedRecords:
     def test_the_design_regenerates_byte_identically(self):
         """A committed verdict expires silently; this is how a reader knows the
         record still describes the tree."""
-        import write_d1_design
+        from stages.phase_d1 import write_d1_design
 
         assert (json.dumps(write_d1_design.build(), indent=1, sort_keys=True)
                 + "\n") == DESIGN.read_text()
@@ -731,7 +731,7 @@ class TestTheOwedGpuValidationStatusIsDerived:
     """
 
     def test_absent_closeout_reads_owed(self, monkeypatch, tmp_path):
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         monkeypatch.setattr(w, "REPO", tmp_path)
         state = w._qualification_state()
@@ -740,7 +740,7 @@ class TestTheOwedGpuValidationStatusIsDerived:
 
     def test_a_closeout_flips_it_and_still_authorizes_nothing(
             self, monkeypatch, tmp_path):
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         closeout = tmp_path / w.QUALIFICATION_CLOSEOUT
         closeout.parent.mkdir(parents=True)
@@ -789,7 +789,7 @@ class TestTheOwedGpuValidationStatusIsDerived:
 
     def test_the_retired_phrasings_cannot_come_back(self):
         """Pin the wording that went stale, not the wording that is current."""
-        source = (REPO / "scripts/autoinit/write_d1_design.py").read_text()
+        source = (REPO / "scripts/stages/stage-1/phase_d1/write_d1_design.py").read_text()
         for retired in ("the validation is owed at authorization time rather "
                         "than now",
                         "It is not requested here"):
@@ -809,7 +809,7 @@ class TestMeasuredEnvelopeCompatibilityIsAuthoritative:
               "provisional_shortfall_usd": 0.0}
 
     def _blockers(self, compatibility, provisional_fits):
-        import write_d1_design
+        from stages.phase_d1 import write_d1_design
 
         return write_d1_design.open_blockers(
             {**self.FUNDED,
@@ -886,7 +886,7 @@ class TestNoLiveFieldClaimsTheTopKCostIsOwed:
 
     @staticmethod
     def _basis():
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         return w._topk_production_basis()
 
@@ -910,7 +910,7 @@ class TestNoLiveFieldClaimsTheTopKCostIsOwed:
         GPU still owes. A writer that said "measured" either way would pass the
         test above for the wrong reason.
         """
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         monkeypatch.setattr(w, "TOPK_PRODUCTION", "logs/does/not/exist.json")
         assert w._topk_production_basis() is None
@@ -948,7 +948,7 @@ class TestOneCurrentSearchCost:
 
     @staticmethod
     def _parts():
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         doc = json.loads(DESIGN.read_text())
         return doc, w._topk_production_basis()
@@ -1333,7 +1333,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
 
         man = json.loads((REPO / "logs/shared/analyses/"
                                  "autoinit_d_series_family_manifest.json").read_text())
-        base = REPO / "artifacts/stage3/d_series_behavioural_v1"
+        base = REPO / "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
         checked = 0
         for rel, rec in man["output_files"].items():
             if not rel.startswith(("d1_screening/", "d1_confirmation/")):
@@ -1363,7 +1363,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
         a = man["roles"]["d1_screening"]["item_ids_sha256"]
         b = man["roles"]["d1_confirmation"]["item_ids_sha256"]
         assert a != b
-        base = REPO / "artifacts/stage3/d_series_behavioural_v1"
+        base = REPO / "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
         for stratum in ("math_verified", "gsm8k", "code"):
             def ids(role):
                 f = base / role / f"{stratum}.jsonl"

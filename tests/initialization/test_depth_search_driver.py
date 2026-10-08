@@ -27,7 +27,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.statistics.contribution import distortion  # noqa: E402
 
-DRIVER = REPO / "scripts/training/search_depth_map.py"
+DRIVER = REPO / "scripts/shared/training/search_depth_map.py"
 
 
 def tiny_local_teacher(path: Path, layers: int = 6, seed: int = 17):
@@ -221,7 +221,7 @@ def test_a_nondeterministic_objective_stops_the_search(tmp_path):
                 logits=torch.randn(1, ids.shape[1], 8))
 
     sys.path.insert(0, str(REPO / "scripts/training"))
-    import search_depth_map as sdm
+    from shared.training import search_depth_map as sdm
 
     prepared = [{"item_id": "x", "subtype": "s",
                  "ids": torch.zeros(1, 5, dtype=torch.long),

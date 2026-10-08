@@ -20,8 +20,8 @@ the operations that would reclaim it are exactly the ones that must not run
 unattended.
 
 Usage:
-    scripts/pod/checkpoint_inventory.py --out artifacts/stage3/checkpoint_inventory.json
-    scripts/pod/checkpoint_inventory.py --out … --apply-local
+    scripts/shared/pod/checkpoint_inventory.py --out artifacts/stages/stage-3/checkpoint_inventory.json
+    scripts/shared/pod/checkpoint_inventory.py --out … --apply-local
 """
 
 from __future__ import annotations
@@ -34,7 +34,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402

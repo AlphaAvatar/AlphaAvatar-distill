@@ -24,8 +24,8 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as S  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as S  # noqa: E402
 from support.design_blockers import (  # noqa: E402
     autouse_blocker_free_design,
 )

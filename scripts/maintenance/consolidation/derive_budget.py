@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """The four balances, computed from the records that own them.
 
-    PYTHONPATH=src python scripts/consolidate/derive_budget.py
-    PYTHONPATH=src python scripts/consolidate/derive_budget.py --json
+    PYTHONPATH=src python scripts/maintenance/consolidation/derive_budget.py
+    PYTHONPATH=src python scripts/maintenance/consolidation/derive_budget.py --json
 
 Four limits bind SEPARATELY and do not transfer into one another:
 
@@ -47,7 +47,7 @@ from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 PACKAGE = "configs/experiments/phase_c1/authorization.json"
 RUN_INDEX = "logs/index.json"

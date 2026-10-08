@@ -413,7 +413,7 @@ def required_profiles(repo_root: str | Path = ".") -> list[dict[str, Any]]:
     """
     from aadistill.initialization.calibration.profiles import get_profile
 
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
     seen, out = set(), []

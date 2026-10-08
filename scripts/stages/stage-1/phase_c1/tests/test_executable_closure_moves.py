@@ -29,7 +29,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 
 from aadistill.governance.closure import derive  # noqa: E402
-from experiments.phase_c1.authorization import (  # noqa: E402
+from stages.phase_c1.authorization import (  # noqa: E402
     C1_DECLARED_INPUTS, C1_ENTRY_POINTS, C1_SOURCE_ROOTS)
 
 
@@ -79,10 +79,10 @@ class TestTheClosureCoversWhatSpendsMoney:
         ("src/aadistill/infrastructure/watchdog.py",
          "class WatchdogPolicy", "class WatchdogPolicy_MUTATED",
          "the watchdog"),
-        ("scripts/pod/watchdog.py",
+        ("scripts/shared/pod/watchdog.py",
          "import argparse", "import argparse  # MUTATED",
          "the watchdog script the runner shells out to"),
-        ("scripts/pod/autoinit_preflight_setup.sh",
+        ("scripts/shared/pod/autoinit_preflight_setup.sh",
          "#!/", "#!/ # MUTATED\n",
          "the setup shell"),
         ("configs/experiments/phase_c1/authorization.json",
@@ -113,7 +113,7 @@ class TestTheClosureIsDerivedNotListed:
                       roots=C1_SOURCE_ROOTS)
         new_module = work / "src/aadistill/infrastructure/newly_added.py"
         new_module.write_text("VALUE = 1\n")
-        mutate(work, "scripts/pod/autoinit_c1_driver.py",
+        mutate(work, "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
                "import json",
                "import json\nfrom aadistill.infrastructure.newly_added import VALUE")
         after = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
@@ -132,7 +132,7 @@ class TestTheClosureIsDerivedNotListed:
         target.write_text("print('hi')\n")
         before = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
                       roots=C1_SOURCE_ROOTS)
-        mutate(work, "scripts/pod/autoinit_c1_driver.py",
+        mutate(work, "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
                "import json",
                'import json\n_NEW = REPO / "scripts/pod/newly_shelled.py"')
         after = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
@@ -150,7 +150,7 @@ class TestTheClosureIsDerivedNotListed:
         target.write_text("print('hi')\n")
         before = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
                       roots=C1_SOURCE_ROOTS)
-        mutate(work, "scripts/pod/autoinit_c1_driver.py",
+        mutate(work, "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
                "import json",
                'import json\n\n"""See scripts/pod/only_mentioned.py for context."""')
         after = derive(work, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
@@ -164,8 +164,8 @@ class TestTheClosureIsDerivedNotListed:
         live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
            roots=C1_SOURCE_ROOTS)
         paths = {r["path"] for r in live["files"]}
-        for declared_elsewhere in ("scripts/autoinit/publish_selected_leaves.py",
-                                   "scripts/pod/simulate_pod_env.sh"):
+        for declared_elsewhere in ("scripts/shared/rollout/publish_selected_leaves.py",
+                                   "scripts/shared/pod/simulate_pod_env.sh"):
             assert declared_elsewhere not in paths
 
 
@@ -179,8 +179,8 @@ class TestTheRealClosure:
                     "src/aadistill/infrastructure/log_relay.py",
                     "src/aadistill/infrastructure/session_runner.py",
                     "src/aadistill/infrastructure/watchdog.py",
-                    "scripts/pod/watchdog.py",
-                    "scripts/pod/autoinit_preflight_setup.sh",
+                    "scripts/shared/pod/watchdog.py",
+                    "scripts/shared/pod/autoinit_preflight_setup.sh",
                     "configs/experiments/phase_c1/authorization.json"):
             assert rel in paths, f"{rel} decides what a paid session does"
 
@@ -194,7 +194,7 @@ class TestTheRealClosure:
         """
         import json
 
-        from experiments.phase_c1.authorization import c1_harness_digest
+        from stages.phase_c1.authorization import c1_harness_digest
 
         live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
                       roots=C1_SOURCE_ROOTS)
@@ -219,14 +219,14 @@ class TestTheRealClosure:
         #
         #    So the live question is asked of the document that exists to be
         #    regenerated, and the frozen one of the document that is frozen.
-        from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
-        from experiments.phase_c1.authorization_payload import (
+        from stages.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
+        from stages.phase_c1.authorization_payload import (
             ATTEMPT_18_PREREGISTRATION,
         )
 
         recorded = json.loads((REPO / CURRENT_CLOSURE_SNAPSHOT).read_text())
         assert recorded["digest"] == c1_harness_digest(REPO)["digest"], (
-            "re-run scripts/architecture/derive_closure.py --write")
+            "re-run scripts/maintenance/architecture/derive_closure.py --write")
         assert doc["preregistration_sha256"] == ATTEMPT_18_PREREGISTRATION, (
             "the canonical preregistration is not the document attempt 18 "
             "executed under; it is frozen to that binding")
@@ -236,19 +236,19 @@ class TestTheRealClosure:
         live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
            roots=C1_SOURCE_ROOTS)
         paths = {r["path"] for r in live["files"]}
-        for rel in ("scripts/pod/autoinit_phase_a_driver.py",
-                    "scripts/pod/autoinit_phase_a_launch.py",
-                    "scripts/pod/autoinit_preflight_driver.py",
-                    "scripts/autoinit/phase_a_search.py"):
+        for rel in ("scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+                    "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+                    "scripts/shared/preflight/autoinit_preflight_driver.py",
+                    "scripts/stages/stage-1/phase_a/phase_a_search.py"):
             assert rel not in paths, f"{rel} is not on the C1 path"
 
     def test_the_committed_snapshot_lists_the_same_files(self):
         import json
 
-        from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
+        from stages.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
         recorded = json.loads((REPO / CURRENT_CLOSURE_SNAPSHOT).read_text())
         live = derive(REPO, "phase_c1", C1_ENTRY_POINTS, C1_DECLARED_INPUTS,
            roots=C1_SOURCE_ROOTS)
         assert {r["path"] for r in recorded["files"]} == \
                {r["path"] for r in live["files"]}, (
-            "re-run scripts/architecture/derive_closure.py --write")
+            "re-run scripts/maintenance/architecture/derive_closure.py --write")

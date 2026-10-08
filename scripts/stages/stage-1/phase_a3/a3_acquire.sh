@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Acquire a pod for A3 and run the chain. Everything before the create is $0.
 #
-#   nohup bash scripts/pod/a3_acquire.sh > /tmp/a3_acquire.out 2>&1 &
+#   nohup bash scripts/stages/stage-1/phase_a3/a3_acquire.sh > /tmp/a3_acquire.out 2>&1 &
 #
 # One round = one $0 capacity watch, one live re-price, one FRESH one-use chain
 # (grant -> launch-bound readiness -> authorization -> bundle), one launcher
@@ -134,7 +134,7 @@ for ROUND in $(seq 1 "$ROUNDS"); do
 
   # ---- re-price LIVE on the device we are about to use --------------------
   if ! PYTHONPATH=src:scripts .venv/bin/python \
-        scripts/experiments/stage-1/phase_c3/a3_pricing.py --write \
+        scripts/stages/stage-1/phase_c3/a3_pricing.py --write \
         --out logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json \
         >> "$LOG" 2>&1; then
     say "$RUN: the live re-price is not fundable; stopping for a maintainer"
@@ -162,7 +162,7 @@ PY
   git commit -q -m "$RUN: grant and live pricing on $GPU" >/dev/null 2>&1
 
   if ! PYTHONPATH=src:scripts .venv/bin/python \
-        scripts/autoinit/record_pod_environment.py --experiment phase_a3 \
+        scripts/shared/pod/record_pod_environment.py --experiment phase_a3 \
         --run-id "$RUN" --stage-id 1 --kind launch_bound >> "$LOG" 2>&1; then
     say "$RUN: the launch-bound readiness sweep failed"
     BACKOFF=$(( BACKOFF + 120 < BACKOFF_MAX ? BACKOFF + 120 : BACKOFF_MAX ))
@@ -172,7 +172,7 @@ PY
   git commit -q -m "$RUN: launch-bound readiness" >/dev/null 2>&1
 
   if ! PYTHONPATH=src:scripts .venv/bin/python \
-        scripts/autoinit/issue_a3_authorization.py \
+        scripts/stages/stage-1/phase_a3/issue_a3_authorization.py \
         --grant "$GOV/grant.json" --out "$GOV/authorization.json" \
         >> "$LOG" 2>&1; then
     say "$RUN: the issuer refused; this chain is consumed"
@@ -183,7 +183,7 @@ PY
   git commit -q -m "$RUN: one-use authorization" >/dev/null 2>&1
 
   SC=$(git rev-parse HEAD)
-  if ! PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/stage_c1_bundle.py \
+  if ! PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_c1/stage_c1_bundle.py \
         --session-commit "$SC" --out "$GOV/bundle.json" >> "$LOG" 2>&1; then
     say "$RUN: the bundle could not be staged and fetch-verified"
     BACKOFF=$(( BACKOFF + 120 < BACKOFF_MAX ? BACKOFF + 120 : BACKOFF_MAX ))
@@ -212,7 +212,7 @@ PY
     POLL_LIMIT=240
     say "$RUN: RESUME AT SCORING from $A3_RESUME_FROM (poll limit ${POLL_LIMIT}m)"
   fi
-  PYTHONPATH=src:scripts .venv/bin/python -u scripts/pod/autoinit_a3_launch.py \
+  PYTHONPATH=src:scripts .venv/bin/python -u scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py \
       --scr "$SCR" --run-id "$RUN" --session-commit "$SC" --bundle "$BN" \
       --gpu "$GPU" --max-price "$PRICE" --poll-limit-min "$POLL_LIMIT" \
       "${RESUME_ARGS[@]}" > "$SCR/launcher.log" 2>&1
@@ -251,7 +251,7 @@ PY
     say "$RUN: terminal marker $TERMINAL -- the loop stops here"
     if [ "$TERMINAL" = "ALL_DONE" ]; then
       say "$RUN: A3 reached ALL_DONE. Next: aggregate OFF POD at \$0 with"
-      say "  PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/aggregate_a3.py \\"
+      say "  PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_a3/aggregate_a3.py \\"
       say "    --evidence $EV --write"
     else
       say "$RUN: NOT a retry. An integrity failure is repaired, not rerun."

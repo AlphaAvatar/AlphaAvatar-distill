@@ -13,9 +13,9 @@ corrected evaluator without retraining or re-running it — which is what makes
 the Experiment 1 arms reusable as controls.
 
 Usage:
-    scripts/evaluation/rescore_gsm8k.py --eval-dir artifacts/eval/e1 \
-        --prompts artifacts/eval/e1/gsm8k_reasoning_100.jsonl \
-        --out artifacts/eval/e1/gsm8k_strict_rescore.json
+    scripts/shared/evaluation/rescore_gsm8k.py --eval-dir artifacts/stages/stage-3/eval/e1 \
+        --prompts artifacts/stages/stage-3/eval/e1/gsm8k_reasoning_100.jsonl \
+        --out artifacts/stages/stage-3/eval/e1/gsm8k_strict_rescore.json
 """
 
 from __future__ import annotations
@@ -27,7 +27,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.strict_answer import score_numeric  # noqa: E402

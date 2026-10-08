@@ -28,8 +28,8 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-import e8a_launch  # noqa: E402
-import e8b_launch  # noqa: E402
+from stages.e8 import e8a_launch  # noqa: E402
+from stages.e8b import e8b_launch  # noqa: E402
 
 LAUNCHERS = (e8a_launch, e8b_launch)
 

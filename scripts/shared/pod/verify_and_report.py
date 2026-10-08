@@ -6,7 +6,7 @@
             content matches the sha256 computed on the pod. Large LFS files are
             checked via the hub's recorded LFS sha256 (no multi-GB download);
             small files are downloaded and hashed locally. Exits non-zero unless
-            every file matches. ``scripts/pod/orchestrate.sh`` treats this as the
+            every file matches. ``scripts/shared/pod/orchestrate.sh`` treats this as the
             safety condition for deleting a paid pod.
 
 **Verify-only.** The former ``report`` subcommand hardcoded one experiment's
@@ -28,7 +28,7 @@ import os
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 HF_REPO = "AlphaAvatar/aadistill-artifacts"
 # Must match run_env.sh's HF_PREFIX_BASE, which is what post_run.sh uploads
 # under. It was a hardcoded "stage3" here while a session could set any prefix,
@@ -61,11 +61,11 @@ MODEL_FILES = [
 
 
 def run_dir(run: str) -> Path:
-    return REPO / "artifacts/stage3" / run
+    return REPO / "artifacts/stages/stage-3" / run
 
 
 def hash_file_for(run: str) -> Path:
-    matches = sorted((REPO / "artifacts/stage3").glob(f"{run}_artifact_hashes_*.txt"))
+    matches = sorted((REPO / "artifacts/stages/stage-3").glob(f"{run}_artifact_hashes_*.txt"))
     if not matches:
         sys.exit(f"FAIL: no pod hash file for run {run}")
     return matches[-1]
@@ -157,7 +157,7 @@ def cmd_verify(run: str) -> int:
             local = Path(
                 hf_hub_download(
                     HF_REPO, path, repo_type="model",
-                    cache_dir=str(REPO / "artifacts/stage3/.verify_cache"),
+                    cache_dir=str(REPO / "artifacts/stages/stage-3/.verify_cache"),
                 )
             )
             got = sha256_file(local)

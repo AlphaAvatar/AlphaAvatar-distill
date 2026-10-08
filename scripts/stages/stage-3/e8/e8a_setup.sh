@@ -87,12 +87,12 @@ fetch('e8_inputs_20260810/calibration_v1',
       ['items.jsonl', 'docs.jsonl', 'general_docs.jsonl',
        'general_docs.manifest.json', 'manifest.json', 'leakage.json',
        'general_disjointness.json'],
-      '/workspace/aad/artifacts/stage1/e8_calibration_v1')
+      '/workspace/aad/artifacts/stages/stage-1/e8_calibration_v1')
 "
 cd "$REPO" && python3 - <<'PYEOF'
 import hashlib, json, sys
 from pathlib import Path
-d = Path('artifacts/stage1/e8_calibration_v1')
+d = Path('artifacts/stages/stage-1/e8_calibration_v1')
 man = json.loads((d / 'manifest.json').read_text())
 items_sha = hashlib.sha256((d / 'items.jsonl').read_bytes()).hexdigest()
 # Only two literals, both self-consistent inside the manifest. The file-level

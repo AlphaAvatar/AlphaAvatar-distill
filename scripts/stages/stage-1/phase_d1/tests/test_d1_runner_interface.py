@@ -37,8 +37,8 @@ for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit"):
         sys.path.insert(0, path)
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as S  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as S  # noqa: E402
 from support.design_blockers import (  # noqa: E402
     autouse_blocker_free_design,
 )
@@ -78,7 +78,7 @@ def issued(tmp_path_factory):
 @pytest.fixture(scope="module")
 def runner(issued, tmp_path_factory):
     """The REAL `SessionRunner`, constructed. No provider call is reachable."""
-    import autoinit_d1_launch as L
+    from stages.phase_d1 import autoinit_d1_launch as L
     from aadistill.infrastructure import session_runner as SR
 
     path, payload = issued
@@ -134,9 +134,9 @@ class TestTheRunnerAcceptsTheAuthorizationInterface:
         assert runner.harness["n_files"] > 50, runner.harness["n_files"]
         #: And the entry points are D1's, not another experiment's.
         paths = {f["path"] for f in runner.harness["files"]}
-        for owned in ("scripts/pod/autoinit_d1_launch.py",
-                      "scripts/pod/autoinit_d1_driver.py",
-                      "scripts/experiments/stage-1/phase_d1/d1_session.py"):
+        for owned in ("scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+                      "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+                      "scripts/stages/stage-1/phase_d1/d1_session.py"):
             assert owned in paths, owned
 
     def test_the_two_money_methods_the_runner_calls(self, runner):

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Phase-C2 behavioural selection: twelve probes, two rungs, one decision.
 
-    /opt/train/bin/python scripts/pod/autoinit_c2_behavioural_driver.py \
+    /opt/train/bin/python scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py \
         --audit-dir <dir> --b-workdir <dir> --campaign <id> ...
 
 Stages, in the order the frozen protocol fixes them:
@@ -68,7 +68,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
@@ -77,7 +77,7 @@ for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
 #: C1 driver module is inert — it defines constants and registers the builtin
 #: profiles and adapters, which this session needs too — and `C1Driver` itself
 #: is deliberately NOT imported.
-from autoinit_c1_driver import (  # noqa: E402
+from stages.phase_c1.autoinit_c1_driver import (  # noqa: E402
     C1_PROBE_OVERRIDES, ENGINE_PROBE, FROZEN_RECIPE, PACK_DIR, TEACHER_BINDING,
     TOKENIZER_SIDECAR_SHA256, TOKENIZER_SOURCE, TRAINER, UNCAPPED_EVAL,
     _trainer_bytes, trained_model_dir,
@@ -91,15 +91,15 @@ from aadistill.initialization.planning.generation import (  # noqa: E402
 from aadistill.runtime.device_handoff import (  # noqa: E402
     complete_release, cuda_memory, require_headroom, require_released,
 )
-from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
-from experiments.phase_c1.scoring import c1_scoring_contract  # noqa: E402
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
-from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
-from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
-from experiments.phase_c2 import scoring as C2S  # noqa: E402
-from experiments.source_sets import generation_source_digest  # noqa: E402
+from stages.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from stages.phase_c1.scoring import c1_scoring_contract  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural_decision as BD  # noqa: E402
+from stages.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import scoring as C2S  # noqa: E402
+from shared.source_sets import generation_source_digest  # noqa: E402
 
 RUN_ID = "autoinit.v1.phase_c2.behavioural"
 EVIDENCE_FILENAME = "c2_behavioural_evidence.json"
@@ -111,8 +111,8 @@ PROBE_MARKER = "C2_BEHAVIOURAL_PROBE_DONE"
 DURABLE_MARKER = "C2_BEHAVIOURAL_DURABLE_UNIT"
 ADVANCED_MARKER = "C2_BEHAVIOURAL_ADVANCED"
 
-C2_SCREENING_SCORER = REPO / "scripts/autoinit/score_c2_screening.py"
-C1_SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
+C2_SCREENING_SCORER = REPO / "scripts/stages/stage-1/phase_c2/score_c2_screening.py"
+C1_SCORER = REPO / "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py"
 
 #: The stages, in order. Own registry: C1's session registry describes C1's
 #: stages and resolving a C2 letter through it raises.
@@ -876,7 +876,7 @@ class C2BehaviouralDriver:
         #: come from the selection document rather than from the order a
         #: builder happened to return. Asserted, not assumed: a silent
         #: reordering would change which candidate advances on a tie.
-        from experiments.phase_c2.replay_specs import load_selection
+        from stages.phase_c2.replay_specs import load_selection
 
         order = [s["state_id"] for s in load_selection(REPO)["selected"]]
         leaves = BG.candidate_leaves(REPO, device=self.a.device)
@@ -1374,7 +1374,7 @@ class C2BehaviouralDriver:
         construction check to the shared materialization; the identity gate and
         the durability announcement are that one path's.
         """
-        from experiments.phase_c2 import baseline as BL
+        from stages.phase_c2 import baseline as BL
 
         say("  B's bytes no longer exist — rebuilding from the frozen treatment path")
         spec = BL.frozen_baseline_spec(device=self.a.device)
@@ -1409,7 +1409,7 @@ class C2BehaviouralDriver:
         frozen = json.loads(FROZEN_RECIPE.read_text())
         name = probe.probe_id
         derived = {**frozen, "run_name": name,
-                   "out_dir": f"artifacts/stage3/c2_behavioural/{name}",
+                   "out_dir": f"artifacts/stages/stage-3/c2_behavioural/{name}",
                    "data_dir": PACK_DIR, "seed": probe.seed,
                    "student_path": probe.initialization_path,
                    "_purpose": (
@@ -1472,7 +1472,7 @@ class C2BehaviouralDriver:
             raise C2DriverError(
                 f"{name}: training failed rc={rc.returncode}; tail: "
                 f"...{(rc.stdout + rc.stderr)[-1200:]}")
-        return REPO / "artifacts/stage3/c2_behavioural" / name
+        return REPO / "artifacts/stages/stage-3/c2_behavioural" / name
 
     def generate_one(self, name: str, package: Path, gen_dir: Path,
                      battery: Path, sets) -> None:

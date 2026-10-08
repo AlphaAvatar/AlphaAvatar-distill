@@ -14,7 +14,7 @@ re-derives to the same artifact digest under the same suite hash, so re-entering
 this function after a lost pod repeats the measurement of nothing that already
 completed.
 
-    PYTHONPATH=src python scripts/autoinit/phase_a_search.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_a/phase_a_search.py \
         --workdir artifacts/autoinit/phase_a_search --out search_result.json
 
 Executed directly it runs the same code path against whatever teacher it is
@@ -32,7 +32,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -40,13 +40,13 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from load_state_eval import load as load_suite  # noqa: E402
+from shared.evaluation.load_state_eval import load as load_suite  # noqa: E402
 
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
 from aadistill.initialization.planning import stage1_selection
@@ -68,7 +68,7 @@ from aadistill.initialization.specs.state import (  # noqa: E402
 #: The searched operators. P=1: one calibration profile, so operators declaring
 #: CalibrationNeed.NONE are offered once and the space is the 48 decomposed
 #: paths the preregistration names.
-from phase_a_frozen import (  # noqa: E402,F401
+from stages.phase_a.phase_a_frozen import (  # noqa: E402,F401
     CANONICAL_INIT, CANONICAL_INIT_SHA256, SEARCH_SEED, TARGET_GEOMETRY,
     TEACHER_ID, TEACHER_REVISION,
 )
@@ -503,7 +503,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--workdir", required=True)
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
     ap.add_argument("--out", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--top-n", type=int, default=5)

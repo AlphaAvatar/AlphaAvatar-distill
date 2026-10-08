@@ -2,7 +2,7 @@
 """Record the measured optimization effects, and what they do to each cost cell.
 
     PYTHONPATH=src:scripts python \
-        scripts/autoinit/write_c2_measured_optimization.py [--write]
+        scripts/stages/stage-1/phase_c2/write_c2_measured_optimization.py [--write]
 
 **An ADJUSTMENT, not an observation.** The cost model's cells are pooled
 per-expansion minutes from committed searches. This round did not run a search;
@@ -37,7 +37,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -67,7 +67,7 @@ DEPTH_RUN = "c2_full_search_perf_20260918_p1"
 #: The suite the state-eval phase actually runs, counted from its own items
 #: file. An earlier draft of this arithmetic used the CALIBRATION mixture's
 #: 59,763 positions, which is a different artifact -- 24% low.
-STATE_EVAL_SUITE = "artifacts/stage1/state_eval_v1/items.jsonl"
+STATE_EVAL_SUITE = "artifacts/stages/stage-1/state_eval_v1/items.jsonl"
 
 PHASES = ("materialize_seconds", "identify_seconds", "canonical_reload_seconds",
           "validation_seconds", "state_evaluation_seconds")

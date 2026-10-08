@@ -25,7 +25,7 @@ canary reports **FAIL** — a pod is never left running to prove a point.
 `--terminate-after` is set as a redundant third layer and does not count toward
 a pass.
 
-    PYTHONPATH=src python scripts/pod/canary.py --scr <scratch> --authorized-usd 0.82
+    PYTHONPATH=src python scripts/shared/pod/canary.py --scr <scratch> --authorized-usd 0.82
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
@@ -105,7 +105,7 @@ SPEC_FINAL = [
 COMPLETION_MARKERS = [{"path": "canary.status", "contains": "MARKER:ALL_DONE"}]
 
 MINI_TREE = [
-    ("scripts/pod/collect_artifacts.py", "aad/scripts/pod/collect_artifacts.py"),
+    ("scripts/shared/pod/collect_artifacts.py", "aad/scripts/shared/pod/collect_artifacts.py"),
     ("src/aadistill/__init__.py", "aad/src/aadistill/__init__.py"),
     ("src/aadistill/infrastructure/__init__.py",
      "aad/src/aadistill/infrastructure/__init__.py"),
@@ -279,7 +279,7 @@ class Canary:
     def launch_watchdog(self, tag: str, hard_minutes: float,
                         runpodctl: str | None) -> Path:
         journal = self.scr / f"watchdog_{tag}.jsonl"
-        cmd = [sys.executable, str(REPO_ROOT / "scripts/pod/watchdog.py"),
+        cmd = [sys.executable, str(REPO_ROOT / "scripts/shared/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.price),
@@ -329,7 +329,7 @@ class Canary:
         final round claims completeness, and they are not the same claim.
         """
         cc = ("cd /workspace/aad && PYTHONPATH=/workspace/aad/src python3 "
-              "scripts/pod/collect_artifacts.py")
+              "scripts/shared/pod/collect_artifacts.py")
         mpath = f"{WS}/manifest_{phase}.json"
         apath = f"{WS}/artifacts_{phase}.tar.gz"
         cmd = (f"{cc} manifest --root {WS} --spec {WS}/{spec_name} "

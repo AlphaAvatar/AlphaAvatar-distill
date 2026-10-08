@@ -1,7 +1,7 @@
 """Build warm-up v1 for Stage 0 activation-statistics collection.
 
 Usage:
-    uv run python scripts/data/build_warmup_v1.py
+    uv run python scripts/shared/data/build_warmup_v1.py
 
 Mixture (user-approved 2026-07-13, see logs/budget/decisions.md): permissively
 licensed public sources plus the 47 handcrafted v0 samples. Char budgets
@@ -25,7 +25,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file

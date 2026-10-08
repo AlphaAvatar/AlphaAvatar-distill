@@ -27,12 +27,12 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-for _extra in ("src", "scripts", "scripts/experiments/stage-1"):
+for _extra in ("src", "scripts", "scripts/stages/stage-1"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
-from experiments.phase_d1 import behavioural as B  # noqa: E402
-from experiments.phase_d1.behavioural_governance import (  # noqa: E402
+from stages.phase_d1 import behavioural as B  # noqa: E402
+from stages.phase_d1.behavioural_governance import (  # noqa: E402
     D1_BEHAVIOURAL_POLICY,
     D1BehaviouralAuthorization,
     D1BehaviouralRefused,
@@ -68,7 +68,7 @@ class TestTheControlArmMustBeTheOneThatActuallyStands:
     """
 
     def test_the_live_design_agrees_with_the_derivation(self):
-        from experiments.phase_d_series.incumbent import disagreements
+        from stages.d_series.incumbent import disagreements
 
         declared = json.loads((REPO / B.DESIGN_REL).read_text())["incumbent"]
         assert disagreements(declared, REPO) == [], (
@@ -158,7 +158,7 @@ class TestTheArmsAreTheFrozenFieldAndNothingElse:
         so the error could manufacture a GO. Owner of the finding:
         `logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json`.
         """
-        from experiments.phase_d_series.incumbent import (
+        from stages.d_series.incumbent import (
             disagreements, standing_incumbent,
         )
 
@@ -426,7 +426,7 @@ class TestTheContractBindsEverythingTheRungMeasures:
         assert "PAIRED difference" in note
 
     def test_the_recipe_is_the_frozen_one(self):
-        from experiments.recipes import E1_KD_HEAVY_0860K as recipe
+        from shared.recipes import E1_KD_HEAVY_0860K as recipe
 
         c = B.session_contract("screening", REPO)
         assert c["recovery_recipe"]["recipe_id"] == recipe.recipe_id
@@ -468,7 +468,7 @@ class TestThePermissionsCannotBeSubstituted:
             assert wire in payload, wire
 
     def test_the_schema_differs_from_the_searchs(self):
-        from experiments.phase_d1.d1_authorization import SCHEMA as SEARCH
+        from stages.phase_d1.d1_authorization import SCHEMA as SEARCH
 
         assert _auth().as_dict()["schema"] != SEARCH
 
@@ -520,7 +520,7 @@ class TestTheScorerIsPinnedToTheRealizedRole:
         for extra in ("scripts/autoinit",):
             if str(REPO / extra) not in sys.path:
                 sys.path.insert(0, str(REPO / extra))
-        path = REPO / "scripts/autoinit/score_d1_screening.py"
+        path = REPO / "scripts/stages/stage-1/phase_d1/score_d1_screening.py"
         spec = importlib.util.spec_from_file_location("score_d1_screening",
                                                       path)
         mod = importlib.util.module_from_spec(spec)
@@ -536,7 +536,7 @@ class TestTheScorerIsPinnedToTheRealizedRole:
         #: Build the real parser by calling main's construction indirectly --
         #: simplest reliable probe is the module source, since main() parses
         #: and then runs.
-        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/score_d1_screening.py").read_text()
         assert '"--battery"' not in src, (
             "the scorer accepts a battery path; that is how a rung gets "
             "scored on the wrong prompts")
@@ -544,7 +544,7 @@ class TestTheScorerIsPinnedToTheRealizedRole:
         assert flags == set() and parser is not None   # probe is the source
 
     def test_the_metric_is_c1s_imported_unchanged(self):
-        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/score_d1_screening.py").read_text()
         assert "from score_c1_confirmation import build_result, score_battery" \
             in src, ("the metric must be C1's, imported: a reimplementation "
                      "would make a screening delta uninformative about a "
@@ -576,7 +576,7 @@ class TestTheScorerIsPinnedToTheRealizedRole:
         assert "confirmation" in text
 
     def test_it_states_the_absolute_score_limitation(self):
-        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/score_d1_screening.py").read_text()
         assert "_absolute_scores_are_not_interchangeable_with_c1s" in src
 
 
@@ -708,7 +708,7 @@ class TestTheDriverAssertsBeforeItTrains:
         for extra in ("scripts/pod", "scripts/autoinit"):
             if str(REPO / extra) not in sys.path:
                 sys.path.insert(0, str(REPO / extra))
-        path = REPO / "scripts/pod/autoinit_d1_behavioural_driver.py"
+        path = REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py"
         spec = importlib.util.spec_from_file_location("d1b_driver", path)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
@@ -725,7 +725,7 @@ class TestTheDriverAssertsBeforeItTrains:
     def test_the_contract_is_asserted_before_the_trainer_is_reached(self):
         import ast
 
-        src = (REPO / "scripts/pod/autoinit_d1_behavioural_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py").read_text()
         assert src.index("session_contract(") < src.index("str(TRAINER)")
         tree = ast.parse(src)
         assert tree is not None

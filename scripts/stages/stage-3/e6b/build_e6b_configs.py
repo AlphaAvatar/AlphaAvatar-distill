@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Build the two E6b arms by composing two configs that already exist.
 
-    PYTHONPATH=src python scripts/training/build_e6b_configs.py
+    PYTHONPATH=src python scripts/stages/stage-3/e6b/build_e6b_configs.py
 
 E6b fills one cell of an objective × data-scale matrix:
 
@@ -31,7 +31,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
@@ -69,12 +69,12 @@ def build(seed: str) -> tuple[dict, dict]:
     for k in FROM_RUNG:                   # the rung and what it implies
         cfg[k] = rung[k]
     cfg["run_name"] = f"e6b_p2_r2960k_{seed}"
-    cfg["out_dir"] = f"artifacts/stage3/e6b_p2_r2960k_{seed}"
+    cfg["out_dir"] = f"artifacts/stages/stage-3/e6b_p2_r2960k_{seed}"
     cfg["_purpose"] = (
         "Experiment 6b (objective x data-scale interaction): the P2-CE-heavy "
         "objective (ce 1.0 / kd 0.25, kd_scope all) trained at the strictly "
         f"nested 2.96M rung. Composed mechanically by "
-        f"scripts/training/build_e6b_configs.py from e4_p2_r1600k_{seed} "
+        f"scripts/stages/stage-3/e6b/build_e6b_configs.py from e4_p2_r1600k_{seed} "
         f"(objective and everything else) and e1_r2960k_{seed}_pca (rung, "
         "schedule, cadences). Trains from the Stage 1 PCA init, NOT continued "
         "from P2-1.60M. The only intended difference from e1_r2960k_"

@@ -18,7 +18,7 @@ sets, because the historical implementation has that loop inline in `main()` and
 there is no seam to call. That duplication is the one real risk here, and it is
 closed by an admission gate rather than by reading: `score_battery` below is
 battery-agnostic precisely so
-`scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py` can drive real retained
+`scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py` can drive real retained
 `recovery_search_v2` generations through it and require equality of every
 material numerical field against the frozen scorer's own output. The C1 pins
 stay on `main()`, so the production path cannot be aimed anywhere else.
@@ -36,7 +36,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
@@ -44,11 +44,11 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 #: The frozen implementation, imported rather than restated. Importing this
 #: module is inert — it defines constants and functions and runs `main()` only
 #: under `__main__` — so its own battery pins are never consulted here.
-from score_recovery_search import (  # noqa: E402
+from shared.evaluation.score_recovery_search import (  # noqa: E402
     TOOL_STRUCTURAL_GATE, group, scorer_correct, summarize,
 )
 
-from experiments.phase_c1.scoring import C1_BATTERY_PATH, C1_METRIC_CONTRACT, SCHEMA, c1_scoring_contract, validate_c1_battery  # noqa: E402
+from stages.phase_c1.scoring import C1_BATTERY_PATH, C1_METRIC_CONTRACT, SCHEMA, c1_scoring_contract, validate_c1_battery  # noqa: E402
 from aadistill.initialization.planning.recovery import (
     score_recovery_row,
     validate_scored_rows,
@@ -56,7 +56,7 @@ from aadistill.initialization.planning.recovery import (
 #: The scientific rule this scorer applies. It lived inside
 #: `score_recovery_row`, which made a generic planning module state
 #: what THIS battery means by correct. The arithmetic is unchanged.
-from experiments.recovery_policy import (
+from shared.recovery_policy import (
     CAPABILITY_SCHEMA_V1, CORRECT_IN_USABLE_ROLLOUT)
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402

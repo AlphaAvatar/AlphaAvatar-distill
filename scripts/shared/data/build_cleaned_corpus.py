@@ -19,10 +19,10 @@ the tokenizer-dependent parts (rendering, supervised-token length) and the
 audit.
 
 Usage:
-    scripts/data/build_cleaned_corpus.py \
+    scripts/shared/data/build_cleaned_corpus.py \
         --corpus <dir with candidates.jsonl + sessions.jsonl + manifest.json> \
         --tokenizer <teacher path or repo@revision> \
-        --out artifacts/stage3/corpus_v2_clean
+        --out artifacts/stages/stage-3/corpus_v2_clean
 """
 
 from __future__ import annotations
@@ -37,7 +37,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation import degeneration  # noqa: E402

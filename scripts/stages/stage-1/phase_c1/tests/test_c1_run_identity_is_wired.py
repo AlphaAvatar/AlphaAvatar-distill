@@ -33,7 +33,7 @@ from pathlib import Path
 
 import pytest
 
-from experiments.run_layout import RUNS_ROOT, RunConventionError, read_run
+from shared.run_layout import RUNS_ROOT, RunConventionError, read_run
 from support.session_specs import load_session_launcher
 
 REPO = Path(__file__).resolve().parents[5]
@@ -438,12 +438,12 @@ def test_the_cuda_validation_records_its_run_too(tmp_path):
     """
     import importlib.util
 
-    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
     spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    from experiments.run_layout import claim_output_root
+    from shared.run_layout import claim_output_root
 
     repo, scr = tmp_path / "repo", tmp_path / "scr"
     (repo / "logs").mkdir(parents=True)
@@ -507,13 +507,13 @@ def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
     """
     import importlib.util
 
-    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
     spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
     from aadistill.infrastructure.session_runner import watchdog_journal_name
-    from experiments.run_layout import claim_output_root
+    from shared.run_layout import claim_output_root
 
     repo, scr = tmp_path / "repo", tmp_path / "scr"
     (repo / "logs").mkdir(parents=True)
@@ -551,9 +551,9 @@ def test_an_unclaimed_scratch_holding_only_a_journal_is_still_refused(tmp_path):
     """
     import importlib.util
 
-    from experiments.run_layout import OutputOwnershipError, claim_output_root
+    from shared.run_layout import OutputOwnershipError, claim_output_root
 
-    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
     spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -577,7 +577,7 @@ def test_the_two_consumers_share_no_role_name():
     import importlib.util
 
     L = load_session_launcher("autoinit_c1_launch")
-    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
     spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -591,7 +591,7 @@ def test_the_index_finds_a_recorded_run_and_reports_an_unrecorded_one(tmp_path,
                                                                       L):
     import importlib.util
 
-    path = REPO / "scripts/architecture/record_run_index.py"
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
     spec = importlib.util.spec_from_file_location("record_run_index", path)
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
@@ -619,7 +619,7 @@ def test_the_index_finds_a_recorded_run_and_reports_an_unrecorded_one(tmp_path,
 def test_an_empty_run_directory_is_not_reported_as_an_orphan(tmp_path):
     import importlib.util
 
-    path = REPO / "scripts/architecture/record_run_index.py"
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
     spec = importlib.util.spec_from_file_location("record_run_index", path)
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
@@ -637,7 +637,7 @@ def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
     """
     import importlib.util
 
-    path = REPO / "scripts/architecture/record_run_index.py"
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
     spec = importlib.util.spec_from_file_location("record_run_index", path)
     ri = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(ri)
@@ -684,7 +684,7 @@ def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path)
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "record_run_index", REPO / "scripts/architecture/record_run_index.py")
+        "record_run_index", REPO / "scripts/maintenance/architecture/record_run_index.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
@@ -724,7 +724,7 @@ def test_the_launcher_writes_under_its_declared_stage(L):
 def test_the_stage_is_declared_by_config_not_inferred_from_the_name():
     """`phase_c1` is an experiment id. Reading a stage out of it would make
     phase and stage the same dimension, which they are not."""
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert 'load_config(REPO_ROOT)["stage_id"]' in src
     assert 'RUN_STAGE_ID = "3"' not in src, "the stage was hard-coded in the launcher"
 
@@ -735,11 +735,11 @@ def test_the_index_discovers_both_layouts(tmp_path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "rri", REPO / "scripts/architecture/record_run_index.py")
+        "rri", REPO / "scripts/maintenance/architecture/record_run_index.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
-    from experiments.run_layout import open_run, record_run, present_roles, ArtifactSpec
+    from shared.run_layout import open_run, record_run, present_roles, ArtifactSpec
     roles = {"session_record": "runtime/session.json"}
     art = ArtifactSpec(spec_id="t", required=("session_record",))
     for stage, exp, run in [(None, "legacy_exp", "r1"), ("3", "staged_exp", "r1")]:
@@ -759,7 +759,7 @@ def test_a_directory_holding_only_a_readme_is_not_a_dead_run(tmp_path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "rri2", REPO / "scripts/architecture/record_run_index.py")
+        "rri2", REPO / "scripts/maintenance/architecture/record_run_index.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 

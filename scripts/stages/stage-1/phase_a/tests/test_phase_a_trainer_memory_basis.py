@@ -34,7 +34,7 @@ def test_the_trainer_requirement_matches_its_recorded_basis():
     import json
 
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_phase_a_driver as drv
+    from stages.phase_a import autoinit_phase_a_driver as drv
 
     basis = json.loads(
         (REPO / "logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_trainer_memory_basis.json").read_text())

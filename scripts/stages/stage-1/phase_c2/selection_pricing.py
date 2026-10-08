@@ -1,6 +1,6 @@
 """What the bounded C2 behavioural selection stage costs, derived and BOUNDED.
 
-    PYTHONPATH=src:scripts python -m experiments.phase_c2.selection_pricing
+    PYTHONPATH=src:scripts python -m stages.phase_c2.selection_pricing
 
 Zero cost. It trains nothing, launches nothing and needs no GPU.
 
@@ -511,7 +511,7 @@ def report(*, schedule: ProbeSchedule, price_per_hour: float,
 
 
 def main() -> int:
-    from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
+    from stages.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
 
     #: Illustrative only — the real schedule is fixed by the protocol document,
     #: which is what a launch would read.
@@ -520,8 +520,8 @@ def main() -> int:
         advanced_candidates=1,
         screening_anchors=("frozen_c1_treatment_b",),
         confirmation_anchors=("frozen_c1_treatment_b",),
-        screening_battery="artifacts/stage3/c2_screening_v1",
-        confirmation_battery="artifacts/stage3/c1_confirmation_v1")
+        screening_battery="artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1",
+        confirmation_battery="artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1")
     print(json.dumps(report(schedule=schedule,
                             price_per_hour=PRICE_PER_HOUR_LAST_QUOTED),
                      indent=1))

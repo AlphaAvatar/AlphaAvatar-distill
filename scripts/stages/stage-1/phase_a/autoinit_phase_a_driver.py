@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pod-side driver for AutoInitializer Phase A. Six stages, then STOP.
 
-    /opt/train/bin/python scripts/pod/autoinit_phase_a_driver.py \
+    /opt/train/bin/python scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py \
         --image-digest <digest> --rate 0.99 --spent-usd 0.20 \
         --soft-stop-usd 18.00 --authorized-usd 20.13
 
@@ -50,7 +50,7 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
@@ -76,13 +76,13 @@ from aadistill.initialization.planning.generation import (
     declared_generation_protocol,
     observe_generation_protocol,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 from aadistill.initialization.planning.generation_compat import (  # noqa: E402
     ComparabilityError,
     comparable_generation_identity,
     require_comparable,
 )
-from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest  # noqa: E402
+from stages.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization, phase_a_manifest  # noqa: E402
 from aadistill.initialization.planning.recovery import (
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
@@ -90,8 +90,8 @@ from aadistill.initialization.planning.recovery import (
     assert_preregistered,
     probe_configs,
 )
-from experiments.recovery_policy import POOLED_COUNTS_V2
-from experiments.source_sets import recovery_scoring_contract
+from shared.recovery_policy import POOLED_COUNTS_V2
+from shared.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing an operator module no longer registers it.
@@ -235,12 +235,12 @@ def selected_leaf_dir() -> Path:
     audit root must redirect everything written under it.
     """
     return AUDIT / "selected_leaves"
-BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
-STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
+BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
+STATE_EVAL = REPO / "artifacts/stages/stage-1/state_eval_v1"
 #: The engine probe's target at stage 0. The canonical initialization is the only
 #: target-architecture checkpoint that exists before the search runs, and it is
 #: what the continuation probed, so the generation identity stays comparable.
-CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL_INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 FROZEN_PLAN = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: The Stage-3 controls materialized this run's equivalence interval and
 #: feasibility floor under ONE evaluation protocol. Phase A must measure
@@ -297,11 +297,11 @@ STATE_EVAL_CONTENT_SHA256 = (
     "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc")
 STATE_EVAL_SUITE_HASH = (
     "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833")
-PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
+PACK_DIR = "artifacts/shared/instruments/ladder_uniform_probe"
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
 
 # The teacher id, revision, target geometry and canonical-control hash live in
-# `scripts/autoinit/phase_a_search.py`, which is the only module that needs them.
+# `scripts/stages/stage-1/phase_a/phase_a_search.py`, which is the only module that needs them.
 # Restating them here would be a second definition of the search's identity, and
 # the two would eventually disagree about which teacher was measured.
 
@@ -459,7 +459,7 @@ class PhaseADriver:
         # -- which is a different question, and has a different answer since the
         # initialization migration -- sets it explicitly.
         assets = self.gate("frozen_assets",
-                           [str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
+                           [str(REPO / "scripts/shared/pod/verify_frozen_assets.py"),
                             *(["--expect", str(FROZEN_ASSETS_EXPECTATION)]
                               if FROZEN_ASSETS_EXPECTATION else [])],
                            timeout=900)
@@ -472,7 +472,7 @@ class PhaseADriver:
         # `assert_preregistered` compares hashes, so a threshold that moved after
         # freezing is caught here rather than in the selection at hour eleven.
         try:
-            from write_preregistration import build_frozen_plan
+            from stages.phase_a.write_preregistration import build_frozen_plan
             self.plan = build_frozen_plan(REPO)
             frozen = assert_preregistered(self.plan, FROZEN_PLAN)
         except Exception as exc:                                  # noqa: BLE001
@@ -500,7 +500,7 @@ class PhaseADriver:
         # detached, because the rehearsal scripted stage 0 instead of building
         # this argv.
         engine = self.gate("engine_probe",
-                           [str(REPO / "scripts/pod/autoinit_engine_probe.py"),
+                           [str(REPO / "scripts/shared/pod/autoinit_engine_probe.py"),
                             "--model", str(CANONICAL_INIT),
                             "--out", str(AUDIT / "engine_probe.json"),
                             "--image-digest", self.a.image_digest],
@@ -667,7 +667,7 @@ class PhaseADriver:
         # no `from_dict`, so a driver that reconstructed candidates from JSON
         # would have to skip `admit_leaves` — the one gate that refuses an
         # intermediate which cannot be a recovery candidate at all.
-        from phase_a_search import run_phase_a_search
+        from stages.phase_a.phase_a_search import run_phase_a_search
 
         # Hold torch to the CPUs the cgroup actually granted, before any heavy
         # work. Attempt 10 ran 192 threads on a 13-vCPU grant because torch sized
@@ -823,7 +823,7 @@ class PhaseADriver:
         name = descriptor["probe_id"]
         derived = {**frozen,
                    "run_name": name,
-                   "out_dir": f"artifacts/stage3/phase_a/{name}",
+                   "out_dir": f"artifacts/stages/stage-3/phase_a/{name}",
                    "data_dir": PACK_DIR,
                    "seed": descriptor["seed"],
                    "student_path": descriptor["student_checkpoint"],
@@ -884,7 +884,7 @@ class PhaseADriver:
         config = self.probe_config(descriptor)
         t = time.time()
         rc = subprocess.run(
-            ["/opt/train/bin/python", str(REPO / "scripts/training/train_stage3.py"),
+            ["/opt/train/bin/python", str(REPO / "scripts/shared/training/train_stage3.py"),
              "--config", str(config)],
             capture_output=True, text=True,
             timeout=int(self.a.probe_train_minutes * 60 * 2), env=self.child_env())
@@ -896,7 +896,7 @@ class PhaseADriver:
                 f"...{(rc.stdout + rc.stderr)[-1200:]}")
         mark(f"PROBE_TRAINED:{name}")
 
-        model_dir = trained_model_dir(REPO / f"artifacts/stage3/phase_a/{name}")
+        model_dir = trained_model_dir(REPO / f"artifacts/stages/stage-3/phase_a/{name}")
         # The trainer writes no tokenizer, and the battery evaluates "the
         # checkpoint's own" — the frozen material rule. Give the checkpoint the
         # attested bytes rather than pointing the evaluator somewhere else.
@@ -925,11 +925,11 @@ class PhaseADriver:
     def battery(self, label: str, model_dir: Path, seed: int) -> dict:
         """Generation + scoring on recovery_search_v2, protocol-checked."""
         sets = json.loads((BATTERY / "manifest.json").read_text())["sets"]
-        gen_dir = REPO / f"artifacts/eval/phase_a/{label}"
+        gen_dir = REPO / f"artifacts/stages/stage-3/eval/phase_a/{label}"
         gen_dir.mkdir(parents=True, exist_ok=True)
         t = time.time()
         out = self.gate(f"{label}_generation",
-                        [str(REPO / "scripts/evaluation/uncapped_eval.py"),
+                        [str(REPO / "scripts/shared/evaluation/uncapped_eval.py"),
                          "--model", str(model_dir), "--label", label,
                          "--prompts", *[str(BATTERY / f"{s}.jsonl") for s in sets],
                          "--out-dir", str(gen_dir), "--diagnostics"],
@@ -943,7 +943,7 @@ class PhaseADriver:
 
         scored = AUDIT / f"{label}_recovery_search.json"
         rc = self.gate(f"{label}_scoring",
-                       [str(REPO / "scripts/autoinit/score_recovery_search.py"),
+                       [str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
                         "--generations", str(gen_dir), "--label", label,
                         "--seed", str(seed), "--out", str(scored),
                         "--per-sample", str(AUDIT / f"{label}_per_sample.jsonl")],

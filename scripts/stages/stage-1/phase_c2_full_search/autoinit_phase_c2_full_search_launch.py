@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch ONE Phase-C2 full-joint-re-search session through the generic runner.
 
-    PYTHONPATH=src python scripts/pod/autoinit_phase_c2_full_search_launch.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py \
         --scr /path/to/scratch --session-commit <sha> --bundle <name> \
         --run-id attempt1
 
@@ -47,7 +47,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -61,20 +61,20 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract)
-from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.phase_c2 import full_search as FSG  # noqa: E402
-from experiments.phase_c2 import full_search_bundle as FST  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from stages.phase_c2 import full_search as FSG  # noqa: E402
+from stages.phase_c2 import full_search_bundle as FST  # noqa: E402
 #: The FULL SEARCH's readiness instance, not the generic runtime module. The
 #: generic module owns the mechanism; which experiment, which schema, which
 #: harness and which staging contract are this experiment's own facts.
-from experiments.phase_c2 import (  # noqa: E402
+from stages.phase_c2 import (  # noqa: E402
     full_search_pod_environment as FPE)
-from experiments.run_layout import (  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run,
     record_run, rel_run_dir, write_run_readmes,
 )
-from phase_a_frozen import TEACHER_REVISION  # noqa: E402
+from stages.phase_a.phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
 WS = "/workspace"
 STATUS = f"{WS}/autoinit_phase_c2_full_search.status"
@@ -243,7 +243,7 @@ def frozen_space_gate(ctx: SessionContext) -> tuple[bool, str]:
     beam explores -- so a session whose authorization bound 578 leaves must not
     quietly search 866.
     """
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     bound = getattr(ctx.auth, "bound", None)
     if not isinstance(bound, dict):
@@ -332,7 +332,7 @@ def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: ASSETS_READY step against the same expectation document.
     result = subprocess.run(
         [sys.executable,
-         str(REPO_ROOT / "scripts/autoinit/verify_frozen_assets.py"),
+         str(REPO_ROOT / "scripts/shared/pod/verify_frozen_assets.py"),
          "--expect", FROZEN_EXPECT],
         cwd=str(REPO_ROOT), capture_output=True, text=True,
         env={"PYTHONPATH": f"{REPO_ROOT}/src:{REPO_ROOT}/scripts",
@@ -593,7 +593,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
 
     row = FSG._standing_row(REPO_ROOT)
     return (f"{POD_IMAGE['remote_python']} "
-            f"scripts/pod/autoinit_phase_c2_full_search_driver.py "
+            f"scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py "
             f"--authorization-path {auth_path_for(ctx.args.run_id)} "
             f"--image-digest {getattr(ctx.args, 'image', '')} "
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
@@ -676,9 +676,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", "")),
         authorization_loader=FSG.FullSearchAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=FSG.PLAN_ID,
         plan_hash=FSG.plan_hash(REPO_ROOT),
@@ -829,16 +829,16 @@ def build_parser() -> argparse.ArgumentParser:
 
 def close_full_search_run(layout, args):
     """Record the run, whatever happened. Called on every path."""
-    from experiments.run_layout import present_roles
+    from shared.run_layout import present_roles
 
     return record_run(
         layout, spec=FULL_SEARCH_RUN_SPEC,
         plan={"session": FSG.SESSION_ID, "plan_id": FSG.PLAN_ID,
               "session_commit": args.session_commit, "bundle": args.bundle},
         implementation={"launcher":
-                        "scripts/pod/autoinit_phase_c2_full_search_launch.py",
+                        "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py",
                         "driver":
-                        "scripts/pod/autoinit_phase_c2_full_search_driver.py"},
+                        "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py"},
         status={"authorizes": "nothing",
                 "terminates_at": "commit_top_k"},
         roles=present_roles(layout, FULL_SEARCH_RUN_ROLES))

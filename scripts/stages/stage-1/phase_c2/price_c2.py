@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price the Phase-C2 Search-1 session. PRICING ONLY — this authorizes nothing.
 
-    PYTHONPATH=src:scripts .venv/bin/python scripts/autoinit/price_c2.py
+    PYTHONPATH=src:scripts .venv/bin/python scripts/stages/stage-1/phase_c2/price_c2.py
 
 Five envelopes, separately named, because each answers a different question and
 collapsing any two of them loses the answer to one:
@@ -23,7 +23,7 @@ collapsing any two of them loses the answer to one:
 * **`artifact_recovery_reserve`** — teardown and collection, untouched.
 
 Every minute figure is DERIVED at generation time: the search envelope from
-`experiments.phase_c2.search_space`, which is itself back-tested against
+`stages.phase_c2.search_space`, which is itself back-tested against
 Phase-B attempt 5's real beams, and the baseline rebuild from the stage
 timestamps C1 attempt 18 recorded. Nothing here is transcribed, so nothing here
 can drift from the model that produced it.
@@ -37,13 +37,13 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
-from experiments.phase_c2.search_space import (  # noqa: E402
+from stages.phase_c2.search_space import (  # noqa: E402
     ATTENTION_ACTIVATION_PROXY_FACTOR,
     ATTENTION_ACTIVATION_PROXY_IMPL,
     PRICE_PER_HOUR_LAST_QUOTED,

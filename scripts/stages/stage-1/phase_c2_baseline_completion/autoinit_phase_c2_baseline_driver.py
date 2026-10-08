@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase C2 baseline completion: establish B, measure it once, compare against frozen C.
 
-    python scripts/pod/autoinit_phase_c2_baseline_driver.py \
+    python scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py \
         --protocol logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json \
         --frozen-inputs .../evidence/c2_frozen_comparison_inputs.json \
         --selection-record .../evidence/stage1_selection.json \\
@@ -15,7 +15,7 @@ the baseline side does not exist. This driver supplies only the missing half.
 **The beam search is unreachable from here.** Not by instruction -- by
 construction. Nothing in this module imports `run_phase_a_search`, `BeamSearch`,
 `SCHEDULE_V1` or any search entry point, and there is no code path that could
-generate a candidate. `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts
+generate a candidate. `scripts/stages/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts
 that over the module's import graph, so an edit that reintroduces the search
 fails a test rather than quietly widening what a grant authorizes.
 
@@ -39,7 +39,7 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -48,15 +48,15 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 from aadistill.initialization.planning import stage1_selection  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.specs.state import make_retained_state  # noqa: E402
-from experiments.phase_c2 import baseline as B  # noqa: E402
-from experiments.phase_c2 import comparison as C  # noqa: E402
-from experiments.phase_c2.frozen_inputs import (  # noqa: E402
+from stages.phase_c2 import baseline as B  # noqa: E402
+from stages.phase_c2 import comparison as C  # noqa: E402
+from stages.phase_c2.frozen_inputs import (  # noqa: E402
     load_frozen_candidates, load_record)
 #: At MODULE scope, because the calibration mixtures are data that an
 #: application bootstrap registers and stage A resolves profiles. C2 attempt 3
 #: died one second into its first stage for want of exactly this import being
 #: here rather than inside the stage that needed it.
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 
 register_builtin_profiles()
 
@@ -145,8 +145,8 @@ class BaselineCompletionDriver:
     # -- stage A -----------------------------------------------------------
     def bind_identities(self) -> bool:
         """Everything the two halves must share, before anything is loaded."""
-        from experiments.phase_c2.search_space import register_c2_operators
-        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+        from stages.phase_c2.search_space import register_c2_operators
+        from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
         #: `attention.activation_importance_v1` is not a shipped default and the
         #: frozen B path's last step names it. Registered FIRST, as everywhere.
@@ -271,8 +271,8 @@ class BaselineCompletionDriver:
         root has neither. The failure would have landed on the pod, after setup,
         inside the only stage that spends money.
         """
-        from load_state_eval import load as load_suite
-        from experiments.phase_c2.frozen_assets import state_eval_root
+        from shared.evaluation.load_state_eval import load as load_suite
+        from stages.phase_c2.frozen_assets import state_eval_root
 
         root = state_eval_root(REPO)
         say(f"  state_eval root resolved from its declaration: {root}")
@@ -287,7 +287,7 @@ class BaselineCompletionDriver:
         """
         import torch
         from transformers import AutoModelForCausalLM
-        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+        from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
         say(f"  loading the original teacher {TEACHER_ID}@{TEACHER_REVISION[:12]}… "
             f"once, on {self.a.device}")
@@ -303,10 +303,10 @@ class BaselineCompletionDriver:
         from aadistill.initialization.adapters.qwen3 import QWEN3_ADAPTER
         from aadistill.initialization.specs.arch import ArchSpec
         from aadistill.initialization.specs.artifact import identify_checkpoint
-        from phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID
+        from stages.phase_a.phase_a_frozen import TARGET_GEOMETRY, TEACHER_ID
         from aadistill.initialization.planning.metrics import StateEvaluator
         from aadistill.initialization.specs.metrics import ReferenceStrategy
-        from experiments.phase_c2.frozen_inputs import (
+        from stages.phase_c2.frozen_inputs import (
             numerical_sensitivity_disclosure)
 
         suite_root, suite, items, suite_manifest = self.load_suite_bundle()
@@ -514,7 +514,7 @@ class BaselineCompletionDriver:
         taken under, the teacher it was scored against, and the frozen Search-1
         identities the comparison will be computed against.
         """
-        from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+        from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
         evaluation = state.evaluation
         self.ev["baseline_measurement"] = {

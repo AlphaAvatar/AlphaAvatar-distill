@@ -2,7 +2,7 @@
 """AutoInitializer Phase A, as a session specification.
 
     PYTHONPATH=src setsid nohup python -u \
-        scripts/pod/autoinit_phase_a_launch.py \
+        scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 Declares WHAT the session is. How it is run lives once, in
@@ -46,7 +46,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
@@ -54,8 +54,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from stages.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.infrastructure.session import (
@@ -72,7 +72,7 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 
@@ -85,13 +85,13 @@ AUTH_PATH = "logs/budget/approvals/autoinit_phase_a_authorization.json"
 FROZEN_SCIENCE_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 #: Dev-box-only inputs the pod cannot fetch from git: the two frozen assets.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py")
+                "scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
 #: Measured, not estimated. 61.55 min end-to-end for an 0.86M probe (attempt 4,
@@ -230,7 +230,7 @@ def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     either miss a rung-2 probe or demand a rung-3 one that correctly never ran.
     """
     journalled = sorted((ctx.scr / "relay").glob("*.train_log.jsonl"))
-    return tuple(f"artifacts/stage3/phase_a/{p.name.split('.')[0]}/train_log.jsonl"
+    return tuple(f"artifacts/stages/stage-3/phase_a/{p.name.split('.')[0]}/train_log.jsonl"
                  for p in journalled)
 
 
@@ -242,7 +242,7 @@ def finalists_to_fetch(ctx: SessionContext) -> list[str]:
     result; fetching only a winner would throw away the finding.
 
     The control is excluded: it is the retained canonical checkpoint, it already
-    exists at `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, and re-fetching
+    exists at `artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint`, and re-fetching
     it would spend transfer time on a byte we already hold.
     """
     if not ctx.args.fetch_finalists:
@@ -443,7 +443,7 @@ def fetch_finalists(ctx: SessionContext) -> list:
         rc = ctx.target.run(
             f"cd {REPO} && HF_TOKEN=\"$(cat {WS}/hf/token)\" "
             f"PYTHONPATH={REPO}/src /opt/train/bin/python "
-            f"{REPO}/scripts/pod/collect_artifacts.py stage-leaves "
+            f"{REPO}/scripts/shared/pod/collect_artifacts.py stage-leaves "
             f"--search-dir {REPO}/artifacts/autoinit/phase_a_search "
             f"--repo {ctx.args.relay_repo} --prefix phase_a_leaves",
             timeout=5400)
@@ -475,7 +475,7 @@ def fetch_finalists(ctx: SessionContext) -> list:
 
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_phase_a_driver.py "
+            f"{REPO}/scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
@@ -575,9 +575,9 @@ def spec(args) -> SessionSpec:
         #: the permission a property of the declaration.
         authorization_loader=PhaseAAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=PHASE_A_PLAN_V1.plan_id,
         plan_hash=PHASE_A_PLAN_V1.plan_hash,

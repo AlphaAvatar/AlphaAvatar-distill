@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """How far each parameter group actually moved from the Stage 1 fork point.
 
-    PYTHONPATH=src python scripts/evaluation/parameter_movement.py \
-        --init artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+    PYTHONPATH=src python scripts/shared/evaluation/parameter_movement.py \
+        --init artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         --checkpoint <run>/checkpoints/step_001023/model \
         --label A1-sa --out artifacts/audit/e3_movement/A1-sa.json
 
@@ -32,7 +32,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402

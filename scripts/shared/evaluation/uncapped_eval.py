@@ -14,10 +14,10 @@ beyond "it degenerated". Each request is checked independently every
 `--check-every` new tokens and aborted on its own evidence, and the outcome is
 recorded as its own class.
 
-    python scripts/evaluation/uncapped_eval.py \
+    python scripts/shared/evaluation/uncapped_eval.py \
         --model <ckpt> --label <arm> \
         --prompts data/eval_behavior_v0/prompts.jsonl \
-        --out artifacts/eval/<arm>_behavior_uncapped.json
+        --out artifacts/stages/stage-3/eval/<arm>_behavior_uncapped.json
 """
 from __future__ import annotations
 
@@ -29,7 +29,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -45,7 +45,7 @@ from aadistill.initialization.planning.generation import (
     TOKENIZER_SOURCE_CHECKPOINT,
     generation_runtime_fingerprint,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 
 #: The sampling parameters, defined once and used both to build SamplingParams
 #: and to describe the run in its summary. Two copies could disagree, and a
@@ -57,7 +57,7 @@ SAMPLING = {"temperature": 0.0, "top_p": 1.0, "top_k": -1, "detokenize": False}
 def tokenizer_files_sha256(source: str) -> str | None:
     """Hash the tokenizer files of a local checkpoint directory.
 
-    Same convention as `scripts/pod/autoinit_engine_probe.py`: the concatenated
+    Same convention as `scripts/shared/pod/autoinit_engine_probe.py`: the concatenated
     bytes of the sorted `tokenizer*.json` files. Defined here so the Stage-0
     probe and every evaluation wave produce a comparable value; a hub id (rather
     than a directory) has no local files and yields `None`, which the strict
@@ -192,7 +192,7 @@ def tool_schemas(sample: dict):
     ten hours and then raised here on the first tool prompt, before generating a
     single token, for $11.19 and no measurement.
 
-    `scripts/data/battery_render.py` has always done this conversion:
+    `scripts/shared/data/battery_render.py` has always done this conversion:
 
         parsed_tools = json.loads(tools) if isinstance(tools, str) else tools
 

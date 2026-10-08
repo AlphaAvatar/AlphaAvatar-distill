@@ -1,7 +1,7 @@
 """Publish the Attempt-12 selected leaves to a private TRANSPORT repo. $0.
 
-    PYTHONPATH=src python scripts/autoinit/publish_selected_leaves.py --upload
-    PYTHONPATH=src python scripts/autoinit/publish_selected_leaves.py --verify
+    PYTHONPATH=src python scripts/shared/rollout/publish_selected_leaves.py --upload
+    PYTHONPATH=src python scripts/shared/rollout/publish_selected_leaves.py --verify
 
 **Why a second repo.** Continuation attempt 2 died staging the first leaf: the
 launcher pushes every `LOCAL_ASSET` by scp under a hard-coded 600 s timeout, and
@@ -43,7 +43,7 @@ import tempfile
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402

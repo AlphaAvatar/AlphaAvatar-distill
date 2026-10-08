@@ -1,6 +1,6 @@
 """What the C3 pilot's two arms cost, derived rather than asserted.
 
-    PYTHONPATH=src:scripts python scripts/experiments/stage-1/phase_c3/pricing.py
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c3/pricing.py
 
 **The pricing is CONSERVATIVE and IDENTICAL in both arms.** `forward_passes`
 is corpus-equivalent *item* forwards — one ablated pass per (layer, head) over
@@ -51,7 +51,7 @@ from aadistill.runtime.cost import HardwareProfile, operator_cost  # noqa: E402
 
 #: The frozen mixture `calib.domain_balanced@v1` resolves to. Gitignored bytes;
 #: the identity is the profile, and the path is where a built tree keeps it.
-MIXTURE = "artifacts/stage1/e8_calibration_v1/items.jsonl"
+MIXTURE = "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"
 
 #: The ATTENTION target, verbatim from the committed C1 path record.
 C1_PATH_RECORD = "logs/stages/stage-1/phase_c1/runs/attempt9/c1_replay_record.json"

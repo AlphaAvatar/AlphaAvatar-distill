@@ -18,7 +18,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/evaluation"))
 
@@ -41,7 +41,7 @@ def main() -> None:
 
     from aadistill.initialization.planning.generation import generation_runtime_fingerprint
 
-    from uncapped_eval import engine_config, resolve_context, resolve_stop_ids
+    from shared.evaluation.uncapped_eval import engine_config, resolve_context, resolve_stop_ids
 
     tok = AutoTokenizer.from_pretrained(args.model)
     cfg = AutoConfig.from_pretrained(args.model)

@@ -314,7 +314,7 @@ def resolve_baseline_state(*, found: Any, outcome: dict[str, Any]) -> Any:
     Refuses rather than guessing: a run that cannot say which state is B has no
     baseline, and a comparison built against the wrong one is worse than none.
     """
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     resolution = (outcome or {}).get("resolution")
     if resolution == "searched":

@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-SCRIPT = REPO / "scripts/pod/engineering_campaign_budget.py"
+SCRIPT = REPO / "scripts/shared/pod/engineering_campaign_budget.py"
 
 
 def _module():

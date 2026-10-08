@@ -42,10 +42,10 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
 
-DRIVER = REPO / "scripts/pod/autoinit_a3_driver.py"
-LAUNCH = REPO / "scripts/pod/autoinit_a3_launch.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py"
+LAUNCH = REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py"
 DESIGN = REPO / "logs/stages/stage-1/phase_c3/plans/a3_design.json"
 
 
@@ -226,7 +226,7 @@ def test_the_evaluator_seam_sends_flags_the_evaluator_defines():
 def test_the_scorer_seam_sends_flags_the_scorer_defines():
     """The THIRD shelled-out seam, reached after a probe has generated.
 
-    `/opt/train/bin/python scripts/autoinit/score_c1_confirmation.py` is a
+    `/opt/train/bin/python scripts/stages/stage-1/phase_c1/score_c1_confirmation.py` is a
     separate interpreter with its own parser, first reached ~4.5 hours into
     the chain. `--arm` is deliberately NOT sent: its choices are C1's two
     ROLES, and passing an experiment's arm id there is what ended C3's
@@ -375,7 +375,7 @@ def test_no_executable_line_pins_a_bsz3_to_any_digest():
 def test_the_seeds_are_attempt75_s_three_and_not_c1_s():
     """A3 trains on the controls' seeds BY DESIGN -- that is what makes the
     comparison paired. A fourth seed, or C1's, would unpair it."""
-    from experiments.phase_c1.isolation import derive_recovery_seeds
+    from stages.phase_c1.isolation import derive_recovery_seeds
 
     assert A3S.recovery_seeds() == (217230555, 1151307191, 2045359208)
     assert not set(A3S.recovery_seeds()) & set(derive_recovery_seeds())
@@ -453,7 +453,7 @@ def test_the_launcher_plan_hash_is_what_an_authorization_would_bind():
     would have been `AUTHORIZATION_MISMATCH` after setup was paid for. An
     issued artifact, when one happens to exist, is compared as well.
     """
-    from experiments.phase_a3.a3_authorization_payload import (
+    from stages.phase_a3.a3_authorization_payload import (
         build_a3_authorization_payload,
     )
 
@@ -599,7 +599,7 @@ def test_the_path_is_the_frozen_incumbents_path_step_for_step(registered):
     spec to the arm C3 actually froze, step for step -- not by restating the
     profile, which is how two owners of one fact drift in the first place.
     """
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c3 import session as CS
 
     CS.register_experimental_operators()
     try:

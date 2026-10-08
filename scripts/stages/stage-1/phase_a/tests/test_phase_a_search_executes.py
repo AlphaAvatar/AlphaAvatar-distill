@@ -94,7 +94,7 @@ def _profile():
 @pytest.fixture(scope="module")
 def searched(tmp_path_factory):
     """One real search, reused by the assertions below (it takes ~a minute)."""
-    from phase_a_search import run_phase_a_search
+    from stages.phase_a.phase_a_search import run_phase_a_search
 
     tmp = tmp_path_factory.mktemp("phase_a_search")
     adapter = get_adapter("qwen3")
@@ -148,7 +148,7 @@ def test_a_search_only_caller_returns_without_resolving_the_canonical_control(
     did. A test that created the directory anyway would pass while the defect
     stood.
     """
-    from phase_a_search import run_phase_a_search
+    from stages.phase_a.phase_a_search import run_phase_a_search
 
     adapter = get_adapter("qwen3")
     teacher = _teacher()
@@ -237,8 +237,8 @@ def test_the_searched_leaves_and_control_pass_the_recovery_gate(searched):
         FeasibilityRule,
         SuccessiveHalvingPlan,
     )
-    from experiments.recovery_policy import plan_policy
-    from experiments.recipes import E1_KD_HEAVY_0860K
+    from shared.recovery_policy import plan_policy
+    from shared.recipes import E1_KD_HEAVY_0860K
 
     leaves = list(searched.leaves)
     plan = SuccessiveHalvingPlan(
@@ -290,7 +290,7 @@ def test_a_control_that_is_not_the_retained_checkpoint_is_refused(tmp_path):
 
 def test_the_search_resumes_without_repeating_a_measured_state(tmp_path):
     """Resume is the difference between losing a pod and losing an hour."""
-    from phase_a_search import run_phase_a_search
+    from stages.phase_a.phase_a_search import run_phase_a_search
 
     adapter = get_adapter("qwen3")
     teacher = _teacher()
@@ -336,7 +336,7 @@ def test_the_whole_function_runs_a_two_profile_search(tmp_path):
     block — a line only a search that runs to completion reaches. Testing the
     seam in isolation could not see it. This runs the function.
     """
-    from phase_a_search import run_phase_a_search
+    from stages.phase_a.phase_a_search import run_phase_a_search
 
     adapter = get_adapter("qwen3")
     teacher = _teacher()

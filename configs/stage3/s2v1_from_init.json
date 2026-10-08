@@ -1,7 +1,7 @@
 {
   "stage": "stage3_recovery",
   "run_name": "s2v1_from_init",
-  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -56,5 +56,5 @@
     "eval_every": 150,
     "eval_blocks": 64
   },
-  "out_dir": "artifacts/stage3/s2v1_from_init"
+  "out_dir": "artifacts/stages/stage-3/s2v1_from_init"
 }

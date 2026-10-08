@@ -59,7 +59,7 @@ FROZEN_PLAN = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_reco
 def load_driver():
     spec = importlib.util.spec_from_file_location(
         "continuation_b_driver_pool",
-        REPO / "scripts/pod/autoinit_continuation_b_driver.py")
+        REPO / "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["continuation_b_driver_pool"] = mod
     spec.loader.exec_module(mod)

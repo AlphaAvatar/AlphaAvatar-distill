@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Verify a completed C2 search's evidence, then freeze the candidate side of B->C.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/freeze_c2_comparison_inputs.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2/freeze_c2_comparison_inputs.py \
         --store /path/to/external/search/evidence --run-id attempt4 --stage-id 1
 
 Phase-C2 Search-1 attempt 4 completed its beam search and then failed to rebuild
@@ -39,7 +39,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -48,7 +48,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 from aadistill.initialization.planning import stage1_selection  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.specs.state import StateStore  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 #: Bumped whenever the extraction changes what it copies or how it chooses a
 #: record. A consumer that finds a rule it does not know must refuse rather than

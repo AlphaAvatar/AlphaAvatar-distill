@@ -1,7 +1,7 @@
 """Issue the recovery-continuation authorization. Zero cost; launches nothing.
 
     PYTHONPATH=src python \
-        scripts/autoinit/issue_recovery_continuation_authorization.py \
+        scripts/stages/stage-1/recovery_continuation/issue_recovery_continuation_authorization.py \
         --grant logs/<a one-use continuation grant>.json --require-clean
 
 **Why this is not `--out` on the Phase-A issuer.** That issuer binds
@@ -44,13 +44,13 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "pod"))
 
-from experiments.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
-from experiments.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
+from stages.phase_a.plan import PHASE_A_PLAN_V1  # noqa: E402
+from stages.recovery_continuation.session import CONTINUATION_GRANT_PROSE_REQUIRED, RECOVERY_CONTINUATION_AUTHORIZATION, RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, recovery_continuation_harness_digest  # noqa: E402
 
 FROZEN_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 OUT = "logs/budget/approvals/autoinit_recovery_continuation_authorization.json"
@@ -109,7 +109,7 @@ def derived_pricing(args) -> dict:
     *output* of this function, and passing the number being derived as the limit
     that constrains the derivation would make it unfalsifiable.
     """
-    import autoinit_phase_a_launch as launcher
+    from stages.phase_a import autoinit_phase_a_launch as launcher
 
     plan = launcher.continuation_budget(args).plan(
         price_per_hour=args.max_price, authorized_usd=float("inf"))
@@ -170,7 +170,7 @@ def main() -> None:
     science_plan_hash = frozen["plan_hash"]
 
     harness = recovery_continuation_harness_digest(REPO_ROOT)
-    if any(f["path"] in ("scripts/autoinit/phase_a_search.py",)
+    if any(f["path"] in ("scripts/stages/stage-1/phase_a/phase_a_search.py",)
            for f in harness["files"]):
         raise SystemExit(
             "refusing to issue: the search module is inside the continuation "
@@ -187,7 +187,7 @@ def main() -> None:
     # The launcher's real parser, so the price is the price the launcher would
     # compute. Transcribing defaults here is the class of defect that makes a
     # validator disagree with the thing it validates.
-    import autoinit_recovery_continuation_launch as cont
+    from stages.recovery_continuation import autoinit_recovery_continuation_launch as cont
     launch_args = cont.build_parser().parse_args(
         ["--scr", "/tmp/pricing-only", "--session-commit", commit or "0" * 40,
          "--bundle", "pricing-only.bundle"])

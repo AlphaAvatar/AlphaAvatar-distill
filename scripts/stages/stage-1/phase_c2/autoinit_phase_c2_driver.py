@@ -33,7 +33,7 @@ class demands has cost this project two paid pods.
 
 **Nothing experiment-specific reaches `src/aadistill`.** The geometry, the
 teacher, the mixtures, the space, the prices and the baseline identities are all
-in `experiments.phase_c2` and `experiments.phase_c1`; this file wires them to
+in `stages.phase_c2` and `stages.phase_c1`; this file wires them to
 generic machinery and adds no constant of its own.
 """
 
@@ -47,7 +47,7 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -56,7 +56,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
 from aadistill.initialization.planning.search import SearchDeadlineExceeded  # noqa: E402
-from experiments.phase_c2 import comparison as C  # noqa: E402
+from stages.phase_c2 import comparison as C  # noqa: E402
 #: HERE, at module scope, and not inside the stage that happens to need it.
 #:
 #: The four calibration mixtures are DATA: they live in
@@ -71,13 +71,13 @@ from experiments.phase_c2 import comparison as C  # noqa: E402
 #: $0.1674. No `$0` test could see it: `tests/conftest.py` imports this
 #: bootstrap, so the registry is full in every pytest process and the empty
 #: registry exists only in a fresh interpreter — which is what a pod runs.
-#: `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` therefore asks in a
+#: `scripts/stages/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` therefore asks in a
 #: SUBPROCESS.
 #:
 #: Module scope rather than a call added to stage A: an import cannot be
 #: ordered after a stage, so the defect becomes unexpressible rather than
 #: merely fixed.
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 
 register_builtin_profiles()
 
@@ -96,7 +96,7 @@ AUDIT = REPO / "artifacts/audit/autoinit_phase_c2"
 #: while the driver wrote `phase_b_search`, the collector matched nothing, and
 #: the journal went with the pod at the one moment it mattered.
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_c2_search"
-STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
+STATE_EVAL = REPO / "artifacts/stages/stage-1/state_eval_v1"
 
 
 def mark(name: str) -> None:
@@ -115,7 +115,7 @@ class PhaseC2Driver:
     """The whole session, in two stages."""
 
     def __init__(self, a) -> None:
-        from experiments.phase_c2.session import (
+        from stages.phase_c2.session import (
             C2_SESSION_CONTRACT, C2Authorization, c2_plan_hash,
         )
 
@@ -190,13 +190,13 @@ class PhaseC2Driver:
     def bind_identities(self) -> bool:
         """Everything checkable before anything expensive."""
         from aadistill.initialization.calibration.profiles import get_profile
-        from experiments.phase_c2 import baseline as B
-        from experiments.phase_c2.search_space import (
+        from stages.phase_c2 import baseline as B
+        from stages.phase_c2.search_space import (
             C2_ALLOWED_IMPLS, C2_IMPL_PROFILES, C2_PROFILE_IDS,
             TEACHER_GEOMETRY, register_c2_operators,
         )
-        from experiments.phase_c2.session import c2_harness_digest
-        from phase_a_frozen import SEARCH_SEED, TEACHER_ID, TEACHER_REVISION
+        from stages.phase_c2.session import c2_harness_digest
+        from stages.phase_a.phase_a_frozen import SEARCH_SEED, TEACHER_ID, TEACHER_REVISION
 
         #: Explicit, and FIRST. `attention.activation_importance_v1` is not a
         #: shipped default, and `_allowed_impl_ids` validates `allowed_impls`
@@ -257,13 +257,13 @@ class PhaseC2Driver:
     def search_and_baseline(self) -> bool:
         """The search, the durability boundary, and the baseline resolved once."""
         from aadistill.initialization.specs.arch import get_adapter
-        from experiments.phase_c2 import baseline as B
-        from experiments.phase_c2.search_space import (
+        from stages.phase_c2 import baseline as B
+        from stages.phase_c2.search_space import (
             C2_ALLOWED_IMPLS, C2_IMPL_PROFILES, C2_PROFILE_IDS,
         )
         from aadistill.initialization.calibration.profiles import get_profile
         from aadistill.initialization.planning.search import Deadline
-        from phase_a_search import as_operator_items, run_phase_a_search
+        from stages.phase_a.phase_a_search import as_operator_items, run_phase_a_search
 
         #: The profiles were registered at module import, not here: registering
         #: in the stage that needs them is what let stage A run first and find

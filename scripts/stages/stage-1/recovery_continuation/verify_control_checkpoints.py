@@ -9,7 +9,7 @@ not. Every entry here therefore reports `recipe_matched_control: false`, and the
 canonical sa/sb reruns are required regardless of what this script finds.
 
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/verify_control_checkpoints.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/recovery_continuation/verify_control_checkpoints.py
 
 Zero cost: metadata and two small JSON files, no LFS payload downloaded.
 
@@ -46,14 +46,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
 #: a subprocess with a caller-set PYTHONPATH.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
+from shared.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 RELAY = "AlphaAvatar/aadistill-artifacts"
@@ -63,7 +63,7 @@ CONTROLS = {
     "e1_r0860k_sb_pca": {"seed": 20260801, "relay_dir":
                          "e1_scaling_20260801/e1_r0860k_sb_pca/step_001023"},
 }
-EXPECTED_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+EXPECTED_INIT = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 def main() -> None:
@@ -84,7 +84,7 @@ def main() -> None:
 
     local_present = {}
     for name in CONTROLS:
-        local = REPO_ROOT / "artifacts/stage3/rescued" / name
+        local = REPO_ROOT / "artifacts/stages/stage-3/rescued" / name
         local_present[name] = local.is_dir()
 
     try:

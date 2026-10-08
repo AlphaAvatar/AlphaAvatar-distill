@@ -35,7 +35,7 @@ RELAY_PREFIXES = {
     "e5_start",
     "transfer",
     "e7_streams_20260809",
-    # Created by scripts/data/stage_e8_inputs.py, roundtrip-verified there.
+    # Created by scripts/stages/stage-3/e8/stage_e8_inputs.py, roundtrip-verified there.
     "e8_inputs_20260810",
     # Created by the documented dev-box upload of the treatment initialization,
     # which `e8b_launch.py` refuses to create a pod without.
@@ -46,11 +46,11 @@ LOCAL_PREFIXES = {
     # The whole Stage 1 tree, not one checkpoint: E8 adds a calibration set, a
     # depth search and a second initialization under it, and enumerating each new
     # directory would make this a changelog rather than a guard against `stage4/`.
-    "artifacts/stage1",
-    "artifacts/eval",
+    "artifacts/stages/stage-1",
+    "artifacts/stages/stage-3/eval",
     "data/eval_behavior_v0",
-    "artifacts/stage1/qwen3_0p6b_init_v0",
-    "artifacts/stage3",
+    "artifacts/stages/stage-1/qwen3_0p6b_init_v0",
+    "artifacts/stages/stage-3",
     "artifacts/audit",
     "configs/stage3",
     "data/warmup",
@@ -200,8 +200,8 @@ def test_launcher_scratch_paths_match_its_own_experiment(script):
 # the amendment's three moving parts so a later refactor cannot quietly restore
 # the cheaper-but-wrong projection.
 
-E5_DRIVER = REPO / "scripts/pod/e5_driver.py"
-E5_BENCH = REPO / "scripts/training/benchmark_e5_throughput.py"
+E5_DRIVER = REPO / "scripts/stages/stage-3/e5/e5_driver.py"
+E5_BENCH = REPO / "scripts/stages/stage-3/e5/benchmark_e5_throughput.py"
 
 
 def _e5_driver() -> str:
@@ -263,11 +263,11 @@ def test_a_stopped_gate_is_not_recorded_as_a_completed_run():
 def test_launcher_hands_the_driver_a_real_starting_balance():
     """A zero starting balance would hide startup + the ~53-min setup from both
     gates, which is roughly $1 of the authorization."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
-    invoke = src[src.index("scripts/pod/e5_driver.py --stage all"):]
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
+    invoke = src[src.index("scripts/stages/stage-3/e5/e5_driver.py --stage all"):]
     assert "--spent-usd" in invoke.split("disown")[0]
     assert "--authorized-usd" in invoke.split("disown")[0]
-    assert "pod_start_epoch" in src[:src.index("scripts/pod/e5_driver.py --stage all")]
+    assert "pod_start_epoch" in src[:src.index("scripts/stages/stage-3/e5/e5_driver.py --stage all")]
     assert "GATE_CEILING=$(echo \"$BACKSTOP_MINUTES/60*$MAX_PRICE\"" in src, \
         "the gate ceiling must be bound to the RunPod deadline it has to fit inside"
 
@@ -285,7 +285,7 @@ def test_driver_marks_every_stage_failure_not_just_three_types():
 
 
 def test_launcher_stops_when_the_driver_process_dies():
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     poll = src[src.index("DEADLINE_TS=$(( $(date -u +%s) + POLL_LIMIT_MIN"):]
     assert "[e]5_driver.py" in poll, \
         "liveness must be checked without pgrep matching its own command line"
@@ -311,7 +311,7 @@ def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
     """The RunPod-side deadline is the one layer that fires even if launcher,
     driver and poller are all dead, so it must itself sit under the
     authorization -- including any pod abandoned earlier in the session."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     backstop = int(re.search(r"BACKSTOP_MINUTES=\$\{BACKSTOP_MINUTES:-(\d+)\}",
                              src).group(1))
     rate = float(re.search(r"MAX_PRICE=\$\{MAX_PRICE:-([\d.]+)\}", src).group(1))
@@ -322,7 +322,7 @@ def test_the_pod_deadline_cannot_exceed_the_remaining_authorization():
 
 
 def test_arm_c_is_staged_and_verified_never_rebuilt():
-    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    setup = (REPO / "scripts/stages/stage-3/e5/e5_setup.sh").read_text()
     assert "e5_start/e5_arm_c.tar.gz" in setup, "arm C must be staged from the relay"
     assert "ARM C BUNDLE MISMATCH" in setup and "ARM C MISMATCH" in setup, \
         "both the bundle and the per-file hashes must be asserted"
@@ -350,7 +350,7 @@ def test_a_replaced_pod_does_not_reset_the_session_billing_origin():
     """2026-08-07: a pod that never exposed TCP 22 was deleted and replaced. The
     replacement reset `pod_start_epoch`, hiding the abandoned pod's $0.25 from
     every gate and handing the replacement a fresh full deadline."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     assert '[ -f "$SCR/pod_start_epoch" ] || date -u +%s > "$SCR/pod_start_epoch"' in src, \
         "the billing origin must be written once per session, not once per pod"
     assert 'date -u +%s > "$SCR/pod_start_epoch"; echo' not in src
@@ -387,7 +387,7 @@ def test_the_tripwire_behavioural_suite_passes():
 def test_setup_and_the_tripwire_test_stay_in_sync():
     """The test lifted the tripwire's structure; if setup's version drifts, the
     passing test stops meaning anything."""
-    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    setup = (REPO / "scripts/stages/stage-3/e5/e5_setup.sh").read_text()
     for token in ('TRIP_S=${UV_TRIP_S:-360}', 'GRACE_S=${UV_GRACE_S:-180}',
                   'uv sync --group dev &', 'kill -0 "$UV_PID"',
                   'graced=0', 'exit 90',
@@ -402,7 +402,7 @@ def test_setup_and_the_tripwire_test_stay_in_sync():
 
 
 def test_launcher_redraws_on_a_cold_host_and_charges_it():
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     assert 'for draw in $(seq 1 "$MAX_HOST_DRAWS"); do' in src
     block = src[src.index("SETUP_RC=$?"):src.index("say \"starting FORMAL E5")]
     assert '[ "$SETUP_RC" -eq 90 ]' in block, "90 must mean redraw"
@@ -455,7 +455,7 @@ def test_generated_corpora_are_retained_before_anything_can_fail():
     # It must run immediately after verification, not at teardown.
     stage = src[src.index("def stage_verify_records("):src.index("def _retain_corpora(")]
     assert stage.rstrip().endswith("_retain_corpora()")
-    launcher = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    launcher = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     tar = launcher[launcher.index("tar czf"):launcher.index("cp /workspace/e5_run.log")]
     assert "e5_arm_r_*/" in tar, "the side bundle must carry the corpora too"
     assert "e5_final_*.jsonl" in tar, "and the paired selection"
@@ -477,7 +477,7 @@ def test_the_launcher_waits_out_a_capacity_drought():
     """Waiting for capacity costs nothing -- no pod exists yet -- so giving up
     after two tries five minutes apart trades a free wait for a lost launch.
     Both of attempt 5's creates failed inside that window."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     tries = int(re.search(r"MAX_POD_ATTEMPTS=\$\{MAX_POD_ATTEMPTS:-(\d+)\}", src).group(1))
     delay = int(re.search(r"CREATE_RETRY_DELAY_S=\$\{CREATE_RETRY_DELAY_S:-(\d+)\}", src).group(1))
     assert tries >= 8, f"{tries} create attempts is not patient enough"
@@ -496,7 +496,7 @@ def test_the_runtime_deadline_is_computed_per_create_not_at_launch():
     computed INSIDE create_pod, once per attempt. Hoisting it to script scope
     would silently charge every drought minute against the pod's runtime.
     """
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     fn = src[src.index("create_pod() {"):src.index("\n}", src.index("create_pod() {"))]
     assert 'deadline=$(date -u -d "+${BACKSTOP_MINUTES} minutes"' in fn, \
         "the deadline must be computed inside create_pod, per attempt"
@@ -510,26 +510,26 @@ def test_the_runtime_deadline_is_computed_per_create_not_at_launch():
 def test_the_spending_meter_starts_at_the_successful_create():
     """`pod_start_epoch` is what every gate charges from, so it must be written
     only once a pod actually exists -- never during a capacity drought."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     loop = src[src.index("POD_ID=$(create_pod"):src.index("# runpodctl 2.7.1")]
     epoch_at = loop.index('date -u +%s > "$SCR/pod_start_epoch"')
     fail_at = loop.index('if [ -z "$POD_ID" ]; then')
     assert fail_at < epoch_at, \
         "the failed-create branch must return before the meter starts"
     assert '[ -f "$SCR/pod_start_epoch" ] ||' in loop, "written once per session"
-    wd_note = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    wd_note = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     assert "no capacity; retrying in" in wd_note
 
 
 def test_arm_r_is_staged_and_contract_checked_like_arm_c():
     """Attempt 5's R corpora cost ~$1.24 and survived; regenerating them costs
     90 min and pushes the run past the authorization."""
-    setup = (REPO / "scripts/pod/e5_setup.sh").read_text()
+    setup = (REPO / "scripts/stages/stage-3/e5/e5_setup.sh").read_text()
     assert "e5_start/e5_arm_r.tar.gz" in setup
     assert "ARM R BUNDLE MISMATCH" in setup, "the staged bundle must be hashed"
-    assert "scripts/data/verify_staged_r.py" in setup, \
+    assert "scripts/stages/stage-3/e1/verify_staged_r.py" in setup, \
         "a reused corpus needs independent verification, not just a bundle hash"
-    v = (REPO / "scripts/data/verify_staged_r.py").read_text()
+    v = (REPO / "scripts/stages/stage-3/e1/verify_staged_r.py").read_text()
     for required in ("record count", "teacher revision", "decoding preset",
                      "P2-0.86M checkpoint identity", "chat_template.jinja",
                      "example_to_rendered", "system block matches its key",
@@ -579,7 +579,7 @@ def test_the_checkpoint_tag_is_derived_not_hard_coded():
     """`step_000738` was a constant from the superseded 492-block design. It
     silently matched nothing and lost all four trained checkpoints on
     2026-08-07, after they had cost 117 minutes of GPU time."""
-    src = (REPO / "scripts/pod/e5_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-3/e5/e5_launch.sh").read_text()
     # Executable lines only. The comment that explains this fix names the stale
     # tag, and a whole-file search flags the documentation for the bug it
     # documents -- the same trap the `hash()` docstring sprang earlier.
@@ -621,7 +621,7 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
 
     This used to pin ONE hardcoded default in `simulate_pod_env.sh` against every
     session's manifest, requiring all sessions to ignore identical files. C1
-    attempt 4 ended that: `scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py` must be
+    attempt 4 ended that: `scripts/stages/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py` must be
     ignored by C1 and is not by the others, so one shared literal cannot describe
     them all -- and the attempt showed what a stale shared default costs.
 
@@ -632,7 +632,7 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
     """
     import re
 
-    setup_text = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup_text = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert "SESSION_TEST_IGNORES" in setup_text, (
         "the pod gate no longer reads the session's ignore list; it has gone "
         "back to naming paths itself, and a session cannot change what it runs")
@@ -640,7 +640,7 @@ def test_the_simulator_runs_each_session_s_own_ignore_list():
         "the pod gate names an --ignore path directly again; it must take the "
         "list from the session")
 
-    recorder = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    recorder = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert 'contract["test_ignores"]' in recorder, (
         "the recorder no longer derives the simulator's ignores from the session "
         "manifest")
@@ -696,7 +696,7 @@ def gate_selection(spec) -> set[str]:
 
 
 #: `test_c1_runs_no_host_local_module_on_a_paid_pod` and its siblings moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_pod_collects_no_host_local_module.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_pod_collects_no_host_local_module.py`
 #: in the 2026-10-03 convergence round: they load that experiment's own
 #: launcher by name, which makes them its tests rather than this suite's.
 

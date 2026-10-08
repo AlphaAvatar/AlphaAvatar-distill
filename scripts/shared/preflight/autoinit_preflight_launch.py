@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The AutoInitializer micro-preflight, as a session specification.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_preflight_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/shared/preflight/autoinit_preflight_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 This file declares WHAT the session is. How a session is run — detached start
@@ -29,7 +29,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -40,9 +40,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.preflight import PreflightAuthorization  # noqa: E402
-from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from shared.preflight import PreflightAuthorization  # noqa: E402
+from shared.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
@@ -55,7 +55,7 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 
@@ -69,17 +69,17 @@ CONTROLS = ("preflight_ctl_r0860k_sa", "preflight_ctl_r0860k_sb")
 #: their names — which is the change that makes a session declaring no assets
 #: actually get none.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
 #: Ignored by the pod's blocking test gate. Must stay equal to the pod
 #: simulator's list, and a test pins them equal.
-#: One entry now. `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
+#: One entry now. `scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
 #: a ~20-minute Phase-A pre-flight rehearsal that a pod would otherwise re-run
 #: inside its 2700 s gate; the 2026-10-03 boundary moved it to
-#: `scripts/experiments/stage-1/phase_a/tests/`, so the core suite no longer contains it
+#: `scripts/stages/stage-1/phase_a/tests/`, so the core suite no longer contains it
 #: and ignoring it would name a path that is not there.
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",)
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
@@ -103,7 +103,7 @@ def fetch_controls(ctx: SessionContext) -> list:
             ["timeout", f"{ctx.args.ckpt_fetch_limit_min}m", "scp", "-r",
              "-P", str(ctx.target.port), "-o", "StrictHostKeyChecking=no",
              "-o", "UserKnownHostsFile=/dev/null",
-             f"root@{ctx.host}:{REPO}/artifacts/stage3/{name}/checkpoints",
+             f"root@{ctx.host}:{REPO}/artifacts/stages/stage-3/{name}/checkpoints",
              str(dest)], capture_output=True, timeout=None)
         size = sum(f.stat().st_size for f in dest.rglob("*")
                    if f.is_file()) if dest.exists() else 0
@@ -116,16 +116,16 @@ def fetch_controls(ctx: SessionContext) -> list:
 
 def control_streams(ctx: SessionContext) -> tuple[str, ...]:
     """Append-only streams a torn-down session may have left mid-write."""
-    return tuple(f"artifacts/stage3/{c}/train_log.jsonl" for c in CONTROLS)
+    return tuple(f"artifacts/stages/stage-3/{c}/train_log.jsonl" for c in CONTROLS)
 
 
 def control_relay(ctx: SessionContext) -> tuple[tuple[str, str], ...]:
-    return tuple((f"{REPO}/artifacts/stage3/{c}/train_log.jsonl",
+    return tuple((f"{REPO}/artifacts/stages/stage-3/{c}/train_log.jsonl",
                   f"{c}.train_log.jsonl") for c in CONTROLS)
 
 
 def driver_command(ctx: SessionContext, plan) -> str:
-    return (f"/opt/train/bin/python scripts/pod/autoinit_preflight_driver.py "
+    return (f"/opt/train/bin/python scripts/shared/preflight/autoinit_preflight_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.2f} "
@@ -142,9 +142,9 @@ def spec(args) -> SessionSpec:
         authorization_path=AUTH_PATH,
         authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=PREFLIGHT_PLAN_V1.plan_id,
         plan_hash=PREFLIGHT_PLAN_V1.plan_hash,

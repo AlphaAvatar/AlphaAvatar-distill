@@ -32,7 +32,7 @@ from support.session_specs import (SESSION_LAUNCHERS, all_specs,
 
 #: The store this deployment means. It was a core module constant computed
 #: at import from configs/; it belongs to the application now.
-from experiments.deployment import MAIN_RELAY
+from shared.deployment import MAIN_RELAY
 
 REPO = Path(__file__).resolve().parents[2]
 POD = REPO / "scripts/pod"
@@ -87,12 +87,12 @@ def test_validate_refuses_a_spec_that_could_never_finish_or_fail():
 
 @pytest.mark.parametrize("kwargs,fragment", [
     ({"path": ""}, "declares no path"),
-    ({"dest": "/workspace/aad/artifacts/stage1/x"}, "it is absolute"),
+    ({"dest": "/workspace/aad/artifacts/stages/stage-1/x"}, "it is absolute"),
     ({"dest": "artifacts/../../etc"}, "escapes the repository"),
     ({"dest": "src/aadistill"}, "not one of"),
     ({"dest": "  "}, "empty dest"),
     ({"sha256": "not-a-digest"}, "which is not a sha256"),
-    ({"dest": None, "also_stage_to": "artifacts/stage1/y"}, "no.*dest"),
+    ({"dest": None, "also_stage_to": "artifacts/stages/stage-1/y"}, "no.*dest"),
 ])
 def test_validate_refuses_a_malformed_relay_input(kwargs, fragment):
     """Unchecked until 2026-08-18, because the shell staged from its own list
@@ -105,7 +105,7 @@ def test_validate_refuses_a_malformed_relay_input(kwargs, fragment):
 
     _name, _mod, _args, spec = all_specs()[0]
     base = {"repo": MAIN_RELAY, "path": "stage1/x/model.safetensors",
-            "dest": "artifacts/stage1/x"}
+            "dest": "artifacts/stages/stage-1/x"}
     bad = RelayInput(**{**base, **kwargs})
     manifest = dataclasses.replace(spec.setup, relay_inputs=(bad,))
     assert isinstance(manifest, SetupManifest)
@@ -117,7 +117,7 @@ def test_validate_refuses_the_same_input_declared_twice():
     from aadistill.infrastructure.session import RelayInput, SessionSpecError
 
     _name, _mod, _args, spec = all_specs()[0]
-    r = RelayInput("stage1/x/model.safetensors", dest="artifacts/stage1/x", repo=MAIN_RELAY)
+    r = RelayInput("stage1/x/model.safetensors", dest="artifacts/stages/stage-1/x", repo=MAIN_RELAY)
     manifest = dataclasses.replace(spec.setup, relay_inputs=(r, r))
     with pytest.raises(SessionSpecError, match="declared twice"):
         dataclasses.replace(spec, setup=manifest).validate()
@@ -253,7 +253,7 @@ def test_no_attempt_specific_grant_prose_in_executable_source():
 
 def test_the_issuer_refuses_to_issue_without_a_grant_document():
     """Issuing must not be possible by running the script."""
-    src = (REPO / "scripts/autoinit/issue_phase_a_authorization.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/issue_phase_a_authorization.py").read_text()
     assert '"--grant", required=True' in src or '--grant", required=True' in src, (
         "the grant document is optional again")
     assert "no grant document at" in src
@@ -287,7 +287,7 @@ def test_every_session_has_a_distinct_operational_identity():
 
 #: `test_the_recovery_continuation_shares_the_science_and_not_the_session`
 #: moved to
-#: `scripts/experiments/stage-1/recovery_continuation/tests/test_it_shares_phase_as_science.py`
+#: `scripts/stages/stage-1/recovery_continuation/tests/test_it_shares_phase_as_science.py`
 #: in the 2026-10-03 convergence round. It compares two named experiments'
 #: plan hashes, authorization types, harness sets and budgets — a claim the
 #: continuation makes about itself. What stays here is the structural rule it
@@ -366,14 +366,14 @@ def test_the_shared_setup_pins_no_digest_of_its_own():
 def test_the_shared_setup_names_no_science_destination_of_its_own():
     """Where a science input lands is the session's declaration, not the shell's.
 
-    A `glob` over `artifacts/stage1/*/checkpoint` is allowed and is not an
+    A `glob` over `artifacts/stages/stage-1/*/checkpoint` is allowed and is not an
     exception: it adapts to whatever the session staged, and refuses when a
     session staged nothing.
     """
     code = setup_code()
     # `*` is inside the class, so a glob is matched whole and then excluded. A
-    # class that omitted it would cut `artifacts/stage1/*/checkpoint` down to
-    # `artifacts/stage1/` and report the glob as a literal.
+    # class that omitted it would cut `artifacts/stages/stage-1/*/checkpoint` down to
+    # `artifacts/stages/stage-1/` and report the glob as a literal.
     literals = sorted({m for m in re.findall(r"artifacts/[A-Za-z0-9_./*-]+", code)
                        if "*" not in m})
     assert not literals, (
@@ -448,7 +448,7 @@ def test_the_relay_staging_path_is_exercised_by_some_session():
 @pytest.mark.parametrize("name,extra", SESSION_LAUNCHERS,
                          ids=lambda v: v if isinstance(v, str) else "")
 def test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without(name, extra):
-    """Weights are not a checkpoint. `logs/shared/analyses/autoinit_control_sb_packaging_repair.json`
+    """Weights are not a checkpoint. `logs/stages/stage-1/recovery_continuation/analyses/autoinit_control_sb_packaging_repair.json`
     is the write-up of a control whose identity gates all passed and which could
     not be evaluated, because it shipped without its tokenizer.
 
@@ -480,7 +480,7 @@ def test_a_session_that_asks_for_rope_ok_stages_a_config_for_it(name, extra):
     """The invariant Attempt 2 was missing, and it is NOT the loadability one.
 
     The shared setup's `ROPE_OK` step globs
-    `artifacts/stage1/*/checkpoint/config.json` and exits `no staged checkpoint to
+    `artifacts/stages/stage-1/*/checkpoint/config.json` and exits `no staged checkpoint to
     check` if it finds none. It reads no weights. So the requirement is not "stage
     a loadable checkpoint" — that is the separate rule above, keyed on
     `model.safetensors` — it is "stage a config the RoPE gate can read".
@@ -504,7 +504,7 @@ def test_a_session_that_asks_for_rope_ok_stages_a_config_for_it(name, extra):
         "checkpoint to check' after the teacher fetch")
     assert any(r.dest.endswith("/checkpoint") for r in configs), (
         f"{name} stages a config.json but none to a */checkpoint directory, so "
-        "the setup's artifacts/stage1/*/checkpoint/ glob would not find it: "
+        "the setup's artifacts/stages/stage-1/*/checkpoint/ glob would not find it: "
         f"{[r.dest for r in configs]}")
     #: A pinned hash is NOT required here. The older sessions stage the whole
     #: CANONICAL_INIT group, in which only `model.safetensors` carries a pin, and
@@ -514,7 +514,7 @@ def test_a_session_that_asks_for_rope_ok_stages_a_config_for_it(name, extra):
 
 
 #: `test_c1_stages_the_canonical_rope_config_specifically` and its siblings moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_stages_the_rope_config.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_stages_the_rope_config.py`
 #: in the 2026-10-03 convergence round: they load that experiment's own
 #: launcher by name, which makes them its tests rather than this suite's.
 
@@ -530,9 +530,9 @@ def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     import sys
 
     sys.path.insert(0, str(POD))
-    from autoinit_science_inputs import CALIBRATION_V1
+    from shared.pod.autoinit_science_inputs import CALIBRATION_V1
 
-    from experiments.datasets import E8A_CALIBRATION
+    from shared.datasets import E8A_CALIBRATION
 
     pins = {r.sha256 for r in CALIBRATION_V1 if r.sha256}
     assert pins == {E8A_CALIBRATION.content_sha256}, (
@@ -609,29 +609,29 @@ def test_the_staging_block_stages_exactly_what_it_is_given(tmp_path, monkeypatch
     other = b"ladder\n"
     inputs = [
         {"repo": MAIN_RELAY, "path": "stage1/x/checkpoint/model.safetensors",
-         "dest": "artifacts/stage1/x/checkpoint",
+         "dest": "artifacts/stages/stage-1/x/checkpoint",
          "sha256": digest, "also_stage_to": None},
         {"repo": MAIN_RELAY, "path": "corpus/ladder/blocks.npz",
-         "dest": "artifacts/stage3/probe",
+         "dest": "artifacts/stages/stage-3/probe",
          "sha256": hashlib.sha256(other).hexdigest(),
-         "also_stage_to": "artifacts/stage3/mirror"},
+         "also_stage_to": "artifacts/stages/stage-3/mirror"},
     ]
     relay = {"stage1/x/checkpoint/model.safetensors": payload,
              "corpus/ladder/blocks.npz": other}
     repo, fetched = run_staging(tmp_path, inputs, relay, monkeypatch)
 
     assert fetched == [i["path"] for i in inputs], "fetched something else"
-    assert (repo / "artifacts/stage1/x/checkpoint/model.safetensors"
+    assert (repo / "artifacts/stages/stage-1/x/checkpoint/model.safetensors"
             ).read_bytes() == payload
     # The mirror is the probe-to-ladder copy, now declared instead of walked.
-    assert (repo / "artifacts/stage3/probe/blocks.npz").read_bytes() == other
-    assert (repo / "artifacts/stage3/mirror/blocks.npz").read_bytes() == other
+    assert (repo / "artifacts/stages/stage-3/probe/blocks.npz").read_bytes() == other
+    assert (repo / "artifacts/stages/stage-3/mirror/blocks.npz").read_bytes() == other
     # And nothing it was not given.
     staged = {p.relative_to(repo).as_posix()
               for p in repo.rglob("*") if p.is_file()}
-    assert staged == {"artifacts/stage1/x/checkpoint/model.safetensors",
-                      "artifacts/stage3/probe/blocks.npz",
-                      "artifacts/stage3/mirror/blocks.npz"}
+    assert staged == {"artifacts/stages/stage-1/x/checkpoint/model.safetensors",
+                      "artifacts/stages/stage-3/probe/blocks.npz",
+                      "artifacts/stages/stage-3/mirror/blocks.npz"}
 
 
 def test_the_staging_block_stages_nothing_when_a_session_declares_nothing(
@@ -645,7 +645,7 @@ def test_the_staging_block_stages_nothing_when_a_session_declares_nothing(
 def test_the_staging_block_refuses_a_wrong_digest(tmp_path, monkeypatch):
     import hashlib
 
-    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stages/stage-1/x",
                "sha256": hashlib.sha256(b"expected").hexdigest(),
                "also_stage_to": None}]
     with pytest.raises(SystemExit) as e:
@@ -665,15 +665,15 @@ def test_the_staging_block_verifies_the_mirror_too(tmp_path, monkeypatch, capsys
     """
     import hashlib
 
-    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "a/b.bin", "dest": "artifacts/stages/stage-1/x",
                "sha256": hashlib.sha256(b"ok").hexdigest(),
-               "also_stage_to": "artifacts/stage1/y"}]
+               "also_stage_to": "artifacts/stages/stage-1/y"}]
     repo, _ = run_staging(tmp_path, inputs, {"a/b.bin": b"ok"}, monkeypatch)
     out = capsys.readouterr().out
-    assert (repo / "artifacts/stage1/x/b.bin").is_file()
-    assert (repo / "artifacts/stage1/y/b.bin").is_file()
-    assert "artifacts/stage1/x/b.bin " in out, "the primary was not verified"
-    assert "artifacts/stage1/y/b.bin " in out, "the mirror was not verified"
+    assert (repo / "artifacts/stages/stage-1/x/b.bin").is_file()
+    assert (repo / "artifacts/stages/stage-1/y/b.bin").is_file()
+    assert "artifacts/stages/stage-1/x/b.bin " in out, "the primary was not verified"
+    assert "artifacts/stages/stage-1/y/b.bin " in out, "the mirror was not verified"
     assert "verified 2 digests" in out, (
         f"one file landed in two places and the block reports: {out!r}")
 
@@ -694,7 +694,7 @@ def test_the_staging_block_refuses_an_input_with_no_repo(tmp_path, monkeypatch):
     """Executed, not inspected. An item without a repository means the manifest
     and the shell disagree about who decides where bytes come from, and the
     shell must not resolve that by defaulting."""
-    inputs = [{"path": "a/b.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"path": "a/b.bin", "dest": "artifacts/stages/stage-1/x",
                "sha256": None, "also_stage_to": None}]          # no "repo"
     with pytest.raises(SystemExit) as e:
         run_staging(tmp_path, inputs, {"a/b.bin": b"x"}, monkeypatch)
@@ -707,22 +707,22 @@ def test_the_staging_block_fetches_each_item_from_its_own_repo(tmp_path,
     the one that declares it — the property the transport leaves depend on."""
     seen: list[tuple[str, str]] = []
     inputs = [
-        {"repo": MAIN_RELAY, "path": "sci/a.bin", "dest": "artifacts/stage1/x",
+        {"repo": MAIN_RELAY, "path": "sci/a.bin", "dest": "artifacts/stages/stage-1/x",
          "sha256": None, "also_stage_to": None},
         {"repo": "AlphaAvatar/aadistill-transport", "path": "leaf/m.bin",
-         "dest": "artifacts/stage1/y", "sha256": None, "also_stage_to": None},
+         "dest": "artifacts/stages/stage-1/y", "sha256": None, "also_stage_to": None},
     ]
     repo_dir, fetched = run_staging(
         tmp_path, inputs, {"sci/a.bin": b"one", "leaf/m.bin": b"two"},
         monkeypatch, record_repo=seen)
     assert dict(seen) == {"sci/a.bin": MAIN_RELAY,
                           "leaf/m.bin": "AlphaAvatar/aadistill-transport"}
-    assert (repo_dir / "artifacts/stage1/x/a.bin").read_bytes() == b"one"
-    assert (repo_dir / "artifacts/stage1/y/m.bin").read_bytes() == b"two"
+    assert (repo_dir / "artifacts/stages/stage-1/x/a.bin").read_bytes() == b"one"
+    assert (repo_dir / "artifacts/stages/stage-1/y/m.bin").read_bytes() == b"two"
 
 
 def test_the_staging_block_gives_up_and_names_the_file(tmp_path, monkeypatch):
-    inputs = [{"repo": MAIN_RELAY, "path": "missing/thing.bin", "dest": "artifacts/stage1/x",
+    inputs = [{"repo": MAIN_RELAY, "path": "missing/thing.bin", "dest": "artifacts/stages/stage-1/x",
                "sha256": None, "also_stage_to": None}]
     with pytest.raises(SystemExit) as e:
         run_staging(tmp_path, inputs, {}, monkeypatch)
@@ -750,7 +750,7 @@ def test_each_real_session_manifest_stages_through_the_real_block(
     # available and is not what this test is for. What it exercises is the real
     # declaration's paths, destinations and mirrors through the real code. That
     # the frozen digests are the RIGHT ones is a separate claim, checked by
-    # `scripts/autoinit/verify_frozen_assets.py` and again on the pod.
+    # `scripts/shared/pod/verify_frozen_assets.py` and again on the pod.
     relay, expect = {}, set()
     for r in declared:
         body = f"content of {r['path']}".encode()
@@ -809,7 +809,7 @@ def run_rope_check(repo_root):
 
 
 #: C1's checkpoint relay inputs and the rope-gate glob moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_rope_gate_inputs.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_rope_gate_inputs.py`
 #: in the 2026-10-03 convergence round: both load C1's launcher by name.
 #: The rope gate's own behaviour, and every structural property a session
 #: spec must satisfy, stay here and are asserted over every launcher.
@@ -818,7 +818,7 @@ def run_rope_check(repo_root):
 
 def test_the_real_rope_check_refuses_a_tree_with_no_config(tmp_path):
     """The Attempt-2 filesystem, reproduced: sidecars only, no config.json."""
-    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d = tmp_path / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     d.mkdir(parents=True)
     for name in ("tokenizer.json", "tokenizer_config.json", "chat_template.jinja"):
         (d / name).write_text("{}")
@@ -828,10 +828,10 @@ def test_the_real_rope_check_refuses_a_tree_with_no_config(tmp_path):
 
 
 def test_the_real_rope_check_accepts_the_canonical_config(tmp_path):
-    src = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    src = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json"
     if not src.is_file():
         pytest.skip("the canonical config is not present on this machine")
-    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d = tmp_path / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     d.mkdir(parents=True)
     (d / "config.json").write_bytes(src.read_bytes())
     rc, msg = run_rope_check(tmp_path)
@@ -851,13 +851,13 @@ def test_the_real_rope_check_refuses_a_wrong_stored_base(tmp_path):
     """
     import json as _json
 
-    src = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+    src = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json"
     if not src.is_file():
         pytest.skip("the canonical config is not present on this machine")
     cfg = _json.loads(src.read_text())
     assert cfg["rope_parameters"]["rope_theta"] == 5_000_000
     cfg["rope_parameters"] = {**cfg["rope_parameters"], "rope_theta": 10_000}
-    d = tmp_path / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    d = tmp_path / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     d.mkdir(parents=True)
     (d / "config.json").write_text(_json.dumps(cfg))
     rc, msg = run_rope_check(tmp_path)

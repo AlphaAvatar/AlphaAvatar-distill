@@ -12,7 +12,7 @@ a `skipif`. That made the CORE suite's result depend on whether an old
 experiment's bytes were still on this machine; archiving them turned core green
 into core-green-with-skips, which is not the same statement. The attempt-12
 integration now lives in
-`scripts/experiments/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
+`scripts/stages/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
 where the historical evidence IS the subject.
 
 What is here instead is the smallest search that exercises each refusal: two toy

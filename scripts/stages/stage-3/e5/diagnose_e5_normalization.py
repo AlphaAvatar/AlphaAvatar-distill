@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Prove the CE/KD normalization is unaffected by prefix length, before E5 spends.
 
-    PYTHONPATH=src python scripts/training/diagnose_e5_normalization.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e5/diagnose_e5_normalization.py \
         --out artifacts/audit/e5_normalization.json
 
 E5's two arms carry different amounts of *context*: R's student prefixes are
@@ -28,7 +28,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -37,8 +37,8 @@ from aadistill.data.ladder import ladder_blocks  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.training.train import Trainer, prediction_mask  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 def tiny_cfg(tmp: Path, *, ce: float, kd: float) -> dict:

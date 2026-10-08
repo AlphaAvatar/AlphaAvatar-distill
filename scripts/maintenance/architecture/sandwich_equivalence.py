@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Hash every parameter `init_student` produces, so a refactor can be checked.
 
-    PYTHONPATH=src:scripts python scripts/architecture/sandwich_equivalence.py --out <file>
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/sandwich_equivalence.py --out <file>
     # refactor
-    PYTHONPATH=src:scripts python scripts/architecture/sandwich_equivalence.py --compare <file>
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/sandwich_equivalence.py --compare <file>
 
 Routing `sandwich.py`'s model-family access through the adapter touches 28 sites
 in the Stage-1 initialization transform. Nothing about that is supposed to change
@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 

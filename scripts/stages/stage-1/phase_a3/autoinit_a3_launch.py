@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Launch the complete A3 chain. Every refusal it can make costs `$0`.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_a3_launch.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py \
         --run-id a3_attempt3 --gpu "NVIDIA L40S" --max-price 1.09
 
 One session, one experiment: the frozen parent under its digest gate, the
 A-bsz1 incumbent gate, interleaved A-bsz1/A-bsz3 diagnostics, three A-bsz3
 recovery probes, three evaluations, preservation. **No decision is computed on
-the pod** — `scripts/autoinit/aggregate_a3.py` runs the comparison off pod at
+the pod** — `scripts/stages/stage-1/phase_a3/aggregate_a3.py` runs the comparison off pod at
 `$0`, which is why attempt75's failure mode is absent rather than guarded.
 
 **One status path, named once.** `A3S.STATUS_PATH` is read by the driver and by
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "pod"))
@@ -47,16 +47,16 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract,
 )
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, RECOVERY_LADDER,
 )
-from experiments.deployment import (  # noqa: E402
+from shared.deployment import (  # noqa: E402
     MAIN_RELAY, POD_IMAGE, deployment_commands,
 )
-from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
-from experiments.phase_a3.a3_authorization import (  # noqa: E402
+from stages.phase_c1.authorization_payload import load_config  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_a3.a3_authorization import (  # noqa: E402
     A3Authorization, a3_budget_spec, a3_harness_digest, a3_hard_ceiling_usd,
     load_live_pricing,
 )
@@ -85,7 +85,7 @@ SPEC_FAILED = "configs/autoinit/a3_artifacts_failed.json"
 #: from the five documented development-only failures, killing the session
 #: during setup with 11 of 11 markers unset. C1 paid 16 billed minutes to learn
 #: the first half of that; A3 would have paid for both halves.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c3/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c3/tests"
 #: POSITIVE now, not a complement. This was
 #: `ignores_for_selection(POD_TEST_SELECTION, REPO_ROOT)`, which derived the
 #: `--ignore` list that left the session's own preflight the only collectable
@@ -106,7 +106,7 @@ STAGE_I = REPO_ROOT / "logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i"
 #: teacher's own tokenizer is a DIFFERENT artifact and cannot substitute.
 A3_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+               dest="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("tokenizer.json",
@@ -119,7 +119,7 @@ A3_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 )
 
 #: SETUP READINESS, not a measurement input. The shared setup's `ROPE_OK` step
-#: globs `artifacts/stage1/*/checkpoint/config.json` and loads each match in
+#: globs `artifacts/stages/stage-1/*/checkpoint/config.json` and loads each match in
 #: BOTH venvs. C1 attempt 2 staged the three sidecars above and nothing else,
 #: so the glob was empty and setup exited `no staged checkpoint to check`
 #: AFTER the teacher had been fetched and verified -- $0.1013. 1,418 bytes,
@@ -127,7 +127,7 @@ A3_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 #: reads none of them.
 A3_ROPE_INPUT: tuple[RelayInput, ...] = (
     RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+               dest="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054",
                repo=MAIN_RELAY),
 )
@@ -137,14 +137,14 @@ A3_ROPE_INPUT: tuple[RelayInput, ...] = (
 #: all four. Declaring only what a session reads is what cost two earlier
 #: sessions their setup.
 A3_LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage3/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stage3"),
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
+               "artifacts/stages/stage-3"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
 
 
@@ -202,7 +202,7 @@ def _run_id(value: str) -> str:
     #: rule it is standing in for.
     try:
         rel_run_dir(RUN_EXPERIMENT_ID, value, RUN_STAGE_ID)
-        from experiments.run_layout import layout_for
+        from shared.run_layout import layout_for
 
         layout_for(REPO_ROOT, RUN_EXPERIMENT_ID, value, RUN_STAGE_ID)
     except RunLayoutError as exc:
@@ -241,7 +241,7 @@ def open_a3_run(args, repo_root: Path | None = None):
     writing its manifest, and overwriting it destroys the only evidence of
     what happened.
     """
-    from experiments.run_layout import open_run
+    from shared.run_layout import open_run
 
     root = REPO_ROOT if repo_root is None else Path(repo_root)
     return open_run(root, RUN_EXPERIMENT_ID, args.run_id,
@@ -444,7 +444,7 @@ def controls_evidence_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 def teacher_binding_gate(ctx: SessionContext) -> tuple[bool, str]:
     """The teacher binding pins the revision this session declares."""
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c3 import session as CS
 
     p = REPO_ROOT / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
     if not p.is_file():
@@ -464,7 +464,7 @@ def teacher_binding_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 def battery_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     """The confirmation battery is staged and is the one attempt75 used."""
-    battery = REPO_ROOT / "artifacts/stage3/c1_confirmation_v1"
+    battery = REPO_ROOT / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
     manifest = battery / "manifest.json"
     if not manifest.is_file():
         return False, (f"the confirmation battery is not staged at "
@@ -493,7 +493,7 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
     complete run as incomplete; one that required three of a nine-probe session
     would call a third of an experiment finished.
     """
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     problems, counts = [], {}
     #: `load_specs` takes ONE path and returns that file's entries. Reading
@@ -558,10 +558,10 @@ def readiness_gate(ctx: SessionContext) -> tuple[bool, str]:
     generous than the pod.
     """
     from aadistill.runtime.pod_environment import LAUNCH_BOUND
-    from experiments.phase_a3.a3_pod_environment import (
+    from stages.phase_a3.a3_pod_environment import (
         a3_record_contract, load_record,
     )
-    from experiments.phase_a3.a3_pod_environment import (
+    from stages.phase_a3.a3_pod_environment import (
         verify_record as verify_a3_record,
     )
 
@@ -623,7 +623,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     import tempfile
 
-    from experiments.phase_c1.bundle import (
+    from stages.phase_c1.bundle import (
         C1BundleError, hf_download, require_canonical_bundle_arg, roundtrip,
     )
 
@@ -637,7 +637,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     staged = REPO_ROOT / bundle_rel
     if not staged.is_file():
         return False, (f"{bundle_rel} is missing; run "
-                       "scripts/autoinit/stage_c1_bundle.py --session-commit "
+                       "scripts/stages/stage-1/phase_c1/stage_c1_bundle.py --session-commit "
                        f"{commit} first")
     record = json.loads(staged.read_text())
     if record.get("session_commit") != commit:
@@ -842,7 +842,7 @@ def driver_command(ctx: SessionContext, plan: Any) -> str:
     before a line of the driver ran. A test parses this exact string with the
     driver's OWN parser, which is the authority on what it accepts.
     """
-    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_a3_driver.py "
+    return (f"/opt/train/bin/python {REPO}/scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py "
             f"--image-digest '{ctx.image_digest}' "
             f"--run-id '{getattr(ctx.args, 'run_id', None) or 'unrecorded'}' "
             f"--rate {ctx.price or ctx.args.max_price} "
@@ -855,13 +855,13 @@ def driver_command(ctx: SessionContext, plan: Any) -> str:
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     return tuple(
-        f"artifacts/stage3/a3/{pid}/train_log.jsonl"
+        f"artifacts/stages/stage-3/a3/{pid}/train_log.jsonl"
         for pid in A3S.probe_ids())
 
 
 def spec(args) -> SessionSpec:
-    from experiments.phase_c3 import session as CS
-    from experiments.phase_c3.hardware import require_approved
+    from stages.phase_c3 import session as CS
+    from stages.phase_c3.hardware import require_approved
 
     require_approved(args.gpu)
     return SessionSpec(
@@ -877,9 +877,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", None)),
         authorization_loader=A3Authorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=f"autoinit.v1.{A3S.EXPERIMENT_ID}",
         plan_hash=A3S.A3_SESSION_CONTRACT.contract_hash,
@@ -975,9 +975,9 @@ def spec(args) -> SessionSpec:
             controls_evidence_gate,
             artifact_spec_gate,
             local_files_gate(REPO_ROOT,
-                             ("scripts/pod/autoinit_a3_driver.py",
-                              "scripts/autoinit/aggregate_a3.py",
-                              "scripts/experiments/stage-1/phase_a3/a3_session.py"),
+                             ("scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py",
+                              "scripts/stages/stage-1/phase_a3/aggregate_a3.py",
+                              "scripts/stages/stage-1/phase_a3/a3_session.py"),
                              what="the A3 executable"),
             readiness_gate,
             bundle_staged_gate,
@@ -1141,7 +1141,7 @@ def main() -> int:
         spec(args), args, REPO_ROOT,
         summary=("STOP for review. A3 ran one experiment end to end and "
                  "computed no decision on the pod; the comparison is "
-                 "scripts/autoinit/aggregate_a3.py, off pod, at $0."))
+                 "scripts/stages/stage-1/phase_a3/aggregate_a3.py, off pod, at $0."))
 
 
 if __name__ == "__main__":

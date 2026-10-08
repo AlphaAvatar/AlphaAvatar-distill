@@ -19,7 +19,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-import audit_skip_predicates as A  # noqa: E402
+from stages.phase_c1 import audit_skip_predicates as A  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -132,7 +132,7 @@ def test_the_committed_audit_record_matches_the_live_one(rec):
     committed = json.loads(path.read_text())
     assert committed["digest"] == rec["digest"], (
         "the committed skip-predicate audit no longer describes this tree; "
-        "re-run scripts/autoinit/audit_skip_predicates.py --write")
+        "re-run scripts/stages/stage-1/phase_c1/audit_skip_predicates.py --write")
 
 
 # --- strict CPU-test parity ---------------------------------------------------
@@ -208,7 +208,7 @@ def test_the_audit_digest_does_not_depend_on_this_machines_artifacts(monkeypatch
     record failed its own equality check. Parity is derived from the git index
     and the SetupManifest, both of which are the same in either place.
     """
-    src = (REPO / "scripts/autoinit/audit_skip_predicates.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/audit_skip_predicates.py").read_text()
     assert "hidden_files(" not in src, (
         "the audit reads the live hidden set again; its digest would depend on "
         "whether the simulator has run")

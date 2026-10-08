@@ -12,7 +12,7 @@ entirely correct about Search-1.
 That is not a prediction. The full search's launch-bound sweep was run against
 Search-1's selection on 2026-09-19 and failed exactly there:
 `test_every_declared_staged_path_is_present` on
-`artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja`, and
+`artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/chat_template.jinja`, and
 `test_the_canonical_control_checkpoint_is_readable` on the same directory's
 `model.safetensors`. `full_search_pod_environment.py` had reused Search-1's
 selection with a docstring naming this exact hazard -- "a selection that
@@ -63,7 +63,7 @@ def registered():
     search of nothing. This project has already lost a pod to an unregistered
     registry.
     """
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
 
@@ -74,7 +74,7 @@ def search(registered):
     from support.session_specs import load_session_launcher, session_args
 
     from aadistill.runtime.staging_contract import derive_contract
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     launcher = load_session_launcher("autoinit_phase_c2_full_search_launch")
     args = session_args(launcher)
@@ -90,7 +90,7 @@ def search(registered):
     #: issuance there is no artifact -- the sweep runs on the grant-containing
     #: tree by design -- and a fixture that answered differently from the class
     #: would be testing itself.
-    from experiments.phase_c2.full_search import FullSearchAuthorization
+    from stages.phase_c2.full_search import FullSearchAuthorization
 
     ctx = SimpleNamespace(
         args=args, image_digest="preflight", auth=FullSearchAuthorization,
@@ -133,14 +133,14 @@ def test_the_canonical_control_is_NOT_staged(search):
     control it never reads would be 1.2 GiB shipped to a pod for nothing.
     """
     from aadistill.runtime.staging_contract import staged_files
-    from phase_a_frozen import CANONICAL_INIT
+    from stages.phase_a.phase_a_frozen import CANONICAL_INIT
 
     declared = sorted(staged_files(search.contract, REPO))
     leaked = [rel for rel in declared if CANONICAL_INIT in rel]
     assert not leaked, (
         f"the full search stages {leaked}, which nothing in its path reads")
     #: and the session's own asset list says the same thing from the other side
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     assert not any(CANONICAL_INIT in a.repo_path
                    for a in FSG.staged_assets(REPO))
@@ -153,12 +153,12 @@ def test_the_three_local_assets_are_exactly_what_the_search_resolves(search):
     validation's second subrun died at `$0.0252` because a hand-written ship
     list named the telemetry and not the profiles' `items_path` files.
     """
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     staged = sorted(a.repo_path for a in FSG.staged_assets(REPO))
-    assert staged == ["artifacts/stage1/e8_calibration_v1",
-                      "artifacts/stage1/reasoning_heavy_v2",
-                      "artifacts/stage1/state_eval_v1"], staged
+    assert staged == ["artifacts/stages/stage-1/e8_calibration_v1",
+                      "artifacts/stages/stage-1/reasoning_heavy_v2",
+                      "artifacts/stages/stage-1/state_eval_v1"], staged
     for rel in staged:
         assert (REPO / rel).is_dir(), f"{rel} is staged and absent"
 
@@ -167,7 +167,7 @@ def test_both_mixtures_resolve_against_their_content_hashes(registered):
     """`resolve()` re-hashes the items file, so a drifted or half-staged mixture
     refuses here rather than silently changing every operator's statistics."""
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2.full_search_space import PROFILE_IDS
+    from stages.phase_c2.full_search_space import PROFILE_IDS
 
     for qualified_id in PROFILE_IDS:
         items = get_profile(qualified_id).resolve(REPO)
@@ -178,9 +178,9 @@ def test_both_mixtures_resolve_against_their_content_hashes(registered):
 def test_the_state_eval_suite_loads_from_its_staged_directory():
     """The one metric the whole search ranks on, and the suite the optimized
     evaluator was certified against. Without it there is no ranking."""
-    from load_state_eval import load as load_suite
+    from shared.evaluation.load_state_eval import load as load_suite
 
-    suite, items, manifest = load_suite(REPO / "artifacts/stage1/state_eval_v1")
+    suite, items, manifest = load_suite(REPO / "artifacts/stages/stage-1/state_eval_v1")
     assert suite.suite_hash and suite.domains
     assert len(items) == 80, len(items)
     assert sum(int(i.input_ids.shape[1]) - 1 for i in items) == 74022
@@ -190,7 +190,7 @@ def test_the_state_eval_suite_loads_from_its_staged_directory():
 def test_the_declared_non_source_inputs_are_present():
     """Two paid subruns of the CUDA validation died one per unshipped producer,
     so the inputs are derived from the code that reads them and checked here."""
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     declared = list(FSG.declared_inputs())
     assert declared, "the session declares no inputs"
@@ -203,7 +203,7 @@ def test_the_declared_non_source_inputs_are_present():
 
 def test_the_space_is_the_derived_578_leaf_joint_space(registered):
     """Enumerated from the registry, never a remembered number."""
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     report = FS.size_report(REPO)["full_joint"]
     assert report["total_leaves"] == 578
@@ -214,7 +214,7 @@ def test_the_space_is_the_derived_578_leaf_joint_space(registered):
 
 
 def test_the_operator_library_and_its_exclusion_are_the_approved_ones(registered):
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     space = FS.full_joint_space(REPO)
     impls = {impl.impl_id for impl, _profiles in space.options(frozenset())}
@@ -255,7 +255,7 @@ def test_the_identities_a_grant_binds_are_derivable(registered):
     A grant binds sixteen of them. If one could not be re-derived here, the
     session would be running against an approval whose basis it cannot check.
     """
-    from experiments.phase_c2 import full_search_authorization as FA
+    from stages.phase_c2 import full_search_authorization as FA
 
     live = {k: v for k, v in FA.live_identities(REPO).items()
             if not k.startswith("_")}
@@ -271,7 +271,7 @@ def test_the_identities_a_grant_binds_are_derivable(registered):
 def test_the_plan_reproduces_the_priced_total_ceiling(search):
     """The minutes are the plan and the dollars are those minutes at the
     EFFECTIVE rate -- GPU securePrice plus the container disk's hourly share."""
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     row = FSG._standing_row(REPO)
     assert search.plan.hard_terminate_minutes <= float(row["hard_ceiling_minutes"])
@@ -284,7 +284,7 @@ def test_the_plan_reproduces_the_priced_total_ceiling(search):
 
 def test_the_provision_covers_the_derived_peak():
     """400 GB for a derived peak, with the environment counted in."""
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     provision = FSG.provision_gb(REPO)
     assert provision["required_gib"] > FSG.peak_resident_gib(REPO)["peak_resident_gib"]
@@ -302,7 +302,7 @@ def test_the_driver_command_names_only_the_authorized_stages(search):
     pod the real command is read. A single branch that quietly passed on an
     error string would be the vacuous half of this test.
     """
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     #: True on both machines: the stage list IS the terminus.
     assert FSG.AUTHORIZED_STAGES == ("bind_identities", "full_joint_search",
@@ -330,8 +330,8 @@ def test_no_behavioural_stage_is_reachable_from_this_session():
     """By import graph, not by instruction."""
     import ast
 
-    for rel in ("scripts/pod/autoinit_phase_c2_full_search_driver.py",
-                "scripts/pod/autoinit_phase_c2_full_search_launch.py"):
+    for rel in ("scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py",
+                "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py"):
         tree = ast.parse((REPO / rel).read_text())
         named = set()
         for node in ast.walk(tree):
@@ -358,7 +358,7 @@ def test_the_authorization_on_this_pod_cannot_authorize_anything_else():
     """
     import os
 
-    from experiments.phase_c2.full_search import FullSearchAuthorization
+    from stages.phase_c2.full_search import FullSearchAuthorization
 
     path = os.environ.get("SESSION_AUTH_PATH")
     resolved = (REPO / path) if path else None

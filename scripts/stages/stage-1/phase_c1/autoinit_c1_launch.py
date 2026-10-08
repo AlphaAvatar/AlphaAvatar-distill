@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Phase C1 — fixed-path ATTENTION isolation, as a session specification.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_c1_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py \
         --scr <scratch> --run-id <attemptN> \
         --session-commit <sha> --bundle <name> < /dev/null &
 
@@ -41,7 +41,7 @@ import shutil
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -49,20 +49,20 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # pre-provider gate executes it directly rather than trusting a transcript of it.
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.run_layout import (  # noqa: E402
+from shared.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, layout_for,
     rel_run_dir,
     open_run, present_roles, record_run, require_output_claim, write_run_readmes,
 )
-from experiments.phase_c1 import session as CS
-from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
-from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
-from experiments.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
-from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
-from experiments.phase_c1.authorization_payload import load_config  # noqa: E402
+from stages.phase_c1 import session as CS
+from stages.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest, c1_price_per_hour_usd  # noqa: E402
+from stages.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
+from stages.phase_c1.bundle import RELAY_REPO as RELAY_REPO_ID, C1BundleError, canonical_bundle_name, hf_download, require_canonical_bundle_arg, roundtrip  # noqa: E402
+from stages.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from stages.phase_c1.authorization_payload import load_config  # noqa: E402
 from aadistill.runtime.staging_contract import derive_contract  # noqa: E402
-from experiments.phase_c1.pod_environment import (  # noqa: E402
+from stages.phase_c1.pod_environment import (  # noqa: E402
     LAUNCH_BOUND,
     RECORD_POINTER as POD_ENV_RECORD,
     c1_record_contract,
@@ -88,12 +88,12 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
 from aadistill.infrastructure.session import RelayInput  # noqa: E402
-from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E402
 
 #: The frozen EVALUATION tokenizer, and nothing else from that checkpoint.
 #:
 #: Declared HERE rather than beside the other frozen science inputs, which is
-#: where it belongs by topic: `scripts/pod/autoinit_science_inputs.py` is a member
+#: where it belongs by topic: `scripts/shared/pod/autoinit_science_inputs.py` is a member
 #: of FIVE hash-bound executable sets (Phase A, Phase B, both continuations and
 #: the measurement authorization), so adding a C1-only group to it moved five
 #: frozen digests for a group only C1 reads. The launcher is already inside the
@@ -109,7 +109,7 @@ from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E40
 #: `chat_template.jinja` at all.
 C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint", sha256=sha, repo=MAIN_RELAY)
+               dest="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint", sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("tokenizer.json",
          "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506"),
@@ -121,7 +121,7 @@ C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 )
 
 #: SETUP READINESS, not a C1 measurement input. The shared setup's `ROPE_OK` step
-#: globs `artifacts/stage1/*/checkpoint/config.json` and loads each match through
+#: globs `artifacts/stages/stage-1/*/checkpoint/config.json` and loads each match through
 #: `AutoConfig.from_pretrained` in BOTH venvs, requiring a stored RoPE base of
 #: 5,000,000. It reads no weights. C1 attempt 2 staged the three sidecars above
 #: and nothing else, so the glob was empty and setup exited `no staged checkpoint
@@ -136,14 +136,14 @@ C1_EVAL_TOKENIZER: tuple[RelayInput, ...] = tuple(
 #: every launch.
 C1_ROPE_INPUT: tuple[RelayInput, ...] = (
     RelayInput("stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+               dest="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                sha256="a7131bb092b38a078edc213961f0eb57eaead24f1396e25741f4887b1a694054", repo=MAIN_RELAY),
 )
 #: What `stored_rope_base` must report for the staged config, in both venvs.
 C1_ROPE_BASE = 5_000_000
 #: The directory the shared setup globs. Named once so the gate and the
 #: RelayInput cannot drift apart.
-C1_ROPE_CHECKPOINT_DIR = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+C1_ROPE_CHECKPOINT_DIR = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 #: C1's own, not Phase A's. The Phase-A launcher was imported for three things:
 #: the teacher revision (which `c1_session` already declares), a two-entry test
@@ -179,7 +179,7 @@ TEACHER_REVISION = CS.TEACHER_REVISION
 #: a new experiment directory cannot join a closed experiment's paid gate by
 #: existing.
 TEST_IGNORES: tuple[str, ...] = ()
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c1/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c1/tests"
 TEST_PATHS = (POD_TEST_SELECTION,)
 
 STATUS = f"{WS}/autoinit_c1.status"
@@ -218,10 +218,10 @@ FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
 #: pod is handed.
 SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
 SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
-BATTERY_MANIFEST = "artifacts/stage3/c1_confirmation_v1/manifest.json"
+BATTERY_MANIFEST = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
 BATTERY_IDENTITY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
-#: Written by scripts/autoinit/stage_c1_bundle.py; the local half of the
+#: Written by scripts/stages/stage-1/phase_c1/stage_c1_bundle.py; the local half of the
 #: transport check. The gate verifies the REMOTE object against it.
 #: The GLOBAL entry point for the staged-bundle record. Like the readiness
 #: record and the authorization, this was one repository-root file that every
@@ -252,7 +252,7 @@ def bundle_record_for(run_id: str | None) -> str:
 # the manual step left evidence with no owner at all.
 #
 # So the run declares its identity BEFORE it runs, and the launcher writes into
-# it. `experiments.run_layout` owns the five-area convention; the roles below are
+# it. `shared.run_layout` owns the five-area convention; the roles below are
 # C1's own vocabulary, which is why a Stage-0 collection run or a rollout
 # benchmark can use the same mechanism without inheriting `replay_record`.
 # ---------------------------------------------------------------------------
@@ -515,19 +515,19 @@ def require_bounded_acquisition(args) -> None:
 #: uplink comfortably — unlike a 1.1 GiB checkpoint, which is why the selected
 #: leaves became relay pulls after continuation attempt 2.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage3/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stage3"),
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
+    LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
+               "artifacts/stages/stage-3"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
     #: C1 reads NEITHER of these. They are staged because the SHARED setup runs
     #: `verify_frozen_assets.py` unconditionally at its ASSETS_READY gate, and
     #: that script checks both. A session declares what the SETUP requires, not
     #: what the session reads — declaring only what it needs is what cost the
     #: device-canary retry $0.0637 and the measurement session $0.0700.
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
 
 
@@ -667,7 +667,7 @@ def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
         return False, (f"{FROZEN_EXPECT} is missing; the setup would refuse at "
                        "the frozen-asset gate after a pod exists")
     proc = subprocess.run(
-        [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+        [sys.executable, "scripts/shared/pod/verify_frozen_assets.py",
          "--expect", str(expect)],
         capture_output=True, text=True, cwd=REPO_ROOT,
         env={**os.environ, "PYTHONPATH": "src:scripts"})
@@ -755,7 +755,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     if recorded != live:
         return False, (f"the recorded executable closure is {str(recorded)[:12]}… "
                        f"and the tree digests to {live[:12]}…; re-run "
-                       "scripts/architecture/derive_closure.py --write")
+                       "scripts/maintenance/architecture/derive_closure.py --write")
     if doc.get("authorizes") != "nothing":
         return False, "the preregistration claims to authorize something"
     return True, (f"preregistration {stated[:12]}… (self-hash verified, the "
@@ -821,7 +821,7 @@ def battery_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     """The battery must be present locally, and be the canonical bytes."""
     canonical = Path(json.loads(
         (REPO_ROOT / BATTERY_IDENTITY).read_text())["canonical_path"])
-    local = REPO_ROOT / "artifacts/stage3/c1_confirmation_v1"
+    local = REPO_ROOT / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
     if not local.is_dir():
         return False, f"{local} is missing; the launcher has nothing to stage"
     if not canonical.is_dir():
@@ -852,7 +852,7 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
 
     Attempt 2 passed all nine gates, reached `TEACHER_READY` on the pod, and died
     at `ROPE_OK` with `no staged checkpoint to check` — the setup globs
-    `artifacts/stage1/*/checkpoint/config.json` and C1 staged only tokenizer
+    `artifacts/stages/stage-1/*/checkpoint/config.json` and C1 staged only tokenizer
     sidecars there. `$0.1013` for a missing 1,418-byte file.
 
     This is NOT a replacement for that pod-side check, which is the thing that
@@ -907,7 +907,7 @@ def rope_input_gate(ctx: SessionContext) -> tuple[bool, str]:
 def renderer_parity_gate(ctx: SessionContext) -> tuple[bool, str]:
     """Is the C1 battery still rendered exactly as every historical measurement?
 
-    The seven parametrized parity cases in `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` used to
+    The seven parametrized parity cases in `scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py` used to
     carry this guarantee alone. They need the pinned Hugging Face source snapshots
     — a dev-box readiness input, never a C1 runtime or scientific one — so on a
     pod they could only ever fail, and on 2026-09-04 fourteen of them did, at the
@@ -923,7 +923,7 @@ def renderer_parity_gate(ctx: SessionContext) -> tuple[bool, str]:
     somebody remembered to regenerate it.
     """
     try:
-        from renderer_parity_gate import gate_verdict, run_parity
+        from shared.validation.renderer_parity_gate import gate_verdict, run_parity
 
         record = run_parity()
     except Exception as exc:                                   # noqa: BLE001
@@ -1047,7 +1047,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     to digest to the authorized harness value.
 
     Read-only: it uploads nothing and mutates nothing. Preparation is
-    `scripts/autoinit/stage_c1_bundle.py`, deliberately a separate command, so
+    `scripts/stages/stage-1/phase_c1/stage_c1_bundle.py`, deliberately a separate command, so
     that what this verifies is the relay's state rather than a side effect of the
     verification.
     """
@@ -1063,7 +1063,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     staged = REPO_ROOT / bundle_rel
     if not staged.is_file():
         return False, (f"{bundle_rel} is missing; run "
-                       f"scripts/autoinit/stage_c1_bundle.py --session-commit "
+                       f"scripts/stages/stage-1/phase_c1/stage_c1_bundle.py --session-commit "
                        f"{commit} first")
     record = json.loads(staged.read_text())
     if record.get("session_commit") != commit:
@@ -1108,7 +1108,7 @@ def artifact_spec_gate(ctx: SessionContext) -> tuple[bool, str]:
     moves the required generation count instead of silently accepting a spec
     that would now archive six sevenths of the evidence.
     """
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     paths = (SPEC_SUCCESS, SPEC_FAILED)
     #: Requirement and invariant in one line: these files decide what evidence
@@ -1199,7 +1199,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
     `test_the_launcher_driver_cli_seam.py` now parses this exact string with the
     driver's OWN parser, which is the authority on what it accepts.
     """
-    return (f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_c1_driver.py "
+    return (f"/opt/train/bin/python {REPO}/scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py "
             f"--image-digest '{ctx.image_digest}' "
             f"--run-id '{getattr(ctx.args, 'run_id', None) or 'unrecorded'}' "
             f"--rate {ctx.price or ctx.args.max_price} "
@@ -1210,7 +1210,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
 
 def probe_streams(ctx: SessionContext) -> tuple[str, ...]:
     """Every probe's training event stream must come home before teardown."""
-    return tuple(f"artifacts/stage3/c1/{arm}_{seed}/train_log.jsonl"
+    return tuple(f"artifacts/stages/stage-3/c1/{arm}_{seed}/train_log.jsonl"
                  for arm in ("incumbent", "treatment")
                  for seed in derive_recovery_seeds())
 
@@ -1231,9 +1231,9 @@ def spec(args) -> SessionSpec:
         #: ceiling derived for different work.
         authorization_loader=C1Authorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id="autoinit.v1.phase_c1",
         #: The isolation plan's own hash, not Phase A's. C1 is different science,
@@ -1347,7 +1347,7 @@ def spec(args) -> SessionSpec:
 
 def _plan_hash() -> str:
     """The frozen C1IsolationPlan's hash, rebuilt rather than transcribed."""
-    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
+    from stages.phase_c1.isolation import C1Arm, C1IsolationPlan
     from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     attention_activation.register(replace=True)
@@ -1530,7 +1530,7 @@ def close_c1_run(layout, args, repo_root: Path | None = None) -> dict:
               "scratch_note": ("the artifact archive and the extracted tree stay "
                                "here; artifacts/manifest.json carries their "
                                "hashes. Large artifacts are not moved into git")},
-        implementation={"launcher": "scripts/pod/autoinit_c1_launch.py",
+        implementation={"launcher": "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
                         "harness_source_digest": session.get(
                             "harness_source_digest"),
                         "authorization": auth_path_for(

@@ -54,7 +54,7 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 #: It is still a genuine `ContinuationAuthorization` written to disk and parsed
 #: by the real loader — nothing here is a stub.
 def fixture_auth_payload() -> dict:
-    from experiments.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V1, ContinuationAuthorization
+    from stages.phase_b.continuation import BOUND_EVIDENCE, CONTINUATION_PLAN_V1, ContinuationAuthorization
 
     return ContinuationAuthorization(
         authorization_id="autoinit.continuation_b.FIXTURE",
@@ -109,7 +109,7 @@ def constructed(tmp_path, monkeypatch):
 # --- the continuation's own wiring ------------------------------------------
 
 def test_the_constructor_loads_a_continuation_authorization(constructed):
-    from experiments.phase_b.continuation import ContinuationAuthorization
+    from stages.phase_b.continuation import ContinuationAuthorization
 
     mod, driver = constructed
     assert isinstance(driver.auth, ContinuationAuthorization), (
@@ -133,14 +133,14 @@ def test_it_came_from_the_continuation_authorization_path(constructed):
 
 def test_it_validates_the_continuation_plan_and_rejects_phase_a(constructed):
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from stages.phase_b.continuation import CONTINUATION_PLAN_V1
 
     mod, driver = constructed
     assert mod.ContinuationDriver.PLAN is CONTINUATION_PLAN_V1
     # Accepts its own — the constructor already ran this, so a repeat must pass.
     driver.auth.require_plan(CONTINUATION_PLAN_V1.plan_hash)
 
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
     with pytest.raises(AuthorizationError):
         driver.auth.require_plan(parent.PHASE_A_PLAN_V1.plan_hash)
 
@@ -181,7 +181,7 @@ def test_the_constructor_leaves_nothing_the_inherited_stages_need_unset(construc
     # attribute the inherited stages will then read.
     import dis
 
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
     parent_attrs = {i.argval
                     for i in dis.get_instructions(parent.PhaseADriver.__init__)
                     if i.opname == "STORE_ATTR"}
@@ -198,10 +198,10 @@ def test_the_mutation_that_caused_attempt_2_is_caught(tmp_path, monkeypatch):
     A guard that has only ever seen the fixed code is not known to be able to
     fail — which is precisely how the original slipped through.
     """
-    from experiments.phase_b.continuation import ContinuationAuthorization
+    from stages.phase_b.continuation import ContinuationAuthorization
 
     mod = load("autoinit_continuation_b_driver")
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
 
     repo = tmp_path / "repo"
     (repo / "logs").mkdir(parents=True)

@@ -29,29 +29,29 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.session import RelayInput  # noqa: E402
 #: WHICH artifact store these inputs come from. `RelayInput.repo` used to
 #: default to a MAIN_RELAY the core computed by reading configs/ at import.
-from experiments.deployment import MAIN_RELAY  # noqa: E402
+from shared.deployment import MAIN_RELAY  # noqa: E402
 
-#: Where the pack is read from. `scripts/pod/p2_driver.py` reads
+#: Where the pack is read from. `scripts/stages/stage-3/p2/p2_driver.py` reads
 #: `ladder_uniform_probe`; the recovery corpus loader reads `ladder_uniform`.
 #: The shell satisfied both with an undeclared directory walk after the fetch.
-_LADDER_PROBE = "artifacts/stage3/ladder_uniform_probe"
-_LADDER_MIRROR = "artifacts/stage3/ladder_uniform"
+_LADDER_PROBE = "artifacts/shared/instruments/ladder_uniform_probe"
+_LADDER_MIRROR = "artifacts/stages/stage-3/ladder_uniform"
 
 #: The canonical Stage-1 student. `model.safetensors` is the pinned one; the
 #: other five are the companion files a checkpoint is unloadable without — and
 #: which no session declared, on the reasoning that the weights were the
 #: artifact. A control that shipped without its tokenizer has already been
-#: written up once (`logs/shared/analyses/autoinit_control_sb_packaging_repair.json`).
+#: written up once (`logs/stages/stage-1/recovery_continuation/analyses/autoinit_control_sb_packaging_repair.json`).
 CANONICAL_INIT: tuple[RelayInput, ...] = tuple(
     RelayInput(f"stage1/qwen3_0p6b_init_v0/checkpoint/{name}",
-               dest="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+               dest="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                sha256=sha, repo=MAIN_RELAY)
     for name, sha in (
         ("model.safetensors",
@@ -83,7 +83,7 @@ RECOVERY_LADDER: tuple[RelayInput, ...] = tuple(
 #: of the four sessions still did not declare it.
 CALIBRATION_V1: tuple[RelayInput, ...] = (
     RelayInput("e8_inputs_20260810/calibration_v1/items.jsonl",
-               dest="artifacts/stage1/e8_calibration_v1",
+               dest="artifacts/stages/stage-1/e8_calibration_v1",
                sha256="c7202338109e459b17b70456461e8f304fadea"
                       "7929ea547accee21adbbe7fd0b", repo=MAIN_RELAY),
 )

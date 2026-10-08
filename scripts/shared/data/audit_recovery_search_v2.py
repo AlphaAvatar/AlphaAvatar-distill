@@ -1,6 +1,6 @@
 """Prove `recovery_search_v2` changed the tools representation and nothing else.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/audit_recovery_search_v2.py
+    PYTHONPATH=src .venv/bin/python scripts/shared/data/audit_recovery_search_v2.py
 
 Zero cost, no GPU, and it runs over the **whole** asset — all 20 tool items and
 all seven sets, never a sample. Three questions, answered separately:
@@ -27,7 +27,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.data.tools import (  # noqa: E402
@@ -35,9 +35,9 @@ from aadistill.data.tools import (  # noqa: E402
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-V1 = REPO / "artifacts/stage3/recovery_search_v1"
-V2 = REPO / "artifacts/stage3/recovery_search_v2"
-TOKENIZER = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+V1 = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v1"
+V2 = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
+TOKENIZER = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 SYSTEM = "You are a helpful Assistant."
 TOOL_SET = "tool"
 

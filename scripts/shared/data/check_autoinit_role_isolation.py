@@ -1,6 +1,6 @@
 """Fail-closed isolation check across every AutoInitializer data role.
 
-    PYTHONPATH=src .venv/bin/python scripts/data/check_autoinit_role_isolation.py \
+    PYTHONPATH=src .venv/bin/python scripts/shared/data/check_autoinit_role_isolation.py \
         --out logs/shared/analyses/autoinit_role_isolation.json
 
 Five roles, and no prompt may appear under two of them:
@@ -34,13 +34,13 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from build_e8_calibration import sha_ids  # noqa: E402
+from stages.e8.build_e8_calibration import sha_ids  # noqa: E402
 
 ROLES = ("OPERATOR_CALIBRATION", "INITIALIZER_STATE_EVAL", "RECOVERY_SEARCH",
          "FINAL_PROMOTION", "RECOVERY_TRAINING")
@@ -188,12 +188,12 @@ def load_roles(args) -> dict[str, RoleAssets]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="logs/shared/analyses/autoinit_role_isolation.json")
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
-    ap.add_argument("--battery", default="artifacts/eval/battery_v2")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
+    ap.add_argument("--recovery-search", default="artifacts/stages/stage-1/batteries/recovery_search_v2")
+    ap.add_argument("--battery", default="artifacts/stages/stage-3/eval/battery_v2")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
     ap.add_argument("--probe-rung", type=int, default=860_000)
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--near-duplicate-shingles", type=int, default=8)

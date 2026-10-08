@@ -19,7 +19,7 @@ that reads `loss` gets four decimals because the console printed four; the
 stream held six. A consumer that wants `grad_norm` gets nothing, because it was
 never printed at all.
 
-    python3 scripts/pod/reconstruct_training_events.py \\
+    python3 scripts/shared/pod/reconstruct_training_events.py \\
         --run-log /home/ecs-user/aad-artifacts/e6b/e6b_run.log \\
         --status  /home/ecs-user/aad-artifacts/e6b/e6b.status \\
         --config configs/stage3/e6b/e6b_p2_r2960k_sa.json \\
@@ -37,7 +37,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
@@ -48,7 +48,7 @@ STEP_RE = re.compile(
     r"\s+lr (?P<lr>[-\d.eE+]+)\s+(?P<seconds>[\d.]+)s\s*$")
 # `eval step 364: {'val_blocks': 16, 'val_ce': 1.915578, ...}`
 EVAL_RE = re.compile(r"^eval step (?P<step>\d+)(?P<suffix>[^:]*): (?P<body>\{.*\})\s*$")
-# `[17:25:51] $ /opt/train/bin/python scripts/training/train_stage3.py --config …/NAME.json`
+# `[17:25:51] $ /opt/train/bin/python scripts/shared/training/train_stage3.py --config …/NAME.json`
 CMD_RE = re.compile(r"^\[(?P<clock>[\d:]+)\] \$ .*train_stage3\.py --config "
                     r"(?P<config>\S+)")
 MARKER_RE = re.compile(r"^(?P<ts>\S+) MARKER:(?P<marker>.+)$")
@@ -230,7 +230,7 @@ def parse(run_log: Path, configs: list[Path], status: Path | None) -> dict:
             "this file is derived from the driver console log and is not a "
             "substitute for them.",
         "generated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-        "generator": "scripts/pod/reconstruct_training_events.py",
+        "generator": "scripts/shared/pod/reconstruct_training_events.py",
         "source": {
             "run_log": str(run_log),
             "run_log_sha256": sha256_file(run_log),

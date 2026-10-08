@@ -8,9 +8,9 @@ environments on this dev box, and separating them also separates a network
 operation from a deterministic build: the documents are written once, hashed, and
 the build then has no network dependency at all.
 
-    python3 scripts/data/fetch_fineweb_docs.py \\
+    python3 scripts/shared/data/fetch_fineweb_docs.py \\
         --start-index 40000 --max-docs 40 \\
-        --out artifacts/stage1/e8_calibration_v1/general_docs.jsonl
+        --out artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl
 
 Reserved consumption already on record — warmup_v1 (from index 0), holdout_v1
 (skip 5,000), `e7_fineweb_val` [20000, 20454), `e7_fineweb_kd` [30000, 31902) —
@@ -25,7 +25,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402

@@ -60,7 +60,7 @@ def test_attempt2_resolves_its_session_record_under_its_own_runtime(launcher):
     assert launcher.session_record_path("attempt2") == (
         "logs/stages/stage-1/phase_c2/runs/attempt2/runtime/session.json")
     #: And through the run layout, not a string built here.
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     assert launcher.session_record_path("attempt2") == (
         f"{rel_run_dir('phase_c2', 'attempt2', STAGE)}/runtime/session.json")
@@ -98,8 +98,8 @@ def test_two_run_ids_cannot_share_one_session_record(launcher):
 def test_the_declared_roles_are_the_ones_this_session_produces(launcher):
     """A search session has no probe, battery, replay, rung or scoring role, and
     declaring one would put a path in the manifest that nothing writes."""
-    from experiments.phase_c2.session import C2_RUN_ROLES
-    from experiments.run_layout import check_roles
+    from stages.phase_c2.session import C2_RUN_ROLES
+    from shared.run_layout import check_roles
 
     #: Every role sits under exactly one declared area. `check_roles` raises
     #: otherwise, which is the whole point of asking it rather than eyeballing.
@@ -140,7 +140,7 @@ def test_opening_the_run_claims_the_scratch_and_points_out_at_the_run(
 def test_a_scratch_root_claimed_by_another_run_is_refused(launcher, tmp_path):
     """Two runs must not share a writable output root: the second would collect
     the first's evidence as its own."""
-    from experiments.run_layout import OutputOwnershipError
+    from shared.run_layout import OutputOwnershipError
 
     scr = tmp_path / "scr"
     repo = tmp_path / "repo"
@@ -154,7 +154,7 @@ def test_a_scratch_root_claimed_by_another_run_is_refused(launcher, tmp_path):
 def test_an_unclaimed_scratch_already_holding_this_runs_outputs_is_refused(
         launcher, tmp_path):
     """Unknown ownership, not "probably stale". mtime is a guess."""
-    from experiments.run_layout import OutputOwnershipError
+    from shared.run_layout import OutputOwnershipError
 
     scr = tmp_path / "scr"
     (scr / "relay").mkdir(parents=True)
@@ -166,7 +166,7 @@ def test_an_unclaimed_scratch_already_holding_this_runs_outputs_is_refused(
 
 
 def test_an_already_recorded_run_id_is_refused(launcher, tmp_path):
-    from experiments.run_layout import RunConventionError
+    from shared.run_layout import RunConventionError
 
     repo = tmp_path / "repo"
     run = repo / "logs/stages/stage-1/phase_c2/runs/attempt2"
@@ -182,7 +182,7 @@ def test_an_unrecorded_occupied_run_is_refused_rather_than_reopened(
         launcher, tmp_path):
     """A launcher process that died leaves a run directory with no manifest.
     Overwriting it destroys the only evidence of what happened."""
-    from experiments.run_layout import RunConventionError
+    from shared.run_layout import RunConventionError
 
     repo = tmp_path / "repo"
     run = repo / "logs/stages/stage-1/phase_c2/runs/attempt2"
@@ -202,7 +202,7 @@ def test_the_prepared_governance_inputs_do_not_count_as_occupancy(
     unsatisfiable — the issuer writes the authorization into the run, the
     launcher reads it from there, and `open_run` refused the run as occupied.
     Attempt 13 died on it at $0."""
-    from experiments.phase_c2.session import C2_RUN_ROLES
+    from stages.phase_c2.session import C2_RUN_ROLES
 
     repo = tmp_path / "repo"
     run = repo / "logs/stages/stage-1/phase_c2/runs/attempt2"
@@ -216,7 +216,7 @@ def test_the_prepared_governance_inputs_do_not_count_as_occupancy(
     assert layout.root.is_dir()
     #: And an UNDECLARED governance file is still refused: the exemption is per
     #: role, by name.
-    from experiments.run_layout import RunConventionError
+    from shared.run_layout import RunConventionError
 
     other = repo / "logs/stages/stage-1/phase_c2/runs/attempt4/governance"
     other.mkdir(parents=True)
@@ -266,7 +266,7 @@ def test_closeout_writes_a_verifiable_manifest_over_the_roles_that_exist(
 
     doc = launcher.close_c2_run(layout, args, repo_root=repo)
 
-    from experiments.run_layout import verify_run_manifest
+    from shared.run_layout import verify_run_manifest
 
     ok, why = verify_run_manifest(doc, layout.run_root,
                                   spec=launcher.C2_RUN_SPEC)
@@ -310,7 +310,7 @@ def test_a_session_refused_at_a_zero_dollar_gate_still_records_an_owned_run(
     doc = launcher.close_c2_run(layout, args, repo_root=repo)
     assert doc["roles"] == {"session_record": "runtime/session.json"}, doc["roles"]
     assert doc["status"]["pod_id"] is None and doc["status"]["cost"] == 0.0
-    from experiments.run_layout import verify_run_manifest
+    from shared.run_layout import verify_run_manifest
 
     ok, why = verify_run_manifest(doc, layout.run_root,
                                   spec=launcher.C2_RUN_SPEC)
@@ -321,7 +321,7 @@ def test_closeout_refuses_a_scratch_that_is_not_this_runs(launcher, tmp_path):
     """Asked again at closeout, not assumed from the open: a foreign scratch
     would turn a run that failed early into a manifest full of someone else's
     evidence."""
-    from experiments.run_layout import OutputOwnershipError, claim_output_root
+    from shared.run_layout import OutputOwnershipError, claim_output_root
 
     scr = tmp_path / "scr"
     repo = tmp_path / "repo"
@@ -338,7 +338,7 @@ def test_closeout_refuses_a_scratch_that_is_not_this_runs(launcher, tmp_path):
 # --- 4. the resource scope, enforced before provider creation ---------------
 
 def scope(run_id="attempt2", permitted=3):
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2.session import C2ResourceScope
 
     return C2ResourceScope(run_id=run_id, issuances_permitted=1,
                            launch_attempts_permitted=1,
@@ -404,7 +404,7 @@ def test_a_create_that_returned_no_pod_id_does_not_consume_a_resource():
     `provider_resource_created: false` precisely so this distinction survives
     into the evidence. Counting rows would let a provider's refusal consume a
     permission."""
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2.session import C2ResourceScope
 
     draws = [
         {"draw": 1, "pod_id": None, "outcome": "create_failed",
@@ -422,7 +422,7 @@ def test_a_create_that_returned_no_pod_id_does_not_consume_a_resource():
 
 def test_the_scope_is_derived_from_the_grant_and_refuses_a_silent_default():
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2.session import C2ResourceScope
 
     stated = {"one_use": {"issuances_permitted": 1,
                           "launch_attempts_permitted": 1,
@@ -452,7 +452,7 @@ def test_the_scope_is_derived_from_the_grant_and_refuses_a_silent_default():
 def test_the_scope_survives_a_round_trip_through_the_real_loader(tmp_path):
     """An authorization the issuer wrote and the launcher cannot read its scope
     from would refuse every launch for the wrong reason."""
-    from experiments.phase_c2.session import C2Authorization
+    from stages.phase_c2.session import C2Authorization
 
     auth = C2Authorization(
         authorization_id="x", granted_utc="2026-01-01T00:00:00Z",

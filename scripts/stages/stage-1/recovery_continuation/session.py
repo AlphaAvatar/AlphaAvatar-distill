@@ -30,7 +30,7 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError
-from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest
+from stages.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, PhaseAAuthorization, phase_a_harness_digest
 
 #: Explicit: importing an operator module no longer registers it.
 register_builtin_operators()
@@ -46,18 +46,18 @@ SCHEMA = "aadistill.autoinit.recovery_continuation_authorization/v1"
 #: the same false coupling that pinning whole-repository HEAD has, one level
 #: smaller.
 SEARCH_ONLY_HARNESS_FILES: tuple[str, ...] = (
-    "scripts/autoinit/phase_a_search.py",
+    "scripts/stages/stage-1/phase_a/phase_a_search.py",
 )
 
 #: What this session runs that a full Phase-A session does not.
 CONTINUATION_ONLY_HARNESS_FILES: tuple[str, ...] = (
     # The session declaration and the driver it names.
-    "scripts/pod/autoinit_recovery_continuation_launch.py",
-    "scripts/pod/autoinit_recovery_continuation_driver.py",
+    "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py",
+    "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_driver.py",
     # The frozen identities, in the module that holds no search code. This is
     # what that extraction exists for: the continuation binds the same teacher,
     # geometry, canonical init and seed without importing the beam.
-    "scripts/autoinit/phase_a_frozen.py",
+    "scripts/stages/stage-1/phase_a/phase_a_frozen.py",
     # What replaces the search, and what hands the card to recovery.
     "src/aadistill/initialization/planning/stage1_import.py",
     "src/aadistill/runtime/device_handoff.py",
@@ -65,7 +65,7 @@ CONTINUATION_ONLY_HARNESS_FILES: tuple[str, ...] = (
     # re-identifies the five leaves with it, and the driver reads them with it.
     "src/aadistill/runtime/leaf_durability.py",
     # This module: the schema, the refusals, and this list.
-    "scripts/experiments/stage-1/recovery_continuation/session.py",
+    "scripts/stages/stage-1/recovery_continuation/session.py",
 )
 
 #: THE EXECUTABLE CONTINUATION CLOSURE — what this session actually runs.
@@ -203,7 +203,7 @@ class RecoveryContinuationAuthorization(PhaseAAuthorization):
 #: though it applies.
 CONTINUATION_GRANT_PROSE_REQUIRED = (
     "NO GRANT. This is the recovery-continuation authorization SCHEMA, not a "
-    "grant. scripts/autoinit/issue_recovery_continuation_authorization.py "
+    "grant. scripts/stages/stage-1/recovery_continuation/issue_recovery_continuation_authorization.py "
     "requires --grant naming a one-use continuation grant document, and refuses "
     "to issue with this value in place.")
 

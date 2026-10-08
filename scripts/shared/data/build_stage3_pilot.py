@@ -38,7 +38,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.dataset import (  # noqa: E402
@@ -255,7 +255,7 @@ def token_stats(arm_dir: Path, tokenizer, block_len: int, seed: int) -> dict:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--targets", default="artifacts/stage2_v2/pilot/targets.jsonl",
+    ap.add_argument("--targets", default="artifacts/stages/stage-2/v2/pilot/targets.jsonl",
                     help="targets.jsonl from generate_teacher_answers.py")
     ap.add_argument("--public-dir", default="data/stage2_v1",
                     help="data dir supplying the control arm's public targets")

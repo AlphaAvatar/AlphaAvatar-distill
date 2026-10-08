@@ -5,7 +5,7 @@ and died one second later. Three defects, in a chain:
 
 1. **Stage A resolved calibration profiles from an EMPTY registry.** The four
    mixtures are data in `configs/calibration/profiles.json`; nothing in
-   `src/aadistill` names them, and `scripts/experiments/calibration.py` is the
+   `src/aadistill` names them, and `scripts/shared/calibration.py` is the
    application bootstrap that loads them. The C2 driver imported that bootstrap
    inside stage B while stage A already called `get_profile`, so stage A raised
    `no calibration profile 'calib.domain_balanced@v1'; registered: []`.
@@ -44,7 +44,7 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
     ArtifactError, LIFECYCLES, build_manifest, evaluate_teardown)
 from aadistill.infrastructure.session_runner import streams_at_risk  # noqa: E402
-from collect_artifacts import load_specs  # noqa: E402
+from shared.pod.collect_artifacts import load_specs  # noqa: E402
 
 SPEC_SCHEMA = "aadistill.artifact_spec/v1"
 C2_SPECS = ("configs/autoinit/c2_artifacts.json",
@@ -91,7 +91,7 @@ import argparse, json, pathlib, sys
 REPO = pathlib.Path(sys.argv[1])
 for rel in ("src", "scripts", "scripts/pod"):
     sys.path.insert(0, str(REPO / rel))
-import autoinit_phase_c2_driver as D
+from stages.phase_c2 import autoinit_phase_c2_driver as D
 tmp = pathlib.Path(sys.argv[2])
 # The pod's /workspace and audit root do not exist here. Stage A's arithmetic
 # does not depend on either; redirecting them is what lets the real stage run.
@@ -179,7 +179,7 @@ def test_conftest_pre_fills_the_registry_for_every_in_process_test():
     deleting them restores the hole that cost a paid pod.
     """
     conftest = (REPO / "tests/conftest.py").read_text()
-    assert "experiments.calibration" in conftest, (
+    assert "shared.calibration" in conftest, (
         "tests/conftest.py no longer imports the calibration bootstrap; "
         "re-check whether in-process tests can now see an empty registry")
     from aadistill.initialization.calibration.profiles import registered_profiles

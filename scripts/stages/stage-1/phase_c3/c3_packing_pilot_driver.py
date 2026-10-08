@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The packing-optimization pilot, as one owned sequence.
 
-    python scripts/pod/c3_packing_pilot_driver.py --out /workspace/out/packing
+    python scripts/stages/stage-1/phase_c3/c3_packing_pilot_driver.py --out /workspace/out/packing
 
     1. obtain the verified pre-ATTENTION parent
          reuse it if durable bytes exist; otherwise replay the prefix ONCE at B1
@@ -28,7 +28,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -67,9 +67,9 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     from aadistill.initialization.planning.fixed_path import FixedPathSpec
     from aadistill.initialization.specs.arch import ArchSpec
 
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c3 import pilot
-    from experiments.phase_c3.compare import compare_head_maps, speedup
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c3 import pilot
+    from stages.phase_c3.compare import compare_head_maps, speedup
 
     #: `nproc` REPORTS THE HOST, NOT THE GRANT. The v1 toy preflight ran on
     #: cpu under a CUDA-built torch, sized its thread pool from the 100+ CPUs
@@ -111,7 +111,7 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
 
     # --- 1-2. the parent ----------------------------------------------------
     if toy:
-        from c3_batching_pilot_driver import (          # noqa: F401
+        from stages.phase_c3.c3_batching_pilot_driver import (          # noqa: F401
             TOY_PARENT, TOY_TARGET, _toy_items, _toy_root)
 
         items = _toy_items()
@@ -217,7 +217,7 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
 
     # --- 3. the screen ------------------------------------------------------
     _say("stage 3/7: three-layer throughput screen")
-    from c3_packing_screen import run as run_screen
+    from stages.phase_c3.c3_packing_screen import run as run_screen
 
     #: A toy run has no frozen mixture and a 3-layer geometry, so it supplies
     #: its own items and its own layers. THE REAL PATH PASSES NEITHER — the
@@ -341,7 +341,7 @@ def _full_scorer(parent_path, protocol, out_dir, *, repo, device, dtype,
     from aadistill.initialization.specs.arch import ArchSpec
     from transformers import AutoModelForCausalLM
 
-    from experiments.phase_c3 import pilot
+    from stages.phase_c3 import pilot
 
     bs = protocol["calibration_forward_batch_size"]
     packing = protocol["calibration_batch_packing"]
@@ -398,7 +398,7 @@ def _full_scorer(parent_path, protocol, out_dir, *, repo, device, dtype,
 
 
 def pilot_toy_items():
-    from c3_batching_pilot_driver import _toy_items
+    from stages.phase_c3.c3_batching_pilot_driver import _toy_items
 
     return _toy_items()
 
@@ -456,7 +456,7 @@ def main(argv=None) -> int:
     #: Both delegate to the pilot module: the answer is a fact about the
     #: pilot's steps, and two copies is one place for it to be wrong.
     if args.required_inputs or args.check_inputs:
-        from experiments.phase_c3 import pilot
+        from stages.phase_c3 import pilot
 
         if args.required_inputs:
             for entry in pilot.required_profiles(Path(args.repo)):

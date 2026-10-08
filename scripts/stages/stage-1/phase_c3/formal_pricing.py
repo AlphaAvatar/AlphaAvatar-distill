@@ -272,7 +272,7 @@ def live_envelopes() -> dict[str, float]:
     import sys
 
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/consolidate/derive_budget.py"), "--json"],
+        [sys.executable, str(REPO / "scripts/maintenance/consolidation/derive_budget.py"), "--json"],
         capture_output=True, text=True, cwd=str(REPO))
     if out.returncode != 0:
         raise C3PricingError(f"derive_budget failed: {out.stderr[-400:]}")
@@ -376,7 +376,7 @@ def main(argv=None) -> int:
     #: is refused rather than priced.
     import sys as _sys
     _sys.path.insert(0, str(REPO / "scripts"))
-    from experiments.phase_c3.hardware import (
+    from stages.phase_c3.hardware import (
         C3HardwareError, query_offers, require_approved, select)
 
     gpu = args.gpu

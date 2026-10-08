@@ -1,9 +1,9 @@
 """Score a checkpoint on `eval_behavior_v0` — deterministic greedy generation
 plus the mechanical scorers in `aadistill.behavior`.
 
-    uv run python scripts/evaluation/eval_behavior.py \
-        --model artifacts/stage3/s1_ffn_norm_v0/checkpoints/step_000660/model \
-        --out artifacts/stage3/s1_ffn_norm_v0/eval_behavior_v0.json
+    uv run python scripts/shared/evaluation/eval_behavior.py \
+        --model artifacts/stages/stage-3/s1_ffn_norm_v0/checkpoints/step_000660/model \
+        --out artifacts/stages/stage-3/s1_ffn_norm_v0/eval_behavior_v0.json
 
 Writes a scorecard JSON (aggregates + per-sample scores + full reproducibility
 metadata) and, next to it, the raw generations as jsonl. Greedy decoding, batch
@@ -25,7 +25,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.behavior import aggregate, score_sample, split_generation

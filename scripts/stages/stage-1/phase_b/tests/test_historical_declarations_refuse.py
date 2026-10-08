@@ -20,16 +20,16 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "tests"))
 
-from experiments.historical_declarations import (  # noqa: E402
+from shared.historical_declarations import (  # noqa: E402
     assert_declaration_refuses,
     missing_from_tree,
 )
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from experiments.phase_b.plan import (  # noqa: E402
+from stages.phase_b.plan import (  # noqa: E402
     PHASE_B_EXECUTABLE_SOURCE_FILES_V1,
     phase_b_source_digest,
 )
-from experiments.phase_b.continuation import (  # noqa: E402
+from stages.phase_b.continuation import (  # noqa: E402
     CONTINUATION_SOURCE_FILES_V2,
     continuation_source_digest,
 )

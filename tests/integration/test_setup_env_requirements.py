@@ -35,7 +35,7 @@ sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
 from support.session_specs import SESSION_LAUNCHERS, load_session_launcher, session_args  # noqa: E402
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 #: Launchers that PREDATE a requirement, named with the reason rather than
 #: silently excluded. `: "${SESSION_FROZEN_EXPECT:?}"` landed on 2026-09-16

@@ -24,9 +24,9 @@ LAUNCH = POD / "e6b_launch.sh"
 def test_setup_stages_the_training_pack_under_both_names():
     """The trainer reads `ladder_uniform`; the battery reads `ladder_uniform_probe`."""
     s = SETUP.read_text()
-    assert 'test -f "$REPO/artifacts/stage3/ladder_uniform/blocks.npz"' in s, \
+    assert 'test -f "$REPO/artifacts/stages/stage-3/ladder_uniform/blocks.npz"' in s, \
         "E6b trains, so the training pack must be present — E6 asserted the opposite"
-    assert 'test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"' in s
+    assert 'test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"' in s
     assert "ladder_uniform'" in s and "audit.jsonl" in s, \
         "ladder_blocks reads audit.jsonl; a pack without it fails only on a pod"
 

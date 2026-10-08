@@ -30,7 +30,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 
-from experiments.phase_c1.bundle import BUNDLE_PREFIX, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, require_canonical_bundle_arg, roundtrip, sha256_bytes  # noqa: E402
+from stages.phase_c1.bundle import BUNDLE_PREFIX, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, require_canonical_bundle_arg, roundtrip, sha256_bytes  # noqa: E402
 
 AUTH_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
@@ -110,7 +110,7 @@ def files() -> tuple[str, ...]:
     that no longer exists -- which is the fail-closed behaviour that set is for,
     and not what a transport round-trip is testing.
     """
-    from experiments.phase_c1.authorization import c1_current_executable
+    from stages.phase_c1.authorization import c1_current_executable
     return tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 
 
@@ -251,7 +251,7 @@ def test_mutation_dropping_canonical_name_enforcement_is_caught():
 def test_mutation_dropping_the_checkout_commit_check_is_caught(tmp_path, files,
                                                                monkeypatch):
     """Without the HEAD equality, the stale-bundle case passes silently."""
-    import experiments.phase_c1.bundle as B
+    import stages.phase_c1.bundle as B
 
     parent = _git("rev-parse", f"{AUTH_COMMIT}^", cwd=REPO)
     built = build_bundle(REPO, parent, tmp_path / "stale.bundle")
@@ -294,7 +294,7 @@ def _executable_text(fn) -> str:
 
 def test_mutation_dropping_the_remote_roundtrip_is_caught():
     """The gate must verify the REMOTE object, not a local record."""
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
     code = _executable_text(L.bundle_staged_gate)
     assert "roundtrip" in code
     assert "hf_download" in code
@@ -315,7 +315,7 @@ def test_the_transport_and_rope_gates_are_wired():
     document an authorization binds; the single pinned literal lives in
     `test_c1_readiness_gates.test_the_prereg_gate_count_and_order_equal_the_live_session`.
     """
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", HEAD,
@@ -331,7 +331,7 @@ def test_the_transport_and_rope_gates_are_wired():
 
 
 def test_preparation_is_a_separate_command_that_may_mutate_the_relay():
-    p = REPO / "scripts/autoinit/stage_c1_bundle.py"
+    p = REPO / "scripts/stages/stage-1/phase_c1/stage_c1_bundle.py"
     assert p.is_file()
     src = p.read_text()
     assert "stage_bundle" in src
@@ -342,6 +342,6 @@ def test_preparation_is_a_separate_command_that_may_mutate_the_relay():
 def test_stage_refuses_to_overwrite_a_different_remote_object():
     import inspect
 
-    from experiments.phase_c1.bundle import stage_bundle
+    from stages.phase_c1.bundle import stage_bundle
     src = inspect.getsource(stage_bundle)
     assert "Refusing to overwrite" in src

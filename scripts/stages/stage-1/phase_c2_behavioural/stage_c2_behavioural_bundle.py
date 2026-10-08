@@ -2,7 +2,7 @@
 """Put the authorization-carrying BEHAVIOURAL session commit where a pod can fetch it.
 
     PYTHONPATH=src:scripts python \\
-        scripts/autoinit/stage_c2_behavioural_bundle.py \\
+        scripts/stages/stage-1/phase_c2_behavioural/stage_c2_behavioural_bundle.py \\
         --run-id attempt1 --session-commit <sha> [--dry-run]
 
 Each session stages through its own module because the record it writes is the
@@ -40,16 +40,16 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
-from experiments.phase_c2.behavioural_bundle import (  # noqa: E402
+from stages.phase_c2.behavioural_bundle import (  # noqa: E402
     BEHAVIOURAL_TRANSPORT, BundleTransportError, build_bundle,
     canonical_bundle_name, canonical_repo_path, stage_bundle,
 )
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 EXPERIMENT_ID = "phase_c2_behavioural"
 STAGE_ID = "1"

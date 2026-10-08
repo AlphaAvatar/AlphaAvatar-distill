@@ -14,13 +14,13 @@ from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[5]
+REPO = Path(__file__).resolve().parents[6]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d_series import battery_family as family  # noqa: E402
+from stages.d_series import battery_family as family  # noqa: E402
 
 
 class TestTheSixRoles:
@@ -61,8 +61,8 @@ class TestTheSixRoles:
         """C1 ordered its battery under `phase-c1-battery` and C2 under
         `phase-c2-screening-battery`. A D-series role reusing either would draw
         the same ordering a consumed battery was drawn from."""
-        import battery_render
-        import build_c2_screening_battery as c2
+        from shared.data import battery_render
+        from stages.phase_c2 import build_c2_screening_battery as c2
 
         historical = {battery_render.DEFAULT_RANK_DOMAIN, c2.RANK_DOMAIN}
         assert not historical & {d for _r, d, _e, _p in family.ROLES}
@@ -150,7 +150,7 @@ class TestItIsFrozenProspectively:
         moves this without an edit.
         """
         report = family.report()
-        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        manifest = REPO / "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
         if manifest.is_file():
             import json as _json
 
@@ -223,7 +223,7 @@ class TestItIsANewDistributionAndSaysSo:
 
     def test_the_stratum_balance_is_inherited_not_restated(self):
         """Imported from the C1 builder, so the two cannot drift apart."""
-        import build_c1_confirmation_battery as c1
+        from stages.phase_c1 import build_c1_confirmation_battery as c1
 
         assert family.strata() == dict(c1.SETS)
         rule = family.allocation_rule()
@@ -306,7 +306,7 @@ class TestTheRequirementNobodyHadComputed:
         """
         report = family.report()
         blocker = report["blocker"]
-        manifest = REPO / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+        manifest = REPO / "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
         if manifest.is_file():
             assert "NOTHING BLOCKS THIS RECORD'S SUBJECT" in blocker
             assert "EVIDENCE BLOCKER is CLOSED" in blocker
@@ -452,7 +452,7 @@ class TestTheAllocationRuleVersioning:
         assert "preserved" in rule["_superseded_rules_are_preserved"]
 
     def test_the_id_schemes_are_derived_from_the_one_declaration(self):
-        from experiments.phase_d_series.identity import ID_SCHEME
+        from stages.d_series.identity import ID_SCHEME
 
         sem = family.allocation_rule()["selection"]["ranking_stable_id_semantics"]
         assert sorted(sem["schemes"]) == sorted(ID_SCHEME)

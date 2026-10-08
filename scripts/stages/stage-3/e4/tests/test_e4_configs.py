@@ -35,7 +35,7 @@ SEEDS = {"sa": 20260726, "sb": 20260801}
 P2_CONFIG_SHA = {"sa": "42616c1921419d01", "sb": "b846fee7bcae670f"}
 OBJECTIVE = {"ce_weight": 1.0, "kd_weight": 0.25,
              "kd_temperature": 1.0, "kd_scope": "all"}
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 
 # The rung drags these with it; every one is copied from the tracked E1 config
 # for the 1.60M rung, so this set is exhaustive and closed.
@@ -97,7 +97,7 @@ def test_objective_optimizer_and_data_source_are_unchanged(seed):
         assert arm[field] == ref[field], field
     assert arm["loss"] == OBJECTIVE
     assert "truncate_padding" not in arm["batch"]
-    assert arm["student_path"] == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    assert arm["student_path"] == "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 @pytest.mark.parametrize("seed", sorted(SEEDS))
@@ -113,7 +113,7 @@ def test_no_experiment3_freeze_policy_or_lora_leaked_in(seed):
 
 
 @pytest.mark.skipif(
-    not (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json").is_file(),
+    not (REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json").is_file(),
     reason="Stage 1 init absent; not every pod session stages it")
 def test_trainable_policy_on_the_real_geometry():
     """Full-rank attention + FFN + all norms; embeddings and lm_head frozen.
@@ -124,7 +124,7 @@ def test_trainable_policy_on_the_real_geometry():
     """
     from transformers import AutoConfig, AutoModelForCausalLM
 
-    init = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    init = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     model = AutoModelForCausalLM.from_config(AutoConfig.from_pretrained(init))
     report = select_trainable(model, e4("sa")["trainable_patterns"])
     assert report["lora_trainable_params"] == 0
@@ -197,7 +197,7 @@ def test_configs_validate_and_are_distinct():
         cfg = e4(seed)
         validate_train_config(cfg)
         hashes.add(sha256_json(cfg))
-        assert cfg["out_dir"] == f"artifacts/stage3/e4_p2_r1600k_{seed}"
+        assert cfg["out_dir"] == f"artifacts/stages/stage-3/e4_p2_r1600k_{seed}"
     assert len(hashes) == 2
     assert not (hashes & {sha256_json(p2(s)) for s in SEEDS})
     assert not (hashes & {sha256_json(e1_1600k(s)) for s in SEEDS})

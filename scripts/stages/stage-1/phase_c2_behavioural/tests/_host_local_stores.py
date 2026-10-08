@@ -47,7 +47,7 @@ for _p in (REPO / "src", REPO / "scripts"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from experiments.phase_c2 import behavioural as _BH  # noqa: E402
+from stages.phase_c2 import behavioural as _BH  # noqa: E402
 
 
 def host_local_stores_are_absent() -> bool:

@@ -33,10 +33,10 @@ the run is how a report gets misread):
    11  fp32 control         the dtype hypothesis. A DIAGNOSTIC, never a proposal
 
 The verdict is not written beside the numbers: `derive_conclusion` computes it
-from the stage outputs, and `scripts/experiments/stage-1/phase_c3/tests/test_batch_invariance_conclusion`
+from the stage outputs, and `scripts/stages/stage-1/phase_c3/tests/test_batch_invariance_conclusion`
 tables that function. Nothing here changes an operator. It measures.
 
-    PYTHONPATH=src:scripts python scripts/validation/batch_invariance_diagnostic.py \
+    PYTHONPATH=src:scripts python scripts/shared/validation/batch_invariance_diagnostic.py \
         --run-id <id> [--device cuda] [--dtype bfloat16] [--out DIR]
 """
 
@@ -50,7 +50,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -2069,7 +2069,7 @@ def main(argv=None) -> int:
             cfg[key] = value
 
     out_dir = Path(args.out) if args.out else (
-        REPO / "artifacts/validation/batch_invariance" / args.run_id)
+        REPO / "artifacts/shared/validation/batch_invariance" / args.run_id)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     device = args.device

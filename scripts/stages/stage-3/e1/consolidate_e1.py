@@ -6,7 +6,7 @@ reports the PCA-vs-random curves across six rungs and two seeds with the
 between-seed spread, so the reader can see which differences clear the noise
 and which do not.
 
-    uv run python scripts/evaluation/consolidate_e1.py
+    uv run python scripts/stages/stage-3/e1/consolidate_e1.py
 """
 
 from __future__ import annotations
@@ -85,9 +85,9 @@ def collect(repo: Path, eval_dir: Path) -> list[dict]:
         if nll_j and nll_j.get("results"):
             nll = nll_j["results"][0]["mean_nll_nats"]
         if nll is None:  # from the training pods
-            for cand in (repo / f"artifacts/stage3/rescued/_relay/{arm}/eval_holdout_v1.json",
-                         repo / f"artifacts/stage3/rescued/{arm}/eval_holdout_v1.json",
-                         repo / f"artifacts/stage3/rescued/_logs_rand/{arm}/eval_holdout_v1.json"):
+            for cand in (repo / f"artifacts/stages/stage-3/rescued/_relay/{arm}/eval_holdout_v1.json",
+                         repo / f"artifacts/stages/stage-3/rescued/{arm}/eval_holdout_v1.json",
+                         repo / f"artifacts/stages/stage-3/rescued/_logs_rand/{arm}/eval_holdout_v1.json"):
                 j = jload(cand)
                 if j and j.get("results"):
                     nll = j["results"][0]["mean_nll_nats"]
@@ -96,11 +96,11 @@ def collect(repo: Path, eval_dir: Path) -> list[dict]:
             "arm": arm, "init": init, "seed": seed, "tokens": toks,
             "control": arm.startswith("e1_ctl"),
             "val_ce": val_ce([
-                repo / f"artifacts/stage3/rescued/_relay/{arm}/train_log.jsonl",
-                repo / f"artifacts/stage3/rescued/_logs_rand/{arm}/train_log.jsonl",
-                repo / f"artifacts/stage3/rescued/{arm}/train_log.jsonl",
+                repo / f"artifacts/stages/stage-3/rescued/_relay/{arm}/train_log.jsonl",
+                repo / f"artifacts/stages/stage-3/rescued/_logs_rand/{arm}/train_log.jsonl",
+                repo / f"artifacts/stages/stage-3/rescued/{arm}/train_log.jsonl",
             ]) or val_ce_from_console(
-                repo / f"artifacts/stage3/rescued/_logs_{init}/console_{arm}.log"),
+                repo / f"artifacts/stages/stage-3/rescued/_logs_{init}/console_{arm}.log"),
             "holdout_nll": nll,
             "behavior": (beh or {}).get("behavior", {}).get("score"),
             "nat_term": (beh or {}).get("natural_termination_rate"),
@@ -120,10 +120,10 @@ def fmt(v, nd=4):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--eval-dir", default="artifacts/eval/e1")
-    ap.add_argument("--out", default="artifacts/stage3/e1_consolidated.json")
+    ap.add_argument("--eval-dir", default="artifacts/stages/stage-3/eval/e1")
+    ap.add_argument("--out", default="artifacts/stages/stage-3/e1_consolidated.json")
     args = ap.parse_args()
-    repo = Path(__file__).resolve().parents[2]
+    repo = Path(__file__).resolve().parents[4]
     rows = collect(repo, Path(args.eval_dir))
     Path(args.out).write_text(json.dumps(rows, indent=1))
 

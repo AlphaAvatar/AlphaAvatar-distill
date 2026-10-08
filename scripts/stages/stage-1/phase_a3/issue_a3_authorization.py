@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue A3's ONE-USE authorization from its grant. Derives; never transcribes.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/issue_a3_authorization.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/issue_a3_authorization.py \
         --grant logs/stages/stage-1/phase_a3/runs/<run>/governance/grant.json \
         --out   logs/stages/stage-1/phase_a3/runs/<run>/governance/authorization.json
 
@@ -29,15 +29,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.grant import (  # noqa: E402
     GrantRefused, refuse_a_future_dated_grant,
 )
-from experiments.phase_a3.a3_authorization import A3Authorization  # noqa: E402
-from experiments.phase_a3.a3_authorization_payload import (  # noqa: E402
+from stages.phase_a3.a3_authorization import A3Authorization  # noqa: E402
+from stages.phase_a3.a3_authorization_payload import (  # noqa: E402
     A3AuthorizationRefused, build_a3_authorization_payload,
 )
 

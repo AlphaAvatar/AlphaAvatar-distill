@@ -2,7 +2,7 @@
 """Derive the Phase-C1 execution preregistration — and REFUSE to rewrite it.
 
     PYTHONPATH=src .venv/bin/python \
-        scripts/autoinit/write_c1_execution_preregistration.py
+        scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py
 
 Every binding is **derived**, never transcribed: the seeds from the frozen C0
 digest, the hashes from the live objects, the teacher shards from the committed
@@ -44,20 +44,20 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 
-from experiments.phase_c1 import session as CS
-from experiments.phase_c1.isolation import BOOTSTRAP_ALGORITHM, BOOTSTRAP_ITERATIONS, BOOTSTRAP_QUANTILE_CONVENTION, BOOTSTRAP_STRATUM_CONVENTION, C0_PREREGISTRATION_SHA256, HISTORICAL_SEEDS, C1Arm, C1IsolationPlan, bootstrap_seed, derive_recovery_seeds  # noqa: E402
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_AUTH_SCHEMA, c1_harness_digest, load_pricing  # noqa: E402
-from experiments.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
-from experiments.phase_c1.scoring import C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
+from stages.phase_c1 import session as CS
+from stages.phase_c1.isolation import BOOTSTRAP_ALGORITHM, BOOTSTRAP_ITERATIONS, BOOTSTRAP_QUANTILE_CONVENTION, BOOTSTRAP_STRATUM_CONVENTION, C0_PREREGISTRATION_SHA256, HISTORICAL_SEEDS, C1Arm, C1IsolationPlan, bootstrap_seed, derive_recovery_seeds  # noqa: E402
+from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_AUTH_SCHEMA, c1_harness_digest, load_pricing  # noqa: E402
+from stages.phase_c1.authorization_payload import ATTEMPT_18_PREREGISTRATION  # noqa: E402
+from stages.phase_c1.scoring import C1_METRIC_CONTRACT, c1_scoring_contract  # noqa: E402
 from aadistill.initialization.calibration.profiles import get_profile  # noqa: E402
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.operators.attention.gqa.activation_importance import ATTENTION_STATS_SPEC  # noqa: E402
-from experiments.recipes import E1_KD_HEAVY_0860K  # noqa: E402
+from shared.recipes import E1_KD_HEAVY_0860K  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing the core no longer registers a mixture.
@@ -76,7 +76,7 @@ NOT_BOUND_BY_THE_CLOSED_EXPERIMENT: tuple[str, ...] = (
 #: The two evidence declarations. Restated here rather than imported, because
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
 #: turned into a checked invariant by
-#: scripts/experiments/stage-1/phase_c1/tests/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
+#: scripts/stages/stage-1/phase_c1/tests/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
 SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
 SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 
@@ -84,14 +84,14 @@ SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
 #: failure mode as the other source-digest sets: a missing declared file raises
 #: rather than yielding a digest over a smaller contract.
 C1_SOURCE_FILES: tuple[str, ...] = (
-    "scripts/experiments/stage-1/phase_c1/isolation.py",
-    "scripts/experiments/stage-1/phase_c1/session.py",
+    "scripts/stages/stage-1/phase_c1/isolation.py",
+    "scripts/stages/stage-1/phase_c1/session.py",
     "src/aadistill/initialization/planning/fixed_path.py",
     "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
     "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
-    "scripts/data/battery_render.py",
-    "scripts/data/build_c1_confirmation_battery.py",
-    "scripts/autoinit/verify_c1_battery_isolation.py",
+    "scripts/shared/data/battery_render.py",
+    "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
+    "scripts/stages/stage-1/phase_c1/verify_c1_battery_isolation.py",
 )
 
 
@@ -136,7 +136,7 @@ def live_prechecks() -> tuple[int, list[str]]:
 
     sys.path.insert(0, str(REPO / "scripts/pod"))
     loader = importlib.util.spec_from_file_location(
-        "_c1_launch_for_prereg", REPO / "scripts/pod/autoinit_c1_launch.py")
+        "_c1_launch_for_prereg", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
     mod = importlib.util.module_from_spec(loader)
     sys.modules["_c1_launch_for_prereg"] = mod
     loader.loader.exec_module(mod)
@@ -207,14 +207,14 @@ def main() -> None:
         },
         "authorization": {
             "schema": C1_AUTH_SCHEMA,
-            "type": "experiments.phase_c1.authorization.C1Authorization",
+            "type": "stages.phase_c1.authorization.C1Authorization",
             "session_kind": "c1",
             "allows_phase_a": False,
             "allows_beam_search": False,
             "n_harness_files": len(C1_HARNESS_SOURCE_FILES_V1),
             "status": "NO GRANT EXISTS. No authorization has been issued.",
         },
-        "launcher": "scripts/pod/autoinit_c1_launch.py",
+        "launcher": "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
         "pricing": {
             "path": "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json",
             "pricing_sha256": load_pricing(REPO)["pricing_sha256"],
@@ -317,12 +317,12 @@ def main() -> None:
             "calib.domain_balanced@v1": {
                 "profile_hash": db.profile_hash,
                 "content_sha256": db.content_sha256,
-                "items_path": "artifacts/stage1/e8_calibration_v1/items.jsonl",
+                "items_path": "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl",
                 "n_items": 67},
             "calib.reasoning_heavy@v2": {
                 "profile_hash": rh.profile_hash,
                 "content_sha256": rh.content_sha256,
-                "items_path": "artifacts/stage1/reasoning_heavy_v2/items.jsonl",
+                "items_path": "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl",
                 "n_items": 62},
             "resolution": "fail-closed: resolve() re-derives and checks the content hash",
         },
@@ -512,7 +512,7 @@ def main() -> None:
                     "The residual hole is recorded in the file's `limitation` "
                     "field and is a live review item, not a closed design."),
             },
-            "gate": ("artifact_spec_gate in scripts/pod/autoinit_c1_launch.py, "
+            "gate": ("artifact_spec_gate in scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py, "
                      "at $0 before provider creation: both files exist, parse, "
                      "load through collect_artifacts.load_specs, stay inside the "
                      "artifact roots, are inside the measured harness set, cover "
@@ -528,12 +528,12 @@ def main() -> None:
         },
 
         "driver": {
-            "path": "scripts/pod/autoinit_c1_driver.py",
+            "path": "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
             "standalone": True,
             "subclasses_phase_a_driver": False,
             "imports_phase_a_driver_or_launcher": False,
-            "owns_paths": ["artifacts/audit/autoinit_c1", "artifacts/stage3/c1",
-                           "artifacts/eval/c1"],
+            "owns_paths": ["artifacts/audit/autoinit_c1", "artifacts/stages/stage-3/c1",
+                           "artifacts/stages/stage-3/eval/c1"],
             "stages": "B-I; A and J belong to the session runner",
             "stage_g_h_separation": (
                 "stage G runs all six recovery trainings and opens no battery, "
@@ -581,7 +581,7 @@ def main() -> None:
             "canonical_bundle_name": "aad_autoinit_<first 8 hex of session commit>.bundle",
             "relay": "AlphaAvatar/aadistill-artifacts:transfer/<canonical name>",
             "derived_from": "--session-commit; an alias fails at $0",
-            "preparation": ("scripts/autoinit/stage_c1_bundle.py -- MAY mutate the "
+            "preparation": ("scripts/stages/stage-1/phase_c1/stage_c1_bundle.py -- MAY mutate the "
                             "relay; refuses a commit that does not carry the "
                             "authorization, and refuses to overwrite a different "
                             "existing remote object"),
@@ -631,7 +631,7 @@ def main() -> None:
         },
 
         #: SETUP READINESS, explicitly NOT a C1 measurement input. The shared
-        #: setup's ROPE_OK step globs artifacts/stage1/*/checkpoint/config.json
+        #: setup's ROPE_OK step globs artifacts/stages/stage-1/*/checkpoint/config.json
         #: and loads each match through AutoConfig in both venvs, requiring a
         #: stored RoPE base of 5,000,000; it reads no weights. Attempt 2 staged
         #: only the three evaluation tokenizer sidecars there and died at that
@@ -639,10 +639,10 @@ def main() -> None:
         "setup_readiness": {
             "rope_ok_input": {
                 "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint/config.json",
-                "dest": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+                "dest": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
                 "sha256": sha256_file(
-                    REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"),
-                "bytes": (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+                    REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json"),
+                "bytes": (REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
                           "/config.json").stat().st_size,
                 "stored_rope_base": 5000000,
                 "verified": ("the relay object was downloaded read-only and hashed "

@@ -78,7 +78,7 @@ needs_whole_tree = pytest.mark.skipif(
 class TestTheBudgetIsDerivedNotRestated:
     @pytest.fixture(scope="class")
     def derived(self):
-        from consolidate.derive_budget import derive
+        from maintenance.consolidation.derive_budget import derive
         return derive(REPO)
 
     def test_the_fundable_count_divides_the_formal_allowance(self, derived):
@@ -136,7 +136,7 @@ class TestTheBudgetIsDerivedNotRestated:
             #: which one the code reads.
             import ast as _ast
 
-            src = (REPO / "scripts/consolidate/derive_budget.py").read_text()
+            src = (REPO / "scripts/maintenance/consolidation/derive_budget.py").read_text()
             tree = _ast.parse(src)
             expr = None
             for node in _ast.walk(tree):
@@ -342,7 +342,7 @@ class TestTheEntryPointsResolve:
 
     def test_the_readme_is_not_counted_as_a_run_product(self):
         """A directory holding only its own README has not executed."""
-        from experiments.run_layout import present_roles, layout_for
+        from shared.run_layout import present_roles, layout_for
         import tempfile
         with tempfile.TemporaryDirectory() as t:
             lay = layout_for(Path(t), "exp", "r1", "1")
@@ -495,7 +495,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         i, j = text.index(MARK_START), text.index(MARK_END)
         assert text[i:j] == render_catalog(REPO) + "\n", (
             "CATALOG.md's classification is stale; re-run "
-            "scripts/consolidate/render_log_navigation.py --write")
+            "scripts/maintenance/consolidation/render_log_navigation.py --write")
 
         runs = runs_by_experiment(REPO)
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
@@ -530,7 +530,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         for st in sorted((REPO / "logs/stages").glob("stage-*")):
             assert (st / "README.md").read_text() == render_stage_readme(st, REPO), (
                 f"{st.name}/README.md is stale; re-run "
-                "scripts/consolidate/render_log_navigation.py --write")
+                "scripts/maintenance/consolidation/render_log_navigation.py --write")
         assert render_stages_index(REPO) in (REPO / "logs/stages/README.md").read_text()
         assert (REPO / "logs/shared/README.md").read_text() == render_shared_readme(REPO)
         text = (REPO / LOGS_README).read_text()
@@ -631,12 +631,12 @@ class TestTheStageMappingIsComplete:
         assert external, "no external material is cited, so this proves nothing"
         #: A concrete cited path the skip-predicate audit can read out of this
         #: source, and one C1's manifest does NOT stage — the Stage-0
-        #: statistics cache. `artifacts/stage1/qwen3_0p6b_init_v0` would have
+        #: statistics cache. `artifacts/stages/stage-1/qwen3_0p6b_init_v0` would have
         #: been the wrong choice twice over: no separator-free name resolves,
         #: and that one IS staged, so the guard would not fire on a pod and the
         #: test would run against material that is not there.
-        if not (REPO / "artifacts/stage0/qwen3_4b_thinking_v1").is_dir():
-            pytest.skip("this checkout has no artifacts/stage0/; the "
+        if not (REPO / "artifacts/stages/stage-0/qwen3_4b_thinking_v1").is_dir():
+            pytest.skip("this checkout has no artifacts/stages/stage-0/; the "
                         "out-of-tree material these citations name is not "
                         "here to check")
         missing = [p for p in external if not (REPO / p).exists()]
@@ -753,7 +753,7 @@ class TestTheStageMappingIsComplete:
         committed = load(attribution.STAGE_INDEX)
         assert committed == attribution.document(REPO), (
             "logs/stages/index.json is stale; re-run "
-            "scripts/consolidate/stage_attribution.py --write")
+            "scripts/maintenance/consolidation/stage_attribution.py --write")
 
     def test_an_experiment_without_runs_is_still_reported(self, attribution):
         """Absent material is not absent work.
@@ -791,7 +791,7 @@ class TestSweepOutputsAreIsolated:
     def _mod(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "rpe", REPO / "scripts/autoinit/record_pod_environment.py")
+            "rpe", REPO / "scripts/shared/pod/record_pod_environment.py")
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)
         return m
@@ -864,7 +864,7 @@ class TestSweepOutputsAreIsolated:
         taken = tmp_path / "junit.xml"
         taken.write_text("<testsuite/>")
         r = sp.run([sys.executable,
-                    str(REPO / "scripts/autoinit/record_pod_environment.py"),
+                    str(REPO / "scripts/shared/pod/record_pod_environment.py"),
                     "--junit", str(taken)],
                    capture_output=True, text=True,
                    env={"PYTHONPATH": f"{REPO}/src", "PATH": "/usr/bin:/bin",
@@ -880,7 +880,7 @@ class TestSweepOutputsAreIsolated:
         import subprocess as sp
 
         r = sp.run([sys.executable,
-                    str(REPO / "scripts/autoinit/record_pod_environment.py"),
+                    str(REPO / "scripts/shared/pod/record_pod_environment.py"),
                     "--from-existing"],
                    capture_output=True, text=True,
                    env={"PYTHONPATH": f"{REPO}/src", "PATH": "/usr/bin:/bin",
@@ -889,7 +889,7 @@ class TestSweepOutputsAreIsolated:
         assert "cannot guess which one" in (r.stdout + r.stderr)
 
     def test_no_shared_default_remains(self):
-        src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+        src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
         assert "podsim_junit.xml" not in src, "the shared JUnit default is back"
         assert "podsim_pytest.log" not in src, "the shared log default is back"
         assert "def sweep_outputs" not in src, (
@@ -1163,7 +1163,7 @@ class TestRunOwnedGovernanceEvidence:
     def _L(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "L", REPO / "scripts/pod/autoinit_c1_launch.py")
+            "L", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)
         return m
@@ -1197,7 +1197,7 @@ class TestRunOwnedGovernanceEvidence:
     def test_the_issuer_refuses_to_overwrite_an_authorization(self, tmp_path):
         """One-use means one artifact. Replacing one in place is how a consumed
         authorization becomes indistinguishable from a fresh one."""
-        src = (REPO / "scripts/autoinit/issue_c1_authorization.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c1/issue_c1_authorization.py").read_text()
         assert "already exists. An authorization is one-use" in src
         assert "--run-id" in src
 
@@ -1217,7 +1217,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
     def test_the_protected_trees_are_declared(self):
         from consolidate.relocate_logs import NEVER_REWRITE, rewritable
         assert "artifacts/" in NEVER_REWRITE
-        assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
+        assert not rewritable("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json")
         assert "logs/stages/" in NEVER_REWRITE
         assert not rewritable("logs/stages/stage-1/phase_c1/runs/attempt10/manifest.json")
         assert rewritable("logs/README.md")
@@ -1225,7 +1225,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
     def test_the_frozen_battery_manifest_verifies(self):
         """The check the scorer makes, made here at $0."""
         from aadistill.infrastructure.manifest import sha256_json
-        p = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        p = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
         if not p.is_file():
             pytest.skip("the battery working copy is not present")
         m = json.loads(p.read_text())
@@ -1236,7 +1236,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
 
     def test_it_matches_the_canonical_store(self):
         from aadistill.infrastructure.manifest import sha256_file
-        a = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        a = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
         b = Path("/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/"
                  "manifest.json")
         if not (a.is_file() and b.is_file()):

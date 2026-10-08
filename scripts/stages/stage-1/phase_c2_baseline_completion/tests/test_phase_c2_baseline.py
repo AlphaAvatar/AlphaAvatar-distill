@@ -40,14 +40,14 @@ for _extra in ("src", "scripts", "scripts/autoinit"):
 from aadistill.initialization.specs.artifact import (  # noqa: E402
     CheckpointIdentity, ShardRecord,
 )
-from experiments.phase_c2 import baseline as B  # noqa: E402
+from stages.phase_c2 import baseline as B  # noqa: E402
 
 
 @pytest.fixture
 def registered():
     """`attention.activation_importance_v1` is not a shipped default."""
     from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
     try:

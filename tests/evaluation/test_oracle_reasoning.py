@@ -121,7 +121,7 @@ def test_role_labels_align_to_the_predicted_token_after_the_causal_shift():
     """
     import numpy as np
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
-    from audit_kd_decomposition import role_labels
+    from shared.training.audit_kd_decomposition import role_labels
 
     THINK_CLOSE, IM_END = 900, 901
     #        0    1    2         3    4    5        6
@@ -142,7 +142,7 @@ def test_role_labels_align_to_the_predicted_token_after_the_causal_shift():
 def test_role_labels_mark_padding_excluded():
     import numpy as np
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
-    from audit_kd_decomposition import role_labels
+    from shared.training.audit_kd_decomposition import role_labels
     ids = np.array([10, 11, 0, 0])
     ce = np.array([0, 0, 0, 0], dtype=bool)
     content = np.array([1, 1, 0, 0], dtype=bool)
@@ -161,7 +161,7 @@ def test_gold_answer_extracts_the_bare_numeric_answer():
     a scorer reporting 0.0 for a reason unrelated to the model.
     """
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-    from run_three_mode_diagnostic import gold_answer
+    from stages.d0.run_three_mode_diagnostic import gold_answer
     gsm = {"data_type": "gsm8k",
            "gold": "Natalia sold 48/2 = 24 clips in May.\n"
                    "Natalia sold 48+24 = 72 clips altogether.\nThe answer is 72."}
@@ -177,7 +177,7 @@ def test_gold_answer_extracts_the_bare_numeric_answer():
 def test_free_form_qa_is_not_held_to_the_numeric_final_answer_rule():
     """A verbatim-correct QA answer carries no boxed/Final-Answer marker."""
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-    from run_three_mode_diagnostic import score
+    from stages.d0.run_three_mode_diagnostic import score
     rag = {"data_type": "rag_evidence", "gold": "Mumbai, India"}
     assert score(rag, "Mumbai, India") is True
     assert score(rag, "The city is Mumbai, India.") is True

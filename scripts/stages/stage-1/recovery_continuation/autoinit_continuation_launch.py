@@ -2,7 +2,7 @@
 """The Stage-3 characterization continuation, as a session specification.
 
     PYTHONPATH=src setsid nohup python -u \
-        scripts/pod/autoinit_continuation_launch.py \
+        scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> \
         --transport relay < /dev/null &
 
@@ -34,7 +34,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
@@ -42,9 +42,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # structural checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.preflight import PreflightAuthorization  # noqa: E402
-from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
+from shared.deployment import MAIN_RELAY, POD_IMAGE, deployment_commands  # noqa: E402
+from shared.preflight import PreflightAuthorization  # noqa: E402
+from stages.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
@@ -60,7 +60,7 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 
@@ -72,15 +72,15 @@ CKPT_STORE = "/home/ecs-user/aad-artifacts/autoinit"
 #: Dev-box-only inputs the pod cannot fetch from git: the frozen battery, and the
 #: permanent controls' own records. Small; the weights travel by `--transport`.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
     LocalAsset("logs/stages/stage-1/phase_a/results/autoinit_permanent_controls", "autoinit_permanent_controls",
                "logs"),
 )
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",
-                "scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py")
+                "scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py")
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 #: The three record files each control travels with.
 CONTROL_RECORDS = tuple(
@@ -185,7 +185,7 @@ transport_gate.__name__ = "transport_inputs"
 
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_continuation_driver.py "
+            f"{REPO}/scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
@@ -218,9 +218,9 @@ def spec(args) -> SessionSpec:
         authorization_path=AUTH_PATH,
         authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,

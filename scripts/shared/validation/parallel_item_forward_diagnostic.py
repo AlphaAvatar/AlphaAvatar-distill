@@ -29,7 +29,7 @@ Phases, each gated on the previous one:
 
 Phase 2 runs only if phase 1 is exact; phase 3 only if phase 2 is.
 
-    PYTHONPATH=src:scripts python scripts/validation/parallel_item_forward_diagnostic.py \
+    PYTHONPATH=src:scripts python scripts/shared/validation/parallel_item_forward_diagnostic.py \
         --run-id <id> [--device cuda] [--concurrency 1,2,4]
 """
 
@@ -43,7 +43,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -64,7 +64,7 @@ def _shared():
     A second copy would be a second set of metric definitions, and two
     definitions of `rel_l2` is exactly how two reports come to disagree.
     """
-    path = REPO / "scripts/validation/batch_invariance_diagnostic.py"
+    path = REPO / "scripts/shared/validation/batch_invariance_diagnostic.py"
     spec = importlib.util.spec_from_file_location("batch_invariance_diagnostic",
                                                   path)
     module = importlib.util.module_from_spec(spec)
@@ -526,7 +526,7 @@ def main(argv=None) -> int:
                                     args.concurrency_sweep.split(",")]
 
     out_dir = Path(args.out) if args.out else (
-        REPO / "artifacts/validation/parallel_item" / args.run_id)
+        REPO / "artifacts/shared/validation/parallel_item" / args.run_id)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     device = args.device

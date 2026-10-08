@@ -30,8 +30,8 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-import autoinit_phase_b_driver as pbd  # noqa: E402
-import autoinit_phase_b_launch as pbl  # noqa: E402
+from stages.phase_b import autoinit_phase_b_driver as pbd  # noqa: E402
+from stages.phase_b import autoinit_phase_b_launch as pbl  # noqa: E402
 
 #: The archive root the collector's patterns are relative to. `manifest.json` from
 #: attempt 3 records `root: /workspace/aad/artifacts`, i.e. `<repo>/artifacts`.
@@ -73,7 +73,7 @@ def test_the_driver_writes_inside_the_archive_root():
 
 def test_phase_b_does_not_write_into_the_phase_a_search_workdir():
     """Two sessions retaining different journals must not share a path."""
-    import autoinit_phase_a_driver as pad
+    from stages.phase_a import autoinit_phase_a_driver as pad
 
     assert pbd.SEARCH_WORKDIR != pad.SEARCH_WORKDIR
 

@@ -18,5 +18,5 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 
 def test_the_summariser_is_inside_the_measured_harness():
-    from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
-    assert "scripts/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1
+    from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1
+    assert "scripts/shared/pod/summarize_pytest_outcomes.py" in C1_HARNESS_SOURCE_FILES_V1

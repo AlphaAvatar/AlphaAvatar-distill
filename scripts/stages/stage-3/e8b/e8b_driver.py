@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """E8b driver: one script for all four sessions, selected by --session.
 
-    /opt/train/bin/python scripts/pod/e8b_driver.py --session s2 \
+    /opt/train/bin/python scripts/stages/stage-3/e8b/e8b_driver.py --session s2 \
         --spent-usd 1.2 --soft-stop-usd 17.97 --authorized-usd 18.76 --rate 1.59
 
 Stage plans, and the order is the rule rather than a convenience:
@@ -48,9 +48,9 @@ REPO = Path("/workspace/aad")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-VAL_STREAM = REPO / "artifacts/stage3/e7_fineweb_val"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+VAL_STREAM = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
 HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
 PROBE_PROMPTS = REPO / "data/eval_behavior_v0/prompts.jsonl"
 
@@ -79,10 +79,10 @@ GATE_MAX_TREND_GIB = 0.05     # allowed rise across that tail
 GATE_MIN_FREE_MARGIN_GIB = 1.5  # required headroom below capacity, not below a constant
 
 INITS = {
-    "DP": "artifacts/stage1/e8b_dp_init",
-    "DC": "artifacts/stage1/e8b_dc_init",
-    "FP": "artifacts/stage1/qwen3_0p6b_init_v0",
-    "FC": "artifacts/stage1/e8_contribution_init_v1",
+    "DP": "artifacts/stages/stage-1/e8b_dp_init",
+    "DC": "artifacts/stages/stage-1/e8b_dc_init",
+    "FP": "artifacts/stages/stage-1/qwen3_0p6b_init_v0",
+    "FC": "artifacts/stages/stage-1/e8_contribution_init_v1",
 }
 LABELS = {"DP": "e8b-dp-depth-only-positional",
           "DC": "e8b-dc-depth-only-contribution",
@@ -159,7 +159,7 @@ def spent_usd(args) -> float:
 
 
 def run_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}"
+    return REPO / f"artifacts/stages/stage-3/{name}"
 
 
 def model_dir(name: str) -> Path:
@@ -182,7 +182,7 @@ def stage_init_nll(args) -> None:
         if now + need > args.soft_stop_usd:
             mark(args.session, f"ABORTED_AT_GATE:budget:{now:.2f}+{need:.2f}")
             raise SystemExit("not enough budget to measure an initialization")
-        run(["scripts/evaluation/measure_init_nll.py",
+        run(["scripts/shared/evaluation/measure_init_nll.py",
              "--checkpoint", base / "checkpoint", "--label", LABELS[cell],
              "--holdout", HOLDOUT, "--fineweb-val", VAL_STREAM,
              "--pack", PACK, "--rung", TRAIN_RUNG,
@@ -221,7 +221,7 @@ def stage_step0_probe(args) -> None:
             return
         dest.parent.mkdir(parents=True, exist_ok=True)
         try:
-            run(["scripts/evaluation/eval_behavior.py",
+            run(["scripts/shared/evaluation/eval_behavior.py",
                  "--model", base / "checkpoint",
                  "--prompts", "data/eval_behavior_v0/prompts.jsonl",
                  "--max-new-tokens", args.probe_max_new_tokens,
@@ -298,7 +298,7 @@ def stage_throughput_gate(args) -> None:
     cfg = json.loads((REPO / f"configs/stage3/e8b/{name}.json").read_text())
     probe = dict(cfg)
     probe["run_name"] = f"{name}_gate"
-    probe["out_dir"] = f"artifacts/stage3/{name}_gate"
+    probe["out_dir"] = f"artifacts/stages/stage-3/{name}_gate"
     probe["schedule"] = {**cfg["schedule"], "total_steps": GATE_STEPS}
     # log_every 1 so the trend has per-step resolution: the failed run logged every
     # 10 steps, which is why its climb from 77.15 to 77.37 was only visible in coarse
@@ -309,7 +309,7 @@ def stage_throughput_gate(args) -> None:
                          f"{GATE_STEPS} real steps of {name}, discarded")
     probe_path = REPO / f"configs/stage3/e8b/{name}_gate.json"
     probe_path.write_text(json.dumps(probe, indent=2) + "\n")
-    run(["scripts/training/train_stage3.py", "--config", probe_path])
+    run(["scripts/shared/training/train_stage3.py", "--config", probe_path])
 
     log = REPO / probe["out_dir"] / "train_log.jsonl"
     steps = [json.loads(l) for l in log.open() if l.strip()]
@@ -395,7 +395,7 @@ def stage_memory_profile(args) -> None:
     if out.is_file():
         mark(args.session, "MEMORY_PROFILE_DONE")
         return
-    run(["scripts/training/profile_dp_memory.py",
+    run(["scripts/stages/stage-3/e8b/profile_dp_memory.py",
          "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
          "--steps", 2, "--out", out])
     mark(args.session, "MEMORY_PROFILE_DONE")
@@ -413,7 +413,7 @@ def stage_lifecycle(args) -> None:
     if out.is_file():
         mark(args.session, "LIFECYCLE_DONE")
         return
-    run(["scripts/training/replay_lifecycle.py",
+    run(["scripts/shared/training/replay_lifecycle.py",
          "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
          "--steps", args.lifecycle_steps, "--post-event-steps", 60,
          "--pin-step", 133, "--out", out])
@@ -423,7 +423,7 @@ def stage_lifecycle(args) -> None:
 def stage_gate(args) -> None:
     """The blocking pre-training gate, scoped to this session."""
     out = OUT / f"e8b_{args.session}_preflight.json"
-    run(["scripts/training/validate_e8b_arms.py", "--session", args.session,
+    run(["scripts/stages/stage-3/e8b/validate_e8b_arms.py", "--session", args.session,
          "--require-init", "--pack", PACK, "--out", out])
     report = json.loads(out.read_text())
     if not report["all_passed"]:
@@ -448,7 +448,7 @@ def stage_train(args) -> None:
             mark(args.session, f"ABORTED_AT_GATE:budget:{now:.2f}+{need:.2f}>"
                                f"{args.soft_stop_usd:.2f}")
             return
-        run(["scripts/training/train_stage3.py",
+        run(["scripts/shared/training/train_stage3.py",
              "--config", REPO / f"configs/stage3/e8b/{name}.json"])
         mark(args.session, f"TRAIN_DONE:{alias}")
     mark(args.session, "TRAIN_DONE")
@@ -463,7 +463,7 @@ def stage_general_text(args) -> None:
         if not m.is_dir() or out.exists():
             continue
         try:
-            run(["scripts/evaluation/eval_general_text.py", "--model", m,
+            run(["scripts/shared/evaluation/eval_general_text.py", "--model", m,
                  "--stream", VAL_STREAM, "--teacher", TEACHER,
                  "--teacher-revision", TEACHER_REVISION,
                  "--dtype", "bfloat16", "--out", out])
@@ -488,11 +488,11 @@ def stage_three_mode(args) -> None:
         if now + need > args.soft_stop_usd:
             mark(args.session, f"ABORTED_AT_GATE:budget:{now:.2f}+{need:.2f}")
             return
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

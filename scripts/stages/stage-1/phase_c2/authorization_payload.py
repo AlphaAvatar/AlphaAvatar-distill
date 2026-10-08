@@ -10,7 +10,7 @@
                                          RE-DERIVES every identity, builds the
                                          payload.
 
-**Both callers use this same function.** `scripts/autoinit/issue_c2_authorization.py`
+**Both callers use this same function.** `scripts/stages/stage-1/phase_c2/issue_c2_authorization.py`
 supplies `git rev-parse HEAD` and the wall clock; a test supplies fixed strings
 and writes into `tmp_path`. A test candidate and a live authorization therefore
 cannot diverge in derivation.
@@ -155,9 +155,9 @@ def live_identities(repo_root: str | Path = ".") -> dict[str, Any]:
     as `authorized_session_commit`, and the lineage rule then permits only the
     authorization artifact after that base.
     """
-    from experiments.phase_c2 import baseline as B
-    from experiments.phase_c2.search_space import register_c2_operators
-    from experiments.phase_c2.session import (
+    from stages.phase_c2 import baseline as B
+    from stages.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.session import (
         C2_SESSION_CONTRACT, c2_current_executable, c2_hard_ceiling_usd,
         c2_plan_hash, load_pricing,
     )
@@ -268,9 +268,9 @@ def require_readiness(session_commit: str, run_id: str, stage_id: str,
     by construction: omitting it made the authorization itself read as post-sweep
     drift, which cost one of C1 attempt 4's six failures.
     """
-    from experiments.phase_c2 import pod_environment as PE
+    from stages.phase_c2 import pod_environment as PE
     from aadistill.runtime.pod_environment import LAUNCH_BOUND
-    from experiments.phase_c2.session import c2_authorization_path
+    from stages.phase_c2.session import c2_authorization_path
 
     rel = PE.record_path_for(run_id, stage_id)
     path = Path(repo_root) / rel
@@ -321,7 +321,7 @@ def build_c2_authorization_payload(
     stale candidate and watch the launch gate refuse it. It is applied AFTER
     every agreement check, so such a candidate is stale in exactly one field.
     """
-    from experiments.phase_c2.session import C2Authorization, C2ResourceScope
+    from stages.phase_c2.session import C2Authorization, C2ResourceScope
 
     root = Path(repo_root)
     cfg = load_config(root)

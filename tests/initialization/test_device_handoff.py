@@ -202,7 +202,7 @@ def test_the_driver_hands_off_after_durability_and_before_stage_2():
     """Order matters: if the release or the contract fails, the five leaves must
     already be off the pod. The other order trades a completed 203-minute search
     for a memory diagnostic."""
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     stage1 = src[src.index("def stage1(self)"):src.index("def probe_config")]
 
     persist = stage1.index("persist_selected_leaves(")
@@ -232,7 +232,7 @@ def test_nothing_reads_the_search_object_after_the_release():
     """
     import ast
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     fn = next(n for n in ast.walk(ast.parse(src))
               if isinstance(n, ast.FunctionDef) and n.name == "stage1")
     body = ast.unparse(fn)
@@ -349,7 +349,7 @@ def test_the_retention_limit_is_the_one_the_verdict_uses():
 # --- the trainer requirement is measured, not chosen ------------------------
 
 #: `test_the_trainer_requirement_matches_its_recorded_basis` moved to
-#: `scripts/experiments/stage-1/phase_a/tests/test_phase_a_trainer_memory_basis.py`
+#: `scripts/stages/stage-1/phase_a/tests/test_phase_a_trainer_memory_basis.py`
 #: in the 2026-10-03 convergence round: it asserts the Phase-A DRIVER's
 #: constants against a measured basis record, which is that experiment's
 #: wiring and its evidence. The handoff mechanism -- what is freed, when, and
@@ -360,7 +360,7 @@ def test_the_retention_limit_is_the_one_the_verdict_uses():
 def test_attempt_4s_free_bytes_would_now_be_refused():
     """The whole point. Attempt 4 saw 36.32 GiB free and started the trainer."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_phase_a_driver as drv
+    from stages.phase_a import autoinit_phase_a_driver as drv
 
     attempt_4_after = {"available": True, "allocated_bytes": 8110229504,
                        "reserved_bytes": 8124366848,
@@ -376,7 +376,7 @@ def test_a_released_card_clears_the_new_requirement():
     """And it must not refuse the run it is meant to allow: with the teacher and
     evaluator actually gone, attempt 4's card had room."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_phase_a_driver as drv
+    from stages.phase_a import autoinit_phase_a_driver as drv
 
     released = {"available": True, "allocated_bytes": 0, "reserved_bytes": 0,
                 # 36.32 GiB free + the 7.55 GiB the driver was holding.
@@ -406,7 +406,7 @@ def _real_layout(root, tag="step_1023"):
 
 def test_the_driver_resolves_the_model_the_trainer_actually_wrote(tmp_path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import trained_model_dir
+    from stages.phase_a.autoinit_phase_a_driver import trained_model_dir
 
     out_dir = tmp_path / "autoinit.v1.phase_a.rung1.cca699c93f34.sa"
     expected = _real_layout(out_dir)
@@ -425,7 +425,7 @@ def test_the_driver_resolves_the_model_the_trainer_actually_wrote(tmp_path):
 def test_a_probe_that_wrote_no_checkpoint_is_named_not_a_bare_oserror(tmp_path):
     """By this point a probe has been paid for; the message is the diagnosis."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import trained_model_dir
+    from stages.phase_a.autoinit_phase_a_driver import trained_model_dir
     from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     out_dir = tmp_path / "probe"
@@ -436,7 +436,7 @@ def test_a_probe_that_wrote_no_checkpoint_is_named_not_a_bare_oserror(tmp_path):
 
 def test_an_index_pointing_at_a_missing_tag_is_distinguished(tmp_path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import trained_model_dir
+    from stages.phase_a.autoinit_phase_a_driver import trained_model_dir
     from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     out_dir = tmp_path / "probe"
@@ -450,7 +450,7 @@ def test_run_probe_uses_the_resolver_rather_than_its_own_path_arithmetic():
     """Wiring: testing the helper proves nothing about whether run_probe calls it."""
     import ast
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     fn = next(n for n in ast.walk(ast.parse(src))
               if isinstance(n, ast.FunctionDef) and n.name == "run_probe")
     body = ast.unparse(fn)
@@ -480,7 +480,7 @@ def _canonical_tokenizer(root):
 def test_a_model_only_checkpoint_receives_the_canonical_sidecars(tmp_path):
     """The trainer writes save_pretrained output; the battery needs a tokenizer."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import (
+    from stages.phase_a.autoinit_phase_a_driver import (
         EVAL_TOKENIZER_SIDECARS, materialize_eval_tokenizer)
     from aadistill.infrastructure.manifest import sha256_file
 
@@ -504,7 +504,7 @@ def test_a_model_only_checkpoint_receives_the_canonical_sidecars(tmp_path):
 def test_materialization_is_idempotent(tmp_path):
     """A re-entered probe must not fail on its own previous work."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import materialize_eval_tokenizer
+    from stages.phase_a.autoinit_phase_a_driver import materialize_eval_tokenizer
 
     src = _canonical_tokenizer(tmp_path / "canonical")
     model = tmp_path / "model"
@@ -517,7 +517,7 @@ def test_materialization_is_idempotent(tmp_path):
 def test_a_conflicting_sidecar_fails_closed_rather_than_being_overwritten(tmp_path):
     """Which tokenizer the probe was scored against must stay recoverable."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import materialize_eval_tokenizer
+    from stages.phase_a.autoinit_phase_a_driver import materialize_eval_tokenizer
     from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     src = _canonical_tokenizer(tmp_path / "canonical")
@@ -533,7 +533,7 @@ def test_a_conflicting_sidecar_fails_closed_rather_than_being_overwritten(tmp_pa
 
 def test_a_missing_canonical_sidecar_fails_closed(tmp_path):
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    from autoinit_phase_a_driver import materialize_eval_tokenizer
+    from stages.phase_a.autoinit_phase_a_driver import materialize_eval_tokenizer
     from aadistill.initialization.planning.recovery import RecoveryAdmissionError
 
     src = _canonical_tokenizer(tmp_path / "canonical")
@@ -548,7 +548,7 @@ def test_run_probe_materializes_before_the_battery_and_passes_no_tokenizer_flag(
     """Wiring, and the protocol constraint that must survive it."""
     import ast
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     tree = ast.parse(src)
     run_probe = ast.unparse(next(
         n for n in ast.walk(tree)

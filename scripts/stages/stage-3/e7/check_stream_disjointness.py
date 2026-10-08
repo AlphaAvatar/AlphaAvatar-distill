@@ -15,14 +15,14 @@ Fails closed. A missing input file is an error, not a skipped check — a
 disjointness proof that silently proves nothing is worse than no proof, and this
 runs immediately before paid training.
 
-    python3 scripts/data/check_stream_disjointness.py \\
-        --stream artifacts/stage3/e7_fineweb_kd \\
-        --stream artifacts/stage3/e7_fineweb_val \\
-        --stream artifacts/stage3/e7_control_kd \\
+    python3 scripts/stages/stage-3/e7/check_stream_disjointness.py \\
+        --stream artifacts/stages/stage-3/e7_fineweb_kd \\
+        --stream artifacts/stages/stage-3/e7_fineweb_val \\
+        --stream artifacts/stages/stage-3/e7_control_kd \\
         --reserved data/warmup/holdout_v1.jsonl \\
         --reserved data/warmup/warmup_v1.jsonl \\
         --reserved data/eval_behavior_v0/prompts.jsonl \\
-        --out artifacts/stage3/e7_disjointness.json
+        --out artifacts/stages/stage-3/e7_disjointness.json
 
 Exit codes: 0 disjoint; 6 an overlap or a missing input.
 """
@@ -36,7 +36,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402

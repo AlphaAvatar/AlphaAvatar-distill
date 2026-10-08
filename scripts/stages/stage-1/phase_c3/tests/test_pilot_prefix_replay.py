@@ -34,7 +34,7 @@ from aadistill.initialization.planning.fixed_path import (  # noqa: E402
     FixedPathSpec, FixedPathStep)
 
 from support.toy import build_tiny_model  # noqa: E402
-from experiments.phase_c3 import pilot  # noqa: E402
+from stages.phase_c3 import pilot  # noqa: E402
 
 #: Toy, and reducible in every dimension the prefix touches.
 PARENT = dict(hidden_size=32, num_hidden_layers=4, intermediate_size=64,
@@ -151,7 +151,7 @@ def test_the_pin_is_a_literal_and_not_an_alias():
     silently become B4, which is exactly the coupling to avoid."""
     import ast
 
-    tree = ast.parse((REPO / "scripts/experiments/stage-1/phase_c3/pilot.py").read_text())
+    tree = ast.parse((REPO / "scripts/stages/stage-1/phase_c3/pilot.py").read_text())
     for node in ast.walk(tree):
         if (isinstance(node, ast.Assign)
                 and any(getattr(t, "id", None) == "PREFIX_EXECUTION"
@@ -300,7 +300,7 @@ def test_the_arm_constructor_refuses_before_the_operator_is_registered():
         "from aadistill.initialization.operators.register import"
         " register_builtin_operators;"
         "register_builtin_operators();"
-        "from experiments.phase_c3 import pilot;"
+        "from stages.phase_c3 import pilot;"
         "\ntry:\n"
         "    pilot.arm_spec(1)\n"
         "    print('NO_REFUSAL')\n"
@@ -328,7 +328,7 @@ def test_the_arm_constructor_succeeds_once_it_is_registered():
         "register_builtin_operators();"
         "from aadistill.initialization.operators.attention.gqa import causal_kl;"
         "causal_kl.register();"
-        "from experiments.phase_c3 import pilot;"
+        "from stages.phase_c3 import pilot;"
         "print(pilot.arm_spec(4).steps[3].impl_id)"
     )
     done = subprocess.run([sys.executable, "-c", probe], cwd=REPO,

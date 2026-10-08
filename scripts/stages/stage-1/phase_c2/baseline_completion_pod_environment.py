@@ -25,7 +25,7 @@ So this instance declares what is the COMPLETION's:
   would run;
 * its own harness field names, so a record's self-hash covers what it claims.
 
-The pod test SELECTION is deliberately the same `scripts/experiments/stage-1/phase_c2/tests/` Search-1
+The pod test SELECTION is deliberately the same `scripts/stages/stage-1/phase_c2/tests/` Search-1
 uses: the environmental question -- can a fresh pod of this image run this
 repository's preflight -- is identical, and inventing a second selection would
 mean maintaining two answers to one question. What differs is everything the
@@ -52,8 +52,8 @@ from aadistill.runtime.pod_environment import (  # noqa: E402,F401
     pod_test_environment_digest,
 )
 
-from experiments.phase_c2 import baseline_completion as BC
-from experiments.phase_c2.pod_environment import (  # noqa: F401
+from stages.phase_c2 import baseline_completion as BC
+from stages.phase_c2.pod_environment import (  # noqa: F401
     POD_TEST_ENVIRONMENT_FILES_V1, ReadinessError,
 )
 
@@ -61,7 +61,7 @@ from experiments.phase_c2.pod_environment import (  # noqa: F401
 #: through this module. Search-1's selection asserts SEARCH-1's staged paths --
 #: including the canonical control this session does not stage -- so reusing it
 #: would fail two tests that are correct about a different session.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c2/tests"
 
 #: Its OWN schema. This is the check that makes a Search-1 readiness record
 #: unusable here: `verify_record` compares the record's schema against the
@@ -101,7 +101,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
             "a baseline-completion readiness record has no location without a "
             "run id: it is evidence about one attempt, and a shared path is how "
             "one attempt's evidence comes to describe another's tree")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir(EXPERIMENT_ID, run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
@@ -146,7 +146,7 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
     """
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c2.baseline_completion_bundle import (
+        from stages.phase_c2.baseline_completion_bundle import (
             canonical_bundle_name)
 
         return canonical_bundle_name(commit)

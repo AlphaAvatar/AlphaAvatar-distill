@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Move loose `logs/` material into the experiment that owns it, and record it.
 
-    PYTHONPATH=src python scripts/consolidate/relocate_logs.py           # plan
-    PYTHONPATH=src python scripts/consolidate/relocate_logs.py --write
+    PYTHONPATH=src python scripts/maintenance/consolidation/relocate_logs.py           # plan
+    PYTHONPATH=src python scripts/maintenance/consolidation/relocate_logs.py --write
 
 `logs/` root had accumulated 198 loose files whose only organising principle was
 a filename prefix. This moves the ones that can move and states, per exception,
@@ -43,7 +43,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 #: Where a logs/ path may be named from. `src/` is absent deliberately: the core
 #: must name no log path, and a reference appearing there is a finding, not an

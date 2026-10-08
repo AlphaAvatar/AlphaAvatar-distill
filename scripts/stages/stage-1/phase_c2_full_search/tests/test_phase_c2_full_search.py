@@ -27,17 +27,17 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-for extra in ("src", "scripts", "scripts/autoinit", "scripts/consolidate"):
+for extra in ("src", "scripts", "scripts/autoinit", "scripts/maintenance/consolidation"):
     if str(REPO / extra) not in sys.path:
         sys.path.insert(0, str(REPO / extra))
 
 from aadistill.infrastructure.budget import BudgetError  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-from experiments import search_cost_model as CM  # noqa: E402
-from experiments.phase_c2 import full_search_space as FS  # noqa: E402
-from experiments.phase_c2 import search_space as SS  # noqa: E402
-from experiments.phase_c2 import selection_pricing as SP  # noqa: E402
+from shared import search_cost_model as CM  # noqa: E402
+from stages.phase_c2 import full_search_space as FS  # noqa: E402
+from stages.phase_c2 import search_space as SS  # noqa: E402
+from stages.phase_c2 import selection_pricing as SP  # noqa: E402
 
 PROTOCOL = REPO / "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json"
 PRICING = REPO / "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json"
@@ -331,7 +331,7 @@ def test_the_headroom_verdict_matches_what_plan_session_actually_does(
     rather than one side of it: the pricing record's derived verdict and the
     budget module's behaviour cannot disagree.
     """
-    from derive_budget import derive
+    from maintenance.consolidation.derive_budget import derive
 
     remaining = derive(REPO)["project"]["remaining_usd"]
     record = json.loads(PRICING.read_text())
@@ -508,7 +508,7 @@ def test_multi_session_continuation_is_not_claimed_as_a_capability():
 
 def test_the_budget_position_is_derived_not_restated():
     doc = json.loads(PRICING.read_text())
-    from derive_budget import derive
+    from maintenance.consolidation.derive_budget import derive
 
     project = derive(REPO)["project"]
     assert doc["budget_position"]["cumulative_spend_usd"] == project[
@@ -816,7 +816,7 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
     import importlib
 
     sys.path.insert(0, str(REPO / "scripts/data"))
-    from battery_render import RENDERERS, rank_take, read_rows
+    from shared.data.battery_render import RENDERERS, rank_take, read_rows
     build = importlib.import_module("build_c2_screening_battery")
     c1_builder = importlib.import_module("build_c1_confirmation_battery")
 
@@ -827,11 +827,11 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
     assert declared == build.RANK_DOMAIN
 
     class _Args:
-        battery = "artifacts/eval/battery_v2"
-        recovery_search = "artifacts/stage3/recovery_search_v2"
-        sessions = "artifacts/stage3/corpus_v2/sessions.jsonl"
-        state_eval = "artifacts/stage1/state_eval_v1"
-        calibration = "artifacts/stage1/e8_calibration_v1"
+        battery = "artifacts/stages/stage-3/eval/battery_v2"
+        recovery_search = "artifacts/stages/stage-1/batteries/recovery_search_v2"
+        sessions = "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+        state_eval = "artifacts/stages/stage-1/state_eval_v1"
+        calibration = "artifacts/stages/stage-1/e8_calibration_v1"
         c1_confirmation = build.C1_CONFIRMATION
 
     for path in (_Args.battery, _Args.sessions, _Args.c1_confirmation):
@@ -866,7 +866,7 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
         "produces; its manifest describes a sampling rule it was not drawn "
         "under")
     #: And it is NOT the default domain's sample, which is what the bug produced.
-    from battery_render import DEFAULT_RANK_DOMAIN
+    from shared.data.battery_render import DEFAULT_RANK_DOMAIN
     assert sample(DEFAULT_RANK_DOMAIN) != frozen, (
         "the frozen sample equals the DEFAULT-domain sample, which is exactly "
         "the symptom of rank_take dropping its domain argument")
@@ -965,7 +965,7 @@ def test_the_documents_are_deterministic_and_regenerating_verifies_them(tmp_path
 
     spec = importlib.util.spec_from_file_location(
         "write_c2_full_search_plan",
-        REPO / "scripts/autoinit/write_c2_full_search_plan.py")
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_plan.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules["write_c2_full_search_plan"] = module
     spec.loader.exec_module(module)
@@ -985,6 +985,6 @@ def test_the_documents_are_deterministic_and_regenerating_verifies_them(tmp_path
         assert scratch.read_bytes() == committed.read_bytes(), (
             f"{committed.name} is not what the generator produces from this "
             "tree; regenerate it with "
-            "`python scripts/autoinit/write_c2_full_search_plan.py --write`")
+            "`python scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_plan.py --write`")
         #: And no clock field crept back in.
         assert "generated_utc" not in doc

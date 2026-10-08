@@ -26,10 +26,10 @@ Arms:
 
 Run it in each environment and compare the two reports:
 
-    .venv/bin/python scripts/autoinit/audit_tool_rendering.py --out A.json
+    .venv/bin/python scripts/shared/preflight/audit_tool_rendering.py --out A.json
     /home/ecs-user/AlphaAvatar/.venv/bin/python \
-        scripts/autoinit/audit_tool_rendering.py --out B.json
-    .venv/bin/python scripts/autoinit/audit_tool_rendering.py --compare A.json B.json
+        scripts/shared/preflight/audit_tool_rendering.py --out B.json
+    .venv/bin/python scripts/shared/preflight/audit_tool_rendering.py --compare A.json B.json
 
 Only the tokenizer and its chat template are loaded — never a model config — so
 the transformers-4.x RoPE misreading (logs/state/current.md §0.5) cannot apply here.
@@ -43,11 +43,11 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 
-BATTERY = REPO / "artifacts/stage3/recovery_search_v1/tool.jsonl"
-TOKENIZER = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v1/tool.jsonl"
+TOKENIZER = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 SYSTEM = "You are a helpful Assistant."
 
 

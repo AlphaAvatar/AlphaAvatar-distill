@@ -41,12 +41,12 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "pod",
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-import autoinit_a3_driver as D  # noqa: E402
+from stages.phase_a3 import autoinit_a3_driver as D  # noqa: E402
 
-from experiments.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
 
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 SEEDS = list(A3S.recovery_seeds())
 
 needs_battery = pytest.mark.skipif(
@@ -91,7 +91,7 @@ def _summary_template() -> dict:
     """
     if _SUMMARY_CACHE:
         return dict(_SUMMARY_CACHE)
-    import verify_c1_scoring_equivalence as EQ
+    from stages.phase_c1 import verify_c1_scoring_equivalence as EQ
 
     for d in EQ.find_generations():
         q = d / "gsm8k.json"
@@ -264,7 +264,7 @@ def _fake_hardware(monkeypatch, h, *, parent_digest=None, incumbent_digest=None,
                              "checkpoint_path": str(ckpt)}
         out["_comparison"] = comparison
         return out
-    import compare_a_bsz3
+    from stages.phase_a3 import compare_a_bsz3
     monkeypatch.setattr(compare_a_bsz3, "structural_half", fake_structural)
 
     #: THE ONLY hardware step of stage F. The loop, the override check, the
@@ -552,12 +552,12 @@ def test_the_probe_record_carries_a3s_arm_and_not_c1s_roles(harness,
     its aggregation, AFTER nine probes were trained, preserved and scored.
     A3 passes its vocabulary explicitly; this drives the real constructor.
     """
-    from experiments.phase_c1.probe_results import C1ProbeRecord, C1ResultsError
+    from stages.phase_c1.probe_results import C1ProbeRecord, C1ResultsError
 
     #: VALID counts, so this test isolates the ARM check. An empty map trips
     #: the count guard first and the test would then pass for the wrong
     #: reason -- it would never reach the vocabulary it exists to check.
-    from experiments.phase_c1.probe_results import N_PROMPTS, N_SCORABLE
+    from stages.phase_c1.probe_results import N_PROMPTS, N_SCORABLE
 
     common = dict(
         probe_id="autoinit.v1.phase_a3.A_bsz3.1", seed=1,
@@ -598,7 +598,7 @@ def test_the_launcher_command_parses_with_the_drivers_own_parser():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "a3lau_seam", REPO / "scripts/pod/autoinit_a3_launch.py")
+        "a3lau_seam", REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py")
     launcher = importlib.util.module_from_spec(spec)
     sys.modules["a3lau_seam"] = launcher
     spec.loader.exec_module(launcher)
@@ -667,9 +667,9 @@ def test_the_resume_path_scores_restored_probes_without_training(
             "probe_id": name, "arm": A3S.TREATMENT_ARM, "seed": seed,
             "initialization_artifact_digest": init_digest,
             "complete": True, "evaluated": False,
-            "run_completion": "artifacts/stage3/a3/run_completion.json",
+            "run_completion": "artifacts/stages/stage-3/a3/run_completion.json",
             "config_sha256": "c" * 64,
-            "model_dir": f"artifacts/stage3/a3/{name}/checkpoints/step_001023/model",
+            "model_dir": f"artifacts/stages/stage-3/a3/{name}/checkpoints/step_001023/model",
             "preserved": {"preserved": True, "relay_repo": "r",
                           "relay_prefix": f"a3_preserved_probes/{source}/{name}",
                           "files": files},

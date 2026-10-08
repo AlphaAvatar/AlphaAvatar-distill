@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Complete inventory of the project's documentary storage, before anything is deleted.
 
-    PYTHONPATH=src python scripts/consolidate/build_log_inventory.py \
+    PYTHONPATH=src python scripts/maintenance/consolidation/build_log_inventory.py \
         --out logs/maintenance/inventories/log_inventory.json
 
 Nothing is deleted here. This answers the questions a cleanup has to answer first:
@@ -71,7 +71,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 #: Where documentary storage lives. `artifacts/` is deliberately excluded — it is
 #: generated, gitignored storage and is inventoried by build_checkpoint_registry.py.

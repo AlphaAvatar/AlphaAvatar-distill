@@ -33,8 +33,8 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
-from experiments.phase_a3.a3_authorization import (  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_a3.a3_authorization import (  # noqa: E402
     A3Authorization, a3_expected_usd, a3_hard_ceiling_usd,
     a3_harness_digest, load_live_pricing,
 )

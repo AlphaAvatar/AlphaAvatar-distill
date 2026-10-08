@@ -43,7 +43,7 @@ for _root in ("src", "scripts", "scripts/pod", "tests/pod"):
 
 from support.session_specs import load_session_launcher, session_args  # noqa: E402
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 #: The sections that are a session's choice. `ENV_READY`, `REPO_READY` and
 #: `TRAIN_ENV` are the substrate every session's script produces and are not
 #: gated — `SetupManifest.SUBSTRATE_MARKERS` refuses a declaration that omits
@@ -153,7 +153,7 @@ def test_the_expectation_verifies_the_staged_state_eval_and_nothing_else(c2):
     import importlib.util
 
     loader = importlib.util.spec_from_file_location(
-        "_vfa", REPO / "scripts/autoinit/verify_frozen_assets.py")
+        "_vfa", REPO / "scripts/shared/pod/verify_frozen_assets.py")
     vfa = importlib.util.module_from_spec(loader)
     sys.modules["_vfa"] = vfa
     loader.loader.exec_module(vfa)
@@ -171,7 +171,7 @@ def test_the_expectation_verifies_against_this_tree_for_real(c2):
     with_out = REPO / "artifacts/audit/_c2_setup_contract_check.json"
     try:
         done = subprocess.run(
-            [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+            [sys.executable, "scripts/shared/pod/verify_frozen_assets.py",
              "--expect", env["SESSION_FROZEN_EXPECT"],
              "--out", str(with_out.relative_to(REPO))],
             cwd=REPO, capture_output=True, text=True, timeout=900,
@@ -382,7 +382,7 @@ def test_the_c2_test_selection_and_readiness_source_are_unchanged(c2):
     assert tuple(spec.setup.test_ignores) == ignores_for_selection(
         "tests/c2_preflight", REPO)
     #: And readiness is still compared against the RUN-OWNED record.
-    from experiments.phase_c2 import pod_environment as PE
+    from stages.phase_c2 import pod_environment as PE
 
     assert PE.record_path_for("attempt3", "1").endswith(
         "runs/attempt3/governance/readiness.json")

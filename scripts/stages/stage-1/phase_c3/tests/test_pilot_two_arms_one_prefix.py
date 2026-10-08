@@ -32,7 +32,7 @@ from aadistill.initialization.planning.fixed_path import (  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 
 from support.toy import build_tiny_model  # noqa: E402
-from experiments.phase_c3 import pilot  # noqa: E402
+from stages.phase_c3 import pilot  # noqa: E402
 
 PARENT = dict(hidden_size=32, num_hidden_layers=4, intermediate_size=64,
               num_attention_heads=8, num_key_value_heads=2, head_dim=8,

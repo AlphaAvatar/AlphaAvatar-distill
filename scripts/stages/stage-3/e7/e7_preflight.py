@@ -10,7 +10,7 @@ weighted extra gradient separately for a few steps, and reports the ratio of
 their norms. No optimizer step is taken and the step counter does not move, so a
 run that calls this is bit-identical to one that does not.
 
-    PYTHONPATH=src python scripts/training/e7_preflight.py \\
+    PYTHONPATH=src python scripts/stages/stage-3/e7/e7_preflight.py \\
         --config configs/stage3/e7/e7_fineweb_r1600k_sa.json \\
         --out artifacts/audit/e7_gradient_share_sa.json
 
@@ -30,7 +30,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import load_extra_stream  # noqa: E402

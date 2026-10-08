@@ -13,7 +13,7 @@ Asserts, per prompt:
   * tool schemas render into the system block when the sample carries tools
   * no assistant turn leaks into the prompt
 
-    uv run python scripts/evaluation/audit_prompt_rendering.py
+    uv run python scripts/shared/evaluation/audit_prompt_rendering.py
 """
 
 from __future__ import annotations
@@ -24,7 +24,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_SYSTEM = "You are a helpful Assistant."
 # The chat template recorded in the corpus manifest; generation, training and
 # evaluation must all use this exact template or the comparison is unsound.
@@ -77,10 +77,10 @@ def audit(tok, path: Path, label: str) -> list[str]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--model", default="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint")
+    ap.add_argument("--model", default="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
     ap.add_argument("--prompts", nargs="*", default=[
         "data/eval_behavior_v0/prompts.jsonl",
-        "artifacts/eval/e1/gsm8k_reasoning_100.jsonl",
+        "artifacts/stages/stage-3/eval/e1/gsm8k_reasoning_100.jsonl",
     ])
     args = ap.parse_args()
 

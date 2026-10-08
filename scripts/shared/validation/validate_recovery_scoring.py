@@ -1,8 +1,8 @@
 """Zero-cost evidence that the recovery-search scorer is sound, before any pod.
 
-    PYTHONPATH=src python scripts/autoinit/validate_recovery_scoring.py
+    PYTHONPATH=src python scripts/shared/validation/validate_recovery_scoring.py
 
-Runs every policy in `scripts/experiments/tests/test_recovery_search_scoring.py` over all
+Runs every policy in `scripts/shared/tests/test_recovery_search_scoring.py` over all
 190 frozen prompts and emits one reviewable artifact. The tests are the gate; this
 is the record a maintainer reads without running pytest, and the thing the
 preregistration binds its scoring-contract digest to.
@@ -28,17 +28,17 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
 #: a subprocess with a caller-set PYTHONPATH.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.source_sets import recovery_scoring_contract  # noqa: E402
+from shared.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-TESTS = REPO_ROOT / "scripts/experiments/tests/test_recovery_search_scoring.py"
+TESTS = REPO_ROOT / "scripts/shared/tests/test_recovery_search_scoring.py"
 GENERIC = ("gsm8k", "math_verified", "multihop", "rag", "knowledge")
 
 #: What each policy must produce. Written here as data so the artifact states its
@@ -69,7 +69,7 @@ def main() -> None:
     report = {
         "schema": "aadistill.autoinit.recovery_scoring_validation/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
-        "battery": "artifacts/stage3/recovery_search_v1",
+        "battery": "artifacts/stages/stage-1/batteries/recovery_search_v1",
         "n_prompts": 190,
         "scoring_contract": recovery_scoring_contract(REPO_ROOT),
         "expectations": EXPECTATIONS,
@@ -84,7 +84,7 @@ def main() -> None:
             out = tmp / f"{policy}.json"
             rc = subprocess.run(
                 [sys.executable,
-                 str(REPO_ROOT / "scripts/autoinit/score_recovery_search.py"),
+                 str(REPO_ROOT / "scripts/shared/evaluation/score_recovery_search.py"),
                  "--generations", str(gen), "--label", policy,
                  "--seed", "20260726", "--out", str(out)],
                 capture_output=True, text=True, cwd=REPO_ROOT,

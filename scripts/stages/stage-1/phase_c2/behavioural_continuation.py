@@ -305,9 +305,9 @@ def _expected_probe_ids(repo_root: str | Path,
     known and is named `<unranked>`; the caller resolves it against the most
     expensive admissible candidate when it needs a materialization bound.
     """
-    from experiments.phase_c2 import behavioural as BH
-    from experiments.phase_c2 import behavioural_governance as BG
-    from experiments.phase_c2 import behavioural_schedule as SCH
+    from stages.phase_c2 import behavioural as BH
+    from stages.phase_c2 import behavioural_governance as BG
+    from stages.phase_c2 import behavioural_schedule as SCH
 
     proto = BH.protocol(repo_root)["behavioural_selection"]
     #: From `candidate_leaves`, which resolves the five candidates out of the
@@ -340,9 +340,9 @@ def arm_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, float]:
     six is `materialization_minutes()['total_minutes']`, which the full-session
     ceiling already uses.
     """
-    from experiments.phase_c2 import behavioural as BH
-    from experiments.phase_c2 import behavioural_governance as BG
-    from experiments.phase_c2 import behavioural_schedule as SCH
+    from stages.phase_c2 import behavioural as BH
+    from stages.phase_c2 import behavioural_governance as BG
+    from stages.phase_c2 import behavioural_schedule as SCH
 
     out = {leaf.state_id: float(leaf.bounded_minutes)
            for leaf in BG.candidate_leaves(repo_root)}
@@ -408,8 +408,8 @@ def remaining_work(repo_root: str | Path = REPO_ROOT, *,
     not permission to do anything: a complete verdict is terminal, and NO_GO and
     INCONCLUSIVE are complete results.
     """
-    from experiments.phase_c2 import behavioural as BH
-    from experiments.phase_c2 import behavioural_schedule as SCH
+    from stages.phase_c2 import behavioural as BH
+    from stages.phase_c2 import behavioural_schedule as SCH
 
     committed = state.get("committed_candidate")
     expected = _expected_probe_ids(repo_root, committed)

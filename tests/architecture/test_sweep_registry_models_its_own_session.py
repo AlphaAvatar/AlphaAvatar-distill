@@ -9,7 +9,7 @@ its driver is invoked with via `--plan`. Each record certified a pod that
 lacked the one file the replay cannot start without.
 
     SEARCH   staged 11   hidden 1851
-    REPLAY   staged 12   hidden 1850   + artifacts/stage1/d1_replay_plan.json
+    REPLAY   staged 12   hidden 1850   + artifacts/stages/stage-1/d1_replay_plan.json
 
 A MISSING registry entry is loud: the recorder refuses with "unknown
 experiment", which is how five other sessions got theirs. A WRONG one is
@@ -41,19 +41,19 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 for _extra in ("src", "scripts", "scripts/pod", "scripts/autoinit",
-               "scripts/experiments/stage-1", "tests"):
+               "scripts/stages/stage-1", "tests"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
 
 def _registry() -> dict:
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     return dict(R.EXPERIMENTS)
 
 
 def _contract(experiment: str):
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     return R.sweep_contract(experiment, run_id="registry-probe", stage_id="1")
 

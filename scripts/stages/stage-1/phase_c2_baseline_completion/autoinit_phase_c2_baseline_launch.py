@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch ONE Phase-C2 baseline-completion session through the generic runner.
 
-    PYTHONPATH=src python scripts/pod/autoinit_phase_c2_baseline_launch.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_launch.py \
         --scr /path/to/scratch --session-commit <sha> --bundle <name> \
         --run-id attempt5
 
@@ -20,7 +20,7 @@ type with a distinct schema reporting `authorizes_c2_search1 = False`, and
 `BaselineCompletionAuthorization.load` refuses an artifact that claims
 otherwise. The Search-1 launcher's own loader refuses this schema symmetrically.
 Nothing here imports the beam runner, and
-`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts that over the import
+`scripts/stages/stage-1/phase_c2/tests/test_phase_c2_baseline_completion.py` asserts that over the import
 graph.
 
 **What it stages, and nothing else.** The pinned teacher revision, the two
@@ -43,7 +43,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -57,23 +57,23 @@ from aadistill.infrastructure.session_prechecks import (  # noqa: E402
 from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract)
-from autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.phase_c2 import baseline_completion as BC  # noqa: E402
-from experiments.phase_c2 import baseline_completion_bundle as BCT  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from stages.phase_c2 import baseline_completion as BC  # noqa: E402
+from stages.phase_c2 import baseline_completion_bundle as BCT  # noqa: E402
 #: The COMPLETION's readiness instance, not the generic runtime module. The
 #: generic module owns the mechanism; which experiment, which schema, which
 #: harness and which staging contract are this experiment's own facts.
-from experiments.phase_c2 import (  # noqa: E402
+from stages.phase_c2 import (  # noqa: E402
     baseline_completion_pod_environment as CPE)
-from experiments.phase_c2.baseline_completion_pod_environment import (  # noqa: E402
+from stages.phase_c2.baseline_completion_pod_environment import (  # noqa: E402
     LAUNCH_BOUND)
-from experiments.phase_c2.frozen_assets import STATE_EVAL_ASSET  # noqa: E402
-from experiments.run_layout import (  # noqa: E402
+from stages.phase_c2.frozen_assets import STATE_EVAL_ASSET  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run, present_roles,
     record_run, rel_run_dir, write_run_readmes,
 )
-from phase_a_frozen import TEACHER_REVISION  # noqa: E402
+from stages.phase_a.phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
 WS = "/workspace"
 STATUS = f"{WS}/autoinit_phase_c2_baseline.status"
@@ -95,10 +95,10 @@ FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
 #: because the frozen B path consumes domain-balanced at DEPTH, FFN and
 #: ATTENTION and reasoning-heavy at RESIDUAL_WIDTH.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
-    LocalAsset(f"artifacts/stage1/{STATE_EVAL_ASSET}", STATE_EVAL_ASSET,
-               "artifacts/stage1"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
+    LocalAsset(f"artifacts/stages/stage-1/{STATE_EVAL_ASSET}", STATE_EVAL_ASSET,
+               "artifacts/stages/stage-1"),
 )
 
 #: This session's OWN selection. Search-1's asserts that every path SEARCH-1
@@ -303,7 +303,7 @@ def frozen_inputs_gate(ctx: SessionContext) -> tuple[bool, str]:
     learning that after B has been rebuilt costs the whole rebuild.
     """
     from aadistill.initialization.planning import stage1_selection
-    from experiments.phase_c2.frozen_inputs import load_frozen_candidates, load_record
+    from stages.phase_c2.frozen_inputs import load_frozen_candidates, load_record
     try:
         record = load_record(REPO_ROOT / BC.FROZEN_INPUTS)
         candidates = load_frozen_candidates(
@@ -330,7 +330,7 @@ def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
     #: ASSETS_READY step against the same expectation document.
     result = subprocess.run(
         [sys.executable,
-         str(REPO_ROOT / "scripts/autoinit/verify_frozen_assets.py"),
+         str(REPO_ROOT / "scripts/shared/pod/verify_frozen_assets.py"),
          "--expect", FROZEN_EXPECT],
         cwd=str(REPO_ROOT), capture_output=True, text=True,
         env={"PYTHONPATH": f"{REPO_ROOT}/src:{REPO_ROOT}/scripts", "PATH": "/usr/bin:/bin"})
@@ -517,7 +517,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
         return f"{math.floor(value * 100) / 100:.2f}"
 
     return (f"{POD_IMAGE['remote_python']} "
-            f"scripts/pod/autoinit_phase_c2_baseline_driver.py "
+            f"scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py "
             f"--protocol {BC.PROTOCOL} "
             f"--frozen-inputs {BC.FROZEN_INPUTS} "
             f"--selection-record {BC.SELECTION_RECORD} "
@@ -542,9 +542,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", "")),
         authorization_loader=BC.BaselineCompletionAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=BC.PLAN_ID,
         plan_hash=BC.plan_hash(REPO_ROOT),
@@ -565,7 +565,7 @@ def spec(args) -> SessionSpec:
             #: the marker is what stops the work rather than a comment saying it
             #: is unnecessary.
             #: ROPE_OK is ABSENT, and the guard it names is not. The shared
-            #: step globs `artifacts/stage1/*/checkpoint/config.json` and exits
+            #: step globs `artifacts/stages/stage-1/*/checkpoint/config.json` and exits
             #: 1 when nothing matches -- which is correct: it verifies that a
             #: STAGED student checkpoint's RoPE base reads back through every
             #: venv, and this session stages no checkpoint. It REBUILDS B on the
@@ -790,8 +790,8 @@ def close_completion_run(layout, args):
               "bundle": getattr(args, "bundle", None),
               "scratch_root": str(scr)},
         implementation={
-            "launcher": "scripts/pod/autoinit_phase_c2_baseline_launch.py",
-            "driver": "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+            "launcher": "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_launch.py",
+            "driver": "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py",
             "harness_source_digest": session.get("harness_source_digest"),
             "authorization": auth_path_for(args.run_id)},
         status={"passed": session.get("passed"),

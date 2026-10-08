@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rebuild attempt 3's five selected leaves. Replay only — nothing is decided here.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_c2_replay_driver.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_driver.py \
         --workdir /workspace/aad/artifacts/autoinit/c2_replay \
         --rate 1.09 --authorized-usd 5.00 --soft-stop-usd 4.00
 
@@ -40,7 +40,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -221,8 +221,8 @@ class ReplayDriver:
     # -- stage A ------------------------------------------------------------
     def bind_identities(self) -> bool:
         """Everything the replay is pinned to, before a single byte is computed."""
-        from experiments.calibration import register_builtin_profiles
-        from experiments.phase_c2 import replay_specs
+        from shared.calibration import register_builtin_profiles
+        from stages.phase_c2 import replay_specs
 
         #: EXPLICIT, and first, exactly as every other pod driver does it. The
         #: driver passes no `calibration_items`, so `materialize_fixed_path`

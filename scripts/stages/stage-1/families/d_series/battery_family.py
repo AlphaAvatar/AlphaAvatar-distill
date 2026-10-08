@@ -69,7 +69,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 for _extra in ("src", "scripts", "scripts/data"):
     _path = str(REPO_ROOT / _extra)
     if _path not in sys.path:
@@ -120,6 +120,13 @@ ROLES: tuple[tuple[str, str, str, str], ...] = (
 #: must remain held out because B was promoted on it and C2's, C3's and A3's
 #: results were measured on it; `c2_screening_v1` because it was drawn from the
 #: same pools and reusing it would re-measure prompts a selection already saw.
+#:
+#: FROZEN RULE-IDENTITY SPELLINGS. These strings are part of the allocation
+#: rule's hash preimage (`allocation_rule_id` = f6047343…, frozen 2026-10-03
+#: before any D1 outcome), so they keep the paths that were true at freeze
+#: time. The 2026-10-08 information-architecture migration moved the objects,
+#: not the rule: resolve a spelling to the object's current address through
+#: `logs/index.json :: historical_paths.map` (`shared.run_layout.resolve_historical`).
 HELD_OUT_BATTERIES: tuple[str, ...] = (
     "artifacts/stage3/c1_confirmation_v1",
     "artifacts/stage3/c2_screening_v1",
@@ -137,7 +144,7 @@ def strata() -> dict[str, tuple[str, int, bool]]:
     of a mixture drift apart; `build_c2_screening_battery` imports it for the
     same reason.
     """
-    import build_c1_confirmation_battery as c1
+    from stages.phase_c1 import build_c1_confirmation_battery as c1
 
     return dict(c1.SETS)
 
@@ -272,6 +279,7 @@ def exclusion_chain() -> dict[str, Any]:
             "historical native/source identity (stable id, including source_key)",
             "historical rendered-prompt exact identity "
             "(sha256 of norm(prompt_text))",
+            #: frozen rule-identity spelling (the module's name at freeze time)
             "canonical problem-content identity "
             "(sha256 of norm(<problem>), experiments.phase_d_series.identity)",
         ],
@@ -288,6 +296,7 @@ def exclusion_chain() -> dict[str, Any]:
         "problem_content_payload": {
             "code": "the bare problem text", "gsm8k": "the question",
             "math_verified": "the problem statement",
+            #: frozen rule-identity spelling (the module's name at freeze time)
             "_owner": "experiments.phase_d_series.identity.PROBLEM_FIELD",
         },
         "reserved_populations_for_problem_content": [
@@ -373,7 +382,7 @@ V1_RULE_ID_AS_COMMITTED = "ced017a1f3f155ba5aaf383e61156c12"
 
 def _id_schemes() -> dict[str, str]:
     """Every stratum's D-series id shape, from the one place it is declared."""
-    from experiments.phase_d_series.identity import ID_SCHEME
+    from stages.d_series.identity import ID_SCHEME
 
     return {group: (f"{prefix}-<config>-<split>-<{key}>" if key
                     else f"{prefix}-<config>-<split>-<row index>")
@@ -387,7 +396,7 @@ def _frozen_review() -> dict[str, Any]:
     and a second copy here would be the duplicate-source-of-truth problem the
     source round just finished removing.
     """
-    from experiments.phase_d_series.identity import (
+    from stages.d_series.identity import (
         REVIEW_PROVENANCE,
         SEMANTIC_DUPLICATE_EXCLUSIONS,
     )
@@ -412,7 +421,7 @@ def _frozen_review() -> dict[str, Any]:
 
 def _source_policy() -> dict[str, Any]:
     """Which population each short stratum draws from. Decided 2026-10-03."""
-    from experiments.phase_d_series import math_source as ms
+    from stages.d_series import math_source as ms
 
     return {
         "_why_in_the_rule": (
@@ -431,6 +440,8 @@ def _source_policy() -> dict[str, Any]:
             "MATH train -- not used for this behavioural stratum",
             "any second code dataset -- MBPP's own splits suffice",
         ],
+        #: frozen rule-identity spelling (the record's path at freeze time);
+        #: the record now lives under logs/stages/stage-1/families/d_series/.
         "status": "DECIDED and IMPLEMENTED; see "
                   "logs/shared/analyses/autoinit_d_series_source_evidence.json",
     }
@@ -558,6 +569,7 @@ def allocation_rule() -> dict[str, Any]:
             "rank_domains": {role: domain for role, domain, _e, _p in ROLES},
             #: THE SEMANTICS OF `stable_id`, bound because it decides the order.
             "ranking_stable_id_semantics": {
+                #: frozen rule-identity spelling (the module's name at freeze time)
                 "for_new_d_series_rows": (
                     "the D-SERIES SPLIT-AWARE ITEM IDENTITY -- "
                     "`experiments.phase_d_series.identity.d_series_item_id`, "
@@ -629,7 +641,7 @@ def _realization() -> dict[str, Any]:
     Derived rather than typed, so building or removing the family moves this
     without an edit.
     """
-    manifest = REPO_ROOT / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+    manifest = REPO_ROOT / "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
     if not manifest.is_file():
         return {
             "status": "DESIGNED / NOT MATERIALIZED",
@@ -643,15 +655,15 @@ def _realization() -> dict[str, Any]:
         "status": "BUILT / VERIFIED",
         "family_content_id": doc.get("family_content_id"),
         "realization": {
-            "owner": "logs/shared/analyses/autoinit_d_series_family_manifest.json",
+            "owner": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
             "_division": ("this record owns the ALLOCATION and the DESIGN; the "
                           "manifest owns the REALIZED family -- per-role item "
                           "digests, the 42 output-file digests and the source "
                           "file digests."),
             "roles_built": sorted(doc.get("roles", {})),
             "allocation_rule_id_at_build": doc.get("allocation_rule_id"),
-            "items": "artifacts/stage3/d_series_behavioural_v1 (gitignored)",
-            "verified_by": ("scripts/experiments/stage-1/phase_d_series/"
+            "items": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1 (gitignored)",
+            "verified_by": ("scripts/stages/stage-1/families/d_series/"
                             "verify_batteries.py"),
         },
         "capacity_source_blocker": "CLOSED",
@@ -667,7 +679,7 @@ def _realization() -> dict[str, Any]:
             "closed by the maintainer source decision of 2026-10-03, integrated "
             "as main@bc31175f. The measured eligible counts clear every "
             "shortfall; owner: "
-            "logs/shared/analyses/autoinit_d_series_source_evidence.json."),
+            "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_source_evidence.json."),
     }
 
 
@@ -681,19 +693,19 @@ def _blocker() -> str:
     renderer. A hand-written blocker goes stale at exactly the moment the thing
     it names is fixed, which is when a reader is most likely to trust it.
     """
-    manifest = REPO_ROOT / "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+    manifest = REPO_ROOT / "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
     if not manifest.is_file():
         return (
             "NOT MATERIALIZED. The allocation rule is frozen and the sources are "
             "decided, but no row has been drawn. Build with "
-            "scripts/experiments/stage-1/phase_d_series/build_batteries.py.")
+            "scripts/stages/stage-1/families/d_series/build_batteries.py.")
     return (
         "NOTHING BLOCKS THIS RECORD'S SUBJECT. The capacity/source blocker is "
         "CLOSED (maintainer source decision 2026-10-03, integrated as "
         "main@bc31175f) and the D1 EVIDENCE BLOCKER is CLOSED on independent "
         "review of the realized family. The six roles are built, byte-hashed and "
         "verified; the realized bytes are owned by "
-        "logs/shared/analyses/autoinit_d_series_family_manifest.json.\n\n"
+        "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json.\n\n"
         "D1 itself remains blocked, for reasons outside this record: FUNDING "
         "AUTHORIZATION (phase_d1 is absent from funds_formal_sessions_of -- "
         "categorical, and no measurement closes it) and the PER-SESSION ENVELOPE "
@@ -757,7 +769,7 @@ def report() -> dict[str, Any]:
 #: home for AutoInit program material spanning the Stage-1 experiments, which a
 #: family owned by three of them is; the `autoinit_` prefix is that directory's
 #: convention.
-RECORD = "logs/shared/analyses/autoinit_d_series_battery_family.json"
+RECORD = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json"
 
 
 def main(argv: list[str] | None = None) -> int:

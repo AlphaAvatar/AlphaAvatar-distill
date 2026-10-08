@@ -1,7 +1,7 @@
 """Build the maximal reusable teacher corpus for the recovery-data scaling study.
 
-    uv run python scripts/rollout/build_recovery_corpus.py \
-        --engine vllm --limits 'gsm8k=1700,...' --out artifacts/stage3/corpus_v2/bulk
+    uv run python scripts/shared/rollout/build_recovery_corpus.py \
+        --engine vllm --limits 'gsm8k=1700,...' --out artifacts/stages/stage-3/corpus_v2/bulk
 
 Distinct from `generate_teacher_answers.py`, which stays as the record of the
 pinned `teacher_corpus_750` artifact it produced. That script selects a
@@ -69,7 +69,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation import degeneration  # noqa: E402

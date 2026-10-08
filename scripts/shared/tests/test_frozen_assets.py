@@ -21,13 +21,13 @@ import aadistill.initialization  # noqa: F401,E402
 from aadistill.initialization.calibration.profiles import mixture_content_sha256  # noqa: E402
 from aadistill.initialization.specs.metrics import StateEvalSuite  # noqa: E402
 
-STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
+STATE_EVAL = REPO / "artifacts/stages/stage-1/state_eval_v1"
 #: The battery that is actually staged to a pod and actually evaluated. It was
 #: still `recovery_search_v1` after the v2 migration — v1 is INVALID before first
 #: use and is no longer staged anywhere, so these tests passed on the dev box,
 #: where v1 remains on disk, and died on the pod's test gate, which is a blocking
 #: setup step. That cost $0.63 and a full setup cycle on 2026-08-14.
-RECOVERY_SEARCH = REPO / "artifacts/stage3/recovery_search_v2"
+RECOVERY_SEARCH = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 ISOLATION = REPO / "logs/shared/analyses/autoinit_role_isolation.json"
 
 #: Both assets are gitignored, so a checkout that staged neither must SKIP rather

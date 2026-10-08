@@ -31,16 +31,16 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _p in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _p) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _p))
 
 #: C1's scorer, imported. Importing it is inert — it runs `main()` only under
 #: `__main__` — so its battery pins are defined but never consulted here.
-from score_c1_confirmation import build_result, score_battery  # noqa: E402
+from stages.phase_c1.score_c1_confirmation import build_result, score_battery  # noqa: E402
 
-from experiments.phase_c2.scoring import (  # noqa: E402
+from stages.phase_c2.scoring import (  # noqa: E402
     BATTERY_PATH, validate_screening_battery,
 )
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402

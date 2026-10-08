@@ -1,7 +1,7 @@
 """Build the small held-out eval set for the Stage 1 initial evaluation.
 
 Usage:
-    uv run python scripts/data/build_holdout_v1.py
+    uv run python scripts/shared/data/build_holdout_v1.py
 
 Streams fineweb-edu documents starting well past the range consumed by
 warmup_v1 (which took the first ~860 stream positions), so held-out text was
@@ -20,7 +20,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue the ONE-USE Phase-C1 authorization. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/issue_c1_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c1/issue_c1_authorization.py \
         --grant logs/budget/approvals/autoinit_c1_grant.json
 
 Same contract as the Phase-A, Phase-B and continuation issuers, and the same
@@ -44,17 +44,17 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-#: NOT `scripts/experiments/stage-1/phase_c1` on sys.path: that directory holds
+#: NOT `scripts/stages/stage-1/phase_c1` on sys.path: that directory holds
 #: `packaging.py`, which shadows the third-party `packaging` distribution
 #: and breaks the next transformers import in the process. Reached through
 #: the package instead, which `scripts` on the path already allows.
 
-from experiments.phase_c1.authorization import C1Authorization  # noqa: E402
-from experiments.phase_c1.authorization_payload import (  # noqa: E402
+from stages.phase_c1.authorization import C1Authorization  # noqa: E402
+from stages.phase_c1.authorization_payload import (  # noqa: E402
     C1AuthorizationRefused, build_c1_authorization_payload, load_config,
 )
 
@@ -73,7 +73,7 @@ def _out_for(run_id: str | None, stage_id: str | None) -> str:
         raise SystemExit("--run-id needs --stage-id: the run's location is "
                          "derived from the stage its experiment declares")
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir('phase_c1', run_id, stage_id)}/governance/authorization.json"
 

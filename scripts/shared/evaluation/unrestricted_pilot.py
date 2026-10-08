@@ -14,9 +14,9 @@ the caller can enforce a budget between waves without ever interrupting an
 active generation.
 
 Usage (on a vLLM pod):
-    python scripts/evaluation/unrestricted_pilot.py \
+    python scripts/shared/evaluation/unrestricted_pilot.py \
         --model <ckpt-dir> --label ttb_treat_a \
-        --prompt-ids "a,b,c" --out artifacts/pilot/ttb_treat_a.json
+        --prompt-ids "a,b,c" --out artifacts/stages/stage-3/pilot/ttb_treat_a.json
 """
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 
@@ -34,7 +34,7 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
     ap.add_argument("--label", required=True)
-    ap.add_argument("--targets", default="artifacts/stage2_v2/teacher_corpus_750/targets.jsonl")
+    ap.add_argument("--targets", default="artifacts/stages/stage-2/v2/teacher_corpus_750/targets.jsonl")
     ap.add_argument("--prompt-ids", required=True, help="comma/space separated")
     ap.add_argument("--tokenizer", default="Qwen/Qwen3-4B-Thinking-2507")
     ap.add_argument("--revision", default="768f209d9ea81521153ed38c47d515654e938aea")

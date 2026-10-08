@@ -18,7 +18,7 @@ trainable-parameter patterns, precision, evaluation intervals, seeds — is copi
 byte-for-byte, and `validate_e8_arms.py` asserts that the realized diff is exactly
 that set before a pod is allowed to train.
 
-    PYTHONPATH=src python scripts/training/build_e8_configs.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8/build_e8_configs.py
 """
 
 from __future__ import annotations
@@ -27,14 +27,14 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 CONTROL_DIR = REPO_ROOT / "configs/stage3/e1"
 OUT_DIR = REPO_ROOT / "configs/stage3/e8"
-TREATMENT_INIT = "artifacts/stage1/e8_contribution_init_v1/checkpoint"
+TREATMENT_INIT = "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint"
 
 # name -> (control config, seed alias)
 ARMS = {
@@ -52,7 +52,7 @@ def main() -> int:
         cfg = dict(control)
         cfg["student_path"] = TREATMENT_INIT
         cfg["run_name"] = name
-        cfg["out_dir"] = f"artifacts/stage3/{name}"
+        cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
         cfg["_purpose"] = (
             "E8 treatment: contribution-guided Stage 1 depth map, then the exact "
             f"E1/P1 KD-heavy 2.96M recovery recipe. Differs from "

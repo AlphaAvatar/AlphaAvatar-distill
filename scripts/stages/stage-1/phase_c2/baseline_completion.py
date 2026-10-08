@@ -38,7 +38,7 @@ from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 from aadistill.infrastructure.session import BudgetSpec
 from aadistill.infrastructure.manifest import sha256_json
 
-from experiments.phase_c2.session import C2Authorization, C2ResourceScope
+from stages.phase_c2.session import C2Authorization, C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -57,16 +57,16 @@ SELECTION_RECORD = ("logs/stages/stage-1/phase_c2/runs/attempt4/evidence/"
 #: What this session executes. The Search-1 driver is NOT here, and neither is
 #: anything that imports the beam runner.
 ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_phase_c2_baseline_launch.py",
-    "scripts/pod/autoinit_phase_c2_baseline_driver.py",
+    "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_launch.py",
+    "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py",
     #: The assembler and the issuer, because the code that decides what the
     #: AUTHORIZATION says belongs to the executable identity that authorization
     #: binds. Search-1's closure names its own pair for the same reason: an
     #: issuer outside the digest could change what a grant means without
     #: changing the digest the grant commits to.
-    "scripts/experiments/stage-1/phase_c2/baseline_completion_authorization.py",
-    "scripts/autoinit/issue_c2_baseline_completion_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c2/baseline_completion_authorization.py",
+    "scripts/stages/stage-1/phase_c2_baseline_completion/issue_c2_baseline_completion_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Non-python inputs the session reads and whose bytes therefore belong in its
@@ -80,7 +80,7 @@ DECLARED_INPUTS: tuple[str, ...] = (
     #: against. Read by the assembler, so its bytes decide what a grant is
     #: allowed to be.
     "configs/experiments/phase_c2/baseline_completion_authorization.json",
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
 )
 
 SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod", "scripts/autoinit")

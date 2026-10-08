@@ -5,7 +5,7 @@ Every figure in `logs/stages/stage-3/e8/plans/e8_preregistration.md` comes from 
 the arithmetic that would enforce it are the same code. Touches no GPU, creates
 no pod.
 
-    PYTHONPATH=src python scripts/training/plan_e8_budget.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8/plan_e8_budget.py
 
 Two paid pods, split where the artifact flow forces a split
 ----------------------------------------------------------
@@ -37,7 +37,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.budget import (  # noqa: E402

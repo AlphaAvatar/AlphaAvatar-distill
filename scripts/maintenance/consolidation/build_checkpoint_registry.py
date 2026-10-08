@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Canonical inventory of every checkpoint and weight artifact, wherever it lives.
 
-    PYTHONPATH=src python scripts/consolidate/build_checkpoint_registry.py \
+    PYTHONPATH=src python scripts/maintenance/consolidation/build_checkpoint_registry.py \
         --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json
 
 Nothing is deleted here. This produces the registry a deletion pass may act on,
@@ -58,7 +58,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 RELAY_REPO = "AlphaAvatar/aadistill-artifacts"
@@ -116,11 +116,11 @@ CLASSIFY: dict[str, dict] = {
         experiment="AutoInitializer dry run", role="toy control materialization",
         retention="duplicate", status="superseded",
         why="a 32-wide 6-layer toy model built by a $0 CPU dry run; its identity "
-            "is recorded in artifacts/autoinit/dryrun/search/states.jsonl and in "
+            "is recorded in artifacts/shared/validation/dryrun/search/states.jsonl and in "
             "logs/shared/validations/dryrun/autoinit_dryrun_fresh.json",
         never_delete=None,
-        reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
-                       "--out artifacts/autoinit/dryrun",
+        reconstruction="PYTHONPATH=src python scripts/shared/validation/dry_run_search.py "
+                       "--out artifacts/shared/validation/dryrun",
         reconstruction_cost="$0 (CPU, minutes)", disposition="delete"),
     "autoinit/dryrun/search/states": dict(
         experiment="AutoInitializer dry run", role="rejected/searched toy leaf",
@@ -130,8 +130,8 @@ CLASSIFY: dict[str, dict] = {
             "and prune decision — is in search/states.jsonl and in "
             "logs/shared/validations/dryrun/autoinit_dryrun_fresh.json / _resume.json",
         never_delete=None,
-        reconstruction="PYTHONPATH=src python scripts/autoinit/dry_run_search.py "
-                       "--out artifacts/autoinit/dryrun",
+        reconstruction="PYTHONPATH=src python scripts/shared/validation/dry_run_search.py "
+                       "--out artifacts/shared/validation/dryrun",
         reconstruction_cost="$0 (CPU, minutes)", disposition="delete"),
 
     # ---- the out-of-tree store -----------------------------------------
@@ -145,7 +145,7 @@ CLASSIFY: dict[str, dict] = {
         never_delete=None,
         reconstruction="hf download AlphaAvatar/aadistill-artifacts "
                        "transfer/wheelhouse_vllm_cp312, or rebuild with "
-                       "scripts/pod/build_wheelhouse.py --from-pins "
+                       "scripts/shared/pod/build_wheelhouse.py --from-pins "
                        "--requirements requirements-vllm.txt",
         reconstruction_cost="$0 (download)", disposition="delete"),
     "aad-artifacts/autoinit/preflight_ctl_r0860k": dict(
@@ -216,14 +216,14 @@ PROTECTED = {"canonical", "control", "behavioral_anchor", "reproducibility_requi
 #: because they occupy the same local storage and need the same discipline.
 BULK_DUPLICATE_NOTES = {
     "artifacts/audit/ladder_uniform_rebuild": (
-        "the rebuilt ladder from scripts/data/audit_e1_mixture_rebuild.py. Its "
+        "the rebuilt ladder from scripts/stages/stage-3/e1/audit_e1_mixture_rebuild.py. Its "
         "blocks.npz and audit.jsonl are byte-identical to the historical pack it "
         "was compared against; the audit's value is the recorded match "
         "(artifacts/audit/e1_mixture_rebuild.json, logs/stages/stage-3/history/EXPERIMENTS.md), not the "
         "second copy of the bytes"),
-    "artifacts/stage3/ladder_uniform": (
+    "artifacts/stages/stage-3/ladder_uniform": (
         "the trainer-side name of the frozen training pack. Byte-identical to "
-        "artifacts/stage3/ladder_uniform_probe, which the test suite reads, and "
+        "artifacts/shared/instruments/ladder_uniform_probe, which the test suite reads, and "
         "refetched from the relay at stage3_recovery_corpus_v2/ladder_uniform by "
         "every pod setup script against the pinned hash 6f324cb0…"),
     "artifacts/_audit_nested_bak": (
@@ -369,7 +369,7 @@ def relay_listing(use_network: bool, previous: dict | None) -> dict:
 
 
 def mirror_verifications() -> dict[str, dict]:
-    """What scripts/consolidate/verify_relay_mirror.py has actually proved, keyed
+    """What scripts/maintenance/consolidation/verify_relay_mirror.py has actually proved, keyed
     by local tree. A `verified_stale_cache` deletion cites this, so the registry
     reads the evidence rather than repeating a claim about it."""
     p = REPO_ROOT / "logs/shared/validations/relay-mirror/relay_mirror_verification.json"

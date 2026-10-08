@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Run ONE bounded real-CUDA engineering validation on one authorized GPU.
 
-    PYTHONPATH=src:scripts python scripts/validation/cuda_engineering_launch.py \
+    PYTHONPATH=src:scripts python scripts/shared/validation/cuda_engineering_launch.py \
         --run-id <unique-engineering-run-id> --scr <scratch-dir> \
         [--authorization <engineering-authorization.json>] \
         [--check <pod-side-script>] [--check-config <json>] \
         [--experiment-id <logs/runs key>] [--ship <path> ...]
 
 A THIN entry point. It builds no provider controller and no authorization
-framework of its own: `RunPodProvider`, `scripts/pod/watchdog.py`, `SSHTarget`
+framework of its own: `RunPodProvider`, `scripts/shared/pod/watchdog.py`, `SSHTarget`
 and the artifact/teardown helpers are the same ones every paid session uses.
 What it adds is the one thing those sessions cannot express -- a run that needs
 no bundle, no teacher weights, no venv build and no formal authorization, and
@@ -60,7 +60,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -69,9 +69,9 @@ from aadistill.infrastructure.provider import (  # noqa: E402
 from aadistill.infrastructure.remote import SSHTarget  # noqa: E402
 from aadistill.infrastructure.session_runner import (  # noqa: E402
     watchdog_journal_name)
-from experiments.deployment import (  # noqa: E402
+from shared.deployment import (  # noqa: E402
     POD_IMAGE, provider_cli_candidates)
-from experiments.run_layout import (  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec, claim_output_root, open_run, present_roles,
     rel_run_dir,
     record_run, require_output_claim, write_run_readmes,
@@ -549,7 +549,7 @@ class Engineering:
         #: not at a fresh $0.40. It measures this pod's own clock, so the
         #: budget it is given is the remaining one.
         hard_minutes = self.remaining_total / self.rate * 60
-        cmd = [sys.executable, str(REPO_ROOT / "scripts/pod/watchdog.py"),
+        cmd = [sys.executable, str(REPO_ROOT / "scripts/shared/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.rate),
@@ -800,7 +800,7 @@ print(json.dumps(out)); print("PROBE_OK")
         repo = POD_IMAGE["checkout_root"]
         scp = ["scp", "-P", port, "-o", "StrictHostKeyChecking=no",
                "-o", "UserKnownHostsFile=/dev/null", "-r"]
-        remote = f"{repo}/artifacts/validation"
+        remote = f"{repo}/artifacts/shared/validation"
         subprocess.run(scp + [f"root@{host}:{remote}", str(self.scr / "artifacts")],
                        capture_output=True, timeout=600)
         got = sorted(str(p.relative_to(self.scr))
@@ -1019,7 +1019,7 @@ print(json.dumps(out)); print("PROBE_OK")
             plan={"validation": self.validation_label, "execution_sha":
                   self.a.execution_sha, "image": self.a.image},
             implementation={"launcher":
-                            "scripts/validation/cuda_engineering_launch.py"},
+                            "scripts/shared/validation/cuda_engineering_launch.py"},
             status={"verdict": self.ev.get("verdict"),
                     "pod_id": self.ev.get("pod_id"),
                     #: The keys `finish` actually writes, not the session
@@ -1049,7 +1049,7 @@ def main() -> int:
                     help="the stage area the run records land in; use the "
                          "stage the validation's governance lives under")
     ap.add_argument("--check",
-                    default="scripts/validation/cuda_engineering_check.py",
+                    default="scripts/shared/validation/cuda_engineering_check.py",
                     help="the pod-side check, repo-relative")
     ap.add_argument("--check-config",
                     default="configs/validation/cuda_engineering.json")

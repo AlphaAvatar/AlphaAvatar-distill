@@ -43,7 +43,7 @@ from aadistill.initialization.calibration.profiles import (
     register_profile,
     unregister_profile,
 )
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from aadistill.initialization.calibration.items import (  # noqa: E402
     CalibrationItemError,
     prepare_calibration_items,
@@ -143,7 +143,7 @@ def test_preparation_does_not_mutate_the_raw_items():
 
 
 #: `test_the_c1_prefix_profiles_are_the_ones_this_covers` moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_prefix_profiles.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_prefix_profiles.py`
 #: in the 2026-10-03 convergence round: it asks whether the mixtures this
 #: module covers are the ones C1's own path names, which is a question about
 #: C1's path. The mixtures themselves, and the conversion, stay here.
@@ -160,7 +160,7 @@ def test_the_frozen_boundary_and_this_one_agree_token_for_token():
     is, this fails, and it fails at `$0`.
     """
     sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
-    from phase_a_search import as_operator_items
+    from stages.phase_a.phase_a_search import as_operator_items
 
     raw = DOMAIN_BALANCED_V1.resolve(REPO)
     frozen = as_operator_items(raw)

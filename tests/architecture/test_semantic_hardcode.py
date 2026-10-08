@@ -24,7 +24,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 
 _spec = importlib.util.spec_from_file_location(
-    "semantic_hardcode_under_test", REPO / "scripts/architecture/semantic_hardcode.py")
+    "semantic_hardcode_under_test", REPO / "scripts/maintenance/architecture/semantic_hardcode.py")
 SH = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(SH)
 
@@ -169,4 +169,4 @@ class TestTheCoreIsClean:
             pytest.skip("no recorded report yet")
         recorded = json.loads(path.read_text())
         assert recorded["total"] == len(SH.scan()), (
-            "re-run scripts/architecture/semantic_hardcode.py --write")
+            "re-run scripts/maintenance/architecture/semantic_hardcode.py --write")

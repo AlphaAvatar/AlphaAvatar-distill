@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The D-series Top-K adoption validation. Engineering evidence only.
 
-    python scripts/pod/topk_adoption_driver.py --out DIR [--deadline-s N]
+    python scripts/stages/stage-1/phase_d1/topk_adoption_driver.py --out DIR [--deadline-s N]
 
 **One set of model forwards, two reductions.** Every comparison below comes from
 the SAME logits: paying for a second set of forwards to compare two reducers
@@ -43,8 +43,8 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-REPO_DEFAULT = Path(__file__).resolve().parents[2]
-STATE_EVAL = "artifacts/stage1/state_eval_v1"
+REPO_DEFAULT = Path(__file__).resolve().parents[4]
+STATE_EVAL = "artifacts/stages/stage-1/state_eval_v1"
 #: One spelling of the policy, used by every stage here.
 POLICY_ID = "positions.supervised_target_v1"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
@@ -237,8 +237,8 @@ def stage_C_depth_dual_scores(*, repo: Path, workdir: Path, teacher_path: str,
         FULL_VOCAB_V1, sketch_forward_kl_mean_batch, sketch_reference,
     )
     from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_a3 import a3_session as A3S
-    from experiments.phase_d_series.scoring_protocol import (
+    from stages.phase_a3 import a3_session as A3S
+    from stages.d_series.scoring_protocol import (
         D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
     )
 
@@ -439,8 +439,8 @@ def _depth_operator_premises(repo: Path) -> dict[str, Any]:
     from aadistill.initialization.scoring.positions import (
         ALL_POSITIONS_V1, SUPERVISED_TARGET_V1, policy_config,
     )
-    from experiments.phase_a3 import a3_session as A3S
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.phase_a3 import a3_session as A3S
+    from stages.d_series import scoring_protocol as SP
 
     spec = A3S.path_spec(workdir_device="cpu")
     impl = get_implementation(spec.steps[0].impl_id)
@@ -519,7 +519,7 @@ def production_operator_context(*, adapter, model, target_spec, profile, items,
     from aadistill.initialization.operators.base import OperatorContext
     from aadistill.initialization.scoring.content import scoring_content_config
     from aadistill.initialization.scoring.positions import policy_config
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.d_series import scoring_protocol as SP
 
     operator_config = SP.operator_config(
         {"n_calibration_items": len(items),
@@ -587,8 +587,8 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
         ALL_POSITIONS_V1, SUPERVISED_TARGET_V1, policy_config,
     )
     from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_a3 import a3_session as A3S
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.phase_a3 import a3_session as A3S
+    from stages.d_series import scoring_protocol as SP
 
     #: A SYNCED RUN CANNOT PRICE, and the operator's own split is the one that
     #: would do it. Recorded so a diagnostic run can never be read as a price.
@@ -997,7 +997,7 @@ def build_positional_candidate(*, repo: Path, workdir: Path,
     from aadistill.initialization.operators.base import OperatorContext
     from aadistill.initialization.operators.register import BUILTIN_OPERATORS
     from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     impl = next(o for o in BUILTIN_OPERATORS
                 if o.impl_id == "depth.positional_v0")
@@ -1044,7 +1044,7 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     from aadistill.initialization.execution import ExecutionConfig
     from aadistill.initialization.scoring.support import FULL_VOCAB_V1
     from aadistill.initialization.scoring.positions import get_position_policy
-    from experiments.phase_d_series.scoring_protocol import (
+    from stages.d_series.scoring_protocol import (
         D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
     )
     #: IMPORTED, not re-derived. `d1_qualification_driver._load_suite` already
@@ -1053,9 +1053,9 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     #: have bound a protocol id over a dict's repr and looked perfectly bound. A
     #: second hand-written copy here is how that lesson gets unlearned.
     sys.path.insert(0, str(repo / "scripts/autoinit"))
-    import load_state_eval
+    from shared.evaluation import load_state_eval
 
-    from d1_qualification_driver import _load_suite
+    from stages.phase_d1.d1_qualification_driver import _load_suite
 
     suite, items, content_sha256 = _load_suite(load_state_eval, repo)
     if not content_sha256:
@@ -1182,12 +1182,12 @@ def main(argv: list[str] | None = None) -> int:
     repo = Path(args.repo).resolve()
     _bootstrap(repo)
 
-    from d1_qualification_driver import (
+    from stages.phase_d1.d1_qualification_driver import (
         WallClockDeadline, _numerics, bind_protocol, environment, fetch_teacher,
     )
 
     if args.required_inputs:
-        from d1_qualification_driver import main as qmain
+        from stages.phase_d1.d1_qualification_driver import main as qmain
 
         return qmain(["--required-inputs", "--repo", str(repo)])
 
@@ -1218,22 +1218,22 @@ def main(argv: list[str] | None = None) -> int:
             from aadistill.initialization.operators.attention.gqa import (
                 activation_importance,
             )
-            from experiments.calibration import register_builtin_profiles
-            from experiments.phase_c2.search_space import register_c2_operators
+            from shared.calibration import register_builtin_profiles
+            from stages.phase_c2.search_space import register_c2_operators
 
             register_builtin_adapters()
             register_builtin_profiles()
             register_c2_operators()
             activation_importance.register()
 
-            from experiments.phase_d_series.scoring_protocol import describe
+            from stages.d_series.scoring_protocol import describe
 
             record["scoring_protocol"] = describe()
             st.result = {"top_k": record["scoring_protocol"]["top_k"]}
 
         from aadistill.initialization.execution import ExecutionConfig
         from aadistill.initialization.scoring.support import FULL_VOCAB_V1
-        from experiments.phase_d_series.scoring_protocol import (
+        from stages.d_series.scoring_protocol import (
             D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
         )
 

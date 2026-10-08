@@ -13,7 +13,7 @@ skip construct, and classifies the signal its condition reads. Anything that can
 see a different premise on a pod must carry an explicit classification; anything
 unclassified is reported and fails the audit.
 
-    PYTHONPATH=src python scripts/autoinit/audit_skip_predicates.py [--write]
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c1/audit_skip_predicates.py [--write]
 
 `--write` refreshes `logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json`. Entirely at `$0`: it
 reads source and never imports the modules under audit.
@@ -29,7 +29,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -63,8 +63,8 @@ SIGNALS: dict[str, tuple[tuple[str, ...], str, str]] = {
         "so it is false on the pod even when the condition it stands for holds. "
         "Never legitimate as a staging or artifact premise."),
     "unstaged_artifact": (
-        ("aad-artifacts", "aad-scratch", "artifacts/stage3/corpus_v2",
-         "artifacts/eval/battery_v2", "artifacts/stage0", "artifacts/stage2"),
+        ("aad-artifacts", "aad-scratch", "artifacts/stages/stage-3/corpus_v2",
+         "artifacts/stages/stage-3/eval/battery_v2", "artifacts/stages/stage-0", "artifacts/stages/stage-2/v0"),
         "differs_on_pod",
         "an artifact path C1's manifest does not stage; present on the dev box "
         "and absent on the pod"),
@@ -103,8 +103,8 @@ SIGNALS: dict[str, tuple[tuple[str, ...], str, str]] = {
         "an existence check against a path this audit could not resolve to "
         "staged or tracked content; a pod holds only what the manifest stages"),
     "staged_artifact": (
-        ("artifacts/stage1/qwen3_0p6b_init_v0", "c1_confirmation_v1",
-         "artifacts/stage3/c1"),
+        ("artifacts/stages/stage-1/qwen3_0p6b_init_v0", "c1_confirmation_v1",
+         "artifacts/stages/stage-3/c1"),
         "same_on_pod",
         "C1's manifest stages exactly this, so the premise travels"),
     "repository_content": (
@@ -129,7 +129,7 @@ def c1_selected_modules(repo: Path) -> tuple[list[Path], list[str]]:
     This used to scan "the modules the C1 session actually runs", which was the
     same thing while a C1 pod ran the whole repository minus four modules. It
     stopped being the same thing on 2026-09-13, when the pod's selection became
-    `scripts/experiments/stage-1/phase_c1/tests/` — thirteen tests with no skip predicate in them at all.
+    `scripts/stages/stage-1/phase_c1/tests/` — thirteen tests with no skip predicate in them at all.
 
     Scoping the audit to that selection would have left it auditing nothing and
     claiming PASS, which is worse than useless. So the coupling is removed
@@ -137,7 +137,7 @@ def c1_selected_modules(repo: Path) -> tuple[list[Path], list[str]]:
     suite, and it is NOT a launch blocker.
 
     The pod-parity property it used to assert for a paid run is now asserted
-    where it is cheap and true — `scripts/experiments/stage-1/phase_c1/tests/` contains no skip
+    where it is cheap and true — `scripts/stages/stage-1/phase_c1/tests/` contains no skip
     predicate, checked by the preflight itself.
     """
     files = sorted((repo / "tests").rglob("test_*.py"))
@@ -207,7 +207,7 @@ def known_attributes() -> dict[str, str]:
 
     Derived, never transcribed: if `RECORD_PATH` moves, this moves with it.
     """
-    from experiments.phase_c1 import pod_environment as pe
+    from stages.phase_c1 import pod_environment as pe
     # Quoted, because the expansion is read back by a literal-path regex: an
     # unquoted value expands and then resolves to nothing.
     return {k: f'"{v}"' for k, v in (
@@ -358,7 +358,7 @@ def known_classification(nodeid: str) -> str | None:
     """Groups the readiness contract already names, by nodeid.
 
     C1's contract named nine groups of repository test node ids while a pod ran
-    the whole repository. It runs `scripts/experiments/stage-1/phase_c1/tests/` now — thirteen tests,
+    the whole repository. It runs `scripts/stages/stage-1/phase_c1/tests/` now — thirteen tests,
     none of which skips anywhere — so all nine described tests no pod collects,
     and they were deleted rather than left to report a missing expectation
     forever.
@@ -419,13 +419,13 @@ DEPENDENCY_EVIDENCE: dict[str, str] = {
         "setup additionally installs the project editable into /opt/train "
         "(`uv pip install --no-deps -e $REPO`)"),
     "analyze_e8b_behaviour": (
-        "committed at scripts/evaluation/analyze_e8b_behaviour.py; the test "
+        "committed at scripts/stages/stage-3/e8b/analyze_e8b_behaviour.py; the test "
         "prepends REPO/scripts/evaluation to sys.path, so the bundle checkout "
         "is sufficient on both machines"),
     'shutil.which("bash")': (
         "the pod's setup script IS executed as `bash "
         "/workspace/autoinit_preflight_setup.sh` by SessionRunner, and the "
-        "simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both "
+        "simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both "
         "machines bash is present by construction before pytest starts"),
     'importorskip("torch")': (
         "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] "
@@ -553,7 +553,7 @@ def audit(repo: Path = REPO) -> dict:
     live_keys = {p["nodeid"] for p in needs_a_word}
     #: STALE means "registered, in scope, and no longer holding a predicate".
     #: An entry for a module this session does not select is OUT OF SCOPE, not
-    #: rotten: C1's pod selection narrowed to `scripts/experiments/stage-1/phase_c1/tests/` on
+    #: rotten: C1's pod selection narrowed to `scripts/stages/stage-1/phase_c1/tests/` on
     #: 2026-09-13 and 40-odd honest entries describing development-side
     #: predicates would otherwise all have read as excuses that had decayed.
     stale = sorted(k for k in registered if k not in live_keys)

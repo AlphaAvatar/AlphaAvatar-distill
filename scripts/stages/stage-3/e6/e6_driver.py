@@ -2,7 +2,7 @@
 """Experiment 6: evaluate six existing checkpoints on the frozen 150-prompt
 protocol. Trains nothing, writes no weights, modifies no checkpoint.
 
-    /opt/train/bin/python scripts/pod/e6_driver.py --stage all \
+    /opt/train/bin/python scripts/stages/stage-3/e6/e6_driver.py --stage all \
         --spent-usd 0.42 --authorized-usd 2.48
 
 **The evaluation rung is pinned to 860000 for every arm**, exactly as E4 pinned
@@ -33,8 +33,8 @@ STATUS = Path("/workspace/e6.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 CKPT = Path("/workspace/ckpt")
 
 EVAL_RUNG = 860000          # pinned; see the module docstring
@@ -57,8 +57,8 @@ STAGING_FAILED = CKPT_LOCAL / "FAILED"  # launcher writes it if the upload dies
 # Scripts this driver executes. None of them may contain an executable optimizer
 # step: E6 is evaluation-only and that is proven by parsing, not asserted in a
 # comment (the same check D0 used on 2026-08-04).
-EXECUTED = ("scripts/evaluation/run_three_mode_diagnostic.py",
-            "scripts/evaluation/diagnose_training_recall.py")
+EXECUTED = ("scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
+            "scripts/shared/evaluation/diagnose_training_recall.py")
 
 
 def mark(name: str) -> None:
@@ -89,7 +89,7 @@ def stage_notrain(args) -> None:
     report = {"executed_scripts": list(EXECUTED),
               "optimizer_step_or_backward_calls": findings,
               "trains_anything": bool(findings),
-              "training_pack_present": (REPO / "artifacts/stage3/ladder_uniform").exists()}
+              "training_pack_present": (REPO / "artifacts/stages/stage-3/ladder_uniform").exists()}
     (OUT / "e6_notrain_proof.json").parent.mkdir(parents=True, exist_ok=True)
     (OUT / "e6_notrain_proof.json").write_text(json.dumps(report, indent=2) + "\n")
     if findings:
@@ -160,11 +160,11 @@ def stage_three_mode(args) -> None:
             return
 
         model = Path(arm["path"])
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

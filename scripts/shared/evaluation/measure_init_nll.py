@@ -23,14 +23,14 @@ All three are **diagnostics**. They may not promote a checkpoint or cancel an ar
 (decision record 2026-08-09). They exist so that what an initialization changed is
 known *before* recovery training obscures it.
 
-    PYTHONPATH=src python scripts/evaluation/measure_init_nll.py \\
-        --checkpoint artifacts/stage1/e8_contribution_init_v1/checkpoint \\
+    PYTHONPATH=src python scripts/shared/evaluation/measure_init_nll.py \\
+        --checkpoint artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint \\
         --label e8-contribution-init \\
         --holdout data/warmup/holdout_v1.jsonl \\
-        --fineweb-val artifacts/stage3/e7_fineweb_val \\
-        --pack artifacts/stage3/ladder_uniform_probe \\
+        --fineweb-val artifacts/stages/stage-3/e7_fineweb_val \\
+        --pack artifacts/shared/instruments/ladder_uniform_probe \\
         --teacher Qwen/Qwen3-4B-Thinking-2507 \\
-        --out artifacts/stage1/e8_contribution_init_v1/init_nll.json
+        --out artifacts/stages/stage-1/e8_contribution_init_v1/init_nll.json
 """
 
 from __future__ import annotations
@@ -42,7 +42,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import load_extra_stream  # noqa: E402
@@ -61,7 +61,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts/evaluation"))
 
 def holdout_nll(model, tokenizer, path: Path, max_seq_len: int, device: str) -> dict:
     """The historical series, through the same function `eval_ppl.py` uses."""
-    from eval_ppl import mean_nll
+    from shared.evaluation.eval_ppl import mean_nll
 
     samples = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
     nll, tokens = mean_nll(model, tokenizer, samples, max_seq_len, device)
@@ -77,8 +77,8 @@ def main() -> int:
     ap.add_argument("--label", required=True)
     ap.add_argument("--holdout", default="data/warmup/holdout_v1.jsonl")
     ap.add_argument("--holdout-max-seq-len", type=int, default=1024)
-    ap.add_argument("--fineweb-val", default="artifacts/stage3/e7_fineweb_val")
-    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
+    ap.add_argument("--fineweb-val", default="artifacts/stages/stage-3/e7_fineweb_val")
+    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
     ap.add_argument("--rung", type=int, default=2960000)
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--teacher", default="")

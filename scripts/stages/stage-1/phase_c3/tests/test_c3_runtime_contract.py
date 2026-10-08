@@ -34,10 +34,10 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3 import session as CS  # noqa: E402
+from stages.phase_c3 import session as CS  # noqa: E402
 
-DRIVER = REPO / "scripts/pod/autoinit_c3_driver.py"
-LAUNCH = REPO / "scripts/pod/autoinit_c3_launch.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py"
+LAUNCH = REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py"
 PREREG_PATH = REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json"
 
 
@@ -205,7 +205,7 @@ def test_the_two_causal_arms_are_distinguishable_before_anything_is_built(regist
 
 def test_the_seeds_are_c3_s_own_and_not_c1_s():
     """Disjoint by construction, which is what makes the mistake detectable."""
-    from experiments.phase_c1.isolation import derive_recovery_seeds
+    from stages.phase_c1.isolation import derive_recovery_seeds
 
     assert CS.recovery_seeds() == (217230555, 1151307191, 2045359208)
     assert not set(CS.recovery_seeds()) & set(derive_recovery_seeds())
@@ -744,7 +744,7 @@ def test_every_shelled_out_scorer_accepts_the_argv_the_driver_builds():
     import tempfile
 
     seeds = CS.recovery_seeds()
-    scorer = REPO / "scripts/autoinit/score_c1_confirmation.py"
+    scorer = REPO / "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py"
     #: Bound, not incidental: the superset assertion at the end reads this.
     exercised: set[str] = set()
     with tempfile.TemporaryDirectory() as tmp:

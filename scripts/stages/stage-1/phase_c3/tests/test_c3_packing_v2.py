@@ -17,8 +17,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-DRIVER = REPO / "scripts/pod/c3_packing_v2_driver.py"
-SCREEN = REPO / "scripts/pod/c3_packing_screen_v2.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c3/c3_packing_v2_driver.py"
+SCREEN = REPO / "scripts/stages/stage-1/phase_c3/c3_packing_screen_v2.py"
 SCOPE = REPO / ("logs/stages/stage-1/phase_c3/pilots/packing-optimization/"
                 "v2/scope.json")
 
@@ -365,7 +365,7 @@ def test_the_toy_root_honours_the_device_it_is_given():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "c3b", REPO / "scripts/pod/c3_batching_pilot_driver.py")
+        "c3b", REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.path.insert(0, str(REPO / "src"))
     sys.path.insert(0, str(REPO / "scripts"))

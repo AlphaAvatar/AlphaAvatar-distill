@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train and score D1's ten screening probes, then advance exactly one.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_d1_behavioural_driver.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py \
         --out artifacts/audit/autoinit_d1_behavioural --run-id <id> --rung screening
 
 Ten probes: four candidates and the incumbent, at two preregistered seeds each.
@@ -46,9 +46,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/pod", "scripts/autoinit",
-               "scripts/experiments/stage-1"):
+               "scripts/stages/stage-1"):
     _path = str(REPO_ROOT / _extra)
     if _path not in sys.path:
         sys.path.insert(0, _path)
@@ -58,7 +58,7 @@ FAILURE_MARKER = "RUN_FAILED"
 CHECK_ONLY_MARKER = "CHECK_ONLY_OK"
 
 #: The one scorer for this rung. Pinned, and it takes no battery argument.
-SCORER = REPO_ROOT / "scripts/autoinit/score_d1_screening.py"
+SCORER = REPO_ROOT / "scripts/stages/stage-1/phase_d1/score_d1_screening.py"
 
 
 class D1BehaviouralDriverError(RuntimeError):
@@ -120,7 +120,7 @@ def probe_config(probe: Any, *, audit: Path, frozen_recipe: Path,
     derived = {
         **frozen,
         "run_name": probe.probe_id,
-        "out_dir": f"artifacts/stage3/d1_behavioural/{probe.probe_id}",
+        "out_dir": f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}",
         "data_dir": pack_dir,
         "seed": probe.seed,
         "student_path": probe.checkpoint_dir,
@@ -168,7 +168,7 @@ def main(argv: list[str] | None = None) -> int:
     mark(status, "DRIVER_START")
     try:
         from aadistill.infrastructure.manifest import sha256_json
-        from experiments.phase_d1 import behavioural as D1B
+        from stages.phase_d1 import behavioural as D1B
 
         #: THE CONTRACT, FIRST. Hashed so the authorization can bind the arms,
         #: the battery, the recipe, the seeds and the schedule in one value --
@@ -189,7 +189,7 @@ def main(argv: list[str] | None = None) -> int:
         #: is inert -- it defines constants and registers the builtin profiles
         #: and adapters, which this session needs too -- and `C1Driver` itself
         #: is deliberately NOT imported.
-        from autoinit_c1_driver import (
+        from stages.phase_c1.autoinit_c1_driver import (
             C1_PROBE_OVERRIDES, FROZEN_RECIPE, PACK_DIR, TRAINER,
             UNCAPPED_EVAL, _trainer_bytes, trained_model_dir,
         )
@@ -261,7 +261,7 @@ def main(argv: list[str] | None = None) -> int:
                     f"{train.returncode}; see {probe.probe_id}_train_tail.log")
             entry["trained"] = True
             model_dir = trained_model_dir(
-                REPO_ROOT / f"artifacts/stage3/d1_behavioural/{probe.probe_id}")
+                REPO_ROOT / f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}")
             entry["model_dir"] = str(model_dir)
             save()
 

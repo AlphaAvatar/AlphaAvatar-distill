@@ -62,7 +62,7 @@ def test_no_command_substitution_over_globs_in_new_launchers(path):
         f"{path.name} expands a glob through command substitution inside an "
         f"ssh command: {offenders}. A pattern that matches nothing yields an "
         "empty substitution and a silently short archive. Use "
-        "scripts/pod/collect_artifacts.py, which expands the spec in Python "
+        "scripts/shared/pod/collect_artifacts.py, which expands the spec in Python "
         "and reports what it could not find.")
 
 
@@ -281,7 +281,7 @@ def _phase_a_ok():
     """
     sys.path.insert(0, str(REPO / "scripts/pod"))
     sys.path.insert(0, str(REPO / "scripts"))
-    import autoinit_phase_a_launch as L
+    from stages.phase_a import autoinit_phase_a_launch as L
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40, "--bundle", "b.bundle"])
@@ -355,8 +355,8 @@ def test_the_phase_a_finalist_fetch_really_does_return_strings():
     fails and the tolerance above should be re-examined rather than silently
     covering a second shape.
     """
-    src = (REPO / "scripts/pod/autoinit_recovery_continuation_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py").read_text()
     assert "fetch_products=finalists_to_fetch" in src
-    launch = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    launch = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py").read_text()
     assert 'return [e["canonical_id"] for e in entries' in launch, (
         "finalists_to_fetch no longer returns canonical_id strings")

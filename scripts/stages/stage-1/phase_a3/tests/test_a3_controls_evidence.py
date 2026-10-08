@@ -38,7 +38,7 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "pod"):
 @pytest.fixture(scope="module")
 def launcher():
     spec = importlib.util.spec_from_file_location(
-        "a3lau_controls", REPO / "scripts/pod/autoinit_a3_launch.py")
+        "a3lau_controls", REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["a3lau_controls"] = mod
     spec.loader.exec_module(mod)

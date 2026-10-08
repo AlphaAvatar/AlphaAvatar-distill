@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Put the authorization-carrying C1 session commit where the pod can fetch it.
 
-    PYTHONPATH=src python scripts/autoinit/stage_c1_bundle.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c1/stage_c1_bundle.py \
         --session-commit <sha> [--dry-run]
 
 The step whose absence cost C1 attempt 1 `$0.0786` and a 404. It was documented
-in `scripts/pod/AGENTS.md` and depended on an operator remembering it; this makes
+in `scripts/shared/pod/AGENTS.md` and depended on an operator remembering it; this makes
 it a command with a name, and `bundle_staged_gate` then refuses to launch without
 its result.
 
@@ -33,11 +33,11 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_c1.bundle import RELAY_REPO, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, stage_bundle  # noqa: E402
+from stages.phase_c1.bundle import RELAY_REPO, C1BundleError, build_bundle, canonical_bundle_name, canonical_repo_path, stage_bundle  # noqa: E402
 
 AUTH_PATH = "logs/budget/approvals/autoinit_c1_authorization.json"
 
@@ -50,7 +50,7 @@ def _out_for(run_id: str | None, stage_id: str | None) -> str:
         raise SystemExit("--run-id needs --stage-id: the run's location is "
                          "derived from the stage its experiment declares")
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir('phase_c1', run_id, stage_id)}/governance/bundle.json"
 

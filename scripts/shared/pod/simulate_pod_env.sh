@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run the pod's test command with only the artifacts a pod session actually stages.
 #
-#   bash scripts/pod/simulate_pod_env.sh
+#   bash scripts/shared/pod/simulate_pod_env.sh
 #
 # Why this exists. A pod checks out the session bundle, which carries only
 # tracked files — everything under `artifacts/` is gitignored and does not
@@ -214,17 +214,17 @@ restore() {
 }
 trap restore EXIT INT TERM
 
-# Everything a pod does NOT get from the bundle. `artifacts/stage3/corpus_v2` and
-# `artifacts/stage3/ladder_uniform_probe` are left in place because every pod
+# Everything a pod does NOT get from the bundle. `artifacts/stages/stage-3/corpus_v2` and
+# `artifacts/shared/instruments/ladder_uniform_probe` are left in place because every pod
 # session stages those from the relay.
 #
 # `recovery_search_v1` joined this list on 2026-08-14: the v2 migration stopped
-# staging it, but `scripts/experiments/tests/test_frozen_assets.py` still pointed at it, so
+# staging it, but `scripts/shared/tests/test_frozen_assets.py` still pointed at it, so
 # seven tests read an artifact no pod possesses. The dev box had it, the suite
 # passed here, and the pod's blocking test gate failed 7 minutes into a paid
 # setup. **When an asset stops being staged, add it here in the same commit.**
 #
-# `artifacts/stage1/...` is NOT a safe blanket exception, and assuming it was cost
+# `artifacts/stages/stage-1/...` is NOT a safe blanket exception, and assuming it was cost
 # a paid E8b-S2 pod on 2026-08-11. Sessions stage different initializations: an
 # E8b s2/s3 pod builds DP and DC only (`NEED_COMPRESSED=0`) and never sees the
 # compressed pair, so a test that assumed the compressed baseline was present ran
@@ -233,22 +233,22 @@ trap restore EXIT INT TERM
 #
 #   HIDDEN_PATHS="$(cat <<'EOS'
 #   artifacts/audit
-#   artifacts/stage3/ladder_uniform
-#   artifacts/stage1/qwen3_0p6b_init_v0
-#   artifacts/stage1/e8_contribution_init_v1
+#   artifacts/stages/stage-3/ladder_uniform
+#   artifacts/stages/stage-1/qwen3_0p6b_init_v0
+#   artifacts/stages/stage-1/e8_contribution_init_v1
 #   EOS
-#   )" bash scripts/pod/simulate_pod_env.sh
+#   )" bash scripts/shared/pod/simulate_pod_env.sh
 #
 # and pin the cpu set the pod will have (`taskset -c 0-12`), since the suite's
 # behaviour depends on it.
 HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
-artifacts/stage3/ladder_uniform
-artifacts/stage3/recovery_search_v1
-artifacts/stage3/rescued
-artifacts/stage3/e1_results.json
-artifacts/stage3/e1_consolidated.json
-artifacts/stage3/e4_p2_r1600k_sa
-artifacts/stage3/e4_p2_r1600k_sb
+artifacts/stages/stage-3/ladder_uniform
+artifacts/stages/stage-1/batteries/recovery_search_v1
+artifacts/stages/stage-3/rescued
+artifacts/stages/stage-3/e1_results.json
+artifacts/stages/stage-3/e1_consolidated.json
+artifacts/stages/stage-3/e4_p2_r1600k_sa
+artifacts/stages/stage-3/e4_p2_r1600k_sb
 data/warmup/holdout_v1.jsonl"}
 
 n=0
@@ -259,7 +259,7 @@ done <<< "$HIDDEN_PATHS"
 echo "hid $n path(s) a pod session does not receive"
 
 # Prune directories emptied by the hiding. A pod does not have an EMPTY
-# `artifacts/eval/battery_v2`; it has no such directory at all, and the
+# `artifacts/stages/stage-3/eval/battery_v2`; it has no such directory at all, and the
 # difference is not cosmetic. `tests/evaluation/test_capability.py` guards with
 # `skipif(not BATTERY.is_dir())`, so an empty directory left behind defeats the
 # guard: the tests run, find no rows and FAIL, where on a pod they skip. The
@@ -369,7 +369,7 @@ echo "isolated HOME=$HOME (empty), HF_HOME=$HF_HOME, HF_TOKEN set (${#HF_TOKEN} 
 # Phase-A pre-flight rehearsal that would have spent a large share of the 2700 s
 # gate re-proving what the dev box already proved, against a timeout whose exit
 # 90 kills the session -- and since the 2026-10-03 boundary it lives in
-# `scripts/experiments/stage-1/phase_a/tests/`, outside the core suite this command
+# `scripts/stages/stage-1/phase_a/tests/`, outside the core suite this command
 # collects. The exclusion became the default.
 #
 # The interpreter is the repo venv directly, not `uv run`. Two reasons, and both

@@ -7,7 +7,7 @@ float32 master weights with bf16 autocast and gradient checkpointing, and holds 
 4B teacher resident for KD. Whether that fits a 48 GB card is an arithmetic
 question, and this answers it rather than assuming.
 
-    PYTHONPATH=src python scripts/training/size_e8b_memory.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/size_e8b_memory.py
 
 Every term is named so a wrong assumption is visible rather than buried:
 
@@ -32,7 +32,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 GB = 1e9

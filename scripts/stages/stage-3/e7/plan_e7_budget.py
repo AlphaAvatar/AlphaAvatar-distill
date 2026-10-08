@@ -5,7 +5,7 @@ Every number in the preregistration comes from here, so the proposal and the
 thing that would actually enforce it are the same arithmetic. Run it to
 regenerate the tables; it touches no GPU and creates no pod.
 
-    PYTHONPATH=src python scripts/training/plan_e7_budget.py
+    PYTHONPATH=src python scripts/stages/stage-3/e7/plan_e7_budget.py
 
 Phase costs are named separately (P6) and derive from **measured E6b wall
 clock**, not from printed step time:
@@ -27,7 +27,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.budget import (  # noqa: E402

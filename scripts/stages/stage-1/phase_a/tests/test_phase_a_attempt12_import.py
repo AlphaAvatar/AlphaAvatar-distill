@@ -52,7 +52,7 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def frozen():
-    from phase_a_search import (
+    from stages.phase_a.phase_a_search import (
         CANONICAL_INIT, CANONICAL_INIT_SHA256, TARGET_GEOMETRY,
     )
     return {"target": TARGET_GEOMETRY, "control_dir": CANONICAL_INIT,

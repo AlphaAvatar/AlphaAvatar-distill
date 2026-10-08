@@ -11,7 +11,7 @@ This uploads them, then **downloads them back and re-hashes**. An upload that
 reports success is not evidence: the check that matters is that the bytes on the
 relay hash to what the local manifest says, verified by fetching them again.
 
-    PYTHONPATH=src python scripts/data/stage_e7_streams.py --verify-roundtrip
+    PYTHONPATH=src python scripts/stages/stage-3/e7/stage_e7_streams.py --verify-roundtrip
 
 Exit codes: 0 staged and verified; 9 a hash mismatch or a missing file.
 """
@@ -24,7 +24,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
@@ -44,7 +44,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--root", default="artifacts/stage3")
+    ap.add_argument("--root", default="artifacts/stages/stage-3")
     ap.add_argument("--relay", default=RELAY)
     ap.add_argument("--prefix", default=PREFIX)
     ap.add_argument("--verify-roundtrip", action="store_true",

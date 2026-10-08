@@ -20,7 +20,7 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if str(ROOT / extra) not in sys.path:
         sys.path.insert(0, str(ROOT / extra))
 
-from experiments.phase_c2 import behavioural as B  # noqa: E402
+from stages.phase_c2 import behavioural as B  # noqa: E402
 
 PROPOSAL = ("logs/stages/stage-1/phase_c2_behavioural/plans/"
             "c2_behavioural_grant_proposal.json")
@@ -217,7 +217,7 @@ def test_the_protocol_is_read_from_its_own_verified_hash():
 def test_every_candidate_joins_the_frozen_selection_to_a_verified_product():
     cands = B.candidate_manifest(ROOT)
     assert len(cands) == 5
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import replay_specs as RS
 
     selection = {e["state_id"]: e for e in RS.load_selection(ROOT)["selected"]}
     for c in cands:
@@ -418,7 +418,7 @@ def test_incumbent_b_is_bound_to_c1s_frozen_construction():
     """B is the sixth arm and is NOT a staged durable input. Its construction
     comes from C1's own constructor and its spec hash must be what C1's
     preregistration froze."""
-    from experiments.phase_c2 import baseline as BL
+    from stages.phase_c2 import baseline as BL
 
     b = B.b_binding(ROOT)
     assert b["construction"]["spec_hash"] == BL.B_SPEC_HASH

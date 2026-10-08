@@ -13,8 +13,8 @@ derived closure, its own SHA.
 
 Run:
 
-    PYTHONPATH=src:scripts python scripts/validation/batching_refactor_cuda_check.py \
-        --run-id <id> [--device cuda] [--out artifacts/validation]
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c3/batching_refactor_cuda_check.py \
+        --run-id <id> [--device cuda] [--out artifacts/shared/validation]
 
 Exit codes: 0 PASS, 3 FAIL, 4 NOT RUN (no usable device).
 """
@@ -29,7 +29,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -580,7 +580,7 @@ def main() -> int:
                     default="configs/validation/batching_refactor_cuda.json")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--device", default="cuda")
-    ap.add_argument("--out", default="artifacts/validation")
+    ap.add_argument("--out", default="artifacts/shared/validation")
     ap.add_argument("--dry-run", action="store_true",
                     help="derive the closure and stop at the CUDA boundary; "
                          "writes a NOT RUN report")
@@ -690,7 +690,7 @@ def derived_closure(cfg: dict) -> dict:
     from architecture.derive_closure import derive
 
     return derive(REPO, "batching_refactor_cuda",
-                  ["scripts/validation/batching_refactor_cuda_check.py"],
+                  ["scripts/stages/stage-1/phase_c3/batching_refactor_cuda_check.py"],
                   list(cfg.get("declared_non_python_inputs", [])),
                   roots=["src", "scripts"])
 

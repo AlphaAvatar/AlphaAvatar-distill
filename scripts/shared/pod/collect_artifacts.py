@@ -5,7 +5,7 @@ Replaces this construct, which is what lost E6b's training event streams:
 
     $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e6b.tar.gz \\
       artifacts/audit/three_mode artifacts/audit/e6_checkpoint_manifest.json \\
-      $(ls -d artifacts/stage3/e6b_*/train_log.jsonl 2>/dev/null)'
+      $(ls -d artifacts/stages/stage-3/e6b_*/train_log.jsonl 2>/dev/null)'
 
 Two failure modes in one line. The literal list was inherited from a session
 that did not train, so `train_log.jsonl` was simply absent from it. And where
@@ -37,7 +37,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
     ArtifactManifest, ArtifactSpec, CompletionMarker, GATE_ORDER, build_manifest,

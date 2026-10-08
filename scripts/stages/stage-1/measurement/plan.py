@@ -16,7 +16,7 @@ silently and still reads as though it applies.
 from __future__ import annotations
 
 from aadistill.governance.authorization import SpendAuthorization
-from experiments.phase_a.plan import GRANT_PROSE_REQUIRED
+from stages.phase_a.plan import GRANT_PROSE_REQUIRED
 from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
 
 #: One stage. The plan exists because an authorization binds to a plan hash, and
@@ -50,7 +50,7 @@ MEASUREMENT_PLAN_V1 = PreflightPlan(
                 "no CUDA device -> STOP: a host run re-measures the defect")),),
 )
 
-#: $1.6294 hard, from `logs/shared/analyses/autoinit_causal_depth_pricing_bound.json`: 24 timed
+#: $1.6294 hard, from `logs/stages/stage-1/measurement/analyses/autoinit_causal_depth_pricing_bound.json`: 24 timed
 #: evaluations, one production reference pass and two E8a paired checks with the
 #: reference recomputed, at E8a's measured 12.0 evaluations/min, plus teacher
 #: load, pod setup and overhead, times three. The recomputed 3x basis is $1.3571;

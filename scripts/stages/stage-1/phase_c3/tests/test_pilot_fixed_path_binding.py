@@ -123,7 +123,7 @@ def test_the_pilot_causal_step_survives_the_collision_check():
     """The real arms must pass the guard that the unsafe case fails."""
     from aadistill.initialization.planning.fixed_path import step_operator_config
 
-    from experiments.phase_c3.pilot import causal_step
+    from stages.phase_c3.pilot import causal_step
 
     for bs in (1, 4):
         merged = step_operator_config(causal_step(bs), 67)
@@ -136,7 +136,7 @@ def test_the_real_item_count_reaches_the_plan():
     """The operator must be PLANNED against the corpus it will execute on."""
     from aadistill.initialization.planning.fixed_path import step_operator_config
 
-    from experiments.phase_c3.pilot import causal_step
+    from stages.phase_c3.pilot import causal_step
 
     assert step_operator_config(causal_step(4), 67)["n_calibration_items"] == 67
     assert step_operator_config(causal_step(4), 8)["n_calibration_items"] == 8
@@ -181,7 +181,7 @@ def _committed_c1_path():
     """The four steps as the committed C1 replay record declares them."""
     import json
 
-    from experiments.phase_c3.pilot import C1_PATH_RECORD
+    from stages.phase_c3.pilot import C1_PATH_RECORD
 
     doc = json.loads((REPO / C1_PATH_RECORD).read_text())
     return doc["path"]["steps"]
@@ -196,7 +196,7 @@ def test_the_pilot_prefix_matches_the_committed_c1_path():
     and reconstructed a different parent -- refused by the digest gate, but
     only after an expensive replay.
     """
-    from experiments.phase_c3.pilot import prefix_steps
+    from stages.phase_c3.pilot import prefix_steps
 
     committed = _committed_c1_path()[:3]
     pilot = prefix_steps()
@@ -208,7 +208,7 @@ def test_the_pilot_prefix_matches_the_committed_c1_path():
 
 def test_the_frozen_profiles_are_not_uniform():
     """States the trap explicitly, so a future uniform refactor fails here."""
-    from experiments.phase_c3.pilot import prefix_steps
+    from stages.phase_c3.pilot import prefix_steps
 
     by_impl = {s.impl_id: s.profile_id for s in prefix_steps()}
     assert by_impl["depth.causal_kl_greedy_v1"] == "calib.domain_balanced@v1"
@@ -218,7 +218,7 @@ def test_the_frozen_profiles_are_not_uniform():
 
 
 def test_only_the_width_step_is_pinned_to_the_frozen_parent_digest():
-    from experiments.phase_c3.pilot import FROZEN_PARENT_DIGEST, prefix_steps
+    from stages.phase_c3.pilot import FROZEN_PARENT_DIGEST, prefix_steps
 
     steps = prefix_steps(pin_parent=True)
     pinned = [s for s in steps if s.expected_artifact_digest]
@@ -231,7 +231,7 @@ def test_the_frozen_digest_matches_the_committed_arm_identity():
     """The digest is evidence, cross-checked against a second committed file."""
     import json
 
-    from experiments.phase_c3.pilot import C1_ARM_IDENTITIES, FROZEN_PARENT_DIGEST
+    from stages.phase_c3.pilot import C1_ARM_IDENTITIES, FROZEN_PARENT_DIGEST
 
     arms = json.loads((REPO / C1_ARM_IDENTITIES).read_text())
     assert arms["parent"]["artifact_digest"] == FROZEN_PARENT_DIGEST
@@ -241,7 +241,7 @@ def test_the_frozen_digest_matches_the_committed_arm_identity():
 
 def test_both_arms_differ_only_by_the_protocol_config():
     """Same impl, same profile, same label. Only the batch size separates them."""
-    from experiments.phase_c3.pilot import BATCH_SIZE_CONFIG_KEY, causal_step
+    from stages.phase_c3.pilot import BATCH_SIZE_CONFIG_KEY, causal_step
 
     b1, b4 = causal_step(1), causal_step(4)
     assert b1.impl_id == b4.impl_id
@@ -249,7 +249,7 @@ def test_both_arms_differ_only_by_the_protocol_config():
     assert b1.label == b4.label, (
         "a differing label is a SECOND identity difference; the arm names "
         "belong in the pilot record, not the step")
-    from experiments.phase_c3.pilot import PACKING_CONFIG_KEY
+    from stages.phase_c3.pilot import PACKING_CONFIG_KEY
 
     assert set(b1.config) == set(b4.config) == {BATCH_SIZE_CONFIG_KEY,
                                                 PACKING_CONFIG_KEY}
@@ -279,11 +279,11 @@ def test_two_batch_sizes_give_the_causal_step_different_identities():
     """B1 and B4 can materialize different head maps, so they must not collide."""
     from aadistill.infrastructure.manifest import sha256_json
 
-    from experiments.phase_c3.pilot import causal_step
+    from stages.phase_c3.pilot import causal_step
 
     #: Through the PILOT's own constructor, not a hand-built step -- otherwise
     #: `causal_step` could stop binding the config and this would still pass.
-    from experiments.phase_c3.pilot import BATCH_SIZE_CONFIG_KEY
+    from stages.phase_c3.pilot import BATCH_SIZE_CONFIG_KEY
 
     b1, b4 = causal_step(1), causal_step(4)
     assert b1.as_dict()["impl_id"] == b4.as_dict()["impl_id"], (
@@ -339,7 +339,7 @@ def test_the_branch_default_is_not_one_so_the_pilot_must_be_explicit():
 
 
 def test_the_pilot_prefix_execution_is_b1_and_not_the_default():
-    from experiments.phase_c3.pilot import PREFIX_EXECUTION
+    from stages.phase_c3.pilot import PREFIX_EXECUTION
 
     assert isinstance(PREFIX_EXECUTION, ExecutionConfig)
     assert PREFIX_EXECUTION.micro_batch_size == 1
@@ -353,7 +353,7 @@ def test_the_pilot_prefix_execution_is_a_literal_not_a_reference():
     """
     import ast
 
-    from experiments.phase_c3 import pilot
+    from stages.phase_c3 import pilot
 
     src = Path(pilot.__file__).read_text()
     tree = ast.parse(src)
@@ -376,7 +376,7 @@ def test_the_pilot_prefix_execution_is_a_literal_not_a_reference():
 
 def test_every_prefix_step_the_pilot_declares_carries_no_config():
     """The B1/B4 variation begins at ATTENTION and nowhere earlier."""
-    from experiments.phase_c3.pilot import prefix_steps
+    from stages.phase_c3.pilot import prefix_steps
 
     for step in prefix_steps():
         assert not step.config, (
@@ -399,7 +399,7 @@ def test_the_packing_key_moved_the_constructor_but_not_the_record():
     from aadistill.initialization.operators.register import (
         register_builtin_operators)
 
-    from experiments.phase_c3.pilot import arm_spec
+    from stages.phase_c3.pilot import arm_spec
 
     #: `FixedPathSpec.__post_init__` resolves every step, so the operator has
     #: to be registered for an arm spec to be constructible at all.

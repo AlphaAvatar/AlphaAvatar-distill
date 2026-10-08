@@ -69,7 +69,7 @@ def descriptor(candidate: str, rung: int, seed: int):
 # --- 1. the attempt-4 reuse digest is AUTHORIZATION-bound -------------------
 
 def test_the_attempt4_reuse_digest_is_bound_evidence(drv):
-    from experiments.phase_b.continuation import BOUND_EVIDENCE
+    from stages.phase_b.continuation import BOUND_EVIDENCE
 
     assert "attempt4_reuse_probes_dir_digest" in BOUND_EVIDENCE, (
         "Attempt 4's probe is a necessary citation — without it the session has "
@@ -85,7 +85,7 @@ def test_a_moved_attempt4_digest_fails_before_any_probe(drv, monkeypatch, tmp_pa
     """`require_evidence` is what stage 0 and the launcher's evidence gate call.
     A moved record must be refused there, not discovered on a pod."""
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_b.continuation import ContinuationAuthorization
+    from stages.phase_b.continuation import ContinuationAuthorization
 
     observed = dict(drv.ContinuationDriver.observed_evidence())
     auth = ContinuationAuthorization(
@@ -154,7 +154,7 @@ def test_the_purchase_seam_is_the_only_route_to_training(drv):
     binds the scope to the act of BUYING rather than to a count or a budget."""
     import inspect
 
-    import autoinit_phase_a_driver as parent
+    from stages.phase_a import autoinit_phase_a_driver as parent
 
     run_probe = inspect.getsource(parent.PhaseADriver.run_probe)
     assert "restored = self.restore_probe(descriptor)" in run_probe
@@ -219,7 +219,7 @@ def test_a_whitelist_that_names_the_wrong_probe_is_refused(launcher, drv,
     """The count can be right and the science still wrong."""
     from aadistill.infrastructure.session import SessionContext
 
-    import autoinit_continuation_b_driver as live
+    from stages.continuation_b import autoinit_continuation_b_driver as live
 
     monkeypatch.setattr(live.ContinuationDriver, "PURCHASABLE", ((BD, 3),))
     args = launcher.build_parser().parse_args(
@@ -233,7 +233,7 @@ def test_a_whitelist_that_names_the_wrong_probe_is_refused(launcher, drv,
 # --- the session plan says what the session does ---------------------------
 
 def test_the_session_plan_describes_the_one_probe_scope():
-    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from stages.phase_b.continuation import CONTINUATION_PLAN_V1
 
     assert CONTINUATION_PLAN_V1.version == 3, (
         "version 2 described 'one missing sb and at most two conditional sc', "
@@ -259,7 +259,7 @@ def test_the_session_plan_describes_the_one_probe_scope():
 # The stale value was only ever in the preregistration.
 
 def test_the_preregistration_binds_the_live_executable_digest():
-    from experiments.phase_b.continuation import continuation_source_digest
+    from stages.phase_b.continuation import continuation_source_digest
 
     prereg = json.loads(
         (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())
@@ -296,7 +296,7 @@ def test_the_preregistration_binds_the_live_executable_digest():
 
 
 def test_the_preregistration_binds_the_live_session_plan_and_pricing():
-    from experiments.phase_b.continuation import CONTINUATION_PLAN_V1
+    from stages.phase_b.continuation import CONTINUATION_PLAN_V1
 
     prereg = json.loads(
         (REPO / "logs/stages/stage-1/continuation_b/plans/autoinit_continuation_b_preregistration.json").read_text())

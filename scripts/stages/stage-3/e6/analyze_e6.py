@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 6 analysis: the E1 PCA scale curve on the frozen 150-prompt battery.
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e6.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e6/analyze_e6.py \
         --out artifacts/audit/e6_results.json --report logs/stages/stage-3/e6/analyses/e6_report.md
 
 Nothing is generated here. Every arm is re-scored from its retained raw
@@ -33,7 +33,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -44,7 +44,7 @@ from aadistill.evaluation.paired_stats import (  # noqa: E402
 )
 from aadistill.evaluation.strict_answer import extract_final_answer  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from run_three_mode_diagnostic import NUMERIC, score  # noqa: E402
+from stages.d0.run_three_mode_diagnostic import NUMERIC, score  # noqa: E402
 
 #: The resampling seed this analysis reports under. Stated here
 #: because a statistics mechanism should not carry one study's seed.
@@ -52,7 +52,7 @@ BOOTSTRAP_SEED = 20260806
 
 AUDIT = REPO_ROOT / "artifacts/audit"
 THREE_MODE = AUDIT / "three_mode"
-SESSIONS_PATH = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
+SESSIONS_PATH = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 REGISTRATION = REPO_ROOT / "logs/stages/stage-3/e6/analyses/e6_registration.json"
 
 # Carried unchanged from the E3/E4/E5 registry; see the registration.
@@ -193,7 +193,7 @@ def diagnostics(reg: dict) -> dict:
     while the primary axis did not move at all.
     """
     e1 = {r["arm"]: r for r in
-          json.loads((REPO_ROOT / "artifacts/stage3/e1_results.json").read_text())}
+          json.loads((REPO_ROOT / "artifacts/stages/stage-3/e1_results.json").read_text())}
     out = {}
     for alias, arm in reg["arms"].items():
         row = {}
@@ -204,7 +204,7 @@ def diagnostics(reg: dict) -> dict:
         else:
             # The anchors are not Experiment 1 arms, so their CE comes from their
             # own training log.
-            log = REPO_ROOT / f"artifacts/stage3/{arm['run']}/train_log.jsonl"
+            log = REPO_ROOT / f"artifacts/stages/stage-3/{arm['run']}/train_log.jsonl"
             if log.is_file():
                 evals = [r for r in jsonl(log) if r["event"] == "eval_result"
                          and r.get("val_set") == "val"]

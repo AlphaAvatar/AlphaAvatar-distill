@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Declare why the frozen Phase-B executable digest moved. Zero cost.
 
-    PYTHONPATH=src python scripts/autoinit/record_phase_b_post_freeze.py
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/record_phase_b_post_freeze.py
 
 Regenerates `logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json` from the tree as it
 actually is. A generator rather than a hand-edited file because the declaration
@@ -24,7 +24,7 @@ on 2026-09-07 silently dropped all of them, and its branch parser also moved
 the result.
 
 Post-completion drift is now appended by
-`scripts/autoinit/record_phase_b_historical_amendment.py`, which reads every
+`scripts/stages/stage-1/phase_b/record_phase_b_historical_amendment.py`, which reads every
 existing entry and adds exactly one. The v1 note is SEALED: it is anchored by
 hash from the amendment ledger, and rewriting it breaks that anchor by design.
 """
@@ -38,12 +38,12 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_b.plan import phase_b_source_digest  # noqa: E402
-from experiments.phase_b.post_freeze import (  # noqa: E402
+from stages.phase_b.plan import phase_b_source_digest  # noqa: E402
+from stages.phase_b.post_freeze import (  # noqa: E402
     SETUP_SCRIPT,
     dispatch_branch_hashes,
 )
@@ -83,7 +83,7 @@ def main() -> None:
             "rather than preserving its accumulated history. Running it here "
             "would drop entries and break the hash the amendment ledger anchors "
             "it by. Append post-completion drift with "
-            "scripts/autoinit/record_phase_b_historical_amendment.py instead.")
+            "scripts/stages/stage-1/phase_b/record_phase_b_historical_amendment.py instead.")
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_post_freeze_changes.json")
     args = ap.parse_args()
@@ -169,7 +169,7 @@ def main() -> None:
                      "gate binds them; recorded here so the blast radius is not "
                      "discovered later."),
             "sets": ["aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
-                     "experiments.recovery_continuation.session.PHASE_A_HARNESS_SOURCE_FILES_V1"],
+                     "stages.recovery_continuation.session.PHASE_A_HARNESS_SOURCE_FILES_V1"],
         },
         "not_a_licence": (
             "This does NOT authorize further edits to the Phase-B source set. Any "

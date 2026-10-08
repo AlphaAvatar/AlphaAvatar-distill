@@ -45,14 +45,14 @@ AUTH = REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json"
 pytestmark = pytest.mark.skipif(
     not (AUTH.is_file() and STAGE3_PROBE.is_file()
          and (REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json").is_file()
-         and (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()),
+         and (REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").is_file()),
     reason="needs the issued authorization, the frozen plan, the Stage-3 engine "
            "probe and the staged battery")
 
 
 def load_driver(tmp_path: Path):
     spec = importlib.util.spec_from_file_location(
-        "phase_a_driver_s0", REPO / "scripts/pod/autoinit_phase_a_driver.py")
+        "phase_a_driver_s0", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_driver_s0"] = mod
     spec.loader.exec_module(mod)
@@ -242,7 +242,7 @@ def test_the_pinned_hash_is_the_one_the_thresholds_were_materialized_under():
     recorded = json.loads(
         (REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/materialized_thresholds.json")
         .read_text())["evaluation_protocol_hash"]
-    mod_src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    mod_src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     assert recorded == STAGE3_HASH
     assert STAGE3_HASH in mod_src
 
@@ -490,7 +490,7 @@ def test_B_the_historical_thresholds_still_bind_the_historical_protocol():
 
 def test_B_the_historical_protocol_records_v2_and_is_not_rewritten_to_v3():
     """The migration bumped the LIVE contract; the record keeps saying v2."""
-    from experiments.source_sets import recovery_scoring_contract
+    from shared.source_sets import recovery_scoring_contract
     att = json.loads(
         (REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete"
          / "attested_evaluation_protocol.json").read_text())
@@ -520,7 +520,7 @@ def test_C_stage0_refuses_against_the_historical_binding(tmp_path):
 def test_C_the_frozen_assets_gate_refuses_on_its_production_default(tmp_path):
     """No --expect: exactly what a pod runs."""
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/verify_frozen_assets.py"),
          "--out", str(tmp_path / "report.json")],
         cwd=REPO, capture_output=True, text=True,
         env={"PYTHONPATH": "src:scripts", "PATH": "/usr/bin:/bin",

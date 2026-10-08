@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Recompute the rung-2 decision from retained evidence, `sa+sb` only. `$0`.
 
-    PYTHONPATH=src python scripts/autoinit/recompute_continuation_rung2.py
+    PYTHONPATH=src python scripts/stages/stage-1/continuation_b/recompute_continuation_rung2.py
 
 Attempt 4 reported `resolved / winner=fe9683e6a9c7`. That decision is
 **withdrawn**: the inherited `pooled_over_rungs` pooled every completed rung, and
@@ -30,7 +30,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
@@ -43,7 +43,7 @@ AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_i
 def load_driver():
     spec = importlib.util.spec_from_file_location(
         "continuation_b_driver_recompute",
-        REPO_ROOT / "scripts/pod/autoinit_continuation_b_driver.py")
+        REPO_ROOT / "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["continuation_b_driver_recompute"] = mod
     spec.loader.exec_module(mod)
@@ -51,7 +51,7 @@ def load_driver():
 
 
 def recompute() -> dict:
-    from write_preregistration import build_frozen_plan
+    from stages.phase_a.write_preregistration import build_frozen_plan
 
     drv = load_driver()
     drv.AUDIT = PROBES.parent          # the driver reads <AUDIT>/probes

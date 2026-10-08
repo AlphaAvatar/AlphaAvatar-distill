@@ -22,8 +22,8 @@ REPO = Path(__file__).resolve().parents[5]
 for p in ("src", "scripts/pod", "scripts/autoinit"):
     sys.path.insert(0, str(REPO / p))
 
-LAUNCH = REPO / "scripts/pod/autoinit_recovery_continuation_launch.py"
-DRIVER = REPO / "scripts/pod/autoinit_recovery_continuation_driver.py"
+LAUNCH = REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py"
+DRIVER = REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_driver.py"
 
 
 def load(path, name):
@@ -186,8 +186,8 @@ def test_no_large_checkpoint_travels_by_scp_any_more(spec, launcher):
 def test_the_frozen_phase_a_assets_are_still_declared(spec):
     """The continuation still needs what the shared setup verifies."""
     installed = {f"{a.install_to}/{a.dest_name}" for a in spec.setup.local_assets}
-    assert "artifacts/stage1/state_eval_v1" in installed
-    assert "artifacts/stage3/recovery_search_v2" in installed
+    assert "artifacts/stages/stage-1/state_eval_v1" in installed
+    assert "artifacts/stages/stage-1/batteries/recovery_search_v2" in installed
 
 
 def test_a_missing_preserved_leaf_refuses_before_a_pod_exists(launcher, tmp_path,
@@ -353,7 +353,7 @@ def test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off(
         pytest.skip("the preserved leaves are not on this host")
 
     from aadistill.initialization.planning.metrics import StateEvaluator  # noqa: E402
-    from write_preregistration import build_frozen_plan
+    from stages.phase_a.write_preregistration import build_frozen_plan
 
     mod = load(DRIVER, "rc_driver_exec")
     # The leaves are staged into the repo on a pod; here they already exist in

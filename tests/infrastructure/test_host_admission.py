@@ -2,7 +2,7 @@
 
 THE MECHANISM, with synthetic hooks. The four A3 tests that drove A3's own
 `host_admission` callable and asserted its controls driver branch moved to
-`scripts/experiments/stage-1/phase_a3/tests/test_a3_host_admission.py` in the
+`scripts/stages/stage-1/phase_a3/tests/test_a3_host_admission.py` in the
 2026-10-03 convergence round: a core test should prove the hook works for an
 arbitrary callable, not that one closed experiment's instance is wired a
 particular way.

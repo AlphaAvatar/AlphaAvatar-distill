@@ -26,7 +26,7 @@ from aadistill.initialization.operators.base import OperatorContext  # noqa: E40
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 
 from support.toy import build_tiny_model  # noqa: E402
-from experiments.phase_c3.compare import (  # noqa: E402
+from stages.phase_c3.compare import (  # noqa: E402
     NARROW_MARGIN, compare_head_maps, speedup, verdict,
 )
 
@@ -229,7 +229,7 @@ def test_the_threshold_is_the_callers_not_a_module_constant():
     import ast
     import inspect
 
-    from experiments.phase_c3 import compare
+    from stages.phase_c3 import compare
 
     tree = ast.parse(inspect.getsource(compare.verdict))
     nums = {n.value for n in ast.walk(tree)

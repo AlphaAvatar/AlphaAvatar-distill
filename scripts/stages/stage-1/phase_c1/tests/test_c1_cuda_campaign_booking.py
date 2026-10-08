@@ -24,7 +24,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-ENTRY = REPO / "scripts/validation/cuda_engineering_launch.py"
+ENTRY = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
 AUTH = REPO / "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
 CAMPAIGN = AUTH.parent / "campaign.json"
 
@@ -56,7 +56,7 @@ def test_the_launcher_starts_from_what_earlier_subruns_booked(tmp_path, monkeypa
         run_limit_min=1.0, min_minutes=25.0, dry_run=False,
         authorization=str(AUTH),
         experiment_id=mod.DEFAULT_EXPERIMENT_ID, stage_id=mod.DEFAULT_STAGE_ID,
-        check="scripts/validation/cuda_engineering_check.py",
+        check="scripts/shared/validation/cuda_engineering_check.py",
         check_config="configs/validation/cuda_engineering.json",
         ship=[], gpu=[]))
     assert eng.booked_usd == booked > 0, "no prior spend was carried in"

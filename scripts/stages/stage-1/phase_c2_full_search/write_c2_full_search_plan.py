@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Emit the Phase-C2 full-joint-re-search protocol and its pricing, derived.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/write_c2_full_search_plan.py --write
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_plan.py --write
 
 Zero cost. Loads no model, needs no GPU, authorizes nothing and launches nothing.
 
@@ -41,8 +41,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-for _extra in ("src", "scripts", "scripts/autoinit", "scripts/consolidate"):
+REPO_ROOT = Path(__file__).resolve().parents[4]
+for _extra in ("src", "scripts", "scripts/autoinit", "scripts/maintenance/consolidation"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
@@ -51,8 +51,8 @@ from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1, SCHEDULE_V1)
 
-from experiments.phase_c2 import full_search_space as FS  # noqa: E402
-from experiments.phase_c2 import selection_pricing as SP  # noqa: E402
+from stages.phase_c2 import full_search_space as FS  # noqa: E402
+from stages.phase_c2 import selection_pricing as SP  # noqa: E402
 
 PROTOCOL_OUT = ("logs/stages/stage-1/phase_c2/plans/"
                 "phase_c2_full_search_protocol.json")
@@ -103,8 +103,8 @@ PHASE_B_PREREGISTRATION_NOT_USED = ("logs/stages/stage-1/phase_b/plans/"
 #: prompts by design: C0's inferential unit is the prompt and it measured
 #: substantial same-prompt cross-seed dependence, so disjoint seeds alone would
 #: let a screening selection leak into the confirmation through that dependence.
-C2_SCREENING_BATTERY = "artifacts/stage3/c2_screening_v1"
-C1_CONFIRMATION_BATTERY = "artifacts/stage3/c1_confirmation_v1"
+C2_SCREENING_BATTERY = "artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1"
+C1_CONFIRMATION_BATTERY = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 
 #: The screening battery's frozen identity record, which lives in git while its
 #: bytes do not.
@@ -131,14 +131,14 @@ TOP_K = 5
 
 
 def budget_position() -> dict[str, Any]:
-    from derive_budget import derive
+    from maintenance.consolidation.derive_budget import derive
 
     project = derive(REPO_ROOT)["project"]
     return {
         "cumulative_spend_usd": project["cumulative_spend_usd"],
         "authorized_cap_usd": project["cap_usd"],
         "remaining_usd": project["remaining_usd"],
-        "_derived_by": ("scripts/consolidate/derive_budget.py, which sums every "
+        "_derived_by": ("scripts/maintenance/consolidation/derive_budget.py, which sums every "
                         "recorded closeout cost across every experiment. Not "
                         "restated from any document."),
         "remaining_is_not_permission": True,
@@ -161,7 +161,7 @@ def _planning_estimate(space) -> dict[str, Any]:
     #: `bound`/`price` code the ceiling uses -- an estimate derived by a
     #: different route than the thing it is compared against would not be
     #: comparable to it.
-    from experiments.search_cost_model import CostModel
+    from shared.search_cost_model import CostModel
 
     model = CostModel(minutes=est["estimated_minutes"], proxies={},
                       source=est["_status"])
@@ -666,7 +666,7 @@ def protocol() -> dict[str, Any]:
                 "the live operator registry, through applicable_implementations "
                 "and expansion_profiles — the same two functions BeamSearch "
                 "calls. Enumerated, not computed from a product formula."),
-            "owner": "scripts/experiments/stage-1/phase_c2/full_search_space.py",
+            "owner": "scripts/stages/stage-1/phase_c2/full_search_space.py",
             **size,
             "order": "FREE. A kind is applied at most once per path.",
             "impl_profiles": None,
@@ -832,14 +832,14 @@ def protocol() -> dict[str, Any]:
                 "promotion decision, and the candidate set the behavioural "
                 "session reads does not exist until the search commits one."),
             "session_1_full_joint_search": {
-                "driver": "scripts/pod/autoinit_phase_c2_full_search_driver.py",
+                "driver": "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py",
                 "stages": ["bind_identities", "full_joint_search",
                            "commit_top_k"],
                 "terminus": "commit_top_k — the session STOPS there",
                 "implemented": True,
                 "executed_end_to_end_at_toy_scale": True,
                 "_toy_execution": (
-                    "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_full_search_driver.py drives the "
+                    "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_full_search_driver.py drives the "
                     "real stages with a scaled-down model: real operators, real "
                     "checkpoints, real reloads, real hashing, real measurement. "
                     "It found and closed one real defect — a relative_to() that "
@@ -973,7 +973,7 @@ def pricing(space) -> dict[str, Any]:
     #: separately. A ceiling that was GPU-only therefore did not cover the
     #: session, and no figure in it disagreed with any other -- which is why
     #: review found it rather than a gate.
-    from experiments.phase_c2 import full_search as _FSG
+    from stages.phase_c2 import full_search as _FSG
     #: Priced on the minutes THIS run computed, not on the committed record's.
     #: `total_ceiling_usd` reads that record by default, which is right for a
     #: launch and wrong here: the block below goes INTO that record, so reading

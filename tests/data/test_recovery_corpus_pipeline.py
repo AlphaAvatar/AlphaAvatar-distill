@@ -93,7 +93,7 @@ def pipeline(tokenizer, tmp_path_factory):
     corpus_dir, packed_dir = out / "gate", out / "packed"
 
     builder = load_script("build_recovery_corpus",
-                          "scripts/rollout/build_recovery_corpus.py")
+                          "scripts/shared/rollout/build_recovery_corpus.py")
     builder.build_engine = lambda args, tok: StubEngine(tok)
 
     argv = [
@@ -122,7 +122,7 @@ def pipeline(tokenizer, tmp_path_factory):
     finally:
         builder.argparse.ArgumentParser.parse_args = original_parse
 
-    ladder = load_script("build_token_ladder", "scripts/data/build_token_ladder.py")
+    ladder = load_script("build_token_ladder", "scripts/shared/data/build_token_ladder.py")
     sys.argv = [
         "build_token_ladder.py",
         "--sessions", str(corpus_dir / "sessions.jsonl"),
@@ -243,7 +243,7 @@ def test_packed_blocks_load_and_are_well_formed(pipeline):
 
 def test_gate_validator_passes_on_the_dress_rehearsal(pipeline):
     corpus, packed = pipeline
-    gate = load_script("validate_corpus_gate", "scripts/data/validate_corpus_gate.py")
+    gate = load_script("validate_corpus_gate", "scripts/shared/data/validate_corpus_gate.py")
     sys.argv = [
         "validate_corpus_gate.py",
         "--corpus", str(corpus),
@@ -321,7 +321,7 @@ def test_session_order_anchor_replays_an_existing_pack(pipeline, tmp_path):
     anchor_file.write_text("\n".join(reversed(anchor_order)) + "\n")
 
     out = tmp_path / "anchored"
-    ladder = load_script("build_token_ladder", "scripts/data/build_token_ladder.py")
+    ladder = load_script("build_token_ladder", "scripts/shared/data/build_token_ladder.py")
     sys.argv = [
         "build_token_ladder.py",
         "--sessions", str(corpus / "sessions.jsonl"),

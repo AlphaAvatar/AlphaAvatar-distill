@@ -1,6 +1,6 @@
 """Assemble a baseline-completion authorization from a maintainer grant.
 
-`experiments.phase_c2.authorization_payload` does this for Search-1 and must
+`stages.phase_c2.authorization_payload` does this for Search-1 and must
 not be retargeted: it asserts `authorizes_c2_search1 is True`, derives the
 SEARCH-1 closure, resolves the SEARCH-1 authorization path and checks the
 $15.0446 ceiling that prices a ten-hour beam. A completion grant flowing
@@ -48,8 +48,8 @@ from aadistill.governance.grant import (
 )
 from aadistill.infrastructure.manifest import sha256_json
 
-from experiments.phase_c2 import baseline_completion as BC
-from experiments.phase_c2.session import C2ResourceScope
+from stages.phase_c2 import baseline_completion as BC
+from stages.phase_c2.session import C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -111,9 +111,9 @@ def live_identities(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     derivation. Each value is computed here and now; nothing is read from a
     record that claims it. It takes no commit.
     """
-    from experiments.phase_c2 import baseline as B
-    from experiments.phase_c2.frozen_inputs import load_record
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2 import baseline as B
+    from stages.phase_c2.frozen_inputs import load_record
+    from stages.phase_c2.search_space import register_c2_operators
 
     #: `attention.activation_importance_v1` is not a shipped default and the
     #: frozen B path's last step names it, so the spec cannot be constructed
@@ -157,7 +157,7 @@ def _staging_contract_digest(run_id: str) -> str:
 
     from aadistill.runtime.staging_contract import derive_contract
 
-    from experiments.phase_c2 import baseline_completion as _BC
+    from stages.phase_c2 import baseline_completion as _BC
 
     #: `scripts/pod` on the path first: the launcher is a script, not an
     #: installed module, and every loader of one here says so explicitly. A bare
@@ -190,8 +190,8 @@ def _readiness(repo_root: Path, run_id: str, stage_id: str,
     issuance commit, the completion authorization path and the LIVE staging
     contract. No second readiness mechanism, and no partial acceptance.
     """
-    from experiments.phase_c2 import baseline_completion as _BC
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion as _BC
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
 
     rel = CPE.record_path_for(run_id, stage_id)
     try:
@@ -231,7 +231,7 @@ def _readiness(repo_root: Path, run_id: str, stage_id: str,
             "staging_contract_digest": record.get("staging_contract_digest"),
             "live_staging_contract_digest": staging,
             "_verified_by": (
-                "experiments.phase_c2.baseline_completion_pod_environment."
+                "stages.phase_c2.baseline_completion_pod_environment."
                 "verify_record, the same production verifier the launcher's "
                 "readiness gate calls -- schema, self hash, verdict, harness "
                 "digest, pod-test-environment digest, staging contract, clean "
@@ -240,7 +240,7 @@ def _readiness(repo_root: Path, run_id: str, stage_id: str,
 
 
 def _run_dir(run_id: str, stage_id: str) -> str:
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return rel_run_dir("phase_c2_baseline_completion", run_id, stage_id)
 

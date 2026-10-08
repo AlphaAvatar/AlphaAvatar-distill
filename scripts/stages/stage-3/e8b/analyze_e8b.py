@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """E8b's three evidence levels, kept separate because they disagree.
 
-    PYTHONPATH=src python scripts/training/analyze_e8b.py --level step0
-    PYTHONPATH=src python scripts/training/analyze_e8b.py --level behaviour \
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/analyze_e8b.py --level step0
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/analyze_e8b.py --level behaviour \
         --results logs/e8b_results.json
 
 E8b asks one question — does contribution-guided depth selection beat positional
@@ -36,7 +36,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 CELLS = ("DP", "DC", "FP", "FC")

@@ -29,8 +29,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SETUP = REPO / "scripts/pod/e8b_setup.sh"
-LAUNCH = REPO / "scripts/pod/e8b_launch.py"
+SETUP = REPO / "scripts/stages/stage-3/e8b/e8b_setup.sh"
+LAUNCH = REPO / "scripts/stages/stage-3/e8b/e8b_launch.py"
 
 
 @pytest.fixture(scope="module")
@@ -319,7 +319,7 @@ def test_the_memory_gate_outlasts_the_failure_it_exists_to_catch(setup_text):
     must exceed it. The three registered thresholds are deliberately NOT part of this
     test: they were never the defect and must not be relaxed.
     """
-    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-3/e8b/e8b_driver.py").read_text()
     m = re.search(r"^GATE_STEPS = (\d+)", driver, re.M)
     assert m, "GATE_STEPS not found"
     assert int(m.group(1)) > 110, (
@@ -327,7 +327,7 @@ def test_the_memory_gate_outlasts_the_failure_it_exists_to_catch(setup_text):
 
 
 def test_the_registered_thresholds_are_unchanged(setup_text):
-    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-3/e8b/e8b_driver.py").read_text()
     for name, want in (("GATE_MAX_SECONDS_PER_STEP", "7.86"),
                        ("GATE_MAX_PEAK_VRAM_GB", "78.0"),
                        ("GATE_MAX_USD_PER_STEP", "0.003472")):
@@ -336,7 +336,7 @@ def test_the_registered_thresholds_are_unchanged(setup_text):
 
 
 def test_the_gate_checks_the_trend_and_the_real_margin(setup_text):
-    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-3/e8b/e8b_driver.py").read_text()
     # Recording a maximum is what the old gate did; it passed. The additions are a
     # drift test and a margin against the card's capacity rather than a constant.
     assert "vram_still_rising" in driver
@@ -346,6 +346,6 @@ def test_the_gate_checks_the_trend_and_the_real_margin(setup_text):
 
 
 def test_the_gate_logs_every_step(setup_text):
-    driver = (REPO / "scripts/pod/e8b_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-3/e8b/e8b_driver.py").read_text()
     assert '"log_every": 1' in driver, (
         "the failed run logged every 10 steps, which hid the climb")

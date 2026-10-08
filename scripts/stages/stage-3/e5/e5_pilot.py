@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """E5 full-path pilot: the last gate before paid generation.
 
-    /opt/train/bin/python scripts/pod/e5_pilot.py --limit 24
+    /opt/train/bin/python scripts/stages/stage-3/e5/e5_pilot.py --limit 24
 
 Runs the complete production path end to end at small scale, through the same
 code the full run uses:
@@ -72,7 +72,7 @@ def verify_identity(student_dir: Path, seed: str) -> dict:
     if not checks["student_sha256_matches_p2"]:
         failures.append(f"student checkpoint is not P2-0.86M-{seed}: {st[:16]}")
 
-    init = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    init = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     checks["stage1_init_sha256"] = sha256(init / "model.safetensors")
     if checks["stage1_init_sha256"] != INIT_SHA:
         failures.append("Stage 1 fork point hash mismatch")
@@ -146,7 +146,7 @@ def main() -> None:
     args = ap.parse_args()
 
     student = Path(args.student or f"/workspace/ckpt/p2_ceheavy_{args.seed}")
-    work = REPO / f"artifacts/stage3/e5_pilot_{args.seed}"
+    work = REPO / f"artifacts/stages/stage-3/e5_pilot_{args.seed}"
     work.mkdir(parents=True, exist_ok=True)
     report = {"created_utc": datetime.now(timezone.utc).isoformat(),
               "limit": args.limit, "seed": args.seed,
@@ -169,7 +169,7 @@ def main() -> None:
 
     print("=== arm C (no generation) ===", flush=True)
     c_dir = work / "arm_c"
-    run(["scripts/data/build_e5_arm_c.py", "--source-seed", args.seed,
+    run(["scripts/stages/stage-3/e5/build_e5_arm_c.py", "--source-seed", args.seed,
          "--out", c_dir])
 
     print("=== arm R (student rollout -> teacher recovery -> gates) ===", flush=True)
@@ -193,7 +193,7 @@ def main() -> None:
         (r_dir / "examples.jsonl").write_text(
             "".join(json.dumps(e) + "\n" for e in synth))
     else:
-        run(["scripts/data/build_e5_arm_r.py", "--student", student,
+        run(["scripts/stages/stage-3/e5/build_e5_arm_r.py", "--student", student,
              "--source-seed", args.seed, "--limit", args.limit, "--out", r_dir,
              "--reject-bundle", victim], py=VLLM_PY)
     report["deliberately_rejected_session"] = victim
@@ -239,7 +239,7 @@ def main() -> None:
                 "".join(json.dumps({"ids": e["ids"], "mask": e["mask"]}) + "\n"
                         for e in rows[:2] if "ids" in e))
         if (gr / "R.jsonl").stat().st_size > 0:
-            run(["scripts/training/diagnose_e5_gradients.py",
+            run(["scripts/stages/stage-3/e5/diagnose_e5_gradients.py",
                  "--student", student, "--teacher", f"{TEACHER}@{TEACHER_REV}",
                  "--examples", gr / "C.jsonl", gr / "R.jsonl",
                  "--labels", "C", "R", "--max-batch", 2,

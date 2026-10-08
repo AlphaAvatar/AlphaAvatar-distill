@@ -32,7 +32,7 @@ from aadistill.models.tokenizer_contract import (  # noqa: E402
     TokenizerContractError, carries_tokenizer_files, resolve_training_tokenizer,
 )
 
-CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: The identity the frozen recovery protocol pins
 #: (`compare_recovery_fingerprints.phase_a_protocol`).
 FROZEN_SHA = "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
@@ -200,7 +200,7 @@ def test_the_trainer_declares_its_tokenizer_source_and_does_not_infer_it():
     """
     import ast
 
-    src = (REPO / "scripts/training/train_stage3.py").read_text()
+    src = (REPO / "scripts/shared/training/train_stage3.py").read_text()
     tree = ast.parse(src)
     calls = [n for n in ast.walk(tree)
              if isinstance(n, ast.Call)
@@ -220,7 +220,7 @@ def test_the_trainer_declares_its_tokenizer_source_and_does_not_infer_it():
 def test_the_tokenizer_is_resolved_before_any_data_is_built():
     """Refusing after the ladder is packed still wastes the pod's time; the
     contract has to fail at the cheapest possible point."""
-    src = (REPO / "scripts/training/train_stage3.py").read_text()
+    src = (REPO / "scripts/shared/training/train_stage3.py").read_text()
     resolve_at = src.index("resolve_training_tokenizer(")
     for later in ("loading {source} from", "data_dir = REPO_ROOT", "load_teacher("):
         assert src.index(later) > resolve_at, (
@@ -277,7 +277,7 @@ def test_the_frozen_recipe_pins_the_protocols_tokenizer():
     different one, probes would be comparable to nothing."""
     cfg = json.loads((REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json").read_text())
     assert cfg["tokenizer_sha256"] == FROZEN_SHA
-    assert cfg["tokenizer_source"] == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    assert cfg["tokenizer_source"] == "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     # And it is NOT the student path, which for a searched leaf carries nothing.
     assert cfg["tokenizer_source"] != cfg["student_path"] or (
         REPO / cfg["student_path"] / "tokenizer.json").is_file()

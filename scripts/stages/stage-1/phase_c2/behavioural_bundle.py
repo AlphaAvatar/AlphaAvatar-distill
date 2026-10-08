@@ -34,7 +34,7 @@ from aadistill.infrastructure.bundle_transport import (  # noqa: F401
     hf_download, sha256_bytes,
 )
 
-from experiments.phase_c2 import behavioural_governance as BG
+from stages.phase_c2 import behavioural_governance as BG
 
 REPO = Path(__file__).resolve().parents[4]
 

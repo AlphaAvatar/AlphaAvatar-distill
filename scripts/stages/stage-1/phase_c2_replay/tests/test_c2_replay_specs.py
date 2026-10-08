@@ -16,7 +16,7 @@ import pytest
 import sys as _sys
 from pathlib import Path as _Path
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import (  # noqa: E402
+from shared.historical_declarations import (  # noqa: E402
     digest_pinned_replay_is_buildable as _replay_buildable,
 )
 
@@ -25,7 +25,7 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if str(ROOT / extra) not in sys.path:
         sys.path.insert(0, str(ROOT / extra))
 
-from experiments.phase_c2 import replay_specs as R  # noqa: E402
+from stages.phase_c2 import replay_specs as R  # noqa: E402
 
 #: What attempt 3 committed. Restated here so an edit to the module's constants
 #: cannot quietly redirect the replay at a different selection.
@@ -136,7 +136,7 @@ MOVED_BY_THE_TOPOLOGY_MIGRATION = {
     "src/aadistill/initialization/planning/fixed_path.py",
     "src/aadistill/initialization/planning/search.py",
     "src/aadistill/initialization/statistics/collect.py",
-    "scripts/experiments/stage-1/phase_c2/search_space.py",
+    "scripts/stages/stage-1/phase_c2/search_space.py",
 }
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Branch-B: does live allocation grow across *identical* optimizer steps?
 
-    PYTHONPATH=src python scripts/training/replay_lifecycle.py \
+    PYTHONPATH=src python scripts/shared/training/replay_lifecycle.py \
         --config configs/stage3/e8b/e8b_dp_r1600k_sa.json \
         --steps 400 --out artifacts/audit/e8b_lifecycle_replay.json
 
@@ -46,7 +46,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -126,7 +126,7 @@ def main() -> int:
 
     pack = REPO_ROOT / cfg["data_dir"]
     if not (pack / "ladder.json").is_file():
-        pack = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
+        pack = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
     train_b, val_b, _ = ladder_blocks(pack, cfg["rung"], n_val=cfg["val_blocks"])
     t = cfg["teacher"]
     teacher, _, _ = load_teacher(t["model_id"], t["revision"], dtype=t["dtype"],

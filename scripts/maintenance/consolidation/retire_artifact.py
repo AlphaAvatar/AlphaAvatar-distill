@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Delete a local artifact, but only behind a tombstone that outlives it.
 
-    PYTHONPATH=src python scripts/consolidate/retire_artifact.py \
+    PYTHONPATH=src python scripts/maintenance/consolidation/retire_artifact.py \
         --path artifacts/audit/ladder_uniform_rebuild \
         --id ladder_uniform_rebuild \
         --criterion byte_identical_duplicate \
         --experiment E1 --role "rebuilt ladder for the mixture audit" \
-        --reason "..." --canonical "artifacts/stage3/ladder_uniform_probe" \
+        --reason "..." --canonical "artifacts/shared/instruments/ladder_uniform_probe" \
         --frozen-results "artifacts/audit/e1_mixture_rebuild.json" \
-        --reconstruction "scripts/data/audit_e1_mixture_rebuild.py …" \
+        --reconstruction "scripts/stages/stage-3/e1/audit_e1_mixture_rebuild.py …" \
         --reconstruction-cost '$0 (CPU)' \
         --apply
 
@@ -46,7 +46,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 TOMBSTONES = REPO_ROOT / "logs/maintenance/inventories/checkpoint_tombstones.json"

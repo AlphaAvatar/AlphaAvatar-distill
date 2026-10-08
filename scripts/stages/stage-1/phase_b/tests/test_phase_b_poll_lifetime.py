@@ -31,8 +31,8 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-import autoinit_phase_a_launch as pal  # noqa: E402
-import autoinit_phase_b_launch as pbl  # noqa: E402
+from stages.phase_a import autoinit_phase_a_launch as pal  # noqa: E402
+from stages.phase_b import autoinit_phase_b_launch as pbl  # noqa: E402
 
 #: What Phase A ran under, and what Phase B silently inherited.
 PHASE_A_HISTORICAL_DEFAULT = 1320

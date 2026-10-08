@@ -1,7 +1,7 @@
 """Stage 1: build a teacher-projected student checkpoint.
 
 Usage:
-    uv run python scripts/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
+    uv run python scripts/shared/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
 
 Consumes the Stage 0 activation-statistics cache, initializes the student via
 global activation-PCA stream projection + sandwich init (see
@@ -12,7 +12,7 @@ src/aadistill/initialization/transforms/sandwich.py), and writes:
     <output_dir>/manifest.json        recipe hash + gate-check record
 
 Gate checks run inline: parameter count, forward smoke test, save/reload
-logit equality. Evaluation is a separate script (scripts/evaluation/eval_ppl.py).
+logit equality. Evaluation is a separate script (scripts/shared/evaluation/eval_ppl.py).
 """
 
 from __future__ import annotations
@@ -26,7 +26,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism

@@ -919,7 +919,7 @@ Therefore, every squash integration owes all three of:
   trailing the record of its own contents.
 
 The first of those three is **checked, not merely required**:
-`scripts/consolidate/converge_before_sweep.py` resolves every commit hash the
+`scripts/maintenance/consolidation/converge_before_sweep.py` resolves every commit hash the
 records cite against the object store in one batch call — 606 hashes across 788
 files in 0.14 s — and reports an unreachable one as a launch-blocking problem
 naming the record that cites it. It is skipped on a shallow or single-commit

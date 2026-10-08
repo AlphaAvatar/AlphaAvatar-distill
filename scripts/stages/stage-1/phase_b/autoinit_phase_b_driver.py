@@ -47,7 +47,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
@@ -55,14 +55,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from stages.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 #: Deliberately the SAME audit root the Phase-A driver and the recovery
 #: continuation write to. It is a per-pod scratch directory that the session
 #: archives wholesale; giving Phase B its own would fork the artifact policy for
 #: no scientific reason, and every inherited method writes there.
-import autoinit_phase_a_driver as _phase_a  # noqa: E402
-from autoinit_phase_a_driver import (  # noqa: E402
+from stages.phase_a import autoinit_phase_a_driver as _phase_a  # noqa: E402
+from stages.phase_a.autoinit_phase_a_driver import (  # noqa: E402
     AUDIT, PhaseADriver, mark, say,
 )
 
@@ -81,7 +81,7 @@ STATUS = WS / "autoinit_phase_b.status"
 #: driver wrote `phase_b_search`, the collector matched nothing, `min_matches: 0`
 #: reported `missing: 0`, and the search journal was deleted with the pod at the
 #: one moment it mattered — a deadline failure with no per-state timings.
-#: `scripts/experiments/stage-1/phase_b/tests/test_phase_b_artifact_paths.py` now holds writer and both
+#: `scripts/stages/stage-1/phase_b/tests/test_phase_b_artifact_paths.py` now holds writer and both
 #: collectors to this constant.
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_b_search"
 
@@ -98,7 +98,7 @@ SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_b_search"
 _phase_a.STATUS = STATUS
 
 #: The verified reuse record, produced at `$0` by
-#: `scripts/autoinit/verify_historical_probe_reuse.py` and re-checked here.
+#: `scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py` and re-checked here.
 REUSE_RECORD = REPO / "logs/shared/analyses/autoinit_historical_probe_reuse.json"
 #: Where the historical probe records themselves live, in the committed tree.
 HISTORICAL_PROBES = REPO / "logs/stages/stage-1/recovery_continuation/runs/attempt7/probes"
@@ -309,7 +309,7 @@ class PhaseBDriver(PhaseADriver):
         would label half the states with one mixture and feed them another, and
         the engine additionally asks it about the `calib.none` sentinel.
         """
-        from phase_a_search import as_operator_items
+        from stages.phase_a.phase_a_search import as_operator_items
 
         items = {p.qualified_id: as_operator_items(p.resolve(REPO))
                  for p in (DOMAIN_BALANCED_V1, REASONING_HEAVY_V2)}
@@ -320,7 +320,7 @@ class PhaseBDriver(PhaseADriver):
             f"{len(PHASE_A_IMPORTED_FINALISTS)} retained finalists injected")
         found = run_phase_a_search(
             workdir=SEARCH_WORKDIR,
-            state_eval=REPO / "artifacts/stage1/state_eval_v1",
+            state_eval=REPO / "artifacts/stages/stage-1/state_eval_v1",
             top_n=self.plan.searched_leaves, device="cuda", repo_root=REPO,
             profiles=(DOMAIN_BALANCED_V1, REASONING_HEAVY_V2),
             calibration_items=items,

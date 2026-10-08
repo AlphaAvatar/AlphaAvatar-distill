@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Build calib.reasoning_heavy@v2 from the frozen domain-balanced pool. Zero cost.
 
-    PYTHONPATH=src python scripts/data/build_reasoning_heavy_calibration.py \
-        --out artifacts/stage1/reasoning_heavy_v2
+    PYTHONPATH=src python scripts/shared/data/build_reasoning_heavy_calibration.py \
+        --out artifacts/stages/stage-1/reasoning_heavy_v2
 
 A deterministic with-replacement reweighting of the SAME 67-item pool, under the
 five-step rule implemented in `aadistill.autoinit.reweight` and stated verbatim in
 `REASONING_HEAVY_V2_SAMPLE_RULE`. Nothing is tokenized, downloaded or generated:
-every output token is a token already in `artifacts/stage1/e8_calibration_v1`,
+every output token is a token already in `artifacts/stages/stage-1/e8_calibration_v1`,
 which is why this inherits that mixture's leakage proof rather than needing a new
 one.
 
@@ -36,7 +36,7 @@ from datetime import datetime, timezone
 from fractions import Fraction
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -44,13 +44,13 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.initialization.calibration.profiles import mixture_content_sha256
-from experiments.calibration import (
+from shared.calibration import (
     REASONING_HEAVY_V2_DOMAIN_WEIGHTS,
     REASONING_HEAVY_V2_SAMPLE_RULE,
     REASONING_HEAVY_V2_SEED,
     REASONING_HEAVY_V2_TOKEN_BUDGET,
 )
-from experiments.calibration import DOMAIN_BALANCED_V1
+from shared.calibration import DOMAIN_BALANCED_V1
 from aadistill.initialization.statistics.reweight import (  # noqa: E402
     MAX_SUPPORT,
     NEAREST,
@@ -146,7 +146,7 @@ def build(pool: list[dict]) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="artifacts/stage1/reasoning_heavy_v2")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/reasoning_heavy_v2")
     args = ap.parse_args()
     out = Path(args.out)
     out = out if out.is_absolute() else REPO_ROOT / out

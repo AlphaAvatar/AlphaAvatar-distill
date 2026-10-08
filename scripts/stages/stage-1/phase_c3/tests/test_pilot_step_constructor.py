@@ -19,7 +19,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 
 def test_the_pilot_step_constructor_refuses_the_same_values():
-    from experiments.phase_c3.pilot import causal_step
+    from stages.phase_c3.pilot import causal_step
 
     for bad in ("4", 4.0, True, None):
         with pytest.raises((TypeError, ValueError)):

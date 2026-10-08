@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch the Phase-B session: joint P=2 search, then the cross-phase rungs.
 
-    python3 scripts/pod/autoinit_phase_b_launch.py --dry-run
+    python3 scripts/stages/stage-1/phase_b/autoinit_phase_b_launch.py --dry-run
 
 A `SessionSpec` declaration, like every launcher in this directory. What is
 Phase-B-specific is the authorization type, the session plan, the calibration
@@ -32,17 +32,17 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from aadistill.runtime.cost import L40S_MEASURED, price_search  # noqa: E402
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
-from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
+from stages.phase_b.plan import CANONICAL_CONTROL, PHASE_A_IMPORTED_FINALISTS, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
     ArtifactPolicy, LocalAsset, MarkerPolicy, RelayInput, SessionContext,
@@ -57,11 +57,11 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 from collections.abc import Mapping  # noqa: E402
-from autoinit_phase_a_launch import (  # noqa: E402
+from stages.phase_a.autoinit_phase_a_launch import (  # noqa: E402
     BEAM6_SEARCH_CORRECTION_MINUTES, FALLBACK_RESERVE_MINUTES,
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, STAGE1_SEARCH_PHASE, TEACHER_REVISION,
     TEST_IGNORES, budget as phase_a_budget, ckpt_store_capacity_gate,
@@ -71,14 +71,14 @@ from autoinit_phase_a_launch import (  # noqa: E402
 #: The frozen Phase-B geometry and mixture sizes the cost model prices against.
 #: Imported rather than restated so the deadline and the dollar figures cannot
 #: describe different searches.
-import price_phase_b as _pricing  # noqa: E402
+from stages.phase_b import price_phase_b as _pricing  # noqa: E402
 #: The transport staging Phase A's continuation proved on hardware. Phase B
 #: needs TWO of those five leaves on the pod — not to train them, but so the
 #: search can measure them on the same state-evaluation suite as everything else.
-from autoinit_recovery_continuation_launch import (  # noqa: E402
+from stages.recovery_continuation.autoinit_recovery_continuation_launch import (  # noqa: E402
     STAGED_INTO, TRANSPORT_MANIFEST, TRANSPORT_REPO, transport_is_verified,
 )
-from verify_historical_probe_reuse import (  # noqa: E402
+from stages.phase_b.verify_historical_probe_reuse import (  # noqa: E402
     ADMITTED as REUSE_ADMITTED, verify as verify_historical_reuse,
 )
 
@@ -102,14 +102,14 @@ REUSE_RECORD = REPO_ROOT / "logs/shared/analyses/autoinit_historical_probe_reuse
 #: whole pricing module would have been the wrong repair: everything else in it
 #: reads committed records and is exactly the kind of thing a pod should re-check.
 PHASE_B_TEST_IGNORES = (*TEST_IGNORES,
-                        "scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
+                        "scripts/stages/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
                         #: A ~7 min CPU beam search. It exists to execute the
                         #: Phase-B Stage-1 path at `$0` on the dev box, which is
                         #: precisely where it belongs — running it again inside
                         #: the pod's setup gate would bill seven minutes of L40S
                         #: to re-prove something already proven for free, exactly
                         #: as `test_phase_a_stages1_5_execute.py` is excluded.
-                        "scripts/experiments/stage-1/phase_b/tests/test_phase_b_stage1_executes.py")
+                        "scripts/stages/stage-1/phase_b/tests/test_phase_b_stage1_executes.py")
 
 #: The citations Phase B's ten-probe budget spends nothing on, derived from the
 #: candidate rules rather than pasted: sa/sb/sc for each imported finalist, and
@@ -184,8 +184,8 @@ TIE_BREAK_PROBES_P2 = 3
 #: costs nothing here. `calib.domain_balanced@v1` keeps travelling by relay as
 #: CALIBRATION_V1, because it is already there.
 CALIBRATION_V2_LOCAL = (
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
 )
 
 
@@ -437,7 +437,7 @@ def poll_lifetime_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_phase_b_driver.py "
+            f"{REPO}/scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
@@ -500,7 +500,7 @@ def preregistration_gate(ctx: SessionContext) -> tuple[bool, str]:
     # preregistration would destroy the record of what attempt 5 executed, so
     # declared additive drift that leaves every pre-existing branch
     # byte-identical is accepted and everything else still fails closed.
-    from experiments.phase_b.post_freeze import accounted_for
+    from stages.phase_b.post_freeze import accounted_for
 
     ok, why = accounted_for(prereg["executable_source"]["digest"], observed,
                             REPO_ROOT)
@@ -617,9 +617,9 @@ def spec(args) -> SessionSpec:
         #: complete; its grant measures a different harness at a different price.
         authorization_loader=PhaseBAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=PHASE_B_PLAN_V1.plan_id,
         plan_hash=PHASE_B_PLAN_V1.plan_hash,
@@ -715,7 +715,7 @@ def spec(args) -> SessionSpec:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    from autoinit_phase_a_launch import build_parser as phase_a_parser
+    from stages.phase_a.autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
     ap.set_defaults(out="logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_session.json",

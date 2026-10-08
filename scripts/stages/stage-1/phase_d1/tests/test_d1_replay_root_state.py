@@ -38,7 +38,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-for _extra in ("src", "scripts", "scripts/experiments/stage-1", "scripts/pod"):
+for _extra in ("src", "scripts", "scripts/stages/stage-1", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
@@ -48,7 +48,7 @@ def R():
     from aadistill.initialization.adapters import register_builtin_adapters
 
     register_builtin_adapters()
-    from experiments.phase_d1 import replay_specs as module
+    from stages.phase_d1 import replay_specs as module
 
     return module
 
@@ -116,7 +116,7 @@ class TestTheCandidateSetIsDerivedFromTheMechanism:
     stale and these fail rather than silently narrowing the derivation."""
 
     def test_the_session_driver_still_mutates_the_root_it_loads(self):
-        src = (REPO / "scripts/pod/autoinit_d1_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py").read_text()
         assert "model.config.use_cache = False" in src, (
             "the search driver no longer sets use_cache on the root it loads, "
             "so ROOT_CANDIDATES describes a mechanism that is gone")
@@ -310,7 +310,7 @@ class TestTheDriverUsesTheDerivedRootAndNothingElse:
     of this driver had its own `load_root` with a bare `from_pretrained`."""
 
     def test_the_driver_has_no_loader_of_its_own(self):
-        src = (REPO / "scripts/pod/autoinit_d1_replay_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py").read_text()
         tree = ast.parse(src)
         bare = [
             node for node in ast.walk(tree)
@@ -326,7 +326,7 @@ class TestTheDriverUsesTheDerivedRootAndNothingElse:
     def test_the_driver_derives_before_it_materializes(self):
         """Order matters for money: deriving costs two config hashes, and
         materializing a wrong root costs a GPU minute per path at best."""
-        src = (REPO / "scripts/pod/autoinit_d1_replay_driver.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py").read_text()
         assert src.index("root_state_from_plan") < src.index(
             "materialize_fixed_path(")
 
@@ -393,7 +393,7 @@ class TestTheRealD1DerivationIsCommittedAndUnique:
     """
 
     def test_the_plan_is_staged_where_the_driver_reads_it(self):
-        path = REPO / "artifacts/stage1/d1_replay_plan.json"
+        path = REPO / "artifacts/stages/stage-1/d1_replay_plan.json"
         assert path.is_file(), (
             f"{path.relative_to(REPO)} is not here. The driver is invoked with "
             "`--plan` pointing at exactly this path, so a pod without it dies "
@@ -401,7 +401,7 @@ class TestTheRealD1DerivationIsCommittedAndUnique:
             "`autoinit_d1_replay_launch.py --write-plan`, which costs $0.")
 
     def test_the_plan_carries_a_unique_derivation(self):
-        path = REPO / "artifacts/stage1/d1_replay_plan.json"
+        path = REPO / "artifacts/stages/stage-1/d1_replay_plan.json"
         state = json.loads(path.read_text())["root_state"]
         assert state is not None, "the plan ships no root-state derivation"
         explain = [c for c in state["evidence"] if c["explains_every_step_0"]]

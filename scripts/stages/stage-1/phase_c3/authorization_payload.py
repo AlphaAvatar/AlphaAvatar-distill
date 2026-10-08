@@ -5,7 +5,7 @@ the **grant is an input**, not a constant. `authorization.py` carries the
 authorization *type* -- the hard-`False` scope properties, the derived harness,
 the live-priced ceiling -- and nothing about a particular permission.
 
-**Both callers use this same function.** `scripts/autoinit/issue_c3_authorization.py`
+**Both callers use this same function.** `scripts/stages/stage-1/phase_c3/issue_c3_authorization.py`
 supplies `git rev-parse HEAD` and the wall clock; the tests supply a fixed
 commit and epoch so a payload is reproducible without a working tree.
 
@@ -40,7 +40,7 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 
 from aadistill.governance.grant import GrantRefused  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
-from experiments.phase_c3.authorization import (  # noqa: E402
+from stages.phase_c3.authorization import (  # noqa: E402
     CURRENT_CLOSURE_SNAPSHOT,
     C3Authorization,
     c3_expected_usd,
@@ -85,7 +85,7 @@ def session_contract_hash(repo_root: str | Path = ".") -> str:
     refuse -- which would surface here as a mysterious failure rather than as
     the ordering property it is.
     """
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c3 import session as CS
 
     CS.register_experimental_operators()
     return CS.C3SessionContract().contract_hash
@@ -103,8 +103,8 @@ def build_c3_authorization_payload(*, grant: Mapping[str, Any],
     A test builds a deliberately stale candidate with it and proves
     `c3_harness_gate` refuses it; the real path never passes it.
     """
-    from experiments.phase_c1.scoring import c1_scoring_contract
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c1.scoring import c1_scoring_contract
+    from stages.phase_c3 import session as CS
 
     root = Path(repo_root)
 

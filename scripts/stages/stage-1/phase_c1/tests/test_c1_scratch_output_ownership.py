@@ -29,7 +29,7 @@ from pathlib import Path
 
 import pytest
 
-from experiments.run_layout import RunConventionError, read_run
+from shared.run_layout import RunConventionError, read_run
 from support.session_specs import load_session_launcher
 
 REPO = Path(__file__).resolve().parents[5]
@@ -144,7 +144,7 @@ def test_the_owning_run_may_reopen_its_own_scratch(tmp_path, L):
     """
     repo = _repo(tmp_path, L)
     scr, _ = _owned_stale_scratch(tmp_path, L, repo)
-    from experiments.run_layout import claim_output_root
+    from shared.run_layout import claim_output_root
 
     again = claim_output_root(scr, "phase_c1", "attempt9",
                               outputs=L.RUN_OUTPUTS)
@@ -258,7 +258,7 @@ def test_a_shared_read_only_input_does_not_make_a_scratch_ambiguous(tmp_path, L)
 def _cuda():
     import importlib.util
 
-    path = REPO / "scripts/validation/cuda_engineering_launch.py"
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
     spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -286,7 +286,7 @@ def _cuda_engineering(scr: Path, run_id: str):
 
 def test_the_cuda_validation_claims_and_requires_the_same_way(tmp_path):
     """One mechanism, two experiments, disjoint output vocabularies."""
-    from experiments.run_layout import claim_output_root
+    from shared.run_layout import claim_output_root
 
     mod = _cuda()
     assert set(mod.RUN_OUTPUTS) == {"validation_stdout.txt", "watchdog_*.jsonl",
@@ -320,7 +320,7 @@ def test_a_cuda_subrun_may_not_collect_another_subruns_scratch(tmp_path):
     Same defect shape: `--scr` is a writable output root independent of
     `logs/runs/`, and three subruns of one campaign share a machine.
     """
-    from experiments.run_layout import claim_output_root
+    from shared.run_layout import claim_output_root
 
     mod = _cuda()
     repo, scr = tmp_path / "repo", tmp_path / "scr"

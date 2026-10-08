@@ -100,7 +100,7 @@ def digest_pinned_replay_is_buildable(repo_root: Path | str = REPO) -> bool:
     That is not a defect: `assert_operators_unmoved` refusing is the correct
     outcome, because rebuilding from different bytes is not a replay. Tests
     that exercise the replay *chain* use this to skip; the refusal itself is
-    asserted in `scripts/experiments/stage-1/phase_c2/tests/test_c2_replay_specs.py`.
+    asserted in `scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py`.
     """
     import sys
     sys.path.insert(0, str(Path(repo_root) / "scripts"))
@@ -109,7 +109,7 @@ def digest_pinned_replay_is_buildable(repo_root: Path | str = REPO) -> bool:
     #: missing dependency or a typo in the import path -- silently skipping the
     #: suite that would have caught it. Only the ONE outcome this predicate is
     #: about is caught: the guard deciding the tree has moved.
-    from experiments.phase_c2 import replay_specs as R
+    from stages.phase_c2 import replay_specs as R
 
     try:
         R.assert_operators_unmoved(Path(repo_root))

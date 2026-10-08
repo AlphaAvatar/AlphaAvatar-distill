@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Re-price E8b's depth-only sessions from the gate's MEASURED step time.
 
-    PYTHONPATH=src python scripts/training/reprice_e8b_after_gate.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/reprice_e8b_after_gate.py
 
 The registered 20-step gate ran and **failed on memory, not speed** (S2 attempt 4,
 2026-08-11, A100 SXM 80 GB, commit `ccba0fbf`). It is a stop-and-re-price event, so
@@ -59,7 +59,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.budget import Phase, StepTime, plan_session  # noqa: E402

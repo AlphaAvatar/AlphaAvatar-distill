@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 6b: train two P2-CE-heavy arms at the 2.96M rung, then evaluate.
 
-    /opt/train/bin/python scripts/pod/e6b_driver.py --stage all \
+    /opt/train/bin/python scripts/stages/stage-3/e6b/e6b_driver.py --stage all \
         --spent-usd 0.30 --authorized-usd 7.12
 
 **The evaluation rung is pinned to 860000 for every arm**, as in E4 and E6. The
@@ -35,9 +35,9 @@ STATUS = Path("/workspace/e6b.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 EVAL_RUNG = 860000          # pinned; see the module docstring
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
@@ -64,7 +64,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def run_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}"
+    return REPO / f"artifacts/stages/stage-3/{name}"
 
 
 def model_dir(name: str) -> Path:
@@ -72,7 +72,7 @@ def model_dir(name: str) -> Path:
 
 
 def stage_validate(args) -> None:
-    run(["scripts/training/validate_e6b_arms.py",
+    run(["scripts/stages/stage-3/e6b/validate_e6b_arms.py",
          "--registration", "logs/stages/stage-3/e6b/analyses/e6b_registration.json",
          "--out", OUT / "e6b_preflight_driver.json"])
     mark("ARMS_VALIDATED")
@@ -96,7 +96,7 @@ def stage_train(args) -> None:
         joined = " ".join(cfg["trainable_patterns"])
         for proj in ("q_proj", "k_proj", "v_proj", "o_proj"):
             assert proj in joined, f"{proj} must be full-rank trainable"
-        run(["scripts/training/train_stage3.py", "--config", cfg_path])
+        run(["scripts/shared/training/train_stage3.py", "--config", cfg_path])
         mark(f"TRAIN_DONE:{alias}")
 
 
@@ -126,7 +126,7 @@ def stage_movement(args) -> None:
         out = OUT / "e6b_movement" / f"{alias}.json"
         if out.exists() or not model_dir(name).is_dir():
             continue
-        run(["scripts/evaluation/parameter_movement.py", "--init", INIT,
+        run(["scripts/shared/evaluation/parameter_movement.py", "--init", INIT,
              "--checkpoint", model_dir(name), "--label", alias, "--out", out])
         rep = json.loads(out.read_text())
         emb = rep["by_group"]["embedding"]["delta_fro"]
@@ -156,11 +156,11 @@ def stage_three_mode(args) -> None:
         if spent + need > args.authorized_usd:
             mark(f"ABORTED_AT_GATE:budget:{spent:.2f}+{need:.2f}>{args.authorized_usd:.2f}")
             return
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

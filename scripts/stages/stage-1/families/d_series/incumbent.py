@@ -34,7 +34,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 
 #: THE C1 RUN THAT PRODUCED THE VERDICT. Attempt 18 is the one that completed:
 #: `phase_c1.authorization_payload.ATTEMPT_18_PREREGISTRATION` is the document

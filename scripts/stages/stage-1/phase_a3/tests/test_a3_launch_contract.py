@@ -23,14 +23,14 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "pod"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
 
-SETUP_SCRIPT = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP_SCRIPT = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 
 def launcher():
     spec = importlib.util.spec_from_file_location(
-        "a3lau_contract", REPO / "scripts/pod/autoinit_a3_launch.py")
+        "a3lau_contract", REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["a3lau_contract"] = mod
     spec.loader.exec_module(mod)
@@ -113,7 +113,7 @@ def test_rope_ok_is_declared_and_its_input_is_staged(session):
     assert "ROPE_OK" in spec.setup.setup_markers
     staged = {r.path for r in spec.setup.relay_inputs}
     assert any(p.endswith("/checkpoint/config.json") for p in staged), (
-        "ROPE_OK globs artifacts/stage1/*/checkpoint/config.json and no "
+        "ROPE_OK globs artifacts/stages/stage-1/*/checkpoint/config.json and no "
         "relay input stages one")
 
 
@@ -133,7 +133,7 @@ def test_the_status_path_and_job_id_come_from_the_one_owner(session):
     acquisition loop would have read a completed formal run as 'no
     measurement began' and launched a second paid attempt."""
     _, _, spec = session
-    import autoinit_a3_driver as D
+    from stages.phase_a3 import autoinit_a3_driver as D
 
     assert spec.status_path == A3S.STATUS_PATH
     assert spec.driver_job_id == A3S.DRIVER_JOB_ID
@@ -145,7 +145,7 @@ def test_the_status_path_and_job_id_come_from_the_one_owner(session):
 def test_the_markers_the_launcher_watches_are_the_markers_the_driver_emits(
         session):
     _, _, spec = session
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     assert f'mark("{spec.markers.success}")' in src, (
         f"the launcher waits for {spec.markers.success!r} and the driver "
         "never emits it")
@@ -213,7 +213,7 @@ def test_both_specs_are_inside_the_harness_the_grant_measures(session):
     """Without this, editing an evidence declaration would not move the
     harness digest and a grant would certify a collection policy it never
     saw."""
-    from experiments.phase_a3.a3_authorization import A3_HARNESS_FILES
+    from stages.phase_a3.a3_authorization import A3_HARNESS_FILES
 
     _, _, spec = session
     for path in (spec.artifacts.spec_success, spec.artifacts.spec_failed):
@@ -222,7 +222,7 @@ def test_both_specs_are_inside_the_harness_the_grant_measures(session):
 
 def test_every_report_name_is_a_file_the_driver_writes(session):
     _, _, spec = session
-    src = (REPO / "scripts/pod/autoinit_a3_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py").read_text()
     for name in spec.artifacts.report_names:
         assert name in src, (
             f"the artifact policy reports {name!r} and the driver never "
@@ -236,7 +236,7 @@ def test_the_plan_reproduces_the_derived_ceiling_rather_than_approaching_it(
         session):
     """A planner that applied its own contingency on top of the component
     table's overrun factor once produced a plan terminating ABOVE its grant."""
-    from experiments.phase_a3.a3_authorization import (
+    from stages.phase_a3.a3_authorization import (
         a3_billed_rate_usd_per_hour, a3_hard_ceiling_usd,
     )
 
@@ -282,7 +282,7 @@ def _ctx(args, **over):
     #: the RATE check started failing on the ceiling check instead, with a
     #: message about something it was not asserting. A literal here is a
     #: second owner of a derived number.
-    from experiments.phase_a3.a3_authorization import a3_hard_ceiling_usd
+    from stages.phase_a3.a3_authorization import a3_hard_ceiling_usd
 
     base = dict(args=args, auth=types.SimpleNamespace(
         hard_cap_usd=a3_hard_ceiling_usd(REPO), harness_source_digest="x" * 64,
@@ -387,7 +387,7 @@ def test_the_acquisition_loop_s_launcher_call_parses(session):
     cannot leave this agreeing with a call nobody makes.
     """
     L, _, _ = session
-    src = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/a3_acquire.sh").read_text()
     m = re.search(r"autoinit_a3_launch\.py(.*?)>\s*\"\$SCR/launcher\.log\"",
                   src, re.S)
     assert m, "the acquisition loop no longer invokes the A3 launcher"
@@ -441,7 +441,7 @@ def test_the_evidence_path_the_loop_writes_is_the_one_the_aggregator_reads():
     the loop's durable root, the archive's own top-level prefix, and the
     directory `aggregate_a3` opens.
     """
-    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    loop = (REPO / "scripts/stages/stage-1/phase_a3/a3_acquire.sh").read_text()
     assert "ART=/home/ecs-user/aad-artifacts/phase_a3" in loop, (
         "the loop no longer declares a durable artifact root")
     assert 'BASE="$ART/_sessions"' in loop, (
@@ -459,7 +459,7 @@ def test_the_evidence_path_the_loop_writes_is_the_one_the_aggregator_reads():
         (REPO / "configs/autoinit/a3_artifacts.json").read_text())
     prefixes = {e["pattern"].split("/", 1)[0] for e in spec["entries"]}
     assert "audit" in prefixes, prefixes
-    agg = (REPO / "scripts/autoinit/aggregate_a3.py").read_text()
+    agg = (REPO / "scripts/stages/stage-1/phase_a3/aggregate_a3.py").read_text()
     assert 'evidence / "audit" / "autoinit_a3"' in agg, (
         "the aggregator no longer reads <evidence>/audit/autoinit_a3; the "
         "loop's copy would land somewhere it does not look")
@@ -479,7 +479,7 @@ def test_the_run_ids_the_loop_mints_are_run_ids_the_layout_accepts(session):
     the launcher's parser refuses a bad one before the grant is written.
     """
     L, _, _ = session
-    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    loop = (REPO / "scripts/stages/stage-1/phase_a3/a3_acquire.sh").read_text()
     m = re.search(r'^\s*RUN="([^"]+)"', loop, re.M)
     assert m, "the loop no longer mints a run name"
     minted = m.group(1).replace("$N", "7")
@@ -551,7 +551,7 @@ def test_the_card_is_part_of_the_measurement_not_only_of_the_price(session):
 
     #: And the acquisition loop's capacity watch offers only that card, so a
     #: chain is not consumed to discover the refusal.
-    loop = (REPO / "scripts/pod/a3_acquire.sh").read_text()
+    loop = (REPO / "scripts/stages/stage-1/phase_a3/a3_acquire.sh").read_text()
     assert 'want = priced["gpu"]' in loop, (
         "the watch no longer filters to the priced card")
     assert "select(query_offers())" not in loop, (

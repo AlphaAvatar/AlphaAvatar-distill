@@ -26,7 +26,7 @@ for _p in ("src", "scripts"):
 
 from aadistill.runtime import durable_store as DS  # noqa: E402
 
-from experiments.durable_stores import (LocalDirStore,  # noqa: E402
+from shared.durable_stores import (LocalDirStore,  # noqa: E402
                                         S3CompatibleStore)
 
 
@@ -71,7 +71,7 @@ def test_the_object_store_backend_takes_its_endpoint_as_an_argument():
     b = S3CompatibleStore(endpoint_url="https://two.example/", bucket="b2",
                           access_key_env="B_KEY", secret_key_env="B_SECRET")
     assert a.endpoint_url != b.endpoint_url and a.bucket != b.bucket
-    src = (REPO / "scripts/experiments/durable_stores.py").read_text()
+    src = (REPO / "scripts/shared/durable_stores.py").read_text()
     body = src.split("class S3CompatibleStore", 1)[1]
     for host in ("runpod.io", "cloudflarestorage.com", "amazonaws.com"):
         assert host not in body, f"{host} is hardcoded into the adapter"
@@ -88,7 +88,7 @@ def test_credentials_are_never_defaulted_or_read_from_the_repository():
                           access_key_env="NOPE_KEY", secret_key_env="NOPE_SEC")
     with pytest.raises(RuntimeError, match="not in the environment"):
         s._client()
-    body = (REPO / "scripts/experiments/durable_stores.py").read_text().split(
+    body = (REPO / "scripts/shared/durable_stores.py").read_text().split(
         "def _client", 1)[1].split("\n    def ")[0]
     assert body.index("not in the environment") < body.index("import boto3")
 
@@ -464,7 +464,7 @@ class TestKeysAreImmutable:
 
     def test_the_object_backend_refuses_a_populated_prefix_too(self):
         """Object stores have no directory to replace, so it is explicit."""
-        body = (REPO / "scripts/experiments/durable_stores.py").read_text()
+        body = (REPO / "scripts/shared/durable_stores.py").read_text()
         s3 = body.split("class S3CompatibleStore", 1)[1]
         put = s3.split("def put_tree", 1)[1].split("\n    def ")[0]
         assert "self.stat_tree(key)" in put and "FileExistsError" in put
@@ -500,7 +500,7 @@ class TestThePresignedFetchPath:
 
     def test_it_fetches_a_real_tree_and_re_identifies_it(self, tmp_path,
                                                          monkeypatch):
-        from experiments.durable_stores import (PresignedFetchPlan,
+        from shared.durable_stores import (PresignedFetchPlan,
                                                 PresignedHttpStore)
         _Identity.install(monkeypatch)
         src = _Probe.make(tmp_path / "src")
@@ -533,7 +533,7 @@ class TestThePresignedFetchPath:
             srv.shutdown()
 
     def test_it_cannot_upload_and_says_why(self, tmp_path):
-        from experiments.durable_stores import (PresignedFetchPlan,
+        from shared.durable_stores import (PresignedFetchPlan,
                                                 PresignedHttpStore)
         store = PresignedHttpStore(PresignedFetchPlan("k", {"a": "u"},
                                                       {"a": 1}, 60))
@@ -541,7 +541,7 @@ class TestThePresignedFetchPath:
             store.put_tree(tmp_path, "k")
 
     def test_a_plan_covers_exactly_one_object(self, tmp_path):
-        from experiments.durable_stores import (PresignedFetchPlan,
+        from shared.durable_stores import (PresignedFetchPlan,
                                                 PresignedHttpStore)
         store = PresignedHttpStore(PresignedFetchPlan("k", {"a": "u"},
                                                       {"a": 1}, 60))
@@ -551,7 +551,7 @@ class TestThePresignedFetchPath:
     def test_a_malicious_object_name_cannot_escape_the_restore_root(
             self, tmp_path):
         """The narrow hardening: a key suffix becomes a local path."""
-        from experiments.durable_stores import (PresignedFetchPlan,
+        from shared.durable_stores import (PresignedFetchPlan,
                                                 PresignedHttpStore)
         srv, base = self._serve(tmp_path)
         try:
@@ -563,7 +563,7 @@ class TestThePresignedFetchPath:
             srv.shutdown()
 
     def test_a_plan_never_prints_its_signatures(self):
-        from experiments.durable_stores import PresignedFetchPlan
+        from shared.durable_stores import PresignedFetchPlan
 
         plan = PresignedFetchPlan(
             "k", {"a": "https://x/?X-Amz-Signature=DEADBEEF"}, {"a": 1}, 60)

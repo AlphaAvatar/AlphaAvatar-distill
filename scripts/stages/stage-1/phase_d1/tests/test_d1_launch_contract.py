@@ -4,7 +4,7 @@ Every class here closes a blocker that was invisible because the thing it
 depended on was never executed. The prepared chain's `$0` evidence was correct
 about everything it checked and checked none of these:
 
-* **the evidence layout.** The driver wrote `artifacts/stage1/d1/<run_id>/`
+* **the evidence layout.** The driver wrote `artifacts/stages/stage-1/d1/<run_id>/`
   while `ArtifactPolicy.audit_dirname` sent the relay and the report fetch to
   `artifacts/audit/autoinit_d1/`, and three of the five artifact-spec patterns
   began `artifacts/` again under a collector root that is already
@@ -43,8 +43,8 @@ for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit", "tests"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
 from support.design_blockers import (  # noqa: E402
     autouse_blocker_free_design,
 )
@@ -71,13 +71,13 @@ RUN_ID = "d1_search_contract_probe"
 
 
 def _launcher():
-    import autoinit_d1_launch as L
+    from stages.phase_d1 import autoinit_d1_launch as L
 
     return L
 
 
 def _driver():
-    import autoinit_d1_driver as D
+    from stages.phase_d1 import autoinit_d1_driver as D
 
     return D
 
@@ -174,7 +174,7 @@ class TestOneAuthoritativeEvidenceLayout:
         what the teardown gate's `required_files_present` reads.
         """
         from aadistill.infrastructure.artifact_gate import build_manifest
-        from collect_artifacts import load_specs
+        from shared.pod.collect_artifacts import load_specs
 
         L = _launcher()
         spec = L.spec(_args())
@@ -202,11 +202,11 @@ class TestOneAuthoritativeEvidenceLayout:
             "states.jsonl", "telemetry.jsonl"}
 
     def test_the_success_spec_is_unsatisfied_by_the_old_layout(self, tmp_path):
-        """The same files under `artifacts/stage1/d1/<run_id>/` must NOT satisfy
+        """The same files under `artifacts/stages/stage-1/d1/<run_id>/` must NOT satisfy
         the spec -- otherwise this suite would pass for either layout and settle
         nothing."""
         from aadistill.infrastructure.artifact_gate import build_manifest
-        from collect_artifacts import load_specs
+        from shared.pod.collect_artifacts import load_specs
 
         L = _launcher()
         spec = L.spec(_args())
@@ -490,8 +490,8 @@ class TestEveryScienceInputIsStaged:
         declared = {a.repo_path for a in spec.setup.local_assets}
         assert declared == {
             D1S.STATE_EVAL_ROOT,
-            "artifacts/stage1/e8_calibration_v1",
-            "artifacts/stage1/reasoning_heavy_v2"}
+            "artifacts/stages/stage-1/e8_calibration_v1",
+            "artifacts/stages/stage-1/reasoning_heavy_v2"}
 
     def test_an_empty_pod_filesystem_cannot_satisfy_the_driver(self, tmp_path):
         """A bundle-only checkout has none of them, which is why they must be
@@ -511,7 +511,7 @@ class TestEveryScienceInputIsStaged:
         $REPO/<install_to>/`. Both steps are reproduced rather than described.
         """
         from aadistill.initialization.calibration.profiles import get_profile
-        from experiments.calibration import register_builtin_profiles
+        from shared.calibration import register_builtin_profiles
 
         L = _launcher()
         spec = L.spec(_args())
@@ -661,7 +661,7 @@ class TestEveryScienceInputIsStaged:
         assert "VLLM_READY" not in declared
         #: And the shell really does refuse without a staged checkpoint, so the
         #: omission is load-bearing rather than a preference.
-        shell = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+        shell = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
         assert "no staged checkpoint to check" in shell
 
 
@@ -887,9 +887,9 @@ class TestTheGovernanceGeneratorsExist:
     P4). The readiness record had no generator at all, and there was no issuer."""
 
     @pytest.mark.parametrize("script", [
-        "scripts/autoinit/issue_d1_authorization.py",
-        "scripts/autoinit/write_d1_launch_readiness.py",
-        "scripts/autoinit/stage_d1_bundle.py",
+        "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py",
+        "scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py",
+        "scripts/stages/stage-1/phase_d1/stage_d1_bundle.py",
     ])
     def test_it_exists_and_parses(self, script):
         path = REPO / script
@@ -897,9 +897,9 @@ class TestTheGovernanceGeneratorsExist:
         compile(path.read_text(), str(path), "exec")
 
     @pytest.mark.parametrize("script", [
-        "scripts/autoinit/issue_d1_authorization.py",
-        "scripts/autoinit/write_d1_launch_readiness.py",
-        "scripts/autoinit/stage_d1_bundle.py",
+        "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py",
+        "scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py",
+        "scripts/stages/stage-1/phase_d1/stage_d1_bundle.py",
     ])
     def test_it_requires_a_run_id(self, script):
         """All three artifacts are per-run, and the authorization's bound
@@ -941,7 +941,7 @@ class TestTheGovernanceGeneratorsExist:
                     L.bundle_record_for(RUN_ID)
 
     def test_the_run_directory_comes_from_the_shared_layout_helper(self):
-        from experiments.run_layout import rel_run_dir
+        from shared.run_layout import rel_run_dir
 
         L = _launcher()
         assert L.run_dir_for(RUN_ID) == rel_run_dir(
@@ -977,7 +977,7 @@ class TestTheLaunchCommitIsCheckedByLineageNotEquality:
         """
         import ast
 
-        src = (REPO / "scripts/autoinit/write_d1_launch_readiness.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py").read_text()
         called = {
             node.func.attr for node in ast.walk(ast.parse(src))
             if isinstance(node, ast.Call)
@@ -1070,7 +1070,7 @@ class TestTheProviderAccountRequirement:
         """An account holding less than one full envelope cannot fund an attempt
         this package permits, whatever this session's own ceiling is."""
         L = _launcher()
-        from experiments.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_authorization as A
 
         envelope = float(
             A.live_money(L.REPO_ROOT)["per_session_envelope_usd"])
@@ -1079,7 +1079,7 @@ class TestTheProviderAccountRequirement:
 
     def test_it_covers_the_ceiling_and_a_reserve(self):
         L = _launcher()
-        from experiments.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_authorization as A
 
         priced = A.session_ceiling(L.REPO_ROOT)
         floor = (float(priced["hard_ceiling_usd"])
@@ -1104,7 +1104,7 @@ class TestTheProviderAccountRequirement:
         passing run to find it.
         """
         L = _launcher()
-        from experiments.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_authorization as A
 
         priced = A.session_ceiling(L.REPO_ROOT)
         #: `gpu_usd` is a term of the DESIGN's cost cell, which is where the
@@ -1129,7 +1129,7 @@ class TestTheProviderAccountRequirement:
         #: computes rather than only on its clamped result.
         assert ceiling + L.ACCOUNT_OPERATIONAL_RESERVE_USD < \
             ceiling + disk + L.ACCOUNT_OPERATIONAL_RESERVE_USD
-        src = (L.REPO_ROOT / "scripts/pod/autoinit_d1_launch.py").read_text()
+        src = (L.REPO_ROOT / "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py").read_text()
         i = src.index("account_balance_required_usd=round(max(")
         rule = src[i:src.index("), 4),", i)]
         assert "container_disk_usd" not in rule, (
@@ -1142,7 +1142,7 @@ class TestTheProviderAccountRequirement:
         the cost model. Only the small reserve is a declared constant, and it is
         named as one."""
         L = _launcher()
-        src = (L.REPO_ROOT / "scripts/pod/autoinit_d1_launch.py").read_text()
+        src = (L.REPO_ROOT / "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py").read_text()
         assert "account_balance_required_usd=round(max(" in src
         assert 'live_money(repo_root)["per_session_envelope_usd"]' in src
         for typed in ("= 30.0", "= 30\n", "30.0)"):
@@ -1173,7 +1173,7 @@ class TestTheReplayFillsEveryRegistryItNeeds:
 
         L = _launcher()
         src = (L.REPO_ROOT /
-               "scripts/experiments/stage-1/phase_d1/replay_specs.py").read_text()
+               "scripts/stages/stage-1/phase_d1/replay_specs.py").read_text()
         calls = {
             node.func.attr
             for node in ast.walk(ast.parse(src))
@@ -1191,7 +1191,7 @@ class TestTheReplayFillsEveryRegistryItNeeds:
 
         L = _launcher()
         src = (L.REPO_ROOT /
-               "scripts/pod/autoinit_d1_replay_driver.py").read_text()
+               "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py").read_text()
         calls = {
             node.func.attr
             for node in ast.walk(ast.parse(src))
@@ -1218,8 +1218,8 @@ class TestTheReplayFillsEveryRegistryItNeeds:
         from aadistill.initialization.calibration.profiles import get_profile
         from aadistill.initialization.operators.base import get_implementation
         from aadistill.initialization.specs.arch import get_adapter
-        from experiments.phase_d1 import d1_session as D1S
-        from experiments.phase_d1 import replay_specs as R
+        from stages.phase_d1 import d1_session as D1S
+        from stages.phase_d1 import replay_specs as R
 
         D1S._register_frozen_operators()
         stage = D1S.design()["search_stage"]

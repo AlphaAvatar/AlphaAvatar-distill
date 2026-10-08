@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Compare a reference model's architecture against our student, field by field.
 
-    PYTHONPATH=src python scripts/evaluation/compare_geometry.py \
+    PYTHONPATH=src python scripts/shared/evaluation/compare_geometry.py \
         --reference Qwen/Qwen3-0.6B --reference-revision <sha> \
-        --student artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+        --student artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         --out artifacts/audit/reference_geometry.json
 
 "Same-geometry reference" is a claim that has to be checked rather than assumed.
@@ -21,7 +21,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402

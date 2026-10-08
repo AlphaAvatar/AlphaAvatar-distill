@@ -42,7 +42,7 @@ sys.path.insert(0, str(REPO / "tests/pod"))
 
 from support.session_specs import load_session_launcher, session_args  # noqa: E402
 
-DRIVER_PATH = REPO / "scripts/pod/autoinit_c1_driver.py"
+DRIVER_PATH = REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py"
 
 
 def driver_module():
@@ -85,7 +85,7 @@ def test_the_generated_command_parses_under_the_drivers_own_parser(command):
     tokens = shlex.split(command)
 
     assert tokens[0] == "/opt/train/bin/python", tokens[0]
-    assert tokens[1].endswith("scripts/pod/autoinit_c1_driver.py"), tokens[1]
+    assert tokens[1].endswith("scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py"), tokens[1]
     assert Path(tokens[1]).name == DRIVER_PATH.name
 
     parser = driver_module().build_parser()

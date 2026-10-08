@@ -1,8 +1,8 @@
 """The explicit gate into bulk generation: validate the whole production path.
 
-    uv run python scripts/data/validate_corpus_gate.py \
-        --corpus artifacts/stage3/corpus_v2/gate \
-        --packed artifacts/stage3/corpus_v2/gate/packed
+    uv run python scripts/shared/data/validate_corpus_gate.py \
+        --corpus artifacts/stages/stage-3/corpus_v2/gate \
+        --packed artifacts/stages/stage-3/corpus_v2/gate/packed
 
 Runs every check the packing spec's §9 lists, **per data type**, over artifacts
 produced by the real generation and packing code. Prints a pass/fail table and
@@ -35,7 +35,7 @@ import hashlib
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.sessions import (  # noqa: E402

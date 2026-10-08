@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Repoint markdown links that a relocation broke, by resolving them.
 
-    PYTHONPATH=src python scripts/consolidate/fix_doc_links.py          # report
-    PYTHONPATH=src python scripts/consolidate/fix_doc_links.py --write
+    PYTHONPATH=src python scripts/maintenance/consolidation/fix_doc_links.py          # report
+    PYTHONPATH=src python scripts/maintenance/consolidation/fix_doc_links.py --write
 
 A markdown link is relative to the file that contains it, so moving either end
 breaks it — and a relocation moves both ends at once. Rewriting absolute
@@ -30,7 +30,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 #: `[text](target)`, excluding external links and in-page anchors.
 LINK = re.compile(r"\[([^\]]*)\]\(([^)\s]+)\)")

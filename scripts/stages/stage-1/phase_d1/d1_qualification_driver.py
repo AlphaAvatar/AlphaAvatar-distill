@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The D1 engineering GPU qualification. Engineering evidence only.
 
-    python scripts/pod/d1_qualification_driver.py --out DIR --repo REPO [--deadline-s N]
+    python scripts/stages/stage-1/phase_d1/d1_qualification_driver.py --out DIR --repo REPO [--deadline-s N]
 
 **It answers five engineering questions and performs no science.** No recovery
 training, no behavioural screening, no confirmation, no formal search, no
@@ -44,7 +44,7 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-REPO_DEFAULT = Path(__file__).resolve().parents[2]
+REPO_DEFAULT = Path(__file__).resolve().parents[4]
 
 
 def _bootstrap(repo: Path) -> None:
@@ -59,7 +59,7 @@ def _bootstrap(repo: Path) -> None:
 INCUMBENT_AUTHORIZATION = (
     "logs/stages/stage-1/phase_a3/runs/a3_attempt3/governance/authorization.json")
 
-STATE_EVAL = "artifacts/stage1/state_eval_v1"
+STATE_EVAL = "artifacts/stages/stage-1/state_eval_v1"
 
 
 class QualificationError(RuntimeError):
@@ -198,7 +198,7 @@ def bind_protocol(repo: Path, *, policy_id: str, execution, numerics,
     from aadistill.initialization.planning.metrics import StateEvaluator
 
     sys.path.insert(0, str(repo / "scripts/autoinit"))
-    import load_state_eval
+    from shared.evaluation import load_state_eval
 
     suite, items, content_sha256 = _load_suite(load_state_eval, repo)
     if not content_sha256:
@@ -269,7 +269,7 @@ def _load_suite(load_state_eval, repo: Path):
 
 def _path_profiles():
     """The fixed path's steps, so the registry check knows what to require."""
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     return A3S.path_spec(workdir_device="cuda").steps
 
@@ -346,7 +346,7 @@ def run_path(*, repo: Path, workdir: Path, arm: str, batch_size: int,
         materialize_fixed_path,
     )
     from aadistill.initialization.specs.arch import get_adapter
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     spec = A3S.path_spec(workdir_device="cuda")
     if expected_final is None:
@@ -444,7 +444,7 @@ def fetch_teacher(repo: Path) -> str:
 
     from huggingface_hub import snapshot_download
 
-    from experiments.phase_c3 import session as CS
+    from stages.phase_c3 import session as CS
 
     #: logs/, not configs/. The binding is EVIDENCE about a fetched artifact --
     #: a revision and its per-shard hashes -- and it lives with the phase that
@@ -802,9 +802,9 @@ def main(argv: list[str] | None = None) -> int:
                 ("state_eval.items", f"{STATE_EVAL}/items.jsonl"),
                 ("state_eval.manifest", f"{STATE_EVAL}/manifest.json"),
                 ("calib.domain_balanced@v1",
-                 "artifacts/stage1/e8_calibration_v1/items.jsonl"),
+                 "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"),
                 ("calib.reasoning_heavy@v2",
-                 "artifacts/stage1/reasoning_heavy_v2/items.jsonl")):
+                 "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl")):
             path = repo / rel
             if not path.is_file():
                 raise QualificationError(
@@ -869,8 +869,8 @@ def main(argv: list[str] | None = None) -> int:
             from aadistill.initialization.calibration.profiles import (
                 registered_profiles,
             )
-            from experiments.calibration import register_builtin_profiles
-            from experiments.phase_c2.search_space import register_c2_operators
+            from shared.calibration import register_builtin_profiles
+            from stages.phase_c2.search_space import register_c2_operators
 
             #: FOUR process-global registries, all empty in a fresh interpreter.
             #: The CALIBRATION PROFILES were missing and subrun s1 paid $0.1098

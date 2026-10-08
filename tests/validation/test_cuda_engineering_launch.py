@@ -32,7 +32,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-ENTRY = REPO / "scripts/validation/cuda_engineering_launch.py"
+ENTRY = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
 #: THE DOCUMENTS THE LAUNCHER READS, BUILT HERE.
 #:
 #: These were read out of `logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/`
@@ -147,7 +147,7 @@ def args(**over):
                 authorization=mod_default("DEFAULT_AUTHORIZATION"),
                 experiment_id=mod_default("DEFAULT_EXPERIMENT_ID"),
                 stage_id=mod_default("DEFAULT_STAGE_ID"),
-                check="scripts/validation/cuda_engineering_check.py",
+                check="scripts/shared/validation/cuda_engineering_check.py",
                 check_config="configs/validation/cuda_engineering.json",
                 ship=[], gpu=[])
     base.update(over)
@@ -181,7 +181,7 @@ def eng(mod, tmp_path, monkeypatch, governance):
 #: The three tests that asserted the 2026-09-10 authorization's CONTENTS — its
 #: withdrawn count-based clauses, its reserve sitting inside its ceiling, what it
 #: declined to authorize — moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_stage_f_authorization.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_cuda_stage_f_authorization.py`
 #: in the 2026-10-03 convergence round. They are facts about a closed record.
 
 
@@ -517,7 +517,7 @@ class TestPriorSpendReducesTheNextResourcesLimits:
     """
 
     #: "the launcher starts from what earlier subruns booked" moved to
-    #: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cuda_campaign_booking.py`
+    #: `scripts/stages/stage-1/phase_c1/tests/test_c1_cuda_campaign_booking.py`
     #: in the 2026-10-03 convergence round: it read the concrete 2026-09-10
     #: cuda-stage-f campaign's booked dollars out of C1's validation directory.
     #: The accounting PROPERTY — that a campaign's prior spend is carried in and

@@ -1,6 +1,6 @@
 """Verify the frozen search assets against PREREGISTERED constants. Setup gate.
 
-    PYTHONPATH=src python scripts/autoinit/verify_frozen_assets.py
+    PYTHONPATH=src python scripts/shared/pod/verify_frozen_assets.py
 
 Runs during pod setup, before any scientific measurement. It answers "are these
 the assets Phase A preregistered", which is a different question from "is this
@@ -30,14 +30,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
 #: a subprocess with a caller-set PYTHONPATH.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.source_sets import recovery_scoring_contract  # noqa: E402
+from shared.source_sets import recovery_scoring_contract  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Frozen at preregistration 1d70a91a... (9b4229c8 before the 2026-08-13
@@ -45,7 +45,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 #: so the check cannot be satisfied by whatever file happens to be on the pod.
 FROZEN = {
     "state_eval_v1": {
-        "root": "artifacts/stage1/state_eval_v1",
+        "root": "artifacts/stages/stage-1/state_eval_v1",
         "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
         "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
         "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
@@ -55,7 +55,7 @@ FROZEN = {
     # by construction — it hashes id:prompt_sha256 pairs, so its equality is the
     # proof that the migration touched only the tools representation.
     "recovery_search_v2": {
-        "root": "artifacts/stage3/recovery_search_v2",
+        "root": "artifacts/stages/stage-1/batteries/recovery_search_v2",
         "content_sha256": "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323",
         "manifest_sha256": "58ae5c6dcbe32eb28c343a66830d7224a14537362deeeff2ce8219d0a31679d6",
         "tools_materialization_sha256": "3016f1c421a705cf72ce852a76f26ad6ef6dcaf84021a80de9c130bf224befdf",

@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
+SCRIPT = REPO / "scripts/shared/pod/reconstruct_training_events.py"
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
 # under a fresh empty HOME so host-local state is invisible on BOTH machines.
 # An absolute literal is immune to that, which is what let host-local cases run
@@ -23,7 +23,7 @@ SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
 E6B = Path.home() / "aad-artifacts/e6b"
 COMMITTED = REPO / "logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json"
 
-RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json
+RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/shared/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json
 device cuda; loading packed token ladder ...
 eval step 0: {{'val_blocks': 16, 'val_ce': 10.919939, 'val_ppl': 55267.4502, 'val_kd': 10.603207}}
 step 10/2916  loss 11.8970  ce 9.6091  kd 9.1515  lr 3.42e-06  4.25s
@@ -56,7 +56,7 @@ def test_the_output_declares_its_provenance(tmp_path):
     assert doc["provenance"] == "reconstructed_from_driver_console"
     assert doc["original_event_stream_available"] is False
     assert doc["original_event_stream_paths"] == [
-        "artifacts/stage3/e6b_p2_r2960k_sa/train_log.jsonl"]
+        "artifacts/stages/stage-3/e6b_p2_r2960k_sa/train_log.jsonl"]
     assert "not a substitute" in doc["original_loss_note"]
 
 

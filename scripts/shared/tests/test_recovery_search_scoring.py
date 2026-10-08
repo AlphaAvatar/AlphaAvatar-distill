@@ -38,7 +38,7 @@ REPO = Path(__file__).resolve().parents[3]
 #: meant the substitution was silent: on a pod, where only v2 is staged, the
 #: whole file SKIPPED rather than failing, so the scorer went unvalidated in the
 #: one environment that was about to spend money on it.
-BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
+BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 sys.path.insert(0, str(REPO / "src"))
 
 pytestmark = pytest.mark.skipif(
@@ -169,7 +169,7 @@ def score(tmp_path: Path, policy: str) -> dict:
     write_generations(gen, policy)
     out = tmp_path / f"{policy}.json"
     rc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/score_recovery_search.py"),
+        [sys.executable, str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
          "--generations", str(gen), "--label", policy, "--seed", "20260726",
          "--out", str(out)],
         capture_output=True, text=True, cwd=REPO,
@@ -257,7 +257,7 @@ def test_code_is_behaviour_only_and_never_enters_correctness(scored):
 
 def test_the_capability_schema_is_enforced_not_defaulted(scored):
     from aadistill.initialization.planning.recovery import CapabilitySchemaError
-    from experiments.recovery_policy import CAPABILITY_SCHEMA_V1
+    from shared.recovery_policy import CAPABILITY_SCHEMA_V1
 
     result = scored["oracle"]
     assert result["capability_schema_enforced"] is True
@@ -276,7 +276,7 @@ def test_a_short_set_is_refused_rather_than_inflating_a_rate(tmp_path):
     kept = path.read_text().splitlines()[:5]
     path.write_text("\n".join(kept) + "\n")
     rc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/score_recovery_search.py"),
+        [sys.executable, str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
          "--generations", str(gen), "--label", "short", "--seed", "1",
          "--out", str(tmp_path / "short.json")],
         capture_output=True, text=True, cwd=REPO,
@@ -334,7 +334,7 @@ def test_the_tool_usable_gate_separates_executability_from_correctness(scored):
 
 def test_an_argument_schema_failure_is_not_a_usability_failure(scored):
     """`tool_args_schema_ok` stays diagnostic, by explicit decision."""
-    from experiments.source_sets import recovery_scoring_contract  # noqa: E402
+    from shared.source_sets import recovery_scoring_contract  # noqa: E402
 
     import json as _json
     gate = _json.loads(_json.dumps(
@@ -391,7 +391,7 @@ def test_an_unprompted_tool_call_is_still_a_protocol_violation(scored):
 
 def test_counts_not_rates_reach_the_pooled_aggregation(scored):
     """`pooled_counts@v1` refuses a float; the scorer must emit integers."""
-    from experiments.recovery_policy import POOLED_COUNTS_V1
+    from shared.recovery_policy import POOLED_COUNTS_V1
 
     sa, sb = scored["oracle"], scored["contentless_perfect"]
     for result in (sa, sb):

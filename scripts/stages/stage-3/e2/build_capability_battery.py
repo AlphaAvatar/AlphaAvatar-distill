@@ -38,7 +38,7 @@ Selection is a deterministic stride over ids sorted by sha256, so it needs no
 seed and re-running reproduces the same battery.
 
 Usage:
-    scripts/data/build_capability_battery.py --out artifacts/eval/battery_v1
+    scripts/stages/stage-3/e2/build_capability_battery.py --out artifacts/stages/stage-3/eval/battery_v1
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "rollout"))
 
@@ -435,7 +435,7 @@ def main() -> None:
                            "never eligible for corpus v2. TriviaQA has never "
                            "been used by this project."),
             "hash_rule": ("content_key / prompt_key from "
-                          "scripts/rollout/build_recovery_corpus.py, applied over "
+                          "scripts/shared/rollout/build_recovery_corpus.py, applied over "
                           "stage2_v1 train+val+calib, eval_behavior_v0 and "
                           "corpus v2 sessions"),
             "exclusion_sets": {"content_hashes": len(excluded_content),

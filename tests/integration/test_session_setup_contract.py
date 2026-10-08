@@ -7,7 +7,7 @@ Two paid pods have now died on the same reasoning error, sixteen days apart:
                                     calibration and the teacher, both from the relay
 
 Both statements were true. Both were about what the session *needed*.
-`autoinit_preflight_setup.sh` runs `scripts/autoinit/verify_frozen_assets.py`
+`autoinit_preflight_setup.sh` runs `scripts/shared/pod/verify_frozen_assets.py`
 **unconditionally** at the `ASSETS_READY` gate, and that verifier checks its
 frozen roots whatever the session is doing — so what binds is what the shared
 setup requires, not what the session uses.
@@ -52,7 +52,7 @@ def verifier_required_local_roots() -> set[str]:
     frozen asset joins this set the moment it joins the verifier, without anyone
     remembering to update a test.
     """
-    from verify_frozen_assets import FROZEN
+    from shared.pod.verify_frozen_assets import FROZEN
 
     return {spec["root"].strip("/") for spec in FROZEN.values()}
 
@@ -119,7 +119,7 @@ def test_every_session_installs_every_root_the_shared_setup_verifies(name, extra
     missing = sorted(required - installed)
     assert not missing, (
         f"{name} does not install {missing}, which "
-        "scripts/autoinit/verify_frozen_assets.py checks at the shared setup's "
+        "scripts/shared/pod/verify_frozen_assets.py checks at the shared setup's "
         "ASSETS_READY gate, which this session DECLARES. A session declares "
         "what the SETUP requires, not what the session reads — declaring only "
         "what it needs is what cost the device-canary retry $0.0637 and the "

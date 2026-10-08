@@ -1,8 +1,8 @@
 """Stage 3 CLI: recovery training over an offline mixture or a packed token ladder.
 
 Usage:
-    uv run python scripts/training/train_stage3.py --config configs/stage3_<name>.json
-    uv run python scripts/training/train_stage3.py --config ... --resume [step_XXXXXX]
+    uv run python scripts/shared/training/train_stage3.py --config configs/stage3_<name>.json
+    uv run python scripts/shared/training/train_stage3.py --config ... --resume [step_XXXXXX]
 
 A fresh run refuses to write into an out_dir that already contains
 checkpoints (pass --resume, or pick a new out_dir). --resume without an
@@ -23,7 +23,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -33,7 +33,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 import torch
 
 from aadistill.initialization.planning.recovery import RuntimeEnvironmentFingerprint
-from experiments.source_sets import trainer_source_digest
+from shared.source_sets import trainer_source_digest
 from aadistill.infrastructure.env import code_state, hardware_report, set_determinism
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash

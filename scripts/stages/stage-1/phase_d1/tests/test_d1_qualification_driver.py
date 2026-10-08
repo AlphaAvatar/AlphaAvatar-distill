@@ -27,7 +27,7 @@ for extra in ("src", "scripts", "scripts/pod"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-import d1_qualification_driver as drv  # noqa: E402
+from stages.phase_d1 import d1_qualification_driver as drv  # noqa: E402
 
 
 def _a3_spec():
@@ -40,15 +40,15 @@ def _a3_spec():
     from aadistill.initialization.operators.attention.gqa import (
         activation_importance,
     )
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c2.search_space import register_c2_operators
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_builtin_adapters()
     register_builtin_profiles()
     register_c2_operators()
     activation_importance.register()
 
-    from experiments.phase_a3 import a3_session
+    from stages.phase_a3 import a3_session
 
     return a3_session.path_spec(workdir_device="cpu")
 
@@ -89,7 +89,7 @@ class TestOnlyTheArmThatClaimsTheIncumbentKeepsThePins:
 
     def test_the_driver_unpins_exactly_the_non_incumbent_arms(self):
         """The decision is `expected_final is None`, read off the source."""
-        source = (REPO / "scripts/pod/d1_qualification_driver.py").read_text()
+        source = (REPO / "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py").read_text()
         assert "    if expected_final is None:\n" in source
         assert "        spec = unpinned(spec)" in source
 
@@ -111,7 +111,7 @@ class TestCompletedStepsSurviveALaterFailure:
         assert isinstance(exc, drv.QualificationError)
 
     def test_the_arm_helper_files_the_partial_before_re_raising(self):
-        source = (REPO / "scripts/pod/d1_qualification_driver.py").read_text()
+        source = (REPO / "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py").read_text()
         body = source[source.index("        def arm("):]
         body = body[:body.index("\n        #: A -- the hard gate")]
         assert "except PartialPath as exc:" in body
@@ -261,7 +261,7 @@ class TestPresenceIsNotSuccess:
         }
 
     def _verdict(self, record):
-        import d1_qualification_closeout as co
+        from stages.phase_d1 import d1_qualification_closeout as co
         return co.verdict_of(record)
 
     def test_the_baseline_passes(self):
@@ -380,7 +380,7 @@ class TestTheArmsSelectorResolvesBeforeAnyStage:
     """
 
     def test_the_selector_is_resolved_before_the_first_arm_call(self):
-        source = (REPO / "scripts/pod/d1_qualification_driver.py").read_text()
+        source = (REPO / "scripts/stages/stage-1/phase_d1/d1_qualification_driver.py").read_text()
         resolved = source.index('    wanted = {a.strip() for a in')
         first_use = source.index('if "A" in wanted:')
         early_return = source.index('record["status"] = "CHECK_ONLY_OK"')

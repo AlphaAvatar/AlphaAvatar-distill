@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Train the two P0-assistant arms, then evaluate both with the D0.3 harness.
 
-    /opt/train/bin/python scripts/pod/p0asst_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/p0/p0asst_driver.py --stage all
 
 The intervention is **assistant-only KD with assistant-token normalization**, not
 a removal. `kd_scope: assistant` drops the 606,717 prompt/context positions from
@@ -34,8 +34,8 @@ STATUS = Path("/workspace/p0asst.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 ARMS = {"P0-assistant-sa": "p0_assistant_sa", "P0-assistant-sb": "p0_assistant_sb"}
 
 
@@ -55,7 +55,7 @@ def run(cmd, py=TRAIN_PY):
 
 def stage_train(args):
     for alias, name in ARMS.items():
-        final = REPO / f"artifacts/stage3/{name}/checkpoints/step_001023/model"
+        final = REPO / f"artifacts/stages/stage-3/{name}/checkpoints/step_001023/model"
         if final.is_dir():
             print(f"{alias} already trained; skipping", flush=True)
             mark(f"TRAIN_DONE:{alias}")
@@ -65,7 +65,7 @@ def stage_train(args):
         loaded = json.loads(cfg.read_text())
         assert loaded["loss"]["kd_scope"] == "assistant", loaded["loss"]
         assert "truncate_padding" not in loaded["batch"], loaded["batch"]
-        run(["scripts/training/train_stage3.py", "--config", cfg])
+        run(["scripts/shared/training/train_stage3.py", "--config", cfg])
         mark(f"TRAIN_DONE:{alias}")
     mark("TRAIN_DONE")
 
@@ -77,15 +77,15 @@ def stage_eval(args):
             print(f"{alias} already evaluated; skipping", flush=True)
             mark(f"EVAL_DONE:{alias}")
             continue
-        model = REPO / f"artifacts/stage3/{name}/checkpoints/step_001023/model"
+        model = REPO / f"artifacts/stages/stage-3/{name}/checkpoints/step_001023/model"
         if not model.is_dir():
             mark(f"EVAL_SKIPPED:{alias}:no_checkpoint")
             continue
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", 860000, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", out], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", 860000, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", out / "forced"])

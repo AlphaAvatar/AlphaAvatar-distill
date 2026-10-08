@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write D1's launch-bound readiness record. DERIVED, and AUTHORIZES NOTHING.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/write_d1_launch_readiness.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py \
         --run-id d1_search_20261006_120000 \
         --session-commit <sha> --bundle aad_autoinit_<sha8>.bundle
 
@@ -33,15 +33,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     p = str(REPO_ROOT / extra)
     if p not in sys.path:
         sys.path.insert(0, p)
 
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 SCHEMA = "aadistill.phase_d1.launch_readiness/v1"
 
@@ -81,7 +81,7 @@ def main(argv=None) -> int:
     if not auth_path.is_file():
         raise SystemExit(
             f"no authorization at {auth_rel}; issue it first with "
-            "scripts/autoinit/issue_d1_authorization.py")
+            "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py")
     auth = A.D1Authorization.load(auth_path)
     auth.require_plan(D1S.design_hash(REPO_ROOT))
     auth.require_run_id(args.run_id)
@@ -142,7 +142,7 @@ def main(argv=None) -> int:
             "immediately before it, with the identity it is bound to. It "
             "AUTHORIZES NOTHING: the one-use artifact does that, and this is "
             "what launch_readiness_gate checks the live invocation against."),
-        "_generated_by": "scripts/autoinit/write_d1_launch_readiness.py",
+        "_generated_by": "scripts/stages/stage-1/phase_d1/write_d1_launch_readiness.py",
         "authorizes": "nothing",
         "generated_utc": datetime.now(timezone.utc).isoformat(
             timespec="seconds"),
@@ -258,14 +258,14 @@ def main(argv=None) -> int:
 
 
 def _audit_dirname() -> str:
-    import autoinit_d1_launch as L
+    from stages.phase_d1 import autoinit_d1_launch as L
 
     return L.AUDIT_DIRNAME
 
 
 def _launch_command(run_id: str, commit: str, bundle: str, arm: str) -> str:
     return ("PYTHONPATH=src:scripts .venv/bin/python "
-            "scripts/pod/autoinit_d1_launch.py "
+            "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py "
             f"--scr <scr> --session-commit {commit} --bundle {bundle} "
             f"--run-id {run_id} --arm {arm}")
 
@@ -292,7 +292,7 @@ def _closure_at_commit(commit: str, files) -> str | None:
 
 def _science_inputs() -> dict:
     """What the launcher will scp, and the pin each one is verified against."""
-    import autoinit_d1_launch as L
+    from stages.phase_d1 import autoinit_d1_launch as L
 
     out = {"local_assets": [a.as_env_entry() for a in L.SCIENCE_ASSETS],
            "teacher_revision": D1S.root_teacher_identity(REPO_ROOT)["revision"]}

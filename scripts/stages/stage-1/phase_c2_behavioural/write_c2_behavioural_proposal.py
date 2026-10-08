@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Regenerate the Phase-C2 behavioural grant PROPOSAL. Authorizes nothing.
 
-    python scripts/autoinit/write_c2_behavioural_proposal.py
+    python scripts/stages/stage-1/phase_c2_behavioural/write_c2_behavioural_proposal.py
 
 Every number is DERIVED when this runs — the protocol, the schedule, the six
 arms' identities, the storage residency, the materialization bound and the
@@ -21,15 +21,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _p in ("src", "scripts"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
 
 OUT = ("logs/stages/stage-1/phase_c2_behavioural/plans/"
        "c2_behavioural_grant_proposal.json")
@@ -76,7 +76,7 @@ def project_position(all_in: float) -> dict:
     import subprocess
 
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/consolidate/derive_budget.py"),
+        [sys.executable, str(REPO / "scripts/maintenance/consolidation/derive_budget.py"),
          "--json"],
         capture_output=True, text=True, cwd=str(REPO),
         env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin"})
@@ -87,7 +87,7 @@ def project_position(all_in: float) -> dict:
     spent = float(project["cumulative_spend_usd"])
     cap = float(project["cap_usd"])
     return {
-        "source": "scripts/consolidate/derive_budget.py --json :: project",
+        "source": "scripts/maintenance/consolidation/derive_budget.py --json :: project",
         #: WHICH BALANCE THIS SESSION IS CHECKED AGAINST, stated rather than
         #: left to be inferred. `derive_budget.py` reports four balances that
         #: bind SEPARATELY and do not transfer into one another. This session
@@ -151,7 +151,7 @@ def build() -> dict:
         "schema": "aadistill.autoinit.c2_behavioural_proposal/v3",
         "_contract": (
             "A PROPOSAL for the Phase-C2 behavioural selection. Every figure is "
-            "derived by scripts/autoinit/write_c2_behavioural_proposal.py from "
+            "derived by scripts/stages/stage-1/phase_c2_behavioural/write_c2_behavioural_proposal.py from "
             "the frozen protocol, the committed evidence and the live tree. "
             "AUTHORIZES NOTHING."),
         "authorizes": "nothing",
@@ -449,32 +449,32 @@ def build() -> dict:
 
         "implementation_state": {
             "governance_module":
-                "scripts/experiments/stage-1/phase_c2/behavioural.py — BUILT",
+                "scripts/stages/stage-1/phase_c2/behavioural.py — BUILT",
             "launch_governance":
-                "scripts/experiments/stage-1/phase_c2/behavioural_governance.py — BUILT",
+                "scripts/stages/stage-1/phase_c2/behavioural_governance.py — BUILT",
             "schedule_control_flow":
-                "scripts/experiments/stage-1/phase_c2/behavioural_schedule.py — BUILT",
+                "scripts/stages/stage-1/phase_c2/behavioural_schedule.py — BUILT",
             "decision":
-                "scripts/experiments/stage-1/phase_c2/behavioural_decision.py — BUILT. "
+                "scripts/stages/stage-1/phase_c2/behavioural_decision.py — BUILT. "
                 "Composes C1's paired_differences, decision_inputs, "
                 "stratified_cluster_bootstrap and decide; supplies a C2 "
                 "decision-rule view derived from the frozen protocol rather "
                 "than instantiating a C1IsolationPlan whose invariants do not "
                 "describe this experiment.",
             "screening_scorer":
-                "scripts/autoinit/score_c2_screening.py — BUILT. Reuses C1's "
+                "scripts/stages/stage-1/phase_c2/score_c2_screening.py — BUILT. Reuses C1's "
                 "battery-agnostic scoring loop and result builder unchanged, "
                 "pinned to the C2 screening battery's own identity record. C1's "
                 "entry point keeps its equality pins.",
             "driver":
-                "scripts/pod/autoinit_c2_behavioural_driver.py — BUILT, "
+                "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py — BUILT, "
                 "STANDALONE. Composes train_stage3.py, uncapped_eval.py, the "
                 "two scorers, build_evaluation_package, the admission gate and "
                 "the Phase-C inference. It does NOT subclass C1Driver, which "
                 "would inherit C1's authorization, plan identity, seeds and "
                 "audit roots.",
             "launcher":
-                "scripts/pod/autoinit_c2_behavioural_launch.py — BUILT. Eight "
+                "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py — BUILT. Eight "
                 "$0 prechecks including the campaign continuation gate, a "
                 "budget built from the ONE canonical phase decomposition, a "
                 "deadline derived from the authorization's own rate, GPU "
@@ -482,7 +482,7 @@ def build() -> dict:
                 "destination re-identification and a teardown gate that "
                 "refuses while evidence is unreadable.",
             "continuation":
-                "scripts/experiments/stage-1/phase_c2/behavioural_continuation.py — "
+                "scripts/stages/stage-1/phase_c2/behavioural_continuation.py — "
                 "BUILT. Reads the campaign's verified state from the durable "
                 "destination, derives the remaining work mechanically, and "
                 "builds the manifest a replacement pod reads. The launcher's "
@@ -491,7 +491,7 @@ def build() -> dict:
             "b_binding": "BUILT",
             "storage_derivation": "BUILT",
             "rehearsal":
-                "scripts/experiments/stage-1/phase_c2/tests/ — BUILT. One production-path "
+                "scripts/stages/stage-1/phase_c2/tests/ — BUILT. One production-path "
                 "rehearsal drives the real driver P through D and reaches all "
                 "three terminal states from separate deterministic fixtures, "
                 "replacing only hardware-bound calls.",

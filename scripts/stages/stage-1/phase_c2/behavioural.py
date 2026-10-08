@@ -118,7 +118,7 @@ def candidate_manifest(repo_root: str | Path = REPO_ROOT,
     here, so a behavioural session cannot be pointed at a checkpoint nobody
     reconstructed.
     """
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import replay_specs as RS
 
     selection = RS.load_selection(repo_root)
     store = Path(store)
@@ -199,8 +199,8 @@ def b_binding(repo_root: str | Path = REPO_ROOT, *,
         register_builtin_operators,
     )
 
-    from experiments.phase_c2 import baseline as BL
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2 import baseline as BL
+    from stages.phase_c2.search_space import register_c2_operators
 
     #: EXPLICIT, and before the spec is built. `build_arm_specs` resolves every
     #: impl_id against the registry and B's last step is
@@ -224,8 +224,8 @@ def b_binding(repo_root: str | Path = REPO_ROOT, *,
     return {
         "role": "frozen_c1_treatment_b -- the behavioural incumbent and the only anchor",
         "construction": {
-            "owner": "scripts/experiments/stage-1/phase_c2/baseline.py",
-            "built_by": "experiments.phase_c1.session.build_arm_specs",
+            "owner": "scripts/stages/stage-1/phase_c2/baseline.py",
+            "built_by": "stages.phase_c1.session.build_arm_specs",
             "spec_hash": construction["spec_hash"],
             "expected_spec_hash": BL.B_SPEC_HASH,
             "path_label": construction["path_label"],
@@ -281,8 +281,8 @@ def b_preparation_minutes(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     Bounding by operator kind rather than by implementation is what overpriced
     a replay path by 25 minutes.
     """
-    from experiments.phase_c2 import baseline as BL
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import baseline as BL
+    from stages.phase_c2 import replay_specs as RS
 
     worst = RS.worst_seconds_by_impl(repo_root)
     per_step = []
@@ -422,7 +422,7 @@ def candidate_parameter_count(repo_root: str | Path = REPO_ROOT) -> int:
     All five candidates share an architecture, so the count is one number and a
     disagreement is a defect rather than a choice.
     """
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import replay_specs as RS
 
     selected = RS.load_selection(repo_root)["selected"]
     counts = {int(e["num_parameters"]) for e in selected}
@@ -865,7 +865,7 @@ def session_decomposition(repo_root: str | Path = REPO_ROOT, *,
     is, and a 30-minute recovery reserve — larger than the 20.4 it replaces —
     for the collection that happens after the soft stop.
     """
-    from experiments.phase_c2 import selection_pricing as SP
+    from stages.phase_c2 import selection_pricing as SP
 
     beh = json.loads(
         (Path(repo_root) / PRICING).read_text())["behavioural_selection"]

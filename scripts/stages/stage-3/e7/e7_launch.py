@@ -6,7 +6,7 @@ durable descriptor, a provider-only watchdog that terminates and confirms
 disappearance, continuous log relay, and manifest-driven collection behind the
 teardown gate.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/e7_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/stages/stage-3/e7/e7_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 Four budget layers, in the order they are trusted:
@@ -37,7 +37,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
@@ -194,7 +194,7 @@ class E7:
 
     def launch_watchdog(self) -> Path:
         journal = self.scr / "watchdog.jsonl"
-        cmd = [sys.executable, str(REPO_ROOT / "scripts/pod/watchdog.py"),
+        cmd = [sys.executable, str(REPO_ROOT / "scripts/shared/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.price),
@@ -255,7 +255,7 @@ class E7:
                        capture_output=True, timeout=180)
         if target.run(f"test -s {WS}/hf/token", timeout=60).returncode != 0:
             return "empty_hf_token"
-        subprocess.run(scp + [str(REPO_ROOT / "scripts/pod/e7_setup.sh"),
+        subprocess.run(scp + [str(REPO_ROOT / "scripts/stages/stage-3/e7/e7_setup.sh"),
                               f"root@{host}:{WS}/"], capture_output=True,
                        timeout=180)
 
@@ -327,7 +327,7 @@ class E7:
         spent = self.usd()
         job = start_detached(target, JobSpec(
             job_id="e7_driver", workdir=REPO,
-            command=(f"/opt/train/bin/python scripts/pod/e7_driver.py --stage all "
+            command=(f"/opt/train/bin/python scripts/stages/stage-3/e7/e7_driver.py --stage all "
                      f"--spent-usd {spent:.3f} "
                      f"--soft-stop-usd {self.plan.soft_stop_usd:.2f} "
                      f"--authorized-usd {self.plan.hard_terminate_usd:.2f} "
@@ -342,7 +342,7 @@ class E7:
 
         # -- poll: relay logs, watch markers, watch the provider
         relay_specs = tuple(
-            RelaySpec(f"{REPO}/artifacts/stage3/{a}/train_log.jsonl",
+            RelaySpec(f"{REPO}/artifacts/stages/stage-3/{a}/train_log.jsonl",
                       f"{a}.train_log.jsonl", required=False) for a in ARMS
         ) + (RelaySpec(RUN_LOG, "e7_run.log", required=False),
              RelaySpec(STATUS, "e7.status", required=False))
@@ -388,7 +388,7 @@ class E7:
     # -- 5. collect --------------------------------------------------------
     def collect_and_teardown(self, target, host, scp, job) -> bool:
         cc = (f"cd {REPO} && PYTHONPATH={REPO}/src /opt/train/bin/python "
-              "scripts/pod/collect_artifacts.py")
+              "scripts/shared/pod/collect_artifacts.py")
         # The session log and status live outside the artifacts tree; copy them
         # in so every spec pattern is a plain relative glob.
         target.run(f"mkdir -p {REPO}/artifacts/audit/e7_session && "
@@ -431,7 +431,7 @@ class E7:
         # Checkpoints: the only artifacts that cannot be regenerated without
         # paying again. Time-boxed, hashed pod-side first.
         ck = target.run(
-            f"cd {REPO}/artifacts/stage3 && find e7_*_r1600k_*/checkpoints/{STEP} "
+            f"cd {REPO}/artifacts/stages/stage-3 && find e7_*_r1600k_*/checkpoints/{STEP} "
             f"-type f \\( -name '*.safetensors' -o -name '*.json' -o -name "
             f"'*.jinja' \\) | sort | xargs sha256sum", timeout=900)
         (store / "checkpoint_hashes.txt").write_text(ck.stdout)
@@ -443,7 +443,7 @@ class E7:
                 ["timeout", f"{self.a.ckpt_fetch_limit_min}m", "scp", "-r",
                  "-P", str(target.port), "-o", "StrictHostKeyChecking=no",
                  "-o", "UserKnownHostsFile=/dev/null",
-                 f"root@{host}:{REPO}/artifacts/stage3/{arm}/checkpoints/{STEP}",
+                 f"root@{host}:{REPO}/artifacts/stages/stage-3/{arm}/checkpoints/{STEP}",
                  str(dest)], capture_output=True, timeout=None)
             fetched.append({"arm": arm, "rc": rc.returncode})
             self.say(f"  checkpoint {arm}: rc={rc.returncode}")
@@ -490,7 +490,7 @@ class E7:
         for arm in ARMS:
             p = self.scr / "relay" / f"{arm}.train_log.jsonl"
             events[arm] = sum(1 for _ in p.open()) if p.is_file() else 0
-        incomplete = tuple(f"artifacts/stage3/{a}/train_log.jsonl" for a in ARMS)
+        incomplete = tuple(f"artifacts/stages/stage-3/{a}/train_log.jsonl" for a in ARMS)
         decision = evaluate_teardown(
             {"training_complete": False, "evaluation_complete": False,
              "artifact_manifest_created": False, "required_files_present": False,

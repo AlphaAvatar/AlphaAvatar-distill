@@ -63,7 +63,7 @@ retire_chain() {
  "cost": {"actual_usd": 0.0, "_why_zero": "no pod was ever created, so nothing billed"},
  "final_provider_state": "nothing to tear down; no resource was created",
  "_chain_disposition": "CONSUMED even at \$0 (P12.1): the authorization is one-use and must not be reused. The incrementing attempt number is not a scope expansion.",
- "_written_by": "scripts/pod/c3_acquire.sh at the moment the chain was spent"
+ "_written_by": "scripts/stages/stage-1/phase_c3/c3_acquire.sh at the moment the chain was spent"
 }
 EOF
   say "attempt${n}: chain retired at \$0 (${gpu})"
@@ -158,19 +158,19 @@ PY
      "logs/stages/stage-1/phase_c3/runs/attempt$N/governance/grant.json"
   git add -A >/dev/null 2>&1 && git commit -q -m "attempt$N: grant and live pricing on $GPU" >/dev/null 2>&1
 
-  .venv/bin/python scripts/autoinit/record_pod_environment.py --experiment phase_c3 \
+  .venv/bin/python scripts/shared/pod/record_pod_environment.py --experiment phase_c3 \
       --run-id "attempt$N" --stage-id 1 --kind launch_bound >> "$LOG" 2>&1 \
       || { say "attempt$N: readiness sweep failed"; continue; }
   git add -A >/dev/null 2>&1 && git commit -q -m "attempt$N: launch-bound readiness" >/dev/null 2>&1
 
-  .venv/bin/python scripts/autoinit/issue_c3_authorization.py \
+  .venv/bin/python scripts/stages/stage-1/phase_c3/issue_c3_authorization.py \
       --grant "logs/stages/stage-1/phase_c3/runs/attempt$N/governance/grant.json" \
       --out "logs/stages/stage-1/phase_c3/runs/attempt$N/governance/authorization.json" \
       >> "$LOG" 2>&1 || { say "attempt$N: issue refused"; continue; }
   git add -A >/dev/null 2>&1 && git commit -q -m "attempt$N: one-use authorization" >/dev/null 2>&1
 
   SC=$(git rev-parse HEAD)
-  .venv/bin/python scripts/autoinit/stage_c1_bundle.py --session-commit "$SC" \
+  .venv/bin/python scripts/stages/stage-1/phase_c1/stage_c1_bundle.py --session-commit "$SC" \
       --out "logs/stages/stage-1/phase_c3/runs/attempt$N/governance/bundle.json" \
       >> "$LOG" 2>&1 || { say "attempt$N: bundle failed"; continue; }
   git add -A >/dev/null 2>&1 && git commit -q -m "attempt$N: staged bundle" >/dev/null 2>&1
@@ -179,7 +179,7 @@ PY
   BN="aad_autoinit_$(echo "$SC" | cut -c1-8).bundle"
   SCR="$BASE/c3_attempt$N"; mkdir -p "$SCR"
   say "attempt$N: launching on $GPU, commit $SC, bundle $BN"
-  .venv/bin/python -u scripts/pod/autoinit_c3_launch.py --scr "$SCR" \
+  .venv/bin/python -u scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py --scr "$SCR" \
       --run-id "attempt$N" --session-commit "$SC" --bundle "$BN" \
       --gpu "$GPU" --max-price "$PRICE" --host-draws 3 \
       > "$SCR/launcher.log" 2>&1

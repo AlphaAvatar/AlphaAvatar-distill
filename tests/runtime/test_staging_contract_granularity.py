@@ -43,14 +43,14 @@ from aadistill.runtime.staging_contract import (
 def repo(tmp_path):
     """A repository-shaped tree with a directory asset, a file asset, and a
     destination holding both a staged and an unstaged sibling."""
-    (tmp_path / "artifacts/stage1/corpus_v1").mkdir(parents=True)
-    (tmp_path / "artifacts/stage1/corpus_v1/items.jsonl").write_text("{}\n")
-    (tmp_path / "artifacts/stage1/corpus_v1/nested").mkdir()
-    (tmp_path / "artifacts/stage1/corpus_v1/nested/more.json").write_text("{}")
-    (tmp_path / "artifacts/stage1/plan.json").write_text('{"leaves": []}')
-    (tmp_path / "artifacts/stage2/ckpt").mkdir(parents=True)
-    (tmp_path / "artifacts/stage2/ckpt/model.safetensors").write_bytes(b"w")
-    (tmp_path / "artifacts/stage2/ckpt/config.json").write_text("{}")
+    (tmp_path / "artifacts/stages/stage-1/corpus_v1").mkdir(parents=True)
+    (tmp_path / "artifacts/stages/stage-1/corpus_v1/items.jsonl").write_text("{}\n")
+    (tmp_path / "artifacts/stages/stage-1/corpus_v1/nested").mkdir()
+    (tmp_path / "artifacts/stages/stage-1/corpus_v1/nested/more.json").write_text("{}")
+    (tmp_path / "artifacts/stages/stage-1/plan.json").write_text('{"leaves": []}')
+    (tmp_path / "artifacts/stages/stage-2/v0/ckpt").mkdir(parents=True)
+    (tmp_path / "artifacts/stages/stage-2/v0/ckpt/model.safetensors").write_bytes(b"w")
+    (tmp_path / "artifacts/stages/stage-2/v0/ckpt/config.json").write_text("{}")
     return tmp_path
 
 
@@ -63,40 +63,40 @@ class TestALocalAssetStagesWhateverItsSourceIs:
 
     def test_a_directory_asset_contributes_its_whole_tree(self, repo):
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/corpus_v1", "corpus_v1",
-                       "artifacts/stage1"),))
+            LocalAsset("artifacts/stages/stage-1/corpus_v1", "corpus_v1",
+                       "artifacts/stages/stage-1"),))
         assert staged_files(contract, repo) == {
-            "artifacts/stage1/corpus_v1/items.jsonl",
-            "artifacts/stage1/corpus_v1/nested/more.json",
+            "artifacts/stages/stage-1/corpus_v1/items.jsonl",
+            "artifacts/stages/stage-1/corpus_v1/nested/more.json",
         }
 
     def test_a_FILE_asset_contributes_itself(self, repo):
         """The regression. This returned the empty set."""
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/plan.json", "plan.json",
-                       "artifacts/stage1"),))
-        assert staged_files(contract, repo) == {"artifacts/stage1/plan.json"}
+            LocalAsset("artifacts/stages/stage-1/plan.json", "plan.json",
+                       "artifacts/stages/stage-1"),))
+        assert staged_files(contract, repo) == {"artifacts/stages/stage-1/plan.json"}
 
     def test_a_file_asset_does_not_drag_in_its_directory(self, repo):
-        """`artifacts/stage1/` also holds `corpus_v1/`, which this session does
+        """`artifacts/stages/stage-1/` also holds `corpus_v1/`, which this session does
         not stage. Staging a file must not make its parent present."""
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/plan.json", "plan.json",
-                       "artifacts/stage1"),))
+            LocalAsset("artifacts/stages/stage-1/plan.json", "plan.json",
+                       "artifacts/stages/stage-1"),))
         staged = staged_files(contract, repo)
-        assert not any(p.startswith("artifacts/stage1/corpus_v1")
+        assert not any(p.startswith("artifacts/stages/stage-1/corpus_v1")
                        for p in staged)
 
     def test_both_kinds_together(self, repo):
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/corpus_v1", "corpus_v1",
-                       "artifacts/stage1"),
-            LocalAsset("artifacts/stage1/plan.json", "plan.json",
-                       "artifacts/stage1"),))
+            LocalAsset("artifacts/stages/stage-1/corpus_v1", "corpus_v1",
+                       "artifacts/stages/stage-1"),
+            LocalAsset("artifacts/stages/stage-1/plan.json", "plan.json",
+                       "artifacts/stages/stage-1"),))
         assert staged_files(contract, repo) == {
-            "artifacts/stage1/corpus_v1/items.jsonl",
-            "artifacts/stage1/corpus_v1/nested/more.json",
-            "artifacts/stage1/plan.json",
+            "artifacts/stages/stage-1/corpus_v1/items.jsonl",
+            "artifacts/stages/stage-1/corpus_v1/nested/more.json",
+            "artifacts/stages/stage-1/plan.json",
         }
 
     def test_an_asset_whose_source_is_absent_stages_nothing(self, repo):
@@ -104,8 +104,8 @@ class TestALocalAssetStagesWhateverItsSourceIs:
         that does not hold its assets, and the launcher's own precheck is what
         refuses a missing one before anything is priced."""
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/not_here.json", "not_here.json",
-                       "artifacts/stage1"),))
+            LocalAsset("artifacts/stages/stage-1/not_here.json", "not_here.json",
+                       "artifacts/stages/stage-1"),))
         assert staged_files(contract, repo) == set()
 
 
@@ -116,18 +116,18 @@ class TestARelayInputStagesOneFileAndNotItsDirectory:
 
     def test_only_the_named_file_is_staged(self, repo):
         contract = _contract(relay_inputs=(
-            RelayInput("transfer/model.safetensors", "artifacts/stage2/ckpt"),))
+            RelayInput("transfer/model.safetensors", "artifacts/stages/stage-2/v0/ckpt"),))
         staged = staged_files(contract, repo)
-        assert "artifacts/stage2/ckpt/config.json" not in staged, (
+        assert "artifacts/stages/stage-2/v0/ckpt/config.json" not in staged, (
             "a relay destination is being modelled as wholly present; its "
             "unstaged siblings must stay hidden")
 
     def test_the_sibling_in_a_relay_destination_stays_hidden(self, repo):
         contract = _contract(relay_inputs=(
-            RelayInput("transfer/model.safetensors", "artifacts/stage2/ckpt"),))
+            RelayInput("transfer/model.safetensors", "artifacts/stages/stage-2/v0/ckpt"),))
         staged = staged_files(contract, repo)
         assert len([p for p in staged
-                    if p.startswith("artifacts/stage2/ckpt/")]) <= 1
+                    if p.startswith("artifacts/stages/stage-2/v0/ckpt/")]) <= 1
 
 
 class TestTheDigestCoversTheDeclarationAndNotTheFilesystem:
@@ -137,31 +137,31 @@ class TestTheDigestCoversTheDeclarationAndNotTheFilesystem:
 
     def test_adding_a_file_under_a_staged_tree_does_not_move_the_digest(
             self, repo):
-        assets = (LocalAsset("artifacts/stage1/corpus_v1", "corpus_v1",
-                             "artifacts/stage1"),)
+        assets = (LocalAsset("artifacts/stages/stage-1/corpus_v1", "corpus_v1",
+                             "artifacts/stages/stage-1"),)
         before = contract_digest(_contract(local_assets=assets))
-        (repo / "artifacts/stage1/corpus_v1/extra.jsonl").write_text("{}\n")
+        (repo / "artifacts/stages/stage-1/corpus_v1/extra.jsonl").write_text("{}\n")
         after = contract_digest(_contract(local_assets=assets))
         assert before == after
 
     def test_declaring_a_different_asset_does_move_it(self, repo):
         a = contract_digest(_contract(local_assets=(
-            LocalAsset("artifacts/stage1/corpus_v1", "corpus_v1",
-                       "artifacts/stage1"),)))
+            LocalAsset("artifacts/stages/stage-1/corpus_v1", "corpus_v1",
+                       "artifacts/stages/stage-1"),)))
         b = contract_digest(_contract(local_assets=(
-            LocalAsset("artifacts/stage1/plan.json", "plan.json",
-                       "artifacts/stage1"),)))
+            LocalAsset("artifacts/stages/stage-1/plan.json", "plan.json",
+                       "artifacts/stages/stage-1"),)))
         assert a != b
 
     def test_the_declared_assets_appear_in_the_contract_body(self):
         contract = _contract(local_assets=(
-            LocalAsset("artifacts/stage1/plan.json", "plan.json",
-                       "artifacts/stage1"),))
+            LocalAsset("artifacts/stages/stage-1/plan.json", "plan.json",
+                       "artifacts/stages/stage-1"),))
         assert contract["local_assets"] == [{
-            "repo_path": "artifacts/stage1/plan.json",
+            "repo_path": "artifacts/stages/stage-1/plan.json",
             "dest_name": "plan.json",
-            "install_to": "artifacts/stage1",
-            "staged_tree": "artifacts/stage1/plan.json",
+            "install_to": "artifacts/stages/stage-1",
+            "staged_tree": "artifacts/stages/stage-1/plan.json",
         }]
 
 

@@ -5,7 +5,7 @@ experiment-specific number taken out of it. Nothing here names an operator, a
 calibration profile, a model family, a GPU, a price, a session phase or a
 repository path: an instance supplies those and this module does the arithmetic.
 
-It was extracted from `experiments.phase_c2.search_space` when a **second**
+It was extracted from `stages.phase_c2.search_space` when a **second**
 consumer appeared — the C2 full joint re-search — and not before. The machinery
 is identical; what moved is ownership. `phase_c2.search_space` remains the
 Search-1 instance and re-exports these names, so its own constants, its

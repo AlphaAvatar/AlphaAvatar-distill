@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 4 comparison: does P2-CE-heavy improve when scaled 0.86M → 1.60M?
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e4.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e4/analyze_e4.py \
         --out artifacts/audit/e4_comparison.json
 
 Two questions, kept separate because they have different controls:
@@ -29,7 +29,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -37,7 +37,7 @@ from aadistill.evaluation.paired_stats import (  # noqa: E402
     joint_rate, mcnemar_counts, paired_bootstrap_ci,
 )
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from reevaluate_stage23 import three_mode_arm  # noqa: E402
+from shared.evaluation.reevaluate_stage23 import three_mode_arm  # noqa: E402
 
 #: The resampling seed this analysis reports under. Stated here
 #: because a statistics mechanism should not carry one study's seed.
@@ -47,19 +47,19 @@ AUDIT = REPO_ROOT / "artifacts/audit"
 
 # alias -> (three-mode dir, training log or None, movement label or None)
 ARMS = {
-    "P2-0.86M-sa": ("P2-ceheavy-sa", "artifacts/stage3/p2_ceheavy_sa/train_log.jsonl",
+    "P2-0.86M-sa": ("P2-ceheavy-sa", "artifacts/stages/stage-3/p2_ceheavy_sa/train_log.jsonl",
                     "A0-P2-sa"),
-    "P2-0.86M-sb": ("P2-ceheavy-sb", "artifacts/stage3/p2_ceheavy_sb/train_log.jsonl",
+    "P2-0.86M-sb": ("P2-ceheavy-sb", "artifacts/stages/stage-3/p2_ceheavy_sb/train_log.jsonl",
                     "A0-P2-sb"),
     "P1-1.60M-sa": ("P1-1600k-sa",
-                    "artifacts/stage3/rescued/_relay/e1_r1600k_sa_pca/train_log.jsonl",
+                    "artifacts/stages/stage-3/rescued/_relay/e1_r1600k_sa_pca/train_log.jsonl",
                     None),
     "P1-1.60M-sb": ("P1-1600k-sb",
-                    "artifacts/stage3/rescued/_relay/e1_r1600k_sb_pca/train_log.jsonl",
+                    "artifacts/stages/stage-3/rescued/_relay/e1_r1600k_sb_pca/train_log.jsonl",
                     None),
-    "P2-1.60M-sa": ("E4-P2-1600k-sa", "artifacts/stage3/e4_p2_r1600k_sa/train_log.jsonl",
+    "P2-1.60M-sa": ("E4-P2-1600k-sa", "artifacts/stages/stage-3/e4_p2_r1600k_sa/train_log.jsonl",
                     "E4-P2-1600k-sa"),
-    "P2-1.60M-sb": ("E4-P2-1600k-sb", "artifacts/stage3/e4_p2_r1600k_sb/train_log.jsonl",
+    "P2-1.60M-sb": ("E4-P2-1600k-sb", "artifacts/stages/stage-3/e4_p2_r1600k_sb/train_log.jsonl",
                     "E4-P2-1600k-sb"),
 }
 FAMILIES = {"P2-0.86M": ["P2-0.86M-sa", "P2-0.86M-sb"],

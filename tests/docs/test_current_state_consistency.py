@@ -882,7 +882,7 @@ class TestTheBlockerFieldsAgreeWithTheirOwner:
 
         repo = Path(__file__).resolve().parents[2]
         sys.path.insert(0, str(repo / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         design = self._design()
         open_ = set(design["open_blockers"])

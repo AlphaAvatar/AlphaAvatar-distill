@@ -42,10 +42,10 @@ for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-import autoinit_c2_behavioural_driver as D
-from experiments.phase_c2 import behavioural_decision as BD
-from experiments.phase_c2 import behavioural_governance as BG
-from experiments.phase_c2 import behavioural_schedule as SCH
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_driver as D
+from stages.phase_c2 import behavioural_decision as BD
+from stages.phase_c2 import behavioural_governance as BG
+from stages.phase_c2 import behavioural_schedule as SCH
 
 
 N_PROMPTS, N_SCORABLE = 950, 850
@@ -261,7 +261,7 @@ def test_the_confirmation_passes_c2s_bootstrap_seed_to_the_bootstrap(
     guards — left the test green. So it now intercepts the function and reads
     the keyword it actually received.
     """
-    from experiments.phase_c1 import isolation
+    from stages.phase_c1 import isolation
 
     real = isolation.stratified_cluster_bootstrap
     seen: list = []
@@ -363,7 +363,7 @@ def test_the_launcher_builds_a_command_this_driver_can_parse(tmp_path):
     A launcher that emits a flag the driver does not define, or omits a
     required one, fails at the first second of a paid session.
     """
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     class _Ctx:
         image_digest = "sha256:abc"
@@ -599,7 +599,7 @@ def _unit(unit_id, *, kind="probe", identity=True):
 
 def test_unreadable_evidence_is_unknown_and_blocks_teardown(tmp_path):
     """"I found no probes" and "no probes were trained" are different findings."""
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     ctx = _Ctx(tmp_path, [])
     (tmp_path / "relay" / "c2_behavioural_evidence.json").unlink()
@@ -610,7 +610,7 @@ def test_unreadable_evidence_is_unknown_and_blocks_teardown(tmp_path):
 
 def test_no_probes_trained_permits_teardown(tmp_path):
     """An early failure legitimately produced none; demanding one would block."""
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     ctx = _Ctx(tmp_path, [_unit("arm0", kind="arm_initialization")])
     assert L.finished_probes(ctx) == []
@@ -619,7 +619,7 @@ def test_no_probes_trained_permits_teardown(tmp_path):
 
 
 def test_a_finished_probe_still_on_the_pod_blocks_teardown(tmp_path):
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     ctx = _Ctx(tmp_path, [_unit("p1"), _unit("p2")])
     ok, why = L.probes_secured(ctx, [
@@ -636,7 +636,7 @@ def test_a_probe_with_no_announced_identity_is_preserved_not_dropped(tmp_path):
     reported as unverifiable — and they cannot block teardown forever, because
     an identity the driver never computed can never be produced by a retry.
     """
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     ctx = _Ctx(tmp_path, [_unit("p1", identity=False)])
     assert [u["unit_id"] for u in L.finished_probes(ctx)] == ["p1"]
@@ -649,7 +649,7 @@ def test_a_probe_with_no_announced_identity_is_preserved_not_dropped(tmp_path):
 
 def test_a_digest_mismatch_is_not_counted_as_secured(tmp_path):
     """Arrival is not verification."""
-    import autoinit_c2_behavioural_launch as L
+    from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L
 
     ctx = _Ctx(tmp_path, [_unit("p1")])
     ok, why = L.probes_secured(ctx, [

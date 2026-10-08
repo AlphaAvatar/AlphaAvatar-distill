@@ -22,7 +22,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import missing_from_tree as _missing  # noqa: E402
+from shared.historical_declarations import missing_from_tree as _missing  # noqa: E402
 
 _DECLARED_MOVED = _missing((
     "src/aadistill/initialization/operators/attention.py",
@@ -49,9 +49,9 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from stages.phase_a.plan import PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from stages.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
 
 PREREG = REPO / "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json"
 
@@ -85,7 +85,7 @@ def test_the_phase_a_harness_is_not_widened_and_phase_b_has_its_own():
 def test_the_source_set_covers_what_a_paid_P2_SEARCH_actually_executes():
     covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
     for required in (
-            "scripts/autoinit/phase_a_search.py",          # the entrypoint
+            "scripts/stages/stage-1/phase_a/phase_a_search.py",          # the entrypoint
             "src/aadistill/initialization/planning/search.py",            # the beam engine
             "src/aadistill/initialization/planning/ranking.py",           # objectives and schedule
             "src/aadistill/initialization/calibration/profiles.py",       # profiles and resolve()
@@ -94,7 +94,7 @@ def test_the_source_set_covers_what_a_paid_P2_SEARCH_actually_executes():
             "src/aadistill/initialization/adapters/qwen3.py",    # the family boundary
             "src/aadistill/initialization/planning/metrics.py",           # state evaluation
             "src/aadistill/initialization/specs/state.py",             # state identity
-            "scripts/experiments/stage-1/phase_b/plan.py"):          # the plan itself
+            "scripts/stages/stage-1/phase_b/plan.py"):          # the plan itself
         assert required in covered, required
     # Every concrete operator that can execute, not just the base class.
     for operator in ("attention", "composite", "depth", "ffn", "width"):
@@ -113,7 +113,7 @@ def test_the_set_is_provenance_closure_not_a_maximal_file_list():
     covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
     # The pod consumes a materialized mixture; it never runs the builder.
     assert "src/aadistill/initialization/statistics/reweight.py" not in covered
-    assert "scripts/data/build_reasoning_heavy_calibration.py" not in covered
+    assert "scripts/shared/data/build_reasoning_heavy_calibration.py" not in covered
     # The probe path is bound elsewhere, and the record says by what.
     # `recovery.py` is inside RECOVERY_SCORING_FILES_V2, which the driver binds
     # at stage 0, so a change to the selection rules it holds is still detected.
@@ -134,20 +134,20 @@ def test_the_set_is_provenance_closure_not_a_maximal_file_list():
 def test_the_driver_and_launcher_now_EXIST_and_are_covered():
     """The blocker is closed. The field stays so a future gap fails closed."""
     covered = set(PHASE_B_EXECUTABLE_SOURCE_FILES_V1)
-    for executable in ("scripts/pod/autoinit_phase_b_driver.py",
-                       "scripts/pod/autoinit_phase_b_launch.py",
+    for executable in ("scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py",
+                       "scripts/stages/stage-1/phase_b/autoinit_phase_b_launch.py",
                        # The parent class: every inherited stage a Phase-B run
                        # executes lives here, so it is Phase-B runtime too.
-                       "scripts/pod/autoinit_phase_a_driver.py",
-                       "scripts/pod/autoinit_phase_a_launch.py",
+                       "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+                       "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
                        # Shelled out to, so no import closure reaches them.
-                       "scripts/pod/autoinit_preflight_setup.sh",
-                       "scripts/pod/watchdog.py",
-                       "scripts/pod/collect_artifacts.py",
-                       "scripts/pod/autoinit_engine_probe.py",
-                       "scripts/autoinit/verify_frozen_assets.py",
+                       "scripts/shared/pod/autoinit_preflight_setup.sh",
+                       "scripts/shared/pod/watchdog.py",
+                       "scripts/shared/pod/collect_artifacts.py",
+                       "scripts/shared/pod/autoinit_engine_probe.py",
+                       "scripts/shared/pod/verify_frozen_assets.py",
                        # Stage 0 imports build_frozen_plan from it.
-                       "scripts/autoinit/write_preregistration.py",
+                       "scripts/stages/stage-1/phase_a/write_preregistration.py",
                        # The session machinery the launcher runs.
                        "src/aadistill/infrastructure/session_runner.py",
                        "src/aadistill/infrastructure/session_prechecks.py"):
@@ -394,7 +394,7 @@ def test_completed_phase_b_drift_is_historically_accounted_for():
     and `test_nonadditive_historical_amendment_does_not_make_phase_b_launchable`
     asks whether it is LAUNCHABLE. The answers are yes and no.
     """
-    from experiments.phase_b.post_freeze import historical_accounted_for
+    from stages.phase_b.post_freeze import historical_accounted_for
 
     prereg = json.loads(PREREG.read_text())
     ok, why = historical_accounted_for(prereg["executable_source"]["digest"],
@@ -412,7 +412,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
     correct answer, because that preregistration describes code this tree no
     longer contains.
     """
-    from experiments.phase_b.post_freeze import accounted_for
+    from stages.phase_b.post_freeze import accounted_for
 
     prereg = json.loads(PREREG.read_text())
     frozen = prereg["executable_source"]["digest"]
@@ -429,7 +429,7 @@ def test_nonadditive_historical_amendment_does_not_make_phase_b_launchable():
 @pytest.mark.skipif(not PREREG.is_file(), reason="preregistration not emitted")
 def test_the_historical_ledger_cannot_be_read_as_launch_permission():
     """Belt and braces: the ledger says it of itself, in a field."""
-    from experiments.phase_b.post_freeze import HISTORICAL_LEDGER_PATH
+    from stages.phase_b.post_freeze import HISTORICAL_LEDGER_PATH
 
     led = json.loads((REPO / HISTORICAL_LEDGER_PATH).read_text())
     assert led["consumed_by_a_paid_launch_gate"] is False
@@ -438,7 +438,7 @@ def test_the_historical_ledger_cannot_be_read_as_launch_permission():
         assert e["phase_b_science_changed"] is False
         assert e["historical_only"] is True
 
-    gate_src = (REPO / "scripts/pod/autoinit_phase_b_launch.py").read_text()
+    gate_src = (REPO / "scripts/stages/stage-1/phase_b/autoinit_phase_b_launch.py").read_text()
     assert "historical_accounted_for" not in gate_src
     assert HISTORICAL_LEDGER_PATH not in gate_src
 
@@ -478,7 +478,7 @@ def test_the_drift_rule_refuses_everything_it_should():
     """Guards the guard: an allowance that allows everything is not a gate."""
     import json as _json
 
-    from experiments.phase_b.post_freeze import NOTE_PATH, accounted_for
+    from stages.phase_b.post_freeze import NOTE_PATH, accounted_for
 
     note_path = REPO / NOTE_PATH
     note = _json.loads(note_path.read_text())

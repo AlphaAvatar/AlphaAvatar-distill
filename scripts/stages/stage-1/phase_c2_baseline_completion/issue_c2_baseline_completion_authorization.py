@@ -2,11 +2,11 @@
 """Issue the baseline-completion authorization from a maintainer grant.
 
     PYTHONPATH=src:scripts python \
-      scripts/autoinit/issue_c2_baseline_completion_authorization.py \
+      scripts/stages/stage-1/phase_c2_baseline_completion/issue_c2_baseline_completion_authorization.py \
       --grant <path> --run-id attempt5
 
 Thin by design. Everything that DECIDES anything lives in
-`experiments.phase_c2.baseline_completion_authorization`, so the CLI and a test
+`stages.phase_c2.baseline_completion_authorization`, so the CLI and a test
 candidate are refused for the same reasons by the same code. Two effects stay
 here because they are effects rather than computations: refusing a dirty tree,
 and reading the clock.
@@ -33,13 +33,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
-from experiments.phase_c2 import baseline_completion as BC  # noqa: E402
-from experiments.phase_c2.baseline_completion_authorization import (  # noqa: E402
+from stages.phase_c2 import baseline_completion as BC  # noqa: E402
+from stages.phase_c2.baseline_completion_authorization import (  # noqa: E402
     CompletionAuthorizationRefused, build_payload, load_config,
 )
 
@@ -53,7 +53,7 @@ def git(*args: str) -> str:
 
 
 def authorization_path_for(run_id: str, stage_id: str) -> str:
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir('phase_c2_baseline_completion', run_id, stage_id)}"
             "/governance/authorization.json")

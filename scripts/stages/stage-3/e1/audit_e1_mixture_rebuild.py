@@ -2,16 +2,16 @@
 """Rebuild Experiment 1's token ladder from the source corpus and verify it is
 identical to the historical artifact, rung by rung and seed by seed.
 
-    PYTHONPATH=src python scripts/data/audit_e1_mixture_rebuild.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e1/audit_e1_mixture_rebuild.py \
         --rebuilt artifacts/audit/ladder_uniform_rebuild \
-        --historical artifacts/stage3/ladder_uniform_probe \
+        --historical artifacts/shared/instruments/ladder_uniform_probe \
         --seeds 20260726 20260801 \
         --out artifacts/audit/e1_mixture_rebuild.json
 
 Why this exists
 ---------------
 `interleave`, `order_blocks` and `block_token_mix` moved from
-`scripts/data/build_token_ladder.py` into `src/aadistill/data/mixture.py` on
+`scripts/shared/data/build_token_ladder.py` into `src/aadistill/data/mixture.py` on
 2026-08-04. Those three functions decide the session order, the block order and
 therefore the contents of every rung of the ladder Experiment 1 trained on. If
 the move perturbed any of them, all 25 Experiment 1 arms would be describing a
@@ -51,7 +51,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402

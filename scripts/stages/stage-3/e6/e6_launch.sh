@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Dev-box orchestrator for the Experiment 6 pod: evaluation only, six arms.
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… nohup bash scripts/pod/e6_launch.sh &
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… nohup bash scripts/stages/stage-3/e6/e6_launch.sh &
 #
 # Nothing trains, so the session is short and the budget layers are tighter than
 # any previous run:
@@ -194,7 +194,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e6_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/e6/e6_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 # The two sb high-rung checkpoints are dev-box-only: the relay never received
 # them and its LFS quota, which deletion cannot reclaim, cannot take 4.8 GB.
@@ -267,7 +267,7 @@ GATE_CEILING=$(echo "$BACKSTOP_MINUTES/60*$MAX_PRICE" | bc -l)
 say "driver budget: \$$(printf '%.2f' "$SPENT_AT_DRIVER_START") already billed, \
 gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the \$$AUTHORIZED_USD authorization)"
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e6_driver.py --stage all \
+  scripts/stages/stage-3/e6/e6_driver.py --stage all \
   --spent-usd $(printf '%.3f' "$SPENT_AT_DRIVER_START") \
   --authorized-usd $(printf '%.2f' "$GATE_CEILING") \
   > /workspace/e6_run.log 2>&1 < /dev/null & \
@@ -291,10 +291,10 @@ if [ ! -f "$SCR/ckpt_upload_ok" ]; then
 else
   say "dev-box checkpoints uploaded and decompressed — $(cost)"
   if $SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python \
-      scripts/pod/e6_stage_checkpoints.py \
+      scripts/stages/stage-3/e6/e6_stage_checkpoints.py \
         --registration logs/stages/stage-3/e6/analyses/e6_registration.json --relay-dest /workspace/ckpt \
         --devbox-src /workspace/ckpt_local \
-        --init artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+        --init artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         --out artifacts/audit/e6_checkpoint_manifest.json" >>"$LOG" 2>&1; then
     say "all six checkpoints staged and hash-verified — $(cost)"
     $SSH "root@$HOST" 'touch /workspace/ckpt_local/STAGED' >>"$LOG" 2>&1

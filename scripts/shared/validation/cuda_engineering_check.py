@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Execute the migrated initialization operators on a real CUDA device.
 
-    PYTHONPATH=src:scripts python scripts/validation/cuda_engineering_check.py \
+    PYTHONPATH=src:scripts python scripts/shared/validation/cuda_engineering_check.py \
         --config configs/validation/cuda_engineering.json --run-id <id>
 
 This is ENGINEERING validation. It answers one question -- do the operators, as
@@ -41,7 +41,7 @@ import sys
 import traceback
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -261,7 +261,7 @@ def run_suffix_case(cfg: dict, *, device: str, dtype_name: str,
         write_suffix_execution_record)
 
     sys.path.insert(0, str(Path(__file__).resolve().parent))
-    from device_observations import observing
+    from shared.validation.device_observations import observing
 
     case = cfg["suffix_case"]
     work = root / f"suffix_{geometry['geometry_id']}"

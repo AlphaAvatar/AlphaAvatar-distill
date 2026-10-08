@@ -1,6 +1,6 @@
 """C3's pod-environment readiness: which record, which non-harness files.
 
-The generic recorder (`scripts/autoinit/record_pod_environment.py`) drives the
+The generic recorder (`scripts/shared/pod/record_pod_environment.py`) drives the
 real `simulate_pod_env.sh` — empty HOME, isolated `HF_HOME`, synthetic
 `HF_TOKEN`, gitignored artifacts hidden, the session's own pytest selection —
 and writes the run's readiness record. Everything experiment-specific arrives
@@ -33,7 +33,7 @@ from aadistill.runtime import pod_environment as _runtime
 #: preflight directory's runtime contract: the launcher/driver CLI seam, the
 #: imports stage H needs after ten hours of training, the two digest gates, the
 #: three-arm agreement and a real GEMM.
-RUNTIME_CONTRACT_MODULE = "scripts/experiments/stage-1/phase_c3/tests/test_c3_runtime_contract.py"
+RUNTIME_CONTRACT_MODULE = "scripts/stages/stage-1/phase_c3/tests/test_c3_runtime_contract.py"
 
 C3_READINESS_GROUPS = ReadinessGroups(
     expected_skips={},
@@ -62,7 +62,7 @@ POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
     #: The simulator itself. It is what the record's command field ran, and a
     #: readiness record whose command was typed by hand is a claim rather than
     #: evidence.
-    "scripts/pod/simulate_pod_env.sh",
+    "scripts/shared/pod/simulate_pod_env.sh",
     #: The suite's fixtures. A conftest change can turn a passing pod
     #: selection red without touching a single test the harness measures.
     "tests/conftest.py",
@@ -77,14 +77,14 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
     """Where THIS run's readiness record lives, repository-relative."""
     if not run_id:
         return RECORD_POINTER
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir('phase_c3', run_id, stage_id or '1')}/governance/readiness.json"
 
 
 def c3_harness_digest_value(repo_root: str = ".") -> str:
     """C3's harness digest, as the contract's callable wants it."""
-    from experiments.phase_c3.authorization import c3_harness_digest
+    from stages.phase_c3.authorization import c3_harness_digest
 
     return c3_harness_digest(repo_root)["digest"]
 
@@ -137,12 +137,12 @@ def c3_sweep_contract(run_id: str | None = None,
     from aadistill.runtime.pod_environment import SweepContract
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c1.bundle import canonical_bundle_name
+        from stages.phase_c1.bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 
     def harness(repo_root):
-        from experiments.phase_c3.authorization import c3_harness_digest
+        from stages.phase_c3.authorization import c3_harness_digest
 
         return c3_harness_digest(repo_root)
 

@@ -1,7 +1,7 @@
 """Run a complete AutoInitializer beam search on tiny models. Zero cost.
 
-    PYTHONPATH=src python scripts/autoinit/dry_run_search.py \
-        --out artifacts/autoinit/dryrun
+    PYTHONPATH=src python scripts/shared/validation/dry_run_search.py \
+        --out artifacts/shared/validation/dryrun
 
 Not a simulation. It builds a real (32-wide, 6-layer) Qwen3 teacher, runs the
 real operators, writes real checkpoints, reloads them through the real
@@ -24,7 +24,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -56,8 +56,8 @@ from aadistill.initialization.planning.recovery import (
     admit_leaves,
     probe_configs,
 )
-from experiments.recipes import E1_KD_HEAVY_0860K
-from experiments.recovery_policy import plan_policy  # noqa: E402
+from shared.recipes import E1_KD_HEAVY_0860K
+from shared.recovery_policy import plan_policy  # noqa: E402
 from aadistill.initialization.planning.search import (  # noqa: E402
     BeamSearch,
     SearchConfig,
@@ -123,7 +123,7 @@ def make_profiles(n: int):
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--out", default="artifacts/autoinit/dryrun")
+    parser.add_argument("--out", default="artifacts/shared/validation/dryrun")
     parser.add_argument("--beam-width", type=int, default=6)
     parser.add_argument("--warmup-levels", type=int, default=1)
     parser.add_argument("--profiles", type=int, default=1, choices=(1, 2, 3))
@@ -192,7 +192,7 @@ def main() -> None:
         control_id="dryrun_canonical", artifact=control_artifact, spec=target_spec,
         target_spec=target_spec, num_parameters=adapter.param_count(target_spec),
         root_teacher_id="dryrun-tiny-teacher", root_teacher_sha256="0" * 64,
-        description="stand-in for artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+        description="stand-in for artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
         expected_single_file_sha256=control_artifact.single_shard_sha256)
     control.attach_evaluation(
         evaluator.evaluate(adapter.load(str(control_dir)),
@@ -245,7 +245,7 @@ def main() -> None:
                     "materialize -> reload -> hash -> validate -> measure cycle"),
         "scope_limit": ("a 32-wide teacher validates the pipeline, not the science; "
                         "no initialization-quality claim follows from it"),
-        "command": "PYTHONPATH=src python scripts/autoinit/dry_run_search.py",
+        "command": "PYTHONPATH=src python scripts/shared/validation/dry_run_search.py",
         "config_hash": result.config.config_hash,
         "manifest_hash": manifest["manifest_hash"],
         "manifest_verified": report,

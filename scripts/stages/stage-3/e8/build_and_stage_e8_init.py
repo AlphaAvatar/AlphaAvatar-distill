@@ -17,7 +17,7 @@ discovered on pod B after a 45-minute setup:
 Then it uploads and **verifies from the relay side** — re-downloads and re-hashes,
 because an upload that returns 200 is not evidence.
 
-    PYTHONPATH=src python scripts/training/build_and_stage_e8_init.py \\
+    PYTHONPATH=src python scripts/stages/stage-3/e8/build_and_stage_e8_init.py \\
         --frozen-map <fetched e8_frozen_depth_map.json> [--skip-upload]
 
 Exit codes: 0 built, verified and staged; 9 a check failed or an upload did not
@@ -33,7 +33,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
@@ -42,9 +42,9 @@ from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa:
 
 RELAY = "AlphaAvatar/aadistill-artifacts"
 PREFIX = "e8_init_20260810"
-SEARCH_DIR = REPO_ROOT / "artifacts/stage1/e8_depth_search"
-INIT_DIR = REPO_ROOT / "artifacts/stage1/e8_contribution_init_v1"
-CONTROL_INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+SEARCH_DIR = REPO_ROOT / "artifacts/stages/stage-1/e8_depth_search"
+INIT_DIR = REPO_ROOT / "artifacts/stages/stage-1/e8_contribution_init_v1"
+CONTROL_INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONTROL_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 CONTROL_PARAMS = 596_049_920
 CONFIG = "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json"
@@ -107,7 +107,7 @@ def main() -> int:
 
     print("\nbuilding the treatment initialization ...", flush=True)
     proc = subprocess.run(
-        [sys.executable, str(REPO_ROOT / "scripts/training/init_stage1.py"),
+        [sys.executable, str(REPO_ROOT / "scripts/shared/training/init_stage1.py"),
          "--config", str(REPO_ROOT / CONFIG)],
         cwd=REPO_ROOT, env={"PYTHONPATH": str(REPO_ROOT / "src"),
                             "PATH": "/usr/bin:/bin", "HOME": str(Path.home())})

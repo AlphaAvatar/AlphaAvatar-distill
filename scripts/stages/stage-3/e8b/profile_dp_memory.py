@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Locate E8b-S2's OOM by measurement, not by arithmetic.
 
-    PYTHONPATH=src python scripts/training/profile_dp_memory.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/profile_dp_memory.py \
         --config configs/stage3/e8b/e8b_dp_r1600k_sa.json \
         --steps 2 --out artifacts/audit/e8b_dp_memory_profile.json
 
@@ -34,7 +34,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -172,7 +172,7 @@ def main() -> int:
         "mlp": type(student.model.layers[0].mlp).__name__,
         "rope": type(student.model.rotary_emb).__name__}
 
-    # Positional order matches scripts/training/train_stage3.py: the class is
+    # Positional order matches scripts/shared/training/train_stage3.py: the class is
     # `Trainer` and `train_blocks` is positional, so a keyword guess would fail
     # here for the first time on a billing pod.
     trainer = Trainer(cfg, student, train, val, teacher=teacher, device="cuda")

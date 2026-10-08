@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The canonical C3 stage-I aggregation, run off pod. $0, CPU, deterministic.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/aggregate_c3_stage_i.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c3/aggregate_c3_stage_i.py \
         --evidence /home/ecs-user/aad-artifacts/phase_c3/attempt75 \
         --out logs/stages/stage-1/phase_c3/analyses/attempt75_stage_i
 
@@ -57,24 +57,24 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_c1.isolation import (  # noqa: E402
+from stages.phase_c1.isolation import (  # noqa: E402
     C1Arm, C1IsolationPlan, decide,
 )
-from experiments.phase_c1.isolation import (  # noqa: E402
+from stages.phase_c1.isolation import (  # noqa: E402
     bootstrap_seed as c1_bootstrap_seed,
     paired_differences, stratified_cluster_bootstrap,
 )
-from experiments.phase_c1.probe_results import (  # noqa: E402
+from stages.phase_c1.probe_results import (  # noqa: E402
     C1ProbeRecord, build_probe_results, decision_inputs,
 )
 
 #: The battery identity the driver reads, at the same path.
 BATTERY_IDENTITY = REPO_ROOT / "logs/stages/stage-1/phase_c1/plans/battery.json"
-from experiments.phase_c3 import session as CS  # noqa: E402
+from stages.phase_c3 import session as CS  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 LABEL = re.compile(r"^autoinit\.v1\.phase_c3\.(?P<arm>[A-Za-z0-9_]+?)\.(?P<seed>\d+)$")
@@ -96,14 +96,14 @@ def implementation_identity() -> dict:
     return {
         "commit": git("rev-parse", "HEAD"),
         "tree_is_dirty": dirty,
-        "aggregator_path": "scripts/autoinit/aggregate_c3_stage_i.py",
+        "aggregator_path": "scripts/stages/stage-1/phase_c3/aggregate_c3_stage_i.py",
         "aggregator_sha256": sha256_file(Path(__file__).resolve()),
         "session_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/stage-1/phase_c3/session.py"),
+            REPO_ROOT / "scripts/stages/stage-1/phase_c3/session.py"),
         "isolation_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/stage-1/phase_c1/isolation.py"),
+            REPO_ROOT / "scripts/stages/stage-1/phase_c1/isolation.py"),
         "probe_results_module_sha256": sha256_file(
-            REPO_ROOT / "scripts/experiments/stage-1/phase_c1/probe_results.py"),
+            REPO_ROOT / "scripts/stages/stage-1/phase_c1/probe_results.py"),
     }
 
 

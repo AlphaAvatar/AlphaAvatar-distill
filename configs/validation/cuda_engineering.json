@@ -87,7 +87,7 @@
   }
  ],
  "run": {
-  "run_root": "artifacts/validation",
+  "run_root": "artifacts/shared/validation",
   "experiment_id": "cuda_engineering",
   "artifact_spec_id": "cuda_engineering_v1",
   "_roles_are_declared_by_the_caller": "RunLayout holds no vocabulary of its own; these are this validation's roles and their paths inside the run.",

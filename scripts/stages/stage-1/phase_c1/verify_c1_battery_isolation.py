@@ -1,6 +1,6 @@
 """Independent isolation check for the Phase-C1 confirmation battery.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/verify_c1_battery_isolation.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_c1/verify_c1_battery_isolation.py
 
 The builder enforces isolation while it selects. This re-derives it afterwards
 from the artifact on disk, against the roles as they exist *now* — so a later
@@ -24,23 +24,23 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-from battery_render import norm  # noqa: E402
+from shared.data.battery_render import norm  # noqa: E402
 
-BATTERY = REPO_ROOT / "artifacts/stage3/c1_confirmation_v1"
+BATTERY = REPO_ROOT / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 
 #: Every role the C1 battery must be disjoint from, and how to read its ids and
 #: prompt text. `final_promotion` is read for exclusion only.
 ROLES = {
-    "FINAL_PROMOTION": ("artifacts/eval/battery_v2", "jsonl_dir"),
-    "RECOVERY_SEARCH": ("artifacts/stage3/recovery_search_v2", "jsonl_dir"),
-    "RECOVERY_TRAINING": ("artifacts/stage3/corpus_v2/sessions.jsonl", "sessions"),
-    "STATE_EVALUATION": ("artifacts/stage1/state_eval_v1/items.jsonl", "items"),
-    "OPERATOR_CALIBRATION": ("artifacts/stage1/e8_calibration_v1/items.jsonl", "items"),
+    "FINAL_PROMOTION": ("artifacts/stages/stage-3/eval/battery_v2", "jsonl_dir"),
+    "RECOVERY_SEARCH": ("artifacts/stages/stage-1/batteries/recovery_search_v2", "jsonl_dir"),
+    "RECOVERY_TRAINING": ("artifacts/stages/stage-3/corpus_v2/sessions.jsonl", "sessions"),
+    "STATE_EVALUATION": ("artifacts/stages/stage-1/state_eval_v1/items.jsonl", "items"),
+    "OPERATOR_CALIBRATION": ("artifacts/stages/stage-1/e8_calibration_v1/items.jsonl", "items"),
 }
 
 

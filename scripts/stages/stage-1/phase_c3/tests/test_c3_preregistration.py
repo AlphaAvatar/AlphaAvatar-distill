@@ -96,7 +96,7 @@ def test_the_preregistration_stamp_binds_its_own_body():
 
 def test_the_convention_is_the_one_the_launcher_verifies():
     """Not a private hash. C1's launcher must agree about what is hashed."""
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert f'k != "{FIELD}"' in src, (
         "autoinit_c1_launch.py no longer excludes only the stamp field; this "
         "test's convention and the launcher's have drifted apart")

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 4: train P2-CE-heavy at the 1.60M rung, then evaluate four models.
 
-    /opt/train/bin/python scripts/pod/e4_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/e4/e4_driver.py --stage all
 
 Trains `e4_p2_r1600k_{sa,sb}` from the Stage 1 PCA init — **not** continued from
 the P2-0.86M checkpoint — and evaluates them beside the existing P1-1.60M
@@ -36,9 +36,9 @@ STATUS = Path("/workspace/e4.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 TRAIN_ARMS = {"E4-P2-1600k-sa": "e4_p2_r1600k_sa",
               "E4-P2-1600k-sb": "e4_p2_r1600k_sb"}
@@ -69,7 +69,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def run_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}"
+    return REPO / f"artifacts/stages/stage-3/{name}"
 
 
 def model_dir(name: str) -> Path:
@@ -95,7 +95,7 @@ def stage_train(args):
         joined = " ".join(cfg["trainable_patterns"])
         for proj in ("q_proj", "k_proj", "v_proj", "o_proj"):
             assert proj in joined, f"{proj} must be full-rank trainable"
-        run(["scripts/training/train_stage3.py", "--config", cfg_path])
+        run(["scripts/shared/training/train_stage3.py", "--config", cfg_path])
         mark(f"TRAIN_DONE:{alias}")
 
 
@@ -125,7 +125,7 @@ def stage_movement(args):
         out = OUT / "e4_movement" / f"{alias}.json"
         if out.exists() or not model_dir(name).is_dir():
             continue
-        run(["scripts/evaluation/parameter_movement.py", "--init", INIT,
+        run(["scripts/shared/evaluation/parameter_movement.py", "--init", INIT,
              "--checkpoint", model_dir(name), "--label", alias, "--out", out])
         rep = json.loads(out.read_text())
         emb = rep["by_group"]["embedding"]["delta_fro"]
@@ -150,11 +150,11 @@ def stage_three_mode(args):
         if not Path(m).is_dir():
             mark(f"EVAL_SKIPPED:{alias}:no_checkpoint")
             continue
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

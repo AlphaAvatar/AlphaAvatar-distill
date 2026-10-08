@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Sequence the three diagnostic jobs on the pod, marker by marker.
 
-    /opt/train/bin/python scripts/pod/e2diag_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/e2/e2diag_driver.py --stage all
 
 Order is deliberate: the benchmark runs first because it is the shortest job
 whose result gates a repository decision, and because it needs the 4B teacher
@@ -34,7 +34,7 @@ VLLM_PY = "/opt/vllm/bin/python"
 
 REF_MODEL = "Qwen/Qwen3-0.6B"
 CONTROL = "/workspace/ckpt/e1_ctl_r0250k_sa_pca_stepmatched"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 
 
 def mark(name: str) -> None:
@@ -56,9 +56,9 @@ def stage_benchmark(args) -> None:
     if out.exists():
         print("benchmark already done; skipping", flush=True)
         return mark("BENCH_DONE")
-    run([TRAIN_PY, "scripts/pod/benchmark_padding_truncation.py",
+    run([TRAIN_PY, "scripts/shared/pod/benchmark_padding_truncation.py",
          "--pack", PACK,
-         "--student", REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+         "--student", REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
          "--teacher", f"Qwen/Qwen3-4B-Thinking-2507@{args.teacher_revision}",
          "--config", REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json",
          "--blocks-per-regime", 8, "--steps", 6, "--warmup", 2,
@@ -68,7 +68,7 @@ def stage_benchmark(args) -> None:
 
 def stage_diag_a(args) -> None:
     """The frozen battery on the pinned reference, under both protocols."""
-    battery = REPO / "artifacts/eval/battery_v2"
+    battery = REPO / "artifacts/stages/stage-3/eval/battery_v2"
     prompts = sorted(str(p) for p in battery.glob("*.jsonl"))
     behavior = REPO / "data/eval_behavior_v0/prompts.jsonl"
     if behavior.exists():
@@ -76,22 +76,22 @@ def stage_diag_a(args) -> None:
     for protocol, kwargs in (("project", "{}"),
                              ("native", json.dumps({"enable_thinking": True}))):
         tag = f"ref_qwen3_0p6b_{protocol}"
-        gen_dir = REPO / f"artifacts/eval/e2diag/{tag}"
+        gen_dir = REPO / f"artifacts/stages/stage-3/eval/e2diag/{tag}"
         if (gen_dir / "gsm8k.generations.jsonl").exists():
             print(f"{tag} already generated; skipping", flush=True)
             continue
-        cmd = [VLLM_PY, "scripts/evaluation/uncapped_eval.py",
+        cmd = [VLLM_PY, "scripts/shared/evaluation/uncapped_eval.py",
                "--model", REF_MODEL, "--revision", args.ref_revision,
                "--label", tag, "--prompts", *prompts,
                "--out-dir", gen_dir, "--trained-context", 8192,
                "--protocol", protocol, "--chat-template-kwargs", kwargs,
                "--diagnostics"]
         run(cmd)
-        run([TRAIN_PY, "scripts/evaluation/score_battery.py",
+        run([TRAIN_PY, "scripts/shared/evaluation/score_battery.py",
              "--battery", battery, "--generations", gen_dir, "--label", tag,
-             "--out", REPO / f"artifacts/eval/e2diag/{tag}_battery.json",
+             "--out", REPO / f"artifacts/stages/stage-3/eval/e2diag/{tag}_battery.json",
              "--per-sample",
-             REPO / f"artifacts/eval/e2diag/{tag}_battery.per_sample.jsonl"])
+             REPO / f"artifacts/stages/stage-3/eval/e2diag/{tag}_battery.per_sample.jsonl"])
         mark(f"DIAGA_DONE:{protocol}")
     mark("DIAGA_DONE")
 
@@ -130,9 +130,9 @@ def stage_diag_b(args) -> None:
     if (out / "report.json").exists():
         print("recall diagnostic already done; skipping", flush=True)
         return mark("DIAGB_DONE")
-    run([VLLM_PY, "scripts/evaluation/diagnose_training_recall.py",
+    run([VLLM_PY, "scripts/shared/evaluation/diagnose_training_recall.py",
          "--model", CONTROL, "--pack", PACK, "--rung", 250000,
-         "--sessions", REPO / "artifacts/stage3/corpus_v2/sessions.jsonl",
+         "--sessions", REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
          "--n", args.n_recall, "--out", out])
     mark("DIAGB_DONE")
 

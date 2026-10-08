@@ -22,7 +22,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-DRIVER = REPO / "scripts/pod/c3_batching_pilot_driver.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py"
 
 
 @pytest.fixture(scope="module")
@@ -222,12 +222,12 @@ def test_each_entry_carries_the_profiles_own_pinned_hash():
 
     sys.path.insert(0, str(REPO / "src"))
     sys.path.insert(0, str(REPO / "scripts"))
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
     #: The derivation moved to the pilot module when a second pilot needed
     #: the same answer; the drivers delegate to it.
-    from experiments.phase_c3 import pilot
+    from stages.phase_c3 import pilot
 
     for entry in pilot.required_profiles(REPO):
         profile = get_profile(entry["profile_id"])
@@ -244,7 +244,7 @@ def test_check_inputs_resolves_the_real_profiles(tmp_path):
     done = subprocess.run([sys.executable, str(DRIVER), "--check-inputs"],
                           cwd=REPO, capture_output=True, text=True,
                           timeout=300, env=env)
-    if not (REPO / "artifacts/stage1").is_dir():
+    if not (REPO / "artifacts/stages/stage-1").is_dir():
         pytest.skip("artifacts/ is gitignored and not built in this tree")
     assert done.returncode == 0, done.stdout + done.stderr
     assert "calib.reasoning_heavy@v2" in done.stdout, (
@@ -295,7 +295,7 @@ def test_the_launcher_pushes_the_derived_mixtures_and_fetches_no_weights():
     push it, and it must NOT `scp -r` the whole output tree — which pulled
     9.1 GiB of checkpoints over a 0.72 MB/s uplink while the pod billed.
     """
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     assert "--required-inputs" in src, "the launcher hardcodes its inputs"
     assert "items_file_sha256" in src, "the push is not verified against the profile"
     assert "/workspace/mixtures" in src, "the mixtures are never pushed"
@@ -308,7 +308,7 @@ def test_the_launcher_pushes_the_derived_mixtures_and_fetches_no_weights():
 
 
 def test_the_remote_payload_checks_real_inputs_before_the_gpu_work():
-    src = (REPO / "scripts/pod/c3_batching_pilot_remote.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_remote.sh").read_text()
     assert "--check-inputs" in src
     #: BEFORE the toy preflight, and before the pilot.
     assert src.index("--check-inputs") < src.index("--toy")
@@ -330,7 +330,7 @@ def test_the_pod_id_regex_does_not_match_the_providers_error_text():
     """
     import re
 
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     m = re.search(r"POD_ID=\$\(echo \"\$CREATE\" \| grep -oE '([^']+)'", src)
     assert m, "no fallback pod-id pattern found in the launcher"
     pattern = m.group(1).replace("\\\\", "\\")
@@ -348,7 +348,7 @@ def test_the_launcher_confirms_the_pod_with_the_provider():
     """Parsing is a guess; the provider is the authority. A pod id this
     script believes in but the provider has never heard of leaves the
     watchdog guarding nothing."""
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     create_at = src.index("runpodctl create pod")
     #: The START of the watchdog, not the string "watchdog.py" — that also
     #: appears in the teardown's pid check, which is EARLIER in the file and
@@ -397,7 +397,7 @@ def test_the_push_loop_does_not_feed_its_listing_to_ssh(tmp_path):
 
 
 def test_the_launcher_uses_the_stdin_safe_shape_and_counts_what_it_pushed():
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     push = src[src.index("pushing the calibration mixtures"):
                src.index("# --- run ---")]
     assert "<&3" in push and "3<" in push, (
@@ -412,7 +412,7 @@ def test_every_ssh_invocation_inside_a_loop_passes_dash_n():
     """Not only the one that bit. Any `$SSH` in a `while read` body has it."""
     import re
 
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     for body in re.findall(r"while read[^\n]*\n(.*?)\ndone", src, re.S):
         for line in body.splitlines():
             stripped = line.strip()
@@ -508,7 +508,7 @@ def test_the_launcher_reads_the_pilots_summary_not_the_preflights():
     """`find -name pilot_summary.json | head -1` matched the PREFLIGHT on a4
     and reported a toy verdict as the session's, on a run whose real arms had
     never started."""
-    src = (REPO / "scripts/pod/c3_batching_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_batching_pilot_launch.sh").read_text()
     assert "-path '*/pilot/pilot_summary.json'" in src
     assert "-name pilot_summary.json" not in src, (
         "the launcher can still pick up the preflight's summary")

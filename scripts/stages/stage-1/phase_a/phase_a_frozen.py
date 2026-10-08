@@ -27,7 +27,7 @@ TARGET_GEOMETRY = dict(hidden_size=1024, num_hidden_layers=28, intermediate_size
 
 #: The retained canonical initialization, injected as the recovery control by
 #: hash. A re-executed composite is not the historical incumbent.
-CANONICAL_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL_INIT = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: The control this study imports Stage 1 against. Stated by the
 #: experiment, because a reusable importer should not default to one.
 CANONICAL_CONTROL_ID = "qwen3_0p6b_init_v0"

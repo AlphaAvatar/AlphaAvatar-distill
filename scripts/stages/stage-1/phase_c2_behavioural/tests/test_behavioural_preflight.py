@@ -25,11 +25,11 @@ for _p in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-from experiments.phase_c2 import behavioural as BH
-from experiments.phase_c2 import behavioural_decision as BD
-from experiments.phase_c2 import behavioural_governance as BG
-from experiments.phase_c2 import behavioural_schedule as SCH
-from experiments.phase_c2 import scoring as C2S
+from stages.phase_c2 import behavioural as BH
+from stages.phase_c2 import behavioural_decision as BD
+from stages.phase_c2 import behavioural_governance as BG
+from stages.phase_c2 import behavioural_schedule as SCH
+from stages.phase_c2 import scoring as C2S
 
 
 # -- the protocol is the plan ------------------------------------------------
@@ -75,7 +75,7 @@ def test_c2_bootstrap_seed_is_not_c1s_default():
     `:phase-c2:bootstrap`. If these ever coincided, passing the seed explicitly
     would stop being a check on anything.
     """
-    from experiments.phase_c1.isolation import bootstrap_seed
+    from stages.phase_c1.isolation import bootstrap_seed
 
     rule = BD.decision_rule(REPO)
     assert rule.bootstrap_seed == 834816710
@@ -111,7 +111,7 @@ def test_every_arm_root_is_the_verified_teacher_binding():
 
 def test_candidate_order_matches_the_frozen_selection():
     """The screening tie-break IS this ordering."""
-    from experiments.phase_c2.replay_specs import load_selection
+    from stages.phase_c2.replay_specs import load_selection
 
     order = [s["state_id"] for s in load_selection(REPO)["selected"]]
     assert [leaf.state_id for leaf in BG.candidate_leaves(REPO)] == order
@@ -143,10 +143,10 @@ def test_screening_battery_validates_against_its_identity_record():
 
 
 def test_confirmation_battery_validates_against_c1s_pins():
-    from experiments.phase_c1.scoring import validate_c1_battery
+    from stages.phase_c1.scoring import validate_c1_battery
     from aadistill.infrastructure.manifest import sha256_json
 
-    path = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+    path = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
     manifest = json.loads(path.read_text())
     sha = sha256_json({k: v for k, v in manifest.items()
                        if k != "manifest_sha256"})
@@ -159,7 +159,7 @@ def test_the_two_batteries_are_different_assets():
     screening = json.loads(
         (REPO / C2S.BATTERY_PATH / "manifest.json").read_text())
     confirmation = json.loads(
-        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
     assert screening["content_sha256"] != confirmation["content_sha256"]
     assert screening["n_prompts"] == confirmation["n_prompts"]
     assert screening["n_scorable_prompts"] == confirmation["n_scorable_prompts"]
@@ -168,14 +168,14 @@ def test_the_two_batteries_are_different_assets():
 def test_screening_validator_refuses_the_confirmation_battery():
     """The pins are real, not decorative."""
     manifest = json.loads(
-        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
     with pytest.raises(C2S.C2ScoringError):
         C2S.validate_screening_battery(manifest, repo_root=REPO)
 
 
 def test_c1_scorer_refuses_the_screening_battery():
     """C1's production path cannot be aimed at the screening rung."""
-    from experiments.phase_c1.scoring import C1ScoringError, validate_c1_battery
+    from stages.phase_c1.scoring import C1ScoringError, validate_c1_battery
     from aadistill.infrastructure.manifest import sha256_json
 
     manifest = json.loads(

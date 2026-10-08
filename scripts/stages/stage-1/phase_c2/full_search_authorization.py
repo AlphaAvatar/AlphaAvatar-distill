@@ -31,8 +31,8 @@ from aadistill.governance.grant import (
     GrantContract, GrantRefused, budget_headroom, validate_grant)
 from aadistill.infrastructure.manifest import sha256_json
 
-from experiments.phase_c2 import full_search as FSG
-from experiments.phase_c2.session import C2ResourceScope
+from stages.phase_c2 import full_search as FSG
+from stages.phase_c2.session import C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -94,7 +94,7 @@ def live_identities(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     record that claims it. It takes no commit.
     """
     from aadistill.initialization.planning.ranking import PARETO_V1
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     #: Neither the promoted ATTENTION operator nor the calibration mixtures are
     #: shipped defaults, and the joint space cannot be enumerated without them.
@@ -373,7 +373,7 @@ def _readiness(repo_root: Path, run_id: str, stage_id: str | None,
     no sweep had ever described -- which is how a pod comes to run code the
     readiness evidence never covered.
     """
-    from experiments.phase_c2 import full_search_pod_environment as PE
+    from stages.phase_c2 import full_search_pod_environment as PE
 
     record = PE.load_record(repo_root, run_id=run_id, stage_id=stage_id)
     PE.verify_record(record, repo_root, run_id=run_id, stage_id=stage_id,

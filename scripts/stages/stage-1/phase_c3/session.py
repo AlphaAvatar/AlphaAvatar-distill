@@ -34,7 +34,7 @@ session's shape.** Arm ids, their implementations and calibration profiles,
 their identity-bearing configs, the digest gates, the seeds and the probe count
 are all READ from the frozen plan and never re-declared here. At `b937aebb` the
 plan said three arms while this module built two, and nothing compared them;
-`scripts/experiments/stage-1/phase_c3/tests/test_c3_session_contract.py` now proves the two agree field by
+`scripts/stages/stage-1/phase_c3/tests/test_c3_session_contract.py` now proves the two agree field by
 field.
 
 This module deliberately contains no search, ranking, successive halving or
@@ -257,7 +257,7 @@ def frozen_isolation_plan():
     They were defaulted before, and all of them happened to match C1's — which
     is precisely why nobody noticed that the seed did not.
     """
-    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan
+    from stages.phase_c1.isolation import C1Arm, C1IsolationPlan
 
     control, candidate = primary_operands()
     battery = json.loads(BATTERY_IDENTITY_PATH.read_text())

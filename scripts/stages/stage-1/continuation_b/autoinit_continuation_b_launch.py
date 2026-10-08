@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch the Phase-B BEHAVIOURAL CONTINUATION. It cannot buy the search.
 
-    python3 scripts/pod/autoinit_continuation_b_launch.py --dry-run
+    python3 scripts/stages/stage-1/continuation_b/autoinit_continuation_b_launch.py --dry-run
 
 Phase-B Stage 1 is complete: attempt 5 emitted an authoritative Top-5, a durable
 Stage-1 selection artifact and a retained journal, and rung 1 was finished at `$0`
@@ -42,15 +42,15 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from stages.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
@@ -65,12 +65,12 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import CANONICAL_INIT, RECOVERY_LADDER  # noqa: E402
-from autoinit_phase_a_launch import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import CANONICAL_INIT, RECOVERY_LADDER  # noqa: E402
+from stages.phase_a.autoinit_phase_a_launch import (  # noqa: E402
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, TEACHER_REVISION, TEST_IGNORES,
     budget as phase_a_budget, probe_streams,
 )
-from autoinit_recovery_continuation_launch import (  # noqa: E402
+from stages.recovery_continuation.autoinit_recovery_continuation_launch import (  # noqa: E402
     STAGED_INTO, TRANSPORT_MANIFEST, TRANSPORT_REPO, transport_is_verified,
 )
 
@@ -89,8 +89,8 @@ AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_i
 #: **Bind is not consume.** Attempt 1 died here for `$0.2513`. Both calibration
 #: mixtures are bound into this session's authorization and preregistration as
 #: provenance for the imported Stage-1 result — and neither is a runtime input.
-#: The paid behavioural probes train from `artifacts/stage3/ladder_uniform_probe`
-#: and are scored on the `artifacts/stage3/recovery_search_v2` battery; the
+#: The paid behavioural probes train from `artifacts/shared/instruments/ladder_uniform_probe`
+#: and are scored on the `artifacts/stages/stage-1/batteries/recovery_search_v2` battery; the
 #: continuation driver contains no calibration reference at all, and the one
 #: mention in `PhaseADriver` is a comment inside the `stage1` search this
 #: session overrides with a raise and never binds into its stage map.
@@ -104,7 +104,7 @@ AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_i
 #:
 #: * `test_causal_depth_measurement_job` drives the causal-depth/calibration
 #:   measurement job through the real resolver, which loads
-#:   `artifacts/stage1/e8_calibration_v1/items.jsonl`. Diagnostic search
+#:   `artifacts/stages/stage-1/e8_calibration_v1/items.jsonl`. Diagnostic search
 #:   machinery; nothing in the continuation's stage map reaches it.
 #: * `test_phase_b_driver_and_launcher` builds the **Phase-B** spec and requires
 #:   both calibration profiles and the `reasoning_heavy_v2` staging that Phase B
@@ -116,11 +116,11 @@ AMENDMENT = REPO_ROOT / "logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_i
 #: excluded here and checked before a pod exists.
 CONTINUATION_TEST_IGNORES = (
     *TEST_IGNORES,
-    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
-    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_stage1_executes.py",
-    "scripts/experiments/stage-1/phase_b/tests/test_continuation_b_executes.py",
+    "scripts/stages/stage-1/phase_b/tests/test_phase_b_reuse_hostlocal.py",
+    "scripts/stages/stage-1/phase_b/tests/test_phase_b_stage1_executes.py",
+    "scripts/stages/stage-1/phase_b/tests/test_continuation_b_executes.py",
     "tests/initialization/test_causal_depth_measurement_job.py",
-    "scripts/experiments/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py",
+    "scripts/stages/stage-1/phase_b/tests/test_phase_b_driver_and_launcher.py",
 )
 
 #: The advancing candidates whose bytes must be on the pod. `fe9683e6a9c7` is the
@@ -274,7 +274,7 @@ def evidence_binding_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     try:
-        from autoinit_continuation_b_driver import ContinuationDriver
+        from stages.continuation_b.autoinit_continuation_b_driver import ContinuationDriver
     except Exception as exc:                       # noqa: BLE001
         return False, f"the continuation driver does not import: {exc}"
     try:
@@ -301,7 +301,7 @@ def no_search_gate(ctx: SessionContext) -> tuple[bool, str]:
        `stage1` the continuation overrides with a raise and never binds into
        its stage map. A call site appearing anywhere else fails here.
     """
-    from experiments.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, FORBIDDEN_CALLS, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
+    from stages.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, FORBIDDEN_CALLS, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
 
     own = search_call_site_owners(REPO_ROOT, files=CONTINUATION_OWN_PATH_FILES)
     if own:
@@ -358,7 +358,7 @@ def workload_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
     """
     sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
     try:
-        from autoinit_continuation_b_driver import ContinuationDriver
+        from stages.continuation_b.autoinit_continuation_b_driver import ContinuationDriver
     except Exception as exc:                                    # noqa: BLE001
         return False, f"the continuation driver does not import: {exc}"
 
@@ -400,7 +400,7 @@ def workload_scope_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 def driver_command(ctx: SessionContext, plan) -> str:
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_continuation_b_driver.py "
+            f"{REPO}/scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
@@ -422,9 +422,9 @@ def spec(args) -> SessionSpec:
         #: authorizes a search this session must not run.
         authorization_loader=ContinuationAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=CONTINUATION_PLAN_V1.plan_id,
         plan_hash=CONTINUATION_PLAN_V1.plan_hash,
@@ -515,7 +515,7 @@ def spec(args) -> SessionSpec:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    from autoinit_phase_a_launch import build_parser as phase_a_parser
+    from stages.phase_a.autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
     ap.set_defaults(out="logs/stages/stage-1/continuation_b/analyses/autoinit_continuation_b_session.json",
@@ -553,7 +553,7 @@ def continuation_poll_limit_minutes(args) -> float:
     exposure. The relational contract itself — hard-terminate plus one poll
     interval plus the fetch bound plus measured teardown — is reused unchanged.
     """
-    from autoinit_phase_b_launch import phase_b_poll_limit_minutes
+    from stages.phase_b.autoinit_phase_b_launch import phase_b_poll_limit_minutes
 
     plan = continuation_budget(args).plan(price_per_hour=args.max_price,
                                           authorized_usd=float("inf"))

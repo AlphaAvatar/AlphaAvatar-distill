@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Operator device canary: every frozen operator, once, on a real GPU.
 
-    /opt/train/bin/python scripts/pod/autoinit_device_canary.py \
+    /opt/train/bin/python scripts/shared/pod/autoinit_device_canary.py \
         --out artifacts/audit/autoinit_device_canary/result.json
 
 **This is not an experiment and its outputs may not enter scientific
@@ -36,7 +36,7 @@ import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -50,7 +50,7 @@ from aadistill.initialization import device as device_contract
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1  # noqa: E402
 from aadistill.initialization.device import model_device, stats_bytes  # noqa: E402
 from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
 from aadistill.initialization.operators.base import (  # noqa: E402
@@ -65,7 +65,7 @@ register_builtin_operators()
 #: Explicit, because importing an adapter module no longer registers it.
 register_builtin_adapters()
 
-CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: The launcher watches this file and decides the session's terminal state from
 #: it. `ALL_DONE` and `CANARY_FAILED` are the only two that end a session.
 STATUS = Path("/workspace/autoinit_device_canary.status")
@@ -109,7 +109,7 @@ def tiny_calibration(n_items: int, max_tokens: int, device):
     Real ids, because the point is the production loader's output shape; few and
     short, because the question is placement, not statistics quality.
     """
-    from phase_a_search import as_operator_items
+    from stages.phase_a.phase_a_search import as_operator_items
 
     items = as_operator_items(DOMAIN_BALANCED_V1.resolve(REPO))[:n_items]
     for item in items:

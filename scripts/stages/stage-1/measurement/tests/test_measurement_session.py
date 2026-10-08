@@ -48,7 +48,7 @@ def test_it_cannot_start_phase_a(spec):
     owner = loader.__self__                       # the class the loader belongs to
     assert not owner.POLICY.allows("phase_a"), (
         f"{owner.__name__}'s policy grants phase_a")
-    from experiments.measurement.plan import MEASUREMENT_AUTHORIZATION
+    from stages.measurement.plan import MEASUREMENT_AUTHORIZATION
     assert not MEASUREMENT_AUTHORIZATION.allows("phase_a"), (
         "the measurement's authorization can authorize Phase A")
     assert spec.evidence_fields["phase_a_reachable_from_this_launcher"] is False
@@ -56,8 +56,8 @@ def test_it_cannot_start_phase_a(spec):
 
 
 def test_it_uses_its_own_authorization_and_plan_not_phase_as(spec):
-    from experiments.measurement.plan import MEASUREMENT_PLAN_V1
-    from experiments.phase_a.plan import PHASE_A_PLAN_V1
+    from stages.measurement.plan import MEASUREMENT_PLAN_V1
+    from stages.phase_a.plan import PHASE_A_PLAN_V1
 
     assert spec.plan_hash == MEASUREMENT_PLAN_V1.plan_hash
     assert spec.plan_hash != PHASE_A_PLAN_V1.plan_hash
@@ -92,7 +92,7 @@ def test_its_budget_is_under_the_authorized_ceiling(spec):
     plan = spec.budget.plan(price_per_hour=0.99, authorized_usd=1.6294)
     assert plan.hard_terminate_usd <= 1.6294, "the plan exceeds the ceiling"
     assert plan.expected_usd < plan.soft_stop_usd < plan.hard_terminate_usd
-    from experiments.measurement.plan import MEASUREMENT_AUTHORIZATION as A
+    from stages.measurement.plan import MEASUREMENT_AUTHORIZATION as A
     assert A.hard_cap_usd == 1.6294 and A.per_launch_hard_usd == 1.6294
     assert A.authorized_stages == (0,)
 
@@ -115,14 +115,14 @@ def test_both_failure_markers_bring_the_report_home(spec):
 
 
 def test_the_job_emits_those_exact_markers():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     for m in ("MEASUREMENT_START", "MEASUREMENT_FAILED", "MEASUREMENT_FALLBACK",
               "ALL_DONE"):
         assert f'mark("{m}")' in src, f"the job never emits {m}"
 
 
 def test_the_stop_conditions_are_the_ones_the_grant_names():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert "is non-zero: the repaired port" in src, "no backend-delta stop"
     assert "fell back to recompute" in src, "no cache-fallback stop"
     # The artifact is written BEFORE either stop: a run that found a real
@@ -140,7 +140,7 @@ def test_the_artifact_spec_exists_and_requires_the_report():
 
 
 def test_the_issuer_requires_a_grant_and_refuses_phase_a():
-    src = (REPO / "scripts/autoinit/issue_measurement_authorization.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/issue_measurement_authorization.py").read_text()
     assert '"--grant", required=True' in src
     assert "no grant document at" in src
     assert "a measurement may not authorize Phase A" in src

@@ -2,7 +2,7 @@
 """Where does the config identity of each selected path first diverge? $0, no GPU.
 
     PYTHONPATH=src:scripts python \
-        scripts/autoinit/c2_replay_config_forensic.py --out <path>
+        scripts/stages/stage-1/phase_c2_replay/c2_replay_config_forensic.py --out <path>
 
 Attempt 8 reconstructed two of the five selected paths byte-for-byte and stopped
 on the third, whose WEIGHTS were identical and whose `config.json` was not.
@@ -39,7 +39,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -47,7 +47,7 @@ for _extra in ("src", "scripts", "scripts/autoinit"):
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 
-from experiments.phase_c2 import replay_specs as RS  # noqa: E402
+from stages.phase_c2 import replay_specs as RS  # noqa: E402
 
 #: The complete attempt-3 journal. The compact one in git drops the per-state
 #: `steps` record — 98% of the bytes — which is where the parent ids and the
@@ -224,7 +224,7 @@ def main(argv=None) -> int:
 
     from aadistill.initialization.adapters import register_builtin_adapters
 
-    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
     #: Explicit, as everywhere in this project: the registry is empty in a fresh
     #: process and a resolver that assumed somebody else had filled it is how a

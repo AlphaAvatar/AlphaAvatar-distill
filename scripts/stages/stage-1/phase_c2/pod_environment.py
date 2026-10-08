@@ -10,7 +10,7 @@ runs rather than a simplification:
 
 **No expected-skip map.** C1's version once declared nine node-id groups
 describing which of 3892 tests should skip on a pod. C2's pod selection is
-`scripts/experiments/stage-1/phase_c2/tests/`, whose last test refuses any conditional marker in the
+`scripts/stages/stage-1/phase_c2/tests/`, whose last test refuses any conditional marker in the
 directory, so the contract is: everything passes and nothing skips. `watched`
 carries the selection, which makes any skip there an unexpected environment skip
 and the verdict FAIL — enforced by the machinery, not by a list somebody keeps.
@@ -66,7 +66,7 @@ SCHEMA = "aadistill.autoinit.c2_pod_environment_verification/v1"
 #: in the launcher derives the complement of the same directory; a test holds
 #: the two equal so the readiness contract cannot describe a different suite
 #: from the one the pod runs.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c2/tests"
 
 #: The run's declared role for its readiness evidence. Same convention as every
 #: other role in a run's `governance/` area.
@@ -78,19 +78,19 @@ RUN_READINESS_ROLE = "governance/readiness.json"
 #: file in both buys nothing and only makes two lists look like independent
 #: evidence when they are not.
 #:
-#: C1 names a third file here, `scripts/autoinit/publish_selected_leaves.py`: a
+#: C1 names a third file here, `scripts/shared/rollout/publish_selected_leaves.py`: a
 #: dev-box tool the paid session never runs and whose tests its pod gate did.
-#: C2's gate collects `scripts/experiments/stage-1/phase_c2/tests/` only, so that asymmetry does not
+#: C2's gate collects `scripts/stages/stage-1/phase_c2/tests/` only, so that asymmetry does not
 #: exist here and declaring the file would measure something this session's gate
 #: cannot reach.
 POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
     #: The simulator that creates the pod-like conditions. Never executed on a
     #: pod, so it has no place in the harness — but a change to it changes what
     #: a recorded sweep MEANT.
-    "scripts/pod/simulate_pod_env.sh",
+    "scripts/shared/pod/simulate_pod_env.sh",
     #: The recorder decides what the record CLAIMS the sweep found. A parser
     #: that mislabelled a skip as a pass would certify a failing gate.
-    "scripts/autoinit/record_pod_environment.py",
+    "scripts/shared/pod/record_pod_environment.py",
 )
 
 #: The contract, and the whole of it: every selected test passes, on the dev
@@ -142,7 +142,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None, *,
             "id (and the stage its experiment declares). There is no "
             "repository-level readiness file for C2, deliberately — a shared "
             "path is how one attempt's evidence gets overwritten by the next.")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir('phase_c2', run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
@@ -166,10 +166,10 @@ def evaluate_sweep(outcomes, skip_reasons=None, *, groups=None):
 def c2_harness_digest_value(repo_root=".") -> str:
     """C2's harness digest — the LIVE derived executable closure.
 
-    Imported inside the function because `experiments.phase_c2.session` reaches
+    Imported inside the function because `stages.phase_c2.session` reaches
     this module's neighbours; a module-level import would make the cycle real.
     """
-    from experiments.phase_c2.session import c2_harness_digest
+    from stages.phase_c2.session import c2_harness_digest
 
     return c2_harness_digest(repo_root)["digest"]
 
@@ -207,12 +207,12 @@ def c2_sweep_contract(run_id: str | None = None,
     """
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c2.bundle import canonical_bundle_name
+        from stages.phase_c2.bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 
     def harness(repo_root):
-        from experiments.phase_c2.session import c2_harness_digest
+        from stages.phase_c2.session import c2_harness_digest
 
         return c2_harness_digest(repo_root)
 

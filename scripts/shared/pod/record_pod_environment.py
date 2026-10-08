@@ -1,9 +1,9 @@
 """Run the pod-like sweep once, and record what it proved.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/record_pod_environment.py \
+    PYTHONPATH=src .venv/bin/python scripts/shared/pod/record_pod_environment.py \
         --experiment phase_c2 --run-id attempt2 --stage-id 1
 
-This drives the real `scripts/pod/simulate_pod_env.sh` — empty HOME, isolated
+This drives the real `scripts/shared/pod/simulate_pod_env.sh` — empty HOME, isolated
 `HF_HOME`, synthetic `HF_TOKEN`, gitignored artifacts hidden, the session's own
 pytest selection — and writes that run's readiness record.
 
@@ -53,7 +53,7 @@ import tempfile
 import time
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
@@ -74,7 +74,7 @@ from aadistill.runtime.staging_contract import (  # noqa: E402
     pytest_arguments,
 )
 
-SIMULATOR = "scripts/pod/simulate_pod_env.sh"
+SIMULATOR = "scripts/shared/pod/simulate_pod_env.sh"
 
 #: `--experiment` -> the factory returning that experiment's `SweepContract`.
 #:
@@ -84,9 +84,9 @@ SIMULATOR = "scripts/pod/simulate_pod_env.sh"
 #: comment records a paid failure — and a copy diverges, so the repair for the
 #: next failure would land in one of them.
 EXPERIMENTS: dict[str, tuple[str, str]] = {
-    "phase_c1": ("experiments.phase_c1.pod_environment", "c1_sweep_contract"),
-    "phase_c3": ("experiments.phase_c3.pod_environment", "c3_sweep_contract"),
-    "phase_c2": ("experiments.phase_c2.pod_environment", "c2_sweep_contract"),
+    "phase_c1": ("stages.phase_c1.pod_environment", "c1_sweep_contract"),
+    "phase_c3": ("stages.phase_c3.pod_environment", "c3_sweep_contract"),
+    "phase_c2": ("stages.phase_c2.pod_environment", "c2_sweep_contract"),
     #: Baseline completion is a THIRD entry rather than a mode of the second.
     #: It binds a different launcher, a different session id, a different
     #: staging contract and a different executable closure, and its record
@@ -94,7 +94,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: verifier and its own cannot satisfy Search-1's. One registry entry is
     #: the whole cost of that separation.
     "phase_c2_baseline_completion": (
-        "experiments.phase_c2.baseline_completion_pod_environment",
+        "stages.phase_c2.baseline_completion_pod_environment",
         "sweep_contract"),
     #: A FOURTH entry, for the same reason the third is not a mode of the
     #: second: the full joint re-search binds its own launcher, session id and
@@ -108,7 +108,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: dispatch entry is the thing this repository has forgotten before:
     #: `SESSION_KIND=phase_b` had no branch in the setup script and cost $0.23.
     "phase_c2_full_search": (
-        "experiments.phase_c2.full_search_pod_environment",
+        "stages.phase_c2.full_search_pod_environment",
         "sweep_contract"),
     #: A FIFTH, and the comment above is why: the replay binds its own launcher,
     #: session id and executable closure, and its record declares its own
@@ -117,7 +117,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: session's staged assets and Search-1's asserts a canonical control this
     #: session does not stage, so either would fail a correct replay tree.
     "phase_c2_replay": (
-        "experiments.phase_c2.replay_pod_environment",
+        "stages.phase_c2.replay_pod_environment",
         "sweep_contract"),
     #: A SIXTH, and the warning three entries above is why this line exists at
     #: all: without it the behavioural chain is unusable at exactly the step a
@@ -126,12 +126,12 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: record rather than a missing registration.
     #:
     #: It binds its own launcher, its own session id, its own executable
-    #: closure and its own pod selection — `scripts/experiments/stage-1/phase_c2/tests`,
+    #: closure and its own pod selection — `scripts/stages/stage-1/phase_c2/tests`,
     #: which the other five would each fail on a correct behavioural tree — and
     #: its record declares its own schema, so no other C2 record can satisfy
     #: its verifier or it theirs.
     "phase_c2_behavioural": (
-        "experiments.phase_c2.behavioural_pod_environment",
+        "stages.phase_c2.behavioural_pod_environment",
         "sweep_contract"),
     #: A SEVENTH, and the warning four entries above came true again: without
     #: this line A3's chain is unusable at exactly the step a launch rests on.
@@ -142,11 +142,11 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: registration.
     #:
     #: It binds its own launcher, its own session id, its own executable
-    #: closure and its own pod selection -- `scripts/experiments/stage-1/phase_c3/tests`, which none
+    #: closure and its own pod selection -- `scripts/stages/stage-1/phase_c3/tests`, which none
     #: of the other six would run -- and its record declares its own schema,
     #: so no other record can satisfy its verifier or it theirs.
     "phase_a3": (
-        "experiments.phase_a3.a3_pod_environment",
+        "stages.phase_a3.a3_pod_environment",
         "sweep_contract"),
     #: AN EIGHTH, and the warning five entries above came true a third time.
     #: AGENTS.md P8.3 requires one `launch_bound` sweep when implementation,
@@ -160,7 +160,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #:
     #: It binds its own launcher, its own session id (read off the real spec,
     #: not typed), its own executable closure, its own canonical bundle
-    #: deriver and its own pod selection — `scripts/experiments/stage-1/phase_d1/tests`,
+    #: deriver and its own pod selection — `scripts/stages/stage-1/phase_d1/tests`,
     #: which none of the other seven would run — and its record declares its
     #: own schema, so no other record can satisfy its verifier or it theirs.
     #:
@@ -168,7 +168,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: particular does not touch the Phase-C1 readiness pointer that
     #: `logs/state/current.json :: latest_verification` is derived from.
     "phase_d1": (
-        "experiments.phase_d1.pod_environment",
+        "stages.phase_d1.pod_environment",
         "sweep_contract"),
     #: A NINTH, and this one was not a missing registration -- it was a WRONG
     #: one, which is worse, because a wrong entry sweeps successfully.
@@ -193,7 +193,7 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     #: four, and its record is filed under `phase_d1_replay/` where its run
     #: directory, session record and stage attribution already live.
     "phase_d1_replay": (
-        "experiments.phase_d1.replay_pod_environment",
+        "stages.phase_d1.replay_pod_environment",
         "sweep_contract"),
 }
 
@@ -439,7 +439,7 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
     #: THE WHOLE SELECTION, both halves, in one equality. Comparing only the
     #: `--ignore` flags left the BASE PATHS unchecked, and that is exactly
     #: where the mismatch was: the manifest declared
-    #: `test_paths=('scripts/experiments/stage-1/phase_d1/tests',)` and the
+    #: `test_paths=('scripts/stages/stage-1/phase_d1/tests',)` and the
     #: invocation passed `tests/`, with an empty ignore list on both sides -- so
     #: this check was satisfied, `[] == []`, while the sweep ran a different
     #: suite from the pod. The interpreter is the only part allowed to differ,
@@ -683,7 +683,7 @@ def main() -> int:
     #
     # Attempt 4's sweep used simulate_pod_env.sh's generic default HIDDEN_PATHS,
     # a hand-maintained complement whose own comment claimed every pod session
-    # stages artifacts/stage3/corpus_v2. C1 stages no such thing, so the sweep
+    # stages artifacts/stages/stage-3/corpus_v2. C1 stages no such thing, so the sweep
     # modelled a machine 55 tests more generous than the pod and certified a tree
     # that then failed six ways for $0.6986. The visible set now comes from the
     # same SetupManifest the SessionRunner launches, and the hidden set is

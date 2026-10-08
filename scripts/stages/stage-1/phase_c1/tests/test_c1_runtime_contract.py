@@ -58,8 +58,8 @@ def load(rel: str) -> dict:
 
 def test_the_driver_and_launcher_both_import():
     """The two modules a session cannot start without."""
-    import autoinit_c1_driver
-    import autoinit_c1_launch
+    from stages.phase_c1 import autoinit_c1_driver
+    from stages.phase_c1 import autoinit_c1_launch
 
     assert hasattr(autoinit_c1_driver, "build_parser")
     assert hasattr(autoinit_c1_launch, "spec")
@@ -75,8 +75,8 @@ def test_the_driver_parser_accepts_exactly_what_the_launcher_emits():
     import shlex
     import types
 
-    import autoinit_c1_driver as driver
-    import autoinit_c1_launch as launcher
+    from stages.phase_c1 import autoinit_c1_driver as driver
+    from stages.phase_c1 import autoinit_c1_launch as launcher
     from support.session_specs import session_args
 
     args = session_args(launcher)
@@ -104,7 +104,7 @@ def test_the_driver_parser_accepts_exactly_what_the_launcher_emits():
 
 def test_the_session_spec_builds_and_declares_its_markers():
     """A spec that cannot be built cannot be launched."""
-    import autoinit_c1_launch as launcher
+    from stages.phase_c1 import autoinit_c1_launch as launcher
     from support.session_specs import session_args
 
     spec = launcher.spec(session_args(launcher))
@@ -127,8 +127,8 @@ def test_the_arms_seeds_and_replay_digests_are_the_frozen_ones():
     actually runs, rather than through a second transcription of the same four
     constants.
     """
-    import autoinit_c1_launch as launcher
-    from experiments.phase_c1.probe_results import ARMS
+    from stages.phase_c1 import autoinit_c1_launch as launcher
+    from stages.phase_c1.probe_results import ARMS
 
     assert ARMS == ("incumbent", "treatment"), ARMS
     ok, why = launcher.frozen_c1_science_gate(None)
@@ -146,7 +146,7 @@ def test_the_staged_battery_is_the_frozen_950_over_850():
     frozen ones.
     """
     identity = load("logs/stages/stage-1/phase_c1/plans/battery.json")
-    staged = REPO / "artifacts/stage3/c1_confirmation_v1"
+    staged = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
     assert staged.is_dir(), f"{staged} was not staged; the session has no battery"
     manifest = json.loads((staged / "manifest.json").read_text())
     assert manifest["content_sha256"] == identity["content_sha256"]
@@ -155,7 +155,7 @@ def test_the_staged_battery_is_the_frozen_950_over_850():
 
 def test_the_preregistration_still_describes_this_executable():
     """Self-hash and harness digest, checked with the launcher's own gate."""
-    import autoinit_c1_launch as launcher
+    from stages.phase_c1 import autoinit_c1_launch as launcher
 
     ok, why = launcher.preregistration_gate(None)
     assert ok, why
@@ -170,7 +170,7 @@ def test_the_scoring_and_behaviour_contracts_import():
     70 minutes of training is an import that fails at the worst moment.
     """
     from aadistill.evaluation.usable_rollout import summarize, usable  # noqa: F401
-    from experiments.phase_c1.scoring import (
+    from stages.phase_c1.scoring import (
         C1_METRIC_CONTRACT, c1_scoring_contract, validate_c1_battery,  # noqa: F401
     )
 
@@ -202,7 +202,7 @@ def test_importing_the_driver_registers_what_stage_d_resolves():
     import subprocess
 
     family = json.loads(
-        (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json"
+        (REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json"
          ).read_text())["model_type"]
 
     probe = (
@@ -222,7 +222,7 @@ def test_the_artifact_spec_never_requires_what_a_failed_run_cannot_produce():
     Which is the single most expensive way to be wrong on a pod: the science
     already failed, and the collection step then refuses to let go of the GPU.
     """
-    import autoinit_c1_launch as launcher
+    from stages.phase_c1 import autoinit_c1_launch as launcher
 
     failed = load(launcher.SPEC_FAILED)
     required = [p for p in failed.get("patterns", [])
@@ -231,7 +231,7 @@ def test_the_artifact_spec_never_requires_what_a_failed_run_cannot_produce():
 
 
 def test_the_run_layout_resolves_where_the_driver_will_write():
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     d = rel_run_dir("phase_c1", "attempt15", "1")
     assert d == "logs/stages/stage-1/phase_c1/runs/attempt15", d

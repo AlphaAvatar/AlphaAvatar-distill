@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reprice D1's search from the GPU qualification's measurements.
 
-    python scripts/autoinit/reprice_d1_from_qualification.py RECORD.json
+    python scripts/stages/stage-1/phase_d1/reprice_d1_from_qualification.py RECORD.json
 
 D1's chain figures rest on a per-expansion cost table derived from two
 historical searches (`phase_b_attempt5`, `phase_c2_attempt4`), per-cell maximum.
@@ -36,13 +36,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_c2.full_search_space import (  # noqa: E402
+from stages.phase_c2.full_search_space import (  # noqa: E402
     derive_cost_table,
 )
 

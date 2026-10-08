@@ -6,7 +6,7 @@ durable descriptor, a provider-only watchdog that terminates and confirms
 disappearance, continuous log relay, and manifest-driven collection behind the
 teardown gate.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/e8a_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/stages/stage-3/e8/e8a_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 Four budget layers, in the order they are trusted:
@@ -37,7 +37,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.artifact_gate import (  # noqa: E402
@@ -62,7 +62,7 @@ RUN_LOG = f"{WS}/e8a_run.log"
 # Pod A trains nothing. Its whole product is a 28-entry layer list plus the
 # 260-candidate trace that produced it, which is why there is no arm list here and
 # no checkpoint fetch below.
-SEARCH_OUT = "artifacts/stage1/e8_depth_search"
+SEARCH_OUT = "artifacts/stages/stage-1/e8_depth_search"
 
 
 def parse_setup_probe(stdout: str) -> dict:
@@ -240,7 +240,7 @@ class E8A:
 
     def launch_watchdog(self) -> Path:
         journal = self.scr / "watchdog.jsonl"
-        cmd = [sys.executable, str(REPO_ROOT / "scripts/pod/watchdog.py"),
+        cmd = [sys.executable, str(REPO_ROOT / "scripts/shared/pod/watchdog.py"),
                "--pod-id", self.pod_id,
                "--session-start-epoch", str(self.start_epoch),
                "--price-per-hour", str(self.price),
@@ -301,7 +301,7 @@ class E8A:
                        capture_output=True, timeout=180)
         if target.run(f"test -s {WS}/hf/token", timeout=60).returncode != 0:
             return "empty_hf_token"
-        subprocess.run(scp + [str(REPO_ROOT / "scripts/pod/e8a_setup.sh"),
+        subprocess.run(scp + [str(REPO_ROOT / "scripts/stages/stage-3/e8/e8a_setup.sh"),
                               f"root@{host}:{WS}/"], capture_output=True,
                        timeout=180)
 
@@ -380,7 +380,7 @@ class E8A:
         spent = self.usd()
         job = start_detached(target, JobSpec(
             job_id="e8a_driver", workdir=REPO,
-            command=(f"/opt/train/bin/python scripts/pod/e8a_driver.py --stage all "
+            command=(f"/opt/train/bin/python scripts/stages/stage-3/e8/e8a_driver.py --stage all "
                      f"--spent-usd {spent:.3f} "
                      f"--soft-stop-usd {self.plan.soft_stop_usd:.2f} "
                      f"--authorized-usd {self.plan.hard_terminate_usd:.2f} "
@@ -445,7 +445,7 @@ class E8A:
     # -- 5. collect --------------------------------------------------------
     def collect_and_teardown(self, target, host, scp, job) -> bool:
         cc = (f"cd {REPO} && PYTHONPATH={REPO}/src /opt/train/bin/python "
-              "scripts/pod/collect_artifacts.py")
+              "scripts/shared/pod/collect_artifacts.py")
         # The session log and status live outside the artifacts tree; copy them
         # in so every spec pattern is a plain relative glob.
         target.run(f"mkdir -p {REPO}/artifacts/audit/e8a_session && "

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Write the immutable Experiment 3 registration, BEFORE anything trains.
 
-    PYTHONPATH=src python scripts/training/register_e3.py --out logs/stages/stage-3/e3/analyses/e3_registration.json
+    PYTHONPATH=src python scripts/stages/stage-3/e3/register_e3.py --out logs/stages/stage-3/e3/analyses/e3_registration.json
 
 Pins, by hash, everything the experiment's conclusions will depend on: the six
 arm configs, the Stage 1 fork point, the packed rung that trains, the corpus the
@@ -23,15 +23,15 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.ladder import ladder_blocks, load_ladder_meta  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONFIGS = {
     "A0-P2-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
     "A0-P2-sb": "configs/stage3/p2/p2_ceheavy_sb.json",
@@ -136,7 +136,7 @@ def main() -> None:
             for alias, path in CONFIGS.items()
         },
         "initialization": {
-            "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+            "path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
             "model_safetensors_sha256": sha256_file(INIT / "model.safetensors"),
             "config_sha256": sha256_file(INIT / "config.json"),
             "tokenizer_sha256": sha256_file(INIT / "tokenizer.json"),
@@ -154,12 +154,12 @@ def main() -> None:
             "val_blocks": stats["val_blocks"],
             "val_block_indices": stats["val_block_indices"],
             "corpus_sessions_sha256": sha256_file(
-                REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"),
+                REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"),
             "holdout_v1_sha256": sha256_file(
                 REPO_ROOT / "data/warmup/holdout_v1.jsonl"),
         },
         "evaluation": {
-            "harness": "scripts/evaluation/run_three_mode_diagnostic.py",
+            "harness": "scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
             "modes": ["free", "oracle", "forced"],
             "n": 150,
             "inclusion_mask_sha256": a0_report["inclusion"]["mask_sha256"],

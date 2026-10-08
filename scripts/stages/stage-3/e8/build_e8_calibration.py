@@ -28,8 +28,8 @@ whole sessions in a deterministic order. Whole sessions only: a session cut
 mid-trace has no `</think>` and no terminator, which would silently empty the
 very diagnostics §6 asks for.
 
-    python3 scripts/data/build_e8_calibration.py \\
-        --out artifacts/stage1/e8_calibration_v1
+    python3 scripts/stages/stage-3/e8/build_e8_calibration.py \\
+        --out artifacts/stages/stage-1/e8_calibration_v1
 
 Outputs (gitignored; manifest is small and committed by hand if useful):
 
@@ -48,7 +48,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
@@ -58,7 +58,7 @@ from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
-from check_stream_disjointness import row_text  # noqa: E402
+from stages.e7.check_stream_disjointness import row_text  # noqa: E402
 
 # --- the frozen design ---------------------------------------------------------
 
@@ -232,7 +232,7 @@ def build_corpus_items(sessions_path: Path, tokenizer, excluded_sources: set[str
 def build_general_items(tokenizer, docs_path: Path, special: dict[str, int]):
     """Tokenize pre-fetched FineWeb documents until the sub-type budget is met.
 
-    Documents arrive from `scripts/data/fetch_fineweb_docs.py`, which owns the
+    Documents arrive from `scripts/shared/data/fetch_fineweb_docs.py`, which owns the
     network step and the revision assertion. Consuming a hashed file keeps this
     build deterministic and offline.
     """
@@ -286,9 +286,9 @@ def build_general_items(tokenizer, docs_path: Path, special: dict[str, int]):
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", default="artifacts/stage1/e8_calibration_v1")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/e8_calibration_v1")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")
     ap.add_argument("--exclude-through-rung", type=int, default=5500000,
                     help="exclude every session the pack consumes up to this rung")
     ap.add_argument("--val-blocks", type=int, default=16,
@@ -296,7 +296,7 @@ def main() -> int:
     ap.add_argument("--reserved", action="append", default=[],
                     help="jsonl prompt sets whose content must not appear")
     ap.add_argument("--general-docs", default="",
-                    help="docs.jsonl from scripts/data/fetch_fineweb_docs.py")
+                    help="docs.jsonl from scripts/shared/data/fetch_fineweb_docs.py")
     ap.add_argument("--skip-general", action="store_true",
                     help="build the templated sub-types only (offline dry run)")
     args = ap.parse_args()
@@ -304,7 +304,7 @@ def main() -> int:
     if not args.skip_general and not args.general_docs:
         raise SystemExit(
             "--general-docs is required: fetch it first with "
-            "scripts/data/fetch_fineweb_docs.py, or pass --skip-general for a "
+            "scripts/shared/data/fetch_fineweb_docs.py, or pass --skip-general for a "
             "templated-only dry run (which is NOT the frozen calibration set)")
 
     out = Path(args.out) if Path(args.out).is_absolute() else REPO_ROOT / args.out

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Train the two p2_ceheavy arms, then run every specified evaluation.
 
-    /opt/train/bin/python scripts/pod/p2_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/p2/p2_driver.py --stage all
 
 Treatment: `kd_weight 1.0 -> 0.25`, `ce_weight 0.25 -> 1.0`. `kd_scope` stays
 "all", so both denominators are unchanged (KD 1,471,467; CE 864,750) and only the
@@ -36,10 +36,10 @@ STATUS = Path("/workspace/p2.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 ARMS = {"P2-ceheavy-sa": "p2_ceheavy_sa", "P2-ceheavy-sb": "p2_ceheavy_sb"}
 
 # The pinned historical protocol, asserted rather than assumed.
@@ -63,7 +63,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def model_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}/checkpoints/step_001023/model"
+    return REPO / f"artifacts/stages/stage-3/{name}/checkpoints/step_001023/model"
 
 
 def stage_train(args):
@@ -77,7 +77,7 @@ def stage_train(args):
         assert cfg["loss"] == {"ce_weight": 1.0, "kd_weight": 0.25,
                                "kd_temperature": 1.0, "kd_scope": "all"}, cfg["loss"]
         assert "truncate_padding" not in cfg["batch"], cfg["batch"]
-        run(["scripts/training/train_stage3.py", "--config", cfg_path])
+        run(["scripts/shared/training/train_stage3.py", "--config", cfg_path])
         mark(f"TRAIN_DONE:{alias}")
     mark("TRAIN_DONE")
 
@@ -115,7 +115,7 @@ def stage_nll(args):
     models = []
     for name in ARMS.values():
         models += ["--model", str(model_dir(name))]
-    run(["scripts/evaluation/eval_ppl.py", "--data", "data/warmup/holdout_v1.jsonl",
+    run(["scripts/shared/evaluation/eval_ppl.py", "--data", "data/warmup/holdout_v1.jsonl",
          *models, "--max-seq-len", 1024, "--dtype", "bfloat16", "--out", out])
     report = json.loads(out.read_text())
     for r in report["results"]:
@@ -137,11 +137,11 @@ def stage_three_mode(args):
         if not m.is_dir():
             mark(f"EVAL_SKIPPED:{alias}:no_checkpoint")
             continue
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK, "--rung", 860000,
              "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK, "--rung", 860000,
              "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

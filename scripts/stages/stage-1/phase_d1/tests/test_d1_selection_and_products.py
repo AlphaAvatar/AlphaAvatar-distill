@@ -55,7 +55,7 @@ from aadistill.initialization.specs.materialization import (  # noqa: E402
 from aadistill.initialization.specs.metrics import (  # noqa: E402
     ReferenceStrategy, StateEvalSuite, SuiteItem,
 )
-from experiments.phase_d1 import d1_session as S  # noqa: E402
+from stages.phase_d1 import d1_session as S  # noqa: E402
 
 CPU = NumericalEnvironment(device_type="cpu", compute_dtype="float32")
 #: A target reachable by DEPTH alone, so a toy beam produces several complete
@@ -238,7 +238,7 @@ class TestTheRealSelectionPath:
         one = result.top_n(PARETO_V1, 1)
         assert len(one.selected) == 1
         #: The driver's own guard, as its message states the consequence.
-        import autoinit_d1_driver as D
+        from stages.phase_d1 import autoinit_d1_driver as D
 
         src = Path(D.__file__).read_text()
         assert "NOT " in src and "COMPLETE" in src
@@ -295,7 +295,7 @@ def _top_k() -> int:
     reads `design.behavioural_design.top_k` and the fixture had its own copy.
     One owner.
     """
-    from experiments.phase_d1 import d1_session as D1S
+    from stages.phase_d1 import d1_session as D1S
 
     return int(D1S.design()["behavioural_design"]["top_k"])
 
@@ -318,7 +318,7 @@ class TestTheProductGateOnTheRealStoreLayout:
         """From `<scr>/store/stage1_selection.json`, which is what the committer
         writes and what the runner fetches -- not the driver's summary and not
         `<scr>/`."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
                          evidence=_ok_evidence(ROWS))
@@ -327,7 +327,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_a_selection_in_the_old_place_is_not_found(self, tmp_path):
         """The regression. A record at `<scr>/` is invisible to the real runner
         layout, and that must REFUSE rather than report nothing owed."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         (tmp_path / "d1_search.json").write_text(
             json.dumps(_ok_evidence(ROWS)))
@@ -339,7 +339,7 @@ class TestTheProductGateOnTheRealStoreLayout:
         """`success + missing selection -> False`. The driver reached
         commit_top_k and the record did not come home: the checkpoints exist and
         this launcher cannot name them."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ctx = _store_ctx(tmp_path, evidence=_ok_evidence(ROWS))
         ok, why = L.both_selected_leaves_secured(ctx, [])
@@ -353,7 +353,7 @@ class TestTheProductGateOnTheRealStoreLayout:
         assert "stage1_selection.json" in why
 
     def test_an_unparseable_selection_fails_the_gate(self, tmp_path):
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         store = tmp_path / "store"
         store.mkdir()
@@ -365,7 +365,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_a_selection_failing_its_own_hash_fails_the_gate(self, tmp_path):
         """`stage1_selection.load` verifies `selection_sha256`. An edited record
         is not a selection."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         doc = _committed(ROWS)
         doc["selected"] = [{**ROWS[0], "state_id": "tampered"}, ROWS[1]]
@@ -376,7 +376,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_the_two_records_must_agree_about_which_leaves(self, tmp_path):
         """Two records of one decision that name different leaves settle
         nothing, and neither may be used to decide which bytes are products."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         other = [{"state_id": "zz1", "checkpoint_path": "/x/zz1"},
                  {"state_id": "zz2", "checkpoint_path": "/x/zz2"}]
@@ -388,7 +388,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_an_empty_fetch_does_not_pass_the_gate(self, tmp_path):
         """`success + 0/K -> False`. `all([])` is True; a fetch that secured
         NOTHING must not pass."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
                          evidence=_ok_evidence(ROWS))
@@ -398,7 +398,7 @@ class TestTheProductGateOnTheRealStoreLayout:
 
     def test_one_short_does_not_pass_either(self, tmp_path):
         """`success + (K-1)/K -> False`."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
         ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
@@ -412,7 +412,7 @@ class TestTheProductGateOnTheRealStoreLayout:
 
     def test_every_selected_leaf_secured_passes(self, tmp_path):
         """`K rows exist and all verify -> PASS`."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
         ctx = _store_ctx(tmp_path, selection=_committed(ROWS),
@@ -425,7 +425,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_a_selection_of_the_wrong_size_fails_the_gate(self, tmp_path):
         """`commit_top_k exists with != K selected rows -> PRODUCT GATE
         FAILURE`. One leaf secured out of one would otherwise read as complete."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
         from aadistill.infrastructure.session import ProductFetchResult
 
         one = [ROWS[0]]
@@ -444,7 +444,7 @@ class TestTheProductGateOnTheRealStoreLayout:
         stage D -- not inferred from a missing file, which is the distinction
         this whole class turns on.
         """
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ctx = _store_ctx(tmp_path, evidence={
             "status": "FAILED",
@@ -456,7 +456,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_no_evidence_at_all_is_an_unknown_not_a_pass(self, tmp_path):
         """Nothing came home, so whether products are owed is UNKNOWN. An
         unknown must not be reported as 'nothing was owed'."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ok, why = L.both_selected_leaves_secured(_store_ctx(tmp_path), [])
         assert ok is False and "PRODUCT GATE FAILURE" in why
@@ -464,7 +464,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_the_fetcher_reports_a_failure_when_it_cannot_read(self, tmp_path):
         """`fetch_products` must not swallow it: the runner's
         `checkpoint_hashes_matched` reads these entries."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         ctx = _store_ctx(tmp_path, evidence=_ok_evidence(ROWS))
         fetched = L.fetch_selected_checkpoints(ctx)
@@ -475,7 +475,7 @@ class TestTheProductGateOnTheRealStoreLayout:
     def test_the_spec_declares_the_pair(self):
         """Not at their defaults: the default answers 'this session owes no
         off-pod products', which for D1 would be false."""
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         args = L.build_parser().parse_args([
             "--scr", "/tmp/x", "--session-commit", "d" * 40,

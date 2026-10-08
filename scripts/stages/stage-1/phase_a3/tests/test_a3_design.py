@@ -33,15 +33,15 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "autoinit"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from compare_a_bsz3 import (  # noqa: E402
+from stages.phase_a3.compare_a_bsz3 import (  # noqa: E402
     _counter_comparison, _incumbent_gate, _score_comparison, _timing,
     pair_rounds, void_reasons,
 )
-from experiments.phase_a3 import a3_pricing as pricing  # noqa: E402
-from experiments.phase_c3 import formal_pricing as FP  # noqa: E402
-from experiments.phase_a3.a_bsz3 import ABsz3Error, frozen_identities  # noqa: E402
+from stages.phase_a3 import a3_pricing as pricing  # noqa: E402
+from stages.phase_c3 import formal_pricing as FP  # noqa: E402
+from stages.phase_a3.a_bsz3 import ABsz3Error, frozen_identities  # noqa: E402
 
-import write_a3_design as design  # noqa: E402
+from stages.phase_a3 import write_a3_design as design  # noqa: E402
 
 PLANS = REPO / "logs/stages/stage-1/phase_c3/plans"
 DESIGN = PLANS / "a3_design.json"

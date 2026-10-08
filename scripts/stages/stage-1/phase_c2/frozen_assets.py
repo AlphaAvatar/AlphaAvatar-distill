@@ -6,7 +6,7 @@ consumes and the root it must live at. This module reads that declaration so a
 consumer does not restate the path.
 
 **Why this exists rather than another constant.** The literal
-`artifacts/stage1/state_eval_v1` appears in seven pod scripts, each of which
+`artifacts/stages/stage-1/state_eval_v1` appears in seven pod scripts, each of which
 predates the expectation document. The baseline-completion path does not add an
 eighth: it asks the declaration. The older copies are left alone deliberately --
 they belong to consumed or closed experiments whose executable identity is

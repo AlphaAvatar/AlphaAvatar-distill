@@ -7,9 +7,9 @@ output distribution moves, aggregated equally across the calibration domains.
 For 36 -> 28 this is 36+35+...+29 = **260 subset evaluations**, and every one of
 them is written to the score table — not just the eight winners.
 
-    PYTHONPATH=src python scripts/training/search_depth_map.py \\
-        --calibration artifacts/stage1/e8_calibration_v1 \\
-        --student-layers 28 --out artifacts/stage1/e8_depth_search
+    PYTHONPATH=src python scripts/shared/training/search_depth_map.py \\
+        --calibration artifacts/stages/stage-1/e8_calibration_v1 \\
+        --student-layers 28 --out artifacts/stages/stage-1/e8_depth_search
 
 What this script may and may not decide
 ---------------------------------------
@@ -43,7 +43,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402
@@ -243,7 +243,7 @@ def load_search_teacher(args, device):
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
     ap.add_argument("--teacher", default="Qwen/Qwen3-4B-Thinking-2507")
     ap.add_argument("--teacher-revision",
                     default="768f209d9ea81521153ed38c47d515654e938aea")
@@ -254,7 +254,7 @@ def main() -> int:
     ap.add_argument("--no-reference-cache", action="store_true",
                     help="recompute the intact reference per candidate "
                          "(numerically identical, ~2x the forward passes)")
-    ap.add_argument("--out", default="artifacts/stage1/e8_depth_search")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/e8_depth_search")
     ap.add_argument("--limit-items", type=int, default=0,
                     help="smoke-test knob: use only the first N calibration items")
     args = ap.parse_args()

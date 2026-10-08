@@ -5,7 +5,7 @@ the driver and the launcher derive them rather than each carrying a copy. Every
 one is READ from the record that owns it:
 
     probe and seed counts      the design's `behavioural_design`
-    the recovery recipe        `experiments.recipes.E1_KD_HEAVY_0860K`
+    the recovery recipe        `shared.recipes.E1_KD_HEAVY_0860K`
     the candidate membership   the maintainer's retention decision
     the incumbent              the design's `incumbent`
     the battery                the realized D-series family manifest
@@ -48,9 +48,9 @@ REPO_ROOT = Path(__file__).resolve().parents[4]
 DESIGN_REL = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 RETENTION_REL = ("logs/stages/stage-1/phase_d1/decisions/"
                  "post_search_finalist_retention.json")
-FAMILY_REL = "logs/shared/analyses/autoinit_d_series_battery_family.json"
-MANIFEST_REL = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
-BATTERY_ROOT_REL = "artifacts/stage3/d_series_behavioural_v1"
+FAMILY_REL = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json"
+MANIFEST_REL = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
+BATTERY_ROOT_REL = "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
 
 #: The seven strata and their per-battery counts, frozen by C0 and preserved
 #: exactly by the D-series family. `correct_overall` is a mean over THIS
@@ -91,7 +91,7 @@ ARM_SOURCES: dict[str, str] = {
 #: the same four-step fixed path C2's and C3's behavioural sessions rebuilt it
 #: from. A second copy of it here would be a second thing that can disagree
 #: about which checkpoint the incumbent is.
-INCUMBENT_CONSTRUCTION = "experiments.phase_c2.baseline.frozen_baseline_spec"
+INCUMBENT_CONSTRUCTION = "stages.phase_c2.baseline.frozen_baseline_spec"
 
 
 class D1BehaviouralError(RuntimeError):
@@ -319,7 +319,7 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
     #: derivation is code: this compares the document against the owner, so an
     #: edited design or a later promotion that this document did not follow is
     #: still refused here, where the field is assembled.
-    from experiments.phase_d_series.incumbent import (
+    from stages.d_series.incumbent import (
         disagreements, standing_incumbent,
     )
 
@@ -632,7 +632,7 @@ def session_contract(rung: str, repo_root: str | Path = REPO_ROOT
     a resource exists, so "what was this session supposed to measure" has one
     answer that was true before it measured anything.
     """
-    from experiments.recipes import E1_KD_HEAVY_0860K as recipe
+    from shared.recipes import E1_KD_HEAVY_0860K as recipe
 
     bd = behavioural_design(repo_root)
     role = f"d1_{rung}"

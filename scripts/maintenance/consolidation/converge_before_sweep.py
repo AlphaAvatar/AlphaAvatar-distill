@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Everything deterministic that a launch-bound sweep assumes, checked in seconds.
 
-    PYTHONPATH=src python scripts/consolidate/converge_before_sweep.py
-    PYTHONPATH=src python scripts/consolidate/converge_before_sweep.py --write
+    PYTHONPATH=src python scripts/maintenance/consolidation/converge_before_sweep.py
+    PYTHONPATH=src python scripts/maintenance/consolidation/converge_before_sweep.py --write
 
 Three of the first four launch-bound sweeps failed on derived records that had
 not been regenerated: a skip predicate changed without re-running the audit, a
@@ -46,7 +46,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -61,7 +61,7 @@ def _closure_experiments() -> tuple[str, ...]:
     """Every experiment `derive_closure` can snapshot, from its own registry."""
     import importlib.util
 
-    path = REPO / "scripts/architecture/derive_closure.py"
+    path = REPO / "scripts/maintenance/architecture/derive_closure.py"
     spec = importlib.util.spec_from_file_location("_derive_closure", path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -70,7 +70,7 @@ def _closure_experiments() -> tuple[str, ...]:
 
 GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("skip-predicate audit",
-     ("scripts/autoinit/audit_skip_predicates.py", "--write")),
+     ("scripts/stages/stage-1/phase_c1/audit_skip_predicates.py", "--write")),
     #: THE EXECUTABLE CLOSURE SNAPSHOT. Missing from this list until
     #: 2026-09-23, when a core edit left `configs/experiments/phase_c1/
     #: executable_closure.json` describing a tree that no longer existed and
@@ -86,25 +86,25 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: over. A second copy of the experiment list is how the next one comes
     #: to be missing too, so adding an experiment THERE adds it here.
     *(("closure snapshot: " + exp,
-       ("scripts/architecture/derive_closure.py", "--experiment", exp, "--write"))
+       ("scripts/maintenance/architecture/derive_closure.py", "--experiment", exp, "--write"))
       for exp in _closure_experiments()),
     ("run index",
-     ("scripts/architecture/record_run_index.py", "--write")),
+     ("scripts/maintenance/architecture/record_run_index.py", "--write")),
     ("stage index",
-     ("scripts/consolidate/stage_attribution.py", "--write")),
+     ("scripts/maintenance/consolidation/stage_attribution.py", "--write")),
     #: Before the navigation, which reads the pointer. A launch_bound sweep
     #: leaves the pointer alone on purpose, so it lags by one run until this
     #: runs -- and it had drifted far enough to name a FAIL at a commit the run
     #: it pointed at had never swept.
     ("readiness pointer",
-     ("scripts/autoinit/record_pod_environment.py", "--repoint")),
+     ("scripts/shared/pod/record_pod_environment.py", "--repoint")),
     ("navigation + snapshot",
-     ("scripts/consolidate/render_log_navigation.py", "--write")),
+     ("scripts/maintenance/consolidation/render_log_navigation.py", "--write")),
     ("log inventory",
-     ("scripts/consolidate/build_log_inventory.py",
+     ("scripts/maintenance/consolidation/build_log_inventory.py",
       "--out", "logs/maintenance/inventories/log_inventory.json")),
     ("document links",
-     ("scripts/consolidate/fix_doc_links.py", "--write")),
+     ("scripts/maintenance/consolidation/fix_doc_links.py", "--write")),
 )
 
 
@@ -255,10 +255,10 @@ def cited_commits_are_reachable(root: Path = REPO) -> list[str]:
 
 
 def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
-    from experiments.phase_c1 import pod_environment as pe
-    from experiments.phase_c1.authorization_payload import (
+    from stages.phase_c1 import pod_environment as pe
+    from stages.phase_c1.authorization_payload import (
         C1AuthorizationRefused, build_c1_authorization_payload)
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     problems = []
     grant_rel = f"{rel_run_dir('phase_c1', run_id, stage_id)}/governance/grant.json"
@@ -290,14 +290,14 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     if any(ch in p for p in permitted for ch in "*?["):
         problems.append(f"the lineage exemption contains a glob: {permitted}")
 
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     if 'args.kind != "launch_bound"' not in src:
         problems.append("the recorder does not guard the global pointer "
                         "against a launch_bound sweep")
 
     #: REMOVED 2026-09-13: a check that the whole `logs/` tree is present, so
     #: that `needs_whole_tree` would not skip 23 tests in the sweep that the pod
-    #: then ran. The pod runs `scripts/experiments/stage-1/phase_c1/tests/` now and collects none of
+    #: then ran. The pod runs `scripts/stages/stage-1/phase_c1/tests/` now and collects none of
     #: them, so the divergence it guarded cannot happen and the guard protected
     #: nothing. Deleted rather than kept for reassurance.
 
@@ -312,7 +312,7 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     #: TWO paths, for two different reasons. The module itself now lives with its
     #: experiment; `support` is the shared helper package that §2.8a keeps in
     #: `tests/` precisely so a moved test does not strand its fixtures.
-    for extra in ("scripts/experiments/stage-1/phase_c1/tests", "tests"):
+    for extra in ("scripts/stages/stage-1/phase_c1/tests", "tests"):
         path = str(REPO / extra)
         if path not in sys.path:
             sys.path.insert(0, path)

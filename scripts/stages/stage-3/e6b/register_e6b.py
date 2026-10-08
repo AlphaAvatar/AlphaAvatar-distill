@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Write the immutable Experiment 6b registration, BEFORE anything trains.
 
-    PYTHONPATH=src python scripts/training/register_e6b.py --authorized-usd X
+    PYTHONPATH=src python scripts/stages/stage-3/e6b/register_e6b.py --authorized-usd X
 
 E6b fills the missing cell of an objective × data-scale matrix:
 
@@ -30,16 +30,16 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 SEEDS = {"sa": 20260726, "sb": 20260801}
 

@@ -32,10 +32,10 @@ for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _p) not in sys.path:
         sys.path.insert(0, str(REPO / _p))
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
 
-import autoinit_c2_behavioural_launch as L  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L  # noqa: E402
 
 
 def test_the_durable_store_can_hold_twelve_probes():

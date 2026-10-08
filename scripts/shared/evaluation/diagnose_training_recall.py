@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Can an overfitted checkpoint reproduce the targets it actually trained on?
 
-    PYTHONPATH=src python scripts/evaluation/diagnose_training_recall.py \
+    PYTHONPATH=src python scripts/shared/evaluation/diagnose_training_recall.py \
         --model /workspace/ckpt/e1_ctl_r0250k_sa_pca_stepmatched/model \
-        --pack artifacts/stage3/ladder_uniform_probe --rung 250000 \
-        --sessions artifacts/stage3/corpus_v2/sessions.jsonl \
+        --pack artifacts/shared/instruments/ladder_uniform_probe --rung 250000 \
+        --sessions artifacts/stages/stage-3/corpus_v2/sessions.jsonl \
         --n 150 --out artifacts/audit/training_recall
 
 The control arm `e1_ctl_r0250k_sa_pca_stepmatched` ran 4,412 steps x 2 blocks
@@ -48,7 +48,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation import degeneration  # noqa: E402

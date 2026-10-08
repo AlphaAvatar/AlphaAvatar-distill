@@ -37,7 +37,7 @@ def toy(tmp_path, monkeypatch):
     """A toy teacher, target, suite and two materialized profiles."""
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
     from aadistill.initialization.specs.metrics import StateEvalSuite, SuiteItem
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
     from transformers import Qwen3Config, Qwen3ForCausalLM
 
     FS.register_c2_operators()
@@ -110,8 +110,8 @@ def toy(tmp_path, monkeypatch):
 @pytest.fixture
 def driven(toy, tmp_path, monkeypatch):
     """The driver, pointed at a toy workspace, with the search scaled down."""
-    import autoinit_phase_c2_full_search_driver as D
-    import phase_a_search
+    from stages.phase_c2_full_search import autoinit_phase_c2_full_search_driver as D
+    from stages.phase_a import phase_a_search
 
     monkeypatch.setattr(D, "AUDIT", tmp_path / "audit")
     monkeypatch.setattr(D, "SEARCH_WORKDIR", tmp_path / "search")
@@ -144,7 +144,7 @@ def driven(toy, tmp_path, monkeypatch):
 
 
 def _args(**over):
-    import autoinit_phase_c2_full_search_driver as D
+    from stages.phase_c2_full_search import autoinit_phase_c2_full_search_driver as D
 
     base = ["--authorization-path", "unused", "--rate", "1.09",
             "--authorized-usd", "100", "--soft-stop-usd", "90",
@@ -186,8 +186,8 @@ def test_the_driver_runs_all_three_stages_for_real(driven):
 
 def test_the_driver_searches_the_JOINT_space(driven):
     """`impl_profiles=None` and the derived allowed set, not Search-1's."""
-    from experiments.phase_c2 import full_search_space as FS
-    from experiments.phase_c2 import search_space as SS
+    from stages.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import search_space as SS
 
     D, seen = driven
     assert D.FullSearchDriver(_args()).run() == 0
@@ -205,7 +205,7 @@ def test_the_driver_searches_the_JOINT_space(driven):
 
 def test_stage_a_records_the_derived_space_and_no_literals(driven):
     """Stage A binds what a reviewer needs and derives it from the registry."""
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     D, seen = driven
     driver = D.FullSearchDriver(_args())
@@ -270,7 +270,7 @@ def test_commit_refuses_when_the_search_committed_nothing(driven, tmp_path):
 def test_stage_a_refuses_an_unmaterialized_branch_profile(driven, monkeypatch):
     """A declared-but-unbuilt mixture is a space this session cannot search."""
     from aadistill.initialization.calibration import profiles as P
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     D, seen = driven
     real = P.get_profile
@@ -299,7 +299,7 @@ def test_stage_a_refuses_an_unmaterialized_branch_profile(driven, monkeypatch):
 
 def test_the_driver_has_no_path_into_a_behavioural_stage():
     """One authorization must not be able to buy a search AND a promotion."""
-    import autoinit_phase_c2_full_search_driver as D
+    from stages.phase_c2_full_search import autoinit_phase_c2_full_search_driver as D
 
     source = Path(D.__file__).read_text()
     for forbidden in ("recovery", "probe", "correct_overall", "screening",

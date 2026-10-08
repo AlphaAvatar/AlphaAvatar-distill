@@ -1,7 +1,7 @@
 """Build the frozen Phase-C2 SCREENING battery (role C2_SCREENING).
 
-    PYTHONPATH=src .venv/bin/python scripts/data/build_c2_screening_battery.py \
-        --out artifacts/stage3/c2_screening_v1
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_c2/build_c2_screening_battery.py \
+        --out artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1
 
 Its only job is to RANK the Top-K full-search candidates against the incumbent B
 on one screening recovery seed, so that one candidate can advance to
@@ -48,19 +48,19 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from battery_render import (  # noqa: E402
+from shared.data.battery_render import (  # noqa: E402
     RENDERERS, norm, rank_take, read_rows, source_digest,
 )
 #: The mixture, the pinned sources and the five-role exclusion contract are C1's.
 #: Imported, never restated: a second copy is how two batteries come to mean
 #: different things by `correct_overall`.
-from build_c1_confirmation_battery import (  # noqa: E402
+from stages.phase_c1.build_c1_confirmation_battery import (  # noqa: E402
     C0_DIGEST, SETS, SOURCES, excluded_identities,
 )
 
@@ -74,7 +74,7 @@ RANK_DOMAIN = "phase-c2-screening-battery"
 
 #: The asset this battery must be disjoint from, beyond C1's five roles. It is
 #: read for exclusion ONLY and is not consumed.
-C1_CONFIRMATION = "artifacts/stage3/c1_confirmation_v1"
+C1_CONFIRMATION = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 
 
 def exclude_c1_confirmation(rel: str, source_ids: set[str],
@@ -111,15 +111,15 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out", default="artifacts/stage3/c2_screening_v1")
-    ap.add_argument("--battery", default="artifacts/eval/battery_v2")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1")
+    ap.add_argument("--battery", default="artifacts/stages/stage-3/eval/battery_v2")
     ap.add_argument("--recovery-search",
-                    default="artifacts/stage3/recovery_search_v2")
+                    default="artifacts/stages/stage-1/batteries/recovery_search_v2")
     ap.add_argument("--sessions",
-                    default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
+                    default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
     ap.add_argument("--calibration",
-                    default="artifacts/stage1/e8_calibration_v1")
+                    default="artifacts/stages/stage-1/e8_calibration_v1")
     ap.add_argument("--c1-confirmation", default=C1_CONFIRMATION)
     args = ap.parse_args()
 
@@ -192,7 +192,7 @@ def main() -> None:
             "verdict, may not promote anything, is never a promotion asset and "
             "is never training data."),
         "created_utc": datetime.now(timezone.utc).isoformat(),
-        "command": "scripts/data/build_c2_screening_battery.py",
+        "command": "scripts/stages/stage-1/phase_c2/build_c2_screening_battery.py",
         "n_prompts": sum(len(v) for v in built.values()),
         "n_scorable_prompts": sum(len(built[n]) for n in scorable),
         "sets": outputs,
@@ -246,7 +246,7 @@ def main() -> None:
         },
         "sources": sources,
         "rendering": (
-            "scripts/data/battery_render.py — the same renderers, instructions "
+            "scripts/shared/data/battery_render.py — the same renderers, instructions "
             "and id conventions as c1_confirmation_v1 and recovery_search"),
         "content_sha256": content,
         "content_sha256_convention": (

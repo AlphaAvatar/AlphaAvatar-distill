@@ -1,7 +1,7 @@
 """Build the frozen recovery-search battery (role RECOVERY_SEARCH).
 
-    PYTHONPATH=src .venv/bin/python scripts/data/build_recovery_search_battery.py \
-        --out artifacts/stage3/recovery_search_v1
+    PYTHONPATH=src .venv/bin/python scripts/shared/data/build_recovery_search_battery.py \
+        --out artifacts/stages/stage-1/batteries/recovery_search_v1
 
 Its **only** job is choosing among the fixed 0.86M recovery probes. It is not the
 promotion battery, does not reuse it, and never reports a final result.
@@ -39,7 +39,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
@@ -221,11 +221,11 @@ def take(rows, want, exclude_ids, exclude_hashes, make):
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="artifacts/stage3/recovery_search_v1")
-    ap.add_argument("--battery", default="artifacts/eval/battery_v2")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/batteries/recovery_search_v1")
+    ap.add_argument("--battery", default="artifacts/stages/stage-3/eval/battery_v2")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
     args = ap.parse_args()
 
     out = REPO_ROOT / args.out

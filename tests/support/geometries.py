@@ -2,7 +2,7 @@
 
 The 36-layer teacher and the 596M target are facts about the models this project
 compresses, not about any one experiment. They lived in
-`scripts/experiments/stage-3/tests/test_frozen_records.py`, so a test in another suite could only
+`scripts/stages/stage-3/tests/test_frozen_records.py`, so a test in another suite could only
 reach them by importing that test module — which is how a historical E-series
 test ended up imported by the shared cost-model tests, and why moving either one
 broke the other.

@@ -52,7 +52,7 @@ from aadistill.runtime.pod_environment import (
     SweepContract,
 )
 
-from experiments.phase_d1 import d1_session as D1S
+from stages.phase_d1 import d1_session as D1S
 
 REPO = Path(__file__).resolve().parents[4]
 
@@ -140,9 +140,9 @@ def pod_test_environment_files() -> tuple[str, ...]:
     line of production code.
     """
     named = [
-        "scripts/pod/simulate_pod_env.sh",
+        "scripts/shared/pod/simulate_pod_env.sh",
         "conftest.py",
-        "scripts/experiments/conftest.py",
+        "scripts/conftest.py",
     ]
     for selection in pod_test_selection():
         root = REPO / selection
@@ -166,7 +166,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
             "a replay readiness record has no location without a run id: it is "
             "evidence about one attempt, and a shared path is how one attempt's "
             "evidence comes to describe another's tree")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir(EXPERIMENT_ID, run_id, stage_id or STAGE_ID)}"
             f"/{RUN_READINESS_ROLE}")
@@ -192,7 +192,7 @@ def harness(repo_root: Any = REPO) -> dict[str, Any]:
     p = str(REPO / "scripts/autoinit")
     if p not in sys.path:
         sys.path.insert(0, p)
-    from issue_d1_replay_authorization import HARNESS_FILES
+    from stages.phase_d1.issue_d1_replay_authorization import HARNESS_FILES
 
     root = Path(repo_root)
     missing = [rel for rel in HARNESS_FILES if not (root / rel).is_file()]

@@ -23,9 +23,9 @@ from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[5]
+REPO = Path(__file__).resolve().parents[6]
 
-from experiments.phase_d_series import incumbent as I  # noqa: E402
+from stages.d_series import incumbent as I  # noqa: E402
 
 D1_DESIGN = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 
@@ -105,7 +105,7 @@ class TestEveryRoundsConstantsAgreeWithTheDerivation:
     """
 
     def test_c2s_four_frozen_b_constants_are_the_standing_identity(self):
-        from experiments.phase_c2 import baseline as BL
+        from stages.phase_c2 import baseline as BL
 
         standing = I.standing_incumbent(REPO)
         assert BL.B_ARTIFACT_DIGEST == standing["artifact_digest"]
@@ -114,7 +114,7 @@ class TestEveryRoundsConstantsAgreeWithTheDerivation:
         assert BL.B_ARCH_SIGNATURE == standing["arch_signature"]
 
     def test_c2s_frozen_path_ends_in_the_operator_c1_promoted(self):
-        from experiments.phase_c2 import baseline as BL
+        from stages.phase_c2 import baseline as BL
 
         standing = I.standing_incumbent(REPO)
         last_kind, last_impl, last_profile = BL.B_PATH[-1]
@@ -130,7 +130,7 @@ class TestEveryRoundsConstantsAgreeWithTheDerivation:
         label would pass while the executed value drifted, which is the
         prose-instead-of-comparison failure this file exists for.
         """
-        from experiments.phase_c3 import session as C3
+        from stages.phase_c3 import session as C3
 
         assert C3.expected_incumbent_digest() == \
             I.standing_incumbent(REPO)["artifact_digest"]
@@ -165,7 +165,7 @@ class TestTheD1DesignDeclaresTheRightControl:
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         check = w.incumbent_identity_check()
         design = _design()
@@ -187,7 +187,7 @@ class TestTheD1DesignDeclaresTheRightControl:
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         declared = _design()["incumbent"]
         emitted = w.incumbent()
@@ -221,7 +221,7 @@ class TestTheDesignHashCarriesNoRunState:
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
 
         design = _design()
         preimage = json.dumps(w.scientific_preimage(design))
@@ -245,7 +245,7 @@ class TestTheDesignHashCarriesNoRunState:
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
         from aadistill.infrastructure.manifest import sha256_json
 
         design = _design()
@@ -259,7 +259,7 @@ class TestTheDesignHashCarriesNoRunState:
         import sys
 
         sys.path.insert(0, str(REPO / "scripts/autoinit"))
-        import write_d1_design as w
+        from stages.phase_d1 import write_d1_design as w
         from aadistill.infrastructure.manifest import sha256_json
 
         design = _design()

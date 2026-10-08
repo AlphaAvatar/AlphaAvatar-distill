@@ -5,7 +5,7 @@ The rejected a4 finding was hand-assembled from numbers that ad-hoc scripts had
 printed, and the gap between "what ran" and "what the record says" is the whole
 reason this investigation exists. So the record is COMPUTED:
 
-    python scripts/validation/batch_invariance_finding.py REPORT_DIR... \\
+    python scripts/shared/validation/batch_invariance_finding.py REPORT_DIR... \\
         --out logs/.../finding.json
 
 Each REPORT_DIR holds one `report.json` written by
@@ -26,7 +26,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 
 #: The prior record's own numbers. Read from it at runtime where possible; these
 #: are the fields a comparison needs and the paths they live at.
@@ -706,7 +706,7 @@ def build(reports: dict, prior: dict | None = None) -> dict:
         "_contract": ("DERIVED, not written. Every number here was read from a "
                       "report.json emitted by batch_invariance_diagnostic.py, "
                       "and the verdict is computed by "
-                      "scripts/validation/batch_invariance_finding.py. It "
+                      "scripts/shared/validation/batch_invariance_finding.py. It "
                       "authorizes nothing and changes nothing."),
         "investigation_id": "batch_invariance_root_cause_v1",
         "derived_utc": datetime.now(timezone.utc).isoformat(),

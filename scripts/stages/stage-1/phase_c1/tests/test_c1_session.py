@@ -11,7 +11,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))   # experiments.* live here
 
-from experiments.phase_c1 import session as C  # noqa: E402
+from stages.phase_c1 import session as C  # noqa: E402
 from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 from aadistill.initialization.operators import registered_implementations  # noqa: E402
 
@@ -167,7 +167,7 @@ def test_the_module_carries_no_search_machinery():
     import ast
 
     path = (Path(__file__).resolve().parents[5]
-            / "scripts/experiments/stage-1/phase_c1/session.py")
+            / "scripts/stages/stage-1/phase_c1/session.py")
     imported: set[str] = set()
     for node in ast.walk(ast.parse(path.read_text())):
         if isinstance(node, ast.ImportFrom):

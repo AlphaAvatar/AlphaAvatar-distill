@@ -17,7 +17,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.governance.authorization import authorization_from_dict  # noqa: E402
-from experiments.preflight import PREFLIGHT_POLICY  # noqa: E402
+from shared.preflight import PREFLIGHT_POLICY  # noqa: E402
 
 AUTHORIZATION_CONFIG = (REPO
                         / "configs/experiments/micro_preflight/authorization.json")

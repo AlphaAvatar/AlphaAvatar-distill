@@ -1,7 +1,7 @@
 """The Phase-C1 confirmation battery: counts, isolation, and rendering parity.
 
 The parity test is the important one. C1 renders prompts through
-`scripts/data/battery_render.py` while the frozen `recovery_search_v2` was built
+`scripts/shared/data/battery_render.py` while the frozen `recovery_search_v2` was built
 by closures inside `build_recovery_search_battery.py`. Two copies of a rendering
 convention drift; this asserts they have not, by re-rendering the frozen
 artifact's own source rows and requiring byte equality.
@@ -21,12 +21,12 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-from battery_render import (DEFAULT_RANK_DOMAIN, FROZEN_SOURCES,  # noqa: E402
+from shared.data.battery_render import (DEFAULT_RANK_DOMAIN, FROZEN_SOURCES,  # noqa: E402
                             RENDERERS, check_group_parity,
                             norm, rank_key, rank_take)
 
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
-FROZEN = REPO / "artifacts/stage3/recovery_search_v2"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
+FROZEN = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 C0_DIGEST = "fb2eeea531f9f0d11f84b77cd47dff30697122de90a072a7a80c3a7535e89280"
 
 MIXTURE = {"gsm8k": 150, "math_verified": 150, "multihop": 150, "rag": 150,
@@ -68,7 +68,7 @@ def require_role(path: Path, role: str) -> None:
             f"historical source role {role!r} is absent at {path.relative_to(REPO)}; "
             "it is construction/isolation evidence, not a C1 runtime input, and a "
             "C1 pod does not stage it. Host-side proof lives in "
-            "scripts/autoinit/verify_c1_battery_isolation.py, which REFUSES an "
+            "scripts/stages/stage-1/phase_c1/verify_c1_battery_isolation.py, which REFUSES an "
             "absent or empty role.")
 
 
@@ -124,8 +124,8 @@ def test_there_are_no_duplicates_inside_the_battery(items):
 
 # --- isolation --------------------------------------------------------------
 
-@pytest.mark.parametrize("role_dir", ["artifacts/eval/battery_v2",
-                                      "artifacts/stage3/recovery_search_v2"])
+@pytest.mark.parametrize("role_dir", ["artifacts/stages/stage-3/eval/battery_v2",
+                                      "artifacts/stages/stage-1/batteries/recovery_search_v2"])
 def test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content(items, role_dir):
     require_role(REPO / role_dir, role_dir)
     rows = load(REPO / role_dir)
@@ -140,7 +140,7 @@ def test_it_is_disjoint_from_each_jsonl_role_by_id_and_by_content(items, role_di
 
 
 def test_it_is_disjoint_from_the_recovery_training_corpus(items):
-    corpus = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+    corpus = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
     require_role(corpus, "RECOVERY_TRAINING (corpus_v2/sessions.jsonl)")
     ids, hashes = set(), set()
     for line in corpus.open():
@@ -155,8 +155,8 @@ def test_it_is_disjoint_from_the_recovery_training_corpus(items):
     assert not {i["prompt_sha256"] for i in items} & hashes
 
 
-@pytest.mark.parametrize("rel", ["artifacts/stage1/state_eval_v1/items.jsonl",
-                                 "artifacts/stage1/e8_calibration_v1/items.jsonl"])
+@pytest.mark.parametrize("rel", ["artifacts/stages/stage-1/state_eval_v1/items.jsonl",
+                                 "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"])
 def test_it_is_disjoint_from_the_token_id_roles(items, rel):
     ids = set()
     for line in (REPO / rel).open():
@@ -175,7 +175,7 @@ def test_final_promotion_is_still_intact_and_was_only_read(manifest):
     assert manifest["isolation"]["final_promotion"]["n_prompts"] == 770
     assert "not sampled from" in manifest["isolation"]["final_promotion"]["note"]
     # The source-presence half needs the historical role on disk.
-    promo = REPO / "artifacts/eval/battery_v2/manifest.json"
+    promo = REPO / "artifacts/stages/stage-3/eval/battery_v2/manifest.json"
     require_role(promo, "FINAL_PROMOTION (eval/battery_v2)")
     assert promo.is_file()
 
@@ -301,7 +301,7 @@ def test_the_default_domain_still_reproduces_the_frozen_c1_identity(tmp_path):
     import subprocess
 
     manifest = json.loads(
-        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
     out = tmp_path / "rebuild"
     #: The hub cache is passed EXPLICITLY, resolved in-process, rather than by
     #: handing the subprocess a `$HOME` to infer it from. `hub_cache()` documents
@@ -309,10 +309,10 @@ def test_the_default_domain_still_reproduces_the_frozen_c1_identity(tmp_path):
     #: C1 attempt 3R: a pod exports `HF_HOME` and holds nothing under `$HOME`,
     #: so a test that reads one and a pod that reads the other decide
     #: differently for reasons unrelated to what is being tested.
-    from battery_render import hub_cache
+    from shared.data.battery_render import hub_cache
 
     result = subprocess.run(
-        [sys.executable, "scripts/data/build_c1_confirmation_battery.py",
+        [sys.executable, "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
          "--out", str(out)],
         cwd=REPO, capture_output=True, text=True,
         env={"PYTHONPATH": "src", "PATH": "/usr/bin:/bin",
@@ -351,7 +351,7 @@ def test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte(group):
         pytest.skip(
             f"pinned source snapshot absent: {result['repo_id']}@{result['revision']} "
             f"(file {result['file']}) expected at {result['resolved_snapshot']} — "
-            "renderer parity is enforced at $0 by scripts/autoinit/renderer_parity_gate.py")
+            "renderer parity is enforced at $0 by scripts/shared/validation/renderer_parity_gate.py")
     assert result["mismatches"] == [], f"{group}: {result['mismatches'][:5]}"
     assert not result["missing"], (
         f"{group}: re-rendered {result['n_checked']} of {result['n_frozen']} frozen "

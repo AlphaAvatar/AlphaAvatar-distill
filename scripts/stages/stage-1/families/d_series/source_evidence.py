@@ -2,7 +2,7 @@
 """Source-extension evidence for the three short D-series strata.
 
     PYTHONPATH=src:scripts:scripts/data python -m \
-        experiments.phase_d_series.source_evidence --write
+        stages.d_series.source_evidence --write
 
 **What this is for.** `battery_family.py` says the six-role family is short in
 three strata and names a candidate extension for each. This measures those
@@ -41,14 +41,14 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO_ROOT / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
 #: the ONE new concept this round adds, owned by the D-series application layer
-from experiments.phase_d_series.identity import (  # noqa: E402
+from stages.d_series.identity import (  # noqa: E402
     RENDERED_PROMPT_IS_THE_PROBLEM,
     d_series_item_id,
     excluded_by_review,
@@ -57,7 +57,7 @@ from experiments.phase_d_series.identity import (  # noqa: E402
     review_decision,
 )
 
-from battery_render import (  # noqa: E402
+from shared.data.battery_render import (  # noqa: E402
     FROZEN_SOURCES,
     RENDERERS,
     norm,
@@ -73,13 +73,13 @@ from battery_render import (  # noqa: E402
 #: within-battery dedup on that same hash. A second implementation of either
 #: would be a second definition of eligibility, and the first time they drifted
 #: the record would report a capacity the builder would not honour.
-from build_c1_confirmation_battery import (  # noqa: E402
+from stages.phase_c1.build_c1_confirmation_battery import (  # noqa: E402
     C0_DIGEST,
     excluded_identities,
 )
 
 SCHEMA = "aadistill.autoinit.d_series_source_evidence/v1"
-RECORD = "logs/shared/analyses/autoinit_d_series_source_evidence.json"
+RECORD = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_source_evidence.json"
 
 #: THE BASELINE CHAIN'S INPUTS, exactly the defaults `build_c1_confirmation_battery`
 #: runs with. Passed to the imported `excluded_identities` as an argument object,
@@ -93,11 +93,11 @@ RECORD = "logs/shared/analyses/autoinit_d_series_source_evidence.json"
 #: the corpus `source_id`. Importing the function is what makes that class of
 #: error impossible rather than merely fixed.
 BASELINE_INPUTS = {
-    "battery": "artifacts/eval/battery_v2",
-    "recovery_search": "artifacts/stage3/recovery_search_v2",
-    "sessions": "artifacts/stage3/corpus_v2/sessions.jsonl",
-    "state_eval": "artifacts/stage1/state_eval_v1",
-    "calibration": "artifacts/stage1/e8_calibration_v1",
+    "battery": "artifacts/stages/stage-3/eval/battery_v2",
+    "recovery_search": "artifacts/stages/stage-1/batteries/recovery_search_v2",
+    "sessions": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+    "state_eval": "artifacts/stages/stage-1/state_eval_v1",
+    "calibration": "artifacts/stages/stage-1/e8_calibration_v1",
 }
 
 #: What the D-SERIES owes beyond the baseline chain. These post-date the C1
@@ -160,7 +160,7 @@ UNPINNED_CANDIDATES: dict[str, dict[str, Any]] = {
 
 #: Per-stratum six-role shortfall, taken from the family rather than restated.
 def _shortfall() -> dict[str, int]:
-    from experiments.phase_d_series.battery_family import requirement
+    from stages.d_series.battery_family import requirement
 
     return {name: int(row["short_by"]) for name, row in requirement().items()
             if int(row["short_by"]) > 0}
@@ -189,7 +189,11 @@ def baseline_chain() -> tuple[set[str], set[str], dict]:
 
 
 def _pool_rows(pool: str, group: str) -> list[dict]:
-    p = REPO_ROOT / "artifacts/stage3" / pool / f"{group}.jsonl"
+    #: pools are addressed by their frozen spelling (the path each had when it
+    #: was drawn); the 2026-10-08 migration moved the bytes, so access resolves
+    #: through the historical-path table.
+    from shared.run_layout import resolve_historical
+    p = REPO_ROOT / resolve_historical(f"artifacts/stage3/{pool}") / f"{group}.jsonl"
     if not p.is_file():
         return []
     return [json.loads(line) for line in p.read_text().splitlines() if line.strip()]
@@ -224,7 +228,7 @@ def d_series_additional(group: str) -> tuple[set[str], set[str], dict]:
                                     "do not know about it"}
 
     for asset in D_SERIES_ADDITIONAL_CALIBRATION:
-        f = REPO_ROOT / "artifacts/stage1" / asset / "items.jsonl"
+        f = REPO_ROOT / "artifacts/stages/stage-1" / asset / "items.jsonl"
         if not f.is_file():
             provenance[asset] = {"status": "ABSENT"}
             continue
@@ -374,7 +378,7 @@ def math_stratum() -> dict[str, Any]:
     hidden behind a shared number.
     """
     from aadistill.data.verify import boxed_answer
-    from experiments.phase_d_series import math_source as ms
+    from stages.d_series import math_source as ms
 
     out: dict[str, Any] = {"pin": ms.file_manifest()}
     if not ms.is_fetched():
@@ -641,7 +645,7 @@ def reserved_problem_content(group: str) -> dict[str, Any]:
     `n_unrecoverable` is the number that matters on review: it is how many
     reserved problems this contract is blind to.
     """
-    from battery_render import FROZEN_SOURCES, read_rows
+    from shared.data.battery_render import FROZEN_SOURCES, read_rows
 
     ids: set[str] = set()
     provenance: dict[str, Any] = {}
@@ -831,7 +835,7 @@ def stage1_provenance() -> dict[str, Any]:
     for asset in (Path(BASELINE_INPUTS["calibration"]).name,
                   Path(BASELINE_INPUTS["state_eval"]).name,
                   *D_SERIES_ADDITIONAL_CALIBRATION):
-        f = REPO_ROOT / "artifacts/stage1" / asset / "items.jsonl"
+        f = REPO_ROOT / "artifacts/stages/stage-1" / asset / "items.jsonl"
         if not f.is_file():
             out[asset] = {"status": "ABSENT"}
             continue

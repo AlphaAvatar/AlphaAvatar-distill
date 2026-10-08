@@ -477,8 +477,8 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
     from aadistill.initialization.planning.fixed_path import (
         FixedPathSpec, FixedPathStep,
     )
-    from experiments.phase_d1 import d1_session as D1S
-    from experiments.phase_d1 import search_space as space
+    from stages.phase_d1 import d1_session as D1S
+    from stages.phase_d1 import search_space as space
 
     #: EVERY REGISTRY A D1 SESSION NEEDS, through the one function that owns
     #: that list. A replay built its own partial registration -- adapters and
@@ -525,7 +525,7 @@ def fixed_path_spec(leaf: ReplayLeaf, *, device: str = REPLAY_DEVICE,
     #: the full vocabulary under the incumbent position policy, which is not a
     #: subset of what the search did -- it is a different computation, and the
     #: pinned digests were produced by the other one.
-    from experiments.phase_d_series import scoring_protocol as SP
+    from stages.d_series import scoring_protocol as SP
     return FixedPathSpec(
         path_id=f"d1_replay.{leaf.state_id}",
         family=FAMILY,
@@ -789,7 +789,7 @@ def verify_operator_configs(leaves: Sequence[ReplayLeaf], *,
     }
 
 
-REPLAY_EXECUTION_OWNER = "experiments.phase_d1.d1_session.execution"
+REPLAY_EXECUTION_OWNER = "stages.phase_d1.d1_session.execution"
 
 
 def replay_execution():
@@ -809,7 +809,7 @@ def replay_execution():
     reproduced byte-exactly anyway, because its greedy block choice compares KL
     gaps far larger than batch-order float noise; FFN did not.
     """
-    from experiments.phase_d1 import d1_session as D1S
+    from stages.phase_d1 import d1_session as D1S
 
     return D1S.execution()
 

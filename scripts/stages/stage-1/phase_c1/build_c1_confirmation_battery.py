@@ -1,7 +1,7 @@
 """Build the frozen Phase-C1 confirmation battery (role C1_CONFIRMATION).
 
-    PYTHONPATH=src .venv/bin/python scripts/data/build_c1_confirmation_battery.py \
-        --out artifacts/stage3/c1_confirmation_v1
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py \
+        --out artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1
 
 Its only job is the Phase-C1 two-arm ATTENTION isolation. It is not the
 recovery-search battery, not the promotion battery, and never training data.
@@ -38,14 +38,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from battery_render import (  # noqa: E402
+from shared.data.battery_render import (  # noqa: E402
     RENDERERS,
     norm,
     rank_take,
@@ -158,12 +158,12 @@ def excluded_identities(args) -> tuple[set[str], set[str], dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="artifacts/stage3/c1_confirmation_v1")
-    ap.add_argument("--battery", default="artifacts/eval/battery_v2")
-    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
-    ap.add_argument("--sessions", default="artifacts/stage3/corpus_v2/sessions.jsonl")
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--calibration", default="artifacts/stage1/e8_calibration_v1")
+    ap.add_argument("--out", default="artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1")
+    ap.add_argument("--battery", default="artifacts/stages/stage-3/eval/battery_v2")
+    ap.add_argument("--recovery-search", default="artifacts/stages/stage-1/batteries/recovery_search_v2")
+    ap.add_argument("--sessions", default="artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
+    ap.add_argument("--calibration", default="artifacts/stages/stage-1/e8_calibration_v1")
     args = ap.parse_args()
 
     out = REPO_ROOT / args.out
@@ -228,7 +228,7 @@ def main() -> None:
                     "never a promotion asset, never training data, never a "
                     "beam-ranking input"),
         "created_utc": datetime.now(timezone.utc).isoformat(),
-        "command": "scripts/data/build_c1_confirmation_battery.py",
+        "command": "scripts/stages/stage-1/phase_c1/build_c1_confirmation_battery.py",
         "n_prompts": sum(len(v) for v in built.values()),
         "n_scorable_prompts": sum(len(built[n]) for n in scorable),
         "sets": outputs,
@@ -256,9 +256,9 @@ def main() -> None:
         },
         "isolation": provenance,
         "sources": sources,
-        "rendering": ("scripts/data/battery_render.py — the same renderers, "
+        "rendering": ("scripts/shared/data/battery_render.py — the same renderers, "
                       "instructions and id conventions as recovery_search, asserted "
-                      "against the frozen artifact in scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py"),
+                      "against the frozen artifact in scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py"),
         "content_sha256": content,
         "content_sha256_convention": ("sha256 over newline-joined sorted "
                                       "'id:prompt_sha256' pairs"),

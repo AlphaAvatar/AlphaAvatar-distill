@@ -9,7 +9,7 @@ nothing about a model family is involved.
 **The experiment-specific half lives with its experiment** (AGENTS.md 2.8a). Which
 four implementations a frozen path applies, and what a committed search record's
 rounds look like, are facts about that campaign:
-`scripts/experiments/stage-1/phase_d1/tests/test_frozen_path_monotonicity.py`.
+`scripts/stages/stage-1/phase_d1/tests/test_frozen_path_monotonicity.py`.
 This file imports no experiment and would hold if every experiment were deleted.
 
 Two separate claims:

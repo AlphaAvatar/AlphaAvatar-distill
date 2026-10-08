@@ -9,12 +9,12 @@ check is all this is: it reads imports and string literals, it builds nothing.
 **Two rules, and the distinction between them is the whole point.**
 
 1. A core test may not import a SPECIFIC experiment package —
-   `experiments.phase_c1`, `experiments.phase_a3`, `experiments.phase_d1`, an
+   `stages.phase_c1`, `stages.phase_a3`, `stages.phase_d1`, an
    `eN` module. Those carry one campaign's arms, seeds, digests, budgets and
    wiring. A test that needs them is that experiment's test.
 2. A core test MAY import the SHARED APPLICATION LAYER —
-   `experiments.run_layout`, `experiments.calibration`, `experiments.datasets`,
-   `experiments.deployment` and their siblings at the top of
+   `shared.run_layout`, `shared.calibration`, `shared.datasets`,
+   `shared.deployment` and their siblings at the top of
    `scripts/experiments/`. These are cross-stage conventions, and a deliberate
    core↔application contract test is legitimate: `run_layout`'s convention is
    checked against `aadistill.runtime.run_layout`'s mechanism precisely because
@@ -234,7 +234,7 @@ def test_the_guard_would_catch_a_violation(tmp_path):
         "false positive that would have made it not worth having")
 
     allowed = tmp_path / "test_allowed.py"
-    allowed.write_text("from experiments.run_layout import RunLayout\n")
+    allowed.write_text("from shared.run_layout import RunLayout\n")
     assert all(m.split(".")[1] in shared for m in experiment_imports(allowed)), \
         "the guard would refuse a legitimate shared-application contract"
 

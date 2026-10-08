@@ -353,11 +353,11 @@ def test_every_scorer_returns_a_reason(name):
 import json  # noqa: E402
 from pathlib import Path  # noqa: E402
 
-BATTERY = Path(__file__).resolve().parents[2] / "artifacts/eval/battery_v2"
+BATTERY = Path(__file__).resolve().parents[2] / "artifacts/stages/stage-3/eval/battery_v2"
 needs_battery = pytest.mark.skipif(
     not BATTERY.is_dir(),
     reason="frozen battery is a gitignored artifact; rebuild with "
-           "scripts/data/build_capability_battery.py")
+           "scripts/stages/stage-3/e2/build_capability_battery.py")
 
 
 def _rows(name):

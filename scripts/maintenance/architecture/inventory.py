@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """What is in `src/aadistill`, and which of it is generic. AST, not grep.
 
-    PYTHONPATH=src python scripts/architecture/inventory.py --write
+    PYTHONPATH=src python scripts/maintenance/architecture/inventory.py --write
 
 The maintainer's rule is that the algorithm core must be reusable and that
 experiment and model instances live in configuration and scripts. Deciding
@@ -39,7 +39,7 @@ import symtable
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 CORE = REPO_ROOT / "src" / "aadistill"
 OUT = "logs/maintenance/inventories/architecture_inventory.json"
 SCHEMA = "aadistill.architecture_inventory/v1"

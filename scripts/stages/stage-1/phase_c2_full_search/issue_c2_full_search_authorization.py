@@ -2,11 +2,11 @@
 """Issue the full-search authorization from a maintainer grant.
 
     PYTHONPATH=src:scripts python \
-      scripts/autoinit/issue_c2_full_search_authorization.py \
+      scripts/stages/stage-1/phase_c2_full_search/issue_c2_full_search_authorization.py \
       --grant <path> --run-id attempt1
 
 Thin by design. Everything that DECIDES anything lives in
-`experiments.phase_c2.full_search_authorization`, so the CLI and a test
+`stages.phase_c2.full_search_authorization`, so the CLI and a test
 candidate are refused for the same reasons by the same code. Three effects stay
 here because they are effects rather than computations: refusing a dirty tree,
 reading the clock, and re-quoting the live rate.
@@ -43,13 +43,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
-from experiments.phase_c2 import full_search as FSG  # noqa: E402
-from experiments.phase_c2.full_search_authorization import (  # noqa: E402
+from stages.phase_c2 import full_search as FSG  # noqa: E402
+from stages.phase_c2.full_search_authorization import (  # noqa: E402
     FullSearchAuthorizationRefused, build_payload, load_config,
 )
 
@@ -63,7 +63,7 @@ def git(*args: str) -> str:
 
 
 def authorization_path_for(run_id: str, stage_id: str) -> str:
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir('phase_c2_full_search', run_id, stage_id)}"
             "/governance/authorization.json")

@@ -2,13 +2,13 @@
  "stage": "stage3_recovery",
  "run_name": "e3_a2_lora_attn_sb",
  "_purpose": "Experiment 3 arm A2 (attention LoRA r8): identical to A1 except that LoRA (rank 32, alpha 64 -- alpha scaled with rank so the alpha/r scaling stays 2.0, i.e. the adapter's effective update magnitude is held fixed and only the subspace dimension changes, dropout 0, bias none, B=0 so the initial merged model is exactly the Stage 1 model) is added to self_attn q/k/v/o while their base weights stay frozen. LoRA tensors are optimized by the SAME single AdamW group, learning rate, schedule and weight decay as every other trainable parameter -- no separate LoRA lr, no separate parameter group. lora.seed is pinned across both arms so the run seed varies block order only, exactly as in A0/A1.",
- "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+ "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16"
  },
- "data_dir": "artifacts/stage3/ladder_uniform",
+ "data_dir": "artifacts/stages/stage-3/ladder_uniform",
  "groups": null,
  "packing": "ladder",
  "block_len": 8192,
@@ -58,7 +58,7 @@
   "eval_every": 127,
   "eval_blocks": 16
  },
- "out_dir": "artifacts/stage3/e3_a2_lora_attn_sb",
+ "out_dir": "artifacts/stages/stage-3/e3_a2_lora_attn_sb",
  "rung": 860000,
  "val_blocks": 16,
  "lora": {

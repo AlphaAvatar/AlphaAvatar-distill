@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Eight ownership violations the literal and semantic gates could not see.
 
-    PYTHONPATH=src:scripts python scripts/architecture/core_ownership.py [--write]
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/core_ownership.py [--write]
 
 Both existing gates reported ZERO while all eight defects below were live in
 `src/aadistill`. They were not evaded; they were out of vocabulary:
@@ -34,7 +34,7 @@ import json
 import re
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 CORE = REPO / "src/aadistill"
 
 RULES = (

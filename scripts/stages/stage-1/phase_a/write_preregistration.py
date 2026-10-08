@@ -1,6 +1,6 @@
 """Emit the machine-readable Phase A preregistration. Zero cost.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/write_preregistration.py
+    PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_a/write_preregistration.py
 
 Everything the run is committed to, assembled from the live objects rather than
 transcribed, so a field cannot drift from what the code will actually do. The
@@ -21,7 +21,7 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -31,8 +31,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.initialization.specs.arch import ArchSpec, get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.calibration.profiles import NO_CALIBRATION
-from experiments.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
-from experiments.calibration import DOMAIN_BALANCED_V1
+from shared.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1
 from aadistill.runtime.cost import (  # noqa: E402
     L40S_MEASURED,
     activation_stats_bytes,
@@ -55,7 +55,7 @@ from aadistill.initialization.planning.recovery import (
     EquivalenceRule,
     SuccessiveHalvingPlan,
 )
-from experiments.recovery_policy import (
+from shared.recovery_policy import (
     plan_policy,
     CAPABILITY_SCHEMA_V1,
     CATASTROPHIC_V1,
@@ -65,12 +65,12 @@ from experiments.recovery_policy import (
     SEED_SB,
     SEED_SC,
 )
-from experiments.source_sets import (
+from shared.source_sets import (
     TRAINER_SOURCE_FILES_V1,
     recovery_scoring_contract,
     trainer_source_digest,
 )
-from experiments.recipes import E1_KD_HEAVY_0860K
+from shared.recipes import E1_KD_HEAVY_0860K
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 #: Explicit: importing an adapter module no longer registers it.
@@ -87,7 +87,7 @@ TARGET = ArchSpec.of("qwen3", dict(
     vocab_size=151936, tie_word_embeddings=True))
 
 CANONICAL_CONTROL = {
-    "path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+    "path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
     "single_file_sha256": ("86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc"
                            "952cabd5df2633e54"),
     "num_parameters": 596_049_920,
@@ -157,7 +157,7 @@ def build_plan(battery: dict) -> SuccessiveHalvingPlan:
 
 
 def build_frozen_plan(repo_root: str | Path = REPO_ROOT, *,
-                      recovery_search: str = "artifacts/stage3/recovery_search_v2",
+                      recovery_search: str = "artifacts/stages/stage-1/batteries/recovery_search_v2",
                       stage3: str = "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete",
                       ) -> SuccessiveHalvingPlan:
     """The executing plan: built, then materialized from the control's own rates.
@@ -218,8 +218,8 @@ def materialize_from_control(plan: SuccessiveHalvingPlan,
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=MATERIALIZED_PREREGISTRATION)
-    ap.add_argument("--state-eval", default="artifacts/stage1/state_eval_v1")
-    ap.add_argument("--recovery-search", default="artifacts/stage3/recovery_search_v2")
+    ap.add_argument("--state-eval", default="artifacts/stages/stage-1/state_eval_v1")
+    ap.add_argument("--recovery-search", default="artifacts/stages/stage-1/batteries/recovery_search_v2")
     ap.add_argument(
         "--stage3", default="logs/stages/stage-1/phase_a/results/autoinit_stage3_complete",
         help="Completed control-characterization products. When this directory "
@@ -389,7 +389,7 @@ def main() -> None:
 
         "data_hashes": {
             "operator_calibration": {
-                "asset": "artifacts/stage1/e8_calibration_v1",
+                "asset": "artifacts/stages/stage-1/e8_calibration_v1",
                 "content_sha256": DOMAIN_BALANCED_V1.content_sha256,
                 "items_file_sha256": DOMAIN_BALANCED_V1.items_file_sha256,
             },
@@ -402,7 +402,7 @@ def main() -> None:
                 "content_sha256": battery["content_sha256"],
             },
             "final_promotion": {
-                "asset": "artifacts/eval/battery_v2",
+                "asset": "artifacts/stages/stage-3/eval/battery_v2",
                 "inclusion_mask_sha256": ("d6e24e0b09da1bcc692b1dc96d8236808d29551a"
                                           "9fc94a47d1d968fd3f73d6ba"),
                 "status": "ISOLATED FROM THE ENTIRE SEARCH",
@@ -526,7 +526,7 @@ def main() -> None:
                                "preregistration must be re-emitted with the "
                                "attested digest before Phase A is authorized."),
                 "attested_artifact": "logs/autoinit_phase_a_protocol_attested.json",
-                "attested_by": "scripts/autoinit/attest_protocol.py",
+                "attested_by": "scripts/shared/preflight/attest_protocol.py",
                 "stage_2_compares_against": ("the Stage-0 attested protocol hash, "
                                              "via RecoveryProbeIdentity."
                                              "require_attested()"),
@@ -687,10 +687,10 @@ def main() -> None:
                 ("the Phase-A harness rehearsed end to end at toy scale before "
                  "any pod exists",
                  all((REPO_ROOT / p).is_file() for p in (
-                     "scripts/experiments/stage-1/phase_a/tests/test_phase_a_rehearsal.py",
-                     "scripts/experiments/stage-1/phase_a/tests/test_phase_a_search_executes.py",
-                     "scripts/pod/autoinit_phase_a_launch.py",
-                     "scripts/pod/autoinit_phase_a_driver.py"))),
+                     "scripts/stages/stage-1/phase_a/tests/test_phase_a_rehearsal.py",
+                     "scripts/stages/stage-1/phase_a/tests/test_phase_a_search_executes.py",
+                     "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+                     "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py"))),
             ) if not satisfied
         ],
         "satisfied_before_launch": [

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Emit the machine-readable Phase-B preregistration. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/write_phase_b_preregistration.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/write_phase_b_preregistration.py \
         --out logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json
 
 Everything Phase B is committed to, **before any Phase-B result exists**,
@@ -30,25 +30,25 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.initialization.calibration.profiles import NO_CALIBRATION
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
 from aadistill.initialization.operators import V1_IMPLEMENTATIONS  # noqa: E402
 from aadistill.initialization.calibration.profiles import CalibrationNeed  # noqa: E402
-from experiments.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_EXCLUSION_RULE, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, SURVIVORS_AT_SB, phase_b_source_digest  # noqa: E402
+from stages.phase_b.plan import CANONICAL_CONTROL, PHASE_A_EXCLUDED_LEAVES, PHASE_A_EXCLUSION_RULE, PHASE_A_IMPORTED_FINALISTS, PHASE_B_DELEGATED_IDENTITIES, PHASE_B_PLAN_V1, PHASE_B_SEARCHED_LEAVES, PHASE_B_UNCOVERED, SURVIVORS_AT_SB, phase_b_source_digest  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
     SCHEDULE_V1,
 )
-from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
+from shared.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 FROZEN_SCIENCE_PLAN = REPO_ROOT / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 REUSE_RECORD = REPO_ROOT / "logs/shared/analyses/autoinit_historical_probe_reuse.json"
-STATE_EVAL_MANIFEST = REPO_ROOT / "artifacts/stage1/state_eval_v1/manifest.json"
+STATE_EVAL_MANIFEST = REPO_ROOT / "artifacts/stages/stage-1/state_eval_v1/manifest.json"
 
 #: Transcribed, then verified against the file. A constant that reads its expected
 #: value out of its own subject cannot fail.

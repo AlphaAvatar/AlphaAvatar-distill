@@ -31,7 +31,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 
-from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, IMPORT_REQUIRED_FIELDS, ControlImportError, continuation_manifest, import_permanent_control  # noqa: E402
+from stages.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, IMPORT_REQUIRED_FIELDS, ControlImportError, continuation_manifest, import_permanent_control  # noqa: E402
 from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 
@@ -279,14 +279,14 @@ def test_the_continuation_does_not_train_and_cannot_reach_phase_a():
     assert manifest["manifest_sha256"]
     assert manifest["import_required_fields"] == list(IMPORT_REQUIRED_FIELDS)
     # It is a different plan from the preflight, not a mutation of it.
-    from experiments.recovery_policy import PREFLIGHT_PLAN_V1
+    from shared.recovery_policy import PREFLIGHT_PLAN_V1
     assert CONTINUATION_PLAN_V1.plan_hash != PREFLIGHT_PLAN_V1.plan_hash
     assert CONTINUATION_PLAN_V1.plan_id != PREFLIGHT_PLAN_V1.plan_id
 
 
 def test_advance_to_was_not_weakened():
     """The preflight gate must still refuse what it refused before."""
-    from experiments.recovery_policy import PREFLIGHT_PLAN_V1
+    from shared.recovery_policy import PREFLIGHT_PLAN_V1
 
     with pytest.raises(RecoveryAdmissionError, match="no recorded result"):
         PREFLIGHT_PLAN_V1.advance_to(3, {0: {"passed": True}, 1: {"passed": True}})
@@ -303,7 +303,7 @@ def load_continuation_driver(tmp_path: Path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "continuation_driver", REPO / "scripts/pod/autoinit_continuation_driver.py")
+        "continuation_driver", REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["continuation_driver"] = mod
     spec.loader.exec_module(mod)
@@ -464,26 +464,26 @@ def test_the_launcher_reports_failure_when_the_driver_does():
     tail = runner[runner.index("def collect_and_teardown"):]
     assert "return done" in tail
     assert "done = terminal == success" in tail
-    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
+    launch = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py").read_text()
     assert "run_session(" in launch
 
 
 def test_transport_is_separate_from_identity():
     """The driver imports a local artifact; how it arrived is not its business."""
-    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
     for forbidden in ("snapshot_download", "hf_hub_download", "scp", "relay"):
         assert forbidden not in driver.split('"""')[2], (
             f"the driver mentions {forbidden}: transport has leaked into the "
             "component that decides what a control IS")
     assert "CONTROL_ROOT" in driver
-    launch = (REPO / "scripts/pod/autoinit_continuation_launch.py").read_text()
+    launch = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py").read_text()
     assert "def materialize_controls" in launch
     assert '"relay"' in launch and '"scp"' in launch
     assert "--transport" in launch
 
 
 def test_the_continuation_driver_cannot_train_or_reach_phase_a():
-    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
     for forbidden in ("train_stage3.py", "Trainer(", "BeamSearch", "admit_leaves",
                       "probe_configs", "SuccessiveHalvingPlan", "run_phase_a"):
         assert forbidden not in driver, f"the continuation driver can reach {forbidden}"
@@ -507,7 +507,7 @@ def load_continuation_launcher():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "continuation_launch", REPO / "scripts/pod/autoinit_continuation_launch.py")
+        "continuation_launch", REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["continuation_launch"] = mod
     spec.loader.exec_module(mod)
@@ -537,7 +537,7 @@ def bare_launcher(mod, **overrides):
     then set explicitly, which is what makes it visible when the runner starts
     reading something new.
     """
-    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
+    from stages.recovery_continuation.plan import CONTINUATION_AUTHORIZATION
     from aadistill.infrastructure.session_runner import SessionRunner
 
     args = launch_args(mod, **overrides)
@@ -693,7 +693,7 @@ def test_the_success_spec_accepts_what_the_driver_writes(tmp_path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "collect_artifacts", REPO / "scripts/pod/collect_artifacts.py")
+        "collect_artifacts", REPO / "scripts/shared/pod/collect_artifacts.py")
     collect = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(collect)
     from aadistill.infrastructure.artifact_gate import build_manifest
@@ -725,7 +725,7 @@ def test_the_success_spec_accepts_what_the_driver_writes(tmp_path):
 def test_the_launcher_recognises_the_markers_its_own_driver_emits():
     """The poll loop watched for PREFLIGHT_* while the driver emits CONTINUATION_*."""
     mod = load_continuation_launcher()
-    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
     import re
 
     emitted = set(re.findall(r'mark\("([A-Z_]+)"\)', driver))
@@ -759,7 +759,7 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
     # is nothing for the continuation to have overridden.
     import importlib.util
     s = importlib.util.spec_from_file_location(
-        "preflight_launch", REPO / "scripts/pod/autoinit_preflight_launch.py")
+        "preflight_launch", REPO / "scripts/shared/preflight/autoinit_preflight_launch.py")
     pf = importlib.util.module_from_spec(s)
     sys.modules["preflight_launch"] = pf
     s.loader.exec_module(pf)
@@ -776,13 +776,13 @@ def test_the_authorization_binds_the_code_that_actually_runs():
     """It digested the preflight's files, so an edited continuation driver —
     the executable that spends the money — passed the gate unnoticed."""
     from aadistill.governance.authorization import harness_source_digest
-    from experiments.preflight import HARNESS_SOURCE_FILES_V1
-    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1
+    from shared.preflight import HARNESS_SOURCE_FILES_V1
+    from stages.recovery_continuation.plan import CONTINUATION_AUTHORIZATION, CONTINUATION_HARNESS_SOURCE_FILES_V1
 
     files = set(CONTINUATION_HARNESS_SOURCE_FILES_V1)
-    for executable in ("scripts/pod/autoinit_continuation_launch.py",
-                       "scripts/pod/autoinit_continuation_driver.py",
-                       "scripts/experiments/stage-1/recovery_continuation/plan.py"):
+    for executable in ("scripts/stages/stage-1/recovery_continuation/autoinit_continuation_launch.py",
+                       "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py",
+                       "scripts/stages/stage-1/recovery_continuation/plan.py"):
         assert executable in files
         assert executable not in HARNESS_SOURCE_FILES_V1   # the gap that existed
     assert CONTINUATION_AUTHORIZATION.harness_source_files == \
@@ -799,7 +799,7 @@ def test_the_authorization_binds_the_code_that_actually_runs():
 
 def test_the_continuation_authorization_is_narrow_and_cannot_train():
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.recovery_continuation.plan import CONTINUATION_AUTHORIZATION as auth
+    from stages.recovery_continuation.plan import CONTINUATION_AUTHORIZATION as auth
 
     # Raised to $4.82/$5.12 after the attempt-7 review. The cap is CUMULATIVE
     # over the continuation -- $3.4244 spent across seven attempts plus one more
@@ -840,7 +840,7 @@ def test_the_session_commit_is_verified_against_the_authorization():
     # The continuation's own type, not the bare primitive. `SpendAuthorization`
     # has no policy and now refuses to load anything at all, which would make
     # this test fail for a reason that has nothing to do with the commit gate.
-    from experiments.preflight import PreflightAuthorization
+    from shared.preflight import PreflightAuthorization
     auth = PreflightAuthorization.load(auth_path)
     head = subprocess.run(["git", "rev-parse", "HEAD"], capture_output=True,
                           text=True, cwd=REPO).stdout.strip()
@@ -943,7 +943,7 @@ def test_the_relay_transport_does_not_depend_on_an_unexported_env_var(tmp_path):
 
 
 @pytest.mark.skipif(
-    not (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file(),
+    not (REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").is_file(),
     reason="the battery is a local artifact, not tracked in git")
 def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     """The writer was validated; this consumer never ran on its output.
@@ -958,11 +958,11 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
     import subprocess
 
 
-    from experiments.recovery_policy import POOLED_COUNTS_V2
+    from shared.recovery_policy import POOLED_COUNTS_V2
 
     spec = importlib.util.spec_from_file_location(
         "rs_tests",
-        REPO / "scripts/experiments/tests/test_recovery_search_scoring.py")
+        REPO / "scripts/shared/tests/test_recovery_search_scoring.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
@@ -973,7 +973,7 @@ def test_stage3_aggregation_consumes_what_the_real_scorer_emits(tmp_path):
         out = tmp_path / f"{policy}_{seed}.json"
         rc = subprocess.run(
             [sys.executable,
-             str(REPO / "scripts/autoinit/score_recovery_search.py"),
+             str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
              "--generations", str(gen), "--label", f"ctl_{seed}",
              "--seed", str(seed), "--out", str(out)],
             capture_output=True, text=True, cwd=REPO,
@@ -1023,7 +1023,7 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     into a paid setup. A fallback to the network would reinstate exactly that,
     silently, so its absence is asserted too.
     """
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     #: Executable lines only. The comments still explain why `uv sync` and the
     #: unpinned pip installs cannot work here, and deleting that explanation to
     #: satisfy a substring match would throw away why two attempts died.
@@ -1052,7 +1052,7 @@ def test_the_paid_setup_contains_no_pypi_on_its_critical_path():
     assert "wheelhouse_vllm_cp312" in setup and "wheelhouse_cu128_cp312" in setup
     # And pinning does not replace observing what actually ran.
     assert "autoinit_engine_probe.py" in (
-        REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+        REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
 
     # Absent as COMMANDS. The comments still explain why `uv sync` cannot work
     # here, and deleting that explanation to satisfy a substring match would
@@ -1118,7 +1118,7 @@ def test_the_vllm_wheelhouse_is_frozen_by_bytes_not_only_by_version():
             if k not in ("manifest_sha256", "hash_formula")}
     assert manifest["manifest_sha256"] == sha256_json(body)
 
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert "wheelhouse_vllm_sha256.json" in setup
     # Before the environment is built from those bytes, not after.
     assert setup.index("VLLM_WHEELHOUSE_HASH_MISMATCH") < setup.index(
@@ -1195,9 +1195,9 @@ def test_setup_verifies_THIS_sessions_authorization_and_fails_closed():
     import sys
     import tempfile
 
-    from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
+    from stages.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     lines = setup.splitlines(True)
     start = next(i for i, l in enumerate(lines)
                  if l.startswith(': "${SESSION_AUTH_PATH'))
@@ -1283,7 +1283,7 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
     import subprocess
     import tempfile
 
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     # No session-specific filename may be baked into the shared script.
     assert "autoinit_preflight.status" not in setup
     assert "SESSION_STATUS" in setup
@@ -1343,7 +1343,7 @@ def test_setup_writes_its_markers_where_the_launcher_looks():
     # The driver still hardcodes its own status path. It agrees with the
     # launcher today, and agreement by coincidence is what cost $0.1324, so the
     # equality is pinned rather than assumed.
-    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
     named = re.search(r'STATUS = WS / "([^"]+)"', driver).group(1)
     cont = load_continuation_launcher()
     assert cont.STATUS.endswith("/" + named), (
@@ -1360,12 +1360,12 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
     which control this is, readiness says whether the frozen evaluator can use
     the package.
     """
-    from experiments.recovery_continuation.plan import EVALUATION_READY_ASSETS_V1, EvaluationReadinessError, check_evaluation_ready
+    from stages.recovery_continuation.plan import EVALUATION_READY_ASSETS_V1, EvaluationReadinessError, check_evaluation_ready
 
     assert set(EVALUATION_READY_ASSETS_V1) == {
         "chat_template.jinja", "tokenizer.json", "tokenizer_config.json"}
     # Pinned to the canonical initialization, which is the source of truth.
-    init = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    init = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     if init.is_dir():
         from aadistill.infrastructure.manifest import sha256_file
         for name, want in EVALUATION_READY_ASSETS_V1.items():
@@ -1387,12 +1387,12 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
             check_evaluation_ready(root)
 
     # And the driver runs it in stage 0, after the import and before any battery.
-    driver = (REPO / "scripts/pod/autoinit_continuation_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py").read_text()
     assert "check_evaluation_ready" in driver
     assert driver.index("check_evaluation_ready(control.checkpoint_dir)") < \
         driver.index("def stage1"), "readiness must be gated in stage 0"
     # Kept out of the recovery identity, not folded into it.
-    from experiments.recovery_continuation.plan import ImportedControl
+    from stages.recovery_continuation.plan import ImportedControl
     assert not any("chat_template" in f or "tokenizer" in f
                    for f in ImportedControl.__dataclass_fields__)
 
@@ -1400,8 +1400,8 @@ def test_stage0_checks_evaluation_readiness_separately_from_identity():
 def test_each_launcher_names_its_own_authorization_to_setup():
     """The preflight and the continuation must not share a binding."""
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_continuation_launch as C
-    from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
+    from stages.recovery_continuation import autoinit_continuation_launch as C
+    from stages.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     import importlib.util
 
@@ -1460,7 +1460,7 @@ def test_the_wheelhouse_builder_selects_for_the_pods_interpreter():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "build_wheelhouse", REPO / "scripts/pod/build_wheelhouse.py")
+        "build_wheelhouse", REPO / "scripts/shared/pod/build_wheelhouse.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     assert mod.POD_PYTHON == (3, 12)

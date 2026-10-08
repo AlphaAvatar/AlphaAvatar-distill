@@ -36,7 +36,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import (  # noqa: E402
+from shared.historical_declarations import (  # noqa: E402
     digest_pinned_replay_is_buildable as _replay_buildable,
 )
 
@@ -55,8 +55,8 @@ for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(ROOT / extra) not in sys.path:
         sys.path.insert(0, str(ROOT / extra))
 
-from experiments.phase_c2 import replay as RG  # noqa: E402
-from experiments.phase_c2 import replay_specs as RS  # noqa: E402
+from stages.phase_c2 import replay as RG  # noqa: E402
+from stages.phase_c2 import replay_specs as RS  # noqa: E402
 
 SELECTION = "7271091c91416b523865ea1320190e4a9ceafb97ecc68bc1b0e49f621573b673"
 SOURCE_COMMIT = "2421f630bc812d414ae25245e855059ffe29610d"
@@ -201,7 +201,7 @@ def test_the_artifact_specs_load_through_the_collectors_own_loader():
     """An invented lifecycle makes the document unloadable and the collector
     exits 1 before it looks at a file — on the pod, at closeout, with the
     weights still on it."""
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     for name in ("c2_replay_artifacts.json", "c2_replay_artifacts_failed.json"):
         specs = load_specs(str(ROOT / "configs/autoinit" / name))
@@ -229,7 +229,7 @@ def test_the_driver_populates_the_profile_registry_it_resolves_from():
         "import autoinit_c2_replay_driver;"
         "from aadistill.initialization.calibration.profiles import _PROFILES;"
         "before=sorted(_PROFILES);"
-        "from experiments.calibration import register_builtin_profiles;"
+        "from shared.calibration import register_builtin_profiles;"
         "register_builtin_profiles();"
         "after=sorted(_PROFILES);"
         "print(repr((before, after)))"
@@ -246,12 +246,12 @@ def test_the_driver_populates_the_profile_registry_it_resolves_from():
     assert "calib.reasoning_heavy@v2" in after
 
     #: And the driver must actually make that call.
-    source = (ROOT / "scripts/pod/autoinit_c2_replay_driver.py").read_text()
+    source = (ROOT / "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_driver.py").read_text()
     assert "register_builtin_profiles()" in source
 
 
 def test_the_driver_module_imports_and_declares_its_markers():
-    import autoinit_c2_replay_driver as D
+    from stages.phase_c2_replay import autoinit_c2_replay_driver as D
 
     assert D.N_LEAVES == 5
     assert D.LEAF_BYTES == 1_192_135_096
@@ -261,7 +261,7 @@ def test_the_driver_module_imports_and_declares_its_markers():
 
 
 def test_the_driver_refuses_a_soft_stop_that_leaves_no_teardown():
-    import autoinit_c2_replay_driver as D
+    from stages.phase_c2_replay import autoinit_c2_replay_driver as D
 
     saved = sys.argv
     try:
@@ -284,7 +284,7 @@ def test_the_workdir_filesystem_can_hold_the_worst_path_and_every_leaf():
     """
     import shutil
 
-    import autoinit_c2_replay_driver as D
+    from stages.phase_c2_replay import autoinit_c2_replay_driver as D
 
     need = D.WORST_PATH_BYTES + D.N_LEAVES * D.LEAF_BYTES
     free = shutil.disk_usage(ROOT).free
@@ -321,7 +321,7 @@ def test_the_session_fits_its_money_while_there_is_work_left():
     require the campaign to fund a sixth run nobody needs. The condition is
     derived from the durable store, not from a flag somebody sets.
     """
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     money = RG.remaining_usd(ROOT)
     outstanding = [leaf for leaf in RS.build_replay_leaves(ROOT, device="cpu")
@@ -348,7 +348,7 @@ def test_the_session_fits_its_money_while_there_is_work_left():
 def test_every_selected_leaf_is_durable_and_exact():
     """The deliverable, checked against the FROZEN SELECTION rather than
     against any run's claims about itself."""
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     store = Path(L.DURABLE_STORE)
     selection = {e["state_id"]: e for e in RS.load_selection(ROOT)["selected"]}
@@ -386,7 +386,7 @@ def test_the_attempt_is_authorized_for_the_campaign_remainder_not_its_ceiling():
 
 
 def test_the_teacher_revision_is_the_one_the_paths_are_rooted_at():
-    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
     for leaf in RS.build_replay_leaves(ROOT, device="cpu"):
         assert leaf.spec.root_repo_id == TEACHER_ID
@@ -394,7 +394,7 @@ def test_the_teacher_revision_is_the_one_the_paths_are_rooted_at():
 
 
 def test_the_launcher_builds_its_session_spec_on_this_tree():
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     spec = L.spec(L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40,
@@ -423,7 +423,7 @@ def test_the_authorization_document_round_trips_through_its_own_loader(tmp_path)
     """
     import json as _json
 
-    from issue_c2_replay_authorization import build_authorization_record
+    from stages.phase_c2_replay.issue_c2_replay_authorization import build_authorization_record
 
     grant = _json.loads(
         (ROOT / "logs/stages/stage-1/phase_c2_replay/runs/attempt1"
@@ -462,7 +462,7 @@ def test_the_launcher_satisfies_the_runners_argument_contract():
     """
     import inspect
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
     from aadistill.infrastructure.session_runner import run_session
 
     args = L.build_parser().parse_args(
@@ -487,8 +487,8 @@ def test_the_launcher_records_its_run_with_what_record_run_requires():
     attempt id was burned."""
     import inspect
 
-    import autoinit_c2_replay_launch as L
-    from experiments.run_layout import record_run
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
+    from shared.run_layout import record_run
 
     required = {name for name, p in
                 inspect.signature(record_run).parameters.items()
@@ -511,8 +511,8 @@ def test_every_transport_name_the_launcher_uses_exists_and_is_callable():
     import inspect
     import re as _re
 
-    import autoinit_c2_replay_launch as L
-    from experiments.phase_c2 import replay_bundle as RT
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
+    from stages.phase_c2 import replay_bundle as RT
 
     used = set(_re.findall(r"\bRT\.([A-Za-z_][A-Za-z0-9_]*)",
                            inspect.getsource(L)))
@@ -533,7 +533,7 @@ def test_the_bound_image_is_an_image_reference():
     roots, remote python, min CUDA — not an image reference. That put a dict on
     the `runpodctl pod create` command line, and it surfaced inside `create()`,
     which is one line away from a billing resource."""
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     assert isinstance(L.BOUND_IMAGE, str), type(L.BOUND_IMAGE)
     assert "/" in L.BOUND_IMAGE and ":" in L.BOUND_IMAGE, L.BOUND_IMAGE
@@ -554,7 +554,7 @@ def test_the_dry_run_flag_actually_stops_before_provider_creation():
 
     from aadistill.infrastructure.session_runner import SessionRunner
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     args = L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40,
@@ -578,9 +578,9 @@ def test_the_pod_paths_agree_with_the_setup_script():
     """
     import re as _re
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
-    text = (ROOT / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    text = (ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     ws = _re.search(r"^WS=(\S+)", text, _re.M)
     repo = _re.search(r"^REPO=(\S+)", text, _re.M)
     assert ws and repo, "the setup script no longer declares WS and REPO"
@@ -613,9 +613,9 @@ def test_the_driver_writes_its_evidence_where_the_collector_looks():
     Both ends are read here, not restated: the spec's pattern and the launcher's
     driver command.
     """
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     specs = load_specs(str(ROOT / "configs/autoinit/c2_replay_artifacts.json"))
     required = [x for x in specs if x.required]
@@ -652,9 +652,9 @@ def test_every_marker_this_session_declares_has_what_the_script_demands():
     """
     import re as _re
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
-    text = (ROOT / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    text = (ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     spec = L.spec(L.build_parser().parse_args(
         ["--scr", "/tmp/x", "--session-commit", "d" * 40,
          "--bundle", "b.bundle", "--run-id", "preflight"]))
@@ -687,7 +687,7 @@ def test_the_frozen_asset_expectation_names_what_the_five_paths_read():
     """Not Search-1's document, and not more than this session stages."""
     import json as _json
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     doc = _json.loads((ROOT / L.FROZEN_EXPECT).read_text())
     roots = {e["root"] for e in doc["assets"].values()}
@@ -708,11 +708,11 @@ def test_the_frozen_asset_verifier_passes_against_this_expectation():
     import subprocess
     import tempfile
 
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     with tempfile.TemporaryDirectory() as tmp:
         out = subprocess.run(
-            [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+            [sys.executable, "scripts/shared/pod/verify_frozen_assets.py",
              "--expect", L.FROZEN_EXPECT,
              "--out", str(Path(tmp) / "check.json")],
             cwd=ROOT, capture_output=True, text=True, timeout=600,
@@ -730,8 +730,8 @@ def test_the_drivers_markers_reach_the_file_the_launcher_tails(tmp_path):
     the exit code instead. The setup script appends to the same file, which is
     why SETUP_DONE was visible and nothing after it was.
     """
-    import autoinit_c2_replay_driver as D
-    import autoinit_c2_replay_launch as L
+    from stages.phase_c2_replay import autoinit_c2_replay_driver as D
+    from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
     status = tmp_path / "session.status"
     saved = D.STATUS_PATH
@@ -759,7 +759,7 @@ def test_the_drivers_markers_reach_the_file_the_launcher_tails(tmp_path):
 def test_a_marker_write_failure_does_not_kill_the_driver(tmp_path):
     """A driver that died because it could not append to a status file would
     lose the work the file exists to report."""
-    import autoinit_c2_replay_driver as D
+    from stages.phase_c2_replay import autoinit_c2_replay_driver as D
 
     saved = D.STATUS_PATH
     try:
@@ -772,7 +772,7 @@ def test_a_marker_write_failure_does_not_kill_the_driver(tmp_path):
 def test_the_setup_script_dispatches_this_session_kind():
     """A missing branch is not a type error — it is a late refusal on a billing
     machine, and it has cost this project two paid sessions."""
-    text = (ROOT / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    text = (ROOT / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert 'SESSION_KIND" = "c2_replay"' in text
     branch = text.split('SESSION_KIND" = "c2_replay"', 1)[1]
     branch = branch.split("elif [", 1)[0]

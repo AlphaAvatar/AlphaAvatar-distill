@@ -94,22 +94,22 @@ sys.path.insert(0, '/workspace')
 from fetch import fetch
 fetch('stage3_recovery_corpus_v2/ladder_uniform',
       ['blocks.npz', 'ladder.json', 'audit.jsonl'],
-      '/workspace/aad/artifacts/stage3/ladder_uniform_probe')
-src = Path('/workspace/aad/artifacts/stage3/ladder_uniform_probe')
-dst = Path('/workspace/aad/artifacts/stage3/ladder_uniform')
+      '/workspace/aad/artifacts/shared/instruments/ladder_uniform_probe')
+src = Path('/workspace/aad/artifacts/shared/instruments/ladder_uniform_probe')
+dst = Path('/workspace/aad/artifacts/stages/stage-3/ladder_uniform')
 dst.mkdir(parents=True, exist_ok=True)
 for f in src.iterdir(): shutil.copy(f, dst / f.name)
 fetch('stage3_recovery_corpus_v2', ['sessions.jsonl'],
-      '/workspace/aad/artifacts/stage3/corpus_v2')
+      '/workspace/aad/artifacts/stages/stage-3/corpus_v2')
 "
 python3 - <<'PYEOF'
 import hashlib, sys
 want = {
-  '/workspace/aad/artifacts/stage3/ladder_uniform_probe/blocks.npz':
+  '/workspace/aad/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz':
     '6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c',
-  '/workspace/aad/artifacts/stage3/ladder_uniform/blocks.npz':
+  '/workspace/aad/artifacts/stages/stage-3/ladder_uniform/blocks.npz':
     '6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c',
-  '/workspace/aad/artifacts/stage3/corpus_v2/sessions.jsonl':
+  '/workspace/aad/artifacts/stages/stage-3/corpus_v2/sessions.jsonl':
     '2b4edc2e2cc16cd56dae3d340345e1a17e2c4a8baa9837650a7bf5e340fa6fcd',
 }
 for p, sha in want.items():
@@ -201,34 +201,34 @@ from fetch import fetch
 CK = ['config.json','generation_config.json','model.safetensors',
       'tokenizer.json','tokenizer_config.json','chat_template.jinja']
 fetch('stage1/qwen3_0p6b_init_v0/checkpoint', CK,
-      '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
+      '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint')
 fetch('e8_inputs_20260810/stage1', ['qwen3_0p6b_init_v0_manifest.json'],
-      '/workspace/aad/artifacts/stage1')
-shutil.move('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0_manifest.json',
-            '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/manifest.json')
+      '/workspace/aad/artifacts/stages/stage-1')
+shutil.move('/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0_manifest.json',
+            '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/manifest.json')
 fetch('e8_init_20260810/e8_contribution_init_v1/checkpoint', CK,
-      '/workspace/aad/artifacts/stage1/e8_contribution_init_v1/checkpoint')
+      '/workspace/aad/artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint')
 fetch('e8_init_20260810/e8_contribution_init_v1', ['manifest.json'],
-      '/workspace/aad/artifacts/stage1/e8_contribution_init_v1')
+      '/workspace/aad/artifacts/stages/stage-1/e8_contribution_init_v1')
 fetch('e8_init_20260810', ['depth_map.json','e8_frozen_depth_map.json'],
-      '/workspace/aad/artifacts/stage1/e8_depth_search')
+      '/workspace/aad/artifacts/stages/stage-1/e8_depth_search')
 fetch('e8_inputs_20260810/calibration_v1', ['manifest.json','leakage.json'],
-      '/workspace/aad/artifacts/stage1/e8_calibration_v1')
+      '/workspace/aad/artifacts/stages/stage-1/e8_calibration_v1')
 "
   python3 - <<'PYEOF'
 import hashlib, json, sys
 want = {
- '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors':
+ '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors':
    '86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54',
- '/workspace/aad/artifacts/stage1/e8_contribution_init_v1/checkpoint/model.safetensors':
+ '/workspace/aad/artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/model.safetensors':
    '7a0694a5d5c59f8e0b0ebc9ac8648b1ec026bf93cab026d33c61ca8fc85d1edb',
 }
 for p, sha in want.items():
     got = hashlib.sha256(open(p,'rb').read()).hexdigest()
     print(f'  {p.rsplit("/",3)[1]} {got[:16]}…')
     if got != sha: sys.exit(f'COMPRESSED INIT MISMATCH {p}: {got}')
-a = json.load(open('/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json'))
-b = json.load(open('/workspace/aad/artifacts/stage1/e8_contribution_init_v1/checkpoint/config.json'))
+a = json.load(open('/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json'))
+b = json.load(open('/workspace/aad/artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint/config.json'))
 if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True):
     sys.exit('FP and FC configs differ — only the depth map may change')
 print('FP and FC verified; identical student config')
@@ -242,8 +242,8 @@ if [ "$NEED_DEPTH" = "1" ]; then
   cd "$REPO"
   for M in positional contribution; do
     case "$M" in positional) O=e8b_dp_init ;; contribution) O=e8b_dc_init ;; esac
-    PYTHONPATH=src /opt/train/bin/python scripts/training/build_depth_only_init.py \
-        --map "$M" --out "artifacts/stage1/$O" 2>&1 | tail -3
+    PYTHONPATH=src /opt/train/bin/python scripts/shared/training/build_depth_only_init.py \
+        --map "$M" --out "artifacts/stages/stage-1/$O" 2>&1 | tail -3
   done
   python3 - <<'PYEOF'
 import hashlib, json, sys
@@ -253,7 +253,7 @@ want = {
 }
 cfg = None
 for name, sha in want.items():
-    base = f'/workspace/aad/artifacts/stage1/{name}'
+    base = f'/workspace/aad/artifacts/stages/stage-1/{name}'
     got = hashlib.sha256(open(f'{base}/checkpoint/model.safetensors','rb').read()).hexdigest()
     m = json.load(open(f'{base}/manifest.json'))
     v = m['verification']
@@ -278,14 +278,14 @@ from fetch import fetch
 fetch('e8_inputs_20260810/warmup', ['holdout_v1.jsonl','holdout_v1.manifest.json'],
       '/workspace/aad/data/warmup')
 fetch('e7_streams_20260809/e7_fineweb_val', ['blocks.npz','docs.jsonl','manifest.json'],
-      '/workspace/aad/artifacts/stage3/e7_fineweb_val')
+      '/workspace/aad/artifacts/stages/stage-3/e7_fineweb_val')
 "
 python3 -c "
 import hashlib, json, sys
 h = hashlib.sha256(open('/workspace/aad/data/warmup/holdout_v1.jsonl','rb').read()).hexdigest()
 if h != '2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8':
     sys.exit(f'HOLDOUT MISMATCH: {h}')
-m = json.load(open('/workspace/aad/artifacts/stage3/e7_fineweb_val/manifest.json'))
+m = json.load(open('/workspace/aad/artifacts/stages/stage-3/e7_fineweb_val/manifest.json'))
 if (m['n_blocks'], m['block_len']) != (512, 1024):
     sys.exit('validation stream is not the 512x1024 stream')
 print('holdout_v1 and the 512x1024 validation stream verified')
@@ -313,7 +313,7 @@ import glob, sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
 from transformers import AutoConfig
 from aadistill.models.student import assert_rope_from_config, stored_rope_base
-paths = sorted(glob.glob('/workspace/aad/artifacts/stage1/*/checkpoint/config.json'))
+paths = sorted(glob.glob('/workspace/aad/artifacts/stages/stage-1/*/checkpoint/config.json'))
 if not paths: sys.exit('no staged checkpoint to check')
 for p in paths:
     # rsplit(1), not rsplit(2): AutoConfig needs the directory holding config.json,
@@ -401,8 +401,8 @@ import hashlib, json, sys
 from pathlib import Path
 sys.path.insert(0, 'scripts/evaluation')
 from diagnose_training_recall import rung_session_ids, stratified_sample
-want = set(rung_session_ids(Path('artifacts/stage3/ladder_uniform_probe'), 860000))
-sess = Path('artifacts/stage3/corpus_v2/sessions.jsonl')
+want = set(rung_session_ids(Path('artifacts/shared/instruments/ladder_uniform_probe'), 860000))
+sess = Path('artifacts/stages/stage-3/corpus_v2/sessions.jsonl')
 rung = [json.loads(l) for l in sess.open() if l.strip() and json.loads(l)['id'] in want]
 incl = [s for s in rung if s.get('correct') is True]
 picked = stratified_sample(incl, 150, 20260804)
@@ -415,7 +415,7 @@ PYEOF
 mark MASK_OK
 
 say "validating the E8b arms for this session"
-cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/training/validate_e8b_arms.py \
+cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/stages/stage-3/e8b/validate_e8b_arms.py \
     --session "$SESSION" --out "artifacts/audit/e8b_${SESSION}_preflight_setup.json"
 mark ARMS_VALIDATED
 

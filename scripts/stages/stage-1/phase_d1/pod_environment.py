@@ -1,6 +1,6 @@
 """D1's pod-environment readiness: which record, which non-harness files.
 
-The generic recorder (`scripts/autoinit/record_pod_environment.py`) drives the
+The generic recorder (`scripts/shared/pod/record_pod_environment.py`) drives the
 real `simulate_pod_env.sh` — empty HOME, isolated `HF_HOME`, synthetic
 `HF_TOKEN`, gitignored artifacts hidden, the session's own pytest selection —
 and writes the run's readiness record. Everything experiment-specific arrives
@@ -49,8 +49,8 @@ from aadistill.runtime.pod_environment import (
     SweepContract,
 )
 
-from experiments.phase_d1 import d1_authorization as A
-from experiments.phase_d1 import d1_session as D1S
+from stages.phase_d1 import d1_authorization as A
+from stages.phase_d1 import d1_session as D1S
 
 REPO = Path(__file__).resolve().parents[4]
 
@@ -155,7 +155,7 @@ def pod_test_environment_files() -> tuple[str, ...]:
     * the simulator, because a readiness record whose command was typed by hand
       is a claim rather than evidence;
     * the two conftests that apply to a selection outside `tests/` — the rootdir
-      one and `scripts/experiments/conftest.py` — which is where the fixtures
+      one and `scripts/conftest.py` — which is where the fixtures
       and the path setup for that selection come from;
     * every `.py` under D1's declared selection. Zero of them are in the
       executable closure (it is derived from the launcher, driver, session,
@@ -168,9 +168,9 @@ def pod_test_environment_files() -> tuple[str, ...]:
     fresh for every sweep and every verification.
     """
     named = [
-        "scripts/pod/simulate_pod_env.sh",
+        "scripts/shared/pod/simulate_pod_env.sh",
         "conftest.py",
-        "scripts/experiments/conftest.py",
+        "scripts/conftest.py",
     ]
     for selection in pod_test_selection():
         root = REPO / selection
@@ -202,7 +202,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
             "a D1 readiness record has no location without a run id: it is "
             "evidence about one attempt, and a shared path is how one attempt's "
             "evidence comes to describe another's tree")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir(EXPERIMENT_ID, run_id, stage_id or STAGE_ID)}"
             f"/{RUN_READINESS_ROLE}")

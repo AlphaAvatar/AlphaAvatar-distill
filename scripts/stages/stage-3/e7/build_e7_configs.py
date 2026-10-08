@@ -11,7 +11,7 @@ Anything else that differed would be a second variable. `validate_e7_arms.py`
 asserts the diff is exactly `{extra_stream, run_name, out_dir, _purpose}` and
 refuses to proceed otherwise.
 
-    PYTHONPATH=src python scripts/training/build_e7_configs.py
+    PYTHONPATH=src python scripts/stages/stage-3/e7/build_e7_configs.py
 """
 
 from __future__ import annotations
@@ -21,7 +21,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import stream_budget  # noqa: E402
@@ -52,11 +52,11 @@ EXTRA = {
 
 ARMS = {
     "B": {"suffix": "fineweb", "kind": "general_text_kd",
-          "data_dir": "artifacts/stage3/e7_fineweb_kd",
+          "data_dir": "artifacts/stages/stage-3/e7_fineweb_kd",
           "purpose": "E7 arm B — FineWeb-Edu raw-text teacher KD alongside the "
                      "unchanged 1.60M rollout stream"},
     "C": {"suffix": "control", "kind": "in_domain_kd_control",
-          "data_dir": "artifacts/stage3/e7_control_kd",
+          "data_dir": "artifacts/stages/stage-3/e7_control_kd",
           "purpose": "E7 arm C — matched extra-KD control: identical extra KD "
                      "positions, forward workload and schedule, from unused "
                      "in-domain rollout text instead of FineWeb"},
@@ -78,7 +78,7 @@ def main() -> int:
             cfg = json.loads(base_path.read_text())
             run = f"e7_{spec['suffix']}_r1600k_{seed}"
             cfg["run_name"] = run
-            cfg["out_dir"] = f"artifacts/stage3/{run}"
+            cfg["out_dir"] = f"artifacts/stages/stage-3/{run}"
             cfg["_purpose"] = (
                 f"{spec['purpose']}. Forked from the canonical Stage 1 PCA "
                 f"init, not from any trained checkpoint. Identical to "

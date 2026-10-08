@@ -25,7 +25,7 @@ mechanistic one. Both are reported, because a mechanism that moves without the
 behaviour following would itself be a finding.
 
 Usage:
-    uv run python scripts/evaluation/probe_think_close.py --model <path-or-id[@rev]> \
+    uv run python scripts/shared/evaluation/probe_think_close.py --model <path-or-id[@rev]> \
         [--data-dir data/stage2_v1] [--per-group 4] [--out probe.json]
 """
 
@@ -38,7 +38,7 @@ from pathlib import Path
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.dataset import load_split, render_chat  # noqa: E402
@@ -77,7 +77,7 @@ def main() -> None:
     dtype = {"float32": torch.float32, "bfloat16": torch.bfloat16}[args.dtype]
     # The pinned teacher tokenizer is used for rendering; every student
     # checkpoint shares it (identical tokenizer.json sha256 in
-    # scripts/pod/hashes_ckpt.txt), so renders are comparable across models.
+    # scripts/shared/pod/hashes_ckpt.txt), so renders are comparable across models.
     model, _ = load_causal_lm(args.model, dtype, device)
     model.eval()
 

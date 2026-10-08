@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The D1 design: target-aware search, derived end to end from what exists.
 
-    PYTHONPATH=src:scripts:scripts/data python scripts/autoinit/write_d1_design.py --write
+    PYTHONPATH=src:scripts:scripts/data python scripts/stages/stage-1/phase_d1/write_d1_design.py --write
 
 **What D1 is.** The first of three GLOBAL scoring/search experiments. Every
 calibration-derived operator objective and the global state metric read positions
@@ -42,7 +42,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO / extra)
     if path not in sys.path:
@@ -63,8 +63,8 @@ C1_BATTERY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 A3_COMPARISON = "logs/stages/stage-1/phase_a3/analyses/a3_comparison.json"
 CAPACITY = "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
 #: THE LIVE behavioural-evidence owners, which supersede CAPACITY above.
-D_SERIES_FAMILY = "logs/shared/analyses/autoinit_d_series_battery_family.json"
-D_SERIES_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+D_SERIES_FAMILY = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json"
+D_SERIES_MANIFEST = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
 BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
 
 #: THE INCUMBENT IS DERIVED, NOT TYPED. MAINTAINER DECISION 2026-10-08.
@@ -94,7 +94,7 @@ def incumbent() -> dict[str, Any]:
     carries the four CONTENT identities instead. A round that keyed its control
     on a state id would be keying on something the promoted arm does not have.
     """
-    from experiments.phase_d_series.incumbent import (
+    from stages.d_series.incumbent import (
         IDENTITY_FIELDS, standing_incumbent,
     )
 
@@ -115,7 +115,7 @@ def incumbent() -> dict[str, Any]:
             "closed without promotion and C3 returned NO_GO, so B still stands."),
         "_derived_not_declared": (
             "from C1's recorded verdict and C1's measured arm identities, by "
-            "scripts/experiments/stage-1/phase_d_series/incumbent.py. This "
+            "scripts/stages/stage-1/families/d_series/incumbent.py. This "
             "block was hand-typed until 2026-10-08 and named the arm C1 BEAT; "
             "see logs/stages/stage-1/phase_d1/analyses/"
             "d1_control_arm_identity.json."),
@@ -146,7 +146,7 @@ def _load(rel: str) -> dict[str, Any]:
 
 def _d_series_protocol() -> dict[str, Any]:
     """The D-series scoring protocol, from its owner rather than retyped."""
-    from experiments.phase_d_series.scoring_protocol import describe
+    from stages.d_series.scoring_protocol import describe
 
     return describe()
 
@@ -283,13 +283,13 @@ def _execution_wiring_status() -> str:
     requirements, and the experiment-suite test that checks them.
     """
     surface = {
-        "session": "scripts/experiments/stage-1/phase_d1/d1_session.py",
-        "authorization": "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
-        "driver": "scripts/pod/autoinit_d1_driver.py",
-        "launcher": "scripts/pod/autoinit_d1_launch.py",
-        "contract test": ("scripts/experiments/stage-1/phase_d1/tests/"
+        "session": "scripts/stages/stage-1/phase_d1/d1_session.py",
+        "authorization": "scripts/stages/stage-1/phase_d1/d1_authorization.py",
+        "driver": "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py",
+        "launcher": "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
+        "contract test": ("scripts/stages/stage-1/phase_d1/tests/"
                           "test_d1_execution_contract.py"),
-        "runner-interface test": ("scripts/experiments/stage-1/phase_d1/tests/"
+        "runner-interface test": ("scripts/stages/stage-1/phase_d1/tests/"
                                   "test_d1_runner_interface.py"),
     }
     missing = [name for name, rel in surface.items()
@@ -365,7 +365,7 @@ def execution_wiring_required() -> dict[str, Any]:
             "declared policy and environment, and that the search's declared "
             "protocol id is non-null and equals the evaluator's before any "
             "expansion. It belongs in "
-            "scripts/experiments/stage-1/phase_d1/tests/, not the core suite: "
+            "scripts/stages/stage-1/phase_d1/tests/, not the core suite: "
             "it checks THIS experiment's wiring, not a reusable mechanism."),
         "_why_it_was_written_before_an_implementation": (
             "so the requirement was not rediscovered after a paid run produced "
@@ -485,7 +485,7 @@ def _ensure_the_frozen_operators_are_registered() -> None:
     since the alternative is a caller that imports the sections in another
     order and gets an unregistered-operator failure far from its cause.
     """
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
     from aadistill.initialization.operators.attention.gqa import (
         activation_importance,
     )
@@ -495,7 +495,7 @@ def _ensure_the_frozen_operators_are_registered() -> None:
 
 
 def search_stage() -> dict[str, Any]:
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_d1 import search_space as d1
 
     _ensure_the_frozen_operators_are_registered()
     size = d1.size_report()
@@ -687,8 +687,8 @@ def scientific_preimage(doc: dict[str, Any]) -> dict[str, Any]:
 
 def behavioural_design() -> dict[str, Any]:
     """Top-K, screening seeds and confirmation seeds, with their rationale."""
-    from experiments.phase_d1 import search_space as d1
-    from experiments.phase_d1.selection_noise import (
+    from stages.phase_d1 import search_space as d1
+    from stages.phase_d1.selection_noise import (
         CLAIM_BOUNDARY,
         P_IN_TOP_K_SENSITIVITY,
         SEED_SD,
@@ -1169,10 +1169,10 @@ def contamination() -> dict[str, Any]:
             "cannot be executed as designed until this is resolved, and neither "
             "can D2 or D3."),
         #: THE FAMILY OWNS THE RESOLUTION, and it corrects the first option
-        #: below. See `logs/shared/analyses/autoinit_d_series_battery_family.json`.
+        #: below. See `logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json`.
         "d_series_battery_family": {
-            "owner": "scripts/experiments/stage-1/phase_d_series/battery_family.py",
-            "record": "logs/shared/analyses/autoinit_d_series_battery_family.json",
+            "owner": "scripts/stages/stage-1/families/d_series/battery_family.py",
+            "record": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
             "family_id": "d_series_behavioural_v1",
             "what": ("six roles - D1/D2/D3 x screening/confirmation - allocated "
                      "by ONE rule frozen before any D1 outcome exists, each "
@@ -1252,7 +1252,7 @@ def _derived_budget() -> dict[str, Any]:
     """
     import importlib.util
 
-    path = REPO / "scripts/consolidate/derive_budget.py"
+    path = REPO / "scripts/maintenance/consolidation/derive_budget.py"
     spec = importlib.util.spec_from_file_location("_derive_budget", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -1291,7 +1291,7 @@ def non_operator_expansion_overhead() -> dict[str, Any] | None:
     MAX, not mean: the cell this feeds is a ceiling, and `CostModel`'s own
     docstring says a ceiling built on a mean is not a ceiling.
     """
-    from experiments.phase_c2.full_search_space import non_operator_observations
+    from stages.phase_c2.full_search_space import non_operator_observations
 
     obs = non_operator_observations(REPO)
     out: dict[str, Any] = {"_derived_from": ("the committed search telemetry, via "
@@ -1486,7 +1486,7 @@ def _rebuilt_cost_model():
     """
     import dataclasses
 
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_d1 import search_space as d1
 
     basis = _topk_production_basis()
     if basis is None:
@@ -1569,7 +1569,7 @@ def _measured_cost_model(adjusted):
     from a frozen-model screening rung and a measured-model search session is
     still one number, and nothing would say which model produced it.
     """
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_d1 import search_space as d1
 
     original = d1.cost_model
     d1.cost_model = lambda *a, **k: adjusted
@@ -1716,8 +1716,8 @@ def topk_search_cost() -> dict[str, Any] | None:
     basis = _topk_production_basis()
     if basis is None:
         return None
-    from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
-    from experiments.phase_d1 import search_space as d1
+    from stages.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
+    from stages.phase_d1 import search_space as d1
 
     _ensure_the_frozen_operators_are_registered()
     before = dict(d1.cost_model().minutes[DEPTH_IMPL])
@@ -1730,7 +1730,7 @@ def topk_search_cost() -> dict[str, Any] | None:
         "depth_cell_before": before,
         "depth_cell_after": dict(adjusted.minutes[DEPTH_IMPL]),
         "search_session": priced,
-        "_priced_by": ("experiments.phase_d1.search_space.search_cost, which "
+        "_priced_by": ("stages.phase_d1.search_space.search_cost, which "
                        "calls search_cost_model.bound. No second pricing formula "
                        "exists here."),
         "_other_three_cells_unchanged": (
@@ -1741,8 +1741,8 @@ def topk_search_cost() -> dict[str, Any] | None:
 
 
 def budget() -> dict[str, Any]:
-    from experiments.phase_d1 import search_space as d1
-    from experiments.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
+    from stages.phase_d1 import search_space as d1
+    from stages.phase_c2.search_space import PRICE_PER_HOUR_LAST_QUOTED
 
     #: `chain_cost` searches the frozen space, so the operators must be there.
     _ensure_the_frozen_operators_are_registered()
@@ -1851,7 +1851,7 @@ def budget() -> dict[str, Any]:
             "package_remaining_usd": float(live["package"]["remaining_usd"]),
             "full_ceiling_sessions_fundable":
                 live.get("full_ceiling_sessions_fundable"),
-            "_derived_by": ("scripts/consolidate/derive_budget.py, CALLED by "
+            "_derived_by": ("scripts/maintenance/consolidation/derive_budget.py, CALLED by "
                             "this writer rather than copied from it. A "
                             "hand-copied balance expires the next time "
                             "anything spends, and this document is "
@@ -1899,7 +1899,7 @@ def budget() -> dict[str, Any]:
 #: The realized D-series family D1's behavioural evidence comes from. Read, not
 #: assumed: the evidence blocker closes because these roles EXIST and are
 #: verified, and it would reopen if the manifest vanished.
-FAMILY_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+FAMILY_MANIFEST = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
 
 #: The two roles D1 itself consumes. D2 and D3 own the other four; D1's evidence
 #: readiness must not depend on roles it never reads.
@@ -2002,7 +2002,7 @@ def incumbent_identity_check() -> dict[str, Any]:
     by restating the identity, which is how the wrong one got here.
     """
     try:
-        from experiments.phase_d_series.incumbent import (
+        from stages.d_series.incumbent import (
             IncumbentUndetermined, disagreements, standing_incumbent,
         )
     except ImportError as exc:                                 # noqa: BLE001
@@ -2024,7 +2024,7 @@ def incumbent_identity_check() -> dict[str, Any]:
             "c1_arm", "verdict", "impl_id", "profile_id", "artifact_digest",
             "weights_digest", "single_shard_sha256", "arch_signature")},
         "disagreements": differ,
-        "owner": "scripts/experiments/stage-1/phase_d_series/incumbent.py",
+        "owner": "scripts/stages/stage-1/families/d_series/incumbent.py",
         "finding": ("logs/stages/stage-1/phase_d1/analyses/"
                     "d1_control_arm_identity.json"),
         "why_it_matters": (

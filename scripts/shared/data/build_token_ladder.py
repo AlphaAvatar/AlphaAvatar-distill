@@ -1,8 +1,8 @@
 """Pack the corpus once and cut the six-point nested token ladder from it.
 
-    uv run python scripts/data/build_token_ladder.py \
-        --sessions artifacts/stage3/corpus_v2/bulk/sessions.jsonl \
-        --out artifacts/stage3/corpus_v2/packed
+    uv run python scripts/shared/data/build_token_ladder.py \
+        --sessions artifacts/stages/stage-3/corpus_v2/bulk/sessions.jsonl \
+        --out artifacts/stages/stage-3/corpus_v2/packed
 
 Why one pack and not six
 ------------------------
@@ -36,7 +36,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.mixture import (  # noqa: E402

@@ -21,8 +21,8 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from experiments.phase_c1.authorization import c1_current_executable  # noqa: E402
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_SCHEMA, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest  # noqa: E402
+from stages.phase_c1.authorization import c1_current_executable  # noqa: E402
+from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1, SCHEMA as C1_SCHEMA, C1Authorization, c1_budget_spec, c1_hard_ceiling_usd, c1_harness_digest  # noqa: E402
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from support.session_specs import load_session_launcher, session_args  # noqa: E402
@@ -61,11 +61,11 @@ def _accepted_cap_usd() -> float:
     this whole file exists to police elsewhere.
 
     Imported through the PACKAGE, like everything else that reaches this
-    module. Putting `scripts/experiments/stage-1/phase_c1` on `sys.path` is never safe:
+    module. Putting `scripts/stages/stage-1/phase_c1` on `sys.path` is never safe:
     it holds `packaging.py`, which shadows the third-party `packaging`
     distribution for the whole process.
     """
-    from experiments.phase_c1.authorization_payload import load_config
+    from stages.phase_c1.authorization_payload import load_config
 
     return float(load_config(REPO)["accepted_pricing"]["cumulative_cap_usd"])
 
@@ -86,7 +86,7 @@ def write_candidate(tmp_path, **over):
     """A deterministic candidate authorization in `tmp_path`. Returns its path.
 
     Imported through the PACKAGE, never by putting
-    `scripts/experiments/stage-1/phase_c1` on `sys.path`. That directory contains
+    `scripts/stages/stage-1/phase_c1` on `sys.path`. That directory contains
     `packaging.py`, which SHADOWS the third-party `packaging` distribution, so
     the first later module to import transformers dies with
     `cannot import name 'version' from 'packaging'`. `sys.path` is
@@ -96,7 +96,7 @@ def write_candidate(tmp_path, **over):
     not, and 17 collection errors in an unrelated module are what that claim
     was worth.
     """
-    from experiments.phase_c1.authorization_payload import (
+    from stages.phase_c1.authorization_payload import (
         build_c1_authorization_payload)
 
     payload = build_c1_authorization_payload(
@@ -163,7 +163,7 @@ def test_the_setup_dispatcher_has_a_c1_branch():
     """A missing branch is not a type error — SESSION_KIND falls through to
     `spend` and loads a SpendAuthorization. Phase-B attempt 2 proved what that
     costs: $0.2300, one step after its test gate passed."""
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert 'elif [ "$SESSION_KIND" = "c1" ]; then' in setup
     branch = setup.split('"$SESSION_KIND" = "c1"')[1].split("elif")[0]
     assert "C1Authorization" in branch
@@ -295,7 +295,7 @@ def test_a_superseded_committed_authorization_cannot_authorize():
     if it is not current then at least one identity gate must refuse it. A
     current authorization passes them all, which is what a launch requires.
     """
-    from experiments.phase_c1.authorization import C1Authorization, c1_hard_ceiling_usd, c1_harness_digest
+    from stages.phase_c1.authorization import C1Authorization, c1_hard_ceiling_usd, c1_harness_digest
 
     p = REPO / "logs/budget/approvals/autoinit_c1_authorization.json"
     assert p.is_file(), "the authorization record must be retained"
@@ -313,16 +313,16 @@ def test_a_superseded_committed_authorization_cannot_authorize():
 # --- the harness the grant measures ----------------------------------------
 
 def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
-    for required in ("scripts/pod/autoinit_c1_launch.py",
-                     "scripts/pod/autoinit_c1_driver.py",
+    for required in ("scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+                     "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
                      # NOT a ternary accepting either setup script. That is what
-                     # let the set name `scripts/pod/setup.sh` — which nothing in
+                     # let the set name `scripts/shared/pod/setup.sh` — which nothing in
                      # the repository executes — while the pod ran
                      # `autoinit_preflight_setup.sh` unmeasured. A regression that
                      # accepts either file cannot detect the wrong one.
-                     "scripts/pod/autoinit_preflight_setup.sh",
-                     "scripts/experiments/stage-1/phase_c1/session.py",
-                     "scripts/experiments/stage-1/phase_c1/isolation.py",
+                     "scripts/shared/pod/autoinit_preflight_setup.sh",
+                     "scripts/stages/stage-1/phase_c1/session.py",
+                     "scripts/stages/stage-1/phase_c1/isolation.py",
                      "src/aadistill/initialization/planning/fixed_path.py",
                      #: The C1 science modules at their LIVE paths. `C1_EXECUTABLE`
                      #: is derived from the tree, so this list moves with it; the
@@ -331,7 +331,7 @@ def test_the_harness_set_covers_the_launcher_driver_and_c1_science():
                      "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
                      "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
                      "src/aadistill/initialization/planning/recovery.py",
-                     "scripts/autoinit/score_recovery_search.py"):
+                     "scripts/shared/evaluation/score_recovery_search.py"):
         assert required in C1_EXECUTABLE, required
 
 
@@ -359,7 +359,7 @@ def test_the_preregistration_is_frozen_to_the_binding_attempt_18_executed_under(
     (`test_the_recorded_closure_describes_the_live_tree` below), and this one
     asks what a frozen binding can answer: is it still the exact blob?
     """
-    from experiments.phase_c1.authorization_payload import (
+    from stages.phase_c1.authorization_payload import (
         ATTEMPT_18_PREREGISTRATION,
     )
 
@@ -392,11 +392,11 @@ def test_the_recorded_closure_describes_the_live_tree():
     This is the check the preregistration was being rewritten to satisfy. Here
     it is satisfiable by regeneration, which is what that file is for.
     """
-    from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
+    from stages.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT
 
     recorded = json.loads((REPO / CURRENT_CLOSURE_SNAPSHOT).read_text())
     assert recorded["digest"] == c1_harness_digest(REPO)["digest"], (
-        "re-run scripts/architecture/derive_closure.py --write")
+        "re-run scripts/maintenance/architecture/derive_closure.py --write")
 
 
 def test_the_writer_refuses_to_rewrite_the_frozen_preregistration():
@@ -407,7 +407,7 @@ def test_the_writer_refuses_to_rewrite_the_frozen_preregistration():
     rel = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
     before = (REPO / rel).read_bytes()
     done = subprocess.run(
-        [sys.executable, "scripts/autoinit/write_c1_execution_preregistration.py"],
+        [sys.executable, "scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py"],
         cwd=REPO, capture_output=True, text=True, timeout=900,
         env={**os.environ, "PYTHONPATH": "src"})
     assert done.returncode == 0, done.stdout + done.stderr
@@ -446,7 +446,7 @@ def test_the_writer_refuses_a_document_that_is_not_the_attempt_18_blob(tmp_path)
 
         done = subprocess.run(
             [sys.executable,
-             "scripts/autoinit/write_c1_execution_preregistration.py"],
+             "scripts/stages/stage-1/phase_c1/write_c1_execution_preregistration.py"],
             cwd=REPO, capture_output=True, text=True, timeout=900,
             env={**os.environ, "PYTHONPATH": "src"})
         assert done.returncode == 3, done.stdout + done.stderr
@@ -470,7 +470,7 @@ def test_the_driver_cannot_search_rank_or_eliminate():
     override, so absence is the stronger property and is what is asserted.
     """
     spec_ = importlib.util.spec_from_file_location(
-        "c1_driver_probe", REPO / "scripts/pod/autoinit_c1_driver.py")
+        "c1_driver_probe", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py")
     mod = importlib.util.module_from_spec(spec_)
     sys.modules["c1_driver_probe"] = mod
     spec_.loader.exec_module(mod)
@@ -483,8 +483,8 @@ def test_the_driver_cannot_search_rank_or_eliminate():
 def test_neither_launcher_nor_driver_imports_the_search():
     import ast
 
-    for rel in ("scripts/pod/autoinit_c1_launch.py",
-                "scripts/pod/autoinit_c1_driver.py"):
+    for rel in ("scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+                "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py"):
         mods: set[str] = set()
         for node in ast.walk(ast.parse((REPO / rel).read_text())):
             if isinstance(node, ast.ImportFrom):
@@ -498,7 +498,7 @@ def test_neither_launcher_nor_driver_imports_the_search():
 
 def test_the_probe_schedule_is_six_and_names_the_frozen_seeds():
     spec_ = importlib.util.spec_from_file_location(
-        "c1_driver_sched", REPO / "scripts/pod/autoinit_c1_driver.py")
+        "c1_driver_sched", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py")
     mod = importlib.util.module_from_spec(spec_)
     sys.modules["c1_driver_sched"] = mod
     spec_.loader.exec_module(mod)
@@ -570,7 +570,7 @@ def canonical_battery_store() -> Path:
     real. Not a module-level constant, because it resolves outside the
     repository — see `test_mutation_a_host_local_candidate_dependency_is_visible_here`.
     """
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     return Path(json.loads(
         (REPO / L.BATTERY_IDENTITY).read_text())["canonical_path"])
@@ -684,7 +684,7 @@ def test_every_gate_but_the_commit_binding_passes_against_the_candidate(
 
 def _prereg_gate(tmp_path, monkeypatch, doc) -> tuple[bool, str]:
     """Point the gate at a mutated copy, in a root that is otherwise the repo."""
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root = tmp_path / "root"
     (root / "logs").mkdir(parents=True, exist_ok=True)
@@ -758,7 +758,7 @@ def test_the_preregistration_describes_the_standalone_driver():
     assert d["subclasses_phase_a_driver"] is False
     assert d["imports_phase_a_driver_or_launcher"] is False
     assert d["owns_paths"] == ["artifacts/audit/autoinit_c1",
-                               "artifacts/stage3/c1", "artifacts/eval/c1"]
+                               "artifacts/stages/stage-3/c1", "artifacts/stages/stage-3/eval/c1"]
     for key in ("stage_g_h_separation", "generation_admission",
                 "attested_evaluation_protocol", "scoring", "device_handoff"):
         assert d[key], key
@@ -770,7 +770,7 @@ def test_the_launcher_fetches_the_report_the_driver_actually_writes(spec):
     """`attested_evaluation_protocol.json` was asked for; the driver writes
     `c1_attested_evaluation_protocol.json`. The scp is best-effort, so the
     mismatch would have fetched nothing, silently."""
-    driver_src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    driver_src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py").read_text()
     for name in spec.artifacts.report_names:
         assert f'"{name}"' in driver_src, name
 
@@ -937,7 +937,7 @@ def test_the_host_local_predicate_does_not_excuse_the_gate_where_the_store_is(
 
     # And TRUE when the store is really gone, asked of a tree whose committed
     # identity names a path that does not exist.
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root = tmp_path / "root"
     (root / L.BATTERY_IDENTITY).parent.mkdir(parents=True)
@@ -959,13 +959,13 @@ def test_the_production_gate_still_refuses_when_the_canonical_store_is_missing(
     """
     import types
 
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root = tmp_path / "root"
     (root / L.BATTERY_IDENTITY).parent.mkdir(parents=True)
     (root / L.BATTERY_IDENTITY).write_text(json.dumps(
         {"canonical_path": str(tmp_path / "gone")}))
-    local = root / "artifacts/stage3/c1_confirmation_v1"
+    local = root / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
     local.mkdir(parents=True)
     (local / "gsm8k.jsonl").write_text('{"id": 1}\n')
     monkeypatch.setattr(L, "REPO_ROOT", root)
@@ -989,7 +989,7 @@ def test_the_production_gate_still_refuses_when_the_canonical_store_is_missing(
 def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
                 grant_body=None, write_grant=True, reference=True):
     """A repo-shaped root holding an authorization and (usually) its grant."""
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
     from aadistill.infrastructure.manifest import sha256_json
 
     root = tmp_path / "root"
@@ -1001,7 +1001,7 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
     #: grouped by stage -- so the two agreed and the test could not see it. A
     #: fixture that recomputes its subject's logic proves only that the logic is
     #: self-consistent.
-    from experiments.run_layout import layout_for, rel_run_dir
+    from shared.run_layout import layout_for, rel_run_dir
     rel = (f"{rel_run_dir(L.RUN_EXPERIMENT_ID, grant_run_id or run_id, L.RUN_STAGE_ID)}"
            f"/{L.C1_RUN_ROLES['grant']}")
     expect = layout_for(root, L.RUN_EXPERIMENT_ID, grant_run_id or run_id,
@@ -1029,7 +1029,7 @@ def _grant_root(tmp_path, *, run_id="attempt10", grant_run_id=None,
 
 def _grant_gate(tmp_path, monkeypatch, *, run_id="attempt10", **over):
     import types
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root, rel = _grant_root(tmp_path, run_id=run_id, **over)
     monkeypatch.setattr(L, "REPO_ROOT", root)
@@ -1064,7 +1064,7 @@ def test_a_grant_the_authorization_names_but_does_not_exist_is_refused(
 
 def test_a_grant_edited_after_issuance_is_refused(tmp_path, monkeypatch):
     """The authorization's self-hash covers the REFERENCE, not the file."""
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root, rel = _grant_root(tmp_path)
     doc = json.loads((root / rel).read_text())
@@ -1088,7 +1088,7 @@ def test_a_spelled_differently_but_identical_path_still_passes(tmp_path,
                                                                monkeypatch):
     """`./logs/...` is the same file as `logs/...`; the operator types one."""
     import types
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     root, rel = _grant_root(tmp_path)
     auth_rel = L.auth_path_for("attempt10")
@@ -1106,7 +1106,7 @@ def test_a_spelled_differently_but_identical_path_still_passes(tmp_path,
 def test_the_grant_role_is_declared_and_is_not_snapshotted(L_unused=None):
     """It is an input, so nothing copies it in — unlike the three one-use
     artifacts, whose live paths the next issuance overwrites."""
-    import autoinit_c1_launch as L
+    from stages.phase_c1 import autoinit_c1_launch as L
 
     assert L.C1_RUN_ROLES["grant"] == "governance/grant.json"
     assert "grant" in L.C1_RUN_SPEC.optional
@@ -1150,8 +1150,8 @@ def test_a_declared_role_outside_the_prepared_set_is_refused(tmp_path):
     launcher, so a copy already sitting there is a dead launcher's residue and
     must still refuse -- which is the whole occupancy rule.
     """
-    import autoinit_c1_launch as L
-    from experiments.run_layout import RunConventionError, layout_for, open_run
+    from stages.phase_c1 import autoinit_c1_launch as L
+    from shared.run_layout import RunConventionError, layout_for, open_run
 
     root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
                       stage_id=L.RUN_STAGE_ID).root
@@ -1173,8 +1173,8 @@ def test_all_four_prepared_artifacts_may_pre_exist(tmp_path):
     launcher runs, and the launcher reads both back from those exact paths. If
     `open_run` refuses them the chain has no satisfiable ordering at all.
     """
-    import autoinit_c1_launch as L
-    from experiments.run_layout import layout_for, open_run
+    from stages.phase_c1 import autoinit_c1_launch as L
+    from shared.run_layout import layout_for, open_run
 
     root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
                       stage_id=L.RUN_STAGE_ID).root
@@ -1194,8 +1194,8 @@ def test_all_four_prepared_artifacts_may_pre_exist(tmp_path):
 
 def test_an_undeclared_governance_file_is_still_refused(tmp_path):
     """`prepared` is a list of roles, not an amnesty on the directory."""
-    import autoinit_c1_launch as L
-    from experiments.run_layout import RunConventionError, layout_for, open_run
+    from stages.phase_c1 import autoinit_c1_launch as L
+    from shared.run_layout import RunConventionError, layout_for, open_run
 
     root = layout_for(tmp_path, L.RUN_EXPERIMENT_ID, "attempt_x",
                       stage_id=L.RUN_STAGE_ID).root
@@ -1222,7 +1222,7 @@ def test_an_undeclared_governance_file_is_still_refused(tmp_path):
 # candidate sweep. These are the $0 checks that close that gap.
 
 def _issued_payload(tmp_path):
-    from experiments.phase_c1.authorization_payload import (
+    from stages.phase_c1.authorization_payload import (
         build_c1_authorization_payload)
 
     return build_c1_authorization_payload(
@@ -1309,7 +1309,7 @@ def test_the_expectation_document_restates_the_asset_block_exactly():
     is a second source for a value that already has one.
     """
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    import verify_frozen_assets as V
+    from shared.pod import verify_frozen_assets as V
 
     doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
                       ).read_text())
@@ -1326,7 +1326,7 @@ def test_the_expectation_document_restates_the_asset_block_exactly():
 
 def test_the_expectation_names_the_live_scoring_contract():
     """And it must be the contract this tree really computes, not a guess."""
-    from experiments.source_sets import recovery_scoring_contract
+    from shared.source_sets import recovery_scoring_contract
 
     doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
                       ).read_text())
@@ -1374,7 +1374,7 @@ def test_the_frozen_asset_gate_reproduces_attempt_tens_refusal(tmp_path,
 def test_the_setup_reads_the_variable_the_launcher_declares(launcher, spec):
     """A forwarded variable nothing reads, or a read variable nothing forwards,
     are the same defect seen from two ends."""
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert "SESSION_FROZEN_EXPECT" in setup
     assert spec.setup.env["SESSION_FROZEN_EXPECT"] == launcher.FROZEN_EXPECT
     assert (REPO / launcher.FROZEN_EXPECT).is_file()
@@ -1396,5 +1396,5 @@ def test_what_the_frozen_asset_gate_trusts_is_inside_the_measured_harness():
     assert launcher.FROZEN_EXPECT in closure, (
         f"{launcher.FROZEN_EXPECT} decides the frozen-asset gate and is not in "
         "the harness the authorization measures")
-    assert "scripts/autoinit/verify_frozen_assets.py" in closure, (
+    assert "scripts/shared/pod/verify_frozen_assets.py" in closure, (
         "the verifier the gate executes is not measured either")

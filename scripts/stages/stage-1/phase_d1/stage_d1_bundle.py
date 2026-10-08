@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build, verify and upload the bundle a D1 pod fetches. MUTATES THE RELAY.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/stage_d1_bundle.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/stage_d1_bundle.py \
         --session-commit <sha> --run-id d1_search_20261006_120000
 
 **D1 had neither this command nor a gate that would have missed it.** The
@@ -32,7 +32,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for extra in ("src", "scripts", "scripts/autoinit"):
     p = str(REPO_ROOT / extra)
     if p not in sys.path:
@@ -41,8 +41,8 @@ for extra in ("src", "scripts", "scripts/autoinit"):
 from aadistill.infrastructure.bundle_transport import (  # noqa: E402
     BundleTransportError, build_bundle, stage_bundle,
 )
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 
 def governance_path(run_id: str, name: str,

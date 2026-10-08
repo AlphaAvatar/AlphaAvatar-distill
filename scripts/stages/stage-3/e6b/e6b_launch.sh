@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Dev-box orchestrator for the Experiment 6b pod: train two arms, then evaluate.
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… nohup bash scripts/pod/e6_launch.sh &
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… nohup bash scripts/stages/stage-3/e6/e6_launch.sh &
 #
 # E6b trains, so the session is long — but unlike E6 nothing large crosses the
 # dev-box uplink: every input is on the relay and only the produced weights move,
@@ -196,7 +196,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e6b_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/e6b/e6b_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 
 say "running setup"
@@ -240,7 +240,7 @@ GATE_CEILING=$(echo "$BACKSTOP_MINUTES/60*$MAX_PRICE" | bc -l)
 say "driver budget: \$$(printf '%.2f' "$SPENT_AT_DRIVER_START") already billed, \
 gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the \$$AUTHORIZED_USD authorization)"
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e6b_driver.py --stage all \
+  scripts/stages/stage-3/e6b/e6b_driver.py --stage all \
   --spent-usd $(printf '%.3f' "$SPENT_AT_DRIVER_START") \
   --authorized-usd $(printf '%.2f' "$GATE_CEILING") \
   > /workspace/e6b_run.log 2>&1 < /dev/null & \
@@ -305,7 +305,7 @@ fi
 # without paying again. Fetch them BEFORE teardown, time-boxed, and hash them on
 # the pod first so a corrupted transfer is detectable rather than assumed.
 say "hashing checkpoints on the pod"
-$SSH "root@$HOST" "cd /workspace/aad/artifacts/stage3 && \
+$SSH "root@$HOST" "cd /workspace/aad/artifacts/stages/stage-3 && \
   find e6b_p2_r2960k_*/checkpoints/step_002916 -type f \( -name '*.safetensors' \
     -o -name '*.json' -o -name '*.jinja' \) | sort | xargs sha256sum" \
   > "$SCR/e6b_ckpt_hashes.txt" 2>>"$LOG"
@@ -313,7 +313,7 @@ cp "$SCR/e6b_ckpt_hashes.txt" "$STORE/" 2>/dev/null
 say "fetching checkpoints (time-boxed to ${CKPT_FETCH_LIMIT_MIN} min)"
 for arm in e6b_p2_r2960k_sa e6b_p2_r2960k_sb; do
   timeout "${CKPT_FETCH_LIMIT_MIN}m" $SCP -r \
-    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/step_002916" \
+    "root@$HOST:/workspace/aad/artifacts/stages/stage-3/$arm/checkpoints/step_002916" \
     "$STORE/$arm" >>"$LOG" 2>&1 || say "WARNING: $arm weights not retrieved"
 done
 

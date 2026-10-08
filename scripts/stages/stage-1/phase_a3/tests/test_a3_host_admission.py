@@ -26,7 +26,7 @@ sys.path.insert(0, str(REPO / "tests"))
 
 
 def test_a3_admits_the_controls_driver_branch_and_refuses_another():
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     want = A3S.control_driver_branch()
     assert want == "580", (
@@ -45,7 +45,7 @@ def test_a3_admits_the_controls_driver_branch_and_refuses_another():
 
 
 def test_a3_fails_closed_when_the_controls_branch_cannot_be_read(monkeypatch):
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     monkeypatch.setattr(A3S, "control_driver_branch", lambda *a, **k: None)
     ok, why = A3S.host_admission("img@580.159.03")
@@ -56,7 +56,7 @@ def test_a3_refuses_an_image_identity_with_no_driver():
     """`read_image_digest` appends the driver only when
     `/etc/podinfo/image_digest` is absent, so a bare tag is a host whose
     comparability cannot be established."""
-    from experiments.phase_a3 import a3_session as A3S
+    from stages.phase_a3 import a3_session as A3S
 
     ok, why = A3S.host_admission("runpod/pytorch:1.1.0-cu1300")
     assert not ok and "no" in why.lower() and "driver" in why

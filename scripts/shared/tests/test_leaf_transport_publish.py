@@ -24,7 +24,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 
-PUBLISH = REPO / "scripts/autoinit/publish_selected_leaves.py"
+PUBLISH = REPO / "scripts/shared/rollout/publish_selected_leaves.py"
 
 
 def load_publisher():
@@ -85,7 +85,7 @@ def test_the_home_token_file_is_still_the_fallback(pub, tmp_path, monkeypatch):
 def test_the_transport_repo_is_not_the_main_relay(pub):
     """A transport path that pointed at the main relay would reintroduce the
     quota problem it exists to avoid."""
-    from experiments.deployment import MAIN_RELAY
+    from shared.deployment import MAIN_RELAY
 
     assert pub.TRANSPORT_REPO != MAIN_RELAY
     assert "transport" in pub.TRANSPORT_REPO
@@ -249,7 +249,7 @@ def test_verification_writes_no_manifest_when_it_fails(pub):
     src = PUBLISH.read_text()
     assert 'man["verified"] = not result["problems"]' in src
     assert "raise SystemExit(1)" in src
-    launcher = (REPO / "scripts/pod/autoinit_recovery_continuation_launch.py").read_text()
+    launcher = (REPO / "scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py").read_text()
     assert 'return bool(man.get("verified"))' in launcher, (
         "the session would accept an unverified transport manifest")
     assert "no verified transport" in launcher, (

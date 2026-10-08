@@ -21,7 +21,7 @@ from typing import Any
 from aadistill.governance.closure import ClosureError, derive, digest_of
 from aadistill.infrastructure.manifest import sha256_json
 
-from experiments.phase_c2.session import C2Authorization
+from stages.phase_c2.session import C2Authorization
 
 
 class ReplayGovernanceError(RuntimeError):
@@ -41,12 +41,12 @@ AUTHORIZED_STAGES: tuple[str, ...] = ("bind_identities", "reconstruct")
 #: full search includes its own: the code that decides what an authorization
 #: SAYS belongs to the executable identity that authorization binds.
 ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_c2_replay_launch.py",
-    "scripts/pod/autoinit_c2_replay_driver.py",
-    "scripts/experiments/stage-1/phase_c2/replay.py",
-    "scripts/experiments/stage-1/phase_c2/replay_specs.py",
-    "scripts/autoinit/issue_c2_replay_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_launch.py",
+    "scripts/stages/stage-1/phase_c2_replay/autoinit_c2_replay_driver.py",
+    "scripts/stages/stage-1/phase_c2/replay.py",
+    "scripts/stages/stage-1/phase_c2/replay_specs.py",
+    "scripts/stages/stage-1/phase_c2_replay/issue_c2_replay_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Where the closure follows imports. Same roots as the full search: the replay
@@ -65,14 +65,14 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
     with them. Two paid pods in this programme died one per producer because a
     non-source input was shipped for one consumer and not the other.
     """
-    from experiments.phase_c2.replay_specs import JOURNAL_REL, SELECTION_REL, TELEMETRY_REL
+    from stages.phase_c2.replay_specs import JOURNAL_REL, SELECTION_REL, TELEMETRY_REL
 
     return (
         SELECTION_REL, JOURNAL_REL, TELEMETRY_REL,
         "configs/experiments/phase_c2/replay_frozen_assets.json",
         "configs/autoinit/c2_replay_artifacts.json",
         "configs/autoinit/c2_replay_artifacts_failed.json",
-        "scripts/pod/autoinit_preflight_setup.sh",
+        "scripts/shared/pod/autoinit_preflight_setup.sh",
     )
 
 
@@ -99,8 +99,8 @@ def staged_assets(repo_root: str | Path = REPO_ROOT):
     from aadistill.infrastructure.session import LocalAsset
     from aadistill.initialization.calibration.profiles import get_profile
 
-    from experiments.calibration import register_builtin_profiles
-    from experiments.phase_c2.replay_specs import build_replay_leaves
+    from shared.calibration import register_builtin_profiles
+    from stages.phase_c2.replay_specs import build_replay_leaves
 
     #: Registered HERE rather than assumed. `get_profile` raises on an empty
     #: registry, and a governance function that asked a registry somebody else
@@ -248,7 +248,7 @@ def plan_payload(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     checked against it at launch, so a plan hash containing `head` can never
     survive from issuance to launch: it was a binding that could not hold.
     """
-    from experiments.phase_c2.replay_specs import source_binding
+    from stages.phase_c2.replay_specs import source_binding
 
     binding = source_binding(repo_root)
     return {
@@ -379,7 +379,7 @@ class ReplayAuthorization(C2Authorization):
         """
         from aadistill.governance.authorization import AuthorizationError
 
-        from experiments.phase_c2.session import C2ResourceScope
+        from stages.phase_c2.session import C2ResourceScope
 
         raw = json.loads(Path(path).read_text())
         stated = raw.get("authorization_sha256")

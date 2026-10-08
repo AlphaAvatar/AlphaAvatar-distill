@@ -2,7 +2,7 @@
 """Build the six D-series behavioural batteries, in the frozen order.
 
     PYTHONPATH=src:scripts:scripts/data python -m \
-        experiments.phase_d_series.build_batteries --write
+        stages.d_series.build_batteries --write
 
 **Six roles, one order, each excluding every role before it.** Distinct rank
 domains give *independent* draws, not disjoint ones — two independent draws from
@@ -48,7 +48,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO_ROOT / extra)
     if path not in sys.path:
@@ -57,7 +57,7 @@ for extra in ("src", "scripts", "scripts/data"):
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
-from battery_render import (  # noqa: E402
+from shared.data.battery_render import (  # noqa: E402
     FROZEN_SOURCES,
     RENDERERS,
     norm,
@@ -66,35 +66,35 @@ from battery_render import (  # noqa: E402
     snapshot_path,
     source_digest,
 )
-from build_c1_confirmation_battery import C0_DIGEST  # noqa: E402
+from stages.phase_c1.build_c1_confirmation_battery import C0_DIGEST  # noqa: E402
 
-from experiments.phase_d_series import math_source as ms  # noqa: E402
-from experiments.phase_d_series.battery_family import (  # noqa: E402
+from stages.d_series import math_source as ms  # noqa: E402
+from stages.d_series.battery_family import (  # noqa: E402
     FAMILY_ID,
     ROLES,
     allocation_rule,
     allocation_rule_id,
     strata,
 )
-from experiments.phase_d_series.identity import (  # noqa: E402
+from stages.d_series.identity import (  # noqa: E402
     d_series_item_id,
     excluded_by_review,
     problem_content_id,
 )
-from experiments.phase_d_series.source_evidence import (  # noqa: E402
+from stages.d_series.source_evidence import (  # noqa: E402
     baseline_chain,
     d_series_additional,
     reserved_problem_content,
 )
 
-OUT = "artifacts/stage3/d_series_behavioural_v1"
+OUT = "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
 
 #: The MANIFEST is a record and goes in `logs/`; the 22 MB of items are artifacts
 #: and stay out of git. AGENTS.md 2.5: code, configs, manifests and small metadata
 #: may be committed; large artifacts may not. The manifest carries each role's
 #: item digest, so the committed record is enough to verify the artifacts are the
 #: ones it describes.
-MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
+MANIFEST = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
 SCHEMA = "aadistill.autoinit.d_series_battery/v1"
 
 #: Every file each stratum draws from: the originally pinned file first, then the

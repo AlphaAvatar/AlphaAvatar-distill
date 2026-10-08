@@ -29,10 +29,10 @@ does, the honest reading is "extra KD positions did it", not "FineWeb did
 nothing special". That is the intended attribution, and it is why C is not a
 neutral filler stream.
 
-    python3 scripts/data/build_control_kd.py \\
-        --pack artifacts/stage3/ladder_uniform --rung 1600000 \\
-        --match artifacts/stage3/e7_fineweb_kd \\
-        --out artifacts/stage3/e7_control_kd
+    python3 scripts/stages/stage-3/e7/build_control_kd.py \\
+        --pack artifacts/stages/stage-3/ladder_uniform --rung 1600000 \\
+        --match artifacts/stages/stage-3/e7_fineweb_kd \\
+        --out artifacts/stages/stage-3/e7_control_kd
 """
 
 from __future__ import annotations
@@ -45,7 +45,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import (  # noqa: E402

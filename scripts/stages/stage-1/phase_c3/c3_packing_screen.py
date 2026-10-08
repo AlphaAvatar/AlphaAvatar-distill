@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A short real-GPU throughput screen over packing protocols.
 
-    python scripts/pod/c3_packing_screen.py --parent DIR --out OUT
+    python scripts/stages/stage-1/phase_c3/c3_packing_screen.py --parent DIR --out OUT
 
 Four protocols, all 67 items, all 32 heads, but only three predeclared
 layers — 0, 13, 27 — so the measurement spans early, middle and late depth
@@ -30,7 +30,7 @@ import sys
 import time
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -54,7 +54,7 @@ def load_scope(repo: Path) -> dict:
 
 def resolve_items(repo: Path, profile_id: str):
     """Delegates. The pilot module owns this; see the note there."""
-    from experiments.phase_c3.pilot import resolve_items as _resolve
+    from stages.phase_c3.pilot import resolve_items as _resolve
 
     return _resolve(repo, profile_id)
 
@@ -72,7 +72,7 @@ def run(parent_dir: str, out_dir: Path, *, repo: Path, device: str,
     from aadistill.initialization.operators.register import (
         register_builtin_operators)
 
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_adapters()
     register_builtin_operators()

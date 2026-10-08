@@ -14,7 +14,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "evaluation"))
 
-from audit_prompt_rendering import DEFAULT_SYSTEM, render  # noqa: E402
+from shared.evaluation.audit_prompt_rendering import DEFAULT_SYSTEM, render  # noqa: E402
 
 
 class FakeTok:

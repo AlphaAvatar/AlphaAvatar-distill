@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Append ONE reviewed amendment to the Phase-B historical ledger. Zero cost.
 
-    PYTHONPATH=src python scripts/autoinit/record_phase_b_historical_amendment.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/record_phase_b_historical_amendment.py \
         --commit <source-repair-sha> \
         --what "..." --why-shared-owner "..." --why-not-c1-override "..." \
         --maintainer "..."
@@ -32,20 +32,20 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.preflight import HARNESS_SOURCE_FILES_V1  # noqa: E402
-from experiments.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
-from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest  # noqa: E402
-from experiments.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
-from experiments.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from shared.preflight import HARNESS_SOURCE_FILES_V1  # noqa: E402
+from stages.phase_a.plan import PHASE_A_HARNESS_SOURCE_FILES_V1  # noqa: E402
+from stages.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, phase_b_source_digest  # noqa: E402
+from stages.phase_b.continuation import CONTINUATION_SOURCE_FILES_V2  # noqa: E402
+from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E402
 from aadistill.governance.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_SCHEMA,
     entry_self_hash,
 )
-from experiments.phase_b.post_freeze import (  # noqa: E402
+from stages.phase_b.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_PATH,
     SEALED_LEGACY_NOTE,
 )
@@ -207,13 +207,13 @@ def main() -> int:
         #: blast radius is recorded here rather than discovered later.
         "also_affected_hash_bound_sets": sorted(
             name for name, files in (
-                ("experiments.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
+                ("stages.phase_a.plan.PHASE_A_HARNESS_SOURCE_FILES_V1",
                  PHASE_A_HARNESS_SOURCE_FILES_V1),
-                ("experiments.phase_b.continuation."
+                ("stages.phase_b.continuation."
                  "CONTINUATION_SOURCE_FILES_V2", CONTINUATION_SOURCE_FILES_V2),
                 ("aadistill.governance.authorization.HARNESS_SOURCE_FILES_V1",
                  HARNESS_SOURCE_FILES_V1),
-                ("experiments.phase_c1.authorization."
+                ("stages.phase_c1.authorization."
                  "C1_HARNESS_SOURCE_FILES_V1", C1_HARNESS_SOURCE_FILES_V1),
             ) if set(changed) & set(files)),
     }
@@ -229,7 +229,7 @@ def main() -> int:
             "both. It records history and confers nothing."),
         "consumed_by_a_paid_launch_gate": False,
         "launch_compatibility_owner": (
-            "scripts/pod/autoinit_phase_b_launch.py::preregistration_gate, via "
+            "scripts/stages/stage-1/phase_b/autoinit_phase_b_launch.py::preregistration_gate, via "
             "aadistill.governance.post_freeze.accounted_for — which is unchanged "
             "and still refuses non-additive drift"),
         "immutability": (

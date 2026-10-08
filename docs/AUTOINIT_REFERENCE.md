@@ -83,9 +83,9 @@ still unmeasured.
 
 ```
 OMP_NUM_THREADS=8 taskset -c 0-12 python -m pytest tests -q        # the pod's 13 cpus
-HIDDEN_PATHS="...artifacts/stage1/qwen3_0p6b_init_v0
-artifacts/stage1/e8_contribution_init_v1" \
-  OMP_NUM_THREADS=8 taskset -c 0-12 bash scripts/pod/simulate_pod_env.sh
+HIDDEN_PATHS="...artifacts/stages/stage-1/qwen3_0p6b_init_v0
+artifacts/stages/stage-1/e8_contribution_init_v1" \
+  OMP_NUM_THREADS=8 taskset -c 0-12 bash scripts/shared/pod/simulate_pod_env.sh
 ```
 
 Together they would have caught four of the five defects for free. The fifth needed a
@@ -141,7 +141,7 @@ must **name** the streams it truncates; an unnamed truncation raises.
 
 ### 0.4 Session contract for every paid pod
 
-[`scripts/pod/AGENTS.md`](../scripts/pod/AGENTS.md) is binding. Detached start via
+[`scripts/shared/pod/AGENTS.md`](../scripts/shared/pod/AGENTS.md) is binding. Detached start via
 `start_job.py`; `watchdog.py` running beside the launcher from pod creation;
 `LogRelay` mirroring event streams continuously; `collect_artifacts.py` gating
 teardown. **`--terminate-after` is a redundant third layer and is not a stop
@@ -152,7 +152,7 @@ control-plane canary ([`e7_canary_rerun_report.md`](../logs/stages/stage-3/e7/an
 ### 0.5 Two prerequisite facts found on 2026-08-10, both binding
 
 **The Stage 0 activation cache was lost — and has been recovered bit-exactly.**
-`artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors` (1.95 GB,
+`artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors` (1.95 GB,
 sha256 `aaeb2e4c…`) was not on the dev box and was **never on the relay** — its 780
 files contain no `stage0/` path. Stage 1 cannot construct *any* initialization
 without it. Regenerated at $0 in 4,972 s of CPU (949,859 tokens, the historical
@@ -316,7 +316,7 @@ Record [`EXPERIMENTS.md`](../logs/stages/stage-3/history/EXPERIMENTS.md) §34 ·
 
 | asset | identity |
 |---|---|
-| **fork point** — Stage 1 structural init | `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, `model.safetensors` sha256 `86fbba78…` |
+| **fork point** — Stage 1 structural init | `artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint`, `model.safetensors` sha256 `86fbba78…` |
 | **recovery corpus v2** (2026-08-01) | `sessions.jsonl` sha256 `2b4edc2e…`, `candidates.jsonl` sha256 `f7f5035e…` |
 | **token ladder v2** | `blocks.npz` + `audit.jsonl` + `ladder.json`, 3,720 blocks |
 | teacher corpus v1 (752 prompts, 540 accepted) | relay `stage3_teacher_corpus_20260730/`, targets sha256 `18028f0c…` |
@@ -333,7 +333,7 @@ Record [`EXPERIMENTS.md`](../logs/stages/stage-3/history/EXPERIMENTS.md) §34 ·
 > [decisions](../logs/budget/decisions.md), 2026-08-02); until that runs, **four arms are
 > dev-box-only**: `e1_r2960k_sb_pca`, `e1_r5500k_sb_pca`, `e1_r2960k_sb_rand`,
 > `e1_r5500k_sb_rand`, each hash-verified under
-> `artifacts/stage3/rescued/`.
+> `artifacts/stages/stage-3/rescued/`.
 
 ## 7. Implementation state (CPU-verified)
 
@@ -358,38 +358,38 @@ Stage-1 checkpoints**: a 4.x reader still misreads their `rope_theta` by 500×
 | dense KD-only stream format | `src/aadistill/data/extra_stream.py` | no padding, explicit doc boundaries, `n_blocks x (block_len-1)` KD positions by construction |
 | general-text diagnostics | `src/aadistill/evaluation/general_text.py` | NLL / teacher KL / top-1 / rank / confidence; 10 known-answer tests |
 | FineWeb + matched-control builders | `scripts/data/build_{fineweb,control}_kd.py` | pinned revision, index ranges, per-doc hashes, exact budget match |
-| stream disjointness proof | `scripts/data/check_stream_disjointness.py` | index **and** content-hash separation; fails closed; 14 tests |
+| stream disjointness proof | `scripts/stages/stage-3/e7/check_stream_disjointness.py` | index **and** content-hash separation; fails closed; 14 tests |
 | E7 arm guards | `scripts/training/{build_e7_configs,validate_e7_arms}.py` | the diff vs the retained baseline is exactly `{extra_stream, run_name, out_dir, _purpose}` |
-| four-threshold E7/canary pricing | `scripts/training/plan_e7_budget.py` | phase-wise, from measured E6b wall clock |
+| four-threshold E7/canary pricing | `scripts/stages/stage-3/e7/plan_e7_budget.py` | phase-wise, from measured E6b wall clock |
 | session rendering + system-grouped packing | `src/aadistill/data/sessions.py` | used in the built corpus |
 | shared assistant-mask helper | `src/aadistill/data/dataset.py` | `final_assistant_loss_mask` for turn expansion |
 | `min_p` + per-prompt completion budgets | `src/aadistill/rollout/engines.py` | threaded through all 5 adapters |
-| corpus builder | `scripts/rollout/build_recovery_corpus.py` | ran the 2026-08-01 bulk build |
-| one-pass pack + nested ladder cut | `scripts/data/build_token_ladder.py` | produced the 6-rung ladder |
-| §6/§9 gate validator | `scripts/data/validate_corpus_gate.py` | PASS on the full corpus |
+| corpus builder | `scripts/shared/rollout/build_recovery_corpus.py` | ran the 2026-08-01 bulk build |
+| one-pass pack + nested ladder cut | `scripts/shared/data/build_token_ladder.py` | produced the 6-rung ladder |
+| §6/§9 gate validator | `scripts/shared/data/validate_corpus_gate.py` | PASS on the full corpus |
 | end-to-end CPU dress rehearsal | `tests/data/test_recovery_corpus_pipeline.py` | builder→ladder→gate with a stub engine |
 | candidate cleaning rules (`clean-v2`) | `src/aadistill/data/cleaning.py` | median-length survivor; built the D1 corpus; 30 rule tests |
-| cleaned-corpus driver | `scripts/data/build_cleaned_corpus.py` | 11,174 sessions screened in 114 s |
-| ladder session-order anchor | `scripts/data/build_token_ladder.py --session-order` | keeps a re-cut pack on the anchor's prompts |
-| prompt-matched single-rung packer | `scripts/data/build_matched_rung.py` | 89.1% D0 overlap at exact compute; appends the control's validation blocks |
-| selection-rule comparison | `scripts/data/audit_selection_rule.py` | median vs shortest on one corpus |
-| checkpoint retention policy | `scripts/pod/retain_checkpoints.py` | trajectory-driven keep set; 13 tests |
-| frozen capability battery | `scripts/data/build_capability_battery.py` | `capability-v2`, 846 prompts, 7 sets, 0 leakage collisions |
+| cleaned-corpus driver | `scripts/shared/data/build_cleaned_corpus.py` | 11,174 sessions screened in 114 s |
+| ladder session-order anchor | `scripts/shared/data/build_token_ladder.py --session-order` | keeps a re-cut pack on the anchor's prompts |
+| prompt-matched single-rung packer | `scripts/shared/data/build_matched_rung.py` | 89.1% D0 overlap at exact compute; appends the control's validation blocks |
+| selection-rule comparison | `scripts/stages/stage-3/e2/audit_selection_rule.py` | median vs shortest on one corpus |
+| checkpoint retention policy | `scripts/shared/pod/retain_checkpoints.py` | trajectory-driven keep set; 13 tests |
+| frozen capability battery | `scripts/stages/stage-3/e2/build_capability_battery.py` | `capability-v2`, 846 prompts, 7 sets, 0 leakage collisions |
 | deterministic capability scorers | `src/aadistill/evaluation/capability.py` | alias EM, symbolic math, evidence recall, paired answerability **and** paired safety; 112 tests |
-| battery scoring driver | `scripts/evaluation/score_battery.py` | pair-accuracy headline; offline, re-runnable |
-| checkpoint inventory + cleanup | `scripts/pod/checkpoint_inventory.py` | both stores, hash-matched duplicates, declared classification |
-| D0↔D1 corpus audit | `scripts/data/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
+| battery scoring driver | `scripts/shared/evaluation/score_battery.py` | pair-accuracy headline; offline, re-runnable |
+| checkpoint inventory + cleanup | `scripts/shared/pod/checkpoint_inventory.py` | both stores, hash-matched duplicates, declared classification |
+| D0↔D1 corpus audit | `scripts/stages/stage-3/e2/audit_d1_corpus.py` | overlap, shares, budget, residual mismatch |
 | strict final-answer rule | `src/aadistill/evaluation/strict_answer.py` | replaces last-number GSM8K scoring; 17 tests |
-| offline GSM8K re-scoring | `scripts/evaluation/rescore_gsm8k.py` | re-scored all 25 E1 arms, $0 |
+| offline GSM8K re-scoring | `scripts/shared/evaluation/rescore_gsm8k.py` | re-scored all 25 E1 arms, $0 |
 | teacher block bypass + greedy contribution search (E8) | `src/aadistill/init/contribution.py` | module-list bypass verified against an identity-block path; 260-evaluation greedy; domain-balanced KL; 23 tests |
 | explicit depth map into Stage 1 init | `src/aadistill/init/sandwich.py` (`explicit_depth_map`, `kept_layers=`) | feeding it the positional map's own representatives reproduces that init **bitwise** |
-| depth-search driver + resume | `scripts/training/search_depth_map.py` | self-consistency gate, positional-map comparison, full per-round tables, auto cache fallback; 9 end-to-end CPU tests |
-| frozen E8 calibration mixture | `scripts/data/build_e8_calibration.py` | 67 items, 59,763 positions, 5 domains, `d65c1f40…`; excludes the rung, the val slice and prompt-content collisions |
-| calibration leakage proof | `scripts/data/check_e8_calibration_leakage.py` | six fail-closed checks; caught two real collisions |
-| mandatory hash-bound init NLL | `src/aadistill/init/nll_gate.py` + `scripts/evaluation/measure_init_nll.py` | an init is incomplete without its own NLL; inherited records rejected; 11 tests |
+| depth-search driver + resume | `scripts/shared/training/search_depth_map.py` | self-consistency gate, positional-map comparison, full per-round tables, auto cache fallback; 9 end-to-end CPU tests |
+| frozen E8 calibration mixture | `scripts/stages/stage-3/e8/build_e8_calibration.py` | 67 items, 59,763 positions, 5 domains, `d65c1f40…`; excludes the rung, the val slice and prompt-content collisions |
+| calibration leakage proof | `scripts/stages/stage-3/e8/check_e8_calibration_leakage.py` | six fail-closed checks; caught two real collisions |
+| mandatory hash-bound init NLL | `src/aadistill/init/nll_gate.py` + `scripts/shared/evaluation/measure_init_nll.py` | an init is incomplete without its own NLL; inherited records rejected; 11 tests |
 | masked teacher-native held-out metrics | `src/aadistill/evaluation/init_nll.py` | assistant-target NLL/KL/top-1/rank on the pack's val slice |
 | E8 arm builder + pre-training gate | `scripts/training/{build_e8_configs,validate_e8_arms}.py` | realized diff exactly `{student_path, run_name, out_dir, _purpose}`; gate fails closed |
-| E8 four-threshold pricing | `scripts/training/plan_e8_budget.py` | two pods, search cost derived from forward-pass arithmetic |
+| E8 four-threshold pricing | `scripts/stages/stage-3/e8/plan_e8_budget.py` | two pods, search cost derived from forward-pass arithmetic |
 | **AutoInitializer** — architecture adapters | `src/aadistill/autoinit/arch.py`, `adapters/qwen3.py` | family-tagged `ArchSpec`, capability dispatch, exact param arithmetic pinned to both frozen counts |
 | operator kind ≠ implementation, immutable ids | `src/aadistill/autoinit/operators/base.py` + `configs/autoinit/operator_ledger.json` | signature hashing, in-process rebinding refused, committed ledger checked by test |
 | the five v1 operators + the incumbent as a composite | `src/aadistill/autoinit/operators/{depth,width,ffn,attention,composite}.py` | wrap existing algorithms; composite bitwise-identical to `init_student` |
@@ -400,8 +400,8 @@ Stage-1 checkpoints**: a 4.x reader still misreads their `rope_theta` by 500×
 | activation-statistics cache | `src/aadistill/autoinit/stats.py` | WIDTH and FFN share one pass on the same parent; the key makes cross-parent reuse impossible |
 | deterministic resumable beam search | `src/aadistill/autoinit/search.py` | family-agnostic (proven against a fake MoE fixture); pruned states keep hash, metrics and reason |
 | search manifest + recovery orchestration | `src/aadistill/autoinit/{manifest,recovery}.py` | manifest hash-verified; halving plan frozen before the run it judges |
-| cost/branching model | `src/aadistill/autoinit/cost.py`, `scripts/autoinit/plan_search.py` | 88.83 TFLOP/s L40S anchor round-trips E8a's measured 1,300 s |
-| zero-cost end-to-end dry run | `scripts/autoinit/dry_run_search.py` | real checkpoints, real reload/hash/measure; found two config-derivation defects |
+| cost/branching model | `src/aadistill/autoinit/cost.py`, `scripts/stages/stage-1/phase_a/plan_search.py` | 88.83 TFLOP/s L40S anchor round-trips E8a's measured 1,300 s |
+| zero-cost end-to-end dry run | `scripts/shared/validation/dry_run_search.py` | real checkpoints, real reload/hash/measure; found two config-derivation defects |
 
 Chunked CE/KD was assessed and is **not** needed: `block_len` stays 8192, which
 the canonical recipe already runs.
@@ -448,13 +448,13 @@ and awaiting its prerequisites and a separate authorization. Ordered next action
 all zero cost:
 
 1. ~~**Build and freeze the initializer-state evaluation suite.**~~ **DONE** —
-   `artifacts/stage1/state_eval_v1`, content `a1197205…`. Role `STATE_EVALUATION`, five domains,
+   `artifacts/stages/stage-1/state_eval_v1`, content `a1197205…`. Role `STATE_EVALUATION`, five domains,
    critical-token tags, leakage-checked against the promotion battery, the recovery
    rung and the validation slice. `check_role_isolation` must report
    `complete: true` — it now fails closed when two roles share no comparable
    identity kind, which a prompt-hash-only check could never detect.
 2. ~~**Build the recovery search battery.**~~ **DONE** —
-   `artifacts/stage3/recovery_search_v1`, content `a1b22778…`. Role `RECOVERY_SEARCH`. It must not be
+   `artifacts/stages/stage-1/batteries/recovery_search_v1`, content `a1b22778…`. Role `RECOVERY_SEARCH`. It must not be
    the 150-prompt promotion battery, and must not reuse the 0.86M rung's prompts:
    that battery's inclusion mask was sampled *using* an 0.86M checkpoint, so an
    0.86M probe scored on it is not out-of-sample.
@@ -480,7 +480,7 @@ all zero cost:
    automatically, and the preregistration must be re-emitted with the attested
    protocol hash before it is authorized.
 7. Then, and only with explicit authorization, the pilot in
-   [`autoinit_pilot_proposal.md`](../logs/shared/analyses/autoinit_pilot_proposal.md): no pruning at level
+   [`autoinit_pilot_proposal.md`](../logs/stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md): no pruning at level
    0 then beam 6, one profile; 5 searched leaves + the retained canonical control
    on seed sa, 2 survivors + the control on sb, a conditional third seed for ties.
    Expected $17.00, hard backstop $26.21 against the $30.3667 E8b released —

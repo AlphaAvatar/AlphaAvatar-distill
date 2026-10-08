@@ -6,7 +6,7 @@ prove at `$0` that the canonical object exists and carries three things: the
 exact authorized session commit, the exact authorization bytes the launcher
 holds, and the exact executable closure the grant binds.
 
-`experiments.phase_c2.bundle` answers that question for Search-1 and cannot
+`stages.phase_c2.bundle` answers that question for Search-1 and cannot
 answer it here: it re-derives the SEARCH-1 closure and resolves the SEARCH-1
 authorization path. A bundle verified against those would be verified against
 the wrong code and the wrong permission -- and would pass, which is worse than
@@ -30,7 +30,7 @@ from aadistill.infrastructure.bundle_transport import (
     hf_download, sha256_bytes,
 )
 
-from experiments.phase_c2 import baseline_completion as BC
+from stages.phase_c2 import baseline_completion as BC
 
 REPO = Path(__file__).resolve().parents[4]
 

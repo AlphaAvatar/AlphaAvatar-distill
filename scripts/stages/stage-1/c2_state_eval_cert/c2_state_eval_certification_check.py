@@ -2,7 +2,7 @@
 """Certify the device-resident reduction on the COMPLETE frozen state-eval suite.
 
     PYTHONPATH=src:scripts python \
-        scripts/validation/c2_state_eval_certification_check.py \
+        scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py \
         --config configs/validation/c2_state_eval_certification.json --run-id <id>
 
 The performance round measured the reduction's speedup well, on four
@@ -62,7 +62,7 @@ from pathlib import Path
 
 REPO = Path(os.environ.get("AAD_REPO", "/workspace/aad"))
 if not (REPO / "src").is_dir():                     # local / toy execution
-    REPO = Path(__file__).resolve().parents[2]
+    REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -349,7 +349,7 @@ def require_cuda(cfg: dict) -> dict:
 def load_teacher(device: str = "cuda"):
     """The pinned teacher, in bf16 on the card. Weights, not just the config."""
     import torch
-    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
     from transformers import AutoModelForCausalLM
 
     say(f"loading {TEACHER_ID}@{TEACHER_REVISION[:12]} in bf16")
@@ -368,7 +368,7 @@ def load_teacher(device: str = "cuda"):
 
 def load_suite(cfg: dict):
     """The COMPLETE frozen suite, with its identity checked before use."""
-    import load_state_eval
+    from shared.evaluation import load_state_eval
 
     root = REPO / cfg["suite"]["root"]
     suite, items, manifest = load_state_eval.load(root)
@@ -956,7 +956,7 @@ def main() -> int:
     #: assertion, wrote nothing, and the launcher collected 0 files -- so the
     #: measurement survives only as a stdout tail. A correct measurement that
     #: lives in memory is not evidence.
-    ap.add_argument("--out", default="artifacts/validation")
+    ap.add_argument("--out", default="artifacts/shared/validation")
     ap.add_argument("--device", default="cuda", choices=("cuda", "cpu"))
     #: THE $0 REHEARSAL. Substitutes a toy suite and a tiny random model and
     #: runs every stage for real -- the fingerprinting, both evaluators, the
@@ -1058,7 +1058,7 @@ REPORT_NAME = "c2_state_eval_certification_report.json"
 def _write(a, report: dict) -> None:
     """Persist the report. Never conditional, never partial.
 
-    `a.out` is a directory: the launcher copies `<repo>/artifacts/validation`
+    `a.out` is a directory: the launcher copies `<repo>/artifacts/shared/validation`
     back, so anything written here is collected whatever the verdict.
     """
     out_dir = (REPO / a.out) if not Path(a.out).is_absolute() else Path(a.out)

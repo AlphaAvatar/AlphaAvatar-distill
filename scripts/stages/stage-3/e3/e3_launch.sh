@@ -2,7 +2,7 @@
 # Dev-box orchestrator for the Experiment 3 pod (attention-update restriction).
 # Runs under nohup so a paid pod never depends on a conversation staying open.
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e3_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/e3/e3_launch.sh
 #
 # Budget discipline, in four independent layers:
 #   1. GPU securePrice is CHECKED before creating anything, and the pod's actual
@@ -178,7 +178,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e3_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/e3/e3_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
 $SCP data/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
 
@@ -201,7 +201,7 @@ say "starting the E3 driver: A1 (2 seeds) -> freeze gate -> A2 (2 seeds) -> eval
 # completed, but with no progress logging for five hours. `setsid` plus a
 # closed stdin puts the driver in its own session so the channel closes at once.
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e3_driver.py --stage all > /workspace/e3_run.log 2>&1 < /dev/null & \
+  scripts/stages/stage-3/e3/e3_driver.py --stage all > /workspace/e3_run.log 2>&1 < /dev/null & \
   disown" >>"$LOG" 2>&1
 say "driver running — $(cost)"
 
@@ -224,7 +224,7 @@ mkdir -p "$STORE"
 say "bundling small artifacts on the pod"
 $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e3_side.tar.gz \
   artifacts/audit configs/stage3/e3 \
-  $(ls -d artifacts/stage3/e3_*/train_log.jsonl artifacts/stage3/e3_*/run_manifest.json 2>/dev/null) \
+  $(ls -d artifacts/stages/stage-3/e3_*/train_log.jsonl artifacts/stages/stage-3/e3_*/run_manifest.json 2>/dev/null) \
   2>/dev/null; cp /workspace/e3_run.log /workspace/e3.status /workspace/ 2>/dev/null; \
   sha256sum /workspace/e3_side.tar.gz' >>"$LOG" 2>&1
 $SCP "root@$HOST:/workspace/e3_side.tar.gz" "$STORE/" >>"$LOG" 2>&1
@@ -237,14 +237,14 @@ else
 fi
 
 say "hashing checkpoints on the pod"
-$SSH "root@$HOST" 'cd /workspace/aad/artifacts/stage3 && \
+$SSH "root@$HOST" 'cd /workspace/aad/artifacts/stages/stage-3 && \
   find e3_*/checkpoints/step_001023 -type f \( -name "*.safetensors" -o -name "*.json" \
     -o -name "*.jinja" \) | sort | xargs sha256sum' > "$SCR/e3_pod_hashes.txt" 2>>"$LOG"
 cp "$SCR/e3_pod_hashes.txt" "$STORE/" 2>/dev/null
 
 say "fetching checkpoints (time-boxed to ${CKPT_TRANSFER_LIMIT_MIN} min)"
 timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
-  "root@$HOST:/workspace/aad/artifacts/stage3/e3_a1_frozen_attn_sa/checkpoints/step_001023" \
+  "root@$HOST:/workspace/aad/artifacts/stages/stage-3/e3_a1_frozen_attn_sa/checkpoints/step_001023" \
   "$STORE/e3_a1_frozen_attn_sa" >>"$LOG" 2>&1
 for arm in e3_a1_frozen_attn_sb e3_a2_lora_attn_sa e3_a2_lora_attn_sb; do
   ELAPSED=$(( ($(date -u +%s) - $(cat "$SCR/pod_start_epoch")) / 60 ))
@@ -253,7 +253,7 @@ for arm in e3_a1_frozen_attn_sb e3_a2_lora_attn_sa e3_a2_lora_attn_sb; do
     break
   fi
   timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
-    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/step_001023" \
+    "root@$HOST:/workspace/aad/artifacts/stages/stage-3/$arm/checkpoints/step_001023" \
     "$STORE/$arm" >>"$LOG" 2>&1 \
     || say "WARNING: $arm weights not retrieved (results bundle is unaffected)"
 done

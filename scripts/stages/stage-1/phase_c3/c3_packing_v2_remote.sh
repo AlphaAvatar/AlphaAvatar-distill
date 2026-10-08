@@ -181,7 +181,7 @@ PY
 # passed on attempt a1 while the mixture the prefix needed was absent. A check
 # that cannot see the thing that is missing is not a check.
 say "checking the real calibration inputs resolve"
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_v2_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/stages/stage-1/phase_c3/c3_packing_v2_driver.py \
     --check-inputs 2>&1 | tee "${OUTROOT}/check_inputs.log"
 CHK_RC=${PIPESTATUS[0]}
 if [ "$CHK_RC" -ne 0 ]; then
@@ -205,7 +205,7 @@ fi
 PREFLIGHT_TIMEOUT="${PREFLIGHT_TIMEOUT:-420}"
 say "preflight: the driver's own toy sequence on cuda:0, bounded at ${PREFLIGHT_TIMEOUT}s"
 timeout "${PREFLIGHT_TIMEOUT}" env PYTHONPATH=src:scripts /opt/train/bin/python -u \
-    scripts/pod/c3_packing_v2_driver.py --toy --device cuda:0 \
+    scripts/stages/stage-1/phase_c3/c3_packing_v2_driver.py --toy --device cuda:0 \
     --out "${OUTROOT}/preflight" 2>&1 | tee "${OUTROOT}/preflight.log"
 PRE_RC=${PIPESTATUS[0]}
 if [ "$PRE_RC" -eq 124 ]; then
@@ -226,7 +226,7 @@ say "preflight ok"
 # --- the pilot ---------------------------------------------------------------
 say "V2: parent, counterbalanced R0/R2/R3/R4 screen, then at most one full pair"
 #: v2 measures its OWN counterbalanced screen; there is nothing to reuse.
-PYTHONPATH=src:scripts /opt/train/bin/python scripts/pod/c3_packing_v2_driver.py \
+PYTHONPATH=src:scripts /opt/train/bin/python scripts/stages/stage-1/phase_c3/c3_packing_v2_driver.py \
     --out "${OUTROOT}/packing2" 2>&1 | tee "${OUTROOT}/packing2.log"
 RC=${PIPESTATUS[0]}
 say "pilot rc=${RC}"

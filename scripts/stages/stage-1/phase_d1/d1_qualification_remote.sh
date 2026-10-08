@@ -182,7 +182,7 @@ say "preflight: everything but the two expensive path runs, on THIS interpreter"
 # unstaged in a fresh interpreter and that have failed a paid session after the
 # stage before them succeeded. Seconds, before the root teacher is resident.
 PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
-    scripts/pod/d1_qualification_driver.py --check-only \
+    scripts/stages/stage-1/phase_d1/d1_qualification_driver.py --check-only \
     --out "${OUTROOT}/preflight" > "${OUTROOT}/preflight.log" 2>&1
 PRE_RC=$?
 if [ "$PRE_RC" -ne 0 ]; then
@@ -192,7 +192,7 @@ if [ "$PRE_RC" -ne 0 ]; then
   exit 29
 fi
 say "preflight ok"
-/opt/train/bin/python scripts/pod/d1_qualification_report.py \
+/opt/train/bin/python scripts/stages/stage-1/phase_d1/d1_qualification_report.py \
     "${OUTROOT}/preflight/qualification.json" 2>/dev/null | while read -r l; do
   say "  $l"
 done
@@ -206,7 +206,7 @@ say "QUALIFICATION: arms ${QUAL_ARMS}"
 # The deadline is the launcher's remaining seconds, so the operator deadline and
 # the session ceiling cannot disagree about what is affordable.
 PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
-    scripts/pod/d1_qualification_driver.py \
+    scripts/stages/stage-1/phase_d1/d1_qualification_driver.py \
     --out "${OUTROOT}/qualification" \
     --arms "${QUAL_ARMS}" \
     --deadline-s "${QUAL_DEADLINE_S:-0}" 2>&1 | tee "${OUTROOT}/qualification.log"
@@ -216,7 +216,7 @@ say "qualification rc=${RC}"
 # Evidence is written stage by stage, so there is something to fetch on every
 # path out of here. Nothing below decides anything; the launcher collects.
 if [ -f "${OUTROOT}/qualification/qualification.json" ]; then
-  /opt/train/bin/python scripts/pod/d1_qualification_report.py \
+  /opt/train/bin/python scripts/stages/stage-1/phase_d1/d1_qualification_report.py \
       "${OUTROOT}/qualification/qualification.json" 2>/dev/null \
     | while read -r l; do say "  $l"; done
 fi

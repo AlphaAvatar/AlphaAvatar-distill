@@ -1,7 +1,7 @@
 """Collection is driven by a declared manifest, and teardown is gated on it.
 
 E6b's bundle listed the three paths E6 needed and never listed
-`artifacts/stage3/e6b_*/train_log.jsonl`, because the launcher was derived from
+`artifacts/stages/stage-3/e6b_*/train_log.jsonl`, because the launcher was derived from
 E6, which did not train. tar exited 0, the digest matched, the transfer verified
 and the pod was deleted: every check passed, and none of them asked whether
 everything that had to survive was present.
@@ -603,7 +603,7 @@ def test_the_writers_that_were_truncated_use_it():
     from pathlib import Path as _P
 
     repo = _P(__file__).resolve().parents[2]
-    for f in ("scripts/autoinit/record_phase_b_post_freeze.py",
-              "scripts/training/build_e6b_configs.py"):
+    for f in ("scripts/stages/stage-1/phase_b/record_phase_b_post_freeze.py",
+              "scripts/stages/stage-3/e6b/build_e6b_configs.py"):
         src = (repo / f).read_text()
         assert "write_text_atomic" in src, f"{f} still truncates before writing"

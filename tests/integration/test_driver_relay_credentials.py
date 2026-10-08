@@ -28,7 +28,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-DRIVER = REPO / "scripts/pod/e8b_driver.py"
+DRIVER = REPO / "scripts/stages/stage-3/e8b/e8b_driver.py"
 TOKEN_FILE = "/workspace/hf/token"
 
 
@@ -58,7 +58,7 @@ def test_no_relay_call_reads_the_token_from_the_environment_alone():
 
 
 def test_token_file_path_is_where_setup_stages_it():
-    setup = (REPO / "scripts/pod/e8b_setup.sh").read_text()
+    setup = (REPO / "scripts/stages/stage-3/e8b/e8b_setup.sh").read_text()
     # Setup writes WS=/workspace and reads $WS/hf/token; the driver must agree.
     assert "WS=/workspace" in setup
     assert 'export HF_TOKEN="$(cat $WS/hf/token)"' in setup

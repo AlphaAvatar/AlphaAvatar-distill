@@ -3,7 +3,7 @@
 Zero cost, CPU only. Two things are being tested and they are different:
 
 1. **The declared space is what committed evidence says it is.** Every constant
-   in `experiments.phase_c2.search_space` is recomputed here from the file it
+   in `stages.phase_c2.search_space` is recomputed here from the file it
    came from. A search configured from an identity someone typed in is a search
    for a path nobody ran, and this repository has pinned the wrong hash before.
 
@@ -33,7 +33,7 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / extra) not in sys.path:
         sys.path.insert(0, str(REPO / extra))
 
-from experiments.phase_c2 import search_space as SS  # noqa: E402
+from stages.phase_c2 import search_space as SS  # noqa: E402
 
 
 @pytest.fixture
@@ -133,7 +133,7 @@ def test_the_allowed_implementations_are_one_per_kind_and_exclude_the_anchors(
 
 def test_both_branch_profiles_are_actually_materialized():
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
     for qualified_id in SS.C2_PROFILE_IDS:
@@ -289,7 +289,7 @@ def test_a_no_calibration_implementation_is_offered_exactly_once(registered):
     """The bug the cost model had, now pinned in the shared function."""
     from aadistill.initialization.operators.base import get_implementation
     from aadistill.initialization.planning.search import expansion_profiles
-    from experiments.calibration import (
+    from shared.calibration import (
         DOMAIN_BALANCED_V1, REASONING_HEAVY_V2, register_builtin_profiles)
 
     register_builtin_profiles()
@@ -316,7 +316,7 @@ def _toy_search_config(tmp_path, impl_profiles, allowed_impls):
     from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1
     from aadistill.initialization.planning.search import BeamSearch, SearchConfig
     from aadistill.initialization.specs.metrics import StateEvalSuite
-    from experiments.calibration import (
+    from shared.calibration import (
         DOMAIN_BALANCED_V1, REASONING_HEAVY_V2, register_builtin_profiles)
 
     register_builtin_profiles()
@@ -420,7 +420,7 @@ def test_the_c2_shaped_search_runs_for_real_at_toy_scale(registered, tmp_path):
     real `from_pretrained` reload, real hashing, real measurement.
     """
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
-    from phase_a_search import run_phase_a_search
+    from stages.phase_a.phase_a_search import run_phase_a_search
     from transformers import Qwen3Config, Qwen3ForCausalLM
 
     from aadistill.initialization.calibration.profiles import (

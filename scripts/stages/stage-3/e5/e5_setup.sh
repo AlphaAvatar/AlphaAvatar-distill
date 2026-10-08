@@ -88,13 +88,13 @@ from fetch import fetch
 LAD = 'stage3_recovery_corpus_v2/ladder_uniform'
 for nm in ('ladder_uniform', 'ladder_uniform_probe'):
     fetch(LAD, ['blocks.npz', 'ladder.json', 'audit.jsonl'],
-          f'/workspace/aad/artifacts/stage3/{nm}')
+          f'/workspace/aad/artifacts/stages/stage-3/{nm}')
 fetch('stage3_recovery_corpus_v2', ['sessions.jsonl'],
-      '/workspace/aad/artifacts/stage3/corpus_v2')
+      '/workspace/aad/artifacts/stages/stage-3/corpus_v2')
 "
-test -f "$REPO/artifacts/stage3/ladder_uniform/blocks.npz"
-test -f "$REPO/artifacts/stage3/ladder_uniform_probe/blocks.npz"
-test -f "$REPO/artifacts/stage3/corpus_v2/sessions.jsonl"
+test -f "$REPO/artifacts/stages/stage-3/ladder_uniform/blocks.npz"
+test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"
+test -f "$REPO/artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 # holdout_v1.jsonl is gitignored so it does not ship in the bundle; the launcher
 # transfers it and the hash is asserted here, before anything trains.
 mkdir -p "$REPO/data/warmup"
@@ -176,7 +176,7 @@ from fetch import fetch
 fetch('stage1/qwen3_0p6b_init_v0/checkpoint',
       ['config.json', 'generation_config.json', 'model.safetensors',
        'tokenizer.json', 'tokenizer_config.json', 'chat_template.jinja'],
-      '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint')
+      '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint')
 "
 python3 -c "
 import os
@@ -189,7 +189,7 @@ print('teacher downloaded')
 # The fork point every arm starts from, verified before anything trains.
 python3 -c "
 import hashlib, sys
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors'
 h = hashlib.sha256(open(p,'rb').read()).hexdigest()
 want = '86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54'
 print('stage1 init sha256', h)
@@ -229,7 +229,7 @@ import sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
 from transformers import AutoConfig, AutoModelForCausalLM
 from aadistill.models.student import assert_rope_matches_config
-p = '/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'
+p = '/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint'
 cfg = AutoConfig.from_pretrained(p)
 m = AutoModelForCausalLM.from_config(cfg)
 base = assert_rope_matches_config(m, cfg, p)
@@ -263,7 +263,7 @@ want = 'fdf44b34a89164a88c59256129e692fd89021bcf53209831ca6d8d9eb6e49bee'
 print('arm C bundle sha256', h)
 sys.exit(0 if h == want else f'ARM C BUNDLE MISMATCH: {h}')
 "
-tar xzf /workspace/e5_arm_c.tar.gz --no-same-owner -C "$REPO/artifacts/stage3"
+tar xzf /workspace/e5_arm_c.tar.gz --no-same-owner -C "$REPO/artifacts/stages/stage-3"
 python3 -c "
 import hashlib, sys
 from pathlib import Path
@@ -274,7 +274,7 @@ want = {
  'e5_arm_c_sb/system_ids.json': '18ace28a0ee785852af508c89bdffd7578b5527874589ed4572404f55df39535',
 }
 for rel, exp in want.items():
-    got = hashlib.sha256(Path('$REPO/artifacts/stage3', rel).read_bytes()).hexdigest()
+    got = hashlib.sha256(Path('$REPO/artifacts/stages/stage-3', rel).read_bytes()).hexdigest()
     if got != exp:
         sys.exit(f'ARM C MISMATCH {rel}: {got}')
     print(f'  {rel} verified')
@@ -286,7 +286,7 @@ import json, sys
 from pathlib import Path
 from aadistill.data.e5_pack import REQUIRED_FIELDS, example_to_rendered, pack_e5
 for seed in ('sa', 'sb'):
-    d = Path('artifacts/stage3', f'e5_arm_c_{seed}')
+    d = Path('artifacts/stages/stage-3', f'e5_arm_c_{seed}')
     rows = [json.loads(l) for l in (d/'examples.jsonl').open() if l.strip()]
     sysids = json.loads((d/'system_ids.json').read_text())
     bad = 0
@@ -323,13 +323,13 @@ want = 'e2cbbd45eefa98b142911414036e6b77fa926024dea368e2e7bc2d075b2c8e96'
 print('arm R bundle sha256', h)
 sys.exit(0 if h == want else f'ARM R BUNDLE MISMATCH: {h}')
 "
-  tar xzf /workspace/e5_arm_r.tar.gz --no-same-owner -C "$REPO/artifacts/stage3"
+  tar xzf /workspace/e5_arm_r.tar.gz --no-same-owner -C "$REPO/artifacts/stages/stage-3"
   # Independent verification of a REUSED artifact: provenance by hash, usability
   # by contract, and the configuration the corpus claims to have been generated
   # under. Every check is fatal -- a corpus failing any of them is not the corpus
   # the experiment registered.
-  cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/data/verify_staged_r.py \
-      --root artifacts/stage3 --ckpt-dir /workspace/ckpt \
+  cd "$REPO" && PYTHONPATH=src /opt/train/bin/python scripts/stages/stage-3/e1/verify_staged_r.py \
+      --root artifacts/stages/stage-3 --ckpt-dir /workspace/ckpt \
       --teacher-revision "$TEACHER_REVISION" \
       --out artifacts/audit/e5_staged_r_verify.json
 fi

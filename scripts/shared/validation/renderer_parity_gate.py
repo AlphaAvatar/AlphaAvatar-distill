@@ -1,9 +1,9 @@
 """The $0 dev-box gate that keeps renderer parity a guarantee, not a hope.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/renderer_parity_gate.py
+    PYTHONPATH=src .venv/bin/python scripts/shared/validation/renderer_parity_gate.py
 
-`scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` asserts that the shared renderers in
-`scripts/data/battery_render.py` reproduce the frozen `recovery_search_v2`
+`scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py` asserts that the shared renderers in
+`scripts/shared/data/battery_render.py` reproduce the frozen `recovery_search_v2`
 prompts byte for byte. That assertion needs the seven pinned Hugging Face source
 snapshots — roughly four gigabytes that the dev box holds from earlier work and
 the C1 pod is deliberately never given, because they are a **readiness** input
@@ -35,12 +35,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/data"))
 
-from battery_render import (FROZEN_SOURCES, check_group_parity,  # noqa: E402
+from shared.data.battery_render import (FROZEN_SOURCES, check_group_parity,  # noqa: E402
                             hub_cache)
 
 SCHEMA = "aadistill.autoinit.c1_renderer_parity/v1"
@@ -64,7 +64,7 @@ def _tree_is_clean() -> bool:
 
 
 def _harness_digest() -> str:
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1.authorization import c1_harness_digest
 
     return c1_harness_digest(REPO_ROOT)["digest"]
 
@@ -93,9 +93,9 @@ def run_parity() -> dict[str, Any]:
         "n_groups_expected": len(EXPECTED_GROUPS),
         "counts": counts,
         "groups": groups,
-        "shared_implementation": "scripts/data/battery_render.py:check_group_parity",
+        "shared_implementation": "scripts/shared/data/battery_render.py:check_group_parity",
         "also_executed_by": (
-            "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::"
+            "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::"
             "test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte"),
     }
     return record

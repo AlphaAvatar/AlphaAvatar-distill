@@ -27,7 +27,7 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
 from aadistill.runtime import pod_environment as PE  # noqa: E402
-from experiments.phase_c1 import pod_environment as C1  # noqa: E402
+from stages.phase_c1 import pod_environment as C1  # noqa: E402
 
 
 def head() -> str:

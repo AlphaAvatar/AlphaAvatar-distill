@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """D0.3 — free rollout vs oracle-reasoning rollout vs teacher-forced answer.
 
-    PYTHONPATH=src python scripts/evaluation/run_three_mode_diagnostic.py \
+    PYTHONPATH=src python scripts/stages/stage-3/d0/run_three_mode_diagnostic.py \
         --student <ckpt> --label P0-real-sa --pack <pack> --rung 860000 \
         --sessions <sessions.jsonl> --n 150 --engine vllm \
         --out artifacts/audit/three_mode/P0-real-sa
@@ -36,7 +36,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation import degeneration  # noqa: E402
@@ -169,7 +169,7 @@ def main() -> None:
     import torch
     from transformers import AutoTokenizer
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-    from diagnose_training_recall import rung_session_ids, stratified_sample
+    from shared.evaluation.diagnose_training_recall import rung_session_ids, stratified_sample
 
     tok = AutoTokenizer.from_pretrained(args.tokenizer or args.student)
     want = set(rung_session_ids(args.pack, args.rung))

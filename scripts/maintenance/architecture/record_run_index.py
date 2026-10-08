@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One index entry per logical RUN, not per artifact root.
 
-    PYTHONPATH=src python scripts/architecture/record_run_index.py --write
+    PYTHONPATH=src python scripts/maintenance/architecture/record_run_index.py --write
 
 The first version of this index counted 77 "runs". It was counting artifact
 roots: `logs/stages/stage-1/phase_c1/runs/attempt9` and `logs/budget/approvals/autoinit_c1_attempt9_grant.json`
@@ -27,8 +27,9 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.runtime.run_layout import digest_of  # noqa: E402
 
@@ -86,30 +87,12 @@ HISTORICAL_PATHS_MAINTENANCE = (
     "reconstructed later.")
 
 
-def historical_paths(repo_root: Path = REPO_ROOT) -> dict[str, str]:
-    """The old-path table the index carries.
-
-    It lives in the index rather than in this file because 300 string pairs are
-    data, and because the index is what a consumer already reads. Four
-    migration manifests used to hold the same pairs alongside per-file digests
-    and prose -- a second, editable copy of trees git already has.
-    """
-    p = repo_root / OUT
-    if not p.is_file():
-        return {}
-    block = json.loads(p.read_text()).get("historical_paths") or {}
-    return dict(block.get("map") or {})
-
-
-def resolve_historical(rel: str, repo_root: Path = REPO_ROOT) -> str:
-    """`rel` as it is addressed today; `rel` itself when nothing moved it."""
-    table = historical_paths(repo_root)
-    if rel in table:
-        return table[rel]
-    for old in sorted(table, key=len, reverse=True):
-        if rel.startswith(old + "/"):
-            return table[old] + rel[len(old):]
-    return rel
+#: The table lives in the index rather than in this file because 600 string
+#: pairs are data, and because the index is what a consumer already reads. The
+#: LOOKUP is owned by `shared.run_layout` -- navigation is layout's job, and
+#: three consumers were each re-implementing the load -- and re-exported here
+#: so this builder and its existing importers keep one name for it.
+from shared.run_layout import historical_paths, resolve_historical  # noqa: E402,F401
 
 
 def discover_legacy(repo_root: Path) -> dict[tuple[str, str], dict]:
@@ -171,7 +154,7 @@ def discover_v3(repo_root: Path) -> list[dict]:
     #:
     #: `logs/cross-stage/` DOES NOT EXIST and is not created: every experiment
     #: resolved to exactly one stage. It is still scanned because
-    #: `experiments.run_layout` still composes that path for `stage_id=None`,
+    #: `shared.run_layout` still composes that path for `stage_id=None`,
     #: and that module is covered by the frozen C1 harness digest -- removing
     #: the fallback would move the digest and invalidate an authorized
     #: preregistration to tidy a directory that is already gone. A scan of a
@@ -278,7 +261,7 @@ def discover_unrecorded(repo_root: Path) -> list[dict]:
             import sys as _sys
             _sys.path.insert(
                 0, str(Path(__file__).resolve().parents[1] / "consolidate"))
-            from closeout_reader import closeout_verdict
+            from maintenance.consolidation.closeout_reader import closeout_verdict
             try:
                 stated = closeout_verdict(json.loads(closeout.read_text()))
             except (json.JSONDecodeError, OSError):

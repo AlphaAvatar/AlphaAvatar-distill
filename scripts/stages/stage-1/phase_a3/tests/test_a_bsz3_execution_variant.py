@@ -53,7 +53,7 @@ from support.tiny_chain import (  # noqa: E402
     DEPTH, FFN, TARGET, WIDTH, write_tiny_mixture,
 )
 
-from experiments.phase_a3.a_bsz3 import (  # noqa: E402
+from stages.phase_a3.a_bsz3 import (  # noqa: E402
     A_BSZ1, A_BSZ3, ATTENTION_IMPL_ID, PROTOCOLS, execution_comparison,
 )
 
@@ -73,7 +73,7 @@ def _registered():
 def test_the_variant_is_the_incumbent_operator_and_imports_no_causal_kl():
     """A-bsz3 must not quietly become a second operator."""
     assert ATTENTION_IMPL_ID == "attention.activation_importance_v1"
-    src = (REPO / "scripts/experiments/stage-1/phase_a3/a_bsz3.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/a_bsz3.py").read_text()
     assert "causal_kl" not in src.replace("`causal_kl`", ""), (
         "A-bsz3 references causal-KL in executable text; it is the incumbent "
         "operator under a different execution protocol and nothing else")
@@ -282,7 +282,7 @@ def test_length_sorting_is_what_makes_bsz3_cheap():
     mixture is ever re-cut.
     """
     from aadistill.initialization.calibration.packing import padding_profile
-    from experiments.phase_a3.a_bsz3 import item_token_counts
+    from stages.phase_a3.a_bsz3 import item_token_counts
 
     lengths = item_token_counts()
     sorted_cost = padding_profile(lengths, 3, packing=LENGTH_SORTED_V1)
@@ -308,7 +308,7 @@ def test_the_structural_comparison_driver_runs_end_to_end(tmp_path):
     `artifact_digest_identical` here is a statement about CPU float32.
     """
     sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
-    from compare_a_bsz3 import structural_half
+    from stages.phase_a3.compare_a_bsz3 import structural_half
 
     profile, raw_items = write_tiny_mixture(tmp_path)
     cmp_dir = tmp_path / "cmp"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Record a snapshot of an experiment's live executable closure.
 
-    PYTHONPATH=src:scripts python scripts/architecture/derive_closure.py --write
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/derive_closure.py --write
 
 The derivation itself lives in `aadistill.governance.closure` and runs live
 wherever an executable identity is needed, so nothing depends on this script
@@ -20,7 +20,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -30,13 +30,13 @@ OUT_DIR = "configs/experiments"
 
 
 def _phase_c1():
-    from experiments.phase_c1.authorization import (
+    from stages.phase_c1.authorization import (
         C1_DECLARED_INPUTS, C1_ENTRY_POINTS, C1_SOURCE_ROOTS)
     return C1_ENTRY_POINTS, C1_DECLARED_INPUTS, C1_SOURCE_ROOTS
 
 
 def _phase_c3():
-    from experiments.phase_c3.authorization import (
+    from stages.phase_c3.authorization import (
         C3_DECLARED_INPUTS, C3_ENTRY_POINTS, C3_SOURCE_ROOTS)
     return C3_ENTRY_POINTS, C3_DECLARED_INPUTS, C3_SOURCE_ROOTS
 

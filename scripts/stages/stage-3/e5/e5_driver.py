@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Formal E5: validation gate -> R generation -> joint feasibility -> four arms.
 
-    /opt/train/bin/python scripts/pod/e5_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/e5/e5_driver.py --stage all
 
 The separate pilot pod was removed from the plan after two attempts showed that
 **setup dominates a short session** — 53 of 57 minutes, paid again on every pod.
@@ -44,7 +44,7 @@ STATUS = Path("/workspace/e5.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 SEEDS = ("sa", "sb")
 STEP = None        # resolved from the measured step count at train time
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
@@ -91,7 +91,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def arm_dir(arm: str, seed: str) -> Path:
-    return REPO / f"artifacts/stage3/e5_{arm}_{seed}"
+    return REPO / f"artifacts/stages/stage-3/e5_{arm}_{seed}"
 
 
 def stage_validate(args):
@@ -100,7 +100,7 @@ def stage_validate(args):
     if out.exists() and json.loads(out.read_text()).get("passed"):
         print("validation already passed; skipping", flush=True)
         return mark("VALIDATED")
-    run(["scripts/pod/e5_pilot.py", "--limit", args.validate_limit,
+    run(["scripts/stages/stage-3/e5/e5_pilot.py", "--limit", args.validate_limit,
          "--seed", "sa", "--student", "/workspace/ckpt/p2_ceheavy_sa",
          "--out", out])
     rep = json.loads(out.read_text())
@@ -112,19 +112,19 @@ def stage_validate(args):
 
 def stage_generate(args):
     for seed in SEEDS:
-        d = REPO / f"artifacts/stage3/e5_arm_r_{seed}"
+        d = REPO / f"artifacts/stages/stage-3/e5_arm_r_{seed}"
         if (d / "examples.jsonl").exists():
             print(f"R corpus for {seed} exists; skipping", flush=True)
             mark(f"GENERATED:{seed}")
             continue
-        run(["scripts/data/build_e5_arm_r.py",
+        run(["scripts/stages/stage-3/e5/build_e5_arm_r.py",
              "--student", f"/workspace/ckpt/p2_ceheavy_{seed}",
              "--source-seed", seed, "--out", d], py=VLLM_PY)
         mark(f"GENERATED:{seed}")
         # Arm C is STAGED from attempt 1 and hash-verified in setup, never
         # rebuilt: a rebuild would silently substitute a corpus for the one the
         # comparison is registered against. Missing here is a setup failure.
-        c = REPO / f"artifacts/stage3/e5_arm_c_{seed}"
+        c = REPO / f"artifacts/stages/stage-3/e5_arm_c_{seed}"
         if not (c / "examples.jsonl").exists():
             raise AssertionError(
                 f"arm C for {seed} is absent; it is staged in setup, not built here")
@@ -148,7 +148,7 @@ def stage_verify_records(args):
     failures = []
     for arm in ("c", "r"):
         for seed in SEEDS:
-            d = REPO / f"artifacts/stage3/e5_arm_{arm}_{seed}"
+            d = REPO / f"artifacts/stages/stage-3/e5_arm_{arm}_{seed}"
             rows = [json.loads(line) for line
                     in (d / "examples.jsonl").open() if line.strip()]
             sysids = json.loads((d / "system_ids.json").read_text())
@@ -202,7 +202,7 @@ def _retain_corpora() -> None:
     tar = OUT / "e5_arm_r_corpora.tar.gz"
     with tarfile.open(tar, "w:gz") as t:
         for seed in SEEDS:
-            d = REPO / f"artifacts/stage3/e5_arm_r_{seed}"
+            d = REPO / f"artifacts/stages/stage-3/e5_arm_r_{seed}"
             t.add(d, arcname=d.name)
     size_mb = tar.stat().st_size / 1e6
     try:
@@ -235,7 +235,7 @@ def _system_ids(seed: str, conditions: list) -> dict:
     merged: dict[str, list[int]] = {}
     clashes = []
     for arm in ("c", "r"):
-        path = REPO / f"artifacts/stage3/e5_arm_{arm}_{seed}/system_ids.json"
+        path = REPO / f"artifacts/stages/stage-3/e5_arm_{arm}_{seed}/system_ids.json"
         for key, ids in json.loads(path.read_text()).items():
             if key in merged and merged[key] != ids:
                 clashes.append(key)
@@ -259,10 +259,10 @@ def stage_pair(args):
     conditions, pools, kept = [], {}, {}
     for seed in SEEDS:
         c_rows = [json.loads(l) for l in
-                  (REPO / f"artifacts/stage3/e5_arm_c_{seed}/examples.jsonl").open()
+                  (REPO / f"artifacts/stages/stage-3/e5_arm_c_{seed}/examples.jsonl").open()
                   if l.strip()]
         r_rows = [json.loads(l) for l in
-                  (REPO / f"artifacts/stage3/e5_arm_r_{seed}/examples.jsonl").open()
+                  (REPO / f"artifacts/stages/stage-3/e5_arm_r_{seed}/examples.jsonl").open()
                   if l.strip()]
         ck, rk, census = intersect(c_rows, r_rows)
         # C draws from its FULL pool, not the intersection. The intersection was
@@ -336,7 +336,7 @@ def stage_pair(args):
         conditions.append((f"{seed} atomic two-truncation bundles", bundles_ok, ""))
         from aadistill.data.paired_corpus import bundle_key
         for arm, rows, pool in (("C", c_sel, ck), ("R", r_sel, rk)):
-            path = REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl"
+            path = REPO / f"artifacts/stages/stage-3/e5_final_{arm}_{seed}.jsonl"
             path.write_text("".join(json.dumps(e) + "\n" for e in rows))
             # Bundles never selected for training become the validation tail.
             # The trainer takes its validation set from blocks past the rung, so
@@ -344,7 +344,7 @@ def stage_pair(args):
             # attempt 7 died there with every gate already passed.
             chosen = {bundle_key(e) for e in rows}
             held = [e for e in pool if bundle_key(e) not in chosen]
-            vpath = REPO / f"artifacts/stage3/e5_val_{arm}_{seed}.jsonl"
+            vpath = REPO / f"artifacts/stages/stage-3/e5_val_{arm}_{seed}.jsonl"
             vpath.write_text("".join(json.dumps(e) + "\n" for e in held))
             print(f"  {seed}/{arm}: {len(rows)} train, {len(held)} held out "
                   f"for validation", flush=True)
@@ -358,7 +358,7 @@ def stage_pair(args):
         sysids = _system_ids(seed, conditions)
         for arm in ("C", "R"):
             rows = [json.loads(l) for l in
-                    (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
+                    (REPO / f"artifacts/stages/stage-3/e5_final_{arm}_{seed}.jsonl").open()
                     if l.strip()]
             minima[(arm, seed)] = len(pack_e5(rows, sysids, block_len=8192, pad_id=PAD_ID))
     common = max(minima.values())
@@ -379,13 +379,13 @@ def stage_pair(args):
         sysids = _system_ids(seed, conditions)
         for arm in ("C", "R"):
             rows = [json.loads(l) for l in
-                    (REPO / f"artifacts/stage3/e5_final_{arm}_{seed}.jsonl").open()
+                    (REPO / f"artifacts/stages/stage-3/e5_final_{arm}_{seed}.jsonl").open()
                     if l.strip()]
-            out = REPO / f"artifacts/stage3/e5_pack_{arm.lower()}_{seed}"
+            out = REPO / f"artifacts/stages/stage-3/e5_pack_{arm.lower()}_{seed}"
             blocks = pack_e5(rows, sysids, block_len=8192, pad_id=PAD_ID,
                              target_blocks=common)
             held = [json.loads(l) for l in
-                    (REPO / f"artifacts/stage3/e5_val_{arm}_{seed}.jsonl").open()
+                    (REPO / f"artifacts/stages/stage-3/e5_val_{arm}_{seed}.jsonl").open()
                     if l.strip()]
             val_blocks = pack_e5(held, sysids, block_len=8192, pad_id=PAD_ID)[:N_VAL]
             if len(val_blocks) < N_VAL:
@@ -428,7 +428,7 @@ def stage_train(args):
             feas = json.loads((OUT / "e5_joint_feasibility.json").read_text())
             if cfg_path.is_file():
                 c = json.loads(cfg_path.read_text())
-                c["data_dir"] = f"artifacts/stage3/e5_pack_{arm}_{seed}"
+                c["data_dir"] = f"artifacts/stages/stage-3/e5_pack_{arm}_{seed}"
                 c["rung"] = TARGET_CE_TOKENS
                 steps = feas["optimizer_steps"]
                 c["schedule"] = {**c["schedule"], "total_steps": steps,
@@ -440,14 +440,14 @@ def stage_train(args):
             if not cfg.is_file():
                 mark(f"TRAIN_SKIPPED:{name}:no_config")
                 continue
-            run(["scripts/training/train_stage3.py", "--config", cfg])
+            run(["scripts/shared/training/train_stage3.py", "--config", cfg])
             mark(f"TRAIN_DONE:{name}")
 
 
 def stage_evaluate(args):
     from transformers import AutoTokenizer
-    pack = REPO / "artifacts/stage3/ladder_uniform_probe"
-    sessions = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+    pack = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+    sessions = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
     for arm in ("c", "r"):
         for seed in SEEDS:
             name, alias = f"e5_{arm}_{seed}", f"E5-{arm.upper()}-{seed}"
@@ -463,11 +463,11 @@ def stage_evaluate(args):
             if (d / "oracle.generations.jsonl").exists():
                 mark(f"EVAL_DONE:{alias}")
                 continue
-            run(["scripts/evaluation/run_three_mode_diagnostic.py", "--student", m,
+            run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py", "--student", m,
                  "--label", alias, "--pack", pack, "--rung", 860000,
                  "--sessions", sessions, "--n", 150, "--modes", "free", "oracle",
                  "--out", d], py=VLLM_PY)
-            run(["scripts/evaluation/run_three_mode_diagnostic.py", "--student", m,
+            run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py", "--student", m,
                  "--label", alias, "--pack", pack, "--rung", 860000,
                  "--sessions", sessions, "--n", 150, "--modes", "forced",
                  "--out", d / "forced"])
@@ -483,10 +483,10 @@ def _pack_c(seed: str) -> Path:
     from aadistill.data.paired_corpus import (
         as_bundles, intersect, select_paired_to_token_target,
     )
-    out = REPO / f"artifacts/stage3/e5_pack_c_{seed}"
+    out = REPO / f"artifacts/stages/stage-3/e5_pack_c_{seed}"
     if (out / "blocks.npz").is_file():
         return out
-    d = REPO / f"artifacts/stage3/e5_arm_c_{seed}"
+    d = REPO / f"artifacts/stages/stage-3/e5_arm_c_{seed}"
     ex = [json.loads(l) for l in (d / "examples.jsonl").open() if l.strip()]
     sysids = json.loads((d / "system_ids.json").read_text())
     ck, rk, _ = intersect(ex, [dict(e) for e in ex])
@@ -511,7 +511,7 @@ def stage_benchmark(args):
         print("throughput benchmark already done; skipping", flush=True)
         return mark("BENCHMARKED")
     pack = _pack_c("sa")
-    run(["scripts/training/benchmark_e5_throughput.py", "--pack", pack,
+    run(["scripts/stages/stage-3/e5/benchmark_e5_throughput.py", "--pack", pack,
          "--student", "/workspace/ckpt/p2_ceheavy_sa",
          "--teacher", f"{TEACHER}@{TEACHER_REV}",
          "--steps", args.bench_steps, "--out", out])
@@ -561,7 +561,7 @@ def stage_budget_gate_1(args):
     # are staged, reserving 90 minutes for work that will be skipped is a $1.48
     # phantom -- it failed this gate by $0.94 on 2026-08-07 while the real plan
     # fitted comfortably.
-    staged = all((REPO / f"artifacts/stage3/e5_arm_r_{s_}/examples.jsonl").is_file()
+    staged = all((REPO / f"artifacts/stages/stage-3/e5_arm_r_{s_}/examples.jsonl").is_file()
                  for s_ in SEEDS)
     phases = {"r_generation": 0 if staged else 90, "verify_records": 2,
               "pair_pack": 20, "final_benchmark": 5,
@@ -620,8 +620,8 @@ def stage_final_benchmark(args):
         print("final-pack benchmark already done; skipping", flush=True)
         return mark("BENCHMARKED_FINAL")
     seed = SEEDS[0]
-    packs = [REPO / f"artifacts/stage3/e5_pack_{a}_{seed}" for a in ("c", "r")]
-    run(["scripts/training/benchmark_e5_throughput.py", "--absolute-only",
+    packs = [REPO / f"artifacts/stages/stage-3/e5_pack_{a}_{seed}" for a in ("c", "r")]
+    run(["scripts/stages/stage-3/e5/benchmark_e5_throughput.py", "--absolute-only",
          "--packs", *packs, "--labels", f"C_{seed}", f"R_{seed}",
          "--student", f"/workspace/ckpt/p2_ceheavy_{seed}",
          "--teacher", f"{TEACHER}@{TEACHER_REV}",

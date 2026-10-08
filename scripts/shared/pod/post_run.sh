@@ -41,7 +41,7 @@ cd /workspace/aad || exit 1
 source /workspace/run_env.sh || { echo "MARKER:POST_FAILED:${RUN_NAME}:source_run_env" >> /workspace/run_markers.log; exit 1; }
 fail() { echo "MARKER:POST_FAILED:${RUN_NAME}:$1" >> /workspace/run_markers.log; exit 1; }
 
-RUN=artifacts/stage3/$RUN_NAME
+RUN=artifacts/stages/stage-3/$RUN_NAME
 CKPT=$RUN/checkpoints/$STEP_TAG/model
 [ -d "$CKPT" ] || fail no_final_ckpt
 
@@ -53,7 +53,7 @@ for f in tokenizer.json tokenizer_config.json chat_template.jinja; do
 done
 
 # 1) bf16 holdout on GPU (comparable to every prior Stage 3 GPU number)
-uv run python scripts/evaluation/eval_ppl.py --data "$HOLDOUT" \
+uv run python scripts/shared/evaluation/eval_ppl.py --data "$HOLDOUT" \
   --model "$CKPT" --out "$RUN/eval_holdout_v1.json" || fail holdout_bf16
 
 # 2) generation smoke: greedy, 80 new tokens, same 3 prompts as every prior run.
@@ -83,7 +83,7 @@ EOF
 cp "/workspace/console_${RUN_NAME}.log" "$RUN/console.log"
 
 # 3) hashes of everything retained, then upload to the private HF repo
-HASHFILE=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
+HASHFILE=artifacts/stages/stage-3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
 SMALL_FILES="train_log.jsonl run_manifest.json eval_holdout_v1.json \
 gen_smoke.json console.log"
 ( cd /workspace/aad && for f in $SMALL_FILES; do echo "$RUN/$f"; done | xargs sha256sum && sha256sum "$CKPT"/* ) \

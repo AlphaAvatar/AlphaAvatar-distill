@@ -81,8 +81,8 @@
    "_source": "resolved at runtime from the repository's canonical stage-1 initialization if present; skipped with a recorded reason when the pod has no real checkpoint, because a toy geometry already covers every changed line and this stage exists only to prove the plumbing survives real bytes.",
    "source": {
     "local_paths": [
-     "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
-     "artifacts/stage1/qwen3_0p6b_init_v0"
+     "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+     "artifacts/stages/stage-1/qwen3_0p6b_init_v0"
     ],
     "relay_repo": "AlphaAvatar/aadistill-artifacts",
     "relay_path": "stage1/qwen3_0p6b_init_v0/checkpoint",

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price the paid work Phase B actually still owes. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/price_phase_b.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/price_phase_b.py \
         --out logs/stages/stage-1/phase_b/analyses/autoinit_phase_b_pricing.json
 
 Phase B is not a fresh Phase A. Its terminal procedure is a **cross-phase**
@@ -43,11 +43,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from plan_search import (  # noqa: E402
+from stages.phase_a.plan_search import (  # noqa: E402
     ADAPTER, CALIBRATION_SEQ_LEN, CALIBRATION_TOKENS, COMPOSITE, DECOMPOSED,
     TARGET, TEACHER, probe_cost,
 )
@@ -109,12 +109,12 @@ def verified_reuse() -> dict:
     and then owes eight, so every failure path here raises instead of degrading
     to the pessimistic case: a silent fallback would look like a priced plan.
     """
-    from verify_historical_probe_reuse import probes_dir_digest
+    from stages.phase_b.verify_historical_probe_reuse import probes_dir_digest
 
     if not REUSE_RECORD.is_file():
         raise SystemExit(
             f"{REUSE_RECORD.name} is missing. Run "
-            "scripts/autoinit/verify_historical_probe_reuse.py first; reuse may "
+            "scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py first; reuse may "
             "not be priced from the existence of probe files.")
     rec = json.loads(REUSE_RECORD.read_text())
     if not rec.get("reuse_verified"):

@@ -30,9 +30,9 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.runtime import cpu_test_env as CTE
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
-SIM = REPO / "scripts/pod/simulate_pod_env.sh"
-EMITTER = REPO / "scripts/pod/cpu_test_env_args.py"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
+SIM = REPO / "scripts/shared/pod/simulate_pod_env.sh"
+EMITTER = REPO / "scripts/shared/pod/cpu_test_env_args.py"
 
 
 def _child(env: dict[str, str], code: str) -> str:
@@ -221,11 +221,11 @@ def test_the_host_local_store_is_located_through_home(tmp_path, monkeypatch):
     monkeypatch.setattr(Path, "home", classmethod(lambda cls: tmp_path))
     assert CTE.host_local_store() == tmp_path / "aad-artifacts"
     for module, name in (
-            ("scripts/experiments/stage-1/recovery_continuation/tests/"
+            ("scripts/stages/stage-1/recovery_continuation/tests/"
              "test_recovery_continuation_session.py", "HOST_LOCAL_PHASE_A_STORE"),
             ("tests/integration/test_reconstruct_training_events.py", "E6B"),
-            ("scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py", "STAGED"),
-            ("scripts/pod/autoinit_recovery_continuation_launch.py", "CKPT_STORE")):
+            ("scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py", "STAGED"),
+            ("scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py", "CKPT_STORE")):
         text = (REPO / module).read_text()
         line = next(ln for ln in text.splitlines() if ln.startswith(f"{name} ="))
         assert "Path.home()" in line, f"{module}::{name} still hardcodes a host path"
@@ -238,7 +238,7 @@ def test_the_host_local_store_is_located_through_home(tmp_path, monkeypatch):
     #: HOME neutralizes a `Path.home()` path, but it cannot make a stale fixture
     #: describe the current tree, which is how a correct gate came to report a
     #: false alarm.
-    contract = (REPO / "scripts/experiments/stage-1/phase_c1/tests/test_c1_session_contract.py").read_text()
+    contract = (REPO / "scripts/stages/stage-1/phase_c1/tests/test_c1_session_contract.py").read_text()
     assert not any(ln.startswith("CANDIDATE =") for ln in contract.splitlines()), (
         "a host-local CANDIDATE constant is back in test_c1_session_contract.py; "
         "the candidate is built into tmp_path and must stay in-repo")

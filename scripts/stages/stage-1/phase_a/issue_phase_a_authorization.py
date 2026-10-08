@@ -1,11 +1,11 @@
 """Issue the Phase-A authorization. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/issue_phase_a_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_a/issue_phase_a_authorization.py \
         --grant logs/<a one-use grant document>.json --require-clean
 
 Run AFTER the rehearsal passes and the harness is committed.
 
-**The grant is an input, not a constant.** `scripts/experiments/stage-1/phase_a/plan.py`
+**The grant is an input, not a constant.** `scripts/stages/stage-1/phase_a/plan.py`
 carries the authorization SCHEMA — caps, stages, stage conditions, scope — and
 nothing about a particular permission. Until 2026-08-18 it also carried the
 attempt-7 grant prose: which attempt it covered, the cumulative spend at
@@ -42,11 +42,11 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, phase_a_harness_digest  # noqa: E402
+from stages.phase_a.plan import GRANT_PROSE_REQUIRED, PHASE_A_AUTHORIZATION, PHASE_A_HARNESS_SOURCE_FILES_V1, PHASE_A_PLAN_V1, phase_a_harness_digest  # noqa: E402
 
 FROZEN_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"
 

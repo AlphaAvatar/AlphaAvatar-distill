@@ -50,7 +50,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     observe_recovery_protocol,
 )
 
-DRIVER_PATH = REPO / "scripts/pod/autoinit_preflight_driver.py"
+DRIVER_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_driver.py"
 TYPES = ["alpha", "beta", "gamma"]
 
 #: A teacher identity block of the shape `load_teacher` records. Taken from a
@@ -104,7 +104,7 @@ def write_student(d: Path) -> None:
     ).save_pretrained(d)
 
 
-CANONICAL_TOKENIZER = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL_TOKENIZER = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 def canonical_tokenizer_sha256() -> str:
@@ -125,7 +125,7 @@ def real_run(tmp_path_factory):
     """Train a toy control with the real `train_stage3.py` and return its tree."""
     tmp = tmp_path_factory.mktemp("observed")
     pack, student = tmp / "pack", tmp / "student"
-    out = tmp / "artifacts/stage3/preflight_ctl_toy"
+    out = tmp / "artifacts/stages/stage-3/preflight_ctl_toy"
     write_pack(pack)
     write_student(student)
     cfg = {
@@ -155,7 +155,7 @@ def real_run(tmp_path_factory):
     }
     (tmp / "cfg.json").write_text(json.dumps(cfg))
     rc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/training/train_stage3.py"),
+        [sys.executable, str(REPO / "scripts/shared/training/train_stage3.py"),
          "--config", str(tmp / "cfg.json")],
         capture_output=True, text=True, timeout=900,
         env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin",
@@ -259,9 +259,9 @@ def run_verify_control(real_run, tmp_path: Path, run_dir: Path,
     spec.loader.exec_module(mod)
     name = run_dir.name
     repo = tmp_path / f"repo_{name}"
-    (repo / "artifacts/stage3").mkdir(parents=True, exist_ok=True)
-    if not (repo / f"artifacts/stage3/{name}").exists():
-        shutil.copytree(run_dir, repo / f"artifacts/stage3/{name}")
+    (repo / "artifacts/stages/stage-3").mkdir(parents=True, exist_ok=True)
+    if not (repo / f"artifacts/stages/stage-3/{name}").exists():
+        shutil.copytree(run_dir, repo / f"artifacts/stages/stage-3/{name}")
     mod.REPO = repo
     mod.AUDIT = tmp_path / f"audit_{name}"
     mod.AUDIT.mkdir(parents=True, exist_ok=True)
@@ -374,7 +374,7 @@ def summary(**overrides) -> dict:
         "thinking_mode": declared["thinking_mode"],
         "stop_ids": [151643, 151645],
         "degeneration_stop": declared["degeneration_stop"],
-        "tokenizer_source": "/workspace/aad/artifacts/stage3/ctl/checkpoints/step_1/model",
+        "tokenizer_source": "/workspace/aad/artifacts/stages/stage-3/ctl/checkpoints/step_1/model",
         "tokenizer_source_rule": declared["tokenizer_source"],
         "tokenizer_sha256": "t" * 64,
         "chat_template_sha256": "c" * 64,
@@ -494,7 +494,7 @@ def test_4c_every_material_field_is_actually_written_by_the_generator():
     )
 
     sys.path.insert(0, str(REPO / "scripts/evaluation"))
-    source = (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
+    source = (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     runtime_keys = set(generation_runtime_fingerprint(None).as_dict())
 
     for field, path in {**SUMMARY_FIELD_PATHS, **NULLABLE_SUMMARY_FIELDS}.items():
@@ -515,7 +515,7 @@ def test_4c_every_material_field_is_actually_written_by_the_generator():
 
 def test_4d_the_declared_protocol_and_the_generator_share_one_definition():
     """Two copies of a rule string is the defect this pair of files had."""
-    source = (REPO / "scripts/evaluation/uncapped_eval.py").read_text()
+    source = (REPO / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     for constant in ("MAX_TOKENS_RULE", "CONTEXT_RESOLUTION_RULE",
                      "SYSTEM_INJECTION_RULE", "STOP_ID_DERIVATION_RULE",
                      "GENERATION_DTYPE", "TOKENIZER_SOURCE_CHECKPOINT"):
@@ -531,7 +531,7 @@ def test_4d_the_declared_protocol_and_the_generator_share_one_definition():
 # --- scenarios 5 and 6: the frozen assets -----------------------------------
 
 
-FROZEN_PRESENT = (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()
+FROZEN_PRESENT = (REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").is_file()
 frozen_only = pytest.mark.skipif(
     not FROZEN_PRESENT, reason="frozen assets are local artifacts, not tracked in git")
 
@@ -539,16 +539,16 @@ frozen_only = pytest.mark.skipif(
 def frozen_repo(tmp_path: Path) -> Path:
     """A minimal repo the frozen-asset verifier can run against."""
     repo = tmp_path / "repo"
-    (repo / "artifacts/stage1").mkdir(parents=True)
-    (repo / "artifacts/stage3").mkdir(parents=True)
-    shutil.copytree(REPO / "artifacts/stage1/state_eval_v1",
-                    repo / "artifacts/stage1/state_eval_v1")
-    shutil.copytree(REPO / "artifacts/stage3/recovery_search_v2",
-                    repo / "artifacts/stage3/recovery_search_v2")
+    (repo / "artifacts/stages/stage-1").mkdir(parents=True)
+    (repo / "artifacts/stages/stage-3").mkdir(parents=True)
+    shutil.copytree(REPO / "artifacts/stages/stage-1/state_eval_v1",
+                    repo / "artifacts/stages/stage-1/state_eval_v1")
+    shutil.copytree(REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2",
+                    repo / "artifacts/stages/stage-1/batteries/recovery_search_v2")
     # V3: the same six files at current paths. V2 is the historical
     # declaration and names the pre-migration ones, so copying it into a
     # scratch tree fails on the first file that no longer exists.
-    from experiments.source_sets import RECOVERY_SCORING_FILES_V3
+    from shared.source_sets import RECOVERY_SCORING_FILES_V3
     for rel in RECOVERY_SCORING_FILES_V3:
         dst = repo / rel
         dst.parent.mkdir(parents=True, exist_ok=True)
@@ -570,7 +570,7 @@ def verify_frozen(repo: Path) -> tuple[int, dict]:
 
     out = repo / "report.json"
     rc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/verify_frozen_assets.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/verify_frozen_assets.py"),
          "--repo", str(repo), "--out", "report.json",
          "--expect", str(current_tree_expectation(repo))],
         capture_output=True, text=True, cwd=REPO, timeout=300,
@@ -586,7 +586,7 @@ def test_5_a_state_eval_identity_mismatch_blocks_before_measurement(tmp_path):
 
     # One prompt changed. The content hash is over the loaded items, so this is
     # exactly the failure that must not reach a measurement.
-    items = repo / "artifacts/stage1/state_eval_v1/items.jsonl"
+    items = repo / "artifacts/stages/stage-1/state_eval_v1/items.jsonl"
     lines = items.read_text().splitlines()
     row = json.loads(lines[0])
     row["text" if "text" in row else list(row)[-1]] = "tampered"
@@ -604,7 +604,7 @@ def test_5b_a_manifest_edited_to_match_itself_is_still_caught(tmp_path):
     from aadistill.infrastructure.manifest import sha256_json
 
     repo = frozen_repo(tmp_path)
-    path = repo / "artifacts/stage1/state_eval_v1/manifest.json"
+    path = repo / "artifacts/stages/stage-1/state_eval_v1/manifest.json"
     manifest = json.loads(path.read_text())
     manifest["content_sha256"] = "0" * 64
     manifest.pop("manifest_sha256", None)
@@ -622,7 +622,7 @@ def test_5b_a_manifest_edited_to_match_itself_is_still_caught(tmp_path):
 @frozen_only
 def test_6_a_recovery_search_or_scoring_drift_blocks_characterization(tmp_path):
     repo = frozen_repo(tmp_path)
-    battery = repo / "artifacts/stage3/recovery_search_v2"
+    battery = repo / "artifacts/stages/stage-1/batteries/recovery_search_v2"
     lines = (battery / "gsm8k.jsonl").read_text().splitlines()
     lines[0] = json.dumps({**json.loads(lines[0]), "answer": "tampered"})
     (battery / "gsm8k.jsonl").write_text("\n".join(lines) + "\n")
@@ -672,7 +672,7 @@ def test_the_driver_verifies_generations_before_it_scores_them():
 
 
 def test_6b_setup_blocks_on_the_frozen_asset_gate_before_stage_1():
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     assert "verify_frozen_assets.py" in setup
     assert "exit 91" in setup and "FROZEN_ASSETS_FAILED" in setup
     assert setup.index("verify_frozen_assets.py") < setup.index("mark ASSETS_READY")
@@ -698,9 +698,9 @@ def test_the_derived_control_config_overrides_exactly_three_fields(tmp_path):
     changed = {k for k in set(frozen) | set(derived)
                if frozen.get(k) != derived.get(k)}
     assert changed == {"out_dir", "data_dir", "run_name", "_purpose"}
-    assert derived["out_dir"] == f"artifacts/stage3/{name}"
+    assert derived["out_dir"] == f"artifacts/stages/stage-3/{name}"
     # The pack path the preregistration and the attested protocol both pin.
-    assert derived["data_dir"] == "artifacts/stage3/ladder_uniform_probe"
+    assert derived["data_dir"] == "artifacts/shared/instruments/ladder_uniform_probe"
     assert derived["seed"] == seed
     # Everything that defines the recovery is untouched.
     for key in ("loss", "optim", "schedule", "batch", "rung", "block_len",

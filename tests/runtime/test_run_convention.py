@@ -2,7 +2,7 @@
 
 `aadistill.runtime.run_layout` is covered by `test_run_layout_all_stages.py`:
 identifiers, containment, role uniqueness, manifest self-hash. This module
-covers the layer above it — `experiments.run_layout`, the one place that says
+covers the layer above it — `shared.run_layout`, the one place that says
 the root is `logs/runs` and that a run's files live in five areas.
 
 Two claims are worth protecting here, and they pull in opposite directions.
@@ -27,7 +27,7 @@ from pathlib import Path
 import pytest
 
 from aadistill.runtime.run_layout import RunLayoutError
-from experiments.run_layout import (
+from shared.run_layout import (
     AREAS, ArtifactSpec, MANIFEST_NAME, RUNS_ROOT, RunConventionError, area_of,
     check_roles, is_recorded, layout_for, manifest_path, open_run,
     present_roles, read_run, record_run,
@@ -433,13 +433,13 @@ def _here(root, experiment_id, run_id="r1", stage_id=None):
     or `cross-stage/<experiment>/runs/<run>` when no stage is declared. One
     helper, so a layout change is one edit rather than twenty.
     """
-    from experiments.run_layout import layout_for
+    from shared.run_layout import layout_for
 
     return layout_for(root, experiment_id, run_id, stage_id).root
 
 
 def test_the_stage_segment_is_declared_not_guessed():
-    from experiments.run_layout import stage_segment
+    from shared.run_layout import stage_segment
 
     assert stage_segment("3") == "stage-3"
     assert stage_segment("shared") == "stage-shared"
@@ -471,7 +471,7 @@ def test_a_stage_the_pipeline_grows_later_needs_no_change_here(tmp_path):
 
     spec = importlib.util.spec_from_file_location(
         "rri_stage7",
-        Path(__file__).resolve().parents[2] / "scripts/architecture/record_run_index.py")
+        Path(__file__).resolve().parents[2] / "scripts/maintenance/architecture/record_run_index.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     found = {(r["experiment_id"], r.get("stage")) for r in mod.discover_v3(tmp_path)}
@@ -511,7 +511,7 @@ def test_the_legacy_root_is_still_addressable(tmp_path):
 # --- a README describes a directory; it is never evidence --------------------
 
 def test_a_readme_is_the_one_other_file_a_run_root_may_hold():
-    from experiments.run_layout import README_NAME, area_of
+    from shared.run_layout import README_NAME, area_of
 
     assert area_of(README_NAME) == "root"
     #: By NAME, not by extension: "ignore Markdown" would let any .md file
@@ -522,7 +522,7 @@ def test_a_readme_is_the_one_other_file_a_run_root_may_hold():
 
 
 def test_a_run_root_holding_only_a_readme_can_still_be_opened(tmp_path):
-    from experiments.run_layout import README_NAME
+    from shared.run_layout import README_NAME
 
     _, _, roles = STAGE4
     root = _here(tmp_path, "stage4_rollout", stage_id="4")
@@ -534,7 +534,7 @@ def test_a_run_root_holding_only_a_readme_can_still_be_opened(tmp_path):
 
 def test_a_readme_does_not_excuse_anything_else_in_the_root(tmp_path):
     """The dead-launcher rule survives README support."""
-    from experiments.run_layout import README_NAME
+    from shared.run_layout import README_NAME
 
     _, _, roles = STAGE4
     root = _here(tmp_path, "stage4_rollout", stage_id="4")

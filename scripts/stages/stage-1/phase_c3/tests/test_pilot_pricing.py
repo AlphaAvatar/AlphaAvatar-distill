@@ -20,12 +20,12 @@ from aadistill.initialization.operators.attention.gqa import causal_kl  # noqa: 
 from aadistill.initialization.operators.register import (  # noqa: E402
     register_builtin_operators)
 
-from experiments.phase_c3 import pricing  # noqa: E402
+from stages.phase_c3 import pricing  # noqa: E402
 
 #: `artifacts/` is gitignored, so the frozen mixture is absent on a fresh
 #: clone. Skip on the TREE, never on the file: a missing mixture inside a
 #: built tree is a real failure.
-BUILT = (REPO / "artifacts/stage1").is_dir()
+BUILT = (REPO / "artifacts/stages/stage-1").is_dir()
 needs_mixture = pytest.mark.skipif(
     not BUILT, reason="artifacts/ is gitignored and not built in this tree")
 
@@ -267,7 +267,7 @@ def test_the_module_pins_no_live_price_as_a_constant():
     fact and is what a later reader would copy into an authorization."""
     import ast
 
-    tree = ast.parse((REPO / "scripts/experiments/stage-1/phase_c3/pricing.py").read_text())
+    tree = ast.parse((REPO / "scripts/stages/stage-1/phase_c3/pricing.py").read_text())
     for node in ast.walk(tree):
         if isinstance(node, ast.Assign):
             for t in node.targets:

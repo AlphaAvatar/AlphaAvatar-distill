@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Decompose the implemented `kd_scope="all"` objective by token role. No updates.
 
-    PYTHONPATH=src python scripts/training/audit_kd_decomposition.py \
+    PYTHONPATH=src python scripts/shared/training/audit_kd_decomposition.py \
         --student <ckpt> --teacher Qwen/Qwen3-4B-Thinking-2507@<rev> \
-        --pack artifacts/stage3/ladder_uniform_probe --rung 860000 \
+        --pack artifacts/shared/instruments/ladder_uniform_probe --rung 860000 \
         --blocks 32 --out artifacts/audit/kd_decomposition_sa.json
 
 `optimizer.step()` is never called and no weight is written. The gradient probe
@@ -47,7 +47,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402

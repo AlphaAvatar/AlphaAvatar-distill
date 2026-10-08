@@ -7,7 +7,7 @@
 # driver — which stops itself at the throughput gate if the gate fails. Teardown
 # is tied to the completion marker, never to --terminate-after.
 #
-#   POD_ID=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e2p1_launch.sh
+#   POD_ID=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/e2/e2p1_launch.sh
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -110,7 +110,7 @@ scp -P "$PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     "$SCR/hf_token" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'chmod 600 /workspace/hf/token'
 scp -P "$PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    scripts/pod/e2p1_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+    scripts/stages/stage-3/e2/e2p1_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 rm -f "$SCR/hf_token"
 
 say "running setup (bundle @ $SESSION_COMMIT)"
@@ -129,19 +129,19 @@ fi
 say "setup done — $(cost)"
 
 say "running the FIRST D0 endpoint and the throughput gate"
-$SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python scripts/pod/e2p1_driver.py --stage d0_sa" \
+$SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python scripts/stages/stage-3/e2/e2p1_driver.py --stage d0_sa" \
   >>"$SCR/e2p1_run.log" 2>&1
 D0_RC=$?
-$SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python scripts/pod/e2p1_driver.py --stage gate" \
+$SSH "root@$HOST" "cd /workspace/aad && /opt/train/bin/python scripts/stages/stage-3/e2/e2p1_driver.py --stage gate" \
   >>"$SCR/e2p1_run.log" 2>&1
 GATE_RC=$?
 say "D0 rc=$D0_RC gate rc=$GATE_RC — $(cost)"
 
 # Always pull telemetry, pass or fail: a failed gate must still leave evidence.
 say "fetching partial output and telemetry"
-mkdir -p artifacts/eval/e2p1
+mkdir -p artifacts/stages/stage-3/eval/e2p1
 scp -r -P "$PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-    "root@$HOST:/workspace/aad/artifacts/eval/e2p1" artifacts/eval/ >>"$LOG" 2>&1
+    "root@$HOST:/workspace/aad/artifacts/stages/stage-3/eval/e2p1" artifacts/stages/stage-3/eval/ >>"$LOG" 2>&1
 scp -P "$PORT" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
     "root@$HOST:/workspace/e2p1.status" "$SCR/e2p1.status" >>"$LOG" 2>&1
 
@@ -155,7 +155,7 @@ if [ $GATE_RC -ne 0 ]; then
 fi
 
 say "gate passed — continuing Phase 1"
-$SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python scripts/pod/e2p1_driver.py --stage rest \
+$SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python scripts/stages/stage-3/e2/e2p1_driver.py --stage rest \
   > /workspace/e2p1_rest.log 2>&1 &" >>"$LOG" 2>&1
 echo "RUNNING" > "$SCR/e2p1.state"
 say "phase 1 continuing on the pod; poller takes over"

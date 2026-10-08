@@ -1,7 +1,7 @@
 """Retire REMOTE relay copies whose canonical local copy is verified. $0.
 
-    PYTHONPATH=src python scripts/autoinit/retire_relay_copies.py            # dry run
-    PYTHONPATH=src python scripts/autoinit/retire_relay_copies.py --execute
+    PYTHONPATH=src python scripts/maintenance/consolidation/retire_relay_copies.py            # dry run
+    PYTHONPATH=src python scripts/maintenance/consolidation/retire_relay_copies.py --execute
 
 **This retires a remote COPY, not a checkpoint.** Every object removed here has a
 byte-identical copy under `/home/ecs-user/aad-artifacts`, verified by content
@@ -36,7 +36,7 @@ import os
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 RELAY = "AlphaAvatar/aadistill-artifacts"

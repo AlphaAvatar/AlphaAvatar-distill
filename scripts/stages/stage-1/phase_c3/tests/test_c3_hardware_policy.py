@@ -27,7 +27,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3 import hardware as H  # noqa: E402
+from stages.phase_c3 import hardware as H  # noqa: E402
 
 
 def python_code(text: str) -> str:
@@ -155,7 +155,7 @@ def test_selection_never_reads_community_price():
     that it is never used). So this asserts what the code DOES: it requests
     and reads securePrice, and nowhere reads communityPrice.
     """
-    src = (REPO / "scripts/experiments/stage-1/phase_c3/hardware.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/hardware.py").read_text()
     assert 'row.get("securePrice")' in src, (
         "the tier does not read securePrice from the response")
     assert "securePrice" in src
@@ -183,7 +183,7 @@ def test_the_launcher_refuses_an_unapproved_device_before_anything_exists():
     for p in ("scripts/pod", "scripts/autoinit"):
         sys.path.insert(0, str(REPO / p))
     spec = importlib.util.spec_from_file_location(
-        "c3launch_gpu", REPO / "scripts/pod/autoinit_c3_launch.py")
+        "c3launch_gpu", REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
 
@@ -203,7 +203,7 @@ def test_the_acquisition_loop_creates_no_run_directory_while_polling():
     a usable type has been seen. Asserted structurally, because the failure
     mode is a `mkdir` that drifts above the capacity check.
     """
-    raw = (REPO / "scripts/pod/c3_acquire.sh").read_text()
+    raw = (REPO / "scripts/stages/stage-1/phase_c3/c3_acquire.sh").read_text()
     watch = raw[raw.index("# ---- $0 capacity watch"):raw.index("# ---- re-price LIVE")]
     watch = shell_code(watch)
     for forbidden in ("mkdir", "issue_c3_authorization", "stage_c1_bundle",
@@ -218,7 +218,7 @@ def test_the_acquisition_loop_creates_no_run_directory_while_polling():
 
 def test_the_loop_reprices_on_the_device_it_will_use():
     """$1.09/h must not be carried from L40S onto another part."""
-    raw = (REPO / "scripts/pod/c3_acquire.sh").read_text()
+    raw = (REPO / "scripts/stages/stage-1/phase_c3/c3_acquire.sh").read_text()
     code = shell_code(raw)
     assert "query_live_secure_price(gpu)" in code
     assert "--gpu" in code and '--max-price "$PRICE"' in code

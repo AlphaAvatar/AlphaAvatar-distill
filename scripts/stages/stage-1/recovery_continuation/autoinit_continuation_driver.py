@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pod-side driver for the characterization continuation. Four stages, then stop.
 
-    /opt/train/bin/python scripts/pod/autoinit_continuation_driver.py \
+    /opt/train/bin/python scripts/stages/stage-1/recovery_continuation/autoinit_continuation_driver.py \
         --image-digest <digest> --rate 0.99 --spent-usd 0.15 \
         --soft-stop-usd 1.50 --authorized-usd 1.75
 
@@ -37,7 +37,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
@@ -46,29 +46,29 @@ from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
     SpendAuthorization,
 )
-from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, ControlImportError, EvaluationReadinessError, check_evaluation_ready, continuation_manifest, import_permanent_control  # noqa: E402
+from stages.recovery_continuation.plan import CONTINUATION_PLAN_V1, CONTINUATION_SCOPE, ControlImportError, EvaluationReadinessError, check_evaluation_ready, continuation_manifest, import_permanent_control  # noqa: E402
 from aadistill.initialization.planning.generation import (
     GenerationProtocolError,
     RecoveryEvaluationProtocol,
     declared_generation_protocol,
     observe_generation_protocol,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 from aadistill.initialization.planning.recovery import (
     EquivalenceRule,
     FeasibilityRule,
     RecoveryAdmissionError,
     RuntimeEnvironmentFingerprint,
 )
-from experiments.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
-from experiments.source_sets import recovery_scoring_contract
+from shared.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
+from shared.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_continuation.status"
 AUDIT = REPO / "artifacts/audit/autoinit_continuation"
-BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
-CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
+CANONICAL_INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: Where the transport layer materializes the controls. The driver does not care
 #: how they arrived; it only cares that the import gate accepts them.
 CONTROL_ROOT = REPO / "artifacts/controls"
@@ -243,7 +243,7 @@ class ContinuationDriver:
             degeneration_source_digest=sha256_file(
                 REPO / "src/aadistill/evaluation/degeneration.py"))
         probe = self.gate("engine_probe",
-                          [str(REPO / "scripts/pod/autoinit_engine_probe.py"),
+                          [str(REPO / "scripts/shared/pod/autoinit_engine_probe.py"),
                            "--model", str(CANONICAL_INIT),
                            "--out", str(AUDIT / "engine_probe.json"),
                            "--image-digest", self.a.image_digest],
@@ -311,7 +311,7 @@ class ContinuationDriver:
         self.enter(2)
         if not self.afford(10, "v2 generation smoke"):
             return self.record(2, False, "insufficient budget for the smoke")
-        smoke_dir = REPO / "artifacts/eval/continuation/_smoke"
+        smoke_dir = REPO / "artifacts/stages/stage-3/eval/continuation/_smoke"
         smoke_dir.mkdir(parents=True, exist_ok=True)
         sets = json.loads((BATTERY / "manifest.json").read_text())["sets"]
         chosen = [s for s in SMOKE_SETS if s in sets]
@@ -326,7 +326,7 @@ class ContinuationDriver:
                 (BATTERY / f"{name}.jsonl").read_text().splitlines()[:2]) + "\n")
             subsets.append(str(path))
         out = self.gate("generation_smoke",
-                        [str(REPO / "scripts/evaluation/uncapped_eval.py"),
+                        [str(REPO / "scripts/shared/evaluation/uncapped_eval.py"),
                          "--model", str(CANONICAL_INIT), "--label", "_smoke",
                          "--prompts", *subsets, "--out-dir", str(smoke_dir),
                          "--diagnostics"],
@@ -372,11 +372,11 @@ class ContinuationDriver:
             if not self.afford(self.a.characterization_minutes, f"characterize {name}"):
                 return self.record(3, False, f"insufficient budget for {name}",
                                    characterized=list(results))
-            gen_dir = REPO / f"artifacts/eval/continuation/{name}"
+            gen_dir = REPO / f"artifacts/stages/stage-3/eval/continuation/{name}"
             gen_dir.mkdir(parents=True, exist_ok=True)
             t = time.time()
             out = self.gate(f"{name}_generation",
-                            [str(REPO / "scripts/evaluation/uncapped_eval.py"),
+                            [str(REPO / "scripts/shared/evaluation/uncapped_eval.py"),
                              "--model", str(control.checkpoint_dir),
                              "--label", name,
                              "--prompts", *[str(BATTERY / f"{s}.jsonl") for s in sets],
@@ -397,7 +397,7 @@ class ContinuationDriver:
                                    characterized=list(results))
             scored = AUDIT / f"{name}_recovery_search.json"
             rc = self.gate(f"{name}_scoring",
-                           [str(REPO / "scripts/autoinit/score_recovery_search.py"),
+                           [str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
                             "--generations", str(gen_dir), "--label", name,
                             "--seed", str(control.seed), "--out", str(scored),
                             "--per-sample", str(AUDIT / f"{name}_per_sample.jsonl")],

@@ -2,13 +2,13 @@
  "stage": "stage3_recovery",
  "run_name": "e4_p2_r1600k_sa",
  "_purpose": "Experiment 4 (P2 scale anchor): the P2-CE-heavy objective (ce 1.0 / kd 0.25, scope all) trained at the existing strictly nested 1.60M rung instead of 0.86M. Differs from p2_ceheavy_sa ONLY in the rung and the schedule/cadence that E1 derives from it (1,174 blocks, 1,600,353 supervised tokens, 1,761 steps = 3 passes at 2 blocks/step, warmup 88 = 5% as at every other rung, save_every 880, eval_every 220). Forks from the same Stage 1 PCA init as every other arm; does NOT continue from the P2-0.86M checkpoint.",
- "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+ "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16"
  },
- "data_dir": "artifacts/stage3/ladder_uniform",
+ "data_dir": "artifacts/stages/stage-3/ladder_uniform",
  "groups": null,
  "packing": "ladder",
  "block_len": 8192,
@@ -58,7 +58,7 @@
   "eval_every": 220,
   "eval_blocks": 16
  },
- "out_dir": "artifacts/stage3/e4_p2_r1600k_sa",
+ "out_dir": "artifacts/stages/stage-3/e4_p2_r1600k_sa",
  "rung": 1600000,
  "val_blocks": 16
 }

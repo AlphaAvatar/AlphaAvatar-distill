@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3 import formal_pricing as P  # noqa: E402
+from stages.phase_c3 import formal_pricing as P  # noqa: E402
 
 #: The amended envelopes, as parameters rather than as live reads, so these
 #: tests describe the decision rule and not today's ledger position.
@@ -45,7 +45,7 @@ ENV = {"per_session_envelope_usd": 30.0, "project_cap_usd": 400.0,
 
 
 def test_the_rate_is_an_input_and_nothing_hardcodes_1_09():
-    src = (REPO / "scripts/experiments/stage-1/phase_c3/formal_pricing.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/formal_pricing.py").read_text()
     body = src.split('"""', 2)[2]
     assert "1.09" not in body, (
         "the historical $1.09/h observation is a literal in the pricing "
@@ -189,7 +189,7 @@ def test_an_implausible_or_non_numeric_rate_is_refused(bad):
 
 def test_the_live_query_reads_secure_price_and_never_community_price():
     """I once reported communityPrice while the launcher priced on secure."""
-    src = (REPO / "scripts/experiments/stage-1/phase_c3/formal_pricing.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/formal_pricing.py").read_text()
     assert 'rows[0].get("securePrice")' in src
     #: communityPrice may be *fetched* for the record, but never substituted.
     assert 'price = rows[0].get("communityPrice")' not in src
@@ -198,7 +198,7 @@ def test_the_live_query_reads_secure_price_and_never_community_price():
 
 def test_the_live_query_sets_the_user_agent_the_edge_requires():
     """RunPod's edge answers Python-urllib with 403 on every query."""
-    src = (REPO / "scripts/experiments/stage-1/phase_c3/formal_pricing.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/formal_pricing.py").read_text()
     assert "USER_AGENT" in src and "User-Agent" in src
 
 
@@ -221,7 +221,7 @@ def test_the_budget_plan_reproduces_the_derived_ceiling_exactly():
     took it down `$0.00003`, leaving a plan that terminated fractionally above
     what it authorized.
     """
-    from experiments.phase_c3 import authorization as A
+    from stages.phase_c3 import authorization as A
 
     spec = A.c3_budget_spec(REPO)
     rate = A.c3_billed_rate_usd_per_hour(REPO)

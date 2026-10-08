@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Sequence D0.3 and D0.4 on both P0-real checkpoints. No optimizer step.
 
-    /opt/train/bin/python scripts/pod/d0diag_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/d0/d0diag_driver.py --stage all
 
 D0.3 runs first: it is the shorter job and its free-rollout result is what makes
 the KD decomposition worth reading. Each stage is resumable — an output that
@@ -23,8 +23,8 @@ STATUS = Path("/workspace/d0diag.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 ARMS = {"P0-real-sa": "e1_r0860k_sa_pca", "P0-real-sb": "e1_r0860k_sb_pca"}
 
 
@@ -51,11 +51,11 @@ def stage_d0_3(args):
         model = f"/workspace/ckpt/{arm}/step_001023/model"
         # free + oracle need vLLM; forced needs the training venv. Split so each
         # runs in the stack that has its dependency, writing into one directory.
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", 860000, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", out], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", model, "--label", alias, "--pack", PACK,
              "--rung", 860000, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", out])
@@ -71,7 +71,7 @@ def stage_d0_4(args):
             continue
         model = f"/workspace/ckpt/{arm}/step_001023/model"
         cfg = REPO / f"configs/stage3/e1/{arm}.json"
-        run(["scripts/training/audit_kd_decomposition.py",
+        run(["scripts/shared/training/audit_kd_decomposition.py",
              "--student", model,
              "--teacher", f"Qwen/Qwen3-4B-Thinking-2507@{args.teacher_revision}",
              "--pack", PACK, "--rung", 860000, "--blocks", args.blocks,

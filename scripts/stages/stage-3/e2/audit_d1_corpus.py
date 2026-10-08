@@ -11,12 +11,12 @@ every session placed in it and the supervised tokens that survived packing — s
 the audit measures the data as packed, not as intended.
 
 Usage:
-    scripts/data/audit_d1_corpus.py \
-        --d0-ladder artifacts/stage3/ladder_uniform_probe --d0-rung 2960000 \
-        --d1-ladder artifacts/stage3/ladder_uniform_clean --d1-rung 2992616 \
-        --cleaning artifacts/stage3/corpus_v2_clean \
+    scripts/stages/stage-3/e2/audit_d1_corpus.py \
+        --d0-ladder artifacts/shared/instruments/ladder_uniform_probe --d0-rung 2960000 \
+        --d1-ladder artifacts/stages/stage-3/ladder_uniform_clean --d1-rung 2992616 \
+        --cleaning artifacts/stages/stage-3/corpus_v2_clean \
         --blocks-per-step 2 --epochs 3 \
-        --out artifacts/stage3/e2_d1_corpus_audit.json
+        --out artifacts/stages/stage-3/e2_d1_corpus_audit.json
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402

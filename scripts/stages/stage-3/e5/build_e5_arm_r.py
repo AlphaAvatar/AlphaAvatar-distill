@@ -2,14 +2,14 @@
 """Build Experiment 5 arm R: student rollout -> two-cut bundle -> teacher recovery.
 
     # pilot (small, same code path)
-    PYTHONPATH=src python scripts/data/build_e5_arm_r.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e5/build_e5_arm_r.py \
         --student <p2_0.86M ckpt> --source-seed sa --limit 24 \
-        --out artifacts/stage3/e5_arm_r_sa_pilot
+        --out artifacts/stages/stage-3/e5_arm_r_sa_pilot
 
     # full run
-    PYTHONPATH=src python scripts/data/build_e5_arm_r.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e5/build_e5_arm_r.py \
         --student <p2_0.86M ckpt> --source-seed sa \
-        --out artifacts/stage3/e5_arm_r_sa
+        --out artifacts/stages/stage-3/e5_arm_r_sa
 
 One code path serves the pilot and the full generation — a pilot that exercises
 different code proves nothing about the run it is gating. `--limit` changes only
@@ -42,7 +42,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -57,11 +57,11 @@ from aadistill.data.sessions import (  # noqa: E402
     render_system_block, system_group_key)
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
-from diagnose_training_recall import rung_session_ids  # noqa: E402
+from shared.evaluation.diagnose_training_recall import rung_session_ids  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 # Official model-card preset, as used to build corpus v2.
 PRESET = {"temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0}
 

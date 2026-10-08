@@ -374,7 +374,7 @@ else
 fi
 FROZEN_RC=0
 FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src:scripts /opt/train/bin/python \
-    scripts/autoinit/verify_frozen_assets.py $FROZEN_EXPECT_ARGS 2>&1) || FROZEN_RC=$?
+    scripts/shared/pod/verify_frozen_assets.py $FROZEN_EXPECT_ARGS 2>&1) || FROZEN_RC=$?
 if [ "$FROZEN_RC" -ne 0 ]; then
   say "FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the "
   say "verifier could not run' and 'these are not the preregistered assets' are "
@@ -513,7 +513,7 @@ import glob, sys, transformers
 sys.path.insert(0, '/workspace/aad/src')
 from transformers import AutoConfig
 from aadistill.models.student import assert_rope_from_config, stored_rope_base
-paths = sorted(glob.glob('/workspace/aad/artifacts/stage1/*/checkpoint/config.json'))
+paths = sorted(glob.glob('/workspace/aad/artifacts/stages/stage-1/*/checkpoint/config.json'))
 if not paths: sys.exit('no staged checkpoint to check')
 for p in paths:
     d = p.rsplit('/', 1)[0]
@@ -579,7 +579,7 @@ tt0=$(date -u +%s)
 # simulator cannot drift apart into two prose lists.
 CPU_TEST_HOME=$(mktemp -d /workspace/cpu_test_scope.XXXXXX)
 mkdir -p "$CPU_TEST_HOME/home" "$CPU_TEST_HOME/hf/hub"
-CPU_TEST_ENV=$(/opt/train/bin/python "$REPO/scripts/pod/cpu_test_env_args.py" \
+CPU_TEST_ENV=$(/opt/train/bin/python "$REPO/scripts/shared/pod/cpu_test_env_args.py" \
   --home "$CPU_TEST_HOME")
 say "CPU-test scope: env $CPU_TEST_ENV"
 OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
@@ -610,7 +610,7 @@ tail -4 /workspace/pytest.log
 # `tail -40`. Runs on BOTH paths: a passing gate whose skip set differs from the
 # sweep's is exactly as informative as a failing one, and cheaper to learn now.
 set +e
-/opt/train/bin/python "$REPO/scripts/pod/summarize_pytest_outcomes.py" \
+/opt/train/bin/python "$REPO/scripts/shared/pod/summarize_pytest_outcomes.py" \
   --junit /workspace/pytest_junit.xml \
   --out /workspace/pytest_outcomes.json \
   --expected "$REPO/logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json" \

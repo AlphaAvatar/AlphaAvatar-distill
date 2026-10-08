@@ -1,6 +1,6 @@
 {
  "_authorizes": "nothing",
- "_capacity_source_blocker": "closed by the maintainer source decision of 2026-10-03, integrated as main@bc31175f. The measured eligible counts clear every shortfall; owner: logs/shared/analyses/autoinit_d_series_source_evidence.json.",
+ "_capacity_source_blocker": "closed by the maintainer source decision of 2026-10-03, integrated as main@bc31175f. The measured eligible counts clear every shortfall; owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_source_evidence.json.",
  "_d1_evidence_blocker": "closed on the realized family: construction pinned to a clean commit, the family identity binding the 42 output files' bytes, pairwise disjointness across six roles, and every item checked independently against the complete historical exclusion contract. Closing it authorizes NO paid execution: the short GPU qualification still needs explicit maintainer authorization.",
  "_materializes": "nothing",
  "allocation_rule": {
@@ -245,7 +245,7 @@
  },
  "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
  "binding_stratum": "math_verified",
- "blocker": "NOTHING BLOCKS THIS RECORD'S SUBJECT. The capacity/source blocker is CLOSED (maintainer source decision 2026-10-03, integrated as main@bc31175f) and the D1 EVIDENCE BLOCKER is CLOSED on independent review of the realized family. The six roles are built, byte-hashed and verified; the realized bytes are owned by logs/shared/analyses/autoinit_d_series_family_manifest.json.\n\nD1 itself remains blocked, for reasons outside this record: FUNDING AUTHORIZATION (phase_d1 is absent from funds_formal_sessions_of -- categorical, and no measurement closes it) and the PER-SESSION ENVELOPE (unresolved pending the short GPU qualification and repricing). Owner: logs/state/current.json :: d_series.blockers.",
+ "blocker": "NOTHING BLOCKS THIS RECORD'S SUBJECT. The capacity/source blocker is CLOSED (maintainer source decision 2026-10-03, integrated as main@bc31175f) and the D1 EVIDENCE BLOCKER is CLOSED on independent review of the realized family. The six roles are built, byte-hashed and verified; the realized bytes are owned by logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json.\n\nD1 itself remains blocked, for reasons outside this record: FUNDING AUTHORIZATION (phase_d1 is absent from funds_formal_sessions_of -- categorical, and no measurement closes it) and the PER-SESSION ENVELOPE (unresolved pending the short GPU qualification and repricing). Owner: logs/state/current.json :: d_series.blockers.",
  "capacity_record": {
   "_why_the_two_disagree": "the record asks how many whole batteries remain and answers zero, binding on math_verified. At six roles the question changes: gsm8k funds five roles and code two, so extending math alone would unblock D1 and still leave the family short.",
   "batteries_remaining_for_one": 0,
@@ -259,8 +259,8 @@
  "realization": {
   "_division": "this record owns the ALLOCATION and the DESIGN; the manifest owns the REALIZED family -- per-role item digests, the 42 output-file digests and the source file digests.",
   "allocation_rule_id_at_build": "f6047343c1c1ad2172f500e979c704c1",
-  "items": "artifacts/stage3/d_series_behavioural_v1 (gitignored)",
-  "owner": "logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "items": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1 (gitignored)",
+  "owner": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "roles_built": [
    "d1_confirmation",
    "d1_screening",
@@ -269,7 +269,7 @@
    "d3_confirmation",
    "d3_screening"
   ],
-  "verified_by": "scripts/experiments/stage-1/phase_d_series/verify_batteries.py"
+  "verified_by": "scripts/stages/stage-1/families/d_series/verify_batteries.py"
  },
  "requirement": {
   "code": {

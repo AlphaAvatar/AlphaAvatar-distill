@@ -1,7 +1,7 @@
 """Build the Stage 2 offline warm-up mixture v0 (`stage2_offline_v0`).
 
 Usage:
-    uv run python scripts/data/build_stage2_v0.py
+    uv run python scripts/shared/data/build_stage2_v0.py
 
 Data groups (AGENTS.md 4.4) and sources, all public and permissively licensed:
 
@@ -35,7 +35,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.dataset import GROUPS, validate_sample

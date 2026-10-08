@@ -16,7 +16,7 @@ authoritative accounts stay where they already are: `logs/stages/stage-3/history
 runs, `logs/budget/ledger.md` for money, `logs/state/phase_index.md` for phase
 history, and the per-validation directories under the experiment that each validation serves, `logs/stages/stage-<id>/<experiment>/validations/`.
 
-`scripts/architecture/core_ownership.py` rule `instance_prose` is what keeps
+`scripts/maintenance/architecture/core_ownership.py` rule `instance_prose` is what keeps
 core clean; this file is where what it removes is supposed to land.
 
 ---
@@ -88,7 +88,7 @@ incident justifies.
 
 ```text
     frozen source sets — Phase A's harness, Phase B's executable, the recovery
-    #: Phase-B values now live in `scripts/experiments/stage-1/phase_b/post_freeze.py`.
+    #: Phase-B values now live in `scripts/stages/stage-1/phase_b/post_freeze.py`.
     # `accounted_for` above answers one question: may a Phase-B launch run against
     # But "Phase B may not launch against this tree" and "nobody ever explained why
 ```
@@ -245,7 +245,7 @@ that proved it had to.
 ```text
     """The device contract for the Phase-A Stage-1 search path.
     false on a GPU. Attempt 6 died in the search's reload validation; attempt 7 died
-    ``scripts/training/search_depth_map.py`` inserted ``.cpu()``, and E8a runs that
+    ``scripts/shared/training/search_depth_map.py`` inserted ``.cpu()``, and E8a runs that
     reduction on the accelerator. Attempt 10 spent $11.43 discovering it. The
     checked it. Attempt 9 died at $0.34 on ``project.py``'s ``avg``, allocated with a
     # CPU budget. Added 2026-08-19 after Phase-A attempt 10.
@@ -275,7 +275,7 @@ that proved it had to.
     copied off the device. Attempt 10 ran 10 h 47 m inside one expansion, GPU at
     where E8a left them.
     it against the real mixture: Phase-A attempt 5 died earlier, at the
-    ``scripts/training/search_depth_map.py``, the E8a script whose algorithm this
+    ``scripts/shared/training/search_depth_map.py``, the E8a script whose algorithm this
     # PARTIAL CACHING. Until 2026-08-27 this was all-or-nothing, and Phase-B
     "E8a kept its cache on the accelerator and therefore checked
     it, which is the $11.43 failure.
@@ -466,7 +466,7 @@ experiment's copy into reusable infrastructure. The prose the core may not carry
 
     `--bundle c1` was an alias for nothing, and the launcher accepted it.
 
-    The second copy is `scripts/experiments/stage-1/phase_c1/bundle.py`. It stays because
+    The second copy is `scripts/stages/stage-1/phase_c1/bundle.py`. It stays because
     it is a member of C1's frozen executable set: importing the core module from
     it would move C1's harness digest and invalidate records describing completed
     attempts, for no benefit to a phase closed by a verdict.
@@ -509,7 +509,7 @@ carry:
     Phase-C2 Search-1 attempt 2 declared no VLLM_READY -- it never calls vLLM --
     and no frozen-asset expectation. The shared setup script installed the whole
     vLLM environment anyway and asked the frozen-asset verifier its HISTORICAL
-    question, which demands artifacts/stage3/recovery_search_v2 and
+    question, which demands artifacts/stages/stage-1/batteries/recovery_search_v2 and
     recovery_search_scoring@v2. SETUP_RC=91, MARKER:FROZEN_ASSETS_FAILED, no
     driver stage, nothing measured, $0.0552.
 

@@ -38,18 +38,18 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit",
-               "scripts/experiments/stage-1"):
+               "scripts/stages/stage-1"):
     _path = str(REPO_ROOT / _extra)
     if _path not in sys.path:
         sys.path.insert(0, _path)
 
-from score_c1_confirmation import build_result, score_battery  # noqa: E402
+from stages.phase_c1.score_c1_confirmation import build_result, score_battery  # noqa: E402
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
-from experiments.phase_d1 import behavioural as D1B  # noqa: E402
-from experiments.phase_d_series import battery_family as FAMILY  # noqa: E402
+from stages.phase_d1 import behavioural as D1B  # noqa: E402
+from stages.d_series import battery_family as FAMILY  # noqa: E402
 
 SCHEMA = "aadistill.phase_d1.screening_result/v1"
 ROLE = "d1_screening"

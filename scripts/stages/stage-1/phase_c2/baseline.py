@@ -65,7 +65,7 @@ class BaselineError(RuntimeError):
 # --- the frozen identities --------------------------------------------------
 #
 # All of these are read out of committed C1 evidence by
-# `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_baseline.py`, which re-derives each one from the
+# `scripts/stages/stage-1/phase_c2/tests/test_phase_c2_baseline.py`, which re-derives each one from the
 # file it came from rather than trusting this block. Two different documents own
 # them, and the distinction matters:
 #
@@ -184,7 +184,7 @@ def frozen_baseline_spec(*, device: str = "cuda") -> FixedPathSpec:
     and `"cuda"` is the value C1 froze. The check is pure arithmetic over
     strings and needs no GPU.
     """
-    from experiments.phase_c1.session import build_arm_specs
+    from stages.phase_c1.session import build_arm_specs
 
     return build_arm_specs(workdir_device=device)["treatment"]
 

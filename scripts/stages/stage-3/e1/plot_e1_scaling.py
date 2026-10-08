@@ -1,6 +1,6 @@
 """Render the Experiment 1 scaling curves.
 
-    uv run python scripts/evaluation/plot_e1_scaling.py
+    uv run python scripts/stages/stage-3/e1/plot_e1_scaling.py
 
 Two panels, not one chart with two y-axes: teacher-native CE is in nats and
 natural termination is a rate, so a shared axis would be meaningless. Both share
@@ -24,8 +24,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.ticker import FuncFormatter, NullFormatter, NullLocator  # noqa: E402
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-DATA = REPO_ROOT / "artifacts/stage3/e1_consolidated.json"
+REPO_ROOT = Path(__file__).resolve().parents[4]
+DATA = REPO_ROOT / "artifacts/stages/stage-3/e1_consolidated.json"
 OUT = REPO_ROOT / "assets/e1_scaling.svg"
 
 PCA = "#2a78d6"       # categorical slot 1

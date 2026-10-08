@@ -25,7 +25,7 @@ gating":
 Already on the relay and re-verified rather than re-uploaded: the pinned control
 initialization, the canonical ladder pack, corpus v2, the E7 FineWeb streams.
 
-    PYTHONPATH=src python scripts/data/stage_e8_inputs.py --verify-roundtrip
+    PYTHONPATH=src python scripts/stages/stage-3/e8/stage_e8_inputs.py --verify-roundtrip
 
 Exit codes: 0 staged and verified; 9 a hash mismatch, a missing file, or an
 upload the relay refused.
@@ -39,7 +39,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
@@ -55,19 +55,19 @@ UPLOAD = [
     ("data/warmup/warmup_v1.manifest.json", "warmup/warmup_v1.manifest.json"),
     ("data/warmup/holdout_v1.jsonl", "warmup/holdout_v1.jsonl"),
     ("data/warmup/holdout_v1.manifest.json", "warmup/holdout_v1.manifest.json"),
-    ("artifacts/stage1/e8_calibration_v1/items.jsonl", "calibration_v1/items.jsonl"),
-    ("artifacts/stage1/e8_calibration_v1/docs.jsonl", "calibration_v1/docs.jsonl"),
-    ("artifacts/stage1/e8_calibration_v1/general_docs.jsonl",
+    ("artifacts/stages/stage-1/e8_calibration_v1/items.jsonl", "calibration_v1/items.jsonl"),
+    ("artifacts/stages/stage-1/e8_calibration_v1/docs.jsonl", "calibration_v1/docs.jsonl"),
+    ("artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl",
      "calibration_v1/general_docs.jsonl"),
-    ("artifacts/stage1/e8_calibration_v1/general_docs.manifest.json",
+    ("artifacts/stages/stage-1/e8_calibration_v1/general_docs.manifest.json",
      "calibration_v1/general_docs.manifest.json"),
-    ("artifacts/stage1/e8_calibration_v1/manifest.json", "calibration_v1/manifest.json"),
-    ("artifacts/stage1/e8_calibration_v1/leakage.json", "calibration_v1/leakage.json"),
-    ("artifacts/stage1/e8_calibration_v1/general_disjointness.json",
+    ("artifacts/stages/stage-1/e8_calibration_v1/manifest.json", "calibration_v1/manifest.json"),
+    ("artifacts/stages/stage-1/e8_calibration_v1/leakage.json", "calibration_v1/leakage.json"),
+    ("artifacts/stages/stage-1/e8_calibration_v1/general_disjointness.json",
      "calibration_v1/general_disjointness.json"),
-    ("artifacts/stage0/qwen3_4b_thinking_v1/manifest.json",
+    ("artifacts/stages/stage-0/qwen3_4b_thinking_v1/manifest.json",
      "stage0/qwen3_4b_thinking_v1/manifest.json"),
-    ("artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors",
+    ("artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors",
      "stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"),
 ]
 
@@ -99,7 +99,7 @@ def main() -> int:
 
     # The Stage 0 cache is the reason this script exists; refuse to stage a file
     # that is not the canonical one.
-    stats = REPO_ROOT / "artifacts/stage0/qwen3_4b_thinking_v1/activation_stats.safetensors"
+    stats = REPO_ROOT / "artifacts/stages/stage-0/qwen3_4b_thinking_v1/activation_stats.safetensors"
     if not stats.is_file():
         print(f"MISSING {stats}", file=sys.stderr)
         return 9

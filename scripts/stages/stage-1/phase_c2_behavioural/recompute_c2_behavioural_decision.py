@@ -36,13 +36,13 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 for _p in (REPO / "src", REPO / "scripts"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
-from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from stages.phase_c2 import behavioural_decision as BD  # noqa: E402
+from stages.phase_c2 import behavioural_schedule as SCH  # noqa: E402
 
 DEFAULT_STORE = ("/home/ecs-user/aad-artifacts/phase_c2_behavioural"
                  "/c2-behavioural-12probe-v1")

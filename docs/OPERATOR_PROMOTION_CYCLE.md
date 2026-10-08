@@ -155,7 +155,7 @@ there.
 ## What has to be an instance, and what must not be
 
 The arithmetic is generic and lives in
-`scripts/experiments/search_cost_model.py`: the space, the branching model, the
+`scripts/shared/search_cost_model.py`: the space, the branching model, the
 leaf enumeration, the bound, the nominated trajectory and the session price. It
 names no operator, no profile, no family, no card, no price and no path. Which
 operator is "the expensive one" is *derived* from the cost model rather than

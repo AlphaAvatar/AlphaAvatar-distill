@@ -12,7 +12,7 @@
 #   3. The launcher deletes the pod itself the moment ALL_DONE lands, so the
 #      backstop is a floor on failure, never the normal path (pods idle-bill).
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e2diag_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/e2/e2diag_launch.sh
 set -uo pipefail
 
 SCR=${SCR:?}
@@ -25,7 +25,7 @@ STARTUP_LIMIT_MIN=${STARTUP_LIMIT_MIN:-15}
 MAX_POD_ATTEMPTS=${MAX_POD_ATTEMPTS:-2}
 REF_REVISION=${REF_REVISION:-c1899de289a04d12100db370d81485cdf75e47ca}
 TEACHER_REVISION=${TEACHER_REVISION:-768f209d9ea81521153ed38c47d515654e938aea}
-CONTROL_SRC=${CONTROL_SRC:-artifacts/stage3/rescued/e1_ctl_r0250k_sa_pca_stepmatched}
+CONTROL_SRC=${CONTROL_SRC:-artifacts/stages/stage-3/rescued/e1_ctl_r0250k_sa_pca_stepmatched}
 LOG=$SCR/e2diag_launch.log
 KEY=$(cat "$SCR/rp_key")
 STATE=$SCR/e2diag.state
@@ -144,7 +144,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e2diag_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/e2/e2diag_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 
 # The control checkpoint exists ONLY on this dev box: the relay holds its
 # evaluation JSONs but not its weights.
@@ -166,6 +166,6 @@ say "setup done — $(cost)"
 
 say "starting the three diagnostic stages"
 $SSH "root@$HOST" "cd /workspace/aad && nohup /opt/train/bin/python \
-  scripts/pod/e2diag_driver.py --stage all --ref-revision $REF_REVISION \
+  scripts/stages/stage-3/e2/e2diag_driver.py --stage all --ref-revision $REF_REVISION \
   --teacher-revision $TEACHER_REVISION > /workspace/e2diag_run.log 2>&1 &" >>"$LOG" 2>&1
 say "driver running; poller takes over — $(cost)"

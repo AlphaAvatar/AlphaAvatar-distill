@@ -9,7 +9,7 @@ E4 and has never once been observed to fire — on 2026-08-08 the deadline was
 Launch it from the launcher immediately after the pod is created, detached from
 it, so it outlives whatever happens next:
 
-    setsid nohup python3 scripts/pod/watchdog.py \\
+    setsid nohup python3 scripts/shared/pod/watchdog.py \\
       --pod-id "$POD_ID" --session-start-epoch "$(cat $SCR/pod_start_epoch)" \\
       --price-per-hour 0.99 --hard-minutes 545 --authorized-usd 9.00 \\
       --journal "$SCR/watchdog.jsonl" > "$SCR/watchdog.out" 2>&1 < /dev/null &
@@ -29,7 +29,7 @@ import os
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from aadistill.infrastructure.provider import (  # noqa: E402
     RunPodProvider, SimulatedProvider, read_api_key,

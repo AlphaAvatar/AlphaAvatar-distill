@@ -1,6 +1,6 @@
 """Build `recovery_search_v2` from v1, changing only the tools representation.
 
-    PYTHONPATH=src .venv/bin/python scripts/data/build_recovery_search_v2.py
+    PYTHONPATH=src .venv/bin/python scripts/shared/data/build_recovery_search_v2.py
 
 `recovery_search_v1` is invalid before first use. Its `tools` field retained the
 xLAM source serialization — a JSON **string** — instead of the project's
@@ -38,7 +38,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.data.tools import (  # noqa: E402
@@ -47,8 +47,8 @@ from aadistill.data.tools import (  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-V1 = REPO / "artifacts/stage3/recovery_search_v1"
-V2 = REPO / "artifacts/stage3/recovery_search_v2"
+V1 = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v1"
+V2 = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 TOOL_SET = "tool"
 
 
@@ -108,7 +108,7 @@ def main() -> int:
     manifest["artifact"] = "recovery_search_v2"
     manifest["version"] = 2
     manifest["created_utc"] = datetime.now(timezone.utc).isoformat()
-    manifest["command"] = "scripts/data/build_recovery_search_v2.py"
+    manifest["command"] = "scripts/shared/data/build_recovery_search_v2.py"
     manifest["purpose"] = v1_manifest["purpose"]
     manifest["supersedes"] = {
         "artifact": "recovery_search_v1",
@@ -127,7 +127,7 @@ def main() -> int:
         "materialized_tools_representation": (
             "serialized xLAM string -> canonical OpenAI-style envelope via "
             "aadistill.data.tools.xlam_tools_to_canonical, the same converter "
-            "scripts/data/build_stage2_v1.py uses for the training mixtures"),
+            "scripts/shared/data/build_stage2_v1.py uses for the training mixtures"),
         "items_converted": converted,
         "sets_copied_unchanged": unchanged_sets,
         "unchanged": ["item membership", "item ordering", "item ids", "messages",

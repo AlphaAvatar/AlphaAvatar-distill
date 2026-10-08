@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 """Break teacher-forced top-1 accuracy down by token role and position.
 
-    PYTHONPATH=src python scripts/evaluation/audit_teacher_forced_by_role.py \
-        --model artifacts/stage3/rescued/e1_ctl_r0250k_sa_pca_stepmatched \
-        --sessions artifacts/stage3/corpus_v2/sessions.jsonl \
-        --pack artifacts/stage3/ladder_uniform_probe --rung 250000 \
+    PYTHONPATH=src python scripts/shared/evaluation/audit_teacher_forced_by_role.py \
+        --model artifacts/stages/stage-3/rescued/e1_ctl_r0250k_sa_pca_stepmatched \
+        --sessions artifacts/stages/stage-3/corpus_v2/sessions.jsonl \
+        --pack artifacts/shared/instruments/ladder_uniform_probe --rung 250000 \
         --n 60 --out artifacts/audit/teacher_forced_by_role.json
 
 An aggregate of 78.03% says almost nothing on its own: reasoning prose is full of
@@ -38,7 +38,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.sessions import render_session  # noqa: E402
@@ -84,7 +84,7 @@ def main() -> None:
     import torch
     from transformers import AutoTokenizer
     sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-    from diagnose_training_recall import rung_session_ids, stratified_sample
+    from shared.evaluation.diagnose_training_recall import rung_session_ids, stratified_sample
 
     tok = AutoTokenizer.from_pretrained(args.tokenizer or args.model)
     tid = {n: tok.convert_tokens_to_ids(n)

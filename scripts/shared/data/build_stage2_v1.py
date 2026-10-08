@@ -2,7 +2,7 @@
 5.39M -> ~24M-train-token scale-up (proposal 2026-07-26, approved same day).
 
 Usage:
-    uv run python scripts/data/build_stage2_v1.py
+    uv run python scripts/shared/data/build_stage2_v1.py
 
 Design (see logs/stages/stage-3/history/EXPERIMENTS.md):
 
@@ -26,7 +26,7 @@ Design (see logs/stages/stage-3/history/EXPERIMENTS.md):
 
 Reuses the v0 builders (oasst2 threading, glaive parsing, fineweb filtering)
 unmodified by iterating sources from row 0 with a sink that skips indices
-consumed by v0; `scripts/data/build_stage2_v0.py` itself is untouched.
+consumed by v0; `scripts/shared/data/build_stage2_v0.py` itself is untouched.
 """
 
 from __future__ import annotations
@@ -39,11 +39,11 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "data"))
 
-import build_stage2_v0 as v0
+from shared.data import build_stage2_v0 as v0
 from aadistill.data.tools import xlam_tools_to_canonical  # noqa: E402
 from aadistill.data.dataset import GROUPS, load_jsonl, validate_sample
 from aadistill.infrastructure.env import code_state

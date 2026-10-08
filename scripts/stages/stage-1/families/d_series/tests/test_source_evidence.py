@@ -12,14 +12,14 @@ from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[5]
+REPO = Path(__file__).resolve().parents[6]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d_series import source_evidence as ev  # noqa: E402
-from experiments.phase_d_series.identity import (  # noqa: E402
+from stages.d_series import source_evidence as ev  # noqa: E402
+from stages.d_series.identity import (  # noqa: E402
     problem_content_id,
 )
 
@@ -29,8 +29,8 @@ RECORD = REPO / ev.RECORD
 #: the 76 MB training corpus. A checkout without them cannot answer, and saying
 #: so is better than a test that quietly measures nothing.
 requires_the_sources = pytest.mark.skipif(
-    not (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl").is_file()
-    or not (REPO / "artifacts/stage3/c1_confirmation_v1/code.jsonl").is_file(),
+    not (REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl").is_file()
+    or not (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/code.jsonl").is_file(),
     reason=("the recovery corpus and the consumed pools are gitignored "
             "out-of-tree assets; a checkout without them has no overlap to "
             "measure"))
@@ -234,7 +234,7 @@ class TestTheRecordIsDerived:
         assert built == RECORD.read_text()
 
     def test_the_shortfall_comes_from_the_family_not_from_here(self):
-        from experiments.phase_d_series.battery_family import requirement
+        from stages.d_series.battery_family import requirement
 
         owned = {n: int(r["short_by"]) for n, r in requirement().items()
                  if int(r["short_by"]) > 0}
@@ -274,8 +274,8 @@ class TestParityWithTheLiveChain:
     @pytest.mark.parametrize("stratum", ["gsm8k", "code"])
     def test_the_frozen_c1_battery_rederives_exactly(self, stratum):
         import json as _json
-        from battery_render import FROZEN_SOURCES, RENDERERS, rank_take, read_rows
-        from build_c1_confirmation_battery import C0_DIGEST, SETS
+        from shared.data.battery_render import FROZEN_SOURCES, RENDERERS, rank_take, read_rows
+        from stages.phase_c1.build_c1_confirmation_battery import C0_DIGEST, SETS
 
         ids, hashes, _ = ev.baseline_chain()
         want = SETS[stratum][1]
@@ -285,7 +285,7 @@ class TestParityWithTheLiveChain:
             rows, want, stratum=stratum, base_digest=C0_DIGEST,
             exclude_ids=ids, exclude_hashes=hashes, make=RENDERERS[stratum])}
 
-        committed_path = (REPO / "artifacts/stage3/c1_confirmation_v1"
+        committed_path = (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
                           / f"{stratum}.jsonl")
         if not committed_path.is_file():
             pytest.skip("the frozen c1_confirmation_v1 battery is not present")
@@ -308,7 +308,7 @@ class TestParityWithTheLiveChain:
         than a `want`-limited slice, which is the one way the reuse could still
         be wrong.
         """
-        from battery_render import FROZEN_SOURCES, read_rows
+        from shared.data.battery_render import FROZEN_SOURCES, read_rows
 
         repo, revision, rel = FROZEN_SOURCES["code"]
         rows = read_rows(repo, revision, rel)
@@ -350,7 +350,7 @@ class TestTheTrainingCorpusContentGap:
         """
         import json as _json
         from aadistill.data.extra_stream import content_sha256
-        from battery_render import FROZEN_SOURCES, norm, read_rows
+        from shared.data.battery_render import FROZEN_SOURCES, norm, read_rows
 
         first_turn = set()
         with (REPO / ev.BASELINE_INPUTS["sessions"]).open() as fh:
@@ -495,7 +495,7 @@ class TestTheStrengthenedContract:
         reproducible from the builder's own function."""
         import inspect
 
-        from build_c1_confirmation_battery import excluded_identities
+        from stages.phase_c1.build_c1_confirmation_battery import excluded_identities
 
         src = inspect.getsource(excluded_identities)
         assert "problem_content" not in src, (
@@ -513,7 +513,7 @@ class TestTheStrengthenedContract:
         import hashlib as _h
         import json as _j
 
-        from battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
+        from shared.data.battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
 
         train = set()
         with (REPO / ev.BASELINE_INPUTS["sessions"]).open() as fh:
@@ -563,7 +563,7 @@ class TestTheStrengthenedContract:
                 "could not be content-hashed, so the contract is blind to them")
 
     def test_the_frozen_review_is_data_not_a_threshold(self, record):
-        from experiments.phase_d_series.identity import REVIEW_PROVENANCE
+        from stages.d_series.identity import REVIEW_PROVENANCE
 
         rv = record["strata"]["code"]["strengthened_contract"]["frozen_review"]
         assert rv["n_excluded"] == 1
@@ -578,7 +578,7 @@ class TestTheDSeriesIdentityCoordinates:
     """Three coordinates, and they must not be conflated."""
 
     def test_the_item_id_is_split_aware_for_every_source(self):
-        from experiments.phase_d_series.identity import d_series_item_id
+        from stages.d_series.identity import d_series_item_id
 
         assert d_series_item_id("code", "full", "train", {"task_id": 602}) == \
             "mbpp-full-train-602"
@@ -589,7 +589,7 @@ class TestTheDSeriesIdentityCoordinates:
             "code", "full", "train", {"task_id": 602}).startswith("mbpp-test-")
 
     def test_gsm8k_without_an_index_is_refused(self):
-        from experiments.phase_d_series.identity import d_series_item_id
+        from stages.d_series.identity import d_series_item_id
 
         with pytest.raises(ValueError, match="no native key"):
             d_series_item_id("gsm8k", "main", "train", {})
@@ -612,7 +612,7 @@ class TestTheDSeriesIdentityCoordinates:
     def test_hashing_a_wrapped_prompt_as_content_is_refused(self):
         """MBPP's rendered prompt wraps the problem, so hashing it would make
         every wrapped item look like a distinct problem."""
-        from experiments.phase_d_series.identity import (
+        from stages.d_series.identity import (
             problem_content_id_from_prompt,
         )
 
@@ -625,8 +625,8 @@ class TestTheDSeriesIdentityCoordinates:
         """Declared, then verified against the real renderers -- the first
         version assumed only a native-key route and reported 430 reserved
         problems as unrecoverable when their text was in `prompt_text`."""
-        from battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
-        from experiments.phase_d_series.identity import (
+        from shared.data.battery_render import FROZEN_SOURCES, RENDERERS, norm, read_rows
+        from stages.d_series.identity import (
             PROBLEM_FIELD,
             RENDERED_PROMPT_IS_THE_PROBLEM,
         )
@@ -678,7 +678,7 @@ class TestThePinnedMathSource:
 
     def test_the_level_mapping_is_applied_not_passed_through(self):
         """Upstream emits `"Level 3"`; the frozen stratum stores `3`."""
-        from experiments.phase_d_series.math_source import level_to_int
+        from stages.d_series.math_source import level_to_int
 
         assert level_to_int("Level 3") == 3
         assert level_to_int(4) == 4
@@ -686,14 +686,14 @@ class TestThePinnedMathSource:
             level_to_int("unknown")
 
     def test_a_row_with_no_boxed_answer_is_refused(self):
-        from experiments.phase_d_series.math_source import adapt
+        from stages.d_series.math_source import adapt
 
         with pytest.raises(ValueError, match="no boxed answer"):
             adapt({"problem": "p", "level": "Level 1", "type": "Algebra",
                    "solution": "no box here"}, config="algebra", index=0)
 
     def test_a_config_type_disagreement_is_refused(self):
-        from experiments.phase_d_series.math_source import adapt
+        from stages.d_series.math_source import adapt
 
         with pytest.raises(ValueError, match="mapping and the data disagree"):
             adapt({"problem": "p", "level": "Level 1", "type": "Geometry",

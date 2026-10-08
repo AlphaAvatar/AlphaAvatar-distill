@@ -8,7 +8,7 @@ comparable to anything the project has measured.
 The renderers therefore live here, once, as module-level functions rather than
 as closures inside a `main()`. The v1 builder is deliberately left untouched, so
 the frozen `recovery_search_v2` artifact keeps the exact build path that produced
-it; `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py` closes the loop by asserting that these
+it; `scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py` closes the loop by asserting that these
 functions reproduce that artifact's stored `prompt_text` byte for byte.
 
 Rows are read straight from the pinned Hugging Face **snapshot directory**, not
@@ -26,7 +26,7 @@ import sys
 from pathlib import Path
 from typing import Any, Callable, Iterable
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
@@ -221,8 +221,8 @@ RENDERERS: dict[str, Callable[[dict], dict | None]] = {
 
 # --- renderer parity with the frozen recovery-search battery ----------------
 #
-# One implementation, two callers: `scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py`, which skips a
-# group whose pinned snapshot is absent, and `scripts/autoinit/renderer_parity_gate.py`,
+# One implementation, two callers: `scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py`, which skips a
+# group whose pinned snapshot is absent, and `scripts/shared/validation/renderer_parity_gate.py`,
 # which refuses that same absence. Two independent comparison algorithms could
 # disagree about what parity means, which is the one thing this guarantee cannot
 # afford, so the algorithm lives here and neither caller reimplements it.
@@ -247,7 +247,7 @@ FROZEN_SOURCES: dict[str, tuple[str, str, str]] = {
              "xlam_function_calling_60k.json"),
 }
 
-FROZEN_BATTERY = REPO_ROOT / "artifacts/stage3/recovery_search_v2"
+FROZEN_BATTERY = REPO_ROOT / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 
 
 def frozen_items(group: str) -> dict[str, dict]:

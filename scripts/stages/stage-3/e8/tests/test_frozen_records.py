@@ -45,7 +45,7 @@ from aadistill.initialization.transforms.sandwich import (  # noqa: E402
 )
 
 ADAPTER = get_adapter("qwen3")
-E8A_DIR = REPO / "artifacts/stage1/e8_depth_search"
+E8A_DIR = REPO / "artifacts/stages/stage-1/e8_depth_search"
 
 #: ONE definition, in `support.geometries`: these are facts about the models,
 #: not about this experiment, and the shared cost-model tests assert on them too.
@@ -53,14 +53,14 @@ from support.geometries import TARGET_596M, TEACHER_36  # noqa: E402
 
 
 @pytest.mark.skipif(
-    not (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/manifest.json").is_file(),
+    not (REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/manifest.json").is_file(),
     reason="the init manifest is a gitignored artifact; a pod stages the "
            "checkpoint files, not the manifest")
 def test_parameter_arithmetic_matches_both_frozen_counts():
     """The cost model prices states it never builds; the arithmetic must be exact."""
     assert ADAPTER.param_count(TEACHER_36) == 4_022_468_096
     assert ADAPTER.param_count(TARGET_596M) == 596_049_920
-    manifest = json.loads((REPO / "artifacts/stage1/qwen3_0p6b_init_v0/manifest.json")
+    manifest = json.loads((REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/manifest.json")
                           .read_text())
     assert manifest["teacher"]["num_parameters"] == ADAPTER.param_count(TEACHER_36)
     assert manifest["student"]["num_parameters"] == ADAPTER.param_count(TARGET_596M)

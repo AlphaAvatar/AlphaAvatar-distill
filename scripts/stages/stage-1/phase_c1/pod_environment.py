@@ -39,7 +39,7 @@ from aadistill.runtime import pod_environment as _runtime  # noqa: E402
 # 3892 tests were expected to skip on a pod, which had to pass, which skipped for
 # reasons that were not environmental, and prose explaining each. All of it
 # existed to make one design work — running the whole repository on a billing
-# GPU — and that design is gone. A C1 pod now runs `scripts/experiments/stage-1/phase_c1/tests/`, thirteen
+# GPU — and that design is gone. A C1 pod now runs `scripts/stages/stage-1/phase_c1/tests/`, thirteen
 # tests, and the contract fits in one screen.
 #
 # The groups are DELETED rather than left in place. They named tests the pod no
@@ -55,7 +55,7 @@ from aadistill.runtime import pod_environment as _runtime  # noqa: E402
 #: like it had. The card is asserted where it can actually be seen: the setup
 #: script checks `torch.cuda.is_available()` after the gate, outside the scope,
 #: and the driver measures headroom against the real device before it trains.
-RUNTIME_CONTRACT_MODULE = "scripts/experiments/stage-1/phase_c1/tests/test_c1_runtime_contract.py"
+RUNTIME_CONTRACT_MODULE = "scripts/stages/stage-1/phase_c1/tests/test_c1_runtime_contract.py"
 
 #: So the contract is the simplest one there is: every preflight test passes, on
 #: the dev box, in the launch-bound sweep and on the pod, and NOTHING skips. Any
@@ -117,7 +117,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
     """
     if not run_id:
         return RECORD_POINTER
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir('phase_c1', run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
@@ -130,13 +130,13 @@ POD_TEST_ENVIRONMENT_FILES_V1: tuple[str, ...] = (
     #: The simulator that creates the pod-like conditions. Not executed on a
     #: pod, so it has no place in the harness, but a change to it changes what
     #: the recorded sweep MEANT.
-    "scripts/pod/simulate_pod_env.sh",
+    "scripts/shared/pod/simulate_pod_env.sh",
     #: A dev-box publishing tool the paid session never runs -- and whose tests
     #: the pod's setup gate does. That asymmetry is why it is measured here.
-    "scripts/autoinit/publish_selected_leaves.py",
+    "scripts/shared/rollout/publish_selected_leaves.py",
     #: The recorder decides what the record CLAIMS the sweep found. A parser
     #: that mislabelled a skip as a pass would certify a failing gate.
-    "scripts/autoinit/record_pod_environment.py",
+    "scripts/shared/pod/record_pod_environment.py",
 )
 
 
@@ -155,11 +155,11 @@ def load_record(repo_root=".", *, run_id: str | None = None,
 def c1_harness_digest_value(repo_root=".") -> str:
     """C1's harness digest, as the contract's callable wants it.
 
-    Imported inside the function: `experiments.phase_c1.authorization` imports
+    Imported inside the function: `stages.phase_c1.authorization` imports
     from this module's neighbours, and a module-level import here would make the
     cycle real.
     """
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1.authorization import c1_harness_digest
 
     return c1_harness_digest(repo_root)["digest"]
 
@@ -209,7 +209,7 @@ def c1_sweep_contract(run_id: str | None = None,
     path that every pre-2026-09-12 sweep wrote to.
 
     Every value here was a module-level constant, a hardcoded string or a
-    top-level import inside `scripts/autoinit/record_pod_environment.py`. None of
+    top-level import inside `scripts/shared/pod/record_pod_environment.py`. None of
     them changes: the schema, the two record key names, the pointer path and its
     schema, the session id and the prose are exactly what C1's existing records
     carry, because their self-hashes were computed over those bytes.
@@ -217,12 +217,12 @@ def c1_sweep_contract(run_id: str | None = None,
     from aadistill.runtime.pod_environment import SweepContract
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c1.bundle import canonical_bundle_name
+        from stages.phase_c1.bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 
     def harness(repo_root):
-        from experiments.phase_c1.authorization import c1_harness_digest
+        from stages.phase_c1.authorization import c1_harness_digest
 
         return c1_harness_digest(repo_root)
 

@@ -30,7 +30,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-import price_phase_b as pb  # noqa: E402
+from stages.phase_b import price_phase_b as pb  # noqa: E402
 from aadistill.runtime.cost import (  # noqa: E402
     L40S_MEASURED,
     REFERENCE_MODES,

@@ -23,7 +23,7 @@ declared.**
 ## What used to produce that failure
 
 A session was a subclass of `Preflight` in
-`scripts/pod/autoinit_preflight_launch.py`. To retarget it, each launcher
+`scripts/shared/preflight/autoinit_preflight_launch.py`. To retarget it, each launcher
 **mutated that module's globals** before constructing it:
 
 ```python
@@ -153,7 +153,7 @@ companions `config.json`, `generation_config.json`, `tokenizer.json`,
 `tokenizer_config.json` and `chat_template.jinja`, plus the recovery pack's
 `ladder.json` and `audit.jsonl`. The companions went undeclared on the reasoning
 that the weights were the artifact. A control that shipped without its tokenizer
-is already written up in `logs/shared/analyses/autoinit_control_sb_packaging_repair.json`.
+is already written up in `logs/stages/stage-1/recovery_continuation/analyses/autoinit_control_sb_packaging_repair.json`.
 
 Now the declaration **is** the staging. `RelayInput` carries source, destination,
 digest and the second destination the recovery pack is mirrored to;
@@ -210,7 +210,7 @@ in the file. Each injection point needs its own test; that one stubs
 
 | check | where |
 | --- | --- |
-| the declared argument contract is what the runner actually reads | `scripts/experiments/tests/test_device_canary_argument_contract.py` |
+| the declared argument contract is what the runner actually reads | `scripts/shared/tests/test_device_canary_argument_contract.py` |
 | every launcher's **real** parser satisfies it, and the runner refuses a namespace that does not | same |
 | every variable the setup script reads is in each session's built environment | `tests/integration/test_launcher_forwards_setup_env.py` |
 | no session supplies an empty value the setup consumes | same |
@@ -234,7 +234,7 @@ in the file. Each injection point needs its own test; that one stubs
 
 `src/aadistill/autoinit/phase_a.py` carries the authorization **schema** — caps,
 stages, stage conditions, scope. It no longer carries a grant.
-`scripts/autoinit/issue_phase_a_authorization.py` requires `--grant` naming a
+`scripts/stages/stage-1/phase_a/issue_phase_a_authorization.py` requires `--grant` naming a
 one-use document that states who permitted what, at what cumulative spend,
 against what cap, and what it does **not** authorize; the issuer derives the
 timestamp, the committed base, the harness digest and both plan hashes itself,

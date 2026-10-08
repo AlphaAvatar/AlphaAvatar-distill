@@ -68,7 +68,7 @@ FULL_JOURNAL_SHA256 = (
 #: 3's digests is only honest if the code that produced them has not moved.
 OPERATOR_TREES = (
     "src/aadistill/initialization",
-    "scripts/experiments/stage-1/phase_c2",
+    "scripts/stages/stage-1/phase_c2",
 )
 
 #: Individual files outside those trees that the replay's inputs come from.
@@ -77,7 +77,7 @@ OPERATOR_TREES = (
 #: checked wholesale: it also holds `phase_a_search.py`, the search entry point
 #: this replay does not call and from which the canonical-control injection was
 #: deliberately removed after attempt 3 died in it.
-OPERATOR_FILES = ("scripts/autoinit/phase_a_frozen.py",)
+OPERATOR_FILES = ("scripts/stages/stage-1/phase_a/phase_a_frozen.py",)
 
 #: Identity fields a duplicate journal row may not disagree about.
 _IDENTITY_KEYS = ("artifact_digest", "checkpoint_sha256", "impl_ids",
@@ -323,7 +323,7 @@ def _teacher_config(repo_root: str | Path):
         candidate = str(Path(repo_root) / extra)
         if candidate not in _sys.path:
             _sys.path.insert(0, candidate)
-    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
 
     return AutoConfig.from_pretrained(TEACHER_ID, revision=TEACHER_REVISION)
 
@@ -442,14 +442,14 @@ def build_replay_leaves(repo_root: str | Path = REPO_ROOT,
         candidate = str(Path(repo_root) / extra)
         if candidate not in sys.path:
             sys.path.insert(0, candidate)
-    from phase_a_frozen import (  # noqa: E402
+    from stages.phase_a.phase_a_frozen import (  # noqa: E402
         SEARCH_SEED, TARGET_GEOMETRY, TEACHER_ID, TEACHER_REVISION,
     )
     from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
     from aadistill.initialization.operators.register import (  # noqa: E402
         register_builtin_operators,
     )
-    from experiments.phase_c2.search_space import (  # noqa: E402
+    from stages.phase_c2.search_space import (  # noqa: E402
         register_c2_operators,
     )
 

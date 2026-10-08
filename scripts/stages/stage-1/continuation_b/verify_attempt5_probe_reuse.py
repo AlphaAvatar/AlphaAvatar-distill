@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Can the behavioural continuation cite Attempt 5's three fresh `sa` probes?
 
-    PYTHONPATH=src python scripts/autoinit/verify_attempt5_probe_reuse.py \
+    PYTHONPATH=src python scripts/stages/stage-1/continuation_b/verify_attempt5_probe_reuse.py \
         --out logs/shared/analyses/autoinit_attempt5_probe_reuse.json
 
 Attempt 5 completed Stage 1, then paid for three genuinely new rung-1 `sa`
@@ -45,7 +45,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -55,8 +55,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from experiments.recovery_policy import POOLED_COUNTS_V2, SEED_SA
-from experiments.source_sets import recovery_scoring_contract
+from shared.recovery_policy import POOLED_COUNTS_V2, SEED_SA
+from shared.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 #: Explicit: importing an adapter module no longer registers it.

@@ -26,7 +26,7 @@ for p in (REPO / "src", REPO / "scripts", REPO / "scripts" / "autoinit"):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-import aggregate_a3 as AG  # noqa: E402
+from stages.phase_a3 import aggregate_a3 as AG  # noqa: E402
 
 BOOTSTRAP_SEED = 654678655          # phase-c3's own, domain-separated
 #: Small, because an interval's SHAPE is what is under test here and 20_000
@@ -329,7 +329,7 @@ def test_the_artifact_binds_what_computed_it_and_not_only_what_it_read():
     """
     impl = AG.implementation_identity()
     assert len(impl["commit"]) == 40
-    assert impl["aggregator_path"] == "scripts/autoinit/aggregate_a3.py"
+    assert impl["aggregator_path"] == "scripts/stages/stage-1/phase_a3/aggregate_a3.py"
     #: Named modules, not a glob: these two DECIDE the numbers, and a self-hash
     #: alone would not move when the strata or the comparability rule changed.
     for key in ("aggregator_sha256", "probe_results_module_sha256",
@@ -365,7 +365,7 @@ def test_a_build_with_no_implementation_says_so_rather_than_omitting_it(
 
 def test_the_cli_refuses_a_dirty_tree_unless_told_otherwise():
     """Read from the source, because the alternative is to dirty the tree."""
-    src = (REPO / "scripts/autoinit/aggregate_a3.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a3/aggregate_a3.py").read_text()
     block = src[src.index("impl = implementation_identity()"):]
     block = block[:block.index("doc = build(")]
     assert 'if impl["tree_is_dirty"] and not args.allow_dirty' in block

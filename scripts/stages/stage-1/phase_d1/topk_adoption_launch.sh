@@ -25,13 +25,13 @@
 #
 # ONE resource, ONE job, teardown in a trap on every exit path.
 #
-#   nohup bash scripts/pod/d1_qualification_launch.sh <run-id> > LOG 2>&1 &
+#   nohup bash scripts/stages/stage-1/phase_d1/d1_qualification_launch.sh <run-id> > LOG 2>&1 &
 #
 set -uo pipefail
 
 RUN_ID="${1:?usage: $0 <run-id>}"
 REPO_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
-OUT="${REPO_DIR}/artifacts/qualification/topk_adoption/${RUN_ID}"
+OUT="${REPO_DIR}/artifacts/stages/stage-1/phase_d1/qualification/topk_adoption/${RUN_ID}"
 BRANCH="${ADOPT_BRANCH:-prep/d-series-topk-tail}"
 COMMIT="${ADOPT_COMMIT:?ADOPT_COMMIT must name the exact source to run}"
 
@@ -92,7 +92,7 @@ printf '%s' "$RATE_USD_H" > "${OUT}/live_price_usd_per_hour"
 # The ceiling is owned by the AUTHORIZATION record and the costs by the
 # CAMPAIGN record -- one owner each. This script computes none of it.
 BUDGET=$("${REPO_DIR}/.venv/bin/python" \
-         "${REPO_DIR}/scripts/pod/engineering_campaign_budget.py" \
+         "${REPO_DIR}/scripts/shared/pod/engineering_campaign_budget.py" \
          "${REPO_DIR}/${CAMPAIGN}" --session-cap "$SESSION_CAP" --rate "$RATE_USD_H")
 if [ $? -ne 0 ]; then
   say "budget could not be established; not creating a pod"
@@ -130,7 +130,7 @@ export HF_TOKEN
 # over a measured 0.72 MB/s uplink is about two seconds, and it removes the
 # question of which mixture lives where.
 INPUTS="${OUT}/required_inputs.jsonl"
-"${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/pod/topk_adoption_driver.py" \
+"${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/stages/stage-1/phase_d1/topk_adoption_driver.py" \
     --required-inputs --repo "$REPO_DIR" > "$INPUTS" 2>>"$LOG"
 if [ ! -s "$INPUTS" ]; then
   say "could not derive the required calibration mixtures; not creating a pod"
@@ -176,7 +176,7 @@ fi
 # ${COMMIT}, so shipping the working copy would leave a record naming a commit
 # that never produced it.
 REMOTE_SH="${OUT}/remote.sh"
-REMOTE_SRC="scripts/pod/topk_adoption_remote.sh"
+REMOTE_SRC="scripts/stages/stage-1/phase_d1/topk_adoption_remote.sh"
 if ! git -C "$REPO_DIR" show "${COMMIT}:${REMOTE_SRC}" > "${REMOTE_SH}.in" 2>/dev/null; then
   say "commit ${COMMIT} does not contain ${REMOTE_SRC}; nothing to ship"
   exit 4
@@ -296,7 +296,7 @@ printf '%s' "$STARTED_EPOCH" > "${OUT}/pod_start_epoch"
 # or the box reboots. RunPod's own --terminate-after has never been observed to
 # fire here, so a separate process owns the deadline and outlives this one.
 WATCHDOG_MINUTES=$(python3 -c "print(int(${MAX_SECONDS}/60) + 12)")
-setsid nohup "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/pod/watchdog.py" \
+setsid nohup "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/shared/pod/watchdog.py" \
   --pod-id "$POD_ID" --session-start-epoch "$STARTED_EPOCH" \
   --price-per-hour "$RATE_USD_H" --hard-minutes "$WATCHDOG_MINUTES" \
   --authorized-usd "$CEILING_USD" \
@@ -400,7 +400,7 @@ fi
 #: matched a preflight's toy summary and reported its verdict as the session's.
 SUMMARY="${OUT}/out/adoption/adoption.json"
 if [ -f "$SUMMARY" ]; then
-  "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/pod/topk_adoption_report.py" \
+  "${REPO_DIR}/.venv/bin/python" "${REPO_DIR}/scripts/stages/stage-1/phase_d1/topk_adoption_report.py" \
       "$SUMMARY" 2>&1 | while read -r l; do say "$l"; done
 else
   say "no adoption.json retrieved; the driver's journal is in out/"

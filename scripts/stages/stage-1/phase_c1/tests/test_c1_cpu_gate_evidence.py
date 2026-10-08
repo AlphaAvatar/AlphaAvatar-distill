@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO / "tests"))
 from support.session_specs import load_session_launcher, session_args  # noqa: E402,F401
 
 #: The shared setup script, whose pod invocation these read.
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 
 def test_the_summary_survives_a_setup_abort():

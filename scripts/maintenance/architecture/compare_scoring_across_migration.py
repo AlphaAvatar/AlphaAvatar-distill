@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Re-score frozen evidence through the pre- and post-migration trees.
 
-    PYTHONPATH=src:scripts python scripts/architecture/compare_scoring_across_migration.py \
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/compare_scoring_across_migration.py \
         --base origin/main --write
 
 The initialization cutover moved `aadistill.autoinit.recovery` and rewrote
@@ -30,11 +30,11 @@ import sys
 import tempfile
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "src"))
 
 from aadistill.evaluation.usable_rollout import detect_schema  # noqa: E402
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 OUT = "logs/maintenance/inventories/architecture_scoring_equivalence.json"
 
 #: Frozen Phase-A rung-1 generations, by search path. Real evidence from a
@@ -90,7 +90,7 @@ def materialize(base: str, dest: Path) -> str:
 def score(tree: Path, label: str, out_dir: Path) -> tuple[Path, Path, list[str]]:
     summary = out_dir / f"{label}.json"
     per_sample = out_dir / f"{label}.persample.json"
-    cmd = [sys.executable, "scripts/autoinit/score_recovery_search.py",
+    cmd = [sys.executable, "scripts/shared/evaluation/score_recovery_search.py",
            "--generations", str(EVIDENCE_ROOT / f"autoinit.v1.phase_a.rung1.{label}.sa"),
            "--label", label, "--seed", TRAINING_SEED,
            "--out", str(summary), "--per-sample", str(per_sample),

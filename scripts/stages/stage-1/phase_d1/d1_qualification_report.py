@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read a qualification record and print what it found, one line per fact.
 
-    python scripts/pod/d1_qualification_report.py QUALIFICATION.json
+    python scripts/stages/stage-1/phase_d1/d1_qualification_report.py QUALIFICATION.json
 
 Separate from the launcher because a shell heredoc that parses JSON is a thing
 nobody can test without creating a pod. This runs at `$0` against any record,

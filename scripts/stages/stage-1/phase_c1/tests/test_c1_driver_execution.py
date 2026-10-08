@@ -33,14 +33,14 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-import autoinit_c1_driver as D  # noqa: E402
+from stages.phase_c1 import autoinit_c1_driver as D  # noqa: E402
 
-from experiments.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
-from experiments.phase_c1.probe_results import C1ResultsError, decision_inputs  # noqa: E402
-from experiments.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
+from stages.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
+from stages.phase_c1.probe_results import C1ResultsError, decision_inputs  # noqa: E402
+from stages.phase_c1.scoring import C1_BATTERY_SETS  # noqa: E402
 
 SEEDS = derive_recovery_seeds()
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 
 
 # --- the driver is C1's own -------------------------------------------------
@@ -52,7 +52,7 @@ def test_c1driver_is_not_a_phase_a_subclass():
     assert D.C1Driver.__mro__[1] is object
 
 
-DRIVER_SRC = REPO / "scripts/pod/autoinit_c1_driver.py"
+DRIVER_SRC = REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py"
 
 
 def _executable_text(path: Path) -> str:
@@ -103,7 +103,7 @@ def test_the_driver_owns_run_and_imports_no_phase_a_operational_module():
         elif isinstance(node, ast.ImportFrom):
             imported.add(node.module or "")
     for forbidden in ("autoinit_phase_a_driver", "autoinit_phase_a_launch",
-                      "phase_a_search", "experiments.phase_a.plan"):
+                      "phase_a_search", "stages.phase_a.plan"):
         assert forbidden not in imported, forbidden
     assert "PHASE_A_PLAN_V1" not in _executable_text(DRIVER_SRC)
 
@@ -118,8 +118,8 @@ def test_stage_h_can_only_reach_the_c1_scorer_and_the_c1_battery():
 
 def test_all_c1_paths_are_c1_owned():
     assert D.AUDIT == REPO / "artifacts/audit/autoinit_c1"
-    assert D.TRAIN == REPO / "artifacts/stage3/c1"
-    assert D.EVAL == REPO / "artifacts/eval/c1"
+    assert D.TRAIN == REPO / "artifacts/stages/stage-3/c1"
+    assert D.EVAL == REPO / "artifacts/stages/stage-3/eval/c1"
     code = _executable_text(DRIVER_SRC)
     for bad in ("audit/autoinit_phase_a", "stage3/phase_a", "eval/phase_a"):
         assert bad not in code, bad
@@ -487,7 +487,7 @@ def test_the_driver_uses_the_real_fixed_path_executor_and_its_device_gate():
 def test_the_trainer_headroom_is_derived_from_the_committed_measurement():
     """39.79 + 1.35 + 0.51 GiB. Not a written constant."""
     assert D._trainer_bytes() == int((39.79 + 1.35 + 0.51) * 2**30)
-    src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py").read_text()
     assert "39.79" not in src.split("def _trainer_bytes")[1].split("return")[1]
 
 
@@ -550,7 +550,7 @@ _SUMMARY_CACHE: dict = {}
 def _summary_template() -> dict:
     if _SUMMARY_CACHE:
         return _SUMMARY_CACHE
-    import verify_c1_scoring_equivalence as EQ
+    from stages.phase_c1 import verify_c1_scoring_equivalence as EQ
     for d in EQ.find_generations():
         p = d / "gsm8k.json"
         if p.is_file():
@@ -572,10 +572,10 @@ def harness(tmp_path, monkeypatch):
         d.mkdir(parents=True, exist_ok=True)
 
     # A structurally valid C1 authorization, at a scratch path outside the repo.
-    from experiments.phase_c1.authorization import C1Authorization, c1_harness_digest, c1_hard_ceiling_usd, load_pricing
+    from stages.phase_c1.authorization import C1Authorization, c1_harness_digest, c1_hard_ceiling_usd, load_pricing
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "c1l_h", REPO / "scripts/pod/autoinit_c1_launch.py")
+        "c1l_h", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
     launcher = importlib.util.module_from_spec(spec)
     sys.modules["c1l_h"] = launcher
     spec.loader.exec_module(launcher)
@@ -1030,7 +1030,7 @@ def test_admission_runs_before_the_scorer_in_source_order():
 
 def test_probe_results_refuse_a_probe_with_no_admitted_protocol():
     """Mutation target: dropping the admission would leave these fields empty."""
-    from experiments.phase_c1.probe_results import C1ProbeRecord, C1ResultsError, build_probe_results, decision_inputs
+    from stages.phase_c1.probe_results import C1ProbeRecord, C1ResultsError, build_probe_results, decision_inputs
     rows = _rows()
     ps = {(a, s): rows for a in ("incumbent", "treatment") for s in SEEDS}
     inputs = decision_inputs(ps, seeds=SEEDS)
@@ -1508,7 +1508,7 @@ def test_the_record_that_survives_a_failure_carries_the_durable_location():
     Preservation is written into the record BEFORE the journal is written, so a
     stage-H failure — which is what happened — still brings the pointer home.
     """
-    src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py").read_text()
     assert 'record["preserved"] = self.preserve_probe(' in src
     assert src.index('record["preserved"] = self.preserve_probe(') < \
         src.index("journal.write_text(json.dumps(record"), (

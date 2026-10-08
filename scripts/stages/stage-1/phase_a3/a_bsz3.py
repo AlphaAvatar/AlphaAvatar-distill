@@ -59,7 +59,7 @@ from aadistill.initialization.execution import ExecutionConfig
 REPO = Path(__file__).resolve().parents[4]
 
 #: The frozen calibration mixture A calibrates on, as staged for a session.
-CALIBRATION_ITEMS = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
+CALIBRATION_ITEMS = REPO / "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"
 
 #: Where the identities A-bsz3 must reproduce actually live. READ, never
 #: restated: the shared parent digest, the incumbent digest and the three

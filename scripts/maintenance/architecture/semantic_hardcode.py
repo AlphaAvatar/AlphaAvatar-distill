@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Detect CURRENT-EXPERIMENT policy in `src/aadistill`, from the syntax tree.
 
-    PYTHONPATH=src:scripts python scripts/architecture/semantic_hardcode.py
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/semantic_hardcode.py
 
 The literal detectors next door answer "is there a hash, a path, a repo id in
 the core". They report zero and are still not enough: an experiment can be
@@ -41,7 +41,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 CORE = REPO_ROOT / "src" / "aadistill"
 SCHEMA = "aadistill.semantic_hardcode/v1"
 

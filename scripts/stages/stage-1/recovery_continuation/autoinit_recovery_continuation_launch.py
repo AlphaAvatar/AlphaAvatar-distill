@@ -2,7 +2,7 @@
 """The Phase-A recovery continuation, as a session specification.
 
     PYTHONPATH=src setsid nohup python -u \
-        scripts/pod/autoinit_recovery_continuation_launch.py \
+        scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 **This session does not search.** Attempts 11 and 12 produced byte-identical
@@ -40,14 +40,14 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
-from experiments.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from stages.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402
+from stages.recovery_continuation.session import RECOVERY_CONTINUATION_HARNESS_FILES_V1, RecoveryContinuationAuthorization, SEARCH_ONLY_HARNESS_FILES, recovery_continuation_harness_digest  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
     ArtifactPolicy, MarkerPolicy, RelayInput, SessionContext, SessionSpec,
@@ -63,12 +63,12 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 #: The launcher owns the pricing; the continuation derivation lives beside the
 #: full one so the two are visibly the same arithmetic minus the search.
-from autoinit_phase_a_launch import (  # noqa: E402
+from stages.phase_a.autoinit_phase_a_launch import (  # noqa: E402
     LOCAL_ASSETS as PHASE_A_LOCAL_ASSETS, TEST_IGNORES, TEACHER_REVISION,
     continuation_budget, finalists_to_fetch, probe_streams,
     selected_leaves_secured,
@@ -118,7 +118,7 @@ def transport_is_verified() -> bool:
     """Has the transport manifest been written AND round-trip verified?
 
     Publishing the leaves is a separate `$0` step
-    (`scripts/autoinit/publish_selected_leaves.py`). Until it has verified all
+    (`scripts/shared/rollout/publish_selected_leaves.py`). Until it has verified all
     five remote copies against attempt 12's identities, this session has no
     usable transport and must not launch.
     """
@@ -176,7 +176,7 @@ LOCAL_ASSETS = PHASE_A_LOCAL_ASSETS
 def driver_command(ctx: SessionContext, plan) -> str:
     """The continuation driver. There is no `--stage` value that searches."""
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_recovery_continuation_driver.py "
+            f"{REPO}/scripts/stages/stage-1/recovery_continuation/autoinit_recovery_continuation_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price or ctx.args.max_price} "
             f"--spent-usd {ctx.spent_usd:.4f} "
@@ -201,9 +201,9 @@ def spec(args) -> SessionSpec:
         #: derived for work it does not do.
         authorization_loader=RecoveryContinuationAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         #: The SAME frozen plan. This session is a different operational
         #: identity, not a different science: nothing here rewrites 9377a2dc to
@@ -365,7 +365,7 @@ def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
         return False, (
             f"the five leaves have no verified transport: {TRANSPORT_MANIFEST} "
             "is absent or not marked verified. Publish and verify them with "
-            "scripts/autoinit/publish_selected_leaves.py before launching; the "
+            "scripts/shared/rollout/publish_selected_leaves.py before launching; the "
             "canonical copies alone cannot reach a pod.")
     inputs = selected_leaf_inputs()
     man = json.loads(TRANSPORT_MANIFEST.read_text())
@@ -403,7 +403,7 @@ def selected_leaves_present_gate(ctx: SessionContext) -> tuple[bool, str]:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    from autoinit_phase_a_launch import build_parser as phase_a_parser
+    from stages.phase_a.autoinit_phase_a_launch import build_parser as phase_a_parser
 
     ap = phase_a_parser()
     ap.set_defaults(out="logs/stages/stage-1/recovery_continuation/analyses/autoinit_recovery_continuation_session.json")

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Build Experiment 5 arm C: teacher-native prefix + supervised teacher continuation.
 
-    PYTHONPATH=src python scripts/data/build_e5_arm_c.py \
-        --out artifacts/stage3/e5_arm_c
+    PYTHONPATH=src python scripts/stages/stage-3/e5/build_e5_arm_c.py \
+        --out artifacts/stages/stage-3/e5_arm_c
 
 C needs **no generation**. Its prefix is the teacher's own trajectory, already in
 the corpus, so a split only moves the loss mask: the first `k` supervised tokens
@@ -25,7 +25,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -37,16 +37,16 @@ from aadistill.data.sessions import (  # noqa: E402
 )
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
-from diagnose_training_recall import rung_session_ids  # noqa: E402
+from shared.evaluation.diagnose_training_recall import rung_session_ids  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", type=Path, default=REPO_ROOT / "artifacts/stage3/e5_arm_c")
+    ap.add_argument("--out", type=Path, default=REPO_ROOT / "artifacts/stages/stage-3/e5_arm_c")
     ap.add_argument("--truncations", type=int, default=2)
     ap.add_argument("--block-len", type=int, default=8192)
     ap.add_argument("--tokenizer", type=Path, default=INIT)

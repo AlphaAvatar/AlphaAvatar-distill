@@ -5,7 +5,7 @@
 # so setup is paid once. A failed gate stops the run before paid generation.
 # Runs under nohup so a paid pod never depends on a conversation staying open.
 #
-#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/pod/e4_launch.sh
+#   SCR=… SESSION_COMMIT=… BUNDLE_NAME=… bash scripts/stages/stage-3/e4/e4_launch.sh
 #
 # Budget discipline, in four independent layers:
 #   1. GPU securePrice is CHECKED before creating anything, and the pod's actual
@@ -222,7 +222,7 @@ $SCP "$TOKEN_SRC" "root@$HOST:/workspace/hf/token" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'test -s /workspace/hf/token' \
   || { say "FATAL: token arrived empty on the pod"; teardown
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
-$SCP scripts/pod/e5_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
+$SCP scripts/stages/stage-3/e5/e5_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
 $SCP data/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
 
@@ -276,7 +276,7 @@ GATE_CEILING=$(echo "$BACKSTOP_MINUTES/60*$MAX_PRICE" | bc -l)
 say "driver budget: \$$(printf '%.2f' "$SPENT_AT_DRIVER_START") already billed, \
 gate ceiling \$$(printf '%.2f' "$GATE_CEILING") (backstop-bound, under the authorization)"
 $SSH "root@$HOST" "cd /workspace/aad && setsid nohup /opt/train/bin/python \
-  scripts/pod/e5_driver.py --stage all \
+  scripts/stages/stage-3/e5/e5_driver.py --stage all \
   --spent-usd $(printf '%.3f' "$SPENT_AT_DRIVER_START") \
   --authorized-usd $(printf '%.2f' "$GATE_CEILING") \
   > /workspace/e5_run.log 2>&1 < /dev/null & \
@@ -310,10 +310,10 @@ done
 mkdir -p "$STORE"
 say "bundling small artifacts on the pod"
 $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e5_side.tar.gz \
-  artifacts/audit artifacts/stage3/e5_pilot_sa configs/stage3/e5 \
-  $(ls -d artifacts/stage3/e5_arm_r_*/ 2>/dev/null) \
-  $(ls artifacts/stage3/e5_final_*.jsonl 2>/dev/null) \
-  $(ls -d artifacts/stage3/e5_*/manifest.json 2>/dev/null) \
+  artifacts/audit artifacts/stages/stage-3/e5_pilot_sa configs/stage3/e5 \
+  $(ls -d artifacts/stages/stage-3/e5_arm_r_*/ 2>/dev/null) \
+  $(ls artifacts/stages/stage-3/e5_final_*.jsonl 2>/dev/null) \
+  $(ls -d artifacts/stages/stage-3/e5_*/manifest.json 2>/dev/null) \
   2>/dev/null; cp /workspace/e5_run.log /workspace/e5.status /workspace/ 2>/dev/null; \
   sha256sum /workspace/e5_side.tar.gz' >>"$LOG" 2>&1
 $SCP "root@$HOST:/workspace/e5_side.tar.gz" "$STORE/" >>"$LOG" 2>&1
@@ -335,14 +335,14 @@ print(\"step_%06d\" % json.load(open(\"/workspace/aad/artifacts/audit/e5_joint_f
 [ -n "$STEP_TAG" ] || STEP_TAG=step_unknown
 say "checkpoint tag from the feasibility report: $STEP_TAG"
 say "hashing checkpoints on the pod"
-$SSH "root@$HOST" "cd /workspace/aad/artifacts/stage3 && \
+$SSH "root@$HOST" "cd /workspace/aad/artifacts/stages/stage-3 && \
   find e5_[cr]_s*/checkpoints/$STEP_TAG -type f \( -name '*.safetensors' -o -name '*.json' \
     -o -name '*.jinja' \) | sort | xargs sha256sum" > "$SCR/e5_pod_hashes.txt" 2>>"$LOG"
 cp "$SCR/e5_pod_hashes.txt" "$STORE/" 2>/dev/null
 say "fetching checkpoints (time-boxed to ${CKPT_TRANSFER_LIMIT_MIN} min)"
 for arm in e5_c_sa e5_c_sb e5_r_sa e5_r_sb; do
   timeout "${CKPT_TRANSFER_LIMIT_MIN}m" $SCP -r \
-    "root@$HOST:/workspace/aad/artifacts/stage3/$arm/checkpoints/$STEP_TAG" \
+    "root@$HOST:/workspace/aad/artifacts/stages/stage-3/$arm/checkpoints/$STEP_TAG" \
     "$STORE/$arm" >>"$LOG" 2>&1 || say "WARNING: $arm weights not retrieved"
 done
 teardown

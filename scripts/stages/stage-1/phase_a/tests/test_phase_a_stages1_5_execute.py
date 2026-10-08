@@ -55,8 +55,8 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
 AUTH = REPO / "logs/budget/approvals/autoinit_phase_a_authorization.json"
 STAGE3_PROBE = REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/engine_probe.json"
-STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
-CALIBRATION = REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl"
+STATE_EVAL = REPO / "artifacts/stages/stage-1/state_eval_v1"
+CALIBRATION = REPO / "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl"
 #: A real scored battery result. The stub copies its shape instead of guessing.
 REAL_SCORED = (REPO / "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete"
                / "preflight_ctl_r0860k_sa_recovery_search.json")
@@ -65,7 +65,7 @@ pytestmark = pytest.mark.skipif(
     not (AUTH.is_file() and STAGE3_PROBE.is_file() and CALIBRATION.is_file()
          and (STATE_EVAL / "manifest.json").is_file() and REAL_SCORED.is_file()
          and (REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json").is_file()
-         and (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file()),
+         and (REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").is_file()),
     reason="needs the issued authorization, the frozen plan, the staged "
            "state_eval + calibration + battery, and a real scored result")
 
@@ -98,7 +98,7 @@ class Args:
 
 def load_driver(tmp_path: Path):
     spec = importlib.util.spec_from_file_location(
-        "phase_a_driver_s15", REPO / "scripts/pod/autoinit_phase_a_driver.py")
+        "phase_a_driver_s15", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_driver_s15"] = mod
     spec.loader.exec_module(mod)
@@ -129,7 +129,7 @@ def suite_subset():
     The pairs are all kept because `StateEvaluator` refuses a subset that drops
     one — "a silently absent sub-type reweights its domain".
     """
-    from load_state_eval import load
+    from shared.evaluation.load_state_eval import load
 
     suite, items, manifest = load(STATE_EVAL)
     shortest: dict[tuple[str, str], object] = {}
@@ -167,8 +167,8 @@ def calibration_subset(n: int):
     adaptation. Only the count is reduced, and only because a full-mixture
     depth pass is tens of minutes of CPU at a 151,936 vocabulary.
     """
-    from experiments.calibration import DOMAIN_BALANCED_V1
-    from phase_a_search import as_operator_items
+    from shared.calibration import DOMAIN_BALANCED_V1
+    from stages.phase_a.phase_a_search import as_operator_items
 
     return as_operator_items(DOMAIN_BALANCED_V1.resolve(REPO))[:n]
 
@@ -182,7 +182,7 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
     binding is exercised as category C in test_phase_a_stage0_executes.py, which
     is where the refusal belongs.
     """
-    import phase_a_search
+    from stages.phase_a import phase_a_search
     from support.fixture_categories import (
         current_tree_stage3_binding, use_current_tree_binding)
 
@@ -255,7 +255,7 @@ def build(tmp_path, monkeypatch, *, separated=False, n_suite_items=None,
         argv = [str(a) for a in argv]
         if any(a.endswith("train_stage3.py") for a in argv):
             config = json.loads(Path(argv[argv.index("--config") + 1]).read_text())
-            out = mod.REPO / f"artifacts/stage3/phase_a/{config['run_name']}"
+            out = mod.REPO / f"artifacts/stages/stage-3/phase_a/{config['run_name']}"
             # THE LAYOUT `Trainer.save_checkpoint` ACTUALLY WRITES: the index and
             # the checkpoints both live under `checkpoints/`, which is what
             # `tests/training/test_train.py` asserts of the real trainer and what
@@ -323,7 +323,7 @@ def run_stages(driver, mod, monkeypatch, tmp_path, stages=range(6)):
     contract, the preregistration, the battery and `state_eval_v1` all live
     there. Only `run_probe`'s *output* path is redirected, and only once the
     stages that read the repo are done, so a rehearsal cannot litter
-    `artifacts/stage3/phase_a/` or collide with a real run's outputs.
+    `artifacts/stages/stage-3/phase_a/` or collide with a real run's outputs.
     """
     codes = {}
     for stage in stages:
@@ -631,7 +631,7 @@ def test_the_battery_never_passes_an_external_tokenizer(driven):
     _driver, mod, _codes = driven
     battery = ast.unparse(next(
         n for n in ast.walk(ast.parse(
-            (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()))
+            (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()))
         if isinstance(n, ast.FunctionDef) and n.name == "battery"))
     assert "uncapped_eval.py" in battery and "--model" in battery
     assert "--tokenizer" not in battery

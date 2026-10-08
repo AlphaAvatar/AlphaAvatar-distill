@@ -1,8 +1,8 @@
 """Token-level NLL / perplexity evaluation on a warm-up-format jsonl.
 
 Usage:
-    uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
-        --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+    uv run python scripts/shared/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+        --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         [--model Qwen/Qwen3-4B-Thinking-2507@<revision> ...] \
         [--max-seq-len 1024] [--out <report.json>]
 
@@ -30,7 +30,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state, hardware_report

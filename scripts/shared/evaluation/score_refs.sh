@@ -17,7 +17,7 @@ cd /workspace/aad || exit 1
 source /workspace/run_env.sh || { echo "MARKER:REFS_FAILED:source_run_env" >> /workspace/run_markers.log; exit 1; }
 fail() { echo "MARKER:REFS_FAILED:$1" >> /workspace/run_markers.log; exit 1; }
 
-OUT=artifacts/stage3/reference_scorecards
+OUT=artifacts/stages/stage-3/reference_scorecards
 mkdir -p "$OUT"
 
 # Warm the teacher tokenizer into HF_HOME before anything reads it.
@@ -42,15 +42,15 @@ for entry in "${REF_CKPTS[@]}"; do
   # arms get, or the per-arm deltas have no origin to be measured from. Behavior
   # alone is not enough (proposal 11.4): holdout NLL is the guard rail, the two
   # probes are the mechanistic readouts, and INT8 is the deployment guard rail.
-  uv run python scripts/evaluation/eval_ppl.py --data "$HOLDOUT" \
+  uv run python scripts/shared/evaluation/eval_ppl.py --data "$HOLDOUT" \
     --model "$dest" --out "$OUT/${name}_holdout_v1.json" || fail "holdout_$name"
-  CUDA_VISIBLE_DEVICES= uv run python scripts/evaluation/eval_ppl.py \
+  CUDA_VISIBLE_DEVICES= uv run python scripts/shared/evaluation/eval_ppl.py \
     --data "$HOLDOUT" --model "$dest" --fake-quant int8 \
     --out "$OUT/${name}_holdout_v1_int8.json" || fail "holdout_int8_$name"
-  uv run python scripts/evaluation/probe_think_close.py --model "$dest" \
+  uv run python scripts/shared/evaluation/probe_think_close.py --model "$dest" \
     --per-group 4 --out "$OUT/${name}_probe_think_close.json" || fail "probe_$name"
 
-  uv run python scripts/evaluation/eval_behavior.py --model "$dest" \
+  uv run python scripts/shared/evaluation/eval_behavior.py --model "$dest" \
     --prompts "$BEHAVIOR_PROMPTS" --max-new-tokens "$BEHAVIOR_MAX_NEW_TOKENS" \
     --out "$OUT/${name}_behavior_v0.json" || fail "$name"
   uvx --from huggingface_hub hf upload "$HF_REPO" \

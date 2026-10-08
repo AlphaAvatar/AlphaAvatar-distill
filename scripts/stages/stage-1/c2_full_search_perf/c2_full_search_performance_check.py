@@ -2,7 +2,7 @@
 """Old-vs-new benchmark and equivalence check for the C2 full-search hot path.
 
     PYTHONPATH=src:scripts python \
-        scripts/validation/c2_full_search_performance_check.py \
+        scripts/stages/stage-1/c2_full_search_perf/c2_full_search_performance_check.py \
         --config configs/validation/c2_full_search_performance.json --run-id <id>
 
 Three stages, all against the REAL pinned teacher in bf16 on the real card:
@@ -51,7 +51,7 @@ from pathlib import Path
 
 REPO = Path(os.environ.get("AAD_REPO", "/workspace/aad"))
 if not (REPO / "src").is_dir():                     # local / toy execution
-    REPO = Path(__file__).resolve().parents[2]
+    REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -59,7 +59,7 @@ for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1 as _PARETO_V1)
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 
 register_builtin_adapters()
 register_builtin_profiles()
@@ -118,7 +118,7 @@ ACCUM_TOLERANCE = 1e-9
 #:
 #: The certification that supersedes this stage compares ABSOLUTE drift on the
 #: ranked objectives against this epsilon, and checks the Pareto decisions
-#: directly. See scripts/validation/c2_state_eval_certification_check.py.
+#: directly. See scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py.
 PARETO_EPSILON = min(_PARETO_V1.epsilon.values())
 DECISION_MARGIN = 10
 
@@ -238,7 +238,7 @@ def require_cuda(cfg: dict) -> dict:
 def load_teacher(cfg: dict, device: str = "cuda"):
     """The pinned teacher, in bf16 on the card. Weights, not just the config."""
     import torch
-    from phase_a_frozen import TEACHER_ID, TEACHER_REVISION
+    from stages.phase_a.phase_a_frozen import TEACHER_ID, TEACHER_REVISION
     from transformers import AutoModelForCausalLM
 
     say(f"loading {TEACHER_ID}@{TEACHER_REVISION[:12]} in bf16")
@@ -256,7 +256,7 @@ def load_teacher(cfg: dict, device: str = "cuda"):
 def calibration_items(cfg: dict, n: int):
     """Real items from a real frozen mixture, truncated in COUNT only."""
     from aadistill.initialization.calibration.profiles import get_profile
-    from phase_a_search import as_operator_items
+    from stages.phase_a.phase_a_search import as_operator_items
 
     profile = get_profile(cfg["profile_id"])
     items = as_operator_items(profile.resolve(REPO))
@@ -380,7 +380,7 @@ def stage_reduction(cfg: dict, teacher, items, report: dict,
         f"{abs_drift:.3e} against an epsilon of {PARETO_EPSILON:.0e}, on "
         "POOLED PER-ITEM KL over four calibration items. The ranked objectives "
         "are aggregates over the complete state_eval_v1 suite and are "
-        "certified by scripts/validation/c2_state_eval_certification_check.py, "
+        "certified by scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py, "
         "which is where a Pareto-decision claim comes from.")
     say(f"stage R: {out['speedup']}x  (old {old_total:.2f}s -> new {new_total:.2f}s), "
         f"worst drift {worst:.3e}")
@@ -633,7 +633,7 @@ def main() -> int:
                          "logic at $0 against a toy model; it establishes "
                          "nothing about CUDA kernels, which is the point of "
                          "the paid run")
-    ap.add_argument("--out", default="artifacts/validation")
+    ap.add_argument("--out", default="artifacts/shared/validation")
     a = ap.parse_args()
 
     cfg = json.loads((REPO / a.config).read_text())

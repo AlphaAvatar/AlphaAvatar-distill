@@ -3,7 +3,7 @@
 Attempt 4's beam completed and its five selected candidates were measured. The
 baseline-completion session measures B and computes the comparison, so it needs
 those five measurements as objects the existing
-`experiments.phase_c2.comparison.build` already knows how to read -- without the
+`stages.phase_c2.comparison.build` already knows how to read -- without the
 28.9 MB journal they were extracted from, and without the ability to change
 them.
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Launch ONE Phase-C2 behavioural selection session. Twelve probes, one verdict.
 
-    python scripts/pod/autoinit_c2_behavioural_launch.py --run-id <id> \
+    python scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py --run-id <id> \
         --bundle <name> --max-price <usd/h> [--dry-run]
 
 What it runs, and the only thing it can run: six arms built from the teacher
@@ -40,7 +40,7 @@ import sys
 from collections.abc import Mapping
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -58,19 +58,19 @@ from aadistill.runtime.cpu_test_env import (  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     ignores_for_selection)
 
-from autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E402
-from autoinit_c1_launch import C1_EVAL_TOKENIZER, C1_ROPE_INPUT  # noqa: E402
-from experiments.deployment import deployment_commands  # noqa: E402
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_bundle as BT  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
-from experiments.phase_c2 import behavioural_pod_environment as BPE  # noqa: E402
-from experiments.run_layout import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1, RECOVERY_LADDER  # noqa: E402
+from stages.phase_c1.autoinit_c1_launch import C1_EVAL_TOKENIZER, C1_ROPE_INPUT  # noqa: E402
+from shared.deployment import deployment_commands  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_bundle as BT  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural_pod_environment as BPE  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, open_run,
     present_roles, record_run, rel_run_dir, write_run_readmes,
 )
-from phase_a_frozen import TEACHER_REVISION  # noqa: E402
+from stages.phase_a.phase_a_frozen import TEACHER_REVISION  # noqa: E402
 
 EXPERIMENT_ID = BPE.EXPERIMENT_ID
 STAGE_ID = "1"
@@ -85,7 +85,7 @@ WS = "/workspace"
 REPO = f"{WS}/aad"
 WORKDIR = f"{REPO}/artifacts/autoinit/c2_behavioural"
 ARM_DIR = f"{WORKDIR}/arms"
-EVAL_DIR = f"{REPO}/artifacts/eval/c2_behavioural"
+EVAL_DIR = f"{REPO}/artifacts/stages/stage-3/eval/c2_behavioural"
 
 AUDIT_DIRNAME = "autoinit_c2_behavioural"
 #: Where the driver writes its evidence and where the collector looks. ONE
@@ -112,7 +112,7 @@ FROZEN_EXPECT = "configs/experiments/phase_c2/behavioural_frozen_assets.json"
 DURABLE_STORE = str(host_local_store() / "phase_c2_behavioural")
 
 #: THE PRE-STAGED BACKEND. A provider network volume holding this campaign's
-#: completed probes, written by `scripts/autoinit/stage_c2_probes_to_volume.py`
+#: completed probes, written by `scripts/shared/pod/stage_c2_probes_to_volume.py`
 #: while nothing expensive was billing, and attached to every later pod of the
 #: campaign.
 #:
@@ -199,19 +199,19 @@ BOUND_IMAGE = "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404"
 LOCAL_ASSETS = (
     *BG.staged_assets(REPO_ROOT),
     #: Both batteries. 3.26 MiB each, comfortably inside the scp timeout.
-    LocalAsset("artifacts/stage3/c1_confirmation_v1", "c1_confirmation_v1",
-               "artifacts/stage3"),
-    LocalAsset("artifacts/stage3/c2_screening_v1", "c2_screening_v1",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1", "c1_confirmation_v1",
+               "artifacts/stages/stage-3"),
+    LocalAsset("artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1", "c2_screening_v1",
+               "artifacts/stages/stage-3"),
     #: Read by NEITHER rung. Staged because the SHARED setup runs
     #: `verify_frozen_assets.py` unconditionally at ASSETS_READY and that script
     #: checks both. A session declares what the SETUP requires, not only what it
     #: reads — declaring only what it needed cost two sibling sessions a pod
     #: each.
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
 
 POD_TEST_SELECTION = BPE.POD_TEST_SELECTION
@@ -614,7 +614,7 @@ def volume_gate(ctx: SessionContext) -> tuple[bool, str]:
             f"{len(missing)} of {len(restorable)} probe(s) this campaign must "
             f"restore were never verified onto volume {volume}: "
             f"{missing[:4]}{'…' if len(missing) > 4 else ''}. Stage them with "
-            "scripts/autoinit/stage_c2_probes_to_volume.py before launching; "
+            "scripts/shared/pod/stage_c2_probes_to_volume.py before launching; "
             "a completed probe may not be retrained, so a pod that finds them "
             "absent can only abort.")
     gib = sum(int(staged[p].get("bytes") or 0) for p in restorable) / 2**30
@@ -996,7 +996,7 @@ def campaign_continuation_gate(ctx: SessionContext) -> tuple[bool, str]:
                       f"probes and ${planned:.4f} all-in against the "
                       f"${approved:.4f} ceiling")
 
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     actuals = [prior_attempt_actual(ctx, a) for a in prior]
     unreadable = [a["attempt"] for a in actuals if a.get("unknown")]
@@ -1188,7 +1188,7 @@ def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
     no evidence, reported no finished work, and tore down a pod holding two
     completed leaves with every check green.
     """
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     scr = Path(ctx.args.scr)
     out: list[Path] = []
@@ -1977,7 +1977,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
     under it.
     """
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/pod/autoinit_c2_behavioural_driver.py "
+            f"{REPO}/scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py "
             f"--campaign {ctx.auth.campaign_id} "
             f"--run-attempt {ctx.args.run_id} "
             f"--continuation-manifest {RESTORE_MANIFEST} "
@@ -2096,9 +2096,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(getattr(args, "run_id", "")),
         authorization_loader=BG.BehaviouralAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=BG.PLAN_ID,
         plan_hash=BG.plan_hash(REPO_ROOT),
@@ -2384,8 +2384,8 @@ def main() -> int:
                       "protocol_sha256":
                           BH.protocol(REPO_ROOT)["protocol_sha256"]},
                 implementation={
-                    "launcher": "scripts/pod/autoinit_c2_behavioural_launch.py",
-                    "driver": "scripts/pod/autoinit_c2_behavioural_driver.py"},
+                    "launcher": "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py",
+                    "driver": "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_driver.py"},
                 status={"authorizes": "nothing",
                         "terminates_at": "decide",
                         "decides": "the C2 incumbent, under the frozen "

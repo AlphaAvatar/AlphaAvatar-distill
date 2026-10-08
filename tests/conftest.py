@@ -9,7 +9,7 @@ What is left here is the toy-model fixture set, imported from
 name rather than inheriting them from a directory it no longer sits under.
 
 **What this file no longer does, and why.** It used to
-`import experiments.datasets` and `import experiments.calibration` at module
+`import shared.datasets` and `import shared.calibration` at module
 scope, so collecting any core test registered one campaign's frozen dataset
 assets as a side effect. That made `tests/` unable to run without the
 application layer, and made the application layer's registration order part of

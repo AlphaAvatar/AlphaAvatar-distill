@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Freeze what the behavioural continuation would do. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/write_continuation_b_preregistration.py
+    PYTHONPATH=src python scripts/stages/stage-1/continuation_b/write_continuation_b_preregistration.py
 
 A generator rather than a hand-written file, because the document binds seven
 identities that all move when code moves — the executable source digest most of
@@ -20,13 +20,13 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
 
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_SET_VERSION, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, continuation_source_digest, search_call_site_owners  # noqa: E402
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from stages.phase_b.continuation import CONTINUATION_PLAN_V1, CONTINUATION_SOURCE_SET_VERSION, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, continuation_source_digest, search_call_site_owners  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 

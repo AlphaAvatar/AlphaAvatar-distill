@@ -21,7 +21,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-SCRIPT = REPO / "scripts/validation/batch_invariance_diagnostic.py"
+SCRIPT = REPO / "scripts/shared/validation/batch_invariance_diagnostic.py"
 
 
 def _module():

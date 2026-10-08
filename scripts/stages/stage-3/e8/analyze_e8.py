@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 8 analysis: does a contribution-guided depth map reach behaviour?
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e8.py --bootstrap 10000
+    PYTHONPATH=src python scripts/stages/stage-3/e8/analyze_e8.py --bootstrap 10000
 
 Two families, one frozen 150-prompt battery, both re-scored from retained raw
 generations with the current scorer:
@@ -32,7 +32,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
@@ -40,7 +40,7 @@ from aadistill.evaluation.paired_stats import (  # noqa: E402
     mcnemar_counts, paired_bootstrap_ci,
 )
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from analyze_e6 import (  # noqa: E402  — one scorer, shared by every experiment
+from stages.e6.analyze_e6 import (  # noqa: E402  — one scorer, shared by every experiment
     arm_alias, load_sessions, rescore_arm, token_stream_sha256,
 )
 
@@ -49,7 +49,7 @@ THREE_MODE = AUDIT / "three_mode"
 REGISTRATION = REPO_ROOT / "logs/stages/stage-3/e8/plans/e8_preregistration.md"
 GENERAL_TEXT = AUDIT / "e8_general_text"
 STEP0 = AUDIT / "e8_step0_comparison.json"
-FROZEN_MAP = REPO_ROOT / "artifacts/stage1/e8_depth_search/e8_frozen_depth_map.json"
+FROZEN_MAP = REPO_ROOT / "artifacts/stages/stage-1/e8_depth_search/e8_frozen_depth_map.json"
 
 FLOORS = {"usable_rollout_rate": 0.0800, "correct_overall": 0.0600,
           "correct_given_usable": 0.0600}

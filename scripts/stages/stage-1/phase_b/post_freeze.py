@@ -26,7 +26,7 @@ SEALED_LEGACY_NOTE = NOTE_PATH
 #: What Phase B preregistered.
 PREREGISTRATION_PATH = "logs/stages/stage-1/phase_b/plans/autoinit_phase_b_preregistration.json"
 #: The single dispatcher every launchable session shares.
-SETUP_SCRIPT = "scripts/pod/autoinit_preflight_setup.sh"
+SETUP_SCRIPT = "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 PATHS = dict(note_path=NOTE_PATH, setup_script=SETUP_SCRIPT)
 HISTORICAL_PATHS = dict(ledger_path=HISTORICAL_LEDGER_PATH,

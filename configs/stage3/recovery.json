@@ -2,7 +2,7 @@
   "stage": "stage3_recovery",
   "run_name": "recovery",
   "_purpose": "Canonical Stage 3 recovery config. A run differs from it only in data_dir (the token-ladder subset) and schedule.total_steps. data_dir defaults to the existing teacher-native corpus so the config is runnable as committed.",
-  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
+  "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
@@ -58,5 +58,5 @@
     "eval_every": 25,
     "eval_blocks": 16
   },
-  "out_dir": "artifacts/stage3/recovery"
+  "out_dir": "artifacts/stages/stage-3/recovery"
 }

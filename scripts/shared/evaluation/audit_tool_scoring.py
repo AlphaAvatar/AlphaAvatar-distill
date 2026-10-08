@@ -1,6 +1,6 @@
 """Can the existing tool-call scorer consume the recovery battery? CPU only.
 
-    PYTHONPATH=src .venv/bin/python scripts/autoinit/audit_tool_scoring.py
+    PYTHONPATH=src .venv/bin/python scripts/shared/evaluation/audit_tool_scoring.py
 
 The question is narrow and has to be answered before the control is measured,
 because the answer changes the scorable denominator and therefore the recovery
@@ -37,7 +37,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.behavior import parse_tool_calls, score_tool_call  # noqa: E402
@@ -106,7 +106,7 @@ EXPECTED = {
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--battery", default="artifacts/stage3/recovery_search_v1")
+    ap.add_argument("--battery", default="artifacts/stages/stage-1/batteries/recovery_search_v1")
     ap.add_argument("--out", default="logs/shared/analyses/autoinit_tool_scoring_audit.json")
     args = ap.parse_args()
 

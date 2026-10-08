@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Did each formal session pass the formal-allowance gate at issuance? $0.
 
-    PYTHONPATH=src python scripts/consolidate/audit_formal_allowance.py
-    PYTHONPATH=src python scripts/consolidate/audit_formal_allowance.py --write
+    PYTHONPATH=src python scripts/maintenance/consolidation/audit_formal_allowance.py
+    PYTHONPATH=src python scripts/maintenance/consolidation/audit_formal_allowance.py --write
 
 The package's 2026-09-28 amendment makes
 
@@ -31,12 +31,12 @@ import re
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "consolidate"))
 
-import derive_budget as B  # noqa: E402
+from maintenance.consolidation import derive_budget as B  # noqa: E402
 
 OUT = "logs/stages/stage-1/phase_c3/analyses/formal_allowance_audit.json"
 

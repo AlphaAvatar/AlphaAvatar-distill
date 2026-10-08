@@ -39,7 +39,7 @@ def test_there_are_exactly_two_arms_on_two_seeds_from_one_init():
     assert len(ARMS["arms"]) == 2
     assert {a["seed"] for a in ARMS["arms"]} == {20260726, 20260801}
     assert {cfg_of(a)["student_path"] for a in ARMS["arms"]} == \
-        {"artifacts/stage1/e8_contribution_init_v1/checkpoint"}
+        {"artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint"}
     assert ARMS["allowed_diff"] == sorted(ALLOWED_DIFF)
 
 
@@ -97,7 +97,7 @@ def test_the_stage1_treatment_config_changes_only_the_depth_map():
 def test_the_token_budget_the_arms_will_consume_is_what_the_pack_holds():
     from aadistill.data.ladder import ladder_blocks
 
-    pack = REPO / "artifacts/stage3/ladder_uniform_probe"
+    pack = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
     if not (pack / "blocks.npz").is_file():
         pytest.skip("canonical pack not present on this machine")
     arm = ARMS["arms"][0]
@@ -112,7 +112,7 @@ def test_the_token_budget_the_arms_will_consume_is_what_the_pack_holds():
 
 
 @pytest.mark.skipif(
-    not (REPO / "artifacts/stage3/ladder_uniform_probe/blocks.npz").is_file(),
+    not (REPO / "artifacts/shared/instruments/ladder_uniform_probe/blocks.npz").is_file(),
     reason="canonical pack absent; the validator reads the budget from it")
 def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init(
         tmp_path):
@@ -125,7 +125,7 @@ def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_ini
     """
     env = {"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin",
            "HOME": str(Path.home())}
-    script = str(REPO / "scripts/training/validate_e8_arms.py")
+    script = str(REPO / "scripts/stages/stage-3/e8/validate_e8_arms.py")
     ok = subprocess.run([sys.executable, script, "--out",
                          str(tmp_path / "configs.json")],
                         capture_output=True, text=True, env=env, cwd=REPO)
@@ -139,7 +139,7 @@ def test_the_validator_passes_its_config_checks_and_fails_closed_without_the_ini
                            capture_output=True, text=True, env=env, cwd=REPO)
 
     def staged(name: str) -> bool:
-        return (REPO / "artifacts/stage1" / name / "checkpoint"
+        return (REPO / "artifacts/stages/stage-1" / name / "checkpoint"
                 / "model.safetensors").is_file()
 
     # The negative case needs a specific machine state: the treatment absent so
@@ -173,7 +173,7 @@ def test_the_positional_map_this_experiment_replaces_is_what_we_think_it_is():
     assert sorted(set(range(36)) - set(kept)) == [5, 7, 9, 11, 13, 15, 17, 19]
     # Recorded in the pinned init's own manifest, so the control's map is not
     # merely re-derived here but confirmed against the artifact.
-    manifest = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/manifest.json"
+    manifest = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/manifest.json"
     if manifest.is_file():
         diag = json.loads(manifest.read_text())["init_diagnostics"]
         assert [d["representative"] for d in diag["depth_map"]] == kept

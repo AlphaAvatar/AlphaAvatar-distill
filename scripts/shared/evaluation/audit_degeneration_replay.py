@@ -2,7 +2,7 @@
 """Replay retained generations through the degeneration detector and compare
 every verdict against the one recorded when the generation was produced.
 
-    PYTHONPATH=src python scripts/evaluation/audit_degeneration_replay.py \
+    PYTHONPATH=src python scripts/shared/evaluation/audit_degeneration_replay.py \
         --roots artifacts --out artifacts/audit/degeneration_replay.json
 
 Why this exists
@@ -74,7 +74,7 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation import degeneration as new_mod  # noqa: E402

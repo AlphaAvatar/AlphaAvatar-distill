@@ -1,6 +1,6 @@
 """The Phase-D1 target-aware search space, derived, and what the chain costs.
 
-    PYTHONPATH=src:scripts python -m experiments.phase_d1.search_space
+    PYTHONPATH=src:scripts python -m stages.phase_d1.search_space
 
 Zero cost. It loads no model, reads no checkpoint and needs no GPU.
 
@@ -31,8 +31,8 @@ causal isolation of position weighting. Evidence:
 
 That makes the space much smaller than C2's full joint re-search — one
 implementation per kind rather than a library — and the cost arithmetic is the
-same, so it is imported rather than copied: `experiments.search_cost_model` owns
-branching and pricing, and `experiments.phase_c2.search_space` owns the measured
+same, so it is imported rather than copied: `shared.search_cost_model` owns
+branching and pricing, and `stages.phase_c2.search_space` owns the measured
 per-expansion cost table and the non-search session shape.
 
 **The cost table is a PROVISIONAL planning ceiling, not a measurement of D1.**
@@ -75,24 +75,24 @@ if str(REPO_ROOT / "scripts") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts"))
 #: `phase_a_frozen` owns the target geometry and the teacher identity, and it
 #: lives beside the Phase-A driver rather than under `experiments/`. Added the
-#: same way `experiments.phase_c2.full_search_space` reaches it.
+#: same way `stages.phase_c2.full_search_space` reaches it.
 if str(REPO_ROOT / "scripts/autoinit") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 
-from experiments.search_cost_model import (  # noqa: E402
+from shared.search_cost_model import (  # noqa: E402
     SearchSpace, bound as _bound, decomposition, trajectory as _trajectory,
     walk_leaves,
 )
 #: The measured cost table, the session shape and the teacher geometry. One
 #: owner: a second copy is how two phases come to price the same expansion
 #: differently.
-from experiments.phase_c2.full_search_space import (  # noqa: E402
+from stages.phase_c2.full_search_space import (  # noqa: E402
     cost_model,
 )
-from experiments.phase_c2.search_space import (  # noqa: E402
+from stages.phase_c2.search_space import (  # noqa: E402
     PRICE_PER_HOUR_LAST_QUOTED, SESSION_PHASE_MINUTES, TEACHER_GEOMETRY,
     register_c2_operators,
 )
@@ -211,7 +211,7 @@ HOURS_PER_MONTH = 720.0
 
 
 def _target_spec() -> ArchSpec:
-    from phase_a_frozen import TARGET_GEOMETRY
+    from stages.phase_a.phase_a_frozen import TARGET_GEOMETRY
 
     return ArchSpec.of(FAMILY, TARGET_GEOMETRY)
 
@@ -489,7 +489,7 @@ def designs(*, price_per_hour: float = PRICE_PER_HOUR_LAST_QUOTED
     being inside the screened field. See
     ``selection_noise.CLAIM_BOUNDARY``.
     """
-    from experiments.phase_d1.selection_noise import (
+    from stages.phase_d1.selection_noise import (
         advance_probability,
         advance_probability_sensitivity,
         screening_estimate_inflation,

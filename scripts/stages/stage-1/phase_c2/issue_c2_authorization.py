@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue the ONE-USE Phase-C2 Search-1 authorization. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/issue_c2_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c2/issue_c2_authorization.py \
         --run-id attempt2 \
         --grant logs/stages/stage-1/phase_c2/runs/attempt2/governance/grant.json
 
@@ -41,19 +41,19 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-#: NOT `scripts/experiments/stage-1/phase_c2` on sys.path. The sibling
-#: `scripts/experiments/stage-1/phase_c1` holds `packaging.py`, which shadows the
+#: NOT `scripts/stages/stage-1/phase_c2` on sys.path. The sibling
+#: `scripts/stages/stage-1/phase_c1` holds `packaging.py`, which shadows the
 #: third-party `packaging` distribution and breaks the next transformers import
 #: in the process; reaching experiment modules through the package is the
 #: convention that avoids it, and `scripts` on the path already allows it.
 
-from experiments.phase_c2.authorization_payload import (  # noqa: E402
+from stages.phase_c2.authorization_payload import (  # noqa: E402
     C2AuthorizationRefused, build_c2_authorization_payload, load_config,
 )
-from experiments.phase_c2.session import C2Authorization  # noqa: E402
+from stages.phase_c2.session import C2Authorization  # noqa: E402
 
 
 def git(*args: str) -> str:
@@ -124,7 +124,7 @@ def main() -> int:
         raise SystemExit(f"refusing to issue: {exc}") from None
 
     if args.out is None:
-        from experiments.phase_c2.session import c2_authorization_path
+        from stages.phase_c2.session import c2_authorization_path
 
         args.out = c2_authorization_path(args.run_id, stage_id)
     out = REPO_ROOT / args.out

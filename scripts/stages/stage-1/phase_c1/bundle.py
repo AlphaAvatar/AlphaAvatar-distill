@@ -8,7 +8,7 @@ Every gate that ran verified the *contents* of the session commit — the harnes
 digest, the lineage, the authorization, the preregistration, the frozen science,
 the teacher binding, the battery, the artifact specs. Not one asked whether the
 pod could **reach** that commit. "Regenerate the git bundle and re-upload it" was
-a documented step in `scripts/pod/AGENTS.md`, so it depended on an operator
+a documented step in `scripts/shared/pod/AGENTS.md`, so it depended on an operator
 remembering it, and the operator did not.
 
 This module answers the transport question instead of assuming it, and splits the

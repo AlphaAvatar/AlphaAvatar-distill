@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 3: train A1 then A2, then evaluate everything with the P1 harness.
 
-    /opt/train/bin/python scripts/pod/e3_driver.py --stage all
+    /opt/train/bin/python scripts/stages/stage-3/e3/e3_driver.py --stage all
 
 Arms (A0 = P2-ceheavy is not retrained; its recorded results are the control):
 
@@ -41,9 +41,9 @@ STATUS = Path("/workspace/e3.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 A1 = {"A1-frozen-attn-sa": "e3_a1_frozen_attn_sa",
       "A1-frozen-attn-sb": "e3_a1_frozen_attn_sb"}
@@ -70,7 +70,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def run_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}"
+    return REPO / f"artifacts/stages/stage-3/{name}"
 
 
 def model_dir(name: str) -> Path:
@@ -108,7 +108,7 @@ def train_arms(arms: dict) -> None:
             assert cfg["lora"]["dropout"] == 0.0 and cfg["lora"]["bias"] == "none"
         else:
             assert "lora" not in cfg
-        run(["scripts/training/train_stage3.py", "--config", config_path(name)])
+        run(["scripts/shared/training/train_stage3.py", "--config", config_path(name)])
         mark(f"TRAIN_DONE:{alias}")
 
 
@@ -119,7 +119,7 @@ def stage_train_a1(args):
 def measure_movement(alias: str, name: str) -> dict:
     out = movement_path(alias)
     if not out.exists():
-        run(["scripts/evaluation/parameter_movement.py", "--init", INIT,
+        run(["scripts/shared/evaluation/parameter_movement.py", "--init", INIT,
              "--checkpoint", model_dir(name), "--label", alias, "--out", out])
     return json.loads(out.read_text())
 
@@ -237,11 +237,11 @@ def stage_three_mode(args):
         if not m.is_dir():
             mark(f"EVAL_SKIPPED:{alias}:no_checkpoint")
             continue
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK, "--rung", 860000,
              "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK, "--rung", 860000,
              "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

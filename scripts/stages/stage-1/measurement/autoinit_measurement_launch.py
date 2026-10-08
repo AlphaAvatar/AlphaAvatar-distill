@@ -2,7 +2,7 @@
 """The bounded causal-depth runtime and backend measurement, as a session spec.
 
     PYTHONPATH=src setsid nohup python -u \
-        scripts/pod/autoinit_measurement_launch.py \
+        scripts/stages/stage-1/measurement/autoinit_measurement_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 **This is not Phase-A attempt 11.** It runs no greedy search, selects no depth
@@ -34,7 +34,7 @@ import argparse
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
@@ -42,9 +42,9 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # checks load every launcher.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-from experiments.preflight import PreflightAuthorization  # noqa: E402
-from experiments.measurement.plan import MEASUREMENT_PLAN_V1  # noqa: E402
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+from shared.preflight import PreflightAuthorization  # noqa: E402
+from stages.measurement.plan import MEASUREMENT_PLAN_V1  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (
     ExecutionCommands,  # noqa: E402
@@ -57,7 +57,7 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 #: image could only be supported by patching the framework's globals.
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
-from autoinit_science_inputs import (  # noqa: E402
+from shared.pod.autoinit_science_inputs import (  # noqa: E402
     CALIBRATION_V1, CANONICAL_INIT, RECOVERY_LADDER,
 )
 
@@ -76,20 +76,20 @@ AUTH_PATH = "logs/budget/approvals/autoinit_measurement_authorization.json"
 #: derives the required roots from the verifier itself, so the next session to
 #: get this wrong fails at $0.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage3/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stage3"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
+               "artifacts/stages/stage-3"),
 )
-#: One entry now. `scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
+#: One entry now. `scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
 #: a ~20-minute Phase-A pre-flight rehearsal that a pod would otherwise re-run
 #: inside its 2700 s gate; the 2026-10-03 boundary moved it to
-#: `scripts/experiments/stage-1/phase_a/tests/`, so the core suite no longer contains it
+#: `scripts/stages/stage-1/phase_a/tests/`, so the core suite no longer contains it
 #: and ignoring it would name a path that is not there.
 TEST_IGNORES = ("tests/data/test_recovery_corpus_pipeline.py",)
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 
-#: From `logs/shared/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
+#: From `logs/stages/stage-1/measurement/analyses/autoinit_causal_depth_pricing_bound.json`. The measurement itself is
 #: ~2.4 min of evaluations at E8a's rate; everything else is session overhead,
 #: which is why the ceiling is dominated by setup and load rather than by work.
 SETUP_MINUTES = 12.0
@@ -110,7 +110,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
     job.
     """
     return (f"/opt/train/bin/python "
-            f"{REPO}/scripts/autoinit/measure_causal_depth_runtime.py "
+            f"{REPO}/scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py "
             f"--out artifacts/audit/autoinit_measurement/result.json")
 
 
@@ -126,9 +126,9 @@ def spec(args) -> SessionSpec:
         #: pointed at a Phase-A artifact refuses it rather than running it.
         authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=MEASUREMENT_PLAN_V1.plan_id,
         plan_hash=MEASUREMENT_PLAN_V1.plan_hash,

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """What did scaling actually repair? Per-prompt transitions between two arms.
 
-    PYTHONPATH=src python scripts/evaluation/transition_table.py \
+    PYTHONPATH=src python scripts/shared/evaluation/transition_table.py \
         --from P2-ceheavy --to E4-P2-1600k \
         --out artifacts/audit/e5_transition_table.json
 
@@ -33,17 +33,17 @@ from collections import Counter
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
 from aadistill.evaluation import usable_rollout as ur  # noqa: E402
 from aadistill.evaluation.behavior import split_generation  # noqa: E402
 from aadistill.infrastructure.env import code_state  # noqa: E402
-from run_three_mode_diagnostic import score  # noqa: E402
+from stages.d0.run_three_mode_diagnostic import score  # noqa: E402
 
 AUDIT = REPO_ROOT / "artifacts/audit"
-SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
+SESSIONS = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 CELLS = ["usable_correct", "usable_wrong", "unusable"]
 
 

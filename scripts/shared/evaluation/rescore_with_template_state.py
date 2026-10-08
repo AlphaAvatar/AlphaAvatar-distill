@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 """Rescore saved generations under the corrected, template-aware scorer.
 
-    PYTHONPATH=src python scripts/evaluation/rescore_with_template_state.py \
-        --battery artifacts/eval/battery_v2 \
-        --generations artifacts/eval/e2diag/ref_qwen3_0p6b_project \
+    PYTHONPATH=src python scripts/shared/evaluation/rescore_with_template_state.py \
+        --battery artifacts/stages/stage-3/eval/battery_v2 \
+        --generations artifacts/stages/stage-3/eval/e2diag/ref_qwen3_0p6b_project \
         --label ref_qwen3_0p6b_project --think-preopened false \
-        --out artifacts/eval/e2diag_rescored_v2/ref_qwen3_0p6b_project_battery.json
+        --out artifacts/stages/stage-3/eval/e2diag_rescored_v2/ref_qwen3_0p6b_project_battery.json
 
 CPU only — generation is the paid part and it is already done. Nothing is
 overwritten: the original scorings stay exactly where they were, and this writes
@@ -26,14 +26,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.behavior import template_opens_think  # noqa: E402
 from aadistill.infrastructure.env import code_state, library_versions  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
-SCORER = REPO_ROOT / "scripts/evaluation/score_battery.py"
+SCORER = REPO_ROOT / "scripts/shared/evaluation/score_battery.py"
 
 
 def sha256_bytes(b: bytes) -> str:

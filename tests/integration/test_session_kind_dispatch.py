@@ -32,7 +32,7 @@ REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/pod"))
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 #: Enough to construct a `SessionSpec`; no pod, no provider, no network.
 BASE_ARGS = ["--scr", "/tmp/does-not-matter", "--session-commit", "d" * 40,
@@ -307,7 +307,7 @@ def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
     The C2 replay launcher refuses on this tree by design: its spec is pinned to
     attempt 3's artifact digests, and the 2026-09-25 topology migration moved
     the operator bytes those digests were produced by. That refusal is correct
-    and is asserted directly in `scripts/experiments/stage-1/phase_c2/tests/test_c2_replay_specs.py`; what
+    and is asserted directly in `scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py`; what
     this pins is that it is RECORDED here rather than silently dropping a
     launcher out of the dispatch probe.
     """

@@ -15,9 +15,9 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[5]
 PY = sys.executable
-FINEWEB = REPO / "artifacts/stage3/e7_fineweb_kd"
-CONTROL = REPO / "artifacts/stage3/e7_control_kd"
-VAL = REPO / "artifacts/stage3/e7_fineweb_val"
+FINEWEB = REPO / "artifacts/stages/stage-3/e7_fineweb_kd"
+CONTROL = REPO / "artifacts/stages/stage-3/e7_control_kd"
+VAL = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
 built = pytest.mark.skipif(
     not (FINEWEB / "manifest.json").is_file(),
     reason="E7 streams are gitignored artifacts; rebuild with the builders")
@@ -102,7 +102,7 @@ def test_every_stream_block_is_full():
 # --------------------------------------------------------------------------
 
 def test_disjointness_refuses_to_run_with_no_streams():
-    r = run(["scripts/data/check_stream_disjointness.py"])
+    r = run(["scripts/stages/stage-3/e7/check_stream_disjointness.py"])
     assert r.returncode != 0
     assert "nothing would be checked" in (r.stdout + r.stderr)
 
@@ -113,7 +113,7 @@ def test_disjointness_errors_on_a_missing_reserved_file(tmp_path):
     stream.mkdir()
     (stream / "manifest.json").write_text(json.dumps({"n_blocks": 1}))
     (stream / "docs.jsonl").write_text(json.dumps({"sha256": "a" * 64}) + "\n")
-    r = run(["scripts/data/check_stream_disjointness.py", "--stream", str(stream),
+    r = run(["scripts/stages/stage-3/e7/check_stream_disjointness.py", "--stream", str(stream),
              "--reserved", str(tmp_path / "does_not_exist.jsonl")])
     assert r.returncode != 0
     assert "FileNotFoundError" in r.stderr or "missing" in r.stderr
@@ -123,7 +123,7 @@ def test_disjointness_errors_when_a_stream_has_no_docs(tmp_path):
     stream = tmp_path / "s"
     stream.mkdir()
     (stream / "manifest.json").write_text(json.dumps({"n_blocks": 1}))
-    r = run(["scripts/data/check_stream_disjointness.py", "--stream", str(stream)])
+    r = run(["scripts/stages/stage-3/e7/check_stream_disjointness.py", "--stream", str(stream)])
     assert r.returncode != 0
     assert "docs.jsonl" in r.stderr
 
@@ -136,7 +136,7 @@ def test_disjointness_detects_a_planted_overlap(tmp_path):
         d.mkdir()
         (d / "manifest.json").write_text(json.dumps({"n_blocks": 1}))
         (d / "docs.jsonl").write_text(json.dumps({"sha256": shared}) + "\n")
-    r = run(["scripts/data/check_stream_disjointness.py",
+    r = run(["scripts/stages/stage-3/e7/check_stream_disjointness.py",
              "--stream", str(tmp_path / "a"), "--stream", str(tmp_path / "b")])
     assert r.returncode == 6
     assert "LEAKAGE" in r.stderr
@@ -157,7 +157,7 @@ def test_an_overlap_between_reserved_artifacts_is_reported_but_not_fatal(tmp_pat
     (stream / "docs.jsonl").write_text(json.dumps({"sha256": "c" * 64}) + "\n")
     for name in ("r1.jsonl", "r2.jsonl"):
         (tmp_path / name).write_text(json.dumps({"text": "identical text"}) + "\n")
-    r = run(["scripts/data/check_stream_disjointness.py",
+    r = run(["scripts/stages/stage-3/e7/check_stream_disjointness.py",
              "--stream", str(stream),
              "--reserved", str(tmp_path / "r1.jsonl"),
              "--reserved", str(tmp_path / "r2.jsonl")])
@@ -170,7 +170,7 @@ def test_an_overlap_between_reserved_artifacts_is_reported_but_not_fatal(tmp_pat
 
 @built
 def test_the_shipped_disjointness_proof_covers_every_stream_and_passes():
-    proof = json.loads((REPO / "artifacts/stage3/e7_disjointness.json").read_text())
+    proof = json.loads((REPO / "artifacts/stages/stage-3/e7_disjointness.json").read_text())
     assert proof["disjoint"] is True
     assert proof["content_hash_overlaps"] == []
     for name in ("e7_fineweb_kd", "e7_control_kd", "e7_fineweb_val"):

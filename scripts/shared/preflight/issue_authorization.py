@@ -1,6 +1,6 @@
 """Issue the micro-preflight spend authorization against the rehearsed harness.
 
-    PYTHONPATH=src python scripts/autoinit/issue_authorization.py
+    PYTHONPATH=src python scripts/shared/preflight/issue_authorization.py
 
 Run this AFTER the harness rehearsal passes and the harness is committed. It
 binds the authorization to three things the launcher then enforces: the preflight
@@ -16,7 +16,7 @@ import sys
 from dataclasses import replace
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -24,8 +24,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.authorization import harness_source_digest
-from experiments.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
-from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
+from shared.micro_preflight import MICRO_PREFLIGHT_AUTHORIZATION
+from shared.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
 
 def main() -> None:

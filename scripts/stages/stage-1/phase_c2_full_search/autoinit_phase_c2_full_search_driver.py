@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Phase-C2 FULL JOINT re-search: search, commit a Top-K, and STOP.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_phase_c2_full_search_driver.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py \
         --authorization-path <path> --rate 1.09 --authorized-usd ... [--device cuda]
 
 Three stages and no fourth:
@@ -43,7 +43,7 @@ from pathlib import Path
 
 REPO = Path(os.environ.get("AAD_REPO", "/workspace/aad"))
 if not (REPO / "src").is_dir():                     # local / toy execution
-    REPO = Path(__file__).resolve().parents[2]
+    REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
@@ -55,7 +55,7 @@ from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 #: registration being explicit is correct, assuming somebody else did it is not.
 #: Registering here rather than in `bind_identities` also means stage A cannot
 #: be the thing that discovers an empty registry.
-from experiments.calibration import register_builtin_profiles  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
 
 register_builtin_profiles()
 
@@ -65,7 +65,7 @@ if not WS.is_dir():
 STATUS = WS / "autoinit_phase_c2_full_search.status"
 AUDIT = REPO / "artifacts/audit/autoinit_phase_c2_full_search"
 SEARCH_WORKDIR = REPO / "artifacts/autoinit/phase_c2_full_search"
-STATE_EVAL = REPO / "artifacts/stage1/state_eval_v1"
+STATE_EVAL = REPO / "artifacts/stages/stage-1/state_eval_v1"
 
 SUCCESS_MARKER = "C2_FULL_SEARCH_ALL_DONE"
 FAILURE_MARKER = "C2_FULL_SEARCH_FAILED"
@@ -181,8 +181,8 @@ class FullSearchDriver:
     def bind_identities(self) -> bool:
         """Everything checkable before anything expensive. Loads no model."""
         from aadistill.initialization.calibration.profiles import get_profile
-        from experiments.phase_c2 import full_search_space as FS
-        from phase_a_frozen import SEARCH_SEED, TEACHER_ID, TEACHER_REVISION
+        from stages.phase_c2 import full_search_space as FS
+        from stages.phase_a.phase_a_frozen import SEARCH_SEED, TEACHER_ID, TEACHER_REVISION
 
         FS.register_c2_operators()
         space = FS.full_joint_space(REPO)
@@ -235,8 +235,8 @@ class FullSearchDriver:
         """The beam over the joint space. No baseline fallback, no comparison."""
         from aadistill.initialization.calibration.profiles import get_profile
         from aadistill.initialization.planning.search import Deadline
-        from experiments.phase_c2 import full_search_space as FS
-        from phase_a_search import as_operator_items, run_phase_a_search
+        from stages.phase_c2 import full_search_space as FS
+        from stages.phase_a.phase_a_search import as_operator_items, run_phase_a_search
 
         #: The FULL envelope, not the expected trajectory: approving the beam
         #: against its expected cost would approve work its own deadline permits.

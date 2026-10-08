@@ -2,7 +2,7 @@
 """Verify the six built D-series batteries, independently of the builder.
 
     PYTHONPATH=src:scripts:scripts/data python -m \
-        experiments.phase_d_series.verify_batteries
+        stages.d_series.verify_batteries
 
 **Independently means it re-derives.** It reads the written items and recomputes
 every property from them: the mixture counts, the 950/850 denominators, pairwise
@@ -25,27 +25,28 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[5]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO_ROOT / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
-from battery_render import norm  # noqa: E402
+from shared.data.battery_render import norm  # noqa: E402
+from shared.run_layout import resolve_historical  # noqa: E402
 
-from experiments.phase_d_series.battery_family import (  # noqa: E402
+from stages.d_series.battery_family import (  # noqa: E402
     HELD_OUT_BATTERIES,
     ROLES,
     allocation_rule_id,
     strata,
 )
-from experiments.phase_d_series.build_batteries import (  # noqa: E402
+from stages.d_series.build_batteries import (  # noqa: E402
     OUT,
     family_content_id,
 )
-from experiments.phase_d_series.identity import PROBLEM_FIELD  # noqa: E402
-from experiments.phase_d_series.source_evidence import (  # noqa: E402
+from stages.d_series.identity import PROBLEM_FIELD  # noqa: E402
+from stages.d_series.source_evidence import (  # noqa: E402
     BASELINE_INPUTS,
     D_SERIES_ADDITIONAL_POOLS,
     reserved_problem_content,
@@ -137,7 +138,8 @@ def check_isolation_from_history(roles) -> list[str]:
         reserved_ids: set[str] = set()
         reserved_prompts: set[str] = set()
         for pool in (*D_SERIES_ADDITIONAL_POOLS, "recovery_search_v2"):
-            path = REPO_ROOT / "artifacts/stage3" / pool / f"{group}.jsonl"
+            #: frozen pool spelling, resolved to the pool's current address
+            path = REPO_ROOT / resolve_historical(f"artifacts/stage3/{pool}") / f"{group}.jsonl"
             if not path.is_file():
                 continue
             for line in path.read_text().splitlines():
@@ -265,7 +267,7 @@ def check_output_digests(root: Path, doc) -> list[str]:
 
     #: and the family id must follow from the RECOMPUTED digests
     if recomputed and not problems:
-        from experiments.phase_d_series.build_batteries import family_content_id
+        from stages.d_series.build_batteries import family_content_id
 
         rebuilt = family_content_id({
             "allocation_rule_id": doc["allocation_rule_id"],
@@ -293,7 +295,7 @@ def reserved_contract(group: str) -> dict[str, set[str]]:
     that `rank_take` relies on, and for `rag`, `multihop`, `knowledge` and `tool`
     that native-identity coordinate is the only one with teeth.
     """
-    from experiments.phase_d_series.source_evidence import (
+    from stages.d_series.source_evidence import (
         baseline_chain,
         d_series_additional,
     )
@@ -398,7 +400,7 @@ def check_renderer_parity(roles) -> list[str]:
     parity recorded in the source evidence -- `boxed_answer(solution)` reproducing
     the frozen stratum's gold on 500/500 rows.
     """
-    from battery_render import FROZEN_SOURCES, RENDERERS, read_rows
+    from shared.data.battery_render import FROZEN_SOURCES, RENDERERS, read_rows
 
     D_SERIES_OWNS = {"id", "historical_render_id", "problem_content_id",
                      "prompt_sha256", "_source_file", "_config", "_split",

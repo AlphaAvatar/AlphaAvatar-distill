@@ -39,8 +39,8 @@ from aadistill.runtime.pod_environment import (  # noqa: E402,F401
     pod_test_environment_digest,
 )
 
-from experiments.phase_c2 import full_search as FSG
-from experiments.phase_c2.pod_environment import (  # noqa: F401
+from stages.phase_c2 import full_search as FSG
+from stages.phase_c2.pod_environment import (  # noqa: F401
     POD_TEST_ENVIRONMENT_FILES_V1, ReadinessError,
 )
 
@@ -61,7 +61,7 @@ from experiments.phase_c2.pod_environment import (  # noqa: F401
 #: other option and the wrong one: it is a consumed experiment's satisfiable
 #: gate, and a guard narrowed to fit the session under test stops guarding the
 #: session it was written for.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c2/tests"
 
 #: Its OWN schema. This is the check that makes a Search-1 or a
 #: baseline-completion readiness record unusable here.
@@ -100,7 +100,7 @@ def record_path_for(run_id: str | None, stage_id: str | None = None) -> str:
             "a full-search readiness record has no location without a run id: "
             "it is evidence about one attempt, and a shared path is how one "
             "attempt's evidence comes to describe another's tree")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return f"{rel_run_dir(EXPERIMENT_ID, run_id, stage_id)}/{RUN_READINESS_ROLE}"
 
@@ -145,7 +145,7 @@ def sweep_contract(run_id: str | None = None, stage_id: str | None = None,
     """
 
     def bundle_name(commit: str) -> str:
-        from experiments.phase_c2.full_search_bundle import canonical_bundle_name
+        from stages.phase_c2.full_search_bundle import canonical_bundle_name
 
         return canonical_bundle_name(commit)
 

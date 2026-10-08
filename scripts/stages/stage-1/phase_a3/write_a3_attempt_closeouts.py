@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """One closeout per A3 attempt, DERIVED from that attempt's own evidence.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/write_a3_attempt_closeouts.py --write
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/write_a3_attempt_closeouts.py --write
 
 `derive_budget` discovers a session's cost through the run index and reads it
 out of the run's own closeout (`cost.actual_usd` or `budget.this_attempt`). A3's
@@ -32,7 +32,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 

@@ -53,13 +53,13 @@ def inventory() -> dict:
     do.
     """
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/architecture/inventory.py")],
+        [sys.executable, str(REPO / "scripts/maintenance/architecture/inventory.py")],
         cwd=REPO, capture_output=True, text=True,
         env={"PYTHONPATH": str(REPO / "src"), "PATH": "/usr/bin:/bin"})
     assert out.returncode == 0, out.stderr[-2000:]
     # the script prints counts; the full document is what we need, so import it
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     modules = INV.scan()
     graph = INV.edges(modules)
@@ -285,13 +285,13 @@ def test_the_inventory_excludes_docstrings_from_literal_collection():
     If docstrings were collected, every module explaining a digest would be
     reported as owning one, and the baseline would be noise.
     """
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     src = (
         '"""A module docstring naming logs/runs and Qwen/Qwen3-4B."""\n'
         'def f():\n'
-        '    """A function docstring naming artifacts/stage1."""\n'
+        '    """A function docstring naming artifacts/stages/stage-1."""\n'
         '    return 1\n'
         'REAL = "logs/actually_read_this"\n'
     )
@@ -308,8 +308,8 @@ def test_the_inventory_excludes_docstrings_from_literal_collection():
 def test_comments_cannot_produce_a_finding():
     """Comments are not in the AST. Stated as a test because three guards in
     this repository have been defeated by exactly this."""
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     src = ("# logs/secret Qwen/Qwen3-4B "
            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef\n"
@@ -333,8 +333,8 @@ def test_the_core_reads_no_global_it_does_not_bind():
     commands; this was a keyword argument, so it was missed, and it raised only
     after a pod existed, setup had finished and the inputs had materialized.
     """
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     found = []
     for path in sorted(CORE.rglob("*.py")):
@@ -351,8 +351,8 @@ def test_a_star_import_would_be_reported_rather_than_silently_trusted():
     noisy, so the scanner records it. The core has none today; if one appears,
     this says so instead of the rule quietly weakening.
     """
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     starred = {rel: m["star_imports"] for rel, m in INV.scan().items()
                if m["star_imports"]}
@@ -365,8 +365,8 @@ def test_the_rule_finds_the_defect_it_was_written_for():
     A guard whose only evidence is that it currently reports zero has not been
     shown to detect anything. This runs it over the exact bytes that raised.
     """
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     broken = (
         "from .remote import JobSpec\n"
@@ -391,8 +391,8 @@ def test_conditional_and_fallback_bindings_are_not_false_positives():
     fallback would be turned off within a week, which is worse than not having
     it.
     """
-    sys.path.insert(0, str(REPO / "scripts/architecture"))
-    import inventory as INV
+    sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
+    from maintenance.architecture import inventory as INV
 
     ok = (
         "from typing import TYPE_CHECKING\n"

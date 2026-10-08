@@ -1,16 +1,16 @@
 """The Phase-C2 FULL JOINT re-search space, derived, and what it costs.
 
-    PYTHONPATH=src:scripts python -m experiments.phase_c2.full_search_space
+    PYTHONPATH=src:scripts python -m stages.phase_c2.full_search_space
 
 Zero cost. It loads no model, reads no checkpoint and needs no GPU.
 
 **What this is not.** It is not Search-1. Search-1 is DONE and FROZEN: it held
 DEPTH, FFN and RESIDUAL_WIDTH at the Phase-B incumbent's mixtures and varied
 only ATTENTION's, and its evidence (`runs/attempt4`, `runs/attempt8`) is
-preserved exactly as it was measured. `experiments.phase_c2.search_space` still
+preserved exactly as it was measured. `stages.phase_c2.search_space` still
 owns that space and is unchanged. This module is the **successor** experiment,
 and the two share the branching-and-cost arithmetic in
-`experiments.search_cost_model` rather than a copy of it.
+`shared.search_cost_model` rather than a copy of it.
 
 **What changed scientifically.** C1 isolated ATTENTION on a fixed path and its
 frozen Stage-I rule returned `GO`, so `attention.activation_importance_v1` is
@@ -64,7 +64,7 @@ if str(REPO_ROOT / "scripts") not in sys.path:
 from aadistill.initialization.planning.ranking import SCHEDULE_V1  # noqa: E402
 from aadistill.initialization.specs.arch import ArchSpec  # noqa: E402
 
-from experiments.search_cost_model import (  # noqa: E402
+from shared.search_cost_model import (  # noqa: E402
     CostModel, SearchSpace, bound as _bound, decomposition,
     price as _price, trajectory as _trajectory, walk_leaves,
 )
@@ -72,7 +72,7 @@ from experiments.search_cost_model import (  # noqa: E402
 #: sync — is identical to Search-1's: same launcher, same image, same staging.
 #: One owner, and it is the module that derived those figures from the preflight
 #: launcher rather than from a lucky warm-image observation.
-from experiments.phase_c2.search_space import (  # noqa: E402
+from stages.phase_c2.search_space import (  # noqa: E402
     PRICE_PER_HOUR_LAST_QUOTED, SESSION_PHASE_MINUTES, TEACHER_GEOMETRY,
     register_c2_operators,
 )
@@ -379,7 +379,7 @@ def competing_attention_space(repo_root: str | Path = REPO_ROOT) -> SearchSpace:
 
 
 def _target_spec() -> ArchSpec:
-    from phase_a_frozen import TARGET_GEOMETRY
+    from stages.phase_a.phase_a_frozen import TARGET_GEOMETRY
 
     return ArchSpec.of(FAMILY, TARGET_GEOMETRY)
 

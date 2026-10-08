@@ -74,7 +74,7 @@ def _L():
     """
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "L", REPO / "scripts/pod/autoinit_c1_launch.py")
+        "L", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     return m
@@ -121,7 +121,7 @@ def test_a_committed_record_still_names_its_own_raw_output():
 
 def test_the_file_the_sweep_stashes_is_not_read_as_a_partial_tree(monkeypatch):
     """The excluded path must be the one the driver actually stashes."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert "shutil.move(str(live), str(stash))" in src, (
         "the sweep no longer stashes the previous record; if it stopped, "
         "this exclusion is now hiding a real partial tree")
@@ -134,8 +134,8 @@ def test_the_file_the_sweep_stashes_is_not_read_as_a_partial_tree(monkeypatch):
     #: BOTH experiments with a run-owned readiness record, because the
     #: predicate exempts one filename and a second experiment using a
     #: different one would be read as a partial tree.
-    from experiments.phase_c1.pod_environment import record_path_for as c1_path
-    from experiments.phase_c2.pod_environment import record_path_for as c2_path
+    from stages.phase_c1.pod_environment import record_path_for as c1_path
+    from stages.phase_c2.pod_environment import record_path_for as c2_path
 
     for stashed in (c1_path("attempt99", "1"), c2_path("attempt99", "1")):
         assert stashed.endswith(STASHED_BY_THE_SWEEP), (
@@ -159,7 +159,7 @@ def test_state_md_agrees_with_the_record_it_links_to():
     i, j = text.index(R_BEGIN), text.index(R_END) + len(R_END)
     assert text[i:j] == render_readiness(REPO), (
         "STATE.md's readiness block is stale; re-run "
-        "scripts/consolidate/render_log_navigation.py --write")
+        "scripts/maintenance/consolidation/render_log_navigation.py --write")
 
 
 @needs_whole_tree
@@ -177,7 +177,7 @@ def test_every_superseded_verdict_is_preserved():
 
 
 def test_each_run_gets_its_own_readiness_path():
-    from experiments.phase_c1.pod_environment import record_path_for
+    from stages.phase_c1.pod_environment import record_path_for
     a = record_path_for("attempt13", "1")
     b = record_path_for("attempt14", "1")
     assert a != b
@@ -195,7 +195,7 @@ def test_each_run_gets_its_own_authorization_path():
 def test_the_lineage_exemption_names_one_file_not_the_directory():
     """The narrowness IS the protection: a grant committed after the sweep
     must still invalidate it, which is what forces grant-then-sweep."""
-    from experiments.phase_c1.pod_environment import (
+    from stages.phase_c1.pod_environment import (
         permitted_post_sweep_paths)
     permitted = permitted_post_sweep_paths("attempt13", "1")
     assert len(permitted) == 1, permitted
@@ -207,7 +207,7 @@ def test_the_lineage_exemption_names_one_file_not_the_directory():
 
 def test_a_grant_in_the_same_directory_is_not_exempt():
     """Same directory, different file: the exemption is per path."""
-    from experiments.phase_c1.pod_environment import (
+    from stages.phase_c1.pod_environment import (
         permitted_post_sweep_paths)
     L = _L()
     grant = (f"logs/stages/stage-1/phase_c1/runs/attempt13/"
@@ -216,7 +216,7 @@ def test_a_grant_in_the_same_directory_is_not_exempt():
 
 
 def test_the_global_paths_are_pointers_not_records():
-    from experiments.phase_c1 import pod_environment as pe
+    from stages.phase_c1 import pod_environment as pe
     assert pe.RECORD_POINTER == "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
     #: The alias stays: every pre-2026-09-12 record is at that path.
     assert pe.RECORD_PATH == pe.RECORD_POINTER

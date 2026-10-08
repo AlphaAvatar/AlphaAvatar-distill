@@ -33,8 +33,8 @@ from aadistill.initialization.specs.metrics import (  # noqa: E402
     StateEvalSuite, StateEvaluation,
 )
 from aadistill.initialization.specs.state import make_retained_state  # noqa: E402
-from experiments.phase_c2 import baseline as B  # noqa: E402
-from experiments.phase_c2 import comparison as C  # noqa: E402
+from stages.phase_c2 import baseline as B  # noqa: E402
+from stages.phase_c2 import comparison as C  # noqa: E402
 
 SUITE = StateEvalSuite(
     suite_id="toy.state_eval", version=1, domains=("general",),

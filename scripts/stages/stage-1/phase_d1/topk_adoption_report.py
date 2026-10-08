@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Read an adoption record and print what it found, one line per fact.
 
-    python scripts/pod/topk_adoption_report.py ADOPTION.json
+    python scripts/stages/stage-1/phase_d1/topk_adoption_report.py ADOPTION.json
 
 Separate from the launcher because a shell heredoc that parses JSON is a thing
 nobody can test without creating a pod. Runs at `$0` against any record,

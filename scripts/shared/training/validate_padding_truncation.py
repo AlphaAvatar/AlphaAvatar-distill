@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Compare the full-width and padding-truncated training paths numerically.
 
-    PYTHONPATH=src python scripts/training/validate_padding_truncation.py \
-        --pack artifacts/stage3/ladder_uniform_probe \
+    PYTHONPATH=src python scripts/shared/training/validate_padding_truncation.py \
+        --pack artifacts/shared/instruments/ladder_uniform_probe \
         --out artifacts/audit/padding_truncation_equivalence.json
 
 What is being claimed, and what is not
@@ -53,7 +53,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402

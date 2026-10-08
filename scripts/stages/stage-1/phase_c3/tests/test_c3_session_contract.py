@@ -32,7 +32,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c3 import session as S  # noqa: E402
+from stages.phase_c3 import session as S  # noqa: E402
 
 PREREG = json.loads(
     (REPO / "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json").read_text())
@@ -130,7 +130,7 @@ def test_the_seeds_and_probe_count_come_from_the_plan():
 def test_the_shared_prefix_is_the_plan_s_and_is_not_restated():
     """One owner. A second copy of the prefix is a second thing to drift."""
     assert [list(p) for p in S.prefix_steps()] == PREREG["shared_parent"]["prefix"]
-    src = (REPO / "scripts/experiments/stage-1/phase_c3/session.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/session.py").read_text()
     assert "depth.causal_kl_greedy_v1" not in src.split('"""', 2)[2], (
         "the prefix implementations are literals in session.py again; they "
         "belong to the plan's shared_parent.prefix")
@@ -306,7 +306,7 @@ def _launcher():
         if str(REPO / p) not in sys.path:
             sys.path.insert(0, str(REPO / p))
     spec = importlib.util.spec_from_file_location(
-        "c3launch_evidence", REPO / "scripts/pod/autoinit_c3_launch.py")
+        "c3launch_evidence", REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["c3launch_evidence"] = mod
     spec.loader.exec_module(mod)
@@ -456,7 +456,7 @@ def test_the_frozen_plan_carries_c3s_thresholds_not_c1s_defaults():
 
 def test_the_bootstrap_seed_is_c3s_and_differs_from_c1s():
     """The one parameter that does NOT coincide, asserted as not coinciding."""
-    from experiments.phase_c1.isolation import bootstrap_seed as c1_seed
+    from stages.phase_c1.isolation import bootstrap_seed as c1_seed
 
     assert S.inference()["seed"] == S.bootstrap_seed() == 654678655
     assert c1_seed() == 816109261
@@ -502,8 +502,8 @@ def test_the_aggregation_passes_both_seed_and_iterations():
     """
     import ast as _ast
 
-    for rel in ("scripts/pod/autoinit_c3_driver.py",
-                "scripts/autoinit/aggregate_c3_stage_i.py"):
+    for rel in ("scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py",
+                "scripts/stages/stage-1/phase_c3/aggregate_c3_stage_i.py"):
         tree = _ast.parse((REPO / rel).read_text())
         calls = [n for n in _ast.walk(tree)
                  if isinstance(n, _ast.Call)
@@ -540,7 +540,7 @@ def test_the_driver_and_the_launcher_name_the_same_status_file():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "c3drv_status", REPO / "scripts/pod/autoinit_c3_driver.py")
+        "c3drv_status", REPO / "scripts/stages/stage-1/phase_c3/autoinit_c3_driver.py")
     driver = importlib.util.module_from_spec(spec)
     sys.modules["c3drv_status"] = driver
     spec.loader.exec_module(driver)

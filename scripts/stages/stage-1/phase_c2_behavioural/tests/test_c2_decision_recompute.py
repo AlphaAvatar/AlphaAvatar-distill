@@ -27,11 +27,11 @@ for _p in (REPO / "src", REPO / "scripts"):
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 
-from experiments.phase_c2 import behavioural_decision as BD  # noqa: E402
-from experiments.phase_c2 import behavioural_schedule as SCH  # noqa: E402
+from stages.phase_c2 import behavioural_decision as BD  # noqa: E402
+from stages.phase_c2 import behavioural_schedule as SCH  # noqa: E402
 
 _spec = importlib.util.spec_from_file_location(
-    "recompute_c2", REPO / "scripts/autoinit/recompute_c2_behavioural_decision.py")
+    "recompute_c2", REPO / "scripts/stages/stage-1/phase_c2_behavioural/recompute_c2_behavioural_decision.py")
 RC = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(RC)
 

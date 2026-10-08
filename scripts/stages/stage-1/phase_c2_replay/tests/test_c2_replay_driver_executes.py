@@ -116,7 +116,7 @@ class Args:
 
 def install_toy_leaves(monkeypatch, leaves, *, calib):
     """Replace only the evidence reader; everything downstream stays real."""
-    from experiments.phase_c2 import replay_specs
+    from stages.phase_c2 import replay_specs
 
     monkeypatch.setattr(replay_specs, "build_replay_leaves",
                         lambda *a, **k: leaves)
@@ -133,7 +133,7 @@ def install_toy_leaves(monkeypatch, leaves, *, calib):
 
 
 def build_leaf(identity, spec, state_id):
-    from experiments.phase_c2.replay_specs import ReplayLeaf
+    from stages.phase_c2.replay_specs import ReplayLeaf
 
     return ReplayLeaf(
         state_id=state_id, path_label="FFN->ATTENTION", lineage="toy",

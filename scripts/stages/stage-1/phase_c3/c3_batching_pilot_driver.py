@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The C3 batching-adoption pilot, as one owned sequence.
 
-    python scripts/pod/c3_batching_pilot_driver.py --out /workspace/out/pilot
+    python scripts/stages/stage-1/phase_c3/c3_batching_pilot_driver.py --out /workspace/out/pilot
 
     1. replay the frozen pre-ATTENTION prefix ONCE, explicitly at B=1
     2. verify the parent is eea90c91...
@@ -36,7 +36,7 @@ from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
@@ -62,7 +62,7 @@ def load_scope(repo: Path) -> dict:
 
 
 #: `required_profiles` and `check_inputs` lived here until the packing pilot
-#: needed the same answer. They are now `experiments.phase_c3.pilot`'s, which
+#: needed the same answer. They are now `stages.phase_c3.pilot`'s, which
 #: owns the steps the answer is derived from; `main` delegates. The copies
 #: that used to sit here also resolved a profile WITHOUT preparing its items,
 #: which is the gap that later cost a paid full scorer.
@@ -146,8 +146,8 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     from aadistill.initialization.planning.fixed_path import FixedPathSpec
     from aadistill.initialization.specs.arch import ArchSpec
 
-    from experiments.phase_c3 import pilot
-    from experiments.phase_c3.compare import compare_head_maps, speedup, verdict
+    from stages.phase_c3 import pilot
+    from stages.phase_c3.compare import compare_head_maps, speedup, verdict
 
     from aadistill.initialization.device import apply_cpu_budget
 
@@ -172,7 +172,7 @@ def run(out_dir: Path, *, repo: Path, toy: bool, device: str,
     #: teacher has been downloaded and loaded onto the GPU. A pytest session
     #: hides this completely, because some sibling test has always filled the
     #: registry first. This line is here because the toy run found it.
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
 
@@ -477,7 +477,7 @@ def main(argv=None) -> int:
     if args.required_inputs or args.check_inputs:
         #: DELEGATED to the pilot module: the answer is a fact about the
         #: pilot's steps, and the packing pilot needs the same one.
-        from experiments.phase_c3 import pilot
+        from stages.phase_c3 import pilot
 
         if args.required_inputs:
             for entry in pilot.required_profiles(Path(args.repo)):

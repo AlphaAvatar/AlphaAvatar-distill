@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure the four storage areas separately, and append the reading to the log.
 
-    PYTHONPATH=src python scripts/consolidate/measure_storage.py \
+    PYTHONPATH=src python scripts/maintenance/consolidation/measure_storage.py \
         --label before-cleanup --note "baseline, nothing deleted yet"
 
 Four areas, because a single total hides what actually changed:
@@ -32,7 +32,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 SCRATCH_ROOT = Path("/home/ecs-user/aad-scratch")
 EXTERNAL_ARTIFACTS = Path("/home/ecs-user/aad-artifacts")
 RELAY_REPO = "AlphaAvatar/aadistill-artifacts"

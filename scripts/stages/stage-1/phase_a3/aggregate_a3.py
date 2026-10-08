@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The A3 comparison. OFF POD, at `$0`, from preserved evidence.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/aggregate_a3.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/aggregate_a3.py \
         --evidence /home/ecs-user/aad-artifacts/phase_a3/<attempt> --write
 
 **Why this is not a pod stage.** attempt75 trained, preserved and scored all
@@ -39,11 +39,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_c1.probe_results import (  # noqa: E402
+from stages.phase_c1.probe_results import (  # noqa: E402
     N_PROMPTS, N_SCORABLE, PRIMARY_STRATA,
 )
 
@@ -85,7 +85,7 @@ def implementation_identity() -> dict[str, Any]:
     def sha(rel: str) -> str:
         return hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
 
-    me = "scripts/autoinit/aggregate_a3.py"
+    me = "scripts/stages/stage-1/phase_a3/aggregate_a3.py"
     return {
         "commit": git("rev-parse", "HEAD"),
         "tree_is_dirty": bool(git("status", "--porcelain")),
@@ -95,7 +95,7 @@ def implementation_identity() -> dict[str, Any]:
         #: prompt counts the estimand is defined over, and the comparability
         #: rule whose id the admission records are checked against.
         "probe_results_module_sha256": sha(
-            "scripts/experiments/stage-1/phase_c1/probe_results.py"),
+            "scripts/stages/stage-1/phase_c1/probe_results.py"),
         "generation_compat_module_sha256": sha(
             "src/aadistill/initialization/planning/generation_compat.py"),
     }

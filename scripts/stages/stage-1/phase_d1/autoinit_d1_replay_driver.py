@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reconstruct D1's unretained quality-order finalists on one GPU, digest-pinned.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_d1_replay_driver.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py \
         --out artifacts/audit/autoinit_d1_replay --run-id <id> --device cuda
 
 Two leaves, four pinned steps each. The session decides nothing: the candidate
@@ -29,7 +29,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -94,7 +94,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    from experiments.phase_d1 import d1_session as D1S
+    from stages.phase_d1 import d1_session as D1S
 
     args = build_parser().parse_args(argv)
     status = args.status or f"{D1S.POD_WORKSPACE}/autoinit_d1_replay.status"
@@ -125,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
         from aadistill.initialization.planning.fixed_path import (
             FixedPathDigestMismatch, materialize_fixed_path,
         )
-        from experiments.phase_d1 import replay_specs as R
+        from stages.phase_d1 import replay_specs as R
 
         if args.plan:
             plan_doc = json.loads(Path(args.plan).read_text())

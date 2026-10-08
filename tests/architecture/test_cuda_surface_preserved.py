@@ -275,7 +275,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "field that described what would happen now decides it. It is "
             "inert for every session that declares the full set -- which every "
             "session but the closed Phase-A launcher does, audited in "
-            "`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_setup_contract.py` -- and it REFUSES a "
+            "`scripts/stages/stage-1/phase_c2/tests/test_phase_c2_setup_contract.py` -- and it REFUSES a "
             "declaration that omits the substrate rather than silently "
             "accepting a setup nobody runs.",
      }),
@@ -299,7 +299,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "than an assumption, and the gate's recorded-loss route applies. "
             "`None` is kept for the only genuinely uninformed case -- streams "
             "declared AND no manifest -- and "
-            "`scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` holds that "
+            "`scripts/stages/stage-1/phase_c2/tests/test_phase_c2_collection_and_profiles.py` holds that "
             "mutation. Extracted rather than left inline because a branch "
             "reachable only from a pod whose collector failed is a branch no "
             "`$0` check can execute; as a function it is four unit tests.",

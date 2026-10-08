@@ -42,13 +42,13 @@ from aadistill.governance.authorization import (  # noqa: E402
 #: The preflight's TYPE, which carries the preflight's ActionPolicy. The base
 #: `SpendAuthorization` now refuses to load without one: a caller that has not
 #: said what an artifact may express cannot check whether it claims more.
-from experiments.preflight import (  # noqa: E402
+from shared.preflight import (  # noqa: E402
     PreflightAuthorization as SpendAuthorization,
 )
-from experiments.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
+from shared.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
-DRIVER_PATH = REPO / "scripts/pod/autoinit_preflight_driver.py"
-LAUNCH_PATH = REPO / "scripts/pod/autoinit_preflight_launch.py"
+DRIVER_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_driver.py"
+LAUNCH_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_launch.py"
 #: The session machinery. It used to live inside the launcher above; the
 #: composition refactor moved the flow here and left the launcher a
 #: declaration, so the tests that assert on the FLOW follow it.
@@ -56,7 +56,7 @@ RUNNER_PATH = REPO / "src/aadistill/infrastructure/session_runner.py"
 AUTH_PATH = REPO / "logs/budget/approvals/autoinit_micro_preflight_authorization.json"
 
 pytestmark = pytest.mark.skipif(
-    not (REPO / "artifacts/stage3/recovery_search_v2/manifest.json").is_file(),
+    not (REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2/manifest.json").is_file(),
     reason="frozen assets are local artifacts, not tracked in git")
 
 
@@ -173,7 +173,7 @@ def build(tmp_path, *, stage0=True, gates=None, controls_ok=True,
                 return d.record(2, False, f"{name} failed rc=1", arms=arms)
             problem = "" if protocol_ok else "ran a different protocol"
             arms[name] = {"trained": True, "seed": seed,
-                          "checkpoint": f"artifacts/stage3/{name}/checkpoints/step_001023",
+                          "checkpoint": f"artifacts/stages/stage-3/{name}/checkpoints/step_001023",
                           "weights_sha256": "a" * 64, "probe_id": "p" * 64,
                           "required_artifacts": {"run_manifest.json": True,
                                                  "train_log.jsonl": True},
@@ -189,7 +189,7 @@ def build(tmp_path, *, stage0=True, gates=None, controls_ok=True,
         if stage3 == "contract_drift":
             return d.record(3, False, "scored under a different scoring contract")
         from aadistill.initialization.planning.recovery import EquivalenceRule, FeasibilityRule
-        from experiments.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
+        from shared.recovery_policy import CATASTROPHIC_V1, POOLED_COUNTS_V2
         sa, sb = fake_result(0.62, 0.31, mod.SEED_SA), fake_result(0.58, 0.29, mod.SEED_SB)
         pooled = POOLED_COUNTS_V2.pool([
             {"seed": mod.SEED_SA,
@@ -319,7 +319,7 @@ def test_a_missing_required_artifact_blocks_teardown_not_the_watchdog():
     # And the emergency path still allows teardown, with the loss recorded.
     emergency = evaluate_teardown(
         state, emergency_budget=True, emergency_reason="hard threshold",
-        incomplete_event_streams=("artifacts/stage3/x/train_log.jsonl",))
+        incomplete_event_streams=("artifacts/stages/stage-3/x/train_log.jsonl",))
     assert emergency.allowed
     assert "hard threshold" in json.dumps(emergency.as_dict())
 
@@ -400,14 +400,14 @@ def test_an_unrehearsed_harness_cannot_consume_the_authorization(tmp_path):
     # Given a file list that EXISTS, so the check under test is the one that
     # fires: the committed authorization names pre-migration paths, and the
     # missing-file refusal would otherwise mask the missing-digest one.
-    from experiments.preflight import HARNESS_SOURCE_FILES_V1
+    from shared.preflight import HARNESS_SOURCE_FILES_V1
     present = tuple(f for f in HARNESS_SOURCE_FILES_V1 if (REPO / f).is_file())
     with pytest.raises(AuthorizationError, match="no harness_source_digest"):
         replace(auth, harness_source_digest=None,
                 harness_source_files=present).require_harness(REPO)
     # A missing declared file raises rather than shrinking the digest.
     with pytest.raises(AuthorizationError, match="is missing"):
-        harness_source_digest(REPO, files=("scripts/pod/watchdog.py",
+        harness_source_digest(REPO, files=("scripts/shared/pod/watchdog.py",
                                            "scripts/pod/does_not_exist.py"))
 
 
@@ -482,7 +482,7 @@ def test_the_watchdog_hard_cap_path_terminates_and_verifies(tmp_path):
     """Rehearse the watchdog's own thresholds with no pod (its --simulate path)."""
     import subprocess
     rc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/pod/watchdog.py"), "--simulate",
+        [sys.executable, str(REPO / "scripts/shared/pod/watchdog.py"), "--simulate",
          "--pod-id", "rehearsal", "--session-start-epoch", "0",
          "--price-per-hour", "0.99", "--hard-minutes", "300",
          "--authorized-usd", "8.60", "--journal", str(tmp_path / "wd.jsonl")],
@@ -534,7 +534,7 @@ def test_setup_never_invokes_an_interpreter_it_has_not_built_yet():
     This is a whole class of ordering bug, so it is checked as one: no line may
     use a venv interpreter before the line that builds that venv.
     """
-    setup = (REPO / "scripts/pod/autoinit_preflight_setup.sh").read_text()
+    setup = (REPO / "scripts/shared/pod/autoinit_preflight_setup.sh").read_text()
     lines = setup.splitlines()
 
     def first(pattern: str) -> int:
@@ -587,7 +587,7 @@ def test_both_artifact_specs_actually_load():
     import importlib.util
 
     spec_mod = importlib.util.spec_from_file_location(
-        "collect_artifacts_mod", REPO / "scripts/pod/collect_artifacts.py")
+        "collect_artifacts_mod", REPO / "scripts/shared/pod/collect_artifacts.py")
     collect = importlib.util.module_from_spec(spec_mod)
     sys.modules["collect_artifacts_mod"] = collect
     spec_mod.loader.exec_module(collect)

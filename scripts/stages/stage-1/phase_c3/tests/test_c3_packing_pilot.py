@@ -15,8 +15,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
-DRIVER = REPO / "scripts/pod/c3_packing_pilot_driver.py"
-SCREEN = REPO / "scripts/pod/c3_packing_screen.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_driver.py"
+SCREEN = REPO / "scripts/stages/stage-1/phase_c3/c3_packing_screen.py"
 SCOPE = REPO / ("logs/stages/stage-1/phase_c3/pilots/packing-optimization/"
                 "v1/scope.json")
 
@@ -169,12 +169,12 @@ def test_the_screen_resolves_and_PREPARES_the_mixture():
     assert "def resolve_items" in src
     #: It DELEGATES now; the preparation lives in the pilot module, which is
     #: the point — one implementation, one place to get it wrong.
-    assert "from experiments.phase_c3.pilot import resolve_items" in src
-    pilot_src = (REPO / "scripts/experiments/stage-1/phase_c3/pilot.py").read_text()
+    assert "from stages.phase_c3.pilot import resolve_items" in src
+    pilot_src = (REPO / "scripts/stages/stage-1/phase_c3/pilot.py").read_text()
     assert "prepare_calibration_items" in pilot_src
 
 
-@pytest.mark.skipif(not (REPO / "artifacts/stage1").is_dir(),
+@pytest.mark.skipif(not (REPO / "artifacts/stages/stage-1").is_dir(),
                     reason="artifacts/ is gitignored and not built here")
 def test_the_real_resolve_path_yields_prepared_items():
     """Executed against the REAL frozen mixture, because the toy run takes
@@ -183,7 +183,7 @@ def test_the_real_resolve_path_yields_prepared_items():
 
     sys.path.insert(0, str(REPO / "src"))
     sys.path.insert(0, str(REPO / "scripts"))
-    from experiments.calibration import register_builtin_profiles
+    from shared.calibration import register_builtin_profiles
 
     register_builtin_profiles()
     spec = importlib.util.spec_from_file_location("c3screen", SCREEN)
@@ -270,7 +270,7 @@ def test_the_full_scorer_uses_the_shared_resolver():
 def test_the_shared_resolver_has_one_implementation():
     """The screen delegates rather than carrying a second copy."""
     screen_src = SCREEN.read_text()
-    assert "from experiments.phase_c3.pilot import resolve_items" in screen_src
+    assert "from stages.phase_c3.pilot import resolve_items" in screen_src
     assert "prepare_calibration_items" not in screen_src, (
         "the screen carries its own copy of the preparation step again")
 
@@ -305,10 +305,10 @@ def test_a_reused_screen_without_a_decided_gate_is_refused(tmp_path):
 
 def test_the_launcher_can_push_a_measured_screen():
     """18 minutes of GPU are not spent reproducing numbers already in hand."""
-    src = (REPO / "scripts/pod/c3_packing_pilot_launch.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_launch.sh").read_text()
     assert "SCREEN_FROM" in src and "/workspace/screen.json" in src
     assert "does not exist" in src, "an absent screen must refuse at $0"
-    remote = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    remote = (REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_remote.sh").read_text()
     assert "--screen-from" in remote
     #: And it is OPTIONAL: with no screen pushed, the pod measures one.
     assert 'SCREEN_FROM="${SCREEN_FROM:-}"' in remote
@@ -325,7 +325,7 @@ def test_the_preflight_is_bounded_and_the_timeout_path_EXECUTES(tmp_path):
     only that the word `timeout` appears would pass on a script that ignored
     the exit status.
     """
-    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_remote.sh").read_text()
     block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
     assert "timeout \"${PREFLIGHT_TIMEOUT}\"" in block
     assert "PIPESTATUS[0]" in block, (
@@ -349,7 +349,7 @@ def test_the_preflight_is_bounded_and_the_timeout_path_EXECUTES(tmp_path):
 def test_the_preflight_streams_instead_of_hiding(tmp_path):
     """23 minutes looked exactly like 16 seconds because the output went to
     a file and only the completion line reached the launch log."""
-    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_remote.sh").read_text()
     block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
     assert "| tee" in block, "the preflight's output is still hidden"
     assert "python -u" in block, "python would buffer it anyway"
@@ -357,7 +357,7 @@ def test_the_preflight_streams_instead_of_hiding(tmp_path):
 
 
 def test_the_preflight_runs_on_the_device_the_pod_has():
-    src = (REPO / "scripts/pod/c3_packing_pilot_remote.sh").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c3/c3_packing_pilot_remote.sh").read_text()
     block = src[src.index("PREFLIGHT_TIMEOUT="):src.index("# --- the pilot ---")]
     assert "--device cuda:0" in block
     assert "--device cpu" not in block, (

@@ -282,7 +282,7 @@ def test_the_capacity_requirement_is_measured_not_asserted(cont):
 
 # 5. the success archive carries the real continuation evidence.
 def test_the_success_archive_carries_the_probes_and_the_final_selection(cont, args):
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     policy = cont.spec(args).artifacts
     specs = load_specs(str(REPO / policy.spec_success))
@@ -315,7 +315,7 @@ def test_the_success_archive_carries_the_probes_and_the_final_selection(cont, ar
 
 # 6. the failure archive still supports diagnosis.
 def test_the_failure_archive_still_supports_diagnosis(cont, args):
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     policy = cont.spec(args).artifacts
     specs = load_specs(str(REPO / policy.spec_failed))
@@ -338,7 +338,7 @@ def test_the_failure_archive_still_supports_diagnosis(cont, args):
 
 # 7. the no-search guarantee survives the repair.
 def test_the_no_search_guarantee_is_intact(cont, args):
-    from experiments.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
+    from stages.phase_b.continuation import CONTINUATION_OWN_PATH_FILES, KNOWN_NEUTRALIZED_SEARCH_CALL_SITES, search_call_site_owners
 
     assert search_call_site_owners(REPO, files=CONTINUATION_OWN_PATH_FILES) == ()
     owners = search_call_site_owners(REPO)
@@ -358,7 +358,7 @@ def test_the_six_to_three_boundary_is_intact():
     preregistration, so a repair that moved the boundary would fail here rather
     than agree with a document it also wrote.
     """
-    import autoinit_continuation_b_driver as drv
+    from stages.continuation_b import autoinit_continuation_b_driver as drv
 
     universe = drv.ContinuationDriver.build_evidence_universe(
         drv.ContinuationDriver)
@@ -398,8 +398,8 @@ SEARCH_ONLY_MODULES = (
 
 #: The mixtures, and where their bytes would have to be for those modules to pass.
 CALIBRATION_DIRS = (
-    "artifacts/stage1/e8_calibration_v1",
-    "artifacts/stage1/reasoning_heavy_v2",
+    "artifacts/stages/stage-1/e8_calibration_v1",
+    "artifacts/stages/stage-1/reasoning_heavy_v2",
 )
 
 
@@ -473,7 +473,7 @@ def test_no_calibration_is_reachable_from_the_continuation_runtime():
     would hide a real defect and buy another pod. Two independent facts say it
     does not: the driver names no calibration, and the stage map has no search.
     """
-    driver = (REPO / "scripts/pod/autoinit_continuation_b_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py").read_text()
     for token in ("DOMAIN_BALANCED", "REASONING_HEAVY", "e8_calibration_v1",
                   "reasoning_heavy_v2", "resolve_calibration"):
         assert token not in driver, (
@@ -490,9 +490,9 @@ def test_no_calibration_is_reachable_from_the_continuation_runtime():
     assert "self.stage1" not in driver.split("def run(")[1]
 
     # The probe path names what it DOES consume, and it is neither mixture.
-    parent = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
-    assert 'artifacts/stage3/ladder_uniform_probe' in parent
-    assert 'artifacts/stage3/recovery_search_v2' in parent
+    parent = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
+    assert 'artifacts/shared/instruments/ladder_uniform_probe' in parent
+    assert 'artifacts/stages/stage-1/batteries/recovery_search_v2' in parent
 
 
 # --- provenance path is not runtime staging path ----------------------------
@@ -515,7 +515,7 @@ def test_no_calibration_is_reachable_from_the_continuation_runtime():
 # driver DERIVES is one the pod will have. These tests assert the derivation.
 
 STAGED_FINALISTS_REL = "artifacts/autoinit/phase_a_selected"
-CONTROL_CHECKPOINT_REL = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CONTROL_CHECKPOINT_REL = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 #: TOY geometry, borrowed from the whole-function test. The first version of the
 #: tests below built at the real frozen target geometry, and a 596M-parameter
@@ -556,7 +556,7 @@ def test_the_driver_and_the_launcher_agree_on_where_finalists_are_staged(cont):
     from a derived path. If those two strings ever diverge the session fails on
     a pod, which is the only place both halves run.
     """
-    import autoinit_continuation_b_driver as drv
+    from stages.continuation_b import autoinit_continuation_b_driver as drv
 
     assert drv.STAGED_FINALISTS == STAGED_FINALISTS_REL
     assert drv.CANONICAL_CONTROL_CHECKPOINT == CONTROL_CHECKPOINT_REL
@@ -569,7 +569,7 @@ def test_the_driver_and_the_launcher_agree_on_where_finalists_are_staged(cont):
             f"the launcher stages a finalist at {dest} but the driver looks "
             f"under {drv.STAGED_FINALISTS}")
     # And the control travels to the path the driver derives for it.
-    from autoinit_science_inputs import CANONICAL_INIT
+    from shared.pod.autoinit_science_inputs import CANONICAL_INIT
 
     assert {r.dest for r in CANONICAL_INIT} == {drv.CANONICAL_CONTROL_CHECKPOINT}
 
@@ -578,7 +578,7 @@ def test_resolution_ignores_the_amendment_and_uses_the_staging_path():
     """The derivation itself, with no filesystem involved."""
     import types
 
-    import autoinit_continuation_b_driver as drv
+    from stages.continuation_b import autoinit_continuation_b_driver as drv
 
     searched = types.SimpleNamespace(
         state_id="85bde4ded2c31953f802e39cf2252c87", primary_role="searched",
@@ -610,7 +610,7 @@ def test_build_finalist_states_succeeds_when_only_the_staged_bytes_exist(
 
     from transformers import AutoConfig
 
-    import autoinit_continuation_b_driver as drv
+    from stages.continuation_b import autoinit_continuation_b_driver as drv
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
     from aadistill.initialization.specs.artifact import identify_checkpoint
 
@@ -619,7 +619,7 @@ def test_build_finalist_states_succeeds_when_only_the_staged_bytes_exist(
 
     # A toy student, written ONLY to the staged location. Nothing is ever
     # written to the amendment's path.
-    import phase_a_frozen
+    from stages.phase_a import phase_a_frozen
 
     monkeypatch.setattr(phase_a_frozen, "TARGET_GEOMETRY", TOY_TARGET_GEOMETRY)
     adapter = get_adapter("qwen3")
@@ -641,7 +641,7 @@ def test_build_finalist_states_succeeds_when_only_the_staged_bytes_exist(
         "collapsed_universe": {"universe_identity": "x", "candidates": []}}))
     monkeypatch.setattr(drv, "AMENDMENT", amendment)
 
-    manifest = repo / "artifacts/stage1/state_eval_v1/manifest.json"
+    manifest = repo / "artifacts/stages/stage-1/state_eval_v1/manifest.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(_json.dumps({"teacher_sha256": "0" * 64}))
 
@@ -664,11 +664,11 @@ def test_a_staged_checkpoint_whose_identity_moved_still_fails_closed(
 
     from transformers import AutoConfig
 
-    import autoinit_continuation_b_driver as drv
+    from stages.continuation_b import autoinit_continuation_b_driver as drv
     from aadistill.initialization.specs.arch import ArchSpec, get_adapter
     from aadistill.initialization.specs.identity_collapse import IdentityCollapseError
 
-    import phase_a_frozen
+    from stages.phase_a import phase_a_frozen
 
     repo = tmp_path / "pod_repo"
     monkeypatch.setattr(drv, "REPO", repo)
@@ -685,7 +685,7 @@ def test_a_staged_checkpoint_whose_identity_moved_still_fails_closed(
         "rung1_selection": {"advancing": [state_id]},
         "collapsed_universe": {"universe_identity": "x", "candidates": []}}))
     monkeypatch.setattr(drv, "AMENDMENT", amendment)
-    manifest = repo / "artifacts/stage1/state_eval_v1/manifest.json"
+    manifest = repo / "artifacts/stages/stage-1/state_eval_v1/manifest.json"
     manifest.parent.mkdir(parents=True, exist_ok=True)
     manifest.write_text(_json.dumps({"teacher_sha256": "0" * 64}))
 

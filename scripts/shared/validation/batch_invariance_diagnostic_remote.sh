@@ -68,7 +68,7 @@ say "fetching the frozen calibration mixture from the relay"
 python3 - <<'PY'
 import hashlib, os, pathlib, shutil, sys, time
 from huggingface_hub import hf_hub_download
-DEST = pathlib.Path("/workspace/repo/artifacts/stage1/e8_calibration_v1")
+DEST = pathlib.Path("/workspace/repo/artifacts/stages/stage-1/e8_calibration_v1")
 DEST.mkdir(parents=True, exist_ok=True)
 PINNED = "c7202338109e459b17b70456461e8f304fadea7929ea547accee21adbbe7fd0b"
 for attempt in range(4):
@@ -228,7 +228,7 @@ print('  /opt/train: torch', torch.__version__, '| transformers', transformers._
 #                      asks whether the runtime alone moves the answer.
 #: WHICH diagnostic a wave runs. Defaults to the batch-invariance one so every
 #: existing call site is unchanged; the parallel-item continuation sets it.
-DIAG=${DIAG:-scripts/validation/batch_invariance_diagnostic.py}
+DIAG=${DIAG:-scripts/shared/validation/batch_invariance_diagnostic.py}
 
 run_one() {
   local label="$1" python="$2" attn="$3" ckpt="$4" only="${5:-}" nitems="${6:-}" \
@@ -275,7 +275,7 @@ cd /workspace/repo
 # `--only` and `--bf16-policy` do not apply to this diagnostic; it takes
 # `--concurrency` and `--concurrency-sweep` instead, so the wave is invoked
 # directly rather than through run_one's flag set.
-DIAG_PI=scripts/validation/parallel_item_forward_diagnostic.py
+DIAG_PI=scripts/shared/validation/parallel_item_forward_diagnostic.py
 run_parallel_item() {
   local label="$1" ckpt="$2" conc="$3" sweep="$4"
   local dir="${OUTROOT}/${label}"

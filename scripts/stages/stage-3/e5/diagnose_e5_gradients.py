@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Gradient attribution for E5's CE and KD terms, on real C and R batches.
 
-    PYTHONPATH=src python scripts/training/diagnose_e5_gradients.py \
-        --examples artifacts/stage3/e5_pilot/{c,r}_examples.jsonl \
+    PYTHONPATH=src python scripts/stages/stage-3/e5/diagnose_e5_gradients.py \
+        --examples artifacts/stages/stage-3/e5_pilot/{c,r}_examples.jsonl \
         --student <ckpt> --teacher <id@rev> --out artifacts/audit/e5_gradients.json
 
 A weighted KD term of 0.0064 against a weighted CE term of 7.60 looks like a
@@ -34,7 +34,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import torch  # noqa: E402

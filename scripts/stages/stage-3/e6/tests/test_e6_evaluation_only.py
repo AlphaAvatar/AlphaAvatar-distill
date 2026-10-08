@@ -17,10 +17,10 @@ import re
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[5]
-DRIVER = REPO / "scripts/pod/e6_driver.py"
-SETUP = REPO / "scripts/pod/e6_setup.sh"
-LAUNCH = REPO / "scripts/pod/e6_launch.sh"
-STAGE = REPO / "scripts/pod/e6_stage_checkpoints.py"
+DRIVER = REPO / "scripts/stages/stage-3/e6/e6_driver.py"
+SETUP = REPO / "scripts/stages/stage-3/e6/e6_setup.sh"
+LAUNCH = REPO / "scripts/stages/stage-3/e6/e6_launch.sh"
+STAGE = REPO / "scripts/stages/stage-3/e6/e6_stage_checkpoints.py"
 
 
 def test_the_no_training_proof_runs_first_and_is_blocking():
@@ -70,7 +70,7 @@ def test_the_executed_scripts_are_free_of_optimizer_steps():
 
 def test_setup_refuses_to_stage_the_training_pack():
     src = SETUP.read_text()
-    assert "test ! -d \"$REPO/artifacts/stage3/ladder_uniform\"" in src, \
+    assert "test ! -d \"$REPO/artifacts/stages/stage-3/ladder_uniform\"" in src, \
         "setup must assert the training ladder pack is absent"
     assert "ladder_uniform_probe" in src, "the probe pack is what the battery needs"
 

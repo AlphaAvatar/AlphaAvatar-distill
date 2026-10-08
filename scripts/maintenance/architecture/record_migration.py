@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Record a source relocation, generically, for every affected declaration.
 
-    PYTHONPATH=src:scripts python scripts/architecture/record_migration.py \
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/record_migration.py \
         --migration initialization-core --version v1 \
         --base <commit> --tip <commit> --decision <file> --write
 
@@ -40,13 +40,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
-sys.path.insert(0, str(REPO / "scripts/architecture"))
+sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
-from migration_map import MAP  # noqa: E402
+from maintenance.architecture.migration_map import MAP  # noqa: E402
 
 SCHEMA = "aadistill.migration_source_relocation/v1"
 
@@ -58,23 +58,23 @@ SCHEMA = "aadistill.migration_source_relocation/v1"
 #: stopped holding. This table follows the owner rather than the historical
 #: location; the historical location is what `account()` measures the move from.
 DECLARATIONS = [
-    ("HARNESS_SOURCE_FILES_V1", "experiments.preflight",
+    ("HARNESS_SOURCE_FILES_V1", "shared.preflight",
      "preflight_harness_digest"),
-    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "experiments.phase_a.plan",
+    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "stages.phase_a.plan",
      "phase_a_harness_digest"),
-    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "experiments.phase_b.plan",
+    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "stages.phase_b.plan",
      "phase_b_source_digest"),
-    ("CONTINUATION_SOURCE_FILES_V2", "experiments.phase_b.continuation",
+    ("CONTINUATION_SOURCE_FILES_V2", "stages.phase_b.continuation",
      "continuation_source_digest"),
     ("CONTINUATION_HARNESS_SOURCE_FILES_V1",
-     "experiments.recovery_continuation.plan", None),
-    ("C1_HARNESS_SOURCE_FILES_V1", "experiments.phase_c1.authorization",
+     "stages.recovery_continuation.plan", None),
+    ("C1_HARNESS_SOURCE_FILES_V1", "stages.phase_c1.authorization",
      "c1_historical_harness_digest"),
-    ("C1_SCORING_FILES_V1", "experiments.phase_c1.scoring", None),
-    ("GENERATION_SOURCE_FILES_V1", "experiments.source_sets", None),
-    ("TRAINER_SOURCE_FILES_V1", "experiments.source_sets", None),
-    ("RECOVERY_SCORING_FILES_V2", "experiments.source_sets", None),
-    ("RECOVERY_SCORING_FILES_V3", "experiments.source_sets", None),
+    ("C1_SCORING_FILES_V1", "stages.phase_c1.scoring", None),
+    ("GENERATION_SOURCE_FILES_V1", "shared.source_sets", None),
+    ("TRAINER_SOURCE_FILES_V1", "shared.source_sets", None),
+    ("RECOVERY_SCORING_FILES_V2", "shared.source_sets", None),
+    ("RECOVERY_SCORING_FILES_V3", "shared.source_sets", None),
 ]
 
 

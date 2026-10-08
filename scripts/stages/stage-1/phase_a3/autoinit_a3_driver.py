@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """A3: replay the frozen parent, diagnose two protocols, train three, score three.
 
-    /opt/train/bin/python scripts/pod/autoinit_a3_driver.py \
+    /opt/train/bin/python scripts/stages/stage-1/phase_a3/autoinit_a3_driver.py \
         --image-digest <digest> --rate 1.09 --spent-usd 0.20 \
         --soft-stop-usd 7.95 --authorized-usd 8.3047
 
@@ -16,7 +16,7 @@
 A and I belong to the session runner. **There is no stage for the decision.**
 attempt75 trained, preserved and scored nine probes over 919 minutes and
 `$16.71`, then raised in its on-pod aggregation before writing a verdict. A3's
-comparison is `scripts/autoinit/aggregate_a3.py`, off pod, at `$0`, so no
+comparison is `scripts/stages/stage-1/phase_a3/aggregate_a3.py`, off pod, at `$0`, so no
 scientific product depends on the pod surviving one more stage.
 
 **The gate is asymmetric and that is the experiment.** A-bsz1 must rebuild the
@@ -59,7 +59,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
@@ -81,14 +81,14 @@ from aadistill.initialization.planning.generation import (  # noqa: E402
 from aadistill.runtime.device_handoff import (  # noqa: E402
     complete_release, cuda_memory, require_headroom, require_released,
 )
-from experiments.calibration import register_builtin_profiles  # noqa: E402
-from experiments.phase_c1.packaging import build_evaluation_package  # noqa: E402
-from experiments.phase_c1.probe_results import C1ProbeRecord  # noqa: E402
-from experiments.phase_c1.scoring import (  # noqa: E402
+from shared.calibration import register_builtin_profiles  # noqa: E402
+from stages.phase_c1.packaging import build_evaluation_package  # noqa: E402
+from stages.phase_c1.probe_results import C1ProbeRecord  # noqa: E402
+from stages.phase_c1.scoring import (  # noqa: E402
     C1_METRIC_CONTRACT, c1_scoring_contract,
 )
-from experiments.phase_a3 import a3_session as A3S  # noqa: E402
-from experiments.source_sets import generation_source_digest  # noqa: E402
+from stages.phase_a3 import a3_session as A3S  # noqa: E402
+from shared.source_sets import generation_source_digest  # noqa: E402
 
 #: Explicit. Importing the core registers neither a mixture nor an adapter, and
 #: a driver that forgot the adapter call reached stage D, loaded 398 tensors,
@@ -105,26 +105,26 @@ STATUS = Path(A3S.STATUS_PATH)
 #: collected by that phase's artifact spec and attributed to a closed
 #: experiment.
 AUDIT = REPO / "artifacts/audit/autoinit_a3"
-TRAIN = REPO / "artifacts/stage3/a3"
-EVAL = REPO / "artifacts/eval/a3"
+TRAIN = REPO / "artifacts/stages/stage-3/a3"
+EVAL = REPO / "artifacts/stages/stage-3/eval/a3"
 WORK = REPO / "artifacts/autoinit/a3_arms"
 
 #: Shared FROZEN identities, referenced rather than copied. A second copy under
 #: a phase_a3 directory would be a second owner free to drift from the battery
 #: the probes are actually evaluated on.
-BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
+BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
 BATTERY_IDENTITY = REPO / "logs/stages/stage-1/phase_c1/plans/battery.json"
 TEACHER_BINDING = REPO / "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"
 MEMORY_BASIS = (REPO / "logs/stages/stage-1/recovery_continuation/analyses"
                        "/autoinit_recovery_trainer_memory_basis.json")
 FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
-PACK_DIR = "artifacts/stage3/ladder_uniform_probe"
-C1_SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
-UNCAPPED_EVAL = REPO / "scripts/evaluation/uncapped_eval.py"
-TRAINER = REPO / "scripts/training/train_stage3.py"
-ENGINE_PROBE = REPO / "scripts/pod/autoinit_engine_probe.py"
+PACK_DIR = "artifacts/shared/instruments/ladder_uniform_probe"
+C1_SCORER = REPO / "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py"
+UNCAPPED_EVAL = REPO / "scripts/shared/evaluation/uncapped_eval.py"
+TRAINER = REPO / "scripts/shared/training/train_stage3.py"
+ENGINE_PROBE = REPO / "scripts/shared/pod/autoinit_engine_probe.py"
 
-TOKENIZER_SOURCE = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+TOKENIZER_SOURCE = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 TOKENIZER_SIDECAR_SHA256 = {
     "tokenizer.json":
         "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
@@ -382,7 +382,7 @@ class A3Driver:
         from huggingface_hub import snapshot_download
 
         binding = json.loads(TEACHER_BINDING.read_text())
-        from experiments.phase_c3 import session as CS
+        from stages.phase_c3 import session as CS
         if binding["revision"] != CS.TEACHER_REVISION:
             raise A3DriverError(
                 f"teacher binding pins {binding['revision']} and the session "
@@ -422,7 +422,7 @@ class A3Driver:
             raise A3DriverError(
                 f"registered {impl.impl_id}, expected {A3S.ATTENTION_IMPL_ID}")
         #: The calibration profile the path names must resolve now too.
-        from experiments.phase_c3 import session as CS
+        from stages.phase_c3 import session as CS
         profile_id = CS.prefix_steps()[-1][1]
         get_profile(profile_id)
 
@@ -451,7 +451,7 @@ class A3Driver:
         if not self.afford(28.0, "parent replay"):
             raise A3DriverError("budget refuses the parent replay")
         from aadistill.initialization.specs.arch import get_adapter
-        from experiments.phase_a3.a_bsz3 import A_BSZ1
+        from stages.phase_a3.a_bsz3 import A_BSZ1
 
         spec = A3S.path_spec(workdir_device="cuda")
         adapter = get_adapter("qwen3")
@@ -521,8 +521,8 @@ class A3Driver:
         continues; only the declared integrity stops end it.
         """
         mark("STAGE_START:E")
-        from compare_a_bsz3 import structural_half
-        from experiments.phase_a3.a_bsz3 import (
+        from stages.phase_a3.compare_a_bsz3 import structural_half
+        from stages.phase_a3.a_bsz3 import (
             execution_comparison, item_token_counts,
         )
 
@@ -771,7 +771,7 @@ class A3Driver:
         frozen = json.loads(FROZEN_RECIPE.read_text())
         name = d["probe_id"]
         derived = {**frozen, "run_name": name,
-                   "out_dir": f"artifacts/stage3/a3/{name}",
+                   "out_dir": f"artifacts/stages/stage-3/a3/{name}",
                    "data_dir": PACK_DIR, "seed": d["seed"],
                    "student_path": d["student_path"],
                    "_purpose": (
@@ -1345,7 +1345,7 @@ class A3Driver:
                 "preserved": self.training[r.seed].get("preserved", {}),
             } for r in records},
             "_the_comparison_runs_off_pod": (
-                "scripts/autoinit/aggregate_a3.py reads this evidence at $0. "
+                "scripts/stages/stage-1/phase_a3/aggregate_a3.py reads this evidence at $0. "
                 "No verdict is computed on the meter."),
         }
         (AUDIT / "a3_probe_inventory.json").write_text(

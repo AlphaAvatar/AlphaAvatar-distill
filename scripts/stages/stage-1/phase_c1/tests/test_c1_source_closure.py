@@ -38,15 +38,15 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 
-from experiments.phase_c1.authorization import (  # noqa: E402
+from stages.phase_c1.authorization import (  # noqa: E402
     C1_DECLARED_INPUTS, C1_ENTRY_POINTS, c1_current_executable)
-from experiments.phase_c1.scoring import C1_SCORING_FILES_V1  # noqa: E402
+from stages.phase_c1.scoring import C1_SCORING_FILES_V1  # noqa: E402
 
 #: The live executable set, derived. Every assertion below is about THIS.
 C1_EXECUTABLE = tuple(r["path"] for r in c1_current_executable(REPO)["files"])
 
-ENTRY_POINTS = ("scripts/pod/autoinit_c1_launch.py",
-                "scripts/pod/autoinit_c1_driver.py")
+ENTRY_POINTS = ("scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+                "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py")
 
 #: Search roots for an in-repo module name, in the order Python would resolve
 #: them given each entry point's own `sys.path` inserts.
@@ -147,9 +147,9 @@ def test_the_transitive_reach_is_measured_not_just_the_direct_names():
 def test_the_paid_path_does_not_reach_the_phase_a_launcher_or_driver():
     """Eliminated rather than declared. C1 has its own parser and its own driver."""
     closure = in_repo_closure()
-    for forbidden in ("scripts/pod/autoinit_phase_a_launch.py",
-                      "scripts/pod/autoinit_phase_a_driver.py",
-                      "scripts/autoinit/phase_a_search.py"):
+    for forbidden in ("scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
+                      "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
+                      "scripts/stages/stage-1/phase_a/phase_a_search.py"):
         assert forbidden not in closure, f"{forbidden} <- {closure.get(forbidden)}"
 
 
@@ -171,8 +171,8 @@ def test_the_artifact_specs_are_measured():
 def test_the_harness_names_the_setup_script_the_runner_executes():
     """Derived from the C1 SESSION, not transcribed from a list.
 
-    Until 2026-09-04 the C1 set named `scripts/pod/setup.sh` and the pod ran
-    `scripts/pod/autoinit_preflight_setup.sh`. The grant therefore measured a
+    Until 2026-09-04 the C1 set named `scripts/shared/pod/setup.sh` and the pod ran
+    `scripts/shared/pod/autoinit_preflight_setup.sh`. The grant therefore measured a
     file that never executes and left the one that does unmeasured — and the
     digest verified perfectly the whole time, because it was a digest of the
     wrong thing.
@@ -184,7 +184,7 @@ def test_the_harness_names_the_setup_script_the_runner_executes():
     both directions — the session names it, the runner uploads and executes
     exactly that, and the harness measures it.
     """
-    launcher = REPO / "scripts/pod/autoinit_c1_launch.py"
+    launcher = REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py"
     commands = [
         {kw.arg: kw.value.value for kw in node.keywords
          if isinstance(kw.value, ast.Constant)}
@@ -195,7 +195,7 @@ def test_the_harness_names_the_setup_script_the_runner_executes():
         f"{launcher.name} builds {len(commands)} ExecutionCommands; this test "
         "cannot say which one the session runs")
     setup = commands[0]["setup_script"]
-    assert setup == "scripts/pod/autoinit_preflight_setup.sh", setup
+    assert setup == "scripts/shared/pod/autoinit_preflight_setup.sh", setup
     assert (REPO / setup).is_file()
 
     # The runner uses the SPEC's value for both the upload and the execution.
@@ -222,7 +222,7 @@ def test_no_session_can_substitute_a_different_setup_script():
 
 
 def test_the_legacy_setup_script_is_executed_by_nothing():
-    """`scripts/pod/setup.sh` may exist as history; it must not be reachable.
+    """`scripts/shared/pod/setup.sh` may exist as history; it must not be reachable.
 
     If some path starts executing it again, it needs measuring, and this fails
     rather than letting it run unmeasured the way it just did in reverse.
@@ -247,5 +247,5 @@ def test_the_legacy_setup_script_is_executed_by_nothing():
                 continue
             if re.search(r"(?<![\w/])setup\.sh", stripped):
                 hits.append(f"{path.relative_to(REPO)}: {stripped[:90]}")
-    assert not hits, ("scripts/pod/setup.sh is referenced by executable code:\n"
+    assert not hits, ("scripts/shared/pod/setup.sh is referenced by executable code:\n"
                       + "\n".join(hits))

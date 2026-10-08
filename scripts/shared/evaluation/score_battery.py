@@ -28,9 +28,9 @@ whoever reads the file:
   inferred.
 
 Usage:
-    scripts/evaluation/score_battery.py --battery artifacts/eval/battery_v1 \
-        --generations artifacts/eval/e2/<arm> --label <arm> \
-        --out artifacts/eval/e2/<arm>_battery.json
+    scripts/shared/evaluation/score_battery.py --battery artifacts/stages/stage-3/eval/battery_v1 \
+        --generations artifacts/stages/stage-3/eval/e2/<arm> --label <arm> \
+        --out artifacts/stages/stage-3/eval/e2/<arm>_battery.json
 """
 
 from __future__ import annotations
@@ -43,7 +43,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.capability import (  # noqa: E402

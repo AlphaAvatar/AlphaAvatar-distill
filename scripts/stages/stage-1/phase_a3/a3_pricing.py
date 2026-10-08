@@ -45,7 +45,7 @@ sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.runtime import cost as COST  # noqa: E402
-from experiments.phase_c3.formal_pricing import (  # noqa: E402
+from stages.phase_c3.formal_pricing import (  # noqa: E402
     DISK_USD_PER_GB_MONTH, HOURS_PER_MONTH, C3PricingError, Fundability,
     evaluate_limits, live_envelopes, price_c3,
 )
@@ -67,7 +67,7 @@ PARAMS_PARENT = 713_490_432
 #: The frozen recovery recipe A3 reuses unchanged from the attempt75 controls.
 FROZEN_RECIPE_REL = "configs/stage3/e1/e1_r0860k_sa_pca.json"
 
-#: Measured in `scripts/experiments/stage-1/phase_c2/behavioural.py`, which owns both:
+#: Measured in `scripts/stages/stage-1/phase_c2/behavioural.py`, which owns both:
 #: the teacher's on-disk size and the worst single four-step path's
 #: intermediates as observed during the C2 replay.
 TEACHER_GIB = 7.51
@@ -489,7 +489,7 @@ def main(argv=None) -> int:
     gpu = "(rate supplied)"
     rate = args.rate
     if rate is None:
-        from experiments.phase_c3.hardware import query_offers, select
+        from stages.phase_c3.hardware import query_offers, select
         offers = query_offers()
         chosen = select(offers)
         if chosen is None or not chosen.usable:

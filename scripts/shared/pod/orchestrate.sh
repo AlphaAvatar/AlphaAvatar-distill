@@ -18,9 +18,9 @@
 #   * if one arm fails terminally, later arms still run and everything already
 #     produced is still fetched, verified and written up.
 #
-# Usage:  POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/pod/orchestrate.sh
-# Inspect: tail -f artifacts/stage3/<session>_orchestrator.log
-# Status:  cat artifacts/stage3/<session>_orchestrator.status
+# Usage:  POD_ID=<id> HOST=<ip> PORT=<port> bash scripts/shared/pod/orchestrate.sh
+# Inspect: tail -f artifacts/stages/stage-3/<session>_orchestrator.log
+# Status:  cat artifacts/stages/stage-3/<session>_orchestrator.status
 
 set -uo pipefail
 
@@ -29,7 +29,7 @@ export PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin"
 unset VIRTUAL_ENV
 
 REPO=/home/ecs-user/AlphaAvatar-distill
-source "$REPO/scripts/pod/run_env.sh"
+source "$REPO/scripts/shared/pod/run_env.sh"
 
 POD_ID="${POD_ID:?set POD_ID}"
 HOST="${HOST:?set HOST}"
@@ -39,7 +39,7 @@ SSH_OPTS="-i $SSHK -o IdentitiesOnly=yes -o StrictHostKeyChecking=no
  -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=20
  -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o BatchMode=yes"
 
-OUTDIR=$REPO/artifacts/stage3
+OUTDIR=$REPO/artifacts/stages/stage-3
 # POD_ROLE keeps a split session's pods from writing over each other's log,
 # status file and fetched artifacts.
 TAG=${SESSION}${POD_ROLE:+_$POD_ROLE}
@@ -80,7 +80,7 @@ log "arms: $(arm_names | tr '\n' ' ')"
 ABORT_PY=$(base64 -w0 <<'PY'
 import json, sys
 run, step = sys.argv[1], int(sys.argv[2])
-path = f"artifacts/stage3/{run}/train_log.jsonl"
+path = f"artifacts/stages/stage-3/{run}/train_log.jsonl"
 ce = {}
 try:
     for line in open(path):
@@ -188,7 +188,7 @@ for arm in "${ARMS[@]}"; do
   RUN_NAME=$(arm_field "$arm" 1)
   CONFIG=$(arm_field "$arm" 2)
   STEP_TAG=$(arm_field "$arm" 3)
-  REMOTE_RUN=/workspace/aad/artifacts/stage3/$RUN_NAME
+  REMOTE_RUN=/workspace/aad/artifacts/stages/stage-3/$RUN_NAME
 
   elapsed=$(( $(date +%s) - SESSION_START ))
   need=$(arm_seconds "$CONFIG") || fatal "cannot_read_steps_$RUN_NAME"
@@ -324,25 +324,25 @@ scp_try() {
   return 1
 }
 
-REF_LOCAL=$REPO/artifacts/stage3/reference_scorecards
+REF_LOCAL=$REPO/artifacts/stages/stage-3/reference_scorecards
 mkdir -p "$REF_LOCAL"
 for entry in "${REF_CKPTS[@]}"; do
   name=$(printf '%s' "$entry" | cut -d'|' -f4)
   [ -n "$name" ] || continue
   for f in "${name}_behavior_v0.json" "${name}_behavior_v0.generations.jsonl"; do
-    scp_try "/workspace/aad/artifacts/stage3/reference_scorecards/$f" "$REF_LOCAL/$f" \
+    scp_try "/workspace/aad/artifacts/stages/stage-3/reference_scorecards/$f" "$REF_LOCAL/$f" \
       || log "WARNING: could not fetch reference scorecard $f"
   done
 done
 
 for RUN_NAME in "${ARMS_DONE[@]}"; do
-  LOCAL_RUN=$REPO/artifacts/stage3/$RUN_NAME
-  REMOTE_RUN=/workspace/aad/artifacts/stage3/$RUN_NAME
+  LOCAL_RUN=$REPO/artifacts/stages/stage-3/$RUN_NAME
+  REMOTE_RUN=/workspace/aad/artifacts/stages/stage-3/$RUN_NAME
   mkdir -p "$LOCAL_RUN"
   for f in ${ARM_ARTIFACTS:-train_log.jsonl run_manifest.json eval_holdout_v1.json gen_smoke.json console.log}; do
     scp_try "$REMOTE_RUN/$f" "$LOCAL_RUN/$f" || fatal "fetch_failed_${RUN_NAME}_$f"
   done
-  HASHFILE_REL=artifacts/stage3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
+  HASHFILE_REL=artifacts/stages/stage-3/${RUN_NAME}_artifact_hashes_${SESSION_DATE}.txt
   scp_try "/workspace/aad/$HASHFILE_REL" "$REPO/$HASHFILE_REL" \
     || fatal "fetch_failed_hashfile_$RUN_NAME"
   log "fetched run artifacts + pod hash list for $RUN_NAME"
@@ -351,7 +351,7 @@ done
 cd "$REPO" || fatal "cd_repo"
 VERIFIED=1
 for RUN_NAME in "${ARMS_DONE[@]}"; do
-  if uv run python scripts/pod/verify_and_report.py verify --run "$RUN_NAME" >>"$LOG" 2>&1; then
+  if uv run python scripts/shared/pod/verify_and_report.py verify --run "$RUN_NAME" >>"$LOG" 2>&1; then
     log "UPLOAD VERIFICATION PASSED for $RUN_NAME"
   else
     VERIFIED=0
@@ -406,7 +406,7 @@ Failed or aborted: ${ARMS_FAILED[*]:-none}.
 ${SESSION_COMMIT_BODY:-}
 
 Each completed arm ran its configured schedule, then this session's post-run
-step (see scripts/pod/post_run.sh for exactly which evals that is), artifact
+step (see scripts/shared/pod/post_run.sh for exactly which evals that is), artifact
 upload to the private HF repo, and independent upload verification. Reference checkpoints were re-scored on the
 same GPU in the same session, so every comparison here is same-device.
 

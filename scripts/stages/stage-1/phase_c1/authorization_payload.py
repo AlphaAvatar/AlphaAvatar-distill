@@ -20,8 +20,8 @@ So the split is:
                                           derives the identities, builds the
                                           payload.
 
-**Both callers use this same function.** `scripts/autoinit/issue_c1_authorization.py`
-supplies `git rev-parse HEAD` and the wall clock; `scripts/experiments/stage-1/phase_c1/tests/test_c1_session_contract.py`
+**Both callers use this same function.** `scripts/stages/stage-1/phase_c1/issue_c1_authorization.py`
+supplies `git rev-parse HEAD` and the wall clock; `scripts/stages/stage-1/phase_c1/tests/test_c1_session_contract.py`
 supplies fixed strings and writes into `tmp_path`. A test candidate and a live
 authorization therefore cannot diverge in derivation — which is the property the
 old host-local fixture never had, and which survives this move unchanged.
@@ -41,7 +41,7 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
 if str(REPO_ROOT / "src") not in sys.path:
     sys.path.insert(0, str(REPO_ROOT / "src"))
 
-from experiments.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_hard_ceiling_usd, c1_harness_digest, load_pricing  # noqa: E402
+from stages.phase_c1.authorization import CURRENT_CLOSURE_SNAPSHOT, C1_HARNESS_SOURCE_FILES_V1, C1Authorization, c1_hard_ceiling_usd, c1_harness_digest, load_pricing  # noqa: E402
 from aadistill.governance.grant import (  # noqa: E402
     GrantContract, GrantRefused, validate_grant,
 )
@@ -84,8 +84,8 @@ def frozen_plan_hash(repo_root: str | Path = ".") -> str:
     not register it — that is deliberate, because an unrestricted beam search
     enumerates the whole registry.
     """
-    from experiments.phase_c1 import session as CS
-    from experiments.phase_c1.isolation import C1Arm, C1IsolationPlan, derive_recovery_seeds
+    from stages.phase_c1 import session as CS
+    from stages.phase_c1.isolation import C1Arm, C1IsolationPlan, derive_recovery_seeds
     from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
 
     cfg = load_config(repo_root)
@@ -139,9 +139,9 @@ def build_c1_authorization_payload(
     the issuer, and a payload built with it does not describe this tree — which
     is precisely what such a test needs.
     """
-    from experiments.phase_c1 import session as CS
-    from experiments.phase_c1.isolation import C0_PREREGISTRATION_SHA256, derive_recovery_seeds
-    from experiments.phase_c1.scoring import c1_scoring_contract
+    from stages.phase_c1 import session as CS
+    from stages.phase_c1.isolation import C0_PREREGISTRATION_SHA256, derive_recovery_seeds
+    from stages.phase_c1.scoring import c1_scoring_contract
 
     root = Path(repo_root)
     cfg = load_config(root)
@@ -199,7 +199,7 @@ def build_c1_authorization_payload(
         if harness["digest"] != recorded.get("digest"):
             problems.append(
                 "the recorded executable closure does not describe the live "
-                "tree; re-run scripts/architecture/derive_closure.py --write")
+                "tree; re-run scripts/maintenance/architecture/derive_closure.py --write")
     if doc["preregistration_sha256"] != ATTEMPT_18_PREREGISTRATION:
         problems.append(
             "the C1 execution preregistration is not the document attempt 18 "

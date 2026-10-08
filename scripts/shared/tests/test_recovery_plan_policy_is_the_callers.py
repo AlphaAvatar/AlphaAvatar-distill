@@ -40,7 +40,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     SuccessiveHalvingPlan,
 )
 
-from experiments.recovery_policy import plan_policy  # noqa: E402
+from shared.recovery_policy import plan_policy  # noqa: E402
 from test_cost_and_recovery import E1_KD_HEAVY_0860K  # noqa: E402
 
 #: A second study's policy. Deliberately unlike the first in every field.
@@ -179,7 +179,7 @@ def test_the_studys_policy_is_unchanged_by_the_move():
     drifted, the Phase-A plan hash would move and its frozen record would stop
     matching.
     """
-    from experiments.recovery_policy import (
+    from shared.recovery_policy import (
         CAPABILITY_SCHEMA_V1, CATASTROPHIC_V1, PREFLIGHT_PLAN_V1, SEED_SA,
         SEED_SB, SEED_SC)
 

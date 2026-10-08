@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pod-side driver for the AutoInitializer micro-preflight. Stages 0-3, then stop.
 
-    /opt/train/bin/python scripts/pod/autoinit_preflight_driver.py --stage all \
+    /opt/train/bin/python scripts/shared/preflight/autoinit_preflight_driver.py --stage all \
         --image-digest sha256:... --rate 0.99 --spent-usd 0.30 \
         --soft-stop-usd 6.00 --authorized-usd 8.60
 
@@ -35,7 +35,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -46,8 +46,8 @@ sys.path.insert(0, str(REPO / "scripts/autoinit"))
 from aadistill.governance.authorization import (  # noqa: E402
     AuthorizationError,
 )
-from experiments.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
-from experiments.preflight import (  # noqa: E402
+from shared.epsilon_response import EPSILON_RESPONSE_V1  # noqa: E402
+from shared.preflight import (  # noqa: E402
     PreflightAuthorization as SpendAuthorization,
 )
 from aadistill.initialization.planning.generation import (
@@ -56,7 +56,7 @@ from aadistill.initialization.planning.generation import (
     declared_generation_protocol,
     observe_generation_protocol,
 )
-from experiments.source_sets import generation_source_digest
+from shared.source_sets import generation_source_digest
 from aadistill.initialization.planning.ranking import (  # noqa: E402
     PARETO_V1,
 )
@@ -69,31 +69,31 @@ from aadistill.initialization.planning.recovery import (
     RuntimeEnvironmentFingerprint,
     observe_recovery_protocol,
 )
-from experiments.recovery_policy import (
+from shared.recovery_policy import (
     CATASTROPHIC_V1,
     POOLED_COUNTS_V2,
     PREFLIGHT_PLAN_V1,
     SEED_SA,
     SEED_SB,
 )
-from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
+from shared.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
 WS = Path("/workspace")
 STATUS = WS / "autoinit_preflight.status"
 AUDIT = REPO / "artifacts/audit/autoinit_preflight"
-BATTERY = REPO / "artifacts/stage3/recovery_search_v2"
-CANONICAL_INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
+CANONICAL_INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONTROLS = (("preflight_ctl_r0860k_sa", SEED_SA,
              "configs/stage3/e1/e1_r0860k_sa_pca.json"),
             ("preflight_ctl_r0860k_sb", SEED_SB,
              "configs/stage3/e1/e1_r0860k_sb_pca.json"))
 PINNED = {
     "canonical_init_weights": (
-        "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
+        "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",
         "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"),
     "recovery_pack_blocks": (
-        "artifacts/stage3/ladder_uniform_probe/blocks.npz",
+        "artifacts/shared/instruments/ladder_uniform_probe/blocks.npz",
         "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"),
 }
 BATTERY_CONTENT = "a1b22778b00d95b6aba358c14a5af5b559fd807bb371c92131eacca59479f323"
@@ -192,7 +192,7 @@ class Driver:
         ok = ok and battery_ok
 
         # Recovery (training) protocol, materialized and frozen.
-        from compare_recovery_fingerprints import phase_a_protocol
+        from stages.recovery_continuation.compare_recovery_fingerprints import phase_a_protocol
         prereg = phase_a_protocol(REPO / CONTROLS[0][2])
         try:
             attested = prereg.materialized(runtime=runtime, trainer_source=trainer)
@@ -268,7 +268,7 @@ class Driver:
         quietly recording the engine's value.
         """
         out = subprocess.run(
-            ["/opt/vllm/bin/python", str(REPO / "scripts/pod/autoinit_engine_probe.py"),
+            ["/opt/vllm/bin/python", str(REPO / "scripts/shared/pod/autoinit_engine_probe.py"),
              "--model", str(CANONICAL_INIT), "--out", str(AUDIT / "engine_probe.json"),
              "--image-digest", self.a.image_digest],
             capture_output=True, text=True, timeout=1800,
@@ -397,7 +397,7 @@ class Driver:
         It is a *path* check, not a measurement: the prompts are a subset and the
         model is the initializer, so nothing here is scored or retained.
         """
-        smoke_dir = REPO / "artifacts/eval/preflight/_generation_smoke"
+        smoke_dir = REPO / "artifacts/stages/stage-3/eval/preflight/_generation_smoke"
         smoke_dir.mkdir(parents=True, exist_ok=True)
         battery = json.loads((BATTERY / "manifest.json").read_text())
         # The HARDEST set, not the alphabetically first. On 2026-08-13 this took
@@ -415,7 +415,7 @@ class Driver:
         first_set = chosen[0]
 
         out = subprocess.run(
-            ["/opt/vllm/bin/python", str(REPO / "scripts/evaluation/uncapped_eval.py"),
+            ["/opt/vllm/bin/python", str(REPO / "scripts/shared/evaluation/uncapped_eval.py"),
              "--model", str(CANONICAL_INIT), "--label", "_generation_smoke",
              "--prompts", *[str(x) for x in subsets], "--out-dir", str(smoke_dir),
              "--diagnostics"],
@@ -458,19 +458,19 @@ class Driver:
         """Score one checkpoint N times on the frozen suite; report the range."""
         return self.gate(
             "evaluator_repeatability",
-            "scripts/autoinit/measure_state_repeatability.py",
+            "scripts/stages/stage-1/phase_a/measure_state_repeatability.py",
             ["--checkpoint", str(CANONICAL_INIT), "--repeats", str(self.a.repeats),
              "--out", str(AUDIT / "evaluator_repeatability.json")],
             timeout=5400)
 
     def stats_split(self) -> dict:
         return self.gate(
-            "statistics_split", "scripts/autoinit/profile_statistics_pass.py",
+            "statistics_split", "scripts/stages/stage-1/phase_a/profile_statistics_pass.py",
             ["--out", str(AUDIT / "statistics_split.json")], timeout=5400)
 
     def peak_memory(self) -> dict:
         return self.gate(
-            "peak_memory", "scripts/autoinit/probe_peak_memory.py",
+            "peak_memory", "scripts/stages/stage-1/phase_a/probe_peak_memory.py",
             ["--out", str(AUDIT / "peak_memory.json")], timeout=3600)
 
     def disk_throughput(self) -> dict:
@@ -520,8 +520,8 @@ class Driver:
         allowed = {"data_dir", "out_dir", "run_name", "_purpose"}
         frozen = json.loads((REPO / config).read_text())
         derived = {**frozen,
-                   "out_dir": f"artifacts/stage3/{name}",
-                   "data_dir": "artifacts/stage3/ladder_uniform_probe",
+                   "out_dir": f"artifacts/stages/stage-3/{name}",
+                   "data_dir": "artifacts/shared/instruments/ladder_uniform_probe",
                    "run_name": name,
                    "_purpose": (
                        "AutoInitializer micro-preflight: a PERMANENT canonical "
@@ -551,7 +551,7 @@ class Driver:
             run_config = self.control_config(name, config)
             t = time.time()
             rc = subprocess.run(
-                ["/opt/train/bin/python", str(REPO / "scripts/training/train_stage3.py"),
+                ["/opt/train/bin/python", str(REPO / "scripts/shared/training/train_stage3.py"),
                  "--config", str(run_config)],
                 capture_output=True, text=True, timeout=int(minutes * 60 * 2),
                 env=self.child_env())
@@ -580,7 +580,7 @@ class Driver:
         object: doing that compares the attestation to itself, which passes
         whatever the trainer did.
         """
-        out_dir = REPO / f"artifacts/stage3/{name}"
+        out_dir = REPO / f"artifacts/stages/stage-3/{name}"
         problem = ""
         observed = None
         comparison: dict = {}
@@ -753,12 +753,12 @@ class Driver:
                 return self.record(3, False, f"insufficient budget for {name}")
             ckpt = REPO / self.ev["stages"]["2"]["arms"][name]["checkpoint"] / "model"
             tokenizer_files = self.stage_tokenizer(ckpt)
-            gen_dir = REPO / f"artifacts/eval/preflight/{name}"
+            gen_dir = REPO / f"artifacts/stages/stage-3/eval/preflight/{name}"
             gen_dir.mkdir(parents=True, exist_ok=True)
             sets = [str(BATTERY / f"{s}.jsonl") for s in
                     json.loads((BATTERY / "manifest.json").read_text())["sets"]]
             rc = subprocess.run(
-                ["/opt/vllm/bin/python", str(REPO / "scripts/evaluation/uncapped_eval.py"),
+                ["/opt/vllm/bin/python", str(REPO / "scripts/shared/evaluation/uncapped_eval.py"),
                  "--model", str(ckpt), "--label", name, "--prompts", *sets,
                  "--out-dir", str(gen_dir), "--diagnostics"],
                 capture_output=True, text=True,
@@ -782,7 +782,7 @@ class Driver:
             scored = AUDIT / f"{name}_recovery_search.json"
             rc = subprocess.run(
                 ["/opt/train/bin/python",
-                 str(REPO / "scripts/autoinit/score_recovery_search.py"),
+                 str(REPO / "scripts/shared/evaluation/score_recovery_search.py"),
                  "--generations", str(gen_dir), "--label", name,
                  "--seed", str(seed), "--out", str(scored),
                  "--per-sample", str(AUDIT / f"{name}_per_sample.jsonl")],

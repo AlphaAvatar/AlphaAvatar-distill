@@ -92,7 +92,7 @@ def test_a_copy_that_acquires_a_tokenizer_is_refused(tiny_leaf, tmp_path):
     `tokenizer_sha256` enters the digest) would move the identity."""
     from transformers import AutoTokenizer
 
-    canonical = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    canonical = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
     if not (canonical / "tokenizer.json").is_file():
         pytest.skip("the canonical initialization is not staged here")
 
@@ -179,7 +179,7 @@ def test_free_bytes_walks_up_to_an_existing_ancestor(tmp_path):
 def test_stage1_persists_before_stage2_and_fails_closed():
     """Read off the real driver: the boundary must sit between SEARCH_DONE and
     stage 1 returning True, and a failure must fail STAGE 1 — not warn."""
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     stage1 = src[src.index("def stage1(self)"):src.index("def probe_config")]
 
     assert "persist_selected_leaves(" in stage1
@@ -208,7 +208,7 @@ def test_the_destination_is_collected_on_the_failure_path():
     failure — which is exactly what attempt 11 needed and did not have."""
     import ast
 
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     fn = next(n for n in ast.parse(src).body
               if isinstance(n, ast.FunctionDef) and n.name == "selected_leaf_dir")
     # The returned expression only — text slicing here over-ran into the
@@ -225,7 +225,7 @@ def test_the_destination_is_collected_on_the_failure_path():
 def test_only_the_selected_leaves_are_persisted():
     """43 states were searched; five were selected. The other 38 are recorded
     and intentionally not preserved."""
-    src = (REPO / "scripts/pod/autoinit_phase_a_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py").read_text()
     stage1 = src[src.index("def stage1(self)"):src.index("def probe_config")]
     call = stage1[stage1.index("persist_selected_leaves("):]
     call = call[:call.index("except LeafDurabilityError")]

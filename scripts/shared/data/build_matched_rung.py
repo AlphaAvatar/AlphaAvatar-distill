@@ -42,12 +42,12 @@ The output is byte-compatible with a `build_token_ladder.py` pack — same
 `packing: "ladder"` path consumes it unchanged.
 
 Usage:
-    scripts/data/build_matched_rung.py \
-        --control-ladder artifacts/stage3/ladder_uniform_probe \
+    scripts/shared/data/build_matched_rung.py \
+        --control-ladder artifacts/shared/instruments/ladder_uniform_probe \
         --control-rung 860000 \
-        --sessions artifacts/stage3/corpus_v2_clean/sessions_clean.jsonl \
+        --sessions artifacts/stages/stage-3/corpus_v2_clean/sessions_clean.jsonl \
         --model <teacher path or repo@revision> \
-        --out artifacts/stage3/rung_0860k_clean
+        --out artifacts/stages/stage-3/rung_0860k_clean
 """
 
 from __future__ import annotations
@@ -62,7 +62,7 @@ from pathlib import Path
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.mixture import order_blocks  # noqa: E402

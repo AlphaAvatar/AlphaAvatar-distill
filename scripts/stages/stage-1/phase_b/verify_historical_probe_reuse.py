@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Can Phase B reuse Phase A's probes as evidence? Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/verify_historical_probe_reuse.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py \
         --out logs/shared/analyses/autoinit_historical_probe_reuse.json
 
 Phase B's terminal procedure reuses historical sa/sb/sc results "only after
@@ -41,7 +41,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -51,8 +51,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.initialization.specs.arch import get_adapter  # noqa: E402
 from aadistill.initialization.adapters import register_builtin_adapters  # noqa: E402
 from aadistill.initialization.specs.artifact import identify_checkpoint  # noqa: E402
-from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
-from experiments.source_sets import recovery_scoring_contract
+from shared.recovery_policy import SEED_SA, SEED_SB, SEED_SC
+from shared.source_sets import recovery_scoring_contract
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 #: Explicit: importing an adapter module no longer registers it.
@@ -74,7 +74,7 @@ CHECKPOINTS = {
     "158b96cf651f": f"{_STORE}/158b96cf651fd8ba8f8ceaefefde2067",
     "281a02c3ac18": f"{_STORE}/281a02c3ac18419b70e896296dac0d03",
     "4e429f7ed722": f"{_STORE}/4e429f7ed722b180dd662c779895693f",
-    "control-qwen": str(REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"),
+    "control-qwen": str(REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"),
 }
 
 #: The candidate set the 2026-08-25 terminal procedure admits as priors. Reuse
@@ -170,7 +170,7 @@ def verify(root: Path = PROBES) -> dict:
         "schema": "aadistill.autoinit.historical_probe_reuse/v1",
         "generated_utc": datetime.now(timezone.utc).isoformat(),
         "_contract": ("The strict reconstruction check Phase B's reuse is "
-                      "conditional on. Consumed by scripts/autoinit/price_phase_b.py, "
+                      "conditional on. Consumed by scripts/stages/stage-1/phase_b/price_phase_b.py, "
                       "which fails closed if this record is missing or its "
                       "probes_dir_digest no longer matches."),
         "probes_dir_digest": probes_dir_digest(root),

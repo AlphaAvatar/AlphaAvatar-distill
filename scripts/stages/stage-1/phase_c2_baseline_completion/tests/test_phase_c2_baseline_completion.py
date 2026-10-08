@@ -36,11 +36,11 @@ for _extra in ("scripts", "scripts/pod", "scripts/autoinit"):
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402
-from experiments.phase_c2 import baseline as B  # noqa: E402
-from experiments.phase_c2.frozen_inputs import (  # noqa: E402
+from stages.phase_c2 import baseline as B  # noqa: E402
+from stages.phase_c2.frozen_inputs import (  # noqa: E402
     FrozenInputError, load_frozen_candidates, load_record,
     numerically_sensitive_pairs)
-from freeze_c2_comparison_inputs import FreezeError, freeze, verify  # noqa: E402
+from stages.phase_c2.freeze_c2_comparison_inputs import FreezeError, freeze, verify  # noqa: E402
 
 RUN = REPO / "logs/stages/stage-1/phase_c2/runs/attempt4"
 FROZEN = RUN / "evidence/c2_frozen_comparison_inputs.json"
@@ -196,7 +196,7 @@ def test_the_committed_frozen_record_matches_the_committed_selection():
 
 
 def test_the_frozen_b_identity_still_reproduces():
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
     register_c2_operators()
     spec = B.frozen_baseline_spec(device="cuda")
     assert spec.spec_hash == B.B_SPEC_HASH
@@ -270,7 +270,7 @@ def test_the_protocol_binds_the_identities_it_claims_to():
 # --- 4. the completion path cannot reach a beam search ----------------------
 
 
-DRIVER = REPO / "scripts/pod/autoinit_phase_c2_baseline_driver.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py"
 
 #: `Deadline` lives in the same module as `BeamSearch`, and the baseline rebuild
 #: legitimately imports it for its own clock. So importability of that module is
@@ -309,7 +309,7 @@ def test_the_driver_calls_the_rebuild_not_the_search_hook():
 def test_no_module_the_driver_imports_reaches_the_beam_runner():
     """Transitively, over in-repo modules, by import graph.
 
-    `scripts/autoinit/phase_a_search.py` is the only thing in this repository
+    `scripts/stages/stage-1/phase_a/phase_a_search.py` is the only thing in this repository
     that runs a beam. Nothing the completion driver imports may reach it.
     """
     roots = {"src/aadistill": REPO / "src", "scripts": REPO / "scripts"}
@@ -580,7 +580,7 @@ def test_the_frozen_contract_refuses_a_replay_under_the_optimized_evaluator(
     binds by content, so a future replay is refused -- and the refusal must
     happen at stage A, before a teacher is loaded or anything is measured.
     """
-    import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
     from aadistill.initialization.planning.metrics import StateEvaluator
 
     drift = _live_evaluator_drift()
@@ -628,10 +628,10 @@ def test_the_frozen_contract_refuses_a_replay_under_the_optimized_evaluator(
 
 def _run_stage_b(tmp_path, monkeypatch, *, baseline_values):
     """Drive the real stage B with the expensive work stubbed. Returns (driver, calls)."""
-    import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
     from aadistill.initialization.planning.metrics import StateEvaluator
     from aadistill.initialization.specs.metrics import StateEvaluation
-    from experiments.phase_c2 import baseline as BL
+    from stages.phase_c2 import baseline as BL
 
     calls = {"teachers": [], "evaluate": [], "rebuild_loader_gave": [],
              "primed_with": []}
@@ -787,7 +787,7 @@ def test_stage_b_orchestration_is_correct_end_to_end(tmp_path, monkeypatch):
 
     #: 1. the suite came from its declaration, not the repository root
     detail = driver.ev["stages"]["rebuild_measure_compare"]["detail"]
-    from experiments.phase_c2.frozen_assets import state_eval_root
+    from stages.phase_c2.frozen_assets import state_eval_root
     assert detail["suite_root"] == str(state_eval_root(REPO))
     assert record["suite"]["hash"] == json.loads(FROZEN.read_text())["suite"]["hash"]
 
@@ -858,7 +858,7 @@ def test_a_close_baseline_is_flagged_without_changing_the_verdict(tmp_path, monk
 
 def test_the_builder_refuses_an_interpretation_that_would_shadow_the_result():
     """Interpretation is added beside the computed result, never over it."""
-    from experiments.phase_c2.comparison import ComparisonError, build
+    from stages.phase_c2.comparison import ComparisonError, build
     with pytest.raises(ComparisonError, match="already computes"):
         build(baseline=_fake_baseline_for_build(), baseline_outcome={},
               candidates=[], suite=_FakeSuite(), policy=PARETO_V1,
@@ -895,12 +895,12 @@ def _fake_baseline_for_build():
 
 # --- 9. the thin formal path, and the scope it cannot exceed ----------------
 
-LAUNCHER = REPO / "scripts/pod/autoinit_phase_c2_baseline_launch.py"
-SETUP_SCRIPT = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+LAUNCHER = REPO / "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_launch.py"
+SETUP_SCRIPT = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 
 def _completion_spec():
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
     args = L.build_parser().parse_args([
         "--scr", "/tmp/unused", "--session-commit", "0" * 40,
         "--bundle", "b.bundle", "--run-id", "attempt5"])
@@ -977,8 +977,8 @@ def test_the_completion_session_names_its_own_driver_and_markers():
 
 
 def test_the_completion_authorization_can_never_authorize_a_beam():
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2.session import C2Authorization
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2.session import C2Authorization
 
     #: The property, on the type.
     assert BC.BaselineCompletionAuthorization.authorizes_c2_search1.fget(
@@ -993,8 +993,8 @@ def test_the_completion_authorization_can_never_authorize_a_beam():
 def test_the_two_authorization_types_refuse_each_others_artifacts(tmp_path):
     """Symmetry. Neither schema may stand in for the other."""
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2.session import SCHEMA as C2_SCHEMA, C2Authorization
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2.session import SCHEMA as C2_SCHEMA, C2Authorization
 
     def written(schema: str, **extra) -> Path:
         payload = {"schema": schema, "authorization_id": "x", **extra}
@@ -1028,17 +1028,17 @@ def test_the_launcher_cannot_reach_the_beam_runner():
 
     #: And the DERIVED closure -- what would actually run -- contains no
     #: Search-1 module at all.
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
     paths = [row["path"] for row in BC.current_executable(REPO)["files"]]
-    for forbidden in ("scripts/autoinit/phase_a_search.py",
-                      "scripts/pod/autoinit_phase_c2_driver.py",
-                      "scripts/pod/autoinit_phase_c2_launch.py"):
+    for forbidden in ("scripts/stages/stage-1/phase_a/phase_a_search.py",
+                      "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py",
+                      "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py"):
         assert forbidden not in paths, (
             f"{forbidden} is in the completion executable set")
 
 
 def test_the_completion_budget_reproduces_the_accepted_pricing():
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
     assert BC.hard_ceiling_usd(REPO) == 1.1950
     assert BC.price_per_hour_usd(REPO) == 1.09
     #: The rebuild allowance must exceed the reserve that failed, or the repair
@@ -1061,7 +1061,7 @@ def test_the_governance_chain_is_never_out_of_order():
     already carries the record. So each artifact implies its predecessor, and a
     chain that skipped a step would be visible here rather than at a pod.
     """
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
 
     runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
     for run in sorted(runs.glob("*")) if runs.exists() else []:
@@ -1081,8 +1081,8 @@ def test_the_governance_chain_is_never_out_of_order():
 
 def test_any_completion_authorization_permits_only_completion():
     """Whatever exists, it cannot authorize a beam."""
-    import autoinit_phase_c2_baseline_launch as L
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2 import baseline_completion as BC
 
     runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
     for found in sorted(runs.glob("*/governance/authorization.json")) if runs.exists() else []:
@@ -1119,7 +1119,7 @@ def test_the_completion_parser_satisfies_the_runner_argument_contract():
     for name in RUNNER_ARGUMENT_CONTRACT:
         assert hasattr(args, name), name
     #: The accepted operational identities, from their owners.
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
     assert args.gpu == BC.gpu_class(REPO)
     assert args.image == BC.image_name(REPO)
     assert args.max_price == BC.price_per_hour_usd(REPO) == 1.09
@@ -1127,7 +1127,7 @@ def test_the_completion_parser_satisfies_the_runner_argument_contract():
 
 def test_the_session_record_path_is_owned_by_the_run():
     """No `--out`. `run_id` owns the run, and the record lives inside it."""
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
 
     with pytest.raises(SystemExit):
         L.build_parser().parse_args([
@@ -1151,7 +1151,7 @@ def test_storage_has_exactly_one_owner():
     """The `$0` gate and provider creation must read the same attribute."""
     import inspect
 
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
 
     _, args, _ = _completion_spec()
     assert args.disk_gb == L.COMPLETION_PROVISION_GIB == 60
@@ -1168,7 +1168,7 @@ def test_storage_has_exactly_one_owner():
 
 def _completion_readiness(run_id="attempt5", stage_id="1", **overrides) -> dict:
     """A record shaped like the one the recorder would write, for refusal tests."""
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
 
     record = {
         "schema": CPE.SCHEMA,
@@ -1186,8 +1186,8 @@ def _completion_readiness(run_id="attempt5", stage_id="1", **overrides) -> dict:
 
 
 def test_the_completion_readiness_contract_is_its_own():
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
-    from experiments.phase_c2 import pod_environment as SPE
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import pod_environment as SPE
 
     assert CPE.SCHEMA != SPE.SCHEMA, (
         "sharing Search-1's schema would let one experiment's readiness record "
@@ -1202,8 +1202,8 @@ def test_the_completion_readiness_contract_is_its_own():
     assert sweep.record.harness_field == "completion_harness_digest"
 
     #: The harness is the LIVE completion closure, not Search-1's.
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2.session import c2_harness_digest
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2.session import c2_harness_digest
     assert sweep.harness(REPO)["digest"] == BC.executable_digest(REPO)
     assert sweep.harness(REPO)["digest"] != c2_harness_digest(REPO)["digest"]
 
@@ -1216,8 +1216,8 @@ def test_the_completion_readiness_contract_is_its_own():
 
 def test_a_search_1_readiness_record_cannot_satisfy_the_completion():
     """The schema is the refusal, and it is checked before anything else."""
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
-    from experiments.phase_c2 import pod_environment as SPE
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import pod_environment as SPE
 
     foreign = _completion_readiness(schema=SPE.SCHEMA)
     ok, reason = CPE.verify_record(
@@ -1229,10 +1229,10 @@ def test_a_search_1_readiness_record_cannot_satisfy_the_completion():
 
 def test_the_generic_recorder_resolves_the_completion_experiment():
     """One registry entry, and everything it needs comes through it."""
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     assert "phase_c2_baseline_completion" in R.EXPERIMENTS
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
     sweep = R.sweep_contract("phase_c2_baseline_completion", "attempt5", "1",
                              CPE.LAUNCH_BOUND)
     assert sweep.experiment_id == "phase_c2_baseline_completion"
@@ -1247,7 +1247,7 @@ def test_the_generic_recorder_resolves_the_completion_experiment():
     contract = derive_contract(launcher.spec(args).setup,
                                session_id=sweep.session_id)
     assert contract["digest"]
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
     assert sweep.harness(REPO)["digest"] == BC.executable_digest(REPO)
     assert "/phase_c2_baseline_completion/runs/attempt5/" in sweep.record.record_path
 
@@ -1262,7 +1262,7 @@ def _synthetic_grant(**overrides) -> dict:
     identities are taken from the live derivation deliberately -- a grant that
     asserted stale ones is a separate refusal with its own test.
     """
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion_authorization as BCA
 
     live = BCA.live_identities(REPO)
     grant = {
@@ -1287,8 +1287,8 @@ def _synthetic_grant(**overrides) -> dict:
 
 
 def _issue(monkeypatch, tmp_path, grant=None, run_id="attempt5"):
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
 
     #: The readiness record is STUBBED, not written: creating one at the real
     #: path would create attempt5 as a run, and no completion run is authorized.
@@ -1308,7 +1308,7 @@ def _issue(monkeypatch, tmp_path, grant=None, run_id="attempt5"):
 
 
 def test_the_issuer_builds_an_artifact_the_completion_type_loads(monkeypatch, tmp_path):
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
 
     payload = _issue(monkeypatch, tmp_path)
     path = tmp_path / "authorization.json"
@@ -1329,8 +1329,8 @@ def test_the_issuer_builds_an_artifact_the_completion_type_loads(monkeypatch, tm
 
 
 def test_the_issued_artifact_reproduces_every_derived_identity(monkeypatch, tmp_path):
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion_authorization as BCA
 
     payload = _issue(monkeypatch, tmp_path)
     bound, live = payload["bound"], BCA.live_identities(REPO)
@@ -1349,7 +1349,7 @@ def test_the_issued_artifact_reproduces_every_derived_identity(monkeypatch, tmp_
 
 
 def test_the_issuer_refuses_a_grant_that_asserts_a_stale_identity(monkeypatch, tmp_path):
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused)
 
     grant = _synthetic_grant()
@@ -1361,7 +1361,7 @@ def test_the_issuer_refuses_a_grant_that_asserts_a_stale_identity(monkeypatch, t
 
 def test_the_issuer_refuses_an_identity_it_cannot_derive(monkeypatch, tmp_path):
     """A grant may not introduce a binding nobody checks."""
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused)
 
     grant = _synthetic_grant()
@@ -1371,9 +1371,9 @@ def test_the_issuer_refuses_an_identity_it_cannot_derive(monkeypatch, tmp_path):
 
 
 def test_the_issuer_refuses_a_search_1_readiness_record(monkeypatch, tmp_path):
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
-    from experiments.phase_c2 import pod_environment as SPE
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import pod_environment as SPE
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused, build_payload)
 
     monkeypatch.setattr(CPE, "load_record",
@@ -1386,8 +1386,8 @@ def test_the_issuer_refuses_a_search_1_readiness_record(monkeypatch, tmp_path):
 
 
 def test_the_issuer_refuses_a_diagnostic_readiness_record(monkeypatch, tmp_path):
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused, build_payload)
 
     monkeypatch.setattr(CPE, "load_record",
@@ -1399,7 +1399,7 @@ def test_the_issuer_refuses_a_diagnostic_readiness_record(monkeypatch, tmp_path)
 
 
 def test_the_completion_config_states_only_what_the_mechanism_needs():
-    from experiments.phase_c2.baseline_completion_authorization import load_config
+    from stages.phase_c2.baseline_completion_authorization import load_config
 
     cfg = load_config(REPO)
     assert cfg["authorizes"] == "nothing"
@@ -1440,9 +1440,9 @@ def test_the_completion_config_states_only_what_the_mechanism_needs():
 
 
 def test_the_completion_transport_binds_the_completion_authorization_and_closure():
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2 import baseline_completion_bundle as BCT
-    from experiments.phase_c2 import bundle as SEARCH1_BUNDLE
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion_bundle as BCT
+    from stages.phase_c2 import bundle as SEARCH1_BUNDLE
 
     digest, files = BCT.completion_executable_set(REPO)
     assert digest == BC.executable_digest(REPO)
@@ -1478,7 +1478,7 @@ def test_the_launcher_gates_include_the_bundle_round_trip():
 def test_the_bundle_gate_uses_the_completion_transport():
     import inspect
 
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
 
     source = inspect.getsource(L.bundle_staged_gate)
     assert "BCT." in source, "the gate must use the completion transport"
@@ -1547,7 +1547,7 @@ def test_the_six_frozen_scientific_identities_are_unchanged():
     `live_identities` is what the issuer binds, so this asserts the values a
     real chain would carry.
     """
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         live_identities)
 
     live = live_identities(REPO)
@@ -1685,7 +1685,7 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
     #: it wrong in the other direction once chains started being consumed. A
     #: grant is prepared while its chain is open, and a closeout closes it, so
     #: the tree's answer is: a grant whose run carries no closeout.
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
     runs = REPO / "logs/stages/stage-1" / L.RUN_EXPERIMENT_ID / "runs"
     open_chains = sorted(
         grant.parents[1].name
@@ -1749,8 +1749,8 @@ def test_issuance_runs_the_production_readiness_verifier(monkeypatch, tmp_path):
     """
     import inspect
 
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
 
     source = inspect.getsource(BCA._readiness)
     assert "CPE.verify_record(" in source, (
@@ -1789,8 +1789,8 @@ def test_issuance_runs_the_production_readiness_verifier(monkeypatch, tmp_path):
 def test_the_issuer_derives_the_staging_contract_from_the_real_session_spec():
     """From the completion launcher's own manifest, under its own session id."""
     from aadistill.runtime.staging_contract import derive_contract
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion_authorization as BCA
 
     _, args, spec = _completion_spec()
     expected = derive_contract(spec.setup, session_id=BC.SESSION_ID)["digest"]
@@ -1799,7 +1799,7 @@ def test_the_issuer_derives_the_staging_contract_from_the_real_session_spec():
 
 def test_a_tampered_readiness_record_is_refused_by_the_real_verifier():
     """Self hash, harness digest and staging contract, each on its own."""
-    from experiments.phase_c2 import baseline_completion_pod_environment as CPE
+    from stages.phase_c2 import baseline_completion_pod_environment as CPE
 
     good = _completion_readiness()
     for changes, why in (
@@ -1817,7 +1817,7 @@ def test_a_tampered_readiness_record_is_refused_by_the_real_verifier():
 
 def test_the_identity_block_must_be_complete(monkeypatch, tmp_path):
     """Absence of a disagreement is not agreement."""
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused)
 
     grant = _synthetic_grant()
@@ -1840,7 +1840,7 @@ def test_the_identity_block_must_be_complete(monkeypatch, tmp_path):
 
 
 def test_the_identity_block_must_name_all_eight(monkeypatch, tmp_path):
-    from experiments.phase_c2 import baseline_completion_authorization as BCA
+    from stages.phase_c2 import baseline_completion_authorization as BCA
 
     derivable = {k for k in BCA.live_identities(REPO) if not k.startswith("_")}
     assert derivable == {
@@ -1853,7 +1853,7 @@ def test_the_identity_block_must_name_all_eight(monkeypatch, tmp_path):
 
 
 def test_approved_money_is_a_real_boundary(monkeypatch, tmp_path):
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused, check_approved_money)
 
     assert check_approved_money(_synthetic_grant(), REPO) == {
@@ -1882,7 +1882,7 @@ def test_approved_money_is_a_real_boundary(monkeypatch, tmp_path):
 
 def test_the_cap_arithmetic_still_gates_the_ceiling(monkeypatch, tmp_path):
     """296.8185 + 1.1950 <= 320.0, and a grant that does not fit is refused."""
-    from experiments.phase_c2.baseline_completion_authorization import (
+    from stages.phase_c2.baseline_completion_authorization import (
         CompletionAuthorizationRefused)
 
     payload = _issue(monkeypatch, tmp_path)
@@ -1909,7 +1909,7 @@ class _Ctx:
 
 def _scoped_auth(*, run_id="attempt5", draws=2, one_billing=True,
                  completion=True, search1=False):
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2.session import C2ResourceScope
 
     class _Auth:
         authorizes_c2_baseline_completion = completion
@@ -1924,7 +1924,7 @@ def _scoped_auth(*, run_id="attempt5", draws=2, one_billing=True,
 def test_the_scope_gate_uses_the_scopes_own_methods():
     import inspect
 
-    import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
 
     source = inspect.getsource(L.completion_scope_gate)
     assert "permits_run(" in source and "permits_draws(" in source, (
@@ -1953,8 +1953,8 @@ def test_the_scope_gate_uses_the_scopes_own_methods():
 
 
 def test_the_frozen_runtime_is_enforced_not_merely_defaulted():
-    import autoinit_phase_c2_baseline_launch as L
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_launch as L
+    from stages.phase_c2 import baseline_completion as BC
 
     _, args, _ = _completion_spec()
     ok, reason = L.frozen_runtime_gate(_Ctx(args))
@@ -1996,8 +1996,8 @@ def test_the_b_measurement_survives_a_post_measurement_failure(tmp_path, monkeyp
     immediately afterwards. The session's final evidence must still carry the
     complete B measurement, and the measurement count must still be one.
     """
-    import autoinit_phase_c2_baseline_driver as D
-    from experiments.phase_c2 import comparison as C
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2 import comparison as C
 
     def explode(**kwargs):
         raise RuntimeError("serialisation failed after the measurement")
@@ -2037,7 +2037,7 @@ def test_the_durable_block_is_written_before_any_post_processing():
     """Ordering, in the source: measure, persist, THEN compare."""
     import inspect
 
-    import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
 
     source = inspect.getsource(D.BaselineCompletionDriver.rebuild_measure_compare)
     measured = source.index("attach_evaluation(")
@@ -2066,7 +2066,7 @@ def test_exactly_one_state_eval_is_performed(tmp_path, monkeypatch):
 def test_the_completion_does_not_declare_rope_ok():
     """The shared step cannot do its job for a session that stages no checkpoint.
 
-    It globs `artifacts/stage1/*/checkpoint/config.json` and exits 1 on an empty
+    It globs `artifacts/stages/stage-1/*/checkpoint/config.json` and exits 1 on an empty
     match. C1 attempt 2 paid $0.1013 there and this session's attempt 6 paid
     $0.0412 -- both correct refusals about a staged checkpoint neither had.
     """
@@ -2080,7 +2080,7 @@ def test_the_completion_does_not_declare_rope_ok():
 
 def test_undeclaring_rope_ok_did_not_remove_the_guard():
     """Undeclaring the step is only legitimate because the check moved."""
-    import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
 
     assert hasattr(D.BaselineCompletionDriver, "assert_rope_base_of_rebuilt_b")
     import inspect
@@ -2109,7 +2109,7 @@ def test_the_rope_guard_refuses_a_disagreeing_base(tmp_path, monkeypatch):
     runtime resolution stubbed -- the comparison and the refusal are the real
     ones.
     """
-    import autoinit_phase_c2_baseline_driver as D
+    from stages.phase_c2_baseline_completion import autoinit_phase_c2_baseline_driver as D
 
     driver = D.BaselineCompletionDriver.__new__(D.BaselineCompletionDriver)
 

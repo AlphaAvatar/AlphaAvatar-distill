@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 7: FineWeb teacher-KD mixture at the fixed 1.60M rollout rung.
 
-    /opt/train/bin/python scripts/pod/e7_driver.py --stage all \
+    /opt/train/bin/python scripts/stages/stage-3/e7/e7_driver.py --stage all \
         --spent-usd 0.80 --soft-stop-usd 12.32 --authorized-usd 12.82
 
 Four arms train from the Stage 1 PCA init — **never** from a trained 1.60M or
@@ -50,10 +50,10 @@ STATUS = Path("/workspace/e7.status")
 OUT = REPO / "artifacts/audit"
 TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
-PACK = REPO / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-VAL_STREAM = REPO / "artifacts/stage3/e7_fineweb_val"
+PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
+VAL_STREAM = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
 HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
 
 EVAL_RUNG = 860000
@@ -94,7 +94,7 @@ def run(cmd, py=TRAIN_PY):
 
 
 def run_dir(name: str) -> Path:
-    return REPO / f"artifacts/stage3/{name}"
+    return REPO / f"artifacts/stages/stage-3/{name}"
 
 
 def model_dir(name: str) -> Path:
@@ -109,7 +109,7 @@ def spent_usd(args) -> float:
 # --------------------------------------------------------------------------
 
 def stage_validate(args) -> None:
-    run(["scripts/training/validate_e7_arms.py", "--require-streams",
+    run(["scripts/stages/stage-3/e7/validate_e7_arms.py", "--require-streams",
          "--out", OUT / "e7_preflight_driver.json"])
     mark("ARMS_VALIDATED")
 
@@ -124,7 +124,7 @@ def stage_preflight(args) -> None:
         assert conf["extra_stream"]["lambda_extra"] == LAMBDA_EXTRA, \
             f"{name}: lambda_extra is not the frozen {LAMBDA_EXTRA}"
         proc = subprocess.run(
-            [TRAIN_PY, "scripts/training/e7_preflight.py", "--config", str(cfg),
+            [TRAIN_PY, "scripts/stages/stage-3/e7/e7_preflight.py", "--config", str(cfg),
              "--out", str(out), "--band-low", str(BAND[0]),
              "--band-high", str(BAND[1])],
             cwd=REPO, env={**os.environ, "PYTHONPATH": str(REPO / "src")})
@@ -171,7 +171,7 @@ def stage_train(args) -> None:
         assert cfg["extra_stream"]["every_n_steps"] == 1, "cadence is frozen"
         assert cfg["extra_stream"]["blocks_per_step"] == 1
         assert "lora" not in cfg
-        run(["scripts/training/train_stage3.py", "--config", cfg_path])
+        run(["scripts/shared/training/train_stage3.py", "--config", cfg_path])
         mark(f"TRAIN_DONE:{alias}")
 
 
@@ -201,7 +201,7 @@ def stage_movement(args) -> None:
         out = OUT / "e7_movement" / f"{alias}.json"
         if out.exists() or not model_dir(name).is_dir():
             continue
-        run(["scripts/evaluation/parameter_movement.py", "--init", INIT,
+        run(["scripts/shared/evaluation/parameter_movement.py", "--init", INIT,
              "--checkpoint", model_dir(name), "--label", alias, "--out", out])
         rep = json.loads(out.read_text())
         emb = rep["by_group"]["embedding"]["delta_fro"]
@@ -232,7 +232,7 @@ def stage_general_text(args) -> None:
             continue
         out = OUT / "e7_general_text" / f"{alias}.json"
         if not out.exists():
-            run(["scripts/evaluation/eval_general_text.py", "--model", m,
+            run(["scripts/shared/evaluation/eval_general_text.py", "--model", m,
                  "--stream", VAL_STREAM, "--teacher", teacher["model_id"],
                  "--teacher-revision", teacher["revision"],
                  "--dtype", "bfloat16", "--out", out])
@@ -242,7 +242,7 @@ def stage_general_text(args) -> None:
         hold = OUT / "e7_general_text" / f"{alias}.holdout_v1.json"
         if not hold.exists() and HOLDOUT.is_file():
             try:
-                run(["scripts/evaluation/eval_ppl.py", "--model", m,
+                run(["scripts/shared/evaluation/eval_ppl.py", "--model", m,
                      "--data", HOLDOUT, "--out", hold])
             except subprocess.CalledProcessError as exc:
                 print(f"  {alias}: holdout_v1 continuity eval failed: {exc}",
@@ -273,11 +273,11 @@ def stage_three_mode(args) -> None:
             mark(f"ABORTED_AT_GATE:budget:{now:.2f}+{need:.2f}>"
                  f"{args.soft_stop_usd:.2f}")
             return
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "free", "oracle", "--out", d], py=VLLM_PY)
-        run(["scripts/evaluation/run_three_mode_diagnostic.py",
+        run(["scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
              "--student", m, "--label", alias, "--pack", PACK,
              "--rung", EVAL_RUNG, "--sessions", SESSIONS, "--n", args.n,
              "--modes", "forced", "--out", d / "forced"])

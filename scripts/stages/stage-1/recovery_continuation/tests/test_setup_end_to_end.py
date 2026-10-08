@@ -48,8 +48,8 @@ import pytest
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
-LAUNCH = REPO / "scripts/pod/autoinit_preflight_launch.py"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
+LAUNCH = REPO / "scripts/shared/preflight/autoinit_preflight_launch.py"
 #: The byte gate needs the real wheels. They are ~3.6 GiB and are not in the
 #: repo, so the location is overridable and the test skips without them rather
 #: than pretending to have checked.
@@ -127,12 +127,12 @@ def _skip_reason() -> str | None:
         return "bubblewrap is needed to provide /workspace without touching the host"
     if not (REPO / ".venv/bin/python").exists():
         return "the repo venv provides the real torch/transformers/aadistill"
-    if not (REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    if not (REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
             / "model.safetensors").is_file():
         return "the canonical checkpoint is not staged locally"
     if len(list(WHEELHOUSE_VLLM.glob("*.whl"))) != 196:
         return (f"the 196-wheel vLLM wheelhouse is not at {WHEELHOUSE_VLLM}; "
-                "build it with scripts/pod/build_wheelhouse.py --from-pins "
+                "build it with scripts/shared/pod/build_wheelhouse.py --from-pins "
                 "or set AAD_VLLM_WHEELHOUSE")
     return None
 
@@ -175,16 +175,16 @@ def _build(tmp: Path) -> dict:
     # only disk.
     ck = fixtures / "stage1/qwen3_0p6b_init_v0/checkpoint"
     ck.parent.mkdir(parents=True, exist_ok=True)
-    ck.symlink_to(REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint")
+    ck.symlink_to(REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
     lad = fixtures / "stage3_recovery_corpus_v2/ladder_uniform"
     lad.parent.mkdir(parents=True, exist_ok=True)
-    lad.symlink_to(REPO / "artifacts/stage3/ladder_uniform_probe")
+    lad.symlink_to(REPO / "artifacts/shared/instruments/ladder_uniform_probe")
     # The frozen calibration mixture. Real, not a stand-in: setup verifies its
     # sha256 against a pinned value, so a placeholder would fail the gate for
     # the wrong reason. Its absence is what Phase-A attempt 5 died of.
     cal = fixtures / "e8_inputs_20260810/calibration_v1"
     cal.parent.mkdir(parents=True, exist_ok=True)
-    cal.symlink_to(REPO / "artifacts/stage1/e8_calibration_v1")
+    cal.symlink_to(REPO / "artifacts/stages/stage-1/e8_calibration_v1")
     # The cu128 wheelhouse is COUNT-checked only (>= 91), so empty files are a
     # faithful stand-in. The vLLM one is BYTE-checked, so it is bind-mounted
     # real below.
@@ -194,8 +194,8 @@ def _build(tmp: Path) -> dict:
         (cu / f"stub_{i:03d}-1.0-py3-none-any.whl").write_bytes(b"")
     (fixtures / "transfer/aad_rehearsal.bundle").write_bytes(b"bundle stand-in")
 
-    for name, rel in (("state_eval_v1", "artifacts/stage1/state_eval_v1"),
-                      ("recovery_search_v2", "artifacts/stage3/recovery_search_v2")):
+    for name, rel in (("state_eval_v1", "artifacts/stages/stage-1/state_eval_v1"),
+                      ("recovery_search_v2", "artifacts/stages/stage-1/batteries/recovery_search_v2")):
         shutil.copytree(REPO / rel, ws / "assets" / name)
     _write(ws / "hf/token", "rehearsal-token\n")
 
@@ -248,7 +248,7 @@ PYTHONPATH="{fetch_stubs}:${{PYTHONPATH:-}}" exec {sys.executable} "$@"
 
 
 def _run_setup(box: dict, **env_extra) -> subprocess.CompletedProcess:
-    from experiments.recovery_continuation.plan import CONTINUATION_PLAN_V1
+    from stages.recovery_continuation.plan import CONTINUATION_PLAN_V1
 
     ws, home, bin_ = box["ws"], box["home"], box["bin"]
     wh_vllm = "/workspace/whv/transfer/wheelhouse_vllm_cp312"

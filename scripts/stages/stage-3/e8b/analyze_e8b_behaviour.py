@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """E8b level 3: does the depth map only fail once composed with compression?
 
-    PYTHONPATH=src python scripts/evaluation/analyze_e8b_behaviour.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/analyze_e8b_behaviour.py \
         --bootstrap 10000 --out logs/e8b_results.json
 
 Four cells on one frozen 150-prompt battery, every arm re-scored from its retained
@@ -37,7 +37,7 @@ frozen inclusion mask is identical, so prompts can be resampled jointly. That is
 done explicitly rather than by combining two independent intervals.
 
 Step-0 NLL, teacher-forced top-1 and the general-text diagnostics may not promote
-anything (decision 2026-08-05 / 2026-08-09). `scripts/training/analyze_e8b.py`
+anything (decision 2026-08-05 / 2026-08-09). `scripts/stages/stage-3/e8b/analyze_e8b.py`
 carries those levels; this script is the endpoint.
 """
 
@@ -51,14 +51,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
 from aadistill.evaluation.paired_stats import (  # noqa: E402
     mcnemar_counts, paired_bootstrap_ci,
 )
-from analyze_e6 import (  # noqa: E402  — one scorer, shared by E6, E7 and E8b
+from stages.e6.analyze_e6 import (  # noqa: E402  — one scorer, shared by E6, E7 and E8b
     load_sessions, rescore_arm,
 )
 

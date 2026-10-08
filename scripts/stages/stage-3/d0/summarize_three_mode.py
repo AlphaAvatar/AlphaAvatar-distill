@@ -10,15 +10,15 @@ from __future__ import annotations
 import argparse, json, sys
 from collections import defaultdict
 from pathlib import Path
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
-from run_three_mode_diagnostic import score, summarize  # noqa: E402
+from stages.d0.run_three_mode_diagnostic import score, summarize  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--dir", required=True, type=Path)
 ap.add_argument("--sessions", type=Path,
-                default=REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl")
+                default=REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
 ap.add_argument("--out", required=True, type=Path)
 a = ap.parse_args()
 

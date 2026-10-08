@@ -13,15 +13,15 @@ from pathlib import Path
 
 import pytest
 
-REPO = Path(__file__).resolve().parents[5]
+REPO = Path(__file__).resolve().parents[6]
 for extra in ("src", "scripts", "scripts/data"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
 
-from experiments.phase_d_series import battery_family as family  # noqa: E402
-from experiments.phase_d_series import build_batteries as build  # noqa: E402
-from experiments.phase_d_series import verify_batteries as verify  # noqa: E402
+from stages.d_series import battery_family as family  # noqa: E402
+from stages.d_series import build_batteries as build  # noqa: E402
+from stages.d_series import verify_batteries as verify  # noqa: E402
 
 ROOT = REPO / build.OUT
 MANIFEST = REPO / build.MANIFEST
@@ -144,7 +144,7 @@ class TestTheVerifierWouldCatchAFailure:
         roles, _ = loaded
         bad = self._copy(roles)
         consumed = json.loads(
-            (REPO / "artifacts/stage3/c1_confirmation_v1/gsm8k.jsonl")
+            (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/gsm8k.jsonl")
             .read_text().splitlines()[0])
         bad["d1_screening"]["gsm8k"][0]["historical_render_id"] = consumed["id"]
         problems = verify.check_isolation_from_history(bad)
@@ -187,7 +187,7 @@ class TestTheIdentityCoordinatesOnDisk:
                     assert str(item["_split"]) in str(item["id"]), item["id"]
 
     def test_the_three_payload_strata_all_carry_a_content_id(self):
-        from experiments.phase_d_series.identity import PROBLEM_FIELD
+        from stages.d_series.identity import PROBLEM_FIELD
 
         roles, _ = verify.load(ROOT)
         for role, per in roles.items():
@@ -297,7 +297,7 @@ class TestEveryItemIsCheckedAgainstTheWholeContract:
             "the reserved id set looks too small to include the training corpus")
         #: a known recovery-training source id must be in it
         first = json.loads(
-            (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl")
+            (REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
             .read_text(errors="ignore").split("\n", 1)[0])
         assert str(first["source_id"]) in reserved["ids"]
 
@@ -308,7 +308,7 @@ class TestEveryItemIsCheckedAgainstTheWholeContract:
         root = tmp_path / "family"
         shutil.copytree(ROOT, root)
         first = json.loads(
-            (REPO / "artifacts/stage3/corpus_v2/sessions.jsonl")
+            (REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
             .read_text(errors="ignore").split("\n", 1)[0])
         reserved_id = str(first["source_id"])
 
@@ -331,7 +331,7 @@ class TestEveryItemIsCheckedAgainstTheWholeContract:
         root = tmp_path / "family"
         shutil.copytree(ROOT, root)
         consumed = json.loads(
-            (REPO / "artifacts/stage3/c1_confirmation_v1/multihop.jsonl")
+            (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/multihop.jsonl")
             .read_text().splitlines()[0])
         path = root / "d2_screening" / "multihop.jsonl"
         rows = [json.loads(line) for line in path.read_text().splitlines()

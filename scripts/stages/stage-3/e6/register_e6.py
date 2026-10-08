@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Write the immutable Experiment 6 registration, BEFORE any GPU is created.
 
-    PYTHONPATH=src python scripts/evaluation/register_e6.py --out logs/stages/stage-3/e6/analyses/e6_registration.json
+    PYTHONPATH=src python scripts/stages/stage-3/e6/register_e6.py --out logs/stages/stage-3/e6/analyses/e6_registration.json
 
 E6 is **evaluation-only**. Nothing trains, nothing is merged, quantized or
 overwritten. It places the existing high-rung Experiment 1 PCA checkpoints onto
@@ -34,16 +34,16 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
-SESSIONS = REPO_ROOT / "artifacts/stage3/corpus_v2/sessions.jsonl"
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
+SESSIONS = REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 RELAY = "AlphaAvatar/aadistill-artifacts"
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
 
@@ -53,8 +53,8 @@ EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6b
 # proves it rather than asserting it.
 E4_COMMIT = "1dafec29b1637d3e1412be7fcf453640c4cd97d9"
 EVALUATOR_PATHS = (
-    "scripts/evaluation/run_three_mode_diagnostic.py",
-    "scripts/evaluation/diagnose_training_recall.py",
+    "scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
+    "scripts/shared/evaluation/diagnose_training_recall.py",
     "src/aadistill/evaluation",
     "src/aadistill/data/verify.py",
 )
@@ -91,7 +91,7 @@ ARMS = {
         "run": "e1_r2960k_sb_pca", "seed": 20260801, "rung": 2960000,
         "step": "step_002916", "config": "configs/stage3/e1/e1_r2960k_sb_pca.json",
         "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
-        "source": ("devbox", "artifacts/stage3/rescued/e1_r2960k_sb_pca"),
+        "source": ("devbox", "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca"),
         "generate": True, "retained_three_mode": None,
         "lineage": "E1 PCA scale curve",
     },
@@ -107,7 +107,7 @@ ARMS = {
         "run": "e1_r5500k_sb_pca", "seed": 20260801, "rung": 5500000,
         "step": "step_004412", "config": "configs/stage3/e1/e1_r5500k_sb_pca.json",
         "weights_sha256": "bcb916cb3e544505770cddf021c680b0af6ded3ec7b5cfafe37eea5bb1541742",
-        "source": ("devbox", "artifacts/stage3/rescued/e1_r5500k_sb_pca"),
+        "source": ("devbox", "artifacts/stages/stage-3/rescued/e1_r5500k_sb_pca"),
         "generate": True, "retained_three_mode": None,
         "lineage": "E1 PCA scale curve",
     },
@@ -244,7 +244,7 @@ def verify_evaluator_unchanged() -> dict:
 
 def frozen_assets() -> dict:
     """Hash every asset the protocol is frozen against, and rebuild the mask."""
-    from diagnose_training_recall import rung_session_ids, stratified_sample
+    from shared.evaluation.diagnose_training_recall import rung_session_ids, stratified_sample
 
     want = set(rung_session_ids(PACK, 860000))
     rung = [json.loads(l) for l in SESSIONS.open()
@@ -287,7 +287,7 @@ def frozen_assets() -> dict:
 
 def protocol() -> dict:
     return {
-        "harness": "scripts/evaluation/run_three_mode_diagnostic.py",
+        "harness": "scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",
         "modes": ["free", "oracle", "forced"],
         "primary_mode": "free",
         "n": 150,

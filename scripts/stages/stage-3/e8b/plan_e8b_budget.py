@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Price E8b's pair-matched, session-split design through the four-threshold planner.
 
-    PYTHONPATH=src python scripts/training/plan_e8b_budget.py
+    PYTHONPATH=src python scripts/stages/stage-3/e8b/plan_e8b_budget.py
 
 Hardware is **pair-matched inside each causal comparison** rather than uniform
 across the 2x2, because the two primary effects are `DC - DP` (depth-only) and
@@ -39,7 +39,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.budget import (  # noqa: E402

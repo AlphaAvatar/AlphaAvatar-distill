@@ -6,9 +6,9 @@ confidence. **All diagnostics.** They describe what happened to the student's
 distribution over ordinary prose; they may not promote a checkpoint. E7's
 promotion decision is the frozen autonomous rollout evaluation and nothing else.
 
-    PYTHONPATH=src python scripts/evaluation/eval_general_text.py \\
-        --model artifacts/stage3/e7_fineweb_r1600k_sa/checkpoints/step_001761/model \\
-        --stream artifacts/stage3/e7_fineweb_val \\
+    PYTHONPATH=src python scripts/shared/evaluation/eval_general_text.py \\
+        --model artifacts/stages/stage-3/e7_fineweb_r1600k_sa/checkpoints/step_001761/model \\
+        --stream artifacts/stages/stage-3/e7_fineweb_val \\
         --teacher Qwen/Qwen3-4B-Thinking-2507 \\
         --out artifacts/audit/e7_general_text/e7_fineweb_sa.json
 
@@ -24,7 +24,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import load_extra_stream  # noqa: E402

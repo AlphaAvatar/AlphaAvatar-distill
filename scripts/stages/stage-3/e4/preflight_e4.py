@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Experiment 4 preflight: prove the arms on the REAL student before renting a GPU.
 
-    PYTHONPATH=src python scripts/training/preflight_e4.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e4/preflight_e4.py \
         --out artifacts/audit/e4_preflight.json
 
 Every check here is one that would otherwise surface only after money had been
@@ -30,7 +30,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import numpy as np  # noqa: E402
@@ -43,9 +43,9 @@ from aadistill.training.train import (  # noqa: E402
     Trainer, select_trainable, stream_block_indices, validate_train_config,
 )
 
-INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
-PACK = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
+PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
 CONFIGS = {
     "P2-0.86M-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
     "P2-0.86M-sb": "configs/stage3/p2/p2_ceheavy_sb.json",

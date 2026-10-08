@@ -4,7 +4,7 @@ C1 attempt 4 died at the pod CPU test gate for `$0.6986` with six failures, and
 the sweep that had certified the same tree passed. It ran with
 `simulate_pod_env.sh`'s generic default `HIDDEN_PATHS` — a hand-maintained
 complement whose own comment claimed every pod session stages
-`artifacts/stage3/corpus_v2`. C1 stages no such thing. The simulation was 55 tests
+`artifacts/stages/stage-3/corpus_v2`. C1 stages no such thing. The simulation was 55 tests
 more generous than the pod: 49 extra skips plus 6 failures, exactly the pass delta.
 
 The direction was the defect. A complement cannot be checked against anything, so
@@ -33,7 +33,7 @@ from support.session_specs import load_session_launcher, session_args  # noqa: E
 #: `verify_record` no longer imports an experiment package to find this out --
 #: which harness a readiness record describes is the caller's fact.
 def c1_digest(repo_root):
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1.authorization import c1_harness_digest
     return c1_harness_digest(repo_root)["digest"]
 
 
@@ -65,11 +65,11 @@ def contract(c1_setup):
 #: The unstaged source roots the hidden-set assertion needs to inspect. Exactly
 #: what attempt 4 tripped on: the generic default claimed every session stages
 #: `corpus_v2`, and C1 stages neither of these.
-UNSTAGED_ROLES = ("artifacts/stage3/corpus_v2", "artifacts/eval/battery_v2")
+UNSTAGED_ROLES = ("artifacts/stages/stage-3/corpus_v2", "artifacts/stages/stage-3/eval/battery_v2")
 
 #: The four files C1's manifest stages into the checkpoint destination. The dev
 #: box holds more; a correctly staged pod holds exactly these.
-CHECKPOINT_DEST = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CHECKPOINT_DEST = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CHECKPOINT_DECLARED = ("tokenizer.json", "tokenizer_config.json",
                        "chat_template.jinja", "config.json")
 
@@ -303,7 +303,7 @@ def test_these_staging_tests_never_consult_the_simulator_flag():
 def test_a_local_asset_is_a_whole_tree_and_a_relay_input_is_one_file(contract):
     """The two staging kinds differ, and the contract must not flatten them."""
     staged = sc.staged_files(contract, REPO)
-    tree = "artifacts/stage3/c1_confirmation_v1"
+    tree = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
     assert sum(1 for p in staged if p.startswith(tree + "/")) > 1
     relay = [r for r in contract["relay_inputs"] if r.get("staged")]
     for r in relay:
@@ -313,12 +313,12 @@ def test_a_local_asset_is_a_whole_tree_and_a_relay_input_is_one_file(contract):
 def test_install_to_alone_would_over_stage(c1_setup):
     """The bug this contract had for one draft: `install_to` is the PARENT.
 
-    Reading it alone marks all of `artifacts/stage1` and `artifacts/stage3` as
+    Reading it alone marks all of `artifacts/stages/stage-1` and `artifacts/stages/stage-3` as
     staged — which would have hidden nothing that matters and reproduced the very
     over-generous model being removed.
     """
     parents = {a.install_to for a in c1_setup.local_assets}
-    assert parents == {"artifacts/stage1", "artifacts/stage3"}
+    assert parents == {"artifacts/stages/stage-1", "artifacts/stages/stage-3"}
     for a in c1_setup.local_assets:
         assert a.repo_path == f"{a.install_to}/{a.dest_name}", (
             "the staged tree is install_to/dest_name; if that stops holding, "
@@ -370,7 +370,7 @@ def test_changing_a_local_asset_destination_changes_the_contract(c1_setup):
 def test_the_recorder_derives_and_never_falls_back(contract):
     """No default path. A sweep that cannot say what this session stages must
     not run at all, because that is exactly what attempt 4 did."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     #: `derive_c1_session()` until 2026-09-15. The recorder now drives one
     #: experiment per invocation through the `SweepContract` that experiment
     #: declares, so the function is `derive_session(sweep)` and the session id
@@ -397,8 +397,8 @@ def test_the_recorder_derives_and_never_falls_back(contract):
 
 
 def test_a_launch_bound_record_without_a_staging_contract_is_refused():
-    from experiments.phase_c1 import pod_environment as pe
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1 import pod_environment as pe
+    from stages.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,
@@ -412,8 +412,8 @@ def test_a_launch_bound_record_without_a_staging_contract_is_refused():
 
 
 def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
-    from experiments.phase_c1 import pod_environment as pe
-    from experiments.phase_c1.authorization import c1_harness_digest
+    from stages.phase_c1 import pod_environment as pe
+    from stages.phase_c1.authorization import c1_harness_digest
 
     rec = {"schema": pe.SCHEMA, "swept_base_commit": pe.head_commit(REPO),
            "tree_clean": True,
@@ -429,7 +429,7 @@ def test_a_record_swept_under_a_different_staging_contract_is_refused(contract):
 
 
 def test_the_paid_gate_passes_the_live_staging_digest():
-    src = (REPO / "scripts/pod/autoinit_c1_launch.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
     assert "staging_contract_digest=live_staging" in src
     assert "derive_contract(spec(ctx.args).setup" in src
 
@@ -439,7 +439,7 @@ def test_the_paid_gate_passes_the_live_staging_digest():
 def test_an_absent_or_empty_role_fails_the_isolation_verifier(tmp_path):
     """`zero collisions` against a role that was never read is not evidence."""
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    import verify_c1_battery_isolation as v
+    from stages.phase_c1 import verify_c1_battery_isolation as v
 
     with pytest.raises(v.RoleUnavailable, match="does not exist"):
         v.role_identities("artifacts/does_not_exist_at_all", "jsonl_dir")
@@ -461,13 +461,13 @@ def test_an_absent_or_empty_role_fails_the_isolation_verifier(tmp_path):
 
 def test_the_verifier_declares_every_role_and_cross_checks_frozen_counts():
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    import verify_c1_battery_isolation as v
+    from stages.phase_c1 import verify_c1_battery_isolation as v
 
     assert set(v.EXPECTED) == set(v.ROLES), (
         "a role has no frozen expectation, so a substituted nonempty asset would "
         "satisfy it")
     manifest = json.loads(
-        (REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json").read_text())
+        (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
     for role, (key, rows_field, _ids) in v.EXPECTED.items():
         assert key in manifest["isolation"], role
         assert rows_field in manifest["isolation"][key], (role, rows_field)
@@ -483,7 +483,7 @@ def test_the_verifier_declares_every_role_and_cross_checks_frozen_counts():
 def _c1_session():
     import sys as _sys
     _sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    from record_pod_environment import derive_session, sweep_contract
+    from shared.pod.record_pod_environment import derive_session, sweep_contract
 
     #: C1's session, through the generic driver. `derive_c1_session()` was this
     #: call with C1 baked in; the experiment is now named.
@@ -492,7 +492,7 @@ def _c1_session():
 
 def test_the_setup_environment_comes_from_the_production_method():
     """`SessionSpec.setup_environment`, not a reconstructed subset."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert "spec.setup_environment(session_commit=" in src
     assert "**setup_env," in src, "the production env is not merged into the child"
     spec, contract, view, env = _c1_session()
@@ -537,7 +537,7 @@ def test_changing_session_kind_moves_the_digest_and_the_child_environment(tmp_pa
 def test_the_recorder_records_the_command_it_ran_not_a_transcription():
     """A record that restates its command cannot be checked against its JUnit.
     Attempt 4's said two ignores while the sweep ran a different selection."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert '"pytest_command": pytest_cmd,' in src
     assert '"--ignore=tests/data/test_recovery_corpus_pipeline.py "' not in src, (
         "a hand-transcribed pytest command is back in the record")
@@ -556,7 +556,7 @@ def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
     """
     import sys as _sys
     _sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    from record_pod_environment import check_invocation_matches
+    from shared.pod.record_pod_environment import check_invocation_matches
 
     spec, contract, view, env = _c1_session()
     cmd = (".venv/bin/python -m pytest tests/ -q "
@@ -581,7 +581,7 @@ def test_a_mismatched_invocation_refuses_before_a_pass_record_exists():
     assert any("generic default" in p for p in r["problems"])
 
     # and the recorder turns any of those into a FAIL verdict
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert 'if realization["problems"]:' in src
     assert 'record["verdict"] = "FAIL"' in src
 
@@ -595,7 +595,7 @@ def test_no_host_local_premise_is_asked_of_a_pod_any_more():
     `tests/c1_preflight/` now, and the rule is simpler than a disjointness
     proof: nothing in the preflight may read a path outside the checkout.
     """
-    from experiments.phase_c1 import pod_environment as pe
+    from stages.phase_c1 import pod_environment as pe
 
     for gone in ("HOST_LOCAL_C1_NODEIDS", "RENDERER_PARITY_NODEIDS",
                  "BATTERY_SOURCE_NODEIDS", "DEVBOX_ONLY_NODEIDS"):
@@ -632,9 +632,9 @@ def test_the_record_embeds_the_whole_findings_block():
     """Cherry-picking findings into the record is how the battery, host-local and
     dev-box skip groups came to be computed but never written: a new group had to
     be remembered in two places and the second was forgotten."""
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src
-    from experiments.phase_c1 import pod_environment as pe
+    from stages.phase_c1 import pod_environment as pe
     keys = set(pe.evaluate_sweep({}))
     #: The nine C1 groups are gone with the design that needed them; what the
     #: record must still carry whole is whatever `evaluate_sweep` computes,

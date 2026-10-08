@@ -27,7 +27,7 @@ for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(ROOT / extra) not in sys.path:
         sys.path.insert(0, str(ROOT / extra))
 
-import autoinit_c2_replay_launch as L  # noqa: E402
+from stages.phase_c2_replay import autoinit_c2_replay_launch as L  # noqa: E402
 
 
 class _Ctx:
@@ -44,7 +44,7 @@ class _Ctx:
 
 def _write_evidence(scr: Path, leaves: list[dict]) -> Path:
     """At the location the runner really extracts to."""
-    from collect_artifacts import load_specs
+    from shared.pod.collect_artifacts import load_specs
 
     spec = [e for e in load_specs(
         str(ROOT / "configs/autoinit/c2_replay_artifacts.json"))

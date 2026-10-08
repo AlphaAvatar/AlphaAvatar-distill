@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Measure the real wall-clock speedup of `truncate_padding` on E5-C blocks.
 
-    PYTHONPATH=src python scripts/training/benchmark_e5_throughput.py \
-        --pack artifacts/stage3/e5_pack_c_sa \
+    PYTHONPATH=src python scripts/stages/stage-3/e5/benchmark_e5_throughput.py \
+        --pack artifacts/stages/stage-3/e5_pack_c_sa \
         --student /workspace/ckpt/p2_ceheavy_sa \
         --teacher Qwen/Qwen3-4B-Thinking-2507@768f209d… \
         --out artifacts/audit/e5_throughput.json
@@ -37,7 +37,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 import numpy as np  # noqa: E402

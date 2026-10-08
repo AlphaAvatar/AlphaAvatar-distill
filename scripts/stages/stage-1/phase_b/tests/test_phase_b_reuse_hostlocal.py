@@ -36,7 +36,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts/autoinit"))
 
-from verify_historical_probe_reuse import verify  # noqa: E402
+from stages.phase_b.verify_historical_probe_reuse import verify  # noqa: E402
 
 
 def test_every_historical_probe_reconstructs_but_reuse_is_now_REFUSED():
@@ -94,7 +94,7 @@ def test_a_checkpoint_whose_BYTES_disagree_is_not_reusable(monkeypatch):
     already fails this check, so on a pod the assertions below would pass
     vacuously — a green test proving nothing.
     """
-    import verify_historical_probe_reuse as vhr
+    from stages.phase_b import verify_historical_probe_reuse as vhr
 
     swapped = dict(vhr.CHECKPOINTS)
     # Point one finalist at the OTHER finalist's retained checkpoint. Same shape,
@@ -114,7 +114,7 @@ def test_a_checkpoint_whose_BYTES_disagree_is_not_reusable(monkeypatch):
 
 def test_a_changed_scoring_contract_invalidates_reuse(monkeypatch):
     """M6: old numbers may not be silently re-interpreted under a new scorer."""
-    import verify_historical_probe_reuse as vhr
+    from stages.phase_b import verify_historical_probe_reuse as vhr
 
     monkeypatch.setattr(vhr, "recovery_scoring_contract",
                         lambda: {"digest": "f" * 64})
@@ -132,7 +132,7 @@ def test_a_changed_scoring_contract_invalidates_reuse(monkeypatch):
 
 def _launcher():
     sys.path.insert(0, str(REPO / "scripts/pod"))
-    import autoinit_phase_b_launch as pbl
+    from stages.phase_b import autoinit_phase_b_launch as pbl
     return pbl
 
 
@@ -163,7 +163,7 @@ def test_the_gate_refuses_when_the_retained_store_is_ABSENT(monkeypatch):
     """
     import types
 
-    import verify_historical_probe_reuse as vhr
+    from stages.phase_b import verify_historical_probe_reuse as vhr
 
     pbl = _launcher()
     monkeypatch.setattr(vhr, "CHECKPOINTS",
@@ -177,7 +177,7 @@ def test_the_gate_refuses_a_SWAPPED_checkpoint(monkeypatch):
     """Not merely absence: bytes that exist and belong to something else."""
     import types
 
-    import verify_historical_probe_reuse as vhr
+    from stages.phase_b import verify_historical_probe_reuse as vhr
 
     pbl = _launcher()
     swapped = dict(vhr.CHECKPOINTS)
@@ -203,7 +203,7 @@ def _position(**kw):
     import sys
 
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    from historical_reuse_position import position
+    from stages.phase_b.historical_reuse_position import position
 
     return position(**kw)
 
@@ -278,7 +278,7 @@ def test_the_committed_record_agrees_with_a_live_derivation():
     import json
 
     path = REPO / "logs/shared/analyses/autoinit_historical_reuse_position.json"
-    assert path.is_file(), "run scripts/autoinit/historical_reuse_position.py"
+    assert path.is_file(), "run scripts/stages/stage-1/phase_b/historical_reuse_position.py"
     recorded = json.loads(path.read_text())
     live = _position()
     assert {k: c["verdict"] for k, c in recorded["conclusions"].items()} == \
@@ -291,7 +291,7 @@ def test_no_old_to_new_equivalence_bypass_was_added():
     """The refusal must still be a plain identity comparison. A branch that
     admitted a superseded digest 'because equivalence was demonstrated' is the
     thing the maintainer decision forbids."""
-    src = (REPO / "scripts/autoinit/verify_historical_probe_reuse.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_b/verify_historical_probe_reuse.py").read_text()
     assert '"scoring_contract_matches_live":' in src
     body = src.split('"scoring_contract_matches_live":')[1].split(",\n")[0]
     assert "==" in body and "or" not in body, (

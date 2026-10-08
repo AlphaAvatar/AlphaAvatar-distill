@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue the ONE-USE Phase-B authorization. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/issue_phase_b_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_b/issue_phase_b_authorization.py \
         --grant logs/autoinit_phase_b_grant.json --require-clean
 
 Same contract as the Phase-A issuer, and the same reason for it: the grant is an
@@ -38,14 +38,14 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
-from experiments.source_sets import generation_source_digest  # noqa: E402
-from experiments.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
-from experiments.source_sets import recovery_scoring_contract, trainer_source_digest
+from shared.calibration import DOMAIN_BALANCED_V1, REASONING_HEAVY_V2
+from shared.source_sets import generation_source_digest  # noqa: E402
+from stages.phase_b.plan import PHASE_B_EXECUTABLE_SOURCE_FILES_V1, PHASE_B_PLAN_V1, PhaseBAuthorization, phase_b_source_digest  # noqa: E402
+from shared.source_sets import recovery_scoring_contract, trainer_source_digest
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 FROZEN_PLAN = "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_recovery_plan_frozen.json"

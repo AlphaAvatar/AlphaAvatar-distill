@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Materialize the pod's dependency set as wheels, from the exact lock.
 
-    PYTHONPATH=src python scripts/pod/build_wheelhouse.py --out <dir>
-    PYTHONPATH=src python scripts/pod/build_wheelhouse.py --out <dir> --upload
+    PYTHONPATH=src python scripts/shared/pod/build_wheelhouse.py --out <dir>
+    PYTHONPATH=src python scripts/shared/pod/build_wheelhouse.py --out <dir> --upload
 
 Why this exists. Four of five host draws on 2026-08-14 died in `uv sync`, and
 every one of them was the same thing: the pod resolves and downloads ~3.8 GiB of
@@ -40,7 +40,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 #: The pod's interpreter, read from a real run's recorded runtime fingerprint
 #: rather than assumed: `logs/shared/validations/micro-preflight/runs/autoinit_preflight_run4` records 3.12.3.
 POD_PYTHON = (3, 12)

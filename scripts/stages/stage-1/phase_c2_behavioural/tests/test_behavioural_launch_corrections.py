@@ -38,12 +38,12 @@ for _p in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-from experiments.phase_c2 import behavioural as BH  # noqa: E402
-from experiments.phase_c2 import behavioural_continuation as BC  # noqa: E402
-from experiments.phase_c2 import behavioural_governance as BG  # noqa: E402
+from stages.phase_c2 import behavioural as BH  # noqa: E402
+from stages.phase_c2 import behavioural_continuation as BC  # noqa: E402
+from stages.phase_c2 import behavioural_governance as BG  # noqa: E402
 
-import autoinit_c2_behavioural_launch as L  # noqa: E402
-import autoinit_c2_behavioural_driver as D  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_launch as L  # noqa: E402
+from stages.phase_c2_behavioural import autoinit_c2_behavioural_driver as D  # noqa: E402
 
 
 class _Args:
@@ -176,7 +176,7 @@ def test_the_launcher_applies_no_second_contingency_or_recovery_reserve():
 
 def test_the_decomposition_is_reconciled_against_the_frozen_record():
     """Its own source must reconstruct from it, or it bounds nothing."""
-    from experiments.phase_c2 import selection_pricing as SP
+    from stages.phase_c2 import selection_pricing as SP
 
     d = BH.session_decomposition(REPO, materialization_minutes=100.0)
     model = d["probe_model"]
@@ -298,7 +298,7 @@ def test_a_declared_runtime_inputs_bytes_reach_the_closure_digest(rel):
 
 def test_the_declared_inputs_come_from_their_owners_constants():
     """One string per path. A retyped path is a path that can drift."""
-    from experiments.phase_c2 import replay_specs as RS
+    from stages.phase_c2 import replay_specs as RS
 
     declared = BG.declared_inputs(REPO)
     for constant in (RS.SELECTION_REL, RS.JOURNAL_REL, RS.TELEMETRY_REL,
@@ -429,7 +429,7 @@ def test_a_replacement_resource_continues_the_same_campaign(tmp_path):
 
 def test_a_restored_probe_that_does_not_match_its_descriptor_is_refused():
     """Continuation may consume; it may not substitute."""
-    from experiments.phase_c2 import behavioural_schedule as SCH
+    from stages.phase_c2 import behavioural_schedule as SCH
 
     probe = SCH.Probe("screening", "B", 1, "a" * 64, "/arms/B")
     driver = D.C2BehaviouralDriver.__new__(D.C2BehaviouralDriver)
@@ -854,7 +854,7 @@ def test_a_remainder_that_exceeds_the_campaign_ceiling_refuses(tmp_path):
     #: states of a live campaign; what must never hold is that it does not fit
     #: AND nothing refuses.
     if settled + hard_usd > ceiling:
-        src = (REPO / "scripts/pod/autoinit_c2_behavioural_launch.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c2_behavioural/autoinit_c2_behavioural_launch.py").read_text()
         body = src.split("def campaign_continuation_gate(", 1)[1].split(
             "\ndef ")[0]
         assert "return False" in body and "ceiling" in body, (

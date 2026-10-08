@@ -30,11 +30,11 @@ for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit"):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-DRIVER = REPO / "scripts/pod/autoinit_d1_driver.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_d1/autoinit_d1_driver.py"
 
 
-from experiments.phase_d1 import d1_authorization as A  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
+from stages.phase_d1 import d1_authorization as A  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
 from support.design_blockers import (  # noqa: E402
     autouse_blocker_free_design,
 )
@@ -158,7 +158,7 @@ class TestTheArgumentSurface:
         import shlex
         import types
 
-        import autoinit_d1_launch as L
+        from stages.phase_d1 import autoinit_d1_launch as L
 
         args = L.build_parser().parse_args(
             ["--scr", "/tmp/x", "--session-commit", "d" * 40,
@@ -227,8 +227,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         """A formal D1 search is treatment-only, so the refusal is at ISSUANCE.
         The control arm stays constructible as a $0 session for protocol-identity
         checks; what it may not be is a paid beam."""
-        from experiments.phase_d1 import d1_authorization as A
-        from experiments.phase_d1 import d1_session as S
+        from stages.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_session as S
 
         with pytest.raises(A.D1AuthorizationRefused, match="may not be issued"):
             A.build_payload(run_id="dispatch_probe", grant={"granted_by": "test"},
@@ -242,8 +242,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
         arm -- which can only arise from editing one, and the self-hash catches
         that first. Both layers are asserted, in order."""
         from aadistill.infrastructure.manifest import sha256_json
-        from experiments.phase_d1 import d1_authorization as A
-        from experiments.phase_d1 import d1_session as S
+        from stages.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_session as S
 
         payload = A.build_payload(
             run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
@@ -267,8 +267,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
 
     def test_an_authorization_bound_to_another_design_revision_is_refused(
             self, driver, tmp_path):
-        from experiments.phase_d1 import d1_authorization as A
-        from experiments.phase_d1 import d1_session as S
+        from stages.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_session as S
 
         payload = A.build_payload(
             run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
@@ -281,8 +281,8 @@ class TestTheRefusalsThatMustFireBeforeMoney:
 
     def test_the_real_authorization_is_accepted(self, driver, tmp_path):
         """So the refusals above are not refusing everything."""
-        from experiments.phase_d1 import d1_authorization as A
-        from experiments.phase_d1 import d1_session as S
+        from stages.phase_d1 import d1_authorization as A
+        from stages.phase_d1 import d1_session as S
 
         payload = A.build_payload(
             run_id="dispatch_probe", grant={"granted_by": "test"}, session_commit="b" * 40,
@@ -381,7 +381,7 @@ class TestEveryAuthorizationAttributeTheDriverReadsExists:
         """
         import dataclasses
 
-        from experiments.phase_d1.d1_authorization import D1Authorization
+        from stages.phase_d1.d1_authorization import D1Authorization
 
         return ({f.name for f in dataclasses.fields(D1Authorization)}
                 | {n for n in dir(D1Authorization) if not n.startswith("_")})

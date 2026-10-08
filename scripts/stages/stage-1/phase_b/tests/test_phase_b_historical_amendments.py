@@ -34,7 +34,7 @@ from pathlib import Path as _Path
 import pytest as _pytest
 
 _sys.path.insert(0, str(_Path(__file__).resolve().parents[5] / "tests"))
-from experiments.historical_declarations import missing_from_tree as _missing  # noqa: E402
+from shared.historical_declarations import missing_from_tree as _missing  # noqa: E402
 
 _DECLARED_MOVED = _missing((
     "src/aadistill/initialization/operators/attention.py",
@@ -59,14 +59,14 @@ import pytest
 REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 
-from experiments.phase_b.plan import phase_b_source_digest  # noqa: E402
+from stages.phase_b.plan import phase_b_source_digest  # noqa: E402
 from aadistill.governance.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_SCHEMA,
     entry_self_hash,
 )
 #: Phase B's paths, and the two verifiers bound to them. The generic mechanism
 #: takes every path as an argument now, so the phase supplies its own.
-from experiments.phase_b.post_freeze import (  # noqa: E402
+from stages.phase_b.post_freeze import (  # noqa: E402
     HISTORICAL_LEDGER_PATH,
     accounted_for,
     historical_accounted_for,
@@ -345,7 +345,7 @@ def test_the_writer_refuses_to_reaccount_for_the_same_tree(tmp_path):
     before = (scratch / LEDGER.name).read_bytes()
 
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/record_phase_b_historical_amendment.py"),
+        [sys.executable, str(REPO / "scripts/stages/stage-1/phase_b/record_phase_b_historical_amendment.py"),
          "--commit", "HEAD", "--reviewed-base", "x", "--what", "x",
          "--why-shared-owner", "x", "--why-not-c1-override", "x",
          "--maintainer", "x", "--ledger", str(scratch / LEDGER.name)],
@@ -370,7 +370,7 @@ def test_the_legacy_generator_refuses_to_overwrite_the_sealed_note():
     import subprocess
 
     out = subprocess.run(
-        [sys.executable, str(REPO / "scripts/autoinit/record_phase_b_post_freeze.py")],
+        [sys.executable, str(REPO / "scripts/stages/stage-1/phase_b/record_phase_b_post_freeze.py")],
         capture_output=True, text=True, cwd=REPO,
         env={"PATH": "/usr/bin:/bin", "PYTHONPATH": str(REPO / "src")}, timeout=180)
     assert out.returncode != 0

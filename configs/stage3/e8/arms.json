@@ -1,5 +1,5 @@
 {
-  "treatment_init": "artifacts/stage1/e8_contribution_init_v1/checkpoint",
+  "treatment_init": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
   "allowed_diff": [
     "_purpose",
     "out_dir",

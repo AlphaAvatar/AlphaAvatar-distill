@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The A3 design: ONE end-to-end experiment, derived from what already exists.
 
-    PYTHONPATH=src:scripts python scripts/autoinit/write_a3_design.py --write
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_a3/write_a3_design.py --write
 
 **What A3 is.** The incumbent ATTENTION operator under B3's batching protocol,
 run as a single chain:
@@ -34,11 +34,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 
-from experiments.phase_a3.a_bsz3 import (  # noqa: E402
+from stages.phase_a3.a_bsz3 import (  # noqa: E402
     ATTENTION_IMPL_ID, execution_comparison, frozen_identities,
     item_token_counts,
 )
@@ -281,7 +281,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
     #: comes out of the record the module wrote; the restart cost comes from
     #: the same component table, over the components preceding the first
     #: scientific probe.
-    from experiments.phase_a3.a3_pricing import pre_science_restart_usd
+    from stages.phase_a3.a3_pricing import pre_science_restart_usd
 
     hard_ceiling = float(pricing["price"]["hard_ceiling"]["usd"])
     restart = pre_science_restart_usd(
@@ -370,7 +370,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
                 "artifact digest is an experimental FINDING and the chain "
                 "proceeds directly into recovery. Only an integrity failure "
                 "stops it."),
-            "driver": "scripts/autoinit/compare_a_bsz3.py :: structural_half",
+            "driver": "scripts/stages/stage-1/phase_a3/compare_a_bsz3.py :: structural_half",
         },
 
         "recovery": {
@@ -464,7 +464,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
                     "rule": ("per primary stratum: candidate usable rate < "
                              "0.10 while control usable rate > 0.40"),
                     "candidate_max": 0.10, "control_min": 0.40,
-                    "implementation": ("scripts/experiments/stage-1/phase_c1/"
+                    "implementation": ("scripts/stages/stage-1/phase_c1/"
                                        "probe_results.py :: decision_inputs"),
                 },
                 "_role": ("reported as safety observations. They do not gate "
@@ -516,7 +516,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
 
         "pricing": {
             "_owner": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-            "_derived_by": "scripts/experiments/stage-1/phase_a3/a3_pricing.py",
+            "_derived_by": "scripts/stages/stage-1/phase_a3/a3_pricing.py",
             "gpu_rate_usd_per_hour": pricing["queried_rate_usd_per_hour"],
             "_rate_note": rate_note,
             "expected_usd": pricing["price"]["expected"]["usd"],

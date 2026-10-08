@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Issue the ONE-USE Phase-C3 authorization. Zero cost; launches nothing.
 
-    PYTHONPATH=src python scripts/autoinit/issue_c3_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c3/issue_c3_authorization.py \
         --grant logs/budget/approvals/autoinit_c3_grant.json
 
 Same contract as the Phase-A, Phase-B, continuation and C1 issuers, and the
@@ -33,9 +33,9 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
-#: NOT `scripts/experiments/stage-1/phase_c3` on sys.path -- the sibling phase_c1
+#: NOT `scripts/stages/stage-1/phase_c3` on sys.path -- the sibling phase_c1
 #: directory holds `packaging.py`, which shadows the third-party `packaging`
 #: distribution and breaks the next transformers import in the process.
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
@@ -43,8 +43,8 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.governance.grant import (  # noqa: E402
     GrantRefused, refuse_a_future_dated_grant,
 )
-from experiments.phase_c3.authorization import C3Authorization  # noqa: E402
-from experiments.phase_c3.authorization_payload import (  # noqa: E402
+from stages.phase_c3.authorization import C3Authorization  # noqa: E402
+from stages.phase_c3.authorization_payload import (  # noqa: E402
     C3AuthorizationRefused, build_c3_authorization_payload,
 )
 

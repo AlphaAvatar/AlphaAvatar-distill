@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reconstruct D1's two unretained quality-order finalists on one L40S.
 
-    PYTHONPATH=src:scripts python scripts/pod/autoinit_d1_replay_launch.py \
+    PYTHONPATH=src:scripts python scripts/stages/stage-1/phase_d1/autoinit_d1_replay_launch.py \
         --scr <dir> --session-commit <sha> --bundle <name> --run-id <id>
 
 ENGINEERING, not science. The session decides nothing and measures nothing: the
@@ -39,7 +39,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
@@ -48,11 +48,11 @@ from aadistill.infrastructure.session import (  # noqa: E402
     ArtifactPolicy, BudgetSpec, ExecutionCommands, LocalAsset, MarkerPolicy,
     Phase, ProductFetchResult, SessionSpec, SetupManifest, TeardownPolicy,
 )
-from experiments.deployment import deployment_commands  # noqa: E402
-from experiments.phase_d1 import d1_session as D1S  # noqa: E402
-from experiments.phase_d1 import replay_specs as R  # noqa: E402
-from experiments.preflight import PreflightAuthorization  # noqa: E402
-from experiments.run_layout import rel_run_dir  # noqa: E402
+from shared.deployment import deployment_commands  # noqa: E402
+from stages.phase_d1 import d1_session as D1S  # noqa: E402
+from stages.phase_d1 import replay_specs as R  # noqa: E402
+from shared.preflight import PreflightAuthorization  # noqa: E402
+from shared.run_layout import rel_run_dir  # noqa: E402
 
 REPO = "/workspace/aad"
 WS = D1S.POD_WORKSPACE
@@ -66,7 +66,7 @@ TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 #: The resolved plan, staged as an asset. Written by `--write-plan` before the
 #: launch and verified on the pod against its own declared digests.
 PLAN_NAME = "d1_replay_plan.json"
-PLAN_REL = f"artifacts/stage1/{PLAN_NAME}"
+PLAN_REL = f"artifacts/stages/stage-1/{PLAN_NAME}"
 
 #: How much the provider account must hold BEYOND this session's own hard
 #: ceiling before a pod is created. An absolute floor, named here because the
@@ -88,7 +88,7 @@ ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
 #: reached TESTS_OK with `rc=1` and
 #:
 #:     D1SessionError: the frozen state-eval asset is not staged at
-#:     artifacts/stage1/state_eval_v1
+#:     artifacts/stages/stage-1/state_eval_v1
 #:
 #: on a billing pod. It is the same shape as the device canary's $0.0637: a
 #: session that honestly declared it wanted an asset it did not read, and a
@@ -98,11 +98,11 @@ ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
 #: three made this exact suite pass its pod gate, 346 tests, on the run that
 #: produced the leaves this session rebuilds. 2.4 MiB total, seconds over scp.
 SCIENCE_ASSETS: tuple[LocalAsset, ...] = (
-    LocalAsset(D1S.STATE_EVAL_ROOT, "state_eval_v1", "artifacts/stage1"),
-    LocalAsset("artifacts/stage1/e8_calibration_v1", "e8_calibration_v1",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
+    LocalAsset(D1S.STATE_EVAL_ROOT, "state_eval_v1", "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/e8_calibration_v1", "e8_calibration_v1",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
 )
 
 
@@ -139,7 +139,7 @@ def write_plan(repo_root: Path) -> dict[str, Any]:
 def driver_command(ctx: Any, plan: Any) -> str:
     """The exact command the pod runs. A test parses it with the driver's parser."""
     return (
-        f"/opt/train/bin/python {REPO}/scripts/pod/autoinit_d1_replay_driver.py "
+        f"/opt/train/bin/python {REPO}/scripts/stages/stage-1/phase_d1/autoinit_d1_replay_driver.py "
         f"--out {EVIDENCE_DIR} "
         f"--run-id {getattr(ctx.args, 'run_id', 'unrecorded')} "
         f"--plan {REPO}/{PLAN_REL} "
@@ -373,9 +373,9 @@ def spec(args) -> SessionSpec:
         authorization_path=AUTH_PATH,
         authorization_loader=PreflightAuthorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=plan.plan_id, plan_hash=plan.plan_hash,
         #: RE-PRICED AGAINST THE CAMPAIGN REMAINDER, not re-estimated to fit.
@@ -447,7 +447,7 @@ def spec(args) -> SessionSpec:
         setup=SetupManifest(
             relay_inputs=(),
             local_assets=(*SCIENCE_ASSETS,
-                          LocalAsset(PLAN_REL, PLAN_NAME, "artifacts/stage1")),
+                          LocalAsset(PLAN_REL, PLAN_NAME, "artifacts/stages/stage-1")),
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "TEACHER_REVISION"),
@@ -464,7 +464,7 @@ def spec(args) -> SessionSpec:
                            "AUTHORIZATION_OK", "SETUP_DONE"),
             uv_max_seconds=args.uv_max_s, tests_max_seconds=args.tests_max_s,
             teacher_revision=TEACHER_REVISION,
-            test_paths=("scripts/experiments/stage-1/phase_d1/tests",)),
+            test_paths=("scripts/stages/stage-1/phase_d1/tests",)),
         driver_command=driver_command,
         driver_job_id="autoinit_d1_replay",
         status_path=STATUS, run_log_path=RUN_LOG,

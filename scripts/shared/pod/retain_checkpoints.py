@@ -35,7 +35,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
@@ -45,7 +45,7 @@ def read_trajectory(train_log: Path, holdout_log: Path | None = None) -> list[di
     """Eval points from a run's append-only log, in step order.
 
     Validation CE comes from the trainer's own `eval_result` events. Held-out NLL
-    does **not**: it is a different scoring path (`scripts/evaluation/eval_ppl.py`
+    does **not**: it is a different scoring path (`scripts/shared/evaluation/eval_ppl.py`
     over `holdout_v1`, not packed teacher-native blocks), and adding it to the
     training loop would change the trainer that produced the control. The
     orchestrator scores each saved checkpoint instead and appends

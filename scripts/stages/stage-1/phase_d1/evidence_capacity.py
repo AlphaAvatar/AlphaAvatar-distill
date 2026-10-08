@@ -1,6 +1,6 @@
 """How many more disjoint behavioural batteries the prompt pool supports.
 
-    PYTHONPATH=src:scripts/data:scripts python -m experiments.phase_d1.evidence_capacity
+    PYTHONPATH=src:scripts/data:scripts python -m stages.phase_d1.evidence_capacity
 
 Zero cost. It reads the pinned source files from the local Hugging Face snapshot
 and the battery assets already on disk. No model, no GPU, no network beyond the
@@ -46,22 +46,22 @@ for extra in ("src", "scripts", "scripts/data"):
 #: The batteries already drawn from these pools. Read for EXCLUSION only; neither
 #: is consumed, and neither is re-measured.
 DRAWN_BATTERIES: tuple[str, ...] = (
-    "artifacts/stage3/c1_confirmation_v1",
-    "artifacts/stage3/c2_screening_v1",
+    "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1",
+    "artifacts/stages/stage-1/phase_c2/batteries/c2_screening_v1",
 )
 
 
-def capacity(*, battery: str = "artifacts/eval/battery_v2",
-             recovery_search: str = "artifacts/stage3/recovery_search_v2",
-             sessions: str = "artifacts/stage3/corpus_v2/sessions.jsonl",
-             state_eval: str = "artifacts/stage1/state_eval_v1",
-             calibration: str = "artifacts/stage1/e8_calibration_v1",
+def capacity(*, battery: str = "artifacts/stages/stage-3/eval/battery_v2",
+             recovery_search: str = "artifacts/stages/stage-1/batteries/recovery_search_v2",
+             sessions: str = "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
+             state_eval: str = "artifacts/stages/stage-1/state_eval_v1",
+             calibration: str = "artifacts/stages/stage-1/e8_calibration_v1",
              drawn: tuple[str, ...] = DRAWN_BATTERIES) -> dict[str, Any]:
     """Eligible items and whole batteries remaining, per stratum."""
     from aadistill.data.extra_stream import content_sha256
-    from battery_render import RENDERERS, norm, read_rows
-    import build_c1_confirmation_battery as c1
-    import build_c2_screening_battery as c2
+    from shared.data.battery_render import RENDERERS, norm, read_rows
+    from stages.phase_c1 import build_c1_confirmation_battery as c1
+    from stages.phase_c2 import build_c2_screening_battery as c2
 
     args = argparse.Namespace(
         out="(unused)", battery=battery, recovery_search=recovery_search,

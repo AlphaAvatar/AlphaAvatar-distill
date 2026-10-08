@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Benchmark the full-width and padding-truncated training paths on one GPU.
 
-    PYTHONPATH=src python scripts/pod/benchmark_padding_truncation.py \
-        --pack artifacts/stage3/ladder_uniform_probe \
-        --student artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+    PYTHONPATH=src python scripts/shared/pod/benchmark_padding_truncation.py \
+        --pack artifacts/shared/instruments/ladder_uniform_probe \
+        --student artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         --teacher Qwen/Qwen3-4B-Thinking-2507 \
         --out artifacts/audit/padding_truncation_benchmark.json
 
@@ -43,7 +43,7 @@ from pathlib import Path
 import numpy as np
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402

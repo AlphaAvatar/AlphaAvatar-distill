@@ -26,8 +26,8 @@ further approval, under the unchanged $18.78 hard spending stop.
 
 Exit status: 0 pass, 1 fail, 2 could not evaluate the gate.
 
-    scripts/pod/throughput_gate.py --eval-dir artifacts/eval/e2/d0_sa \\
-        --out artifacts/eval/e2/d0_sa_throughput_gate.json
+    scripts/shared/pod/throughput_gate.py --eval-dir artifacts/stages/stage-3/eval/e2/d0_sa \\
+        --out artifacts/stages/stage-3/eval/e2/d0_sa_throughput_gate.json
 """
 
 from __future__ import annotations

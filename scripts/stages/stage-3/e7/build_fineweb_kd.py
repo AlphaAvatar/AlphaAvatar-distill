@@ -14,8 +14,8 @@ index range says which rows were read; the per-document hashes are what
 `check_stream_disjointness.py` actually proves disjointness with, because two
 different ranges can still deliver the same text.
 
-    python3 scripts/data/build_fineweb_kd.py \\
-        --out artifacts/stage3/e7_fineweb_kd --n-blocks 1761 --block-len 1024 \\
+    python3 scripts/stages/stage-3/e7/build_fineweb_kd.py \\
+        --out artifacts/stages/stage-3/e7_fineweb_kd --n-blocks 1761 --block-len 1024 \\
         --start-index 20000
 
 Reserved ranges, and why the default start is 20,000:
@@ -37,7 +37,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import (  # noqa: E402
@@ -75,7 +75,7 @@ def main() -> int:
     ap.add_argument("--block-len", type=int, default=1024)
     ap.add_argument("--start-index", type=int, default=RESERVED_PREFIX_END)
     ap.add_argument("--tokenizer",
-                    default="artifacts/stage1/qwen3_0p6b_init_v0/checkpoint")
+                    default="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
     ap.add_argument("--purpose", default="train",
                     choices=("train", "validation"))
     ap.add_argument("--kind", default="general_text_kd")

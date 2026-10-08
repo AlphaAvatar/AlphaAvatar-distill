@@ -1,14 +1,14 @@
 """Score stored generations against the frozen `recovery_search_v2` battery.
 
-    PYTHONPATH=src python scripts/autoinit/score_recovery_search.py \
-        --generations artifacts/eval/preflight/<label> --label <label> \
+    PYTHONPATH=src python scripts/shared/evaluation/score_recovery_search.py \
+        --generations artifacts/stages/stage-3/eval/preflight/<label> --label <label> \
         --seed 20260726 --out artifacts/audit/<label>_recovery_search.json
 
 CPU only, and deliberately separate from generation: generation is the paid part
 and scoring is free and re-runnable, which is what let the Experiment 1 GSM8K
 evaluator be corrected after the fact without re-running a checkpoint.
 
-**Why this exists rather than `scripts/evaluation/score_battery.py`.** That script
+**Why this exists rather than `scripts/shared/evaluation/score_battery.py`.** That script
 requires `manifest["battery_version"] == capability-v2` and iterates *its* set
 list. `recovery_search_v2` is a different asset with a different manifest schema
 (`battery_id` / `version`), a different set list (it adds `gsm8k`, `code` and
@@ -45,7 +45,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.`
 #: since the core/application separation, and this file is also run as
@@ -53,7 +53,7 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))
 
-from audit_tool_scoring import as_openai_calls, as_openai_tools  # noqa: E402
+from shared.evaluation.audit_tool_scoring import as_openai_calls, as_openai_tools  # noqa: E402
 
 from aadistill.initialization.planning.recovery import (
     score_recovery_row,
@@ -62,9 +62,9 @@ from aadistill.initialization.planning.recovery import (
 #: The scientific rule this scorer applies. It lived inside
 #: `score_recovery_row`, which made a generic planning module state
 #: what THIS battery means by correct. The arithmetic is unchanged.
-from experiments.recovery_policy import (
+from shared.recovery_policy import (
     CAPABILITY_SCHEMA_V1, CORRECT_IN_USABLE_ROLLOUT)
-from experiments.source_sets import recovery_scoring_contract
+from shared.source_sets import recovery_scoring_contract
 from aadistill.evaluation import usable_rollout  # noqa: E402
 from aadistill.data.tools import normalize_tools  # noqa: E402
 from aadistill.evaluation.behavior import score_tool_call, split_generation  # noqa: E402
@@ -72,7 +72,7 @@ from aadistill.evaluation.capability import SCORERS  # noqa: E402
 from aadistill.evaluation.strict_answer import score_numeric  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
-BATTERY = "artifacts/stage3/recovery_search_v2"
+BATTERY = "artifacts/stages/stage-1/batteries/recovery_search_v2"
 #: Frozen pins. The battery this scores is an immutable asset; if either moves,
 #: the result is not comparable to anything else scored under this name.
 #:

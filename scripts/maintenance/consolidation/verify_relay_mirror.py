@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prove, file by file, that a local tree is mirrored on the relay before deleting it.
 
-    PYTHONPATH=src python scripts/consolidate/verify_relay_mirror.py \
+    PYTHONPATH=src python scripts/maintenance/consolidation/verify_relay_mirror.py \
         --local /home/ecs-user/aad-artifacts/wheelhouse_vllm_cp312 \
         --relay-prefix transfer/wheelhouse_vllm_cp312 \
         --out logs/shared/validations/relay-mirror/relay_mirror_verification.json
@@ -29,7 +29,7 @@ import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 RELAY_REPO = "AlphaAvatar/aadistill-artifacts"

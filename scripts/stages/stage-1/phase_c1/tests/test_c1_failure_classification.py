@@ -36,12 +36,12 @@ sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "pod"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-import autoinit_c1_driver as D  # noqa: E402
+from stages.phase_c1 import autoinit_c1_driver as D  # noqa: E402
 
 from support.session_specs import all_specs  # noqa: E402
 
 RUNNER = REPO / "src/aadistill/infrastructure/session_runner.py"
-LAUNCHER = REPO / "scripts/pod/autoinit_c1_launch.py"
+LAUNCHER = REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py"
 
 #: Claims a marker-blind note is not entitled to make. Each is a statement about
 #: WHICH stage failed or WHY, and the note is printed before either is known.
@@ -145,7 +145,7 @@ def test_the_launcher_names_the_mismatch_marker_only_as_a_marker():
 # --- the explicit path, unchanged -------------------------------------------
 
 def test_only_the_driver_that_observed_a_mismatch_emits_its_marker():
-    src = (REPO / "scripts/pod/autoinit_c1_driver.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py").read_text()
     tree = ast.parse(src)
     emitters = []
     for fn in ast.walk(tree):

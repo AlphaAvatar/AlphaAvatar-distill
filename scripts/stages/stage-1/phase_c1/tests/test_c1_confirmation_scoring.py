@@ -30,14 +30,14 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
 
-import score_c1_confirmation as C1S  # noqa: E402
-import verify_c1_scoring_equivalence as EQ  # noqa: E402
+from stages.phase_c1 import score_c1_confirmation as C1S  # noqa: E402
+from stages.phase_c1 import verify_c1_scoring_equivalence as EQ  # noqa: E402
 
-from experiments.recovery_policy import CORRECT_IN_USABLE_ROLLOUT  # noqa: E402
-from experiments.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_BATTERY_MANIFEST_SHA256, C1_BATTERY_SETS, C1_METRIC_CONTRACT, C1_N_PROMPTS, C1_N_SCORABLE_PROMPTS, C1_SCORING_FILES_V1, C1ScoringError, c1_scoring_contract, validate_c1_battery  # noqa: E402
+from shared.recovery_policy import CORRECT_IN_USABLE_ROLLOUT  # noqa: E402
+from stages.phase_c1.scoring import C1_BATTERY_CONTENT_SHA256, C1_BATTERY_MANIFEST_SHA256, C1_BATTERY_SETS, C1_METRIC_CONTRACT, C1_N_PROMPTS, C1_N_SCORABLE_PROMPTS, C1_SCORING_FILES_V1, C1ScoringError, c1_scoring_contract, validate_c1_battery  # noqa: E402
 
-C1_BATTERY = REPO / "artifacts/stage3/c1_confirmation_v1"
-SCORER = REPO / "scripts/autoinit/score_c1_confirmation.py"
+C1_BATTERY = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1"
+SCORER = REPO / "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py"
 HISTORICAL = EQ.find_generations()
 
 
@@ -69,7 +69,7 @@ def test_the_frozen_assets_are_untouched():
     """
     import json
 
-    from experiments.source_sets import recovery_scoring_contract
+    from shared.source_sets import recovery_scoring_contract
 
     contract = recovery_scoring_contract(REPO)
     assert contract["contract"] == "recovery_search_scoring@v3"
@@ -109,15 +109,15 @@ def test_the_c1_contract_is_a_new_name_not_a_new_metric():
 
 def test_the_c1_closure_covers_the_three_files_v2_omits():
     """V2 omits three files that decide numbers. Do not repeat the hole."""
-    from experiments.source_sets import RECOVERY_SCORING_FILES_V2
+    from shared.source_sets import RECOVERY_SCORING_FILES_V2
 
-    holes = {"scripts/autoinit/audit_tool_scoring.py",
+    holes = {"scripts/shared/evaluation/audit_tool_scoring.py",
              "src/aadistill/data/tools.py",
              "src/aadistill/data/verify.py"}
     assert not (holes & set(RECOVERY_SCORING_FILES_V2))   # the historical hole
     assert holes <= set(C1_SCORING_FILES_V1)              # not repeated here
-    assert "scripts/autoinit/score_c1_confirmation.py" in C1_SCORING_FILES_V1
-    assert "scripts/experiments/stage-1/phase_c1/scoring.py" in C1_SCORING_FILES_V1
+    assert "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py" in C1_SCORING_FILES_V1
+    assert "scripts/stages/stage-1/phase_c1/scoring.py" in C1_SCORING_FILES_V1
 
 
 def test_every_declared_scoring_source_exists_and_a_missing_one_refuses():
@@ -402,7 +402,7 @@ def test_the_scorer_refuses_the_historical_battery_end_to_end(tmp_path):
 
 def test_the_frozen_scorer_is_never_pointed_at_the_c1_battery():
     """The driver and the launcher must invoke only the C1 scorer for C1."""
-    for rel in ("scripts/pod/autoinit_c1_driver.py",):
+    for rel in ("scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",):
         p = REPO / rel
         if not p.is_file():
             continue

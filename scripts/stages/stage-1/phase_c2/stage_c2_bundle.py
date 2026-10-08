@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Put the authorization-carrying C2 session commit where the pod can fetch it.
 
-    PYTHONPATH=src python scripts/autoinit/stage_c2_bundle.py \
+    PYTHONPATH=src python scripts/stages/stage-1/phase_c2/stage_c2_bundle.py \
         --run-id attempt2 --session-commit <sha> [--dry-run]
 
 The step whose absence cost C1 attempt 1 `$0.0786` and a 404. `bundle_staged_gate`
@@ -32,15 +32,15 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
-from experiments.phase_c2.bundle import (  # noqa: E402
+from stages.phase_c2.bundle import (  # noqa: E402
     C2_TRANSPORT, BundleTransportError, build_bundle, canonical_bundle_name,
     canonical_repo_path, stage_bundle,
 )
-from experiments.phase_c2.session import (  # noqa: E402
+from stages.phase_c2.session import (  # noqa: E402
     c2_authorization_path, c2_run_path,
 )
 

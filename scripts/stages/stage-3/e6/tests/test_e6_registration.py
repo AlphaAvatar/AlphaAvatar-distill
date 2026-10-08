@@ -24,7 +24,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[5]
 REGISTRATION = REPO / "logs/stages/stage-3/e6/analyses/e6_registration.json"
-DRIVER = REPO / "scripts/pod/e6_driver.py"
+DRIVER = REPO / "scripts/stages/stage-3/e6/e6_driver.py"
 
 pytestmark = pytest.mark.skipif(
     not REGISTRATION.is_file(), reason="E6 registration not written yet")

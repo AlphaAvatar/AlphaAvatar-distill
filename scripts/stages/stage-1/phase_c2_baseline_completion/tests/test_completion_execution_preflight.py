@@ -48,7 +48,7 @@ for _root in ("src", "scripts", "scripts/autoinit", "scripts/pod", "tests/pod"):
 @pytest.fixture(scope="module")
 def registered():
     """The registration the driver performs at stage A, performed here."""
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
 
@@ -59,7 +59,7 @@ def completion(registered):
     from support.session_specs import load_session_launcher, session_args
 
     from aadistill.runtime.staging_contract import derive_contract
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
 
     launcher = load_session_launcher("autoinit_phase_c2_baseline_launch")
     args = session_args(launcher)
@@ -109,7 +109,7 @@ def test_both_mixtures_resolve_against_their_content_hashes(registered):
     """`resolve()` re-hashes the items file, so a drifted or half-staged mixture
     refuses here rather than silently changing the operators' statistics."""
     from aadistill.initialization.calibration.profiles import get_profile
-    from experiments.phase_c2.search_space import C2_PROFILE_IDS
+    from stages.phase_c2.search_space import C2_PROFILE_IDS
 
     for qualified_id in C2_PROFILE_IDS:
         items = get_profile(qualified_id).resolve(REPO)
@@ -124,9 +124,9 @@ def test_the_state_eval_suite_loads_from_its_declared_root():
     root holds neither `manifest.json` nor `items.jsonl` -- a failure that would
     have landed inside the only stage that spends money.
     """
-    from load_state_eval import load as load_suite
+    from shared.evaluation.load_state_eval import load as load_suite
 
-    from experiments.phase_c2.frozen_assets import state_eval_root
+    from stages.phase_c2.frozen_assets import state_eval_root
 
     root = state_eval_root(REPO)
     suite, items, _manifest = load_suite(root)
@@ -143,8 +143,8 @@ def test_the_state_eval_suite_loads_from_its_declared_root():
 def test_the_frozen_candidates_load_and_match_the_cited_ranking():
     from aadistill.initialization.planning import stage1_selection
 
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2.frozen_inputs import (
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2.frozen_inputs import (
         load_frozen_candidates, load_record)
 
     record = load_record(REPO / BC.FROZEN_INPUTS)
@@ -165,8 +165,8 @@ def test_the_frozen_candidates_satisfy_the_ranking_contract():
     from aadistill.initialization.planning.ranking import PARETO_V1
     from aadistill.initialization.specs.state import StateValidity
 
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2.frozen_inputs import load_frozen_candidates
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2.frozen_inputs import load_frozen_candidates
 
     for candidate in load_frozen_candidates(REPO / BC.FROZEN_INPUTS):
         assert candidate.validity is StateValidity.MEASURED
@@ -177,7 +177,7 @@ def test_the_frozen_candidates_satisfy_the_ranking_contract():
 def test_the_frozen_baseline_construction_verifies(registered):
     """The cheapest gate in the session: a wrong recipe caught here costs
     nothing, and caught after the rebuild it costs the rebuild."""
-    from experiments.phase_c2 import baseline as B
+    from stages.phase_c2 import baseline as B
 
     spec = B.frozen_baseline_spec(device="cuda")
     evidence = B.assert_frozen_construction(spec)
@@ -190,7 +190,7 @@ def test_the_frozen_baseline_construction_verifies(registered):
 
 
 def test_the_plan_reproduces_the_priced_ceiling(completion):
-    from experiments.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import baseline_completion as BC
 
     plan = completion.plan
     assert plan.hard_terminate_usd <= BC.hard_ceiling_usd(REPO) + 1e-9
@@ -208,7 +208,7 @@ def test_the_driver_command_passes_floored_limits_and_no_identity(completion):
     import shlex
 
     parts = shlex.split(completion.command)
-    assert "scripts/pod/autoinit_phase_c2_baseline_driver.py" in parts
+    assert "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py" in parts
     flags = {parts[i]: parts[i + 1] for i in range(len(parts) - 1)
              if parts[i].startswith("--")}
     assert float(flags["--soft-stop-usd"]) <= completion.plan.soft_stop_usd + 1e-9
@@ -228,8 +228,8 @@ def test_the_beam_is_unreachable_from_this_session():
     """By import graph, not by instruction."""
     import ast
 
-    for rel in ("scripts/pod/autoinit_phase_c2_baseline_driver.py",
-                "scripts/pod/autoinit_phase_c2_baseline_launch.py"):
+    for rel in ("scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_driver.py",
+                "scripts/stages/stage-1/phase_c2_baseline_completion/autoinit_phase_c2_baseline_launch.py"):
         tree = ast.parse((REPO / rel).read_text())
         named = set()
         for node in ast.walk(tree):
@@ -247,7 +247,7 @@ def test_the_authorization_on_this_pod_cannot_authorize_a_beam():
     """The artifact the setup script loaded, read again here."""
     import os
 
-    from experiments.phase_c2.baseline_completion import (
+    from stages.phase_c2.baseline_completion import (
         BaselineCompletionAuthorization)
 
     #: Keyed on the FILE, not on the environment variable. The launch-bound

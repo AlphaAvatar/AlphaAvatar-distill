@@ -1,8 +1,8 @@
 """Generate verified-correct teacher targets for a mixture slice (Stage 2 v2).
 
-    uv run python scripts/rollout/generate_teacher_answers.py \
+    uv run python scripts/shared/rollout/generate_teacher_answers.py \
         --slices rag_evidence,multihop_qa,refusal_uncertainty,gsm8k,openmath \
-        --limit-per-slice 200 --n 4 --out artifacts/stage2_v2/pilot
+        --limit-per-slice 200 --n 4 --out artifacts/stages/stage-2/v2/pilot
 
 For each prompt the teacher produces **n sampled candidates in its native
 thinking mode**, every candidate is verified against the gold key with
@@ -57,7 +57,7 @@ from pathlib import Path
 import torch
 from transformers import __version__ as transformers_version
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.evaluation.behavior import THINK_CLOSE, split_generation

@@ -25,17 +25,17 @@ for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / extra) not in sys.path:
         sys.path.insert(0, str(REPO / extra))
 
-from experiments.phase_c2 import full_search as FSG  # noqa: E402
-from experiments.phase_c2 import full_search_authorization as FA  # noqa: E402
-from experiments.phase_c2 import full_search_bundle as FST  # noqa: E402
-from experiments.phase_c2 import full_search_pod_environment as FPE  # noqa: E402
+from stages.phase_c2 import full_search as FSG  # noqa: E402
+from stages.phase_c2 import full_search_authorization as FA  # noqa: E402
+from stages.phase_c2 import full_search_bundle as FST  # noqa: E402
+from stages.phase_c2 import full_search_pod_environment as FPE  # noqa: E402
 
 
 @pytest.fixture(scope="module")
 def launcher():
     spec = importlib.util.spec_from_file_location(
         "c2_full_search_launch",
-        REPO / "scripts/pod/autoinit_phase_c2_full_search_launch.py")
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules["c2_full_search_launch"] = module
     spec.loader.exec_module(module)
@@ -73,8 +73,8 @@ def test_it_authorizes_the_search_and_nothing_else():
 
 def test_the_schemas_are_mutually_exclusive():
     """The one-line check that stops any C2 artifact standing in for another."""
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2 import session as C2S
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import session as C2S
 
     schemas = {FSG.SCHEMA, BC.SCHEMA, C2S.SCHEMA}
     assert len(schemas) == 3, f"two C2 sessions share a schema: {schemas}"
@@ -142,7 +142,7 @@ def test_the_beam_width_comes_from_the_frozen_schedule():
     `SCHEDULE_V1` means a narrower width would have to change the schedule,
     which is a change of experiment rather than an edit to a config.
     """
-    from experiments.phase_c2 import full_search_space as FS
+    from stages.phase_c2 import full_search_space as FS
 
     assert FSG.standing_beam_width() == FS.SCHEDULE_V1.width == 6
     #: And the config must not restate it.
@@ -689,7 +689,7 @@ def test_the_readiness_gate_reads_the_key_the_recorder_writes(launcher,
 
     So both kinds are presented here, through the module the gate loads from.
     """
-    import experiments.phase_c2.full_search_pod_environment as FPE
+    import stages.phase_c2.full_search_pod_environment as FPE
 
     def record(kind):
         return {"schema": FPE.SCHEMA, "record_kind": kind, "verdict": "PASS",
@@ -744,7 +744,7 @@ def test_the_beam_envelope_the_driver_is_handed_is_affordable(launcher):
     """
     import re
 
-    import experiments.phase_c2.full_search as FSG
+    import stages.phase_c2.full_search as FSG
 
     spec = launcher.spec(launch_args(launcher))
     rate = FSG.price_per_hour_basis(REPO)
@@ -838,13 +838,13 @@ def test_nothing_in_the_chain_reaches_a_recovery_or_scoring_path():
     forbidden = ("recovery", "probe", "correct_overall", "screening",
                  "confirmation", "usable_rollout", "behavioural")
     files = [
-        REPO / "scripts/pod/autoinit_phase_c2_full_search_launch.py",
-        REPO / "scripts/pod/autoinit_phase_c2_full_search_driver.py",
-        REPO / "scripts/experiments/stage-1/phase_c2/full_search.py",
-        REPO / "scripts/experiments/stage-1/phase_c2/full_search_authorization.py",
-        REPO / "scripts/experiments/stage-1/phase_c2/full_search_bundle.py",
-        REPO / "scripts/experiments/stage-1/phase_c2/full_search_pod_environment.py",
-        REPO / "scripts/autoinit/issue_c2_full_search_authorization.py",
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py",
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py",
+        REPO / "scripts/stages/stage-1/phase_c2/full_search.py",
+        REPO / "scripts/stages/stage-1/phase_c2/full_search_authorization.py",
+        REPO / "scripts/stages/stage-1/phase_c2/full_search_bundle.py",
+        REPO / "scripts/stages/stage-1/phase_c2/full_search_pod_environment.py",
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/issue_c2_full_search_authorization.py",
     ]
     for path in files:
         tree = ast.parse(path.read_text())
@@ -893,7 +893,7 @@ def test_both_artifact_specs_load_through_the_collectors_own_loader(name):
     during a teardown.
     """
     collector = importlib.util.spec_from_file_location(
-        "collect_artifacts_for_test", REPO / "scripts/pod/collect_artifacts.py")
+        "collect_artifacts_for_test", REPO / "scripts/shared/pod/collect_artifacts.py")
     module = importlib.util.module_from_spec(collector)
     sys.modules["collect_artifacts_for_test"] = module
     collector.loader.exec_module(module)
@@ -931,7 +931,7 @@ def test_the_artifact_patterns_are_the_ones_the_driver_actually_writes():
     path, and this project has lost a search journal to `phase_a_search` versus
     `phase_b_search`.
     """
-    driver = (REPO / "scripts/pod/autoinit_phase_c2_full_search_driver.py").read_text()
+    driver = (REPO / "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py").read_text()
     assert 'artifacts/autoinit/phase_c2_full_search' in driver
     assert 'artifacts/audit/autoinit_phase_c2_full_search' in driver
     for name in ("c2_full_search_artifacts", "c2_full_search_artifacts_failed"):
@@ -954,7 +954,7 @@ def test_the_readiness_record_path_requires_a_run_id():
 
 
 def test_the_readiness_schema_is_its_own():
-    from experiments.phase_c2 import baseline_completion_pod_environment as BPE
+    from stages.phase_c2 import baseline_completion_pod_environment as BPE
 
     assert FPE.SCHEMA != BPE.SCHEMA
     assert FPE.EXPERIMENT_ID == "phase_c2_full_search"
@@ -1046,7 +1046,7 @@ def test_the_proposal_regenerates_byte_identically():
 
     spec = importlib.util.spec_from_file_location(
         "write_proposal",
-        REPO / "scripts/autoinit/write_c2_full_search_grant_proposal.py")
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_grant_proposal.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules["write_proposal"] = module
     spec.loader.exec_module(module)
@@ -1123,7 +1123,7 @@ def test_the_sweep_can_actually_be_DRIVEN_for_this_experiment():
     registry is checked by resolving through it, not by reading it.
     """
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
-    import record_pod_environment as R
+    from shared.pod import record_pod_environment as R
 
     assert "phase_c2_full_search" in R.EXPERIMENTS
     contract = R.sweep_contract("phase_c2_full_search", "attempt1", "1",

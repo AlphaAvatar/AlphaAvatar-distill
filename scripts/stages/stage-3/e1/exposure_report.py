@@ -1,6 +1,6 @@
 """Training-exposure accounting for the six Experiment 1 rungs.
 
-    uv run python scripts/evaluation/exposure_report.py
+    uv run python scripts/stages/stage-3/e1/exposure_report.py
 
 
 Answers: how many blocks each rung holds, how many the trainer actually consumed,
@@ -11,7 +11,7 @@ supervised-token quantity or moves quantity and exposure together.
 import json
 from pathlib import Path
 
-LADDER = json.loads(Path("artifacts/stage3/ladder_uniform_probe/ladder.json").read_text())
+LADDER = json.loads(Path("artifacts/shared/instruments/ladder_uniform_probe/ladder.json").read_text())
 BLOCK_LEN = LADDER["block_len"]
 
 rows = []

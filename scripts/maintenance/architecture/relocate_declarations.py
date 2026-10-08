@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Point the frozen source declarations at the paths that now exist.
 
-    PYTHONPATH=src:scripts python scripts/architecture/relocate_declarations.py --write
+    PYTHONPATH=src:scripts python scripts/maintenance/architecture/relocate_declarations.py --write
 
 A declaration like `PHASE_A_HARNESS_SOURCE_FILES_V1` was doing two jobs at once,
 and until the cutover they had the same answer:
@@ -38,34 +38,34 @@ import subprocess
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
-sys.path.insert(0, str(REPO / "scripts/architecture"))
+sys.path.insert(0, str(REPO / "scripts/maintenance/architecture"))
 
-from migration_map import MAP  # noqa: E402
+from maintenance.architecture.migration_map import MAP  # noqa: E402
 
 OUT = "logs/maintenance/inventories/architecture_declaration_history.json"
 
 #: (declaration, file it lives in, module, the version constant to bump)
 DECLARATIONS = [
-    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "scripts/experiments/stage-1/phase_a/plan.py",
-     "experiments.phase_a.plan", "PHASE_A_HARNESS_SOURCE_SET_VERSION"),
-    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "scripts/experiments/stage-1/phase_b/plan.py",
-     "experiments.phase_b.plan", "PHASE_B_SOURCE_SET_VERSION"),
-    ("CONTINUATION_SOURCE_FILES_V2", "scripts/experiments/stage-1/phase_b/continuation.py",
-     "experiments.phase_b.continuation", "CONTINUATION_SOURCE_SET_VERSION"),
+    ("PHASE_A_HARNESS_SOURCE_FILES_V1", "scripts/stages/stage-1/phase_a/plan.py",
+     "stages.phase_a.plan", "PHASE_A_HARNESS_SOURCE_SET_VERSION"),
+    ("PHASE_B_EXECUTABLE_SOURCE_FILES_V1", "scripts/stages/stage-1/phase_b/plan.py",
+     "stages.phase_b.plan", "PHASE_B_SOURCE_SET_VERSION"),
+    ("CONTINUATION_SOURCE_FILES_V2", "scripts/stages/stage-1/phase_b/continuation.py",
+     "stages.phase_b.continuation", "CONTINUATION_SOURCE_SET_VERSION"),
     ("CONTINUATION_HARNESS_SOURCE_FILES_V1",
-     "scripts/experiments/stage-1/recovery_continuation/plan.py",
-     "experiments.recovery_continuation.plan", None),
+     "scripts/stages/stage-1/recovery_continuation/plan.py",
+     "stages.recovery_continuation.plan", None),
     ("HARNESS_SOURCE_FILES_V1", "src/aadistill/governance/authorization.py",
      "aadistill.governance.authorization", "HARNESS_SOURCE_SET_VERSION"),
     #: C1_HARNESS_SOURCE_FILES_V1 is deliberately ABSENT. C1's live contract is
     #: now the derived closure (`c1_current_executable`), so repointing the list
     #: as well would leave two implementations owning one identity. Its history
     #: is recorded below like the others; the list itself stays historical.
-    ("C1_SCORING_FILES_V1", "scripts/experiments/stage-1/phase_c1/scoring.py",
-     "experiments.phase_c1.scoring", "C1_SCORING_CONTRACT_VERSION"),
+    ("C1_SCORING_FILES_V1", "scripts/stages/stage-1/phase_c1/scoring.py",
+     "stages.phase_c1.scoring", "C1_SCORING_CONTRACT_VERSION"),
 ]
 
 

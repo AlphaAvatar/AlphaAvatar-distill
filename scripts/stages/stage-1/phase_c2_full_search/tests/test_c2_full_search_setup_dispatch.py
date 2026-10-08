@@ -36,7 +36,7 @@ for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / extra) not in sys.path:
         sys.path.insert(0, str(REPO / extra))
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 KIND = "c2_full_search"
 
 
@@ -88,8 +88,8 @@ def artifact(tmp_path: Path, name: str = "auth.json", **over) -> Path:
     combination the type cannot actually produce — and the branch would then be
     tested against something no issuer can emit.
     """
-    from experiments.phase_c2 import full_search as FSG
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2 import full_search as FSG
+    from stages.phase_c2.session import C2ResourceScope
 
     auth = FSG.FullSearchAuthorization(
         authorization_id="autoinit.v1.phase_c2.full_search",
@@ -103,7 +103,7 @@ def artifact(tmp_path: Path, name: str = "auth.json", **over) -> Path:
         scope_note="one beam over the derived joint space, one committed Top-5",
         authorized_session_commit="a" * 40,
         harness_source_digest="d" * 64,
-        harness_source_files=("scripts/pod/autoinit_phase_c2_full_search_driver.py",),
+        harness_source_files=("scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py",),
         resource_scope=C2ResourceScope(
             run_id="attempt1", issuances_permitted=1,
             launch_attempts_permitted=1, provider_resources_permitted=2,
@@ -128,7 +128,7 @@ def test_the_shell_has_a_branch_for_the_kind_the_launcher_exports():
 
     spec = importlib.util.spec_from_file_location(
         "fs_launch_for_dispatch",
-        REPO / "scripts/pod/autoinit_phase_c2_full_search_launch.py")
+        REPO / "scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_launch.py")
     module = importlib.util.module_from_spec(spec)
     sys.modules["fs_launch_for_dispatch"] = module
     spec.loader.exec_module(module)
@@ -149,7 +149,7 @@ def test_the_shell_still_parses():
 # --- it ADMITS a valid artifact ---------------------------------------------
 
 def test_the_branch_admits_a_valid_full_search_authorization(tmp_path):
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     out = run_body(artifact(tmp_path), FSG.plan_hash(REPO))
     assert out.returncode == 0, out.stdout + out.stderr
@@ -187,7 +187,7 @@ def test_the_branch_refuses_each_forbidden_claim(tmp_path, claim, why):
     launcher's `$0` gates concluded, this is the last check before a pod is
     allowed to start work.
     """
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     path = artifact(tmp_path, name=f"{claim}.json", **{claim: True})
     out = run_body(path, FSG.plan_hash(REPO))
@@ -214,7 +214,7 @@ def test_the_followon_assertion_cannot_fail_and_that_is_STRONGER(tmp_path):
     evidence, so what is checked here is the actual property -- and the
     artifact override is confirmed inert rather than left looking enforced.
     """
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     prop = type(FSG.FullSearchAuthorization.automatic_followon_start)
     assert prop is property, "it became a field; the shell assertion now matters"
@@ -236,9 +236,9 @@ def test_the_branch_refuses_an_artifact_of_another_type(tmp_path):
     this is the one that matters here, because a completion grant is cheap
     ($1.1950) and a full search is not.
     """
-    from experiments.phase_c2 import baseline_completion as BC
-    from experiments.phase_c2 import full_search as FSG
-    from experiments.phase_c2.session import C2ResourceScope
+    from stages.phase_c2 import baseline_completion as BC
+    from stages.phase_c2 import full_search as FSG
+    from stages.phase_c2.session import C2ResourceScope
 
     other = BC.BaselineCompletionAuthorization(
         authorization_id="autoinit.v1.phase_c2.baseline_completion",
@@ -269,7 +269,7 @@ def test_the_branch_refuses_an_artifact_of_another_type(tmp_path):
 
 def test_the_branch_refuses_a_tampered_artifact(tmp_path):
     """Edited after issuance: the self-hash no longer verifies."""
-    from experiments.phase_c2 import full_search as FSG
+    from stages.phase_c2 import full_search as FSG
 
     path = artifact(tmp_path)
     doc = json.loads(path.read_text())

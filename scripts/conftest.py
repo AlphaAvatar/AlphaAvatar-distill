@@ -5,8 +5,8 @@ to the collected test, so this applies to each
 `scripts/experiments/stage-<n>/<experiment>/tests/` suite and to none of
 `tests/` — precisely the boundary the 2026-10-03 refactor drew.
 
-**Why the registry imports live HERE.** `experiments.datasets` and
-`experiments.calibration` are the application bootstrap: importing them
+**Why the registry imports live HERE.** `shared.datasets` and
+`shared.calibration` are the application bootstrap: importing them
 registers the frozen dataset assets and calibration profiles of this campaign.
 They used to be imported by `tests/conftest.py`, so collecting a core test
 pulled in one campaign's frozen assets and the application layer's registration
@@ -24,8 +24,8 @@ from __future__ import annotations
 #: The application registries. Import side effects are the point: each module
 #: registers this campaign's assets at import, which is the application layer's
 #: job and not the core's.
-import experiments.calibration  # noqa: F401
-import experiments.datasets  # noqa: F401
+import shared.calibration  # noqa: F401
+import shared.datasets  # noqa: F401
 
 from support.toy import (  # noqa: F401
     calibration_items,

@@ -2,7 +2,7 @@
 """Close a D1 GPU qualification subrun: file its evidence, book its cost, derive
 the verdict.
 
-    python scripts/pod/d1_qualification_closeout.py RUN_ID --subrun s2
+    python scripts/stages/stage-1/phase_d1/d1_qualification_closeout.py RUN_ID --subrun s2
 
 Three things happen, each to the one record that owns the fact:
 
@@ -30,7 +30,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 QUAL = REPO / "logs/stages/stage-1/phase_d1/validations/gpu-qualification/v1"
 CAMPAIGN = QUAL / "campaign.json"
 CLOSEOUT = QUAL / "closeout.json"
@@ -451,7 +451,7 @@ def aggregate() -> int:
                         "formal one. It closes none of D1's open blockers and "
                         "it is not D1 authorization."),
         "_owner_of": ("whether the GPU validation D1 owes has run. "
-                      "scripts/autoinit/write_d1_design.py reads this file, so "
+                      "scripts/stages/stage-1/phase_d1/write_d1_design.py reads this file, so "
                       "the design's status derives from it."),
     }, indent=1, sort_keys=True) + "\n")
     #: THE CAMPAIGN IS CLOSED BY DERIVATION, not by a sentence someone
@@ -468,7 +468,7 @@ def aggregate() -> int:
         f"${camp['booked_usd']:.4f} of ${camp['ceiling_usd']:.4f}; the verdict "
         "and every answer's provenance are in closeout.json")
     camp["_status_is_derived_by"] = (
-        "scripts/pod/d1_qualification_closeout.py --aggregate, from the filed "
+        "scripts/stages/stage-1/phase_d1/d1_qualification_closeout.py --aggregate, from the filed "
         "subruns and the closeout it writes. It is CLOSED when a closeout "
         "exists, because that is the only condition under which one is written.")
     CAMPAIGN.write_text(json.dumps(camp, indent=1, sort_keys=True) + "\n")
@@ -489,7 +489,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--subrun", required=True)
     ap.add_argument("--commit", required=True)
     ap.add_argument("--notes")
-    ap.add_argument("--artifacts", default="artifacts/qualification/d1_gpu")
+    ap.add_argument("--artifacts", default="artifacts/stages/stage-1/phase_d1/qualification/d1_gpu")
     args = ap.parse_args(argv)
 
     run_dir = REPO / args.artifacts / args.run_id
@@ -533,7 +533,7 @@ def main(argv: list[str] | None = None) -> int:
                         "formal one. It closes none of D1's open blockers and "
                         "it is not D1 authorization."),
         "_owner_of": ("whether the GPU validation D1 owes has run. "
-                      "scripts/autoinit/write_d1_design.py reads this file, so "
+                      "scripts/stages/stage-1/phase_d1/write_d1_design.py reads this file, so "
                       "the design's status derives from it."),
     }, indent=1, sort_keys=True) + "\n")
     print(f"  wrote {CLOSEOUT.relative_to(REPO)}")

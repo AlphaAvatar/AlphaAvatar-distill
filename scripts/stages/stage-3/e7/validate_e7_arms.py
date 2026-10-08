@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Prove the E7 arms are what the preregistration says, before a step is taken.
 
-    PYTHONPATH=src python scripts/training/validate_e7_arms.py \\
+    PYTHONPATH=src python scripts/stages/stage-3/e7/validate_e7_arms.py \\
         --out artifacts/audit/e7_preflight.json
 
 E7's claim is one sentence: *the only intended difference from
@@ -34,7 +34,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.data.extra_stream import stream_budget  # noqa: E402
@@ -46,7 +46,7 @@ ALLOWED_VS_E1 = {"extra_stream", "run_name", "out_dir", "_purpose"}
 # Permitted to differ between B and C: only where the extra text comes from.
 ALLOWED_EXTRA_BC = {"data_dir", "kind"}
 
-INIT_PATH = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+INIT_PATH = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 BASE = "configs/stage3/e1/e1_r1600k_{seed}_pca.json"
 
 
@@ -61,7 +61,7 @@ def main() -> int:
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--configs", default="configs/stage3/e7/e7_configs.json")
-    ap.add_argument("--disjointness", default="artifacts/stage3/e7_disjointness.json")
+    ap.add_argument("--disjointness", default="artifacts/stages/stage-3/e7_disjointness.json")
     ap.add_argument("--out", required=True)
     ap.add_argument("--require-streams", action="store_true",
                     help="also verify the packed streams on disk; omit before "

@@ -41,7 +41,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -57,15 +57,15 @@ from aadistill.initialization.specs.identity_collapse import (  # noqa: E402
     collapse,
     universe_identity,
 )
-from experiments.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
+from stages.phase_b.continuation import CONTINUATION_PLAN_V1, ContinuationAuthorization, continuation_source_digest  # noqa: E402
 from aadistill.initialization.planning.recovery import RecoveryAdmissionError  # noqa: E402
 from aadistill.initialization.specs.state import (  # noqa: E402
     make_control_state,
     make_retained_state,
 )
 
-import autoinit_phase_a_driver as _phase_a  # noqa: E402
-from autoinit_phase_a_driver import (  # noqa: E402
+from stages.phase_a import autoinit_phase_a_driver as _phase_a  # noqa: E402
+from stages.phase_a.autoinit_phase_a_driver import (  # noqa: E402
     AUDIT, PhaseADriver, WS, mark, say,
 )
 
@@ -102,7 +102,7 @@ ATTEMPT5_PROBES = REPO / "logs/stages/stage-1/phase_b/runs/attempt5/probes"
 #: withdrawn — the inherited pooling let a historical `sc` leak into the rung-2
 #: comparison — but the probe is a valid finished measurement of the right
 #: checkpoint on the right seed, strictly reconstructed by
-#: `scripts/autoinit/verify_attempt4_probe_reuse.py`. Citing it is what stops the
+#: `scripts/stages/stage-1/continuation_b/verify_attempt4_probe_reuse.py`. Citing it is what stops the
 #: next session paying ~72 min of L40S for evidence that already exists.
 ATTEMPT4_REUSE = REPO / "logs/shared/analyses/autoinit_attempt4_probe_reuse.json"
 ATTEMPT4_PROBES = REPO / "logs/stages/stage-1/continuation_b/runs/attempt4/probes"
@@ -137,7 +137,7 @@ CONTROL_ID = "qwen3_0p6b_init_v0"
 #: Derived from `CONTROL_ID` rather than written out, so the staged location and
 #: the control's identity cannot drift apart. This is the `dest` the launcher's
 #: `CANONICAL_INIT` relay inputs write to.
-CANONICAL_CONTROL_CHECKPOINT = f"artifacts/stage1/{CONTROL_ID}/checkpoint"
+CANONICAL_CONTROL_CHECKPOINT = f"artifacts/stages/stage-1/{CONTROL_ID}/checkpoint"
 
 #: The two numbers that keep evidence and workload apart, asserted rather than
 #: assumed. SIX distinct behavioural candidates carry the completed `sa`
@@ -466,14 +466,14 @@ class ContinuationDriver(PhaseADriver):
         # manifest, the same place the search read it.
         from transformers import AutoConfig
 
-        import phase_a_frozen
+        from stages.phase_a import phase_a_frozen
         from aadistill.initialization.specs.arch import ArchSpec, get_adapter
         from aadistill.initialization.specs.artifact import identify_checkpoint
 
         adapter = get_adapter("qwen3")
         target = ArchSpec.of("qwen3", phase_a_frozen.TARGET_GEOMETRY)
         manifest = json.loads(
-            (REPO / "artifacts/stage1/state_eval_v1/manifest.json").read_text())
+            (REPO / "artifacts/stages/stage-1/state_eval_v1/manifest.json").read_text())
         teacher_sha = manifest.get("teacher_sha256") or "0" * 64
 
         states = []

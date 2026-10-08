@@ -20,8 +20,8 @@ for extra in ("src", "scripts", "scripts/autoinit"):
     if str(ROOT / extra) not in sys.path:
         sys.path.insert(0, str(ROOT / extra))
 
-from experiments.phase_c2 import behavioural as B  # noqa: E402
-from experiments.phase_c2 import behavioural_schedule as S  # noqa: E402
+from stages.phase_c2 import behavioural as B  # noqa: E402
+from stages.phase_c2 import behavioural_schedule as S  # noqa: E402
 
 SCREENING_SEED = 616738081
 CONFIRMATION_SEEDS = [1936324010, 1916380711, 1523147638]

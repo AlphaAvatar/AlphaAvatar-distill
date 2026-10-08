@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The Phase-C2 Search-1 session, as a specification. NOT AUTHORIZED.
 
-    PYTHONPATH=src setsid nohup python -u scripts/pod/autoinit_phase_c2_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 This file declares WHAT the session is. How a session is run — detached start
@@ -46,7 +46,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 #: `scripts` too: the experiment instances live under `experiments.` since the
 #: core/application separation, and this file is also run as a subprocess with a
@@ -69,19 +69,19 @@ from aadistill.infrastructure.session_runner import run_session  # noqa: E402
 from aadistill.runtime.pod_environment import LAUNCH_BOUND  # noqa: E402
 from aadistill.runtime.staging_contract import (  # noqa: E402
     derive_contract)
-from experiments.deployment import POD_IMAGE, deployment_commands  # noqa: E402
-#: The GENERIC run-layout primitives. `scripts/experiments/run_layout.py` owns
+from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
+#: The GENERIC run-layout primitives. `scripts/shared/run_layout.py` owns
 #: the five-area convention, the occupancy rule, the output claim and the
 #: manifest; what is C2's is the role vocabulary in `phase_c2.session` and the
 #: two compositions below. There is no C2 run-layout framework.
-from experiments.run_layout import (  # noqa: E402
+from shared.run_layout import (  # noqa: E402
     ArtifactSpec as RunArtifactSpec, claim_output_root, layout_for, open_run,
     present_roles, record_run, rel_run_dir, require_output_claim,
     write_run_readmes,
 )
-from experiments.phase_c2 import bundle as BUNDLE  # noqa: E402
-from experiments.phase_c2 import pod_environment as PE  # noqa: E402
-from experiments.phase_c2.session import (  # noqa: E402
+from stages.phase_c2 import bundle as BUNDLE  # noqa: E402
+from stages.phase_c2 import pod_environment as PE  # noqa: E402
+from stages.phase_c2.session import (  # noqa: E402
     C2_PLAN_ID, C2_RUN_EXPERIMENT_ID, C2_RUN_ROLES, C2Authorization,
     c2_authorization_path, c2_budget_spec, c2_current_executable,
     c2_hard_ceiling_usd, c2_plan_hash, c2_price_per_hour_usd, c2_run_path,
@@ -90,7 +90,7 @@ from experiments.phase_c2.session import (  # noqa: E402
 WS = POD_IMAGE["workspace_root"]
 REPO = POD_IMAGE["checkout_root"]
 
-from autoinit_science_inputs import CALIBRATION_V1, CANONICAL_INIT  # noqa: E402
+from shared.pod.autoinit_science_inputs import CALIBRATION_V1, CANONICAL_INIT  # noqa: E402
 
 STATUS = f"{WS}/autoinit_phase_c2.status"
 RUN_LOG = f"{WS}/autoinit_phase_c2_run.log"
@@ -102,7 +102,7 @@ RUN_LOG = f"{WS}/autoinit_phase_c2_run.log"
 #:
 #: Attempt 2 declared nothing here. The shared setup script then asked the
 #: verifier its HISTORICAL question against compiled-in Phase-A/C1 constants,
-#: which demanded `artifacts/stage3/recovery_search_v2` — an asset C2 neither
+#: which demanded `artifacts/stages/stage-1/batteries/recovery_search_v2` — an asset C2 neither
 #: stages nor needs — and a scoring digest from a source set C2 does not
 #: execute. `SETUP_RC=91`, no driver stage, nothing measured, `$0.0552`. The
 #: script now refuses a session that declares `ASSETS_READY` without naming its
@@ -323,8 +323,8 @@ def close_c2_run(layout, args, repo_root: Path | None = None) -> dict:
                                "every intermediate search state stay here; "
                                "artifacts/manifest.json carries their hashes. "
                                "Large artifacts are not moved into git")},
-        implementation={"launcher": "scripts/pod/autoinit_phase_c2_launch.py",
-                        "driver": "scripts/pod/autoinit_phase_c2_driver.py",
+        implementation={"launcher": "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py",
+                        "driver": "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py",
                         "harness_source_digest": session.get(
                             "harness_source_digest"),
                         "authorization": auth_path_for(args.run_id)},
@@ -382,15 +382,15 @@ TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 #: `state_eval_v1` is the suite every candidate is measured on. Without it there
 #: is no ranking metric at all.
 LOCAL_ASSETS = (
-    LocalAsset("artifacts/stage1/reasoning_heavy_v2", "reasoning_heavy_v2",
-               "artifacts/stage1"),
-    LocalAsset("artifacts/stage1/state_eval_v1", "state_eval_v1",
-               "artifacts/stage1"),
+    LocalAsset("artifacts/stages/stage-1/reasoning_heavy_v2", "reasoning_heavy_v2",
+               "artifacts/stages/stage-1"),
+    LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
+               "artifacts/stages/stage-1"),
 )
 
 #: The directory the paid pod runs, named so the contract is greppable from the
 #: launcher rather than only inferable from what is missing.
-POD_TEST_SELECTION = "scripts/experiments/stage-1/phase_c2/tests"
+POD_TEST_SELECTION = "scripts/stages/stage-1/phase_c2/tests"
 
 #: Ignored by the pod's blocking test gate: everything that is not the
 #: selection, DERIVED from the tree at launch time.
@@ -502,7 +502,7 @@ def c2_executable_gate(ctx: SessionContext) -> tuple[bool, str]:
     expected = tuple(f["path"] for f in live["files"])
     declared = tuple(getattr(ctx.auth, "harness_source_files", ()) or ())
     if declared != expected:
-        from experiments.phase_c2.session import C2_HARNESS_SOURCE_FILES_V1
+        from stages.phase_c2.session import C2_HARNESS_SOURCE_FILES_V1
 
         if declared == C2_HARNESS_SOURCE_FILES_V1:
             return False, (
@@ -578,7 +578,7 @@ def frozen_assets_gate(ctx: SessionContext) -> tuple[bool, str]:
             #: The DEV-BOX interpreter: this is the $0 pre-provider check. The
             #: pod runs the same script under /opt/train, which is where the
             #: setup script invokes it.
-            [sys.executable, "scripts/autoinit/verify_frozen_assets.py",
+            [sys.executable, "scripts/shared/pod/verify_frozen_assets.py",
              "--expect", rel, "--out", f"{tmp}/frozen_check.json"],
             cwd=REPO_ROOT, capture_output=True, text=True, timeout=600,
             env={**os.environ, "PYTHONPATH": "src:scripts"})
@@ -729,7 +729,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     and to digest to the authorized executable value.
 
     Read-only: it uploads nothing and mutates nothing. Preparation is
-    `scripts/autoinit/stage_c2_bundle.py`, deliberately a separate command, so
+    `scripts/stages/stage-1/phase_c2/stage_c2_bundle.py`, deliberately a separate command, so
     what this verifies is the relay's state rather than a side effect of the
     verification.
     """
@@ -744,7 +744,7 @@ def bundle_staged_gate(ctx: SessionContext) -> tuple[bool, str]:
     staged = REPO_ROOT / bundle_rel
     if not staged.is_file():
         return False, (f"{bundle_rel} is missing; run "
-                       f"scripts/autoinit/stage_c2_bundle.py --run-id {run_id} "
+                       f"scripts/stages/stage-1/phase_c2/stage_c2_bundle.py --run-id {run_id} "
                        f"--session-commit {commit} first")
     record = json.loads(staged.read_text())
     if record.get("session_commit") != commit:
@@ -839,7 +839,7 @@ def driver_command(ctx: SessionContext, plan) -> str:
         return f"{math.floor(value * 100) / 100:.2f}"
 
     return (f"{POD_IMAGE['remote_python']} "
-            f"scripts/pod/autoinit_phase_c2_driver.py --stage all "
+            f"scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py --stage all "
             f"--image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
             f"--soft-stop-usd {floor2(plan.soft_stop_usd)} "
@@ -865,9 +865,9 @@ def spec(args) -> SessionSpec:
         authorization_path=auth_path_for(args.run_id),
         authorization_loader=C2Authorization.load,
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             **deployment_commands()),
         plan_id=C2_PLAN_ID,
         plan_hash=c2_plan_hash(),

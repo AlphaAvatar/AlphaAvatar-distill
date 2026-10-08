@@ -500,27 +500,27 @@
     "exclude_prompt_hashes": 11983,
     "populations": {
      "final_promotion": {
-      "asset": "artifacts/eval/battery_v2",
+      "asset": "artifacts/stages/stage-3/eval/battery_v2",
       "n_prompts": 770,
       "note": "read for exclusion only; not sampled from, remains unconsumed"
      },
      "initializer_state_eval": {
-      "asset": "artifacts/stage1/state_eval_v1",
+      "asset": "artifacts/stages/stage-1/state_eval_v1",
       "excluded_source_ids": 80,
       "n_items": 80
      },
      "operator_calibration": {
-      "asset": "artifacts/stage1/e8_calibration_v1",
+      "asset": "artifacts/stages/stage-1/e8_calibration_v1",
       "excluded_source_ids": 51,
       "n_items": 67
      },
      "recovery_search": {
-      "asset": "artifacts/stage3/recovery_search_v2",
+      "asset": "artifacts/stages/stage-1/batteries/recovery_search_v2",
       "n_prompts": 190,
       "note": "historical/development evidence; excluded from C1 confirmation"
      },
      "recovery_training": {
-      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "asset": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
       "distinct_source_ids": 10831,
       "n_sessions": 11174,
       "note": "the whole recovery corpus, not just the 0.86M rung"
@@ -704,27 +704,27 @@
     "exclude_prompt_hashes": 11983,
     "populations": {
      "final_promotion": {
-      "asset": "artifacts/eval/battery_v2",
+      "asset": "artifacts/stages/stage-3/eval/battery_v2",
       "n_prompts": 770,
       "note": "read for exclusion only; not sampled from, remains unconsumed"
      },
      "initializer_state_eval": {
-      "asset": "artifacts/stage1/state_eval_v1",
+      "asset": "artifacts/stages/stage-1/state_eval_v1",
       "excluded_source_ids": 80,
       "n_items": 80
      },
      "operator_calibration": {
-      "asset": "artifacts/stage1/e8_calibration_v1",
+      "asset": "artifacts/stages/stage-1/e8_calibration_v1",
       "excluded_source_ids": 51,
       "n_items": 67
      },
      "recovery_search": {
-      "asset": "artifacts/stage3/recovery_search_v2",
+      "asset": "artifacts/stages/stage-1/batteries/recovery_search_v2",
       "n_prompts": 190,
       "note": "historical/development evidence; excluded from C1 confirmation"
      },
      "recovery_training": {
-      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "asset": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
       "distinct_source_ids": 10831,
       "n_sessions": 11174,
       "note": "the whole recovery corpus, not just the 0.86M rung"
@@ -906,27 +906,27 @@
     "_what": "the historical chain's rendered-prompt hash, applied by coordinate. `make_math_verified` reads `unique_id`, which this source lacks, so `rank_take` cannot be called on it.",
     "populations": {
      "final_promotion": {
-      "asset": "artifacts/eval/battery_v2",
+      "asset": "artifacts/stages/stage-3/eval/battery_v2",
       "n_prompts": 770,
       "note": "read for exclusion only; not sampled from, remains unconsumed"
      },
      "initializer_state_eval": {
-      "asset": "artifacts/stage1/state_eval_v1",
+      "asset": "artifacts/stages/stage-1/state_eval_v1",
       "excluded_source_ids": 80,
       "n_items": 80
      },
      "operator_calibration": {
-      "asset": "artifacts/stage1/e8_calibration_v1",
+      "asset": "artifacts/stages/stage-1/e8_calibration_v1",
       "excluded_source_ids": 51,
       "n_items": 67
      },
      "recovery_search": {
-      "asset": "artifacts/stage3/recovery_search_v2",
+      "asset": "artifacts/stages/stage-1/batteries/recovery_search_v2",
       "n_prompts": 190,
       "note": "historical/development evidence; excluded from C1 confirmation"
      },
      "recovery_training": {
-      "asset": "artifacts/stage3/corpus_v2/sessions.jsonl",
+      "asset": "artifacts/stages/stage-3/corpus_v2/sessions.jsonl",
       "distinct_source_ids": 10831,
       "n_sessions": 11174,
       "note": "the whole recovery corpus, not just the 0.86M rung"

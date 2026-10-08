@@ -36,7 +36,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parents[2]
+REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
@@ -51,19 +51,19 @@ from aadistill.runtime.device_handoff import (  # noqa: E402
     require_released,
 )
 from aadistill.initialization.planning.recovery import admit_leaves  # noqa: E402
-from experiments.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
+from stages.recovery_continuation.session import RecoveryContinuationAuthorization  # noqa: E402
 from aadistill.initialization.planning.stage1_import import (  # noqa: E402
     Stage1ImportError,
     import_stage1_result,
 )
 #: The frozen identities WITHOUT the search module. Importing `phase_a_search`
 #: here would put `run_phase_a_search` one attribute lookup away.
-from phase_a_frozen import (  # noqa: E402
+from stages.phase_a.phase_a_frozen import (  # noqa: E402
     CANONICAL_CONTROL_ID, CANONICAL_INIT, CANONICAL_INIT_SHA256,
     TARGET_GEOMETRY, TEACHER_ID,
     TEACHER_REVISION,
 )
-from autoinit_phase_a_driver import (  # noqa: E402
+from stages.phase_a.autoinit_phase_a_driver import (  # noqa: E402
     AUDIT, RECOVERY_TRAINER_BYTES, STATE_EVAL, PhaseADriver, mark, say,
 )
 
@@ -184,7 +184,7 @@ class RecoveryContinuationDriver(PhaseADriver):
         from transformers import AutoModelForCausalLM
 
         from aadistill.initialization.planning.metrics import StateEvaluator
-        from load_state_eval import load as load_suite
+        from shared.evaluation.load_state_eval import load as load_suite
 
         suite, items, _manifest = load_suite(STATE_EVAL)
         teacher = AutoModelForCausalLM.from_pretrained(

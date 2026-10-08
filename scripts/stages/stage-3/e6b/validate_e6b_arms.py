@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Prove the E6b arms are what the registration says, before a step is taken.
 
-    PYTHONPATH=src python scripts/training/validate_e6b_arms.py \
+    PYTHONPATH=src python scripts/stages/stage-3/e6b/validate_e6b_arms.py \
         --registration logs/stages/stage-3/e6b/analyses/e6b_registration.json --out artifacts/audit/e6b_preflight.json
 
 E6b's entire claim rests on one sentence: *the only intended difference from
@@ -29,7 +29,7 @@ import json
 import sys
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
@@ -105,7 +105,7 @@ def main() -> None:
             failures.append(f"{alias}: objective is not the registered CE-heavy one")
         report["arms"][alias] = row
 
-    init = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+    init = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
     if init.is_file():
         got = sha256_file(init)
         report["stage1_init_sha256"] = got
@@ -117,7 +117,7 @@ def main() -> None:
         report["stage1_init_matches"] = None
 
     # Realized data, recomputed here rather than trusted from the registration.
-    pack = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
+    pack = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
     if (pack / "blocks.npz").is_file():
         import torch
         from aadistill.data.ladder import ladder_blocks

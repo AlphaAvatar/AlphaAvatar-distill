@@ -30,8 +30,8 @@ for _extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
 
-LAUNCHER = REPO / "scripts/pod/autoinit_phase_c2_launch.py"
-DRIVER = REPO / "scripts/pod/autoinit_phase_c2_driver.py"
+LAUNCHER = REPO / "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py"
+DRIVER = REPO / "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py"
 
 
 def load(path: Path, name: str):
@@ -44,7 +44,7 @@ def load(path: Path, name: str):
 @pytest.fixture(scope="module")
 def registered():
     from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation
-    from experiments.phase_c2.search_space import register_c2_operators
+    from stages.phase_c2.search_space import register_c2_operators
 
     register_c2_operators()
     try:
@@ -102,7 +102,7 @@ def test_it_cannot_run_because_the_grant_does_not_exist(session):
     """The honest state of this change: implemented, not authorized."""
     _args, spec = session
     assert not (REPO / spec.authorization_path).exists()
-    from experiments.phase_c2.session import C2Authorization
+    from stages.phase_c2.session import C2Authorization
 
     #: By identity of the underlying function, not of the bound classmethod:
     #: `C2Authorization.load` builds a new bound object on every attribute
@@ -113,7 +113,7 @@ def test_it_cannot_run_because_the_grant_does_not_exist(session):
 
 def test_the_authorization_type_authorizes_only_this_search():
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_c2.session import SCHEMA, C2Authorization
+    from stages.phase_c2.session import SCHEMA, C2Authorization
 
     auth = C2Authorization(
         authorization_id="x", granted_utc="2026-01-01T00:00:00Z",
@@ -149,7 +149,7 @@ def test_the_authorization_type_authorizes_only_this_search():
 
 def built_plan(spec):
     from aadistill.infrastructure.budget import StepTime, plan_session
-    from experiments.phase_c2.session import c2_hard_ceiling_usd
+    from stages.phase_c2.session import c2_hard_ceiling_usd
 
     b = spec.budget
     return plan_session(
@@ -260,7 +260,7 @@ def test_the_evidence_document_is_relayed_as_rewritten_in_place(session):
 
 def test_the_budget_reproduces_the_pricing_record(session):
     _args, spec = session
-    from experiments.phase_c2.session import c2_hard_ceiling_usd, load_pricing
+    from stages.phase_c2.session import c2_hard_ceiling_usd, load_pricing
 
     doc = load_pricing(REPO)
     plan = built_plan(spec)
@@ -296,7 +296,7 @@ def test_both_reserves_are_named_and_stay_separate(session):
 
 def test_the_baseline_reserve_is_derived_from_c1s_measured_stages():
     """Measured, not modelled: the same work, on the same card."""
-    from experiments.phase_c2.session import load_pricing
+    from stages.phase_c2.session import load_pricing
 
     doc = load_pricing(REPO)
     entry = next(r for r in doc["reserves"]
@@ -316,7 +316,7 @@ def test_the_baseline_reserve_is_derived_from_c1s_measured_stages():
 
 def test_a_tampered_pricing_record_is_refused(tmp_path):
     from aadistill.governance.authorization import AuthorizationError
-    from experiments.phase_c2 import session as S
+    from stages.phase_c2 import session as S
 
     doc = json.loads((REPO / S.PRICING_PATH).read_text())
     doc["totals"]["hard_ceiling_usd"] = 999.0
@@ -336,7 +336,7 @@ def test_the_driver_searches_exactly_the_accepted_space(driver):
     restriction could search something the plan hash does not describe.
     """
     body = DRIVER.read_text()
-    assert "from experiments.phase_c2.search_space import" in body
+    assert "from stages.phase_c2.search_space import" in body
     for name in ("C2_ALLOWED_IMPLS", "C2_IMPL_PROFILES", "C2_PROFILE_IDS"):
         assert f"{name}," in body or f"{name}=" in body or name in body
     #: and it must not name an operator id or a profile id of its own.
@@ -344,7 +344,7 @@ def test_the_driver_searches_exactly_the_accepted_space(driver):
                     "calib.domain_balanced@v1", "calib.reasoning_heavy@v2"):
         assert literal not in body, (
             f"the driver hardcodes {literal!r}; the space belongs to "
-            "experiments.phase_c2.search_space")
+            "stages.phase_c2.search_space")
 
 
 def test_the_harness_set_names_every_file_the_session_executes(registered):
@@ -366,7 +366,7 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
     """
     from pathlib import Path as _P
 
-    from experiments.phase_c2.session import (
+    from stages.phase_c2.session import (
         C2_HARNESS_SOURCE_FILES_V1, c2_harness_digest,
     )
 
@@ -388,9 +388,9 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
         assert spends in digested, f"{spends} can spend money and must bind"
 
     #: Every module the driver and launcher import from the experiment layer.
-    for required in ("scripts/experiments/stage-1/phase_c2/comparison.py",
-                     "scripts/experiments/stage-1/phase_c2/baseline.py",
-                     "scripts/experiments/stage-1/phase_c2/search_space.py",
+    for required in ("scripts/stages/stage-1/phase_c2/comparison.py",
+                     "scripts/stages/stage-1/phase_c2/baseline.py",
+                     "scripts/stages/stage-1/phase_c2/search_space.py",
                      "configs/autoinit/c2_artifacts.json",
                      "configs/autoinit/c2_artifacts_failed.json"):
         assert required in digested, f"{required} is not measured by the grant"
@@ -417,8 +417,8 @@ def test_the_comparison_is_written_after_the_search_and_never_over_it(driver):
 
 def test_the_plan_hash_binds_the_space_and_moves_with_it(registered):
     """A grant issued against a different space cannot authorize this run."""
-    from experiments.phase_c2 import search_space as SS
-    from experiments.phase_c2.session import c2_plan_hash
+    from stages.phase_c2 import search_space as SS
+    from stages.phase_c2.session import c2_plan_hash
 
     before = c2_plan_hash()
     original = dict(SS.C2_IMPL_PROFILES)
@@ -466,11 +466,11 @@ def test_the_generic_search_seam_defaults_to_the_previous_behaviour():
     """
     import inspect
 
-    import phase_a_search
+    from stages.phase_a import phase_a_search
 
     sig = inspect.signature(phase_a_search.run_phase_a_search)
     assert sig.parameters["conditional_candidates"].default is None
-    body = (REPO / "scripts/autoinit/phase_a_search.py").read_text()
+    body = (REPO / "scripts/stages/stage-1/phase_a/phase_a_search.py").read_text()
     assert "conditional_candidates(result, lambda: teacher)" in body, (
         "the hook must receive the teacher THIS search used")
     #: And its results join the same measured-candidate loop, so a conditional

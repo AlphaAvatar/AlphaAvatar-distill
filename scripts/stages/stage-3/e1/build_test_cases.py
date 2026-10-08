@@ -15,8 +15,8 @@ Writes two files:
   * a Markdown file to read
   * a JSONL file with the same cases, for programmatic analysis
 
-    uv run python scripts/evaluation/build_test_cases.py \
-        --eval-dir artifacts/eval/e1 --out logs/stages/stage-3/e1/analyses/e1_test_cases.md
+    uv run python scripts/stages/stage-3/e1/build_test_cases.py \
+        --eval-dir artifacts/stages/stage-3/eval/e1 --out logs/stages/stage-3/e1/analyses/e1_test_cases.md
 """
 
 from __future__ import annotations
@@ -90,12 +90,12 @@ def pick(rows: list[dict], per_bucket: int) -> list[dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--eval-dir", default="artifacts/eval/e1")
+    ap.add_argument("--eval-dir", default="artifacts/stages/stage-3/eval/e1")
     ap.add_argument("--out", default="logs/stages/stage-3/e1/analyses/e1_test_cases.md")
     ap.add_argument("--per-bucket", type=int, default=6)
     ap.add_argument("--prompts", nargs="*",
                     default=["data/eval_behavior_v0/prompts.jsonl",
-                             "artifacts/eval/e1/gsm8k_reasoning_100.jsonl"],
+                             "artifacts/stages/stage-3/eval/e1/gsm8k_reasoning_100.jsonl"],
                     help="prompt sets to join by id, so cases show the question")
     args = ap.parse_args()
 
@@ -103,7 +103,7 @@ def main() -> None:
     rows = load(eval_dir)
     prompts = load_prompts([Path(x) for x in args.prompts])
     import sys as _sys
-    _sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[4] / "src"))
     from aadistill.evaluation.behavior import final_number, split_generation
     for r in rows:
         src = prompts.get(r["id"], {})

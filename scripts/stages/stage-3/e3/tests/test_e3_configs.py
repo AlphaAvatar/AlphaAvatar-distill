@@ -67,7 +67,7 @@ def test_the_control_is_the_arm_we_think_it_is(seed):
     assert p1(seed)["loss"] == BASELINE_LOSS
     assert p1(seed)["seed"] == SEEDS[seed]
     assert p1(seed)["rung"] == 860000
-    assert p1(seed)["student_path"] == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+    assert p1(seed)["student_path"] == "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 
 
 @pytest.mark.parametrize("seed", sorted(SEEDS))
@@ -135,7 +135,7 @@ def test_every_e3_config_validates_and_has_a_distinct_out_dir(seed):
         validate_train_config(arm)
         dirs.add(arm["out_dir"])
     assert len(dirs) == 2
-    for prefix in ("artifacts/stage3/e1_", "artifacts/stage3/p2_"):
+    for prefix in ("artifacts/stages/stage-3/e1_", "artifacts/stages/stage-3/p2_"):
         assert not any(d.startswith(prefix) for d in dirs)
 
 

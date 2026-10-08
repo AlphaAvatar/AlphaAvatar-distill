@@ -12,12 +12,12 @@ derivations that shortest-length selection throws away? `verify.select` claimed
 it does; this measures it.
 
 Usage:
-    scripts/data/audit_selection_rule.py \
-        --a artifacts/stage3/corpus_v2_clean          --a-name median \
-        --b artifacts/stage3/corpus_v2_clean_shortest --b-name shortest \
-        --a-rung artifacts/stage3/rung_0860k_clean_median \
+    scripts/stages/stage-3/e2/audit_selection_rule.py \
+        --a artifacts/stages/stage-3/corpus_v2_clean          --a-name median \
+        --b artifacts/stages/stage-3/corpus_v2_clean_shortest --b-name shortest \
+        --a-rung artifacts/stages/stage-3/rung_0860k_clean_median \
         --b-rung <shortest rung dir> \
-        --out artifacts/stage3/e2_selection_rule_audit.json
+        --out artifacts/stages/stage-3/e2_selection_rule_audit.json
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.env import code_state  # noqa: E402
