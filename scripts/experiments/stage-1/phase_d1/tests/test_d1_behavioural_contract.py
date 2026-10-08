@@ -348,3 +348,79 @@ class TestThePermissionsCannotBeSubstituted:
         assert "must NAME the advancing candidate" in str(exc.value)
         named = _auth(rung="confirmation", advancing_candidate="q2")
         assert named.require_advancing_candidate() == "q2"
+
+
+class TestTheScorerIsPinnedToTheRealizedRole:
+    """`score_d1_screening.py` exists rather than a `--battery` flag on an
+    existing scorer, and that is the point: C1's `main()` pins its battery by
+    equality on purpose -- "the production path cannot be aimed anywhere else"
+    -- and the rung it guards is the one that may name an incumbent. C2's
+    screening scorer pins its own for the same reason. A flag is exactly how a
+    rung comes to be scored on the wrong prompts.
+    """
+
+    @staticmethod
+    def _mod():
+        import importlib.util
+
+        for extra in ("scripts/autoinit",):
+            if str(REPO / extra) not in sys.path:
+                sys.path.insert(0, str(REPO / extra))
+        path = REPO / "scripts/autoinit/score_d1_screening.py"
+        spec = importlib.util.spec_from_file_location("score_d1_screening",
+                                                      path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_it_takes_no_battery_argument(self):
+        mod = self._mod()
+        flags = set()
+        import argparse
+
+        parser = argparse.ArgumentParser()
+        #: Build the real parser by calling main's construction indirectly --
+        #: simplest reliable probe is the module source, since main() parses
+        #: and then runs.
+        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        assert '"--battery"' not in src, (
+            "the scorer accepts a battery path; that is how a rung gets "
+            "scored on the wrong prompts")
+        assert "THE BATTERY IS NOT AN ARGUMENT" in src
+        assert flags == set() and parser is not None   # probe is the source
+
+    def test_the_metric_is_c1s_imported_unchanged(self):
+        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        assert "from score_c1_confirmation import build_result, score_battery" \
+            in src, ("the metric must be C1's, imported: a reimplementation "
+                     "would make a screening delta uninformative about a "
+                     "confirmation delta")
+
+    def test_the_scorable_split_is_derived_and_matches_the_manifest(self):
+        """The D-series roles have no per-role `manifest.json`, so a stale
+        sidecar is impossible by construction -- but only if the split really
+        is derived."""
+        mod = self._mod()
+        layout = mod.battery_sets("d1_screening")
+        role = B.battery_role("d1_screening", REPO)
+        assert layout["behaviour_only_sets"] == {"code"}
+        derived = sum(role["per_stratum"][s] for s in layout["scorable_sets"])
+        assert derived == role["n_scorable"] == 850
+        assert set(layout["sets"]) == set(B.FROZEN_STRATA)
+
+    def test_the_result_schema_is_not_c1s(self):
+        """A screening result carrying C1's confirmation schema would be
+        indistinguishable from evidence that may promote."""
+        mod = self._mod()
+        assert mod.SCHEMA == "aadistill.phase_d1.screening_result/v1"
+        assert mod.ROLE == "d1_screening"
+
+    def test_it_carries_what_it_may_not_be_read_as(self):
+        mod = self._mod()
+        text = " ".join(mod.MAY_NOT)
+        assert "winner's curse" in text
+        assert "confirmation" in text
+
+    def test_it_states_the_absolute_score_limitation(self):
+        src = (REPO / "scripts/autoinit/score_d1_screening.py").read_text()
+        assert "_absolute_scores_are_not_interchangeable_with_c1s" in src
