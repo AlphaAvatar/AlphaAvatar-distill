@@ -5,8 +5,7 @@
  "test_ignores": [],
  "n_predicates": 45,
  "by_signal": {
-  "filesystem_premise_offpod": 1,
-  "filesystem_premise_onpod": 10,
+  "filesystem_premise_onpod": 11,
   "filesystem_premise_unresolved": 1,
   "gpu": 1,
   "optional_dependency": 10,
@@ -14,7 +13,7 @@
   "unrecognised": 14,
   "unstaged_artifact": 6
  },
- "n_differs_on_pod": 18,
+ "n_differs_on_pod": 17,
  "n_unrecognised": 15,
  "n_registered": 51,
  "registry": "configs/autoinit/c1_skip_predicate_classification.json",
@@ -143,10 +142,10 @@
  },
  "strict_cpu_test_parity_ready": "REVIEW",
  "parity_by_resolution": {
-  "absent_on_both": 5,
+  "absent_on_both": 3,
   "guaranteed_dependency": 10,
-  "normalized_by_contract": 13,
-  "same_on_pod": 17
+  "normalized_by_contract": 14,
+  "same_on_pod": 18
  },
  "parity_unresolved": [],
  "parity_rules": {
@@ -186,12 +185,7 @@
   "importorskip(\"torch\")": "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] dependencies, not an extra: the dev box resolves it through the `pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` image that ships it, into whose interpreter setup installs the project. A machine where this import fails cannot run the project at all, so the skip fires on neither"
  },
  "parity_not_executable_at_zero_cost": "that CUDA_VISIBLE_DEVICES=\"\" hides an L40S cannot be executed on a CPU dev box. The contract is applied and the decision is proven stable here; the GPU half is first exercised on the next pod.",
- "unaccounted": [
-  [
-   "tests/docs/test_log_organisation.py::test_the_frozen_battery_manifest_verifies",
-   "filesystem_premise_offpod"
-  ]
- ],
+ "unaccounted": [],
  "unrecognised": [
   "tests/data/test_dataset.py::tokenizer",
   "tests/data/test_recovery_corpus_pipeline.py::tokenizer",
@@ -329,14 +323,14 @@
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
    "expanded": "not p.is_file() | p=REPO / \"artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json\" | REPO=Path(__file__).resolve().parents[2] | m=json.loads(p.read_text())",
-   "signal": "filesystem_premise_offpod",
-   "verdict": "differs_on_pod",
-   "why": "inspects artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json \u2014 neither tracked nor staged, so absent on a pod",
+   "signal": "filesystem_premise_onpod",
+   "verdict": "same_on_pod",
+   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
    "nodeid": "tests/docs/test_log_organisation.py::test_the_frozen_battery_manifest_verifies",
    "readiness_group": null,
    "registered_as": null,
-   "parity": "absent_on_both",
-   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json']"
+   "parity": "same_on_pod",
+   "parity_why": "every path it inspects is tracked or staged"
   },
   {
    "file": "tests/docs/test_log_organisation.py",
@@ -351,12 +345,12 @@
    "nodeid": "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store",
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
-   "parity": "absent_on_both",
-   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json']"
+   "parity": "normalized_by_contract",
+   "parity_why": "the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
   },
   {
    "file": "tests/docs/test_repository_structure.py",
-   "line": 585,
+   "line": 594,
    "kind": "skipif",
    "function": "<module>",
    "condition": "_logs_tree_is_partial()",
@@ -580,11 +574,11 @@
   },
   {
    "file": "tests/integration/test_launcher_forwards_setup_env.py",
-   "line": 159,
+   "line": 163,
    "kind": "pytest.skip",
    "function": "test_launcher_forwards_every_variable_the_setup_reads",
    "condition": "setup == SHARED_SETUP",
-   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=POD / \"autoinit_preflight_setup.sh\" | POD=REPO / \"scripts/pod\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=REPO / \"scripts/shared/pod/autoinit_preflight_setup.sh\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "repository_content",
    "verdict": "same_on_pod",
    "why": "tracked content the bundle checkout carries",
@@ -596,11 +590,11 @@
   },
   {
    "file": "tests/integration/test_launcher_forwards_setup_env.py",
-   "line": 238,
+   "line": 242,
    "kind": "pytest.skip",
    "function": "test_forwarded_variables_have_a_launcher_side_default",
    "condition": "setup == SHARED_SETUP",
-   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=POD / \"autoinit_preflight_setup.sh\" | POD=REPO / \"scripts/pod\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=REPO / \"scripts/shared/pod/autoinit_preflight_setup.sh\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "repository_content",
    "verdict": "same_on_pod",
    "why": "tracked content the bundle checkout carries",
@@ -612,7 +606,7 @@
   },
   {
    "file": "tests/integration/test_operational_hardening.py",
-   "line": 60,
+   "line": 70,
    "kind": "pytest.skip",
    "function": "test_no_command_substitution_over_globs_in_new_launchers",
    "condition": "path.name in FROZEN_RECORD_LAUNCHERS",
@@ -628,7 +622,7 @@
   },
   {
    "file": "tests/integration/test_pod_script_paths.py",
-   "line": 147,
+   "line": 174,
    "kind": "pytest.skip",
    "function": "test_setup_driver_and_launcher_agree_on_the_status_file",
    "condition": "len(paths) < 2",
@@ -982,5 +976,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "80aad8b6c12115dbbe07578fc1a1547b416b3464169c3847ca4a354b45d92605"
+ "digest": "8c851327a26f40147f9e30cccd5c7cd3d94ca6c4096c83684bb067df62d45c93"
 }

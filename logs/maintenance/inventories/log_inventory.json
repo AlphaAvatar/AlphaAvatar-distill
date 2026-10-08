@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-08T13:45:48+00:00",
+  "created_utc": "2026-10-08T17:12:36+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,11 +10,11 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3306,
-    "bytes": 120757469,
+    "files": 3307,
+    "bytes": 120992779,
     "by_disposition": {
       "keep_canonical": 222,
-      "keep_immutable": 2846,
+      "keep_immutable": 2847,
       "keep_referenced": 223,
       "keep_unique_evidence": 15
     },
@@ -22,7 +22,8 @@
       "derived_summary": 6,
       "immutable_record": 1505,
       "index": 8,
-      "narrative": 933,
+      "living_state": 2,
+      "narrative": 932,
       "raw_execution_artifact": 839,
       "scratch_debug": 15
     },
@@ -6626,8 +6627,8 @@
   "files": [
     {
       "path": "AGENTS.md",
-      "size_bytes": 105525,
-      "sha256": "522e2eb78e77c24775b9e3ca29eb4df82ef5ebc6fc77b5f133cf2476b97ef7db",
+      "size_bytes": 105520,
+      "sha256": "a482fae4a6f93cc717ac592540bfffaec3ec5ac1769ce170c15e6afdf107a6a9",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -6649,6 +6650,7 @@
         "logs/maintenance/inventories/checkpoint_tombstones.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/inventories/scratch_inventory_20260829.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/shared/analyses/autoinit_relay_capacity.md",
         "logs/shared/validations/micro-preflight/autoinit_micro_preflight_plan.md",
         "logs/stages/README.md",
@@ -6736,6 +6738,8 @@
         "logs/state/current.json",
         "logs/state/current.md",
         "logs/state/supported_models.md",
+        "scripts/README.md",
+        "scripts/maintenance/README.md",
         "scripts/maintenance/architecture/core_ownership.py",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
@@ -6743,6 +6747,7 @@
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/info_architecture.py",
+        "scripts/shared/README.md",
         "scripts/shared/__init__.py",
         "scripts/shared/data/build_stage2_v0.py",
         "scripts/shared/data/build_stage3_pilot.py",
@@ -6840,6 +6845,8 @@
         "tests/runtime/test_run_convention.py"
       ],
       "referenced_by_executable": [
+        "scripts/README.md",
+        "scripts/maintenance/README.md",
         "scripts/maintenance/architecture/core_ownership.py",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
@@ -6847,6 +6854,7 @@
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/info_architecture.py",
+        "scripts/shared/README.md",
         "scripts/shared/__init__.py",
         "scripts/shared/data/build_stage2_v0.py",
         "scripts/shared/data/build_stage3_pilot.py",
@@ -6945,12 +6953,12 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/architecture/core_ownership.py, scripts/maintenance/consolidation/build_checkpoint_registry.py, scripts/maintenance/consolidation/build_log_inventory.py"
+      "disposition_reason": "named by scripts/README.md, scripts/maintenance/README.md, scripts/maintenance/architecture/core_ownership.py"
     },
     {
       "path": "README.md",
-      "size_bytes": 46729,
-      "sha256": "4cc8a50bbf0d443de85e01b7ad99f140fb6a40d0da5b08c79ccf3631a52607ba",
+      "size_bytes": 45736,
+      "sha256": "3a8468c780c0f5fe66da8f9113e08074c7c78a4f97c0cc3e0c811845f629b064",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -6960,6 +6968,7 @@
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/phase_a/results/autoinit_stage3_complete/README.md",
         "logs/stages/stage-1/phase_a3/runs/a3_attempt34/evidence/a3_replay.json",
@@ -6972,6 +6981,7 @@
         "logs/state/current.json",
         "logs/state/current.md",
         "logs/state/ownership.md",
+        "scripts/README.md",
         "scripts/maintenance/architecture/record_run_index.py",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
@@ -6991,6 +7001,7 @@
         "tests/evaluation/test_perf_trend.py"
       ],
       "referenced_by_executable": [
+        "scripts/README.md",
         "scripts/maintenance/architecture/record_run_index.py",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
@@ -7011,7 +7022,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/architecture/record_run_index.py, scripts/maintenance/consolidation/build_checkpoint_registry.py, scripts/maintenance/consolidation/build_log_inventory.py"
+      "disposition_reason": "named by scripts/README.md, scripts/maintenance/architecture/record_run_index.py, scripts/maintenance/consolidation/build_checkpoint_registry.py"
     },
     {
       "path": "docs/AUTOINIT_REFERENCE.md",
@@ -7055,8 +7066,8 @@
     },
     {
       "path": "docs/POD_SCRIPTS.md",
-      "size_bytes": 44034,
-      "sha256": "8af0c45e05b6e5b71ebc7316715108deb501017eae35a13e4fef50de7c98f8a0",
+      "size_bytes": 45269,
+      "sha256": "c1eb7941765c276e67d91c9ba1a59c8a5f1677f5580dadd41377b4b52485d39c",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7066,14 +7077,16 @@
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/state/artifact_manifests.md",
+        "scripts/shared/README.md",
         "tests/docs/test_repository_structure.py"
       ],
       "referenced_by_executable": [
+        "scripts/shared/README.md",
         "tests/docs/test_repository_structure.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by tests/docs/test_repository_structure.py"
+      "disposition_reason": "named by scripts/shared/README.md, tests/docs/test_repository_structure.py"
     },
     {
       "path": "docs/POST_PHASE_B_GENERALIZATION.md",
@@ -7093,8 +7106,8 @@
     },
     {
       "path": "docs/REPO_LAYOUT.md",
-      "size_bytes": 12895,
-      "sha256": "52095c96b482ed03d088d92d74cf1b4379642a8e056a90362d890e1c5fecdf8f",
+      "size_bytes": 14148,
+      "sha256": "7282b61854b6ab0b02546766d6bcc858981e945d8aabab45fc37f1991e2bedf4",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7121,8 +7134,8 @@
     },
     {
       "path": "docs/SESSION_ARCHITECTURE.md",
-      "size_bytes": 14898,
-      "sha256": "db0e045db8bcf92bb2b6d808c9c95dd53eb4052a23e87527fce248f2836afe22",
+      "size_bytes": 14892,
+      "sha256": "ad9f7e8029696a353a7f1c686cd3c6e6a6926899c9ccef0961ad9b8a51022340",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7144,8 +7157,8 @@
     },
     {
       "path": "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
-      "size_bytes": 19614,
-      "sha256": "358f6873afbf5bc6863bb7165b6086c987d0b255f2ee218cef1e5b754b8c4ae6",
+      "size_bytes": 19630,
+      "sha256": "4b845fe6d043750a722139cc52afc3b6614dae2eb45919d040eb10769927e469",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7221,6 +7234,7 @@
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "README.md",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
         "logs/state/current.json",
@@ -7241,8 +7255,8 @@
     },
     {
       "path": "logs/budget/README.md",
-      "size_bytes": 1040,
-      "sha256": "011c79ade2e2670921309f2bdbc7c45324fcb2552ceb3e127332333120343092",
+      "size_bytes": 1054,
+      "sha256": "cdbd796d9ed05e3591adc5b6a70e6d935e8fe442a70306d85066461349ab336c",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8054,8 +8068,8 @@
     },
     {
       "path": "logs/budget/decisions.md",
-      "size_bytes": 1010654,
-      "sha256": "79b9703fb58aa52feeced795e3e2b5aa171fc4cfb66930e5c2dad60b09e1f03d",
+      "size_bytes": 1010705,
+      "sha256": "a2fc46f9f7cb013a6ad1fbd4d09940e4076b033ef331cb26bb2c2dacfdc6cc2e",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8152,6 +8166,7 @@
         "logs/budget/decisions.md",
         "logs/budget/ledger.md",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917/README.md",
         "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a1/README.md",
         "logs/stages/stage-1/c2_full_search_cuda/runs/c2_full_search_cuda_20260917_a2/README.md",
@@ -8261,9 +8276,13 @@
         "logs/stages/stage-1/phase_c3/runs/attempt9/README.md",
         "logs/state/current.json",
         "logs/state/current.md",
+        "scripts/README.md",
+        "scripts/index.json",
+        "scripts/maintenance/README.md",
         "scripts/maintenance/architecture/record_migration.py",
         "scripts/maintenance/architecture/record_run_index.py",
         "scripts/maintenance/architecture/record_source_relocation.py",
+        "scripts/maintenance/architecture/render_ownership_views.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
         "scripts/maintenance/consolidation/derive_budget.py",
         "scripts/maintenance/consolidation/fix_doc_links.py",
@@ -8272,6 +8291,7 @@
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/README.md",
         "scripts/maintenance/migration/info_architecture.py",
+        "scripts/shared/README.md",
         "scripts/shared/run_layout.py",
         "scripts/stages/stage-1/families/d_series/battery_family.py",
         "scripts/stages/stage-1/phase_b/tests/test_phase_b_plan.py",
@@ -8285,9 +8305,13 @@
         "tests/runtime/test_run_layout_all_stages.py"
       ],
       "referenced_by_executable": [
+        "scripts/README.md",
+        "scripts/index.json",
+        "scripts/maintenance/README.md",
         "scripts/maintenance/architecture/record_migration.py",
         "scripts/maintenance/architecture/record_run_index.py",
         "scripts/maintenance/architecture/record_source_relocation.py",
+        "scripts/maintenance/architecture/render_ownership_views.py",
         "scripts/maintenance/consolidation/build_log_inventory.py",
         "scripts/maintenance/consolidation/derive_budget.py",
         "scripts/maintenance/consolidation/fix_doc_links.py",
@@ -8296,6 +8320,7 @@
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/README.md",
         "scripts/maintenance/migration/info_architecture.py",
+        "scripts/shared/README.md",
         "scripts/shared/run_layout.py",
         "scripts/stages/stage-1/families/d_series/battery_family.py",
         "scripts/stages/stage-1/phase_b/tests/test_phase_b_plan.py",
@@ -8310,7 +8335,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/architecture/record_migration.py, scripts/maintenance/architecture/record_run_index.py, scripts/maintenance/architecture/record_source_relocation.py"
+      "disposition_reason": "named by scripts/README.md, scripts/index.json, scripts/maintenance/README.md"
     },
     {
       "path": "logs/maintenance/README.md",
@@ -8334,6 +8359,8 @@
       "in_paid_attempt_chain": true,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py"
       ],
       "referenced_by_executable": [
@@ -8351,6 +8378,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py"
       ],
       "referenced_by_executable": [
@@ -8494,6 +8523,7 @@
         "configs/experiments/phase_c3/frozen_assets.json",
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/shared/analyses/autoinit_historical_reuse_position.json",
         "scripts/maintenance/architecture/compare_scoring_across_migration.py",
         "scripts/shared/tests/test_correctness_rule_contract.py",
         "scripts/shared/tests/test_cost_and_recovery.py",
@@ -8687,6 +8717,20 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
+      "size_bytes": 226905,
+      "sha256": "9336bb6b784bcb2c4e77a5e9ffba52c2aca4783e7739cf3b114c58ee85e42713",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],
@@ -8942,8 +8986,8 @@
     },
     {
       "path": "logs/shared/analyses/autoinit_historical_reuse_position.json",
-      "size_bytes": 3014,
-      "sha256": "d168b9e0b98a91e0e66b59ddbbdba15538e89751dbb116a53b41abcf64d6955f",
+      "size_bytes": 3038,
+      "sha256": "6632329c3805839cd2e99f685d0f4cf0689b897b2fac850dc0889fd4137139f2",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9333,8 +9377,8 @@
     },
     {
       "path": "logs/shared/validations/micro-preflight/autoinit_micro_preflight_plan.md",
-      "size_bytes": 12199,
-      "sha256": "09fc49fab1ecc9576d6c67f0739a8ac9e276a6a71d2d32742a6cc0e3a85360f3",
+      "size_bytes": 12206,
+      "sha256": "5fa2028d109dd6219420b2d7d42681b6cb9f8d6e2062fde65e831efcabba40c5",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9542,8 +9586,8 @@
     },
     {
       "path": "logs/stages/index.json",
-      "size_bytes": 87018,
-      "sha256": "f3376cdc9dcce70102560e8eb3530ddfef25257a27563a6f76128044196cdd46",
+      "size_bytes": 92135,
+      "sha256": "384f2b3b34db5a586045bc98992a334df30f9ad0a9f746bd75f34e07e43c4230",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9552,20 +9596,28 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/state/current.md",
+        "scripts/README.md",
+        "scripts/index.json",
+        "scripts/maintenance/architecture/render_ownership_views.py",
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
+        "scripts/stages/README.md",
         "scripts/stages/__init__.py",
         "tests/docs/test_log_organisation.py"
       ],
       "referenced_by_executable": [
+        "scripts/README.md",
+        "scripts/index.json",
+        "scripts/maintenance/architecture/render_ownership_views.py",
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
+        "scripts/stages/README.md",
         "scripts/stages/__init__.py",
         "tests/docs/test_log_organisation.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/consolidation/render_log_navigation.py, scripts/maintenance/consolidation/stage_attribution.py, scripts/stages/__init__.py"
+      "disposition_reason": "named by scripts/README.md, scripts/index.json, scripts/maintenance/architecture/render_ownership_views.py"
     },
     {
       "path": "logs/stages/stage-0/README.md",
@@ -14142,7 +14194,9 @@
       "sha256": "40db71431e5ea7bd945aca240cad0b5f330b8f4dfde6abb63724b0e9fb2d6c59",
       "category": "narrative",
       "in_paid_attempt_chain": false,
-      "referenced_by": [],
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json"
+      ],
       "referenced_by_executable": [],
       "duplicate_of": null,
       "disposition": "keep_canonical",
@@ -14156,6 +14210,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/families/d_series/current.json",
         "logs/stages/stage-1/phase_d1/current.json",
@@ -14182,23 +14238,25 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
         "logs/stages/stage-1/families/d_series/current.json",
+        "logs/state/current.json",
+        "logs/state/current.md",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/stages/stage-1/families/d_series/battery_family.py",
         "scripts/stages/stage-1/families/d_series/build_batteries.py",
         "scripts/stages/stage-1/families/d_series/tests/test_d_series_battery_family.py",
-        "scripts/stages/stage-1/phase_d1/behavioural.py",
-        "scripts/stages/stage-1/phase_d1/write_d1_design.py"
+        "scripts/stages/stage-1/phase_d1/behavioural.py"
       ],
       "referenced_by_executable": [
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/stages/stage-1/families/d_series/battery_family.py",
         "scripts/stages/stage-1/families/d_series/build_batteries.py",
         "scripts/stages/stage-1/families/d_series/tests/test_d_series_battery_family.py",
-        "scripts/stages/stage-1/phase_d1/behavioural.py",
-        "scripts/stages/stage-1/phase_d1/write_d1_design.py"
+        "scripts/stages/stage-1/phase_d1/behavioural.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
@@ -14212,6 +14270,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
@@ -14234,20 +14294,24 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/index.json",
         "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_source_evidence.json",
         "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
+        "scripts/index.json",
         "scripts/stages/stage-1/families/d_series/current.py",
         "scripts/stages/stage-1/families/d_series/source_evidence.py",
         "scripts/stages/stage-1/phase_d1/evidence_capacity.py"
       ],
       "referenced_by_executable": [
+        "scripts/index.json",
         "scripts/stages/stage-1/families/d_series/current.py",
         "scripts/stages/stage-1/families/d_series/source_evidence.py",
         "scripts/stages/stage-1/phase_d1/evidence_capacity.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/stages/stage-1/families/d_series/current.py, scripts/stages/stage-1/families/d_series/source_evidence.py, scripts/stages/stage-1/phase_d1/evidence_capacity.py"
+      "disposition_reason": "named by scripts/index.json, scripts/stages/stage-1/families/d_series/current.py, scripts/stages/stage-1/families/d_series/source_evidence.py"
     },
     {
       "path": "logs/stages/stage-1/history/operator_config_mutation_requirement.md",
@@ -14285,6 +14349,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py",
         "scripts/stages/stage-1/measurement/autoinit_measurement_launch.py",
         "scripts/stages/stage-1/measurement/plan.py"
@@ -14683,8 +14749,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_preregistration.md",
-      "size_bytes": 20118,
-      "sha256": "049915b256bdbc52e886cd489a8d26dd6ac5fa55b6292d25d0e88fa507a3fcde",
+      "size_bytes": 20090,
+      "sha256": "7fb91ab003c8f72212f830e20e19a5d3c7013df7d83d0bfba503d4bf20650492",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -14771,8 +14837,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_repricing.md",
-      "size_bytes": 13020,
-      "sha256": "e690ee10d1d249c77a405adfea25ae2037a057027cf572ddde8ff788302f110e",
+      "size_bytes": 12992,
+      "sha256": "0ca7b027e4784309ed2d1cb0fe82d484981e0c6326ce95f65f516f2327b0bfb0",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -14830,13 +14896,16 @@
     },
     {
       "path": "logs/stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md",
-      "size_bytes": 13070,
-      "sha256": "4fdc0c497d9dbb8361ebfa6be7d374012c0d4934092132d0e96a4dd911214e34",
+      "size_bytes": 13098,
+      "sha256": "eee0dd2a1ab2687f3106fa127205e3226c968e248088d48f8fe85872f386c857",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "docs/AUTOINIT_REFERENCE.md",
+        "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py"
       ],
       "referenced_by_executable": [
@@ -20450,8 +20519,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_b/autoinit_phase_b_reconstruction.md",
-      "size_bytes": 30145,
-      "sha256": "5e4b4a47a2cc24f43f6f87d1030b352fd0aa492522ac050ba99a364f43d1621a",
+      "size_bytes": 30140,
+      "sha256": "fd5a6089e5f4b48604829b42092f14781f23f28ea110538da5ef18b64f6ccf49",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22187,8 +22256,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
-      "size_bytes": 56289,
-      "sha256": "1d60d2345c392abca8072c82407338e0947a9eb3f26395a67def19f2247469d5",
+      "size_bytes": 56275,
+      "sha256": "347362e1313ca7aa23118ec8dd55abdaa6d52f345d1e59799b51cb35c1aa283b",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22479,8 +22548,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
-      "size_bytes": 36303,
-      "sha256": "8369da33cf1513079e3aef2caa4c48917eb4e5002d54e30d227ff0342eb0e69a",
+      "size_bytes": 36330,
+      "sha256": "accd3397de5ed3dcce354dc99f5fe40113693d7bc65b845b18fb54f2c1fdb7eb",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -28144,8 +28213,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
-      "size_bytes": 29803,
-      "sha256": "49df1d5c9ae16c041a64b9c3d9759954206f91ca5c97c6683a54e977ce4469e7",
+      "size_bytes": 29828,
+      "sha256": "e8d73dd43259ca271bf8571ca90d88d7744a87213fb20fc4fd9fbbff7d67b122",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -33023,8 +33092,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_c2_behavioural/validations/durable-staging/README.md",
-      "size_bytes": 1526,
-      "sha256": "01b472c8e3e861198a2193ab95cca2476858d8628c24041a66b693cc485f08ce",
+      "size_bytes": 1528,
+      "sha256": "3266dab467fa68d5980104d9ca963b9bde6fc80ded2717fe0d189b31cd5d9159",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50438,6 +50507,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_d1/plans/d1_design.json",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_behavioural_contract.py",
         "scripts/stages/stage-1/phase_d1/write_d1_design.py"
@@ -50482,19 +50552,23 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/current.json",
-      "size_bytes": 2399,
-      "sha256": "f447b6390452f436d6c485fa7a4c4d927b776c1052878c54d053ccf8c110e8a8",
+      "size_bytes": 2501,
+      "sha256": "8264eb318385f4143a54066f35acfeafedc399f90187755ea57e0aa3f6b4856e",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/index.json",
+        "scripts/index.json",
         "scripts/stages/stage-1/phase_d1/current.py"
       ],
       "referenced_by_executable": [
+        "scripts/index.json",
         "scripts/stages/stage-1/phase_d1/current.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/stages/stage-1/phase_d1/current.py"
+      "disposition_reason": "named by scripts/index.json, scripts/stages/stage-1/phase_d1/current.py"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
@@ -53529,6 +53603,8 @@
       "referenced_by": [
         "docs/SESSION_ARCHITECTURE.md",
         "logs/index.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py",
         "scripts/shared/pod/autoinit_science_inputs.py",
         "scripts/stages/stage-1/recovery_continuation/plan.py",
@@ -56331,8 +56407,8 @@
     },
     {
       "path": "logs/stages/stage-3/e8/plans/e8_preregistration.md",
-      "size_bytes": 30995,
-      "sha256": "50841928c513822f8f688564fe17924d068833e0cc4b0efc08e871650af8e20c",
+      "size_bytes": 31002,
+      "sha256": "0008bbd7b99f2f3ce9f4de7aaee3452ea7d07c52e930250885b996bc40edb069",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56763,8 +56839,8 @@
     },
     {
       "path": "logs/state/README.md",
-      "size_bytes": 1694,
-      "sha256": "9bc2555919b684912377592771c4d99bae6cc075a161af0399146de56e11ca6c",
+      "size_bytes": 1708,
+      "sha256": "eb1c0f40706c7aa05930f2e88e89f8ed4ab5cfe881d55130ce490ce9efb6f05f",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56799,9 +56875,9 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17484,
-      "sha256": "e37844e03e25258819b3a12bb5129fb3f8da58b7e9281ceaa492e97c44723f90",
-      "category": "immutable_record",
+      "size_bytes": 17847,
+      "sha256": "a93bbdb8f16fe2a1432e67fcaf779c9f793479ad9bc3c10948bd4545db99d3a1",
+      "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "README.md",
@@ -56868,9 +56944,9 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 231723,
-      "sha256": "b6b9178e597f2699eac832715448207175d35293b651b1a268299cec39d067ed",
-      "category": "narrative",
+      "size_bytes": 232922,
+      "sha256": "9ed62007f54c59af1979b1abfa7d85ffafc6d951c947f8257e5ca987f0f95588",
+      "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "AGENTS.md",
@@ -56883,6 +56959,7 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/state/artifact_manifests.md",
         "logs/state/current.json",
+        "scripts/maintenance/consolidation/build_log_inventory.py",
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/shared/pod/audit_tool_rendering.py",
         "scripts/stages/stage-1/phase_c1/tests/test_c1_log_records.py",
@@ -56894,6 +56971,7 @@
         "tests/docs/test_repository_structure.py"
       ],
       "referenced_by_executable": [
+        "scripts/maintenance/consolidation/build_log_inventory.py",
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/shared/pod/audit_tool_rendering.py",
         "scripts/stages/stage-1/phase_c1/tests/test_c1_log_records.py",
@@ -56906,7 +56984,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/consolidation/render_log_navigation.py, scripts/shared/pod/audit_tool_rendering.py, scripts/stages/stage-1/phase_c1/tests/test_c1_log_records.py"
+      "disposition_reason": "named by scripts/maintenance/consolidation/build_log_inventory.py, scripts/maintenance/consolidation/render_log_navigation.py, scripts/shared/pod/audit_tool_rendering.py"
     },
     {
       "path": "logs/state/experiment_index.md",

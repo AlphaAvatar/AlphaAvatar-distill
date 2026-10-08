@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 114,
- "digest": "45b268d9739e733aa22aefac877a65f1ad560890942fad4e8bb1d061a0f0b83b",
+ "digest": "7fab89c8ff813a410abbc6a7d619f68f2e29dcec082fdcc5585dae90cc242e76",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -84,13 +84,13 @@
   },
   {
    "path": "scripts/shared/pod/autoinit_preflight_setup.sh",
-   "sha256": "873d3286ddfcddb05484a0ae79215565de521007894a0a13155ba6134ba3ddf8",
-   "bytes": 61073
+   "sha256": "4df4e579b05347260a1278a564e5ab9b397f88bd9ae1203516b1f6f3df9de5ac",
+   "bytes": 61003
   },
   {
    "path": "scripts/shared/pod/autoinit_science_inputs.py",
-   "sha256": "b8576615653fe9c45fd28b7818bf9f76d5837b229b4cd77507baaadb02534cd7",
-   "bytes": 4380
+   "sha256": "8f0297c5e50ec9946958bc591add07e1e079dbbed6cb2952e080c9e0d60a3215",
+   "bytes": 4431
   },
   {
    "path": "scripts/shared/pod/collect_artifacts.py",
@@ -134,8 +134,8 @@
   },
   {
    "path": "scripts/stages/stage-1/phase_a/plan.py",
-   "sha256": "b6ab7a2599c347db1e9f36954dbb199ea8185ad36ce8577edc1b9f1d3a962319",
-   "bytes": 27813
+   "sha256": "cf787002791da62c677a0dfd782d0d5e366e5a2a7f9781c8c84f4a9f32944aad",
+   "bytes": 28179
   },
   {
    "path": "scripts/stages/stage-1/phase_c1/__init__.py",
@@ -159,8 +159,8 @@
   },
   {
    "path": "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
-   "sha256": "1fb786c389da14dc05e56467299c80515fba579701ecdd8791ee0e5f30c3df1f",
-   "bytes": 85293
+   "sha256": "08db8ca7e02eb3f703b3819cdcf2ae83c3f05ae27a11160bf89f1c899f15e761",
+   "bytes": 85322
   },
   {
    "path": "scripts/stages/stage-1/phase_c1/bundle.py",
@@ -474,8 +474,8 @@
   },
   {
    "path": "src/aadistill/initialization/planning/recovery.py",
-   "sha256": "65040f8a06b1554a51d24efcfd87a59ac3b721f14f0c084896bc36f74e1d1723",
-   "bytes": 110776
+   "sha256": "3336bb1c8bd11668e3b8ff22f2eef0090544ddc7bb807948b65f79a22e065dc3",
+   "bytes": 111273
   },
   {
    "path": "src/aadistill/initialization/scoring/batches.py",
