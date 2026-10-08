@@ -269,7 +269,7 @@ def main() -> None:
     # Illustrative post-attestation state: the *shape* Stage 0 produces, using a
     # placeholder image digest. It is not an attestation and confers nothing; the
     # real one is written to logs/autoinit_phase_a_protocol_attested.json on the
-    # pod by scripts/shared/preflight/attest_protocol.py.
+    # pod by scripts/shared/pod/attest_protocol.py.
     demo_runtime = RuntimeEnvironmentFingerprint.observe(
         image_digest="sha256:<attested-at-preflight-stage-0>")
     after = phase_a.materialized(runtime=demo_runtime,

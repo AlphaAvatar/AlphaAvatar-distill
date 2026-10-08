@@ -23,7 +23,7 @@ declared.**
 ## What used to produce that failure
 
 A session was a subclass of `Preflight` in
-`scripts/shared/preflight/autoinit_preflight_launch.py`. To retarget it, each launcher
+`scripts/shared/pod/autoinit_preflight_launch.py`. To retarget it, each launcher
 **mutated that module's globals** before constructing it:
 
 ```python

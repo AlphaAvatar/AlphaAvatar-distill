@@ -14,7 +14,16 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-POD = REPO / "scripts/pod"
+POD = REPO / "scripts/shared/pod"
+
+
+def _owned(name: str):
+    """A pod script wherever its owner directory is (launchers moved to their
+    experiments in the 2026-10-08 information-architecture migration)."""
+    hits = [p for p in sorted((REPO / "scripts").rglob(name))
+            if "__pycache__" not in p.parts]
+    assert len(hits) <= 1, f"{name}: expected at most one owner, found {hits}"
+    return hits[0] if hits else None
 PY = sys.executable
 ENV_SRC = {"PYTHONPATH": str(REPO / "src")}
 
@@ -44,7 +53,8 @@ FROZEN_RECORD_LAUNCHERS = {
 
 
 def launchers():
-    return sorted(POD.glob("*_launch.sh"))
+    return [p for p in sorted((REPO / "scripts").rglob("*_launch.sh"))
+            if "__pycache__" not in p.parts]
 
 
 def test_launchers_are_discovered():
@@ -69,7 +79,7 @@ def test_no_command_substitution_over_globs_in_new_launchers(path):
 @pytest.mark.parametrize("name", sorted(FROZEN_RECORD_LAUNCHERS))
 def test_the_frozen_allowlist_only_names_launchers_that_exist(name):
     """A stale exemption is an exemption that will be inherited by accident."""
-    assert (POD / name).is_file(), (
+    assert _owned(name) is not None, (
         f"{name} is exempted from the glob lint but no longer exists; drop it "
         "from FROZEN_RECORD_LAUNCHERS rather than leaving a name that a future "
         "script could take.")

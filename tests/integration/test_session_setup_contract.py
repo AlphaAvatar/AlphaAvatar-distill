@@ -192,7 +192,7 @@ def test_the_requirement_is_read_from_the_verifier_not_copied_into_this_file():
     src = Path(__file__).read_text()
     body = src[src.index("def verifier_required_local_roots"):
                src.index("def installed_local_roots")]
-    assert "from verify_frozen_assets import FROZEN" in body
+    assert "from shared.pod.verify_frozen_assets import FROZEN" in body
     for literal in ("state_eval_v1", "recovery_search_v2"):
         assert literal not in body, (
             f"the required roots are transcribed ({literal!r}) rather than "

@@ -49,7 +49,7 @@ REPO = Path(__file__).resolve().parents[5]
 sys.path.insert(0, str(REPO / "src"))
 
 SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
-LAUNCH = REPO / "scripts/shared/preflight/autoinit_preflight_launch.py"
+LAUNCH = REPO / "scripts/shared/pod/autoinit_preflight_launch.py"
 #: The byte gate needs the real wheels. They are ~3.6 GiB and are not in the
 #: repo, so the location is overridable and the test skips without them rather
 #: than pretending to have checked.

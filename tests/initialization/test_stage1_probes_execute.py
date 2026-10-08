@@ -156,7 +156,7 @@ def test_the_statistics_profile_runs_and_marks_a_cpu_run_as_not_the_gate(
 
 def test_the_driver_refuses_a_smoke_artifact_as_a_gate_measurement():
     """A CPU or stand-in run must never satisfy the gate it informs."""
-    driver = (REPO / "scripts/shared/preflight/autoinit_preflight_driver.py").read_text()
+    driver = (REPO / "scripts/shared/pod/autoinit_preflight_driver.py").read_text()
     stage1 = driver[driver.index("def stage1"):driver.index("def gate(")]
     assert '"is_gate_measurement"' in stage1 and '"is_real_teacher"' in stage1
     assert "this is a smoke artifact" in stage1
@@ -213,7 +213,7 @@ def test_the_disk_probe_runs_and_reports_both_directions(tmp_path):
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "preflight_driver_disk", REPO / "scripts/shared/preflight/autoinit_preflight_driver.py")
+        "preflight_driver_disk", REPO / "scripts/shared/pod/autoinit_preflight_driver.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["preflight_driver_disk"] = mod
     spec.loader.exec_module(mod)

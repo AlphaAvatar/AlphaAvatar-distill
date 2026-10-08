@@ -47,8 +47,8 @@ from shared.preflight import (  # noqa: E402
 )
 from shared.recovery_policy import PREFLIGHT_PLAN_V1  # noqa: E402
 
-DRIVER_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_driver.py"
-LAUNCH_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_launch.py"
+DRIVER_PATH = REPO / "scripts/shared/pod/autoinit_preflight_driver.py"
+LAUNCH_PATH = REPO / "scripts/shared/pod/autoinit_preflight_launch.py"
 #: The session machinery. It used to live inside the launcher above; the
 #: composition refactor moved the flow here and left the launcher a
 #: declaration, so the tests that assert on the FLOW follow it.

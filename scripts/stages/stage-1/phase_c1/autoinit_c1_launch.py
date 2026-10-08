@@ -526,7 +526,7 @@ LOCAL_ASSETS = (
     LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
                "artifacts/stages/stage-1"),
     LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/batteries"),
 )
 
 

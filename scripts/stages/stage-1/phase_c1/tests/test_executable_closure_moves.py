@@ -238,7 +238,7 @@ class TestTheRealClosure:
         paths = {r["path"] for r in live["files"]}
         for rel in ("scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",
                     "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py",
-                    "scripts/shared/preflight/autoinit_preflight_driver.py",
+                    "scripts/shared/pod/autoinit_preflight_driver.py",
                     "scripts/stages/stage-1/phase_a/phase_a_search.py"):
             assert rel not in paths, f"{rel} is not on the C1 path"
 

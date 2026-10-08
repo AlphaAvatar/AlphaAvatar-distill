@@ -265,7 +265,7 @@ def test_the_production_peak_is_captured_before_the_comparison_path_exists():
     body = src[src.index("def run_measurement"):src.index("def main")]
     prod = body.index("production_peak =")
     release = body.index("reference._cache.clear()")
-    e8a = body.index("from search_depth_map import")
+    e8a = body.index("from shared.training.search_depth_map import")
     assert prod < release < e8a, (
         "the production peak must be taken BEFORE the cache is released and "
         "before E8a's path is built; otherwise it is not the Phase-A number")
@@ -451,7 +451,7 @@ def test_the_entrypoint_imports_as_operator_items_from_its_real_owner():
     import importlib.util
 
     src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
-    assert "from phase_a_search import as_operator_items" in src
+    assert "from stages.phase_a.phase_a_search import as_operator_items" in src
     assert "from aadistill.autoinit.datasets import as_operator_items" not in src
 
     # And it really is there, rather than merely spelled differently.

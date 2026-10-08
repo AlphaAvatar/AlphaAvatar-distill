@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pod-side driver for the AutoInitializer micro-preflight. Stages 0-3, then stop.
 
-    /opt/train/bin/python scripts/shared/preflight/autoinit_preflight_driver.py --stage all \
+    /opt/train/bin/python scripts/shared/pod/autoinit_preflight_driver.py --stage all \
         --image-digest sha256:... --rate 0.99 --spent-usd 0.30 \
         --soft-stop-usd 6.00 --authorized-usd 8.60
 

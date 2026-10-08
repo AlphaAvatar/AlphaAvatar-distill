@@ -1,6 +1,6 @@
 """Issue the micro-preflight spend authorization against the rehearsed harness.
 
-    PYTHONPATH=src python scripts/shared/preflight/issue_authorization.py
+    PYTHONPATH=src python scripts/shared/pod/issue_authorization.py
 
 Run this AFTER the harness rehearsal passes and the harness is committed. It
 binds the authorization to three things the launcher then enforces: the preflight

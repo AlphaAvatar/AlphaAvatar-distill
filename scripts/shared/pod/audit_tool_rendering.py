@@ -26,10 +26,10 @@ Arms:
 
 Run it in each environment and compare the two reports:
 
-    .venv/bin/python scripts/shared/preflight/audit_tool_rendering.py --out A.json
+    .venv/bin/python scripts/shared/pod/audit_tool_rendering.py --out A.json
     /home/ecs-user/AlphaAvatar/.venv/bin/python \
-        scripts/shared/preflight/audit_tool_rendering.py --out B.json
-    .venv/bin/python scripts/shared/preflight/audit_tool_rendering.py --compare A.json B.json
+        scripts/shared/pod/audit_tool_rendering.py --out B.json
+    .venv/bin/python scripts/shared/pod/audit_tool_rendering.py --compare A.json B.json
 
 Only the tokenizer and its chat template are loaded — never a model config — so
 the transformers-4.x RoPE misreading (logs/state/current.md §0.5) cannot apply here.

@@ -759,7 +759,7 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
     # is nothing for the continuation to have overridden.
     import importlib.util
     s = importlib.util.spec_from_file_location(
-        "preflight_launch", REPO / "scripts/shared/preflight/autoinit_preflight_launch.py")
+        "preflight_launch", REPO / "scripts/shared/pod/autoinit_preflight_launch.py")
     pf = importlib.util.module_from_spec(s)
     sys.modules["preflight_launch"] = pf
     s.loader.exec_module(pf)

@@ -526,7 +526,7 @@ def main() -> None:
                                "preregistration must be re-emitted with the "
                                "attested digest before Phase A is authorized."),
                 "attested_artifact": "logs/autoinit_phase_a_protocol_attested.json",
-                "attested_by": "scripts/shared/preflight/attest_protocol.py",
+                "attested_by": "scripts/shared/pod/attest_protocol.py",
                 "stage_2_compares_against": ("the Stage-0 attested protocol hash, "
                                              "via RecoveryProbeIdentity."
                                              "require_attested()"),

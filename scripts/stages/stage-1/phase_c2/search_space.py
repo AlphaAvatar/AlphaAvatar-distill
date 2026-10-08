@@ -280,7 +280,7 @@ def _target_spec() -> ArchSpec:
 DEPTH_IMPL = "depth.causal_kl_greedy_v1"
 
 #: Non-search pod time for a search session, in minutes. Each figure is the one
-#: this repository already plans with (`scripts/shared/preflight/autoinit_preflight_launch.py`
+#: this repository already plans with (`scripts/shared/pod/autoinit_preflight_launch.py`
 #: uses `setup_minutes=45.0`, `transfer_minutes=6.0` and the same named phases),
 #: NOT the warm-image observations. C1 attempt 18 set up in 6 minutes; the same
 #: script on the same image and card has also taken 8.5 and over 150. Budgeting

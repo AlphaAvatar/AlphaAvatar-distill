@@ -53,6 +53,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 from aadistill.data.extra_stream import content_sha256  # noqa: E402
 from aadistill.data.ladder import select_val_blocks  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_file  # noqa: E402

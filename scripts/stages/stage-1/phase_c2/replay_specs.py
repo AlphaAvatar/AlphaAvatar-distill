@@ -66,9 +66,13 @@ FULL_JOURNAL_SHA256 = (
 
 #: Trees whose contents decide an artifact digest. A replay pinned to attempt
 #: 3's digests is only honest if the code that produced them has not moved.
+#: FROZEN SPELLINGS: these are the paths as they existed at
+#: ATTEMPT3_SESSION_COMMIT, which is the tree the digests are pinned to — the
+#: 2026-10-08 information-architecture migration moved the files, which is
+#: exactly the drift `source_binding` exists to refuse.
 OPERATOR_TREES = (
     "src/aadistill/initialization",
-    "scripts/stages/stage-1/phase_c2",
+    "scripts/experiments/stage-1/phase_c2",
 )
 
 #: Individual files outside those trees that the replay's inputs come from.
@@ -77,7 +81,8 @@ OPERATOR_TREES = (
 #: checked wholesale: it also holds `phase_a_search.py`, the search entry point
 #: this replay does not call and from which the canonical-control injection was
 #: deliberately removed after attempt 3 died in it.
-OPERATOR_FILES = ("scripts/stages/stage-1/phase_a/phase_a_frozen.py",)
+#: frozen spelling, as of ATTEMPT3_SESSION_COMMIT (see OPERATOR_TREES above)
+OPERATOR_FILES = ("scripts/autoinit/phase_a_frozen.py",)
 
 #: Identity fields a duplicate journal row may not disagree about.
 _IDENTITY_KEYS = ("artifact_digest", "checkpoint_sha256", "impl_ids",

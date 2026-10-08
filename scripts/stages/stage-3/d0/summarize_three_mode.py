@@ -12,6 +12,7 @@ from collections import defaultdict
 from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 from stages.d0.run_three_mode_diagnostic import score, summarize  # noqa: E402
 

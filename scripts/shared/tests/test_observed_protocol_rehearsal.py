@@ -50,7 +50,7 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     observe_recovery_protocol,
 )
 
-DRIVER_PATH = REPO / "scripts/shared/preflight/autoinit_preflight_driver.py"
+DRIVER_PATH = REPO / "scripts/shared/pod/autoinit_preflight_driver.py"
 TYPES = ["alpha", "beta", "gamma"]
 
 #: A teacher identity block of the shape `load_teacher` records. Taken from a

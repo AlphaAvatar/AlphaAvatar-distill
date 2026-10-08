@@ -78,7 +78,7 @@ LOCAL_ASSETS = (
     LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
                "artifacts/stages/stage-1"),
     LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/batteries"),
 )
 #: One entry now. `scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py` was the second,
 #: a ~20-minute Phase-A pre-flight rehearsal that a pod would otherwise re-run

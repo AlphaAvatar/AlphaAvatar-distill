@@ -100,13 +100,12 @@ C2_DECLARED_INPUTS: tuple[str, ...] = (
     "configs/experiments/phase_c2/authorization.json",
 )
 
-#: The sys.path roots the C2 entry points insert. They import several helpers by
-#: BARE NAME — `from autoinit_science_inputs import ...`, `from phase_a_search
-#: import ...` — which resolve only because the scripts put these directories on
-#: the path. A walk that did not know them silently missed those files: an
-#: unresolvable bare name looks like a third-party import rather than a gap.
-C2_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
-                                    "scripts/autoinit")
+#: The sys.path roots the C2 entry points insert. Since the 2026-10-08
+#: information-architecture migration every cross-file import is package-form
+#: (`shared.pod.autoinit_science_inputs`, `stages.phase_a.phase_a_search`),
+#: so two roots resolve everything; the dissolved `scripts/pod` and
+#: `scripts/autoinit` roots are gone from the tree.
+C2_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts")
 
 
 def c2_current_executable(repo_root: str | Path = ".") -> dict[str, Any]:

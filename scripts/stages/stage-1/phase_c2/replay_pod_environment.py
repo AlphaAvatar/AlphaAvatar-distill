@@ -22,6 +22,7 @@ REPO = Path(__file__).resolve().parents[4]
 if str(REPO / "src") not in sys.path:
     sys.path.insert(0, str(REPO / "src"))
 
+    sys.path.insert(0, str(REPO / "scripts"))
 from aadistill.runtime import pod_environment as _pe  # noqa: E402
 from aadistill.runtime.pod_environment import (  # noqa: E402,F401
     LAUNCH_BOUND,

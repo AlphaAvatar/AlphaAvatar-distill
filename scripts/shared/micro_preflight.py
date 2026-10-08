@@ -16,6 +16,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
+sys.path.insert(0, str(REPO / "scripts"))
 from aadistill.governance.authorization import authorization_from_dict  # noqa: E402
 from shared.preflight import PREFLIGHT_POLICY  # noqa: E402
 

@@ -1,6 +1,6 @@
 """Preflight Stage 0: attest the runtime, materialize the protocol, freeze it.
 
-    PYTHONPATH=src python scripts/shared/preflight/attest_protocol.py \
+    PYTHONPATH=src python scripts/shared/pod/attest_protocol.py \
         --image-digest sha256:... --out logs/autoinit_phase_a_protocol_attested.json
 
 Runs **on the pod**, first, before anything is measured or trained. It fills the

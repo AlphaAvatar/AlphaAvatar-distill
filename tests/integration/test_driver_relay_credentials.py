@@ -68,7 +68,7 @@ def test_token_file_path_is_where_setup_stages_it():
 
 def _driver_module():
     import importlib
-    return importlib.import_module("e8b_driver")
+    return importlib.import_module("stages.e8b.e8b_driver")
 
 
 def test_env_var_overrides_the_file(monkeypatch):

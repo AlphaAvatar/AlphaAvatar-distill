@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """The AutoInitializer micro-preflight, as a session specification.
 
-    PYTHONPATH=src setsid nohup python -u scripts/shared/preflight/autoinit_preflight_launch.py \
+    PYTHONPATH=src setsid nohup python -u scripts/shared/pod/autoinit_preflight_launch.py \
         --scr <scratch> --session-commit <sha> --bundle <name> < /dev/null &
 
 This file declares WHAT the session is. How a session is run — detached start
@@ -71,7 +71,7 @@ LOCAL_ASSETS = (
     LocalAsset("artifacts/stages/stage-1/state_eval_v1", "state_eval_v1",
                "artifacts/stages/stage-1"),
     LocalAsset("artifacts/stages/stage-1/batteries/recovery_search_v2", "recovery_search_v2",
-               "artifacts/stages/stage-3"),
+               "artifacts/stages/stage-1/batteries"),
 )
 #: Ignored by the pod's blocking test gate. Must stay equal to the pod
 #: simulator's list, and a test pins them equal.
@@ -124,7 +124,7 @@ def control_relay(ctx: SessionContext) -> tuple[tuple[str, str], ...]:
 
 
 def driver_command(ctx: SessionContext, plan) -> str:
-    return (f"/opt/train/bin/python scripts/shared/preflight/autoinit_preflight_driver.py "
+    return (f"/opt/train/bin/python scripts/shared/pod/autoinit_preflight_driver.py "
             f"--stage all --image-digest '{ctx.image_digest}' "
             f"--rate {ctx.price} --spent-usd {ctx.spent_usd:.3f} "
             f"--soft-stop-usd {plan.soft_stop_usd:.2f} "

@@ -1753,6 +1753,27 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "operators do, which is why the GPU validation this round owes is "
             "the replay itself -- the eight pinned digests are the test.",
      }),
+    ("e6069cf31ecaec71657f41c5d977a004fa3e4a04",
+     "information-architecture migration: grouping-aware closure resolution",
+     {
+        "src/aadistill/governance/closure.py":
+            "_resolve_through_a_grouping_directory: the grouping-directory "
+            "resolution generalizes from exactly one intervening level to a "
+            "bounded chain of PURE grouping directories -- a grouping "
+            "directory is one without __init__.py; a directory that has one "
+            "is a package and already resolved by the direct candidates. "
+            "This is what lets `stages.d_series` resolve through "
+            "`scripts/stages/stage-1/families/d_series/` while the function "
+            "still reads no directory name and recognises no convention. "
+            "INTERNAL_ROOTS follows the application package renames "
+            "(`experiments` -> `stages`/`shared`, plus `maintenance`): which "
+            "import roots are repository-internal is application layout, and "
+            "the 2026-10-08 migration moved that layout. "
+            "NO CUDA SURFACE: it issues no kernel and performs no reduction; "
+            "it is the static walker grants derive executable identity from, "
+            "and both executable-closure snapshots were regenerated and "
+            "verified against the new tree in the same round.",
+     }),
 )
 
 
