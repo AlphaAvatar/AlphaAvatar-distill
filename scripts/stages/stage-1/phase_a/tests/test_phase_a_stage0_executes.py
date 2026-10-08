@@ -496,7 +496,7 @@ def test_B_the_historical_protocol_records_v2_and_is_not_rewritten_to_v3():
          / "attested_evaluation_protocol.json").read_text())
     live = recovery_scoring_contract(REPO)
     assert att["evaluation_protocol"]["scoring_contract"] == "recovery_search_scoring@v2"
-    assert live["contract"] == "recovery_search_scoring@v3"
+    assert live["contract"] == "recovery_search_scoring@v4"
     assert att["evaluation_protocol"]["scoring_digest"] != live["digest"], (
         "the historical record must keep the digest it recorded; rewriting it "
         "to the live one would claim the completed run executed this tree")
@@ -512,7 +512,7 @@ def test_C_stage0_refuses_against_the_historical_binding(tmp_path):
     assert mod.PhaseADriver.stage0(d) is False, (
         "an old preregistration must not validate against the migrated tree")
     reason = d.ev["stages"]["0"]["reason"]
-    assert "frozen assets" in reason and "recovery_search_scoring@v3" in reason
+    assert "frozen assets" in reason and "recovery_search_scoring@v4" in reason
     assert not (mod.AUDIT / "attested_evaluation_protocol.json").is_file(), (
         "a refused stage 0 must not leave an attestation behind")
 
@@ -530,4 +530,4 @@ def test_C_the_frozen_assets_gate_refuses_on_its_production_default(tmp_path):
     assert report["passed"] is False
     assert any("scoring contract" in p for p in report["problems"])
     assert report["scoring_contract"]["expected"] == "recovery_search_scoring@v2"
-    assert report["scoring_contract"]["observed"] == "recovery_search_scoring@v3"
+    assert report["scoring_contract"]["observed"] == "recovery_search_scoring@v4"

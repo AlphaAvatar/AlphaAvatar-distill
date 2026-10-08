@@ -827,7 +827,7 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
     sys.path.insert(0, str(REPO / "scripts"))
     from shared.data.battery_render import RENDERERS, rank_take, read_rows
     build = importlib.import_module("stages.phase_c2.build_c2_screening_battery")
-    c1_builder = importlib.import_module("build_c1_confirmation_battery")
+    c1_builder = importlib.import_module("stages.phase_c1.build_c1_confirmation_battery")
 
     record = json.loads(
         (REPO / "logs/stages/stage-1/phase_c2/plans/"
@@ -865,7 +865,7 @@ def test_the_screening_sample_was_drawn_under_the_domain_it_claims():
             make=RENDERERS[stratum], domain=domain)}
 
     frozen = set()
-    asset = REPO / record["path"].split()[0] / f"{stratum}.jsonl"
+    asset = REPO / _resolve(record["path"].split()[0]) / f"{stratum}.jsonl"
     for line in asset.read_text().splitlines():
         if line.strip():
             frozen.add(str(json.loads(line)["id"]))

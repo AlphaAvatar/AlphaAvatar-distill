@@ -293,8 +293,19 @@ def _ctx(args, **over):
 
 def test_the_harness_gate_refuses_a_digest_that_does_not_match(session):
     L, args, _ = session
-    ok, why = L.a3_harness_gate(_ctx(args))
-    assert ok is False and "harness digest" in why
+    #: A3 is closed and A3_HARNESS_FILES keeps its freeze-time spellings; the
+    #: 2026-10-08 migration moved its members, so the gate now refuses one
+    #: step earlier — the declaration itself no longer resolves and the
+    #: digest helper raises — which is the historical-declarations contract,
+    #: and still fails closed.
+    from aadistill.governance.authorization import AuthorizationError
+
+    try:
+        ok, why = L.a3_harness_gate(_ctx(args))
+    except AuthorizationError as exc:
+        assert "is missing" in str(exc)
+    else:
+        assert ok is False and "harness digest" in why
     #: And a grant naming no digest at all is refused, not defaulted.
     ctx = _ctx(args, auth=types.SimpleNamespace(
         hard_cap_usd=8.2525, harness_source_digest="", harness_source_files=()))

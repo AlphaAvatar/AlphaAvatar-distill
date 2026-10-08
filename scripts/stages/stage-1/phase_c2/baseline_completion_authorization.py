@@ -167,7 +167,7 @@ def _staging_contract_digest(run_id: str) -> str:
     pod = str(REPO_ROOT / "scripts/pod")
     if pod not in _sys.path:
         _sys.path.insert(0, pod)
-    launcher = importlib.import_module("autoinit_phase_c2_baseline_launch")
+    launcher = importlib.import_module("stages.phase_c2_baseline_completion.autoinit_phase_c2_baseline_launch")
     args = launcher.build_parser().parse_args([
         "--scr", "/unused", "--session-commit", "0" * 40,
         "--bundle", "aad_autoinit_00000000.bundle", "--run-id", run_id])

@@ -370,7 +370,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
                 "artifact digest is an experimental FINDING and the chain "
                 "proceeds directly into recovery. Only an integrity failure "
                 "stops it."),
-            "driver": "scripts/stages/stage-1/phase_a3/compare_a_bsz3.py :: structural_half",
+            "driver": "scripts/autoinit/compare_a_bsz3.py :: structural_half",
         },
 
         "recovery": {
@@ -464,7 +464,8 @@ def build(*, rate_note: str) -> dict[str, Any]:
                     "rule": ("per primary stratum: candidate usable rate < "
                              "0.10 while control usable rate > 0.40"),
                     "candidate_max": 0.10, "control_min": 0.40,
-                    "implementation": ("scripts/stages/stage-1/phase_c1/"
+                    #: frozen design-emission spelling (closed experiment record)
+                    "implementation": ("scripts/experiments/stage-1/phase_c1/"
                                        "probe_results.py :: decision_inputs"),
                 },
                 "_role": ("reported as safety observations. They do not gate "
@@ -516,7 +517,7 @@ def build(*, rate_note: str) -> dict[str, Any]:
 
         "pricing": {
             "_owner": "logs/stages/stage-1/phase_c3/plans/a3_pricing.json",
-            "_derived_by": "scripts/stages/stage-1/phase_a3/a3_pricing.py",
+            "_derived_by": "scripts/experiments/stage-1/phase_a3/a3_pricing.py",
             "gpu_rate_usd_per_hour": pricing["queried_rate_usd_per_hour"],
             "_rate_note": rate_note,
             "expected_usd": pricing["price"]["expected"]["usd"],
