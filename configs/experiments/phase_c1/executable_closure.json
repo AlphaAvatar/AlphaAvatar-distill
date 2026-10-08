@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 114,
- "digest": "7fab89c8ff813a410abbc6a7d619f68f2e29dcec082fdcc5585dae90cc242e76",
+ "digest": "f0d84fd30d7867eb21faa3e17fe78ccd89b034292ed0659a9d11318d715b2b02",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -44,8 +44,8 @@
   },
   {
    "path": "configs/experiments/phase_c1/frozen_assets.json",
-   "sha256": "03ef39d1ce6db2e7d0407a57f9e3fc465c724708aca7c15acc6065141c897c3e",
-   "bytes": 3358
+   "sha256": "d9a19f88888e8fb14e8362596c5200c9a50e3c6759db0a7dd7a23093432050d4",
+   "bytes": 3676
   },
   {
    "path": "scripts/shared/calibration.py",
