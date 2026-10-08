@@ -56,7 +56,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "the repository information-architecture migration. D1 does NOT resume until that migration is independently reviewed; it is paused before behavioural screening with no authorization issued and no resource created.",
+  "next_scientific_action": "independent review of the information-architecture migration (branch migration/info-architecture; record: logs/maintenance/source-relocations/info-architecture/v1/). D1 does NOT resume before that review approves it; it stays paused before behavioural screening with no authorization issued and no resource created.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }
