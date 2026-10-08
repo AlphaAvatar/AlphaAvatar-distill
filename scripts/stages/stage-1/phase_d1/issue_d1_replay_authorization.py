@@ -2,7 +2,7 @@
 """Issue the one-use authorization for D1's finalist rematerialization.
 
     PYTHONPATH=src:scripts python \
-        scripts/autoinit/issue_d1_replay_authorization.py --rate 1.09
+        scripts/stages/stage-1/phase_d1/issue_d1_replay_authorization.py --rate 1.09
 
 Run it AFTER the launch-bound readiness sweep is recorded and committed, and
 BEFORE the bundle is staged: the bundle must carry the authorization, so the
@@ -33,8 +33,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-for _extra in ("src", "scripts", "scripts/experiments/stage-1"):
+REPO_ROOT = Path(__file__).resolve().parents[4]
+for _extra in ("src", "scripts", "scripts/stages/stage-1"):
     if str(REPO_ROOT / _extra) not in sys.path:
         sys.path.insert(0, str(REPO_ROOT / _extra))
 
@@ -96,7 +96,7 @@ def campaign_money(repo_root: Path) -> dict[str, float]:
     #: bound binds, binds.
     import sys as _sys
     _sys.path.insert(0, str(REPO_ROOT / "scripts"))
-    from consolidate.derive_budget import derive
+    from maintenance.consolidation.derive_budget import derive
 
     allowance = derive(REPO_ROOT)["engineering"]
     from_allowance = round(float(allowance["remaining_usd"]) - reserve, 4)
@@ -120,7 +120,7 @@ def priced_session(rate: float) -> dict[str, float]:
     one place. A hand-typed expectation here is how a cap and a plan disagree.
     """
     sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
-    import autoinit_d1_replay_launch as L
+    from stages.phase_d1 import autoinit_d1_replay_launch as L
 
     args = L.build_parser().parse_args([
         "--scr", "/tmp/d1-replay-pricing",
@@ -169,7 +169,7 @@ def build_record(*, rate: float, commit: str, money: dict[str, float],
         PreflightPlan, PreflightStage,
     )
     sys.path.insert(0, str(REPO_ROOT / "scripts/pod"))
-    import autoinit_d1_replay_launch as L
+    from stages.phase_d1 import autoinit_d1_replay_launch as L
 
     args = L.build_parser().parse_args([
         "--scr", "/tmp/d1-replay-pricing", "--session-commit", "0" * 40,

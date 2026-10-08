@@ -52,7 +52,6 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 # The sibling science-input declarations. Present when this file is run
 # directly; absent when a test loads it by path, which is how the
 # structural checks load every launcher.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from stages.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE, PhaseAAuthorization  # noqa: E402

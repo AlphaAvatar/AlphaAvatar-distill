@@ -1,0 +1,62 @@
+{
+  "schema": "aadistill.experiment_current/v1",
+  "_contract": "DERIVED navigation for the current state of phase_d1. Every value names its owner; edit the owner, then regenerate this file (it runs in the convergence chain). AUTHORIZES NOTHING.",
+  "experiment_id": "phase_d1",
+  "stage_id": 1,
+  "owners": {
+    "scripts": "scripts/stages/stage-1/phase_d1",
+    "logs": "logs/stages/stage-1/phase_d1",
+    "artifacts": "artifacts/stages/stage-1/phase_d1",
+    "family": "logs/stages/stage-1/families/d_series",
+    "repo_snapshot": "logs/state/current.json"
+  },
+  "design": {
+    "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- NO OPEN BLOCKER",
+    "open_blockers": [],
+    "_blockers_are_derived": "d1_session.open_blockers()"
+  },
+  "evidence": {
+    "battery_family": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
+    "roles_required": [
+      "d1_screening",
+      "d1_confirmation"
+    ],
+    "status_owner": "the family's current.json"
+  },
+  "candidates": {
+    "decision": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "rule_applied": "quality_only",
+    "finalist_bytes_present": {
+      "q1": true,
+      "q2": true,
+      "q3": true,
+      "q4": true
+    },
+    "_presence_is_not_identity": "a directory existing is navigation; identity is the digest check `behavioural.require_arms_present()` performs"
+  },
+  "runs": {
+    "root": "logs/stages/stage-1/phase_d1/runs",
+    "all": [
+      "d1_replay_001",
+      "d1_replay_002",
+      "d1_search_20261005_173304",
+      "d1_search_20261005_193733",
+      "d1_search_20261006_055409",
+      "d1_search_20261006_095623",
+      "d1_search_20261006_101725",
+      "d1_search_20261006_210210",
+      "runner_iface"
+    ],
+    "with_closeout": [
+      "d1_search_20261006_055409",
+      "d1_search_20261006_101725",
+      "d1_search_20261006_210210"
+    ]
+  },
+  "active_run": null,
+  "next_scientific_action": "the repository information-architecture migration. D1 does NOT resume until that migration is independently reviewed; it is paused before behavioural screening with no authorization issued and no resource created.",
+  "_next_owner": "logs/state/current.json :: next",
+  "authorizes": "nothing"
+}

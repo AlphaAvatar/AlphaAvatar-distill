@@ -38,7 +38,7 @@ source of truth.
 
 ## Outputs
 
-* `artifacts/stage0/qwen3_4b_thinking_v1` — the statistics cache Stage 1 initializes from. Outside git; regenerable from the config and the corpus
+* `artifacts/stages/stage-0/qwen3_4b_thinking_v1` — the statistics cache Stage 1 initializes from. Outside git; regenerable from the config and the corpus
 
 ## Pipeline activity
 
@@ -81,7 +81,7 @@ an artifact lives outside git with its manifest. Neither is
 copied here.
 
 * `data/warmup/warmup_v1.manifest.json`
-* `artifacts/stage0/qwen3_4b_thinking_v1`
+* `artifacts/stages/stage-0/qwen3_4b_thinking_v1`
 
 ## Decisions
 

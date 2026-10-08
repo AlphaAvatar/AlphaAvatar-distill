@@ -21,6 +21,7 @@ reporting success.
 from __future__ import annotations
 
 import contextlib
+import importlib.util
 import io
 import re
 import sys
@@ -30,7 +31,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
-sys.path.insert(0, str(REPO / "scripts/pod"))
+sys.path.insert(0, str(REPO / "scripts"))
 
 SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
@@ -148,10 +149,19 @@ def launchers() -> dict[str, tuple[str, str]]:
 
 def _enumerate_launchers() -> dict[str, tuple[str, str]]:
     found = {}
-    for path in sorted((REPO / "scripts/pod").glob("*_launch.py")):
+    #: Launchers live with the experiment that owns them (`scripts/stages/...`)
+    #: or a stage-neutral capability (`scripts/shared/...`), so they are
+    #: enumerated by name shape across the whole tree rather than from one
+    #: flat directory.
+    paths = [p for p in sorted((REPO / "scripts").rglob("*_launch.py"))
+             if "__pycache__" not in p.parts]
+    for path in paths:
         mod_name = path.stem
         try:
-            mod = __import__(mod_name)
+            spec_obj = importlib.util.spec_from_file_location(mod_name, path)
+            mod = importlib.util.module_from_spec(spec_obj)
+            sys.modules[mod_name] = mod
+            spec_obj.loader.exec_module(mod)
         except BaseException:                     # noqa: BLE001 - not a launcher we can build
             continue
         if not (hasattr(mod, "spec") and hasattr(mod, "build_parser")):

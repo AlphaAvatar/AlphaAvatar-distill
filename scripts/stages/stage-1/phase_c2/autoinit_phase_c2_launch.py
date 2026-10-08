@@ -55,7 +55,6 @@ sys.path.insert(0, str(REPO_ROOT / "scripts"))
 #: The sibling science-input declarations. Present when this file is run
 #: directly; absent when a test loads it by path, which is how the structural
 #: checks load every launcher.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.session import (  # noqa: E402

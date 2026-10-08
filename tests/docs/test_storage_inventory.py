@@ -102,7 +102,7 @@ def _relocated(old: str) -> str:
     import sys
 
     sys.path.insert(0, str(REPO / "scripts"))
-    from architecture.record_run_index import resolve_historical
+    from maintenance.architecture.record_run_index import resolve_historical
 
     return resolve_historical(old, REPO)
 

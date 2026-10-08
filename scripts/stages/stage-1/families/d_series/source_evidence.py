@@ -1253,6 +1253,15 @@ def report() -> dict[str, Any]:
                 if isinstance(v.get("renderer"), dict) and "BLOCKER" in v["renderer"]}
     return {
         "schema": SCHEMA,
+        "record_role": "historical_analysis",
+        "live_state": False,
+        "superseded_for_readiness_by":
+            "logs/stages/stage-1/families/d_series/current.json",
+        "_record_role_means": (
+            "a point-in-time measurement that informed the maintainer source "
+            "decision. Its BLOCKER fields describe the state of the sources "
+            "AT MEASUREMENT TIME, before the family was built; the family's "
+            "live record above owns readiness now."),
         "_contract": (
             "Evidence for the maintainer source decision. AUTHORIZES NOTHING "
             "and MATERIALIZES NOTHING -- no battery is built and no row is "

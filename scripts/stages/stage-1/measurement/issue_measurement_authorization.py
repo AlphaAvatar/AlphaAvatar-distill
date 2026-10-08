@@ -1,6 +1,6 @@
 """Issue the bounded causal-depth measurement authorization. Zero cost.
 
-    PYTHONPATH=src python scripts/autoinit/issue_measurement_authorization.py \
+    PYTHONPATH=src python scripts/stages/stage-1/measurement/issue_measurement_authorization.py \
         --grant logs/<a one-use grant document>.json --require-clean
 
 The same grant/schema split the Phase-A issuer uses, for the same reason: who
@@ -25,13 +25,13 @@ from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.governance.authorization import harness_source_digest  # noqa: E402
-from experiments.measurement.plan import MEASUREMENT_AUTHORIZATION, MEASUREMENT_PLAN_V1  # noqa: E402
-from experiments.phase_a.plan import GRANT_PROSE_REQUIRED  # noqa: E402
+from stages.measurement.plan import MEASUREMENT_AUTHORIZATION, MEASUREMENT_PLAN_V1  # noqa: E402
+from stages.phase_a.plan import GRANT_PROSE_REQUIRED  # noqa: E402
 
 #: What the measurement session actually executes. NOT the Phase-A set: this
 #: session runs its own launcher and its own job, and digesting Phase-A's files

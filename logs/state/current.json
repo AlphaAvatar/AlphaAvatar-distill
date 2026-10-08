@@ -27,8 +27,8 @@
  "branch": "prep/d1-funding-decision",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
-  "_derived_by": "scripts/consolidate/render_log_navigation.py, from derive_budget.py",
-  "_owner": "derived by scripts/consolidate/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
+  "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
+  "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
   "_package_spent_usd": 106.2829,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 490.0,
@@ -79,10 +79,10 @@
   "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
   "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
   "execution_wiring": "SEARCH complete, verified at $0. SCREENING built and PAUSED: field, schedule, seeds, battery role, scorer, ranking, driver verify at $0. Launcher, issuer, sweep contract and execution preregistration do NOT exist. Owner: d1_design.json.",
-  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/shared/analyses/autoinit_d_series_family_manifest.json",
+  "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
-  "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/experiments/stage-1/phase_d_series/scoring_protocol.py",
+  "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "REBOUND 2026-10-08 with the corrected design_hash, prospectively -- nothing measured. screening 614923639, 516448251; confirmation 396880939, 766527341, 1004399678. An execution preregistration hash-binding them is still owed.",
   "state": "D1 PAUSED BEFORE BEHAVIOURAL SCREENING 2026-10-08; its search is complete and its family built. D2 and D3 NOT STARTED."
  },
@@ -107,7 +107,7 @@
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
-  "_derived_by": "scripts/consolidate/render_log_navigation.py, from logs/index.json and the run's own closeout",
+  "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from logs/index.json and the run's own closeout",
   "experiment_id": "phase_a3",
   "index": "logs/index.json",
   "last_executed": null,
@@ -117,12 +117,12 @@
   "state": "no run manifest; its closeout states: MEASUREMENT_COMPLETE_3_PROBES_SCORED"
  },
  "latest_verification": {
-  "_derived_by": "scripts/consolidate/render_log_navigation.py:readiness_view",
+  "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py:readiness_view",
   "latest_sweep": {
-   "describes_head": false,
    "kind": "launch_bound",
+   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "verdict": "PASS"
+   "describes_head": false
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,

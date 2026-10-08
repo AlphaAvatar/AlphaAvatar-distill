@@ -351,7 +351,7 @@ def test_the_pricing_cites_the_attempt4_reuse_that_makes_missing_sb_empty():
     import sys as _sys
 
     _sys.path.insert(0, str(REPO / "scripts"))
-    from architecture.record_run_index import historical_paths
+    from maintenance.architecture.record_run_index import historical_paths
 
     forward = historical_paths(REPO)
     records = {}

@@ -23,18 +23,25 @@ from aadistill.initialization.planning import recovery as _rec  # noqa: E402
 SOURCE_SETS_CONFIG = REPO / "configs/experiments/phase_a/source_sets.json"
 _DOC = json.loads(SOURCE_SETS_CONFIG.read_text())
 
-#: The current scorer. v2 names the pre-migration paths and is the record of
-#: what completed runs bound; it is deliberately not computable here.
-RECOVERY_SCORING_FILES_V3: tuple[str, ...] = tuple(_DOC["recovery_scoring"]["files_v3"])
+#: The current scorer. Historical versions name the paths completed runs
+#: bound and are deliberately not computable here: v2 is the
+#: initialization-core cutover's record, v3 the information-architecture
+#: migration's (2026-10-08).
+RECOVERY_SCORING_FILES_V4: tuple[str, ...] = tuple(_DOC["recovery_scoring"]["files_v4"])
+RECOVERY_SCORING_FILES_V3: tuple[str, ...] = tuple(
+    _DOC["recovery_scoring"]["files_v3_historical"])
 RECOVERY_SCORING_FILES_V2: tuple[str, ...] = tuple(
     _DOC["recovery_scoring"]["files_v2_historical"])
 RECOVERY_SCORING_CONTRACT_ID: str = _DOC["recovery_scoring"]["contract_id"]
 RECOVERY_SCORING_CONTRACT_VERSION: int = _DOC["recovery_scoring"]["version"]
 
-TRAINER_SOURCE_FILES_V1: tuple[str, ...] = tuple(_DOC["trainer"]["files"])
+TRAINER_SOURCE_FILES_V2: tuple[str, ...] = tuple(_DOC["trainer"]["files"])
+TRAINER_SOURCE_FILES_V1: tuple[str, ...] = tuple(_DOC["trainer"]["files_v1_historical"])
 TRAINER_SOURCE_SET_VERSION: int = _DOC["trainer"]["set_version"]
 
-GENERATION_SOURCE_FILES_V1: tuple[str, ...] = tuple(_DOC["generation"]["files"])
+GENERATION_SOURCE_FILES_V2: tuple[str, ...] = tuple(_DOC["generation"]["files"])
+GENERATION_SOURCE_FILES_V1: tuple[str, ...] = tuple(
+    _DOC["generation"]["files_v1_historical"])
 GENERATION_SOURCE_SET_VERSION: int = _DOC["generation"]["set_version"]
 
 
@@ -43,7 +50,7 @@ def recovery_scoring_contract(repo_root=".", *, files=None, version=None,
     """This project's scoring contract, over the files it declares."""
     return _rec.recovery_scoring_contract(
         repo_root,
-        files=RECOVERY_SCORING_FILES_V3 if files is None else files,
+        files=RECOVERY_SCORING_FILES_V4 if files is None else files,
         version=RECOVERY_SCORING_CONTRACT_VERSION if version is None else version,
         contract_id=contract_id or RECOVERY_SCORING_CONTRACT_ID)
 
@@ -51,18 +58,21 @@ def recovery_scoring_contract(repo_root=".", *, files=None, version=None,
 def trainer_source_digest(repo_root=".", files=None) -> dict:
     return _rec.trainer_source_digest(
         repo_root,
-        files=TRAINER_SOURCE_FILES_V1 if files is None else files,
+        files=TRAINER_SOURCE_FILES_V2 if files is None else files,
         set_version=TRAINER_SOURCE_SET_VERSION)
 
 
 def generation_source_digest(repo_root=".", *, files=None) -> dict:
     return _gen.generation_source_digest(
-        repo_root, files=GENERATION_SOURCE_FILES_V1 if files is None else files)
+        repo_root, files=GENERATION_SOURCE_FILES_V2 if files is None else files)
 
 
 __all__ = ["SOURCE_SETS_CONFIG", "RECOVERY_SCORING_FILES_V2",
-           "RECOVERY_SCORING_FILES_V3", "RECOVERY_SCORING_CONTRACT_ID",
+           "RECOVERY_SCORING_FILES_V3", "RECOVERY_SCORING_FILES_V4",
+           "RECOVERY_SCORING_CONTRACT_ID",
            "RECOVERY_SCORING_CONTRACT_VERSION", "TRAINER_SOURCE_FILES_V1",
+           "TRAINER_SOURCE_FILES_V2",
            "TRAINER_SOURCE_SET_VERSION", "GENERATION_SOURCE_FILES_V1",
+           "GENERATION_SOURCE_FILES_V2",
            "GENERATION_SOURCE_SET_VERSION", "recovery_scoring_contract",
            "trainer_source_digest", "generation_source_digest"]

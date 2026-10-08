@@ -2,7 +2,7 @@
 
 **Status: PROPOSAL, revised 2026-08-12 after the pre-GPU correction pass. Nothing
 here is authorized and no compute has been launched.** Numbers come from
-[`autoinit_v1_search_space.json`](autoinit_v1_search_space.json), regenerable with
+[`autoinit_v1_search_space.json`](../../../../shared/analyses/autoinit_v1_search_space.json), regenerable with
 `PYTHONPATH=src python scripts/autoinit/plan_search.py`.
 
 ---

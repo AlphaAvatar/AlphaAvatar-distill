@@ -144,7 +144,7 @@ class TestTheClaimBoundaryOfTheNoiseModel:
     def test_the_three_design_numbers_are_stated_not_selected(self):
         """K, screening seeds and confirmation seeds are a recorded judgement.
         Mutating the grid's probabilities must not move them."""
-        from autoinit.write_d1_design import (
+        from stages.phase_d1.write_d1_design import (
             D1_CONFIRMATION_SEEDS,
             D1_SCREENING_SEEDS,
             D1_TOP_K,
@@ -162,7 +162,7 @@ class TestTheClaimBoundaryOfTheNoiseModel:
             (D1_TOP_K, D1_SCREENING_SEEDS, D1_CONFIRMATION_SEEDS) == (4, 2, 3)
 
     def test_the_design_records_how_the_numbers_were_chosen(self):
-        from autoinit.write_d1_design import behavioural_design
+        from stages.phase_d1.write_d1_design import behavioural_design
 
         design = behavioural_design()
         why = design["_how_these_three_numbers_were_chosen"]
@@ -170,7 +170,7 @@ class TestTheClaimBoundaryOfTheNoiseModel:
         assert "NOT claimed" in why and "optimum" in why
 
     def test_the_design_carries_the_claim_boundary(self):
-        from autoinit.write_d1_design import behavioural_design
+        from stages.phase_d1.write_d1_design import behavioural_design
 
         boundary = behavioural_design()["_claim_boundary_of_the_noise_model"]
         assert "not a validity condition" in boundary
@@ -1134,13 +1134,13 @@ class TestTheScientificDesignHashIsNotAFunctionOfMoney:
     @staticmethod
     def _hash(doc):
         from aadistill.infrastructure.manifest import sha256_json
-        from autoinit.write_d1_design import scientific_preimage
+        from stages.phase_d1.write_d1_design import scientific_preimage
 
         return sha256_json(scientific_preimage(doc))
 
     @pytest.fixture(scope="class")
     def doc(self):
-        from autoinit.write_d1_design import build
+        from stages.phase_d1.write_d1_design import build
 
         return build()
 
@@ -1208,7 +1208,7 @@ class TestTheScientificDesignHashIsNotAFunctionOfMoney:
         still reads as a valid identity."""
         import copy
 
-        from autoinit.write_d1_design import scientific_preimage
+        from stages.phase_d1.write_d1_design import scientific_preimage
 
         broken = copy.deepcopy(doc)
         del broken["recovery_recipe"]
@@ -1260,7 +1260,7 @@ class TestTheScientificDesignHashIsNotAFunctionOfMoney:
     def test_the_finalist_retention_rule_is_quality_only_and_hash_bound(self, doc):
         from aadistill.initialization.planning.ranking import PARETO_V1
 
-        from autoinit.write_d1_design import SCIENTIFIC_BEHAVIOURAL
+        from stages.phase_d1.write_d1_design import SCIENTIFIC_BEHAVIOURAL
 
         assert doc["behavioural_design"]["finalist_retention"] == \
             PARETO_V1.RETENTION_QUALITY_ONLY

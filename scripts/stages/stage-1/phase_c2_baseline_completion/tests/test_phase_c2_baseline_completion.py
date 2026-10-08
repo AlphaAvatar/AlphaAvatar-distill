@@ -1715,7 +1715,7 @@ def test_the_snapshot_does_not_contradict_itself_about_attempt_4():
 def test_the_renderer_reports_a_missing_closeout_rather_than_inheriting_one(tmp_path):
     """A run with no closeout says so. Nothing is carried over."""
     sys.path.insert(0, str(REPO / "scripts"))
-    from consolidate.render_log_navigation import _run_outcome
+    from maintenance.consolidation.render_log_navigation import _run_outcome
 
     assert "no closeout" in _run_outcome(tmp_path, "runs/attempt9", recorded=True)
     assert "no run root" in _run_outcome(tmp_path, None, recorded=True)

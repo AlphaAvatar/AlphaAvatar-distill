@@ -33,7 +33,7 @@ from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.infrastructure.budget import Phase  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.infrastructure.session import BudgetSpec  # noqa: E402
-from experiments.phase_a.plan import PhaseAAuthorization  # noqa: E402
+from stages.phase_a.plan import PhaseAAuthorization  # noqa: E402
 
 SCHEMA = "aadistill.autoinit.a3_authorization/v1"
 LIVE_PRICING_PATH = "logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json"
@@ -221,7 +221,7 @@ def load_live_pricing(repo_root: str | Path = REPO) -> dict[str, Any]:
     if not p.is_file():
         raise AuthorizationError(
             f"no live pricing record at {LIVE_PRICING_PATH}; run "
-            "scripts/experiments/stage-1/phase_a3/a3_pricing.py --write first")
+            "scripts/stages/stage-1/phase_a3/a3_pricing.py --write first")
     doc = json.loads(p.read_text())
     if not doc.get("FUNDABLE"):
         raise AuthorizationError(
@@ -251,7 +251,7 @@ def a3_budget_spec(repo_root: str | Path = REPO) -> BudgetSpec:
     `plan_session` adds the reserve on top of the priced total. Passing it as
     both a phase and the reserve is how a plan lands above its ceiling.
     """
-    from experiments.phase_a3.a3_pricing import (
+    from stages.phase_a3.a3_pricing import (
         OVERRUN_FACTOR, SETUP_WORST_CASE_MINUTES, component_minutes,
     )
 

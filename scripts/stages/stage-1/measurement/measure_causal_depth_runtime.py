@@ -70,7 +70,6 @@ sys.path.insert(0, str(REPO_ROOT / "scripts" / "training"))
 # Its own directory: present when this file is run directly, absent when a
 # test loads it by path. `phase_a_search` -- the real owner of
 # `as_operator_items` -- lives here.
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.initialization.device import apply_cpu_budget  # noqa: E402
 from aadistill.initialization.statistics.contribution import (  # noqa: E402

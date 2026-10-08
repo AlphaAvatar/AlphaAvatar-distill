@@ -71,11 +71,16 @@ FROZEN_STRATA: dict[str, int] = {
 #: state-id directory to name -- and its bytes are not on this host at all. It
 #: is materialized on the pod from its frozen construction spec; see
 #: `INCUMBENT_CONSTRUCTION`. An entry here would be a path that cannot exist.
+#: The two runs' bytes were moved from the scratch store to the durable store
+#: (`/home/ecs-user/aad-artifacts/phase_d1/`) on 2026-10-08, and all four
+#: finalists' `single_shard_sha256` re-verified against
+#: `decisions/post_search_finalist_retention.json` after the move — a scratch
+#: store is deletable by definition, and secured finalists must not be.
 ARM_SOURCES: dict[str, str] = {
-    "q1": "/home/ecs-user/aad-scratch/d1_search_20261006_210210/products",
-    "q3": "/home/ecs-user/aad-scratch/d1_search_20261006_210210/products",
-    "q2": "/home/ecs-user/aad-scratch/d1_replay_002/products",
-    "q4": "/home/ecs-user/aad-scratch/d1_replay_002/products",
+    "q1": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products",
+    "q3": "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products",
+    "q2": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products",
+    "q4": "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products",
 }
 
 #: HOW B REACHES A POD, and it is the same answer for every arm in the end.

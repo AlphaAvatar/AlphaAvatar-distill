@@ -37,9 +37,9 @@ source of truth.
 
 ## Outputs
 
-* `artifacts/stage1/qwen3_0p6b_init_v0` — the pinned init checkpoint every Stage-3 recovery run forks from, plus the random baseline saved beside it for comparison
-* `artifacts/stage1/state_eval_v1` — the state-evaluation suite the AutoInitializer search scores candidate initializations with
-* `artifacts/stage1/e8_contribution_init_v1` — the contribution-guided depth variant, built for E8
+* `artifacts/stages/stage-1/qwen3_0p6b_init_v0` — the pinned init checkpoint every Stage-3 recovery run forks from, plus the random baseline saved beside it for comparison
+* `artifacts/stages/stage-1/state_eval_v1` — the state-evaluation suite the AutoInitializer search scores candidate initializations with
+* `artifacts/stages/stage-1/e8_contribution_init_v1` — the contribution-guided depth variant, built for E8
 
 ## This stage's own areas
 
@@ -48,6 +48,7 @@ experiments.
 
 | area | what it holds |
 | --- | --- |
+| [`families/`](families/) | experiment FAMILIES — material owned by a group of sibling experiments (e.g. D1/D2/D3) rather than any single one; each family directory carries its own current.json |
 | [`history/`](history/) | records spanning this stage's experiments, kept verbatim |
 
 ## Pipeline activity
@@ -59,10 +60,10 @@ studies *of* it.
 | --- | --- | --- | --- |
 | PCA / sandwich structural initialization of the 0.6B student | `pipeline-activity` | none | complete |
 | Causal-depth runtime measurement — pricing a Stage-1 operator | `engineering-measurement` | [`measurement/`](measurement/) | complete |
-| D-series family and source records, spanning D1/D2/D3 | `experiment-spanning` | logs/shared/analyses | here by design, not by inheritance |
+| D-series family and source records, spanning D1/D2/D3 | `experiment-spanning` | logs/stages/stage-1/families/d_series/analyses | here by design, not by inheritance |
 | AutoInit program analyses and harness validations, spanning the Stage-1 experiments | `experiment-spanning` | logs/shared/ (BLOCKED — pinned by frozen sources) | pinned in place |
 
-`autoinit_program_material` is stage-1 material that stays where it is: scripts/pod/autoinit_phase_b_driver.py and scripts/pod/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/. Moving it would mean editing frozen-set members to tidy a directory. Declared rather than left looking stage-neutral.
+`autoinit_program_material` is stage-1 material that stays where it is: scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py and scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/. Moving it would mean editing frozen-set members to tidy a directory. Declared rather than left looking stage-neutral.
 
 ## Experiments
 
@@ -121,9 +122,9 @@ an artifact lives outside git with its manifest. Neither is
 copied here.
 
 * `data/warmup/holdout_v1.manifest.json`
-* `artifacts/stage1/qwen3_0p6b_init_v0`
-* `artifacts/stage1/state_eval_v1`
-* `artifacts/stage1/e8_contribution_init_v1`
+* `artifacts/stages/stage-1/qwen3_0p6b_init_v0`
+* `artifacts/stages/stage-1/state_eval_v1`
+* `artifacts/stages/stage-1/e8_contribution_init_v1`
 
 ## Current status
 

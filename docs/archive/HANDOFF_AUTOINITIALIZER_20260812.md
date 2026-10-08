@@ -186,7 +186,7 @@ recompute-per-candidate reference logits. Nine items, each pinned by a test in
 **What is still missing, and blocks a paid run:** the initializer-state evaluation
 suite, the recovery search battery, the `calib.reasoning_heavy@v1` mixture, a
 frozen halving preregistration, and one measurement of the statistics-pass GPU/CPU
-split. All zero cost. See [`../logs/shared/analyses/autoinit_pilot_proposal.md`](../../logs/shared/analyses/autoinit_pilot_proposal.md) §3.
+split. All zero cost. See [`../logs/shared/analyses/autoinit_pilot_proposal.md`](../../logs/stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md) §3.
 
 ## 6. Budget
 

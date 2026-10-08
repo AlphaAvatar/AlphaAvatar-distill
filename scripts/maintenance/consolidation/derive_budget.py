@@ -497,7 +497,7 @@ def _historical(rel: str, root: Path) -> str:
     """
     try:
         sys.path.insert(0, str(root / "scripts"))
-        from architecture.record_run_index import resolve_historical
+        from shared.run_layout import resolve_historical
     except ImportError:
         return rel
     try:

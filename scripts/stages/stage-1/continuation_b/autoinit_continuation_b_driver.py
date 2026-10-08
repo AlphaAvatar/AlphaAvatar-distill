@@ -44,7 +44,6 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 #: `phase_a_frozen` lives here. It is a SEPARATE module from
 #: `phase_a_search` — importing it reaches no search — and it is where the
 #: frozen target geometry and teacher identity live.

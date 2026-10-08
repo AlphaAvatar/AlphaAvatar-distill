@@ -44,7 +44,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))   # experiments.* live here
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 # `renderer_parity_gate` lives with the other dev-box verifiers, and the eleventh
 # pre-provider gate executes it directly rather than trusting a transcript of it.
 sys.path.insert(0, str(REPO_ROOT / "scripts/autoinit"))

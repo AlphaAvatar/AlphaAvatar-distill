@@ -1,6 +1,7 @@
 {
  "_authorizes": "nothing",
  "_contract": "Evidence for the maintainer source decision. AUTHORIZES NOTHING and MATERIALIZES NOTHING -- no battery is built and no row is admitted anywhere by it. Counts are reported at four named levels and `eligible` means ONE of them: the output of the STRENGTHENED chain, which is the historical contract plus canonical problem-content identity. Survivors of the contract as it exists today are reported as `current_exact_chain_survivors` and are NOT eligible counts, because that contract is measurably blind to recovery-training problem content.",
+ "_record_role_means": "a point-in-time measurement that informed the maintainer source decision. Its BLOCKER fields describe the state of the sources AT MEASUREMENT TIME, before the family was built; the family's live record above owns readiness now.",
  "_stage1_provenance_meaning": "the Stage-1 calibration and state-evaluation items of these strata carry token ids rather than text, so they cannot be compared by content. Every one is traceable into `corpus_v2`, so excluding the training corpus already excludes them and the chain has one fewer independent population than its documentation suggests.",
  "_what_is_no_longer_owed": "the source decision (made and implemented 2026-10-03), the MATH pin and fetch (done -- immutable revision, per-file SHA256, test only), the canonical problem-content key (implemented in identity.py and load-bearing in every count above), the GSM8K training-content repair (0 recovery-training rows survive), and the duplicate review (frozen before any outcome). Each was listed here while open; leaving them would make the record describe a state it is no longer in.",
  "chain_gap": {
@@ -11,6 +12,7 @@
   "consequence": "cross-split expansion of a stratum needs an exact problem-content key added to the chain, plus a pre-freeze review of the high-Jaccard pairs. The threshold selects what is reviewed and decides nothing -- one invented here would be a guess wearing a number.",
   "demonstrated": "MBPP `full/train` task 602 is the same problem as the already-consumed `full/test` task 217. Different `task_id` and different test asserts, so the rendered id and the rendered prompt both differ: the duplicate passes the chain. Found by the screen, not by the chain."
  },
+ "live_state": false,
  "math_pinning_readiness": {
   "_download_decision": "MADE and EXECUTED 2026-10-03. This block was written while the candidate was unpinned, to show the pinning decision was not blocked on a download for the part that did not need one. The measured counts now live in `strata.math_verified`; this stays as the parity baseline those counts were checked against.",
   "_what": "measurable readiness for the MATH pinning decision, derived from the ALREADY PINNED MATH-500 without downloading the candidate",
@@ -55,6 +57,7 @@
    "rows": 500
   }
  },
+ "record_role": "historical_analysis",
  "renderer_blockers": {
   "gsm8k": "1319 rendered ids collide with the pinned file and 0 of them are the same prompt. The existing renderer CANNOT be used on this candidate: every colliding id would name a different problem than the already-consumed row holding that id, and ids are what the exclusion chain, the frozen batteries and every score record key on. A split-aware id scheme is required, and changing an id scheme is a data decision rather than a refactor."
  },
@@ -1123,6 +1126,7 @@
    }
   }
  },
+ "superseded_for_readiness_by": "logs/stages/stage-1/families/d_series/current.json",
  "traps": [
   {
    "trap": "gsm8k `socratic` config",

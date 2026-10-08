@@ -34,7 +34,7 @@ from aadistill.infrastructure.budget import Phase
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import BudgetSpec
 from aadistill.governance.authorization import AuthorizationError
-from experiments.phase_a.plan import PhaseAAuthorization
+from stages.phase_a.plan import PhaseAAuthorization
 
 SCHEMA = "aadistill.autoinit.c1_authorization/v1"
 
@@ -181,11 +181,11 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
 #: experiment-instance fact, so it lives with the experiment; the walker that
 #: consumes it is generic and lives in `aadistill.governance.closure`.
 C1_ENTRY_POINTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_c1_launch.py",
-    "scripts/pod/autoinit_c1_driver.py",
-    "scripts/experiments/stage-1/phase_c1/authorization_payload.py",
-    "scripts/autoinit/issue_c1_authorization.py",
-    "scripts/pod/collect_artifacts.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+    "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+    "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+    "scripts/stages/stage-1/phase_c1/issue_c1_authorization.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Files no import edge reaches, whose bytes still decide what runs or what is
@@ -200,7 +200,7 @@ C1_ENTRY_POINTS: tuple[str, ...] = (
 #:
 #: Everything else a session loads and cannot reach by import IS here.
 C1_DECLARED_INPUTS: tuple[str, ...] = (
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     "configs/experiments/phase_c1/authorization.json",
     "configs/autoinit/c1_artifacts.json",
     "configs/autoinit/c1_artifacts_failed.json",

@@ -107,6 +107,15 @@ def capacity(*, battery: str = "artifacts/stages/stage-3/eval/battery_v2",
     remaining = strata[binding]["batteries_remaining"]
     return {
         "schema": "aadistill.autoinit.battery_evidence_capacity/v1",
+        "record_role": "historical_analysis",
+        "live_state": False,
+        "superseded_for_readiness_by":
+            "logs/stages/stage-1/families/d_series/current.json",
+        "_record_role_means": (
+            "a point-in-time measurement of the ORIGINAL C1 source pools. It "
+            "stays true as evidence and is kept as the provenance that made "
+            "the realized family necessary; it must not be read as D1's "
+            "current battery readiness, which the live record above owns."),
         "mixture": {k: v[1] for k, v in sorted(c1.SETS.items())},
         "exclusions": {"baseline": baseline, "drawn_batteries": drawn_detail,
                        "total_source_ids": len(source_ids),

@@ -68,10 +68,10 @@ MA = "scripts/maintenance"
 _AUTOINIT: dict[str, str] = {
     "aggregate_a3": f"{S1}/phase_a3",
     "aggregate_c3_stage_i": f"{S1}/phase_c3",
-    "attest_protocol": f"{SH}/preflight",
+    "attest_protocol": f"{SH}/pod",
     "audit_recovery_search_v2": f"{SH}/data",
     "audit_skip_predicates": f"{S1}/phase_c1",
-    "audit_tool_rendering": f"{SH}/preflight",
+    "audit_tool_rendering": f"{SH}/pod",
     "audit_tool_scoring": f"{SH}/evaluation",
     "c2_replay_config_forensic": f"{S1}/phase_c2_replay",
     "characterize_thresholds": f"{S1}/phase_a",
@@ -82,7 +82,7 @@ _AUTOINIT: dict[str, str] = {
     "freeze_c2_comparison_inputs": f"{S1}/phase_c2",
     "historical_reuse_position": f"{S1}/phase_b",
     "issue_a3_authorization": f"{S1}/phase_a3",
-    "issue_authorization": f"{SH}/preflight",
+    "issue_authorization": f"{SH}/pod",
     "issue_c1_authorization": f"{S1}/phase_c1",
     "issue_c2_authorization": f"{S1}/phase_c2",
     "issue_c2_baseline_completion_authorization": f"{S1}/phase_c2_baseline_completion",
@@ -191,8 +191,8 @@ _POD: dict[str, str] = {
     "autoinit_phase_c2_full_search_driver.py": f"{S1}/phase_c2_full_search",
     "autoinit_phase_c2_full_search_launch.py": f"{S1}/phase_c2_full_search",
     "autoinit_phase_c2_launch.py": f"{S1}/phase_c2",
-    "autoinit_preflight_driver.py": f"{SH}/preflight",
-    "autoinit_preflight_launch.py": f"{SH}/preflight",
+    "autoinit_preflight_driver.py": f"{SH}/pod",
+    "autoinit_preflight_launch.py": f"{SH}/pod",
     "autoinit_preflight_setup.sh": f"{SH}/pod",
     "autoinit_recovery_continuation_driver.py": f"{S1}/recovery_continuation",
     "autoinit_recovery_continuation_launch.py": f"{S1}/recovery_continuation",
@@ -576,7 +576,19 @@ def _apply_artifacts() -> None:
             print(f"skip (absent): {rel_old}")
             continue
         if new.exists():
-            raise SystemExit(f"refusing: destination exists: {rel_new}")
+            # A re-root whose destination was already created by an earlier
+            # subtree extraction MERGES, entry by entry; a same-named entry on
+            # both sides is a refusal, never an overwrite.
+            if not (old.is_dir() and new.is_dir()):
+                raise SystemExit(f"refusing: destination exists: {rel_new}")
+            for entry in sorted(old.iterdir()):
+                dest = new / entry.name
+                if dest.exists():
+                    raise SystemExit(f"refusing: collision: {dest}")
+                shutil.move(str(entry), str(dest))
+            old.rmdir()
+            print(f"merged: {rel_old} -> {rel_new}")
+            continue
         new.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(old), str(new))
         print(f"moved: {rel_old} -> {rel_new}")

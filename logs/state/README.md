@@ -25,5 +25,5 @@ what happened belongs to the experiment that owns it, under
 
 The readiness block in `current.md` and `latest_verification` in `current.json`
 are **generated** from the readiness record by
-[`render_log_navigation.py`](../../scripts/consolidate/render_log_navigation.py).
+[`render_log_navigation.py`](../../scripts/maintenance/consolidation/render_log_navigation.py).
 Do not hand-edit them: they went stale within hours when they were prose.

@@ -205,10 +205,13 @@ STAGE_INDEX = "logs/stages/index.json"
 #: `experiment_dirs`, so nothing regenerated its README — which went on saying
 #: `Runs: none recorded` beside all seventy. It is an experiment row now, in
 #: `stage_attribution.py` with the other Stage-1 experiments.
-STAGE_AREAS = ("history",)
+STAGE_AREAS = ("history", "families")
 
 STAGE_AREA_PURPOSE = {
     "history": "records spanning this stage's experiments, kept verbatim",
+    "families": ("experiment FAMILIES — material owned by a group of sibling "
+                 "experiments (e.g. D1/D2/D3) rather than any single one; "
+                 "each family directory carries its own current.json"),
 }
 
 #: What each stage IS, in the pipeline's own terms (AGENTS.md section 4). The
@@ -811,6 +814,14 @@ def main() -> int:
             readmes[st / "README.md"] = render_stage_readme(st, root)
             for d in experiment_dirs(st):
                 readmes[d / "README.md"] = render_experiment_readme(d, root, runs)
+            #: family directories get the same generated navigation an
+            #: experiment does — the family level is a grouping, not an owner
+            #: of its own README prose.
+            fams = st / "families"
+            if fams.is_dir():
+                for d in sorted(p for p in fams.iterdir() if p.is_dir()):
+                    readmes[d / "README.md"] = render_experiment_readme(
+                        d, root, runs)
     shared = root / "logs/shared"
     if shared.is_dir():
         readmes[shared / "README.md"] = render_shared_readme(root)

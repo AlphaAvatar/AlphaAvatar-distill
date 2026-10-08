@@ -1,0 +1,65 @@
+{
+  "schema": "aadistill.family_current/v1",
+  "_contract": "DERIVED navigation for the current state of the D-series behavioural family. Every value names its owner; edit the owner, then regenerate this file. AUTHORIZES NOTHING.",
+  "family_id": "d_series_behavioural_v1",
+  "kind": "experiment_family",
+  "stage_id": 1,
+  "serves": [
+    "phase_d1",
+    "phase_d2",
+    "phase_d3"
+  ],
+  "owners": {
+    "scripts": "scripts/stages/stage-1/families/d_series",
+    "logs": "logs/stages/stage-1/families/d_series",
+    "design_record": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
+    "realized_manifest": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
+    "battery_bytes": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1",
+    "verifier": "scripts/stages/stage-1/families/d_series/verify_batteries.py"
+  },
+  "status": "BUILT / VERIFIED",
+  "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+  "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+  "roles": {
+    "d1_confirmation": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b"
+    },
+    "d1_screening": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53"
+    },
+    "d2_confirmation": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "6b50625e764454c93bf62ee7b6289897cb9cba6c9a39382816250ad463850ddb"
+    },
+    "d2_screening": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "89758b3a0887e857aaf5c11f7fa87a1be4adecaa930eee266c4d64e800f63c55"
+    },
+    "d3_confirmation": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "60c08be46befd52293263895ef51108782b7c180a05c0073848b28e8c1c1cb95"
+    },
+    "d3_screening": {
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "item_ids_sha256": "91e8987d0b228e2b97ba6bf4507bba0bfe269b6ee99ec97af5f429cb63bb1f01"
+    }
+  },
+  "realized_files_present": {
+    "present": 42,
+    "expected": 42,
+    "_presence_is_not_identity": "run the verifier for byte identity; this is navigation"
+  },
+  "superseded_for_readiness": {
+    "d1_evidence_capacity": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
+    "_why": "that record answers how many further batteries the ORIGINAL C1 pools could yield (zero); the realized family superseded it for readiness on 2026-10-03 and it is kept as provenance"
+  },
+  "authorizes": "nothing"
+}

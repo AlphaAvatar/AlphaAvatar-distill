@@ -219,7 +219,7 @@ Protocol and pricing:
 [`phase_c2_full_search_protocol.json`](../../phase_c2/plans/phase_c2_full_search_protocol.json) ·
 [`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
 The space is **derived from the registry**, never written down:
-[`full_search_space.py`](../../../../../scripts/experiments/stage-1/phase_c2/full_search_space.py).
+[`full_search_space.py`](../../../../../scripts/stages/stage-1/phase_c2/full_search_space.py).
 
 > **Question C2.** With the promoted ATTENTION operator in the accepted library,
 > what is the globally preferred initialization composition when
@@ -359,7 +359,7 @@ incumbent is a legitimate terminal result.
 Two sessions, two authorizations, deliberately not combined:
 
 1. **full joint search** —
-   [`autoinit_phase_c2_full_search_driver.py`](../../../../../scripts/pod/autoinit_phase_c2_full_search_driver.py):
+   [`autoinit_phase_c2_full_search_driver.py`](../../../../../scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py):
    `bind_identities` → `full_joint_search` → `commit_top_k`, and it **stops**.
    It trains nothing, measures no behaviour, and has no code path into a
    behavioural stage. Executed end to end at toy scale, which found and closed a

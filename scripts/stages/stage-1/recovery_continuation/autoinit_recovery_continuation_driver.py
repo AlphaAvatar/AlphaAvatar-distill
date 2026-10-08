@@ -40,7 +40,6 @@ REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "scripts"))
 sys.path.insert(0, str(REPO / "scripts" / "autoinit"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.initialization.operators.register import register_builtin_operators  # noqa: E402
 from aadistill.runtime.device_handoff import (  # noqa: E402

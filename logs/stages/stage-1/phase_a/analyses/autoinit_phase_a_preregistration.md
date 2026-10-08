@@ -310,7 +310,7 @@ Storage: **peak working 105.9 GiB**, total written 135.4 GiB, retained 35.9 GiB,
 peak GPU resident 14.3 GiB. **Provision ≥ 150 GiB of container disk.**
 
 Recovery probes are priced separately in
-[`autoinit_pilot_proposal.md`](../../../../shared/analyses/autoinit_pilot_proposal.md). **These search-only
+[`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md). **These search-only
 figures are not the final authorization numbers** — those are recomputed after the
 micro-preflight.
 

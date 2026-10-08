@@ -8,7 +8,7 @@ Phase B to be?* — and records what blocks it. It does **not** design Phase B, 
 it does not resolve any of the open scientific choices in §6; those are the
 reviewer's.
 
-Sources: [`autoinit_pilot_proposal.md`](../../../shared/analyses/autoinit_pilot_proposal.md) §4, §5, §6, §9;
+Sources: [`autoinit_pilot_proposal.md`](../phase_a/analyses/autoinit_pilot_proposal.md) §4, §5, §6, §9;
 [`../docs/AUTOINIT_REFERENCE.md`](../../../../docs/AUTOINIT_REFERENCE.md) §9.4;
 [`decisions.md`](../../../budget/decisions.md) 2026-08-12 Decision (1), (7), (8);
 [`autoinit_v1_search_space.json`](../../../shared/analyses/autoinit_v1_search_space.json);

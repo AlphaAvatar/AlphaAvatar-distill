@@ -343,7 +343,7 @@ def test_the_historical_c2_cap_matches_the_decision_c2_ran_under():
 
     # 3. the canonical owner states the current cap, which is what any NEW
     #    session prices against.
-    from consolidate import derive_budget as D
+    from maintenance.consolidation import derive_budget as D
 
     live = D.load_config(REPO) if hasattr(D, "load_config") else owner
     assert current_cap == live["accepted_pricing"]["cumulative_cap_usd"]

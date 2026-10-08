@@ -236,7 +236,7 @@ say "rebuilding the inclusion mask in the pod environment"
 cd "$REPO" && PYTHONPATH=src /opt/train/bin/python - <<'PYEOF'
 import hashlib, json, sys
 from pathlib import Path
-sys.path.insert(0, 'scripts/evaluation')
+sys.path.insert(0, 'scripts/shared/evaluation')
 from diagnose_training_recall import rung_session_ids, stratified_sample
 PACK = Path('artifacts/shared/instruments/ladder_uniform_probe')
 SESS = Path('artifacts/stages/stage-3/corpus_v2/sessions.jsonl')

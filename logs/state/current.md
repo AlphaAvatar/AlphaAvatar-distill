@@ -305,8 +305,8 @@ experiment's record. AGENTS.md **§2.8a** names the three suites and
 
 ```text
 pytest                                              core full suite
-pytest scripts/experiments/stage-1/phase_d1/tests   a current experiment
-pytest scripts/experiments/stage-1/phase_c2/tests   historical verification
+pytest scripts/stages/stage-1/phase_d1/tests   a current experiment
+pytest scripts/stages/stage-1/phase_c2/tests   historical verification
 ```
 
 **The eleven "expected" failures are gone from the default run, and none was
@@ -323,9 +323,9 @@ the C2 family's four separate ids (`phase_c2_full_search`, `phase_c2_replay`,
 their own tests rather than sharing a prefix.
 
 ```text
-scripts/experiments/stage-1/phase_d1/   <->  logs/stages/stage-1/phase_d1/
-scripts/experiments/stage-1/phase_c3/   <->  logs/stages/stage-1/phase_c3/
-scripts/experiments/stage-3/tests/      <->  logs/stages/stage-3/
+scripts/stages/stage-1/phase_d1/   <->  logs/stages/stage-1/phase_d1/
+scripts/stages/stage-1/phase_c3/   <->  logs/stages/stage-1/phase_c3/
+scripts/stages/stage-3/tests/      <->  logs/stages/stage-3/
 ```
 
 **Specific experiment imports from the core suite: ZERO**, enforced by
@@ -355,7 +355,7 @@ Stage 3 holds the E-series ladder. **A3 is its own package now** — the index h
 always called it its own experiment, while its six modules sat inside
 `phase_c3`.
 
-`stage-1` is not a Python identifier, so `scripts/experiments/__init__.py`
+`stage-1` is not a Python identifier, so `scripts/stages/__init__.py`
 extends `__path__` over the stage directories and `experiments.phase_d1` keeps
 resolving. No import in the repository grew a stage, and core knows nothing about
 stages — the closure deriver follows a grouped package by globbing one level,
@@ -365,7 +365,7 @@ reading no directory name.
 `SetupManifest.test_paths` names the suite; the ignore-complement is gone.
 `autoinit_c1_launch` recorded that complement going stale six times, once per
 experiment preflight directory created after C1 closed — each one a directory a
-C1 pod would have collected on its own meter. And `scripts/pod/setup.sh` ran the
+C1 pod would have collected on its own meter. And `scripts/shared/pod/setup.sh` ran the
 whole suite **twice**, once for a `tail -3` and once for an exit status; it is one
 invocation with `tee` and `PIPESTATUS[0]`.
 
@@ -465,8 +465,8 @@ provenance names — the manifest records it with `dirty: false` — and a squas
 commit is not it.
 
 **What exists.** Six behavioural roles, 950 prompts / 850 scorable each, 5,700
-items in `artifacts/stage3/d_series_behavioural_v1` (22 MB, gitignored). The
-record is `logs/shared/analyses/autoinit_d_series_family_manifest.json`, which
+items in `artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1` (22 MB, gitignored). The
+record is `logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json`, which
 carries all 42 output-file digests; `family_content_id` binds those bytes, not
 merely which source rows the ids refer to.
 
@@ -608,9 +608,9 @@ experiment closes?
 tests/initialization/test_scoring_content_identity.py        CORE
 tests/initialization/test_target_aware_scoring_end_to_end.py CORE
 tests/initialization/test_materialization_identity.py        CORE
-scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py          D1's
-scripts/experiments/stage-1/phase_d_series/{__init__,battery_family}.py
-scripts/experiments/stage-1/phase_d_series/tests/                     the series'
+scripts/stages/stage-1/phase_d1/tests/test_d1_design.py          D1's
+scripts/stages/stage-1/families/d_series/{__init__,battery_family}.py
+scripts/stages/stage-1/families/d_series/tests/                     the series'
 ```
 
 **The battery family's placement was the real judgement.** Flat under
@@ -769,7 +769,7 @@ removed, together with the test that had encoded it. What governs detection is
 own 95% interval, because that spread comes from **three** A3 deltas; the first
 is **UNKNOWN**, and C2's negative result argues against assuming it is near 1.
 Owner:
-[`selection_noise.py`](../../scripts/experiments/stage-1/phase_d1/selection_noise.py),
+[`selection_noise.py`](../../scripts/stages/stage-1/phase_d1/selection_noise.py),
 whose quadrature is self-checked against two closed forms and whose
 `CLAIM_BOUNDARY` travels into the design record. No C2 figure is re-analysed.
 
@@ -797,7 +797,7 @@ weight to a mask.
 > `1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58` binds their
 > 42 output files, and the allocation rule is
 > `f6047343c1c1ad2172f500e979c704c1`. The producer derives this now — see
-> [`battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py)'s
+> [`battery_family.py`](../../scripts/stages/stage-1/families/d_series/battery_family.py)'s
 > `_realization()` — so building or removing the family moves the record without
 > an edit. The description below of the ROLES and the RULE is unchanged and still
 > accurate.
@@ -806,9 +806,9 @@ weight to a mask.
 `d1_confirmation`, `d2_screening`, `d2_confirmation`, `d3_screening`,
 `d3_confirmation` — each disjoint from the others and from every historical role
 by stable id **and** normalized prompt content. Owner:
-[`battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py);
+[`battery_family.py`](../../scripts/stages/stage-1/families/d_series/battery_family.py);
 record:
-[`autoinit_d_series_battery_family.json`](../shared/analyses/autoinit_d_series_battery_family.json).
+[`autoinit_d_series_battery_family.json`](../stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json).
 
 It adds **no selection code**: `battery_render.rank_take` already orders a pool
 by `SHA256(base_digest : rank_domain : stratum : stable_id)`, which is how
@@ -856,7 +856,7 @@ recorded first. **Nothing was fetched and no source is pinned.**
 recovery training → evaluation → aggregation → closeout — answered the
 practical question once. Owner:
 [`a3_closeout.md`](../stages/stage-1/phase_a3/analyses/a3_closeout.md), every
-figure derived by `scripts/autoinit/aggregate_a3.py` into
+figure derived by `scripts/stages/stage-1/phase_a3/aggregate_a3.py` into
 [`a3_comparison.json`](../stages/stage-1/phase_a3/analyses/a3_comparison.json)
 (`75f2641041a66882…`), computed **off pod at `$0`**.
 
@@ -1201,7 +1201,7 @@ implementation's commit and module hashes — and it refuses to run on a dirty
 tree, because a commit recorded beside uncommitted edits names bytes that did
 not execute. Owner:
 [`attempt75_stage_i/c3_decision.json`](../stages/stage-1/phase_c3/analyses/attempt75_stage_i/c3_decision.json),
-produced by `scripts/autoinit/aggregate_c3_stage_i.py`.
+produced by `scripts/stages/stage-1/phase_c3/aggregate_c3_stage_i.py`.
 
 **attempt75's stage-I failure remains historical fact** and is not rewritten as
 though the live session had reached stage I successfully.
@@ -1244,7 +1244,7 @@ respected — `$383.3623` of `$400.0000`.
 
 **The authorization-gate defect is larger than estimated, and it is
 attempt75's alone.** Reconstructed chronologically by
-`scripts/consolidate/audit_formal_allowance.py`:
+`scripts/maintenance/consolidation/audit_formal_allowance.py`:
 
 | session | formal remaining before | derived ceiling | gate |
 | --- | --- | --- | --- |
@@ -1643,7 +1643,7 @@ larger campaign ceiling buys another attempt and nothing else — no runtime, no
 disk, no probes, no seeds, no scientific scope. Owners:
 `behavioural_governance.CAMPAIGN_ALL_IN_CEILING_USD` and
 `authorization_terms`; the separation is asserted by driving the two apart in
-`scripts/experiments/stage-1/phase_c2/tests/test_behavioural_continuation.py`.
+`scripts/stages/stage-1/phase_c2/tests/test_behavioural_continuation.py`.
 
 **Cleanup failure now fails closed at the caller.** `release_intermediates`
 stays non-raising — a cleanup error must not destroy a verified, announced arm
@@ -2002,7 +2002,7 @@ Three defects were found adjacent to this work and fixed, all `$0`:
   sweep would have been green about a gate that fails at TESTS_OK a minute or
   two into a billing pod. Reproduced at `$0` with `unshare -r -m` and a tmpfs
   over the store: **at `147b2c6` the selection fails; on this tree all 121 pass.**
-  The check moved to `scripts/experiments/stage-1/phase_c2/tests/test_c2_behavioural_launch_governance.py`
+  The check moved to `scripts/stages/stage-1/phase_c2/tests/test_c2_behavioural_launch_governance.py`
   with the other three dev-box-only cases, and its real production caller,
   `destination_gate`, now has tests — it had none, and had drifted to reading
   the `DURABLE_STORE` constant while the fetcher honoured `--ckpt-store`.
@@ -2024,13 +2024,13 @@ this section said before — that no grant existed and none could be created
 without a maintainer decision — was true until 2026-09-21, when that decision
 was made. Owners:
 [`c2_behavioural_grant_proposal.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_grant_proposal.json)
-(regenerate with `scripts/autoinit/write_c2_behavioural_proposal.py`) and
+(regenerate with `scripts/stages/stage-1/phase_c2_behavioural/write_c2_behavioural_proposal.py`) and
 [`c2_behavioural_resume_preregistration.json`](../stages/stage-1/phase_c2_behavioural/plans/c2_behavioural_resume_preregistration.json).
 
 **No scientific run is in flight.** Replay campaign: `$4.77` authorized,
 `$3.27` spent across nine attempts, `$1.50` left and no further replay owed.
 Project: `$309.2043` of `$370.0000` — owner
-`scripts/consolidate/derive_budget.py --json :: project`.
+`scripts/maintenance/consolidation/derive_budget.py --json :: project`.
 
 ## HISTORICAL — the 38 red, before the suite had a boundary
 
@@ -2062,7 +2062,7 @@ record:
 **3 are new, and they are mine.** All three are the same fact: this round edited
 two files that belong to *other phases'* declared harness sets —
 `src/aadistill/runtime/leaf_durability.py` (one identity construction shared by
-sender and receiver) and `scripts/pod/autoinit_preflight_setup.sh` (the
+sender and receiver) and `scripts/shared/pod/autoinit_preflight_setup.sh` (the
 `SESSION_KIND=c2_behavioural` branch, without which the session cannot
 authenticate at all). Both edits are required and neither is revertible without
 breaking the work they enable.
@@ -2113,7 +2113,7 @@ After the line `stage-1 selection committed: … (5 leaves)`:
 
 ```
 OSError: Repo id must be in the form 'repo_name' or 'namespace/repo_name':
-'/workspace/aad/artifacts/stage1/qwen3_0p6b_init_v0/checkpoint'
+'/workspace/aad/artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint'
 ```
 
 `run_phase_a_search` injects the canonical 0.6B control as its measured control
@@ -2208,7 +2208,7 @@ branching factor: the promoted ATTENTION operator consumes calibration where
 offered once however many mixtures were active. Nothing is pinned — every
 applicable implementation, every applicable profile and every order compete, so
 calibration choices can affect pruning. Owner:
-[`full_search_space.py`](../../scripts/experiments/stage-1/phase_c2/full_search_space.py),
+[`full_search_space.py`](../../scripts/stages/stage-1/phase_c2/full_search_space.py),
 with a test that refuses those integers as literals.
 
 **One exclusion, and it is scientific, not economic.**
@@ -2283,7 +2283,7 @@ C1's `4.12%` is a *post-recovery* measurement, not raw initialization accuracy;
 and C2 promotion depends only on the fresh recovery comparison of C against B.
 
 **The search execution path exists and was run for real.** The
-[full-search driver](../../scripts/pod/autoinit_phase_c2_full_search_driver.py)
+[full-search driver](../../scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py)
 does `bind_identities` → `full_joint_search` → `commit_top_k` and **stops**, with
 no code path into a behavioural stage. It was executed end to end at toy scale —
 real operators, real checkpoints, real reloads, real measurement — which found
@@ -2443,7 +2443,7 @@ forwards a 596M student where this perturbs the teacher's own logits.
 Two subruns, `$0.8446` of a `$1.50` ceiling, both pods provider-confirmed gone,
 one billing resource at a time. **s1 failed on my instrumentation and cost
 `$0.4925` of evidence**: `--out` defaulted to `None` while the launcher
-collects `artifacts/validation` and passes no `--out`, so the run measured all
+collects `artifacts/shared/validation` and passes no `--out`, so the run measured all
 three candidates and wrote nothing. Its repairs — report on every exit path, a
 diagnostic bound that does not divide by a near-zero value, the forward timed
 apart from the reduction, and the candidate reusing the reference forward — are
@@ -2546,7 +2546,7 @@ another approval round.
 | attempt | where it stopped | cost |
 | --- | --- | --- |
 | [5](../stages/stage-1/phase_c2_baseline_completion/runs/attempt5/closeout/outcome.json) | the launcher's **first statement**: `claim_output_root` took the stage id positionally where the signature takes `outputs` by keyword. No gate ran, no price was queried, **no provider resource existed**. The chain was consumed anyway — its one-use rule counts the invocation | `$0.0000` |
-| [6](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json) | **10/10 `$0` gates passed** and setup refused at **`ROPE_OK`**, which globs `artifacts/stage1/*/checkpoint/config.json`. This session stages no checkpoint — it rebuilds B on the pod — so the step had nothing to look at. `SETUP_RC=1`, no driver stage | `$0.0412` |
+| [6](../stages/stage-1/phase_c2_baseline_completion/runs/attempt6/closeout/outcome.json) | **10/10 `$0` gates passed** and setup refused at **`ROPE_OK`**, which globs `artifacts/stages/stage-1/*/checkpoint/config.json`. This session stages no checkpoint — it rebuilds B on the pod — so the step had nothing to look at. `SETUP_RC=1`, no driver stage | `$0.0412` |
 | [7](../stages/stage-1/phase_c2_baseline_completion/runs/attempt7/closeout/outcome.json) | **10/10 `$0` gates passed twice**, the pod came up and SSH answered — and the **launcher process was killed two minutes in**, by the agent's own blocking tool call. Setup never ran; `stages` is `{}`. The pod outlived its orchestrator and an explicit provider query removed it | `$0.0621` |
 | [8](../stages/stage-1/phase_c2_baseline_completion/runs/attempt8/closeout/outcome.json) | **COMPLETE.** `SETUP_RC=0`, driver detached and confirmed by descriptor probe, both stages passed, B rebuilt to its expected digest, measured once, comparison computed. Pod deleted behind its teardown gate | `$0.5872` |
 
@@ -2706,11 +2706,11 @@ torch 2.9.1+cu128, and `pip install transformers` with no version pin.
 **The root-cause investigation is the current work.** Ceiling **`$3.00`
 cumulative, inheriting the `$0.0822`** already spent; `$2.9178` remains and no
 part of it is C3's envelope. Its executable is
-`scripts/validation/batch_invariance_diagnostic.py`, and the point of it is
+`scripts/shared/validation/batch_invariance_diagnostic.py`, and the point of it is
 that every number a conclusion rests on is emitted by that file: the verdict is
 COMPUTED by `derive_conclusion()` from the stage outputs rather than written
 beside them, and that function is tabled and mutation-checked in
-`scripts/experiments/stage-1/phase_c3/tests/test_batch_invariance_conclusion.py`. Records:
+`scripts/stages/stage-1/phase_c3/tests/test_batch_invariance_conclusion.py`. Records:
 [`scope.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/scope.json),
 [`authorization.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/authorization.json),
 [`campaign.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/campaign.json).
@@ -2728,7 +2728,7 @@ cause on four reports for `$0.1005` and whose numbers `d3` reproduces — a
 cross-session check that cost `$0.10` and was worth it. Cumulative diagnostic
 spend `$0.4006` of `$3.00`. Owner:
 [`finding.json`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/finding.json),
-**derived** by `scripts/validation/batch_invariance_finding.py` from the four
+**derived** by `scripts/shared/validation/batch_invariance_finding.py` from the four
 raw reports in
 [`evidence/`](../stages/stage-1/phase_c3/investigations/batch-invariance-root-cause/v1/evidence/),
 not typed.
@@ -3013,7 +3013,7 @@ that a call it had just written passed a `1`, which a pilot that forgot the
 argument entirely would also have passed.
 
 **Pricing is conservative and arm-identical**, derived by
-[`phase_c3/pricing.py`](../../scripts/experiments/stage-1/phase_c3/pricing.py) from the
+[`phase_c3/pricing.py`](../../scripts/stages/stage-1/phase_c3/pricing.py) from the
 frozen mixture through the real loader and the real grouper:
 
 | | groups | item-forward equiv. | physical invocations | padded positions | pad/valid |
@@ -3349,7 +3349,7 @@ the digest itself is wrong.
 project spend **`$366.654`**, remaining **`$33.346`** of the amended
 **`$400.00`** cap; formal allowance **`$32.3824`** of `$55.00` remaining.
 Provider state verified clean: **pods 0, network volumes 0**. Owners:
-[`derive_budget.py`](../../scripts/consolidate/derive_budget.py) and
+[`derive_budget.py`](../../scripts/maintenance/consolidation/derive_budget.py) and
 [attempt66's closeout](../stages/stage-1/phase_c3/runs/attempt66/closeout/outcome.json).
 
 ## Readiness
@@ -3363,7 +3363,7 @@ Provider state verified clean: **pods 0, network volumes 0**. Owners:
 | launch-bound for the next session | **not prepared** — no launch-bound sweep describes the current tree. Whether one is owed depends on whether a launch is authorized, which this file's launch-chain section owns | this file's launch-chain section |
 | last launch-bound failure | swept at `82745981` on 2026-09-12 — kept as history, not a current state | [`readiness_history.json`](../stages/stage-1/phase_c1/history/readiness_history.json) |
 
-*Generated from the record by `scripts/consolidate/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*
+*Generated from the record by `scripts/maintenance/consolidation/render_log_navigation.py`; do not edit by hand — it went stale within hours when it was prose.*
 
 <!-- readiness:end -->
 
@@ -3451,7 +3451,7 @@ producer.** `record_run_index` also read only `classification`, so all 38
 `phase_a3` and 17 `phase_c3` runs were filed under "predates the run-manifest
 convention" while every one of them states a `status` — the index said nothing
 about why a run that *finished* had no manifest. The tables now live in
-`scripts/consolidate/closeout_reader.py` and both producers import them, so a
+`scripts/maintenance/consolidation/closeout_reader.py` and both producers import them, so a
 fourth family needs one edit in one place.
 
 **Two derived records went stale twice each and were regenerated, not
@@ -3547,7 +3547,7 @@ worth more than one quietly replaced.
 
 ## Budget — four limits that do not transfer
 
-Derived by [`scripts/consolidate/derive_budget.py`](../../scripts/consolidate/derive_budget.py)
+Derived by [`scripts/maintenance/consolidation/derive_budget.py`](../../scripts/maintenance/consolidation/derive_budget.py)
 from the approved package and each session's own closeout. **Do not restate
 these by hand; run the deriver.**
 
@@ -3562,7 +3562,7 @@ these by hand; run the deriver.**
 
 **Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 
-*Generated by `scripts/consolidate/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
+*Generated by `scripts/maintenance/consolidation/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 
 <!-- budget:end -->
 
@@ -3787,7 +3787,7 @@ started. The one remaining blocker is a maintainer funding decision.
 **Why the source branch is kept.** 637 distinct commit hashes are cited by 1,074
 record files and resolve only through that branch's history — confirmed reachable
 in 0.28 s immediately before and after the merge, by
-`scripts/consolidate/converge_before_sweep.py`. Deleting it, which the host offers
+`scripts/maintenance/consolidation/converge_before_sweep.py`. Deleting it, which the host offers
 by default after a squash, would invalidate every one of them.
 
 **Why a fresh working branch.** A squash commit does not have the branch's commits

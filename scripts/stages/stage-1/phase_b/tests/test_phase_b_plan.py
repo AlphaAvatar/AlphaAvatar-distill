@@ -458,7 +458,7 @@ def test_the_immutable_phase_b_records_are_byte_identical_to_the_reviewed_base()
     import sys as _sys
 
     _sys.path.insert(0, str(REPO / "scripts"))
-    from architecture.record_run_index import historical_paths
+    from maintenance.architecture.record_run_index import historical_paths
 
     back = {new: old for old, new in historical_paths(REPO).items()}
 

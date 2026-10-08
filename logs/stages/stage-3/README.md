@@ -19,7 +19,7 @@ Recover the structurally initialized student offline — repair the damage compr
 
 What this stage receives from the pipeline before it.
 
-* the pinned Stage-1 init checkpoint `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, which every arm forks from so that arms differ only in what is under test
+* the pinned Stage-1 init checkpoint `artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint`, which every arm forks from so that arms differ only in what is under test
 * the same pinned teacher, loaded to produce KD targets rather than to be imitated wholesale
 * Stage-2 data: today the teacher-target pilot corpus, with the public mixtures behind it
 
@@ -40,7 +40,7 @@ source of truth.
 
 ## Outputs
 
-* recovered checkpoints under `artifacts/stage3/<run_name>/`, each with its own run manifest. Outside git; the checkpoint registry and the tombstones record which still exist and what was frozen before any were deleted
+* recovered checkpoints under `artifacts/stages/stage-3/<run_name>/`, each with its own run manifest. Outside git; the checkpoint registry and the tombstones record which still exist and what was frozen before any were deleted
 
 ## This stage's own areas
 
@@ -91,11 +91,11 @@ because omitting it would misreport the stage; it gets no
 directory because an empty one would assert material that
 does not exist. Its evidence is in the stage index:
 
-* `ttb` — artifacts/stage3/ttb_ctrl_a/run_manifest.json; artifacts/stage3/ttb_treat_a/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `ttb` — artifacts/stages/stage-3/ttb_ctrl_a/run_manifest.json; artifacts/stages/stage-3/ttb_treat_a/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
 * `p0_real` — artifacts/audit/three_mode/P0-real-sa; artifacts/audit/three_mode/P0-real-sb; logs/stages/stage-3/history/EXPERIMENTS.md
 * `d0` — logs/stages/stage-3/history/EXPERIMENTS.md; artifacts/audit/three_mode/P0-real-sa
-* `p0` — configs/stage3/p0/p0_assistant_sa.json; artifacts/stage3/p0_assistant_sa/run_manifest.json; artifacts/stage3/p0_assistant_sb/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
-* `p2` — configs/stage3/p2/p2_ceheavy_sa.json; artifacts/stage3/p2_ceheavy_sa/run_manifest.json; configs/stage3/e4/e4_p2_r1600k_sa.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `p0` — configs/stage3/p0/p0_assistant_sa.json; artifacts/stages/stage-3/p0_assistant_sa/run_manifest.json; artifacts/stages/stage-3/p0_assistant_sb/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `p2` — configs/stage3/p2/p2_ceheavy_sa.json; artifacts/stages/stage-3/p2_ceheavy_sa/run_manifest.json; configs/stage3/e4/e4_p2_r1600k_sa.json; logs/stages/stage-3/history/EXPERIMENTS.md
 
 ### Arms and aliases, filed with their experiment
 

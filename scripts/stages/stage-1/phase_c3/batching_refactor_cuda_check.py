@@ -687,7 +687,7 @@ def derived_closure(cfg: dict) -> dict:
     Derived, not the hand-maintained planning tuple: the closure binds the exact
     source the paid GPU runs, and a human list cannot make that claim.
     """
-    from architecture.derive_closure import derive
+    from maintenance.architecture.derive_closure import derive
 
     return derive(REPO, "batching_refactor_cuda",
                   ["scripts/stages/stage-1/phase_c3/batching_refactor_cuda_check.py"],

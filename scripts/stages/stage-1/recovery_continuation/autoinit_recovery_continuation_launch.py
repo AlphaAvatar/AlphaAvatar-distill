@@ -43,7 +43,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 sys.path.insert(0, str(REPO_ROOT / "scripts"))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from shared.deployment import POD_IMAGE, deployment_commands  # noqa: E402
 from stages.phase_a.plan import PHASE_A_PLAN_V1, PHASE_A_SCOPE  # noqa: E402

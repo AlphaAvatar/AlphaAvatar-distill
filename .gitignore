@@ -45,8 +45,15 @@ data/stage2_v1/calib/
 data/stage3_pilot/*/train/
 data/stage3_pilot/*/val/
 
-# Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
-artifacts/
+# Heavy local artifacts (activation caches, checkpoints, datasets, run outputs).
+# The tree's own navigation (README + generated ownership index) is tracked;
+# everything else under artifacts/ is local-only bytes.
+artifacts/*
+!artifacts/README.md
+!artifacts/index.json
+# A run's `artifacts/` area holds heavy run products and stays dark, exactly
+# as the old unanchored `artifacts/` rule treated it.
+logs/**/artifacts/
 checkpoints/
 # Anchored, for the same reason `runs/` needed the exception below: unanchored,
 # it matched `configs/datasets/` and silently refused to track the dataset-asset

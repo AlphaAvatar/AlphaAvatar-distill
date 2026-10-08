@@ -92,6 +92,16 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
      ("scripts/maintenance/architecture/record_run_index.py", "--write")),
     ("stage index",
      ("scripts/maintenance/consolidation/stage_attribution.py", "--write")),
+    #: Live-state records for the active experiment and family, BEFORE the
+    #: ownership views and the navigation: the stage index's `live_state` leg
+    #: and the experiment READMEs read what these derive.
+    ("phase_d1 current",
+     ("scripts/stages/stage-1/phase_d1/current.py", "--write")),
+    ("d_series family current",
+     ("scripts/stages/stage-1/families/d_series/current.py", "--write")),
+    #: The scripts/ and artifacts/ projections of the ownership index.
+    ("ownership views",
+     ("scripts/maintenance/architecture/render_ownership_views.py", "--write")),
     #: Before the navigation, which reads the pointer. A launch_bound sweep
     #: leaves the pointer alone on purpose, so it lags by one run until this
     #: runs -- and it had drifted far enough to name a FAIL at a commit the run

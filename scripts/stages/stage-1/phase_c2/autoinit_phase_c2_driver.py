@@ -51,7 +51,6 @@ REPO = Path(__file__).resolve().parents[4]
 for _extra in ("src", "scripts", "scripts/autoinit"):
     if str(REPO / _extra) not in sys.path:
         sys.path.insert(0, str(REPO / _extra))
-sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from aadistill.governance.authorization import AuthorizationError  # noqa: E402
 from aadistill.initialization.planning.ranking import PARETO_V1  # noqa: E402

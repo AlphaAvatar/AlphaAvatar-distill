@@ -35,8 +35,20 @@ from support.session_specs import (SESSION_LAUNCHERS, all_specs,
 from shared.deployment import MAIN_RELAY
 
 REPO = Path(__file__).resolve().parents[2]
-POD = REPO / "scripts/pod"
-SETUP = POD / "autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
+
+
+def _launcher_source(name: str) -> str:
+    """A launcher's source, wherever its owner directory is.
+
+    Launchers live with the experiment that owns them under `scripts/stages/`
+    or with a stage-neutral capability under `scripts/shared/`; basenames are
+    unique across the tree (`support.session_specs` asserts it when loading).
+    """
+    hits = [p for p in sorted((REPO / "scripts").rglob(f"{name}.py"))
+            if "__pycache__" not in p.parts]
+    assert len(hits) == 1, f"{name}.py: expected one owner, found {hits}"
+    return hits[0].read_text()
 
 
 def test_every_session_validates():
@@ -173,7 +185,7 @@ def test_no_launcher_mutates_another_modules_globals(name, extra):
     constructing a subclass. Two sessions sharing one module is two sessions
     sharing one set of globals.
     """
-    src = (POD / f"{name}.py").read_text()
+    src = _launcher_source(name)
     # `_preflight.` as an attribute access, not the substring — every session
     # legitimately names `autoinit_preflight_setup.sh` and its own status file.
     assert not re.search(r"(?<![A-Za-z0-9])_preflight\.", src), (
@@ -209,22 +221,28 @@ def authorization_constants():
     import importlib
 
     out = []
-    root = REPO / "scripts/experiments"
-    for path in sorted(root.rglob("*.py")):
-        if path.name.startswith("_") or "/tests/" in str(path):
-            continue
-        rel = path.relative_to(root).with_suffix("")
-        parts = [p for p in rel.parts if not p.startswith("stage-")]
-        module = "experiments." + ".".join(parts)
-        try:
-            mod = importlib.import_module(module)
-        except Exception:                 # a module needing live inputs is not ours to fix
-            continue
-        for name in dir(mod):
-            if name.endswith("_AUTHORIZATION"):
-                constant = getattr(mod, name)
-                if hasattr(constant, "granted_by"):
-                    out.append((f"{module}.{name}", constant))
+    roots = ((REPO / "scripts/stages", "stages"),
+             (REPO / "scripts/shared", "shared"))
+    for root, pkg in roots:
+        for path in sorted(root.rglob("*.py")):
+            if path.name.startswith("_") or "/tests/" in str(path):
+                continue
+            rel = path.relative_to(root).with_suffix("")
+            #: stage and family levels are grouping directories, not packages
+            parts = [p for p in rel.parts
+                     if not p.startswith("stage-") and p != "families"]
+            module = f"{pkg}." + ".".join(parts)
+            try:
+                mod = importlib.import_module(module)
+            #: BaseException: a CLI that parses args at import raises
+            #: SystemExit; a module needing live inputs is not ours to fix.
+            except BaseException:  # noqa: BLE001
+                continue
+            for name in dir(mod):
+                if name.endswith("_AUTHORIZATION"):
+                    constant = getattr(mod, name)
+                    if hasattr(constant, "granted_by"):
+                        out.append((f"{module}.{name}", constant))
     return out
 
 
@@ -527,9 +545,6 @@ def test_the_calibration_pin_matches_the_registry_that_already_carried_it():
     since E8a. The shared setup carried a second copy of it, and nothing compared
     them.
     """
-    import sys
-
-    sys.path.insert(0, str(POD))
     from shared.pod.autoinit_science_inputs import CALIBRATION_V1
 
     from shared.datasets import E8A_CALIBRATION

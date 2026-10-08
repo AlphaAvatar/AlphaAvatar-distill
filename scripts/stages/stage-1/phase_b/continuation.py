@@ -261,8 +261,8 @@ class ContinuationAuthorization:
         **Bound as provenance, not consumed at runtime.** An earlier version of
         this docstring said the probe trainer consumes the calibration; it does
         not. The paid behavioural probes train from
-        `artifacts/stage3/ladder_uniform_probe` and are scored on the
-        `artifacts/stage3/recovery_search_v2` battery. Neither mixture is read by
+        `artifacts/shared/instruments/ladder_uniform_probe` and are scored on the
+        `artifacts/stages/stage-1/batteries/recovery_search_v2` battery. Neither mixture is read by
         this session at all: the continuation runs no search, and the only
         calibration reference on the inherited path is a comment inside the
         `stage1` its stage map never binds.
@@ -389,8 +389,8 @@ class ContinuationAuthorization:
 
 #: The two entry points whose import closure IS the continuation executable.
 CONTINUATION_IMPORT_ROOTS = (
-    "scripts/pod/autoinit_continuation_b_driver.py",
-    "scripts/pod/autoinit_continuation_b_launch.py",
+    "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py",
+    "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_launch.py",
 )
 
 #: Runtime sources that no import reaches, because they are invoked as
@@ -400,9 +400,9 @@ CONTINUATION_IMPORT_ROOTS = (
 #:   * `watchdog.py`                 — session_runner.py:379, detached poller
 #:   * `collect_artifacts.py`        — session_runner.py:673, pod-side collection
 CONTINUATION_RUNTIME_ONLY_FILES = (
-    "scripts/pod/autoinit_preflight_setup.sh",
-    "scripts/pod/collect_artifacts.py",
-    "scripts/pod/watchdog.py",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/collect_artifacts.py",
+    "scripts/shared/pod/watchdog.py",
 )
 
 #: What a paid CONTINUATION actually loads and executes — **derived from the real
@@ -587,9 +587,9 @@ FORBIDDEN_CALLS = ("run_phase_a_search(", "BeamSearch(")
 #: The files that ARE the continuation — as opposed to the libraries it loads.
 #: A search call site here would mean the continuation itself invokes a search.
 CONTINUATION_OWN_PATH_FILES = (
-    "scripts/pod/autoinit_continuation_b_driver.py",
-    "scripts/pod/autoinit_continuation_b_launch.py",
-    "scripts/experiments/stage-1/phase_b/continuation.py",
+    "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py",
+    "scripts/stages/stage-1/continuation_b/autoinit_continuation_b_launch.py",
+    "scripts/stages/stage-1/phase_b/continuation.py",
 )
 
 #: The ONE loaded file that legitimately contains a search call site, and why it
@@ -606,14 +606,14 @@ CONTINUATION_OWN_PATH_FILES = (
 #: Pinning the set rather than skipping the check means a search call site
 #: appearing in ANY other loaded file fails the gate, including one added to a
 #: library module that today has none.
-KNOWN_NEUTRALIZED_SEARCH_CALL_SITES = ("scripts/pod/autoinit_phase_a_driver.py",)
+KNOWN_NEUTRALIZED_SEARCH_CALL_SITES = ("scripts/stages/stage-1/phase_a/autoinit_phase_a_driver.py",)
 
 
 def search_call_site_owners(repo_root: str | Path = ".",
                             files: tuple[str, ...] | None = None) -> tuple[str, ...]:
     """Which loaded files contain a search call site. Declaration excluded."""
     root = Path(repo_root)
-    declarer = "scripts/experiments/stage-1/phase_b/continuation.py"
+    declarer = "scripts/stages/stage-1/phase_b/continuation.py"
     declared = tuple(files) if files is not None else CONTINUATION_SOURCE_FILES_V2
     out = []
     for rel in declared:
@@ -628,7 +628,7 @@ def search_call_site_owners(repo_root: str | Path = ".",
 def continuation_source_digest(repo_root: str | Path = ".", *,
                                files: tuple[str, ...] | None = None) -> dict[str, Any]:
     """Digest the declared continuation source. Fails closed on a gap."""
-    from experiments.phase_a.plan import sha256_file
+    from stages.phase_a.plan import sha256_file
 
     root = Path(repo_root)
     declared = tuple(files) if files is not None else CONTINUATION_SOURCE_FILES_V2

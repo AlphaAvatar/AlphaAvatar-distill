@@ -215,7 +215,7 @@ class TestTheBudgetIsDerivedNotRestated:
         """The deriver reported `$0.0000 spent` against a package that had
         booked `$0.3960`, because the index entry shape it expected was not the
         one on disk. Silence about spend is the dangerous direction."""
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         entry = {"experiment_id": "phase_c1", "run_id": "attempt10",
                  "components": {"root": "logs/stages/stage-1/phase_c1/runs/attempt10"}}
         assert m._outcome_paths(REPO, entry), (
@@ -357,7 +357,7 @@ class TestTheEntryPointsResolve:
 class TestRegisteredEvidenceIsProtected:
     def test_the_relocator_refuses_a_registered_component(self):
         """24 were moved before this guard existed."""
-        from consolidate.relocate_logs import plan
+        from maintenance.consolidation.relocate_logs import plan
         p = plan(REPO)
         reasons = {e["path"]: e["reason"] for e in p["exceptions"]}
         index = load("logs/index.json")
@@ -382,7 +382,7 @@ class TestRegisteredEvidenceIsProtected:
 
     def test_the_link_fixer_will_not_edit_inside_a_registered_directory(self):
         """It edited 15 READMEs there; the digest covers the directory."""
-        from consolidate.fix_doc_links import protected_dirs, repair
+        from maintenance.consolidation.fix_doc_links import protected_dirs, repair
         dirs = protected_dirs(REPO)
         assert dirs, "no registered directories found, so the guard is vacuous"
         r = repair(REPO, write=False)
@@ -392,7 +392,7 @@ class TestRegisteredEvidenceIsProtected:
             assert not any(doc["doc"].startswith(d + "/") for d in dirs), doc
 
     def test_every_registered_component_still_hashes_to_its_record(self):
-        from architecture.record_run_index import digest_of
+        from maintenance.architecture.record_run_index import digest_of
         index = load("logs/index.json")
         drift = []
         for e in index["runs"]:
@@ -422,7 +422,7 @@ class TestAnOldPathStillResolves:
 
     @pytest.fixture(scope="class")
     def resolve(self):
-        from architecture.record_run_index import resolve_historical
+        from maintenance.architecture.record_run_index import resolve_historical
         return lambda rel: resolve_historical(rel, REPO)
 
     def test_every_old_path_points_at_something_that_is_there(self, table):
@@ -488,7 +488,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         """Run the renderer against the live tree; its output must already be
         what is committed. A drift means a file moved and the navigation was
         not regenerated — which is the state this replaced."""
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             CATALOG, MARK_END, MARK_START, render_catalog,
             render_experiment_readme, runs_by_experiment)
         text = (REPO / CATALOG).read_text()
@@ -501,7 +501,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
         #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
         #: has no README and is not meant to.
-        from consolidate.render_log_navigation import experiment_dirs
+        from maintenance.consolidation.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
                         for q in experiment_dirs(st)):
             assert (d / "README.md").read_text() == render_experiment_readme(
@@ -524,7 +524,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         is exactly how `logs/README.md` came to say "only phase_c1 declares a
         stage, everything else is cross-stage" long after neither was true.
         """
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             LOGS_README, S_BEGIN, S_END, render_shared_readme,
             render_stage_readme, render_stages_index)
         for st in sorted((REPO / "logs/stages").glob("stage-*")):
@@ -556,7 +556,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         `$0` before any resource existed — still states `0.0`, so there is no
         legitimate `None` here to exempt.
         """
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             _closeout_cost, _closeout_verdict)
         blind = []
         for p in sorted((REPO / "logs").rglob("closeout/outcome.json")):
@@ -592,7 +592,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
         #: their areas, and not the STAGE's own areas either: `history/` is
         #: stage-level material, has no experiment README and is not meant to.
-        from consolidate.render_log_navigation import experiment_dirs
+        from maintenance.consolidation.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
                         for q in experiment_dirs(st)):
             body = (d / "README.md").read_text()
@@ -612,7 +612,7 @@ class TestTheStageMappingIsComplete:
 
     @pytest.fixture(scope="class")
     def attribution(self):
-        from consolidate import stage_attribution
+        from maintenance.consolidation import stage_attribution
         return stage_attribution
 
     def test_every_cited_path_including_untracked_really_exists(self, attribution):
@@ -731,7 +731,7 @@ class TestTheStageMappingIsComplete:
         here. A new area therefore has to be written down before it can appear,
         which is the same bargain every experiment row makes.
         """
-        from consolidate.render_log_navigation import STAGE_AREAS
+        from maintenance.consolidation.render_log_navigation import STAGE_AREAS
         known = {r["experiment_id"] for r in attribution.INVENTORY}
         for st in sorted((REPO / "logs/stages").glob("stage-*")):
             for d in st.iterdir():
@@ -906,7 +906,7 @@ class TestEngineeringSpendIsAttributedByPackage:
     package stopped counting the moment it closed."""
 
     def _mod(self):
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         return m
 
     def _campaign(self, root: Path, name: str, *, cost, granted=None,
@@ -1109,7 +1109,7 @@ class TestTheCurrentViewReadsItsOwner:
     one prose line, so the line was wrong about all three at once."""
 
     def _view(self):
-        from consolidate.render_log_navigation import readiness_view
+        from maintenance.consolidation.render_log_navigation import readiness_view
         return readiness_view(REPO)
 
 
@@ -1137,7 +1137,7 @@ class TestTheCurrentViewReadsItsOwner:
     def test_a_launch_bound_claim_requires_the_current_tree(self, tmp_path,
                                                             monkeypatch):
         """A PASS swept at another commit is not a prepared launch-bound."""
-        from consolidate import render_log_navigation as m
+        from maintenance.consolidation import render_log_navigation as m
         v = self._view()
         #: The conjunction, asserted directly rather than through whichever
         #: combination happens to be live: readiness requires kind AND verdict
@@ -1215,7 +1215,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
     A path string inside an artifact may be part of what a hash covers."""
 
     def test_the_protected_trees_are_declared(self):
-        from consolidate.relocate_logs import NEVER_REWRITE, rewritable
+        from maintenance.consolidation.relocate_logs import NEVER_REWRITE, rewritable
         assert "artifacts/" in NEVER_REWRITE
         assert not rewritable("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json")
         assert "logs/stages/" in NEVER_REWRITE
@@ -1258,7 +1258,7 @@ class TestProjectSessionCostShapes:
     """
 
     def _mod(self):
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         return m
 
     def _run(self, root: Path, name: str, doc: dict):

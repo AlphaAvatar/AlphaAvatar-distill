@@ -13,7 +13,7 @@ ceiling.
 
 | | |
 | --- | --- |
-| tool | [`stage_c2_probes_to_volume.py`](../../../../../../scripts/autoinit/stage_c2_probes_to_volume.py) |
+| tool | [`stage_c2_probes_to_volume.py`](../../../../../../scripts/shared/pod/stage_c2_probes_to_volume.py) |
 | decision | [`durable_backend_decision_20260923.md`](../../analyses/durable_backend_decision_20260923.md) |
 | consumed by | `autoinit_c2_behavioural_launch.py :: volume_gate`, at `$0`, before a pod is drawn |
 

@@ -22,7 +22,7 @@
 # carried from L40S onto another part.
 set -uo pipefail
 cd /home/ecs-user/AlphaAvatar-distill
-export PYTHONPATH=src:scripts:scripts/pod:scripts/autoinit
+export PYTHONPATH=src:scripts
 export PYTHONHASHSEED=7
 
 # Session-scoped, and REQUIRED rather than defaulted. This line held one

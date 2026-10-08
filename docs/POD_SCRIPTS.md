@@ -1,12 +1,18 @@
 # Pod script catalog
 
-Every executable under `scripts/pod/`, classified. Nothing here is deleted for
-tidiness: reproducing a recorded result means reproducing the implementation
-that produced it (AGENTS.md P4), so a retired experiment's launcher stays and is
+Every executable under `scripts/shared/pod/` — the stage-neutral session
+infrastructure every paid session shares — classified. Per-experiment drivers,
+launchers and acquire scripts live with their owning experiment under
+`scripts/stages/stage-<n>/<experiment>/` since the 2026-10-08
+information-architecture migration; their rows below are kept because the
+catalogue prose is still the best short description of each, and the owning
+directory now says whose each one is. Nothing here is deleted for tidiness:
+reproducing a recorded result means reproducing the implementation that
+produced it (AGENTS.md P4), so a retired experiment's launcher stays and is
 labelled instead of removed.
 
-`tests/docs/test_repository_structure.py` requires every file in `scripts/pod/`
-to appear below.
+`tests/docs/test_repository_structure.py` requires every file in
+`scripts/shared/pod/` to appear below.
 
 | class | meaning |
 | --- | --- |
@@ -54,6 +60,12 @@ to appear below.
 | `autoinit_science_inputs.py` | the frozen relay science inputs — source, destination, digest — that sessions compose their `relay_inputs` from. Lifted out of the shared setup on 2026-08-18; here rather than in `src/` because `docs/REPO_LAYOUT.md` rule 1 keeps frozen hashes in the scripts that own them |
 | `autoinit_continuation_driver.py` | the continuation's pod-side driver |
 | `autoinit_engine_probe.py` | vLLM engine identity probe, run at stage 0 |
+| `verify_frozen_assets.py` | the pod-setup frozen-asset gate: every staged asset re-hashed against its declaration before a session proceeds |
+| `record_pod_environment.py` | the readiness recorder — writes and repoints the launch-bound/diagnostic sweep record a launch gate reads |
+| `attest_protocol.py` | preflight stage 0: attests the observed protocol — trainer source digest, runtime digest — on the pod itself |
+| `audit_tool_rendering.py` | micro-preflight forensics over a render failure in the recovery-search battery; `$0` diagnostic |
+| `issue_authorization.py` | the micro-preflight campaign's authorization issuer |
+| `stage_c2_probes_to_volume.py` | engineering transport: stages probe checkpoints onto a network volume; its own docstring files it as infrastructure, not science |
 | `watchdog.py` | the independent provider-side kill switch |
 | `collect_artifacts.py` | artifact manifest, gate and collection |
 | `cpu_test_env_args.py` | emits the C1 CPU-test environment as `env(1)` arguments, from the one declaration in `aadistill.autoinit.cpu_test_env`. The pod's gate and the dev-box simulator both consume it, so the diagnostic and the paid pod run pytest under the same hardware- and cache-neutral scope |

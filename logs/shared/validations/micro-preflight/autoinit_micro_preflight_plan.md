@@ -232,7 +232,7 @@ view. That ordering is the entire reason it is a separate session.
 
 ## 10. Session contract
 
-[`scripts/pod/AGENTS.md`](../../../../scripts/pod/AGENTS.md) applies unchanged: detached
+[`scripts/pod/AGENTS.md`](../../../../scripts/shared/pod/AGENTS.md) applies unchanged: detached
 start via `start_job.py`, `watchdog.py` beside the launcher from creation,
 `LogRelay` mirroring continuously, `collect_artifacts.py` gating teardown, and
 termination confirmed by polling the control plane rather than by a return code.

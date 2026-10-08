@@ -163,7 +163,7 @@ DEFAULT_CANDIDATES = (
 #: What the pod needs by default. Everything else -- torch, CUDA -- is in the
 #: image. `--ship` appends; a check that imports from elsewhere in the tree
 #: must say so, because an unshipped import fails on the pod after it bills.
-DEFAULT_SHIP = ("src", "scripts/validation", "scripts/experiments",
+DEFAULT_SHIP = ("src", "scripts/shared", "scripts/stages",
                 "configs/validation")
 
 

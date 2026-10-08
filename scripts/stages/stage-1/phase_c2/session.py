@@ -43,7 +43,7 @@ from aadistill.governance.authorization import AuthorizationError
 from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.infrastructure.session import BudgetSpec
-from experiments.phase_a.plan import PhaseAAuthorization
+from stages.phase_a.plan import PhaseAAuthorization
 
 SCHEMA = "aadistill.autoinit.c2_authorization/v1"
 
@@ -59,17 +59,17 @@ PLAN_PATH = "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md"
 #: and lives in `aadistill.governance.closure`.
 C2_ENTRY_POINTS: tuple[str, ...] = (
     #: The launcher and the driver: the session, end to end.
-    "scripts/pod/autoinit_phase_c2_launch.py",
-    "scripts/pod/autoinit_phase_c2_driver.py",
+    "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py",
+    "scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py",
     #: The authorization half. Both are entry points because neither is
     #: imported by the launcher — an authorization is issued BEFORE a launch, by
     #: a different process — and code that decides whether a session may spend
     #: money belongs inside the set that session's grant binds.
-    "scripts/experiments/stage-1/phase_c2/authorization_payload.py",
-    "scripts/autoinit/issue_c2_authorization.py",
+    "scripts/stages/stage-1/phase_c2/authorization_payload.py",
+    "scripts/stages/stage-1/phase_c2/issue_c2_authorization.py",
     #: The artifact collector. Run as a subprocess on the pod, so no import edge
     #: reaches it, and what it does decides which evidence survives teardown.
-    "scripts/pod/collect_artifacts.py",
+    "scripts/shared/pod/collect_artifacts.py",
 )
 
 #: Files no import edge reaches, whose bytes still decide what runs or what is
@@ -87,7 +87,7 @@ C2_DECLARED_INPUTS: tuple[str, ...] = (
     #: carries no setup-script field, so no session can substitute another —
     #: and its `SESSION_KIND` dispatch decides which authorization TYPE the pod
     #: loads, which is not something that may change unmeasured.
-    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/shared/pod/autoinit_preflight_setup.sh",
     #: The evidence contract. `collect_artifacts.py` is a spec interpreter, and
     #: what actually decides which evidence survives teardown is the declared
     #: pattern list. A session whose evidence contract can be edited without
@@ -207,7 +207,7 @@ def c2_run_path(run_id: str, role: str, stage_id: str | None = None) -> str:
             f"the C2 {role} belongs to a run: pass the run id. There is no "
             "repository-level location for it, deliberately — a shared path is "
             "how one attempt's governance artifact gets overwritten by the next.")
-    from experiments.run_layout import rel_run_dir
+    from shared.run_layout import rel_run_dir
 
     return (f"{rel_run_dir(C2_RUN_EXPERIMENT_ID, run_id, stage_id)}"
             f"/{C2_RUN_ROLES[role]}")
@@ -336,7 +336,7 @@ def c2_plan_hash() -> str:
     cannot survive a change to either. Restating the space here would be a
     second declaration of the thing whose fixity is the point.
     """
-    from experiments.phase_c2.search_space import (
+    from stages.phase_c2.search_space import (
         C2_ALLOWED_IMPLS, C2_IMPL_PROFILES, C2_PROFILE_IDS,
     )
     from aadistill.initialization.planning.ranking import PARETO_V1, SCHEDULE_V1

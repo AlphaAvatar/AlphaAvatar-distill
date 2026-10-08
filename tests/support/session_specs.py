@@ -49,7 +49,16 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
 
 
 def load_session_launcher(name: str):
-    path = REPO / f"scripts/pod/{name}.py"
+    """Load a launcher by module basename, wherever its owner directory is.
+
+    Launchers live with the experiment that owns them (`scripts/stages/...`)
+    or with a stage-neutral capability (`scripts/shared/...`); the basename is
+    unique across the tree, which the assertion below keeps true.
+    """
+    hits = sorted((REPO / "scripts").rglob(f"{name}.py"))
+    hits = [h for h in hits if "__pycache__" not in h.parts]
+    assert len(hits) == 1, f"{name}.py: expected one owner, found {hits}"
+    path = hits[0]
     spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod

@@ -111,7 +111,7 @@ def test_the_binding_still_matches(doc):
     import sys as _sys
 
     _sys.path.insert(0, str(REPO / "scripts"))
-    from architecture.record_run_index import resolve_historical
+    from maintenance.architecture.record_run_index import resolve_historical
 
     def _resolve(rel: str) -> Path:
         here = REPO / rel

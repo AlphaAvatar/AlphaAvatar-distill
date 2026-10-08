@@ -45,7 +45,7 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_file, sha256_json
 from aadistill.governance.authorization import AuthorizationError
 from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
-from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
+from shared.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 
 SCHEMA = "aadistill.autoinit.phase_a_authorization/v1"
 
@@ -390,7 +390,7 @@ class PhaseAAuthorization:
 #: and never priced the session around them.
 #:
 #: `authorized_session_commit` and `harness_source_digest` are filled at issue
-#: time by `scripts/autoinit/issue_phase_a_authorization.py`, against the
+#: time by `scripts/stages/stage-1/phase_a/issue_phase_a_authorization.py`, against the
 #: committed tree. Editing any declared harness file invalidates it by design:
 #: re-rehearse, re-commit, re-issue.
 #: Written into `granted_by` by the template, and refused by the issuer. A grant
@@ -401,7 +401,7 @@ class PhaseAAuthorization:
 #: where it goes stale silently and reads as though it still applies.
 GRANT_PROSE_REQUIRED = (
     "NO GRANT. This is the Phase-A authorization SCHEMA, not a grant. "
-    "scripts/autoinit/issue_phase_a_authorization.py requires --grant naming a "
+    "scripts/stages/stage-1/phase_a/issue_phase_a_authorization.py requires --grant naming a "
     "one-use grant document, and refuses to issue with this value in place.")
 
 #: The durable half: caps, stages, stage conditions and scope. Everything here

@@ -60,7 +60,10 @@ DECISION_REL = ("logs/stages/stage-1/phase_d1/decisions/"
 #: intermediate, so the journal is read from the durable store and its location
 #: is a parameter rather than a constant -- a replay prepared on another host
 #: must be able to say where it read the journal from.
-DEFAULT_JOURNAL = (f"/home/ecs-user/aad-scratch/{SOURCE_RUN_ID}"
+#: The run's bytes were moved from the scratch store to the durable store on
+#: 2026-10-08 (information-architecture migration) and every finalist shard
+#: re-verified against post_search_finalist_retention.json after the move.
+DEFAULT_JOURNAL = (f"/home/ecs-user/aad-artifacts/phase_d1/{SOURCE_RUN_ID}"
                    "/oob_products/states.jsonl")
 
 #: Fields two rows for the same state must agree on.

@@ -17,13 +17,13 @@ no longer exists.
 | `README.md` | timeless public overview. Owns **no** live facts |
 | `src/aadistill/` | the algorithm core — reusable, model-recipe-agnostic |
 | `scripts/` | executables: data, training, evaluation, rollout, pod sessions |
-| `tests/` | **the CORE suite, and only that** — reusable framework behaviour, organised by subsystem: `architecture/ data/ docs/ evaluation/ infrastructure/ initialization/ integration/ models/ rollout/ runtime/ training/ validation/`, plus `tests/support/` which holds shared helpers and no tests. `pytest` from the root collects exactly this (`testpaths`). An experiment's own tests live with the experiment, under `scripts/experiments/stage-{n}/{experiment}/tests/`, and are invoked explicitly — AGENTS.md §2.8a names the three suites |
+| `tests/` | **the CORE suite, and only that** — reusable framework behaviour, organised by subsystem: `architecture/ data/ docs/ evaluation/ infrastructure/ initialization/ integration/ models/ rollout/ runtime/ training/ validation/`, plus `tests/support/` which holds shared helpers and no tests. `pytest` from the root collects exactly this (`testpaths`). An experiment's own tests live with the experiment, under `scripts/stages/stage-{n}/{experiment}/tests/`, and are invoked explicitly — AGENTS.md §2.8a names the three suites |
 | `configs/` | frozen run configurations and artifact specifications |
 | `logs/` | project memory. See [`logs/state/ownership.md`](../logs/state/ownership.md) |
 | `logs/stages/` | **stage → experiment → run.** `logs/stages/stage-{stage_id}/{experiment_id}/` holds that experiment's `plans/ analyses/ results/ history/ validations/` and its `runs/{run_id}/` — each run with `manifest.json` and five areas: **governance** (what permitted it), **runtime** (how it executed), **evidence** (what it observed), **artifacts** (what it produced), **closeout** (how it ended). The stage is read from repository facts — an explicit `stage_id`, the `configs/stage<N>/` directory a config lives in, or the experiment's own subject and product — and is never inferred from a name; `logs/stages/index.json` is the stage index — it records the evidence for every assignment, what each stage is for, and what each stage's canonical configs, data manifests and outputs are, and every stage README is rendered from it. A stage may also hold a stage-level history area, for a record spanning its experiments — `logs/stages/stage-3/history/` is the only one today. `logs/cross-stage/{experiment_id}/` would have the same shape and is for an experiment that genuinely spans several stages; **it does not exist**, because every experiment resolved to one stage on evidence, and an experiment whose stage is not established is reported `unresolved` rather than shelved. The layout module still composes that path for an undeclared stage — it is a frozen C1 harness member, and moving its digest to delete a fallback to a directory that is already absent is not a trade this project makes. The convention is `scripts/shared/run_layout.py`; the mechanism is `src/aadistill/runtime/run_layout.py`, which names no directory. `logs/index.json` registers every run across every stage, reports under `unrecorded` any run directory without a manifest, and carries `historical_paths`: old path → current path, for the frozen payloads that name a path an object no longer has. Reviewable text only — an artifact archive stays in the session's scratch and the manifest carries its hash. A maintainer grant is authored as `grant.json` in that run's **governance** area before the run opens, and declared to `open_run` as `prepared` |
 | `docs/` | durable reference (this file, and its siblings) |
 | `data/` | corpora; the large files are gitignored |
-| `artifacts/` | generated locally, gitignored, never committed |
+| `artifacts/` | durable local scientific products, **by owner**: `artifacts/stages/stage-{n}/{experiment}/`, `artifacts/stages/stage-{n}/families/{family}/`, `artifacts/shared/`, plus `artifacts/audit/` (the runtime session-audit namespace). Local-only bytes, gitignored except the tree's own `README.md` and generated `index.json`; identity lives in the checkpoint registry, not beside the bytes — see [`artifacts/README.md`](../artifacts/README.md) |
 
 ## Storage that is not in the tree
 
@@ -70,15 +70,20 @@ and their contents inventoried in
 | `src/aadistill/infrastructure/session_runner.py` | the one runner that executes a spec. Never subclassed |
 | `src/aadistill/infrastructure/session_prechecks.py` | the shared $0 gates a session lists in `precheck` |
 
-## `scripts/`
+## `scripts/` — one owner per executable
+
+Three trees, by ownership. An experiment's scripts live WITH the experiment;
+`scripts/shared/` is reserved for the genuinely stage-neutral;
+`scripts/maintenance/` is repository tooling. The move map that produced this layout is
+`scripts/maintenance/migration/info_architecture.py`, and a frozen record
+naming a pre-2026-10-08 path resolves forward through
+`logs/index.json :: historical_paths.map`.
 
 | path | responsibility |
 | --- | --- |
-| `scripts/autoinit/` | AutoInitializer tooling: preregistration, search, scoring, issuers, audits |
-| `scripts/experiments/` | experiment instances — plans, seeds, digests, budgets — plus the deployment and run-layout conventions this repository's sessions share. Nothing here is a mechanism. **Organised by STAGE, mirroring `logs/stages/` name for name**: `scripts/stages/stage-1/phase_d1/` is the code whose evidence is `logs/stages/stage-1/phase_d1/`, and stage ownership comes from `logs/stages/index.json` rather than from a name. Modules at the top level (`calibration.py`, `datasets.py`, `recipes.py`, `recovery_policy.py`, `preflight.py`, ...) are the shared application layer, used across stages and therefore owned by none. `stage-1` is not a Python identifier, so `scripts/stages/__init__.py` extends `__path__` over the stage directories and `experiments.phase_d1` keeps resolving — the import name says which experiment, and the stage is where its evidence lives |
-| `scripts/pod/` | paid-session executables. Catalogued in [`docs/POD_SCRIPTS.md`](POD_SCRIPTS.md) |
-| `scripts/training/`, `scripts/evaluation/`, `scripts/data/`, `scripts/shared/rollout/` | stage tooling |
-| `scripts/maintenance/consolidation/` | result consolidation |
+| `scripts/stages/` | experiment instances — plans, seeds, digests, budgets, drivers, launchers, issuers and their tests. **Organised by STAGE, mirroring `logs/stages/` name for name**: `scripts/stages/stage-1/phase_d1/` is the code whose evidence is `logs/stages/stage-1/phase_d1/`, and stage ownership comes from `logs/stages/index.json` rather than from a name. `scripts/stages/stage-1/families/d_series/` is the D-series FAMILY — material owned by D1/D2/D3 together, mirrored at `logs/stages/stage-1/families/d_series/`. `stage-1` is not a Python identifier, so `scripts/stages/__init__.py` extends `__path__` over the stage and family grouping directories and `stages.phase_d1` / `stages.d_series` resolve — the import name says which experiment or family, and the stage is where its evidence lives |
+| `scripts/shared/` | the shared application layer (`shared.calibration`, `shared.run_layout`, `shared.recipes`, …: cross-stage conventions, owned by no stage) and the stage-neutral CLI capabilities: `scripts/shared/data/`, `scripts/shared/evaluation/`, `scripts/shared/training/`, `scripts/shared/rollout/`, `scripts/shared/validation/`, and `scripts/shared/pod/` — the session setup script, watchdog, collectors and other pod infrastructure every session shares, catalogued in [`docs/POD_SCRIPTS.md`](POD_SCRIPTS.md) |
+| `scripts/maintenance/` | repository tooling, not science: `scripts/maintenance/architecture/` (run index, closures, source-relocation machinery), `scripts/maintenance/consolidation/` (stage attribution, navigation rendering, budget derivation, inventories, convergence), `scripts/maintenance/migration/` (the 2026-10-08 information-architecture move map) |
 
 ## `configs/`
 

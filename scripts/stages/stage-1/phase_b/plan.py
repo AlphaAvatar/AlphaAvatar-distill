@@ -40,9 +40,9 @@ from typing import Any
 
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.governance.authorization import AuthorizationError
-from experiments.phase_a.plan import sha256_file
+from stages.phase_a.plan import sha256_file
 from aadistill.initialization.planning.recovery import PreflightPlan, PreflightStage
-from experiments.recovery_policy import SEED_SA, SEED_SB, SEED_SC
+from shared.recovery_policy import SEED_SA, SEED_SB, SEED_SC
 
 SCHEMA = "aadistill.autoinit.phase_b_authorization/v1"
 
@@ -56,7 +56,7 @@ SCHEMA = "aadistill.autoinit.phase_b_authorization/v1"
 #:
 #: Deliberately ABSENT, and why:
 #:
-#: * `reweight.py` and `scripts/data/build_reasoning_heavy_calibration.py` — the
+#: * `reweight.py` and `scripts/shared/data/build_reasoning_heavy_calibration.py` — the
 #:   pod never runs them. It consumes an already-materialized mixture bound by
 #:   `profile_hash` + `content_sha256` + `items_file_sha256`. They are artifact
 #:   provenance, and putting them here would digest a builder that does not

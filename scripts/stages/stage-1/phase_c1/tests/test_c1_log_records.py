@@ -153,7 +153,7 @@ def test_state_md_agrees_with_the_record_it_links_to():
     if named and not (REPO / named).is_file():
         pytest.skip(f"{named} is not in this checkout; it is run-owned "
                     "and gitignored")
-    from consolidate.render_log_navigation import (R_BEGIN, R_END,
+    from maintenance.consolidation.render_log_navigation import (R_BEGIN, R_END,
                                                    render_readiness)
     text = (REPO / "logs/state/current.md").read_text()
     i, j = text.index(R_BEGIN), text.index(R_END) + len(R_END)

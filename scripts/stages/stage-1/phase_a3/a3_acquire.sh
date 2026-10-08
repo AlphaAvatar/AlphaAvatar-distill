@@ -134,7 +134,7 @@ for ROUND in $(seq 1 "$ROUNDS"); do
 
   # ---- re-price LIVE on the device we are about to use --------------------
   if ! PYTHONPATH=src:scripts .venv/bin/python \
-        scripts/stages/stage-1/phase_c3/a3_pricing.py --write \
+        scripts/stages/stage-1/phase_a3/a3_pricing.py --write \
         --out logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json \
         >> "$LOG" 2>&1; then
     say "$RUN: the live re-price is not fundable; stopping for a maintainer"

@@ -260,7 +260,6 @@ def run_suffix_case(cfg: dict, *, device: str, dtype_name: str,
         VerifiedSuffix, materialize_fixed_path, materialize_fixed_path_suffix,
         write_suffix_execution_record)
 
-    sys.path.insert(0, str(Path(__file__).resolve().parent))
     from shared.validation.device_observations import observing
 
     case = cfg["suffix_case"]

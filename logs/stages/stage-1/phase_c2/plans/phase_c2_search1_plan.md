@@ -49,7 +49,7 @@ is a separate future ATTENTION-R&D hypothesis.
 
 ## The space
 
-Owned by [`scripts/experiments/stage-1/phase_c2/search_space.py`](../../../../../scripts/experiments/stage-1/phase_c2/search_space.py),
+Owned by [`scripts/experiments/stage-1/phase_c2/search_space.py`](../../../../../scripts/stages/stage-1/phase_c2/search_space.py),
 not by this page. Every identity in it is re-derived from committed evidence by
 `scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_search_space.py`; the values are repeated here to
 be read, and that module is what a run would load.
@@ -107,7 +107,7 @@ out of 18 is not a guarantee.
 **Resolved 2026-09-16, and no longer discretionary.** The fallback is
 implemented, preregistered here, and priced with its own named reserve. It is
 `BaselineFallback` in
-[`scripts/experiments/stage-1/phase_c2/baseline.py`](../../../../../scripts/experiments/stage-1/phase_c2/baseline.py),
+[`scripts/experiments/stage-1/phase_c2/baseline.py`](../../../../../scripts/stages/stage-1/phase_c2/baseline.py),
 and the rule has no judgement in it:
 
 1. **If the search generates and evaluates B, that candidate IS the baseline and
@@ -219,7 +219,7 @@ attained by some ranking and no ranking exceeds it.
 **Five envelopes, separately named**, because each answers a different question
 and one number for two of them is one number nobody can interpret. All of them
 are derived by
-[`scripts/autoinit/price_c2.py`](../../../../../scripts/autoinit/price_c2.py)
+[`scripts/autoinit/price_c2.py`](../../../../../scripts/stages/stage-1/phase_c2/price_c2.py)
 into the hash-verified
 [`phase_c2_pricing.json`](phase_c2_pricing.json), which
 `experiments.phase_c2.session.c2_budget_spec` is the only reader of.
@@ -406,12 +406,12 @@ evidence contract, an authorization *type* and a derived budget:
 
 | what | where |
 | --- | --- |
-| the session, declared | [`scripts/pod/autoinit_phase_c2_launch.py`](../../../../../scripts/pod/autoinit_phase_c2_launch.py) |
-| the pod-side driver, two stages | [`scripts/pod/autoinit_phase_c2_driver.py`](../../../../../scripts/pod/autoinit_phase_c2_driver.py) |
-| the space | [`scripts/experiments/stage-1/phase_c2/search_space.py`](../../../../../scripts/experiments/stage-1/phase_c2/search_space.py) |
-| the baseline rule | [`scripts/experiments/stage-1/phase_c2/baseline.py`](../../../../../scripts/experiments/stage-1/phase_c2/baseline.py) |
-| plan, authorization type, budget | [`scripts/experiments/stage-1/phase_c2/session.py`](../../../../../scripts/experiments/stage-1/phase_c2/session.py) |
-| the B→C comparison | [`scripts/experiments/stage-1/phase_c2/comparison.py`](../../../../../scripts/experiments/stage-1/phase_c2/comparison.py) |
+| the session, declared | [`scripts/pod/autoinit_phase_c2_launch.py`](../../../../../scripts/stages/stage-1/phase_c2/autoinit_phase_c2_launch.py) |
+| the pod-side driver, two stages | [`scripts/pod/autoinit_phase_c2_driver.py`](../../../../../scripts/stages/stage-1/phase_c2/autoinit_phase_c2_driver.py) |
+| the space | [`scripts/experiments/stage-1/phase_c2/search_space.py`](../../../../../scripts/stages/stage-1/phase_c2/search_space.py) |
+| the baseline rule | [`scripts/experiments/stage-1/phase_c2/baseline.py`](../../../../../scripts/stages/stage-1/phase_c2/baseline.py) |
+| plan, authorization type, budget | [`scripts/experiments/stage-1/phase_c2/session.py`](../../../../../scripts/stages/stage-1/phase_c2/session.py) |
+| the B→C comparison | [`scripts/experiments/stage-1/phase_c2/comparison.py`](../../../../../scripts/stages/stage-1/phase_c2/comparison.py) |
 | the evidence contract | `configs/autoinit/c2_artifacts.json` and `…_failed.json` |
 | the price | [`phase_c2_pricing.json`](phase_c2_pricing.json), from `scripts/autoinit/price_c2.py` |
 

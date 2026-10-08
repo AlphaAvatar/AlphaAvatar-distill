@@ -1122,7 +1122,7 @@ STAGE_1 = [
             "prices for is the Stage-1 autoinit search."),
     ),
     dict(
-        id="d_series_family_material",
+        id="d_series",
         kind="experiment-spanning",
         stage_id="1",
         status="here by design, not by inheritance",
@@ -1159,16 +1159,20 @@ STAGE_1 = [
         ],
         external_material=[],
         decisions=[],
-        canonical_log_destination="logs/shared/analyses",
+        canonical_log_destination="logs/stages/stage-1/families/d_series/analyses",
         classification_reason=(
             "Stage 1, and genuinely owned by no single experiment: the "
             "allocation rule and the source evidence span D1, D2 and D3, so "
             "freezing either inside `phase_d1/` would make the next round "
-            "inherit a record named for its predecessor. Unlike the AutoInit "
-            "program material below, nothing pins these in place — they are "
-            "here because the subject is a family, and if the D-series ever "
-            "collapses to one experiment they move. Both are generated, both "
-            "authorize nothing, and neither materializes anything."),
+            "inherit a record named for its predecessor. The 2026-10-08 "
+            "information-architecture migration gave the family its own home "
+            "— `logs/stages/stage-1/families/d_series/` — because "
+            "cross-experiment within one stage is ownership, not "
+            "stage-neutrality: these records sat in `logs/shared/` and a "
+            "reader inferring readiness from their neighbours mistook a "
+            "historical capacity analysis for a live blocker. The family's "
+            "live state is `current.json` beside them. All three are "
+            "generated, authorize nothing, and materialize nothing."),
     ),
     dict(
         id="autoinit_program_material",
@@ -1650,6 +1654,31 @@ QUESTIONS = {
 #: short keys because they are read as source; one normalizer turns them into
 #: the published shape, so there is exactly one place where a field is named
 #: and no consumer has to know both spellings.
+def _owner_legs(exp_id: str, stage_id: str | None) -> dict:
+    """The owner's scripts/artifacts/live-state legs, DERIVED by convention.
+
+    The three trees share one namespace — `stages/stage-<n>/<owner>` (with
+    `families/<owner>` for an experiment family) — so the legs are computed
+    from the id and checked against the tree rather than typed per row. A leg
+    that does not exist is `None`: a row never claims a directory the
+    repository does not have.
+    """
+    legs = {"canonical_scripts": None, "canonical_artifacts": None,
+            "live_state": None}
+    if stage_id is None:
+        return legs
+    for shape in (f"stages/stage-{stage_id}/{exp_id}",
+                  f"stages/stage-{stage_id}/families/{exp_id}"):
+        if (REPO_ROOT / "scripts" / shape).is_dir():
+            legs["canonical_scripts"] = f"scripts/{shape}"
+        if (REPO_ROOT / "artifacts" / shape).is_dir():
+            legs["canonical_artifacts"] = f"artifacts/{shape}"
+        cur = REPO_ROOT / "logs" / shape / "current.json"
+        if cur.is_file():
+            legs["live_state"] = f"logs/{shape}/current.json"
+    return legs
+
+
 def _row(rec: dict) -> dict:
     r = dict(rec)
     out = {
@@ -1666,6 +1695,7 @@ def _row(rec: dict) -> dict:
         "decisions": r.pop("decisions", []),
         "classification_reason": r.pop("classification_reason", ""),
     }
+    out.update(_owner_legs(out["experiment_id"], out["stage_id"]))
     #: `blocked_by` and `index_section` only appear on the rows that have them.
     out.update(r)
     return out

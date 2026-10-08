@@ -9,7 +9,7 @@ Money and permission. Nothing here is a scientific result.
 | grants and issued authorizations | [`approvals/`](approvals/) |
 
 **The live balances are derived, not stored here.** Run
-[`derive_budget.py`](../../scripts/consolidate/derive_budget.py): it reads the
+[`derive_budget.py`](../../scripts/maintenance/consolidation/derive_budget.py): it reads the
 approved package from `configs/` and each session's own closeout, and reports
 the formal, engineering, package and project balances separately. They bind
 separately and do not transfer into one another — dividing the wrong one by the

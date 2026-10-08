@@ -535,11 +535,20 @@ def test_every_log_is_classified_in_the_catalog():
 
 
 def test_every_pod_script_is_classified():
+    """The SHARED pod infrastructure is the catalogued set.
+
+    Per-experiment drivers and launchers moved to their owning experiment
+    directories in the 2026-10-08 information-architecture migration, and
+    their classification is ownership itself — the directory says whose they
+    are. What still needs a catalogue is the stage-neutral set every session
+    shares.
+    """
     named = backticked(POD_SCRIPTS)
-    unclassified = [p.name for p in sorted((REPO / "scripts/pod").iterdir())
-                    if p.name not in named and p.name != "__pycache__"]
+    unclassified = [p.name for p in sorted((REPO / "scripts/shared/pod").iterdir())
+                    if p.name not in named and p.name not in ("__pycache__",
+                                                              "__init__.py")]
     assert not unclassified, (
-        f"scripts/pod entries with no class in POD_SCRIPTS.md: {unclassified}")
+        f"scripts/shared/pod entries with no class in POD_SCRIPTS.md: {unclassified}")
 
 
 def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
