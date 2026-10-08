@@ -1158,3 +1158,109 @@ class TestTheScientificDesignHashIsNotAFunctionOfMoney:
         assert doc["behavioural_design"]["finalist_retention"] == \
             PARETO_V1.RETENTION_QUALITY_ONLY
         assert "finalist_retention" in SCIENTIFIC_BEHAVIOURAL
+
+
+class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
+    """A reader followed `inputs.evidence_capacity`, found
+    `batteries_remaining: 0`, and reported D1 as blocked on a battery it
+    already has.
+
+    Every fact needed to avoid that was in the same document: `evidence.status`
+    is CLOSED, `open_blockers` is empty, and the prose directly above `inputs`
+    says the realized family superseded the capacity record. None of that
+    helped, because a key named like a live input sent the reader to the
+    historical record first.
+
+    So the live owners are named as such and the superseded one is
+    underscore-prefixed with its reason. The capacity record is NOT deleted --
+    it is the provenance showing why the D-series family was necessary.
+    """
+
+    @staticmethod
+    def _doc():
+        return json.loads((REPO / "logs/stages/stage-1/phase_d1/plans/"
+                                  "d1_design.json").read_text())
+
+    def test_the_live_evidence_owners_are_named_in_inputs(self):
+        inputs = self._doc()["inputs"]
+        assert "behavioural_evidence_family" in inputs
+        assert "behavioural_evidence_realized" in inputs
+        for key in ("behavioural_evidence_family",
+                    "behavioural_evidence_realized"):
+            assert (REPO / inputs[key]).is_file(), inputs[key]
+
+    def test_the_superseded_record_is_marked_superseded(self):
+        inputs = self._doc()["inputs"]
+        assert "evidence_capacity" not in inputs, (
+            "the historical capacity record is listed as a peer of the live "
+            "inputs again; that is what sent a reader to a closed blocker")
+        assert "_superseded_capacity_record" in inputs
+        assert "NOT the live evidence owner" in inputs[
+            "_why_that_key_is_underscored"]
+
+    def test_it_is_kept_rather_than_deleted(self):
+        """It explains why the family exists. Deleting it would lose the
+        reason and leave the family looking arbitrary."""
+        inputs = self._doc()["inputs"]
+        assert (REPO / inputs["_superseded_capacity_record"]).is_file()
+
+    def test_the_evidence_block_is_the_owner_and_says_closed(self):
+        ev = self._doc()["evidence"]
+        assert ev["status"] == "CLOSED"
+        assert ev["owner"].endswith("autoinit_d_series_family_manifest.json")
+        assert ev["roles_required"] == ["d1_screening", "d1_confirmation"]
+
+    def test_the_family_the_design_names_is_built_and_verified(self):
+        """Not a claim in the design -- read from the family record itself."""
+        ev = self._doc()["evidence"]
+        fam = json.loads((REPO / "logs/shared/analyses/"
+                                 "autoinit_d_series_battery_family.json").read_text())
+        assert fam["status"] == "BUILT / VERIFIED"
+        assert fam["capacity_source_blocker"] == "CLOSED"
+        assert fam["family_content_id"] == ev["family_content_id"]
+        assert fam["allocation_rule_id"] == ev["allocation_rule_id"]
+
+    def test_both_d1_roles_are_realized_on_disk_and_match_the_manifest(self):
+        """The one check that would have answered the question directly."""
+        import hashlib
+
+        man = json.loads((REPO / "logs/shared/analyses/"
+                                 "autoinit_d_series_family_manifest.json").read_text())
+        base = REPO / "artifacts/stage3/d_series_behavioural_v1"
+        checked = 0
+        for rel, rec in man["output_files"].items():
+            if not rel.startswith(("d1_screening/", "d1_confirmation/")):
+                continue
+            f = base / rel
+            assert f.is_file(), f"{rel} is not realized"
+            assert hashlib.sha256(f.read_bytes()).hexdigest() == rec["sha256"], rel
+            checked += 1
+        assert checked == 14, f"expected 14 D1 role files, checked {checked}"
+
+    def test_each_d1_role_preserves_the_frozen_stratum_balance(self):
+        man = json.loads((REPO / "logs/shared/analyses/"
+                                 "autoinit_d_series_family_manifest.json").read_text())
+        frozen = {"code": 100, "gsm8k": 150, "knowledge": 150,
+                  "math_verified": 150, "multihop": 150, "rag": 150,
+                  "tool": 100}
+        for role in ("d1_screening", "d1_confirmation"):
+            r = man["roles"][role]
+            assert r["per_stratum"] == frozen, role
+            assert r["n_prompts"] == 950 and r["n_scorable"] == 850, role
+
+    def test_the_two_d1_roles_are_disjoint(self):
+        """The validity condition for the two-rung design: an advancing
+        candidate is selected on prompts the confirmation does not reuse."""
+        man = json.loads((REPO / "logs/shared/analyses/"
+                                 "autoinit_d_series_family_manifest.json").read_text())
+        a = man["roles"]["d1_screening"]["item_ids_sha256"]
+        b = man["roles"]["d1_confirmation"]["item_ids_sha256"]
+        assert a != b
+        base = REPO / "artifacts/stage3/d_series_behavioural_v1"
+        for stratum in ("math_verified", "gsm8k", "code"):
+            def ids(role):
+                f = base / role / f"{stratum}.jsonl"
+                return {json.loads(line)["id"] for line in
+                        f.read_text().splitlines() if line.strip()}
+            overlap = ids("d1_screening") & ids("d1_confirmation")
+            assert not overlap, f"{stratum}: {len(overlap)} shared prompts"

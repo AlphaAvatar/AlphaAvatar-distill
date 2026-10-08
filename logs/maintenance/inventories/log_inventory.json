@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-07T20:19:39+00:00",
+  "created_utc": "2026-10-08T05:13:21+00:00",
   "command": "scripts/consolidate/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3301,
-    "bytes": 120670262,
+    "files": 3302,
+    "bytes": 120681027,
     "by_disposition": {
       "keep_canonical": 222,
-      "keep_immutable": 2847,
+      "keep_immutable": 2848,
       "keep_referenced": 217,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1501,
+      "immutable_record": 1502,
       "index": 8,
       "narrative": 932,
       "raw_execution_artifact": 839,
@@ -7591,8 +7591,8 @@
     },
     {
       "path": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
-      "size_bytes": 3485,
-      "sha256": "62f65f3817d6f84ce46782c0acbb216e9eb7c62c5501a22751f2ebbd5137ad6f",
+      "size_bytes": 3462,
+      "sha256": "fba2fa4fb162ecc3058ee13098f7a9f760ae234e98a4c76657e389cf88f2ecea",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8060,8 +8060,8 @@
     },
     {
       "path": "logs/index.json",
-      "size_bytes": 124364,
-      "sha256": "a7d524da69e149e220c7f345af128774bcfeeb5cd7d3e83aec94595498ee331d",
+      "size_bytes": 124434,
+      "sha256": "c8835bd4392c9232120a7c4be3f82e5d817b17d2519db6cf90a6312f018c8214",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50376,8 +50376,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-      "size_bytes": 78133,
-      "sha256": "164983e28c0d4904ce0c8b9c722873eb068cdb1006651e24ea693f2e996d2c67",
+      "size_bytes": 78658,
+      "sha256": "ccb65d661e5232d8eaa41a71495148b9861dace7e3ee40507f68c718f717bd36",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -51078,8 +51078,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
-      "size_bytes": 12310,
-      "sha256": "18cbf459f5abde0d33415ee0a5848bdc44e49b2ec860884eb9c82589374b3293",
+      "size_bytes": 16579,
+      "sha256": "935afd5a8566ed4a7f7cb6d6a78742ddd87b1d510070fc2ddac19ea7c6a1f918",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -53265,9 +53265,21 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
+      "path": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/closeout/outcome.json",
+      "size_bytes": 5216,
+      "sha256": "0ce08745f9e861b69ac9c77e42e5a960f23aacaf9202229866337dbe7b424ab3",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/governance/bundle.json",
       "size_bytes": 1399,
-      "sha256": "487c6fdd29372ef782d09a5daf0db67fc2e0ee3b21ce1de48ecf2300a84b7726",
+      "sha256": "d99e842b42e78dde46733f8f9078bae935bded0323d496fecfb43ee17f6c6ada",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -53281,7 +53293,7 @@
     {
       "path": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/governance/readiness.json",
       "size_bytes": 9749,
-      "sha256": "837d4dced3ef2309e4eb0dbb02aca487e9850061ea9f27bd4146a5b4d1155634",
+      "sha256": "66588a9f179a5ced41bcccecbf8f14093d3266e9747fd454d0a5610f9468acc4",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -53308,8 +53320,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/runtime/session.json",
-      "size_bytes": 16501,
-      "sha256": "00400f93c2998ac2415c007e70d33111b674c9155ac4445f7cc6d70116a914fd",
+      "size_bytes": 17208,
+      "sha256": "f26d5273c7e8f613d45faf092b69f139c580e9f97430322f38cf94e9bd274fa5",
       "category": "raw_execution_artifact",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56607,8 +56619,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 16484,
-      "sha256": "e9160feb1394c603dd3798abb5024567e15c9438ac1e912a95c4774f0e3dbd3f",
+      "size_bytes": 16485,
+      "sha256": "aa7ee2c685a535d88693cec39aa1c3543f57d7a948ff202ef9a9e6e40085862d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56668,7 +56680,7 @@
     {
       "path": "logs/state/current.md",
       "size_bytes": 227517,
-      "sha256": "c24db6d3034bd2d28900b93efed47e1553f047291a7f4d1f05899d060b9eb408",
+      "sha256": "683f7bd862d51cfcfd13ab4a513bccc0596904fe18615352afa0d3ccf23c7493",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [

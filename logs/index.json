@@ -2899,9 +2899,9 @@
    "experiment_id": "phase_d1_replay",
    "run_id": "d1_replay_002",
    "root": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
-   "n_files": 4,
-   "digest": "f2b90b89ece04b88eee8fd4d7f0657133063b75667144324e4e664b4c2d60880",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "n_files": 5,
+   "digest": "7b14bb77094bc51818cb6b6d6b08345f516e2d83f16eedc963f20b4ea4e24ef1",
+   "why": "no run manifest; its closeout states: ENGINEERING COMPLETE -- a digest-pinned rematerialization, not a measurement. It decided nothing, ranked nothing and selected nothing."
   }
  ],
  "authorizes": "nothing"

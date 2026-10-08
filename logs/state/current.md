@@ -53,71 +53,71 @@ What remains unverified is the **weights** half of each identity, which is what
 the digest-pinned replay on the GPU measures; a mismatch after this derivation
 holds would be material.
 
-**r6 REPRODUCED THE DEPTH OPERATOR BYTE-EXACTLY.** That is the first
-operator this programme has reproduced bit-for-bit across hosts, and it is the
-evidence that the reconstruction mechanism is converging:
+**BOTH UNRETAINED FINALISTS ARE REPRODUCED AND SECURED.** The
+rematerialization campaign is CLOSED.
 
 ```text
-q4 step 0  depth.causal_kl_greedy_v1   1610.35 s   DIGEST MATCHED  e63a36e4e03b
-q2 step 0  ffn.activation_importance_v0    60.2 s   mismatch
-q4 step 1  ffn.activation_importance_v0   46.98 s   mismatch
+q2  afd50c9ff0e3d20542bb5473ea745b55    963.2 s   adopted, differ: []
+q4  3fcaf42eaa91b3ed02eab6c2f3213bfc   1280.3 s   adopted, differ: []
+
+artifact_digest · weights_digest · single_shard_sha256 · arch_signature
+all four match, both leaves, all eight pinned steps
 ```
 
-Every `expected_config_hash` check passed, so the inputs that `config_hash`
-covers were provably reproduced. The remaining failure is
-`ffn.activation_importance_v0`, on a single identified cause: the two
-**execution knobs**, which no hash covers because they do not change the
-estimand.
+Identity-verified three times: on the pod against each step's pin, on arrival
+from the bytes that transferred, and again independently on this host. Owner:
+[`d1_replay_002/closeout/outcome.json`](../stages/stage-1/phase_d1_replay/runs/d1_replay_002/closeout/outcome.json).
+
+**The campaign settled `$3.4490` of `$10.0000` over seven subruns.** Four
+failed, and every one was
+the same class — an **input** the completed search recorded and the replay did
+not carry. Not one was a property of the checkpoints.
 
 ```text
-all eight recorded steps   mbs=3  pack=length_sorted_v1
-the replay ran             mbs=4  pack=original_order_v1   (DEFAULT_EXECUTION)
+r4  the root state       use_cache on the loaded teacher
+r5  the operator config  Top-200 support + supervised_target, vs sha256({})
+r6  the execution knobs  mbs=3, length_sorted_v1 — which no hash covers
 ```
 
-DEPTH reproduces anyway because its greedy block choice compares KL gaps far
-larger than batch-order float noise. FFN keeps the top 3072 of 9728 neurons,
-and near that cutoff the importance scores are dense enough that a different
-reduction order flips the kept set — the documented sensitivity
-`FixedPathStep.config` was added for.
-
-**Three `$0` agreement checks now cover the three classes of input**, each
-derived from the search's own records rather than declared:
+r6 was the informative one: DEPTH reproduced byte-exactly there while FFN did
+not, and that asymmetry identified the cause. DEPTH's greedy block choice
+compares KL gaps far larger than batch-order float noise; FFN keeps the top
+3072 of 9728 neurons, and near that cutoff a different reduction order flips
+the kept set. Three `$0` agreement checks now cover the three classes of
+input, each derived from the search's own records and each mutation-verified:
 
 ```text
-derive_root_state          the parent the operators start from    8/8 + 6/6
-verify_operator_configs    the protocol they run under            8/8
-verify_execution_config    the runtime shape they reduce in       8/8
+derive_root_state          the parent the operators start from
+verify_operator_configs    the protocol they run under
+verify_execution_config    the runtime shape they reduce in
 ```
 
-The third exists precisely because a hash deliberately omits what it checks.
-All three run at `$0` before launch and again on the pod.
+**The host driver was never the discriminator.** r7 ran on `595.91.07` where
+the search and r6 both ran `580.126.09`, and reproduced exactly across that
+difference.
 
-**A near-miss worth recording:** the trace also carries `stats_spec 4dd0e23a`
-against the default `08b0dffb` — but only on the two ATTENTION steps, because
-that operator declares its own required spec. Checking per-step rather than in
-aggregate stopped a repair to something that was not broken.
-
-**MAINTAINER DECISIONS 2026-10-07/08.** The campaign ceiling is `$10.0000`,
-and the package-level GPU engineering allowance was raised by **exactly the
-shortfall** so that the older accounting bound cannot refuse the campaign's
-own approved dollars:
+**THE BEHAVIOURAL BATTERY IS NOT A BLOCKER, and a stale pointer made it look
+like one.** `d1_evidence_capacity.json` reports `batteries_remaining: 0`,
+binding on MATH-500 — correct for the question it answers, which is how many
+further batteries the ORIGINAL C1 source populations can yield. The realized
+D-series family superseded it on 2026-10-03:
 
 ```text
-engineering allowance   $20.0000 -> $25.0741   (+$5.0741, the derived shortfall)
-package total           $176.6523 -> $181.7264  (formal + engineering, derived)
-formal allowance        unchanged
-project cap             unchanged — $65.4435 headroom already covers $7.6300
+family_id                 d_series_behavioural_v1
+status                    BUILT / VERIFIED
+capacity_source_blocker   CLOSED
+d1_evidence_blocker       CLOSED
+roles required by D1      d1_screening, d1_confirmation
+each role                 950 prompts, 850 scorable, frozen stratum balance
+realized on disk          14 of 14 D1 files match the manifest byte-for-byte
 ```
 
-This creates no new spending authority. The hard limit remains **total
-campaign spend ≤ `$10.0000`**, and the issuer caps every attempt at
-`min(campaign remaining, allowance remaining)`:
-
-```text
-campaign  $10.0000 ceiling   settled $2.3700   ->   $7.5300   <- binds
-allowance $7.7300 remaining                    ->   $7.6300
-session   expected 118.0 min $2.1437 · hard 139.4 min $2.5332
-```
+The design's `evidence.status` has said CLOSED all along and `open_blockers` has
+been empty; what misled a reader was `inputs` listing the capacity record as a
+peer of the live ones. It is now named `_superseded_capacity_record` with its
+reason, the live owners are named, and a regression asserts all of it. The
+capacity record is KEPT — it is the provenance showing why the family was
+necessary.
 
 **THE D1 FORMAL TARGET-AWARE SEARCH IS COMPLETE.** Run
 `d1_search_20261006_210210` ran its full trajectory, produced **12 complete
@@ -3486,9 +3486,9 @@ these by hand; run the deriver.**
 | limit | remaining |
 | --- | --- |
 | formal sessions | `$68.7925` of `$156.6523` |
-| GPU engineering | `$7.7300` of `$25.0741` |
-| package | `$76.5225` of `$181.7264` |
-| project cap | `$424.5565` spent of `$490.0000`, leaving `$65.4435` |
+| GPU engineering | `$6.6510` of `$25.0741` |
+| package | `$75.4435` of `$181.7264` |
+| project cap | `$426.7145` spent of `$490.0000`, leaving `$63.2855` |
 
 **Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 

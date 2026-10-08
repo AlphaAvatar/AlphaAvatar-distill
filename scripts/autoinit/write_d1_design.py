@@ -62,6 +62,9 @@ C0_PREREG = "logs/stages/stage-1/phase_c1/plans/phase_c0_preregistration.json"
 C1_BATTERY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 A3_COMPARISON = "logs/stages/stage-1/phase_a3/analyses/a3_comparison.json"
 CAPACITY = "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
+#: THE LIVE behavioural-evidence owners, which supersede CAPACITY above.
+D_SERIES_FAMILY = "logs/shared/analyses/autoinit_d_series_battery_family.json"
+D_SERIES_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
 BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
 
 #: The incumbent the comparison is against, carried forward from C1. C2 closed
@@ -2094,10 +2097,28 @@ def build() -> dict[str, Any]:
             **contamination_section,
         },
         "budget": budget_section,
+        #: THE LIVE OWNERS FIRST, AND THE HISTORICAL ONE NAMED AS HISTORICAL.
+        #: This map used to list `evidence_capacity` as a peer of the others,
+        #: and a reader who followed it found `batteries_remaining: 0` --
+        #: correct for the question that record answers, which is how many
+        #: further batteries the ORIGINAL C1 source populations can yield. It
+        #: is not the live blocker: the realized D-series family superseded it
+        #: on 2026-10-03, `evidence.status` is CLOSED and `open_blockers` is
+        #: empty. All three facts were in the same document, and a key that
+        #: reads as a live input still sent a reader to the wrong one.
         "inputs": {"c0_preregistration": C0_PREREG, "c1_battery": C1_BATTERY,
                    "a3_comparison": A3_COMPARISON,
-                   "evidence_capacity": CAPACITY,
-                   "budget_terms": BUDGET_TERMS},
+                   "budget_terms": BUDGET_TERMS,
+                   "behavioural_evidence_family": D_SERIES_FAMILY,
+                   "behavioural_evidence_realized": D_SERIES_MANIFEST,
+                   "_superseded_capacity_record": CAPACITY,
+                   "_why_that_key_is_underscored": (
+                       "it answers a HISTORICAL question -- how many further "
+                       "batteries the original C1 pool can yield, which is "
+                       "zero, binding on MATH-500 -- and is kept as the "
+                       "provenance showing why the D-series family was "
+                       "necessary. It is NOT the live evidence owner; "
+                       "`evidence` above is, and it is CLOSED.")},
         "what_this_may_not_be_used_to_claim": [
             "that target-aware scoring is better. Nothing has been measured; "
             "this is a design.",
