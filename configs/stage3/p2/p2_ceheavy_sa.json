@@ -2,13 +2,13 @@
  "stage": "stage3_recovery",
  "run_name": "p2_ceheavy_sa",
  "_purpose": "Loss-weight swap arm: identical to P0-real-sa (e1_r0860k_sa_pca) except loss.kd_weight 1.0 -> 0.25 and loss.ce_weight 0.25 -> 1.0. kd_scope stays 'all', so both denominators are unchanged (KD 1,471,467; CE 864,750) and only the scalar mixing moves. Baseline is P1 = the existing P0-real arms; no baseline re-run.",
- "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+ "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16"
  },
- "data_dir": "artifacts/stages/stage-3/ladder_uniform",
+ "data_dir": "artifacts/stage3/ladder_uniform",
  "groups": null,
  "packing": "ladder",
  "block_len": 8192,
@@ -58,7 +58,7 @@
   "eval_every": 127,
   "eval_blocks": 16
  },
- "out_dir": "artifacts/stages/stage-3/p2_ceheavy_sa",
+ "out_dir": "artifacts/stage3/p2_ceheavy_sa",
  "rung": 860000,
  "val_blocks": 16
 }

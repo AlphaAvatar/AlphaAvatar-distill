@@ -545,7 +545,8 @@ class TestTheScorerIsPinnedToTheRealizedRole:
 
     def test_the_metric_is_c1s_imported_unchanged(self):
         src = (REPO / "scripts/stages/stage-1/phase_d1/score_d1_screening.py").read_text()
-        assert "from score_c1_confirmation import build_result, score_battery" \
+        assert ("from stages.phase_c1.score_c1_confirmation import "
+                "build_result, score_battery") \
             in src, ("the metric must be C1's, imported: a reimplementation "
                      "would make a screening delta uninformative about a "
                      "confirmation delta")

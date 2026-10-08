@@ -2,13 +2,13 @@
  "stage": "stage3_recovery",
  "run_name": "e3_a1_frozen_attn_sb",
  "_purpose": "Experiment 3 arm A1 (attention frozen): identical to the 0.86M P2-ceheavy baseline (p2_ceheavy_sb) except that the four attention PROJECTIONS (q_proj/k_proj/v_proj/o_proj) are removed from trainable_patterns. FFN, both decoder norms, the final model norm and attention q_norm/k_norm still train full-rank; embeddings and lm_head stay frozen. Data, objective (ce 1.0 / kd 0.25, scope all), optimizer, schedule, batch, seeds, block order and evaluation are unchanged from the baseline.",
- "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+ "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
  "teacher": {
   "model_id": "Qwen/Qwen3-4B-Thinking-2507",
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16"
  },
- "data_dir": "artifacts/stages/stage-3/ladder_uniform",
+ "data_dir": "artifacts/stage3/ladder_uniform",
  "groups": null,
  "packing": "ladder",
  "block_len": 8192,
@@ -58,7 +58,7 @@
   "eval_every": 127,
   "eval_blocks": 16
  },
- "out_dir": "artifacts/stages/stage-3/e3_a1_frozen_attn_sb",
+ "out_dir": "artifacts/stage3/e3_a1_frozen_attn_sb",
  "rung": 860000,
  "val_blocks": 16
 }

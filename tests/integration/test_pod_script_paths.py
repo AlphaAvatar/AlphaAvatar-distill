@@ -22,7 +22,33 @@ from support.session_specs import (  # noqa: E402
 )
 
 REPO = Path(__file__).resolve().parents[2]
-POD = REPO / "scripts/pod"
+#: Pod-facing scripts live with their owners since the 2026-10-08 migration:
+#: shared session infrastructure under `scripts/shared/pod/`, per-experiment
+#: setups/drivers/launchers under `scripts/stages/stage-<n>/<exp>/`. The
+#: helpers below search the whole tree by the same name shapes.
+_SCRIPTS_ROOT = REPO / "scripts"
+
+
+def _pod_glob(pattern: str) -> list:
+    #: tests excluded: the flat scripts/pod never held any, and an experiment
+    #: suite's fixtures legitimately quote truncated hashes as test data.
+    return [p for p in sorted(_SCRIPTS_ROOT.rglob(pattern))
+            if "__pycache__" not in p.parts and "tests" not in p.parts]
+
+
+class _PodTree:
+    """Glob-compatible stand-in for the dissolved flat `scripts/pod/` dir."""
+
+    def glob(self, pattern: str) -> list:
+        return _pod_glob(pattern)
+
+    def __truediv__(self, name: str):
+        hits = _pod_glob(name)
+        assert len(hits) <= 1, f"{name}: expected at most one owner, found {hits}"
+        return hits[0] if hits else (_SCRIPTS_ROOT / "absent" / name)
+
+
+POD = _PodTree()
 
 # Prefixes known to exist in the private relay repo, established by the sessions
 # that successfully downloaded from them. Add a row only when a real upload
@@ -51,6 +77,7 @@ LOCAL_PREFIXES = {
     "data/eval_behavior_v0",
     "artifacts/stages/stage-1/qwen3_0p6b_init_v0",
     "artifacts/stages/stage-3",
+    "artifacts/shared",
     "artifacts/audit",
     "configs/stage3",
     "data/warmup",
@@ -164,6 +191,9 @@ def test_the_stage1_fork_point_hash_is_identical_everywhere():
         if not script.is_file():
             continue
         text = script.read_text(errors="ignore")
+        #: Python implicit string concatenation splits a hash across literals
+        #: without truncating it; join the fragments before judging length.
+        text = re.sub(r'"\s*\n\s*"', "", text)
         for match in re.finditer(r"\b86fbba78[0-9a-f]*", text):
             tail = text[match.end():match.end() + 3]
             if tail.startswith("…") or tail.startswith("..."):

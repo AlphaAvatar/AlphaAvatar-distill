@@ -8,7 +8,7 @@
   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
   "dtype": "bfloat16"
  },
- "data_dir": "artifacts/stages/stage-3/e5_pack_r_sa",
+ "data_dir": "artifacts/stage3/e5_pack_r_sa",
  "groups": null,
  "packing": "ladder",
  "block_len": 8192,
@@ -59,7 +59,7 @@
   "eval_every": 123,
   "eval_blocks": 16
  },
- "out_dir": "artifacts/stages/stage-3/e5_r_sa",
+ "out_dir": "artifacts/stage3/e5_r_sa",
  "rung": 735603,
  "val_blocks": 16
 }

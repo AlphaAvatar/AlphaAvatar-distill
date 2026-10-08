@@ -2,13 +2,13 @@
   "stage": "stage3_recovery",
   "run_name": "e7_fineweb_r1600k_sb",
   "_purpose": "E7 arm B \u2014 FineWeb-Edu raw-text teacher KD alongside the unchanged 1.60M rollout stream. Forked from the canonical Stage 1 PCA init, not from any trained checkpoint. Identical to configs/stage3/e1/e1_r1600k_sb_pca.json except for extra_stream and the identity fields.",
-  "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
     "dtype": "bfloat16"
   },
-  "data_dir": "artifacts/stages/stage-3/ladder_uniform",
+  "data_dir": "artifacts/stage3/ladder_uniform",
   "groups": null,
   "packing": "ladder",
   "block_len": 8192,
@@ -58,11 +58,11 @@
     "eval_every": 220,
     "eval_blocks": 16
   },
-  "out_dir": "artifacts/stages/stage-3/e7_fineweb_r1600k_sb",
+  "out_dir": "artifacts/stage3/e7_fineweb_r1600k_sb",
   "rung": 1600000,
   "val_blocks": 16,
   "extra_stream": {
-    "data_dir": "artifacts/stages/stage-3/e7_fineweb_kd",
+    "data_dir": "artifacts/stage3/e7_fineweb_kd",
     "kind": "general_text_kd",
     "lambda_extra": 0.25,
     "blocks_per_step": 1,

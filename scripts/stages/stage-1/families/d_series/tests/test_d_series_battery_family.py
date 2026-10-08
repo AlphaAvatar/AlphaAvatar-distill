@@ -385,10 +385,13 @@ class TestTheCommittedRecord:
             "this PRODUCER materializes nothing -- build_batteries.py does")
         assert doc["status"] in ("BUILT / VERIFIED", "DESIGNED / NOT MATERIALIZED")
 
-    def test_it_lives_in_the_shared_area_not_under_one_experiment(self):
+    def test_it_lives_in_the_family_area_not_under_one_experiment(self):
         """Three experiments own two roles each. Filing it under `phase_d1`
-        would make D1's directory the authority on D2's evidence."""
-        assert family.RECORD.startswith("logs/shared/analyses/")
+        would make D1's directory the authority on D2's evidence; the
+        2026-10-08 migration gave the family its own home under the stage
+        it belongs to, which is ownership without being `logs/shared/`."""
+        assert family.RECORD.startswith(
+            "logs/stages/stage-1/families/d_series/analyses/")
         assert "phase_d" not in family.RECORD
 
     def test_it_is_tracked_rather_than_ignored(self):

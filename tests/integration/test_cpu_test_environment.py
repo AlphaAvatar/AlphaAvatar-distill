@@ -206,8 +206,8 @@ def test_the_shared_hub_resolver_follows_the_contract(tmp_path):
     the isolated root — that resolver is what the seven parity cases read."""
     scope = tmp_path / "scope"
     env = _scoped(scope, {"PATH": os.environ["PATH"], "HOME": str(tmp_path)})
-    env["PYTHONPATH"] = f"{REPO / 'src'}{os.pathsep}{REPO / 'scripts/data'}"
-    out = _child(env, "import battery_render as b;print(b.hub_cache())")
+    env["PYTHONPATH"] = f"{REPO / 'src'}{os.pathsep}{REPO / 'scripts'}"
+    out = _child(env, "from shared.data import battery_render as b;print(b.hub_cache())")
     assert out == f"{scope}/hf/hub", out
 
 

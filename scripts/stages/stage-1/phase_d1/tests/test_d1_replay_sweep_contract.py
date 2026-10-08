@@ -106,9 +106,23 @@ class TestTheD1ReplayModelsItsOwnPod:
 
     def test_its_harness_is_the_one_the_authorization_binds(self):
         """One owner. A readiness record describing a different executable
-        from the authorization is two identities for one session."""
+        from the authorization is two identities for one session.
+
+        The replay campaign is CLOSED and its harness tuple is a frozen
+        declaration; the 2026-10-08 migration moved its members, so this
+        runs only while the declaration still resolves (and the refusal
+        when it does not is asserted below)."""
+        from shared.historical_declarations import missing_from_tree
         from stages.phase_d1.issue_d1_replay_authorization import HARNESS_FILES
         from stages.phase_d1 import replay_pod_environment as RPE
+
+        if missing_from_tree(HARNESS_FILES):
+            import pytest
+
+            with pytest.raises(RPE.D1ReplayReadinessError,
+                               match="declared replay harness files are missing"):
+                RPE.harness(REPO)
+            return
 
         harness = RPE.harness(REPO)
         assert harness["n_files"] == len(HARNESS_FILES)

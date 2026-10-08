@@ -2,13 +2,13 @@
   "stage": "stage3_recovery",
   "run_name": "e1_r2960k_sa_pca",
   "_purpose": "Experiment 1 (data scaling): rung 2,960,000 supervised tokens, 1944 blocks, 3 epochs, seed 20260726, pca init. Differs from configs/stage3/recovery.json only in data source, rung, seed, student_path and the derived schedule.",
-  "student_path": "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint",
+  "student_path": "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint",
   "teacher": {
     "model_id": "Qwen/Qwen3-4B-Thinking-2507",
     "revision": "768f209d9ea81521153ed38c47d515654e938aea",
     "dtype": "bfloat16"
   },
-  "data_dir": "artifacts/stages/stage-3/ladder_uniform",
+  "data_dir": "artifacts/stage3/ladder_uniform",
   "groups": null,
   "packing": "ladder",
   "block_len": 8192,
@@ -58,7 +58,7 @@
     "eval_every": 364,
     "eval_blocks": 16
   },
-  "out_dir": "artifacts/stages/stage-3/e1_r2960k_sa_pca",
+  "out_dir": "artifacts/stage3/e1_r2960k_sa_pca",
   "rung": 2960000,
   "val_blocks": 16
 }

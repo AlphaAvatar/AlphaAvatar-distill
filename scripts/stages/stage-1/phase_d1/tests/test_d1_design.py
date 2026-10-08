@@ -1229,7 +1229,7 @@ class TestTheScientificDesignHashIsNotAFunctionOfMoney:
         """
         import ast
 
-        from autoinit import write_d1_design as W
+        from stages.phase_d1 import write_d1_design as W
 
         tree = ast.parse(Path(W.__file__).read_text())
         assigned = []
@@ -1292,9 +1292,14 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
         inputs = self._doc()["inputs"]
         assert "behavioural_evidence_family" in inputs
         assert "behavioural_evidence_realized" in inputs
+        from shared.run_layout import resolve_historical
         for key in ("behavioural_evidence_family",
                     "behavioural_evidence_realized"):
-            assert (REPO / inputs[key]).is_file(), inputs[key]
+            #: the frozen design names the owners by their freeze-time
+            #: spelling; the 2026-10-08 migration moved them, so the
+            #: existence check follows the historical-path table.
+            assert (REPO / resolve_historical(inputs[key], REPO)).is_file(), \
+                inputs[key]
 
     def test_the_superseded_record_is_marked_superseded(self):
         inputs = self._doc()["inputs"]
@@ -1320,7 +1325,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
     def test_the_family_the_design_names_is_built_and_verified(self):
         """Not a claim in the design -- read from the family record itself."""
         ev = self._doc()["evidence"]
-        fam = json.loads((REPO / "logs/shared/analyses/"
+        fam = json.loads((REPO / "logs/stages/stage-1/families/d_series/analyses/"
                                  "autoinit_d_series_battery_family.json").read_text())
         assert fam["status"] == "BUILT / VERIFIED"
         assert fam["capacity_source_blocker"] == "CLOSED"
@@ -1331,7 +1336,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
         """The one check that would have answered the question directly."""
         import hashlib
 
-        man = json.loads((REPO / "logs/shared/analyses/"
+        man = json.loads((REPO / "logs/stages/stage-1/families/d_series/analyses/"
                                  "autoinit_d_series_family_manifest.json").read_text())
         base = REPO / "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
         checked = 0
@@ -1345,7 +1350,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
         assert checked == 14, f"expected 14 D1 role files, checked {checked}"
 
     def test_each_d1_role_preserves_the_frozen_stratum_balance(self):
-        man = json.loads((REPO / "logs/shared/analyses/"
+        man = json.loads((REPO / "logs/stages/stage-1/families/d_series/analyses/"
                                  "autoinit_d_series_family_manifest.json").read_text())
         frozen = {"code": 100, "gsm8k": 150, "knowledge": 150,
                   "math_verified": 150, "multihop": 150, "rag": 150,
@@ -1358,7 +1363,7 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
     def test_the_two_d1_roles_are_disjoint(self):
         """The validity condition for the two-rung design: an advancing
         candidate is selected on prompts the confirmation does not reuse."""
-        man = json.loads((REPO / "logs/shared/analyses/"
+        man = json.loads((REPO / "logs/stages/stage-1/families/d_series/analyses/"
                                  "autoinit_d_series_family_manifest.json").read_text())
         a = man["roles"]["d1_screening"]["item_ids_sha256"]
         b = man["roles"]["d1_confirmation"]["item_ids_sha256"]

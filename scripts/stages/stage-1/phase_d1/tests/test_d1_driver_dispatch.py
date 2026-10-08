@@ -25,7 +25,7 @@ import pytest
 torch = pytest.importorskip("torch")
 
 REPO = Path(__file__).resolve().parents[5]
-for extra in ("src", "scripts", "scripts/pod", "scripts/autoinit"):
+for extra in ("src", "scripts"):
     path = str(REPO / extra)
     if path not in sys.path:
         sys.path.insert(0, path)
@@ -58,7 +58,7 @@ reach_past_the_blocker_refusal_in_the_session = autouse_blocker_free_design(
 
 @pytest.fixture(scope="module")
 def driver():
-    return importlib.import_module("autoinit_d1_driver")
+    return importlib.import_module("stages.phase_d1.autoinit_d1_driver")
 
 
 def _deferred_imports(source: str) -> list[tuple[str, tuple[str, ...]]]:

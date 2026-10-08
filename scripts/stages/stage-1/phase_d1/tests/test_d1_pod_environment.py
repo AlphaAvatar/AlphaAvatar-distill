@@ -216,13 +216,14 @@ class TestTheEnvironmentDigestCoversWhatTheGateRuns:
 
         clone = tmp_path / "repo"
         for rel in ("tests", "scripts/stages/stage-1/phase_d1/tests",
-                    "scripts/pod", "scripts/experiments"):
+                    "scripts/shared/pod",):
             src = REPO / rel
             dst = clone / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copytree(src, dst, dirs_exist_ok=True,
                             ignore=shutil.ignore_patterns("__pycache__"))
         shutil.copy(REPO / "conftest.py", clone / "conftest.py")
+        shutil.copy(REPO / "scripts/conftest.py", clone / "scripts/conftest.py")
         victim = (clone / "scripts/stages/stage-1/phase_d1/tests"
                   / "test_d1_pod_environment.py")
         victim.write_text(victim.read_text() + "\n# one changed byte\n")

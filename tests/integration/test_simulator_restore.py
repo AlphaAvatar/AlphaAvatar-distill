@@ -463,7 +463,7 @@ def test_the_ambient_python_fallback_is_gone_from_the_code():
 
 def test_every_nodeid_attempt_6_lost_is_in_this_module():
     """The repair is checked against the recorded failures, not a proxy."""
-    src = SCRIPT.parent.parent.parent / "tests/integration/test_simulator_restore.py"
+    src = REPO / "tests/integration/test_simulator_restore.py"
     text = src.read_text()
     missing = [n for n in ATTEMPT_6_FAILED if f"def {n}(" not in text]
     assert not missing, f"attempt 6 named nodeids this module no longer has: {missing}"

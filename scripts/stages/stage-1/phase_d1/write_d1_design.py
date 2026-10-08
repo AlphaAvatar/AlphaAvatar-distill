@@ -63,8 +63,13 @@ C1_BATTERY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 A3_COMPARISON = "logs/stages/stage-1/phase_a3/analyses/a3_comparison.json"
 CAPACITY = "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json"
 #: THE LIVE behavioural-evidence owners, which supersede CAPACITY above.
-D_SERIES_FAMILY = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json"
-D_SERIES_MANIFEST = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
+#: FROZEN SPELLINGS. These strings are EMITTED into the committed design,
+#: whose bytes are frozen science (`design_hash f9c6688f…` binds the seeds,
+#: and regeneration must be byte-identical). They are the paths as they were
+#: when the design was frozen; the 2026-10-08 migration moved the objects,
+#: so every READ resolves through `shared.run_layout.resolve_historical`.
+D_SERIES_FAMILY = "logs/shared/analyses/autoinit_d_series_battery_family.json"
+D_SERIES_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
 BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
 
 #: THE INCUMBENT IS DERIVED, NOT TYPED. MAINTAINER DECISION 2026-10-08.
@@ -115,7 +120,7 @@ def incumbent() -> dict[str, Any]:
             "closed without promotion and C3 returned NO_GO, so B still stands."),
         "_derived_not_declared": (
             "from C1's recorded verdict and C1's measured arm identities, by "
-            "scripts/stages/stage-1/families/d_series/incumbent.py. This "
+            "scripts/experiments/stage-1/phase_d_series/incumbent.py. This "
             "block was hand-typed until 2026-10-08 and named the arm C1 BEAT; "
             "see logs/stages/stage-1/phase_d1/analyses/"
             "d1_control_arm_identity.json."),
@@ -365,7 +370,7 @@ def execution_wiring_required() -> dict[str, Any]:
             "declared policy and environment, and that the search's declared "
             "protocol id is non-null and equals the evaluator's before any "
             "expansion. It belongs in "
-            "scripts/stages/stage-1/phase_d1/tests/, not the core suite: "
+            "scripts/experiments/stage-1/phase_d1/tests/, not the core suite: "
             "it checks THIS experiment's wiring, not a reusable mechanism."),
         "_why_it_was_written_before_an_implementation": (
             "so the requirement was not rediscovered after a paid run produced "
@@ -1171,8 +1176,8 @@ def contamination() -> dict[str, Any]:
         #: THE FAMILY OWNS THE RESOLUTION, and it corrects the first option
         #: below. See `logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json`.
         "d_series_battery_family": {
-            "owner": "scripts/stages/stage-1/families/d_series/battery_family.py",
-            "record": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
+            "owner": "scripts/experiments/stage-1/phase_d_series/battery_family.py",
+            "record": "logs/shared/analyses/autoinit_d_series_battery_family.json",
             "family_id": "d_series_behavioural_v1",
             "what": ("six roles - D1/D2/D3 x screening/confirmation - allocated "
                      "by ONE rule frozen before any D1 outcome exists, each "
@@ -1730,7 +1735,7 @@ def topk_search_cost() -> dict[str, Any] | None:
         "depth_cell_before": before,
         "depth_cell_after": dict(adjusted.minutes[DEPTH_IMPL]),
         "search_session": priced,
-        "_priced_by": ("stages.phase_d1.search_space.search_cost, which "
+        "_priced_by": ("experiments.phase_d1.search_space.search_cost, which "
                        "calls search_cost_model.bound. No second pricing formula "
                        "exists here."),
         "_other_three_cells_unchanged": (
@@ -1851,7 +1856,7 @@ def budget() -> dict[str, Any]:
             "package_remaining_usd": float(live["package"]["remaining_usd"]),
             "full_ceiling_sessions_fundable":
                 live.get("full_ceiling_sessions_fundable"),
-            "_derived_by": ("scripts/maintenance/consolidation/derive_budget.py, CALLED by "
+            "_derived_by": ("scripts/consolidate/derive_budget.py, CALLED by "
                             "this writer rather than copied from it. A "
                             "hand-copied balance expires the next time "
                             "anything spends, and this document is "
@@ -1899,7 +1904,8 @@ def budget() -> dict[str, Any]:
 #: The realized D-series family D1's behavioural evidence comes from. Read, not
 #: assumed: the evidence blocker closes because these roles EXIST and are
 #: verified, and it would reopen if the manifest vanished.
-FAMILY_MANIFEST = "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json"
+#: frozen spelling, emitted as `evidence.owner`; reads resolve (see above)
+FAMILY_MANIFEST = "logs/shared/analyses/autoinit_d_series_family_manifest.json"
 
 #: The two roles D1 itself consumes. D2 and D3 own the other four; D1's evidence
 #: readiness must not depend on roles it never reads.
@@ -1917,7 +1923,8 @@ def d_series_evidence() -> dict[str, Any]:
     kept below as the historical reasoning that led to extending the sources,
     where it no longer drives a blocker.
     """
-    path = REPO / FAMILY_MANIFEST
+    from shared.run_layout import resolve_historical
+    path = REPO / resolve_historical(FAMILY_MANIFEST, REPO)
     if not path.is_file():
         return {
             "status": "OPEN",
@@ -2024,7 +2031,7 @@ def incumbent_identity_check() -> dict[str, Any]:
             "c1_arm", "verdict", "impl_id", "profile_id", "artifact_digest",
             "weights_digest", "single_shard_sha256", "arch_signature")},
         "disagreements": differ,
-        "owner": "scripts/stages/stage-1/families/d_series/incumbent.py",
+        "owner": "scripts/experiments/stage-1/phase_d_series/incumbent.py",
         "finding": ("logs/stages/stage-1/phase_d1/analyses/"
                     "d1_control_arm_identity.json"),
         "why_it_matters": (

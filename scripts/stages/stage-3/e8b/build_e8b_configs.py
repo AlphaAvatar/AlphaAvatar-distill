@@ -38,9 +38,9 @@ ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 
 # cell -> (init path, regime, hardware class the cell trains on)
 CELLS = {
-    "dp": ("artifacts/stages/stage-1/e8b_dp_init/checkpoint", "depth_only", "A100_SXM_80GB"),
-    "dc": ("artifacts/stages/stage-1/e8b_dc_init/checkpoint", "depth_only", "A100_SXM_80GB"),
-    "fc": ("artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
+    "dp": ("artifacts/stage1/e8b_dp_init/checkpoint", "depth_only", "A100_SXM_80GB"),
+    "dc": ("artifacts/stage1/e8b_dc_init/checkpoint", "depth_only", "A100_SXM_80GB"),
+    "fc": ("artifacts/stage1/e8_contribution_init_v1/checkpoint",
            "fully_compressed", "L40S_48GB"),
 }
 # The preregistered KD chunk fallback, applied to the WHOLE depth-only regime after
@@ -80,7 +80,7 @@ def main() -> int:
             cfg = dict(control)
             cfg["student_path"] = init
             cfg["run_name"] = name
-            cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
+            cfg["out_dir"] = f"artifacts/stage3/{name}"
             chunk = KD_CHUNK_BY_REGIME.get(regime)
             if chunk is not None:
                 cfg["loss"] = {**control["loss"], "kd_chunk": chunk}

@@ -926,7 +926,7 @@ class TestTheGovernanceGeneratorsExist:
                 ("write_d1_launch_readiness", None, None),
                 ("stage_d1_bundle", None, None)):
             spec = importlib.util.spec_from_file_location(
-                script, REPO / f"scripts/autoinit/{script}.py")
+                script, REPO / f"scripts/stages/stage-1/phase_d1/{script}.py")
             mod = importlib.util.module_from_spec(spec)
             sys.modules[script] = mod
             spec.loader.exec_module(mod)

@@ -22,7 +22,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sa_pca.json",
       "config_sha256": "51507fb8995628939a5cd1033c5a5cec6a10d367e16fcdb0004f37fba97ec638",
       "control_sha256": "222a0925e966048d41704d58bf92829b8ded3428491f07779b68f23eb5ae225e",
-      "student_path": "artifacts/stages/stage-1/e8b_dp_init/checkpoint",
+      "student_path": "artifacts/stage1/e8b_dp_init/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
@@ -39,7 +39,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sb_pca.json",
       "config_sha256": "5c03226420f6ebb682a59ba867effc35e242185f5913eff54d6cfa005534fce9",
       "control_sha256": "486e9e90d77c93ce6ddd758031ffd319c909ba63a0604938c3b4d917854eee97",
-      "student_path": "artifacts/stages/stage-1/e8b_dp_init/checkpoint",
+      "student_path": "artifacts/stage1/e8b_dp_init/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
@@ -56,7 +56,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sa_pca.json",
       "config_sha256": "89d34ad8dfa0dd2df3edaa800162c9f4c3c381af56483fc457ccd2964351e34a",
       "control_sha256": "222a0925e966048d41704d58bf92829b8ded3428491f07779b68f23eb5ae225e",
-      "student_path": "artifacts/stages/stage-1/e8b_dc_init/checkpoint",
+      "student_path": "artifacts/stage1/e8b_dc_init/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
@@ -73,7 +73,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sb_pca.json",
       "config_sha256": "bcaabc17e4b49ad2aa2bfee7155c652956775b3d9cec37ea8bb424fa52054243",
       "control_sha256": "486e9e90d77c93ce6ddd758031ffd319c909ba63a0604938c3b4d917854eee97",
-      "student_path": "artifacts/stages/stage-1/e8b_dc_init/checkpoint",
+      "student_path": "artifacts/stage1/e8b_dc_init/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
@@ -90,7 +90,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sa_pca.json",
       "config_sha256": "77b3da5f56fc4f6dcdad6dc72307378f3b3fba3ca733c251f30392cada9f8856",
       "control_sha256": "222a0925e966048d41704d58bf92829b8ded3428491f07779b68f23eb5ae225e",
-      "student_path": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
+      "student_path": "artifacts/stage1/e8_contribution_init_v1/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
@@ -107,7 +107,7 @@
       "control": "configs/stage3/e1/e1_r1600k_sb_pca.json",
       "config_sha256": "b220726c1fb94cc994e524beefc7f8cc734eb2716f0275f031bea01ff6576495",
       "control_sha256": "486e9e90d77c93ce6ddd758031ffd319c909ba63a0604938c3b4d917854eee97",
-      "student_path": "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint",
+      "student_path": "artifacts/stage1/e8_contribution_init_v1/checkpoint",
       "rung": 1600000,
       "total_steps": 1761,
       "save_every": 880
