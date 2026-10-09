@@ -638,7 +638,7 @@
   },
   {
    "file": "tests/integration/test_reconstruct_training_events.py",
-   "line": 134,
+   "line": 140,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not COMMITTED.is_file()",
@@ -654,7 +654,7 @@
   },
   {
    "file": "tests/integration/test_reconstruct_training_events.py",
-   "line": 154,
+   "line": 160,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E6B / \"e6b_run.log\").is_file()",
@@ -976,5 +976,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "ac26e075aef4046a49de37e46fc2ef5558305adfe4ddd9095f91aaed88bb3207"
+ "digest": "a0ee6a2663cd02f39fc7b1e7f24bd584aed0f10a99316eb6926978f56972d8cf"
 }
