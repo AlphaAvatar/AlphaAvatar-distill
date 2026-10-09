@@ -763,7 +763,7 @@
    "new": "configs/stages/stage-1/phase_c1/executable_closure.json",
    "kind": "rename_modified",
    "sha256_at_base": "2f596b45dcf40ca1c0ca722ffc88f1df645179787b1f103095173c1be28ea115",
-   "sha256_now": "83b120895d622a55b632a76a4091ef95bbd278565dccb14ee5b26a6516c52eea"
+   "sha256_now": "460b29f6badb3dafd64e54fa0423b6e3653e5358011ec061665bb16082bf1fb0"
   },
   {
    "old": "configs/experiments/phase_c1/frozen_assets.json",
@@ -819,7 +819,7 @@
    "new": "configs/stages/stage-1/phase_c3/executable_closure.json",
    "kind": "rename_modified",
    "sha256_at_base": "575df273869c5f121a1fd18a23defe67c8836b67cfd4900701db06ff3553441d",
-   "sha256_now": "a9e80034bf2a6107485326fe72210c4c899a7cc0e2f3d3974487ab78f438aea5"
+   "sha256_now": "135629b2d6cddad054e50ba3618684c61a79e25db4eb2194f18415b46dc4a442"
   },
   {
    "old": "configs/experiments/phase_c3/frozen_assets.json",

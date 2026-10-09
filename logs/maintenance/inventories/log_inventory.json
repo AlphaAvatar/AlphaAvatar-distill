@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T13:34:27+00:00",
+  "created_utc": "2026-10-09T15:26:45+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3311,
-    "bytes": 121178973,
+    "bytes": 121182074,
     "by_disposition": {
       "keep_canonical": 222,
       "keep_immutable": 2847,
@@ -8815,8 +8815,8 @@
     },
     {
       "path": "logs/maintenance/inventories/checkpoint_registry.json",
-      "size_bytes": 344418,
-      "sha256": "498475bd7f17ea4048a7d43ae6375e8bd0a2222dd885f3cceb6a998d9443b9cf",
+      "size_bytes": 347519,
+      "sha256": "05a071ca8a0ee010d2e3f1a74c2950fa4d7e696257346f534cea1f53216aea48",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8925,7 +8925,7 @@
     {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
       "size_bytes": 74124,
-      "sha256": "31c71f745cb3a61b57a2475ce320a457ae7ba445174709912aa7a02b21671fe5",
+      "sha256": "8b3f287c439d873b719b2203ca655d5bc5dcdd19eb7c1e20c7068c24aec7de99",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [

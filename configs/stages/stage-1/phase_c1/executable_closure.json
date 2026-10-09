@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 114,
- "digest": "047dc9c898e1dde59988b4089ba1678085793b4e87997dc9daa1e859aa51223b",
+ "digest": "746d6e8b52596709c0cc7adae0abe57fa6b3624c7015f15342bb27ea4cdc7692",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -124,8 +124,8 @@
   },
   {
    "path": "scripts/shared/training/train_stage3.py",
-   "sha256": "f67930e562ba340e653418d811284ee276e323b8556cfb2e78f6d1b236ae237b",
-   "bytes": 15397
+   "sha256": "b5c686dc9f5d36bcc8b7c00a1352a708df20efc35814daf4de73c8343abedc7a",
+   "bytes": 17923
   },
   {
    "path": "scripts/shared/validation/renderer_parity_gate.py",
