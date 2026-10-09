@@ -11,8 +11,8 @@
   "recovery_search_v1 / calib.reasoning_heavy@v1; the 14-probe Phase-B no-reuse path; student-prefix recovery (E5); any 4th seed; the paid device-canary path (TERMINATED 2026-08-18, evidence kept)"
  ],
  "architecture_migration": {
-  "record": "logs/maintenance/source-relocations/info-architecture/",
-  "status": "the information-architecture migration, two rounds on branch migration/info-architecture, AWAITING INDEPENDENT REVIEW: v1/ (2026-10-08) moved scripts/, logs/, artifacts/; v2/ (2026-10-09) moved configs/, data/, docs/, extended the ownership index and relocation registry to all six trees, and rebuilt the checkpoint registry hashed with the D1 finalist identities. Authorizes nothing."
+  "record": "logs/maintenance/source-relocations/info-architecture/v2/",
+  "status": "the information-architecture migration, two rounds on branch migration/info-architecture, AWAITING INDEPENDENT REVIEW: v1/ (2026-10-08) moved scripts/, logs/, artifacts/; v2/ (2026-10-09) moved configs/, data/, docs/, extended the ownership index and relocation registry to all six trees, and rebuilt the checkpoint registry hashed with the D1 finalist identities. NOT a C1 result, no ATTENTION evidence, authorizes nothing."
  },
  "authorized": {
   "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap.",

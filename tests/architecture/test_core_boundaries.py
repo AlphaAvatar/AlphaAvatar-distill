@@ -212,12 +212,23 @@ def _accepted_baseline(baseline: dict) -> tuple[dict | None, str]:
     rev = baseline.get("accepted_revision")
     if not rev:
         return None, "no accepted_revision recorded"
-    out = subprocess.run(
-        ["git", "show", f"{rev}:{BASELINE.relative_to(REPO)}"],
-        cwd=REPO, capture_output=True, text=True)
-    if out.returncode != 0:
-        return None, f"accepted_revision {rev[:12]} does not resolve"
-    return json.loads(out.stdout), rev
+    # The baseline file itself can have been relocated since the accepted
+    # revision (2026-10-09: configs/architecture -> configs/maintenance/
+    # architecture). The accepted state is the same FILE at its then-current
+    # spelling, so try the current path first and then every historical
+    # spelling the relocation registry maps onto it.
+    current = str(BASELINE.relative_to(REPO))
+    reloc = json.loads((REPO / "logs/index.json").read_text())
+    historical = [old + current[len(new):]
+                  for old, new in reloc["historical_paths"]["map"].items()
+                  if current == new or current.startswith(new + "/")]
+    for candidate in (current, *historical):
+        out = subprocess.run(
+            ["git", "show", f"{rev}:{candidate}"],
+            cwd=REPO, capture_output=True, text=True)
+        if out.returncode == 0:
+            return json.loads(out.stdout), rev
+    return None, f"accepted_revision {rev[:12]} does not resolve"
 
 
 @pytest.mark.parametrize("rule,description", RULES, ids=[r[0] for r in RULES])

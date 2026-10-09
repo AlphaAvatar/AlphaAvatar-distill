@@ -18,6 +18,15 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
+sys.path.insert(0, str(REPO / "scripts"))
+from shared.run_layout import resolve_historical  # noqa: E402
+
+def _read(rel):
+    """arms.json is FROZEN: its paths are freeze-time spellings and access
+    resolves through the relocation registry."""
+    return json.loads((REPO / resolve_historical(rel, REPO)).read_text())
+
+
 ARMS = json.loads((REPO / "configs/stages/stage-3/e8/arms.json").read_text())
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 GRADIENT_RELEVANT = (
@@ -28,11 +37,11 @@ GRADIENT_RELEVANT = (
 
 
 def cfg_of(arm: dict) -> dict:
-    return json.loads((REPO / arm["path"]).read_text())
+    return _read(arm["path"])
 
 
 def control_of(arm: dict) -> dict:
-    return json.loads((REPO / arm["control"]).read_text())
+    return _read(arm["control"])
 
 
 def test_there_are_exactly_two_arms_on_two_seeds_from_one_init():

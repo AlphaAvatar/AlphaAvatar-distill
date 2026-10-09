@@ -433,11 +433,16 @@ def test_writer_and_launcher_name_the_same_specs():
 def test_preregistration_binds_both_spec_hashes():
     from aadistill.infrastructure.manifest import sha256_file
 
+    from shared.run_layout import resolve_historical
+
     doc = json.loads(
         (REPO / "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json").read_text())
     block = doc["artifact_specs"]
-    assert block["success"]["path"] == SUCCESS
-    assert block["failed"]["path"] == FAILED
+    # The preregistration is FROZEN: it spells the specs as they were at
+    # binding time. Those spellings must RESOLVE to the paths the launcher
+    # uses now, and the bound bytes must be the bytes at the resolved home.
+    assert resolve_historical(block["success"]["path"], REPO) == SUCCESS
+    assert resolve_historical(block["failed"]["path"], REPO) == FAILED
     assert block["success"]["sha256"] == sha256_file(REPO / SUCCESS)
     assert block["failed"]["sha256"] == sha256_file(REPO / FAILED)
 

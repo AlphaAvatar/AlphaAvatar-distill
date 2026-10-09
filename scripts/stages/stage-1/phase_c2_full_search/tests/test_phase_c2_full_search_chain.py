@@ -300,7 +300,11 @@ def test_the_historical_c2_cap_matches_the_decision_c2_ran_under():
       3. the canonical owner states the CURRENT cap.
     """
     cfg = FA.load_config(REPO)
-    owner_path = "configs/stages/stage-1/phase_c1/authorization.json"
+    #: What the FROZEN C2 config names is the freeze-time spelling of the
+    #: cap owner; the canonical owner is wherever that spelling resolves.
+    frozen_owner_spelling = "configs/experiments/phase_c1/authorization.json"
+    from shared.run_layout import resolve_historical
+    owner_path = resolve_historical(frozen_owner_spelling, REPO)
     owner = json.loads((REPO / owner_path).read_text())
 
     c2_cap = cfg["accepted_pricing"]["cumulative_cap_usd"]
@@ -337,7 +341,7 @@ def test_the_historical_c2_cap_matches_the_decision_c2_ran_under():
     # 2. it is not the canonical owner, and says so.
     provenance = " ".join(str(v) for v in cfg["accepted_pricing"].values())
     provenance += " " + " ".join(str(v) for v in cfg.values() if isinstance(v, str))
-    assert owner_path in provenance, (
+    assert frozen_owner_spelling in provenance, (
         "C2's config must name the canonical cap owner, so a reader cannot "
         "mistake this copy for the live figure")
 

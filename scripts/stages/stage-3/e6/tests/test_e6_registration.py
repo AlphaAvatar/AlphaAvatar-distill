@@ -18,11 +18,13 @@ comparison between two different instruments wearing the same metric names.
 
 import json
 import re
+import sys
 from pathlib import Path
 
 import pytest
 
 REPO = Path(__file__).resolve().parents[5]
+sys.path.insert(0, str(REPO / "scripts"))
 REGISTRATION = REPO / "logs/stages/stage-3/e6/analyses/e6_registration.json"
 DRIVER = REPO / "scripts/stages/stage-3/e6/e6_driver.py"
 
@@ -77,7 +79,9 @@ def test_the_scale_curve_is_a_single_recipe_at_three_rungs(reg):
     assert len(e1) == 6, f"expected six E1 arms, got {sorted(e1)}"
     assert {v["rung"] for v in e1.values()} == {1600000, 2960000, 5500000}
     for alias, arm in e1.items():
-        cfg = json.loads((REPO / arm["config"]).read_text())
+        from shared.run_layout import resolve_historical
+        cfg = json.loads((REPO / resolve_historical(arm["config"], REPO)
+                          ).read_text())
         assert cfg["rung"] == arm["rung"], alias
         assert cfg["seed"] == arm["seed"], alias
         assert cfg["student_path"].endswith("qwen3_0p6b_init_v0/checkpoint"), alias
@@ -92,7 +96,9 @@ def test_the_anchor_is_a_different_objective_and_is_labelled_as_one(reg):
     anchors = {a: v for a, v in reg["arms"].items() if v["lineage"].startswith("external")}
     assert len(anchors) == 2, sorted(anchors)
     for alias, arm in anchors.items():
-        cfg = json.loads((REPO / arm["config"]).read_text())
+        from shared.run_layout import resolve_historical
+        cfg = json.loads((REPO / resolve_historical(arm["config"], REPO)
+                          ).read_text())
         assert cfg["loss"]["ce_weight"] == 1.0 and cfg["loss"]["kd_weight"] == 0.25, \
             f"{alias}: the anchor is the CE-heavy objective"
         assert alias not in reg["scale_curve"]

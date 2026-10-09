@@ -103,5 +103,6 @@ def test_a_bad_chunk_is_rejected_by_config_validation():
 def test_the_recorded_hashes_match_the_regenerated_configs():
     from aadistill.infrastructure.manifest import sha256_json
     for arm in ARMS["arms"]:
-        got = sha256_json(json.loads((REPO / arm["path"]).read_text()))
+        from support.historical import resolve
+        got = sha256_json(json.loads((REPO / resolve(arm["path"])).read_text()))
         assert got == arm["config_sha256"], f"{arm['name']} hash drifted"

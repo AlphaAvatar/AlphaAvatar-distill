@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T05:29:32+00:00",
+  "created_utc": "2026-10-09T06:33:18+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3310,
-    "bytes": 121156808,
+    "bytes": 121156851,
     "by_disposition": {
       "keep_canonical": 221,
       "keep_immutable": 2847,
@@ -8446,12 +8446,14 @@
         "scripts/stages/stage-1/phase_c1/tests/test_c1_log_records.py",
         "scripts/stages/stage-1/phase_c1/tests/test_c1_run_identity_is_wired.py",
         "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py",
+        "tests/architecture/test_core_boundaries.py",
         "tests/architecture/test_core_suite_boundary.py",
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
         "tests/docs/test_storage_inventory.py",
         "tests/models/test_tokenizer_contract.py",
-        "tests/runtime/test_run_layout_all_stages.py"
+        "tests/runtime/test_run_layout_all_stages.py",
+        "tests/support/historical.py"
       ],
       "referenced_by_executable": [
         "scripts/README.md",
@@ -8478,12 +8480,14 @@
         "scripts/stages/stage-1/phase_c1/tests/test_c1_log_records.py",
         "scripts/stages/stage-1/phase_c1/tests/test_c1_run_identity_is_wired.py",
         "scripts/stages/stage-1/phase_c2_baseline_completion/tests/test_phase_c2_baseline_completion.py",
+        "tests/architecture/test_core_boundaries.py",
         "tests/architecture/test_core_suite_boundary.py",
         "tests/docs/test_log_organisation.py",
         "tests/docs/test_repository_structure.py",
         "tests/docs/test_storage_inventory.py",
         "tests/models/test_tokenizer_contract.py",
-        "tests/runtime/test_run_layout_all_stages.py"
+        "tests/runtime/test_run_layout_all_stages.py",
+        "tests/support/historical.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
@@ -57171,8 +57175,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17928,
-      "sha256": "4f96f8c228e70e8d8711c02772ca1174af1833e340274acfb1520373c052e4ae",
+      "size_bytes": 17971,
+      "sha256": "7d8e29ef8cf4857331f1042df1912e24716899abfcecd4fae1d2857f5c0dc587",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [

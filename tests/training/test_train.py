@@ -131,7 +131,7 @@ def test_kd_forward_kl_properties():
 def test_select_trainable_real_stage3_patterns():
     patterns = json.loads(
         (Path(__file__).resolve().parents[2]
-         / "configs" / "stage3" / "recovery.json").read_text()
+         / "configs" / "stages" / "stage-3" / "recovery.json").read_text()
     )["trainable_patterns"]
     model = tiny_model(0)
     report = select_trainable(model, patterns)
