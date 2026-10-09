@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T15:26:45+00:00",
+  "created_utc": "2026-10-09T16:50:58+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3311,
-    "bytes": 121182074,
+    "bytes": 121182650,
     "by_disposition": {
       "keep_canonical": 222,
       "keep_immutable": 2847,
@@ -50846,8 +50846,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/current.json",
-      "size_bytes": 4506,
-      "sha256": "c12f95cbf9ff1433dc2767e03a2052bdc27489e5cb140973805004a952cbb7f7",
+      "size_bytes": 4460,
+      "sha256": "559f8af7404c0d96402580b7bbf7e7530e24cadd35bf0c0dfe2ca7900c3a2cf9",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57211,8 +57211,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17971,
-      "sha256": "7d8e29ef8cf4857331f1042df1912e24716899abfcecd4fae1d2857f5c0dc587",
+      "size_bytes": 17985,
+      "sha256": "cac178209cfa7638f9edda1595c71d6afe7994cb32d5af6cd9e5bbccd986db01",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57283,8 +57283,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 233362,
-      "sha256": "345a455c0917834e3743f255726f632ae5fd625a7dae8dcc107df9435510bb60",
+      "size_bytes": 233970,
+      "sha256": "684001f9f406e440a4b5ef195c5369835684cec2e5dbec44e21dd623cbbb77df",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [

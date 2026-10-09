@@ -58,7 +58,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "independent review of the six-tree information-architecture migration (branch migration/info-architecture; records under logs/maintenance/source-relocations/info-architecture/). D1 does NOT resume before that review approves it; it stays paused with no authorization issued and no resource created."
+    "maintainer_pause": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -80,7 +80,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "independent review of the six-tree information-architecture migration (branch migration/info-architecture; records under logs/maintenance/source-relocations/info-architecture/). D1 does NOT resume before that review approves it; it stays paused with no authorization issued and no resource created.",
+  "next_scientific_action": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

@@ -12,7 +12,7 @@
  ],
  "architecture_migration": {
   "record": "logs/maintenance/source-relocations/info-architecture/v2/",
-  "status": "the information-architecture migration, two rounds on branch migration/info-architecture, AWAITING INDEPENDENT REVIEW: v1/ (2026-10-08) moved scripts/, logs/, artifacts/; v2/ (2026-10-09) moved configs/, data/, docs/, extended the ownership index and relocation registry to all six trees, and rebuilt the checkpoint registry hashed with the D1 finalist identities. NOT a C1 result, no ATTENTION evidence, authorizes nothing."
+  "status": "the six-tree information-architecture migration: COMPLETE and INTEGRATED into main by squash-merge (maintainer authorization 2026-10-10, independent review GO). v1/ moved scripts/, logs/, artifacts/; v2/ moved configs/, data/, docs/ and extended the ownership index, relocation registry and hashed artifact registry to all six trees. Source branch PRESERVED: records cite commits reachable only there. NOT a C1 result, no ATTENTION evidence, authorizes nothing."
  },
  "authorized": {
   "_sessions_max_meaning": "the 2026-09-11b AMENDMENT, not an omission: no package-level cap on launcher invocations. What binds is budget.per_session_ceiling_usd, the package and the project cap.",
@@ -128,7 +128,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "independent review of the six-tree information-architecture migration (branch migration/info-architecture; records under logs/maintenance/source-relocations/info-architecture/). D1 does NOT resume before that review approves it; it stays paused with no authorization issued and no resource created.",
+ "next": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "maintainer launch review of the prepared run named in `next`, then the launcher. The chain is verified at $0 and no provider resource exists.",

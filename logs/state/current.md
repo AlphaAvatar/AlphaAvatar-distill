@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-08 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-10 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,13 +9,21 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 IS PAUSED BEFORE BEHAVIOURAL SCREENING.** Maintainer instruction of
-2026-10-08: the control-arm decision is resolved, the two corrections it implies
-are made, and D1 does not resume until the repository information-architecture
-migration has been independently reviewed.
+**D1 IS PAUSED BEFORE BEHAVIOURAL SCREENING.** The control-arm decision is
+resolved and the two corrections it implies are made. The migration that
+blocked it has been reviewed and integrated, so the remaining gate is D1's own
+execution-readiness process (maintainer, 2026-10-10): no execution grant is
+issued, no screening authorization exists, and no resource has been created.
+**Future D-series work starts on a FRESH branch cut from the integrated
+`main`** — P12.2, because a squash commit is not an ancestor of the source
+branch's commits and continuing there would re-apply the whole range.
 
-**THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS IMPLEMENTED and awaits
-that review**, on branch `migration/info-architecture`. Round 1 (2026-10-08)
+**THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
+into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
+independent review returned GO. Its source branch `migration/info-architecture`
+is **preserved and must never be deleted**: committed records cite commit
+hashes that are reachable only there, and every one of them was verified
+reachable before the integration. Round 1 (2026-10-08)
 made `scripts/`, `logs/` and `artifacts/` owner-first; round 2 (2026-10-09)
 finished the architecture across `configs/`, `data/` and `docs/` —
 `configs/stages/stage-{n}/{experiment}/`, `data/stages/stage-{n}/`,
