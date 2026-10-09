@@ -300,7 +300,7 @@ def main() -> None:
         "adapter": ADAPTER.identity(),
         "operator_ledger": registry_ledger(),
         "operator_ledger_file_sha256": sha256_file(
-            REPO_ROOT / "configs/autoinit/operator_ledger.json"),
+            REPO_ROOT / "configs/stages/stage-1/operator_ledger.json"),
         "active_calibration_profile": DOMAIN_BALANCED_V1.as_dict(),
         "no_calibration_sentinel": NO_CALIBRATION.qualified_id,
 

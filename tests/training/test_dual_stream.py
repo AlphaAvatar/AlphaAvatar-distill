@@ -190,7 +190,7 @@ def test_the_real_e7_arm_configs_are_budget_matched():
     """The shipped configs, not a toy: B and C must differ only in source."""
     from pathlib import Path
     root = Path(__file__).resolve().parents[2]
-    index = json.loads((root / "configs/stage3/e7/e7_configs.json").read_text())
+    index = json.loads((root / "configs/stages/stage-3/e7/e7_configs.json").read_text())
     budgets, extras = {}, {}
     for run, meta in index.items():
         cfg = json.loads((root / meta["path"]).read_text())

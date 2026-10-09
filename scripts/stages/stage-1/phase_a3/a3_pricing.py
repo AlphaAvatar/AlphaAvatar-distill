@@ -65,7 +65,7 @@ PARAMS_A = 596_049_920
 PARAMS_PARENT = 713_490_432
 
 #: The frozen recovery recipe A3 reuses unchanged from the attempt75 controls.
-FROZEN_RECIPE_REL = "configs/stage3/e1/e1_r0860k_sa_pca.json"
+FROZEN_RECIPE_REL = "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json"
 
 #: Measured in `scripts/stages/stage-1/phase_c2/behavioural.py`, which owns both:
 #: the teacher's on-disk size and the worst single four-step path's

@@ -2096,7 +2096,7 @@ GO / NO-GO / INCONCLUSIVE. **An `INCONCLUSIVE` is a result, not an engineering
 failure**, and re-running one in pursuit of a GO is forbidden, as is splicing
 probes across attempts, substituting a seed, or selectively retaining outputs.
 
-**Instance policy lives in [`configs/experiments/phase_c1/authorization.json`](../../configs/experiments/phase_c1/authorization.json)**
+**Instance policy lives in [`configs/experiments/phase_c1/authorization.json`](../../configs/stages/stage-1/phase_c1/authorization.json)**
 under `execution_package`, where the issuer reads the cap it refuses a
 mis-stated grant against. None of it is in `src/aadistill`.
 

@@ -19,9 +19,9 @@ runs immediately before paid training.
         --stream artifacts/stages/stage-3/e7_fineweb_kd \\
         --stream artifacts/stages/stage-3/e7_fineweb_val \\
         --stream artifacts/stages/stage-3/e7_control_kd \\
-        --reserved data/warmup/holdout_v1.jsonl \\
-        --reserved data/warmup/warmup_v1.jsonl \\
-        --reserved data/eval_behavior_v0/prompts.jsonl \\
+        --reserved data/stages/stage-0/warmup/holdout_v1.jsonl \\
+        --reserved data/stages/stage-0/warmup/warmup_v1.jsonl \\
+        --reserved data/stages/stage-3/eval_behavior_v0/prompts.jsonl \\
         --out artifacts/stages/stage-3/e7_disjointness.json
 
 Exit codes: 0 disjoint; 6 an overlap or a missing input.

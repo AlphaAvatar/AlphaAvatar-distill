@@ -199,7 +199,7 @@ def proposal() -> dict:
             "_derived_by": (
                 "scripts/maintenance/consolidation/derive_budget.py :: project_balance, from "
                 "the package anchor plus every recorded run closeout. The cap's "
-                "canonical owner is configs/experiments/phase_c1/"
+                "canonical owner is configs/stages/stage-1/phase_c1/"
                 "authorization.json :: accepted_pricing.cumulative_cap_usd."),
             "_fitting_is_not_permission": (
                 "the cap rose to 370.00 on 2026-09-17 as an ACCOUNTING "

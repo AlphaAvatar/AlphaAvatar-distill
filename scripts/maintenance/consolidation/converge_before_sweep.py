@@ -72,7 +72,7 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("skip-predicate audit",
      ("scripts/stages/stage-1/phase_c1/audit_skip_predicates.py", "--write")),
     #: THE EXECUTABLE CLOSURE SNAPSHOT. Missing from this list until
-    #: 2026-09-23, when a core edit left `configs/experiments/phase_c1/
+    #: 2026-09-23, when a core edit left `configs/stages/stage-1/phase_c1/
     #: executable_closure.json` describing a tree that no longer existed and
     #: twelve session-contract tests refused with "re-run derive_closure.py".
     #: That is exactly the failure this tool's docstring describes — a derived

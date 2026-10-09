@@ -257,7 +257,7 @@ def generate_candidates(engine, tokenizer, prompt_ids: list[list[int]], *, n: in
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen3-4B-Thinking-2507@768f209d")
-    ap.add_argument("--data-dir", default="data/stage2_v1")
+    ap.add_argument("--data-dir", default="data/stages/stage-2/stage2_v1")
     # Defaults to the dense baseline's in-scope slices, not to every slice the
     # verifier *can* check. `refusal_uncertainty` is evaluation-only for this
     # recipe (decision 2026-07-30): it is outside the declared capability target,

@@ -51,10 +51,10 @@ PREFIX = "e8_inputs_20260810"
 # local path -> relay path under PREFIX. Ordered small-first so a quota refusal on
 # the 1.95 GB file still leaves the cheap-but-critical inputs durable.
 UPLOAD = [
-    ("data/warmup/warmup_v1.jsonl", "warmup/warmup_v1.jsonl"),
-    ("data/warmup/warmup_v1.manifest.json", "warmup/warmup_v1.manifest.json"),
-    ("data/warmup/holdout_v1.jsonl", "warmup/holdout_v1.jsonl"),
-    ("data/warmup/holdout_v1.manifest.json", "warmup/holdout_v1.manifest.json"),
+    ("data/stages/stage-0/warmup/warmup_v1.jsonl", "warmup/warmup_v1.jsonl"),
+    ("data/stages/stage-0/warmup/warmup_v1.manifest.json", "warmup/warmup_v1.manifest.json"),
+    ("data/stages/stage-0/warmup/holdout_v1.jsonl", "warmup/holdout_v1.jsonl"),
+    ("data/stages/stage-0/warmup/holdout_v1.manifest.json", "warmup/holdout_v1.manifest.json"),
     ("artifacts/stages/stage-1/e8_calibration_v1/items.jsonl", "calibration_v1/items.jsonl"),
     ("artifacts/stages/stage-1/e8_calibration_v1/docs.jsonl", "calibration_v1/docs.jsonl"),
     ("artifacts/stages/stage-1/e8_calibration_v1/general_docs.jsonl",

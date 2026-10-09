@@ -189,7 +189,7 @@ def expansion_profiles(
     this rule disagree immediately — the second one branched a
     `CalibrationNeed.NONE` operator over every active profile and over-counted
     the root's children — and a price for a space the search does not run is
-    worse than no price. See `docs/core-provenance.md`.
+    worse than no price. See `docs/maintenance/core-provenance.md`.
 
     Both rules live here:
 
@@ -352,7 +352,7 @@ class SearchConfig:
         #: the value its own record carries and stays verifiable against this
         #: code. A search that DOES restrict gets a different hash, which is the
         #: point: two searches reaching different leaves must not share an
-        #: identity. See `docs/core-provenance.md`.
+        #: identity. See `docs/maintenance/core-provenance.md`.
         return sha256_json(self.as_dict())
 
 

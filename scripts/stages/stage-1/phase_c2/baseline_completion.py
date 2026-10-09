@@ -75,11 +75,11 @@ ENTRY_POINTS: tuple[str, ...] = (
 #: shell that stages it.
 DECLARED_INPUTS: tuple[str, ...] = (
     PROTOCOL, PRICING, FROZEN_INPUTS, SELECTION_RECORD,
-    "configs/experiments/phase_c2/frozen_assets.json",
+    "configs/stages/stage-1/phase_c2/frozen_assets.json",
     #: The grant contract's field split and the project cap the issuer checks
     #: against. Read by the assembler, so its bytes decide what a grant is
     #: allowed to be.
-    "configs/experiments/phase_c2/baseline_completion_authorization.json",
+    "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json",
     "scripts/shared/pod/autoinit_preflight_setup.sh",
 )
 

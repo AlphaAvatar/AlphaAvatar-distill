@@ -25,7 +25,7 @@ What this stage receives from the pipeline before it.
 
 ## Data
 
-* `data/warmup/holdout_v1.manifest.json` — purpose: "Held-out perplexity eval for Stage 1 gate"; the gate compares the initialized student against a random baseline
+* `data/stages/stage-0/warmup/holdout_v1.manifest.json` — purpose: "Held-out perplexity eval for Stage 1 gate"; the gate compares the initialized student against a random baseline
 
 ## How it runs
 
@@ -98,18 +98,18 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
-* `configs/autoinit/c2_replay_artifacts.json`
-* `configs/autoinit/d1_replay_artifacts.json`
-* `configs/experiments/phase_a/source_sets.json`
-* `configs/experiments/phase_c1/authorization.json`
-* `configs/experiments/phase_c2/baseline_completion_authorization.json`
-* `configs/experiments/phase_c2/full_search_authorization.json`
-* `configs/stage1/qwen3_0p6b_from_4b_thinking.json`
-* `configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json`
-* `configs/validation/batching_refactor_cuda.json`
-* `configs/validation/c2_full_search_cuda.json`
-* `configs/validation/c2_full_search_performance.json`
-* `configs/validation/c2_state_eval_certification.json`
+* `configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json`
+* `configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json`
+* `configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json`
+* `configs/stages/stage-1/phase_c1/authorization.json`
+* `configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json`
+* `configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json`
+* `configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json`
+* `configs/stages/stage-1/phase_c3/batching_refactor_cuda.json`
+* `configs/stages/stage-1/phase_d1/d1_replay_artifacts.json`
+* `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json`
+* `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json`
+* `configs/stages/stage-1/source_sets.json`
 * `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
 * `logs/stages/stage-1/phase_c3/plans/a3_design.json`
 * `logs/stages/stage-1/phase_c3/plans/c3_preregistration.json`
@@ -121,7 +121,7 @@ A dataset manifest lives beside the data it describes, and
 an artifact lives outside git with its manifest. Neither is
 copied here.
 
-* `data/warmup/holdout_v1.manifest.json`
+* `data/stages/stage-0/warmup/holdout_v1.manifest.json`
 * `artifacts/stages/stage-1/qwen3_0p6b_init_v0`
 * `artifacts/stages/stage-1/state_eval_v1`
 * `artifacts/stages/stage-1/e8_contribution_init_v1`

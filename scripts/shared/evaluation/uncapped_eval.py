@@ -16,7 +16,7 @@ recorded as its own class.
 
     python scripts/shared/evaluation/uncapped_eval.py \
         --model <ckpt> --label <arm> \
-        --prompts data/eval_behavior_v0/prompts.jsonl \
+        --prompts data/stages/stage-3/eval_behavior_v0/prompts.jsonl \
         --out artifacts/stages/stage-3/eval/<arm>_behavior_uncapped.json
 """
 from __future__ import annotations

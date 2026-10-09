@@ -1,0 +1,602 @@
+{
+ "schema": "aadistill.executable_closure/v1",
+ "_contract": "What a CURRENT session would execute, derived by walking import edges from the declared entry points, plus the non-python inputs that decide execution or authorization. Derived live from the tree at the moment it was computed. This is NOT a historical record and describes no completed run. AUTHORIZES NOTHING.",
+ "experiment_id": "phase_c1",
+ "entry_points": [
+  "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+  "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+  "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+  "scripts/stages/stage-1/phase_c1/issue_c1_authorization.py",
+  "scripts/shared/pod/collect_artifacts.py"
+ ],
+ "declared_non_python_inputs": [
+  "scripts/shared/pod/autoinit_preflight_setup.sh",
+  "configs/stages/stage-1/phase_c1/authorization.json",
+  "configs/stages/stage-1/phase_c1/c1_artifacts.json",
+  "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json",
+  "configs/stages/stage-1/phase_c1/frozen_assets.json"
+ ],
+ "source_roots": [
+  "src",
+  "scripts",
+  "scripts/pod",
+  "scripts/autoinit"
+ ],
+ "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
+ "n_files": 114,
+ "digest": "047dc9c898e1dde59988b4089ba1678085793b4e87997dc9daa1e859aa51223b",
+ "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
+ "files": [
+  {
+   "path": "configs/stages/stage-1/phase_c1/authorization.json",
+   "sha256": "fee711971d68e0055db1a395f0b617259ff37b84bd289e805420b64c8204a90a",
+   "bytes": 32551
+  },
+  {
+   "path": "configs/stages/stage-1/phase_c1/c1_artifacts.json",
+   "sha256": "39576ead0ef2e510386b9baf7d8640241607df667189f54c71f388c359ea271c",
+   "bytes": 5824
+  },
+  {
+   "path": "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json",
+   "sha256": "6b82cd5ee0d9deb35330bcb4b219ad36743ff17284ff8ce54b98c941a2f3f21f",
+   "bytes": 6820
+  },
+  {
+   "path": "configs/stages/stage-1/phase_c1/frozen_assets.json",
+   "sha256": "4133806ba83b30fadc3201d69bc17a0e45359f41550ef975ed74b3c336afd040",
+   "bytes": 4081
+  },
+  {
+   "path": "scripts/shared/calibration.py",
+   "sha256": "d221213a6fb29ca8e28389df8929b5a99c1d962635e3fb555fcaab168b4d2d1a",
+   "bytes": 3338
+  },
+  {
+   "path": "scripts/shared/data/battery_render.py",
+   "sha256": "6d580e02ff4782a08529333b7b013543cd49de496a0e853047f24738d8667a1d",
+   "bytes": 17056
+  },
+  {
+   "path": "scripts/shared/deployment.py",
+   "sha256": "4aa59c6d94254db3e4a33c6648d3811982a14ddf25acfe30f989cbf666151070",
+   "bytes": 3208
+  },
+  {
+   "path": "scripts/shared/evaluation/audit_tool_scoring.py",
+   "sha256": "8bea5061bc158679bea122626f1c0fea1e4e206ff5dc672a01ae7b118c4169d1",
+   "bytes": 10295
+  },
+  {
+   "path": "scripts/shared/evaluation/score_recovery_search.py",
+   "sha256": "8bb7a9d48d5e43eb7946c1e6eb8a480ad5b984e19888cb0ed925ed44abe75882",
+   "bytes": 22206
+  },
+  {
+   "path": "scripts/shared/evaluation/uncapped_eval.py",
+   "sha256": "117a3d05a81cd95b813047b32024440a2e59ef6b73b8ca110402340a7fee2c8d",
+   "bytes": 30272
+  },
+  {
+   "path": "scripts/shared/pod/autoinit_engine_probe.py",
+   "sha256": "e017cab560293a974a979fca3687ae2ec0e3b3bd91cb7b4c934b9a31b75f4b07",
+   "bytes": 3953
+  },
+  {
+   "path": "scripts/shared/pod/autoinit_preflight_setup.sh",
+   "sha256": "4df4e579b05347260a1278a564e5ab9b397f88bd9ae1203516b1f6f3df9de5ac",
+   "bytes": 61003
+  },
+  {
+   "path": "scripts/shared/pod/autoinit_science_inputs.py",
+   "sha256": "0ccd40ce8d80f19576244b7cdb0d3d7d5436395f6b86c17059295ac984c01eb5",
+   "bytes": 4443
+  },
+  {
+   "path": "scripts/shared/pod/collect_artifacts.py",
+   "sha256": "c8a13eae215b7e0cc04279e9c32ba6bb9815634858bd0c7f451855bd16d365c9",
+   "bytes": 9002
+  },
+  {
+   "path": "scripts/shared/pod/verify_frozen_assets.py",
+   "sha256": "11f9a454fee6cd218ec89d25bb4e2bebd8d9772b901f52b2b257534666289a02",
+   "bytes": 13351
+  },
+  {
+   "path": "scripts/shared/pod/watchdog.py",
+   "sha256": "26f6fb78fc1cc007b95e16cff6d256071006f94da15a522d73fd3eafbc3f186e",
+   "bytes": 4551
+  },
+  {
+   "path": "scripts/shared/recovery_policy.py",
+   "sha256": "16ec2d1c12549154aaa9ca4c2b89c8b93cfd06c4521b7dc7cce4f8bdf30a83a3",
+   "bytes": 6312
+  },
+  {
+   "path": "scripts/shared/run_layout.py",
+   "sha256": "64186c31ffaaf3b0c877a70cf2ecfda04d4abcf82bb30d1ae6fabab07094a3eb",
+   "bytes": 32699
+  },
+  {
+   "path": "scripts/shared/source_sets.py",
+   "sha256": "5d153a84c06667d37edc4f3124e0b9fa2dbf759640866dce2716e7c6ba26f038",
+   "bytes": 3624
+  },
+  {
+   "path": "scripts/shared/training/train_stage3.py",
+   "sha256": "f67930e562ba340e653418d811284ee276e323b8556cfb2e78f6d1b236ae237b",
+   "bytes": 15397
+  },
+  {
+   "path": "scripts/shared/validation/renderer_parity_gate.py",
+   "sha256": "2ffdb61aea42a0ea95ea45f5c69f8727a29bf7a91cf196fb0daf2a3d0638f8c8",
+   "bytes": 6700
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_a/plan.py",
+   "sha256": "cf787002791da62c677a0dfd782d0d5e366e5a2a7f9781c8c84f4a9f32944aad",
+   "bytes": 28179
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/__init__.py",
+   "sha256": "c1b21f798da24f20b2a09afdd95ab09bad53b6e350572482074741560e603da7",
+   "bytes": 80
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/authorization.py",
+   "sha256": "e7a9cec80a3ac66747802b4fc5ecdfa7836b1287767e6d10d1453f0716a92bbc",
+   "bytes": 25179
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/authorization_payload.py",
+   "sha256": "3d5ebb296a2df60cabd2c62f098142aa351474be682ee2e7fd94db7704fe8b34",
+   "bytes": 15237
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/autoinit_c1_driver.py",
+   "sha256": "9e2d9f700812aad33104ae00f11ac2197cbd50da93399fabde9233c8c66f1a54",
+   "bytes": 67649
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py",
+   "sha256": "19d0f45007e568f8c39ff677bbed8d336d0c2ab30a2d894684ff918a84a6fda7",
+   "bytes": 85355
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/bundle.py",
+   "sha256": "6b90bd55441b68515c0a7579b82ba5f6ac5b77ae7db5f8db17fb199e462f82a2",
+   "bytes": 12990
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/isolation.py",
+   "sha256": "9fdcf6a6aace4dfeeff4c7aba52309a81c00705833cfcd818ef6f9864ef0abee",
+   "bytes": 19632
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/issue_c1_authorization.py",
+   "sha256": "0d771476f7ee5b53cd24d79dfcf00f68cbb6b2796da02a16e9744475709a5f06",
+   "bytes": 9632
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/packaging.py",
+   "sha256": "eee453c2a57ede97bc6ab496059f6da5a031865f99299d3e45e73f71252e5847",
+   "bytes": 6154
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/pod_environment.py",
+   "sha256": "df1db2484586d76e03622731bf309ba81d1a9d3edaab2f00ca38755618f7d9de",
+   "bytes": 12414
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/probe_results.py",
+   "sha256": "1a588ed88fa6bd9b0ed859418e4fc9e801d7b94b0297e0cb1cd594ffb46ed133",
+   "bytes": 15423
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+   "sha256": "a30ff69ca85d9d78d963c0a6fa8596e9fcd3e0f9f385e0f03ca11ef9a31e4d06",
+   "bytes": 14995
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/scoring.py",
+   "sha256": "f147a9e6e97b28028813b4b1f8089ca117b9c05e6230989dfb24545aaf87c0c4",
+   "bytes": 12166
+  },
+  {
+   "path": "scripts/stages/stage-1/phase_c1/session.py",
+   "sha256": "5d6be1d4a1738ccadee28d481b83792812fd4b25a5d572f1e51738783f268c91",
+   "bytes": 14167
+  },
+  {
+   "path": "src/aadistill/data/dataset.py",
+   "sha256": "82c361f8b5614a7324b25dffb48733f5d1b92b903daeb0f098e13d9d16421a66",
+   "bytes": 18533
+  },
+  {
+   "path": "src/aadistill/data/extra_stream.py",
+   "sha256": "712e828328987806a5b093a1bab77f36ecc4064a7da368e0faf1fa06838ad2ce",
+   "bytes": 8112
+  },
+  {
+   "path": "src/aadistill/data/ladder.py",
+   "sha256": "ed4744f42ee9e920f7b52a269067ef1cd7e2da0e621aca07a6ce6cecd09070ca",
+   "bytes": 7055
+  },
+  {
+   "path": "src/aadistill/data/tools.py",
+   "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+   "bytes": 6043
+  },
+  {
+   "path": "src/aadistill/data/verify.py",
+   "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+   "bytes": 7594
+  },
+  {
+   "path": "src/aadistill/evaluation/__init__.py",
+   "sha256": "ef0d31ab3f8eb1e7c98749f9015b6ed4c7d0aa8164bf9885a64e9ee9aad6ff9e",
+   "bytes": 27
+  },
+  {
+   "path": "src/aadistill/evaluation/behavior.py",
+   "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+   "bytes": 19983
+  },
+  {
+   "path": "src/aadistill/evaluation/capability.py",
+   "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+   "bytes": 19568
+  },
+  {
+   "path": "src/aadistill/evaluation/degeneration.py",
+   "sha256": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+   "bytes": 5245
+  },
+  {
+   "path": "src/aadistill/evaluation/strict_answer.py",
+   "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+   "bytes": 7628
+  },
+  {
+   "path": "src/aadistill/evaluation/usable_rollout.py",
+   "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+   "bytes": 6155
+  },
+  {
+   "path": "src/aadistill/governance/authorization.py",
+   "sha256": "7e19c34c4cda7f7520f1f89fc28824dd947a27c0eabd4db684a29e66ac004981",
+   "bytes": 17959
+  },
+  {
+   "path": "src/aadistill/governance/closure.py",
+   "sha256": "26993530af75358d8c616e5450f2b76aba159f9bc5f747fefcf52c137de7e979",
+   "bytes": 15225
+  },
+  {
+   "path": "src/aadistill/governance/grant.py",
+   "sha256": "853130c8ccb6e8763aea1a2b4454683f3b178df2d9cbeeb69eaba7c826129f3a",
+   "bytes": 6500
+  },
+  {
+   "path": "src/aadistill/infrastructure/artifact_gate.py",
+   "sha256": "a46f743bd9eadfbb22f4e73af698f4ba6d59db930ad914501b9b48720401cd5b",
+   "bytes": 25391
+  },
+  {
+   "path": "src/aadistill/infrastructure/budget.py",
+   "sha256": "52654abf257de8365d2b2a87ad009622db32cd323426828c0800c308de03d761",
+   "bytes": 12173
+  },
+  {
+   "path": "src/aadistill/infrastructure/env.py",
+   "sha256": "28af5663171568aa8e74d02556084e2932a6b8cc6e7f94f5e3cd0f58b3142be8",
+   "bytes": 4368
+  },
+  {
+   "path": "src/aadistill/infrastructure/failure_signature.py",
+   "sha256": "0bbbcc6edfc121719df4cdb11cdb2ad7119a9b5b299cae124c87f4798ba1605f",
+   "bytes": 5724
+  },
+  {
+   "path": "src/aadistill/infrastructure/log_relay.py",
+   "sha256": "45c8372f8d6adf9d5a657f7ca804fd3703ba6262796566990264cad42f3ee9c3",
+   "bytes": 9845
+  },
+  {
+   "path": "src/aadistill/infrastructure/manifest.py",
+   "sha256": "8b2ed17b278b6fa34d963d277fba612ae4ce9a27b948179f57a290a192c1d467",
+   "bytes": 2060
+  },
+  {
+   "path": "src/aadistill/infrastructure/provider.py",
+   "sha256": "813a59f1d9b962009e007720d837ecf44d2ceafd0e68e34b1caedf8b300bb7d8",
+   "bytes": 21239
+  },
+  {
+   "path": "src/aadistill/infrastructure/remote.py",
+   "sha256": "8d194cce37c9093a8e63986f856624039a0895fc853e687770639e1b66743184",
+   "bytes": 13454
+  },
+  {
+   "path": "src/aadistill/infrastructure/session.py",
+   "sha256": "d7d35f79b4267f2b3ff64d27ac2c76809bd9f5409069ba373e9ae5d3c0ca5af4",
+   "bytes": 48383
+  },
+  {
+   "path": "src/aadistill/infrastructure/session_prechecks.py",
+   "sha256": "6804ce4b7925e13310c355bdc6489bd969af77096a43ff9da88cd6e45702c289",
+   "bytes": 14394
+  },
+  {
+   "path": "src/aadistill/infrastructure/session_runner.py",
+   "sha256": "b4e31912246ac15e00368fcceb22e1f0b2e2e432e16e6f0d8d09b20c0d9f1600",
+   "bytes": 81604
+  },
+  {
+   "path": "src/aadistill/infrastructure/watchdog.py",
+   "sha256": "222c46c9931656973b031e411ac5d137adf95164a6bb5fe91b09747672277184",
+   "bytes": 14152
+  },
+  {
+   "path": "src/aadistill/initialization/adapters/__init__.py",
+   "sha256": "8c0a022fd412d73f1703a587af05781f8b9310655b5b74a8c361b6356939ffd5",
+   "bytes": 2643
+  },
+  {
+   "path": "src/aadistill/initialization/adapters/qwen3.py",
+   "sha256": "308e2c84384ea584ac426b77a201f75798680056705e7f79a57ba6a994a929d9",
+   "bytes": 10928
+  },
+  {
+   "path": "src/aadistill/initialization/calibration/batching.py",
+   "sha256": "773d919a96edbd4d68c4d20c3c907bf58d37e68bd78e844d24f59ee81bcb0180",
+   "bytes": 14221
+  },
+  {
+   "path": "src/aadistill/initialization/calibration/datasets.py",
+   "sha256": "3b42cf6ac5b62448037a197c4bbae80b4e62aedbbe2a4f1b643de25ea82f172d",
+   "bytes": 13536
+  },
+  {
+   "path": "src/aadistill/initialization/calibration/items.py",
+   "sha256": "6cd2f2c2dad30db733704523a0a3c81dd9f20f5a598b6a1658aafb74a3b616be",
+   "bytes": 7533
+  },
+  {
+   "path": "src/aadistill/initialization/calibration/packing.py",
+   "sha256": "b348e4ce5f0a883137fba5c446bd21548c99534848676b3c54080259f84a640b",
+   "bytes": 6352
+  },
+  {
+   "path": "src/aadistill/initialization/calibration/profiles.py",
+   "sha256": "1fff73322f3a16434c7030445b578c7fd1de81378c97831c08028238a65db138",
+   "bytes": 15619
+  },
+  {
+   "path": "src/aadistill/initialization/device.py",
+   "sha256": "761acc4efca13a81e961870e99dd254596c8dd7eca767f61f7f3a45f9a746edb",
+   "bytes": 12044
+  },
+  {
+   "path": "src/aadistill/initialization/execution.py",
+   "sha256": "4ec6010efe1969ed84021d842dcbab47af1e99893ac7ca46eea58949651f37a5",
+   "bytes": 6144
+  },
+  {
+   "path": "src/aadistill/initialization/operators/_common.py",
+   "sha256": "4f261abc2a0568a32d0fc965ec1e89d1a40fdbc755478aa370c41992822ae557",
+   "bytes": 10673
+  },
+  {
+   "path": "src/aadistill/initialization/operators/attention/gqa/__init__.py",
+   "sha256": "ab4f6418d4f0a0108f5acdd6f5f4ff67eadd990364168e86ab6e7c218107c3f0",
+   "bytes": 647
+  },
+  {
+   "path": "src/aadistill/initialization/operators/attention/gqa/_common.py",
+   "sha256": "ac79c926358fe256c44aee3bf8524cfba52f40ef955603cb4df26598ca5b816c",
+   "bytes": 7669
+  },
+  {
+   "path": "src/aadistill/initialization/operators/attention/gqa/_statistics.py",
+   "sha256": "3b102eca92fb2954faab078c45c1333aaae59817c0c5e9a7964478325c8fbbcb",
+   "bytes": 13650
+  },
+  {
+   "path": "src/aadistill/initialization/operators/attention/gqa/activation_importance.py",
+   "sha256": "86a83899366c29f17c55da6f13e8dfefc0b3086ad82e8324fc009e58391f2244",
+   "bytes": 22816
+  },
+  {
+   "path": "src/aadistill/initialization/operators/attention/gqa/weight_proxy.py",
+   "sha256": "345b60d88427a3db956dda92ec90ca5a98e4f5137b87b146216fc8ad27ad5761",
+   "bytes": 6985
+  },
+  {
+   "path": "src/aadistill/initialization/operators/base.py",
+   "sha256": "f3074170b58351bc13737a27a1666a8df76ee4296e14c0389690c46071cb3be8",
+   "bytes": 25096
+  },
+  {
+   "path": "src/aadistill/initialization/operators/composite/stage1_sandwich.py",
+   "sha256": "8deff57c9119dfc2ac2ac8ec28c4ad996821a88b05ec3814531eceefd76b6c7d",
+   "bytes": 10624
+  },
+  {
+   "path": "src/aadistill/initialization/operators/depth/_common.py",
+   "sha256": "d422a4a5e31c4547148f6b92407b05bcb95c49b38ef04f25c742b2fc1c377c5a",
+   "bytes": 1409
+  },
+  {
+   "path": "src/aadistill/initialization/operators/depth/causal_kl_greedy.py",
+   "sha256": "0a82740fcacf8d81df4b8c509f0bcfc422b075a814cfe459a2cb171d8bd5fca9",
+   "bytes": 50268
+  },
+  {
+   "path": "src/aadistill/initialization/operators/depth/positional.py",
+   "sha256": "649015bab664fbfb141ee1f2621cdab58dfe813e5fe171e1b47caca115200f3e",
+   "bytes": 3461
+  },
+  {
+   "path": "src/aadistill/initialization/operators/ffn/dense/activation_importance.py",
+   "sha256": "14c86bff108e5bd66f3a5e34336206e8393ecd0d3e6a8636cb16c89ed06cc0ce",
+   "bytes": 7988
+  },
+  {
+   "path": "src/aadistill/initialization/operators/register.py",
+   "sha256": "733bad0da4202d9f7b7c2466b33bc4a906697136205977dca494dd47cd6f682b",
+   "bytes": 3122
+  },
+  {
+   "path": "src/aadistill/initialization/operators/width/residual/global_pca.py",
+   "sha256": "5cce2451ce0c08b354f286209b640e426f224d5d4d81881b803859ed7be36f24",
+   "bytes": 9316
+  },
+  {
+   "path": "src/aadistill/initialization/planning/__init__.py",
+   "sha256": "5ed897c6addfb4605d736ab3da9e62d958cf1b7815f4294ffe84c8a8a7554ba4",
+   "bytes": 50
+  },
+  {
+   "path": "src/aadistill/initialization/planning/fixed_path.py",
+   "sha256": "973eb125ea4cd8bb8dd7834fc77bea579a0715ab9fd800e1574c122a9abede7c",
+   "bytes": 48180
+  },
+  {
+   "path": "src/aadistill/initialization/planning/generation.py",
+   "sha256": "dc7b019238c605ad35192e671d6c916a3e06971fbc29b0a6ac7a4bfe54b65692",
+   "bytes": 27763
+  },
+  {
+   "path": "src/aadistill/initialization/planning/operator_config.py",
+   "sha256": "fc428b816643088668f400a144fc0c0d11f3cd0a00565b5be413edaed4640e61",
+   "bytes": 6923
+  },
+  {
+   "path": "src/aadistill/initialization/planning/recovery.py",
+   "sha256": "1fcd5647e1c790107d0845529b2ef93cea9de87820a8d2ff971b298477bb0d8f",
+   "bytes": 111306
+  },
+  {
+   "path": "src/aadistill/initialization/scoring/batches.py",
+   "sha256": "19a8fdc987f872d9b7c9ef3c20ffa0fcb45a6d9a81b26579c538c3fec755d9d8",
+   "bytes": 12562
+  },
+  {
+   "path": "src/aadistill/initialization/scoring/content.py",
+   "sha256": "ecc2f1830501949705446d16dd15396a7e36a74027d7687601e4e3f9f52d6f09",
+   "bytes": 9244
+  },
+  {
+   "path": "src/aadistill/initialization/scoring/positions.py",
+   "sha256": "8b38cabd123f97d0147a6a087ab3dbe8a45a35f6508503e5f11a0300577334e3",
+   "bytes": 31689
+  },
+  {
+   "path": "src/aadistill/initialization/scoring/support.py",
+   "sha256": "563de1b429d70515bf7d93e9cc852840a18f201935358b7389e794800830905f",
+   "bytes": 28139
+  },
+  {
+   "path": "src/aadistill/initialization/specs/arch.py",
+   "sha256": "52d8224d96740b599006a7995cd629eb8d531dac1db81a37a6a2cdfba7851f5f",
+   "bytes": 16248
+  },
+  {
+   "path": "src/aadistill/initialization/specs/artifact.py",
+   "sha256": "6c32dadcd43be7105d007795fe36343d8938ac4556a09ccae04882955eb736a9",
+   "bytes": 8819
+  },
+  {
+   "path": "src/aadistill/initialization/specs/materialization.py",
+   "sha256": "48ab0d9efd14aff39ca44dc5a5c31f90922181e39ac77363e89f52a63c5a188f",
+   "bytes": 21269
+  },
+  {
+   "path": "src/aadistill/initialization/specs/metrics.py",
+   "sha256": "e00f6b1902647a2d2a78eebcd8485d9625e63a26a02c2f144a23875566dac4ab",
+   "bytes": 10857
+  },
+  {
+   "path": "src/aadistill/initialization/specs/state.py",
+   "sha256": "41c0bf50e0df8b2e30e197141799dc457781e30d92df30a78167a699aedc45a4",
+   "bytes": 25998
+  },
+  {
+   "path": "src/aadistill/initialization/statistics/collect.py",
+   "sha256": "a9458db64fbd8d67b53087d4836a8e97380ba18ec1056b0372c8790451a2424a",
+   "bytes": 15886
+  },
+  {
+   "path": "src/aadistill/initialization/statistics/contribution.py",
+   "sha256": "83b4d5d5abd2024727b6869c323def6e8507d1991b9ad749be600843fc1b37a7",
+   "bytes": 37008
+  },
+  {
+   "path": "src/aadistill/initialization/statistics/spec.py",
+   "sha256": "73eece373215333f8a0269205a239f70e9c69b3664b2455d2180ce681cb672b7",
+   "bytes": 5485
+  },
+  {
+   "path": "src/aadistill/initialization/transforms/project.py",
+   "sha256": "0b783fb59a9377b2496df66d53f6acdbf8c99167576a9c241a6c7d66cd0f632b",
+   "bytes": 6265
+  },
+  {
+   "path": "src/aadistill/initialization/transforms/sandwich.py",
+   "sha256": "ac7af66a466d5b0ca059b0a290e290756b30b2de64ad4202530a8566ce84074f",
+   "bytes": 15276
+  },
+  {
+   "path": "src/aadistill/models/student.py",
+   "sha256": "2ad3655c5726567944ff078fa56e26f9052d51d7e8bcd9d879b7cf9976b9c79c",
+   "bytes": 6653
+  },
+  {
+   "path": "src/aadistill/models/teacher.py",
+   "sha256": "d8d070850dad37cb53d6db4cb548a48af08a5a705eb86bb7990d054125a525da",
+   "bytes": 3567
+  },
+  {
+   "path": "src/aadistill/models/tokenizer_contract.py",
+   "sha256": "47a2f49f05f1199fa398f835969e1f71600d47cd77aa7a4506015221a753d439",
+   "bytes": 6920
+  },
+  {
+   "path": "src/aadistill/runtime/__init__.py",
+   "sha256": "9ab9b982b521e72ec4f56e3ed744acb897cf1ae9270a035a8c8bd614226239a8",
+   "bytes": 287
+  },
+  {
+   "path": "src/aadistill/runtime/device_handoff.py",
+   "sha256": "39ad7cc03c7f7e02f8ef3b36ed440370e3afd61e0627e32132fe20807fdb0fd0",
+   "bytes": 9995
+  },
+  {
+   "path": "src/aadistill/runtime/pod_environment.py",
+   "sha256": "417a02f12ab453e41bd103d74547d141f33b54d6b61fe1524040dceddf515cea",
+   "bytes": 36533
+  },
+  {
+   "path": "src/aadistill/runtime/run_layout.py",
+   "sha256": "2317d16715ac0ae5117009e118d086f9191b9fdf054a5be2f12a0f0be6c6a9e5",
+   "bytes": 12534
+  },
+  {
+   "path": "src/aadistill/runtime/staging_contract.py",
+   "sha256": "f8f7dbeaefa803ba7b7df3a51ac556b9372d492794a5776512fe8428b88fe3d8",
+   "bytes": 18558
+  },
+  {
+   "path": "src/aadistill/training/lora.py",
+   "sha256": "991609f6793beb0ed14331070da9f54f7c13f55a7d3cb46cf24823a1bd71d333",
+   "bytes": 10657
+  },
+  {
+   "path": "src/aadistill/training/train.py",
+   "sha256": "d473ccc9a210916252d661de8e1185cd190b324939eb63f826776246893c6539",
+   "bytes": 63007
+  }
+ ],
+ "authorizes": "nothing"
+}

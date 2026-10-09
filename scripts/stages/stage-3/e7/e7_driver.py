@@ -54,7 +54,7 @@ PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 VAL_STREAM = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
-HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
+HOLDOUT = REPO / "data/stages/stage-0/warmup/holdout_v1.jsonl"
 
 EVAL_RUNG = 860000
 EXPECTED_MASK = "d6e24e0b09da1bcc692b1dc96d8236808d29551a9fc94a47d1d968fd3f73d6ba"
@@ -119,7 +119,7 @@ def stage_preflight(args) -> None:
     results = {}
     for label, name in PREFLIGHT.items():
         out = OUT / f"e7_gradient_share_{label}.json"
-        cfg = REPO / f"configs/stage3/e7/{name}.json"
+        cfg = REPO / f"configs/stages/stage-3/e7/{name}.json"
         conf = json.loads(cfg.read_text())
         assert conf["extra_stream"]["lambda_extra"] == LAMBDA_EXTRA, \
             f"{name}: lambda_extra is not the frozen {LAMBDA_EXTRA}"
@@ -159,7 +159,7 @@ def stage_train(args) -> None:
             print("stopping before an arm that would eat the artifact reserve",
                   flush=True)
             return
-        cfg_path = REPO / f"configs/stage3/e7/{name}.json"
+        cfg_path = REPO / f"configs/stages/stage-3/e7/{name}.json"
         cfg = json.loads(cfg_path.read_text())
         # Assert the arm is what it claims to be, from the file that will train.
         assert cfg["loss"] == OBJECTIVE, cfg["loss"]
@@ -222,7 +222,7 @@ def stage_general_text(args) -> None:
     two are reported as separate columns and are never merged.
     """
     teacher = json.loads(
-        (REPO / "configs/stage3/e7/e7_fineweb_r1600k_sa.json").read_text())["teacher"]
+        (REPO / "configs/stages/stage-3/e7/e7_fineweb_r1600k_sa.json").read_text())["teacher"]
     targets = {**{a: model_dir(n) for a, n in ARMS.items()},
                **{a: run_dir(n) / f"checkpoints/{STEP}/model"
                   for a, n in ARM_A.items()}}

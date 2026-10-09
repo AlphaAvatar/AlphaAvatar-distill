@@ -69,9 +69,9 @@ C3_DECLARED_INPUTS: tuple[str, ...] = (
     #: is precisely the defect C1's harness list carried for months --
     #: it named a legacy script whose only remaining reference was that list.
     "scripts/shared/pod/autoinit_preflight_setup.sh",
-    "configs/experiments/phase_c1/authorization.json",
-    "configs/autoinit/c3_artifacts.json",
-    "configs/autoinit/c3_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_c3/c3_artifacts.json",
+    "configs/stages/stage-1/phase_c3/c3_artifacts_failed.json",
 )
 
 #: The sys.path roots the C3 entry points insert; a walk that did not know
@@ -79,7 +79,7 @@ C3_DECLARED_INPUTS: tuple[str, ...] = (
 C3_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
                                     "scripts/autoinit")
 
-CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_c3/executable_closure.json"
+CURRENT_CLOSURE_SNAPSHOT = "configs/stages/stage-1/phase_c3/executable_closure.json"
 
 LIVE_PRICING_PATH = "logs/stages/stage-1/phase_c3/plans/c3_live_pricing.json"
 

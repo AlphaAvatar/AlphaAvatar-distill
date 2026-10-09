@@ -209,8 +209,8 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_device_canary",
             evidence_filename="result.json",
             archive_basename="device_canary_artifacts.tar.gz",
-            spec_success="configs/autoinit/device_canary_artifacts.json",
-            spec_failed="configs/autoinit/device_canary_artifacts.json",
+            spec_success="configs/shared/pod/device_canary_artifacts.json",
+            spec_failed="configs/shared/pod/device_canary_artifacts.json",
             report_names=("result.json",),
             event_streams=lambda ctx: (),
             #: Nothing. The canary produces no artifact worth keeping beyond its

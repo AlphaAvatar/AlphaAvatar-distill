@@ -65,7 +65,7 @@ EVALUATOR_PATHS = (
 ARMS = {
     "E1-1.60M-sa": {
         "run": "e1_r1600k_sa_pca", "seed": 20260726, "rung": 1600000,
-        "step": "step_001761", "config": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+        "step": "step_001761", "config": "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
         "weights_sha256": "6f77676ab8fde397ef7af75fda3e62171b5c84f315c439a1abb49917e46f6697",
         "source": ("relay", "e1_scaling_20260801/e1_r1600k_sa_pca/step_001761/model"),
         "generate": True, "retained_three_mode": "P1-1600k-sa",
@@ -73,7 +73,7 @@ ARMS = {
     },
     "E1-1.60M-sb": {
         "run": "e1_r1600k_sb_pca", "seed": 20260801, "rung": 1600000,
-        "step": "step_001761", "config": "configs/stage3/e1/e1_r1600k_sb_pca.json",
+        "step": "step_001761", "config": "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json",
         "weights_sha256": "e432d57e598d57e1633392e92955c8185faab57909f75f44bc1c349db6ccf39e",
         "source": ("relay", "e1_scaling_20260801/e1_r1600k_sb_pca/step_001761/model"),
         "generate": True, "retained_three_mode": "P1-1600k-sb",
@@ -81,7 +81,7 @@ ARMS = {
     },
     "E1-2.96M-sa": {
         "run": "e1_r2960k_sa_pca", "seed": 20260726, "rung": 2960000,
-        "step": "step_002916", "config": "configs/stage3/e1/e1_r2960k_sa_pca.json",
+        "step": "step_002916", "config": "configs/stages/stage-3/e1/e1_r2960k_sa_pca.json",
         "weights_sha256": "3f08482c2c8e7372fc87fd2496f50c1c618f61feaec021d73c0cc646413b80c3",
         "source": ("relay", "e1_scaling_20260801/e1_r2960k_sa_pca/step_002916/model"),
         "generate": True, "retained_three_mode": None,
@@ -89,7 +89,7 @@ ARMS = {
     },
     "E1-2.96M-sb": {
         "run": "e1_r2960k_sb_pca", "seed": 20260801, "rung": 2960000,
-        "step": "step_002916", "config": "configs/stage3/e1/e1_r2960k_sb_pca.json",
+        "step": "step_002916", "config": "configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
         "weights_sha256": "b658fe392ab0db492c0df73c7008fc79ed89c0f526ad10edb10404c3bdb6f8c5",
         "source": ("devbox", "artifacts/stages/stage-3/rescued/e1_r2960k_sb_pca"),
         "generate": True, "retained_three_mode": None,
@@ -97,7 +97,7 @@ ARMS = {
     },
     "E1-5.50M-sa": {
         "run": "e1_r5500k_sa_pca", "seed": 20260726, "rung": 5500000,
-        "step": "step_004412", "config": "configs/stage3/e1/e1_r5500k_sa_pca.json",
+        "step": "step_004412", "config": "configs/stages/stage-3/e1/e1_r5500k_sa_pca.json",
         "weights_sha256": "3069b329df3edfbd5edc0356516cd06ee7f02fe59663c19df7b30ef6acd8e397",
         "source": ("relay", "e1_scaling_20260801/e1_r5500k_sa_pca/step_004412/model"),
         "generate": True, "retained_three_mode": None,
@@ -105,7 +105,7 @@ ARMS = {
     },
     "E1-5.50M-sb": {
         "run": "e1_r5500k_sb_pca", "seed": 20260801, "rung": 5500000,
-        "step": "step_004412", "config": "configs/stage3/e1/e1_r5500k_sb_pca.json",
+        "step": "step_004412", "config": "configs/stages/stage-3/e1/e1_r5500k_sb_pca.json",
         "weights_sha256": "bcb916cb3e544505770cddf021c680b0af6ded3ec7b5cfafe37eea5bb1541742",
         "source": ("devbox", "artifacts/stages/stage-3/rescued/e1_r5500k_sb_pca"),
         "generate": True, "retained_three_mode": None,
@@ -113,7 +113,7 @@ ARMS = {
     },
     "P2-1.60M-sa": {
         "run": "e4_p2_r1600k_sa", "seed": 20260726, "rung": 1600000,
-        "step": "step_001761", "config": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+        "step": "step_001761", "config": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
         "weights_sha256": "7ee1d9355b97563f095c15850dff51b7693d65e29d544a10c1575b63fdc78dce",
         "source": ("devbox", "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sa/model"),
         "generate": False, "retained_three_mode": "E4-P2-1600k-sa",
@@ -121,7 +121,7 @@ ARMS = {
     },
     "P2-1.60M-sb": {
         "run": "e4_p2_r1600k_sb", "seed": 20260801, "rung": 1600000,
-        "step": "step_001761", "config": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+        "step": "step_001761", "config": "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json",
         "weights_sha256": "98e8c9811414e982150bac934ae08cd17bb0772b797eaedae8efb2157721708c",
         "source": ("devbox", "/home/ecs-user/aad-artifacts/e4/e4_p2_r1600k_sb/model"),
         "generate": False, "retained_three_mode": "E4-P2-1600k-sb",

@@ -26,7 +26,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[5]
 CHECK = REPO / "scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py"
-CONFIG = REPO / "configs/validation/c2_state_eval_certification.json"
+CONFIG = REPO / "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json"
 
 
 def _module():

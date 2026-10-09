@@ -42,7 +42,7 @@ from aadistill.data.dataset import GROUPS, validate_sample
 from aadistill.infrastructure.env import code_state
 from aadistill.infrastructure.manifest import sha256_file, write_manifest
 
-OUT_DIR = REPO_ROOT / "data/stage2"
+OUT_DIR = REPO_ROOT / "data/stages/stage-2/stage2"
 MIXTURE = "stage2_offline_v0"
 
 MSG_CHAR_CAP = 6000      # per message
@@ -376,7 +376,7 @@ def build_mbpp(rows, sink: Sink):
 
 
 def load_holdout_prefixes() -> set[str]:
-    path = REPO_ROOT / "data/warmup/holdout_v1.jsonl"
+    path = REPO_ROOT / "data/stages/stage-0/warmup/holdout_v1.jsonl"
     if not path.exists():
         print("WARNING: holdout_v1.jsonl not found; relying on stream offset only")
         return set()
@@ -435,7 +435,7 @@ SOURCES = [
      False, build_mbpp, {"code_math": 400_000}),
     ("fineweb_edu_long", "HuggingFaceFW/fineweb-edu", "sample-10BT", "train", "ODC-By 1.0",
      True, build_fineweb_long, {"long_context": 3_000_000}),
-    ("warmup_v0_handcrafted", "data/warmup/warmup_v0.jsonl", None, None,
+    ("warmup_v0_handcrafted", "data/stages/stage-0/warmup/warmup_v0.jsonl", None, None,
      "project-authored (license-clean, see v0 record)", False, build_v0_handcrafted,
      {"refusal_uncertainty": 100_000, "tool_calling": 100_000}),
 ]

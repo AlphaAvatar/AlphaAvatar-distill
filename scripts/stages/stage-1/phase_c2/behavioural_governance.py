@@ -121,7 +121,7 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
         "logs/stages/stage-1/phase_c2/plans/c2_screening_battery.json",
         "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json",
         "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
-        "configs/stage3/e1/e1_r0860k_sa_pca.json",
+        "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
         BH.STORAGE_PRICING,
         "scripts/shared/pod/autoinit_preflight_setup.sh",
         #: The runtime scientific inputs of the prepare stage.

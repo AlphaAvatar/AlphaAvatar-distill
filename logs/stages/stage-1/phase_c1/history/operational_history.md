@@ -24,7 +24,7 @@ tree, a new one-use authorization, an exact-session bundle, a live quote at or
 below the accepted rate, and every pre-provider gate. Full terms:
 [`BUDGET_LEDGER.md`](../../../../budget/ledger.md), [`decisions.md`](../../../../budget/decisions.md) and
 `execution_package` in
-[`configs/experiments/phase_c1/authorization.json`](../../../../../configs/experiments/phase_c1/authorization.json),
+[`configs/experiments/phase_c1/authorization.json`](../../../../../configs/stages/stage-1/phase_c1/authorization.json),
 which is also where the issuer reads the cap it refuses a mis-stated grant
 against. **Booked against the package so far: `$0.3960`** (attempts 10 and 11;
 attempt 12 cost `$0`).

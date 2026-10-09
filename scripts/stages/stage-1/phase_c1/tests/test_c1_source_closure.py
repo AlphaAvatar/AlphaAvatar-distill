@@ -161,8 +161,8 @@ def test_the_scoring_closure_is_inside_the_harness():
 
 
 def test_the_artifact_specs_are_measured():
-    for rel in ("configs/autoinit/c1_artifacts.json",
-                "configs/autoinit/c1_artifacts_failed.json"):
+    for rel in ("configs/stages/stage-1/phase_c1/c1_artifacts.json",
+                "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json"):
         assert rel in C1_EXECUTABLE
 
 

@@ -35,7 +35,7 @@ emitting them now, even as explicit defaults, would move every one of those
 hashes and the `measurement_protocol_id`s beside them.
 
 The timings, hashes and costs behind all of this belong to the runs that
-produced them; see `docs/core-provenance.md`.
+produced them; see `docs/maintenance/core-provenance.md`.
 """
 from __future__ import annotations
 

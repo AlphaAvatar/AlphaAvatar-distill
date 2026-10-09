@@ -211,7 +211,7 @@ def main() -> None:
             RELAY, f"{relay_dir}/run_manifest.json", repo_type="model")).read_text())
         hist = historical_protocol(manifest)
         cfg_name = f"e1_r0860k_{'sa' if seed == 20260726 else 'sb'}_pca.json"
-        future = phase_a_protocol(REPO_ROOT / "configs/stage3/e1" / cfg_name)
+        future = phase_a_protocol(REPO_ROOT / "configs/stages/stage-3/e1" / cfg_name)
         comparison = hist.compare(future)
         material = [m for m in comparison["mismatched_fields"]
                     if m["field"] not in BENIGN_MISMATCHES]
@@ -253,7 +253,7 @@ def main() -> None:
     # until Stage 0 attests it on the pod. So the pair is reported as NOT ELIGIBLE
     # FOR MATCHED, not as matched — two `None`s are unknown on both sides, which is
     # a different statement from verified identical.
-    phase_a = phase_a_protocol(REPO_ROOT / "configs/stage3/e1/e1_r0860k_sa_pca.json")
+    phase_a = phase_a_protocol(REPO_ROOT / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json")
 
     def pair(protocol) -> dict:
         control = RecoveryProbeIdentity(

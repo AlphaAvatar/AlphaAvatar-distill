@@ -44,7 +44,7 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json
 
 #: The implementation whose behaviour this fingerprint claims to describe. If the
 #: generator changes, the digest must move, or the identity is a decoration.
-#: Moved to `configs/experiments/phase_a/source_sets.json`, loaded by
+#: Moved to `configs/stages/stage-1/source_sets.json`, loaded by
 #: `scripts/experiments/source_sets.py`. Which scripts implement a project's
 #: generation protocol is that project's fact.
 GENERATION_PROTOCOL_ID = "recovery_generation"

@@ -4,7 +4,7 @@ Attempt 3 reached a $1.09/h pod, completed setup in 2m33s, started its driver
 and died one second later. Three defects, in a chain:
 
 1. **Stage A resolved calibration profiles from an EMPTY registry.** The four
-   mixtures are data in `configs/calibration/profiles.json`; nothing in
+   mixtures are data in `configs/stages/stage-1/calibration/profiles.json`; nothing in
    `src/aadistill` names them, and `scripts/shared/calibration.py` is the
    application bootstrap that loads them. The C2 driver imported that bootstrap
    inside stage B while stage A already called `get_profile`, so stage A raised
@@ -47,8 +47,8 @@ from aadistill.infrastructure.session_runner import streams_at_risk  # noqa: E40
 from shared.pod.collect_artifacts import load_specs  # noqa: E402
 
 SPEC_SCHEMA = "aadistill.artifact_spec/v1"
-C2_SPECS = ("configs/autoinit/c2_artifacts.json",
-            "configs/autoinit/c2_artifacts_failed.json")
+C2_SPECS = ("configs/stages/stage-1/phase_c2/c2_artifacts.json",
+            "configs/stages/stage-1/phase_c2/c2_artifacts_failed.json")
 
 #: The device C1 froze. `FixedPathSpec.as_dict` includes it, so the B spec hash
 #: is device-dependent and `cuda:0` or `cpu` produce a different, correct-for-
@@ -193,7 +193,7 @@ def test_conftest_pre_fills_the_registry_for_every_in_process_test():
 
 def _spec_documents() -> list[Path]:
     out = []
-    for p in sorted((REPO / "configs/autoinit").glob("*.json")):
+    for p in sorted((REPO / "configs").rglob("*.json")):
         try:
             doc = json.loads(p.read_text())
         except json.JSONDecodeError:
@@ -253,7 +253,7 @@ def test_the_failed_spec_over_an_early_failure_is_complete_and_quiescent(tmp_pat
         "2026-09-15T18:24:46Z MARKER:STAGE_FAILED:bind_identities\n")
 
     manifest = build_manifest(
-        str(root), load_specs(str(REPO / "configs/autoinit/c2_artifacts_failed.json")),
+        str(root), load_specs(str(REPO / "configs/stages/stage-1/phase_c2/c2_artifacts_failed.json")),
         created_utc="2026-09-16T00:00:00+00:00", settle_seconds=0)
     assert manifest.missing == [], manifest.missing
     assert manifest.ok

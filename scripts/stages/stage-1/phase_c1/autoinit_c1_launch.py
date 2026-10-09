@@ -211,12 +211,12 @@ PRICING = "logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json"
 PREREG = "logs/stages/stage-1/phase_c1/plans/execution_preregistration.json"
 #: The expectation the frozen-asset gate checks this tree against, on the pod
 #: and — since 2026-09-11 — at $0 before a pod exists.
-FROZEN_EXPECT = "configs/experiments/phase_c1/frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c1/frozen_assets.json"
 #: Declared once. `artifact_spec_gate` reads these and `ArtifactPolicy` books
 #: them, so the gate cannot end up validating a different file than the one the
 #: pod is handed.
-SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
-SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
+SPEC_SUCCESS = "configs/stages/stage-1/phase_c1/c1_artifacts.json"
+SPEC_FAILED = "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json"
 BATTERY_MANIFEST = "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
 BATTERY_IDENTITY = "logs/stages/stage-1/phase_c1/plans/battery.json"
 TEACHER_BINDING = "logs/stages/stage-1/phase_c1/plans/teacher_binding.json"

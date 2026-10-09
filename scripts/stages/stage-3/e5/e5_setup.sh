@@ -97,11 +97,11 @@ test -f "$REPO/artifacts/shared/instruments/ladder_uniform_probe/blocks.npz"
 test -f "$REPO/artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 # holdout_v1.jsonl is gitignored so it does not ship in the bundle; the launcher
 # transfers it and the hash is asserted here, before anything trains.
-mkdir -p "$REPO/data/warmup"
-cp "${HOLDOUT_SRC:-/workspace/aad_holdout/holdout_v1.jsonl}" "$REPO/data/warmup/holdout_v1.jsonl"
+mkdir -p "$REPO/data/stages/stage-0/warmup"
+cp "${HOLDOUT_SRC:-/workspace/aad_holdout/holdout_v1.jsonl}" "$REPO/data/stages/stage-0/warmup/holdout_v1.jsonl"
 python3 -c "
 import hashlib,sys
-h=hashlib.sha256(open('$REPO/data/warmup/holdout_v1.jsonl','rb').read()).hexdigest()
+h=hashlib.sha256(open('$REPO/data/stages/stage-0/warmup/holdout_v1.jsonl','rb').read()).hexdigest()
 want='2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8'
 print('holdout_v1 sha256', h)
 sys.exit(0 if h==want else f'HOLDOUT MISMATCH {h}')

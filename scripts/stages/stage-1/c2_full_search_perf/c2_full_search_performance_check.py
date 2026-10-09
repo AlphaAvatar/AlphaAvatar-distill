@@ -3,7 +3,7 @@
 
     PYTHONPATH=src:scripts python \
         scripts/stages/stage-1/c2_full_search_perf/c2_full_search_performance_check.py \
-        --config configs/validation/c2_full_search_performance.json --run-id <id>
+        --config configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json --run-id <id>
 
 Three stages, all against the REAL pinned teacher in bf16 on the real card:
 
@@ -626,7 +626,7 @@ def stage_memory(cfg: dict, teacher, items, report: dict,
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config",
-                    default="configs/validation/c2_full_search_performance.json")
+                    default="configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--device", default="cuda",
                     help="the compute device. `cpu` executes every stage's "

@@ -249,7 +249,7 @@ artifacts/stages/stage-3/e1_results.json
 artifacts/stages/stage-3/e1_consolidated.json
 artifacts/stages/stage-3/e4_p2_r1600k_sa
 artifacts/stages/stage-3/e4_p2_r1600k_sb
-data/warmup/holdout_v1.jsonl"}
+data/stages/stage-0/warmup/holdout_v1.jsonl"}
 
 n=0
 while IFS= read -r p; do

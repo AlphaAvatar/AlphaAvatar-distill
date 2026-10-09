@@ -13,7 +13,7 @@ So the split is:
 
     src/aadistill/governance/grant.py     the MECHANISM: stated vs derived
                                           fields, cap arithmetic. No experiment.
-    configs/experiments/phase_c1/         the INSTANCE: which files to read,
+    configs/stages/stage-1/phase_c1/         the INSTANCE: which files to read,
       authorization.json                  which money figures to refuse against,
                                           what the stage conditions say.
     this file                             the ASSEMBLER: reads that config,
@@ -47,7 +47,7 @@ from aadistill.governance.grant import (  # noqa: E402
 )
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-CONFIG = "configs/experiments/phase_c1/authorization.json"
+CONFIG = "configs/stages/stage-1/phase_c1/authorization.json"
 
 #: The `preregistration_sha256` of the document attempt 18 actually executed
 #: under, read from `bound.execution_preregistration` in that attempt's own
@@ -185,7 +185,7 @@ def build_c1_authorization_payload(
     #: stopped matching what any attempt executed under.
     #:
     #: The live executable identity has an owner that is meant to be
-    #: regenerated: `configs/experiments/phase_c1/executable_closure.json`. The
+    #: regenerated: `configs/stages/stage-1/phase_c1/executable_closure.json`. The
     #: question asked here is unchanged — does the recorded identity still
     #: describe the code that would run — and it is now asked of the document
     #: whose job that is. The preregistration is checked for the only thing a

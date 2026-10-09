@@ -712,7 +712,7 @@ def test_the_launcher_writes_under_its_declared_stage(L):
     import json as _json
 
     cfg = _json.loads(
-        (REPO / "configs/experiments/phase_c1/authorization.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c1/authorization.json").read_text())
     assert L.RUN_STAGE_ID == cfg["stage_id"], (
         "the launcher's stage is not the one the experiment config declares")
     assert L.session_record_path("attempt_x") == (

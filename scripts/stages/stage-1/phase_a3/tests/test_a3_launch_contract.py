@@ -467,7 +467,7 @@ def test_the_evidence_path_the_loop_writes_is_the_one_the_aggregator_reads():
     #: The extracted tree's top level is the artifact spec's prefix, and the
     #: aggregator opens `<evidence>/audit/autoinit_a3`.
     spec = json.loads(
-        (REPO / "configs/autoinit/a3_artifacts.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_a3/a3_artifacts.json").read_text())
     prefixes = {e["pattern"].split("/", 1)[0] for e in spec["entries"]}
     assert "audit" in prefixes, prefixes
     agg = (REPO / "scripts/stages/stage-1/phase_a3/aggregate_a3.py").read_text()

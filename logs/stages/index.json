@@ -45,15 +45,15 @@
    ],
    "data": [
     {
-     "path": "data/warmup/warmup_v1.jsonl",
+     "path": "data/stages/stage-0/warmup/warmup_v1.jsonl",
      "says": "the warm-up corpus itself: five families \u2014 FineWeb-Edu, Dolly-15k, GSM8K, MBPP and a small project-authored set \u2014 deduplicated on content hash"
     },
     {
-     "path": "data/warmup/warmup_v1.manifest.json",
+     "path": "data/stages/stage-0/warmup/warmup_v1.manifest.json",
      "says": "owns the per-source dataset id, revision, license, sample count and output hash. Read it rather than this page for any number"
     },
     {
-     "path": "data/warmup/holdout_v1.jsonl",
+     "path": "data/stages/stage-0/warmup/holdout_v1.jsonl",
      "says": "held-out FineWeb-Edu documents, disjoint from the warm-up corpus, kept for the Stage-1 perplexity gate"
     }
    ],
@@ -69,11 +69,11 @@
    ],
    "configs": [
     {
-     "path": "configs/stage0/qwen3_4b_thinking.json",
+     "path": "configs/stages/stage-0/qwen3_4b_thinking.json",
      "says": "the collection recipe: teacher id and revision, dtype, sequence length, corpus and cache budget"
     },
     {
-     "path": "configs/stage0/qwen3_4b_thinking_v1.json",
+     "path": "configs/stages/stage-0/qwen3_4b_thinking_v1.json",
      "says": "the v1 recipe, which produced the cache now in use"
     }
    ],
@@ -95,11 +95,11 @@
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
-    "configs/stage0/qwen3_4b_thinking.json",
-    "configs/stage0/qwen3_4b_thinking_v1.json"
+    "configs/stages/stage-0/qwen3_4b_thinking.json",
+    "configs/stages/stage-0/qwen3_4b_thinking_v1.json"
    ],
    "canonical_data_manifests": [
-    "data/warmup/warmup_v1.manifest.json"
+    "data/stages/stage-0/warmup/warmup_v1.manifest.json"
    ]
   },
   {
@@ -112,7 +112,7 @@
    ],
    "data": [
     {
-     "path": "data/warmup/holdout_v1.manifest.json",
+     "path": "data/stages/stage-0/warmup/holdout_v1.manifest.json",
      "says": "purpose: \"Held-out perplexity eval for Stage 1 gate\"; the gate compares the initialized student against a random baseline"
     }
    ],
@@ -136,11 +136,11 @@
    ],
    "configs": [
     {
-     "path": "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+     "path": "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
      "says": "the canonical initialization recipe"
     },
     {
-     "path": "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+     "path": "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
      "says": "the contribution-guided depth variant E8 initialized from"
     }
    ],
@@ -157,25 +157,25 @@
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
-    "configs/autoinit/c2_replay_artifacts.json",
-    "configs/autoinit/d1_replay_artifacts.json",
-    "configs/experiments/phase_a/source_sets.json",
-    "configs/experiments/phase_c1/authorization.json",
-    "configs/experiments/phase_c2/baseline_completion_authorization.json",
-    "configs/experiments/phase_c2/full_search_authorization.json",
-    "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
-    "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
-    "configs/validation/batching_refactor_cuda.json",
-    "configs/validation/c2_full_search_cuda.json",
-    "configs/validation/c2_full_search_performance.json",
-    "configs/validation/c2_state_eval_certification.json",
+    "configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json",
+    "configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json",
+    "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json",
+    "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
+    "configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json",
+    "configs/stages/stage-1/phase_c3/batching_refactor_cuda.json",
+    "configs/stages/stage-1/phase_d1/d1_replay_artifacts.json",
+    "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
+    "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
+    "configs/stages/stage-1/source_sets.json",
     "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
     "logs/stages/stage-1/phase_c3/plans/a3_design.json",
     "logs/stages/stage-1/phase_c3/plans/c3_preregistration.json",
     "logs/stages/stage-1/phase_d1/plans/d1_design.json"
    ],
    "canonical_data_manifests": [
-    "data/warmup/holdout_v1.manifest.json"
+    "data/stages/stage-0/warmup/holdout_v1.manifest.json"
    ]
   },
   {
@@ -187,15 +187,15 @@
    ],
    "data": [
     {
-     "path": "data/stage2/stage2_offline_v0.manifest.json",
+     "path": "data/stages/stage-2/stage2/stage2_offline_v0.manifest.json",
      "says": "mixture v0: the first grouped build, from public sources only"
     },
     {
-     "path": "data/stage2_v1/stage2_offline_v1.manifest.json",
+     "path": "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
      "says": "mixture v1: the approved ~4.5x train scale-up for data-limited Stage-3 recovery. The current mixture"
     },
     {
-     "path": "data/stage3_pilot/manifest.json",
+     "path": "data/stages/stage-3/stage3_pilot/manifest.json",
      "says": "the teacher-generated pilot: a control/treatment 2x2 over one shared accepted prompt subset, which is what Stage 3 actually trains on today"
     }
    ],
@@ -248,7 +248,7 @@
    "execution": [],
    "outputs": [
     {
-     "path": "data/stage2_v1",
+     "path": "data/stages/stage-2/stage2_v1",
      "says": "the v1 mixture on disk: `train/`, `val/` and `calib/` per group. Untracked; rebuildable from the manifest and its builder"
     }
    ],
@@ -277,12 +277,12 @@
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
-    "data/stage2_v1/stage2_offline_v1.manifest.json"
+    "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json"
    ],
    "canonical_data_manifests": [
-    "data/stage2/stage2_offline_v0.manifest.json",
-    "data/stage2_v1/stage2_offline_v1.manifest.json",
-    "data/stage3_pilot/manifest.json"
+    "data/stages/stage-2/stage2/stage2_offline_v0.manifest.json",
+    "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
+    "data/stages/stage-3/stage3_pilot/manifest.json"
    ]
   },
   {
@@ -295,15 +295,15 @@
    ],
    "data": [
     {
-     "path": "data/stage3_pilot/manifest.json",
+     "path": "data/stages/stage-3/stage3_pilot/manifest.json",
      "says": "the recovery corpus in use: control and treatment arms over one shared accepted prompt subset, grouped code_math / multihop_qa / rag_evidence, with per-arm token and packing statistics"
     },
     {
-     "path": "data/stage3_pilot/treatment",
+     "path": "data/stages/stage-3/stage3_pilot/treatment",
      "says": "the treatment arm the canonical config points at by default"
     },
     {
-     "path": "data/eval_behavior_v0",
+     "path": "data/stages/stage-3/eval_behavior_v0",
      "says": "the behaviour evaluation set the stage is judged on \u2014 autonomous rollout, not held-out loss"
     }
    ],
@@ -317,7 +317,7 @@
    ],
    "configs": [
     {
-     "path": "configs/stage3/recovery.json",
+     "path": "configs/stages/stage-3/recovery.json",
      "says": "the canonical recovery config, runnable as committed. Its `_purpose` states the contract every arm keeps: a run differs from it only in `data_dir` and `schedule.total_steps`",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -336,22 +336,22 @@
     "_note": "a stage with 0 experiments is not an empty stage: its material may be configs, datasets and artifacts, whose canonical owners are outside logs/"
    },
    "canonical_configs": [
-    "configs/stage3/e1/e1_r1600k_sa_pca.json",
-    "configs/stage3/e2/e2_d1_sa_pca.json",
-    "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-    "configs/stage3/e4/e4_p2_r1600k_sa.json",
-    "configs/stage3/e5/e5_c_sa.json",
-    "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
-    "configs/stage3/e7/e7_control_r1600k_sa.json",
-    "configs/stage3/e8/e8_contrib_r2960k_sa.json",
-    "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
-    "configs/stage3/p0/p0_assistant_sa.json",
-    "configs/stage3/p2/p2_ceheavy_sa.json",
-    "configs/stage3/recovery.json",
-    "configs/stage3/s2v1_from_init.json"
+    "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
+    "configs/stages/stage-3/e2/e2_d1_sa_pca.json",
+    "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
+    "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
+    "configs/stages/stage-3/e5/e5_c_sa.json",
+    "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
+    "configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
+    "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
+    "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
+    "configs/stages/stage-3/p0/p0_assistant_sa.json",
+    "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+    "configs/stages/stage-3/recovery.json",
+    "configs/stages/stage-3/s2v1_from_init.json"
    ],
    "canonical_data_manifests": [
-    "data/stage3_pilot/manifest.json"
+    "data/stages/stage-3/stage3_pilot/manifest.json"
    ]
   }
  ],
@@ -364,16 +364,16 @@
    "title": "Teacher activation / statistics collection for student initialization",
    "question": null,
    "canonical_path": null,
-   "canonical_config": "configs/stage0/qwen3_4b_thinking.json",
+   "canonical_config": "configs/stages/stage-0/qwen3_4b_thinking.json",
    "evidence": [
     {
-     "path": "configs/stage0/qwen3_4b_thinking.json",
+     "path": "configs/stages/stage-0/qwen3_4b_thinking.json",
      "says": "declares stage \"stage0_init_warmup_collection\"",
      "field": "stage",
      "equals": "stage0_init_warmup_collection"
     },
     {
-     "path": "configs/stage0/qwen3_4b_thinking_v1.json",
+     "path": "configs/stages/stage-0/qwen3_4b_thinking_v1.json",
      "says": "the v1 collection config, after the cache-loss regeneration"
     },
     {
@@ -381,7 +381,7 @@
      "says": "the collector"
     },
     {
-     "path": "data/warmup/warmup_v1.manifest.json",
+     "path": "data/stages/stage-0/warmup/warmup_v1.manifest.json",
      "says": "purpose: \"Stage 0 initialization warm-up statistics (not training data)\""
     },
     {
@@ -390,8 +390,8 @@
     }
    ],
    "external_material": [
-    "configs/stage0/ \u2014 collection configs (source of truth; not copied here)",
-    "data/warmup/ \u2014 dataset and manifests, beside the data they describe",
+    "configs/stages/stage-0/ \u2014 collection configs (source of truth; not copied here)",
+    "data/stages/stage-0/warmup/ \u2014 dataset and manifests, beside the data they describe",
     "artifacts/stages/stage-0/ \u2014 the activation cache itself, outside git"
    ],
    "decisions": [
@@ -402,6 +402,9 @@
    "classification_reason": "Pipeline production work, not a study: it collects the teacher signals Stage 1 initializes from. It has configs, a collector, a dataset manifest and an artifact, and no experiment-run logs \u2014 so the stage is represented by a README, and no run, experiment or manifest is invented to fill it.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -412,14 +415,14 @@
    "title": "PCA / sandwich structural initialization of the 0.6B student",
    "question": null,
    "canonical_path": null,
-   "canonical_config": "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+   "canonical_config": "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
    "evidence": [
     {
-     "path": "configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+     "path": "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
      "says": "the initialization recipe"
     },
     {
-     "path": "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+     "path": "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
      "says": "the contribution-guided depth variant E8 initialized from"
     },
     {
@@ -427,18 +430,21 @@
      "says": "the pinned init checkpoint every recovery run forks from"
     },
     {
-     "path": "data/warmup/holdout_v1.manifest.json",
+     "path": "data/stages/stage-0/warmup/holdout_v1.manifest.json",
      "says": "purpose: \"Held-out perplexity eval for Stage 1 gate\""
     }
    ],
    "external_material": [
-    "configs/stage1/ \u2014 initialization recipes",
+    "configs/stages/stage-1/ \u2014 initialization recipes",
     "artifacts/stages/stage-1/ \u2014 init checkpoints and the state-eval suite"
    ],
    "decisions": [],
    "classification_reason": "The stage's own production work: it builds the student checkpoint. Its gate result (holdout NLL 11.748 vs 12.13 random) is recorded in logs/stages/stage-3/history/EXPERIMENTS.md \u00a72. No experiment-run logs of its own.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -449,14 +455,14 @@
    "title": "AutoInitializer Phase A \u2014 greedy search over initialization operator paths",
    "question": "Under one fixed calibration distribution, which initialization operator path gives the best behavioural starting point?",
    "canonical_path": "logs/stages/stage-1/phase_a",
-   "canonical_config": "configs/experiments/phase_a/source_sets.json",
+   "canonical_config": "configs/stages/stage-1/source_sets.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json",
      "says": "its subject is `target_architecture` \u2014 the student spec being initialized \u2014 searched over a `search_space` of DEPTH, WIDTH, FFN and ATTENTION structural operators plus `composite.stage1_sandwich_v0`. Those are the Stage-1 operators of AGENTS.md 4.3, and its product is which operator path to use"
     },
     {
-     "path": "configs/experiments/phase_a/recovery_policy.json",
+     "path": "configs/stages/stage-1/phase_a/recovery_policy.json",
      "says": "the recovery battery it scores candidates with \u2014 the INSTRUMENT; the search does not produce a recovered checkpoint"
     },
     {
@@ -469,6 +475,9 @@
    "classification_reason": "Its own preregistration names a student architecture and a space of structural initialization operators. Subject and product are both Stage 1; the stage-3 battery is how it measures.",
    "canonical_scripts": "scripts/stages/stage-1/phase_a",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_a",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -495,6 +504,9 @@
    "classification_reason": "Its registered hypothesis is about the initialization composition's sensitivity to calibration data. A composition of initialization operators is a Stage-1 object.",
    "canonical_scripts": "scripts/stages/stage-1/phase_b",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_b",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -521,6 +533,9 @@
    "classification_reason": "It imports Phase B's Stage-1 selection artifact and finishes that selection. Its product is a Stage-1 decision; it writes no recovered checkpoint.",
    "canonical_scripts": "scripts/stages/stage-1/continuation_b",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/continuation_b",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -547,6 +562,9 @@
    "classification_reason": "It continues Phase A's operator-path search and selects state ids. `trains_anything: true` describes its probes, which are the instrument; the product is the Stage-1 path selection.",
    "canonical_scripts": "scripts/stages/stage-1/recovery_continuation",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/recovery_continuation",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -557,10 +575,10 @@
    "title": "Phase C1 \u2014 fixed-path ATTENTION isolation",
    "question": "Does a replacement ATTENTION operator beat the frozen incumbent with every other operator held on a fixed path?",
    "canonical_path": "logs/stages/stage-1/phase_c1",
-   "canonical_config": "configs/experiments/phase_c1/authorization.json",
+   "canonical_config": "configs/stages/stage-1/phase_c1/authorization.json",
    "evidence": [
     {
-     "path": "configs/experiments/phase_c1/authorization.json",
+     "path": "configs/stages/stage-1/phase_c1/authorization.json",
      "says": "declares stage_id \"1\"",
      "field": "stage_id",
      "equals": "1"
@@ -575,6 +593,9 @@
    "classification_reason": "The only experiment in the repository that declares its own stage. It also measures with stage-3 confirmation probes, which is what calibrates the subject-vs-instrument rule for the others.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c1",
    "canonical_artifacts": "artifacts/stages/stage-1/phase_c1",
+   "canonical_configs": "configs/stages/stage-1/phase_c1",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -585,10 +606,10 @@
    "title": "Phase C2 full joint re-search \u2014 all four operator kinds, Top-5",
    "question": "After ATTENTION was promoted by C1, which JOINT assignment of DEPTH, FFN, RESIDUAL_WIDTH and ATTENTION -- including their order and each step's calibration mixture -- produces the best initialization on the frozen state_eval metrics? Search-1 could not answer it: it fixed three operators at the incumbent's assignment and varied one, so an ATTENTION change that moved the best DEPTH or WIDTH was invisible to it. The answer is a preregistered Top-5 candidate set, not an incumbent: which candidate becomes the incumbent is a BEHAVIOURAL question a separate session asks.",
    "canonical_path": "logs/stages/stage-1/phase_c2_full_search",
-   "canonical_config": "configs/experiments/phase_c2/full_search_authorization.json",
+   "canonical_config": "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
    "evidence": [
     {
-     "path": "configs/experiments/phase_c2/full_search_authorization.json",
+     "path": "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
      "says": "declares stage_id \"1\"",
      "field": "stage_id",
      "equals": "1"
@@ -611,6 +632,9 @@
    "classification_reason": "Stage 1 because it is an initialization search: it generates student states and ranks them on the frozen cheap state_eval metrics. It trains nothing and measures no behaviour, so it is a Stage-1 experiment whose instrument is not a Stage-3 probe. It is separate from `phase_c2` because Search-1's restricted space is a consumed, frozen measurement and this searches all four operator kinds jointly -- a different question with its own authorization type, so its runs do not sit among Search-1's attempts.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c2_full_search",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_c2_full_search",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -621,7 +645,7 @@
    "title": "Phase C2 replay-only artifact reconstruction \u2014 attempt 3's Top-5 checkpoints",
    "question": "Can the five checkpoints behind the frozen Top-5 be rebuilt byte-for-byte from the committed evidence? The full joint re-search committed its selection and then lost the weights when the pod was torn down, so the ranking survives and the artifacts it ranked do not. This session replays each selected path with EVERY step pinned to the artifact digest attempt 3 recorded, and either reproduces each leaf's exact identity or stops. It decides nothing: no beam, no ranking, no selection, no selection-bearing evaluation, no control comparison and no behavioural work. A digest mismatch would be a scientific finding, not a retryable engineering failure.",
    "canonical_path": "logs/stages/stage-1/phase_c2_replay",
-   "canonical_config": "configs/autoinit/c2_replay_artifacts.json",
+   "canonical_config": "configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
@@ -645,6 +669,9 @@
    "classification_reason": "Stage 1 because it reconstructs Stage-1 initialization artifacts. It is separate from `phase_c2_full_search` because it is not an attempt of that search and must never be counted as one: the search is complete, its selection is frozen and accepted, and the review that authorized this work was explicit that there is no fourth Full Search attempt. It produces no ranking and no measurement of its own -- only the weights behind a decision that was already made.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c2_replay",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_c2_replay",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -677,6 +704,9 @@
    "classification_reason": "Stage 1 because it selects a Stage-1 initialization, even though its instrument is a Stage-3 recovery probe. It is separate from `phase_c2_full_search` because the search ranks on frozen cheap metrics and explicitly cannot promote, and separate from `phase_c2_replay` because that reconstructed artifacts and decided nothing. This is the only experiment that may name a C2 incumbent.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c2_behavioural",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_c2_behavioural",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -713,6 +743,9 @@
    "classification_reason": "Stage 1 because it decides a Stage-1 ATTENTION initialization, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c2_behavioural` is Stage 1. It was declared a stage AREA rather than an experiment while it held only engineering validations and no runs; that stopped being true once it acquired a frozen preregistration and a formal attempt, and the area declaration was why its README said `Runs: none recorded` beside seventy registered runs. The engineering validations filed beneath it keep their own rows and remain `engineering`: they train nothing and decide nothing.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c3",
    "canonical_artifacts": "artifacts/stages/stage-1/phase_c3",
+   "canonical_configs": "configs/stages/stage-1/phase_c3",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -741,6 +774,9 @@
    "classification_reason": "Stage 1 because it decides how a Stage-1 ATTENTION initialization is MATERIALIZED, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c3` and `phase_c2_behavioural` are Stage 1. It is a separate experiment from `phase_c3` rather than one of its attempts: C3 is complete with a canonical NO_GO on a different question (which operator), and this asks about an execution protocol for the operator C3 left standing. It reuses C3 attempt75's three controls as evidence and retrains none of them.",
    "canonical_scripts": "scripts/stages/stage-1/phase_a3",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_a3",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -751,7 +787,7 @@
    "title": "D1 finalist rematerialization \u2014 the two quality-order finalists the search measured and did not retain",
    "question": "Can the checkpoints behind D1's quality positions 2 and 4 be rebuilt byte-for-byte from the completed search's own evidence? The search ranked all twelve complete leaves and retained the four its Stage-D policy committed, which under lineage rotation were quality positions 1, 3, 5 and 11; the standing retention rule of 2026-10-07 makes the behavioural finalists positions 1 to 4, and two of those were discarded with the pod. This session replays each of those two paths with every one of its four steps pinned to the artifact digest the search recorded, starting from the ROOT STATE derived from the search's own records, and either reproduces each leaf's exact identity or stops. It decides nothing: no beam, no ranking, no selection, no measurement and no behavioural work.",
    "canonical_path": "logs/stages/stage-1/phase_d1_replay",
-   "canonical_config": "configs/autoinit/d1_replay_artifacts.json",
+   "canonical_config": "configs/stages/stage-1/phase_d1/d1_replay_artifacts.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json",
@@ -773,6 +809,9 @@
    "classification_reason": "Stage 1 because it reconstructs Stage-1 initialization artifacts. `engineering`, not an experiment: it trains nothing, measures nothing and ranks nothing, which is why it is booked against the GPU engineering allowance rather than D1's formal sessions. It is SEPARATE from `phase_d1` and must never be counted as one of its attempts -- the search is complete, its ranking is frozen and accepted, and there is no fourth D1 search. It produces only the weights behind a decision already made.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -803,6 +842,9 @@
    "classification_reason": "Stage 1 because it varies how a Stage-1 initialization is SCORED, even though its instrument is a Stage-3 recovery probe -- the same reason `phase_c3`, `phase_a3` and `phase_c2_behavioural` are Stage 1. It is not a per-operator isolation: the operator set is held frozen and the scoring semantics are the variable, which is why it is a separate experiment from the C-series rather than another of its rungs.",
    "canonical_scripts": "scripts/stages/stage-1/phase_d1",
    "canonical_artifacts": "artifacts/stages/stage-1/phase_d1",
+   "canonical_configs": "configs/stages/stage-1/phase_d1",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": "logs/stages/stage-1/phase_d1/current.json"
   },
   {
@@ -813,7 +855,7 @@
    "title": "Operator topology + calibration batching \u2014 real-CUDA validation",
    "question": null,
    "canonical_path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda",
-   "canonical_config": "configs/validation/batching_refactor_cuda.json",
+   "canonical_config": "configs/stages/stage-1/phase_c3/batching_refactor_cuda.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/v1/scope.json",
@@ -833,6 +875,9 @@
    "classification_reason": "Stage 1 for the same reason the other CUDA validations are: what it validates is Stage-1 initialization machinery. `engineering`, not an experiment -- it trains nothing, measures no behaviour and ranks nothing. Filed under `phase_c3` because the refactor it certifies is what C3 will execute on, and kept SEPARATE from the 2026-09-10 validation because that one ran a different workload on the pre-migration flat layout at its own execution SHA.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -843,7 +888,7 @@
    "title": "C2 full-search hot path \u2014 old-vs-new performance and equivalence",
    "question": null,
    "canonical_path": "logs/stages/stage-1/c2_full_search_perf",
-   "canonical_config": "configs/validation/c2_full_search_performance.json",
+   "canonical_config": "configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
@@ -859,6 +904,9 @@
    "classification_reason": "Stage 1 for the same reason the CUDA validation is: validation material is Stage-1 material rather than stage-neutral, and what it validates is a Stage-1 initialization search. It is `engineering`, not an experiment -- it trains nothing, measures no behaviour and ranks no candidate. Separate from the CUDA validation because the subject differs: that one certified the driver's device integration, this one benchmarks the reduction kernels and their equivalence.",
    "canonical_scripts": "scripts/stages/stage-1/c2_full_search_perf",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/c2_full_search_perf",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -869,7 +917,7 @@
    "title": "C2 state-eval reduction \u2014 full-suite equivalence and Pareto-decision certification",
    "question": null,
    "canonical_path": "logs/stages/stage-1/c2_state_eval_cert",
-   "canonical_config": "configs/validation/c2_state_eval_certification.json",
+   "canonical_config": "configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
@@ -885,6 +933,9 @@
    "classification_reason": "Stage 1, engineering, for the same reasons as the two validations above: it trains nothing, measures no behaviour and ranks no scientific candidate. Separate from the performance round because the subject differs -- that one benchmarked the reduction on four calibration items, this one certifies the aggregate metrics and the PARETO_V1 decisions over the COMPLETE frozen state_eval suite, which is the decision path the earlier evidence did not reach.",
    "canonical_scripts": "scripts/stages/stage-1/c2_state_eval_cert",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/c2_state_eval_cert",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -895,7 +946,7 @@
    "title": "C2 full-search driver \u2014 real-CUDA engineering validation",
    "question": null,
    "canonical_path": "logs/stages/stage-1/c2_full_search_cuda",
-   "canonical_config": "configs/validation/c2_full_search_cuda.json",
+   "canonical_config": "configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
@@ -915,6 +966,9 @@
    "classification_reason": "Stage 1 because the repository has declared that validation material is Stage-1 material rather than stage-neutral, and because the thing it validates is a Stage-1 initialization search. It is `engineering`, not an experiment: it trains nothing, measures no behaviour, produces no correct_overall and ranks no candidate for promotion. Its runs sit in their own destination rather than among phase_c2's formal attempts, so 'show me the C2 attempts' does not return an engineering probe -- while still sharing the stage, so one validation's evidence is not split across two stage areas. The first run to use the launcher's `shared` default created an undeclared stage area, which is what surfaced this.",
    "canonical_scripts": "scripts/stages/stage-1/c2_full_search_cuda",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/c2_full_search_cuda",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -941,6 +995,9 @@
    "classification_reason": "It re-optimizes the Stage-1 initialization composition around the operator C1 selected, and its product is a Stage-1 path selection. Like `phase_c1` it would measure with stage-3 confirmation probes if a confirmation were ever authorized; those are the instrument, not the subject.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c2",
    "canonical_artifacts": "artifacts/stages/stage-1/phase_c2",
+   "canonical_configs": "configs/stages/stage-1/phase_c2",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -951,7 +1008,7 @@
    "title": "Phase C2 baseline completion \u2014 the B side of B\u2192C",
    "question": "What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B\u2192C comparison Attempt 4 collected its ranking to ask can finally be computed?",
    "canonical_path": "logs/stages/stage-1/phase_c2_baseline_completion",
-   "canonical_config": "configs/experiments/phase_c2/baseline_completion_authorization.json",
+   "canonical_config": "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json",
    "evidence": [
     {
      "path": "logs/stages/stage-1/phase_c2/plans/phase_c2_baseline_completion_protocol.json",
@@ -971,6 +1028,9 @@
    "classification_reason": "It completes a Stage-1 initialization measurement Attempt 4 began and did not finish: the candidate side of a Stage-1 path comparison is already measured and frozen, and this supplies the baseline side on the same frozen suite. Its product is the same Stage-1 path selection evidence, which is why it belongs to the stage rather than to the confirmation instrument.",
    "canonical_scripts": "scripts/stages/stage-1/phase_c2_baseline_completion",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/phase_c2_baseline_completion",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -1003,6 +1063,9 @@
    "classification_reason": "Not a scientific experiment \u2014 it registers `scientific_use: false` and answers a cost question. It is Stage 1 because the operator it prices is a Stage-1 depth-compression operator and the search it prices for is the Stage-1 autoinit search.",
    "canonical_scripts": "scripts/stages/stage-1/measurement",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-1/measurement",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -1039,6 +1102,9 @@
    "classification_reason": "Stage 1, and genuinely owned by no single experiment: the allocation rule and the source evidence span D1, D2 and D3, so freezing either inside `phase_d1/` would make the next round inherit a record named for its predecessor. The 2026-10-08 information-architecture migration gave the family its own home \u2014 `logs/stages/stage-1/families/d_series/` \u2014 because cross-experiment within one stage is ownership, not stage-neutrality: these records sat in `logs/shared/` and a reader inferring readiness from their neighbours mistook a historical capacity analysis for a live blocker. The family's live state is `current.json` beside them. All three are generated, authorize nothing, and materialize nothing.",
    "canonical_scripts": "scripts/stages/stage-1/families/d_series",
    "canonical_artifacts": "artifacts/stages/stage-1/families/d_series",
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": "logs/stages/stage-1/families/d_series/current.json"
   },
   {
@@ -1073,6 +1139,9 @@
    "classification_reason": "Stage-1 AutoInit program material that belongs to no single experiment, and it is NOT stage-neutral. It stays under `logs/shared/` because roughly twenty-five scripts read these exact paths, including `autoinit_phase_b_driver.py` and `autoinit_continuation_b_driver.py`, which consumed Phase-B and continuation-B authorizations name by digest. Moving the files means editing frozen-set members to tidy a directory, which is not a trade this project makes. Declared here as a known exception with its blocker rather than left looking stage-neutral.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "blocked_by": "scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py and scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/"
   },
@@ -1084,14 +1153,14 @@
    "title": "Offline warm-up / distillation mixtures v0 and v1",
    "question": null,
    "canonical_path": null,
-   "canonical_config": "data/stage2_v1/stage2_offline_v1.manifest.json",
+   "canonical_config": "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
    "evidence": [
     {
-     "path": "data/stage2/stage2_offline_v0.manifest.json",
+     "path": "data/stages/stage-2/stage2/stage2_offline_v0.manifest.json",
      "says": "purpose: \"Stage 2 offline warm-up/distillation data for post-init student recovery (Stage 3+); grouped by training use\""
     },
     {
-     "path": "data/stage2_v1/stage2_offline_v1.manifest.json",
+     "path": "data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
      "says": "purpose: \"Stage 2 offline mixture v1: approved ~4.5x train scale-up for data-limited Stage 3 recovery\""
     },
     {
@@ -1108,8 +1177,8 @@
     }
    ],
    "external_material": [
-    "data/stage2/, data/stage2_v1/ \u2014 mixtures and manifests, beside the data they describe",
-    "data/stage3_pilot/, artifacts/stages/stage-2/v2/ \u2014 the teacher-generated corpus pilot",
+    "data/stages/stage-2/stage2/, data/stages/stage-2/stage2_v1/ \u2014 mixtures and manifests, beside the data they describe",
+    "data/stages/stage-3/stage3_pilot/, artifacts/stages/stage-2/v2/ \u2014 the teacher-generated corpus pilot",
     "artifacts/stages/stage-2/v0/ \u2014 build console and dry-run reports"
    ],
    "decisions": [
@@ -1121,6 +1190,9 @@
    "classification_reason": "Data production, not a study of it. Its records are the dataset manifests, which live beside the data by the same rule that keeps configs in `configs/`, plus four decision records. The two 2026-07 build notes were folded into the historical index and the decision log; nothing is reconstructed to give the stage a run.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -1131,10 +1203,10 @@
    "title": "Stage-3 sub-stage 1 \u2014 FFN + norm recovery (`s1_ffn_norm`)",
    "question": null,
    "canonical_path": null,
-   "canonical_config": "configs/stage3/recovery.json",
+   "canonical_config": "configs/stages/stage-3/recovery.json",
    "evidence": [
     {
-     "path": "configs/stage3/recovery.json",
+     "path": "configs/stages/stage-3/recovery.json",
      "says": "declares stage \"stage3_recovery\", run_name \"recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1149,6 +1221,9 @@
    "classification_reason": "The recovery recipe the stage exists to run, not an experiment about it. Every E-series experiment forks from its line.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a73"
   },
@@ -1182,6 +1257,9 @@
    "classification_reason": "A sizing decision for the stage's own recovery recipe \u2014 which tensors to unfreeze \u2014 taken before the E-series existed. Recorded as pipeline activity, with its decision record.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a73"
   },
@@ -1193,10 +1271,10 @@
    "title": "Stage-3 sub-stage 2 on mixture v1 \u2014 the standing branch point",
    "question": null,
    "canonical_path": null,
-   "canonical_config": "configs/stage3/s2v1_from_init.json",
+   "canonical_config": "configs/stages/stage-3/s2v1_from_init.json",
    "evidence": [
     {
-     "path": "configs/stage3/s2v1_from_init.json",
+     "path": "configs/stages/stage-3/s2v1_from_init.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1217,6 +1295,9 @@
    "classification_reason": "The stage's own recovery run on mixture v1. Its checkpoint is an input to later experiments, which does not make it one.",
    "canonical_scripts": null,
    "canonical_artifacts": "artifacts/stages/stage-3/s2v1_from_init",
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a73"
   },
@@ -1248,6 +1329,9 @@
    "classification_reason": "Its own question (which target style), its own arms, its own verdict. Four run directories, no config directory and no log directory \u2014 it predates both.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a75"
   },
@@ -1279,6 +1363,9 @@
    "classification_reason": "A real training experiment whose checkpoints were later reclaimed. Its evaluation survives under artifacts/audit/three_mode/, and the index treats it as the baseline P0-assistant and D0 are measured against.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a716, \u00a717"
   },
@@ -1306,6 +1393,9 @@
    "classification_reason": "Its own section, its own budget line and its own verdict (\"evidence supports proceeding to the assistant-only KD-scope P0 arms\"). It trains nothing \u2014 a diagnostic experiment is still an experiment, as E6 also is.",
    "canonical_scripts": "scripts/stages/stage-3/d0",
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a716"
   },
@@ -1317,10 +1407,10 @@
    "title": "P0-assistant \u2014 assistant-only KD with assistant-token normalization",
    "question": "Does restricting the KD scope to assistant tokens, normalized over assistant tokens, help?",
    "canonical_path": null,
-   "canonical_config": "configs/stage3/p0/p0_assistant_sa.json",
+   "canonical_config": "configs/stages/stage-3/p0/p0_assistant_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/p0/p0_assistant_sa.json",
+     "path": "configs/stages/stage-3/p0/p0_assistant_sa.json",
      "says": "declares stage \"stage3_recovery\", run_name \"p0_assistant_sa\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1343,6 +1433,9 @@
    "classification_reason": "An experiment: one question (does assistant-only KD scope help), two seed arms, a registered comparison and a verdict. `sa`/`sb` are its arms, not two experiments.",
    "canonical_scripts": "scripts/stages/stage-3/p0",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/p0",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a717"
   },
@@ -1354,10 +1447,10 @@
    "title": "P2-ceheavy \u2014 swapping the CE/KD loss weights",
    "question": "Does swapping the CE/KD loss weights toward CE improve recovery?",
    "canonical_path": null,
-   "canonical_config": "configs/stage3/p2/p2_ceheavy_sa.json",
+   "canonical_config": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/p2/p2_ceheavy_sa.json",
+     "path": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
      "says": "declares stage \"stage3_recovery\", run_name \"p2_ceheavy_sa\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1367,7 +1460,7 @@
      "says": "seed a run"
     },
     {
-     "path": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+     "path": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
      "says": "E4 reuses the protocol this experiment established, at another rung \u2014 a different experiment, same recipe"
     },
     {
@@ -1380,6 +1473,9 @@
    "classification_reason": "Both an experiment and a protocol. The experiment P2-ceheavy established the CE-heavy recipe; `e4` and `e6b` are separate experiments that reuse it, which is why `p2` appearing inside `e4_p2_r1600k_sa` does not make E4 part of P2.",
    "canonical_scripts": "scripts/stages/stage-3/p2",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/p2",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a718"
   },
@@ -1391,10 +1487,10 @@
    "title": "Experiment 1 \u2014 data-scaling matrix, 24 arms",
    "question": "How does recovery scale with the supervised token budget, and does structural initialization beat random?",
    "canonical_path": "logs/stages/stage-3/e1",
-   "canonical_config": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+   "canonical_config": "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
    "evidence": [
     {
-     "path": "configs/stage3/e1/e1_r1600k_sa_pca.json",
+     "path": "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1413,6 +1509,9 @@
    "classification_reason": "Config location; 24 arms across 6 rungs x 2 inits x 2 seeds.",
    "canonical_scripts": "scripts/stages/stage-3/e1",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e1",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a711"
   },
@@ -1424,16 +1523,16 @@
    "title": "Experiment 2 \u2014 three sequential 0.86M diagnostics",
    "question": "Do targeted recipe variations at the 0.86M rung move behaviour?",
    "canonical_path": "logs/stages/stage-3/e2",
-   "canonical_config": "configs/stage3/e2/e2_d1_sa_pca.json",
+   "canonical_config": "configs/stages/stage-3/e2/e2_d1_sa_pca.json",
    "evidence": [
     {
-     "path": "configs/stage3/e2/e2_d1_sa_pca.json",
+     "path": "configs/stages/stage-3/e2/e2_d1_sa_pca.json",
      "says": "declares stage \"stage3_recovery\", run_name \"e2_d1_sa_pca\"",
      "field": "stage",
      "equals": "stage3_recovery"
     },
     {
-     "path": "configs/stage3/e2/e2_d1_sb_pca.json",
+     "path": "configs/stages/stage-3/e2/e2_d1_sb_pca.json",
      "says": "the second seed arm"
     },
     {
@@ -1465,6 +1564,9 @@
    "classification_reason": "A real experiment that RAN \u2014 two D1 arms, two audits, a decision record \u2014 and wrote no run logs of its own. Its one surviving document is the phases 2-3 proposal, which is a plan for this experiment and now sits in `plans/` under it; the directory holds that and nothing invented. Its runs remain absent because they were never recorded, not because they are filed elsewhere.",
    "canonical_scripts": "scripts/stages/stage-3/e2",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e2",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a712"
   },
@@ -1476,10 +1578,10 @@
    "title": "Experiment 3 \u2014 restricting attention updates at the 0.86M rung",
    "question": "Does freezing or LoRA-restricting attention help recovery?",
    "canonical_path": "logs/stages/stage-3/e3",
-   "canonical_config": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
+   "canonical_config": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
+     "path": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1498,6 +1600,9 @@
    "classification_reason": "Config location; `a1`/`a2` are its arms.",
    "canonical_scripts": "scripts/stages/stage-3/e3",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e3",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a720"
   },
@@ -1509,10 +1614,10 @@
    "title": "Experiment 4 \u2014 P2 CE-heavy scaled from the 0.86M to the 1.60M rung",
    "question": "Does the CE-heavy objective scale as well as KD-heavy from the 0.86M rung to the 1.60M rung?",
    "canonical_path": "logs/stages/stage-3/e4",
-   "canonical_config": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+   "canonical_config": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e4/e4_p2_r1600k_sa.json",
+     "path": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1531,6 +1636,9 @@
    "classification_reason": "Config location. It reuses the P2 protocol, which is a recipe it borrows, not the experiment it belongs to.",
    "canonical_scripts": "scripts/stages/stage-3/e4",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e4",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a721"
   },
@@ -1542,16 +1650,16 @@
    "title": "Experiment 5 \u2014 teacher-prefix continuation vs student-prefix recovery",
    "question": "Does conditioning recovery on student-generated prefixes beat teacher prefixes?",
    "canonical_path": "logs/stages/stage-3/e5",
-   "canonical_config": "configs/stage3/e5/e5_c_sa.json",
+   "canonical_config": "configs/stages/stage-3/e5/e5_c_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e5/e5_c_sa.json",
+     "path": "configs/stages/stage-3/e5/e5_c_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
     },
     {
-     "path": "configs/experiments/e5/nested_rung.json",
+     "path": "configs/stages/stage-3/e5/nested_rung.json",
      "says": "a second config location, added when the rung shape changed"
     },
     {
@@ -1568,6 +1676,9 @@
    "classification_reason": "Config location. `c`/`r` are its arms and attempts 1-5 are its runs, not six experiments.",
    "canonical_scripts": "scripts/stages/stage-3/e5",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e5",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a722-\u00a727"
   },
@@ -1583,7 +1694,7 @@
    "evidence": [
     {
      "path": "logs/stages/stage-3/e6/analyses/e6_registration.json",
-     "says": "`kind: \"evaluation-only\"`, `trains_anything: false`, and five registered questions. Its arms cite E1's configs under configs/stage3/e1/, so its subjects are Stage-3 recovery checkpoints",
+     "says": "`kind: \"evaluation-only\"`, `trains_anything: false`, and five registered questions. Its arms cite E1's configs under configs/stages/stage-3/e1/, so its subjects are Stage-3 recovery checkpoints",
      "field": "trains_anything",
      "equals": false
     },
@@ -1602,9 +1713,12 @@
    ],
    "external_material": [],
    "decisions": [],
-   "classification_reason": "An experiment in its own right, NOT merely the predecessor named in e6b's provenance: it has its own registration, results and report, and its own section and budget line. It has no `configs/stage3/e6/` because it trained nothing and so needed no training config \u2014 its registration names the E1 configs it re-scored. Stage 3 by the subjects it evaluates.",
+   "classification_reason": "An experiment in its own right, NOT merely the predecessor named in e6b's provenance: it has its own registration, results and report, and its own section and budget line. It has no `configs/stages/stage-3/e6/` because it trained nothing and so needed no training config \u2014 its registration names the E1 configs it re-scored. Stage 3 by the subjects it evaluates.",
    "canonical_scripts": "scripts/stages/stage-3/e6",
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a728"
   },
@@ -1616,17 +1730,17 @@
    "title": "Experiment 6b \u2014 P2 CE-heavy at the 2.96M rung",
    "question": "Does the CE-heavy objective behave differently at the 2.96M rung?",
    "canonical_path": "logs/stages/stage-3/e6b",
-   "canonical_config": "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+   "canonical_config": "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+     "path": "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
     },
     {
-     "path": "configs/stage3/e6b/provenance.json",
-     "says": "names its parents under configs/stage3/e4/ and configs/stage3/e1/"
+     "path": "configs/stages/stage-3/e6b/provenance.json",
+     "says": "names its parents under configs/stages/stage-3/e4/ and configs/stages/stage-3/e1/"
     },
     {
      "path": "logs/stages/stage-3/e6b/analyses/e6b_results.json",
@@ -1642,6 +1756,9 @@
    "classification_reason": "Config location. A separate experiment from E6 \u2014 it trains at a new rung, where E6 trained nothing \u2014 and separate from P2, whose protocol it reuses.",
    "canonical_scripts": "scripts/stages/stage-3/e6b",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e6b",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a729"
   },
@@ -1653,10 +1770,10 @@
    "title": "Experiment 7 \u2014 general language modelling restored; behaviour unmoved",
    "question": "Does restoring general language modelling improve autonomous reasoning?",
    "canonical_path": "logs/stages/stage-3/e7",
-   "canonical_config": "configs/stage3/e7/e7_control_r1600k_sa.json",
+   "canonical_config": "configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e7/e7_control_r1600k_sa.json",
+     "path": "configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
@@ -1679,6 +1796,9 @@
    "classification_reason": "Config location; control/fineweb are its arms.",
    "canonical_scripts": "scripts/stages/stage-3/e7",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e7",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a731, \u00a734"
   },
@@ -1690,16 +1810,16 @@
    "title": "Experiment 8 \u2014 contribution-guided depth initialization",
    "question": "Does position-based depth compression discard teacher blocks that are disproportionately important to the teacher's predictions?",
    "canonical_path": "logs/stages/stage-3/e8",
-   "canonical_config": "configs/stage3/e8/e8_contrib_r2960k_sa.json",
+   "canonical_config": "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e8/e8_contrib_r2960k_sa.json",
+     "path": "configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
     },
     {
-     "path": "configs/stage3/e8/arms.json",
+     "path": "configs/stages/stage-3/e8/arms.json",
      "says": "defines its arms"
     },
     {
@@ -1716,6 +1836,9 @@
    "classification_reason": "Config location. It initializes from a contribution-guided depth map \u2014 a Stage-1 operator \u2014 and its subject is whether that map recovers better, which is a Stage-3 question about recovery.",
    "canonical_scripts": "scripts/stages/stage-3/e8",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e8",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a735, \u00a736"
   },
@@ -1730,15 +1853,15 @@
    "canonical_config": null,
    "evidence": [
     {
-     "path": "configs/stage3/e8/arms.json",
+     "path": "configs/stages/stage-3/e8/arms.json",
      "says": "defines the arms; A is one of them"
     },
     {
-     "path": "configs/stage3/e8/artifacts_a.json",
+     "path": "configs/stages/stage-3/e8/artifacts_a.json",
      "says": "arm A's artifact list"
     },
     {
-     "path": "configs/stage3/e8/completion_markers_a.json",
+     "path": "configs/stages/stage-3/e8/completion_markers_a.json",
      "says": "arm A's markers"
     },
     {
@@ -1751,6 +1874,9 @@
    "classification_reason": "An ARM of E8, not an experiment: it has no arms file, no registration and no verdict of its own, and its files are E8's `*_a.json` half. Not counted in the experiment totals.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a736"
   },
@@ -1762,16 +1888,16 @@
    "title": "E8b \u2014 depth-map x compression interaction",
    "question": "Is the contribution depth map good on its own, or does it only fail once composed with width/FFN/attention compression?",
    "canonical_path": "logs/stages/stage-3/e8b",
-   "canonical_config": "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
+   "canonical_config": "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
    "evidence": [
     {
-     "path": "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
+     "path": "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
      "says": "declares stage \"stage3_recovery\"",
      "field": "stage",
      "equals": "stage3_recovery"
     },
     {
-     "path": "configs/stage3/e8b/arms.json",
+     "path": "configs/stages/stage-3/e8b/arms.json",
      "says": "its four arms DC/DP/FC/FP"
     },
     {
@@ -1792,6 +1918,9 @@
    "classification_reason": "Config location. `s1`-`s4` are its paid sessions and DC/DP/FC/FP its arms; a terminated experiment is still one experiment.",
    "canonical_scripts": "scripts/stages/stage-3/e8b",
    "canonical_artifacts": null,
+   "canonical_configs": "configs/stages/stage-3/e8b",
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a737-\u00a742"
   },
@@ -1819,6 +1948,9 @@
    "classification_reason": "Not an experiment: nothing was trained and no question was asked. A label over checkpoints that already existed. Not counted.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null,
    "index_section": "\u00a717.5"
   },
@@ -1842,6 +1974,9 @@
    "classification_reason": "Its subject is whether a rented machine can run the stack at all. No stage owns it, and any session may need it.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   },
   {
@@ -1864,6 +1999,9 @@
    "classification_reason": "Its subject is the artifact transport between the dev box, the relay and paid pods. Stage 1 and Stage 3 both used it; neither owns it.",
    "canonical_scripts": null,
    "canonical_artifacts": null,
+   "canonical_configs": null,
+   "canonical_data": null,
+   "canonical_docs": null,
    "live_state": null
   }
  ]

@@ -45,12 +45,12 @@ INIT = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 
 ARMS = {
-    "A0_control_p2_sa": "configs/stage3/p2/p2_ceheavy_sa.json",
-    "A0_control_p2_sb": "configs/stage3/p2/p2_ceheavy_sb.json",
-    "A1_frozen_attn_sa": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-    "A1_frozen_attn_sb": "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
-    "A2_lora_attn_sa": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
-    "A2_lora_attn_sb": "configs/stage3/e3/e3_a2_lora_attn_sb.json",
+    "A0_control_p2_sa": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+    "A0_control_p2_sb": "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+    "A1_frozen_attn_sa": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
+    "A1_frozen_attn_sb": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json",
+    "A2_lora_attn_sa": "configs/stages/stage-3/e3/e3_a2_lora_attn_sa.json",
+    "A2_lora_attn_sb": "configs/stages/stage-3/e3/e3_a2_lora_attn_sb.json",
 }
 
 ATTN_PROJ = ("q_proj", "k_proj", "v_proj", "o_proj")

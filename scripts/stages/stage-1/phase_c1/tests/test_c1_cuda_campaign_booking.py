@@ -57,7 +57,7 @@ def test_the_launcher_starts_from_what_earlier_subruns_booked(tmp_path, monkeypa
         authorization=str(AUTH),
         experiment_id=mod.DEFAULT_EXPERIMENT_ID, stage_id=mod.DEFAULT_STAGE_ID,
         check="scripts/shared/validation/cuda_engineering_check.py",
-        check_config="configs/validation/cuda_engineering.json",
+        check_config="configs/shared/validation/cuda_engineering.json",
         ship=[], gpu=[]))
     assert eng.booked_usd == booked > 0, "no prior spend was carried in"
     assert eng.remaining_total == pytest.approx(eng.hard_usd - booked)

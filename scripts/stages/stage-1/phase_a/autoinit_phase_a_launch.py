@@ -625,8 +625,8 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_phase_a",
             evidence_filename="phase_a_evidence.json",
             archive_basename="phase_a_artifacts.tar.gz",
-            spec_success="configs/autoinit/phase_a_artifacts.json",
-            spec_failed="configs/autoinit/phase_a_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_a/phase_a_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_a/phase_a_artifacts_failed.json",
             #: `leaf_retention.json` is fetched BEFORE fetch_products runs,
             #: because `finalists_to_fetch` reads it to decide which
             #: initializations come home. The runner fetches reports first for

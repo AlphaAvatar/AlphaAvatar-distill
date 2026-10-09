@@ -367,7 +367,7 @@ def comparability_report(c: list[dict], r: list[dict], *,
     }
 
 
-# The nested-rung increment moved to `configs/experiments/e5/nested_rung.json`.
+# The nested-rung increment moved to `configs/stages/stage-3/e5/nested_rung.json`.
 # It is the SCALE one study reproduces, not a property of paired-corpus
 # construction, and a default here made every caller that omitted it that study.
 

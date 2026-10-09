@@ -28,7 +28,7 @@ from aadistill.data.extra_stream import stream_budget  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.training.train import validate_train_config  # noqa: E402
 
-BASE = "configs/stage3/e1/e1_r1600k_{seed}_pca.json"
+BASE = "configs/stages/stage-3/e1/e1_r1600k_{seed}_pca.json"
 SEEDS = ("sa", "sb")
 
 # The preregistered treatment. Every field is part of the config hash.
@@ -66,7 +66,7 @@ ARMS = {
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--out-dir", default="configs/stage3/e7")
+    ap.add_argument("--out-dir", default="configs/stages/stage-3/e7")
     args = ap.parse_args()
 
     out_root = REPO_ROOT / args.out_dir

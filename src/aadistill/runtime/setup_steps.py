@@ -5,7 +5,7 @@ shared setup script existed, and until 2026-09-16 it was read by **nothing**.
 The script ran its sections unconditionally and emitted the markers as it went,
 so the declaration described what would happen rather than deciding it — and a
 session that omitted a marker got the step anyway. A paid session was lost to
-it; `docs/core-provenance.md` records which.
+it; `docs/maintenance/core-provenance.md` records which.
 
 So the declaration is now the contract, and this module is the rule both sides
 read:

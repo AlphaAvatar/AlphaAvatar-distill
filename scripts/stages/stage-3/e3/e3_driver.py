@@ -78,7 +78,7 @@ def model_dir(name: str) -> Path:
 
 
 def config_path(name: str) -> Path:
-    return REPO / f"configs/stage3/e3/{name}.json"
+    return REPO / f"configs/stages/stage-3/e3/{name}.json"
 
 
 def movement_path(alias: str) -> Path:

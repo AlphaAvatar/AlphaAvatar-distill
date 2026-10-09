@@ -182,7 +182,7 @@ $SCP scripts/stages/stage-3/p2/p2_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&
 # holdout_v1.jsonl is gitignored (data/, not manifests) so it is not in the
 # bundle. Ship it explicitly; setup asserts its sha256 before training.
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
-$SCP data/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
+$SCP data/stages/stage-0/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
 
 # the repo is cloned by setup, so the holdout is moved into place from there
 say "running setup"

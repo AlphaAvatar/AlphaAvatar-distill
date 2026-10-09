@@ -2,7 +2,7 @@
 """Real-CUDA engineering check of the Phase-C2 full-joint-search DRIVER.
 
     PYTHONPATH=src:scripts python scripts/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda_check.py \
-        --config configs/validation/c2_full_search_cuda.json --run-id <id>
+        --config configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json --run-id <id>
 
 **What is already verified, and therefore not re-run here.** All six
 implementations the joint space searches have real-L40S evidence from paid
@@ -533,7 +533,7 @@ def stage_geometry(cfg: dict, device: str, dtype_name: str, work: Path) -> dict:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config",
-                    default="configs/validation/c2_full_search_cuda.json")
+                    default="configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--out", default="artifacts/shared/validation")

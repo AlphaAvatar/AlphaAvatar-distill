@@ -33,10 +33,10 @@ import math
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-CANONICAL = REPO_ROOT / "configs/stage3/recovery.json"
+CANONICAL = REPO_ROOT / "configs/stages/stage-3/recovery.json"
 
 # Experiment 1's 0.86M PCA control, which every Experiment 2 arm must match.
-# Read off `configs/stage3/e1/e1_r0860k_s*_pca.json` and their run manifests,
+# Read off `configs/stages/stage-3/e1/e1_r0860k_s*_pca.json` and their run manifests,
 # not derived by scaling another rung.
 D0_STEPS = 1023
 D0_BLOCKS = 682
@@ -95,7 +95,7 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
             f"{D0_BLOCKS} blocks / {D0_STEPS} steps, matching the Experiment 1 "
             f"0.86M PCA control ({D0_SUPERVISED:,} supervised) exactly on "
             f"compute. Seed {seed}, Stage 1 PCA init. "
-            "Differs from configs/stage3/recovery.json only in the fields this "
+            "Differs from configs/stages/stage-3/recovery.json only in the fields this "
             "phase is testing plus data source, rung, seed and schedule length."
         )
         cfg["student_path"] = PCA_INIT
@@ -149,7 +149,7 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True, choices=sorted(PHASES))
-    ap.add_argument("--out", default="configs/stage3/e2")
+    ap.add_argument("--out", default="configs/stages/stage-3/e2")
     ap.add_argument("--data-dir",
                     default="artifacts/stages/stage-3/rung_0860k_clean_median",
                     help="the packed rung this phase's arms read")

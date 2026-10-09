@@ -42,7 +42,7 @@ The invariants it enforces:
 
 ``N``, the recipe, the probe size, the seeds and the battery are all supplied by
 the caller. Which experiments established these invariants, and what they cost,
-is recorded in ``docs/core-provenance.md``.
+is recorded in ``docs/maintenance/core-provenance.md``.
 """
 
 from __future__ import annotations
@@ -1877,7 +1877,7 @@ def validate_scored_rows(rows: Sequence[Mapping[str, Any]], *,
     return counts
 
 #: The concrete instances moved to `scripts/experiments/recovery_policy.py`,
-#: built from `configs/experiments/phase_a/recovery_policy.json`. They used to
+#: built from `configs/stages/stage-1/phase_a/recovery_policy.json`. They used to
 #: be module constants here AND dataclass defaults below, so a plan constructed
 #: without policy arguments silently became the current experiment.
 

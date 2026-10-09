@@ -210,7 +210,7 @@ for name in ('e7_fineweb_kd', 'e7_control_kd', 'e7_fineweb_val'):
           f'/workspace/aad/artifacts/stages/stage-3/{name}')
 fetch('e7_streams_20260809', ['e7_disjointness.json'],
       '/workspace/aad/artifacts/stages/stage-3')
-fetch('e7_streams_20260809', ['holdout_v1.jsonl'], '/workspace/aad/data/warmup')
+fetch('e7_streams_20260809', ['holdout_v1.jsonl'], '/workspace/aad/data/stages/stage-0/warmup')
 "
 cd "$REPO" && python3 - <<'PYEOF'
 import hashlib, json, sys
@@ -229,7 +229,7 @@ c = relay['streams']['e7_control_kd']
 for k in ('n_blocks', 'block_len', 'kd_positions', 'padding_tokens'):
     if b[k] != c[k]:
         sys.exit(f'ARMS NOT BUDGET-MATCHED on {k}: {b[k]} != {c[k]}')
-h = hashlib.sha256(Path('data/warmup/holdout_v1.jsonl').read_bytes()).hexdigest()
+h = hashlib.sha256(Path('data/stages/stage-0/warmup/holdout_v1.jsonl').read_bytes()).hexdigest()
 if h != '2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8':
     sys.exit(f'holdout_v1 mismatch: {h}')
 print('E7 streams verified and budget-matched; holdout_v1 verified')

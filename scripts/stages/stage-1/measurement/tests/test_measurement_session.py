@@ -132,7 +132,7 @@ def test_the_stop_conditions_are_the_ones_the_grant_names():
 
 def test_the_artifact_spec_exists_and_requires_the_report():
     import json
-    spec_path = REPO / "configs/autoinit/measurement_artifacts.json"
+    spec_path = REPO / "configs/stages/stage-1/measurement/measurement_artifacts.json"
     doc = json.loads(spec_path.read_text())
     required = [e for e in doc["entries"] if e.get("required")]
     assert len(required) == 1

@@ -25,7 +25,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-E6B = REPO / "configs/stage3/e6b"
+E6B = REPO / "configs/stages/stage-3/e6b"
 SEEDS = {"sa": 20260726, "sb": 20260801}
 CE_HEAVY = {"ce_weight": 1.0, "kd_weight": 0.25,
             "kd_temperature": 1.0, "kd_scope": "all"}
@@ -53,7 +53,7 @@ def diff_keys(a: dict, b: dict) -> set:
 @pytest.mark.parametrize("seed", sorted(SEEDS))
 def test_only_the_objective_differs_from_e1_at_the_same_rung(seed):
     a = cfg(E6B / f"e6b_p2_r2960k_{seed}.json")
-    e1 = cfg(REPO / f"configs/stage3/e1/e1_r2960k_{seed}_pca.json")
+    e1 = cfg(REPO / f"configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json")
     d = diff_keys(a, e1)
     assert "loss" in d, "the objective must actually differ, or there is no experiment"
     assert d <= ALLOWED_VS_E1, (
@@ -65,7 +65,7 @@ def test_only_the_objective_differs_from_e1_at_the_same_rung(seed):
 @pytest.mark.parametrize("seed", sorted(SEEDS))
 def test_only_the_rung_differs_from_p2_at_the_lower_scale(seed):
     a = cfg(E6B / f"e6b_p2_r2960k_{seed}.json")
-    p2 = cfg(REPO / f"configs/stage3/e4/e4_p2_r1600k_{seed}.json")
+    p2 = cfg(REPO / f"configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json")
     d = diff_keys(a, p2)
     assert "rung" in d, "the rung must actually differ, or there is no scale arm"
     assert d <= ALLOWED_VS_P2, (
@@ -78,7 +78,7 @@ def test_only_the_rung_differs_from_p2_at_the_lower_scale(seed):
 def test_schedule_is_taken_from_the_same_rung_arm_not_invented(seed):
     """total_steps and warmup follow from the block count, so they are copied."""
     a = cfg(E6B / f"e6b_p2_r2960k_{seed}.json")
-    e1 = cfg(REPO / f"configs/stage3/e1/e1_r2960k_{seed}_pca.json")
+    e1 = cfg(REPO / f"configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json")
     for key in ("schedule", "checkpoint", "intervals", "rung"):
         assert a[key] == e1[key], f"{key} must match the same-rung E1 arm exactly"
     assert a["schedule"]["total_steps"] == 2916

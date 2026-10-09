@@ -2,7 +2,7 @@
 """Locate E8b-S2's OOM by measurement, not by arithmetic.
 
     PYTHONPATH=src python scripts/stages/stage-3/e8b/profile_dp_memory.py \
-        --config configs/stage3/e8b/e8b_dp_r1600k_sa.json \
+        --config configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json \
         --steps 2 --out artifacts/audit/e8b_dp_memory_profile.json
 
 The gate died with `Tried to allocate 298.00 MiB` at

@@ -873,7 +873,7 @@ class SessionRunner:
         #: MAY THIS SESSION RUN ON THIS HOST? Asked before setup, so a host
         #: whose properties make the result incomparable costs one ssh round
         #: trip instead of a full chain. A refusal is redrawable, like a cold
-        #: host. See `docs/core-provenance.md` for what prompted it.
+        #: host. See `docs/maintenance/core-provenance.md` for what prompted it.
         admit = getattr(self.spec, "host_admission", None)
         if admit is not None:
             try:
@@ -1080,7 +1080,7 @@ class SessionRunner:
             #: change, not appended to, so relaying it by byte offset splices a
             #: new document's tail onto an old document's head — right size,
             #: unparseable, no error anywhere. The run log and the status file
-            #: above really are append-only. See `docs/core-provenance.md`.
+            #: above really are append-only. See `docs/maintenance/core-provenance.md`.
             RelaySpec(f"{self.repo}/artifacts/audit/{self.spec.artifacts.audit_dirname}/"
                       f"{self.spec.artifacts.evidence_filename}",
                       self.spec.artifacts.evidence_filename, required=False,

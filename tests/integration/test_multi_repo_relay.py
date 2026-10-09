@@ -35,7 +35,7 @@ from aadistill.infrastructure.session import (  # noqa: E402
     RelayInput, SetupManifest,
 )
 #: The store THIS deployment means. It was a module constant in the core,
-#: computed at import by reading `configs/infrastructure/artifact_store.json`,
+#: computed at import by reading `configs/shared/infrastructure/artifact_store.json`,
 #: so importing the framework read the repository.
 from shared.deployment import MAIN_RELAY  # noqa: E402
 

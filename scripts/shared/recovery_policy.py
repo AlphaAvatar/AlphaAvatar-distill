@@ -28,8 +28,8 @@ from aadistill.initialization.planning.recovery import (  # noqa: E402
     EquivalenceRule, PreflightPlan, PreflightStage,
     ScorableAwareSeedAggregation, SeedAggregation)
 
-POLICY_CONFIG = REPO / "configs/experiments/phase_a/recovery_policy.json"
-PREFLIGHT_PLAN_CONFIG = REPO / "configs/experiments/phase_a/preflight_plan.json"
+POLICY_CONFIG = REPO / "configs/stages/stage-1/phase_a/recovery_policy.json"
+PREFLIGHT_PLAN_CONFIG = REPO / "configs/stages/stage-1/phase_a/preflight_plan.json"
 
 _POLICY = json.loads(POLICY_CONFIG.read_text())
 _PLAN = json.loads(PREFLIGHT_PLAN_CONFIG.read_text())

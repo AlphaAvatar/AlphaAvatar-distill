@@ -510,7 +510,7 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "project's experiment tokens. It sits beside `paired_stats`, the "
             "arithmetic it guards. One application caller exists, a thin "
             "wrapper that only translates the error type; the reason the rule "
-            "was paid for is in `docs/core-provenance.md`.",
+            "was paid for is in `docs/maintenance/core-provenance.md`.",
         "src/aadistill/infrastructure/session_runner.py":
             "`verify_watchdog_owns_pod`, and the blocked-teardown branch of "
             "`collect_and_teardown` now acting on it. THIS IS A DECLARED "
@@ -1837,7 +1837,7 @@ HISTORICAL_SURFACE_SUCCESSORS = {
 #: **HAND-MAINTAINED, and deliberately not called a derived closure.** Nothing
 #: computes it: it was written by reading the batched execution path, and it
 #: stays correct only while someone keeps reading. The repository DOES have a
-#: derived closure -- `configs/experiments/phase_c1/executable_closure.json`,
+#: derived closure -- `configs/stages/stage-1/phase_c1/executable_closure.json`,
 #: produced by walking import edges -- and conflating the two would let a reader
 #: assume a machine is checking this list when none is. What the tests below
 #: check is narrower and honest: that every path on it exists, that the two

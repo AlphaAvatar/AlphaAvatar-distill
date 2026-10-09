@@ -38,7 +38,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[5]
 CHECK = REPO / "scripts/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda_check.py"
-CONFIG = REPO / "configs/validation/c2_full_search_cuda.json"
+CONFIG = REPO / "configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json"
 
 for extra in ("src", "scripts", "scripts/autoinit", "scripts/pod"):
     if str(REPO / extra) not in sys.path:

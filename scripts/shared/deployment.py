@@ -20,9 +20,9 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-PROVIDER_CLI_CONFIG = REPO / "configs/infrastructure/provider_cli.json"
-ARTIFACT_STORE_CONFIG = REPO / "configs/infrastructure/artifact_store.json"
-POD_IMAGE_CONFIG = REPO / "configs/infrastructure/pod_image.json"
+PROVIDER_CLI_CONFIG = REPO / "configs/shared/infrastructure/provider_cli.json"
+ARTIFACT_STORE_CONFIG = REPO / "configs/shared/infrastructure/artifact_store.json"
+POD_IMAGE_CONFIG = REPO / "configs/shared/infrastructure/pod_image.json"
 
 #: The provider CLI's name on PATH, then the fallback locations this deployment
 #: declares. An empty fallback list is legitimate: it means the CLI is expected

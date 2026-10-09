@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate the two E8 treatment configs from the E1/P1 2.96M control.
 
-The control is `configs/stage3/e1/e1_r2960k_{sa,sb}_pca.json` — the arms that
+The control is `configs/stages/stage-3/e1/e1_r2960k_{sa,sb}_pca.json` — the arms that
 produced the standing behavioural anchor (usable 0.8400, correct 0.2067). E8's
 intended causal variable is the Stage 1 depth map and nothing else, so a treatment
 config is its control with **three keys changed**:
@@ -32,8 +32,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-CONTROL_DIR = REPO_ROOT / "configs/stage3/e1"
-OUT_DIR = REPO_ROOT / "configs/stage3/e8"
+CONTROL_DIR = REPO_ROOT / "configs/stages/stage-3/e1"
+OUT_DIR = REPO_ROOT / "configs/stages/stage-3/e8"
 TREATMENT_INIT = "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint"
 
 # name -> (control config, seed alias)
@@ -56,7 +56,7 @@ def main() -> int:
         cfg["_purpose"] = (
             "E8 treatment: contribution-guided Stage 1 depth map, then the exact "
             f"E1/P1 KD-heavy 2.96M recovery recipe. Differs from "
-            f"configs/stage3/e1/{control_name} only in student_path (the intended "
+            f"configs/stages/stage-3/e1/{control_name} only in student_path (the intended "
             "causal variable), run_name, out_dir and this note.")
         # Key order follows the control so a textual diff stays readable.
         ordered = {k: cfg[k] for k in control}
@@ -70,7 +70,7 @@ def main() -> int:
         path.write_text(json.dumps(ordered, indent=2) + "\n")
         written.append({
             "name": name, "seed_alias": alias, "path": str(path.relative_to(REPO_ROOT)),
-            "control": f"configs/stage3/e1/{control_name}",
+            "control": f"configs/stages/stage-3/e1/{control_name}",
             "config_sha256": sha256_json(ordered),
             "control_sha256": sha256_json(control),
             "seed": ordered["seed"], "rung": ordered["rung"],

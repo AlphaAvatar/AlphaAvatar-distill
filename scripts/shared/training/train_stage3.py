@@ -1,7 +1,7 @@
 """Stage 3 CLI: recovery training over an offline mixture or a packed token ladder.
 
 Usage:
-    uv run python scripts/shared/training/train_stage3.py --config configs/stage3_<name>.json
+    uv run python scripts/shared/training/train_stage3.py --config configs/stages/stage-3/<name>.json
     uv run python scripts/shared/training/train_stage3.py --config ... --resume [step_XXXXXX]
 
 A fresh run refuses to write into an out_dir that already contains

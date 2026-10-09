@@ -36,7 +36,7 @@ from stages.phase_c2.session import C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-CONFIG = "configs/experiments/phase_c2/full_search_authorization.json"
+CONFIG = "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json"
 
 #: The grant fields carried into the artifact for a reader.
 GRANT_FIELDS: tuple[str, ...] = ("granted_by", "covers",
@@ -107,7 +107,7 @@ def live_identities(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     space = FS.full_joint_space(repo_root)
     pricing = FSG.pricing(repo_root)
     suite = json.loads(
-        (Path(repo_root) / "configs/experiments/phase_c2/frozen_assets.json"
+        (Path(repo_root) / "configs/stages/stage-1/phase_c2/frozen_assets.json"
          ).read_text())["assets"]["state_eval_v1"]
 
     return {

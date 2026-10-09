@@ -18,7 +18,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.transforms.sandwich import depth_span_map  # noqa: E402
 
-ARMS = json.loads((REPO / "configs/stage3/e8/arms.json").read_text())
+ARMS = json.loads((REPO / "configs/stages/stage-3/e8/arms.json").read_text())
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 GRADIENT_RELEVANT = (
     "loss", "optim", "schedule", "batch", "trainable_patterns", "dtype",
@@ -76,9 +76,9 @@ def test_the_arm_is_the_kd_heavy_2960k_recipe_and_not_something_adjacent(arm):
 
 def test_the_stage1_treatment_config_changes_only_the_depth_map():
     base = json.loads(
-        (REPO / "configs/stage1/qwen3_0p6b_from_4b_thinking.json").read_text())
+        (REPO / "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json").read_text())
     treat = json.loads(
-        (REPO / "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json"
+        (REPO / "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json"
          ).read_text())
     realized = {k for k in set(base) | set(treat)
                 if json.dumps(base.get(k), sort_keys=True)

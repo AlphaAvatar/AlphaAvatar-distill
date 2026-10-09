@@ -101,7 +101,7 @@ def verify_identity(student_dir: Path, seed: str) -> dict:
         failures.append("teacher is not in frozen eval state")
     del teacher
 
-    cfg = json.loads((REPO / "configs/stage3/p2/p2_ceheavy_sa.json").read_text())
+    cfg = json.loads((REPO / "configs/stages/stage-3/p2/p2_ceheavy_sa.json").read_text())
     checks["kd_temperature"] = cfg["loss"]["kd_temperature"]
     checks["ce_weight"] = cfg["loss"]["ce_weight"]
     checks["kd_weight"] = cfg["loss"]["kd_weight"]
@@ -256,7 +256,7 @@ def main() -> None:
         from aadistill.training.train import select_trainable
         m = AutoModelForCausalLM.from_pretrained(student, dtype=torch.float32)
         rep = select_trainable(m, json.loads(
-            (REPO / "configs/stage3/p2/p2_ceheavy_sa.json").read_text()
+            (REPO / "configs/stages/stage-3/p2/p2_ceheavy_sa.json").read_text()
         )["trainable_patterns"])
         opt = torch.optim.AdamW([p_ for p_ in m.parameters() if p_.requires_grad], lr=0.0)
         ids = torch.arange(1, 65).unsqueeze(0)

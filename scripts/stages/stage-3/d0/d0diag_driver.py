@@ -70,7 +70,7 @@ def stage_d0_4(args):
             print(f"{alias} KD decomposition already done; skipping", flush=True)
             continue
         model = f"/workspace/ckpt/{arm}/step_001023/model"
-        cfg = REPO / f"configs/stage3/e1/{arm}.json"
+        cfg = REPO / f"configs/stages/stage-3/e1/{arm}.json"
         run(["scripts/shared/training/audit_kd_decomposition.py",
              "--student", model,
              "--teacher", f"Qwen/Qwen3-4B-Thinking-2507@{args.teacher_revision}",

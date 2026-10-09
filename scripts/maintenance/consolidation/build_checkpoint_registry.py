@@ -72,7 +72,7 @@ LOCAL_ROOTS = ((REPO_ROOT / "artifacts", "repo_artifacts"),
 #: path suffix -> classification. `disposition` is the proposal a deletion pass
 #: reads; `never_delete` records which clause of the retention rule protects it.
 CLASSIFY: dict[str, dict] = {
-    "stage1/qwen3_0p6b_init_v0/checkpoint": dict(
+    "stages/stage-1/qwen3_0p6b_init_v0/checkpoint": dict(
         experiment="E1-E8", role="positional Stage-1 initialization (FP lineage)",
         retention="canonical", status="active",
         why="the pinned control initialization every E1/E4/E6/E7/E8 arm descends "
@@ -83,7 +83,7 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="PYTHONPATH=src python scripts/init/build_stage1_init.py "
                        "against the pinned Stage-0 activation cache aaeb2e4c…",
         reconstruction_cost="$0 (CPU)", disposition="keep"),
-    "stage1/e8_contribution_init_v1/checkpoint": dict(
+    "stages/stage-1/e8_contribution_init_v1/checkpoint": dict(
         experiment="E8a",
         role="contribution-guided fully-compressed initialization (FC)",
         retention="canonical", status="active",
@@ -93,16 +93,16 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="the E8a initialization recipe against the same Stage-0 "
                        "cache and the frozen depth map",
         reconstruction_cost="$0 (CPU)", disposition="keep"),
-    "stage3/rescued/e1_r2960k_sb_pca": dict(
+    "stages/stage-3/rescued/e1_r2960k_sb_pca": dict(
         experiment="E1/E6", role="2.96M rung, seed sb",
         retention="canonical", status="active",
         why="part of the accepted E1 scale curve",
         never_delete="accepted experiment checkpoint; the relay holds its "
                      "evaluations but NOT its weights, so this is the only copy",
-        reconstruction="a paid recovery run of configs/stage3/e1/e1_r2960k_sb_pca.json",
+        reconstruction="a paid recovery run of configs/stages/stage-3/e1/e1_r2960k_sb_pca.json",
         reconstruction_cost="paid GPU (a full 2.96M-token recovery)",
         disposition="keep"),
-    "stage0/qwen3_4b_thinking_v1": dict(
+    "stages/stage-0/qwen3_4b_thinking_v1": dict(
         experiment="Stage 0", role="teacher activation statistics cache",
         retention="reproducibility_required", status="active",
         why="every structural initialization in the project is a deterministic "
@@ -112,7 +112,7 @@ CLASSIFY: dict[str, dict] = {
                      "tombstoned checkpoints reads it",
         reconstruction="a full teacher statistics pass over the pinned corpus",
         reconstruction_cost="paid GPU (teacher inference)", disposition="keep"),
-    "autoinit/dryrun/canonical_control": dict(
+    "shared/validation/dryrun/canonical_control": dict(
         experiment="AutoInitializer dry run", role="toy control materialization",
         retention="duplicate", status="superseded",
         why="a 32-wide 6-layer toy model built by a $0 CPU dry run; its identity "
@@ -122,7 +122,7 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="PYTHONPATH=src python scripts/shared/validation/dry_run_search.py "
                        "--out artifacts/shared/validation/dryrun",
         reconstruction_cost="$0 (CPU, minutes)", disposition="delete"),
-    "autoinit/dryrun/search/states": dict(
+    "shared/validation/dryrun/search/states": dict(
         experiment="AutoInitializer dry run", role="rejected/searched toy leaf",
         retention="duplicate", status="superseded",
         why="a materialized beam leaf of the $0 toy search. Its complete lineage — "
@@ -161,7 +161,7 @@ CLASSIFY: dict[str, dict] = {
         experiment="P2 / E4 / E5", role="CE-heavy 0.86M start checkpoint",
         retention="reproducibility_required", status="active",
         why="the initialization E4's 1.60M arms and E5's arm-C/arm-R recoveries "
-            "start from; configs/stage3/{e4,e5}/*.json name it",
+            "start from; configs/stages/stage-3/{e4,e5}/*.json name it",
         never_delete="living recovery path: downstream experiment configs start "
                      "from it. Its relay copy at e5_start/ is hash-verified, which "
                      "makes it eligible under the stale-cache clause and the "
@@ -189,7 +189,7 @@ CLASSIFY: dict[str, dict] = {
         why="the CE-heavy side of the accepted KD-vs-CE comparison. The relay "
             "holds no copy of these weights",
         never_delete="accepted experiment checkpoint, and the only copy anywhere",
-        reconstruction="a paid recovery run of configs/stage3/e4/*.json",
+        reconstruction="a paid recovery run of configs/stages/stage-3/e4/*.json",
         reconstruction_cost="paid GPU", disposition="keep"),
     "aad-artifacts/e2p1/": dict(
         experiment="E2 phase 1", role="0.86M diagnostic arm",
@@ -200,6 +200,66 @@ CLASSIFY: dict[str, dict] = {
         never_delete=None,
         reconstruction="a paid recovery run of the E2 phase-1 arm config",
         reconstruction_cost="paid GPU", disposition="review"),
+    "aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6": dict(
+        experiment="phase_a / phase_c1 / phase_d1", role="incumbent B — the arm C1 promoted; D1's control arm",
+        retention="behavioral_anchor", status="active",
+        why="C1's confirmation promoted this Phase-A leaf as the incumbent; "
+            "the D1 design derives its control arm from that verdict, so the "
+            "paused D1 screening consumes these bytes as its baseline",
+        never_delete="the live incumbent is an explicitly retained anchor (AGENTS.md 2.5)",
+        reconstruction="byte-exact replay from the committed Phase-A search record",
+        reconstruction_cost="paid GPU", disposition="keep"),
+    "aad-artifacts/autoinit/phase_a/": dict(
+        experiment="phase_a", role="retained Phase-A search leaf",
+        retention="reproducibility_required", status="closed",
+        why="the Phase-A search's retained leaves; their lineage, probe "
+            "results and selection evidence are committed, and the leaves "
+            "back every later incumbent comparison",
+        never_delete=None,
+        reconstruction="byte-exact replay from the committed search record",
+        reconstruction_cost="paid GPU", disposition="keep"),
+    "aad-artifacts/phase_d1/d1_search_20261006_210210/products": dict(
+        experiment="phase_d1", role="D1 behavioural finalist or retained search leaf",
+        retention="reproducibility_required", status="active",
+        why="the completed D1 search's retained products: finalists q1 and q3 "
+            "of the frozen quality-order top-4, plus the search's own "
+            "lineage-retained leaves. The paused D1 screening consumes the "
+            "finalists; identities are bound by "
+            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+        never_delete="D1 finalists are frozen scientific inputs of a paused experiment",
+        reconstruction="byte-exact replay from the committed search record "
+                       "(proved twice by the finalist-rematerialization campaign)",
+        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="keep"),
+    "aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products": dict(
+        experiment="phase_d1", role="out-of-band duplicate of the D1 search products",
+        retention="duplicate", status="active",
+        why="a second transport copy of the same product set; the canonical "
+            "copy is products/ one level up, hash-verified",
+        never_delete=None, reconstruction="byte-identical to products/",
+        reconstruction_cost="$0 (copy)", disposition="review"),
+    "aad-artifacts/phase_d1/d1_replay_002/products": dict(
+        experiment="phase_d1", role="D1 behavioural finalist (rematerialized)",
+        retention="reproducibility_required", status="active",
+        why="finalists q2 and q4 of the frozen quality-order top-4, which the "
+            "search did not retain; reproduced EXACTLY by the "
+            "finalist-rematerialization campaign and secured off-pod. The "
+            "paused D1 screening consumes them; identities are bound by "
+            "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+        never_delete="D1 finalists are frozen scientific inputs of a paused experiment",
+        reconstruction="byte-exact replay from the committed search record",
+        reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="keep"),
+    "stages/stage-1/families/d_series/batteries/d_series_behavioural_v1": dict(
+        experiment="d_series", role="D-series behavioural battery family v1 (42 batteries)",
+        retention="reproducibility_required", status="active",
+        why="the realized battery family every D-series screening and "
+            "confirmation consumes; its immutable identity is "
+            "logs/shared/analyses/autoinit_d_series_family_manifest.json "
+            "(family_content_id 1e3445f1...) and the per-battery digests are "
+            "verified by scripts/stages/stage-1/families/d_series/verify_batteries.py",
+        never_delete="the family manifest pins these exact bytes",
+        reconstruction="scripts/stages/stage-1/families/d_series/build_batteries.py "
+                       "over the frozen pools, then verify_batteries.py",
+        reconstruction_cost="$0 (CPU)", disposition="keep"),
     "aad-artifacts/e5/": dict(
         experiment="E5", role="per-attempt side artifacts",
         retention="diagnostic", status="closed",
@@ -259,6 +319,41 @@ def classify(rel: str) -> dict:
                     "deletion",
                 never_delete="unclassified", reconstruction=None,
                 reconstruction_cost=None, disposition="review")
+
+
+D1_RETENTION_DECISION = ("logs/stages/stage-1/phase_d1/decisions/"
+                         "post_search_finalist_retention.json")
+
+
+def d1_finalist_identities() -> dict[str, dict]:
+    """state_id -> the finalist identity the retention decision froze.
+
+    DERIVED from the decision record, never retyped: the registry carries the
+    identity so a reader standing here can find q1-q4 without knowing D1's log
+    layout, and `--hash` cross-checks the stored single-shard sha256 against
+    the bytes on disk. The decision record stays the owner of the figures.
+    """
+    p = REPO_ROOT / D1_RETENTION_DECISION
+    if not p.is_file():
+        return {}
+    out = {}
+    for m in json.loads(p.read_text())["the_frozen_behavioural_finalists"]["members"]:
+        out[m["state_id"]] = {
+            "artifact_id": f"d1_finalist_q{m['finalist']}",
+            "finalist": m["finalist"],
+            "state_id": m["state_id"],
+            "operator_path": m["path"],
+            "artifact_digest": m["artifact_digest"],
+            "weights_digest": m["weights_digest"],
+            "single_shard_sha256": m["single_shard_sha256"],
+            "arch_signature": m["arch_signature"],
+            "identity_owner": D1_RETENTION_DECISION,
+            "creating_run": ("d1_search_20261006_210210" if "SECURED" in m["availability"]
+                             else "d1_replay_002 (rematerialized, exact)"),
+            "consumers": ["phase_d1 screening (paused; "
+                          "logs/stages/stage-1/phase_d1/current.json)"],
+        }
+    return out
 
 
 def load_corpus() -> dict[str, str]:
@@ -449,6 +544,7 @@ def main() -> int:
 
     corpus = load_corpus()
     mirrors = mirror_verifications()
+    d1_ids = d1_finalist_identities()
     entries = []
     units = discover_units()
     units += declared_trees({rel_to_repo(u) for _, _, u, _ in units})
@@ -503,6 +599,12 @@ def main() -> int:
             "protected": meta["retention"] in PROTECTED or bool(meta["never_delete"]),
             "disposition": meta["disposition"],
         })
+        ident = d1_ids.get(unit.name)
+        if ident:
+            entries[-1]["scientific_identity"] = ident
+            if wsha is not None:
+                entries[-1]["identity_verified"] = (
+                    wsha == ident["single_shard_sha256"])
 
     entries.sort(key=lambda e: -e["size_bytes"])
     total = sum(e["size_bytes"] for e in entries)

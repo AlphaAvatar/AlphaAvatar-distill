@@ -180,7 +180,7 @@ $SSH "root@$HOST" 'test -s /workspace/hf/token' \
        echo "LAUNCH_FAILED:empty_token" > "$STATE"; exit 1; }
 $SCP scripts/stages/stage-3/e3/e3_setup.sh "root@$HOST:/workspace/" >>"$LOG" 2>&1
 $SSH "root@$HOST" 'mkdir -p /workspace/aad_holdout'
-$SCP data/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
+$SCP data/stages/stage-0/warmup/holdout_v1.jsonl "root@$HOST:/workspace/aad_holdout/" >>"$LOG" 2>&1
 
 say "running setup"
 $SSH "root@$HOST" "cd /workspace && SESSION_COMMIT=$SESSION_COMMIT \
@@ -223,7 +223,7 @@ done
 mkdir -p "$STORE"
 say "bundling small artifacts on the pod"
 $SSH "root@$HOST" 'cd /workspace/aad && tar czf /workspace/e3_side.tar.gz \
-  artifacts/audit configs/stage3/e3 \
+  artifacts/audit configs/stages/stage-3/e3 \
   $(ls -d artifacts/stages/stage-3/e3_*/train_log.jsonl artifacts/stages/stage-3/e3_*/run_manifest.json 2>/dev/null) \
   2>/dev/null; cp /workspace/e3_run.log /workspace/e3.status /workspace/ 2>/dev/null; \
   sha256sum /workspace/e3_side.tar.gz' >>"$LOG" 2>&1

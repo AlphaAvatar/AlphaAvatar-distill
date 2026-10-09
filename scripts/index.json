@@ -4,12 +4,29 @@
  "derived_from": "logs/stages/index.json",
  "owners": [
   {
+   "logical_id": "stage-1",
+   "kind": "stage",
+   "stage_id": "1",
+   "scripts": "scripts/stages/stage-1",
+   "logs": "logs/stages/stage-1"
+  },
+  {
+   "logical_id": "stage-3",
+   "kind": "stage",
+   "stage_id": "3",
+   "scripts": "scripts/stages/stage-3",
+   "logs": "logs/stages/stage-3"
+  },
+  {
    "logical_id": "phase_a",
    "kind": "experiment",
    "stage_id": "1",
    "scripts": "scripts/stages/stage-1/phase_a",
    "logs": "logs/stages/stage-1/phase_a",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_a",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -19,6 +36,9 @@
    "scripts": "scripts/stages/stage-1/phase_b",
    "logs": "logs/stages/stage-1/phase_b",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_b",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -28,6 +48,9 @@
    "scripts": "scripts/stages/stage-1/continuation_b",
    "logs": "logs/stages/stage-1/continuation_b",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/continuation_b",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -37,6 +60,9 @@
    "scripts": "scripts/stages/stage-1/recovery_continuation",
    "logs": "logs/stages/stage-1/recovery_continuation",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/recovery_continuation",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -46,6 +72,9 @@
    "scripts": "scripts/stages/stage-1/phase_c1",
    "logs": "logs/stages/stage-1/phase_c1",
    "artifacts": "artifacts/stages/stage-1/phase_c1",
+   "configs": "configs/stages/stage-1/phase_c1",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -55,6 +84,9 @@
    "scripts": "scripts/stages/stage-1/phase_c2_full_search",
    "logs": "logs/stages/stage-1/phase_c2_full_search",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_c2_full_search",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -64,6 +96,9 @@
    "scripts": "scripts/stages/stage-1/phase_c2_replay",
    "logs": "logs/stages/stage-1/phase_c2_replay",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_c2_replay",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -73,6 +108,9 @@
    "scripts": "scripts/stages/stage-1/phase_c2_behavioural",
    "logs": "logs/stages/stage-1/phase_c2_behavioural",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_c2_behavioural",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -82,6 +120,9 @@
    "scripts": "scripts/stages/stage-1/phase_c3",
    "logs": "logs/stages/stage-1/phase_c3",
    "artifacts": "artifacts/stages/stage-1/phase_c3",
+   "configs": "configs/stages/stage-1/phase_c3",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -91,6 +132,9 @@
    "scripts": "scripts/stages/stage-1/phase_a3",
    "logs": "logs/stages/stage-1/phase_a3",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_a3",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -100,6 +144,9 @@
    "scripts": "scripts/stages/stage-1/phase_d1",
    "logs": "logs/stages/stage-1/phase_d1",
    "artifacts": "artifacts/stages/stage-1/phase_d1",
+   "configs": "configs/stages/stage-1/phase_d1",
+   "data": null,
+   "docs": null,
    "live_state": "logs/stages/stage-1/phase_d1/current.json"
   },
   {
@@ -109,6 +156,9 @@
    "scripts": "scripts/stages/stage-1/c2_full_search_perf",
    "logs": "logs/stages/stage-1/c2_full_search_perf",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/c2_full_search_perf",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -118,6 +168,9 @@
    "scripts": "scripts/stages/stage-1/c2_state_eval_cert",
    "logs": "logs/stages/stage-1/c2_state_eval_cert",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/c2_state_eval_cert",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -127,6 +180,9 @@
    "scripts": "scripts/stages/stage-1/c2_full_search_cuda",
    "logs": "logs/stages/stage-1/c2_full_search_cuda",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/c2_full_search_cuda",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -136,6 +192,9 @@
    "scripts": "scripts/stages/stage-1/phase_c2",
    "logs": "logs/stages/stage-1/phase_c2",
    "artifacts": "artifacts/stages/stage-1/phase_c2",
+   "configs": "configs/stages/stage-1/phase_c2",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -145,6 +204,9 @@
    "scripts": "scripts/stages/stage-1/phase_c2_baseline_completion",
    "logs": "logs/stages/stage-1/phase_c2_baseline_completion",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/phase_c2_baseline_completion",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -154,6 +216,9 @@
    "scripts": "scripts/stages/stage-1/measurement",
    "logs": "logs/stages/stage-1/measurement",
    "artifacts": null,
+   "configs": "configs/stages/stage-1/measurement",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -163,6 +228,9 @@
    "scripts": "scripts/stages/stage-1/families/d_series",
    "logs": "logs/stages/stage-1/families/d_series/analyses",
    "artifacts": "artifacts/stages/stage-1/families/d_series",
+   "configs": null,
+   "data": null,
+   "docs": null,
    "live_state": "logs/stages/stage-1/families/d_series/current.json"
   },
   {
@@ -172,6 +240,9 @@
    "scripts": "scripts/stages/stage-3/d0",
    "logs": null,
    "artifacts": null,
+   "configs": null,
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -181,6 +252,9 @@
    "scripts": "scripts/stages/stage-3/p0",
    "logs": null,
    "artifacts": null,
+   "configs": "configs/stages/stage-3/p0",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -190,6 +264,9 @@
    "scripts": "scripts/stages/stage-3/p2",
    "logs": null,
    "artifacts": null,
+   "configs": "configs/stages/stage-3/p2",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -199,6 +276,9 @@
    "scripts": "scripts/stages/stage-3/e1",
    "logs": "logs/stages/stage-3/e1",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e1",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -208,6 +288,9 @@
    "scripts": "scripts/stages/stage-3/e2",
    "logs": "logs/stages/stage-3/e2",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e2",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -217,6 +300,9 @@
    "scripts": "scripts/stages/stage-3/e3",
    "logs": "logs/stages/stage-3/e3",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e3",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -226,6 +312,9 @@
    "scripts": "scripts/stages/stage-3/e4",
    "logs": "logs/stages/stage-3/e4",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e4",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -235,6 +324,9 @@
    "scripts": "scripts/stages/stage-3/e5",
    "logs": "logs/stages/stage-3/e5",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e5",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -244,6 +336,9 @@
    "scripts": "scripts/stages/stage-3/e6",
    "logs": "logs/stages/stage-3/e6",
    "artifacts": null,
+   "configs": null,
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -253,6 +348,9 @@
    "scripts": "scripts/stages/stage-3/e6b",
    "logs": "logs/stages/stage-3/e6b",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e6b",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -262,6 +360,9 @@
    "scripts": "scripts/stages/stage-3/e7",
    "logs": "logs/stages/stage-3/e7",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e7",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -271,6 +372,9 @@
    "scripts": "scripts/stages/stage-3/e8",
    "logs": "logs/stages/stage-3/e8",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e8",
+   "data": null,
+   "docs": null,
    "live_state": null
   },
   {
@@ -280,6 +384,9 @@
    "scripts": "scripts/stages/stage-3/e8b",
    "logs": "logs/stages/stage-3/e8b",
    "artifacts": null,
+   "configs": "configs/stages/stage-3/e8b",
+   "data": null,
+   "docs": null,
    "live_state": null
   }
  ]

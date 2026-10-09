@@ -1,10 +1,10 @@
 """Emit the 24 Experiment-1 run configs from the canonical recovery recipe.
 
-    uv run python scripts/stages/stage-3/e1/build_experiment1_configs.py --out configs/stage3/e1
+    uv run python scripts/stages/stage-3/e1/build_experiment1_configs.py --out configs/stages/stage-3/e1
 
 Experiment 1 asks one question — does behavioural recovery scale with
 teacher-generated supervised tokens — so every arm is the canonical
-`configs/stage3/recovery.json` with exactly four fields changed: the packed
+`configs/stages/stage-3/recovery.json` with exactly four fields changed: the packed
 ladder it reads, the rung, the seed, and the start checkpoint. Nothing about the
 objective, optimizer, freeze set, packing or precision moves, because anything
 that moves is a second variable.
@@ -28,7 +28,7 @@ import math
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
-CANONICAL = REPO_ROOT / "configs/stage3/recovery.json"
+CANONICAL = REPO_ROOT / "configs/stages/stage-3/recovery.json"
 
 # (target supervised tokens, blocks) — measured from the uniform pack, not
 # nominal. Blocks are what set the step count.
@@ -73,7 +73,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
         cfg["_purpose"] = (
             f"Experiment 1 (data scaling): rung {rung:,} supervised tokens, "
             f"{blocks} blocks, {EPOCHS} epochs, seed {seed}, {init_tag} init. "
-            "Differs from configs/stage3/recovery.json only in data source, "
+            "Differs from configs/stages/stage-3/recovery.json only in data source, "
             "rung, seed, student_path and the derived schedule."
         )
         cfg["student_path"] = init_path
@@ -106,7 +106,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--out", default="configs/stage3/e1")
+    ap.add_argument("--out", default="configs/stages/stage-3/e1")
     ap.add_argument("--packed-dir", default="artifacts/stages/stage-3/ladder_uniform",
                     help="the uniform token-ladder pack the arms read")
     ap.add_argument("--val-blocks", type=int, default=16)

@@ -103,7 +103,7 @@ def main() -> None:
     ap.add_argument("--blocks", type=int, default=32,
                     help="how many rung blocks to accumulate over")
     ap.add_argument("--config", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e1/e1_r0860k_sa_pca.json")
+                    default=REPO_ROOT / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json")
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--grad-probe-blocks", type=int, default=4)
     ap.add_argument("--label", required=True)

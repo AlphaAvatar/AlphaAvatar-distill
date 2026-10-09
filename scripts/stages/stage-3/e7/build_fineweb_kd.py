@@ -48,7 +48,7 @@ from aadistill.infrastructure.env import code_state  # noqa: E402
 DATASET = "HuggingFaceFW/fineweb-edu"
 CONFIG = "sample-10BT"
 SPLIT = "train"
-# Pinned in `data/warmup/{warmup_v1,holdout_v1}.manifest.json`; asserted below
+# Pinned in `data/stages/stage-0/warmup/{warmup_v1,holdout_v1}.manifest.json`; asserted below
 # rather than trusted, so a silent upstream re-tag cannot change what E7 trains
 # on while the manifest still claims this revision.
 EXPECTED_REVISION = "87f09149ef4734204d70ed1d046ddc9ca3f2b8f9"

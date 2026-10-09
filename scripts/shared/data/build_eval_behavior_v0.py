@@ -1,7 +1,7 @@
 """Build the `eval_behavior_v0` prompt set from held-out val data.
 
     uv run python scripts/shared/data/build_eval_behavior_v0.py \
-        --data-dir data/stage2_v1 --out-dir data/eval_behavior_v0
+        --data-dir data/stages/stage-2/stage2_v1 --out-dir data/stages/stage-3/eval_behavior_v0
 
 Selection is deterministic: candidates are filtered, sorted by id, and sampled
 with a pinned seed, so the same command reproduces the same prompt set. The
@@ -101,8 +101,8 @@ def build_entry(sample: dict, tokenizer) -> dict | None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--data-dir", default="data/stage2_v1")
-    ap.add_argument("--out-dir", default="data/eval_behavior_v0")
+    ap.add_argument("--data-dir", default="data/stages/stage-2/stage2_v1")
+    ap.add_argument("--out-dir", default="data/stages/stage-3/eval_behavior_v0")
     ap.add_argument("--tokenizer", default="artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint")
     ap.add_argument("--per-group", type=int, default=PER_GROUP)
     ap.add_argument("--seed", type=int, default=SEED)

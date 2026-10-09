@@ -26,7 +26,7 @@ known *before* recovery training obscures it.
     PYTHONPATH=src python scripts/shared/evaluation/measure_init_nll.py \\
         --checkpoint artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint \\
         --label e8-contribution-init \\
-        --holdout data/warmup/holdout_v1.jsonl \\
+        --holdout data/stages/stage-0/warmup/holdout_v1.jsonl \\
         --fineweb-val artifacts/stages/stage-3/e7_fineweb_val \\
         --pack artifacts/shared/instruments/ladder_uniform_probe \\
         --teacher Qwen/Qwen3-4B-Thinking-2507 \\
@@ -75,7 +75,7 @@ def main() -> int:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--checkpoint", required=True)
     ap.add_argument("--label", required=True)
-    ap.add_argument("--holdout", default="data/warmup/holdout_v1.jsonl")
+    ap.add_argument("--holdout", default="data/stages/stage-0/warmup/holdout_v1.jsonl")
     ap.add_argument("--holdout-max-seq-len", type=int, default=1024)
     ap.add_argument("--fineweb-val", default="artifacts/stages/stage-3/e7_fineweb_val")
     ap.add_argument("--pack", default="artifacts/shared/instruments/ladder_uniform_probe")

@@ -47,7 +47,7 @@ def _write_evidence(scr: Path, leaves: list[dict]) -> Path:
     from shared.pod.collect_artifacts import load_specs
 
     spec = [e for e in load_specs(
-        str(ROOT / "configs/autoinit/c2_replay_artifacts.json"))
+        str(ROOT / "configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json"))
         if e.artifact_class == "session_evidence"][0]
     path = scr / "store" / "extracted" / spec.pattern
     path.parent.mkdir(parents=True, exist_ok=True)

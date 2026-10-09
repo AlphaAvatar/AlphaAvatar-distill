@@ -88,8 +88,8 @@ for prefix, dest in (
         shutil.copy(f, dest / f.name)
     print("staged", dest, sorted(x.name for x in dest.iterdir()))
 PY
-test -f "$REPO/data/warmup/holdout_v1.jsonl"
-test -f "$REPO/data/eval_behavior_v0/prompts.jsonl"
+test -f "$REPO/data/stages/stage-0/warmup/holdout_v1.jsonl"
+test -f "$REPO/data/stages/stage-3/eval_behavior_v0/prompts.jsonl"
 test -f "$REPO/artifacts/stages/stage-3/eval/battery_v2/manifest.json"
 test -f "$REPO/artifacts/stages/stage-3/rung_0860k_clean_median/blocks.npz"
 mark DATA_READY

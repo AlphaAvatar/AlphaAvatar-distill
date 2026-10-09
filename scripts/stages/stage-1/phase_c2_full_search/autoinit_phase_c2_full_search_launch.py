@@ -84,12 +84,12 @@ AUDIT_DIRNAME = "autoinit_phase_c2_full_search"
 
 RUN_EXPERIMENT_ID = "phase_c2_full_search"
 RUN_STAGE_ID = json.loads(
-    (REPO_ROOT / "configs/experiments/phase_c2/full_search_authorization.json"
+    (REPO_ROOT / "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json"
      ).read_text())["stage_id"]
 
 #: The frozen-asset expectation. The same document Search-1 and the completion
 #: named, because the asset is the same one and there is exactly one declaration.
-FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c2/frozen_assets.json"
 
 #: The image both halves of the pooled cost table were measured under --
 #: Phase-B attempt 5 and C2 attempt 4, whose recorded digest was
@@ -743,8 +743,8 @@ def spec(args) -> SessionSpec:
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_full_search_evidence.json",
             archive_basename="c2_full_search_artifacts.tar.gz",
-            spec_success="configs/autoinit/c2_full_search_artifacts.json",
-            spec_failed="configs/autoinit/c2_full_search_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_c2_full_search/c2_full_search_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_c2_full_search/c2_full_search_artifacts_failed.json",
             report_names=("c2_full_search_evidence.json",
                           "stage1_selection.json")),
         teardown=TeardownPolicy(

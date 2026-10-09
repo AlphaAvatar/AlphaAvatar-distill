@@ -2,7 +2,7 @@
 
 Three paid pods were lost to one shape of defect — a session inheriting a
 requirement it never declared — and the composition design in
-`docs/SESSION_ARCHITECTURE.md` is only worth the churn if the properties it
+`docs/shared/SESSION_ARCHITECTURE.md` is only worth the churn if the properties it
 claims are checked rather than asserted. Each test below corresponds to one line
 of that document's "structural checks the replacement must ship with", or to one
 of the three failures:

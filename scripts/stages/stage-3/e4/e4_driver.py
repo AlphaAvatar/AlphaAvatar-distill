@@ -82,7 +82,7 @@ def stage_train(args):
             print(f"{alias} already trained; skipping", flush=True)
             mark(f"TRAIN_DONE:{alias}")
             continue
-        cfg_path = REPO / f"configs/stage3/e4/{name}.json"
+        cfg_path = REPO / f"configs/stages/stage-3/e4/{name}.json"
         cfg = json.loads(cfg_path.read_text())
         # Assert the arm is what it claims to be, from the file that will train.
         assert cfg["loss"] == OBJECTIVE, cfg["loss"]

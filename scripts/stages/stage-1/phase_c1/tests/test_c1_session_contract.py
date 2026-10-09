@@ -232,7 +232,7 @@ def test_no_prose_in_the_live_config_restates_a_stale_project_cap():
     import re
 
     canonical = _accepted_cap_usd()
-    raw = (REPO / "configs/experiments/phase_c1/authorization.json").read_text()
+    raw = (REPO / "configs/stages/stage-1/phase_c1/authorization.json").read_text()
     config = json.loads(raw)
 
     def strings(node):
@@ -354,7 +354,7 @@ def test_the_preregistration_is_frozen_to_the_binding_attempt_18_executed_under(
     Nothing scientific had drifted — the arms, seeds, plan hash, fixed path,
     battery, teacher and scoring contract were identical in every version. What
     drifted was a snapshot of what a CURRENT session would execute, which is
-    what `configs/experiments/phase_c1/executable_closure.json` owns and is
+    what `configs/stages/stage-1/phase_c1/executable_closure.json` owns and is
     regenerated for. So the live question is asked of that document
     (`test_the_recorded_closure_describes_the_live_tree` below), and this one
     asks what a frozen binding can answer: is it still the exact blob?
@@ -1313,7 +1313,7 @@ def test_the_expectation_document_restates_the_asset_block_exactly():
     sys.path.insert(0, str(REPO / "scripts/autoinit"))
     from shared.pod import verify_frozen_assets as V
 
-    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+    doc = json.loads((REPO / "configs/stages/stage-1/phase_c1/frozen_assets.json"
                       ).read_text())
     assert doc["assets"] == V.FROZEN, (
         "the expectation document's asset block has drifted from the verifier's "
@@ -1330,7 +1330,7 @@ def test_the_expectation_names_the_live_scoring_contract():
     """And it must be the contract this tree really computes, not a guess."""
     from shared.source_sets import recovery_scoring_contract
 
-    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+    doc = json.loads((REPO / "configs/stages/stage-1/phase_c1/frozen_assets.json"
                       ).read_text())
     live = recovery_scoring_contract(REPO)
     assert doc["scoring_contract"]["contract"] == live["contract"]
@@ -1355,11 +1355,11 @@ def test_the_frozen_asset_gate_reproduces_attempt_tens_refusal(tmp_path,
     """
     import types
 
-    doc = json.loads((REPO / "configs/experiments/phase_c1/frozen_assets.json"
+    doc = json.loads((REPO / "configs/stages/stage-1/phase_c1/frozen_assets.json"
                       ).read_text())
     doc["scoring_contract"] = {**doc["scoring_contract"],
                                **doc["scoring_contract"]["supersedes"]}
-    stale = REPO / "configs/experiments/phase_c1/_stale_expect_for_test.json"
+    stale = REPO / "configs/stages/stage-1/phase_c1/_stale_expect_for_test.json"
     stale.write_text(json.dumps(doc, indent=1) + "\n")
     try:
         mod = load_session_launcher("autoinit_c1_launch")

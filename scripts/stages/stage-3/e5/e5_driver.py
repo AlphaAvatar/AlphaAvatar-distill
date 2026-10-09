@@ -424,7 +424,7 @@ def stage_train(args):
             if (arm_dir(arm, seed) / f"checkpoints/{step_tag}/model").is_dir():
                 mark(f"TRAIN_DONE:{name}")
                 continue
-            cfg_path = REPO / f"configs/stage3/e5/{name}.json"
+            cfg_path = REPO / f"configs/stages/stage-3/e5/{name}.json"
             feas = json.loads((OUT / "e5_joint_feasibility.json").read_text())
             if cfg_path.is_file():
                 c = json.loads(cfg_path.read_text())

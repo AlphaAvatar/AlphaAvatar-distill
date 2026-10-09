@@ -237,7 +237,7 @@ def test_the_tokenizer_is_resolved_before_any_data_is_built():
 #: strictly better than the previous behaviour of silently training against a
 #: one-token vocabulary. Adding the two fields is then a one-line, deliberate act
 #: by whoever re-runs it, not a silent rewrite of the record.
-ACTIVE_RECOVERY_CONFIGS = ("configs/stage3/e1/e1_r0860k_sa_pca.json",)
+ACTIVE_RECOVERY_CONFIGS = ("configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",)
 
 
 def test_every_active_recovery_config_declares_the_contract():
@@ -258,7 +258,7 @@ def test_the_historical_configs_are_left_alone():
     import glob
 
     edited = []
-    for p in sorted(glob.glob(str(REPO / "configs/stage3/*/*.json"))):
+    for p in sorted(glob.glob(str(REPO / "configs/stages/stage-3/*/*.json"))):
         rel = str(Path(p).relative_to(REPO))
         if rel in ACTIVE_RECOVERY_CONFIGS:
             continue
@@ -275,7 +275,7 @@ def test_the_frozen_recipe_pins_the_protocols_tokenizer():
     """`e1_r0860k_sa_pca.json` is what every Phase-A probe derives from, and the
     recovery protocol fingerprint pins `tokenizer_sha256`. If the recipe named a
     different one, probes would be comparable to nothing."""
-    cfg = json.loads((REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json").read_text())
+    cfg = json.loads((REPO / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json").read_text())
     assert cfg["tokenizer_sha256"] == FROZEN_SHA
     # The recipe is FROZEN: its bytes carry the spelling from when it was
     # written, and the 2026-10-08 relocation resolves it rather than edits it.

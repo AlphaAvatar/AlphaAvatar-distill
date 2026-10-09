@@ -442,7 +442,7 @@ def test_every_required_audit_artifact_is_one_the_driver_writes():
     not exist until the run does.
     """
     spec = json.loads(
-        (REPO / "configs/autoinit/c3_artifacts.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c3/c3_artifacts.json").read_text())
     driver_src = DRIVER.read_text()
     missing = []
     for entry in spec["entries"]:

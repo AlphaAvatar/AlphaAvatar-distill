@@ -1516,7 +1516,7 @@ def test_the_record_that_survives_a_failure_carries_the_durable_location():
             "them would lose the pointer to weights that exist")
 
     spec = json.loads(
-        (REPO / "configs/autoinit/c1_artifacts_failed.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json").read_text())
     patterns = [e.get("pattern") or e.get("glob") for e in spec["entries"]]
     assert "audit/autoinit_c1/probes/autoinit.v1.phase_c1.*.training.json" in patterns
     #: And it stays OPTIONAL: an early failure has no probes and must still

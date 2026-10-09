@@ -59,7 +59,7 @@ from stages.phase_c2 import comparison as C  # noqa: E402
 #: HERE, at module scope, and not inside the stage that happens to need it.
 #:
 #: The four calibration mixtures are DATA: they live in
-#: `configs/calibration/profiles.json` and nothing in `src/aadistill` names
+#: `configs/stages/stage-1/calibration/profiles.json` and nothing in `src/aadistill` names
 #: them, so the core's profile registry starts EMPTY and the application
 #: bootstrap below is what fills it. Every other driver imports it at module
 #: scope for exactly this reason.

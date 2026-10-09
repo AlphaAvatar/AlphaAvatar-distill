@@ -37,8 +37,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
 
 SEEDS = ("sa", "sb")
-OBJECTIVE_PARENT = "configs/stage3/e4/e4_p2_r1600k_{seed}.json"
-RUNG_PARENT = "configs/stage3/e1/e1_r2960k_{seed}_pca.json"
+OBJECTIVE_PARENT = "configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json"
+RUNG_PARENT = "configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json"
 
 # Taken from the RUNG parent: the data scale and the quantities it mechanically
 # implies. `schedule` carries total_steps and warmup, both derived from the block
@@ -100,9 +100,9 @@ def build(seed: str) -> tuple[dict, dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out-dir", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e6b")
+                    default=REPO_ROOT / "configs/stages/stage-3/e6b")
     ap.add_argument("--manifest", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e6b/provenance.json")
+                    default=REPO_ROOT / "configs/stages/stage-3/e6b/provenance.json")
     args = ap.parse_args()
 
     args.out_dir.mkdir(parents=True, exist_ok=True)

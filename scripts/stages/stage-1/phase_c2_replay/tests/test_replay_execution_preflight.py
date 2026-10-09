@@ -204,7 +204,7 @@ def test_the_artifact_specs_load_through_the_collectors_own_loader():
     from shared.pod.collect_artifacts import load_specs
 
     for name in ("c2_replay_artifacts.json", "c2_replay_artifacts_failed.json"):
-        specs = load_specs(str(ROOT / "configs/autoinit" / name))
+        specs = load_specs(str(ROOT / "configs/stages/stage-1/phase_c2_replay" / name))
         assert specs
         assert any(s.required for s in specs)
 
@@ -617,7 +617,7 @@ def test_the_driver_writes_its_evidence_where_the_collector_looks():
 
     from stages.phase_c2_replay import autoinit_c2_replay_launch as L
 
-    specs = load_specs(str(ROOT / "configs/autoinit/c2_replay_artifacts.json"))
+    specs = load_specs(str(ROOT / "configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json"))
     required = [x for x in specs if x.required]
     assert len(required) == 1, [x.pattern for x in required]
     pattern = required[0].pattern

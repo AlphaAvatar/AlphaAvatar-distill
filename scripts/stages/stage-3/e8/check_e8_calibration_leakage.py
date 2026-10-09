@@ -33,7 +33,7 @@ Four independent checks, all fail-closed:
         --calibration artifacts/stages/stage-1/e8_calibration_v1 \\
         --pack artifacts/shared/instruments/ladder_uniform_probe \\
         --sessions artifacts/stages/stage-3/corpus_v2/sessions.jsonl \\
-        --reserved data/eval_behavior_v0/prompts.jsonl \\
+        --reserved data/stages/stage-3/eval_behavior_v0/prompts.jsonl \\
         --reserved 'artifacts/stages/stage-3/eval/battery_v2/*.jsonl' \\
         --out artifacts/stages/stage-1/e8_calibration_v1/leakage.json
 

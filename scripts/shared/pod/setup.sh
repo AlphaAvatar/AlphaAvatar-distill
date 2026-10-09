@@ -40,7 +40,7 @@ git checkout main || fail checkout
 
 # --- data ---
 tar --use-compress-program=unzstd -xf "/workspace/xfer/$TRANSFER_DATA" || fail untar
-ls data/stage2_v1/train data/stage2/val "$HOLDOUT" || fail data_layout
+ls data/stages/stage-2/stage2_v1/train data/stages/stage-2/stage2/val "$HOLDOUT" || fail data_layout
 
 # Optional third artifact: data built on the dev box that is neither tracked in
 # the repo nor part of the standing mixture — the Stage 3 2x2 arms, which are

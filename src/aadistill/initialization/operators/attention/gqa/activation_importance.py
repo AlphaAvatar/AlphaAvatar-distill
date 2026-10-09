@@ -23,7 +23,7 @@ a frozen historical document must keep describing the code that actually ran.
 The extension route is the one `operators/__init__` documents — "an
 implementation defined elsewhere joins by calling ``register_implementation``".
 The specific set and digest this avoided are recorded in
-`docs/core-provenance.md`.
+`docs/maintenance/core-provenance.md`.
 
 **Registration is an explicit call, not an import side effect.** The first
 version of this module registered at import, and the full suite caught what that
@@ -273,7 +273,7 @@ class AttentionActivationImportanceV1(OperatorImplementation):
         _cuda_sync(compute)
         scorer_seconds = time.monotonic() - started
         #: THE TRANSFER BOUNDARY, and a defect this project has already paid
-        #: for once (`docs/core-provenance.md`).
+        #: for once (`docs/maintenance/core-provenance.md`).
         #:
         #: `state()` returns a HOST-RESIDENT snapshot on purpose — that is the
         #: evidence/cache form, and it is what gets hashed and kept. Handing it

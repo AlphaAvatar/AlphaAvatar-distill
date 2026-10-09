@@ -64,8 +64,8 @@ def main() -> None:
         alias = f"P2-2.96M-{seed}"
         arm = reg["arms"][alias]
         cfg = json.loads((REPO_ROOT / arm["config"]).read_text())
-        e1 = json.loads((REPO_ROOT / f"configs/stage3/e1/e1_r2960k_{seed}_pca.json").read_text())
-        p2 = json.loads((REPO_ROOT / f"configs/stage3/e4/e4_p2_r1600k_{seed}.json").read_text())
+        e1 = json.loads((REPO_ROOT / f"configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json").read_text())
+        p2 = json.loads((REPO_ROOT / f"configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json").read_text())
 
         got_sha = sha256_json(cfg)
         d_e1 = diff_keys(cfg, e1)

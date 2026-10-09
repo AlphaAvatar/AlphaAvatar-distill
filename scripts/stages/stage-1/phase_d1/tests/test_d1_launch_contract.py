@@ -150,7 +150,7 @@ class TestOneAuthoritativeEvidenceLayout:
         Three of the five entries did."""
         for name in ("d1_search_artifacts.json",
                      "d1_search_artifacts_failed.json"):
-            doc = json.loads((REPO / "configs/autoinit" / name).read_text())
+            doc = json.loads((REPO / "configs/stages/stage-1/phase_d1" / name).read_text())
             for entry in doc["entries"]:
                 assert not entry["pattern"].startswith("artifacts/"), (
                     name, entry["artifact_class"], entry["pattern"])

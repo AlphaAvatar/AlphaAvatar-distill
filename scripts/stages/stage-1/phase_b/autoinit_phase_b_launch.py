@@ -658,8 +658,8 @@ def spec(args) -> SessionSpec:
             #: — per-state timings, beam contents, how close it came — was
             #: deleted with the pod because the collector looked in
             #: `phase_a_search`. The probe minimums here are also Phase B's own.
-            spec_success="configs/autoinit/phase_b_artifacts.json",
-            spec_failed="configs/autoinit/phase_b_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_b/phase_b_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_b/phase_b_artifacts_failed.json",
             report_names=("phase_a_evidence.json",
                           "attested_evaluation_protocol.json",
                           "phase_b_stage0_binding.json", "search_result.json",

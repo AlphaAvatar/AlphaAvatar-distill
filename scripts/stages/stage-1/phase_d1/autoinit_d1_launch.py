@@ -1020,11 +1020,11 @@ def spec(args) -> SessionSpec:
             #: 0.72 MB/s uplink with the pod still billing. Nothing on the dev
             #: box consumes search checkpoints; the decision reads scores,
             #: digests and identities, all of which are JSON.
-            spec_success="configs/autoinit/d1_search_artifacts.json",
+            spec_success="configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
             #: NOTHING IS `required` ON THE FAILURE PATH. An early refusal may
             #: legitimately have produced none of it, and demanding an artifact
             #: there would block the collection of what the run DOES have.
-            spec_failed="configs/autoinit/d1_search_artifacts_failed.json",
+            spec_failed="configs/stages/stage-1/phase_d1/d1_search_artifacts_failed.json",
             report_names=("d1_search.json", "journal.jsonl",
                           "stage1_selection.json"),
             #: THE COMMITTED TOP-2 ARE PRODUCTS. Without these two the runner

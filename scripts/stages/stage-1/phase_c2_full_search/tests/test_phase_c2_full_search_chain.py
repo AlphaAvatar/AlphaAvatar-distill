@@ -300,7 +300,7 @@ def test_the_historical_c2_cap_matches_the_decision_c2_ran_under():
       3. the canonical owner states the CURRENT cap.
     """
     cfg = FA.load_config(REPO)
-    owner_path = "configs/experiments/phase_c1/authorization.json"
+    owner_path = "configs/stages/stage-1/phase_c1/authorization.json"
     owner = json.loads((REPO / owner_path).read_text())
 
     c2_cap = cfg["accepted_pricing"]["cumulative_cap_usd"]
@@ -448,7 +448,7 @@ def test_a_basis_claiming_to_be_a_quote_is_refused(tmp_path):
     """The guard must actually fire."""
     doc = json.loads((REPO / FSG.STORAGE_PRICING).read_text())
     doc["container_disk"]["provider_api_exposes_this"] = True
-    fake = tmp_path / "configs/infrastructure"
+    fake = tmp_path / "configs/shared/infrastructure"
     fake.mkdir(parents=True)
     (fake / "provider_storage_pricing.json").write_text(json.dumps(doc))
     with pytest.raises(Exception, match="does not"):
@@ -898,7 +898,7 @@ def test_both_artifact_specs_load_through_the_collectors_own_loader(name):
     sys.modules["collect_artifacts_for_test"] = module
     collector.loader.exec_module(module)
 
-    specs = module.load_specs(str(REPO / f"configs/autoinit/{name}.json"))
+    specs = module.load_specs(str(REPO / f"configs/stages/stage-1/phase_c2_full_search/{name}.json"))
     assert len(specs) == 5
     classes = {s.artifact_class for s in specs}
     assert {"session_evidence", "stage1_selection", "search_journal",
@@ -912,9 +912,9 @@ def test_the_failed_spec_requires_only_the_evidence():
     a failed run DOES have.
     """
     success = json.loads(
-        (REPO / "configs/autoinit/c2_full_search_artifacts.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c2_full_search/c2_full_search_artifacts.json").read_text())
     failed = json.loads(
-        (REPO / "configs/autoinit/c2_full_search_artifacts_failed.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c2_full_search/c2_full_search_artifacts_failed.json").read_text())
     req_success = {e["artifact_class"] for e in success["entries"] if e["required"]}
     req_failed = {e["artifact_class"] for e in failed["entries"] if e["required"]}
     assert req_failed == {"session_evidence"}
@@ -935,7 +935,7 @@ def test_the_artifact_patterns_are_the_ones_the_driver_actually_writes():
     assert 'artifacts/autoinit/phase_c2_full_search' in driver
     assert 'artifacts/audit/autoinit_phase_c2_full_search' in driver
     for name in ("c2_full_search_artifacts", "c2_full_search_artifacts_failed"):
-        doc = json.loads((REPO / f"configs/autoinit/{name}.json").read_text())
+        doc = json.loads((REPO / f"configs/stages/stage-1/phase_c2_full_search/{name}.json").read_text())
         for entry in doc["entries"]:
             pattern = entry["pattern"]
             assert (pattern.startswith("autoinit/phase_c2_full_search/")

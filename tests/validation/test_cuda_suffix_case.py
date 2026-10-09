@@ -30,7 +30,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 ENTRY = REPO / "scripts/shared/validation/cuda_engineering_check.py"
-CONFIG = REPO / "configs/validation/cuda_engineering.json"
+CONFIG = REPO / "configs/shared/validation/cuda_engineering.json"
 
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "tests/initialization"))

@@ -32,8 +32,8 @@ sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-CONTROL_DIR = REPO_ROOT / "configs/stage3/e1"
-OUT_DIR = REPO_ROOT / "configs/stage3/e8b"
+CONTROL_DIR = REPO_ROOT / "configs/stages/stage-3/e1"
+OUT_DIR = REPO_ROOT / "configs/stages/stage-3/e8b"
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 
 # cell -> (init path, regime, hardware class the cell trains on)
@@ -92,7 +92,7 @@ def main() -> int:
             cfg["_purpose"] = (
                 f"E8b cell {cell.upper()} ({regime}, {DEPTH_MAP[cell]} depth map), "
                 f"seed {seed}, on {hardware}. The canonical E1/P1 KD-heavy 1.60M "
-                f"recipe; differs from configs/stage3/e1/{control_name} only in "
+                f"recipe; differs from configs/stages/stage-3/e1/{control_name} only in "
                 "student_path (the intended causal variable), run_name, out_dir and "
                 f"this note.{extra}")
             ordered = {k: cfg[k] for k in control}
@@ -110,7 +110,7 @@ def main() -> int:
                 "depth_map": DEPTH_MAP[cell], "hardware": hardware,
                 "seed_alias": seed, "seed": ordered["seed"],
                 "path": str(path.relative_to(REPO_ROOT)),
-                "control": f"configs/stage3/e1/{control_name}",
+                "control": f"configs/stages/stage-3/e1/{control_name}",
                 "config_sha256": sha256_json(ordered),
                 "control_sha256": sha256_json(control),
                 "student_path": init,

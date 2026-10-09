@@ -20,7 +20,7 @@ sys.path.insert(0, str(REPO / "src"))
 from aadistill.initialization.planning import generation as _gen  # noqa: E402
 from aadistill.initialization.planning import recovery as _rec  # noqa: E402
 
-SOURCE_SETS_CONFIG = REPO / "configs/experiments/phase_a/source_sets.json"
+SOURCE_SETS_CONFIG = REPO / "configs/stages/stage-1/source_sets.json"
 _DOC = json.loads(SOURCE_SETS_CONFIG.read_text())
 
 #: The current scorer. Historical versions name the paths completed runs

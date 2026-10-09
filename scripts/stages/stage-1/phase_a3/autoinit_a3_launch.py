@@ -70,8 +70,8 @@ RUN_EXPERIMENT_ID = "phase_a3"
 #: recovery probes to answer a Stage-1 question; `a3_chain` is a phase name,
 #: not a stage id, and `rel_run_dir` correctly refused it.
 RUN_STAGE_ID = load_config(REPO_ROOT)["stage_id"]
-SPEC_SUCCESS = "configs/autoinit/a3_artifacts.json"
-SPEC_FAILED = "configs/autoinit/a3_artifacts_failed.json"
+SPEC_SUCCESS = "configs/stages/stage-1/phase_a3/a3_artifacts.json"
+SPEC_FAILED = "configs/stages/stage-1/phase_a3/a3_artifacts_failed.json"
 
 #: The pod's blocking test gate, as a POSITIVE selection. The shared setup
 #: script runs `pytest tests/ $SESSION_TEST_IGNORES` and a session may only add
@@ -907,7 +907,7 @@ def spec(args) -> SessionSpec:
             #: source for a value that already has one.
             env={"SESSION_KIND": "a3",
                  "SESSION_FROZEN_EXPECT":
-                     "configs/experiments/phase_c3/frozen_assets.json"},
+                     "configs/stages/stage-1/phase_c3/frozen_assets.json"},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",
                           "SESSION_AUTH_PATH", "SESSION_PLAN_HASH",
                           "SESSION_ASSETS", "SESSION_RELAY_INPUTS",

@@ -94,7 +94,7 @@ def main() -> None:
     ap.add_argument("--out", default="logs/stages/stage-3/e1/analyses/e1_test_cases.md")
     ap.add_argument("--per-bucket", type=int, default=6)
     ap.add_argument("--prompts", nargs="*",
-                    default=["data/eval_behavior_v0/prompts.jsonl",
+                    default=["data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
                              "artifacts/stages/stage-3/eval/e1/gsm8k_reasoning_100.jsonl"],
                     help="prompt sets to join by id, so cases show the question")
     args = ap.parse_args()

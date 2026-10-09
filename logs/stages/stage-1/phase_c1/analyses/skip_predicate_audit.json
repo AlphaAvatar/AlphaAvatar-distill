@@ -16,7 +16,7 @@
  "n_differs_on_pod": 17,
  "n_unrecognised": 15,
  "n_registered": 51,
- "registry": "configs/autoinit/c1_skip_predicate_classification.json",
+ "registry": "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
    "scripts/stages/stage-1/phase_a3/tests/test_a3_aggregation.py",
@@ -976,5 +976,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "a5761cb49dee1b510e36d597f12a963e20931460de77c763e02a3f28023c6584"
+ "digest": "ac26e075aef4046a49de37e46fc2ef5558305adfe4ddd9095f91aaed88bb3207"
 }

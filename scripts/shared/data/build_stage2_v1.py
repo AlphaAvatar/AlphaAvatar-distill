@@ -15,8 +15,8 @@ Design (see logs/stages/stage-3/history/EXPERIMENTS.md):
   the v0 jsonl ids) or from new sources; global content dedup is seeded with
   the digests of every v0 sample (train, val, calib), which is also the
   leakage guard keeping frozen v0 val/calib content out of v1 train.
-* v0 `val` (771) and `calib` (120) stay frozen in data/stage2/. This build
-  writes data/stage2_v1/: train = v0-carried + new, val = fresh val_v1 slice
+* v0 `val` (771) and `calib` (120) stay frozen in data/stages/stage-2/stage2/. This build
+  writes data/stages/stage-2/stage2_v1/: train = v0-carried + new, val = fresh val_v1 slice
   (same modular rule), calib = v0's 120 + up to 10 new per group (~200).
 * New sources: smol-smoltalk, OpenMathInstruct-2 (train_1M), Magicoder-OSS-
   Instruct-75K, everyday-conversations-llama3.1-2k, xlam-function-calling-60k
@@ -50,8 +50,8 @@ from aadistill.data.dataset import GROUPS, load_jsonl, validate_sample
 from aadistill.infrastructure.env import code_state
 from aadistill.infrastructure.manifest import sha256_file, write_manifest
 
-V0_DIR = REPO_ROOT / "data/stage2"
-OUT_DIR = REPO_ROOT / "data/stage2_v1"
+V0_DIR = REPO_ROOT / "data/stages/stage-2/stage2"
+OUT_DIR = REPO_ROOT / "data/stages/stage-2/stage2_v1"
 MIXTURE = "stage2_offline_v1"
 XLAM_REPO = "Salesforce/xlam-function-calling-60k"
 
@@ -449,7 +449,7 @@ def main() -> None:
 
         final = {
             "train": train_carried.get(group, []) + splits["train"],
-            "val": splits["val"],  # val_v1; frozen val_v0 stays in data/stage2
+            "val": splits["val"],  # val_v1; frozen val_v0 stays in data/stages/stage-2/stage2
             "calib": calib_v0.get(group, []) + splits["calib"],
         }
         group_records[group] = {}
@@ -484,7 +484,7 @@ def main() -> None:
                 V0_DIR / "stage2_offline_v0.manifest.json"),
             "carry": carry_stats,
             "note": ("v0 train carried into v1 train (gsm8k normalized); v0 "
-                     "val/calib stay frozen in data/stage2/ as val_v0 and the "
+                     "val/calib stay frozen in data/stages/stage-2/stage2/ as val_v0 and the "
                      "first 120 calib samples; v1 val split is val_v1 only"),
         },
         "schema": {

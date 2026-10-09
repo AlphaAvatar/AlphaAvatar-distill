@@ -7320,7 +7320,7 @@ two devices, cuda:0 and cpu!
   is clean. The choice was therefore between finishing and restoring, and
   restoring is the honest one at the point where the remaining work is the
   delicate part.
-- **What survives:** [`docs/SESSION_ARCHITECTURE.md`](../../docs/SESSION_ARCHITECTURE.md)
+- **What survives:** [`docs/SESSION_ARCHITECTURE.md`](../../docs/shared/SESSION_ARCHITECTURE.md)
   — the problem stated in money, the three failures it explains, the full type
   list, the manifest-driven setup contract, the structural checks it must ship
   with, what the aborted build demonstrated, and the order to do it in, with an

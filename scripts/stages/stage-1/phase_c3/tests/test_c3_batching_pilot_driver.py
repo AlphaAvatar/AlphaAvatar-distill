@@ -257,9 +257,9 @@ def test_check_inputs_REFUSES_when_a_mixture_is_absent(tmp_path):
     import shutil
 
     fake = tmp_path / "repo"
-    (fake / "configs/calibration").mkdir(parents=True)
-    shutil.copy(REPO / "configs/calibration/profiles.json",
-                fake / "configs/calibration/profiles.json")
+    (fake / "configs/stages/stage-1/calibration").mkdir(parents=True)
+    shutil.copy(REPO / "configs/stages/stage-1/calibration/profiles.json",
+                fake / "configs/stages/stage-1/calibration/profiles.json")
     (fake / "logs/stages/stage-1/phase_c3/pilots/batching-adoption/v1").mkdir(
         parents=True)
     shutil.copy(REPO / "logs/stages/stage-1/phase_c3/pilots/batching-adoption"

@@ -26,7 +26,7 @@ behaviour following would itself be a finding.
 
 Usage:
     uv run python scripts/shared/evaluation/probe_think_close.py --model <path-or-id[@rev]> \
-        [--data-dir data/stage2_v1] [--per-group 4] [--out probe.json]
+        [--data-dir data/stages/stage-2/stage2_v1] [--per-group 4] [--out probe.json]
 """
 
 from __future__ import annotations
@@ -51,7 +51,7 @@ TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True, help="path or id[@revision]")
-    ap.add_argument("--data-dir", default="data/stage2_v1")
+    ap.add_argument("--data-dir", default="data/stages/stage-2/stage2_v1")
     ap.add_argument("--split", default="train")
     ap.add_argument("--per-group", type=int, default=4)
     ap.add_argument("--dtype", default="float32")

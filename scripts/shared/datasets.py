@@ -1,7 +1,7 @@
 """The concrete datasets this project has frozen.
 
 The application layer. The assets themselves are DATA and live in
-`configs/datasets/assets.json`; what an asset *is*, and the role isolation that
+`configs/shared/datasets/assets.json`; what an asset *is*, and the role isolation that
 governs it, live in `aadistill.initialization.calibration.datasets`; and the
 decision to load these particular three is made here.
 
@@ -25,7 +25,7 @@ from aadistill.initialization.calibration.datasets import (  # noqa: E402
     get_asset, load_assets)
 
 #: Where the assets are declared. Data, not code.
-ASSET_CONFIG = REPO / "configs/datasets/assets.json"
+ASSET_CONFIG = REPO / "configs/shared/datasets/assets.json"
 
 
 def register_builtin_assets(config: Path | None = None) -> tuple:

@@ -8,7 +8,7 @@ so the declaration was an existence assertion for the $0 precheck and the
 staging was hidden — the relay-side twin of the `LOCAL_ASSETS` defect that cost
 the device-canary retry $0.0637.
 
-They are here, and not in `src/aadistill/`, because `docs/REPO_LAYOUT.md` rule 1
+They are here, and not in `src/aadistill/`, because `docs/maintenance/REPO_LAYOUT.md` rule 1
 is that the algorithm core holds no model-recipe constants: teacher ids, target
 geometry and frozen hashes live in the scripts and configs that own them.
 

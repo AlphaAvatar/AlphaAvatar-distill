@@ -76,7 +76,7 @@ def test_tool_schema_renders_into_the_system_block():
     assert "search_recipes" in head
 
 
-@pytest.mark.parametrize("suite", ["data/eval_behavior_v0/prompts.jsonl"])
+@pytest.mark.parametrize("suite", ["data/stages/stage-3/eval_behavior_v0/prompts.jsonl"])
 def test_real_prompt_set_renders_one_system_turn_each(suite):
     """Runs against the committed behaviour set, not a fixture."""
     import json

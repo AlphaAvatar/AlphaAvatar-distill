@@ -148,7 +148,7 @@ def args(**over):
                 experiment_id=mod_default("DEFAULT_EXPERIMENT_ID"),
                 stage_id=mod_default("DEFAULT_STAGE_ID"),
                 check="scripts/shared/validation/cuda_engineering_check.py",
-                check_config="configs/validation/cuda_engineering.json",
+                check_config="configs/shared/validation/cuda_engineering.json",
                 ship=[], gpu=[])
     base.update(over)
     return types.SimpleNamespace(**base)

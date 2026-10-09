@@ -83,7 +83,7 @@ def main() -> None:
     ap.add_argument("--runs", required=True, type=Path)
     ap.add_argument("--pack", required=True, type=Path)
     ap.add_argument("--configs", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e1")
+                    default=REPO_ROOT / "configs/stages/stage-3/e1")
     ap.add_argument("--out", required=True, type=Path)
     args = ap.parse_args()
 

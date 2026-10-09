@@ -1,7 +1,7 @@
 """The concrete calibration mixtures this project has defined.
 
 This is the application layer. The mixtures themselves are DATA and live in
-`configs/calibration/profiles.json`; what a profile *is* lives in
+`configs/stages/stage-1/calibration/profiles.json`; what a profile *is* lives in
 `aadistill.initialization.calibration.profiles`; and the decision to load these
 particular four is made here, where an experiment-instance decision belongs.
 
@@ -27,7 +27,7 @@ from aadistill.initialization.calibration.profiles import (  # noqa: E402
     get_profile, load_profiles)
 
 #: Where the mixtures are declared. Data, not code.
-PROFILE_CONFIG = REPO / "configs/calibration/profiles.json"
+PROFILE_CONFIG = REPO / "configs/stages/stage-1/calibration/profiles.json"
 
 
 def register_builtin_profiles(config: Path | None = None) -> tuple:

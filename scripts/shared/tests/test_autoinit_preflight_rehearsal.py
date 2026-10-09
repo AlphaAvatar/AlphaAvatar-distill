@@ -593,13 +593,13 @@ def test_both_artifact_specs_actually_load():
     spec_mod.loader.exec_module(collect)
 
     for name in ("preflight_artifacts.json", "preflight_artifacts_failed.json"):
-        specs = collect.load_specs(str(REPO / "configs/autoinit" / name))
+        specs = collect.load_specs(str(REPO / "configs/shared/pod/preflight" / name))
         assert specs, f"{name} loaded no specs"
         for entry in specs:
             assert entry.artifact_class and entry.pattern
     # The success spec must demand what the session exists to produce.
     success = {e.pattern for e in
-               collect.load_specs(str(REPO / "configs/autoinit/preflight_artifacts.json"))}
+               collect.load_specs(str(REPO / "configs/shared/pod/preflight/preflight_artifacts.json"))}
     for needed in ("stage3/preflight_ctl_r0860k_s*/run_completion.json",
                    "audit/autoinit_preflight/preflight_ctl_r0860k_s*_probe_identity.json",
                    "audit/autoinit_preflight/materialized_thresholds.json",

@@ -47,7 +47,7 @@ INIT_DIR = REPO_ROOT / "artifacts/stages/stage-1/e8_contribution_init_v1"
 CONTROL_INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONTROL_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 CONTROL_PARAMS = 596_049_920
-CONFIG = "configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json"
+CONFIG = "configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json"
 CKPT_FILES = ("config.json", "generation_config.json", "model.safetensors",
               "tokenizer.json", "tokenizer_config.json", "chat_template.jinja")
 

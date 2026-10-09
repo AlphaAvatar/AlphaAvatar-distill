@@ -23,8 +23,8 @@ README = REPO / "README.md"
 STATE = REPO / "logs/state/current.md"
 SNAPSHOT = REPO / "logs/state/current.json"
 CATALOG = REPO / "logs/state/ownership.md"
-LAYOUT = REPO / "docs/REPO_LAYOUT.md"
-POD_SCRIPTS = REPO / "docs/POD_SCRIPTS.md"
+LAYOUT = REPO / "docs/maintenance/REPO_LAYOUT.md"
+POD_SCRIPTS = REPO / "docs/shared/POD_SCRIPTS.md"
 
 
 def backticked(path: Path) -> set[str]:
@@ -77,7 +77,7 @@ def test_the_readme_points_at_the_owners_of_the_facts_it_dropped():
     text = README.read_text()
     for owner in ("logs/state/current.json", "logs/state/current.md",
                   "logs/budget/ledger.md", "logs/state/ownership.md",
-                  "docs/REPO_LAYOUT.md"):
+                  "docs/maintenance/REPO_LAYOUT.md"):
         assert owner in text, f"the README does not point at {owner}"
 
 
@@ -105,7 +105,7 @@ def test_every_path_named_in_the_repo_layout_exists():
 
     Absolute references are a different kind of claim. The two the document
     names — the out-of-tree artifact store and the scratch area — are real
-    operational facts about the maintainer host, and `docs/REPO_LAYOUT.md`
+    operational facts about the maintainer host, and `docs/maintenance/REPO_LAYOUT.md`
     should keep naming them exactly. But `Path(REPO) / "/home/ecs-user/..."`
     **discards the base**, so the original assertion read the literal host
     filesystem and demanded that every execution environment be the maintainer's
@@ -568,7 +568,7 @@ def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
 
 
 def test_the_obsolete_handoff_is_archived_and_bannered():
-    archived = REPO / "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
+    archived = REPO / "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
     assert archived.is_file()
     assert not (REPO / "docs/HANDOFF_AUTOINITIALIZER.md").exists(), (
         "the superseded handoff is still in the live docs directory")
@@ -615,7 +615,7 @@ def _registered_run_dirs() -> tuple[str, ...]:
 def test_no_markdown_link_points_at_a_file_that_is_not_there():
     """Cross-references are what replaces a duplicated copy, so a broken one is
     a lost fact rather than a cosmetic defect. Two whole classes of these existed
-    until 2026-08-18: docs/AUTOINIT_REFERENCE.md linked to `logs/` files as if
+    until 2026-08-18: docs/stages/stage-1/AUTOINIT_REFERENCE.md linked to `logs/` files as if
     they were siblings, and the handoff kept `../logs/…` after being moved a
     directory deeper."""
     broken = []

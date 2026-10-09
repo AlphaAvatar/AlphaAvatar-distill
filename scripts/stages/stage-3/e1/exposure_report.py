@@ -21,7 +21,7 @@ for rung in LADDER["rungs"]:
     target = rung["target_supervised_tokens"]
     tag = {250_000: "0250k", 460_000: "0460k", 860_000: "0860k",
            1_600_000: "1600k", 2_960_000: "2960k", 5_500_000: "5500k"}[target]
-    cfg = json.loads(Path(f"configs/stage3/e1/e1_r{tag}_sa_pca.json").read_text())
+    cfg = json.loads(Path(f"configs/stages/stage-3/e1/e1_r{tag}_sa_pca.json").read_text())
     steps = cfg["schedule"]["total_steps"]
     bps = cfg["batch"]["blocks_per_step"]
 

@@ -74,13 +74,13 @@ LOCAL_PREFIXES = {
     # directory would make this a changelog rather than a guard against `stage4/`.
     "artifacts/stages/stage-1",
     "artifacts/stages/stage-3/eval",
-    "data/eval_behavior_v0",
+    "data/stages/stage-3/eval_behavior_v0",
     "artifacts/stages/stage-1/qwen3_0p6b_init_v0",
     "artifacts/stages/stage-3",
     "artifacts/shared",
     "artifacts/audit",
-    "configs/stage3",
-    "data/warmup",
+    "configs/stages/stage-3",
+    "data/stages/stage-0/warmup",
     "scripts",
     "tests",
     "src",
@@ -219,7 +219,7 @@ def test_launcher_scratch_paths_match_its_own_experiment(script):
         assert token == prefix, (
             f"{script.name} references scratch path {token!r} but belongs to "
             f"{prefix!r} — collateral from a global rename")
-    for token in set(re.findall(r"configs/stage3/(e\d+)\b", text)):
+    for token in set(re.findall(r"configs/stages/stage-3/(e\d+)\b", text)):
         assert token == prefix, (
             f"{script.name} bundles {token!r} configs but belongs to {prefix!r} "
             "— the returned side bundle would carry the wrong experiment")

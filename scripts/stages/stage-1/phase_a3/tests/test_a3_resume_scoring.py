@@ -220,7 +220,7 @@ def test_the_cited_evidence_the_resume_run_carries_exists():
     import json as _json
 
     spec = _json.loads(
-        (REPO / "configs/autoinit/a3_artifacts.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_a3/a3_artifacts.json").read_text())
     required = {e["pattern"].rsplit("/", 1)[-1] for e in spec["entries"]
                 if e.get("required") and "*" not in e["pattern"]
                 and "/audit/" in f"/{e['pattern']}"}

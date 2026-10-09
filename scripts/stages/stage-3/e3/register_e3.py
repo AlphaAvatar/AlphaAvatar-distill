@@ -33,12 +33,12 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
 INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONFIGS = {
-    "A0-P2-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
-    "A0-P2-sb": "configs/stage3/p2/p2_ceheavy_sb.json",
-    "A1-frozen-attn-sa": "configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-    "A1-frozen-attn-sb": "configs/stage3/e3/e3_a1_frozen_attn_sb.json",
-    "A2-lora-attn-sa": "configs/stage3/e3/e3_a2_lora_attn_sa.json",
-    "A2-lora-attn-sb": "configs/stage3/e3/e3_a2_lora_attn_sb.json",
+    "A0-P2-sa": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+    "A0-P2-sb": "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+    "A1-frozen-attn-sa": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
+    "A1-frozen-attn-sb": "configs/stages/stage-3/e3/e3_a1_frozen_attn_sb.json",
+    "A2-lora-attn-sa": "configs/stages/stage-3/e3/e3_a2_lora_attn_sa.json",
+    "A2-lora-attn-sb": "configs/stages/stage-3/e3/e3_a2_lora_attn_sb.json",
 }
 
 DECISION_RULES = [
@@ -156,7 +156,7 @@ def main() -> None:
             "corpus_sessions_sha256": sha256_file(
                 REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"),
             "holdout_v1_sha256": sha256_file(
-                REPO_ROOT / "data/warmup/holdout_v1.jsonl"),
+                REPO_ROOT / "data/stages/stage-0/warmup/holdout_v1.jsonl"),
         },
         "evaluation": {
             "harness": "scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",

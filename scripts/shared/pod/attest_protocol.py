@@ -71,7 +71,7 @@ def main() -> None:
     ap.add_argument("--image-digest", required=True,
                     help="the container image digest this pod is running")
     ap.add_argument("--attention-backend", default="sdpa")
-    ap.add_argument("--config", default="configs/stage3/e1/e1_r0860k_sa_pca.json")
+    ap.add_argument("--config", default="configs/stages/stage-3/e1/e1_r0860k_sa_pca.json")
     ap.add_argument("--skip-input-hashes", action="store_true",
                     help="dry-run the handshake off-pod, where inputs are absent")
     ap.add_argument("--out", default="logs/shared/validations/micro-preflight/autoinit_phase_a_protocol_attested.json")

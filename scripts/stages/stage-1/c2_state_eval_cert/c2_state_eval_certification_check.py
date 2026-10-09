@@ -3,7 +3,7 @@
 
     PYTHONPATH=src:scripts python \
         scripts/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification_check.py \
-        --config configs/validation/c2_state_eval_certification.json --run-id <id>
+        --config configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json --run-id <id>
 
 The performance round measured the reduction's speedup well, on four
 calibration items and 2032 prediction positions. It did **not** exercise the

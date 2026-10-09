@@ -66,7 +66,7 @@ def project_position(all_in: float) -> dict:
     """Where this ceiling sits against the cumulative cap.
 
     From `derive_budget.py`, which is the canonical deriver: the cap is owned by
-    `configs/experiments/phase_c1/authorization.json ::
+    `configs/stages/stage-1/phase_c1/authorization.json ::
     accepted_pricing.cumulative_cap_usd` and the spend is computed from the run
     closeouts. Regexing the ledger prose instead — which an earlier draft of
     this script did — would make a narrative file the authority for money, and

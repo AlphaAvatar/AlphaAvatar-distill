@@ -1780,7 +1780,7 @@ def load_items(cfg: dict, vocab: int) -> tuple[list, dict]:
 
     provenance: dict = {"requested": cfg["calibration_profile"]}
     try:
-        doc = json.loads((REPO / "configs/calibration/profiles.json").read_text())
+        doc = json.loads((REPO / "configs/stages/stage-1/calibration/profiles.json").read_text())
         load_profiles(doc)
         profile = get_profile(cfg["calibration_profile"])
         raw = profile.resolve(REPO)[: int(cfg["n_items"])]

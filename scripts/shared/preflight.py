@@ -29,7 +29,7 @@ from aadistill.governance.authorization import (  # noqa: E402
     ActionPolicy, SpendAuthorization, harness_source_digest)
 
 #: Where the harness is declared. Data, not code.
-HARNESS_CONFIG = REPO / "configs/experiments/preflight/harness.json"
+HARNESS_CONFIG = REPO / "configs/shared/pod/preflight/harness.json"
 
 _HARNESS = json.loads(HARNESS_CONFIG.read_text())
 

@@ -57,7 +57,7 @@ def main() -> None:
     ap.add_argument("--rung", type=int, default=860000)
     ap.add_argument("--blocks", type=int, default=4)
     ap.add_argument("--config", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e1/e1_r0860k_sa_pca.json")
+                    default=REPO_ROOT / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json")
     ap.add_argument("--seq", type=int, default=0,
                     help="optional truncation of each block, for CPU feasibility")
     ap.add_argument("--out", required=True, type=Path)

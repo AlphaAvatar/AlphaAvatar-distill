@@ -1,6 +1,6 @@
 """Where Phase C2's frozen assets are, resolved from the document that declares them.
 
-`configs/experiments/phase_c2/frozen_assets.json` is the expectation the pod's
+`configs/stages/stage-1/phase_c2/frozen_assets.json` is the expectation the pod's
 setup verifies before any measurement, and it already states the one asset C2
 consumes and the root it must live at. This module reads that declaration so a
 consumer does not restate the path.
@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Any
 
 #: The declaration. Named ONCE, here.
-EXPECTATION_DOCUMENT = "configs/experiments/phase_c2/frozen_assets.json"
+EXPECTATION_DOCUMENT = "configs/stages/stage-1/phase_c2/frozen_assets.json"
 
 #: The asset C2 consumes. There is exactly one.
 STATE_EVAL_ASSET = "state_eval_v1"

@@ -1,7 +1,7 @@
 """The micro-preflight session authorization.
 
 The application layer. The grant is DATA and lives in
-`configs/experiments/micro_preflight/authorization.json`; what an authorization
+`configs/shared/pod/micro_preflight/authorization.json`; what an authorization
 IS lives in `aadistill.governance.authorization`.
 
 It used to be written out inside `src/aadistill`, which put one session's
@@ -21,7 +21,7 @@ from aadistill.governance.authorization import authorization_from_dict  # noqa: 
 from shared.preflight import PREFLIGHT_POLICY  # noqa: E402
 
 AUTHORIZATION_CONFIG = (REPO
-                        / "configs/experiments/micro_preflight/authorization.json")
+                        / "configs/shared/pod/micro_preflight/authorization.json")
 
 #: Under the preflight's wire contract: this session's artifact carries the
 #: same schema and the same `preflight_plan_hash` key, so it reads and writes

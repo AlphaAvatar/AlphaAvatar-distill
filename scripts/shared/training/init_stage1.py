@@ -1,7 +1,7 @@
 """Stage 1: build a teacher-projected student checkpoint.
 
 Usage:
-    uv run python scripts/shared/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
+    uv run python scripts/shared/training/init_stage1.py --config configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json
 
 Consumes the Stage 0 activation-statistics cache, initializes the student via
 global activation-PCA stream projection + sandwich init (see

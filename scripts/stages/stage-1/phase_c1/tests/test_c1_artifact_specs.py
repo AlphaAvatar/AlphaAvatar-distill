@@ -40,8 +40,8 @@ from stages.phase_c1.authorization import C1_HARNESS_SOURCE_FILES_V1  # noqa: E4
 from stages.phase_c1.isolation import derive_recovery_seeds  # noqa: E402
 from shared.pod.collect_artifacts import load_specs  # noqa: E402
 
-SUCCESS = "configs/autoinit/c1_artifacts.json"
-FAILED = "configs/autoinit/c1_artifacts_failed.json"
+SUCCESS = "configs/stages/stage-1/phase_c1/c1_artifacts.json"
+FAILED = "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json"
 COLLECT = REPO / "scripts/shared/pod/collect_artifacts.py"
 BATTERY = json.loads(
     (REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json").read_text())
@@ -396,9 +396,9 @@ def test_artifact_spec_gate_catches_an_unmeasured_spec(monkeypatch):
 
 def test_artifact_spec_gate_catches_a_missing_file(monkeypatch):
     L = _gate()
-    monkeypatch.setattr(L, "SPEC_SUCCESS", "configs/autoinit/does_not_exist.json")
+    monkeypatch.setattr(L, "SPEC_SUCCESS", "configs/stages/stage-1/phase_c1/does_not_exist.json")
     monkeypatch.setattr(L, "C1_HARNESS_SOURCE_FILES_V1",
-                        ("configs/autoinit/does_not_exist.json", FAILED))
+                        ("configs/stages/stage-1/phase_c1/does_not_exist.json", FAILED))
     ok, why = L.artifact_spec_gate(None)
     assert not ok and "missing" in why
 

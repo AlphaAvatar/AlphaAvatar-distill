@@ -14,20 +14,25 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 are made, and D1 does not resume until the repository information-architecture
 migration has been independently reviewed.
 
-**THE INFORMATION-ARCHITECTURE MIGRATION IS IMPLEMENTED and awaits that
-review**, on branch `migration/info-architecture`. The three trees are
-owner-first now — `scripts/{stages,shared,maintenance}`,
-`logs/stages/stage-1/families/d_series/`, `artifacts/{stages,shared,audit}` —
-with one declarative move map
-(`scripts/maintenance/migration/info_architecture.py`), the old→new table
-extended in `logs/index.json :: historical_paths.map`, derived `current.json`
-live-state records for D1 and the D-series family, and the hash-anchored
-record at `logs/maintenance/source-relocations/info-architecture/v1/`. No
-scientific identity moved: the D1 design regenerates byte-identically
-(`design_hash f9c6688f…`), the allocation rule is still `f6047343…`, all 42
-battery digests and all four finalists re-verified after their physical moves
-— the finalists now in the durable store at
-`/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
+**THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS IMPLEMENTED and awaits
+that review**, on branch `migration/info-architecture`. Round 1 (2026-10-08)
+made `scripts/`, `logs/` and `artifacts/` owner-first; round 2 (2026-10-09)
+finished the architecture across `configs/`, `data/` and `docs/` —
+`configs/stages/stage-{n}/{experiment}/`, `data/stages/stage-{n}/`,
+`docs/{stages,shared,maintenance}` — each round with its own declarative move
+map (`scripts/maintenance/migration/info_architecture.py`, `…_v2.py`), the
+old→new table extended to 731 pairs in `logs/index.json ::
+historical_paths.map`, the ownership index projected into all six trees
+(`{scripts,artifacts,configs,data,docs}/index.json`), derived `current.json`
+live-state records (D1's now answers battery readiness mechanically), and
+hash-anchored records at
+`logs/maintenance/source-relocations/info-architecture/{v1,v2}/`. The
+checkpoint registry was rebuilt **hashed** with the four D1 finalists'
+scientific identities bound and byte-verified. No scientific identity moved:
+the D1 design regenerates byte-identically (`design_hash f9c6688f…`), the
+allocation rule is still `f6047343…`, all 42 battery digests and all four
+finalists re-verified after their physical moves — the finalists in the
+durable store at `/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
 
 **Nothing is running and nothing is billing.** An account-wide provider query
 returns **0 pods and 0 network volumes** at a spend rate of `$0/h`, against a
@@ -2338,7 +2343,7 @@ provisions 400 GB of it, so a GPU-only ceiling did not cover the
 session — and no figure in the record disagreed with any other, which is
 why review found it rather than a gate. The GPU rate is re-quoted live;
 the storage price is a dated stated basis and
-[`provider_storage_pricing.json`](../../configs/infrastructure/provider_storage_pricing.json)
+[`provider_storage_pricing.json`](../../configs/shared/infrastructure/provider_storage_pricing.json)
 says so in a field a machine reads. The behavioural session's disk term
 is **bounded, not derived**: its launcher and provision do not exist yet,
 so it is bounded above by the search's own 400 GB and should fall when
@@ -2376,7 +2381,7 @@ built: it is a possible future design option and no plan here assumes it.
 
 **The roadmap is now C1–C4**, and the repeated shape is written down once as a
 family-neutral pattern in
-[`OPERATOR_PROMOTION_CYCLE.md`](../../docs/OPERATOR_PROMOTION_CYCLE.md):
+[`OPERATOR_PROMOTION_CYCLE.md`](../../docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md):
 operator R&D → isolation → promotion → full joint re-search → behavioural
 selection → new incumbent. C3 is causal-KL ATTENTION isolation on the C2
 incumbent and cannot start before C2 names one; C4 is conditional on C3
@@ -2553,7 +2558,7 @@ cheap pre-measurement abort consumes its actual cost and its one-use chain,
 nothing more. The ceiling, the `$1.09/h` L40S boundary and every frozen
 scientific identity stayed unchanged throughout; the project cap was
 `$320.0000` for those attempts and is now `$370.0000`, owned by
-`configs/experiments/phase_c1/authorization.json ::
+`configs/stages/stage-1/phase_c1/authorization.json ::
 accepted_pricing.cumulative_cap_usd`. Attempts 7
 and 8 both ran under that rule, and it is what let the work finish without
 another approval round.
@@ -3706,7 +3711,7 @@ governs retries **before** measurement and never after a complete verdict.
 
 Full terms — attempt counting, the six retry conditions, the stop list:
 `execution_package` in
-[`../configs/experiments/phase_c1/authorization.json`](../../configs/experiments/phase_c1/authorization.json).
+[`../../configs/stages/stage-1/phase_c1/authorization.json`](../../configs/stages/stage-1/phase_c1/authorization.json).
 Those terms are C1's. A C2 session would need its own grant and its own ceiling;
 neither the project headroom above nor C1's unused formal allowance is
 authorization for one.

@@ -140,7 +140,9 @@ RECOVERY_RECIPE = "E1_KD_HEAVY_0860K"
 
 
 def _load(rel: str) -> dict[str, Any]:
-    path = REPO / rel
+    from shared.run_layout import resolve_historical
+
+    path = REPO / resolve_historical(rel, REPO)
     if not path.is_file():
         raise SystemExit(
             f"{rel} is missing, and this design restates none of its figures. "

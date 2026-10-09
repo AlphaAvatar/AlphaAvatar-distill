@@ -257,9 +257,9 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--targets", default="artifacts/stages/stage-2/v2/pilot/targets.jsonl",
                     help="targets.jsonl from generate_teacher_answers.py")
-    ap.add_argument("--public-dir", default="data/stage2_v1",
+    ap.add_argument("--public-dir", default="data/stages/stage-2/stage2_v1",
                     help="data dir supplying the control arm's public targets")
-    ap.add_argument("--out", default="data/stage3_pilot")
+    ap.add_argument("--out", default="data/stages/stage-3/stage3_pilot")
     ap.add_argument("--val-frac", type=float, default=0.1)
     ap.add_argument("--block-len", type=int, default=8192,
                     help="block length to report best_fit packing against")

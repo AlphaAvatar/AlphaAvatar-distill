@@ -184,8 +184,8 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_measurement",
             evidence_filename="result.json",
             archive_basename="measurement_artifacts.tar.gz",
-            spec_success="configs/autoinit/measurement_artifacts.json",
-            spec_failed="configs/autoinit/measurement_artifacts.json",
+            spec_success="configs/stages/stage-1/measurement/measurement_artifacts.json",
+            spec_failed="configs/stages/stage-1/measurement/measurement_artifacts.json",
             report_names=("result.json",),
             event_streams=lambda ctx: (),
             #: Empty. The measurement produces no weights, by design.

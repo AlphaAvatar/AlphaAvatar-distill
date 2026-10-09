@@ -486,7 +486,7 @@ def test_storage_is_derived_from_the_recipe_and_two_resources_stay_apart():
 def test_a_recipe_with_an_unknown_dtype_refuses_to_be_priced(tmp_path):
     """A storage bound may not guess a dtype: the ratio between two dtypes is
     exactly the factor by which the bound would be wrong."""
-    bad = tmp_path / "configs/stage3/e1"
+    bad = tmp_path / "configs/stages/stage-3/e1"
     bad.mkdir(parents=True)
     (bad / "e1_r0860k_sa_pca.json").write_text(
         json.dumps({"dtype": "float9", "optim": {"betas": [0.9, 0.95]}}))
@@ -502,7 +502,7 @@ def test_a3_is_booked_to_the_formal_allowance():
     package says the engineering allowance authorizes neither."""
     assert pricing.BOOK == "formal_allowance"
     terms = json.loads(
-        (REPO / "configs/experiments/phase_c1/authorization.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_c1/authorization.json").read_text())
     forbidden = " ".join(terms["execution_package"][
         "engineering_allowance_does_not_authorize"]).lower()
     assert "confirmation battery" in forbidden
@@ -579,7 +579,7 @@ def test_the_phase_envelope_is_the_amount_the_maintainer_granted():
     `tests/infrastructure/test_same_failure_rule.py` and in the launcher's
     gate order.
     """
-    auth = json.loads((REPO / "configs/experiments/phase_c1/authorization.json")
+    auth = json.loads((REPO / "configs/stages/stage-1/phase_c1/authorization.json")
                       .read_text())
     pkg = auth["execution_package"]
     assert pkg["formal_allowance_usd"] == 76.6523

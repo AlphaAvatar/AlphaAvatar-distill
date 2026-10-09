@@ -113,7 +113,7 @@ INSTANCE_PATTERNS: tuple[tuple[str, re.Pattern], ...] = (
 #: their deferral rather than carrying it to the new paths. Their findings now
 #: COUNT, which is exactly what the paragraph above requires of a removal — and
 #: they were resolved the way the rule prescribes, by relocating this project's
-#: campaign-instance prose to `docs/core-provenance.md` and keeping the
+#: campaign-instance prose to `docs/maintenance/core-provenance.md` and keeping the
 #: mechanism. The historical CUDA surface itself is NOT edited here; it is
 #: preserved verbatim in `tests/architecture/test_cuda_surface_preserved.py`
 #: as `HISTORICAL_CUDA_VALIDATED_SURFACE`.
@@ -366,7 +366,7 @@ def scan_prose(path: str, source: str) -> list[dict]:
                     "why": (f"a {label} from this project's run history "
                             f"({m.group(0)!r}) documents reusable core with one "
                             "campaign's instance data; relocate it to "
-                            "docs/core-provenance.md and keep the mechanism"),
+                            "docs/maintenance/core-provenance.md and keep the mechanism"),
                 })
     return out
 

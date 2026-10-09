@@ -466,7 +466,7 @@ def teacher_and_environment_gib(repo_root: str | Path = REPO_ROOT) -> dict[str, 
     }
 
 
-STORAGE_PRICING = "configs/infrastructure/provider_storage_pricing.json"
+STORAGE_PRICING = "configs/shared/infrastructure/provider_storage_pricing.json"
 
 #: Headroom over the derived requirement. Disk is cents and a volume that fills
 #: at the residency peak loses every state the search has measured, so the
@@ -693,7 +693,7 @@ def staged_assets(repo_root: str | Path = REPO_ROOT) -> tuple[LocalAsset, ...]:
     #: a profile, because nothing in the search resolves it -- the evaluator
     #: does. One owner either way: the expectation document.
     suite = json.loads(
-        (Path(repo_root) / "configs/experiments/phase_c2/frozen_assets.json"
+        (Path(repo_root) / "configs/stages/stage-1/phase_c2/frozen_assets.json"
          ).read_text())["assets"]
     for name, entry in sorted(suite.items()):
         roots.append(entry["root"])
@@ -711,8 +711,8 @@ def declared_inputs(repo_root: str | Path = REPO_ROOT) -> tuple[str, ...]:
     """Every non-python input whose bytes belong in the executable identity."""
     return (
         PROTOCOL, PRICING,
-        "configs/experiments/phase_c2/frozen_assets.json",
-        "configs/experiments/phase_c2/full_search_authorization.json",
+        "configs/stages/stage-1/phase_c2/frozen_assets.json",
+        "configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
         "scripts/shared/pod/autoinit_preflight_setup.sh",
         *tracked_non_source_inputs(),
     )

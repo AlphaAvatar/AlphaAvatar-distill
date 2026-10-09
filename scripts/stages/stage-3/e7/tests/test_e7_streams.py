@@ -185,7 +185,7 @@ def test_the_shipped_disjointness_proof_covers_every_stream_and_passes():
 # --------------------------------------------------------------------------
 
 def test_the_e7_artifact_spec_requires_the_structured_training_stream():
-    spec = json.loads((REPO / "configs/stage3/e7/artifacts.json").read_text())
+    spec = json.loads((REPO / "configs/stages/stage-3/e7/artifacts.json").read_text())
     classes = {s["artifact_class"]: s for s in spec}
     assert classes["event_stream"]["required"] is True
     assert "train_log.jsonl" in classes["event_stream"]["pattern"]
@@ -200,7 +200,7 @@ def test_a_missing_training_stream_blocks_teardown(tmp_path):
     from aadistill.infrastructure.artifact_gate import (
         ArtifactSpec, build_manifest, evaluate_teardown,
     )
-    spec = json.loads((REPO / "configs/stage3/e7/artifacts.json").read_text())
+    spec = json.loads((REPO / "configs/stages/stage-3/e7/artifacts.json").read_text())
     specs = tuple(ArtifactSpec(**s) for s in spec)
 
     root = tmp_path / "artifacts"
@@ -224,7 +224,7 @@ def test_a_missing_training_stream_blocks_teardown(tmp_path):
 
 def test_an_undersized_training_stream_counts_as_missing(tmp_path):
     from aadistill.infrastructure.artifact_gate import ArtifactSpec, build_manifest
-    spec = json.loads((REPO / "configs/stage3/e7/artifacts.json").read_text())
+    spec = json.loads((REPO / "configs/stages/stage-3/e7/artifacts.json").read_text())
     specs = tuple(ArtifactSpec(**s) for s in spec
                   if s["artifact_class"] == "event_stream")
     root = tmp_path / "artifacts"

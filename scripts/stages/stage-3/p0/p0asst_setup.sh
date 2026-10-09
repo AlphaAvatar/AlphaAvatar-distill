@@ -159,8 +159,8 @@ say "verifying the single-variable guarantee"
 /opt/train/bin/python -c "
 import json
 for t in ('sa','sb'):
-    a=json.load(open(f'/workspace/aad/configs/stage3/e1/e1_r0860k_{t}_pca.json'))
-    b=json.load(open(f'/workspace/aad/configs/stage3/p0/p0_assistant_{t}.json'))
+    a=json.load(open(f'/workspace/aad/configs/stages/stage-3/e1/e1_r0860k_{t}_pca.json'))
+    b=json.load(open(f'/workspace/aad/configs/stages/stage-3/p0/p0_assistant_{t}.json'))
     ld={k for k in set(a['loss'])|set(b['loss']) if a['loss'].get(k)!=b['loss'].get(k)}
     assert ld=={'kd_scope'}, (t, ld)
     assert b['loss']['kd_scope']=='assistant'

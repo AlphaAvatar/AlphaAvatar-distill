@@ -16,7 +16,7 @@ attempt executed under. This script kept running afterwards and rewrote it four
 times, because four separate guards demanded that a document bound BEFORE any
 result existed keep describing the current tree. Nothing scientific ever drifted
 in those rewrites; the live-executable snapshot did, and that snapshot belongs to
-`configs/experiments/phase_c1/executable_closure.json`, which exists to be
+`configs/stages/stage-1/phase_c1/executable_closure.json`, which exists to be
 regenerated.
 
 So this still derives the whole document — the derivation IS the check, and a
@@ -77,8 +77,8 @@ NOT_BOUND_BY_THE_CLOSED_EXPERIMENT: tuple[str, ...] = (
 #: importing the launcher would pull the whole Phase-A launcher in; the copy is
 #: turned into a checked invariant by
 #: scripts/stages/stage-1/phase_c1/tests/test_c1_artifact_specs.py::test_writer_and_launcher_name_the_same_specs.
-SPEC_SUCCESS = "configs/autoinit/c1_artifacts.json"
-SPEC_FAILED = "configs/autoinit/c1_artifacts_failed.json"
+SPEC_SUCCESS = "configs/stages/stage-1/phase_c1/c1_artifacts.json"
+SPEC_FAILED = "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json"
 
 #: Every file whose bytes decide what the C1 session does. Same shape and same
 #: failure mode as the other source-digest sets: a missing declared file raises
@@ -689,7 +689,7 @@ def main() -> None:
     #: battery, teacher and scoring contract were identical every time. What
     #: drifted was `c1_harness`, a snapshot of what a CURRENT session would
     #: execute — which is exactly what
-    #: `configs/experiments/phase_c1/executable_closure.json` owns and is
+    #: `configs/stages/stage-1/phase_c1/executable_closure.json` owns and is
     #: regenerated for. One fact, one owner.
     #:
     #: So this refuses rather than writing. It still DERIVES the whole document,
@@ -725,7 +725,7 @@ def main() -> None:
             raise SystemExit(2)
         print("  every bound science field still reproduces from this tree; "
               "only the live-executable snapshot differs, and that belongs to "
-              "configs/experiments/phase_c1/executable_closure.json")
+              "configs/stages/stage-1/phase_c1/executable_closure.json")
         raise SystemExit(0)
 
     OUT.write_text(json.dumps(doc, indent=1) + "\n")

@@ -398,9 +398,9 @@ class E7:
         arc = f"{WS}/e7_artifacts.tar.gz"
         r_man = target.run(
             f"{cc} manifest --root {REPO}/artifacts "
-            f"--spec {REPO}/configs/stage3/e7/artifacts.json --out {man} "
+            f"--spec {REPO}/configs/stages/stage-3/e7/artifacts.json --out {man} "
             f"--settle-seconds {self.a.settle_seconds} "
-            f"--completion-markers {REPO}/configs/stage3/e7/completion_markers.json",
+            f"--completion-markers {REPO}/configs/stages/stage-3/e7/completion_markers.json",
             timeout=900)
         self.say(f"  manifest rc={r_man.returncode}\n{r_man.stdout.strip()[-900:]}")
         r_arc = target.run(f"{cc} archive --manifest {man} --out {arc}", timeout=1800)

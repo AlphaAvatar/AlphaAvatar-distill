@@ -60,7 +60,7 @@ def stage_train(args):
             print(f"{alias} already trained; skipping", flush=True)
             mark(f"TRAIN_DONE:{alias}")
             continue
-        cfg = REPO / f"configs/stage3/p0/{name}.json"
+        cfg = REPO / f"configs/stages/stage-3/p0/{name}.json"
         # Fail loudly if the single-variable guarantee was broken in transit.
         loaded = json.loads(cfg.read_text())
         assert loaded["loss"]["kd_scope"] == "assistant", loaded["loss"]

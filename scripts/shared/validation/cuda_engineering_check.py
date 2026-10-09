@@ -2,7 +2,7 @@
 """Execute the migrated initialization operators on a real CUDA device.
 
     PYTHONPATH=src:scripts python scripts/shared/validation/cuda_engineering_check.py \
-        --config configs/validation/cuda_engineering.json --run-id <id>
+        --config configs/shared/validation/cuda_engineering.json --run-id <id>
 
 This is ENGINEERING validation. It answers one question -- do the operators, as
 they exist after the initialization migration, plan and apply on a real device
@@ -420,7 +420,7 @@ def _suffix_body(cfg, case, geometry, work, profile, adapter, build_root, *,
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default="configs/validation/cuda_engineering.json")
+    ap.add_argument("--config", default="configs/shared/validation/cuda_engineering.json")
     ap.add_argument("--run-id", required=True,
                     help="names this run's directory under the config's run root")
     ap.add_argument("--run-root", default=None,

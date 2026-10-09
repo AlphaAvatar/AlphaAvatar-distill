@@ -276,13 +276,13 @@ python3 -c "
 import sys; sys.path.insert(0, '/workspace')
 from fetch import fetch
 fetch('e8_inputs_20260810/warmup', ['holdout_v1.jsonl','holdout_v1.manifest.json'],
-      '/workspace/aad/data/warmup')
+      '/workspace/aad/data/stages/stage-0/warmup')
 fetch('e7_streams_20260809/e7_fineweb_val', ['blocks.npz','docs.jsonl','manifest.json'],
       '/workspace/aad/artifacts/stages/stage-3/e7_fineweb_val')
 "
 python3 -c "
 import hashlib, json, sys
-h = hashlib.sha256(open('/workspace/aad/data/warmup/holdout_v1.jsonl','rb').read()).hexdigest()
+h = hashlib.sha256(open('/workspace/aad/data/stages/stage-0/warmup/holdout_v1.jsonl','rb').read()).hexdigest()
 if h != '2d49f637a711ae82510fd55a3af98e332314f972780841869508aebe7b3cd8e8':
     sys.exit(f'HOLDOUT MISMATCH: {h}')
 m = json.load(open('/workspace/aad/artifacts/stages/stage-3/e7_fineweb_val/manifest.json'))

@@ -67,7 +67,7 @@ CALIBRATION = "artifacts/stage1/e8_calibration_v1"
 def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--arms", default="configs/stage3/e8/arms.json")
+    ap.add_argument("--arms", default="configs/stages/stage-3/e8/arms.json")
     ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
     ap.add_argument("--require-init", action="store_true",
                     help="require the initialization checkpoints and their NLL "

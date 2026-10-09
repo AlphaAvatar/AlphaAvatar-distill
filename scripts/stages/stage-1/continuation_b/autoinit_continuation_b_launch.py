@@ -470,7 +470,7 @@ def spec(args) -> SessionSpec:
         # What this session must not lose is its probe journal, generations,
         # per-sample rows, pooled decision and report. None of those are weights;
         # all of them travel in the artifact archive described by
-        # `configs/autoinit/continuation_b_artifacts.json`, whose entries were
+        # `configs/stages/stage-1/continuation_b/continuation_b_artifacts.json`, whose entries were
         # enumerated from a real end-to-end run. The temporary probe training
         # checkpoints are deliberately NOT promoted to permanent products: no
         # downstream evidence contract reads them, and the frozen final selection
@@ -479,8 +479,8 @@ def spec(args) -> SessionSpec:
             audit_dirname="autoinit_phase_a",
             evidence_filename="phase_a_evidence.json",
             archive_basename="continuation_b_artifacts.tar.gz",
-            spec_success="configs/autoinit/continuation_b_artifacts.json",
-            spec_failed="configs/autoinit/continuation_b_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/continuation_b/continuation_b_artifacts.json",
+            spec_failed="configs/stages/stage-1/continuation_b/continuation_b_artifacts_failed.json",
             report_names=("phase_a_evidence.json",
                           "attested_evaluation_protocol.json",
                           "rung2_selection.json", "phase_a_result.json"),

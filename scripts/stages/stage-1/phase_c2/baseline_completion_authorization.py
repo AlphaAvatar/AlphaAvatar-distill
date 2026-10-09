@@ -53,7 +53,7 @@ from stages.phase_c2.session import C2ResourceScope
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
-CONFIG = "configs/experiments/phase_c2/baseline_completion_authorization.json"
+CONFIG = "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json"
 
 #: Grant fields copied verbatim into the artifact's `grant` block, so a reader
 #: of the authorization can see what was permitted without opening the grant.

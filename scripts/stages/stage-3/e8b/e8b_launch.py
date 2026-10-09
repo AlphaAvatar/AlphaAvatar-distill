@@ -538,9 +538,9 @@ class E8B:
         arc = f"{WS}/e8b_{self.a.session}_artifacts.tar.gz"
         r_man = target.run(
             f"{cc} manifest --root {REPO}/artifacts "
-            f"--spec {REPO}/configs/stage3/e8b/artifacts_{self.a.session}.json --out {man} "
+            f"--spec {REPO}/configs/stages/stage-3/e8b/artifacts_{self.a.session}.json --out {man} "
             f"--settle-seconds {self.a.settle_seconds} "
-            f"--completion-markers {REPO}/configs/stage3/e8b/completion_markers_{self.a.session}.json",
+            f"--completion-markers {REPO}/configs/stages/stage-3/e8b/completion_markers_{self.a.session}.json",
             timeout=900)
         self.say(f"  manifest rc={r_man.returncode}\n{r_man.stdout.strip()[-900:]}")
         r_arc = target.run(f"{cc} archive --manifest {man} --out {arc}", timeout=1800)

@@ -34,7 +34,7 @@ from aadistill.runtime.cpu_test_env import host_local_store
 #: The config every probe's training config is derived from, by the driver's
 #: own `probe_config`. Named here so the storage model reads the SAME
 #: document the trainer runs under instead of restating its dtypes.
-FROZEN_RECIPE_REL = "configs/stage3/e1/e1_r0860k_sa_pca.json"
+FROZEN_RECIPE_REL = "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json"
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -60,7 +60,7 @@ PRICING = "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_pricing.json"
 DURABLE_STORE = str(host_local_store() / "phase_c2_full_search"
                     / "attempt3_replay")
 
-STORAGE_PRICING = "configs/infrastructure/provider_storage_pricing.json"
+STORAGE_PRICING = "configs/shared/infrastructure/provider_storage_pricing.json"
 
 
 class BehaviouralProposalError(RuntimeError):
@@ -749,7 +749,7 @@ def storage_requirement(candidates: list[dict[str, Any]],
         "_units": (
             "the residency is derived in GiB and the provider's flag is GB. "
             "The conversion is the one recorded in "
-            "configs/infrastructure/provider_storage_pricing.json, not a local "
+            "configs/shared/infrastructure/provider_storage_pricing.json, not a local "
             "convention: rounding a GiB subtotal straight into a GB flag "
             "under-provisions by 7%."),
         "_why_not_400": (

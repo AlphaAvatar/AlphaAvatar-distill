@@ -52,6 +52,76 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
 
     snapshot = json.loads((repo_root / "logs/state/current.json").read_text())
 
+    family_cur = json.loads((repo_root / "logs/stages/stage-1/families/"
+                             "d_series/current.json").read_text())
+    capacity = json.loads((repo_root / "logs/stages/stage-1/phase_d1/"
+                           "analyses/d1_evidence_capacity.json").read_text())
+    roles = family_cur.get("roles", {})
+    family_ready = (family_cur.get("status") == "BUILT / VERIFIED"
+                    and "d1_screening" in roles and "d1_confirmation" in roles)
+    capacity_is_historical = (capacity.get("record_role") == "historical_analysis"
+                              and capacity.get("live_state") is False)
+    def _is_active(r: str) -> bool:
+        """A run is active only if its own records say it has not ended:
+        no closeout, and a runtime session record without a `terminal`
+        field. Early aborts keep runtime evidence and a terminal marker;
+        counting them as active is the false-liveness this derivation
+        replaces."""
+        if (runs_root / r / "closeout").is_dir():
+            return False
+        sess = runs_root / r / "runtime" / "session.json"
+        if not sess.is_file():
+            return False
+        return "terminal" not in json.loads(sess.read_text())
+
+    active = [r for r in runs if _is_active(r)]
+
+    readiness = {
+        "_contract": (
+            "The battery-readiness answers a reviewer needs, each DERIVED "
+            "from its named owner at generation time. The realized family "
+            "manifest is the readiness authority; the capacity analysis is "
+            "historical and can never reopen this block."),
+        "d_series_family": family_cur.get("family_id"),
+        "family_status": family_cur.get("status"),
+        "d1_screening_battery": "AVAILABLE" if "d1_screening" in roles else "MISSING",
+        "d1_confirmation_battery": ("AVAILABLE" if "d1_confirmation" in roles
+                                    else "MISSING"),
+        "original_c1_pool_capacity": (
+            "EXHAUSTED, HISTORICAL ONLY" if capacity_is_historical
+            else "see the capacity analysis — its record_role is not historical"),
+        "d1_evidence_blocker": ("CLOSED" if family_ready and not open_blockers
+                                else "OPEN"),
+        "d1_screening": ("ACTIVE: " + ", ".join(active) if active else
+                         "PAUSED — no open blocker, no outstanding one-use "
+                         "authorization, no active run; the gate is the "
+                         "maintainer decision in logs/state/current.json :: next"),
+        "_owners": {
+            "family_status": "logs/stages/stage-1/families/d_series/current.json",
+            "battery_roles": family_cur.get("owners", {}).get("realized_manifest"),
+            "pool_capacity": ("logs/stages/stage-1/phase_d1/analyses/"
+                              "d1_evidence_capacity.json (record_role: "
+                              "historical_analysis; superseded for readiness by "
+                              "the family manifest)"),
+            "blockers": "d1_session.open_blockers()",
+            "pause": "logs/state/current.json :: next",
+        },
+    }
+
+    gates = {
+        "_contract": (
+            "Four different kinds of 'can D1 run?', kept distinct because "
+            "conflating them has already produced a false blocker once."),
+        "formal_funding": ("priced in the frozen design "
+                           f"({ds.DESIGN_PATH} :: pricing); the budget terms "
+                           "live with the C1 grant the design cites"),
+        "one_use_execution_authorization": (
+            "none outstanding — a chain is built fresh per attempt and "
+            "consumed by it (P12.1)"),
+        "open_scientific_blockers": list(open_blockers),
+        "maintainer_pause": snapshot.get("next"),
+    }
+
     return {
         "schema": SCHEMA,
         "_contract": (
@@ -89,6 +159,8 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
                 "a directory existing is navigation; identity is the digest "
                 "check `behavioural.require_arms_present()` performs"),
         },
+        "readiness": readiness,
+        "gates": gates,
         "runs": {
             "root": "logs/stages/stage-1/phase_d1/runs",
             "all": runs,

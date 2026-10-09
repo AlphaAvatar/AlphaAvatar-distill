@@ -77,7 +77,7 @@ CALIBRATION_TOKENS = 59_763
 CALIBRATION_SEQ_LEN = 892
 
 # --- measured recovery anchors ---------------------------------------------
-PROBE_STEPS_0860K = 1023          # configs/stage3/e1/e1_r0860k_sa_pca.json
+PROBE_STEPS_0860K = 1023          # configs/stages/stage-3/e1/e1_r0860k_sa_pca.json
 SECONDS_PER_STEP_596M = 4.15      # E6b, measured
 PROBE_EVAL_OVERHEAD = 1.20        # periodic eval + checkpointing, stated not measured
 BATTERY_EVAL_USD = 0.236          # E6: $2.36 over 10 arms on 150 prompts
@@ -198,7 +198,7 @@ def main() -> None:
             "recipe": E1_KD_HEAVY_0860K.as_dict(),
             "anchors": {
                 "probe_steps": PROBE_STEPS_0860K,
-                "probe_steps_source": "configs/stage3/e1/e1_r0860k_sa_pca.json",
+                "probe_steps_source": "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",
                 "seconds_per_step": SECONDS_PER_STEP_596M,
                 "seconds_per_step_source": "E6b measured, 596M student + 4B teacher",
                 "battery_eval_usd": BATTERY_EVAL_USD,

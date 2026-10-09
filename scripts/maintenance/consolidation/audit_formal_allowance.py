@@ -91,7 +91,7 @@ def audit(root: Path, derived_ceiling_usd: float) -> dict:
             "package's declared funding scope. Derived on every run; no figure "
             "here is maintained by hand."),
         "_the_condition": "remaining formal allowance >= derived session ceiling",
-        "_authority": ("configs/experiments/phase_c1/authorization.json :: "
+        "_authority": ("configs/stages/stage-1/phase_c1/authorization.json :: "
                        "execution_package._amendment_2026_09_28"),
         "allowance_usd": allowance,
         "derived_session_ceiling_usd": derived_ceiling_usd,

@@ -87,7 +87,7 @@ D1_SEARCH_POLICY = ActionPolicy(
 
 
 
-BUDGET_TERMS = "configs/experiments/phase_c1/authorization.json"
+BUDGET_TERMS = "configs/stages/stage-1/phase_c1/authorization.json"
 DESIGN_REL = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 
 #: Stages a D1 SEARCH session is authorized to execute. The search commits a
@@ -147,16 +147,16 @@ D1_ENTRY_POINTS: tuple[str, ...] = (
 #: with no solution. It is bound by `require_plan` instead.
 D1_DECLARED_INPUTS: tuple[str, ...] = (
     "scripts/shared/pod/autoinit_preflight_setup.sh",
-    "configs/experiments/phase_c1/authorization.json",
-    "configs/autoinit/d1_search_artifacts.json",
-    "configs/autoinit/d1_search_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
+    "configs/stages/stage-1/phase_d1/d1_search_artifacts_failed.json",
     "scripts/stages/stage-1/families/d_series/scoring_protocol.py",
 )
 
 D1_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
                                     "scripts/autoinit")
 
-CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_d1/executable_closure.json"
+CURRENT_CLOSURE_SNAPSHOT = "configs/stages/stage-1/phase_d1/executable_closure.json"
 
 
 def d1_current_executable(repo_root: str | Path = REPO) -> dict[str, Any]:

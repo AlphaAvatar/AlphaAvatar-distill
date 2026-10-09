@@ -63,7 +63,7 @@ def main() -> int:
     args = ap.parse_args()
 
     cfg = json.loads(
-        (REPO_ROOT / "configs/experiments/phase_c2/authorization.json").read_text())
+        (REPO_ROOT / "configs/stages/stage-1/phase_c2/authorization.json").read_text())
     stage_id = args.stage_id or cfg["stage_id"]
     auth_rel = c2_authorization_path(args.run_id, stage_id)
     if args.out is None:

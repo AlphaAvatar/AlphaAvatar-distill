@@ -577,7 +577,7 @@ STAGES = (
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--config",
-                    default="configs/validation/batching_refactor_cuda.json")
+                    default="configs/stages/stage-1/phase_c3/batching_refactor_cuda.json")
     ap.add_argument("--run-id", required=True)
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--out", default="artifacts/shared/validation")

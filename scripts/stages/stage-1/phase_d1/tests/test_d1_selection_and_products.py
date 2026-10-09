@@ -491,7 +491,7 @@ class TestTheSuccessArtifactContract:
 
     @staticmethod
     def _spec(name: str) -> dict:
-        return json.loads((REPO / "configs/autoinit" / name).read_text())
+        return json.loads((REPO / "configs/stages/stage-1/phase_d1" / name).read_text())
 
     def test_success_requires_the_selection_and_the_journals(self):
         entries = {e["artifact_class"]: e

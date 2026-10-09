@@ -83,12 +83,12 @@ AUDIT_DIRNAME = "autoinit_phase_c2_baseline"
 
 RUN_EXPERIMENT_ID = "phase_c2_baseline_completion"
 RUN_STAGE_ID = json.loads(
-    (REPO_ROOT / "configs/experiments/phase_c2/authorization.json").read_text()
+    (REPO_ROOT / "configs/stages/stage-1/phase_c2/authorization.json").read_text()
 )["stage_id"]
 
 #: The frozen-asset expectation. The same document Search-1 named, because the
 #: asset is the same one and there is exactly one declaration of it.
-FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c2/frozen_assets.json"
 
 #: `calib.reasoning_heavy@v2` and the frozen suite come from the dev box;
 #: `calib.domain_balanced@v1` is already on the relay. Both mixtures are needed
@@ -607,8 +607,8 @@ def spec(args) -> SessionSpec:
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_baseline_completion_evidence.json",
             archive_basename="c2_baseline_completion_artifacts.tar.gz",
-            spec_success="configs/autoinit/c2_baseline_completion_artifacts.json",
-            spec_failed=("configs/autoinit/"
+            spec_success="configs/stages/stage-1/phase_c2_baseline_completion/c2_baseline_completion_artifacts.json",
+            spec_failed=("configs/stages/stage-1/phase_c2_baseline_completion/"
                          "c2_baseline_completion_artifacts_failed.json"),
             report_names=("c2_baseline_completion_evidence.json",
                           "c2_baseline_comparison.json")),

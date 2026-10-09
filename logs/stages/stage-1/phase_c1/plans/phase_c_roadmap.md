@@ -4,7 +4,7 @@
 > **Restructured 2026-09-17** by maintainer decision, after C1 returned a
 > verdict and C2's restricted Search-1 was accepted as validation evidence. The
 > programme is now four phases, C1–C4, and the shape they share is written down
-> once in [`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md)
+> once in [`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md)
 > as a family-neutral pattern rather than restated per phase.
 >
 > This file owns the **plan**. For current status read
@@ -410,7 +410,7 @@ If C3 does not promote, C4 does not run and the C2 incumbent stands.
 
 This is the same cycle as C1→C2, and that repetition is deliberate: it is a
 **pattern**, documented family-neutrally in
-[`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md),
+[`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md),
 so a future teacher/student family, geometry or compression ratio reuses the
 machinery instead of a Qwen3-shaped copy of it.
 

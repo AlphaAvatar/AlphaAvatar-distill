@@ -394,8 +394,8 @@ def test_the_harness_set_names_every_file_the_session_executes(registered):
     for required in ("scripts/stages/stage-1/phase_c2/comparison.py",
                      "scripts/stages/stage-1/phase_c2/baseline.py",
                      "scripts/stages/stage-1/phase_c2/search_space.py",
-                     "configs/autoinit/c2_artifacts.json",
-                     "configs/autoinit/c2_artifacts_failed.json"):
+                     "configs/stages/stage-1/phase_c2/c2_artifacts.json",
+                     "configs/stages/stage-1/phase_c2/c2_artifacts_failed.json"):
         assert required in digested, f"{required} is not measured by the grant"
 
 

@@ -168,7 +168,7 @@ def test_the_gpu_predicate_makes_the_same_decision_under_the_contract(tmp_path):
                         ("passed" if " passed" in r.stdout else r.stdout[-300:]))
     assert outcomes[0] == outcomes[1] == "passed", outcomes
     # And it is NOT excused by a waiver.
-    reg = json.loads((REPO / "configs/autoinit/c1_skip_predicate_classification.json"
+    reg = json.loads((REPO / "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json"
                       ).read_text())["predicates"]
     assert not any("test_causal_depth_measurement_job" in k for k in reg), (
         "the GPU predicate must be NORMALIZED by the contract, not waived")

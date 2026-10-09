@@ -106,7 +106,7 @@ RUN_LOG = f"{WS}/autoinit_phase_c2_run.log"
 #: execute. `SETUP_RC=91`, no driver stage, nothing measured, `$0.0552`. The
 #: script now refuses a session that declares `ASSETS_READY` without naming its
 #: own expectation, so the fallback that produced that abort is unreachable.
-FROZEN_EXPECT = "configs/experiments/phase_c2/frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c2/frozen_assets.json"
 
 #: The audit root the driver writes into and the collector walks, named ONCE.
 #: `ArtifactPolicy` books it and `close_c2_run` looks inside the extracted
@@ -118,7 +118,7 @@ AUDIT_DIRNAME = "autoinit_phase_c2"
 #: The stage this experiment's runs are placed under, read from the experiment's
 #: own configuration rather than decided here.
 RUN_STAGE_ID = json.loads(
-    (REPO_ROOT / "configs/experiments/phase_c2/authorization.json").read_text()
+    (REPO_ROOT / "configs/stages/stage-1/phase_c2/authorization.json").read_text()
 )["stage_id"]
 
 
@@ -919,8 +919,8 @@ def spec(args) -> SessionSpec:
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_evidence.json",
             archive_basename="c2_search1_artifacts.tar.gz",
-            spec_success="configs/autoinit/c2_artifacts.json",
-            spec_failed="configs/autoinit/c2_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_c2/c2_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_c2/c2_artifacts_failed.json",
             report_names=("c2_evidence.json", "c2_search_summary.json")),
         teardown=TeardownPolicy(
             note="delete the pod, verify from the provider that it is gone, STOP"),

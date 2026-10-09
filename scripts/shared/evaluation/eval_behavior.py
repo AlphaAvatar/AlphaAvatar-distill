@@ -104,7 +104,7 @@ def generate(model, tokenizer, entry: dict, max_new_tokens: int | None, device: 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
-    ap.add_argument("--prompts", default="data/eval_behavior_v0/prompts.jsonl")
+    ap.add_argument("--prompts", default="data/stages/stage-3/eval_behavior_v0/prompts.jsonl")
     ap.add_argument("--out", required=True)
     # A fixed cap is NOT permitted for formal measurement (AGENTS.md P18): it
     # censors exactly the behaviour being measured. `--unrestricted` derives the

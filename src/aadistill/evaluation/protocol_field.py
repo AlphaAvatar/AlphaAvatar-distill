@@ -14,7 +14,7 @@ interpretation of "same protocol".
 Nothing here names an experiment, an arm, a battery or a stage: the keys are
 opaque and the field's name is a parameter, so every stage inherits it. The
 observed failure that motivated it -- its stage, its member counts and its
-fingerprints -- is recorded in `docs/core-provenance.md` and in that stage's
+fingerprints -- is recorded in `docs/maintenance/core-provenance.md` and in that stage's
 own analysis, not here, because core does not carry this project's run labels.
 
 The failure mode, stated generically: a field whose battery, scoring contract

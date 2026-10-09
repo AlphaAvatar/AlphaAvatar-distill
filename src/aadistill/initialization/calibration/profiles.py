@@ -327,7 +327,7 @@ def unregister_profile(qualified_id: str) -> None:
 # budgets, seeds, item paths, source datasets and leakage proofs -- inside the
 # reusable core, and made merely importing this module change global state.
 #
-# They now live in `configs/calibration/profiles.json`, and a caller loads them.
+# They now live in `configs/stages/stage-1/calibration/profiles.json`, and a caller loads them.
 # This module keeps only the mechanism: what a profile IS, and how to build one
 # from a document.
 

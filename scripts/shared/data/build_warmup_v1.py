@@ -9,8 +9,8 @@ approximate a ~1M-token total at ~4 chars/token; exact token counts are
 logged later by the Stage 0 collection manifest.
 
 Output:
-    data/warmup/warmup_v1.jsonl           gitignored (third-party text)
-    data/warmup/warmup_v1.manifest.json   committed reproducibility record
+    data/stages/stage-0/warmup/warmup_v1.jsonl           gitignored (third-party text)
+    data/stages/stage-0/warmup/warmup_v1.manifest.json   committed reproducibility record
 
 Determinism: each source is pinned to an exact dataset revision and read in
 its native order; selection is "first N documents passing filters", so the
@@ -124,8 +124,8 @@ def main() -> None:
     from huggingface_hub import HfApi
 
     api = HfApi()
-    out_path = REPO_ROOT / "data/warmup/warmup_v1.jsonl"
-    v0_path = REPO_ROOT / "data/warmup/warmup_v0.jsonl"
+    out_path = REPO_ROOT / "data/stages/stage-0/warmup/warmup_v1.jsonl"
+    v0_path = REPO_ROOT / "data/stages/stage-0/warmup/warmup_v0.jsonl"
 
     samples: list[dict] = []
     seen_hashes: set[str] = set()
@@ -174,7 +174,7 @@ def main() -> None:
         samples.append(s)
     source_records.append({
         "name": "warmup_v0_handcrafted",
-        "dataset": "data/warmup/warmup_v0.jsonl",
+        "dataset": "data/stages/stage-0/warmup/warmup_v0.jsonl",
         "config": None, "split": None,
         "license": "project-authored (license-clean, see v0 record)",
         "revision": sha256_file(v0_path),

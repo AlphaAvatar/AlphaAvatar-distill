@@ -1,7 +1,7 @@
 """Stage 0: collect teacher activation statistics for student initialization.
 
 Usage:
-    uv run python scripts/shared/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking.json [--limit N]
+    uv run python scripts/shared/training/collect_stage0.py --config configs/stages/stage-0/qwen3_4b_thinking.json [--limit N]
 
 Reads a JSON config, forwards the warm-up dataset through the teacher one
 sequence at a time, and writes:

@@ -1,7 +1,7 @@
 """The concrete recovery recipes this project has frozen.
 
 The application layer. The recipes are DATA and live in
-`configs/recipes/recovery.json`; what a recipe *is* lives in
+`configs/stages/stage-3/recipes/recovery.json`; what a recipe *is* lives in
 `aadistill.initialization.planning.recovery`; and the decision to load these
 is made here, where an experiment-instance decision belongs.
 """
@@ -16,7 +16,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 from aadistill.initialization.planning.recovery import load_recipes  # noqa: E402
 
-RECIPE_CONFIG = REPO / "configs/recipes/recovery.json"
+RECIPE_CONFIG = REPO / "configs/stages/stage-3/recipes/recovery.json"
 
 RECIPES = load_recipes(json.loads(RECIPE_CONFIG.read_text()))
 BY_ID = {r.recipe_id: r for r in RECIPES}

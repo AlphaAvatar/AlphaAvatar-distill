@@ -23,7 +23,7 @@ SCRIPT = REPO / "scripts/shared/pod/reconstruct_training_events.py"
 E6B = Path.home() / "aad-artifacts/e6b"
 COMMITTED = REPO / "logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json"
 
-RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/shared/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json
+RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/shared/training/train_stage3.py --config /workspace/aad/configs/stages/stage-3/e6b/{name}.json
 device cuda; loading packed token ladder ...
 eval step 0: {{'val_blocks': 16, 'val_ce': 10.919939, 'val_ppl': 55267.4502, 'val_kd': 10.603207}}
 step 10/2916  loss 11.8970  ce 9.6091  kd 9.1515  lr 3.42e-06  4.25s
@@ -44,7 +44,7 @@ def run_script(tmp_path, config_name="e6b_p2_r2960k_sa"):
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-log", str(log), "--status",
          str(status), "--config",
-         str(REPO / f"configs/stage3/e6b/{config_name}.json"),
+         str(REPO / f"configs/stages/stage-3/e6b/{config_name}.json"),
          "--out", str(out)],
         capture_output=True, text=True, cwd=REPO, timeout=120)
     assert proc.returncode == 0, proc.stderr
@@ -158,8 +158,8 @@ def test_it_reproduces_from_the_surviving_console_log(tmp_path):
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-log", str(E6B / "e6b_run.log"),
          "--status", str(E6B / "e6b.status"),
-         "--config", str(REPO / "configs/stage3/e6b/e6b_p2_r2960k_sa.json"),
-         "--config", str(REPO / "configs/stage3/e6b/e6b_p2_r2960k_sb.json"),
+         "--config", str(REPO / "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json"),
+         "--config", str(REPO / "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json"),
          "--out", str(out)],
         capture_output=True, text=True, cwd=REPO, timeout=300)
     assert proc.returncode == 0, proc.stderr

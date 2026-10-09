@@ -38,7 +38,7 @@ TRAIN_PY = "/opt/train/bin/python"
 VLLM_PY = "/opt/vllm/bin/python"
 PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
-HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
+HOLDOUT = REPO / "data/stages/stage-0/warmup/holdout_v1.jsonl"
 INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 ARMS = {"P2-ceheavy-sa": "p2_ceheavy_sa", "P2-ceheavy-sb": "p2_ceheavy_sb"}
 
@@ -72,7 +72,7 @@ def stage_train(args):
             print(f"{alias} already trained; skipping", flush=True)
             mark(f"TRAIN_DONE:{alias}")
             continue
-        cfg_path = REPO / f"configs/stage3/p2/{name}.json"
+        cfg_path = REPO / f"configs/stages/stage-3/p2/{name}.json"
         cfg = json.loads(cfg_path.read_text())
         assert cfg["loss"] == {"ce_weight": 1.0, "kd_weight": 0.25,
                                "kd_temperature": 1.0, "kd_scope": "all"}, cfg["loss"]
@@ -115,7 +115,7 @@ def stage_nll(args):
     models = []
     for name in ARMS.values():
         models += ["--model", str(model_dir(name))]
-    run(["scripts/shared/evaluation/eval_ppl.py", "--data", "data/warmup/holdout_v1.jsonl",
+    run(["scripts/shared/evaluation/eval_ppl.py", "--data", "data/stages/stage-0/warmup/holdout_v1.jsonl",
          *models, "--max-seq-len", 1024, "--dtype", "bfloat16", "--out", out])
     report = json.loads(out.read_text())
     for r in report["results"]:

@@ -126,9 +126,9 @@ def test_the_closure_contains_what_a_c2_session_actually_runs():
             "src/aadistill/initialization/planning/ranking.py",
             #: the declared non-python inputs
             "scripts/shared/pod/autoinit_preflight_setup.sh",
-            "configs/autoinit/c2_artifacts.json",
-            "configs/autoinit/c2_artifacts_failed.json",
-            "configs/experiments/phase_c2/authorization.json"):
+            "configs/stages/stage-1/phase_c2/c2_artifacts.json",
+            "configs/stages/stage-1/phase_c2/c2_artifacts_failed.json",
+            "configs/stages/stage-1/phase_c2/authorization.json"):
         assert rel in paths, rel
 
 

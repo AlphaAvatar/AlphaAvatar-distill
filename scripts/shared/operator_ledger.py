@@ -2,7 +2,7 @@
 
 The application layer. `aadistill.initialization.operators.base` owns what a
 ledger IS and how it is verified; it used to also name
-`configs/autoinit/operator_ledger.json`, which made a reusable core depend on
+`configs/stages/stage-1/operator_ledger.json`, which made a reusable core depend on
 this repository's directory layout.
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from aadistill.initialization.operators.base import (  # noqa: E402
     verify_ledger as _verify, write_ledger as _write)
 
 #: Repository-relative, so it reads the same on a pod checkout.
-LEDGER_PATH = "configs/autoinit/operator_ledger.json"
+LEDGER_PATH = "configs/stages/stage-1/operator_ledger.json"
 
 
 def verify_ledger(path: str | Path = LEDGER_PATH, **kw):

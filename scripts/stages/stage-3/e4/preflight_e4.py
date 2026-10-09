@@ -47,10 +47,10 @@ INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 INIT_SHA = "86fbba78e8a2a32481ca77e5ac362ed1f17a39dbc30bcbc952cabd5df2633e54"
 PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
 CONFIGS = {
-    "P2-0.86M-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
-    "P2-0.86M-sb": "configs/stage3/p2/p2_ceheavy_sb.json",
-    "E4-P2-1.60M-sa": "configs/stage3/e4/e4_p2_r1600k_sa.json",
-    "E4-P2-1.60M-sb": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+    "P2-0.86M-sa": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+    "P2-0.86M-sb": "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+    "E4-P2-1.60M-sa": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
+    "E4-P2-1.60M-sb": "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json",
 }
 ATTN_PROJ = ("q_proj", "k_proj", "v_proj", "o_proj")
 

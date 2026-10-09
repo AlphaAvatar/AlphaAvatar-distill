@@ -2,7 +2,7 @@
 """Branch-B: does live allocation grow across *identical* optimizer steps?
 
     PYTHONPATH=src python scripts/shared/training/replay_lifecycle.py \
-        --config configs/stage3/e8b/e8b_dp_r1600k_sa.json \
+        --config configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json \
         --steps 400 --out artifacts/audit/e8b_lifecycle_replay.json
 
 The full-stream shape audit excluded the workload as the cause: the worst block in the

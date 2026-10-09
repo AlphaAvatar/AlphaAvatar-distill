@@ -39,7 +39,7 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 sys.path.insert(0, str(REPO / "tests"))
 
 RECORD = "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json"
-REGISTRY = "configs/autoinit/c1_skip_predicate_classification.json"
+REGISTRY = "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json"
 SCHEMA = "aadistill.autoinit.c1_skip_predicate_audit/v1"
 
 #: What a condition can read, and whether a pod sees the same thing.
@@ -365,7 +365,7 @@ def known_classification(nodeid: str) -> str | None:
 
     Nothing is resolved here any more. Everything those groups used to account
     for is accounted for by
-    `configs/autoinit/c1_skip_predicate_classification.json`, where a human says
+    `configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json`, where a human says
     why — the mechanism that was already doing this work for the rest of the
     repository. Kept as a seam rather than removed outright: the caller asks one
     question and gets one answer, and a future session with a genuine pod-side

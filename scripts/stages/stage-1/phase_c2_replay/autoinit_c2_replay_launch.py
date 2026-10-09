@@ -81,7 +81,7 @@ LEAF_DIR = f"{WORKDIR}/leaves"
 #: inherited. Search-1's document names ONE asset, the state_eval metric suite,
 #: which this session neither stages nor needs because it ranks nothing; the
 #: replay's names the two calibration mixtures its five paths actually read.
-FROZEN_EXPECT = "configs/experiments/phase_c2/replay_frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c2_replay/replay_frozen_assets.json"
 
 #: Where reconstructed leaves live off-pod. ONE constant: the fetcher writes
 #: here and the preflight reads here, so "is this leaf already durable" has a
@@ -426,7 +426,7 @@ def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
 
     scr = Path(ctx.args.scr)
     out: list[Path] = []
-    specs = load_specs(str(REPO_ROOT / "configs/autoinit/c2_replay_artifacts.json"))
+    specs = load_specs(str(REPO_ROOT / "configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json"))
     for entry in specs:
         if entry.artifact_class == "session_evidence":
             out.append(scr / "store" / "extracted" / entry.pattern)
@@ -768,8 +768,8 @@ def spec(args) -> SessionSpec:
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_replay_evidence.json",
             archive_basename="c2_replay_artifacts.tar.gz",
-            spec_success="configs/autoinit/c2_replay_artifacts.json",
-            spec_failed="configs/autoinit/c2_replay_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts_failed.json",
             report_names=("c2_replay_evidence.json",),
             on_poll=secure_finished_leaves,
             fetch_products=fetch_leaves,

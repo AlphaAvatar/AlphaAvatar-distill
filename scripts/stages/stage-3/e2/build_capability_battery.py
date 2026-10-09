@@ -62,8 +62,8 @@ from aadistill.infrastructure.manifest import sha256_file  # noqa: E402
 
 # Reserved material every candidate is checked against.
 EXCLUDE_PATHS = [
-    "data/stage2_v1/train", "data/stage2_v1/val", "data/stage2_v1/calib",
-    "data/eval_behavior_v0/prompts.jsonl",
+    "data/stages/stage-2/stage2_v1/train", "data/stages/stage-2/stage2_v1/val", "data/stages/stage-2/stage2_v1/calib",
+    "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
 ]
 
 SOURCES = {
@@ -473,7 +473,7 @@ def main() -> None:
         },
         "sets": sets,
         "reused_from_experiment_1": {
-            "behavior_v0": {"path": "data/eval_behavior_v0/prompts.jsonl",
+            "behavior_v0": {"path": "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
                             "n": 76,
                             "why": ("unchanged so D0's stored behaviour "
                                     "generations stay comparable without a "

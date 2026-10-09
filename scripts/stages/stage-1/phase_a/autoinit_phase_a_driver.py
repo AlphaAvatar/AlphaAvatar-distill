@@ -280,7 +280,7 @@ RECOVERY_TRAINER_BYTES = int(
      + RECOVERY_TRAINER_NON_TORCH_GIB) * 2**30)
 #: The versioned comparability relation the live protocol is judged under.
 COMPAT_V2 = REPO / "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_protocol_compat_v2.json"
-FROZEN_RECIPE = REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json"
+FROZEN_RECIPE = REPO / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json"
 #: The preregistered `state_eval@v1` identity, as two hashes that bind two
 #: different things. The manifest carries only the first.
 #:

@@ -1082,7 +1082,7 @@ def _load_specs(path):
 def test_the_specs_load_with_the_real_parser(spec_name):
     """`ArtifactSpec(**item)` rejects an unknown key; collection died of that
     once already, on the pod, after the run had finished."""
-    specs = _load_specs(REPO / "configs/autoinit" / spec_name)
+    specs = _load_specs(REPO / "configs/stages/stage-1/phase_a" / spec_name)
     assert specs
 
 
@@ -1119,7 +1119,7 @@ def test_the_success_spec_requires_what_the_driver_actually_writes(tmp_path):
     (search / "states.jsonl").write_text("{}\n")
 
     manifest = build_manifest(str(root), _load_specs(
-        REPO / "configs/autoinit/phase_a_artifacts.json"),
+        REPO / "configs/stages/stage-1/phase_a/phase_a_artifacts.json"),
         created_utc="2026-08-15T00:00:00Z", settle_seconds=0)
     assert manifest.ok, f"missing {manifest.missing}"
 
@@ -1135,7 +1135,7 @@ def test_the_failed_spec_requires_only_the_evidence(tmp_path):
     (audit / "phase_a_evidence.json").parent.mkdir(parents=True, exist_ok=True)
     (audit / "phase_a_evidence.json").write_text("{}")
     manifest = build_manifest(str(root), _load_specs(
-        REPO / "configs/autoinit/phase_a_artifacts_failed.json"),
+        REPO / "configs/stages/stage-1/phase_a/phase_a_artifacts_failed.json"),
         created_utc="2026-08-15T00:00:00Z", settle_seconds=0)
     assert manifest.ok, f"missing {manifest.missing}"
 

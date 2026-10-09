@@ -29,7 +29,7 @@ experiment has a directory. The kinds are:
 * ``experiment`` — its own question, its own result, its own record. This is
   what a stage README lists.
 * ``arm`` — a configured variant *inside* one experiment: `e8a` is arm A of
-  `e8` (`configs/stage3/e8/arms.json`), and `sa`/`sb` are seed arms. Filed with
+  `e8` (`configs/stages/stage-3/e8/arms.json`), and `sa`/`sb` are seed arms. Filed with
   its experiment; never counted as an experiment.
 * ``protocol`` — a named training recipe established by one experiment and
   reused by later ones. `p2` is both: the experiment P2-ceheavy established it,
@@ -143,14 +143,14 @@ STAGES = [
             "statistics are not fitted to one distribution",
         ],
         data=[
-            E("data/warmup/warmup_v1.jsonl",
+            E("data/stages/stage-0/warmup/warmup_v1.jsonl",
               "the warm-up corpus itself: five families — FineWeb-Edu, "
               "Dolly-15k, GSM8K, MBPP and a small project-authored set — "
               "deduplicated on content hash"),
-            E("data/warmup/warmup_v1.manifest.json",
+            E("data/stages/stage-0/warmup/warmup_v1.manifest.json",
               "owns the per-source dataset id, revision, license, sample count "
               "and output hash. Read it rather than this page for any number"),
-            E("data/warmup/holdout_v1.jsonl",
+            E("data/stages/stage-0/warmup/holdout_v1.jsonl",
               "held-out FineWeb-Edu documents, disjoint from the warm-up "
               "corpus, kept for the Stage-1 perplexity gate"),
         ],
@@ -167,10 +167,10 @@ STAGES = [
               "regenerable from the config and the corpus"),
         ],
         configs=[
-            E("configs/stage0/qwen3_4b_thinking.json",
+            E("configs/stages/stage-0/qwen3_4b_thinking.json",
               "the collection recipe: teacher id and revision, dtype, sequence "
               "length, corpus and cache budget"),
-            E("configs/stage0/qwen3_4b_thinking_v1.json",
+            E("configs/stages/stage-0/qwen3_4b_thinking_v1.json",
               "the v1 recipe, which produced the cache now in use"),
         ],
         code=[
@@ -197,7 +197,7 @@ STAGES = [
             "recipe states and this page does not own",
         ],
         data=[
-            E("data/warmup/holdout_v1.manifest.json",
+            E("data/stages/stage-0/warmup/holdout_v1.manifest.json",
               'purpose: "Held-out perplexity eval for Stage 1 gate"; the gate '
               "compares the initialized student against a random baseline"),
         ],
@@ -221,9 +221,9 @@ STAGES = [
               "the contribution-guided depth variant, built for E8"),
         ],
         configs=[
-            E("configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+            E("configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
               "the canonical initialization recipe"),
-            E("configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+            E("configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
               "the contribution-guided depth variant E8 initialized from"),
         ],
         code=[],
@@ -251,12 +251,12 @@ STAGES = [
             "that explicitly; the teacher-generated corpus is a separate pilot",
         ],
         data=[
-            E("data/stage2/stage2_offline_v0.manifest.json",
+            E("data/stages/stage-2/stage2/stage2_offline_v0.manifest.json",
               "mixture v0: the first grouped build, from public sources only"),
-            E("data/stage2_v1/stage2_offline_v1.manifest.json",
+            E("data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
               "mixture v1: the approved ~4.5x train scale-up for data-limited "
               "Stage-3 recovery. The current mixture"),
-            E("data/stage3_pilot/manifest.json",
+            E("data/stages/stage-3/stage3_pilot/manifest.json",
               "the teacher-generated pilot: a control/treatment 2x2 over one "
               "shared accepted prompt subset, which is what Stage 3 actually "
               "trains on today"),
@@ -289,7 +289,7 @@ STAGES = [
         ],
         execution=[],
         outputs=[
-            E("data/stage2_v1",
+            E("data/stages/stage-2/stage2_v1",
               "the v1 mixture on disk: `train/`, `val/` and `calib/` per group. "
               "Untracked; rebuildable from the manifest and its builder"),
         ],
@@ -325,13 +325,13 @@ STAGES = [
             "public mixtures behind it",
         ],
         data=[
-            E("data/stage3_pilot/manifest.json",
+            E("data/stages/stage-3/stage3_pilot/manifest.json",
               "the recovery corpus in use: control and treatment arms over one "
               "shared accepted prompt subset, grouped code_math / multihop_qa "
               "/ rag_evidence, with per-arm token and packing statistics"),
-            E("data/stage3_pilot/treatment",
+            E("data/stages/stage-3/stage3_pilot/treatment",
               "the treatment arm the canonical config points at by default"),
-            E("data/eval_behavior_v0",
+            E("data/stages/stage-3/eval_behavior_v0",
               "the behaviour evaluation set the stage is judged on — "
               "autonomous rollout, not held-out loss"),
         ],
@@ -352,7 +352,7 @@ STAGES = [
             "before any were deleted",
         ],
         configs=[
-            E("configs/stage3/recovery.json",
+            E("configs/stages/stage-3/recovery.json",
               "the canonical recovery config, runnable as committed. Its "
               "`_purpose` states the contract every arm keeps: a run differs "
               "from it only in `data_dir` and `schedule.total_steps`",
@@ -381,22 +381,22 @@ STAGE_0 = [
         stage_id="0",
         status="complete",
         title="Teacher activation / statistics collection for student initialization",
-        canonical_config="configs/stage0/qwen3_4b_thinking.json",
+        canonical_config="configs/stages/stage-0/qwen3_4b_thinking.json",
         evidence=[
-            E("configs/stage0/qwen3_4b_thinking.json",
+            E("configs/stages/stage-0/qwen3_4b_thinking.json",
               'declares stage "stage0_init_warmup_collection"',
               field="stage", equals="stage0_init_warmup_collection"),
-            E("configs/stage0/qwen3_4b_thinking_v1.json",
+            E("configs/stages/stage-0/qwen3_4b_thinking_v1.json",
               "the v1 collection config, after the cache-loss regeneration"),
             E("scripts/shared/training/collect_stage0.py", "the collector"),
-            E("data/warmup/warmup_v1.manifest.json",
+            E("data/stages/stage-0/warmup/warmup_v1.manifest.json",
               'purpose: "Stage 0 initialization warm-up statistics (not training data)"'),
             E("artifacts/stages/stage-0/qwen3_4b_thinking_v1",
               "the regenerated cache this stage produced"),
         ],
         external_material=[
-            "configs/stage0/ — collection configs (source of truth; not copied here)",
-            "data/warmup/ — dataset and manifests, beside the data they describe",
+            "configs/stages/stage-0/ — collection configs (source of truth; not copied here)",
+            "data/stages/stage-0/warmup/ — dataset and manifests, beside the data they describe",
             "artifacts/stages/stage-0/ — the activation cache itself, outside git",
         ],
         decisions=[
@@ -427,19 +427,19 @@ STAGE_1 = [
         stage_id="1",
         status="complete",
         title="PCA / sandwich structural initialization of the 0.6B student",
-        canonical_config="configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+        canonical_config="configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
         evidence=[
-            E("configs/stage1/qwen3_0p6b_from_4b_thinking.json",
+            E("configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json",
               "the initialization recipe"),
-            E("configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json",
+            E("configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json",
               "the contribution-guided depth variant E8 initialized from"),
             E("artifacts/stages/stage-1/qwen3_0p6b_init_v0",
               "the pinned init checkpoint every recovery run forks from"),
-            E("data/warmup/holdout_v1.manifest.json",
+            E("data/stages/stage-0/warmup/holdout_v1.manifest.json",
               'purpose: "Held-out perplexity eval for Stage 1 gate"'),
         ],
         external_material=[
-            "configs/stage1/ — initialization recipes",
+            "configs/stages/stage-1/ — initialization recipes",
             "artifacts/stages/stage-1/ — init checkpoints and the state-eval suite",
         ],
         decisions=[],
@@ -455,7 +455,7 @@ STAGE_1 = [
         stage_id="1",
         status="complete",
         title="AutoInitializer Phase A — greedy search over initialization operator paths",
-        canonical_config="configs/experiments/phase_a/source_sets.json",
+        canonical_config="configs/stages/stage-1/source_sets.json",
         evidence=[
             E("logs/stages/stage-1/phase_a/plans/autoinit_phase_a_preregistration.json",
               "its subject is `target_architecture` — the student spec being "
@@ -463,7 +463,7 @@ STAGE_1 = [
               "and ATTENTION structural operators plus "
               "`composite.stage1_sandwich_v0`. Those are the Stage-1 operators of "
               "AGENTS.md 4.3, and its product is which operator path to use"),
-            E("configs/experiments/phase_a/recovery_policy.json",
+            E("configs/stages/stage-1/phase_a/recovery_policy.json",
               "the recovery battery it scores candidates with — the INSTRUMENT; "
               "the search does not produce a recovered checkpoint"),
             E("artifacts/stages/stage-1/state_eval_v1",
@@ -552,9 +552,9 @@ STAGE_1 = [
         stage_id="1",
         status="authorized — not launched",
         title="Phase C1 — fixed-path ATTENTION isolation",
-        canonical_config="configs/experiments/phase_c1/authorization.json",
+        canonical_config="configs/stages/stage-1/phase_c1/authorization.json",
         evidence=[
-            E("configs/experiments/phase_c1/authorization.json",
+            E("configs/stages/stage-1/phase_c1/authorization.json",
               'declares stage_id "1"', field="stage_id", equals="1"),
             E("logs/stages/stage-1/phase_c1/validations/cuda-stage-f",
               "its engineering validation, filed under the experiment it serves"),
@@ -583,9 +583,9 @@ STAGE_1 = [
                   "it. The answer is a preregistered Top-5 candidate set, not "
                   "an incumbent: which candidate becomes the incumbent is a "
                   "BEHAVIOURAL question a separate session asks."),
-        canonical_config="configs/experiments/phase_c2/full_search_authorization.json",
+        canonical_config="configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
         evidence=[
-            E("configs/experiments/phase_c2/full_search_authorization.json",
+            E("configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json",
               'declares stage_id "1"', field="stage_id", equals="1"),
             E("logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
               "the frozen protocol: the space, the ranking policy and what a "
@@ -629,7 +629,7 @@ STAGE_1 = [
                   "comparison and no behavioural work. A digest mismatch would "
                   "be a scientific finding, not a retryable engineering "
                   "failure."),
-        canonical_config="configs/autoinit/c2_replay_artifacts.json",
+        canonical_config="configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json",
         evidence=[
             E("logs/stages/stage-1/phase_c2_replay/plans/replay_requirement.json",
               "the derived money, corrected once and recording both figures",
@@ -814,7 +814,7 @@ STAGE_1 = [
             "reproduces each leaf's exact identity or stops. It decides "
             "nothing: no beam, no ranking, no selection, no measurement and no "
             "behavioural work."),
-        canonical_config="configs/autoinit/d1_replay_artifacts.json",
+        canonical_config="configs/stages/stage-1/phase_d1/d1_replay_artifacts.json",
         evidence=[
             E("logs/stages/stage-1/phase_d1/validations/"
               "finalist-rematerialization/v1/campaign.json",
@@ -906,7 +906,7 @@ STAGE_1 = [
         stage_id="1",
         status="in progress — engineering evidence, authorizes nothing",
         title="Operator topology + calibration batching — real-CUDA validation",
-        canonical_config="configs/validation/batching_refactor_cuda.json",
+        canonical_config="configs/stages/stage-1/phase_c3/batching_refactor_cuda.json",
         evidence=[
             E("logs/stages/stage-1/phase_c3/validations/batching-refactor-cuda/"
               "v1/scope.json",
@@ -939,7 +939,7 @@ STAGE_1 = [
         stage_id="1",
         status="in progress — engineering evidence, authorizes nothing",
         title="C2 full-search hot path — old-vs-new performance and equivalence",
-        canonical_config="configs/validation/c2_full_search_performance.json",
+        canonical_config="configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json",
         evidence=[
             E("logs/stages/stage-1/phase_c2/validations/full-search-performance/v1/authorization.json",
               "its engineering authorization, filed under the experiment it serves"),
@@ -966,7 +966,7 @@ STAGE_1 = [
         status="in progress — engineering evidence, authorizes nothing",
         title=("C2 state-eval reduction — full-suite equivalence and "
                "Pareto-decision certification"),
-        canonical_config="configs/validation/c2_state_eval_certification.json",
+        canonical_config="configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json",
         evidence=[
             E("logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
               "its engineering authorization, with the drift target and the "
@@ -994,7 +994,7 @@ STAGE_1 = [
         stage_id="1",
         status="PASS — engineering evidence, authorizes nothing",
         title="C2 full-search driver — real-CUDA engineering validation",
-        canonical_config="configs/validation/c2_full_search_cuda.json",
+        canonical_config="configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json",
         evidence=[
             E("logs/stages/stage-1/phase_c2/validations/full-search-cuda/v1/authorization.json",
               "its engineering authorization, filed under the experiment it serves"),
@@ -1059,7 +1059,7 @@ STAGE_1 = [
         #: schema and authorization TYPE: a completion grant cannot buy a beam
         #: and a Search-1 grant cannot buy a completion.
         canonical_config=(
-            "configs/experiments/phase_c2/baseline_completion_authorization.json"),
+            "configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json"),
         evidence=[
             E("logs/stages/stage-1/phase_c2/plans/"
               "phase_c2_baseline_completion_protocol.json",
@@ -1225,12 +1225,12 @@ STAGE_2 = [
         stage_id="2",
         status="complete — v0 and v1 built",
         title="Offline warm-up / distillation mixtures v0 and v1",
-        canonical_config="data/stage2_v1/stage2_offline_v1.manifest.json",
+        canonical_config="data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
         evidence=[
-            E("data/stage2/stage2_offline_v0.manifest.json",
+            E("data/stages/stage-2/stage2/stage2_offline_v0.manifest.json",
               'purpose: "Stage 2 offline warm-up/distillation data for post-init '
               'student recovery (Stage 3+); grouped by training use"'),
-            E("data/stage2_v1/stage2_offline_v1.manifest.json",
+            E("data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json",
               'purpose: "Stage 2 offline mixture v1: approved ~4.5x train '
               'scale-up for data-limited Stage 3 recovery"'),
             E("scripts/shared/data/build_stage2_v0.py", "the v0 builder"),
@@ -1238,9 +1238,9 @@ STAGE_2 = [
             E("artifacts/stages/stage-2/v0/dry_run_v1_report.json", "its build gate"),
         ],
         external_material=[
-            "data/stage2/, data/stage2_v1/ — mixtures and manifests, beside the "
+            "data/stages/stage-2/stage2/, data/stages/stage-2/stage2_v1/ — mixtures and manifests, beside the "
             "data they describe",
-            "data/stage3_pilot/, artifacts/stages/stage-2/v2/ — the teacher-generated "
+            "data/stages/stage-3/stage3_pilot/, artifacts/stages/stage-2/v2/ — the teacher-generated "
             "corpus pilot",
             "artifacts/stages/stage-2/v0/ — build console and dry-run reports",
         ],
@@ -1280,14 +1280,14 @@ def _s3(id, kind, status, title, section, **kw):
     return d
 
 
-#: Every config directly under `configs/stage3/` declares `stage3_recovery`, so
+#: Every config directly under `configs/stages/stage-3/` declares `stage3_recovery`, so
 #: config location settles the stage for everything below it. What each row adds
 #: is the *kind*: which of these is an experiment, and which is not.
 STAGE_3 = [
     _s3("recovery", "pipeline-activity", "complete",
         "Stage-3 sub-stage 1 — FFN + norm recovery (`s1_ffn_norm`)", "§3",
-        canonical_config="configs/stage3/recovery.json",
-        evidence=[E("configs/stage3/recovery.json",
+        canonical_config="configs/stages/stage-3/recovery.json",
+        evidence=[E("configs/stages/stage-3/recovery.json",
                     'declares stage "stage3_recovery", run_name "recovery"',
                     field="stage", equals="stage3_recovery"),
                   E(INDEX, "§3 lists `s1_ffn_norm` (660 steps), holdout 4.21, "
@@ -1308,8 +1308,8 @@ STAGE_3 = [
             "as pipeline activity, with its decision record.")),
     _s3("s2v1_from_init", "pipeline-activity", "complete",
         "Stage-3 sub-stage 2 on mixture v1 — the standing branch point", "§3",
-        canonical_config="configs/stage3/s2v1_from_init.json",
-        evidence=[E("configs/stage3/s2v1_from_init.json",
+        canonical_config="configs/stages/stage-3/s2v1_from_init.json",
+        evidence=[E("configs/stages/stage-3/s2v1_from_init.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("artifacts/stages/stage-3/s2v1_from_init/run_manifest.json", "its run"),
@@ -1355,8 +1355,8 @@ STAGE_3 = [
             "experiment, as E6 also is.")),
     _s3("p0", "experiment", "complete — does not beat P0-real",
         "P0-assistant — assistant-only KD with assistant-token normalization", "§17",
-        canonical_config="configs/stage3/p0/p0_assistant_sa.json",
-        evidence=[E("configs/stage3/p0/p0_assistant_sa.json",
+        canonical_config="configs/stages/stage-3/p0/p0_assistant_sa.json",
+        evidence=[E("configs/stages/stage-3/p0/p0_assistant_sa.json",
                     'declares stage "stage3_recovery", run_name "p0_assistant_sa"',
                     field="stage", equals="stage3_recovery"),
                   E("artifacts/stages/stage-3/p0_assistant_sa/run_manifest.json", "seed a run"),
@@ -1369,12 +1369,12 @@ STAGE_3 = [
             "its arms, not two experiments.")),
     _s3("p2", "experiment", "complete — adopted as a protocol",
         "P2-ceheavy — swapping the CE/KD loss weights", "§18",
-        canonical_config="configs/stage3/p2/p2_ceheavy_sa.json",
-        evidence=[E("configs/stage3/p2/p2_ceheavy_sa.json",
+        canonical_config="configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+        evidence=[E("configs/stages/stage-3/p2/p2_ceheavy_sa.json",
                     'declares stage "stage3_recovery", run_name "p2_ceheavy_sa"',
                     field="stage", equals="stage3_recovery"),
                   E("artifacts/stages/stage-3/p2_ceheavy_sa/run_manifest.json", "seed a run"),
-                  E("configs/stage3/e4/e4_p2_r1600k_sa.json",
+                  E("configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
                     "E4 reuses the protocol this experiment established, at "
                     "another rung — a different experiment, same recipe"),
                   E(INDEX, "§18: 2026-08-05, $2.88")],
@@ -1385,8 +1385,8 @@ STAGE_3 = [
             "`e4_p2_r1600k_sa` does not make E4 part of P2.")),
     _s3("e1", "experiment", "complete",
         "Experiment 1 — data-scaling matrix, 24 arms", "§11",
-        canonical_config="configs/stage3/e1/e1_r1600k_sa_pca.json",
-        evidence=[E("configs/stage3/e1/e1_r1600k_sa_pca.json",
+        canonical_config="configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
+        evidence=[E("configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e1/analyses/e1_test_cases.md", "its analyses"),
@@ -1395,11 +1395,11 @@ STAGE_3 = [
         classification_reason="Config location; 24 arms across 6 rungs x 2 inits x 2 seeds."),
     _s3("e2", "experiment", "phase 1 complete; phases 2-3 never authorized",
         "Experiment 2 — three sequential 0.86M diagnostics", "§12",
-        canonical_config="configs/stage3/e2/e2_d1_sa_pca.json",
-        evidence=[E("configs/stage3/e2/e2_d1_sa_pca.json",
+        canonical_config="configs/stages/stage-3/e2/e2_d1_sa_pca.json",
+        evidence=[E("configs/stages/stage-3/e2/e2_d1_sa_pca.json",
                     'declares stage "stage3_recovery", run_name "e2_d1_sa_pca"',
                     field="stage", equals="stage3_recovery"),
-                  E("configs/stage3/e2/e2_d1_sb_pca.json", "the second seed arm"),
+                  E("configs/stages/stage-3/e2/e2_d1_sb_pca.json", "the second seed arm"),
                   E("artifacts/stages/stage-3/e2_d1_sa_pca/run_manifest.json",
                     "D1 ran: its run manifest and train log are on disk"),
                   E("artifacts/stages/stage-3/e2_d1_corpus_audit.json", "its corpus audit"),
@@ -1423,8 +1423,8 @@ STAGE_3 = [
     ),
     _s3("e3", "experiment", "complete",
         "Experiment 3 — restricting attention updates at the 0.86M rung", "§20",
-        canonical_config="configs/stage3/e3/e3_a1_frozen_attn_sa.json",
-        evidence=[E("configs/stage3/e3/e3_a1_frozen_attn_sa.json",
+        canonical_config="configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
+        evidence=[E("configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e3/analyses/e3_registration.json", "its registration"),
@@ -1433,8 +1433,8 @@ STAGE_3 = [
         classification_reason="Config location; `a1`/`a2` are its arms."),
     _s3("e4", "experiment", "complete",
         "Experiment 4 — P2 CE-heavy scaled from the 0.86M to the 1.60M rung", "§21",
-        canonical_config="configs/stage3/e4/e4_p2_r1600k_sa.json",
-        evidence=[E("configs/stage3/e4/e4_p2_r1600k_sa.json",
+        canonical_config="configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
+        evidence=[E("configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e4/analyses/e4_registration.json", "its registration"),
@@ -1445,11 +1445,11 @@ STAGE_3 = [
             "borrows, not the experiment it belongs to.")),
     _s3("e5", "experiment", "complete — 5 aborted attempts, then a result",
         "Experiment 5 — teacher-prefix continuation vs student-prefix recovery", "§22-§27",
-        canonical_config="configs/stage3/e5/e5_c_sa.json",
-        evidence=[E("configs/stage3/e5/e5_c_sa.json",
+        canonical_config="configs/stages/stage-3/e5/e5_c_sa.json",
+        evidence=[E("configs/stages/stage-3/e5/e5_c_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
-                  E("configs/experiments/e5/nested_rung.json",
+                  E("configs/stages/stage-3/e5/nested_rung.json",
                     "a second config location, added when the rung shape changed"),
                   E("logs/stages/stage-3/e5/analyses/e5_registration.json", "its registration"),
                   E(INDEX, "§27: COMPLETE 2026-08-07")],
@@ -1462,7 +1462,7 @@ STAGE_3 = [
         evidence=[E("logs/stages/stage-3/e6/analyses/e6_registration.json",
                     '`kind: "evaluation-only"`, `trains_anything: false`, and '
                     'five registered questions. Its arms cite E1\'s configs under '
-                    'configs/stage3/e1/, so its subjects are Stage-3 recovery '
+                    'configs/stages/stage-3/e1/, so its subjects are Stage-3 recovery '
                     'checkpoints',
                     field="trains_anything", equals=False),
                   E("logs/stages/stage-3/e6/analyses/e6_results.json", "its results"),
@@ -1473,18 +1473,18 @@ STAGE_3 = [
             "An experiment in its own right, NOT merely the predecessor named in "
             "e6b's provenance: it has its own registration, results and report, "
             "and its own section and budget line. It has no "
-            "`configs/stage3/e6/` because it trained nothing and so needed no "
+            "`configs/stages/stage-3/e6/` because it trained nothing and so needed no "
             "training config — its registration names the E1 configs it "
             "re-scored. Stage 3 by the subjects it evaluates."),
     ),
     _s3("e6b", "experiment", "complete",
         "Experiment 6b — P2 CE-heavy at the 2.96M rung", "§29",
-        canonical_config="configs/stage3/e6b/e6b_p2_r2960k_sa.json",
-        evidence=[E("configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+        canonical_config="configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
+        evidence=[E("configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
-                  E("configs/stage3/e6b/provenance.json",
-                    "names its parents under configs/stage3/e4/ and configs/stage3/e1/"),
+                  E("configs/stages/stage-3/e6b/provenance.json",
+                    "names its parents under configs/stages/stage-3/e4/ and configs/stages/stage-3/e1/"),
                   E("logs/stages/stage-3/e6b/analyses/e6b_results.json", "its results"),
                   E(INDEX, "§29: 2026-08-09, $7.68, $0.56 over its authorization")],
         canonical_log_destination="logs/stages/stage-3/e6b",
@@ -1494,8 +1494,8 @@ STAGE_3 = [
             "protocol it reuses.")),
     _s3("e7", "experiment", "complete",
         "Experiment 7 — general language modelling restored; behaviour unmoved", "§31, §34",
-        canonical_config="configs/stage3/e7/e7_control_r1600k_sa.json",
-        evidence=[E("configs/stage3/e7/e7_control_r1600k_sa.json",
+        canonical_config="configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
+        evidence=[E("configs/stages/stage-3/e7/e7_control_r1600k_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
                   E("logs/stages/stage-3/e7/analyses/e7_preregistration.md", "its preregistration"),
@@ -1505,11 +1505,11 @@ STAGE_3 = [
         classification_reason="Config location; control/fineweb are its arms."),
     _s3("e8", "experiment", "complete",
         "Experiment 8 — contribution-guided depth initialization", "§35, §36",
-        canonical_config="configs/stage3/e8/e8_contrib_r2960k_sa.json",
-        evidence=[E("configs/stage3/e8/e8_contrib_r2960k_sa.json",
+        canonical_config="configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
+        evidence=[E("configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
-                  E("configs/stage3/e8/arms.json", "defines its arms"),
+                  E("configs/stages/stage-3/e8/arms.json", "defines its arms"),
                   E("logs/stages/stage-3/e8/analyses/e8_step0_report.md", "its step-0 report"),
                   E("logs/stages/stage-3/e8/plans/e8_preregistration.md",
                     "the original 2.96M preregistration, cancelled before execution")],
@@ -1520,9 +1520,9 @@ STAGE_3 = [
             "recovers better, which is a Stage-3 question about recovery.")),
     _s3("e8a", "arm", "complete",
         "E8 arm A", "§36",
-        evidence=[E("configs/stage3/e8/arms.json", "defines the arms; A is one of them"),
-                  E("configs/stage3/e8/artifacts_a.json", "arm A's artifact list"),
-                  E("configs/stage3/e8/completion_markers_a.json", "arm A's markers"),
+        evidence=[E("configs/stages/stage-3/e8/arms.json", "defines the arms; A is one of them"),
+                  E("configs/stages/stage-3/e8/artifacts_a.json", "arm A's artifact list"),
+                  E("configs/stages/stage-3/e8/completion_markers_a.json", "arm A's markers"),
                   E("logs/stages/stage-3/e8/analyses/e8a_session_evidence.json",
                     "its session evidence, filed with E8")],
         canonical_log_destination="logs/stages/stage-3/e8",
@@ -1533,11 +1533,11 @@ STAGE_3 = [
     ),
     _s3("e8b", "experiment", "strategically terminated — no valid comparison",
         "E8b — depth-map x compression interaction", "§37-§42",
-        canonical_config="configs/stage3/e8b/e8b_dc_r1600k_sa.json",
-        evidence=[E("configs/stage3/e8b/e8b_dc_r1600k_sa.json",
+        canonical_config="configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
+        evidence=[E("configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
                     'declares stage "stage3_recovery"',
                     field="stage", equals="stage3_recovery"),
-                  E("configs/stage3/e8b/arms.json", "its four arms DC/DP/FC/FP"),
+                  E("configs/stages/stage-3/e8b/arms.json", "its four arms DC/DP/FC/FP"),
                   E("logs/stages/stage-3/e8b/analyses/e8b_analysis.json", "its analysis"),
                   E("logs/stages/stage-3/e8b/plans/e8b_preregistration.md", "its preregistration"),
                   E(INDEX, "§41: DP-sa trained, DC-sa OOM'd, 80 GB is marginal")],
@@ -1655,24 +1655,28 @@ QUESTIONS = {
 #: the published shape, so there is exactly one place where a field is named
 #: and no consumer has to know both spellings.
 def _owner_legs(exp_id: str, stage_id: str | None) -> dict:
-    """The owner's scripts/artifacts/live-state legs, DERIVED by convention.
+    """The owner's per-tree legs, DERIVED by convention.
 
-    The three trees share one namespace — `stages/stage-<n>/<owner>` (with
+    The six trees share one namespace — `stages/stage-<n>/<owner>` (with
     `families/<owner>` for an experiment family) — so the legs are computed
     from the id and checked against the tree rather than typed per row. A leg
     that does not exist is `None`: a row never claims a directory the
     repository does not have.
     """
     legs = {"canonical_scripts": None, "canonical_artifacts": None,
-            "live_state": None}
+            "canonical_configs": None, "canonical_data": None,
+            "canonical_docs": None, "live_state": None}
     if stage_id is None:
         return legs
     for shape in (f"stages/stage-{stage_id}/{exp_id}",
                   f"stages/stage-{stage_id}/families/{exp_id}"):
-        if (REPO_ROOT / "scripts" / shape).is_dir():
-            legs["canonical_scripts"] = f"scripts/{shape}"
-        if (REPO_ROOT / "artifacts" / shape).is_dir():
-            legs["canonical_artifacts"] = f"artifacts/{shape}"
+        for tree, leg in (("scripts", "canonical_scripts"),
+                          ("artifacts", "canonical_artifacts"),
+                          ("configs", "canonical_configs"),
+                          ("data", "canonical_data"),
+                          ("docs", "canonical_docs")):
+            if (REPO_ROOT / tree / shape).is_dir():
+                legs[leg] = f"{tree}/{shape}"
         cur = REPO_ROOT / "logs" / shape / "current.json"
         if cur.is_file():
             legs["live_state"] = f"logs/{shape}/current.json"

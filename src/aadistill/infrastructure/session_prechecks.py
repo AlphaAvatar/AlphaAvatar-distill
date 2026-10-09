@@ -9,7 +9,7 @@ without reading three files. A precheck is now a value in
 Each returns `(ok, message)`. A false `ok` aborts before the provider is
 contacted; the message is what the session record and the launch log say.
 
-(The design in `docs/SESSION_ARCHITECTURE.md` names two new modules. This is a
+(The design in `docs/shared/SESSION_ARCHITECTURE.md` names two new modules. This is a
 third, deliberately: the shared gates run git and read the relay, and putting
 that I/O in the module that defines the frozen types would make a declaration
 module do work. The composition is the same either way.)

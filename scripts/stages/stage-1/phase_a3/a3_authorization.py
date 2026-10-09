@@ -43,9 +43,9 @@ LIVE_PRICING_PATH = "logs/stages/stage-1/phase_c3/plans/a3_live_pricing.json"
 #: fresh chain — which is the point: the launcher that ran is the launcher the
 #: maintainer authorized.
 A3_HARNESS_FILES: tuple[str, ...] = (
-    "configs/autoinit/a3_artifacts.json",
-    "configs/autoinit/a3_artifacts_failed.json",
-    "configs/experiments/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_a3/a3_artifacts.json",
+    "configs/stages/stage-1/phase_a3/a3_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c1/authorization.json",
     "scripts/autoinit/aggregate_a3.py",
     "scripts/autoinit/compare_a_bsz3.py",
     "scripts/autoinit/write_a3_design.py",

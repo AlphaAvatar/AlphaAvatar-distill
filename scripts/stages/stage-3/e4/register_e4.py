@@ -33,12 +33,12 @@ from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: 
 PACK = REPO_ROOT / "artifacts/shared/instruments/ladder_uniform_probe"
 INIT = REPO_ROOT / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONFIGS = {
-    "P2-0.86M-sa": "configs/stage3/p2/p2_ceheavy_sa.json",
-    "P2-0.86M-sb": "configs/stage3/p2/p2_ceheavy_sb.json",
-    "P1-1.60M-sa": "configs/stage3/e1/e1_r1600k_sa_pca.json",
-    "P1-1.60M-sb": "configs/stage3/e1/e1_r1600k_sb_pca.json",
-    "E4-P2-1.60M-sa": "configs/stage3/e4/e4_p2_r1600k_sa.json",
-    "E4-P2-1.60M-sb": "configs/stage3/e4/e4_p2_r1600k_sb.json",
+    "P2-0.86M-sa": "configs/stages/stage-3/p2/p2_ceheavy_sa.json",
+    "P2-0.86M-sb": "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
+    "P1-1.60M-sa": "configs/stages/stage-3/e1/e1_r1600k_sa_pca.json",
+    "P1-1.60M-sb": "configs/stages/stage-3/e1/e1_r1600k_sb_pca.json",
+    "E4-P2-1.60M-sa": "configs/stages/stage-3/e4/e4_p2_r1600k_sa.json",
+    "E4-P2-1.60M-sb": "configs/stages/stage-3/e4/e4_p2_r1600k_sb.json",
 }
 REFERENCE_WEIGHTS = {
     "P2-0.86M-sa": ("local", "/home/ecs-user/aad-artifacts/p2_ceheavy/p2_ceheavy_sa",
@@ -182,7 +182,7 @@ def main() -> None:
             "corpus_sessions_sha256": sha256_file(
                 REPO_ROOT / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"),
             "holdout_v1_sha256": sha256_file(
-                REPO_ROOT / "data/warmup/holdout_v1.jsonl"),
+                REPO_ROOT / "data/stages/stage-0/warmup/holdout_v1.jsonl"),
         },
         "evaluation": {
             "harness": "scripts/stages/stage-3/d0/run_three_mode_diagnostic.py",

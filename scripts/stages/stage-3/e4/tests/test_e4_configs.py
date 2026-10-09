@@ -48,15 +48,15 @@ def load(path: str) -> dict:
 
 
 def p2(seed: str) -> dict:
-    return load(f"configs/stage3/p2/p2_ceheavy_{seed}.json")
+    return load(f"configs/stages/stage-3/p2/p2_ceheavy_{seed}.json")
 
 
 def e4(seed: str) -> dict:
-    return load(f"configs/stage3/e4/e4_p2_r1600k_{seed}.json")
+    return load(f"configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json")
 
 
 def e1_1600k(seed: str) -> dict:
-    return load(f"configs/stage3/e1/e1_r1600k_{seed}_pca.json")
+    return load(f"configs/stages/stage-3/e1/e1_r1600k_{seed}_pca.json")
 
 
 @pytest.mark.parametrize("seed", sorted(SEEDS))

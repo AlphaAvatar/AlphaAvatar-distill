@@ -26,7 +26,9 @@ sys.path.insert(0, str(REPO / "scripts"))
 
 from aadistill.governance.closure import compare, derive  # noqa: E402
 
-OUT_DIR = "configs/experiments"
+#: Snapshots live with their experiment owner. Both registered experiments
+#: are stage-1; registering one from another stage extends this mapping.
+OUT_DIR = "configs/stages/stage-1"
 
 
 def _phase_c1():

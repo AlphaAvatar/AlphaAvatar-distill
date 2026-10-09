@@ -3,7 +3,7 @@
 
     src/aadistill/governance/grant.py    the MECHANISM: stated vs derived
                                          fields, cap arithmetic. No experiment.
-    configs/experiments/phase_c2/        the INSTANCE: the stage, the money
+    configs/stages/stage-1/phase_c2/    the INSTANCE: the stage, the money
       authorization.json                 figures to refuse against, the two
                                          stage conditions.
     this file                            the ASSEMBLER: reads that config,
@@ -80,7 +80,7 @@ from aadistill.governance.grant import (  # noqa: E402
 )
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
-CONFIG = "configs/experiments/phase_c2/authorization.json"
+CONFIG = "configs/stages/stage-1/phase_c2/authorization.json"
 
 #: The module's public exception, so both callers catch one name.
 C2AuthorizationRefused = GrantRefused

@@ -124,11 +124,11 @@ TYPES = {
 # found 27 train rows duplicating `val` and 4 duplicating `calib`, so the
 # exclusion is recomputed here rather than trusted.
 DEFAULT_EXCLUDE = (
-    "data/stage2_v1/val",
-    "data/stage2_v1/calib",
-    "data/stage2/val",
-    "data/warmup/holdout_v1.jsonl",
-    "data/eval_behavior_v0/prompts.jsonl",
+    "data/stages/stage-2/stage2_v1/val",
+    "data/stages/stage-2/stage2_v1/calib",
+    "data/stages/stage-2/stage2/val",
+    "data/stages/stage-0/warmup/holdout_v1.jsonl",
+    "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
 )
 
 # Larger than any plausible batch count, so candidate i of batch b never reuses
@@ -326,7 +326,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", default="Qwen/Qwen3-4B-Thinking-2507@"
                                        "768f209d9ea81521153ed38c47d515654e938aea")
-    ap.add_argument("--data-dir", default="data/stage2_v1")
+    ap.add_argument("--data-dir", default="data/stages/stage-2/stage2_v1")
     ap.add_argument("--types", default=",".join(TYPES))
     ap.add_argument("--limit-per-type", type=int, default=None)
     ap.add_argument("--limits", default=None,

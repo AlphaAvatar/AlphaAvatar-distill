@@ -27,7 +27,7 @@ in several documents at once.
 
 Sources, all already owned elsewhere:
 
-* the allowances and the ceiling — `configs/experiments/phase_c1/authorization.json`
+* the allowances and the ceiling — `configs/stages/stage-1/phase_c1/authorization.json`
   → `execution_package`, the maintainer decision;
 * what each formal session actually cost — that session's own
   `closeout/outcome.json`, discovered through the run index so a session cannot
@@ -49,7 +49,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
-PACKAGE = "configs/experiments/phase_c1/authorization.json"
+PACKAGE = "configs/stages/stage-1/phase_c1/authorization.json"
 RUN_INDEX = "logs/index.json"
 CAMPAIGN = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/campaign.json"
 

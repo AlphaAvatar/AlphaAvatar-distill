@@ -508,7 +508,7 @@ def test_every_required_audit_artifact_is_one_the_driver_writes():
     comes home incomplete -- C3 learned that at teardown, where the evidence
     is still on the pod and only recoverable if someone is watching."""
     spec = json.loads(
-        (REPO / "configs/autoinit/a3_artifacts.json").read_text())
+        (REPO / "configs/stages/stage-1/phase_a3/a3_artifacts.json").read_text())
     src = DRIVER.read_text()
     missing = []
     for entry in spec["entries"]:

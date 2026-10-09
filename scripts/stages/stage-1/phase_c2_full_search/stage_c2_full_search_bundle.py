@@ -84,7 +84,7 @@ def main(argv=None) -> int:
                          "governance/bundle.json")
     args = ap.parse_args(argv)
 
-    cfg = json.loads((REPO_ROOT / "configs/experiments/phase_c2"
+    cfg = json.loads((REPO_ROOT / "configs/stages/stage-1/phase_c2_full_search"
                       / "full_search_authorization.json").read_text())
     stage_id = args.stage_id or str(cfg["stage_id"])
     auth_rel = governance_path(args.run_id, "authorization.json", stage_id)

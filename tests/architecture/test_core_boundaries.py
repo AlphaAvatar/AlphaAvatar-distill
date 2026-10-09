@@ -13,7 +13,7 @@ today — that is the maintainer's finding, and fixing it is a multi-session
 migration touching 164 importing files and every frozen source-set declaration.
 A test that simply fails would be red for the whole migration and would stop
 telling anyone anything. So each rule is a **ratchet**: the known violations are
-committed in `configs/architecture/core_boundary_baseline.json` with an exact
+committed in `configs/maintenance/architecture/core_boundary_baseline.json` with an exact
 count, and the assertion is
 
     observed <= baseline,  and every observed violation is already listed
@@ -41,7 +41,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 CORE = REPO / "src" / "aadistill"
 INVENTORY = REPO / "logs/maintenance/inventories/architecture_inventory.json"
-BASELINE = REPO / "configs/architecture/core_boundary_baseline.json"
+BASELINE = REPO / "configs/maintenance/architecture/core_boundary_baseline.json"
 
 
 @pytest.fixture(scope="module")

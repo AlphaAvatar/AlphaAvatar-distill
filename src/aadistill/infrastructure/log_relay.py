@@ -66,7 +66,7 @@ class RelaySpec:
     #: has, so `tail -c +N` splices the NEW document's tail onto the OLD
     #: document's head. The result has a plausible size, is not a document, and
     #: nothing in the transfer reports an error — the failure mode this flag
-    #: exists to end. See `docs/core-provenance.md` for the incident.
+    #: exists to end. See `docs/maintenance/core-provenance.md` for the incident.
     whole_file: bool = False
 
 

@@ -141,10 +141,10 @@ RUN_OUTPUTS: tuple[str, ...] = (
     "validation_stdout.txt", "artifacts", "watchdog_*.jsonl")
 
 DEFAULT_AUTHORIZATION = "logs/stages/stage-1/phase_c1/validations/cuda-stage-f/v1/authorization.json"
-#: THIS run's image, not a formal session's. `configs/infrastructure/pod_image.json`
+#: THIS run's image, not a formal session's. `configs/shared/infrastructure/pod_image.json`
 #: describes an image whose `/opt/train/bin/python` is built by a long setup this
 #: run does not perform.
-DEPLOYMENT_CONFIG = REPO_ROOT / "configs/validation/cuda_engineering_deployment.json"
+DEPLOYMENT_CONFIG = REPO_ROOT / "configs/shared/validation/cuda_engineering_deployment.json"
 
 #: Candidates when the authorization does NOT pin a card: any that can satisfy
 #: cc >= 8.0 with native BF16, cheapest AVAILABLE one from a single bounded
@@ -164,7 +164,7 @@ DEFAULT_CANDIDATES = (
 #: image. `--ship` appends; a check that imports from elsewhere in the tree
 #: must say so, because an unshipped import fails on the pod after it bills.
 DEFAULT_SHIP = ("src", "scripts/shared", "scripts/stages",
-                "configs/validation")
+                "configs/shared/validation")
 
 
 class Stop(RuntimeError):
@@ -1052,7 +1052,7 @@ def main() -> int:
                     default="scripts/shared/validation/cuda_engineering_check.py",
                     help="the pod-side check, repo-relative")
     ap.add_argument("--check-config",
-                    default="configs/validation/cuda_engineering.json")
+                    default="configs/shared/validation/cuda_engineering.json")
     ap.add_argument("--ship", action="append", default=[],
                     help="extra repo-relative paths to ship; appends to the "
                          "default set")

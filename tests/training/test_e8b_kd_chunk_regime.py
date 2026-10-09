@@ -20,7 +20,7 @@ import pytest
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
 
-ARMS = json.loads((REPO / "configs/stage3/e8b/arms.json").read_text())
+ARMS = json.loads((REPO / "configs/stages/stage-3/e8b/arms.json").read_text())
 DEPTH_ARMS = ("e8b_dp_r1600k_sa", "e8b_dc_r1600k_sa",
               "e8b_dp_r1600k_sb", "e8b_dc_r1600k_sb")
 COMPRESSED_ARMS = ("e8b_fc_r1600k_sa", "e8b_fc_r1600k_sb")
@@ -29,7 +29,7 @@ CANONICAL_OBJECTIVE = {"ce_weight": 0.25, "kd_weight": 1.0,
 
 
 def cfg(name: str) -> dict:
-    return json.loads((REPO / f"configs/stage3/e8b/{name}.json").read_text())
+    return json.loads((REPO / f"configs/stages/stage-3/e8b/{name}.json").read_text())
 
 
 @pytest.mark.parametrize("name", DEPTH_ARMS)
@@ -59,7 +59,7 @@ def test_the_objective_itself_is_unchanged(name):
 
 def test_the_e1_control_was_not_touched():
     for control in ("e1_r1600k_sa_pca.json", "e1_r1600k_sb_pca.json"):
-        loss = json.loads((REPO / "configs/stage3/e1" / control).read_text())["loss"]
+        loss = json.loads((REPO / "configs/stages/stage-3/e1" / control).read_text())["loss"]
         assert loss == CANONICAL_OBJECTIVE
         assert "kd_chunk" not in loss
 

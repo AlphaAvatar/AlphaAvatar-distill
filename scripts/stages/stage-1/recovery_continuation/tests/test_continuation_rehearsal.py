@@ -703,12 +703,12 @@ def test_the_success_spec_accepts_what_the_driver_writes(tmp_path):
     continuation_output_tree(root)
 
     good = build_manifest(root, collect.load_specs(
-        str(REPO / "configs/autoinit/continuation_artifacts.json")))
+        str(REPO / "configs/stages/stage-1/recovery_continuation/continuation_artifacts.json")))
     assert good.ok, good.missing
 
     # The same tree under the preflight's success spec: this is the bug.
     bad = build_manifest(root, collect.load_specs(
-        str(REPO / "configs/autoinit/preflight_artifacts.json")))
+        str(REPO / "configs/shared/pod/preflight/preflight_artifacts.json")))
     assert not bad.ok
     assert any(m["artifact_class"] == "preflight_evidence" for m in bad.missing)
     assert any("train_log" in m["pattern"] for m in bad.missing)
@@ -718,7 +718,7 @@ def test_the_success_spec_accepts_what_the_driver_writes(tmp_path):
     (sparse / "audit/autoinit_continuation").mkdir(parents=True)
     (sparse / "audit/autoinit_continuation/continuation_evidence.json").write_text("{}\n")
     reduced = build_manifest(sparse, collect.load_specs(
-        str(REPO / "configs/autoinit/continuation_artifacts_failed.json")))
+        str(REPO / "configs/stages/stage-1/recovery_continuation/continuation_artifacts_failed.json")))
     assert reduced.ok, reduced.missing
 
 
@@ -768,7 +768,7 @@ def test_the_continuation_fetches_no_checkpoints_and_waits_on_no_train_log():
          "--bundle", "aad_test.bundle"]))
     assert pre.artifacts.audit_dirname == "autoinit_preflight"
     assert pre.markers.failure == ("PREFLIGHT_FAILED", "PREFLIGHT_INCOMPLETE")
-    assert pre.artifacts.spec_success == "configs/autoinit/preflight_artifacts.json"
+    assert pre.artifacts.spec_success == "configs/shared/pod/preflight/preflight_artifacts.json"
     assert pre.artifacts.report_names[0] == "preflight_evidence.json"
 
 

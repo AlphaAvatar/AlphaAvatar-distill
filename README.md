@@ -28,10 +28,10 @@ has exactly one owner:
 | **what Phase A and Phase B concluded** | [`logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md`](logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md) |
 | spend, caps, authorizations | [`logs/budget/ledger.md`](./logs/budget/ledger.md) |
 | which log owns which fact | [`logs/state/ownership.md`](./logs/state/ownership.md) |
-| where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
-| how a paid session is specified and run | [`docs/SESSION_ARCHITECTURE.md`](./docs/SESSION_ARCHITECTURE.md) |
-| which pod script is live, historical or terminated | [`docs/POD_SCRIPTS.md`](./docs/POD_SCRIPTS.md) |
-| AutoInitializer binding rules and pinned assets | [`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md) |
+| where code lives | [`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md) |
+| how a paid session is specified and run | [`docs/shared/SESSION_ARCHITECTURE.md`](./docs/shared/SESSION_ARCHITECTURE.md) |
+| which pod script is live, historical or terminated | [`docs/shared/POD_SCRIPTS.md`](./docs/shared/POD_SCRIPTS.md) |
+| AutoInitializer binding rules and pinned assets | [`docs/stages/stage-1/AUTOINIT_REFERENCE.md`](./docs/stages/stage-1/AUTOINIT_REFERENCE.md) |
 | what each experiment proved | [`logs/state/experiment_index.md`](./logs/state/experiment_index.md) |
 | decisions and their reasons | [`logs/budget/decisions.md`](./logs/budget/decisions.md) |
 | which checkpoints exist, and why | [`logs/maintenance/inventories/checkpoint_registry.json`](./logs/maintenance/inventories/checkpoint_registry.json) |
@@ -42,7 +42,7 @@ has exactly one owner:
 initialization operators, operator order and calibration configuration, with
 conditional remeasurement after every operator. Its design, pinned assets and
 binding rules are in
-[`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md); its status is in
+[`docs/stages/stage-1/AUTOINIT_REFERENCE.md`](./docs/stages/stage-1/AUTOINIT_REFERENCE.md); its status is in
 `logs/state/current.md`, not here.
 
 The methods are meant to be **model-family-agnostic** — the same
@@ -328,20 +328,20 @@ uv run python scripts/shared/data/build_stage2_v0.py       # offline mixture v0 
 uv run python scripts/shared/data/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
 
 # Stage 0 → 1: teacher statistics (~1 h CPU; dry run with --limit 2), then init (~5 min)
-uv run python scripts/shared/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking_v1.json
-uv run python scripts/shared/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
+uv run python scripts/shared/training/collect_stage0.py --config configs/stages/stage-0/qwen3_4b_thinking_v1.json
+uv run python scripts/shared/training/init_stage1.py --config configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json
 
 # gate check
-uv run python scripts/shared/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+uv run python scripts/shared/evaluation/eval_ppl.py --data data/stages/stage-0/warmup/holdout_v1.jsonl \
   --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
   --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/random_baseline
 
 # Stage 3 recovery: the canonical config, resumable through the same code path
-uv run python scripts/shared/training/train_stage3.py --config configs/stage3/recovery.json
-uv run python scripts/shared/training/train_stage3.py --config configs/stage3/recovery.json --resume
+uv run python scripts/shared/training/train_stage3.py --config configs/stages/stage-3/recovery.json
+uv run python scripts/shared/training/train_stage3.py --config configs/stages/stage-3/recovery.json --resume
 
 # any checkpoint, at the deployment precision (bf16 baseline + INT8 weight fake-quant)
-uv run python scripts/shared/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+uv run python scripts/shared/evaluation/eval_ppl.py --data data/stages/stage-0/warmup/holdout_v1.jsonl \
   --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
   --fake-quant int8 --fake-quant-scope decoder
 
@@ -372,7 +372,7 @@ uv run python scripts/shared/data/validate_corpus_gate.py \
   --corpus artifacts/stages/stage-3_corpus_v2 --packed artifacts/stages/stage-3_ladder_v2 --skip-logits
 ```
 
-`configs/stage3/recovery.json` is the single recovery recipe; a run differs from
+`configs/stages/stage-3/recovery.json` is the single recovery recipe; a run differs from
 it only in `data_dir` and `schedule.total_steps` — hardware never changes the
 experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
 
@@ -392,13 +392,13 @@ Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, fol
 
 ## 🗂️ Project structure
 
-Code is grouped by **responsibility**; configs, logs and tests by **training stage**.
-[`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) is the full map and the rule for where new files go.
+All six trees — scripts, logs, artifacts, configs, data, docs — share one owner-first namespace: `stages/stage-<n>/<experiment>` (with `families/<family>` for experiment families), `shared/`, `maintenance/`.
+[`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md) is the full map and the rule for where new files go.
 
 ```text
 AlphaAvatar-distill/
 ├── AGENTS.md               # agent working contract (single source of truth)
-├── docs/REPO_LAYOUT.md     # where code, configs, logs and artifacts belong
+├── docs/maintenance/REPO_LAYOUT.md     # where code, configs, logs and artifacts belong
 ├── pyproject.toml          # uv-managed env; CPU torch index by default
 ├── src/aadistill/          # algorithm core — model-agnostic, config-driven
 │   ├── models/             #   teacher/student loading, INT8 fake-quant
@@ -422,8 +422,11 @@ AlphaAvatar-distill/
 │   │                       #   data/ evaluation/ training/ rollout/ validation/ pod/
 │   └── maintenance/        #   repository tooling: architecture/ consolidation/
 │                           #   migration/ (the declarative move map lives here)
-├── configs/                # stage recipes and frozen run configurations
-├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
+├── configs/                # owner-first: stages/stage-<n>/<experiment>/ for
+│                           # experiment-owned specs and authorizations; stage-level
+│                           # registries at stages/stage-<n>/; shared/ and maintenance/
+├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
+│                           # tracked, heavy files gitignored, rebuildable
 ├── tests/                  # the CORE suite; experiment suites live with their
 │                           # experiments under scripts/stages/.../tests/
 ├── logs/                   # project memory — read logs/README.md first
@@ -431,11 +434,12 @@ AlphaAvatar-distill/
 │   │                       #   ownership.md, artifact_manifests.md
 │   ├── stages/             #   stage → experiment → run evidence; families/ for
 │   │                       #   experiment-family records; index.json is the
-│   │                       #   ownership index (scripts/logs/artifacts legs)
+│   │                       #   ownership index (one leg per tree, all six)
 │   ├── budget/             #   ledger, decisions, consumed approvals
 │   └── maintenance/        #   inventories, registries, source-relocations
 ├── artifacts/              # durable local products, by owner (gitignored except
 │                           # README.md and the generated index.json)
+├── docs/                   # durable reference, by owner — start at docs/README.md
 └── assets/                 # trend data + rendered figure
 ```
 

@@ -81,7 +81,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--session", required=True, choices=sorted(SESSION_INITS))
-    ap.add_argument("--arms", default="configs/stage3/e8b/arms.json")
+    ap.add_argument("--arms", default="configs/stages/stage-3/e8b/arms.json")
     ap.add_argument("--pack", default="artifacts/stage3/ladder_uniform_probe")
     ap.add_argument("--require-init", action="store_true",
                     help="also require each initialization's own hash-bound NLL "

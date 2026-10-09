@@ -162,7 +162,7 @@ def main() -> None:
     ap.add_argument("--student", required=True)
     ap.add_argument("--teacher", default="")
     ap.add_argument("--config", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e1/e1_r0860k_sa_pca.json")
+                    default=REPO_ROOT / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json")
     ap.add_argument("--blocks-per-regime", type=int, default=8)
     ap.add_argument("--steps", type=int, default=6)
     ap.add_argument("--warmup", type=int, default=2)

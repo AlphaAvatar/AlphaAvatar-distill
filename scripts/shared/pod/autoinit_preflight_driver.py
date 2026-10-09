@@ -85,9 +85,9 @@ AUDIT = REPO / "artifacts/audit/autoinit_preflight"
 BATTERY = REPO / "artifacts/stages/stage-1/batteries/recovery_search_v2"
 CANONICAL_INIT = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 CONTROLS = (("preflight_ctl_r0860k_sa", SEED_SA,
-             "configs/stage3/e1/e1_r0860k_sa_pca.json"),
+             "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json"),
             ("preflight_ctl_r0860k_sb", SEED_SB,
-             "configs/stage3/e1/e1_r0860k_sb_pca.json"))
+             "configs/stages/stage-3/e1/e1_r0860k_sb_pca.json"))
 PINNED = {
     "canonical_init_weights": (
         "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/model.safetensors",

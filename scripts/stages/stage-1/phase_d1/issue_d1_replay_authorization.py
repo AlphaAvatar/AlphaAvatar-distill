@@ -58,8 +58,8 @@ HARNESS_FILES: tuple[str, ...] = (
     "scripts/experiments/stage-1/phase_d1/d1_session.py",
     "scripts/pod/autoinit_preflight_setup.sh",
     "scripts/pod/collect_artifacts.py",
-    "configs/autoinit/d1_replay_artifacts.json",
-    "configs/autoinit/d1_replay_artifacts_failed.json",
+    "configs/stages/stage-1/phase_d1/d1_replay_artifacts.json",
+    "configs/stages/stage-1/phase_d1/d1_replay_artifacts_failed.json",
     "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
 )
 

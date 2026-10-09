@@ -98,7 +98,7 @@ RUN_LOG = f"{WS}/autoinit_c2_behavioural_run.log"
 #: that declares it and names no expectation — explicit or refused, never
 #: inherited. Names the assets THIS session reads: both calibration mixtures,
 #: the recovery pack, the evaluation tokenizer and both batteries.
-FROZEN_EXPECT = "configs/experiments/phase_c2/behavioural_frozen_assets.json"
+FROZEN_EXPECT = "configs/stages/stage-1/phase_c2_behavioural/behavioural_frozen_assets.json"
 
 #: Where finished probes live off-pod. ONE constant: the fetcher writes here and
 #: the preflight reads here, so "is this probe already durable" has one answer.
@@ -1192,7 +1192,7 @@ def evidence_locations(ctx: SessionContext) -> tuple[Path, ...]:
 
     scr = Path(ctx.args.scr)
     out: list[Path] = []
-    spec_file = REPO_ROOT / "configs/autoinit/c2_behavioural_artifacts.json"
+    spec_file = REPO_ROOT / "configs/stages/stage-1/phase_c2_behavioural/c2_behavioural_artifacts.json"
     if spec_file.is_file():
         for entry in load_specs(str(spec_file)):
             if entry.artifact_class == "session_evidence":
@@ -2150,8 +2150,8 @@ def spec(args) -> SessionSpec:
             audit_dirname=AUDIT_DIRNAME,
             evidence_filename="c2_behavioural_evidence.json",
             archive_basename="c2_behavioural_artifacts.tar.gz",
-            spec_success="configs/autoinit/c2_behavioural_artifacts.json",
-            spec_failed="configs/autoinit/c2_behavioural_artifacts_failed.json",
+            spec_success="configs/stages/stage-1/phase_c2_behavioural/c2_behavioural_artifacts.json",
+            spec_failed="configs/stages/stage-1/phase_c2_behavioural/c2_behavioural_artifacts_failed.json",
             report_names=("c2_behavioural_evidence.json",),
             on_poll=secure_finished_probes,
             fetch_products=fetch_probes,

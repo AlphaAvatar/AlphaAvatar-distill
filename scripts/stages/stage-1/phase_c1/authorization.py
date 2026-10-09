@@ -99,8 +99,8 @@ C1_HARNESS_SOURCE_FILES_V1: tuple[str, ...] = (
     # the generic HIDDEN_PATHS default did for $0.6986.
     "src/aadistill/autoinit/staging_contract.py",
     # what the collector is told to save, and what it may skip on failure
-    "configs/autoinit/c1_artifacts.json",
-    "configs/autoinit/c1_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c1/c1_artifacts.json",
+    "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json",
     # the C1 scoring binding, and every file that can move a C1 number.
     # `recovery_search_scoring@v2` cannot run on this battery, so C1 declares
     # `c1_confirmation_scoring@v1`; the three files V2 omits and this set does not
@@ -201,9 +201,9 @@ C1_ENTRY_POINTS: tuple[str, ...] = (
 #: Everything else a session loads and cannot reach by import IS here.
 C1_DECLARED_INPUTS: tuple[str, ...] = (
     "scripts/shared/pod/autoinit_preflight_setup.sh",
-    "configs/experiments/phase_c1/authorization.json",
-    "configs/autoinit/c1_artifacts.json",
-    "configs/autoinit/c1_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c1/authorization.json",
+    "configs/stages/stage-1/phase_c1/c1_artifacts.json",
+    "configs/stages/stage-1/phase_c1/c1_artifacts_failed.json",
     #: What the frozen-asset gate checks this tree against, on the pod and at
     #: $0 before one exists. Declared because the AST walk cannot see it: the
     #: launcher names it as a string and hands it to a subprocess, so without
@@ -211,7 +211,7 @@ C1_DECLARED_INPUTS: tuple[str, ...] = (
     #: OUTSIDE the set a grant binds, and could be edited without moving the
     #: digest — the same property that makes `c1_artifacts.json` a declared
     #: input rather than an incidental file.
-    "configs/experiments/phase_c1/frozen_assets.json",
+    "configs/stages/stage-1/phase_c1/frozen_assets.json",
 )
 
 #: A recorded snapshot of the derived closure, for reporting drift. Never the
@@ -225,7 +225,7 @@ C1_DECLARED_INPUTS: tuple[str, ...] = (
 C1_SOURCE_ROOTS: tuple[str, ...] = ("src", "scripts", "scripts/pod",
                                     "scripts/autoinit")
 
-CURRENT_CLOSURE_SNAPSHOT = "configs/experiments/phase_c1/executable_closure.json"
+CURRENT_CLOSURE_SNAPSHOT = "configs/stages/stage-1/phase_c1/executable_closure.json"
 
 
 def c1_current_executable(repo_root: str | Path = ".") -> dict[str, Any]:

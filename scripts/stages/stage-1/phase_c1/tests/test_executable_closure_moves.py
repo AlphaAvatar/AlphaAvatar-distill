@@ -85,10 +85,10 @@ class TestTheClosureCoversWhatSpendsMoney:
         ("scripts/shared/pod/autoinit_preflight_setup.sh",
          "#!/", "#!/ # MUTATED\n",
          "the setup shell"),
-        ("configs/experiments/phase_c1/authorization.json",
+        ("configs/stages/stage-1/phase_c1/authorization.json",
          "{", '{"_mutated": true,',
          "the execution config"),
-        ("configs/autoinit/c1_artifacts.json",
+        ("configs/stages/stage-1/phase_c1/c1_artifacts.json",
          "{", '{"_mutated": true,',
          "the artifact contract"),
     ], ids=lambda v: v if isinstance(v, str) and " " in v else None)
@@ -182,7 +182,7 @@ class TestTheRealClosure:
                     "src/aadistill/infrastructure/watchdog.py",
                     "scripts/shared/pod/watchdog.py",
                     "scripts/shared/pod/autoinit_preflight_setup.sh",
-                    "configs/experiments/phase_c1/authorization.json"):
+                    "configs/stages/stage-1/phase_c1/authorization.json"):
             assert rel in paths, f"{rel} decides what a paid session does"
 
     def test_the_preregistration_is_bound_by_its_own_hash_not_by_the_closure(self):

@@ -45,10 +45,10 @@ from aadistill.training.train import (  # noqa: E402
 
 VOCAB = 151_936
 ARMS = {
-    "DP-sa": "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
-    "DC-sa": "configs/stage3/e8b/e8b_dc_r1600k_sa.json",
-    "DP-sb": "configs/stage3/e8b/e8b_dp_r1600k_sb.json",
-    "DC-sb": "configs/stage3/e8b/e8b_dc_r1600k_sb.json",
+    "DP-sa": "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json",
+    "DC-sa": "configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json",
+    "DP-sb": "configs/stages/stage-3/e8b/e8b_dp_r1600k_sb.json",
+    "DC-sb": "configs/stages/stage-3/e8b/e8b_dc_r1600k_sb.json",
 }
 WINDOWS = {"first_20": (0, 20), "first_200": (0, 200), "first_310": (0, 310),
            "around_dc_oom_850_950": (850, 950), "full_stream": (0, None)}

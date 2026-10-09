@@ -28,7 +28,7 @@ existing budget rather than a new one.
 cross-device add on every hooked call. The same rule the residual/FFN collector
 follows applies here, and `state()` moves the result to the host once, at the
 end. (This project has paid for the alternative; see
-`docs/core-provenance.md`.)
+`docs/maintenance/core-provenance.md`.)
 
 Hooking the attention-output projection's *input* is deliberate: it already holds
 the concatenated per-head outputs, so nothing about the attention kernel, the GQA

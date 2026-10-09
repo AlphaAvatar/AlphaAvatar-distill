@@ -1,7 +1,7 @@
 """Token-level NLL / perplexity evaluation on a warm-up-format jsonl.
 
 Usage:
-    uv run python scripts/shared/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
+    uv run python scripts/shared/evaluation/eval_ppl.py --data data/stages/stage-0/warmup/holdout_v1.jsonl \
         --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
         [--model Qwen/Qwen3-4B-Thinking-2507@<revision> ...] \
         [--max-seq-len 1024] [--out <report.json>]

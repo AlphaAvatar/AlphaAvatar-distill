@@ -51,8 +51,8 @@ VLLM_PY = "/opt/vllm/bin/python"
 PACK = REPO / "artifacts/shared/instruments/ladder_uniform_probe"
 SESSIONS = REPO / "artifacts/stages/stage-3/corpus_v2/sessions.jsonl"
 VAL_STREAM = REPO / "artifacts/stages/stage-3/e7_fineweb_val"
-HOLDOUT = REPO / "data/warmup/holdout_v1.jsonl"
-PROBE_PROMPTS = REPO / "data/eval_behavior_v0/prompts.jsonl"
+HOLDOUT = REPO / "data/stages/stage-0/warmup/holdout_v1.jsonl"
+PROBE_PROMPTS = REPO / "data/stages/stage-3/eval_behavior_v0/prompts.jsonl"
 
 TEACHER = "Qwen/Qwen3-4B-Thinking-2507"
 TEACHER_REVISION = "768f209d9ea81521153ed38c47d515654e938aea"
@@ -223,7 +223,7 @@ def stage_step0_probe(args) -> None:
         try:
             run(["scripts/shared/evaluation/eval_behavior.py",
                  "--model", base / "checkpoint",
-                 "--prompts", "data/eval_behavior_v0/prompts.jsonl",
+                 "--prompts", "data/stages/stage-3/eval_behavior_v0/prompts.jsonl",
                  "--max-new-tokens", args.probe_max_new_tokens,
                  "--dtype", "bfloat16", "--out", dest])
         except subprocess.CalledProcessError as exc:
@@ -295,7 +295,7 @@ def stage_throughput_gate(args) -> None:
         mark(args.session, "THROUGHPUT_GATE_PASSED")
         return
     alias, name = next(iter(SESSION_ARMS[args.session].items()))
-    cfg = json.loads((REPO / f"configs/stage3/e8b/{name}.json").read_text())
+    cfg = json.loads((REPO / f"configs/stages/stage-3/e8b/{name}.json").read_text())
     probe = dict(cfg)
     probe["run_name"] = f"{name}_gate"
     probe["out_dir"] = f"artifacts/stages/stage-3/{name}_gate"
@@ -307,7 +307,7 @@ def stage_throughput_gate(args) -> None:
     probe["checkpoint"] = {"save_every": 10_000, "keep_last": 1}
     probe["_purpose"] = (f"E8b {args.session} throughput/VRAM/$-per-step gate: "
                          f"{GATE_STEPS} real steps of {name}, discarded")
-    probe_path = REPO / f"configs/stage3/e8b/{name}_gate.json"
+    probe_path = REPO / f"configs/stages/stage-3/e8b/{name}_gate.json"
     probe_path.write_text(json.dumps(probe, indent=2) + "\n")
     run(["scripts/shared/training/train_stage3.py", "--config", probe_path])
 
@@ -396,7 +396,7 @@ def stage_memory_profile(args) -> None:
         mark(args.session, "MEMORY_PROFILE_DONE")
         return
     run(["scripts/stages/stage-3/e8b/profile_dp_memory.py",
-         "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+         "--config", REPO / "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json",
          "--steps", 2, "--out", out])
     mark(args.session, "MEMORY_PROFILE_DONE")
 
@@ -414,7 +414,7 @@ def stage_lifecycle(args) -> None:
         mark(args.session, "LIFECYCLE_DONE")
         return
     run(["scripts/shared/training/replay_lifecycle.py",
-         "--config", REPO / "configs/stage3/e8b/e8b_dp_r1600k_sa.json",
+         "--config", REPO / "configs/stages/stage-3/e8b/e8b_dp_r1600k_sa.json",
          "--steps", args.lifecycle_steps, "--post-event-steps", 60,
          "--pin-step", 133, "--out", out])
     mark(args.session, "LIFECYCLE_DONE")
@@ -449,7 +449,7 @@ def stage_train(args) -> None:
                                f"{args.soft_stop_usd:.2f}")
             return
         run(["scripts/shared/training/train_stage3.py",
-             "--config", REPO / f"configs/stage3/e8b/{name}.json"])
+             "--config", REPO / f"configs/stages/stage-3/e8b/{name}.json"])
         mark(args.session, f"TRAIN_DONE:{alias}")
     mark(args.session, "TRAIN_DONE")
 

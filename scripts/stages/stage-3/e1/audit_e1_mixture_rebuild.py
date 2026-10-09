@@ -82,7 +82,7 @@ def main() -> None:
     ap.add_argument("--historical", required=True, type=Path)
     ap.add_argument("--seeds", nargs="+", type=int, required=True)
     ap.add_argument("--configs", type=Path,
-                    default=REPO_ROOT / "configs/stage3/e1")
+                    default=REPO_ROOT / "configs/stages/stage-3/e1")
     ap.add_argument("--out", required=True, type=Path)
     args = ap.parse_args()
 

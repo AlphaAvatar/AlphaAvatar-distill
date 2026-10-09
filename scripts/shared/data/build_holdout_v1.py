@@ -9,8 +9,8 @@ never seen by the Stage 0 statistics. Same revision pinning and manifest
 scheme as the warm-up builder.
 
 Output:
-    data/warmup/holdout_v1.jsonl           gitignored
-    data/warmup/holdout_v1.manifest.json   committed
+    data/stages/stage-0/warmup/holdout_v1.jsonl           gitignored
+    data/stages/stage-0/warmup/holdout_v1.manifest.json   committed
 """
 
 from __future__ import annotations
@@ -40,7 +40,7 @@ def main() -> None:
     revision = HfApi().dataset_info(DATASET).sha
     ds = load_dataset(DATASET, CONFIG, split="train", revision=revision, streaming=True)
 
-    out_path = REPO_ROOT / "data/warmup/holdout_v1.jsonl"
+    out_path = REPO_ROOT / "data/stages/stage-0/warmup/holdout_v1.jsonl"
     samples = []
     for idx, row in enumerate(ds):
         if idx < SKIP_DOCS:

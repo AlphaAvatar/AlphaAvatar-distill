@@ -69,7 +69,7 @@ def test_c2_declares_assets_ready_and_names_its_own_expectation(c2):
     assert "ASSETS_READY" in markers
     assert env["SESSION_FROZEN_EXPECT"] == launcher.FROZEN_EXPECT
     assert env["SESSION_FROZEN_EXPECT"] == (
-        "configs/experiments/phase_c2/frozen_assets.json")
+        "configs/stages/stage-1/phase_c2/frozen_assets.json")
     assert (REPO / env["SESSION_FROZEN_EXPECT"]).is_file()
     #: And the setup script is told, so it cannot fall back.
     assert "SESSION_FROZEN_EXPECT" in _spec.setup.required_env

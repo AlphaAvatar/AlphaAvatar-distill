@@ -473,7 +473,7 @@ class TestTheSpace:
         assert rebuilt["hard_ceiling_usd"] == pytest.approx(
             cell["hard_ceiling_usd"])
         envelope = json.loads(
-            (REPO / "configs/experiments/phase_c1/authorization.json").read_text()
+            (REPO / "configs/stages/stage-1/phase_c1/authorization.json").read_text()
         )["execution_package"]["per_attempt_hard_ceiling_usd"]
         assert cell["hard_ceiling_usd"] <= envelope
 
@@ -1006,11 +1006,11 @@ class TestThePhaseFundingAmendment:
     assert the GRANTED figures and the funded list, which only a maintainer moves.
     """
 
-    AUTH = Path("configs/experiments/phase_c1/authorization.json")
+    AUTH = Path("configs/stages/stage-1/phase_c1/authorization.json")
 
     @staticmethod
     def _terms():
-        doc = json.loads((REPO / "configs/experiments/phase_c1"
+        doc = json.loads((REPO / "configs/stages/stage-1/phase_c1"
                                  "/authorization.json").read_text())
         return doc["execution_package"], doc["accepted_pricing"]
 

@@ -93,11 +93,11 @@ C2_DECLARED_INPUTS: tuple[str, ...] = (
     #: pattern list. A session whose evidence contract can be edited without
     #: moving the digest has an unmeasured mutable input at exactly the point
     #: where loss is irreversible.
-    "configs/autoinit/c2_artifacts.json",
-    "configs/autoinit/c2_artifacts_failed.json",
+    "configs/stages/stage-1/phase_c2/c2_artifacts.json",
+    "configs/stages/stage-1/phase_c2/c2_artifacts_failed.json",
     #: The authorization instance: plan id, stage conditions, the accepted money
     #: figures the issuer refuses against, and the stage the run layout uses.
-    "configs/experiments/phase_c2/authorization.json",
+    "configs/stages/stage-1/phase_c2/authorization.json",
 )
 
 #: The sys.path roots the C2 entry points insert. Since the 2026-10-08

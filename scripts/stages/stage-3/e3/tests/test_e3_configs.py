@@ -44,15 +44,15 @@ def load(path: str) -> dict:
 
 def p1(seed: str) -> dict:
     """The 0.86M P2-ceheavy baseline (kept as `p1()` for call-site brevity)."""
-    return load(f"configs/stage3/p2/p2_ceheavy_{seed}.json")
+    return load(f"configs/stages/stage-3/p2/p2_ceheavy_{seed}.json")
 
 
 def a1(seed: str) -> dict:
-    return load(f"configs/stage3/e3/e3_a1_frozen_attn_{seed}.json")
+    return load(f"configs/stages/stage-3/e3/e3_a1_frozen_attn_{seed}.json")
 
 
 def a2(seed: str) -> dict:
-    return load(f"configs/stage3/e3/e3_a2_lora_attn_{seed}.json")
+    return load(f"configs/stages/stage-3/e3/e3_a2_lora_attn_{seed}.json")
 
 
 # Fields that identify the run rather than define it, plus the one field each

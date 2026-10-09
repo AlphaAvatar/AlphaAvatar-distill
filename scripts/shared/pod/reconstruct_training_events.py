@@ -22,8 +22,8 @@ never printed at all.
     python3 scripts/shared/pod/reconstruct_training_events.py \\
         --run-log /home/ecs-user/aad-artifacts/e6b/e6b_run.log \\
         --status  /home/ecs-user/aad-artifacts/e6b/e6b.status \\
-        --config configs/stage3/e6b/e6b_p2_r2960k_sa.json \\
-        --config configs/stage3/e6b/e6b_p2_r2960k_sb.json \\
+        --config configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json \\
+        --config configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json \\
         --out logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json
 """
 

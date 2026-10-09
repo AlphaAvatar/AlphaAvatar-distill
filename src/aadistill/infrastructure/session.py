@@ -13,7 +13,7 @@ satisfied all three, and three paid pods were lost proving it:
   had honestly declared it wanted none.
 
 Every one is the same failure: **a session inherited a requirement it never
-declared.** (Which sessions, and what each cost, is in ``docs/core-provenance.md``.)
+declared.** (Which sessions, and what each cost, is in ``docs/maintenance/core-provenance.md``.)
 This module is the replacement. A session states everything it is,
 once, in a frozen object; :mod:`aadistill.infrastructure.session_runner` consumes
 that object and nothing else. There is no base class to inherit from and no
@@ -356,7 +356,7 @@ class SetupManifest:
         every section unconditionally and emitted the markers as it went, so a
         session that omitted one got the step anyway — an environment it never
         calls, and a frozen-asset question about assets it does not stage. A
-        paid session was lost to it; `docs/core-provenance.md` records which.
+        paid session was lost to it; `docs/maintenance/core-provenance.md` records which.
         """
         missing = [m for m in self.SUBSTRATE_MARKERS
                    if m not in self.setup_markers]
@@ -744,7 +744,7 @@ class SessionSpec:
     #: against measurements taken elsewhere therefore needs a say in which
     #: host it accepts, and needs it before setup spends anything. The
     #: alternative is to discover it from a comparability check after the
-    #: science has run; see `docs/core-provenance.md`.
+    #: science has run; see `docs/maintenance/core-provenance.md`.
     #:
     #: Default None admits every host, so no existing session changes.
     host_admission: Callable[[str], tuple[bool, str]] | None = None
