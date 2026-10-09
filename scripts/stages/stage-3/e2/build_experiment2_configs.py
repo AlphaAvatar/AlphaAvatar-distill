@@ -43,7 +43,10 @@ D0_BLOCKS = 682
 D0_SUPERVISED = 864_750
 EPOCHS = 3
 SEEDS = [("a", 20260726), ("b", 20260801)]
-PCA_INIT = "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
+#: EMISSION vs LOCATION (2026-10-09 review). A value RECORDED into a frozen
+#: config keeps its freeze-time spelling so regeneration stays byte-identical;
+#: where files live is separate and reads resolve.
+PCA_INIT = "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
 
 PHASES = {
     "d1": {
@@ -95,7 +98,7 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
             f"{D0_BLOCKS} blocks / {D0_STEPS} steps, matching the Experiment 1 "
             f"0.86M PCA control ({D0_SUPERVISED:,} supervised) exactly on "
             f"compute. Seed {seed}, Stage 1 PCA init. "
-            "Differs from configs/stages/stage-3/recovery.json only in the fields this "
+            "Differs from configs/stage3/recovery.json only in the fields this "
             "phase is testing plus data source, rung, seed and schedule length."
         )
         cfg["student_path"] = PCA_INIT
@@ -135,7 +138,7 @@ def build(phase: str, out_dir: Path, data_dir: str, rung: int, val_blocks: int,
         cfg["checkpoint"] = {"save_every": eval_every, "keep_last": evals + 1}
         cfg["intervals"] = {"log_every": 10, "eval_every": eval_every,
                             "eval_blocks": val_blocks}
-        cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
+        cfg["out_dir"] = f"artifacts/stage3/{name}"
         path = out_dir / f"{name}.json"
         path.write_text(json.dumps(cfg, indent=2) + "\n")
         arms.append({"name": name, "config": str(path.relative_to(REPO_ROOT)),
@@ -151,7 +154,7 @@ def main() -> None:
     ap.add_argument("--phase", required=True, choices=sorted(PHASES))
     ap.add_argument("--out", default="configs/stages/stage-3/e2")
     ap.add_argument("--data-dir",
-                    default="artifacts/stages/stage-3/rung_0860k_clean_median",
+                    default="artifacts/stage3/rung_0860k_clean_median",
                     help="the packed rung this phase's arms read")
     ap.add_argument("--rung", type=int, default=858_409,
                     help="the compute-matched cleaned 0.86M rung (682 blocks)")

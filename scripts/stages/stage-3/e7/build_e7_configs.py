@@ -28,7 +28,11 @@ from aadistill.data.extra_stream import stream_budget  # noqa: E402
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 from aadistill.training.train import validate_train_config  # noqa: E402
 
+#: Where the base config LIVES now (reads resolve through it) and what the
+#: frozen arm configs RECORD as their base. Separate, since a config's bytes
+#: are evidence and must regenerate byte-identically (2026-10-09 review).
 BASE = "configs/stages/stage-3/e1/e1_r1600k_{seed}_pca.json"
+RECORDED_BASE = "configs/stage3/e1/e1_r1600k_{seed}_pca.json"
 SEEDS = ("sa", "sb")
 
 # The preregistered treatment. Every field is part of the config hash.
@@ -52,11 +56,11 @@ EXTRA = {
 
 ARMS = {
     "B": {"suffix": "fineweb", "kind": "general_text_kd",
-          "data_dir": "artifacts/stages/stage-3/e7_fineweb_kd",
+          "data_dir": "artifacts/stage3/e7_fineweb_kd",
           "purpose": "E7 arm B — FineWeb-Edu raw-text teacher KD alongside the "
                      "unchanged 1.60M rollout stream"},
     "C": {"suffix": "control", "kind": "in_domain_kd_control",
-          "data_dir": "artifacts/stages/stage-3/e7_control_kd",
+          "data_dir": "artifacts/stage3/e7_control_kd",
           "purpose": "E7 arm C — matched extra-KD control: identical extra KD "
                      "positions, forward workload and schedule, from unused "
                      "in-domain rollout text instead of FineWeb"},
@@ -78,11 +82,11 @@ def main() -> int:
             cfg = json.loads(base_path.read_text())
             run = f"e7_{spec['suffix']}_r1600k_{seed}"
             cfg["run_name"] = run
-            cfg["out_dir"] = f"artifacts/stages/stage-3/{run}"
+            cfg["out_dir"] = f"artifacts/stage3/{run}"
             cfg["_purpose"] = (
                 f"{spec['purpose']}. Forked from the canonical Stage 1 PCA "
                 f"init, not from any trained checkpoint. Identical to "
-                f"{base_path.relative_to(REPO_ROOT)} except for extra_stream "
+                f"{RECORDED_BASE.format(seed=seed)} except for extra_stream "
                 f"and the identity fields.")
             cfg["extra_stream"] = {"data_dir": spec["data_dir"],
                                    "kind": spec["kind"], **EXTRA}
@@ -93,7 +97,7 @@ def main() -> int:
                 1761, 1024, total_steps=cfg["schedule"]["total_steps"],
                 blocks_per_step=EXTRA["blocks_per_step"],
                 every_n_steps=EXTRA["every_n_steps"])
-            written[run] = {"path": str(dest.relative_to(REPO_ROOT)),
+            written[run] = {"path": f"configs/stage3/e7/{run}.json",
                             "config_sha256": sha256_json(cfg),
                             "arm": arm, "seed": cfg["seed"],
                             "extra_budget": budget}

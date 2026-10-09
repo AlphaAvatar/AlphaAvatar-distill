@@ -33,12 +33,13 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.infrastructure.manifest import sha256_json, write_text_atomic  # noqa: E402
 
 SEEDS = ("sa", "sb")
-OBJECTIVE_PARENT = "configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json"
-RUNG_PARENT = "configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json"
+OBJECTIVE_PARENT = "configs/stage3/e4/e4_p2_r1600k_{seed}.json"
+RUNG_PARENT = "configs/stage3/e1/e1_r2960k_{seed}_pca.json"
 
 # Taken from the RUNG parent: the data scale and the quantities it mechanically
 # implies. `schedule` carries total_steps and warmup, both derived from the block
@@ -49,8 +50,16 @@ IDENTITY = ("run_name", "out_dir", "_purpose")
 
 
 def build(seed: str) -> tuple[dict, dict]:
-    obj = json.loads((REPO_ROOT / OBJECTIVE_PARENT.format(seed=seed)).read_text())
-    rung = json.loads((REPO_ROOT / RUNG_PARENT.format(seed=seed)).read_text())
+    #: The templates are EMISSIONS: provenance.json records them verbatim and
+    #: regeneration must stay byte-identical, so they keep their freeze-time
+    #: spellings and only the READ resolves. (The 2026-10-09 review caught a
+    #: regenerate-identically test rewriting the sealed record in place after
+    #: a path sweep drifted these.)
+    from shared.run_layout import resolve_historical
+    obj = json.loads((REPO_ROOT / resolve_historical(
+        OBJECTIVE_PARENT.format(seed=seed), REPO_ROOT)).read_text())
+    rung = json.loads((REPO_ROOT / resolve_historical(
+        RUNG_PARENT.format(seed=seed), REPO_ROOT)).read_text())
 
     # The control: the parents must already agree on everything E6b does not
     # deliberately take from one of them. If they do not, the "only the objective

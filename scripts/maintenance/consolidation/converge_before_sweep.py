@@ -115,6 +115,14 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
       "--out", "logs/maintenance/inventories/log_inventory.json")),
     ("document links",
      ("scripts/maintenance/consolidation/fix_doc_links.py", "--write")),
+    #: The migration record is a CLAIM about git blobs, and a claim that is
+    #: only ever written once goes stale silently: the 2026-10-09 review found
+    #: a `rename_pure` entry that was true when written and false two commits
+    #: later, after a builder rewrote the file it described. Regenerating it
+    #: here turns that into visible drift. It reads its own base commit and
+    #: data manifest, so it takes no arguments.
+    ("migration record v2",
+     ("scripts/maintenance/migration/write_relocation_record_v2.py", "--write")),
 )
 
 

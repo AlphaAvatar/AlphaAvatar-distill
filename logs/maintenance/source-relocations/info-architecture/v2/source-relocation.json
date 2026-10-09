@@ -13,6 +13,7 @@
   "rename_modified": 11,
   "relocation_pairs_added_to_historical_paths": 75
  },
+ "_data_manifest": "data_pre_move.sha256, beside this record: the sha256 of every data/ file before the move, including the gitignored payloads",
  "data_bytes_verified": {
   "files_verified": 70,
   "mismatches": 0,
@@ -392,7 +393,12 @@
    "v2_member_list_keeps_freeze_time_spellings": true,
    "pod_verifier_still_pins_v2": true
   },
-  "frozen_log_records_content_modified_this_round": [],
+  "frozen_log_records_content_modified_this_round": [
+   "A\tlogs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+   "M\tlogs/stages/stage-3/e2/plans/PROPOSAL.md\t[SEALED DOCUMENT]",
+   "M\tlogs/stages/stage-3/e8/plans/e8_preregistration.md\t[SEALED DOCUMENT]",
+   "M\tlogs/stages/stage-3/e8b/plans/e8b_preregistration.md\t[SEALED DOCUMENT]"
+  ],
   "_touched_must_be_empty": "every entry above is a frozen record this round changed in place — the list being empty IS the guard"
  },
  "frozen_exceptions": [],

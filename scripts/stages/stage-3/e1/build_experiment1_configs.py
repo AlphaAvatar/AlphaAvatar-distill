@@ -46,8 +46,8 @@ RUNG_TAGS = {250_000: "0250k", 460_000: "0460k", 860_000: "0860k",
 # The pinned comparability seed first (every logged Stage 3 run used it).
 SEEDS = [("a", 20260726), ("b", 20260801)]
 INITS = [
-    ("pca", "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"),
-    ("rand", "artifacts/stages/stage-1/qwen3_0p6b_init_v0/random_baseline"),
+    ("pca", "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"),
+    ("rand", "artifacts/stage1/qwen3_0p6b_init_v0/random_baseline"),
 ]
 EPOCHS = 3
 
@@ -73,7 +73,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
         cfg["_purpose"] = (
             f"Experiment 1 (data scaling): rung {rung:,} supervised tokens, "
             f"{blocks} blocks, {EPOCHS} epochs, seed {seed}, {init_tag} init. "
-            "Differs from configs/stages/stage-3/recovery.json only in data source, "
+            "Differs from configs/stage3/recovery.json only in data source, "
             "rung, seed, student_path and the derived schedule."
         )
         cfg["student_path"] = init_path
@@ -94,7 +94,7 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
         cfg["intervals"] = {"log_every": 10,
                             "eval_every": max(25, total_steps // 8),
                             "eval_blocks": val_blocks}
-        cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
+        cfg["out_dir"] = f"artifacts/stage3/{name}"
         path = out_dir / f"{name}.json"
         path.write_text(json.dumps(cfg, indent=2) + "\n")
         arms.append({"name": name, "config": str(path.relative_to(REPO_ROOT)),
@@ -107,7 +107,10 @@ def build(out_dir: Path, packed_dir: str, val_blocks: int) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default="configs/stages/stage-3/e1")
-    ap.add_argument("--packed-dir", default="artifacts/stages/stage-3/ladder_uniform",
+    #: RECORDED into every arm's `data_dir`, so it keeps the frozen spelling
+    #: and the trainer resolves it; see the emission-vs-location note in the
+    #: E8 builder (2026-10-09 review).
+    ap.add_argument("--packed-dir", default="artifacts/stage3/ladder_uniform",
                     help="the uniform token-ladder pack the arms read")
     ap.add_argument("--val-blocks", type=int, default=16)
     ap.add_argument("--seconds-per-step", type=float, default=4.3,

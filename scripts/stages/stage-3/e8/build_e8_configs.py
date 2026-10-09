@@ -29,12 +29,21 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 CONTROL_DIR = REPO_ROOT / "configs/stages/stage-3/e1"
 OUT_DIR = REPO_ROOT / "configs/stages/stage-3/e8"
-TREATMENT_INIT = "artifacts/stages/stage-1/e8_contribution_init_v1/checkpoint"
+TREATMENT_INIT = "artifacts/stage1/e8_contribution_init_v1/checkpoint"
+#: EMISSION vs LOCATION. The constants below are *recorded* into the frozen
+#: configs and arms.json, so they keep their freeze-time spellings and
+#: regeneration stays byte-identical; where the files actually live is
+#: separate, and reads resolve. The 2026-10-09 review caught a path sweep
+#: drifting the two together, after which a regenerate-identically test
+#: rewrote a sealed provenance record in place.
+RECORDED_CONTROL_DIR = "configs/stage3/e1"
+RECORDED_OUT_PREFIX = "artifacts/stage3"
 
 # name -> (control config, seed alias)
 ARMS = {
@@ -52,11 +61,11 @@ def main() -> int:
         cfg = dict(control)
         cfg["student_path"] = TREATMENT_INIT
         cfg["run_name"] = name
-        cfg["out_dir"] = f"artifacts/stages/stage-3/{name}"
+        cfg["out_dir"] = f"{RECORDED_OUT_PREFIX}/{name}"
         cfg["_purpose"] = (
             "E8 treatment: contribution-guided Stage 1 depth map, then the exact "
             f"E1/P1 KD-heavy 2.96M recovery recipe. Differs from "
-            f"configs/stages/stage-3/e1/{control_name} only in student_path (the intended "
+            f"{RECORDED_CONTROL_DIR}/{control_name} only in student_path (the intended "
             "causal variable), run_name, out_dir and this note.")
         # Key order follows the control so a textual diff stays readable.
         ordered = {k: cfg[k] for k in control}
@@ -69,8 +78,9 @@ def main() -> int:
         path = OUT_DIR / f"{name}.json"
         path.write_text(json.dumps(ordered, indent=2) + "\n")
         written.append({
-            "name": name, "seed_alias": alias, "path": str(path.relative_to(REPO_ROOT)),
-            "control": f"configs/stages/stage-3/e1/{control_name}",
+            "name": name, "seed_alias": alias,
+            "path": f"configs/stage3/e8/{name}.json",
+            "control": f"{RECORDED_CONTROL_DIR}/{control_name}",
             "config_sha256": sha256_json(ordered),
             "control_sha256": sha256_json(control),
             "seed": ordered["seed"], "rung": ordered["rung"],

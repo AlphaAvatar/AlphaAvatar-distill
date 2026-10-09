@@ -29,11 +29,20 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 from aadistill.infrastructure.manifest import sha256_json  # noqa: E402
 
 CONTROL_DIR = REPO_ROOT / "configs/stages/stage-3/e1"
 OUT_DIR = REPO_ROOT / "configs/stages/stage-3/e8b"
+#: EMISSION vs LOCATION. The constants below are *recorded* into the frozen
+#: configs and arms.json, so they keep their freeze-time spellings and
+#: regeneration stays byte-identical; where the files actually live is
+#: separate, and reads resolve. The 2026-10-09 review caught a path sweep
+#: drifting the two together, after which a regenerate-identically test
+#: rewrote a sealed provenance record in place.
+RECORDED_CONTROL_DIR = "configs/stage3/e1"
+RECORDED_OUT_PREFIX = "artifacts/stage3"
 ALLOWED_DIFF = {"student_path", "run_name", "out_dir", "_purpose"}
 
 # cell -> (init path, regime, hardware class the cell trains on)
@@ -92,7 +101,7 @@ def main() -> int:
             cfg["_purpose"] = (
                 f"E8b cell {cell.upper()} ({regime}, {DEPTH_MAP[cell]} depth map), "
                 f"seed {seed}, on {hardware}. The canonical E1/P1 KD-heavy 1.60M "
-                f"recipe; differs from configs/stages/stage-3/e1/{control_name} only in "
+                f"recipe; differs from {RECORDED_CONTROL_DIR}/{control_name} only in "
                 "student_path (the intended causal variable), run_name, out_dir and "
                 f"this note.{extra}")
             ordered = {k: cfg[k] for k in control}
@@ -109,8 +118,8 @@ def main() -> int:
                 "name": name, "cell": cell.upper(), "regime": regime,
                 "depth_map": DEPTH_MAP[cell], "hardware": hardware,
                 "seed_alias": seed, "seed": ordered["seed"],
-                "path": str(path.relative_to(REPO_ROOT)),
-                "control": f"configs/stages/stage-3/e1/{control_name}",
+                "path": f"configs/stage3/e8b/{name}.json",
+                "control": f"{RECORDED_CONTROL_DIR}/{control_name}",
                 "config_sha256": sha256_json(ordered),
                 "control_sha256": sha256_json(control),
                 "student_path": init,

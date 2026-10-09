@@ -65,6 +65,17 @@ REGENERATED_UNDER_LOGS = (
 REGENERATED_PREFIXES = ("logs/stages/", "logs/state/", "logs/shared/README")
 
 
+def is_sealed_document(rel: str) -> bool:
+    """A preregistration or proposal: a commitment whose value is that its
+    bytes have not moved. NEVER tolerated by the guard below, however it was
+    changed — the 2026-10-09 review found three of these link-repaired, and
+    the prefix tolerance above would have absorbed them silently. Same
+    convention as `fix_doc_links.is_sealed_document`."""
+    name = rel.rsplit("/", 1)[-1].lower()
+    return ("/plans/" in rel and name.endswith(".md")
+            and ("preregistration" in name or "proposal" in name))
+
+
 def sha(p: Path) -> str:
     return hashlib.sha256(p.read_bytes()).hexdigest()
 
@@ -177,6 +188,9 @@ def identity_guard(base: str) -> dict:
         status, rel = parts[0], parts[-1]
         if status.startswith("R100"):
             continue                       # pure rename: bytes identical
+        if is_sealed_document(rel):
+            touched.append(f"{line}\t[SEALED DOCUMENT]")
+            continue
         if rel in REGENERATED_UNDER_LOGS or any(
                 rel.startswith(p) and rel.endswith((".md", "README.md"))
                 for p in REGENERATED_PREFIXES):
@@ -211,11 +225,21 @@ def identity_guard(base: str) -> dict:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--base", required=True)
-    ap.add_argument("--data-manifest", required=True)
+    #: Both default from the record this regenerates, so the convergence
+    #: chain can re-derive it with no arguments and a stale claim shows up
+    #: as drift instead of surviving as a point-in-time assertion. (The
+    #: 2026-10-09 review found exactly that: a `rename_pure` claim that was
+    #: true when written and false two commits later.)
+    prev = REPO / OUT
+    doc = json.loads(prev.read_text()) if prev.is_file() else {}
+    ap.add_argument("--base", default=doc.get("base_commit"))
+    ap.add_argument("--data-manifest",
+                    default=str(prev.parent / "data_pre_move.sha256"))
     ap.add_argument("--write", action="store_true")
     args = ap.parse_args()
 
+    if not args.base:
+        raise SystemExit("no base commit: pass --base (no prior record to read)")
     files, pure, modified = classify_moves(args.base)
     doc = {
         "schema": "aadistill.migration_source_relocation/v1",
@@ -240,6 +264,9 @@ def main() -> int:
             "rename_modified": modified,
             "relocation_pairs_added_to_historical_paths": len(decl.all_pairs()),
         },
+        "_data_manifest": ("data_pre_move.sha256, beside this record: the "
+                           "sha256 of every data/ file before the move, "
+                           "including the gitignored payloads"),
         "data_bytes_verified": data_bytes_verified(Path(args.data_manifest)),
         "scientific_identities_verified_unchanged": scientific_identities(),
         "identity_guard": identity_guard(args.base),

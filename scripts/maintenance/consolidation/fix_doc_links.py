@@ -39,6 +39,23 @@ SKIP_PREFIX = ("http://", "https://", "mailto:", "#")
 SEARCH_ROOTS = ("logs", "docs", "configs", "scripts", "src", "tests")
 
 
+#: Sealed scientific commitments: a preregistration or proposal states what an
+#: experiment WOULD do, before it ran, and its value is that its bytes have not
+#: moved since. A link inside one records where a file was at sealing time, so
+#: repointing it edits the commitment to suit a later relocation -- which is
+#: exactly what the 2026-10-09 review caught in E2's proposal and E8/E8b's
+#: preregistrations. Access resolves instead, through
+#: `logs/index.json :: historical_paths.map`.
+#:
+#: Derived by CONVENTION so the fixer and the core link test can agree without
+#: either importing the other (the core suite imports nothing from scripts/).
+def is_sealed_document(rel: str) -> bool:
+    name = rel.rsplit("/", 1)[-1].lower()
+    return ("/plans/" in rel
+            and name.endswith(".md")
+            and ("preregistration" in name or "proposal" in name))
+
+
 def protected_dirs(root: Path) -> tuple[str, ...]:
     """Directories the run index registers with a digest.
 
@@ -161,7 +178,7 @@ def repair(root: Path = REPO_ROOT, write: bool = False) -> dict:
         if ".git" in doc.parts:
             continue
         rel = doc.relative_to(root).as_posix()
-        if any(rel.startswith(d + "/") for d in frozen):
+        if any(rel.startswith(d + "/") for d in frozen) or is_sealed_document(rel):
             skipped.append(rel)
             continue
         try:

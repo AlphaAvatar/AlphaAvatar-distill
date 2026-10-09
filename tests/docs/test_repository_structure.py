@@ -601,7 +601,19 @@ def _preserved(rel: str) -> bool:
     inside one would change registered evidence to suit a relocation. The
     forward mapping lives in `logs/index.json`.`historical_paths` instead.
     """
+    if _is_sealed_document(rel):
+        return True
     return any(rel.startswith(d + "/") for d in _registered_run_dirs())
+
+
+def _is_sealed_document(rel: str) -> bool:
+    """A preregistration or proposal under `plans/`: a commitment whose value
+    is that its bytes have not moved. Same convention as
+    `scripts/maintenance/consolidation/fix_doc_links.is_sealed_document`,
+    derived rather than imported so the core suite stays free of scripts/."""
+    name = rel.rsplit("/", 1)[-1].lower()
+    return ("/plans/" in rel and name.endswith(".md")
+            and ("preregistration" in name or "proposal" in name))
 
 
 def _registered_run_dirs() -> tuple[str, ...]:
