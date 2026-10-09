@@ -279,10 +279,23 @@ def launch_preconditions(run_id: str, stage_id: str) -> list[str]:
     from shared.run_layout import rel_run_dir
 
     problems = []
+    run_root = REPO / rel_run_dir('phase_c1', run_id, stage_id)
     grant_rel = f"{rel_run_dir('phase_c1', run_id, stage_id)}/governance/grant.json"
     grant_p = REPO / grant_rel
+    #: A TERMINAL run's grant is consumed evidence, not a launchable chain.
+    #: attempt13 closed with the project cap at $320; the cap has since been
+    #: amended twice, so a dry-run of its grant against the LIVE cap refuses
+    #: forever -- a closed experiment's historical state blocking every
+    #: current sweep, which is exactly the class AGENTS.md §2.8a moved out of
+    #: the default suite. The issuer dry-run therefore applies only to a run
+    #: that could still launch (no closeout); every structural check below --
+    #: the paths, the lineage exemption, the pointer guard -- still runs, and
+    #: a FUTURE prepared chain (which has no closeout yet) is still dry-run.
+    terminal = (run_root / "closeout" / "outcome.json").is_file()
     if not grant_p.is_file():
         problems.append(f"no grant at {grant_rel}")
+    elif terminal:
+        pass  # consumed evidence; nothing can launch from a closed run
     else:
         try:
             build_c1_authorization_payload(
