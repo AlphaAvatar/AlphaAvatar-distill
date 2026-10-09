@@ -222,7 +222,12 @@ def test_the_tokenizer_is_resolved_before_any_data_is_built():
     contract has to fail at the cheapest possible point."""
     src = (REPO / "scripts/shared/training/train_stage3.py").read_text()
     resolve_at = src.index("resolve_training_tokenizer(")
-    for later in ("loading {source} from", "data_dir = REPO_ROOT", "load_teacher("):
+    #: Anchored on what the trainer does, not on one spelling of it:
+    #: `data_dir = REPO_ROOT / ...` became `data_dir = paths[...]` when path
+    #: resolution moved behind `effective_paths`. Computing paths is not
+    #: reading data — no I/O happens before the contract — so the property
+    #: this test exists for is unchanged.
+    for later in ("loading {source} from", 'data_dir = paths[', "load_teacher("):
         assert src.index(later) > resolve_at, (
             f"{later!r} happens before the tokenizer contract is checked")
 

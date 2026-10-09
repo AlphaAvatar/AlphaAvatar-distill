@@ -94,7 +94,12 @@ def test_patterns_match_the_producing_source_literals():
     assert 'AUDIT / "probes" / f"{name}.training.json"' in c1
     assert 'AUDIT / "configs" / f"{name}.json"' in c1
     assert 'AUDIT / f"{name}_train_tail.log"' in c1
-    assert 'JsonlLogger(out_dir / "train_log.jsonl")' in trainer
+    #: The trainer's log path moved behind `effective_paths`, which is where
+    #: a declared path becomes a physical one. What C1's spec depends on is
+    #: unchanged and still asserted: the file is named `train_log.jsonl` and
+    #: it sits directly under the run's `out_dir`.
+    assert 'JsonlLogger(paths["train_log"])' in trainer
+    assert 'out["train_log"] = out["out_dir"] / "train_log.jsonl"' in trainer
     assert '"run_manifest.json"' in trainer and '"run_completion.json"' in trainer
     assert '.generations.jsonl' in ev
     for name in ("c1_replay_record.json", "c1_arm_identities.json",
