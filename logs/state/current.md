@@ -46,12 +46,48 @@ bound at issuance from the screening selection record) is implemented; its
 off-pod verdict computation is owed before the CONFIRMATION launch and blocks
 nothing about screening.
 
+**The 2026-10-10 independent review returned ENGINEERING NO-GO on the first
+HEAD (`6a76bc10`) and its four findings are repaired on this branch:**
+
+```text
+1  checkpoint layout   materialize_fixed_path writes workdir/steps/NN_kind;
+                       every consumer now reads the PRODUCER'S checkpoint_path
+                       (final_checkpoint_in + resolved_paths through the
+                       contract), and a confirmation pod byte-verifies only
+                       its two arms while binding the full frozen field
+2  B's execution       materialize_incumbent passes A3's A_bsz1 (mbs=1,
+                       original_order_v1) from its owner, never
+                       DEFAULT_EXECUTION and never the candidates' bsz=3
+3  admission           C1's engine attestation + per-probe observed-protocol
+                       admission run BEFORE scoring; results bind
+                       --trained-run and the OBSERVED generation fingerprint
+4  trained-unscored    P8.4 state 2: the driver hashes each trained
+                       checkpoint at completion, teardown refuses while one
+                       is pod-only (checked BEFORE the no-scored-probes early
+                       return), the failure path preserves it off-pod
+                       verified, and a replacement session restores + resumes
+                       at evaluation (identity re-checked) instead of
+                       retraining; scored probes' weights are never fetched
+```
+
+Failure classification is corrected with them: only `D1ArmIdentityMismatch` —
+a completed pinned path diverging after its root state, operator configs and
+execution knobs were verified against the search's own records — maps to the
+scientific `DIGEST_MISMATCH` marker; every harness, path or configuration
+error is ordinary `RUN_FAILED` engineering (P12.1). And a confirmation
+issuance now RECOMPUTES the mechanical selection from the secured screening
+evidence's own scored rows under the frozen rule, refusing any record whose
+recorded selection disagrees — never trusting a file that merely says
+`advanced: true`.
+
 **What remains before formal screening — exactly one maintainer decision plus
 its mechanical consequences:** write the one-use screening grant; issue the
 authorization against it at the live rate; commit the authorization; run the
 launch-bound sweep; stage the bundle; write launch readiness; launch. No
 execution grant exists, no authorization is issued, and no resource has been
-created.
+created. Owed before the CONFIRMATION launch (blocking nothing about
+screening): the off-pod stratified prompt-cluster bootstrap verdict
+implementation.
 
 **THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
 into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
