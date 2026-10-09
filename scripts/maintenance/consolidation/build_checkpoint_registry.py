@@ -201,12 +201,18 @@ CLASSIFY: dict[str, dict] = {
         reconstruction="a paid recovery run of the E2 phase-1 arm config",
         reconstruction_cost="paid GPU", disposition="review"),
     "aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6": dict(
-        experiment="phase_a / phase_c1 / phase_d1", role="incumbent B — the arm C1 promoted; D1's control arm",
-        retention="behavioral_anchor", status="active",
-        why="C1's confirmation promoted this Phase-A leaf as the incumbent; "
-            "the D1 design derives its control arm from that verdict, so the "
-            "paused D1 screening consumes these bytes as its baseline",
-        never_delete="the live incumbent is an explicitly retained anchor (AGENTS.md 2.5)",
+        experiment="phase_a / phase_c1",
+        role="C1's INCUMBENT arm (attention.weight_proxy_v0) — the arm C1 "
+             "measured and BEAT; NOT the promoted treatment",
+        retention="reproducibility_required", status="closed",
+        why="Phase-A's leader, which C1 used as its incumbent arm. C1 returned "
+            "GO at +0.013725 against a SESOI of 0.010, so what C1 PROMOTED is "
+            "its treatment arm (see `scientific_artifacts.standing_incumbent_B`, "
+            "digest 53e30566…), not this. Reproducing C1's comparison needs both "
+            "arms, which is why this is retained; it is not the standing "
+            "incumbent and no later round's control arm is these bytes. The "
+            "2026-10-09 review caught this entry claiming otherwise.",
+        never_delete=None,
         reconstruction="byte-exact replay from the committed Phase-A search record",
         reconstruction_cost="paid GPU", disposition="keep"),
     "aad-artifacts/autoinit/phase_a/": dict(
@@ -352,6 +358,150 @@ def d1_finalist_identities() -> dict[str, dict]:
                              else "d1_replay_002 (rematerialized, exact)"),
             "consumers": ["phase_d1 screening (paused; "
                           "logs/stages/stage-1/phase_d1/current.json)"],
+        }
+    return out
+
+
+#: What `identity_verified` on a physical entry MEANS, stated once so a reader
+#: cannot over-read it. It compares the sha256 of the unit's PRIMARY WEIGHT
+#: SHARD against the `single_shard_sha256` the owning scientific record
+#: declares. It does NOT recompute `artifact_digest` (which folds config and
+#: tokenizer identity) or `weights_digest` (a tensor-level digest): those are
+#: carried from the owner as declarations, and recomputing them needs the
+#: model loaded, not the file hashed.
+IDENTITY_VERIFIED_MEANS = (
+    "sha256(primary weight shard) == single_shard_sha256 declared by the "
+    "owning scientific record. artifact_digest and weights_digest are CARRIED "
+    "from that record, not recomputed here.")
+
+
+def scientific_artifacts(entries: list[dict]) -> dict:
+    """One entry per LOGICAL artifact, identity derived from its owner.
+
+    Separate from `checkpoints`, which inventories PHYSICAL units: a logical
+    artifact may have several byte-identical copies (q1 and q3 are each in
+    `products/` and `oob_products/`) or none at all (the standing incumbent is
+    reconstructed on the pod and its bytes are not on this host). The
+    2026-10-09 review found both conflated — six finalist rows for four
+    finalists, and a different checkpoint wearing the incumbent's name.
+
+    Deletion-survivable by construction: identity, provenance and consumers
+    live here, not beside the bytes.
+    """
+    out: dict[str, dict] = {}
+
+    # --- the standing incumbent, from C1's verdict and MEASURED identities ---
+    try:
+        from stages.d_series.incumbent import standing_incumbent
+        b = standing_incumbent(REPO_ROOT)
+    except Exception as exc:                                  # noqa: BLE001
+        out["standing_incumbent_B"] = {"error": f"undetermined: {exc}"}
+    else:
+        shard = b["single_shard_sha256"]
+        copies = [e["path_local"] for e in entries
+                  if e.get("weights_sha256") == shard]
+        out["standing_incumbent_B"] = {
+            "artifact_id": "standing_incumbent_B",
+            "label": b["label"],
+            "role": "the checkpoint every later round challenges (C1's "
+                    "promoted TREATMENT arm)",
+            "identity": {k: b[k] for k in
+                         ("impl_id", "profile_id", "kind", "num_parameters",
+                          "config_sha256", "artifact_digest", "weights_digest",
+                          "single_shard_sha256", "arch_signature")},
+            "state_id": None,
+            "_state_id_is_null": (
+                "C1's arms were built as FIXED PATHS; the promoted treatment "
+                "has no search state id. A consumer keying its control on a "
+                "state id is keying on something this arm does not have."),
+            "identity_owner": b["measured_by"],
+            "verdict_owner": b["verdict_from"],
+            "derived_by": "stages.d_series.incumbent.standing_incumbent()",
+            "selected_because": b["selected_because"],
+            "local_copies": copies,
+            "retention": "reproducibility_required",
+            "materialization": (
+                "RECONSTRUCTED on the pod from its frozen construction spec "
+                "`stages.phase_c2.baseline.frozen_baseline_spec` — the same "
+                "four-step fixed path C2's and C3's behavioural sessions "
+                "rebuilt it from. Its bytes are NOT retained on this host."
+                if not copies else
+                "local bytes present; see local_copies"),
+            "consumers": ["phase_d1 screening arm B (paused)",
+                          "phase_c2 / phase_c3 behavioural baselines"],
+        }
+
+    # --- the D1 finalists: four logical artifacts, copies collapsed ---
+    for e in entries:
+        si = e.get("scientific_identity")
+        if not si:
+            continue
+        row = out.setdefault(si["artifact_id"], {
+            "artifact_id": si["artifact_id"],
+            "role": f"D1 behavioural finalist q{si['finalist']} "
+                    f"(quality position {si['finalist']})",
+            "identity": {k: si[k] for k in
+                         ("state_id", "operator_path", "artifact_digest",
+                          "weights_digest", "single_shard_sha256",
+                          "arch_signature")},
+            "identity_owner": si["identity_owner"],
+            "creating_run": si["creating_run"],
+            "retention": "reproducibility_required",
+            "local_copies": [],
+            "copies_identity_verified": [],
+            "consumers": si["consumers"],
+            "materialization": ("local bytes retained; byte-exact replay from "
+                                "the committed search record is the fallback"),
+        })
+        row["local_copies"].append(e["path_local"])
+        row["copies_identity_verified"].append(bool(e.get("identity_verified")))
+    for row in out.values():
+        if "local_copies" in row and isinstance(row.get("copies_identity_verified"), list):
+            row["copies"] = len(row["local_copies"])
+            row["all_copies_identity_verified"] = all(row.pop(
+                "copies_identity_verified")) if row["copies"] else False
+            row["local_copies"] = sorted(row["local_copies"])
+
+    # --- the D-series battery family, from the canonical manifest ---
+    fam_rel = ("logs/stages/stage-1/families/d_series/analyses/"
+               "autoinit_d_series_family_manifest.json")
+    fam_path = REPO_ROOT / fam_rel
+    if fam_path.is_file():
+        fam = json.loads(fam_path.read_text())
+        bytes_dir = ("artifacts/stages/stage-1/families/d_series/batteries/"
+                     "d_series_behavioural_v1")
+        out["d_series_behavioural_v1"] = {
+            "artifact_id": "d_series_behavioural_v1",
+            "role": "the realized D-series behavioural battery family",
+            "identity": {
+                "family_id": fam["family_id"],
+                "family_content_id": fam["family_content_id"],
+                "allocation_rule_id": fam["allocation_rule_id"],
+                "allocation_rule_version": fam.get("allocation_rule_version"),
+                "roles": list(fam["role_order"]),
+                "n_roles": len(fam["roles"]),
+                "n_output_files": len(fam["output_files"]),
+                "per_role_item_ids_sha256": {
+                    r: fam["roles"][r]["item_ids_sha256"]
+                    for r in fam["role_order"]},
+            },
+            "identity_owner": fam_rel,
+            "_identity_owner_is_canonical": (
+                "`family_content_id` binds the 42 realized item files by the "
+                "sha256 of their actual bytes; the per-role `item_ids_sha256` "
+                "is a readable secondary identity. This registry carries the "
+                "identities and points at that manifest — it does not restate "
+                "the per-file digests, which have one owner."),
+            "verifier": ("scripts/stages/stage-1/families/d_series/"
+                         "verify_batteries.py"),
+            "local_copies": [bytes_dir] if (REPO_ROOT / bytes_dir).is_dir() else [],
+            "retention": "reproducibility_required",
+            "materialization": (
+                "rebuildable at $0 on CPU by "
+                "scripts/stages/stage-1/families/d_series/build_batteries.py "
+                "over the frozen pools, then verify_batteries.py"),
+            "consumers": ["phase_d1 screening + confirmation (paused)",
+                          "phase_d2 / phase_d3 (not designed)"],
         }
     return out
 
@@ -631,6 +781,12 @@ def main() -> int:
                           "tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json"),
         "retention_classes": sorted({e["retention"] for e in entries}),
         "protected_classes": sorted(PROTECTED),
+        "identity_verified_means": IDENTITY_VERIFIED_MEANS,
+        #: LOGICAL artifacts: one entry per scientific identity, with its
+        #: owner, its copies (possibly none) and its consumers. This is the
+        #: part that survives a deletion; `checkpoints` below is the physical
+        #: inventory and a logical artifact may map to 0, 1 or n of its rows.
+        "scientific_artifacts": scientific_artifacts(entries),
         "local": {
             "n_units": len(entries),
             "n_weight_files": sum(len(e["weight_files"]) for e in entries),

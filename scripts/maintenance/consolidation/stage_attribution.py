@@ -852,7 +852,15 @@ STAGE_1 = [
         id="phase_d1",
         kind="experiment",
         stage_id="1",
-        status="DESIGNED — not authorized, blocked on evidence and funding",
+        #: STABLE status only. Readiness is DYNAMIC and has one owner,
+        #: `logs/stages/stage-1/phase_d1/current.json`, which derives it from
+        #: the realized family, the blocker predicate and the maintainer
+        #: pause. This string said "blocked on evidence and funding" for a
+        #: month after the realized family closed the evidence blocker --
+        #: because a hand-written status cannot notice -- and the 2026-10-09
+        #: review found it contradicting D1's own current.json. The index owns
+        #: ownership and navigation; it points at readiness.
+        status="DESIGNED — see live_state for readiness",
         title="D1 — target-aware search",
         question=("Does making structural scoring and global candidate "
                   "evaluation SUPERVISED-TARGET-AWARE produce a better "
@@ -882,11 +890,25 @@ STAGE_1 = [
               #: realized family closed the evidence one. What endures is that
               #: the design authorizes nothing, built family or not.
               field="_authorizes", equals="nothing"),
+            #: HISTORICAL ANALYSIS, not a live blocker. It measured the
+            #: ORIGINAL C1 prompt pool and found it exhausted; the realized
+            #: D-series family then became the battery source and closed that
+            #: blocker. The record says so itself (`record_role`,
+            #: `live_state: false`, `superseded_for_readiness_by`), and this
+            #: entry pins those fields so the index cannot reintroduce the
+            #: exhausted pool as an active constraint.
             E("logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
-              "how many further disjoint behavioural batteries the prompt pool "
-              "supports under the frozen C1 mixture. The answer is zero and it "
-              "is the first of the three blockers",
-              field="batteries_remaining", equals=0),
+              "how many further disjoint behavioural batteries the ORIGINAL "
+              "C1 prompt pool supports: zero, which is why the D-series "
+              "family was built. Historical; superseded for readiness by the "
+              "realized family manifest",
+              field="live_state", equals=False),
+            E("logs/stages/stage-1/families/d_series/analyses/"
+              "autoinit_d_series_family_manifest.json",
+              "the realized battery family D1 actually consumes -- six roles "
+              "over 42 item files -- which is the readiness authority the "
+              "capacity analysis points at",
+              field="family_id", equals="d_series_behavioural_v1"),
         ],
         external_material=[],
         decisions=[],

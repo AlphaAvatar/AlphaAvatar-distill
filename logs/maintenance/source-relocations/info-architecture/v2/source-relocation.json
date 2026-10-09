@@ -393,11 +393,10 @@
    "v2_member_list_keeps_freeze_time_spellings": true,
    "pod_verifier_still_pins_v2": true
   },
-  "frozen_log_records_content_modified_this_round": [
-   "A\tlogs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-   "M\tlogs/stages/stage-3/e2/plans/PROPOSAL.md\t[SEALED DOCUMENT]",
-   "M\tlogs/stages/stage-3/e8/plans/e8_preregistration.md\t[SEALED DOCUMENT]",
-   "M\tlogs/stages/stage-3/e8b/plans/e8b_preregistration.md\t[SEALED DOCUMENT]"
+  "frozen_log_records_content_modified_this_round": [],
+  "records_added_this_round": [
+   "logs/maintenance/source-relocations/info-architecture/v2/data_pre_move.sha256",
+   "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
   ],
   "_touched_must_be_empty": "every entry above is a frozen record this round changed in place — the list being empty IS the guard"
  },

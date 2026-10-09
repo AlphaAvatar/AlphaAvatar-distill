@@ -818,7 +818,7 @@
    "experiment_id": "phase_d1",
    "stage_id": "1",
    "classification": "experiment",
-   "status": "DESIGNED \u2014 not authorized, blocked on evidence and funding",
+   "status": "DESIGNED \u2014 see live_state for readiness",
    "title": "D1 \u2014 target-aware search",
    "question": "Does making structural scoring and global candidate evaluation SUPERVISED-TARGET-AWARE produce a better initialization than the incumbent full-sequence scoring, under the same operator set, the same calibration data, the same beam and the same recovery recipe? The four structural implementations are frozen at the current best per kind, so the scoring semantics are the only experimental variable. The first of three global scoring/search experiments; D2 and D3 are not started.",
    "canonical_path": "logs/stages/stage-1/phase_d1",
@@ -832,9 +832,15 @@
     },
     {
      "path": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
-     "says": "how many further disjoint behavioural batteries the prompt pool supports under the frozen C1 mixture. The answer is zero and it is the first of the three blockers",
-     "field": "batteries_remaining",
-     "equals": 0
+     "says": "how many further disjoint behavioural batteries the ORIGINAL C1 prompt pool supports: zero, which is why the D-series family was built. Historical; superseded for readiness by the realized family manifest",
+     "field": "live_state",
+     "equals": false
+    },
+    {
+     "path": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
+     "says": "the realized battery family D1 actually consumes -- six roles over 42 item files -- which is the readiness authority the capacity analysis points at",
+     "field": "family_id",
+     "equals": "d_series_behavioural_v1"
     }
    ],
    "external_material": [],

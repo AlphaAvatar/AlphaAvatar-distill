@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T06:33:18+00:00",
+  "created_utc": "2026-10-09T09:47:47+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,10 +10,10 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3310,
-    "bytes": 121156851,
+    "files": 3311,
+    "bytes": 121175651,
     "by_disposition": {
-      "keep_canonical": 221,
+      "keep_canonical": 222,
       "keep_immutable": 2847,
       "keep_referenced": 227,
       "keep_unique_evidence": 15
@@ -23,7 +23,7 @@
       "immutable_record": 1507,
       "index": 8,
       "living_state": 2,
-      "narrative": 933,
+      "narrative": 934,
       "raw_execution_artifact": 839,
       "scratch_debug": 15
     },
@@ -6097,7 +6097,7 @@
       ]
     },
     {
-      "sentence": "> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../../../../docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md).",
+      "sentence": "> [`../../docs/HANDOFF_AUTOINITIALIZER.md`](../../../../../docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md).",
       "files": [
         "logs/stages/stage-3/e2/plans/PROPOSAL.md",
         "logs/stages/stage-3/e8/plans/e8_preregistration.md",
@@ -7346,9 +7346,6 @@
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-        "logs/stages/stage-3/e2/plans/PROPOSAL.md",
-        "logs/stages/stage-3/e8/plans/e8_preregistration.md",
-        "logs/stages/stage-3/e8b/plans/e8b_preregistration.md",
         "scripts/maintenance/migration/info_architecture_v2.py",
         "tests/docs/test_repository_structure.py"
       ],
@@ -8438,6 +8435,7 @@
         "scripts/maintenance/migration/README.md",
         "scripts/maintenance/migration/info_architecture.py",
         "scripts/maintenance/migration/info_architecture_v2.py",
+        "scripts/maintenance/migration/tests/test_frozen_record_emissions.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/shared/README.md",
         "scripts/shared/run_layout.py",
@@ -8472,6 +8470,7 @@
         "scripts/maintenance/migration/README.md",
         "scripts/maintenance/migration/info_architecture.py",
         "scripts/maintenance/migration/info_architecture_v2.py",
+        "scripts/maintenance/migration/tests/test_frozen_record_emissions.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/shared/README.md",
         "scripts/shared/run_layout.py",
@@ -8814,8 +8813,8 @@
     },
     {
       "path": "logs/maintenance/inventories/checkpoint_registry.json",
-      "size_bytes": 333681,
-      "sha256": "23829589bea817964ac9b5dafd9db7d02c45db479bb0a5065129e041f9006357",
+      "size_bytes": 344418,
+      "sha256": "498475bd7f17ea4048a7d43ae6375e8bd0a2222dd885f3cceb6a998d9443b9cf",
       "category": "index",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8828,6 +8827,7 @@
         "scripts/maintenance/consolidation/measure_storage.py",
         "scripts/maintenance/consolidation/retire_artifact.py",
         "scripts/maintenance/consolidation/verify_relay_mirror.py",
+        "scripts/maintenance/migration/tests/test_artifact_registry_identities.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "tests/docs/test_storage_inventory.py"
       ],
@@ -8836,6 +8836,7 @@
         "scripts/maintenance/consolidation/measure_storage.py",
         "scripts/maintenance/consolidation/retire_artifact.py",
         "scripts/maintenance/consolidation/verify_relay_mirror.py",
+        "scripts/maintenance/migration/tests/test_artifact_registry_identities.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "tests/docs/test_storage_inventory.py"
       ],
@@ -8905,12 +8906,28 @@
       "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
+      "path": "logs/maintenance/source-relocations/info-architecture/v2/data_pre_move.sha256",
+      "size_bytes": 7409,
+      "sha256": "c2cff93ca5b9e4b0d071186355cc874f0e72ffc371fecc921e0e7d2fdd63fa0a",
+      "category": "narrative",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_canonical",
+      "disposition_reason": "sole copy, no superseding owner"
+    },
+    {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-      "size_bytes": 70450,
-      "sha256": "3e5c769f449343d66f0275bf6a78ec4d7da011fec24b2ccd731ccc2956a59174",
+      "size_bytes": 70802,
+      "sha256": "2843ed50742db58c09297d11b887c760ad82768ddf7e1fe8cbcf6f829d4e7052",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "scripts/maintenance/migration/write_relocation_record_v2.py"
       ],
@@ -9778,8 +9795,8 @@
     },
     {
       "path": "logs/stages/index.json",
-      "size_bytes": 98137,
-      "sha256": "73404fc3a4e2db5d8d9e5ec5159a1423a25dba319023f38769c0f8c7a55371f2",
+      "size_bytes": 98503,
+      "sha256": "04e7faa51226e81e3c9b740352e98777a18055702eff229a9ab07d67ae1d9a1d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9798,6 +9815,7 @@
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/tests/test_info_architecture_v2.py",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/README.md",
         "scripts/stages/__init__.py",
@@ -9810,6 +9828,7 @@
         "scripts/maintenance/consolidation/render_log_navigation.py",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/tests/test_info_architecture_v2.py",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/README.md",
         "scripts/stages/__init__.py",
@@ -9835,8 +9854,8 @@
     },
     {
       "path": "logs/stages/stage-1/README.md",
-      "size_bytes": 12926,
-      "sha256": "b0dfe631d4f4436d753a21a14b43b2194e8480a8cc7d7ed2f3db7822eb11a4ba",
+      "size_bytes": 12907,
+      "sha256": "b76c5c10e02064d5b1addf451a9f8fb54f058c208cf87e4b98bc2284ad84fdec",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -14523,6 +14542,7 @@
         "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
         "logs/stages/stage-1/phase_d1/current.json",
         "scripts/index.json",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/families/d_series/current.py",
         "scripts/stages/stage-1/families/d_series/source_evidence.py",
@@ -14532,6 +14552,7 @@
       ],
       "referenced_by_executable": [
         "scripts/index.json",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/families/d_series/current.py",
         "scripts/stages/stage-1/families/d_series/source_evidence.py",
@@ -14541,7 +14562,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/index.json, scripts/maintenance/migration/write_relocation_record_v2.py, scripts/stages/stage-1/families/d_series/current.py"
+      "disposition_reason": "named by scripts/index.json, scripts/maintenance/migration/tests/test_owner_index_readiness.py, scripts/maintenance/migration/write_relocation_record_v2.py"
     },
     {
       "path": "logs/stages/stage-1/history/operator_config_mutation_requirement.md",
@@ -24509,6 +24530,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json"
       ],
@@ -24539,6 +24561,7 @@
       "category": "immutable_record",
       "in_paid_attempt_chain": true,
       "referenced_by": [
+        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/stage-1/phase_c1/runs/attempt18/closeout/outcome.json",
         "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json",
@@ -50827,6 +50850,8 @@
         "logs/stages/index.json",
         "scripts/index.json",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
+        "scripts/maintenance/consolidation/stage_attribution.py",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/phase_d1/current.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_battery_readiness.py"
@@ -50834,13 +50859,15 @@
       "referenced_by_executable": [
         "scripts/index.json",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
+        "scripts/maintenance/consolidation/stage_attribution.py",
+        "scripts/maintenance/migration/tests/test_owner_index_readiness.py",
         "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/phase_d1/current.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_battery_readiness.py"
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/index.json, scripts/maintenance/consolidation/build_checkpoint_registry.py, scripts/maintenance/migration/write_relocation_record_v2.py"
+      "disposition_reason": "named by scripts/index.json, scripts/maintenance/consolidation/build_checkpoint_registry.py, scripts/maintenance/consolidation/stage_attribution.py"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
@@ -55850,8 +55877,8 @@
     },
     {
       "path": "logs/stages/stage-3/e2/plans/PROPOSAL.md",
-      "size_bytes": 68146,
-      "sha256": "3b2bf694dcaa5d5d8f2b85a2452a9e563717654abd3e9253ad9c95b2978a06d3",
+      "size_bytes": 68131,
+      "sha256": "97cd54b1f3919d311969e8c5566f523d804a4b6ca2f58d9700998eba2599f709",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -56037,7 +56064,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
@@ -56702,8 +56728,8 @@
     },
     {
       "path": "logs/stages/stage-3/e8/plans/e8_preregistration.md",
-      "size_bytes": 31017,
-      "sha256": "53868725246e92f5d2946ad16ba9816037b1c43c0f493622ee834f048cc92c18",
+      "size_bytes": 31002,
+      "sha256": "0008bbd7b99f2f3ce9f4de7aaee3452ea7d07c52e930250885b996bc40edb069",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57069,8 +57095,8 @@
     },
     {
       "path": "logs/stages/stage-3/e8b/plans/e8b_preregistration.md",
-      "size_bytes": 22805,
-      "sha256": "8bde4780e894a37df7c00f168256845b01acd4f4cdb7f2872cf7c4a761160e32",
+      "size_bytes": 22790,
+      "sha256": "4afb4b1c5a31dea23dd7a7c93b3f173924517487aadb90cca3c5ec662b18fbd0",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57372,7 +57398,6 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
-        "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json"
       ],
       "referenced_by_executable": [],

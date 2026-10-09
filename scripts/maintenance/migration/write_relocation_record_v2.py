@@ -181,13 +181,19 @@ def identity_guard(base: str) -> dict:
     v2_pin = 'FROZEN_SCORING_CONTRACT = "recovery_search_scoring@v2"' in verifier
 
     # no frozen log record was content-modified this round
-    touched = []
+    touched, added = [], []
     for line in git("diff", "--name-status", "-M", f"{base}..HEAD",
                     "--", "logs").splitlines():
         parts = line.split("\t")
         status, rel = parts[0], parts[-1]
         if status.startswith("R100"):
             continue                       # pure rename: bytes identical
+        if status.startswith("A"):
+            #: A NEW file cannot be a frozen record this round rewrote. These
+            #: are the round's own evidence (its relocation record and data
+            #: manifest); counted so they are visible, not silent.
+            added.append(rel)
+            continue
         if is_sealed_document(rel):
             touched.append(f"{line}\t[SEALED DOCUMENT]")
             continue
@@ -217,6 +223,7 @@ def identity_guard(base: str) -> dict:
             "pod_verifier_still_pins_v2": v2_pin,
         },
         "frozen_log_records_content_modified_this_round": touched,
+        "records_added_this_round": sorted(added),
         "_touched_must_be_empty": (
             "every entry above is a frozen record this round changed in "
             "place — the list being empty IS the guard"),

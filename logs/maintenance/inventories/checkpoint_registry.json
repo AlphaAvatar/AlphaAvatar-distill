@@ -1,12 +1,11 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-09T05:25:39+00:00",
+  "created_utc": "2026-10-09T09:42:49+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
   "deletion_rule": "a checkpoint may be deleted only if it is not protected, no never_delete clause applies, its scientific status is recorded elsewhere, its hash is in this registry, and a tombstone is written to logs/maintenance/inventories/checkpoint_tombstones.json",
   "retention_classes": [
-    "behavioral_anchor",
     "canonical",
     "control",
     "diagnostic",
@@ -19,12 +18,182 @@
     "control",
     "reproducibility_required"
   ],
+  "identity_verified_means": "sha256(primary weight shard) == single_shard_sha256 declared by the owning scientific record. artifact_digest and weights_digest are CARRIED from that record, not recomputed here.",
+  "scientific_artifacts": {
+    "standing_incumbent_B": {
+      "artifact_id": "standing_incumbent_B",
+      "label": "B",
+      "role": "the checkpoint every later round challenges (C1's promoted TREATMENT arm)",
+      "identity": {
+        "impl_id": "attention.activation_importance_v1",
+        "profile_id": "calib.domain_balanced@v1",
+        "kind": "ATTENTION",
+        "num_parameters": 596049920,
+        "config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+        "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+        "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+        "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "state_id": null,
+      "_state_id_is_null": "C1's arms were built as FIXED PATHS; the promoted treatment has no search state id. A consumer keying its control on a state id is keying on something this arm does not have.",
+      "identity_owner": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_arm_identities.json",
+      "verdict_owner": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json",
+      "derived_by": "stages.d_series.incumbent.standing_incumbent()",
+      "selected_because": "C1's verdict was GO at a pooled delta of 0.013725490196078431 against a SESOI of 0.01, which selects the treatment arm",
+      "local_copies": [],
+      "retention": "reproducibility_required",
+      "materialization": "RECONSTRUCTED on the pod from its frozen construction spec `stages.phase_c2.baseline.frozen_baseline_spec` \u2014 the same four-step fixed path C2's and C3's behavioural sessions rebuilt it from. Its bytes are NOT retained on this host.",
+      "consumers": [
+        "phase_d1 screening arm B (paused)",
+        "phase_c2 / phase_c3 behavioural baselines"
+      ]
+    },
+    "d1_finalist_q4": {
+      "artifact_id": "d1_finalist_q4",
+      "role": "D1 behavioural finalist q4 (quality position 4)",
+      "identity": {
+        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+        "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+        "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+        "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_replay_002 (rematerialized, exact)",
+      "retention": "reproducibility_required",
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc"
+      ],
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
+      "copies": 1,
+      "all_copies_identity_verified": true
+    },
+    "d1_finalist_q2": {
+      "artifact_id": "d1_finalist_q2",
+      "role": "D1 behavioural finalist q2 (quality position 2)",
+      "identity": {
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+        "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+        "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+        "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_replay_002 (rematerialized, exact)",
+      "retention": "reproducibility_required",
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55"
+      ],
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
+      "copies": 1,
+      "all_copies_identity_verified": true
+    },
+    "d1_finalist_q3": {
+      "artifact_id": "d1_finalist_q3",
+      "role": "D1 behavioural finalist q3 (quality position 3)",
+      "identity": {
+        "state_id": "56388d47b6a71e1b49e44929e48d4061",
+        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+        "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+        "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_search_20261006_210210",
+      "retention": "reproducibility_required",
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061",
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061"
+      ],
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
+      "copies": 2,
+      "all_copies_identity_verified": true
+    },
+    "d1_finalist_q1": {
+      "artifact_id": "d1_finalist_q1",
+      "role": "D1 behavioural finalist q1 (quality position 1)",
+      "identity": {
+        "state_id": "e5e3edb0477b25147de952153da8fc21",
+        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+        "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+        "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+        "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_search_20261006_210210",
+      "retention": "reproducibility_required",
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21",
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21"
+      ],
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
+      "copies": 2,
+      "all_copies_identity_verified": true
+    },
+    "d_series_behavioural_v1": {
+      "artifact_id": "d_series_behavioural_v1",
+      "role": "the realized D-series behavioural battery family",
+      "identity": {
+        "family_id": "d_series_behavioural_v1",
+        "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+        "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+        "allocation_rule_version": 3,
+        "roles": [
+          "d1_screening",
+          "d1_confirmation",
+          "d2_screening",
+          "d2_confirmation",
+          "d3_screening",
+          "d3_confirmation"
+        ],
+        "n_roles": 6,
+        "n_output_files": 42,
+        "per_role_item_ids_sha256": {
+          "d1_screening": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+          "d1_confirmation": "7d200ffe666add66721c3cb233f6f9b876825ee5277438669926e3633fe8547b",
+          "d2_screening": "89758b3a0887e857aaf5c11f7fa87a1be4adecaa930eee266c4d64e800f63c55",
+          "d2_confirmation": "6b50625e764454c93bf62ee7b6289897cb9cba6c9a39382816250ad463850ddb",
+          "d3_screening": "91e8987d0b228e2b97ba6bf4507bba0bfe269b6ee99ec97af5f429cb63bb1f01",
+          "d3_confirmation": "60c08be46befd52293263895ef51108782b7c180a05c0073848b28e8c1c1cb95"
+        }
+      },
+      "identity_owner": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
+      "_identity_owner_is_canonical": "`family_content_id` binds the 42 realized item files by the sha256 of their actual bytes; the per-role `item_ids_sha256` is a readable secondary identity. This registry carries the identities and points at that manifest \u2014 it does not restate the per-file digests, which have one owner.",
+      "verifier": "scripts/stages/stage-1/families/d_series/verify_batteries.py",
+      "local_copies": [
+        "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
+      ],
+      "retention": "reproducibility_required",
+      "materialization": "rebuildable at $0 on CPU by scripts/stages/stage-1/families/d_series/build_batteries.py over the frozen pools, then verify_batteries.py",
+      "consumers": [
+        "phase_d1 screening + confirmation (paused)",
+        "phase_d2 / phase_d3 (not designed)"
+      ]
+    }
+  },
   "local": {
     "n_units": 46,
     "n_weight_files": 43,
     "total_bytes": 74102515533,
     "total_human": "69.013 GiB",
-    "artifacts_tree_bytes": 8089856617,
+    "artifacts_tree_bytes": 8089855071,
     "external_store_tree_bytes": 68098407142,
     "by_store": {
       "external_store": {
@@ -6331,9 +6500,9 @@
         "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/stage-3/e1/analyses/e1_test_cases.md",
-        "logs/stages/stage-3/e2/plans/PROPOSAL.md",
-        "logs/stages/stage-3/e6/analyses/e6_registration.json"
+        "logs/stages/stage-3/e2/plans/PROPOSAL.md"
       ],
       "relay_path": null,
       "relay_verified": false,
@@ -6891,10 +7060,10 @@
         "logs/budget/decisions.md",
         "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-3/README.md",
-        "logs/stages/stage-3/e3/analyses/e3_registration.json",
-        "logs/stages/stage-3/e4/analyses/e4_registration.json"
+        "logs/stages/stage-3/e3/analyses/e3_registration.json"
       ],
       "relay_path": "e5_start/p2_ceheavy_sa/model.safetensors",
       "relay_verified": true,
@@ -6941,11 +7110,11 @@
         "configs/stages/stage-3/p2/p2_ceheavy_sb.json",
         "logs/maintenance/cleanup/autoinit_relay_retention_20260822.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/stage-3/e3/analyses/e3_registration.json",
         "logs/stages/stage-3/e4/analyses/e4_registration.json",
         "logs/stages/stage-3/history/EXPERIMENTS.md",
-        "logs/state/artifact_manifests.md",
-        "logs/state/supported_models.md"
+        "logs/state/artifact_manifests.md"
       ],
       "relay_path": "e5_start/p2_ceheavy_sb/model.safetensors",
       "relay_verified": true,
@@ -7718,11 +7887,11 @@
       "weight_files": [
         "/home/ecs-user/aad-artifacts/autoinit/phase_a/fe9683e6a9c783bbc6fe276a78c851c6/model.safetensors"
       ],
-      "experiment": "phase_a / phase_c1 / phase_d1",
-      "role": "incumbent B \u2014 the arm C1 promoted; D1's control arm",
-      "retention": "behavioral_anchor",
-      "status": "active",
-      "retention_reason": "C1's confirmation promoted this Phase-A leaf as the incumbent; the D1 design derives its control arm from that verdict, so the paused D1 screening consumes these bytes as its baseline",
+      "experiment": "phase_a / phase_c1",
+      "role": "C1's INCUMBENT arm (attention.weight_proxy_v0) \u2014 the arm C1 measured and BEAT; NOT the promoted treatment",
+      "retention": "reproducibility_required",
+      "status": "closed",
+      "retention_reason": "Phase-A's leader, which C1 used as its incumbent arm. C1 returned GO at +0.013725 against a SESOI of 0.010, so what C1 PROMOTED is its treatment arm (see `scientific_artifacts.standing_incumbent_B`, digest 53e30566\u2026), not this. Reproducing C1's comparison needs both arms, which is why this is retained; it is not the standing incumbent and no later round's control arm is these bytes. The 2026-10-09 review caught this entry claiming otherwise.",
       "architecture": {
         "num_hidden_layers": 28,
         "hidden_size": 1024,
@@ -7757,7 +7926,7 @@
       "reconstructable": true,
       "reconstruction_recipe": "byte-exact replay from the committed Phase-A search record",
       "reconstruction_cost": "paid GPU",
-      "never_delete_clause": "the live incumbent is an explicitly retained anchor (AGENTS.md 2.5)",
+      "never_delete_clause": null,
       "protected": true,
       "disposition": "keep"
     },
