@@ -275,11 +275,22 @@ def confirmation_seeds(repo_root: str | Path = REPO_ROOT) -> tuple[int, ...]:
     return derive_seeds("confirmation", repo_root)
 
 
-def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
+def arms(repo_root: str | Path = REPO_ROOT, *,
+         arm_root: str | None = None) -> tuple[Arm, ...]:
     """The five arms: the frozen Top-4 field plus the incumbent.
 
     Candidate membership is READ from the maintainer's retention decision, so
     this session cannot re-select; the incumbent is read from the design.
+
+    `arm_root` is WHERE THE BYTES ARE, not WHO THE ARMS ARE. On the dev host it
+    is `None` and the candidates resolve to their secured durable-store copies
+    (`ARM_SOURCES`) while B has no bytes at all. On a pod every arm is
+    materialized under one root -- the candidates by replaying their
+    digest-pinned paths, B from its frozen construction spec -- so a non-None
+    `arm_root` resolves candidate `arm_root/<state_id>` and incumbent
+    `arm_root/B`. Location is execution configuration and never enters the
+    hashed session contract; the IDENTITIES are the same frozen records either
+    way.
     """
     root = Path(repo_root)
     decision = _read(RETENTION_REL, repo_root)
@@ -292,16 +303,20 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
     for member in frozen["members"]:
         position = int(member["quality_position"])
         arm_id = f"q{position}"
-        source = ARM_SOURCES.get(arm_id)
-        if source is None:
-            raise D1BehaviouralError(
-                f"{arm_id} has no declared checkpoint source; a probe cannot "
-                "be trained from a checkpoint nobody can name")
+        if arm_root is not None:
+            directory = str(Path(arm_root) / member["state_id"])
+        else:
+            source = ARM_SOURCES.get(arm_id)
+            if source is None:
+                raise D1BehaviouralError(
+                    f"{arm_id} has no declared checkpoint source; a probe "
+                    "cannot be trained from a checkpoint nobody can name")
+            directory = str(Path(source) / member["state_id"])
         out.append(Arm(
             arm_id=arm_id, state_id=member["state_id"],
             artifact_digest=member["artifact_digest"],
             quality_position=position,
-            checkpoint_dir=str(Path(source) / member["state_id"]),
+            checkpoint_dir=directory,
             role="candidate",
             #: All four, from the retention decision, so a consumer can bind
             #: the arm by content and not only by its construction identity --
@@ -346,9 +361,12 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
         state_id=incumbent.get("state_id"),
         artifact_digest=incumbent["artifact_digest"],
         quality_position=None,
-        #: No directory. Its bytes do not exist on this host and are built on
-        #: the pod from the spec named below.
-        checkpoint_dir=None,
+        #: No directory on the dev host -- its bytes do not exist here and are
+        #: built on the pod from the spec named below. Under a pod `arm_root`
+        #: it resolves to `arm_root/B`, the directory the materialization stage
+        #: builds into and the probes train from.
+        checkpoint_dir=(str(Path(arm_root) / "B")
+                        if arm_root is not None else None),
         role="incumbent",
         identities={k: incumbent[k] for k in (
             "artifact_digest", "weights_digest", "single_shard_sha256",
@@ -358,19 +376,51 @@ def arms(repo_root: str | Path = REPO_ROOT) -> tuple[Arm, ...]:
     return tuple(out)
 
 
-def probes(rung: str, repo_root: str | Path = REPO_ROOT) -> tuple[Probe, ...]:
+def probes(rung: str, repo_root: str | Path = REPO_ROOT, *,
+           advancing_candidate: str | None = None,
+           arm_root: str | None = None) -> tuple[Probe, ...]:
     """Every probe of one rung, in a deterministic order.
 
     The count is CHECKED against the design rather than assumed: the design
-    says screening is 10 probes, and 5 arms x 2 seeds is the only way to reach
-    it with this field. A schedule that silently produced a different number
+    says screening is 10 probes (5 arms x 2 seeds) and confirmation is 6
+    (2 arms x 3 seeds). A schedule that silently produced a different number
     would be a different experiment at the same price.
+
+    THE CONFIRMATION FIELD IS NARROWED, and the narrowing is not this
+    function's choice. The design declares `confirmation_arms: 2` -- the one
+    advancing candidate and B -- and the candidate is named by the screening
+    rung's mechanical selection and bound into the confirmation authorization
+    (`require_advancing_candidate`). A confirmation schedule over the full
+    five-arm field would be fifteen probes against a six-probe priced cell:
+    a different experiment at the same price, which is exactly what the count
+    check below exists to refuse. Screening takes NO advancing candidate --
+    naming one there would be choosing an arm before anything measured it.
     """
     if rung not in ("screening", "confirmation"):
         raise D1BehaviouralError(f"unknown rung {rung!r}")
     seeds = (screening_seeds(repo_root) if rung == "screening"
              else confirmation_seeds(repo_root))
-    field = arms(repo_root)
+    field = arms(repo_root, arm_root=arm_root)
+    if rung == "screening":
+        if advancing_candidate:
+            raise D1BehaviouralError(
+                "screening has no advancing candidate; it is what produces "
+                "one. Naming an arm here would select before measuring.")
+    else:
+        if not advancing_candidate:
+            raise D1BehaviouralError(
+                "a confirmation schedule must name the advancing candidate. "
+                "The design declares confirmation_arms: 2 -- that candidate "
+                "and B -- and a schedule over the full field would run "
+                "fifteen probes against the six-probe priced cell.")
+        candidate_ids = sorted(a.arm_id for a in field if not a.is_incumbent)
+        if advancing_candidate not in candidate_ids:
+            raise D1BehaviouralError(
+                f"advancing candidate {advancing_candidate!r} is not in the "
+                f"frozen candidate field {candidate_ids}; a confirmation may "
+                "only measure an arm the screening field contained")
+        field = tuple(a for a in field
+                      if a.arm_id == advancing_candidate or a.is_incumbent)
     role = f"d1_{rung}"
     out = tuple(
         Probe(probe_id=f"d1_{rung}_{a.arm_id}_s{seed}", arm_id=a.arm_id,
@@ -378,7 +428,7 @@ def probes(rung: str, repo_root: str | Path = REPO_ROOT) -> tuple[Probe, ...]:
               battery_role=role)
         for a in field for seed in seeds)
     declared = int(behavioural_design(repo_root)[f"{rung}_probes"])
-    if rung == "screening" and len(out) != declared:
+    if len(out) != declared:
         raise D1BehaviouralError(
             f"the schedule yields {len(out)} {rung} probes "
             f"({len(field)} arms x {len(seeds)} seeds) and the design declares "
@@ -489,7 +539,8 @@ def roles_are_disjoint(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     return {"disjoint": True, "per_stratum_screening_ids": counts}
 
 
-def require_arms_present(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
+def require_arms_present(repo_root: str | Path = REPO_ROOT, *,
+                         arm_root: str | None = None) -> dict[str, Any]:
     """Every arm is OBTAINABLE and carries the identity the frozen record names.
 
     At `$0`, before anything is priced. A probe trained from the wrong
@@ -519,7 +570,10 @@ def require_arms_present(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
     register_builtin_adapters()
     adapter = get_adapter("qwen3")
     out: list[dict[str, Any]] = []
-    for arm in arms(repo_root):
+    #: Under a pod `arm_root`, B resolves to a real directory and takes the
+    #: byte-hashing branch like every candidate -- which is the pod's digest
+    #: gate, the thing the dev-host spec check explicitly does not claim.
+    for arm in arms(repo_root, arm_root=arm_root):
         #: AN ARM WITH NO IDENTITIES VERIFIES NOTHING. Both checks below are
         #: "every declared identity agrees", and `all([])` is True -- so an arm
         #: that declared none would pass every check while binding nothing, and
@@ -629,13 +683,26 @@ def _incumbent_construction_row(arm: Arm,
     }
 
 
-def session_contract(rung: str, repo_root: str | Path = REPO_ROOT
-                     ) -> dict[str, Any]:
+def session_contract(rung: str, repo_root: str | Path = REPO_ROOT, *,
+                     advancing_candidate: str | None = None,
+                     arm_root: str | None = None) -> dict[str, Any]:
     """Everything this rung is bound to, derived and checked. `$0`.
 
     One document the driver asserts on the pod and the launcher writes before
     a resource exists, so "what was this session supposed to measure" has one
     answer that was true before it measured anything.
+
+    THE CONTRACT IS LOCATION-FREE. Its hash is computed on the dev host at
+    issuance and recomputed on the pod by the driver, and the two must be
+    equal -- so the arm rows below carry IDENTITY coordinates only (the four
+    digests, the state id, the quality position), never a filesystem path.
+    Where the bytes sit is execution configuration: the dev host reads the
+    durable store, the pod materializes under its own `arm_root`, and neither
+    location says anything about WHICH field is measured. The verification
+    that hashes real bytes still runs on both sides -- `require_arms_present`
+    is called here and refuses before this document exists -- but its
+    machine-local outputs are the caller's evidence, not the contract's
+    content.
     """
     from shared.recipes import E1_KD_HEAVY_0860K as recipe
 
@@ -643,10 +710,32 @@ def session_contract(rung: str, repo_root: str | Path = REPO_ROOT
     role = f"d1_{rung}"
     seeds = (screening_seeds(repo_root) if rung == "screening"
              else confirmation_seeds(repo_root))
-    scheduled = probes(rung, repo_root)
+    scheduled = probes(rung, repo_root,
+                       advancing_candidate=advancing_candidate,
+                       arm_root=arm_root)
+    verified = require_arms_present(repo_root, arm_root=arm_root)
+    #: Identity coordinates only; see the docstring. `identities` carries all
+    #: four digests from the frozen records, so the contract binds the arms by
+    #: content -- A3 showed two differing artifacts sharing one state id.
+    field = arms(repo_root, arm_root=arm_root)
+    arms_bound = {
+        "n_arms": verified["n_arms"],
+        "arms": [{
+            "arm": a.arm_id,
+            "role": a.role,
+            "quality_position": a.quality_position,
+            "state_id": a.state_id,
+            "identities": dict(a.identities),
+        } for a in field],
+        "_location_free": (
+            "paths are execution configuration and differ between the dev "
+            "host and the pod; the identities bind the field either way"),
+    }
     return {
         "schema": "aadistill.phase_d1.behavioural_contract/v1",
         "rung": rung,
+        "advancing_candidate": (advancing_candidate
+                                if rung == "confirmation" else None),
         "design_hash": design(repo_root)["design_hash"],
         "recovery_recipe": {
             "recipe_id": recipe.recipe_id,
@@ -662,7 +751,7 @@ def session_contract(rung: str, repo_root: str | Path = REPO_ROOT
         "n_probes_declared": int(bd[f"{rung}_probes"]),
         "probes": [{"probe_id": p.probe_id, "arm": p.arm_id, "seed": p.seed}
                    for p in scheduled],
-        "arms": require_arms_present(repo_root),
+        "arms": arms_bound,
         "battery": battery_role(role, repo_root),
         "roles_disjoint": roles_are_disjoint(repo_root),
         "endpoint": bd["decision_rule"]["primary_endpoint"],
