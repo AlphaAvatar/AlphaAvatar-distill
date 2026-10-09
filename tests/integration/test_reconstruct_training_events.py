@@ -55,8 +55,14 @@ def test_the_output_declares_its_provenance(tmp_path):
     doc, _ = run_script(tmp_path)
     assert doc["provenance"] == "reconstructed_from_driver_console"
     assert doc["original_event_stream_available"] is False
+    #: The FROZEN spelling, derived by the script from the arm config's
+    #: `out_dir`. Both are historical: the config is registered by E6b's
+    #: prospective registration, and this path states where the destroyed
+    #: event streams WERE. The committed reconstruction carries the same
+    #: spelling. (A path sweep had updated this literal alone, which only
+    #: agreed with the tree while the registered config was also drifted.)
     assert doc["original_event_stream_paths"] == [
-        "artifacts/stages/stage-3/e6b_p2_r2960k_sa/train_log.jsonl"]
+        "artifacts/stage3/e6b_p2_r2960k_sa/train_log.jsonl"]
     assert "not a substitute" in doc["original_loss_note"]
 
 
