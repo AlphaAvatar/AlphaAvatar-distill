@@ -115,5 +115,11 @@ def test_the_four_gates_stay_separate_in_the_live_record(d1_row):
     assert set(gates) >= {"formal_funding", "one_use_execution_authorization",
                           "open_scientific_blockers", "maintainer_pause"}
     assert gates["open_scientific_blockers"] == []
-    assert re.search(r"review", gates["maintainer_pause"], re.I), (
-        "the pause gate must say what the pause is waiting for")
+    #: The gate must name what would UNBLOCK it, not merely assert a pause.
+    #: Not a phrase lock: this asserted the literal "review" while the pause
+    #: was for the migration review, and went stale the moment the pause
+    #: became D1's own execution-readiness process.
+    pause = gates["maintainer_pause"]
+    assert len(pause) > 40, pause
+    assert re.search(r"readiness|review|authoriz|decision|approv", pause, re.I), (
+        f"the pause gate does not say what the pause is waiting for: {pause!r}")
