@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T16:50:58+00:00",
+  "created_utc": "2026-10-09T18:47:16+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,17 +10,17 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3311,
-    "bytes": 121182650,
+    "files": 3313,
+    "bytes": 121241649,
     "by_disposition": {
       "keep_canonical": 222,
       "keep_immutable": 2847,
-      "keep_referenced": 227,
+      "keep_referenced": 229,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1507,
+      "immutable_record": 1509,
       "index": 8,
       "living_state": 2,
       "narrative": 934,
@@ -6873,13 +6873,16 @@
         "scripts/stages/stage-1/phase_c2_full_search/tests/test_phase_c2_full_search_chain.py",
         "scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_grant_proposal.py",
         "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py",
+        "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
         "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
         "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_launch.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_pod_environment.py",
         "scripts/stages/stage-1/phase_d1/d1_qualification_closeout.py",
         "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py",
         "scripts/stages/stage-1/phase_d1/issue_d1_replay_authorization.py",
         "scripts/stages/stage-1/phase_d1/pod_environment.py",
+        "scripts/stages/stage-1/phase_d1/tests/test_d1_behavioural_chain.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_launch_contract.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_pod_environment.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_replay_sweep_contract.py",
@@ -6980,13 +6983,16 @@
         "scripts/stages/stage-1/phase_c2_full_search/tests/test_phase_c2_full_search_chain.py",
         "scripts/stages/stage-1/phase_c2_full_search/write_c2_full_search_grant_proposal.py",
         "scripts/stages/stage-1/phase_c3/autoinit_c3_launch.py",
+        "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_launch.py",
         "scripts/stages/stage-1/phase_d1/autoinit_d1_launch.py",
         "scripts/stages/stage-1/phase_d1/autoinit_d1_replay_launch.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_pod_environment.py",
         "scripts/stages/stage-1/phase_d1/d1_qualification_closeout.py",
         "scripts/stages/stage-1/phase_d1/issue_d1_authorization.py",
         "scripts/stages/stage-1/phase_d1/issue_d1_replay_authorization.py",
         "scripts/stages/stage-1/phase_d1/pod_environment.py",
+        "scripts/stages/stage-1/phase_d1/tests/test_d1_behavioural_chain.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_launch_contract.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_pod_environment.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_replay_sweep_contract.py",
@@ -8925,7 +8931,7 @@
     {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
       "size_bytes": 74124,
-      "sha256": "8b3f287c439d873b719b2203ca655d5bc5dcdd19eb7c1e20c7068c24aec7de99",
+      "sha256": "2cf9bb5f3acb4d7c5271396a97119095259c87ebd8fb8d63bc23fd3535f11bc7",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50846,8 +50852,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/current.json",
-      "size_bytes": 4460,
-      "sha256": "559f8af7404c0d96402580b7bbf7e7530e24cadd35bf0c0dfe2ca7900c3a2cf9",
+      "size_bytes": 4842,
+      "sha256": "70b9cd4b102fbd7fbb7dea749ae0141b45811759dd90836c7678026eb17ec46c",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50888,6 +50894,7 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/phase_d1/current.json",
+        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
         "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001/runtime/session.json",
         "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002/runtime/session.json",
         "scripts/maintenance/consolidation/build_checkpoint_registry.py",
@@ -50904,6 +50911,45 @@
       "disposition_reason": "named by scripts/maintenance/consolidation/build_checkpoint_registry.py, scripts/stages/stage-1/phase_d1/issue_d1_replay_authorization.py, scripts/stages/stage-1/phase_d1/replay_specs.py"
     },
     {
+      "path": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+      "size_bytes": 14914,
+      "sha256": "a699911ef4237628acccda17f7d1408e5b91d212972fc0b99fd6188dc1006753",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+        "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py"
+      ],
+      "referenced_by_executable": [
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+        "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py"
+      ],
+      "duplicate_of": null,
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/stages/stage-1/phase_d1/behavioural_authorization.py, scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+      "size_bytes": 40579,
+      "sha256": "fe58c3a5be23e54f71ca823966f5437214a387598bea0c5fc9c5fa5d30f45c6c",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_materialize.py"
+      ],
+      "referenced_by_executable": [
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_materialize.py"
+      ],
+      "duplicate_of": null,
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/stages/stage-1/phase_d1/behavioural_authorization.py, scripts/stages/stage-1/phase_d1/behavioural_materialize.py"
+    },
+    {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
       "size_bytes": 82921,
       "sha256": "4e4622f6380ed351709fe1451d5dea4acea032eb8d023bf84ea1a29071e03e1d",
@@ -50917,6 +50963,7 @@
         "logs/stages/stage-1/README.md",
         "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json",
         "logs/stages/stage-1/phase_d1/current.json",
+        "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
         "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_095623/closeout/superseded.json",
         "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
@@ -50924,6 +50971,7 @@
         "scripts/stages/stage-1/families/d_series/tests/test_production_operator_timing.py",
         "scripts/stages/stage-1/families/d_series/tests/test_standing_incumbent.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/d1_authorization.py",
         "scripts/stages/stage-1/phase_d1/d1_session.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_authorization.py",
@@ -50937,6 +50985,7 @@
         "scripts/stages/stage-1/families/d_series/tests/test_production_operator_timing.py",
         "scripts/stages/stage-1/families/d_series/tests/test_standing_incumbent.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
+        "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/d1_authorization.py",
         "scripts/stages/stage-1/phase_d1/d1_session.py",
         "scripts/stages/stage-1/phase_d1/tests/test_d1_authorization.py",
@@ -57211,8 +57260,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17985,
-      "sha256": "cac178209cfa7638f9edda1595c71d6afe7994cb32d5af6cd9e5bbccd986db01",
+      "size_bytes": 18888,
+      "sha256": "2849f9bd89e6c52246378e179ddc9ba0900c3a57a844b41d87c645cc9cb6bb7c",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57283,8 +57332,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 233970,
-      "sha256": "684001f9f406e440a4b5ef195c5369835684cec2e5dbec44e21dd623cbbb77df",
+      "size_bytes": 236191,
+      "sha256": "a9c40c9fb36541c6c64d18fcfe4d71aaac6d61a38d9556298a7cc3d046abea8e",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [

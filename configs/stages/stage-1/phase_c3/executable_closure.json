@@ -24,7 +24,7 @@
  ],
  "derivation": "transitive AST import closure; `from pkg import name` probes name as a submodule and keeps it only if it resolves to a file",
  "n_files": 123,
- "digest": "6c45b4e8c8981e8c8b6bd44db515dc3599b352c4d77b110b2590416335135854",
+ "digest": "c7d848f3dce48c3316310e4ae735edced35bf796678dcadb7c523a225946fa27",
  "rule": "sha256 over sorted 'path:sha256' lines of the derived set",
  "files": [
   {
@@ -84,8 +84,8 @@
   },
   {
    "path": "scripts/shared/pod/autoinit_preflight_setup.sh",
-   "sha256": "4df4e579b05347260a1278a564e5ab9b397f88bd9ae1203516b1f6f3df9de5ac",
-   "bytes": 61003
+   "sha256": "c75c9e6e24b0796eb8e4eec49e07668027b262e5cdf2a71a97aef772f5c5c7ed",
+   "bytes": 63439
   },
   {
    "path": "scripts/shared/pod/autoinit_science_inputs.py",

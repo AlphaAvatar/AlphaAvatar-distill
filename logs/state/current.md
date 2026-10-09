@@ -9,14 +9,49 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 IS PAUSED BEFORE BEHAVIOURAL SCREENING.** The control-arm decision is
-resolved and the two corrections it implies are made. The migration that
-blocked it has been reviewed and integrated, so the remaining gate is D1's own
-execution-readiness process (maintainer, 2026-10-10): no execution grant is
-issued, no screening authorization exists, and no resource has been created.
-**Future D-series work starts on a FRESH branch cut from the integrated
-`main`** — P12.2, because a squash commit is not an ancestor of the source
-branch's commits and continuing there would re-apply the whole range.
+**D1 SCREENING AWAITS ITS ONE-USE MAINTAINER GRANT, AND NOTHING ELSE.** The
+execution-readiness process the 2026-10-10 pause gated on has been EXECUTED,
+on `exec/d1-behavioural-readiness`, cut fresh from the integrated `main`
+(`c8f714af`) per P12.2:
+
+```text
+execution preregistration   plans/d1_behavioural_preregistration.json
+                            aa70338a22bdaae1…  — C0's seed hash-binding,
+                            written while no probe, grant or resource exists;
+                            regenerates identically across hash seeds
+replay plan                 plans/d1_behavioural_replay_plan.json
+                            fe58c3a5be23e54f…  — all four finalists' pinned
+                            paths resolved from the search journal at $0
+launcher                    autoinit_d1_behavioural_launch.py — seven $0 gates
+                            incl. same_failure_gate; per-probe evidence pulled
+                            off-pod on every poll; evidence-not-checkpoints
+                            products contract (P8.4)
+one-use issuer              issue_d1_behavioural_authorization.py over
+                            behavioural_authorization.build_payload — live
+                            secure rate, four budget conditions, contract and
+                            preregistration hash-bound, read back through the
+                            loading type
+driver                      arm materialization ON THE POD along digest-pinned
+                            paths (candidates replay the search's recorded
+                            steps; B from frozen_baseline_spec), location-free
+                            contract asserted before any probe, rung-pinned
+                            scorers, evidence announced per probe
+sweep contract              --experiment phase_d1_behavioural, run-owned
+dispatch                    SESSION_KIND=d1_behavioural branch asserting the
+                            behavioural type's claims
+```
+
+The confirmation rung's field-narrowing (2 arms × 3 seeds = 6 probes, candidate
+bound at issuance from the screening selection record) is implemented; its
+off-pod verdict computation is owed before the CONFIRMATION launch and blocks
+nothing about screening.
+
+**What remains before formal screening — exactly one maintainer decision plus
+its mechanical consequences:** write the one-use screening grant; issue the
+authorization against it at the live rate; commit the authorization; run the
+launch-bound sweep; stage the bundle; write launch readiness; launch. No
+execution grant exists, no authorization is issued, and no resource has been
+created.
 
 **THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
 into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
@@ -292,9 +327,11 @@ about 1.756 GiB of private-storage headroom. B has no local bytes at all and is
 rebuilt from `phase_c2.baseline.frozen_baseline_spec`, the one owner of that
 construction, as C2's and C3's behavioural sessions did.
 
-**What does not exist, deliberately:** the launcher, the authorization issuer,
-the sweep contract and the execution preregistration. Building them is
-experimental execution, and D1 is paused before it.
+**The launcher, the authorization issuer, the sweep contract and the execution
+preregistration EXIST NOW** — built by the 2026-10-10 readiness round this
+document's "Right now" section describes. The paragraph that stood here said
+they did not exist, deliberately, because building them was gated on the
+maintainer's readiness process; that process is the one that built them.
 
 **Three attempts, and the two failures bought the gates the third needed.**
 
