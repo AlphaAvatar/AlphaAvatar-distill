@@ -868,6 +868,41 @@ print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
       f'search {a.allows_beam_search}, arm {a.arm}, '
       f'protocol {a.measurement_protocol_id[:12]}')
 " || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d1_behavioural" ]; then
+  # D1 BEHAVIOURAL. The ONLY D1 session that trains: ten screening probes (or
+  # six confirmation probes) under the frozen recovery recipe, from arms
+  # materialized on this pod along digest-pinned paths. Its artifact reports
+  # `allows_recovery_training` TRUE where the search's reports recovery False,
+  # and `allows_beam_search` False where the search's reports it True --
+  # delegating to the search's loader would refuse the one artifact that can
+  # authorize this session, and accepting the search's here would let a beam
+  # grant buy training.
+  #
+  # The flags below are the ones a careless reuse would set: this must not be
+  # able to buy a beam, a re-selection of the frozen Top-4, a re-measurement of
+  # B's standing result, or an automatic follow-on into the other rung.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d1.behavioural_governance import D1BehaviouralAuthorization
+a = D1BehaviouralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_recovery_training is True, 'every behavioural probe is a training run'
+assert a.authorizes_behavioural_selection is True, 'this session needs a behavioural authorization'
+assert a.allows_beam_search is False, 'a behavioural grant must not authorize a beam'
+assert a.authorizes_d1_search is False, 'the D1 search is complete and consumed'
+assert a.authorizes_candidate_reselection is False, 'the Top-4 field is the retention decision, not this session'
+assert a.authorizes_incumbent_remeasurement is False, 'B stands; this session trains FROM its checkpoint'
+assert a.automatic_followon_start is False, 'the other rung is a separately authorized session'
+print(f'  {a.authorization_id}: rung {a.rung}, '
+      f'hard \${a.hard_cap_usd:.4f}, training {a.allows_recovery_training}, '
+      f'contract {a.contract_hash[:12]}, battery {a.battery_role}, '
+      f'probes {a.n_probes}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
 elif [ "$SESSION_KIND" = "c2" ]; then
   # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
   # C2 launcher, driver, search space and baseline rule, none of which appear in

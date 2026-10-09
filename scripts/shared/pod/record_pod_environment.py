@@ -195,6 +195,18 @@ EXPERIMENTS: dict[str, tuple[str, str]] = {
     "phase_d1_replay": (
         "stages.phase_d1.replay_pod_environment",
         "sweep_contract"),
+    #: A TENTH, for the behavioural rungs, and the ninth entry's lesson is the
+    #: reason it is not a mode of `phase_d1`: that entry binds
+    #: `autoinit_d1_launch` -- the SEARCH's launcher -- so a behavioural sweep
+    #: through it would derive the staged view of a different session. The
+    #: behavioural session stages the two battery roles and a second
+    #: calibration mixture the search never ships, runs under
+    #: SESSION_KIND=d1_behavioural, and its record declares its own schema, so
+    #: no other record can satisfy its verifier or it theirs. RUN-OWNED, no
+    #: pointer.
+    "phase_d1_behavioural": (
+        "stages.phase_d1.behavioural_pod_environment",
+        "sweep_contract"),
 }
 
 

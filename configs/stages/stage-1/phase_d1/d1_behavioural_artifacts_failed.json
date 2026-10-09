@@ -1,0 +1,38 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d1_behavioural",
+ "note": "FAILURE spec: what a stopped D1 behavioural session still owes. Nothing is `required`, deliberately -- an early failure may legitimately have produced none of it, and demanding an artifact on the failure path would block the collection of what the run DOES have. The driver writes `d1_behavioural.json` on every path out, and every probe that FINISHED has its result, per-sample rows and generations announced already -- the launcher's poll hook pulls them off-pod while the next probe trains, so the failure path collects the stragglers rather than carrying the whole burden.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. See the success spec.",
+ "entries": [
+  {
+   "artifact_class": "d1_behavioural_record",
+   "pattern": "audit/autoinit_d1_behavioural/d1_behavioural.json",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_behavioural_results",
+   "pattern": "audit/autoinit_d1_behavioural/results",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_behavioural_per_sample",
+   "pattern": "audit/autoinit_d1_behavioural/per_sample",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_behavioural_generations",
+   "pattern": "audit/autoinit_d1_behavioural/generations",
+   "required": false,
+   "lifecycle": "evidence"
+  },
+  {
+   "artifact_class": "d1_behavioural_train_tails",
+   "pattern": "audit/autoinit_d1_behavioural/*_tail.log",
+   "required": false,
+   "lifecycle": "evidence"
+  }
+ ]
+}
