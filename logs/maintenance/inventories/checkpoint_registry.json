@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.checkpoint_registry/v2",
-  "created_utc": "2026-10-09T09:42:49+00:00",
+  "created_utc": "2026-10-09T15:22:23+00:00",
   "command": "scripts/maintenance/consolidation/build_checkpoint_registry.py --hash --out logs/maintenance/inventories/checkpoint_registry.json",
   "hashed": true,
   "scope": "every checkpoint and weight artifact in the three storage areas: local artifacts/, the relay, and anything git tracks",
@@ -41,86 +41,19 @@
       "verdict_owner": "logs/stages/stage-1/phase_c1/runs/attempt18/evidence/c1_decision.json",
       "derived_by": "stages.d_series.incumbent.standing_incumbent()",
       "selected_because": "C1's verdict was GO at a pooled delta of 0.013725490196078431 against a SESOI of 0.01, which selects the treatment arm",
-      "local_copies": [],
       "retention": "reproducibility_required",
-      "materialization": "RECONSTRUCTED on the pod from its frozen construction spec `stages.phase_c2.baseline.frozen_baseline_spec` \u2014 the same four-step fixed path C2's and C3's behavioural sessions rebuilt it from. Its bytes are NOT retained on this host.",
       "consumers": [
         "phase_d1 screening arm B (paused)",
         "phase_c2 / phase_c3 behavioural baselines"
-      ]
-    },
-    "d1_finalist_q4": {
-      "artifact_id": "d1_finalist_q4",
-      "role": "D1 behavioural finalist q4 (quality position 4)",
-      "identity": {
-        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
-        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
-        "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
-        "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
-        "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
-      },
-      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-      "creating_run": "d1_replay_002 (rematerialized, exact)",
-      "retention": "reproducibility_required",
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc"
       ],
-      "consumers": [
-        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-      ],
-      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
-      "copies": 1,
-      "all_copies_identity_verified": true
-    },
-    "d1_finalist_q2": {
-      "artifact_id": "d1_finalist_q2",
-      "role": "D1 behavioural finalist q2 (quality position 2)",
-      "identity": {
-        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
-        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
-        "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
-        "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
-        "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
-      },
-      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-      "creating_run": "d1_replay_002 (rematerialized, exact)",
-      "retention": "reproducibility_required",
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55"
-      ],
-      "consumers": [
-        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-      ],
-      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
-      "copies": 1,
-      "all_copies_identity_verified": true
-    },
-    "d1_finalist_q3": {
-      "artifact_id": "d1_finalist_q3",
-      "role": "D1 behavioural finalist q3 (quality position 3)",
-      "identity": {
-        "state_id": "56388d47b6a71e1b49e44929e48d4061",
-        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
-        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
-        "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
-        "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
-        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
-      },
-      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
-      "creating_run": "d1_search_20261006_210210",
-      "retention": "reproducibility_required",
-      "local_copies": [
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061",
-        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061"
-      ],
-      "consumers": [
-        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
-      ],
-      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
-      "copies": 2,
-      "all_copies_identity_verified": true
+      "local_copies": [],
+      "copies": 0,
+      "all_copies_identity_verified": false,
+      "tombstone": null,
+      "lifecycle": "no_local_copy",
+      "reconstruction": "RECONSTRUCTED on the pod from its frozen construction spec `stages.phase_c2.baseline.frozen_baseline_spec` \u2014 the same four-step fixed path C2's and C3's behavioural sessions rebuilt it from.",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "RECONSTRUCTED on the pod from its frozen construction spec `stages.phase_c2.baseline.frozen_baseline_spec` \u2014 the same four-step fixed path C2's and C3's behavioural sessions rebuilt it from."
     },
     "d1_finalist_q1": {
       "artifact_id": "d1_finalist_q1",
@@ -135,17 +68,110 @@
       },
       "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
       "creating_run": "d1_search_20261006_210210",
+      "availability_at_decision": "SECURED. The completed search retained it as a product; identity-verified off-pod.",
       "retention": "reproducibility_required",
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
       "local_copies": [
         "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/e5e3edb0477b25147de952153da8fc21",
         "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/e5e3edb0477b25147de952153da8fc21"
       ],
+      "copies": 2,
+      "all_copies_identity_verified": true,
+      "tombstone": null,
+      "lifecycle": "retained_local",
+      "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "local bytes retained; replay is the fallback"
+    },
+    "d1_finalist_q2": {
+      "artifact_id": "d1_finalist_q2",
+      "role": "D1 behavioural finalist q2 (quality position 2)",
+      "identity": {
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "operator_path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+        "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+        "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+        "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_replay_002 (rematerialized, exact)",
+      "availability_at_decision": "NOT RETAINED. Requires rematerialization from the committed search record, with exact identity equality before adoption.",
+      "retention": "reproducibility_required",
       "consumers": [
         "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
       ],
-      "materialization": "local bytes retained; byte-exact replay from the committed search record is the fallback",
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/afd50c9ff0e3d20542bb5473ea745b55"
+      ],
+      "copies": 1,
+      "all_copies_identity_verified": true,
+      "tombstone": null,
+      "lifecycle": "retained_local",
+      "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "local bytes retained; replay is the fallback"
+    },
+    "d1_finalist_q3": {
+      "artifact_id": "d1_finalist_q3",
+      "role": "D1 behavioural finalist q3 (quality position 3)",
+      "identity": {
+        "state_id": "56388d47b6a71e1b49e44929e48d4061",
+        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+        "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+        "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_search_20261006_210210",
+      "availability_at_decision": "SECURED. The completed search retained it as a product; identity-verified off-pod.",
+      "retention": "reproducibility_required",
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/oob_products/products/56388d47b6a71e1b49e44929e48d4061",
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_search_20261006_210210/products/56388d47b6a71e1b49e44929e48d4061"
+      ],
       "copies": 2,
-      "all_copies_identity_verified": true
+      "all_copies_identity_verified": true,
+      "tombstone": null,
+      "lifecycle": "retained_local",
+      "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "local bytes retained; replay is the fallback"
+    },
+    "d1_finalist_q4": {
+      "artifact_id": "d1_finalist_q4",
+      "role": "D1 behavioural finalist q4 (quality position 4)",
+      "identity": {
+        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+        "operator_path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+        "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+        "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+        "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+        "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+      },
+      "identity_owner": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+      "creating_run": "d1_replay_002 (rematerialized, exact)",
+      "availability_at_decision": "NOT RETAINED. Requires rematerialization from the committed search record, with exact identity equality before adoption.",
+      "retention": "reproducibility_required",
+      "consumers": [
+        "phase_d1 screening (paused; logs/stages/stage-1/phase_d1/current.json)"
+      ],
+      "local_copies": [
+        "/home/ecs-user/aad-artifacts/phase_d1/d1_replay_002/products/3fcaf42eaa91b3ed02eab6c2f3213bfc"
+      ],
+      "copies": 1,
+      "all_copies_identity_verified": true,
+      "tombstone": null,
+      "lifecycle": "retained_local",
+      "reconstruction": "byte-exact replay from the committed search record; both unretained finalists were reproduced EXACTLY by the finalist-rematerialization campaign (logs/stages/stage-1/phase_d1/validations/finalist-rematerialization/v1/campaign.json)",
+      "_identity_survives_zero_copies": "this entry is derived from its scientific owner, not from the physical inventory, so it remains here when the bytes do not",
+      "materialization": "local bytes retained; replay is the fallback"
     },
     "d_series_behavioural_v1": {
       "artifact_id": "d_series_behavioural_v1",
@@ -180,12 +206,17 @@
       "local_copies": [
         "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1"
       ],
+      "copies": 1,
+      "lifecycle": "retained_local",
+      "tombstone": null,
       "retention": "reproducibility_required",
+      "reconstruction": "rebuildable at $0 on CPU by scripts/stages/stage-1/families/d_series/build_batteries.py over the frozen pools, then verify_batteries.py",
       "materialization": "rebuildable at $0 on CPU by scripts/stages/stage-1/families/d_series/build_batteries.py over the frozen pools, then verify_batteries.py",
       "consumers": [
         "phase_d1 screening + confirmation (paused)",
         "phase_d2 / phase_d3 (not designed)"
-      ]
+      ],
+      "_identity_survives_zero_copies": "derived from the family manifest, not from the bytes"
     }
   },
   "local": {
@@ -193,7 +224,7 @@
     "n_weight_files": 43,
     "total_bytes": 74102515533,
     "total_human": "69.013 GiB",
-    "artifacts_tree_bytes": 8089855071,
+    "artifacts_tree_bytes": 8089856620,
     "external_store_tree_bytes": 68098407142,
     "by_store": {
       "external_store": {
@@ -8654,14 +8685,14 @@
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
+        "logs/stages/index.json",
         "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
         "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
         "logs/stages/stage-1/families/d_series/current.json",
         "logs/stages/stage-1/phase_d1/current.json",
         "logs/stages/stage-1/phase_d1/plans/d1_design.json",
         "logs/state/current.json",
-        "logs/state/current.md",
-        "scripts/maintenance/consolidation/build_checkpoint_registry.py"
+        "logs/state/current.md"
       ],
       "relay_path": null,
       "relay_verified": false,

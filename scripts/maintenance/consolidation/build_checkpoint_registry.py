@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Canonical inventory of every checkpoint and weight artifact, wherever it lives.
 
-    PYTHONPATH=src python scripts/maintenance/consolidation/build_checkpoint_registry.py \
+    PYTHONPATH=src:scripts python scripts/maintenance/consolidation/build_checkpoint_registry.py \
         --hash --relay --out logs/maintenance/inventories/checkpoint_registry.json
 
 Nothing is deleted here. This produces the registry a deletion pass may act on,
@@ -60,6 +60,12 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+#: `scripts` too: the logical identities below are DERIVED from application
+#: modules (`stages.d_series.incumbent`), and the documented invocation sets
+#: only PYTHONPATH=src. Without this the incumbent derivation failed on an
+#: import and was recorded as "undetermined" — a registry quietly missing
+#: the identity of the checkpoint every later round challenges.
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
 
 RELAY_REPO = "AlphaAvatar/aadistill-artifacts"
 WEIGHT_SUFFIXES = (".safetensors", ".bin", ".pt", ".pth", ".gguf", ".ckpt")
@@ -375,32 +381,96 @@ IDENTITY_VERIFIED_MEANS = (
     "from that record, not recomputed here.")
 
 
+TOMBSTONES_REL = "logs/maintenance/inventories/checkpoint_tombstones.json"
+
+
+def _tombstones() -> dict[str, dict]:
+    """Deleted-weight records, keyed by every digest they name.
+
+    Reused rather than duplicated: a retired checkpoint's provenance already
+    has an owner, and a second inventory of the same fact is a second thing
+    that can disagree.
+    """
+    p = REPO_ROOT / TOMBSTONES_REL
+    if not p.is_file():
+        return {}
+    out: dict[str, dict] = {}
+    for row in json.loads(p.read_text()).get("tombstones", []):
+        for key in ("weights_sha256", "config_sha256", "canonical_id"):
+            if row.get(key):
+                out[row[key]] = row
+    return out
+
+
 def scientific_artifacts(entries: list[dict]) -> dict:
-    """One entry per LOGICAL artifact, identity derived from its owner.
+    """One entry per LOGICAL artifact, derived from its scientific owner.
 
-    Separate from `checkpoints`, which inventories PHYSICAL units: a logical
-    artifact may have several byte-identical copies (q1 and q3 are each in
-    `products/` and `oob_products/`) or none at all (the standing incumbent is
-    reconstructed on the pod and its bytes are not on this host). The
-    2026-10-09 review found both conflated — six finalist rows for four
-    finalists, and a different checkpoint wearing the incumbent's name.
+    **Owner first, copies second.** The identities come from the records that
+    own them — D1's retention decision, C1's verdict and measured arm
+    identities, the D-series family manifest — and the physical inventory is
+    then matched against them by digest. The earlier version built the
+    finalist rows by iterating `entries`, so a finalist with zero local
+    copies vanished from the registry on the next regeneration: exactly the
+    artifact whose identity most needs to survive, because nothing else on
+    the machine still carries it.
 
-    Deletion-survivable by construction: identity, provenance and consumers
-    live here, not beside the bytes.
+    A zero-copy artifact therefore stays discoverable here with its digests,
+    its creating run, its consumers, its owner, its retention state, its
+    tombstone when one exists, and how it would be reconstructed.
     """
     out: dict[str, dict] = {}
+    by_shard: dict[str, list[dict]] = {}
+    for e in entries:
+        if e.get("weights_sha256"):
+            by_shard.setdefault(e["weights_sha256"], []).append(e)
+    tombs = _tombstones()
+
+    def attach(row: dict, shard: str, reconstruction: str) -> dict:
+        """Physical copies and lifecycle state for one logical identity."""
+        copies = sorted(e["path_local"] for e in by_shard.get(shard, []))
+        row["local_copies"] = copies
+        row["copies"] = len(copies)
+        row["all_copies_identity_verified"] = bool(copies) and all(
+            e.get("weights_sha256") == shard for e in by_shard.get(shard, []))
+        tomb = tombs.get(shard)
+        row["tombstone"] = (
+            {"record": TOMBSTONES_REL,
+             "canonical_id": tomb.get("canonical_id"),
+             "deleted_utc": tomb.get("deleted_utc"),
+             "reason": tomb.get("reason_physical_weights_deleted")}
+            if tomb else None)
+        if copies:
+            row["lifecycle"] = "retained_local"
+        elif tomb:
+            row["lifecycle"] = "weights_retired_tombstoned"
+        else:
+            row["lifecycle"] = "no_local_copy"
+        row["reconstruction"] = reconstruction
+        row["_identity_survives_zero_copies"] = (
+            "this entry is derived from its scientific owner, not from the "
+            "physical inventory, so it remains here when the bytes do not")
+        return row
 
     # --- the standing incumbent, from C1's verdict and MEASURED identities ---
+    #: An import failure here is a WIRING bug and must not be recorded as a
+    #: scientific one: only `IncumbentUndetermined` — C1's records not
+    #: determining an incumbent — is a legitimate "undetermined".
+    from stages.d_series.incumbent import (IncumbentUndetermined,
+                                           standing_incumbent)
     try:
-        from stages.d_series.incumbent import standing_incumbent
         b = standing_incumbent(REPO_ROOT)
-    except Exception as exc:                                  # noqa: BLE001
-        out["standing_incumbent_B"] = {"error": f"undetermined: {exc}"}
-    else:
-        shard = b["single_shard_sha256"]
-        copies = [e["path_local"] for e in entries
-                  if e.get("weights_sha256") == shard]
+    except IncumbentUndetermined as exc:
         out["standing_incumbent_B"] = {
+            "artifact_id": "standing_incumbent_B",
+            "undetermined": str(exc),
+            "identity_owner": ("logs/stages/stage-1/phase_c1/runs/attempt18/"
+                               "evidence/c1_arm_identities.json"),
+            "_why_this_is_not_an_error": (
+                "C1's own records do not determine an incumbent. That is a "
+                "scientific state, reported rather than guessed."),
+        }
+    else:
+        row = {
             "artifact_id": "standing_incumbent_B",
             "label": b["label"],
             "role": "the checkpoint every later round challenges (C1's "
@@ -418,49 +488,61 @@ def scientific_artifacts(entries: list[dict]) -> dict:
             "verdict_owner": b["verdict_from"],
             "derived_by": "stages.d_series.incumbent.standing_incumbent()",
             "selected_because": b["selected_because"],
-            "local_copies": copies,
             "retention": "reproducibility_required",
-            "materialization": (
-                "RECONSTRUCTED on the pod from its frozen construction spec "
-                "`stages.phase_c2.baseline.frozen_baseline_spec` — the same "
-                "four-step fixed path C2's and C3's behavioural sessions "
-                "rebuilt it from. Its bytes are NOT retained on this host."
-                if not copies else
-                "local bytes present; see local_copies"),
             "consumers": ["phase_d1 screening arm B (paused)",
                           "phase_c2 / phase_c3 behavioural baselines"],
         }
+        out["standing_incumbent_B"] = attach(
+            row, b["single_shard_sha256"],
+            "RECONSTRUCTED on the pod from its frozen construction spec "
+            "`stages.phase_c2.baseline.frozen_baseline_spec` — the same "
+            "four-step fixed path C2's and C3's behavioural sessions rebuilt "
+            "it from.")
+        if row["copies"]:
+            out["standing_incumbent_B"]["materialization"] = (
+                "local bytes present; see local_copies")
+        else:
+            out["standing_incumbent_B"]["materialization"] = row["reconstruction"]
 
-    # --- the D1 finalists: four logical artifacts, copies collapsed ---
-    for e in entries:
-        si = e.get("scientific_identity")
-        if not si:
-            continue
-        row = out.setdefault(si["artifact_id"], {
-            "artifact_id": si["artifact_id"],
-            "role": f"D1 behavioural finalist q{si['finalist']} "
-                    f"(quality position {si['finalist']})",
-            "identity": {k: si[k] for k in
-                         ("state_id", "operator_path", "artifact_digest",
-                          "weights_digest", "single_shard_sha256",
-                          "arch_signature")},
-            "identity_owner": si["identity_owner"],
-            "creating_run": si["creating_run"],
-            "retention": "reproducibility_required",
-            "local_copies": [],
-            "copies_identity_verified": [],
-            "consumers": si["consumers"],
-            "materialization": ("local bytes retained; byte-exact replay from "
-                                "the committed search record is the fallback"),
-        })
-        row["local_copies"].append(e["path_local"])
-        row["copies_identity_verified"].append(bool(e.get("identity_verified")))
-    for row in out.values():
-        if "local_copies" in row and isinstance(row.get("copies_identity_verified"), list):
-            row["copies"] = len(row["local_copies"])
-            row["all_copies_identity_verified"] = all(row.pop(
-                "copies_identity_verified")) if row["copies"] else False
-            row["local_copies"] = sorted(row["local_copies"])
+    # --- the four D1 finalists, from the retention decision ---
+    retention_rel = ("logs/stages/stage-1/phase_d1/decisions/"
+                     "post_search_finalist_retention.json")
+    rp = REPO_ROOT / retention_rel
+    if rp.is_file():
+        block = json.loads(rp.read_text())["the_frozen_behavioural_finalists"]
+        for m in block["members"]:
+            key = f"d1_finalist_q{m['finalist']}"
+            secured = "SECURED" in m["availability"]
+            row = {
+                "artifact_id": key,
+                "role": f"D1 behavioural finalist q{m['finalist']} "
+                        f"(quality position {m['quality_position']})",
+                "identity": {
+                    "state_id": m["state_id"],
+                    "operator_path": m["path"],
+                    "artifact_digest": m["artifact_digest"],
+                    "weights_digest": m["weights_digest"],
+                    "single_shard_sha256": m["single_shard_sha256"],
+                    "arch_signature": m["arch_signature"],
+                },
+                "identity_owner": retention_rel,
+                "creating_run": ("d1_search_20261006_210210" if secured
+                                 else "d1_replay_002 (rematerialized, exact)"),
+                "availability_at_decision": m["availability"],
+                "retention": "reproducibility_required",
+                "consumers": ["phase_d1 screening (paused; "
+                              "logs/stages/stage-1/phase_d1/current.json)"],
+            }
+            out[key] = attach(
+                row, m["single_shard_sha256"],
+                "byte-exact replay from the committed search record; both "
+                "unretained finalists were reproduced EXACTLY by the "
+                "finalist-rematerialization campaign "
+                "(logs/stages/stage-1/phase_d1/validations/"
+                "finalist-rematerialization/v1/campaign.json)")
+            out[key]["materialization"] = (
+                "local bytes retained; replay is the fallback"
+                if row["copies"] else out[key]["reconstruction"])
 
     # --- the D-series battery family, from the canonical manifest ---
     fam_rel = ("logs/stages/stage-1/families/d_series/analyses/"
@@ -470,6 +552,7 @@ def scientific_artifacts(entries: list[dict]) -> dict:
         fam = json.loads(fam_path.read_text())
         bytes_dir = ("artifacts/stages/stage-1/families/d_series/batteries/"
                      "d_series_behavioural_v1")
+        present = (REPO_ROOT / bytes_dir).is_dir()
         out["d_series_behavioural_v1"] = {
             "artifact_id": "d_series_behavioural_v1",
             "role": "the realized D-series behavioural battery family",
@@ -494,14 +577,23 @@ def scientific_artifacts(entries: list[dict]) -> dict:
                 "the per-file digests, which have one owner."),
             "verifier": ("scripts/stages/stage-1/families/d_series/"
                          "verify_batteries.py"),
-            "local_copies": [bytes_dir] if (REPO_ROOT / bytes_dir).is_dir() else [],
+            "local_copies": [bytes_dir] if present else [],
+            "copies": 1 if present else 0,
+            "lifecycle": "retained_local" if present else "no_local_copy",
+            "tombstone": None,
             "retention": "reproducibility_required",
+            "reconstruction": (
+                "rebuildable at $0 on CPU by "
+                "scripts/stages/stage-1/families/d_series/build_batteries.py "
+                "over the frozen pools, then verify_batteries.py"),
             "materialization": (
                 "rebuildable at $0 on CPU by "
                 "scripts/stages/stage-1/families/d_series/build_batteries.py "
                 "over the frozen pools, then verify_batteries.py"),
             "consumers": ["phase_d1 screening + confirmation (paused)",
                           "phase_d2 / phase_d3 (not designed)"],
+            "_identity_survives_zero_copies": (
+                "derived from the family manifest, not from the bytes"),
         }
     return out
 
