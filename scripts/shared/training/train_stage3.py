@@ -38,6 +38,45 @@ from aadistill.infrastructure.env import code_state, hardware_report, set_determ
 from aadistill.infrastructure.manifest import sha256_file, sha256_json, write_manifest
 from aadistill.models.teacher import DTYPES, load_teacher, tokenizer_hash
 from aadistill.models.tokenizer_contract import resolve_training_tokenizer
+from shared.run_layout import resolve_historical
+
+
+def at(rel: str | Path) -> Path:
+    """Where a path a CONFIG spells actually is, now.
+
+    A frozen training config's path values are part of its identity: E6b's
+    two arms are hashed by `e6b_registration.json`, so their `out_dir`,
+    `student_path` and `data_dir` keep the spellings they were registered
+    with. The 2026-10-08 migration moved the objects those strings name, so
+    every physical access resolves here while the config dictionary — and its
+    `sha256_json`, and everything serialized into run evidence — is untouched.
+
+    A config written after the migration already spells the canonical path,
+    which the table leaves alone: resolution is the identity for those.
+    """
+    return REPO_ROOT / resolve_historical(str(rel), REPO_ROOT)
+
+
+def effective_paths(cfg: dict) -> dict:
+    """Every physical path this run will touch, derived from the config.
+
+    ONE place where a declared path becomes a physical one, so "what does the
+    trainer actually read and write" is a question with an answer a test can
+    ask directly — rather than something only a training run would reveal.
+    Keys absent from the config are absent here.
+    """
+    out = {"out_dir": at(cfg["out_dir"]),
+           "student_path": at(cfg["student_path"]),
+           "data_dir": at(cfg["data_dir"])}
+    out["checkpoints"] = out["out_dir"] / "checkpoints"
+    out["train_log"] = out["out_dir"] / "train_log.jsonl"
+    if cfg.get("tokenizer_source"):
+        out["tokenizer_source"] = at(cfg["tokenizer_source"])
+    if cfg.get("extra_stream"):
+        out["extra_stream"] = at(cfg["extra_stream"]["data_dir"])
+    for name, rel in (cfg.get("extra_val") or {}).items():
+        out[f"extra_val:{name}"] = at(rel)
+    return out
 from aadistill.data.ladder import ladder_blocks
 from aadistill.training.train import (
     JsonlLogger,
@@ -68,12 +107,19 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    cfg = json.loads(Path(args.config).read_text())
+    #: A caller may hand us a config by its pre-migration path (a historical
+    #: command line, a driver that transcribes one). Absolute paths and paths
+    #: that already exist are used as given.
+    cfg_path = Path(args.config)
+    if not cfg_path.is_absolute() and not cfg_path.is_file():
+        cfg_path = at(args.config)
+    cfg = json.loads(cfg_path.read_text())
     validate_train_config(cfg)
     set_determinism(cfg["seed"])
     device = resolve_device(cfg["device"])
-    out_dir = REPO_ROOT / cfg["out_dir"]
-    ckpt_root = out_dir / "checkpoints"
+    paths = effective_paths(cfg)
+    out_dir = paths["out_dir"]
+    ckpt_root = paths["checkpoints"]
 
     if args.resume:
         tag = args.resume
@@ -93,9 +139,9 @@ def main() -> None:
                 "choose a fresh out_dir"
             )
         resume_ckpt = None
-        model_path = REPO_ROOT / cfg["student_path"]
+        model_path = paths["student_path"]
 
-    logger = JsonlLogger(out_dir / "train_log.jsonl")
+    logger = JsonlLogger(paths["train_log"])
     from transformers import AutoModelForCausalLM
 
     # The tokenizer is a SEPARATE dependency from the student weights, declared
@@ -105,16 +151,23 @@ def main() -> None:
     # attempt 11 reached Stage 2 on that path and was saved only by the
     # teacher/student equality check further down. Resolved here, before any
     # data construction, so a bad contract costs nothing.
+    #: Resolved before the contract reads them, so a frozen config's
+    #: tokenizer source is found without the core learning anything about
+    #: relocation (P3). The contract still refuses an absent or mismatched
+    #: source; what it checks is the bytes, which do not move.
+    _tok_src = cfg.get("tokenizer_source")
     tokenizer, tokenizer_contract = resolve_training_tokenizer(
-        student_path=cfg["student_path"],
-        tokenizer_source=cfg.get("tokenizer_source"),
+        student_path=paths["student_path"],
+        tokenizer_source=paths.get("tokenizer_source", _tok_src),
         expected_sha256=cfg.get("tokenizer_sha256"),
         repo_root=REPO_ROOT)
-    logger.log("tokenizer_resolved", **tokenizer_contract)
+    logger.log("tokenizer_resolved", **tokenizer_contract,
+               declared_student_path=cfg["student_path"],
+               declared_tokenizer_source=_tok_src)
     source = ("packed token ladder" if cfg.get("packing") == "ladder"
               else "Stage 2 mixture")
     print(f"device {device}; loading {source} from {cfg['data_dir']} ...")
-    data_dir = REPO_ROOT / cfg["data_dir"]
+    data_dir = paths["data_dir"]
     # kd_scope "all_no_think" needs the think tokens; resolve them here rather
     # than in the core, which stays model-agnostic (P3). Single-token ids are
     # required so the span scan is unambiguous.
@@ -157,7 +210,7 @@ def main() -> None:
         train_stats, val_stats = train_blocks[3], val_blocks[3]
         for name, extra_dir in (cfg.get("extra_val") or {}).items():
             blocks = build_blocks(
-                tokenizer, REPO_ROOT / extra_dir, "val", cfg["block_len"], None,
+                tokenizer, paths[f"extra_val:{name}"], "val", cfg["block_len"], None,
                 packing=packing, seed=cfg["seed"],
             )
             extra_val_blocks[name] = (blocks[0], blocks[1], blocks[4])
@@ -206,7 +259,7 @@ def main() -> None:
     if cfg.get("extra_stream") is not None:
         from aadistill.data.extra_stream import load_extra_stream, stream_budget
 
-        extra_dir = REPO_ROOT / cfg["extra_stream"]["data_dir"]
+        extra_dir = paths["extra_stream"]
         print(f"loading extra KD stream from {extra_dir} ...")
         e_ids, e_content, extra_stream_meta = load_extra_stream(extra_dir)
         extra_stream_blocks = (e_ids, e_content)
@@ -259,7 +312,7 @@ def main() -> None:
             "data_manifests": {
                 p.name: sha256_file(p)
                 for d in [data_dir]
-                + [REPO_ROOT / e for e in (cfg.get("extra_val") or {}).values()]
+                + [v for k, v in paths.items() if k.startswith("extra_val:")]
                 for p in sorted(Path(d).glob("*.manifest.json"))
             },
             # A ladder run's data identity is the pack itself, not a mixture
