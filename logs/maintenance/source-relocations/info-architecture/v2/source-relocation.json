@@ -9,8 +9,8 @@
  "move_map_owner": "scripts/maintenance/migration/info_architecture_v2.py",
  "totals": {
   "tracked_files_relocated": 160,
-  "rename_pure": 149,
-  "rename_modified": 11,
+  "rename_pure": 146,
+  "rename_modified": 14,
   "relocation_pairs_added_to_historical_paths": 75
  },
  "_data_manifest": "data_pre_move.sha256, beside this record: the sha256 of every data/ file before the move, including the gitignored payloads",
@@ -400,7 +400,62 @@
   ],
   "_touched_must_be_empty": "every entry above is a frozen record this round changed in place — the list being empty IS the guard"
  },
+ "lineage_guard": {
+  "_contract": "Every sealed record, compared against the TRUE pre-migration base across all four record trees. A sealed record may differ only in markdown link TARGETS — navigation that necessarily moves when a document does — with visible labels and all other content byte-identical. Any other difference is a violation.",
+  "true_base": "35259b64e8a8813cb1cfad4c0bc456b53bc69dbc",
+  "sealed_records_inspected": 2876,
+  "byte_identical": 2871,
+  "link_targets_repaired_only": [
+   {
+    "record": "logs/shared/analyses/autoinit_pilot_proposal.md",
+    "now_at": "logs/stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md"
+   },
+   {
+    "record": "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_preregistration.md",
+    "now_at": "logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_preregistration.md"
+   },
+   {
+    "record": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md",
+    "now_at": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md"
+   },
+   {
+    "record": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md",
+    "now_at": "logs/stages/stage-1/phase_c2/plans/phase_c2_search1_plan.md"
+   },
+   {
+    "record": "logs/stages/stage-3/e8/plans/e8_preregistration.md",
+    "now_at": "logs/stages/stage-3/e8/plans/e8_preregistration.md"
+   }
+  ],
+  "violations": [],
+  "_violations_must_be_empty": "a non-empty list means sealed scientific evidence was edited by the migration"
+ },
+ "registration_pin_audit": {
+  "_contract": "every (record, config, pinned hash) triple outside a run directory, verified against the config at its resolved current location",
+  "triples_checked": 9,
+  "agree": 8,
+  "broken": [
+   {
+    "record": "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json",
+    "config": "configs/validation/c2_state_eval_certification.json",
+    "pinned": "e0864de579314ee4c10171695d4736a14a7eb04d92630f6f6c608631f1f04eb5",
+    "loaded": "396421031b59086965127c426ca958660e667036ce5de6034cb5822689f60be0"
+   }
+  ],
+  "known_pre_existing": {
+   "logs/stages/stage-1/phase_c2/validations/state-eval-certification/v1/authorization.json": "its inputs.config_sha256 (e0864de5…) and inputs.check_sha256 (537b3be9…) match NO blob at any commit in either file's history, under either sha256_file or sha256_json. The mismatch therefore PREDATES the migration and is not migration damage. Left as found: the record is a maintainer-granted authorization for a CLOSED engineering validation, and editing its recorded hashes to agree with the tree would rewrite a granted authorization — which is precisely what must not happen. Reported for the maintainer."
+  }
+ },
  "frozen_exceptions": [],
+ "_restored_to_true_base_content": {
+  "_why": "These were modified by ROUND 1 and restored, in round 3, to their content at the true pre-migration base. They therefore appear under `files` as `rename_modified` — this record's own base is the round-1 HEAD, against which a restoration IS a change — while being byte-identical to 35259b64. `lineage_guard` is the statement that matters for them.",
+  "records": [
+   "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+   "configs/stage3/e6b/e6b_p2_r2960k_sb.json",
+   "configs/stage3/e6b/provenance.json"
+  ],
+  "verified_byte_identical_to": "35259b64e8a8813cb1cfad4c0bc456b53bc69dbc"
+ },
  "files": [
   {
    "old": "configs/architecture/core_boundary_baseline.json",
@@ -1105,23 +1160,23 @@
   {
    "old": "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
    "new": "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json",
-   "kind": "rename_pure",
+   "kind": "rename_modified",
    "sha256_at_base": "ad25d66a4f1c44975039e0ea3cb225593088078ddcb857a154dc674d0cc6ad3d",
-   "sha256_now": "ad25d66a4f1c44975039e0ea3cb225593088078ddcb857a154dc674d0cc6ad3d"
+   "sha256_now": "4dcc5ce6674fb3d7b289461ca76a5e1d5c22e99c7bec174373972873d69fe9f6"
   },
   {
    "old": "configs/stage3/e6b/e6b_p2_r2960k_sb.json",
    "new": "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json",
-   "kind": "rename_pure",
+   "kind": "rename_modified",
    "sha256_at_base": "7b6589e1fd7680081ba2e8f1a24cedddb0b828d372ea86b2d1b2c162b8248eb0",
-   "sha256_now": "7b6589e1fd7680081ba2e8f1a24cedddb0b828d372ea86b2d1b2c162b8248eb0"
+   "sha256_now": "5fdaae2a66c0b63e372a5e8029e2260d8ece7e36ffcc3dc7c8a12e93b46b4112"
   },
   {
    "old": "configs/stage3/e6b/provenance.json",
    "new": "configs/stages/stage-3/e6b/provenance.json",
-   "kind": "rename_pure",
+   "kind": "rename_modified",
    "sha256_at_base": "9c7ac58cc2fe957fa54d285fe2d9af3024e7289cfcf0860689df3a4a35d64830",
-   "sha256_now": "9c7ac58cc2fe957fa54d285fe2d9af3024e7289cfcf0860689df3a4a35d64830"
+   "sha256_now": "fb5d7aa1690b4acf8bd757ca652ea3d0f8efd570fd589e63c5c442372fc630bf"
   },
   {
    "old": "configs/stage3/e7/artifacts.json",

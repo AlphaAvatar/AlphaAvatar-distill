@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -162,6 +163,174 @@ def scientific_identities() -> dict:
     }
 
 
+#: The TRUE pre-migration base. Round 1 started here; round 2's own base is
+#: the round-1 HEAD, which is why a round-1 collateral modification was
+#: invisible to a round-2-scoped check. Lineage questions are asked from here.
+TRUE_BASE = "35259b64e8a8813cb1cfad4c0bc456b53bc69dbc"
+
+#: A sealed record: its bytes are the evidence. Matched by path shape rather
+#: than enumerated, so a new experiment's registration is covered the day it
+#: is written.
+SEALED_RECORD = re.compile(
+    r"(/runs/|/decisions/|/plans/|registration|preregistration|proposal"
+    r"|provenance|closeout|authorization|grant)", re.I)
+
+#: ... except these, which match the shape and are not sealed evidence:
+#: live documentation and generated navigation.
+#: Spelled at BOTH ends, because the lineage walk sees a record's base-commit
+#: path while the tree holds its current one.
+NOT_SEALED = (
+    "docs/core-provenance.md",               # live core documentation
+    "docs/maintenance/core-provenance.md",
+    "logs/index.json", "logs/stages/index.json",
+)
+
+LINK_TARGET = re.compile(r"\]\([^)]*\)")
+
+
+def _link_normalized(text: str) -> str:
+    """The document with every markdown link TARGET blanked.
+
+    A relative link is navigation, not a fact: when the document moves, the
+    same string denotes a different file, so preserving the string destroys
+    the reference it was written to carry. Visible labels and all other prose
+    are evidence and must be byte-identical. Comparing normalized text is
+    what separates "its links were repaired" from "its content was edited" —
+    the distinction the 2026-10-09 lineage review turned on, where a config's
+    `_purpose` and `out_dir` VALUES had changed and no link was involved.
+    """
+    return LINK_TARGET.sub("](~)", text)
+
+
+def lineage_guard() -> dict:
+    """Has any SEALED record changed since the true pre-migration base?
+
+    Asked across the whole migration lineage and all four record trees, not
+    just one round and not just `logs/`. Round 1 modified two E6b arm configs
+    and their provenance as collateral of a path sweep; its own record covered
+    only the trees it set out to move, and round 2's guard started at the
+    round-1 HEAD, so nothing in either record could see it. The registered
+    `config_sha256` in E6b's prospective registration stopped matching the
+    configs it registered and no mechanism noticed for three rounds.
+    """
+    from shared.run_layout import resolve_historical
+
+    def resolve_historical_cached(rel: str) -> str:
+        return resolve_historical(rel, REPO)
+
+    changed, link_only, violations = 0, [], []
+    inspected = 0
+    for tree in ("configs", "data", "docs", "logs"):
+        for rel in tracked_at(TRUE_BASE, tree):
+            if not SEALED_RECORD.search(rel) or rel in NOT_SEALED:
+                continue
+            if resolve_historical_cached(rel) in NOT_SEALED:
+                continue
+            inspected += 1
+            new = resolve_historical_cached(rel)
+            path = REPO / new
+            old = git_bytes(TRUE_BASE, rel)
+            if not path.is_file():
+                violations.append({"record": rel, "state": "ABSENT",
+                                   "resolved_to": new})
+                continue
+            now = path.read_bytes()
+            if now == old:
+                continue
+            changed += 1
+            entry = {"record": rel, "now_at": new}
+            if rel.endswith(".md") and _link_normalized(
+                    old.decode(errors="ignore")) == _link_normalized(
+                    now.decode(errors="ignore")):
+                link_only.append(entry)
+            else:
+                entry["why_it_is_a_violation"] = (
+                    "content outside markdown link targets differs: this is "
+                    "an edit to sealed evidence, not a repaired reference")
+                violations.append(entry)
+    return {
+        "_contract": (
+            "Every sealed record, compared against the TRUE pre-migration "
+            "base across all four record trees. A sealed record may differ "
+            "only in markdown link TARGETS — navigation that necessarily "
+            "moves when a document does — with visible labels and all other "
+            "content byte-identical. Any other difference is a violation."),
+        "true_base": TRUE_BASE,
+        "sealed_records_inspected": inspected,
+        "byte_identical": inspected - changed,
+        "link_targets_repaired_only": link_only,
+        "violations": violations,
+        "_violations_must_be_empty": (
+            "a non-empty list means sealed scientific evidence was edited by "
+            "the migration"),
+    }
+
+
+def registration_pin_audit() -> dict:
+    """Every committed record that pins a config path and its hash.
+
+    This is the sweep that found the E6b defect generalizable: a prospective
+    registration's whole purpose is that a LIVE reader can check the config
+    it registered still hashes to the registered value. Run records are
+    excluded — their identities are anchored to their own commit, which
+    `git` preserves and a later tree is not expected to reproduce.
+    """
+    from aadistill.infrastructure.manifest import sha256_json
+    from shared.run_layout import resolve_historical
+
+    rows, broken = [], []
+    for p in sorted((REPO / "logs").rglob("*.json")):
+        if "/runs/" in p.as_posix():
+            continue
+        try:
+            doc = json.loads(p.read_text())
+        except (json.JSONDecodeError, OSError):
+            continue
+        stack = [doc]
+        while stack:
+            node = stack.pop()
+            if isinstance(node, dict):
+                cfg = node.get("config") or node.get("config_path")
+                sha = node.get("config_sha256")
+                if isinstance(cfg, str) and isinstance(sha, str) \
+                        and cfg.endswith(".json"):
+                    rel = str(p.relative_to(REPO))
+                    target = REPO / resolve_historical(cfg, REPO)
+                    if not target.is_file():
+                        broken.append({"record": rel, "config": cfg,
+                                       "state": "unresolvable"})
+                    else:
+                        got = sha256_json(json.loads(target.read_text()))
+                        rows.append((rel, cfg, got == sha))
+                        if got != sha:
+                            broken.append({"record": rel, "config": cfg,
+                                           "pinned": sha, "loaded": got})
+                stack.extend(node.values())
+            elif isinstance(node, list):
+                stack.extend(node)
+    return {
+        "_contract": ("every (record, config, pinned hash) triple outside a "
+                      "run directory, verified against the config at its "
+                      "resolved current location"),
+        "triples_checked": len(rows),
+        "agree": sum(1 for _, _, ok in rows if ok),
+        "broken": broken,
+        "known_pre_existing": {
+            "logs/stages/stage-1/phase_c2/validations/state-eval-certification/"
+            "v1/authorization.json": (
+                "its inputs.config_sha256 (e0864de5…) and inputs.check_sha256 "
+                "(537b3be9…) match NO blob at any commit in either file's "
+                "history, under either sha256_file or sha256_json. The "
+                "mismatch therefore PREDATES the migration and is not "
+                "migration damage. Left as found: the record is a "
+                "maintainer-granted authorization for a CLOSED engineering "
+                "validation, and editing its recorded hashes to agree with "
+                "the tree would rewrite a granted authorization — which is "
+                "precisely what must not happen. Reported for the maintainer."),
+        },
+    }
+
+
 def identity_guard(base: str) -> dict:
     sys.path.insert(0, str(REPO / "scripts/shared"))
     import source_sets
@@ -277,13 +446,31 @@ def main() -> int:
         "data_bytes_verified": data_bytes_verified(Path(args.data_manifest)),
         "scientific_identities_verified_unchanged": scientific_identities(),
         "identity_guard": identity_guard(args.base),
+        "lineage_guard": lineage_guard(),
+        "registration_pin_audit": registration_pin_audit(),
         "frozen_exceptions": list(decl.FROZEN_EXCEPTIONS),
+        "_restored_to_true_base_content": {
+            "_why": (
+                "These were modified by ROUND 1 and restored, in round 3, to "
+                "their content at the true pre-migration base. They therefore "
+                "appear under `files` as `rename_modified` — this record's own "
+                "base is the round-1 HEAD, against which a restoration IS a "
+                "change — while being byte-identical to 35259b64. "
+                "`lineage_guard` is the statement that matters for them."),
+            "records": [
+                "configs/stage3/e6b/e6b_p2_r2960k_sa.json",
+                "configs/stage3/e6b/e6b_p2_r2960k_sb.json",
+                "configs/stage3/e6b/provenance.json",
+            ],
+            "verified_byte_identical_to": TRUE_BASE,
+        },
         "files": files,
         "authorizes": "nothing",
     }
     body = json.dumps(doc, indent=1, ensure_ascii=False) + "\n"
     out = REPO / OUT
-    guard = doc["identity_guard"]["frozen_log_records_content_modified_this_round"]
+    guard = (doc["identity_guard"]["frozen_log_records_content_modified_this_round"]
+             + doc["lineage_guard"]["violations"])
     if guard:
         print("IDENTITY GUARD VIOLATIONS:")
         for g in guard:

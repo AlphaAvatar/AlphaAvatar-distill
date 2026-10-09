@@ -29,7 +29,7 @@
       "kd_scope": "all"
     },
     "parents_agree_on_everything_else": true,
-    "config_sha256": "b65458e741ad40e03ecbb14100036584d55db43f2f78edb4389a5b950696310c"
+    "config_sha256": "963aa00ead1676820abd66c1fced12a90424bb144c19b4dede8ea08b0e985002"
   },
   "e6b_p2_r2960k_sb": {
     "objective_parent": "configs/stage3/e4/e4_p2_r1600k_sb.json",
@@ -61,6 +61,6 @@
       "kd_scope": "all"
     },
     "parents_agree_on_everything_else": true,
-    "config_sha256": "fe8c211ed103dd71dbce623bee116dd22be9a4ee5c3e22d69d125c62e79dad60"
+    "config_sha256": "da71974841a39b96aceb05d6c39a2723a18624afc6c8c78630937d49ecfa1aef"
   }
 }

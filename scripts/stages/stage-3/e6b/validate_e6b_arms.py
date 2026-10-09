@@ -31,6 +31,21 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO_ROOT / "src"))
+sys.path.insert(0, str(REPO_ROOT / "scripts"))
+
+from shared.run_layout import resolve_historical  # noqa: E402
+
+
+def read(rel: str) -> Path:
+    """A path a HISTORICAL record spells, resolved to where the object is now.
+
+    The registration this validates was written before the 2026-10-08
+    information-architecture migration and names `configs/stage3/e6b/...`; its
+    spellings are the registered evidence and are never rewritten, so the
+    lookup resolves instead. Without this the validation failed to open the
+    very configs it exists to check.
+    """
+    return REPO_ROOT / resolve_historical(rel, REPO_ROOT)
 
 from aadistill.infrastructure.manifest import sha256_file, sha256_json  # noqa: E402
 
@@ -63,7 +78,7 @@ def main() -> None:
     for seed in ("sa", "sb"):
         alias = f"P2-2.96M-{seed}"
         arm = reg["arms"][alias]
-        cfg = json.loads((REPO_ROOT / arm["config"]).read_text())
+        cfg = json.loads(read(arm["config"]).read_text())
         e1 = json.loads((REPO_ROOT / f"configs/stages/stage-3/e1/e1_r2960k_{seed}_pca.json").read_text())
         p2 = json.loads((REPO_ROOT / f"configs/stages/stage-3/e4/e4_p2_r1600k_{seed}.json").read_text())
 
@@ -105,7 +120,7 @@ def main() -> None:
             failures.append(f"{alias}: objective is not the registered CE-heavy one")
         report["arms"][alias] = row
 
-    init = REPO_ROOT / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors"
+    init = read("artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/model.safetensors")
     if init.is_file():
         got = sha256_file(init)
         report["stage1_init_sha256"] = got
@@ -117,7 +132,7 @@ def main() -> None:
         report["stage1_init_matches"] = None
 
     # Realized data, recomputed here rather than trusted from the registration.
-    pack = REPO_ROOT / "artifacts/stage3/ladder_uniform_probe"
+    pack = read("artifacts/stage3/ladder_uniform_probe")
     if (pack / "blocks.npz").is_file():
         import torch
         from aadistill.data.ladder import ladder_blocks

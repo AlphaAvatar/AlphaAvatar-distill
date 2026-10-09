@@ -41,6 +41,17 @@ SEEDS = ("sa", "sb")
 OBJECTIVE_PARENT = "configs/stage3/e4/e4_p2_r1600k_{seed}.json"
 RUNG_PARENT = "configs/stage3/e1/e1_r2960k_{seed}_pca.json"
 
+#: EVERY serialized value below keeps its freeze-time spelling, because
+#: `logs/stages/stage-3/e6b/analyses/e6b_registration.json` PROSPECTIVELY
+#: registered each arm's `config_sha256` — 963aa00e… / da719748… — and a
+#: registered identity is the thing a prospective registration exists to fix.
+#: Round 1 of the 2026-10-08 migration swept these two strings along with the
+#: file locations, this builder's own regenerate-identically test then rewrote
+#: both arms, and the registered hashes stopped matching the configs they
+#: registered. Where the files LIVE is resolved at the read boundary instead.
+RECORDED_BUILDER = "scripts/training/build_e6b_configs.py"
+RECORDED_OUT_PREFIX = "artifacts/stage3"
+
 # Taken from the RUNG parent: the data scale and the quantities it mechanically
 # implies. `schedule` carries total_steps and warmup, both derived from the block
 # count; the two cadences are derived from total_steps.
@@ -78,12 +89,12 @@ def build(seed: str) -> tuple[dict, dict]:
     for k in FROM_RUNG:                   # the rung and what it implies
         cfg[k] = rung[k]
     cfg["run_name"] = f"e6b_p2_r2960k_{seed}"
-    cfg["out_dir"] = f"artifacts/stages/stage-3/e6b_p2_r2960k_{seed}"
+    cfg["out_dir"] = f"{RECORDED_OUT_PREFIX}/e6b_p2_r2960k_{seed}"
     cfg["_purpose"] = (
         "Experiment 6b (objective x data-scale interaction): the P2-CE-heavy "
         "objective (ce 1.0 / kd 0.25, kd_scope all) trained at the strictly "
         f"nested 2.96M rung. Composed mechanically by "
-        f"scripts/stages/stage-3/e6b/build_e6b_configs.py from e4_p2_r1600k_{seed} "
+        f"{RECORDED_BUILDER} from e4_p2_r1600k_{seed} "
         f"(objective and everything else) and e1_r2960k_{seed}_pca (rung, "
         "schedule, cadences). Trains from the Stage 1 PCA init, NOT continued "
         "from P2-1.60M. The only intended difference from e1_r2960k_"

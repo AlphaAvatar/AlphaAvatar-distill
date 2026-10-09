@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T09:47:47+00:00",
+  "created_utc": "2026-10-09T12:47:33+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3311,
-    "bytes": 121175651,
+    "bytes": 121178973,
     "by_disposition": {
       "keep_canonical": 222,
       "keep_immutable": 2847,
@@ -7180,6 +7180,7 @@
         "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "scripts/maintenance/architecture/core_ownership.py",
         "scripts/maintenance/migration/info_architecture_v2.py",
+        "scripts/maintenance/migration/write_relocation_record_v2.py",
         "src/aadistill/evaluation/protocol_field.py",
         "src/aadistill/infrastructure/budget.py",
         "src/aadistill/infrastructure/bundle_transport.py",
@@ -7199,6 +7200,7 @@
       "referenced_by_executable": [
         "scripts/maintenance/architecture/core_ownership.py",
         "scripts/maintenance/migration/info_architecture_v2.py",
+        "scripts/maintenance/migration/write_relocation_record_v2.py",
         "src/aadistill/evaluation/protocol_field.py",
         "src/aadistill/infrastructure/budget.py",
         "src/aadistill/infrastructure/bundle_transport.py",
@@ -7217,7 +7219,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/architecture/core_ownership.py, scripts/maintenance/migration/info_architecture_v2.py, src/aadistill/evaluation/protocol_field.py"
+      "disposition_reason": "named by scripts/maintenance/architecture/core_ownership.py, scripts/maintenance/migration/info_architecture_v2.py, scripts/maintenance/migration/write_relocation_record_v2.py"
     },
     {
       "path": "docs/shared/POD_SCRIPTS.md",
@@ -8922,8 +8924,8 @@
     },
     {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-      "size_bytes": 70802,
-      "sha256": "2843ed50742db58c09297d11b887c760ad82768ddf7e1fe8cbcf6f829d4e7052",
+      "size_bytes": 74124,
+      "sha256": "31c71f745cb3a61b57a2475ce320a457ae7ba445174709912aa7a02b21671fe5",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -15007,6 +15009,7 @@
       "referenced_by": [
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "scripts/stages/stage-1/phase_a/write_preregistration.py"
       ],
       "referenced_by_executable": [
@@ -15158,6 +15161,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/source-relocations/info-architecture/v1/source-relocation.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "scripts/maintenance/migration/info_architecture.py"
       ],
       "referenced_by_executable": [
@@ -22816,7 +22820,8 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/index.json",
-        "logs/maintenance/inventories/log_inventory.json"
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
       ],
       "referenced_by_executable": [],
       "duplicate_of": null,
@@ -28489,6 +28494,7 @@
       "referenced_by": [
         "configs/stages/stage-1/phase_c2/authorization.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
@@ -29557,6 +29563,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1/evidence/evidence.json",
         "logs/stages/stage-1/c2_state_eval_cert/runs/c2_state_eval_cert_20260919_s1_dry/evidence/evidence.json",
@@ -56194,6 +56201,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/log_inventory.json",
         "scripts/stages/stage-3/e6b/analyze_e6b.py",
+        "scripts/stages/stage-3/e6b/build_e6b_configs.py",
         "scripts/stages/stage-3/e6b/e6b_driver.py",
         "scripts/stages/stage-3/e6b/e6b_setup.sh",
         "scripts/stages/stage-3/e6b/register_e6b.py",
@@ -56201,6 +56209,7 @@
       ],
       "referenced_by_executable": [
         "scripts/stages/stage-3/e6b/analyze_e6b.py",
+        "scripts/stages/stage-3/e6b/build_e6b_configs.py",
         "scripts/stages/stage-3/e6b/e6b_driver.py",
         "scripts/stages/stage-3/e6b/e6b_setup.sh",
         "scripts/stages/stage-3/e6b/register_e6b.py",
@@ -56208,7 +56217,7 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/stages/stage-3/e6b/analyze_e6b.py, scripts/stages/stage-3/e6b/e6b_driver.py, scripts/stages/stage-3/e6b/e6b_setup.sh"
+      "disposition_reason": "named by scripts/stages/stage-3/e6b/analyze_e6b.py, scripts/stages/stage-3/e6b/build_e6b_configs.py, scripts/stages/stage-3/e6b/e6b_driver.py"
     },
     {
       "path": "logs/stages/stage-3/e6b/analyses/e6b_report.md",
@@ -56736,6 +56745,7 @@
         "logs/index.json",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/index.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/stages/stage-3/e8/analyze_e8.py",
