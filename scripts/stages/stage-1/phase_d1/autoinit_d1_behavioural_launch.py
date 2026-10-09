@@ -152,7 +152,8 @@ def driver_command(ctx: Any, plan: Any) -> str:
            f"--arm-root '{M.POD_ARM_ROOT}' "
            f"--replay-plan '{REPO}/{M.PLAN_REL}' "
            f"--status '{STATUS}' "
-           f"--device cuda")
+           f"--device cuda "
+           f"--image-digest '{ctx.image_digest}'")
     if rung == "confirmation":
         cmd += f" --advancing-candidate '{ctx.auth.advancing_candidate}'"
     return cmd
@@ -265,9 +266,181 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
             f"secure_probe_evidence: {type(exc).__name__}: {exc}")
 
 
+#: Where a probe's training writes on the pod, and where a restore puts a
+#: preserved probe back. Named once; the driver's `model_root` is the same
+#: expression over its own REPO_ROOT.
+POD_PROBE_ROOT = f"{REPO}/artifacts/stages/stage-3/d1_behavioural"
+
+
+def trained_unscored_probes(ctx: SessionContext) -> list[dict] | None:
+    """Probes that FINISHED TRAINING and were not scored, or None if unknown.
+
+    P8.4 state 2: trained + not validly scored means the WEIGHTS are owed --
+    scoring genuinely consumes them, and the protocol forbids retraining a
+    frozen unit for a different outcome. A probe that scored is state 1 and
+    its weights are deliberately NOT fetched.
+    """
+    for path in evidence_locations(ctx):
+        if not path.is_file():
+            continue
+        try:
+            record = json.loads(path.read_text())
+        except json.JSONDecodeError:
+            continue
+        return [p for p in record.get("probes", [])
+                if p.get("trained") and not p.get("scored")
+                and p.get("model_dir")]
+    return None
+
+
+def preserve_trained_unscored(ctx: SessionContext) -> None:
+    """Fetch every trained-but-unscored probe's checkpoint off-pod. Verified.
+
+    DOWNLOAD, which is the direction that works: the search secured four
+    1.11 GiB products this way, and it is the dev-box UPLINK that cannot carry
+    a checkpoint. Each arrival is re-hashed against the `trained_sha256` the
+    driver recorded the moment training completed, and the identity travels
+    beside the bytes as `preserved_identity.json` -- the sidecar a replacement
+    pod's resume re-checks before scoring them.
+
+    Idempotent and MUST NOT raise into the poll/teardown path.
+    """
+    import hashlib
+    import shutil
+
+    try:
+        units = trained_unscored_probes(ctx)
+        if not units:
+            return
+        store = Path(getattr(ctx.args, "ckpt_store", None)
+                     or Path(ctx.args.scr) / "products") / "trained_unscored"
+        preserved = ctx.evidence.setdefault("trained_unscored_preserved", {})
+        for unit in units:
+            probe_id = str(unit.get("probe_id") or "")
+            if not probe_id or preserved.get(probe_id, {}).get("verified"):
+                continue
+            remote_model = str(unit["model_dir"])
+            tag = Path(remote_model).parent.name
+            remote_root = f"{POD_PROBE_ROOT}/{probe_id}"
+            dest = store / probe_id
+            (dest / "checkpoints" / tag).mkdir(parents=True, exist_ok=True)
+            rcs = {
+                "run_completion.json": _scp_from_pod(
+                    ctx, f"{remote_root}/run_completion.json",
+                    dest / "run_completion.json"),
+                "latest.txt": _scp_from_pod(
+                    ctx, f"{remote_root}/checkpoints/latest.txt",
+                    dest / "checkpoints" / "latest.txt"),
+                "model": _scp_from_pod(
+                    ctx, remote_model, dest / "checkpoints" / tag,
+                    recursive=True,
+                    limit_min=int(getattr(ctx.args, "ckpt_fetch_limit_min",
+                                          45))),
+            }
+            shard = dest / "checkpoints" / tag / "model" / "model.safetensors"
+            #: scp -r of `.../model` INTO `checkpoints/<tag>/` lands at
+            #: `checkpoints/<tag>/model/` -- create the tag dir first so the
+            #: copy nests rather than renames.
+            if not shard.is_file():
+                flat = dest / "checkpoints" / tag / "model.safetensors"
+                if flat.is_file():
+                    (dest / "checkpoints" / tag / "model").mkdir(
+                        parents=True, exist_ok=True)
+                    for item in list((dest / "checkpoints" / tag).iterdir()):
+                        if item.name != "model":
+                            shutil.move(str(item),
+                                        str(dest / "checkpoints" / tag
+                                            / "model" / item.name))
+            want = str(unit.get("trained_sha256") or "")
+            got = (hashlib.sha256(shard.read_bytes()).hexdigest()
+                   if shard.is_file() else None)
+            verified = bool(want) and got == want
+            row = {"rcs": rcs, "trained_sha256": want,
+                   "arrived_sha256": got, "verified": verified,
+                   "dest": str(dest)}
+            preserved[probe_id] = row
+            if verified:
+                (dest / "preserved_identity.json").write_text(json.dumps({
+                    "schema": "aadistill.phase_d1.preserved_trained_probe/v1",
+                    "probe_id": probe_id,
+                    "trained_sha256": want,
+                    "tag": tag,
+                    "_reuse_is_not_authorized_by_preservation": (
+                        "P8.2.1: saving this checkpoint authorizes nothing "
+                        "about reusing it. Whether a replacement session may "
+                        "resume it at evaluation is the frozen protocol's "
+                        "rule (P8.4 state 2), enforced by the driver's "
+                        "identity-checked resume."),
+                }, indent=1) + "\n")
+                ctx.say(f"  trained-unscored {probe_id}: preserved and "
+                        f"verified ({row['arrived_sha256'][:12]})")
+            else:
+                ctx.say(f"  trained-unscored {probe_id}: NOT verified "
+                        f"(rcs={rcs}, want={want[:12] if want else None}, "
+                        f"got={str(got)[:12]})")
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("on_poll_errors", []).append(
+            f"preserve_trained_unscored: {type(exc).__name__}: {exc}")
+
+
+def restore_trained_probes(ctx: SessionContext) -> bool:
+    """Put preserved trained-unscored probes back on a REPLACEMENT pod.
+
+    The other half of P8.4 state 2. `--restore-trained` names a local
+    directory of preserved probes (the layout `preserve_trained_unscored`
+    writes); each is pushed to the pod's probe root before the driver starts,
+    sidecar included, and the driver's `trained_checkpoint_state` then
+    re-hashes the shard against the sidecar before resuming at evaluation.
+    `False` aborts the session -- a restore that half-arrived must not
+    silently retrain the probe it was supposed to resume.
+    """
+    root = str(getattr(ctx.args, "restore_trained", "") or "").strip()
+    if not root:
+        return True
+    source = Path(root)
+    probes = sorted(p for p in source.iterdir() if p.is_dir()) \
+        if source.is_dir() else []
+    if not probes:
+        ctx.say(f"  --restore-trained {root}: nothing to restore")
+        return True
+    import subprocess as sp
+
+    for probe_dir in probes:
+        sidecar = probe_dir / "preserved_identity.json"
+        if not sidecar.is_file():
+            ctx.say(f"  restore {probe_dir.name}: no preserved_identity.json; "
+                    "refusing to push unverifiable bytes")
+            return False
+        remote_root = f"{POD_PROBE_ROOT}/{probe_dir.name}"
+        sp.run(["ssh", "-p", str(ctx.target.port),
+                "-o", "StrictHostKeyChecking=no",
+                "-o", "UserKnownHostsFile=/dev/null",
+                f"root@{ctx.host}", f"mkdir -p {remote_root}"],
+               capture_output=True, timeout=120)
+        #: PUSH, deliberately without the LocalAsset machinery: its 600 s
+        #: per-asset cap exists for small science inputs, and a 1.2 GiB
+        #: checkpoint at the measured ~0.72 MB/s uplink is ~28 minutes --
+        #: a priced contingency, not a routine transfer.
+        rc = sp.run(["scp", "-r", "-P", str(ctx.target.port),
+                     "-o", "StrictHostKeyChecking=no",
+                     "-o", "UserKnownHostsFile=/dev/null",
+                     *[str(p) for p in sorted(probe_dir.iterdir())],
+                     f"root@{ctx.host}:{remote_root}/"],
+                    capture_output=True, timeout=None).returncode
+        ctx.evidence.setdefault("trained_unscored_restored", {})[
+            probe_dir.name] = {"rc": rc, "from": str(probe_dir)}
+        if rc != 0:
+            ctx.say(f"  restore {probe_dir.name}: scp rc={rc}; aborting "
+                    "before the driver can retrain a preserved probe")
+            return False
+        ctx.say(f"  restored trained-unscored probe {probe_dir.name}")
+    return True
+
+
 def fetch_probe_evidence(ctx: SessionContext) -> list:
     """Closeout sweep: anything the poll loop did not already secure."""
     secure_probe_evidence(ctx)
+    preserve_trained_unscored(ctx)
     return [
         {"probe_id": probe_id, **state}
         for probe_id, state in sorted(
@@ -295,9 +468,37 @@ def probes_evidence_secured(ctx: SessionContext,
             "the second is how a pod holding finished work gets deleted with "
             f"every check green. Looked in: "
             f"{[str(p) for p in evidence_locations(ctx)]}")
+    #: THE TRAINED-BUT-UNSCORED WEIGHTS FIRST (P8.4 state 2), and BEFORE the
+    #: "nothing scored" early return: the session that dies during its FIRST
+    #: probe's generation has zero scored probes and one trained checkpoint,
+    #: and that is precisely the pod that must not be deleted early. Scoring
+    #: genuinely consumes these weights and the protocol forbids retraining a
+    #: frozen unit for a different outcome.
+    unscored = trained_unscored_probes(ctx)
+    if unscored is None:
+        return False, (
+            "the driver evidence could not be read while deciding whether any "
+            "trained-but-unscored checkpoint is owed; refusing teardown on an "
+            "unknown")
+    preserved = ctx.evidence.get("trained_unscored_preserved") or {}
+    unpreserved = sorted(
+        str(u.get("probe_id")) for u in unscored
+        if not preserved.get(str(u.get("probe_id")), {}).get("verified"))
+    if unpreserved:
+        return False, (
+            f"{len(unscored)} probe(s) finished TRAINING without a valid "
+            f"score and {unpreserved} are not preserved off-pod. P8.4 state "
+            "2: their weights are what a resumed scoring consumes, and "
+            "retraining them for a different outcome is forbidden -- the pod "
+            "holds the only copy.")
+
     want = {str(u.get("probe_id")) for u in units if u.get("probe_id")}
     if not want:
-        return True, "the driver scored no probe, so none is owed off-pod"
+        note = "the driver scored no probe, so no scored evidence is owed"
+        if unscored:
+            note += (f"; {len(unscored)} trained-unscored checkpoint(s) "
+                     "preserved and identity-verified")
+        return True, note
     secured = ctx.evidence.get("probe_evidence_secured") or {}
     missing = sorted(
         probe_id for probe_id in want
@@ -309,11 +510,15 @@ def probes_evidence_secured(ctx: SessionContext,
             f"their result and per-sample rows off-pod; missing {missing}. "
             "Deleting the pod now would destroy measurements this session "
             "already paid for.")
+
     no_generations = sorted(
         probe_id for probe_id in want
         if not secured.get(probe_id, {}).get("generations"))
     note = (f"all {len(want)} scored probes' results and per-sample rows "
             "off-pod")
+    if unscored:
+        note += (f"; {len(unscored)} trained-unscored checkpoint(s) preserved "
+                 "and identity-verified")
     if no_generations:
         note += (f"; generations for {no_generations} rely on the required "
                  "final archive")
@@ -813,6 +1018,12 @@ def spec(args) -> SessionSpec:
             uv_max_seconds=getattr(args, "uv_max_s", 1500),
             tests_max_seconds=getattr(args, "tests_max_s", 2700)),
         driver_command=driver_command,
+        #: The replacement-resource handoff for P8.4 state 2, AFTER setup and
+        #: BEFORE the driver: preserved trained-unscored probes are pushed
+        #: back so the driver resumes them at evaluation instead of
+        #: retraining. Returns False -- and the runner tears down -- on a
+        #: half-arrived restore.
+        materialize_inputs=restore_trained_probes,
         driver_job_id="autoinit_d1_behavioural_driver",
         status_path=STATUS,
         run_log_path=RUN_LOG,
@@ -889,6 +1100,17 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--uv-max-s", type=int, default=1500)
     ap.add_argument("--tests-max-s", type=int, default=2700)
+    ap.add_argument("--ckpt-store", default=None,
+                    help="where trained-but-unscored probes are preserved on "
+                         "a failure path; defaults to <scr>/products")
+    ap.add_argument("--ckpt-fetch-limit-min", type=int, default=45,
+                    help="per-checkpoint preservation transfer timeout")
+    ap.add_argument("--restore-trained", default=None,
+                    help="a directory of preserved trained-unscored probes "
+                         "(the layout preserve_trained_unscored writes) to "
+                         "push back onto a REPLACEMENT pod before the driver "
+                         "starts; the driver then resumes each at evaluation "
+                         "after re-hashing it against its sidecar")
     ap.add_argument("--dry-run", action="store_true",
                     help="run every $0 gate through the real SessionRunner "
                          "and stop before provider creation; create nothing")

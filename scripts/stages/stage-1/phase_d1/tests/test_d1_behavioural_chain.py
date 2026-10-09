@@ -357,6 +357,7 @@ class TestTheLauncherDeclaresTheSessionCompletely:
         class _Ctx:
             auth = _Auth()
             args = _Args()
+            image_digest = "sha256:test"
 
         command = launcher.driver_command(_Ctx(), None)
         assert f"--status '{launcher.STATUS}'" in command
@@ -380,6 +381,7 @@ class TestTheLauncherDeclaresTheSessionCompletely:
         class _Ctx:
             auth = _Auth()
             args = _Args()
+            image_digest = "sha256:test"
 
         command = launcher.driver_command(_Ctx(), None)
         tokens = shlex.split(command)
@@ -462,7 +464,7 @@ class TestTheLauncherDeclaresTheSessionCompletely:
         (relay / "d1_behavioural.json").write_text(json.dumps({"probes": []}))
         ctx.evidence = {}
         ok, why = launcher.probes_evidence_secured(ctx, [])
-        assert ok and "none is owed" in why
+        assert ok and "no scored evidence is owed" in why
 
 
 class TestTheMaterializationModuleRefusesWhatItMust:
@@ -606,17 +608,17 @@ class TestTheIssuerCommandRefusesBeforeItQuotes:
             if action.required:
                 assert action.type in (None, str, Path), action.option_strings
 
-    def test_confirmation_reads_the_candidate_from_the_record(self, tmp_path):
+    def test_a_bare_selection_record_is_no_longer_accepted(self, tmp_path):
+        """The 2026-10-10 review's confirmation obligation: an arbitrary JSON
+        file containing `advanced: true` and an arm label is not evidence.
+        The full validation (schema, rung, contract hash, recomputed
+        selection) lives in TestTheConfirmationCandidateIsRecomputedNotTrusted."""
         issuer = self._issuer()
         record = tmp_path / "selection.json"
         record.write_text(json.dumps({
             "selection": {"advanced": True, "arm": "q2",
                           "outcome": "ONE_CANDIDATE_ADVANCES"}}))
-        assert issuer.advanced_arm_from(record) == "q2"
-        record.write_text(json.dumps({
-            "selection": {"advanced": None,
-                          "outcome": "NO_CANDIDATE_ADVANCES"}}))
-        with pytest.raises(SystemExit, match="advanced nobody"):
+        with pytest.raises(SystemExit, match="schema"):
             issuer.advanced_arm_from(record)
 
 
@@ -657,3 +659,416 @@ class TestTheSweepContractIsExpressible:
         assert "allows_recovery_training is True" in branch
         assert "allows_beam_search is False" in branch
         assert "automatic_followon_start is False" in branch
+
+
+class TestTheProducersOwnCheckpointLayoutIsWhatConsumersRead:
+    """The review finding: `materialize_fixed_path` writes a path's final
+    checkpoint under `workdir/steps/{i:02d}_{kind}/`, and the first version of
+    this chain verified `arm_root/<state_id>/config.json` -- a directory the
+    producer never writes -- AFTER paying for the materialization. These
+    exercise the actual layout end to end, not declarations about it."""
+
+    def test_final_checkpoint_is_the_last_step_directory(self, tmp_path):
+        dest = tmp_path / "state"
+        for index, kind in enumerate(("ffn", "depth", "residual_width",
+                                      "attention")):
+            (dest / "steps" / f"{index:02d}_{kind}").mkdir(parents=True)
+            (dest / "steps" / f"{index:02d}_{kind}" / "config.json"
+             ).write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found.name == "03_attention"
+
+    def test_a_partial_path_is_not_adopted(self, tmp_path):
+        dest = tmp_path / "state"
+        for index, kind in enumerate(("ffn", "depth")):
+            (dest / "steps" / f"{index:02d}_{kind}").mkdir(parents=True)
+            (dest / "steps" / f"{index:02d}_{kind}" / "config.json"
+             ).write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert found is not None and not complete
+
+    def test_a_flattened_restore_is_recognized(self, tmp_path):
+        dest = tmp_path / "state"
+        dest.mkdir()
+        (dest / "config.json").write_text("{}")
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found == dest
+
+    def test_nothing_there_is_nothing(self, tmp_path):
+        assert M.final_checkpoint_in(tmp_path / "absent", n_steps=4) == \
+            (None, False)
+
+    def test_the_step_layout_verifies_through_the_real_consumer(self,
+                                                                tmp_path):
+        """PRODUCER -> CONSUMER on real bytes: a pod-shaped
+        `arm_root/<state_id>/steps/03_attention` holding q1's actual secured
+        checkpoint must be found by the layout resolver AND pass the identity
+        gate at the FOUND path -- the exact seam the session would have died
+        on."""
+        q1 = B.arms(REPO)[0]
+        dest = tmp_path / q1.state_id
+        (dest / "steps").mkdir(parents=True)
+        (dest / "steps" / "03_attention").symlink_to(q1.checkpoint_dir)
+        found, complete = M.final_checkpoint_in(dest, n_steps=4)
+        assert complete and found.name == "03_attention"
+        identity = M._verify_bytes_at(found, dict(q1.identities),
+                                      what="q1-layout-test")
+        assert identity["artifact_digest"] == q1.identities["artifact_digest"]
+        #: And the CONTRACT verification consumes the resolved path, not the
+        #: guessed one, without moving the location-free hash.
+        resolved = {a.arm_id: a.checkpoint_dir for a in B.arms(REPO)
+                    if a.checkpoint_dir}
+        resolved["q1"] = str(found)
+        contract = B.session_contract("screening", REPO,
+                                      resolved_paths=resolved)
+        assert sha256_json(contract) == sha256_json(
+            B.session_contract("screening", REPO))
+
+    def test_resolution_consumes_the_rows_checkpoint_path(self, tmp_path):
+        inner = tmp_path / "steps" / "03_attention"
+        inner.mkdir(parents=True)
+        (inner / "config.json").write_text("{}")
+        rows = {"arms": [
+            *[{"arm": a.arm_id, "state_id": a.state_id,
+               "checkpoint_path": a.checkpoint_dir}
+              for a in B.arms(REPO) if not a.is_incumbent],
+            {"arm": "B", "checkpoint_path": str(inner)},
+        ]}
+        out = M.resolve_arm_checkpoints("screening", tmp_path, rows,
+                                        repo_root=REPO)
+        assert out["B"] == str(inner)
+        assert Path(out["q1"]).is_dir()
+
+
+class TestTheIncumbentRebuildsUnderItsHistoricalProtocol:
+    """A3's terminal finding: canonical B (53e30566...) reproduces exactly
+    only under A_bsz1. A rebuild under DEFAULT_EXECUTION (mbs=4) or the
+    candidates' bsz=3 policy is a THIRD protocol nothing measured B under."""
+
+    def test_the_execution_is_a_bsz1_read_from_its_owner(self):
+        from stages.phase_a3.a_bsz3 import A_BSZ1
+
+        execution = M.incumbent_execution()
+        assert execution is A_BSZ1
+        assert execution.as_fingerprint() == {
+            "micro_batch_size": 1,
+            "calibration_batch_packing": "original_order_v1"}
+
+    def test_materialize_incumbent_passes_it_to_the_producer(self,
+                                                             monkeypatch,
+                                                             tmp_path):
+        import aadistill.initialization.planning.fixed_path as FP
+
+        captured = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def capture(spec, **kwargs):
+            captured["execution"] = kwargs.get("execution")
+            raise _Stop()
+
+        monkeypatch.setattr(FP, "materialize_fixed_path", capture)
+        with pytest.raises(_Stop):
+            M.materialize_incumbent(tmp_path / "B", device="cuda",
+                                    identities={"artifact_digest": "x" * 64},
+                                    repo_root=REPO)
+        from stages.phase_a3.a_bsz3 import A_BSZ1
+
+        assert captured["execution"] is A_BSZ1
+
+
+class TestFailureClassificationSeparatesHarnessFromScience:
+    """The stop condition is narrower than 'the comparison failed': only an
+    identity discrepancy AFTER the inputs were demonstrably reproduced is
+    scientific. A missing path or plan leaf is P12.1 ordinary engineering."""
+
+    def test_a_missing_plan_leaf_is_engineering_not_identity(self, tmp_path):
+        plan = json.loads((REPO / M.PLAN_REL).read_text())
+        plan["leaves"] = plan["leaves"][:3]
+        path = tmp_path / "short.json"
+        path.write_text(json.dumps(plan))
+        with pytest.raises(M.D1MaterializeError) as excinfo:
+            M.materialize_arms("screening", plan_path=path,
+                               arm_root=tmp_path / "arms", device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+        assert not isinstance(excinfo.value, M.D1ArmIdentityMismatch)
+
+    def test_a_mid_path_digest_divergence_is_the_identity_class(
+            self, monkeypatch, tmp_path):
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        def diverge(spec, **kwargs):
+            raise FP.FixedPathDigestMismatch(0, "step 0 label", "y" * 64,
+                                             "x" * 64, {})
+
+        monkeypatch.setattr(FP, "materialize_fixed_path", diverge)
+        plan = M.load_plan(REPO / M.PLAN_REL)
+        leaf = R.leaves_from_plan(plan)[0]
+        with pytest.raises(M.D1ArmIdentityMismatch, match="verified"):
+            M.materialize_candidate(leaf, tmp_path / "x", device="cpu",
+                                    repo_root=REPO)
+
+    def test_the_driver_marks_mismatch_only_for_the_identity_class(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert "except M.D1ArmIdentityMismatch:" in src
+        block = src.split("except M.D1ArmIdentityMismatch:", 1)[1]
+        assert "mismatch = True" in block.split("record[", 1)[0]
+        #: And the base class is NOT caught into the mismatch flag.
+        assert "except M.D1MaterializeError:" not in src
+
+
+class TestGenerationAdmissionGuardsTheScoringPath:
+
+    @staticmethod
+    def _driver():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        spec = importlib.util.spec_from_file_location("_d1b_drv3", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_scoring_contract_digests_the_rungs_own_scorer(self):
+        driver = self._driver()
+        screening = driver.d1_scoring_contract("screening", REPO)
+        confirmation = driver.d1_scoring_contract("confirmation", REPO)
+        assert screening["contract"].startswith("c1_confirmation_scoring@")
+        assert screening["digest"] != confirmation["digest"], (
+            "two rungs with two pinned scorers must not share one digest")
+        names = {e["path"] for e in screening["files"]}
+        assert ("scripts/stages/stage-1/phase_d1/score_d1_screening.py"
+                in names)
+
+    def test_the_battery_triple_is_the_familys_own_identity(self):
+        driver = self._driver()
+        contract = B.session_contract("screening", REPO)
+        fields = driver.battery_protocol_fields(contract)
+        battery = contract["battery"]
+        assert fields["battery_artifact"] == \
+            f"{battery['family_id']}:{battery['role']}"
+        assert fields["battery_manifest_sha256"] == \
+            battery["item_ids_sha256"]
+        assert fields["battery_content_sha256"] == \
+            battery["family_content_id"]
+
+    def test_admission_refuses_a_drifted_protocol_before_scoring(
+            self, tmp_path):
+        """A probe whose summaries cannot establish the protocol is refused
+        -- fail-closed, through the real observer."""
+        driver = self._driver()
+        gen_dir = tmp_path / "gen"
+        gen_dir.mkdir()
+        (gen_dir / "code.json").write_text(json.dumps({
+            "label": "p", "prompts": "code"}))
+        scoring = {"contract": "c1_confirmation_scoring@v1", "digest": "d"}
+        fields = {"battery_artifact": "a", "battery_manifest_sha256": "m",
+                  "battery_content_sha256": "c"}
+
+        class _Attested:
+            evaluation_protocol_hash = "x"
+
+        with pytest.raises(Exception) as excinfo:
+            driver.admit_generation("p", gen_dir, attested=_Attested(),
+                                    scoring=scoring, battery_fields=fields,
+                                    out=tmp_path)
+        assert "material generation field" in str(excinfo.value) or \
+            "not comparable" in str(excinfo.value)
+
+    def test_the_driver_admits_before_it_scores_and_binds_provenance(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert src.index("build_attested_protocol(") < src.index(
+            '"--prompts"'), "the attestation must exist before generation"
+        assert src.index("admit_generation(\n") < src.index(
+            '"--trained-run"'), "admission must precede scoring"
+        assert '"--trained-run"' in src
+        assert '"--generation-fingerprint"' in src
+
+
+class TestTrainedButUnscoredProbesSurviveAndResume:
+    """P8.2.1 + P8.4 state 2 together: a trained, not-validly-scored probe's
+    weights are preserved at the moment the later stage fails, and a resumed
+    session scores them rather than retraining the frozen unit."""
+
+    @staticmethod
+    def _model_root(tmp_path, *, sha=None, sidecar_sha=None):
+        import hashlib
+
+        root = tmp_path / "probe"
+        model = root / "checkpoints" / "step100" / "model"
+        model.mkdir(parents=True)
+        (model / "config.json").write_text("{}")
+        shard = b"not-a-real-shard"
+        (model / "model.safetensors").write_bytes(shard)
+        (root / "checkpoints" / "latest.txt").write_text("step100")
+        (root / "run_completion.json").write_text(json.dumps(
+            {"final_step": 100}))
+        if sidecar_sha is not None:
+            (root / "preserved_identity.json").write_text(json.dumps(
+                {"trained_sha256": sidecar_sha}))
+        return root, hashlib.sha256(shard).hexdigest()
+
+    def test_a_completed_training_resumes_at_evaluation(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, _sha = self._model_root(tmp_path)
+        state = driver.trained_checkpoint_state(root)
+        assert state is not None
+        assert state["model_dir"].endswith("checkpoints/step100/model")
+
+    def test_a_restored_probe_is_rehashed_against_its_sidecar(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, sha = self._model_root(tmp_path)
+        (root / "preserved_identity.json").write_text(json.dumps(
+            {"trained_sha256": sha}))
+        state = driver.trained_checkpoint_state(root)
+        assert state and state.get("restored_sha256_verified")
+        (root / "preserved_identity.json").write_text(json.dumps(
+            {"trained_sha256": "f" * 64}))
+        with pytest.raises(driver.D1BehaviouralDriverError,
+                           match="nobody preserved"):
+            driver.trained_checkpoint_state(root)
+
+    def test_an_incomplete_training_retrains(self, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        root, _sha = self._model_root(tmp_path)
+        (root / "run_completion.json").unlink()
+        assert driver.trained_checkpoint_state(root) is None
+
+    def test_teardown_refuses_while_a_trained_unscored_probe_is_pod_only(
+            self, tmp_path):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+
+        class _Args:
+            scr = str(tmp_path)
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        relay = tmp_path / "relay"
+        relay.mkdir()
+        (relay / "d1_behavioural.json").write_text(json.dumps({
+            "probes": [{"probe_id": "p1", "trained": True, "scored": False,
+                        "model_dir": "/workspace/x/checkpoints/t/model",
+                        "trained_sha256": "a" * 64}]}))
+        ctx = _Ctx()
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "P8.4" in why
+
+        ctx.evidence = {"trained_unscored_preserved": {
+            "p1": {"verified": True}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "preserved" in why
+
+    def test_a_restore_without_a_sidecar_is_refused(self, tmp_path):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        store = tmp_path / "preserved"
+        (store / "p1").mkdir(parents=True)
+
+        said = []
+
+        class _Args:
+            restore_trained = str(store)
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(msg):
+                said.append(msg)
+
+        assert launcher.restore_trained_probes(_Ctx()) is False
+        assert any("unverifiable" in s for s in said)
+
+    def test_scored_probes_weights_are_never_fetched(self):
+        """P8.4 state 1: completed + validly scored contributes evidence, not
+        checkpoint bytes."""
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "if p.get(\"trained\") and not p.get(\"scored\")" in src
+        assert launcher is not None
+
+
+class TestTheConfirmationCandidateIsRecomputedNotTrusted:
+
+    @staticmethod
+    def _issuer():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "issue_d1_behavioural_authorization.py")
+        spec = importlib.util.spec_from_file_location("_d1b_issue2", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    @staticmethod
+    def _screening_record(tmp_path, *, tamper_arm=None, tamper_contract=None):
+        seeds = B.screening_seeds(REPO)
+        table = {"q1": (0.40, 0.90), "q2": (0.45, 0.90), "q3": (0.42, 0.89),
+                 "q4": (0.38, 0.91), "B": (0.40, 0.90)}
+        probes = [{"probe_id": f"d1_screening_{arm}_s{seed}", "arm": arm,
+                   "seed": seed, "scored": True,
+                   "correct_overall": value[0],
+                   "usable_rollout_rate": value[1]}
+                  for arm, value in table.items() for seed in seeds]
+        rows = [{"arm": p["arm"], "seed": p["seed"],
+                 "correct_overall": p["correct_overall"],
+                 "usable_rollout_rate": p["usable_rollout_rate"]}
+                for p in probes]
+        selection = B.advance_one(B.rank_screening(rows, REPO))
+        if tamper_arm:
+            selection = dict(selection)
+            selection["arm"] = tamper_arm
+        record = {
+            "schema": "aadistill.phase_d1.behavioural_session/v1",
+            "rung": "screening", "status": "COMPLETE",
+            "contract_hash": tamper_contract or sha256_json(
+                B.session_contract("screening", REPO)),
+            "probes": probes, "selection": selection,
+        }
+        path = tmp_path / "d1_behavioural.json"
+        path.write_text(json.dumps(record))
+        return path
+
+    def test_a_consistent_record_yields_the_recomputed_arm(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path)
+        assert issuer.advanced_arm_from(path) == "q2"
+
+    def test_a_tampered_selection_is_refused_not_resolved(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path, tamper_arm="q4")
+        with pytest.raises(SystemExit, match="refused, not resolved"):
+            issuer.advanced_arm_from(path)
+
+    def test_a_record_from_another_field_is_refused(self, tmp_path):
+        issuer = self._issuer()
+        path = self._screening_record(tmp_path, tamper_contract="e" * 64)
+        with pytest.raises(SystemExit, match="not the frozen field"):
+            issuer.advanced_arm_from(path)
+
+    def test_a_bare_verdict_file_is_refused(self, tmp_path):
+        issuer = self._issuer()
+        path = tmp_path / "claim.json"
+        path.write_text(json.dumps({"selection": {"advanced": True,
+                                                  "arm": "q1"}}))
+        with pytest.raises(SystemExit, match="schema"):
+            issuer.advanced_arm_from(path)

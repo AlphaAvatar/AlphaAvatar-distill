@@ -137,6 +137,9 @@ def build_parser() -> argparse.ArgumentParser:
                     help="confirmation only: the candidate screening advanced. "
                          "Must equal the one the authorization names.")
     ap.add_argument("--device", default="cuda")
+    ap.add_argument("--image-digest", default=None,
+                    help="the pod image digest, from the launcher; the engine "
+                         "probe binds it into the generation-runtime identity")
     ap.add_argument("--status", default=None,
                     help="where the terminal marker is appended")
     ap.add_argument("--probe-train-minutes", type=float, default=60.0,
@@ -224,6 +227,212 @@ def cheap_preflight(rung: str, repo_root: Path) -> dict[str, Any]:
             "pack_sha256": got}
 
 
+def d1_scoring_contract(rung: str, repo_root: Path) -> dict[str, Any]:
+    """The scoring digest a D1 behavioural result binds to. C1's rule.
+
+    The metric IS C1's (`score_battery`/`build_result`, imported unchanged),
+    so the contract id is C1's; the digested FILE SET is C1's declared closure
+    plus the rung's own pinned entry point, because that file is part of what
+    actually scores and a digest over a smaller scorer than the one that runs
+    describes nothing.
+    """
+    from stages.phase_c1.scoring import c1_scoring_contract
+
+    scorer = SCORER if rung == "screening" else CONFIRMATION_SCORER
+    from stages.phase_c1.scoring import C1_SCORING_FILES_V1
+
+    files = tuple(sorted({*C1_SCORING_FILES_V1,
+                          str(scorer.relative_to(REPO_ROOT))}))
+    return c1_scoring_contract(repo_root, files=files)
+
+
+def battery_protocol_fields(contract: dict[str, Any]) -> dict[str, str]:
+    """The battery identity triple `RecoveryEvaluationProtocol` binds.
+
+    The D-series roles have no per-role `manifest.json`; their identity lives
+    in the realized family manifest, already byte-verified by the session
+    contract. The mapping is stated once, here: the artifact names the family
+    and the role, the manifest identity is the role's frozen membership
+    (`item_ids_sha256`), and the content identity is the family's bound bytes
+    (`family_content_id`).
+    """
+    battery = contract["battery"]
+    return {
+        "battery_artifact": f"{battery['family_id']}:{battery['role']}",
+        "battery_manifest_sha256": battery["item_ids_sha256"],
+        "battery_content_sha256": battery["family_content_id"],
+    }
+
+
+def build_attested_protocol(package: Path, *, image_digest: str | None,
+                            scoring: dict[str, Any],
+                            battery_fields: dict[str, str],
+                            out: Path) -> Any:
+    """This session's evaluation-protocol attestation, from a REAL package.
+
+    C1's mechanism, reused: the shared engine probe observes the actual vLLM
+    runtime over the packaged checkpoint, the declared generation protocol is
+    materialized with those observations, and the result is the ONE hash
+    every probe's generations must be comparable to. Run once, before the
+    first probe generates; each probe is then admitted against it from its
+    own raw summaries.
+    """
+    from aadistill.infrastructure.manifest import sha256_file, sha256_json
+    from aadistill.initialization.planning.generation import (
+        RecoveryEvaluationProtocol, declared_generation_protocol,
+    )
+    from shared.source_sets import generation_source_digest
+
+    probe_out = out / "engine_probe.json"
+    engine = subprocess.run(
+        ["/opt/vllm/bin/python",
+         str(REPO_ROOT / "scripts/shared/pod/autoinit_engine_probe.py"),
+         "--model", str(package), "--out", str(probe_out)]
+        + (["--image-digest", image_digest] if image_digest else []),
+        capture_output=True, text=True, timeout=1800)
+    (out / "engine_probe_tail.log").write_text(
+        (engine.stdout + engine.stderr)[-2000:])
+    if engine.returncode != 0 or not probe_out.is_file():
+        raise D1BehaviouralDriverError(
+            f"the engine probe exited {engine.returncode}; without it no "
+            "generation protocol can be attested and no probe may be scored")
+    observed = json.loads(probe_out.read_text())
+
+    gen = declared_generation_protocol().materialized(
+        generation_source_digest=generation_source_digest(REPO_ROOT)["digest"],
+        degeneration_source_digest=sha256_file(
+            REPO_ROOT / "src/aadistill/evaluation/degeneration.py"))
+    gen = gen.materialized(
+        vllm_version=observed["vllm_version"],
+        transformers_version=observed["transformers_version"],
+        torch_version=observed["torch_version"],
+        runtime_digest=observed["runtime_digest"], dtype=observed["dtype"],
+        gpu_memory_utilization=observed["gpu_memory_utilization"],
+        max_num_seqs=observed["max_num_seqs"],
+        max_num_batched_tokens=observed["max_num_batched_tokens"],
+        enforce_eager=observed["enforce_eager"],
+        tokenizer_sha256=observed["tokenizer_sha256"],
+        chat_template_sha256=observed["chat_template_sha256"],
+        resolved_context=observed["resolved_context"],
+        context_source=observed["context_source"],
+        stop_token_ids=tuple(observed["stop_token_ids"]))
+    gen.require_materialized(context="phase D1 behavioural attestation")
+
+    attested = RecoveryEvaluationProtocol(
+        generation=gen,
+        scoring_contract=scoring["contract"],
+        scoring_digest=scoring["digest"],
+        **battery_fields)
+    report = {
+        "schema": "aadistill.phase_d1.behavioural_attested_protocol/v1",
+        "generation_protocol_fingerprint": gen.fingerprint,
+        "evaluation_protocol_hash": attested.evaluation_protocol_hash,
+        "scoring_contract": scoring,
+        "evaluation_protocol": attested.as_dict(),
+        "engine_probe": "engine_probe.json",
+    }
+    report["report_sha256"] = sha256_json(report)
+    (out / "d1_behavioural_attested_protocol.json").write_text(
+        json.dumps(report, indent=2) + "\n")
+    return attested
+
+
+def admit_generation(name: str, gen_dir: Path, *, attested: Any,
+                     scoring: dict[str, Any],
+                     battery_fields: dict[str, str], out: Path) -> dict:
+    """Refuse a probe whose generations were not produced under the protocol.
+
+    C1's rule, unchanged: the attestation says what the runtime SHOULD do;
+    this reconstructs what it actually DID, from this probe's own raw per-set
+    summaries, and requires the two comparable under the project's versioned
+    relation. Fail-closed and BEFORE the scorer runs -- a probe generated
+    under a drifted protocol must not be scored, and scoring first then
+    recording the fingerprint lets a result claim an identity whose evidence
+    was never admitted.
+    """
+    from aadistill.initialization.planning.generation import (
+        RecoveryEvaluationProtocol, observe_generation_protocol,
+    )
+
+    summaries = [json.loads(p.read_text())
+                 for p in sorted(gen_dir.glob("*.json"))
+                 if not p.name.endswith(".generations.jsonl")]
+    observed_gen = observe_generation_protocol(summaries).protocol
+    observed = RecoveryEvaluationProtocol(
+        generation=observed_gen,
+        scoring_contract=scoring["contract"],
+        scoring_digest=scoring["digest"],
+        **battery_fields)
+    admission = {
+        "probe_id": name,
+        "generation_fingerprint": observed_gen.fingerprint,
+        "evaluation_protocol_hash": observed.evaluation_protocol_hash,
+        "attested_evaluation_protocol_hash":
+            attested.evaluation_protocol_hash,
+        "n_summaries": len(summaries),
+    }
+    try:
+        observed.require_comparable(attested, context=name)
+    except Exception as exc:                                      # noqa: BLE001
+        admission["comparable"] = False
+        admission["reason"] = str(exc)[-1500:]
+        (out / f"{name}_generation_admission.json").write_text(
+            json.dumps(admission, indent=2) + "\n")
+        raise D1BehaviouralDriverError(
+            f"{name}: the generations were not produced under the attested "
+            f"evaluation protocol, so this probe cannot be scored. {exc}"
+        ) from exc
+    admission["comparable"] = True
+    (out / f"{name}_generation_admission.json").write_text(
+        json.dumps(admission, indent=2) + "\n")
+    return admission
+
+
+def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
+    """Is a COMPLETED trained checkpoint already on this host for a probe?
+
+    The resume half of the trained-but-unscored contract (P8.4 state 2: a
+    trained, durable, not-validly-scored probe is RESUMED at evaluation, never
+    retrained). True in two situations: a driver restart on the same pod, and
+    a replacement pod whose launcher restored the preserved checkpoint. The
+    training-completion record is the gate -- a crash mid-training leaves no
+    `run_completion.json`, so a partial checkpoint retrains.
+
+    When the restorer shipped a `preserved_identity.json` sidecar, the shard
+    is re-hashed against it: restored bytes that are not the preserved bytes
+    must refuse here, before forty minutes of generation measure the wrong
+    model.
+    """
+    import hashlib
+
+    completion = model_root / "run_completion.json"
+    if not completion.is_file():
+        return None
+    from stages.phase_c1.autoinit_c1_driver import trained_model_dir
+
+    model_dir = trained_model_dir(model_root)
+    if not (Path(model_dir) / "config.json").is_file():
+        return None
+    shard = Path(model_dir) / "model.safetensors"
+    state: dict[str, Any] = {
+        "model_dir": str(model_dir),
+        "run_completion": str(completion),
+    }
+    sidecar = model_root / "preserved_identity.json"
+    if sidecar.is_file():
+        want = json.loads(sidecar.read_text()).get("trained_sha256")
+        got = hashlib.sha256(shard.read_bytes()).hexdigest() \
+            if shard.is_file() else None
+        if not want or got != want:
+            raise D1BehaviouralDriverError(
+                f"{model_root.name}: restored trained checkpoint hashes to "
+                f"{str(got)[:12]} and the preservation record says "
+                f"{str(want)[:12]}; resuming on it would score bytes nobody "
+                "preserved")
+        state["restored_sha256_verified"] = True
+    return state
+
+
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     out = REPO_ROOT / args.out
@@ -270,9 +479,12 @@ def main(argv: list[str] | None = None) -> int:
                     device=args.device, advancing_candidate=advancing,
                     repo_root=REPO_ROOT,
                     say=lambda s: print(s, flush=True))
-            except M.D1MaterializeError:
-                #: A completed path carrying the wrong identity is a
-                #: SCIENTIFIC stop, not an engineering retry.
+            except M.D1ArmIdentityMismatch:
+                #: ONLY a completed pinned path carrying the wrong identity
+                #: after its inputs were verified is a SCIENTIFIC stop. A
+                #: missing plan leaf, a wrong path, an unreadable journal or
+                #: any other harness error stays an ordinary engineering
+                #: failure (RUN_FAILED): diagnose, repair, retry -- P12.1.
                 mismatch = True
                 raise
             record["arm_materialization"] = materialization
@@ -292,13 +504,24 @@ def main(argv: list[str] | None = None) -> int:
         #: authorized is the one failure no amount of later evidence repairs.
         contract = D1B.session_contract(
             args.rung, REPO_ROOT, advancing_candidate=advancing,
-            arm_root=args.arm_root)
+            arm_root=args.arm_root,
+            #: THE PRODUCER'S OWN FINAL-CHECKPOINT PATHS.
+            #: `materialize_fixed_path` writes `workdir/steps/{i:02d}_{kind}`,
+            #: so the bytes the identity gate must hash are the ones the
+            #: materialization rows name -- verifying `arm_root/<state_id>`
+            #: directly would refuse the session's own output after paying
+            #: for it.
+            resolved_paths=student_paths or None)
         record["contract"] = contract
         record["contract_hash"] = sha256_json(contract)
         #: The machine-local verification evidence -- which directories were
-        #: hashed, to what -- beside the contract, never inside it.
+        #: hashed, to what -- beside the contract, never inside it. Scoped
+        #: exactly as the contract's own verification was.
         record["arm_verification"] = D1B.require_arms_present(
-            REPO_ROOT, arm_root=args.arm_root)
+            REPO_ROOT, arm_root=args.arm_root,
+            resolved_paths=student_paths or None,
+            restrict_to=({advancing, "B"} if args.rung == "confirmation"
+                         else None))
         save()
         print(f"contract {record['contract_hash'][:16]} — "
               f"{contract['n_probes']} probes, {contract['arms']['n_arms']} "
@@ -397,6 +620,16 @@ def main(argv: list[str] | None = None) -> int:
         record["schedule"] = [p.probe_id for p in probes]
         save()
 
+        #: THE EVALUATION-PROTOCOL IDENTITIES this rung's results bind to,
+        #: derived once; the attestation itself is built from the FIRST
+        #: probe's real package, below, because it needs a checkpoint to
+        #: probe the engine over.
+        scoring = d1_scoring_contract(args.rung, REPO_ROOT)
+        battery_fields = battery_protocol_fields(contract)
+        record["scoring_contract"] = {k: scoring[k]
+                                      for k in ("contract", "digest")}
+        attested = None
+
         results: list[dict[str, Any]] = []
         for index, probe in enumerate(probes):
             entry: dict[str, Any] = {
@@ -408,45 +641,83 @@ def main(argv: list[str] | None = None) -> int:
             save()
             print(f"[{index + 1}/{len(probes)}] {probe.probe_id}", flush=True)
 
-            config = probe_config(probe, audit=out, frozen_recipe=FROZEN_RECIPE,
-                                  pack_dir=PACK_DIR,
-                                  overrides=C1_PROBE_OVERRIDES)
-            entry["config"] = str(config.relative_to(REPO_ROOT))
-
-            #: HAND THE CARD OVER, AND PROVE IT. A C1 attempt read a verdict
-            #: saying 7.55 GiB was still allocated, started the trainer anyway
-            #: and lost the probe. Both conditions are enforced: the release
-            #: worked, and the card has room for the measured peak.
-            import gc
-
-            before = cuda_memory()
-            gc.collect()
-            handoff = complete_release(before)
-            require_released(handoff, what="the D1 recovery trainer")
-            require_headroom(handoff["after"], need_bytes=_trainer_bytes(),
-                             what="the D1 recovery trainer")
-            entry["device_handoff"] = handoff.get("verdict")
-            save()
-
-            started = time.time()
-            train = subprocess.run(
-                ["/opt/train/bin/python", str(TRAINER), "--config", str(config)],
-                capture_output=True, text=True,
-                timeout=int(args.probe_train_minutes * 60 * 2))
-            (out / f"{probe.probe_id}_train_tail.log").write_text(
-                (train.stdout + train.stderr)[-2000:])
-            entry["train_seconds"] = round(time.time() - started, 1)
-            entry["train_rc"] = train.returncode
-            if train.returncode != 0:
-                entry["failed"] = "training"
+            model_root = (REPO_ROOT
+                          / f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}")
+            #: RESUME AT EVALUATION when a completed trained checkpoint is
+            #: already here -- a driver restart on this pod, or a replacement
+            #: pod whose launcher restored the preserved probe. P8.4 state 2:
+            #: trained + durable + not validly scored is resumed at scoring,
+            #: never retrained for a different outcome.
+            resumed = trained_checkpoint_state(model_root)
+            if resumed is not None:
+                entry["resumed_from_trained"] = resumed
+                entry["trained"] = True
+                model_dir = Path(resumed["model_dir"])
+                entry["model_dir"] = str(model_dir)
                 save()
-                raise D1BehaviouralDriverError(
-                    f"{probe.probe_id}: the trainer exited "
-                    f"{train.returncode}; see {probe.probe_id}_train_tail.log")
-            entry["trained"] = True
-            model_dir = trained_model_dir(
-                REPO_ROOT / f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}")
-            entry["model_dir"] = str(model_dir)
+                print(f"  resuming at evaluation from {model_dir}", flush=True)
+            else:
+                config = probe_config(probe, audit=out,
+                                      frozen_recipe=FROZEN_RECIPE,
+                                      pack_dir=PACK_DIR,
+                                      overrides=C1_PROBE_OVERRIDES)
+                entry["config"] = str(config.relative_to(REPO_ROOT))
+
+                #: HAND THE CARD OVER, AND PROVE IT. A C1 attempt read a
+                #: verdict saying 7.55 GiB was still allocated, started the
+                #: trainer anyway and lost the probe. Both conditions are
+                #: enforced: the release worked, and the card has room for
+                #: the measured peak.
+                import gc
+
+                before = cuda_memory()
+                gc.collect()
+                handoff = complete_release(before)
+                require_released(handoff, what="the D1 recovery trainer")
+                require_headroom(handoff["after"],
+                                 need_bytes=_trainer_bytes(),
+                                 what="the D1 recovery trainer")
+                entry["device_handoff"] = handoff.get("verdict")
+                save()
+
+                started = time.time()
+                train = subprocess.run(
+                    ["/opt/train/bin/python", str(TRAINER),
+                     "--config", str(config)],
+                    capture_output=True, text=True,
+                    timeout=int(args.probe_train_minutes * 60 * 2))
+                (out / f"{probe.probe_id}_train_tail.log").write_text(
+                    (train.stdout + train.stderr)[-2000:])
+                entry["train_seconds"] = round(time.time() - started, 1)
+                entry["train_rc"] = train.returncode
+                if train.returncode != 0:
+                    entry["failed"] = "training"
+                    save()
+                    raise D1BehaviouralDriverError(
+                        f"{probe.probe_id}: the trainer exited "
+                        f"{train.returncode}; see "
+                        f"{probe.probe_id}_train_tail.log")
+                entry["trained"] = True
+                model_dir = trained_model_dir(model_root)
+                entry["model_dir"] = str(model_dir)
+
+            #: THE TRAINED CHECKPOINT'S OWN IDENTITY, hashed the moment the
+            #: unit of work completes (P8.2.1). This is what the launcher's
+            #: preservation verifies a fetched trained-but-unscored probe
+            #: against, and what a replacement pod's resume re-checks -- a
+            #: preserved probe without an identity could never be shown to be
+            #: the probe that was trained.
+            import hashlib as _hashlib
+
+            shard = Path(model_dir) / "model.safetensors"
+            if shard.is_file():
+                entry["trained_sha256"] = _hashlib.sha256(
+                    shard.read_bytes()).hexdigest()
+                entry["trained_bytes"] = shard.stat().st_size
+            #: ANNOUNCED BEFORE EVALUATION: a probe that trained is thirty-plus
+            #: paid minutes whether or not its generation succeeds, and the
+            #: launcher's teardown gate reads this flag to refuse deleting a
+            #: pod holding the only copy.
             save()
 
             #: THE EVALUATION PACKAGE, built the way C1 built every probe's:
@@ -462,6 +733,21 @@ def main(argv: list[str] | None = None) -> int:
                 model_dir, tokenizer_source=TOKENIZER_SOURCE,
                 dest=package_dir,
                 expected_sidecar_sha256=TOKENIZER_SIDECAR_SHA256)
+
+            #: THE ATTESTATION, once, from the first REAL package: the shared
+            #: engine probe observes the actual vLLM runtime and the declared
+            #: generation protocol is materialized with it. Every probe's
+            #: generations are then ADMITTED against this before scoring.
+            if attested is None:
+                attested = build_attested_protocol(
+                    package_dir, image_digest=args.image_digest,
+                    scoring=scoring, battery_fields=battery_fields, out=out)
+                record["attested_evaluation_protocol_hash"] = \
+                    attested.evaluation_protocol_hash
+                save()
+                print(f"  attested protocol "
+                      f"{attested.evaluation_protocol_hash[:12]}", flush=True)
+
             battery_root = REPO_ROOT / contract["battery"]["root"]
             prompt_files = [str(battery_root / f"{name}.jsonl")
                             for name in sorted(D1B.FROZEN_STRATA)]
@@ -485,6 +771,20 @@ def main(argv: list[str] | None = None) -> int:
                     f"{probe.probe_id}: generation exited "
                     f"{generate.returncode}")
 
+            #: ADMISSION, before scoring: what the runtime actually DID,
+            #: reconstructed from this probe's own raw summaries, comparable
+            #: to the attestation under the project's versioned relation.
+            admission = admit_generation(
+                probe.probe_id, gen_dir, attested=attested,
+                scoring=scoring, battery_fields=battery_fields, out=out)
+            entry["generation_admission"] = {
+                "comparable": True,
+                "generation_fingerprint": admission["generation_fingerprint"],
+                "evaluation_protocol_hash":
+                    admission["evaluation_protocol_hash"],
+            }
+            save()
+
             result_path = out / "results" / f"{probe.probe_id}.json"
             per_sample = out / "per_sample" / f"{probe.probe_id}.jsonl"
             arm = next(a for a in D1B.arms(REPO_ROOT, arm_root=args.arm_root)
@@ -495,7 +795,13 @@ def main(argv: list[str] | None = None) -> int:
                  "--seed", str(probe.seed), "--out", str(result_path),
                  "--per-sample", str(per_sample),
                  "--screening-arm", probe.arm_id,
-                 "--init-digest", arm.artifact_digest],
+                 "--init-digest", arm.artifact_digest,
+                 #: The TRAINING COMPLETION identity and the OBSERVED (not
+                 #: attested) fingerprint, bound into the result -- the
+                 #: direction of provenance is the point.
+                 "--trained-run", str(model_root / "run_completion.json"),
+                 "--generation-fingerprint",
+                 admission["generation_fingerprint"]],
                 capture_output=True, text=True, timeout=1800)
             (out / f"{probe.probe_id}_score_tail.log").write_text(
                 (score.stdout + score.stderr)[-2000:])

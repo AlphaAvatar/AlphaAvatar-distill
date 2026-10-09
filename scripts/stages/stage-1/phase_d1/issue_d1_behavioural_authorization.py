@@ -60,27 +60,71 @@ def authorization_path_for(run_id: str) -> str:
 
 
 def advanced_arm_from(selection_record: Path) -> str:
-    """The arm screening's mechanical selection advanced. READ, never typed.
+    """The arm screening's mechanical selection advanced. READ AND RECOMPUTED.
 
-    Accepts the secured session evidence (`d1_behavioural.json`) or any record
-    carrying its `selection` block. Refuses a record whose selection advanced
-    nobody: a confirmation cannot be issued for a rung that produced no
-    candidate.
+    Takes the SECURED SCREENING SESSION EVIDENCE (`d1_behavioural.json`) and
+    trusts none of its conclusions: an arbitrary JSON file containing
+    `advanced: true` and an arm label is not evidence of a selection. Four
+    things are required, each from the document's own data:
+
+    * it is a COMPLETED screening session record, by schema, rung and status;
+    * its contract hash is the one THIS tree derives for the screening rung,
+      so the field it measured is the frozen field;
+    * the mechanical selection RECOMPUTES from its per-probe scored rows,
+      through the same frozen `rank_screening` + `advance_one` the pod ran;
+    * the recomputation AGREES with the recorded selection -- arm and outcome
+      both -- and advanced somebody.
+
+    A disagreement anywhere is refused, never resolved: the rule is frozen,
+    so two answers means the record is not what it claims to be.
     """
+    from aadistill.infrastructure.manifest import sha256_json
+
     doc = json.loads(selection_record.read_text())
-    selection = doc.get("selection") or doc
-    if not selection.get("advanced"):
+    if doc.get("schema") != "aadistill.phase_d1.behavioural_session/v1":
         raise SystemExit(
-            f"{selection_record} records outcome "
-            f"{selection.get('outcome')!r} and advances no candidate; a "
-            "confirmation cannot be issued for a screening that advanced "
-            "nobody")
-    arm = str(selection.get("arm") or "")
-    if not arm:
+            f"{selection_record} declares schema {doc.get('schema')!r}; the "
+            "selection is read only from the secured screening session "
+            "evidence, never from a document that merely contains a verdict")
+    if doc.get("rung") != "screening":
         raise SystemExit(
-            f"{selection_record} advances a candidate but names no arm; the "
-            "record is not usable evidence")
-    return arm
+            f"{selection_record} is a {doc.get('rung')!r} record; only the "
+            "screening rung produces an advancing candidate")
+    if doc.get("status") != "COMPLETE":
+        raise SystemExit(
+            f"{selection_record} records status {doc.get('status')!r}; an "
+            "incomplete screening selected nothing anyone may confirm")
+    want_contract = sha256_json(B.session_contract("screening", REPO_ROOT))
+    if doc.get("contract_hash") != want_contract:
+        raise SystemExit(
+            f"{selection_record} ran under contract "
+            f"{str(doc.get('contract_hash'))[:16]} and this tree derives "
+            f"{want_contract[:16]} for the screening rung; the field it "
+            "measured is not the frozen field this confirmation would extend")
+
+    rows = [{"arm": p["arm"], "seed": p["seed"],
+             "correct_overall": p["correct_overall"],
+             "usable_rollout_rate": p["usable_rollout_rate"]}
+            for p in doc.get("probes", []) if p.get("scored")]
+    recomputed = B.advance_one(B.rank_screening(rows, REPO_ROOT))
+    recorded = doc.get("selection") or {}
+    if not recomputed.get("advanced"):
+        raise SystemExit(
+            f"{selection_record}: the frozen rule recomputes "
+            f"{recomputed.get('outcome')!r} over the record's own scored "
+            "rows; a confirmation cannot be issued for a screening that "
+            "advanced nobody")
+    if (recorded.get("arm") != recomputed.get("arm")
+            or bool(recorded.get("advanced")) != bool(
+                recomputed.get("advanced"))):
+        raise SystemExit(
+            f"{selection_record} records selection "
+            f"{recorded.get('arm')!r}/{recorded.get('outcome')!r} and the "
+            f"frozen rule recomputes {recomputed.get('arm')!r}/"
+            f"{recomputed.get('outcome')!r} from the same rows. Two answers "
+            "from one frozen rule means the record is not what it claims to "
+            "be; refused, not resolved.")
+    return str(recomputed["arm"])
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -540,8 +540,25 @@ def roles_are_disjoint(repo_root: str | Path = REPO_ROOT) -> dict[str, Any]:
 
 
 def require_arms_present(repo_root: str | Path = REPO_ROOT, *,
-                         arm_root: str | None = None) -> dict[str, Any]:
+                         arm_root: str | None = None,
+                         resolved_paths: Mapping[str, str] | None = None,
+                         restrict_to: set[str] | None = None
+                         ) -> dict[str, Any]:
     """Every arm is OBTAINABLE and carries the identity the frozen record names.
+
+    `resolved_paths` (arm_id -> directory) overrides WHERE each arm's bytes
+    are read: `materialize_fixed_path` writes a path's final checkpoint under
+    `workdir/steps/{i:02d}_{kind}/`, so on a pod the real location is the
+    producer's `checkpoint_path`, not `arm_root/<state_id>` -- verifying the
+    latter after an expensive rematerialization refuses the session's own
+    output. Location never enters the contract; this only decides which bytes
+    the identity gate hashes.
+
+    `restrict_to` scopes the BYTE verification to the arms a rung actually
+    trains from: a confirmation pod materializes two arms, not five, and
+    demanding bytes for the other three would refuse every correct
+    confirmation session. The frozen FIELD is still bound in full by the
+    contract's identity rows; only which directories get hashed narrows.
 
     At `$0`, before anything is priced. A probe trained from the wrong
     checkpoint is a measurement of something nobody asked about, and it costs
@@ -574,6 +591,15 @@ def require_arms_present(repo_root: str | Path = REPO_ROOT, *,
     #: byte-hashing branch like every candidate -- which is the pod's digest
     #: gate, the thing the dev-host spec check explicitly does not claim.
     for arm in arms(repo_root, arm_root=arm_root):
+        if restrict_to is not None and arm.arm_id not in restrict_to:
+            continue
+        if resolved_paths is not None and arm.arm_id in resolved_paths:
+            arm = Arm(arm_id=arm.arm_id, state_id=arm.state_id,
+                      artifact_digest=arm.artifact_digest,
+                      quality_position=arm.quality_position,
+                      checkpoint_dir=str(resolved_paths[arm.arm_id]),
+                      role=arm.role, identities=dict(arm.identities),
+                      construction=arm.construction)
         #: AN ARM WITH NO IDENTITIES VERIFIES NOTHING. Both checks below are
         #: "every declared identity agrees", and `all([])` is True -- so an arm
         #: that declared none would pass every check while binding nothing, and
@@ -685,7 +711,9 @@ def _incumbent_construction_row(arm: Arm,
 
 def session_contract(rung: str, repo_root: str | Path = REPO_ROOT, *,
                      advancing_candidate: str | None = None,
-                     arm_root: str | None = None) -> dict[str, Any]:
+                     arm_root: str | None = None,
+                     resolved_paths: Mapping[str, str] | None = None
+                     ) -> dict[str, Any]:
     """Everything this rung is bound to, derived and checked. `$0`.
 
     One document the driver asserts on the pod and the launcher writes before
@@ -713,13 +741,25 @@ def session_contract(rung: str, repo_root: str | Path = REPO_ROOT, *,
     scheduled = probes(rung, repo_root,
                        advancing_candidate=advancing_candidate,
                        arm_root=arm_root)
-    verified = require_arms_present(repo_root, arm_root=arm_root)
+    #: THE BYTE VERIFICATION, scoped to the arms this rung trains from: a
+    #: confirmation session materializes two arms, and demanding bytes for the
+    #: other three would refuse every correct confirmation pod. Its output is
+    #: the caller's evidence, never contract content; the FIELD below is bound
+    #: in full either way.
+    trains_from = ({p.arm_id for p in scheduled}
+                   if rung == "confirmation" else None)
+    verified = require_arms_present(repo_root, arm_root=arm_root,
+                                    resolved_paths=resolved_paths,
+                                    restrict_to=trains_from)
     #: Identity coordinates only; see the docstring. `identities` carries all
     #: four digests from the frozen records, so the contract binds the arms by
     #: content -- A3 showed two differing artifacts sharing one state id.
     field = arms(repo_root, arm_root=arm_root)
     arms_bound = {
-        "n_arms": verified["n_arms"],
+        #: THE FROZEN FIELD's size, not the verification's: the two differ on
+        #: a confirmation pod, and a contract hash that counted verified
+        #: directories would disagree between issuance and execution.
+        "n_arms": len(field),
         "arms": [{
             "arm": a.arm_id,
             "role": a.role,

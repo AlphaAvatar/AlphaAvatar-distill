@@ -50,7 +50,27 @@ POD_ARM_ROOT = "/workspace/aad_arms"
 
 
 class D1MaterializeError(RuntimeError):
-    """An arm cannot be (or was not) materialized at its recorded identity."""
+    """A materialization premise does not hold. ORDINARY ENGINEERING.
+
+    A missing plan leaf, an unreadable journal, a wrong schema, a path that is
+    not where a row said it was, an execution-configuration disagreement
+    detected BEFORE an operator runs -- every one of these is a harness error:
+    diagnose, repair, retry (P12.1). None of them says anything about the
+    checkpoints, and none of them may be reported as a scientific finding.
+    """
+
+
+class D1ArmIdentityMismatch(D1MaterializeError):
+    """A COMPLETED pinned path does not carry its recorded identity.
+
+    The scientific stop condition, and ONLY this: the root state, the operator
+    configs and the execution knobs were all verified against the search's own
+    records before the path ran -- the conditions were demonstrably reproduced
+    -- and the bytes still differ. That is a deterministic-materialization
+    discrepancy to diagnose under review, never an error to retry and never a
+    checkpoint to substitute. The driver maps exactly this type to
+    DIGEST_MISMATCH; everything else is RUN_FAILED.
+    """
 
 
 def write_plan(repo_root: str | Path = REPO_ROOT,
@@ -153,15 +173,54 @@ def _verify_bytes_at(directory: Path, identities: dict[str, str],
             **{k: got[k] for k in sorted(got)}}
 
 
+def final_checkpoint_in(dest: Path, *, n_steps: int) -> tuple[Path | None, bool]:
+    """Where a previously materialized path's FINAL checkpoint is, if anywhere.
+
+    `materialize_fixed_path` writes every step's checkpoint under
+    `workdir/steps/{i:02d}_{kind}/` -- the final checkpoint of an n-step path
+    is the step n-1 directory, NOT `workdir/config.json`. The first version of
+    this module verified `dest/config.json` after a full rematerialization,
+    which is a directory the producer never writes: the session would have
+    paid for every arm and then refused its own output.
+
+    Returns `(path, is_complete)`:
+
+    * `(dest, True)` when the bytes are a FLATTENED checkpoint (`config.json`
+      at the top level) -- the shape of a restored durable-store copy;
+    * `(step_dir, True)` when the LAST step's checkpoint exists;
+    * `(step_dir, False)` when only an EARLIER step exists -- a partial path
+      from an interrupted run, which is rebuilt rather than adopted;
+    * `(None, False)` when nothing is there.
+    """
+    if (dest / "config.json").is_file():
+        return dest, True
+    steps = dest / "steps"
+    if not steps.is_dir():
+        return None, False
+    done = sorted(p for p in steps.iterdir()
+                  if p.is_dir() and (p / "config.json").is_file())
+    if not done:
+        return None, False
+    last = done[-1]
+    index = int(last.name.split("_", 1)[0])
+    return last, index == n_steps - 1
+
+
 def materialize_candidate(leaf: Any, dest: Path, *, device: str,
                           repo_root: str | Path = REPO_ROOT,
                           root_loader: Callable[[], Any] | None = None,
                           execution: Any = None,
                           on_step: Callable[[Any], None] | None = None,
                           ) -> dict[str, Any]:
-    """One finalist along its pinned path, into `dest`. Every step gated."""
+    """One finalist along its pinned path, into `dest`. Every step gated.
+
+    Raises `D1ArmIdentityMismatch` -- the scientific stop -- only when the
+    path COMPLETED under the verified inputs and the bytes still differ: a
+    mid-path `FixedPathDigestMismatch` or a failed final adoption. Everything
+    else that can go wrong here is a harness error and stays the base type.
+    """
     from aadistill.initialization.planning.fixed_path import (
-        materialize_fixed_path,
+        FixedPathDigestMismatch, materialize_fixed_path,
     )
     from aadistill.initialization.specs.arch import get_adapter
     from stages.phase_d1 import replay_specs as R
@@ -169,20 +228,52 @@ def materialize_candidate(leaf: Any, dest: Path, *, device: str,
     spec = R.fixed_path_spec(leaf, device=device, repo_root=repo_root)
     dest.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    results = materialize_fixed_path(
-        spec, adapter=get_adapter(R.FAMILY),
-        root_loader=root_loader, workdir=dest,
-        repo_root=repo_root, on_step=on_step, execution=execution)
+    try:
+        results = materialize_fixed_path(
+            spec, adapter=get_adapter(R.FAMILY),
+            root_loader=root_loader, workdir=dest,
+            repo_root=repo_root, on_step=on_step, execution=execution)
+    except FixedPathDigestMismatch as exc:
+        raise D1ArmIdentityMismatch(
+            f"{leaf.state_id}: a pinned step diverged after the root state, "
+            f"the operator configs and the execution knobs were all verified "
+            f"against the search's own records: {exc}. The conditions were "
+            "reproduced and the bytes differ; this goes to review, is not "
+            "retried, and no near-equivalent checkpoint is substituted."
+        ) from exc
     ok, detail = R.adoption_matches(leaf, results[-1].identity)
     if not ok:
-        raise D1MaterializeError(
-            f"{leaf.state_id}: reconstruction completed and does not carry the "
-            f"recorded identity: {detail['differ']}. Terminal for this "
-            "session; diagnose, never substitute.")
+        raise D1ArmIdentityMismatch(
+            f"{leaf.state_id}: reconstruction completed and does not carry "
+            f"the recorded identity: {detail['differ']}. Diagnose, never "
+            "substitute.")
     return {"state_id": leaf.state_id, "spec_hash": spec.spec_hash,
             "seconds": round(time.time() - t0, 1),
+            #: THE PRODUCER'S OWN ANSWER: the last step's checkpoint
+            #: directory. Every consumer -- the identity verification, the
+            #: probes' student_path, the contract's byte check -- reads THIS,
+            #: never a layout guessed beside it.
             "checkpoint_path": results[-1].checkpoint_path,
             "identity": detail, "adopted": True}
+
+
+def incumbent_execution():
+    """B's NUMERICAL EXECUTION PROTOCOL, read from its authoritative record.
+
+    A3's terminal finding is that `53e30566…` -- canonical B -- is reproduced
+    exactly only under `A_bsz1`: `micro_batch_size=1`, unpadded,
+    `original_order_v1` (`a3_comparison.json`; A-bsz3 at mbs=3 produced
+    `7dd2f6f6…`, a DISTINCT numerical materialization protocol from the same
+    path). `stages.phase_a3.a_bsz3.A_BSZ1` is the one place that protocol is
+    declared, so it is imported, never retyped -- and never defaulted:
+    `materialize_fixed_path` falls back to `DEFAULT_EXECUTION`
+    (micro_batch_size=4), which is a third protocol nothing measured B under,
+    and the D1 candidates' bsz=3 policy belongs to the candidates' own
+    recorded steps, not to B.
+    """
+    from stages.phase_a3.a_bsz3 import A_BSZ1
+
+    return A_BSZ1
 
 
 def materialize_incumbent(dest: Path, *, device: str,
@@ -193,9 +284,13 @@ def materialize_incumbent(dest: Path, *, device: str,
     `frozen_baseline_spec` is C1's own constructor re-exported by C2's
     baseline module -- the same four-step fixed path C2's and C3's behavioural
     sessions rebuilt B from -- and `assert_frozen_construction` refuses a
-    recipe drift at `$0` before a tensor moves. The adoption gate here then
-    compares what was BUILT against what the design BINDS, which is the half
-    no CPU host can claim.
+    recipe drift at `$0` before a tensor moves. The EXECUTION is A3's
+    `A_bsz1`, the protocol canonical B is proven to reproduce under; see
+    `incumbent_execution`. The adoption gate then compares what was BUILT
+    against what the design BINDS, which is the half no CPU host can claim --
+    and because the construction spec and the execution protocol were both
+    verified against their authoritative records BEFORE the build, a mismatch
+    here is `D1ArmIdentityMismatch`, the scientific stop.
     """
     from aadistill.initialization.planning.fixed_path import (
         materialize_fixed_path,
@@ -207,15 +302,20 @@ def materialize_incumbent(dest: Path, *, device: str,
     D1S._register_frozen_operators()
     spec = BL.frozen_baseline_spec(device=device)
     construction = BL.assert_frozen_construction(spec)
+    execution = incumbent_execution()
     dest.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     results = materialize_fixed_path(
         spec, adapter=get_adapter("qwen3"), workdir=dest,
-        repo_root=repo_root)
+        repo_root=repo_root, execution=execution)
     built = Path(results[-1].checkpoint_path)
-    identity = _verify_bytes_at(built, identities, what="incumbent B")
+    try:
+        identity = _verify_bytes_at(built, identities, what="incumbent B")
+    except D1MaterializeError as exc:
+        raise D1ArmIdentityMismatch(str(exc)) from exc
     return {"arm": "B", "spec_hash": spec.spec_hash,
             "construction": construction,
+            "execution": execution.as_fingerprint(),
             "seconds": round(time.time() - t0, 1),
             "checkpoint_path": str(built), "identity": identity,
             "adopted": True}
@@ -240,6 +340,10 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
 
     root = Path(repo_root)
     arm_root = Path(arm_root)
+    #: All four process-global registries, once, before any spec is built:
+    #: `frozen_baseline_spec` and `fixed_path_spec` both construct against
+    #: them, and a partial registration has already killed a paid step 0.
+    D1S._register_frozen_operators()
     field = B.arms(root, arm_root=str(arm_root))
     if rung == "confirmation":
         if not advancing_candidate:
@@ -294,18 +398,34 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
         key=lambda a: first_cost.get(
             leaves[a.state_id].steps[0].impl_id, 1))
     for arm in ordered:
+        leaf = leaves[arm.state_id]
         dest = Path(arm.checkpoint_dir)
-        if (dest / "config.json").is_file():
-            say(f"[{arm.arm_id}] present at {dest}; verifying, not rebuilding")
-            identity = _verify_bytes_at(dest, dict(arm.identities),
-                                        what=arm.arm_id)
-            out["arms"].append({"arm": arm.arm_id, "state_id": arm.state_id,
-                                "reused": True, "identity": identity})
-            continue
+        found, complete = final_checkpoint_in(dest, n_steps=len(leaf.steps))
+        if found is not None and complete:
+            #: A COMPLETED path's bytes at rest: adopt only at the recorded
+            #: identity. A mismatch HERE is restored-or-leftover bytes that
+            #: are not what they claim -- an engineering state to rebuild
+            #: from, not a scientific finding about a path nobody just ran.
+            say(f"[{arm.arm_id}] final checkpoint present at {found}; "
+                "verifying, not rebuilding")
+            try:
+                identity = _verify_bytes_at(found, dict(arm.identities),
+                                            what=arm.arm_id)
+                out["arms"].append({
+                    "arm": arm.arm_id, "state_id": arm.state_id,
+                    "reused": True, "identity": identity,
+                    "checkpoint_path": str(found)})
+                continue
+            except D1MaterializeError as exc:
+                say(f"[{arm.arm_id}] existing bytes fail their identity "
+                    f"({str(exc)[:120]}); rebuilding along the pinned path")
+        elif found is not None:
+            say(f"[{arm.arm_id}] partial path at {found} (interrupted run); "
+                "rebuilding along the pinned path")
         say(f"[{arm.arm_id}] materializing {arm.state_id} along its pinned "
             "path")
         row = materialize_candidate(
-            leaves[arm.state_id], dest, device=device, repo_root=root,
+            leaf, dest, device=device, repo_root=root,
             root_loader=lambda: load_root(None), execution=execution,
             on_step=lambda r: say(
                 f"  step {r.index} {r.impl_id} -> "
@@ -314,23 +434,30 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
 
     incumbent = next(a for a in field if a.is_incumbent)
     dest = Path(incumbent.checkpoint_dir)
-    if (dest / "config.json").is_file() or any(
-            (dest / sub / "config.json").is_file()
-            for sub in ([p.name for p in dest.iterdir()] if dest.is_dir()
-                        else [])):
-        say(f"[B] present under {dest}; verifying, not rebuilding")
-        built = (dest if (dest / "config.json").is_file()
-                 else next(p.parent for p in sorted(dest.rglob("config.json"))))
-        identity = _verify_bytes_at(built, dict(incumbent.identities),
-                                    what="incumbent B")
-        out["arms"].append({"arm": "B", "reused": True, "identity": identity,
-                            "checkpoint_path": str(built)})
-    else:
-        say("[B] materializing from phase_c2.baseline.frozen_baseline_spec")
-        row = materialize_incumbent(dest, device=device,
-                                    identities=dict(incumbent.identities),
-                                    repo_root=root)
-        out["arms"].append({"reused": False, **row})
+    from stages.phase_c2 import baseline as BL
+
+    b_steps = len(BL.frozen_baseline_spec(device=device).steps)
+    found, complete = final_checkpoint_in(dest, n_steps=b_steps)
+    row = None
+    if found is not None and complete:
+        say(f"[B] final checkpoint present at {found}; verifying, not "
+            "rebuilding")
+        try:
+            identity = _verify_bytes_at(found, dict(incumbent.identities),
+                                        what="incumbent B")
+            row = {"arm": "B", "reused": True, "identity": identity,
+                   "checkpoint_path": str(found)}
+        except D1MaterializeError as exc:
+            say(f"[B] existing bytes fail their identity "
+                f"({str(exc)[:120]}); rebuilding from the frozen spec")
+    if row is None:
+        say("[B] materializing from phase_c2.baseline.frozen_baseline_spec "
+            "under A_bsz1")
+        row = {"reused": False,
+               **materialize_incumbent(dest, device=device,
+                                       identities=dict(incumbent.identities),
+                                       repo_root=root)}
+    out["arms"].append(row)
     out["n_arms"] = len(out["arms"])
     return out
 
@@ -370,7 +497,8 @@ def resolve_arm_checkpoints(rung: str, arm_root: str | Path,
     return out
 
 
-__all__ = ["PLAN_REL", "POD_ARM_ROOT", "D1MaterializeError", "load_plan",
-           "materialize_arms", "materialize_candidate",
+__all__ = ["PLAN_REL", "POD_ARM_ROOT", "D1ArmIdentityMismatch",
+           "D1MaterializeError", "final_checkpoint_in", "incumbent_execution",
+           "load_plan", "materialize_arms", "materialize_candidate",
            "materialize_incumbent", "plan_sha256",
            "resolve_arm_checkpoints", "write_plan"]
