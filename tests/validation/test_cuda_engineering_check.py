@@ -26,8 +26,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-ENTRY = REPO / "scripts/validation/cuda_engineering_check.py"
-CONFIG = REPO / "configs/validation/cuda_engineering.json"
+ENTRY = REPO / "scripts/shared/validation/cuda_engineering_check.py"
+CONFIG = REPO / "configs/shared/validation/cuda_engineering.json"
 
 
 @pytest.fixture

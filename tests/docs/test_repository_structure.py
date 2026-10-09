@@ -23,8 +23,8 @@ README = REPO / "README.md"
 STATE = REPO / "logs/state/current.md"
 SNAPSHOT = REPO / "logs/state/current.json"
 CATALOG = REPO / "logs/state/ownership.md"
-LAYOUT = REPO / "docs/REPO_LAYOUT.md"
-POD_SCRIPTS = REPO / "docs/POD_SCRIPTS.md"
+LAYOUT = REPO / "docs/maintenance/REPO_LAYOUT.md"
+POD_SCRIPTS = REPO / "docs/shared/POD_SCRIPTS.md"
 
 
 def backticked(path: Path) -> set[str]:
@@ -77,7 +77,7 @@ def test_the_readme_points_at_the_owners_of_the_facts_it_dropped():
     text = README.read_text()
     for owner in ("logs/state/current.json", "logs/state/current.md",
                   "logs/budget/ledger.md", "logs/state/ownership.md",
-                  "docs/REPO_LAYOUT.md"):
+                  "docs/maintenance/REPO_LAYOUT.md"):
         assert owner in text, f"the README does not point at {owner}"
 
 
@@ -105,7 +105,7 @@ def test_every_path_named_in_the_repo_layout_exists():
 
     Absolute references are a different kind of claim. The two the document
     names — the out-of-tree artifact store and the scratch area — are real
-    operational facts about the maintainer host, and `docs/REPO_LAYOUT.md`
+    operational facts about the maintainer host, and `docs/maintenance/REPO_LAYOUT.md`
     should keep naming them exactly. But `Path(REPO) / "/home/ecs-user/..."`
     **discards the base**, so the original assertion read the literal host
     filesystem and demanded that every execution environment be the maintainer's
@@ -373,11 +373,46 @@ def test_the_snapshot_stays_minimal_and_declares_its_contract():
     recorded three times above, at the one block where it would break several
     at once. The next place to look is `d_series` once D1 is authorized or
     abandoned, because then its blockers stop being decisions anyone acts on.
+
+    16_500 -> 18_000 on 2026-10-08, and the reclamation came first and did NOT
+    cover the growth — which is the honest reading and is why the raise is
+    recorded rather than the facts trimmed.
+
+    What it buys is three live subjects in `d_series`, each one a decision a
+    reader acts on now, and the first of them is why the other two exist:
+
+    * **which checkpoint B is.** The design named C1's BEATEN arm (`c313d1b4`,
+      `attention.weight_proxy_v0`) as its control for the whole of its design
+      and search. C1 returned GO, so B is the TREATMENT at `53e30566` — and
+      C1's delta between the two arms EXCEEDS the SESOI the D1 decision rule
+      tests against, so the error could manufacture a GO rather than merely add
+      noise. A reader who does not find this in the snapshot repeats it.
+    * **what the behavioural rungs cost.** Arm materialization was one rebuild
+      inside a FIXED session overhead — C3's figure, for a session with one
+      arm — against D1 screening's five, so the priced session funded a fifth
+      of the work. It is now a per-arm term.
+    * **which seeds are bound.** They are `SHA256(design_hash + ...)` and the
+      correction moved `design_hash`, so they were rebound prospectively. C0
+      requires them bound before any candidate result exists.
+
+    Reclaimed in the same round, each checked for readers BY NAME first — the
+    paragraphs above record that claim being made wrongly twice, once because
+    the grep was piped into `head`: `d_series.a3_precondition` (a closed
+    precondition `a_bsz3.blocks` already owns), `d_series.scoring_identity`
+    (folded into `scoring_protocol`, which three tests read and which owns the
+    subject), and `d_series.family_and_sources` lost a construction commit the
+    manifest owns. `prepared_launch.note` was also STALE — it spoke about C3
+    while D1's search had since completed — and a stale note is worse than a
+    long one.
+
+    **The next place to look is still `d_series`, and the trigger is now
+    explicit:** when D1 resumes and is authorized, its pricing and seeds move
+    into the authorization that binds them and stop being snapshot facts.
     """
     snap = load_snapshot()
     assert snap["schema"] == "aadistill.current_state/v2"
     assert "_contract" in snap, "the snapshot does not say what it owns"
-    assert len(SNAPSHOT.read_bytes()) < 16_500, (
+    assert len(SNAPSHOT.read_bytes()) < 18_000, (
         f"current_state.json is {len(SNAPSHOT.read_bytes())} bytes; it is the "
         "minimal snapshot, not an archive — history belongs in the per-run "
         "directories and decisions.md")
@@ -500,11 +535,20 @@ def test_every_log_is_classified_in_the_catalog():
 
 
 def test_every_pod_script_is_classified():
+    """The SHARED pod infrastructure is the catalogued set.
+
+    Per-experiment drivers and launchers moved to their owning experiment
+    directories in the 2026-10-08 information-architecture migration, and
+    their classification is ownership itself — the directory says whose they
+    are. What still needs a catalogue is the stage-neutral set every session
+    shares.
+    """
     named = backticked(POD_SCRIPTS)
-    unclassified = [p.name for p in sorted((REPO / "scripts/pod").iterdir())
-                    if p.name not in named and p.name != "__pycache__"]
+    unclassified = [p.name for p in sorted((REPO / "scripts/shared/pod").iterdir())
+                    if p.name not in named and p.name not in ("__pycache__",
+                                                              "__init__.py")]
     assert not unclassified, (
-        f"scripts/pod entries with no class in POD_SCRIPTS.md: {unclassified}")
+        f"scripts/shared/pod entries with no class in POD_SCRIPTS.md: {unclassified}")
 
 
 def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
@@ -524,7 +568,7 @@ def test_the_device_canary_is_recorded_as_terminated_and_not_prepared():
 
 
 def test_the_obsolete_handoff_is_archived_and_bannered():
-    archived = REPO / "docs/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
+    archived = REPO / "docs/stages/stage-1/archive/HANDOFF_AUTOINITIALIZER_20260812.md"
     assert archived.is_file()
     assert not (REPO / "docs/HANDOFF_AUTOINITIALIZER.md").exists(), (
         "the superseded handoff is still in the live docs directory")
@@ -557,7 +601,19 @@ def _preserved(rel: str) -> bool:
     inside one would change registered evidence to suit a relocation. The
     forward mapping lives in `logs/index.json`.`historical_paths` instead.
     """
+    if _is_sealed_document(rel):
+        return True
     return any(rel.startswith(d + "/") for d in _registered_run_dirs())
+
+
+def _is_sealed_document(rel: str) -> bool:
+    """A preregistration or proposal under `plans/`: a commitment whose value
+    is that its bytes have not moved. Same convention as
+    `scripts/maintenance/consolidation/fix_doc_links.is_sealed_document`,
+    derived rather than imported so the core suite stays free of scripts/."""
+    name = rel.rsplit("/", 1)[-1].lower()
+    return ("/plans/" in rel and name.endswith(".md")
+            and ("preregistration" in name or "proposal" in name))
 
 
 def _registered_run_dirs() -> tuple[str, ...]:
@@ -571,7 +627,7 @@ def _registered_run_dirs() -> tuple[str, ...]:
 def test_no_markdown_link_points_at_a_file_that_is_not_there():
     """Cross-references are what replaces a duplicated copy, so a broken one is
     a lost fact rather than a cosmetic defect. Two whole classes of these existed
-    until 2026-08-18: docs/AUTOINIT_REFERENCE.md linked to `logs/` files as if
+    until 2026-08-18: docs/stages/stage-1/AUTOINIT_REFERENCE.md linked to `logs/` files as if
     they were siblings, and the handoff kept `../logs/…` after being moved a
     directory deeper."""
     broken = []

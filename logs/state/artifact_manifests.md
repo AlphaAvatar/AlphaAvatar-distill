@@ -10,7 +10,7 @@ Two reading notes:
   the 2026-07-30 repository reorganization (`633dc6b`): `scripts/train_stage3.py`
   → `scripts/training/train_stage3.py`, `configs/stage3_*.json` →
   `configs/stage3/*.json`, and so on. See
-  [`docs/REPO_LAYOUT.md`](../../docs/REPO_LAYOUT.md) for the current map.
+  [`docs/REPO_LAYOUT.md`](../../docs/maintenance/REPO_LAYOUT.md) for the current map.
 * **Per-run experiment logs were consolidated** into
   [`EXPERIMENTS.md`](../stages/stage-3/history/EXPERIMENTS.md) on 2026-07-31 (`1fbcb99`); the originals are
   in git history at `866dac2`. "Related logs" below point at the consolidated

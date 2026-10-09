@@ -37,6 +37,12 @@ def _runner_at_the_boundary(dry_run: bool):
     runner.save = lambda: None
     runner.make_plan = lambda: True
     runner.run_prechecks = lambda: True
+    #: `run()` also asks whether the PROVIDER ACCOUNT can fund the session,
+    #: before this stop. Declared ungated here -- the subject is the dry-run
+    #: boundary -- which is also the default and is asserted as such in
+    #: `test_account_balance_gate.py`.
+    runner.spec = type("S", (), {
+        "budget": type("B", (), {"account_balance_required_usd": None})()})()
 
     def create():
         raise _Stop("create() was reached")

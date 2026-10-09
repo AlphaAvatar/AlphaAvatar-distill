@@ -100,9 +100,9 @@ def _runner(tmp_path, monkeypatch, *, returned_price, max_price=1.09,
         #: `checkout_root` and `min_cuda_version` were added: twenty tests
         #: failed with AttributeError on a double, not on the code.
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
             workspace_root="/workspace", checkout_root="/workspace/aad",
             min_cuda_version="13.0"),

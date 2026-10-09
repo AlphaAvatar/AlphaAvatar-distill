@@ -42,7 +42,7 @@ class BudgetError(ValueError):
 # The step time a Stage-3 ladder arm actually sustained on an L40S: 2916 steps,
 # bf16, teacher-in-memory KD, both arms, mean of the per-10-step console
 # timings. Any Stage 3 L40S estimate starts from an OBSERVED number, not an
-# extrapolated one; which run observed it is in docs/core-provenance.md.
+# extrapolated one; which run observed it is in docs/maintenance/core-provenance.md.
 #
 # 3.625 s/step — the figure derived from an earlier run's comparable arms, and
 # the one that underpriced a session — is superseded. It is recorded in

@@ -1,0 +1,125 @@
+{
+ "schema": "aadistill.phase_d1.run_failed/v1",
+ "run_id": "d1_search_20261006_101725",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "outcome": "PROVIDER / ACCOUNT-BALANCE INFRASTRUCTURE ABORT. The formal beam search ran 449.8 minutes and was stopped mid-beam by RunPod because the ACCOUNT balance had run out. 39 of 92 expansions, 0 complete leaves, no scientific endpoint.",
+ "classification": "PROVIDER / ACCOUNT-BALANCE INFRASTRUCTURE ABORT: stopped mid-beam at 449.8 of 1125.55 authorized minutes with 39 of 92 expansions and 0 complete leaves; no scientific endpoint",
+ "recorded_utc": "2026-10-07T02:30:00Z",
+ "session_commit": "6c9ea75802277dd95fee9a8480bdf18d18d2d1e2",
+ "authorized_base_commit": "1fa1ee9370e72344deb28116db2e1f186ce6b9af",
+ "cost": {
+  "actual_usd": 8.1716,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 449.81,
+  "authorized_usd": 21.4897,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost. Restated here because scripts/consolidate/derive_budget.py books a formal session from closeout/outcome.json :: cost.actual_usd."
+ },
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "zhk120whedjsg9",
+  "gpu": "NVIDIA L40S",
+  "one_use_grant_consumed": true,
+  "note": "the grant is spent and produced no endpoint. A one-use chain is consumed by presentation, not by success."
+ },
+ "root_cause": {
+  "cause": "the RunPod ACCOUNT ran out of balance",
+  "classification": "provider/account infrastructure abort, outside this project's limits",
+  "what_it_was_NOT": {
+   "the_watchdog": "the watchdog journal records action `none` on all 446 polls and `over_hard_limit: false` throughout. It never terminated anything.",
+   "terminate_after": "the provider-side deadline was 2026-10-07T05:09:29Z, ELEVEN HOURS AND TWENTY MINUTES after the pod stopped.",
+   "the_hard_threshold": "449.81 of 1125.55 authorized minutes -- 40% of the bound.",
+   "disk": "176 GB of 400 GB used at the last observation, 225 GB free.",
+   "the_launcher": "the launcher's own delete call ran at 17:53:46, but the watchdog's INDEPENDENT query already recorded `pod_exists: false` at 17:53:03 -- 43 seconds earlier. RunPod had removed the pod before this project touched it, so the error path did not cost the recovery."
+  }
+ },
+ "workdir_recovery": {
+  "resolved": "IMPOSSIBLE. The pod was DELETED, not stopped, so there is no local volume to recover and no zero-GPU restart to perform.",
+  "evidence": [
+   "GraphQL pod(input:{podId:\"zhk120whedjsg9\"}) -> null",
+   "REST GET /v1/pods/zhk120whedjsg9 -> 404 pod not found",
+   "REST GET /v1/pods (all states) -> []",
+   "runpodctl pod list -> []",
+   "the watchdog's own last poll, before any delete call by this project, recorded pod_exists false / desired_status TERMINATED"
+  ],
+  "consequence": "every materialized checkpoint is lost -- 39 states, about 147 GB. The next search starts from zero.",
+  "_restore_was_not_weakened": "search.py::_restore() still requires the checkpoint bytes and an artifact whose digest matches the journal. The salvaged JSON is NOT sufficient to resume and was not made sufficient."
+ },
+ "what_was_salvaged": {
+  "how": "OUT-OF-BAND SNAPSHOTS taken by hand while diagnosing the slow transfer link, hours before the pod died. The launcher's own collection never ran, so nothing came home through the artifact spec. This was luck, not design.",
+  "evidence/states_partial_oob_38states.jsonl": {
+   "valid_records": 38,
+   "truncated_records": 1,
+   "note": "the final line is truncated because the scp that produced the file hit its own timeout at 0.04 MB/s. 38 records parse; all 38 are validity `measured`, all 38 carry an evaluation, and all of them under measurement_protocol_id ac23798a4572fab5da81c04c70e6c0ef.",
+   "status": "EVIDENCE ONLY. Not a resumable workdir and not a scientific result."
+  },
+  "evidence/telemetry_partial_oob_39expansions.jsonl": "39 expansion records with per-operator timing.",
+  "runtime/watchdog_zhk120whedjsg9.jsonl": "446 polls plus watchdog_end, the evidence that the watchdog did not act.",
+  "runtime/session.json": "the shared SessionRunner's record, including every pre-provider gate.",
+  "complete_leaves": 0,
+  "_so_no_endpoint_is_being_reinterpreted": "0 complete leaves means there was never a ranking, a Top-K, or a committed selection. The Top-4 amendment of 2026-10-07 therefore reinterprets nothing."
+ },
+ "measured_cost_evidence": {
+  "finding": "THE NON-ROOT DEPTH OPERATOR IS 1.39x ITS PRICED CELL.",
+  "depth_causal_kl_greedy_v1": {
+   "n_observed": 9,
+   "mean_minutes": 32.0492,
+   "min_minutes": 19.66,
+   "max_minutes": 41.41,
+   "priced_cell_minutes": 22.9759,
+   "factor_mean": 1.3949,
+   "factor_max": 1.8024,
+   "share_of_expansions": 0.2308,
+   "_why": "the priced cell was rebuilt from ONE real production Top-K invocation AT THE ROOT. Non-root states have different geometry, and the candidate workload is unchanged -- 260 candidate subsets, 5980 ablated forwards, 17420 ablated items per invocation, identical to the root measurement. So this is a per-state cost difference, not a workload difference."
+  },
+  "other_operators": {
+   "n_observed": 30,
+   "mean_minutes": 0.7676,
+   "note": "attention, ffn and width together are 1/42 of a DEPTH invocation. DEPTH is 90% of the search's operator time."
+  },
+  "materialization_overhead_minutes_per_expansion": 1.02,
+  "where_this_applies": [
+   "D2/D3 full-search pricing, which execute the same non-root DEPTH path",
+   "any future search executing depth.causal_kl_greedy_v1 off the root"
+  ],
+  "where_this_does_NOT_apply": [
+   "recovery screening",
+   "behavioural confirmation"
+  ],
+  "_why_not": "neither rung executes the DEPTH operator. Inflating a behavioural price because a search operator was slower would be attributing a cost to work that does not do it.",
+  "effect_on_the_d1_retry": {
+   "hard_bound_retained": true,
+   "bound_minutes": 1125.55,
+   "observed_projection_minutes": "829 at the observed DEPTH mean, 943 at the observed DEPTH max, measured at 39 of 92 expansions",
+   "verdict": "the real observed timing still fits the existing bound, so the bound is RETAINED. The expected trajectory moves; the search is not narrowed to preserve an expectation."
+  }
+ },
+ "what_this_run_did_establish": {
+  "the_regenerated_design_binds_on_real_cuda": {
+   "authorization_design_hash": "a0babe43ba0a5dfb",
+   "pod_recomputed_design_hash": "a0babe43ba0a5dfb",
+   "authorization_config_hash": "59b63de3455ad805",
+   "pod_recomputed_config_hash": "59b63de3455ad805",
+   "match": true
+  },
+  "stage_a_and_b_complete": "A environment, registries_and_design, session_and_contract and authorization all ok; B teacher_and_reference ok in 8.0 s at revision 768f209d9ea8, root_sha256 6de20cc746dd. The attribute-name defect that killed the previous attempt is closed.",
+  "the_pod_test_gate": "341 passed in 268 s",
+  "setup": "5.7 minutes, all eight declared markers"
+ },
+ "repairs_this_failure_produced": {
+  "the_missing_gate": "SessionRunner.check_account_funds -- the provider ACCOUNT balance is now verified against a session-declared requirement before any pod is created, at $0, and before the dry-run stop. Every gate in this project asked whether the experiment was PERMITTED to spend; none asked whether the provider would still be paid.",
+  "the_emergency_closeout": "finish_emergency now passes streams_at_risk(None, streams). It had never passed it, so the gate took its strict no-evidence rule and a session declaring no event streams could not satisfy 'name the streams you are truncating' -- impossible, there was none. This run's closeout was lost to that ArtifactError.",
+  "the_false_attribution": "observed_stop_cause classifies from the watchdog journal on disk. The launcher said 'the pod is gone -- the watchdog acted' and finish_emergency recorded 'the watchdog terminated the pod at the hard threshold', and both were wrong.",
+  "the_double_count": "D1's first balance derivation added container_disk_usd to a hard_ceiling_usd that already contained it. A session ceiling owns which priced components it contains.",
+  "the_watcher_leak": "a product fetcher kept polling this deleted host every 60 s for a selection file that could never appear. Waiters now stop on consecutive unreachability."
+ },
+ "retry_policy": {
+  "is_this_a_retried_experiment": false,
+  "why": "no complete leaf was produced, so no measurement reached an endpoint and there is nothing to retry or pool. Under AGENTS.md P12.1 an engineering failure that prevents a unit from producing a complete valid endpoint is repaired and the SAME frozen unit is rerun to produce one REPLACEMENT endpoint.",
+  "frozen_search_science_unchanged": "beam width 6, one warmup level, K=200 reference_topk_tail_v1, bsz=3, length_sorted_v1, the four frozen operators, both calibration profiles, the supervised_target position policy, the state-eval metrics.",
+  "what_did_change": "the DOWNSTREAM finalist/recovery policy only: Top-2 -> Top-4, with 2 screening seeds and 3 confirmation seeds unchanged. A maintainer decision of 2026-10-07, which this run's zero complete leaves means cannot be a retrospective reinterpretation of any result.",
+  "funding": "a +$25.0000 phase amendment of 2026-10-07 covers the replacement search and the amended chain. This run's $8.1716 is real spend and is booked."
+ }
+}

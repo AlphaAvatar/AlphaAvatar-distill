@@ -49,7 +49,7 @@ def head() -> str:
 # --- two callers, deliberately unlike --------------------------------------
 
 #: A FIRST caller, synthetic. This used to be
-#: `experiments.phase_c1.pod_environment.C1_RECORD_CONTRACT`, imported at module
+#: `stages.phase_c1.pod_environment.C1_RECORD_CONTRACT`, imported at module
 #: scope -- so collecting the CORE suite required a closed experiment's package
 #: to import. The mechanism under test is "a RecordContract's schema, harness key
 #: and record path drive verification", and that is a statement about arbitrary
@@ -58,7 +58,7 @@ def head() -> str:
 #:
 #: Phase C1's concrete instance -- that ITS schema string and ITS harness key have
 #: not moved, and that its wrapper supplies the contract -- is asserted in
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_record_contract.py`, where
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_record_contract.py`, where
 #: a reader looking for C1's wiring will look.
 FIRST = PE.RecordContract(
     schema="example.first_session_readiness/v1",
@@ -131,7 +131,7 @@ class TestAContractsOwnStringsAreUsedVerbatim:
         from the same place, which is the property that keeps every record
         verifiable — not just the one currently on disk.
         """
-        src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+        src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
         code = "\n".join(l for l in src.splitlines()
                          if not l.lstrip().startswith("#"))
         #: These read `C1_RECORD_CONTRACT.schema` and

@@ -23,7 +23,11 @@ from support.session_specs import (  # noqa: E402
 )
 
 REPO = Path(__file__).resolve().parents[2]
-POD = REPO / "scripts/pod"
+#: Setup scripts live beside their launchers in the owning experiment
+#: directory (2026-10-08 information-architecture migration), so pairing is
+#: same-directory siblings across the whole scripts tree.
+PODS = [p for p in sorted((REPO / "scripts").rglob("*_setup.sh"))
+        if "__pycache__" not in p.parts]
 
 # Provided by the pod image or by the setup script's own preamble, not by the
 # launcher's ssh invocation.
@@ -45,14 +49,14 @@ def _launcher_for(setup: Path):
     the E6b setup at INIT_READY after both venvs were built.
     """
     stem = setup.name[: -len("_setup.sh")]
-    for cand in (POD / f"{stem}_launch.sh", POD / f"{stem}_launch.py"):
+    for cand in (setup.parent / f"{stem}_launch.sh",
+                 setup.parent / f"{stem}_launch.py"):
         if cand.is_file():
             return cand
     return None
 
 
-PAIRS = [(_launcher_for(p), p) for p in sorted(POD.glob("*_setup.sh"))
-         if _launcher_for(p) is not None]
+PAIRS = [(_launcher_for(p), p) for p in PODS if _launcher_for(p) is not None]
 
 
 def required_env(setup_text: str) -> set[str]:
@@ -149,7 +153,7 @@ def python_source_is_non_empty(launch: Path, var: str) -> bool:
 #: rule happens to pair it with. That pairing rule was the reason the canary
 #: could declare `LOCAL_ASSETS = ()` and still have two assets copied: nothing
 #: ever compared the canary to the script it would run.
-SHARED_SETUP = POD / "autoinit_preflight_setup.sh"
+SHARED_SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 
 @pytest.mark.parametrize("launch,setup", PAIRS,
@@ -243,7 +247,7 @@ def test_forwarded_variables_have_a_launcher_side_default(launch, setup):
     # launcher-side default rather than a weaker one: the failure is immediate
     # and named, instead of an empty string flowing into a command. The unset
     # cases are executed, not assumed, in
-    # scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py.
+    # scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py.
     # `test_launcher_forwards_every_variable_the_setup_reads` still requires the
     # launcher to forward these; only the default requirement is lifted.
     needed -= set(re.findall(r"\$\{([A-Z][A-Z0-9_]+):\?", setup.read_text()))

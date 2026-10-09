@@ -78,7 +78,7 @@ needs_whole_tree = pytest.mark.skipif(
 class TestTheBudgetIsDerivedNotRestated:
     @pytest.fixture(scope="class")
     def derived(self):
-        from consolidate.derive_budget import derive
+        from maintenance.consolidation.derive_budget import derive
         return derive(REPO)
 
     def test_the_fundable_count_divides_the_formal_allowance(self, derived):
@@ -136,7 +136,7 @@ class TestTheBudgetIsDerivedNotRestated:
             #: which one the code reads.
             import ast as _ast
 
-            src = (REPO / "scripts/consolidate/derive_budget.py").read_text()
+            src = (REPO / "scripts/maintenance/consolidation/derive_budget.py").read_text()
             tree = _ast.parse(src)
             expr = None
             for node in _ast.walk(tree):
@@ -215,7 +215,7 @@ class TestTheBudgetIsDerivedNotRestated:
         """The deriver reported `$0.0000 spent` against a package that had
         booked `$0.3960`, because the index entry shape it expected was not the
         one on disk. Silence about spend is the dangerous direction."""
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         entry = {"experiment_id": "phase_c1", "run_id": "attempt10",
                  "components": {"root": "logs/stages/stage-1/phase_c1/runs/attempt10"}}
         assert m._outcome_paths(REPO, entry), (
@@ -342,7 +342,7 @@ class TestTheEntryPointsResolve:
 
     def test_the_readme_is_not_counted_as_a_run_product(self):
         """A directory holding only its own README has not executed."""
-        from experiments.run_layout import present_roles, layout_for
+        from shared.run_layout import present_roles, layout_for
         import tempfile
         with tempfile.TemporaryDirectory() as t:
             lay = layout_for(Path(t), "exp", "r1", "1")
@@ -357,7 +357,7 @@ class TestTheEntryPointsResolve:
 class TestRegisteredEvidenceIsProtected:
     def test_the_relocator_refuses_a_registered_component(self):
         """24 were moved before this guard existed."""
-        from consolidate.relocate_logs import plan
+        from maintenance.consolidation.relocate_logs import plan
         p = plan(REPO)
         reasons = {e["path"]: e["reason"] for e in p["exceptions"]}
         index = load("logs/index.json")
@@ -382,7 +382,7 @@ class TestRegisteredEvidenceIsProtected:
 
     def test_the_link_fixer_will_not_edit_inside_a_registered_directory(self):
         """It edited 15 READMEs there; the digest covers the directory."""
-        from consolidate.fix_doc_links import protected_dirs, repair
+        from maintenance.consolidation.fix_doc_links import protected_dirs, repair
         dirs = protected_dirs(REPO)
         assert dirs, "no registered directories found, so the guard is vacuous"
         r = repair(REPO, write=False)
@@ -392,7 +392,7 @@ class TestRegisteredEvidenceIsProtected:
             assert not any(doc["doc"].startswith(d + "/") for d in dirs), doc
 
     def test_every_registered_component_still_hashes_to_its_record(self):
-        from architecture.record_run_index import digest_of
+        from maintenance.architecture.record_run_index import digest_of
         index = load("logs/index.json")
         drift = []
         for e in index["runs"]:
@@ -422,7 +422,7 @@ class TestAnOldPathStillResolves:
 
     @pytest.fixture(scope="class")
     def resolve(self):
-        from architecture.record_run_index import resolve_historical
+        from maintenance.architecture.record_run_index import resolve_historical
         return lambda rel: resolve_historical(rel, REPO)
 
     def test_every_old_path_points_at_something_that_is_there(self, table):
@@ -488,20 +488,20 @@ class TestTheNavigationIsDerivedFromTheTree:
         """Run the renderer against the live tree; its output must already be
         what is committed. A drift means a file moved and the navigation was
         not regenerated — which is the state this replaced."""
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             CATALOG, MARK_END, MARK_START, render_catalog,
             render_experiment_readme, runs_by_experiment)
         text = (REPO / CATALOG).read_text()
         i, j = text.index(MARK_START), text.index(MARK_END)
         assert text[i:j] == render_catalog(REPO) + "\n", (
             "CATALOG.md's classification is stale; re-run "
-            "scripts/consolidate/render_log_navigation.py --write")
+            "scripts/maintenance/consolidation/render_log_navigation.py --write")
 
         runs = runs_by_experiment(REPO)
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
         #: their areas. `rglob("*/*")` also matched `phase_c1/analyses`, which
         #: has no README and is not meant to.
-        from consolidate.render_log_navigation import experiment_dirs
+        from maintenance.consolidation.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
                         for q in experiment_dirs(st)):
             assert (d / "README.md").read_text() == render_experiment_readme(
@@ -524,13 +524,13 @@ class TestTheNavigationIsDerivedFromTheTree:
         is exactly how `logs/README.md` came to say "only phase_c1 declares a
         stage, everything else is cross-stage" long after neither was true.
         """
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             LOGS_README, S_BEGIN, S_END, render_shared_readme,
             render_stage_readme, render_stages_index)
         for st in sorted((REPO / "logs/stages").glob("stage-*")):
             assert (st / "README.md").read_text() == render_stage_readme(st, REPO), (
                 f"{st.name}/README.md is stale; re-run "
-                "scripts/consolidate/render_log_navigation.py --write")
+                "scripts/maintenance/consolidation/render_log_navigation.py --write")
         assert render_stages_index(REPO) in (REPO / "logs/stages/README.md").read_text()
         assert (REPO / "logs/shared/README.md").read_text() == render_shared_readme(REPO)
         text = (REPO / LOGS_README).read_text()
@@ -556,7 +556,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         `$0` before any resource existed — still states `0.0`, so there is no
         legitimate `None` here to exempt.
         """
-        from consolidate.render_log_navigation import (
+        from maintenance.consolidation.render_log_navigation import (
             _closeout_cost, _closeout_verdict)
         blind = []
         for p in sorted((REPO / "logs").rglob("closeout/outcome.json")):
@@ -592,7 +592,7 @@ class TestTheNavigationIsDerivedFromTheTree:
         #: Experiment directories only -- `stages/<stage>/<experiment>` -- not
         #: their areas, and not the STAGE's own areas either: `history/` is
         #: stage-level material, has no experiment README and is not meant to.
-        from consolidate.render_log_navigation import experiment_dirs
+        from maintenance.consolidation.render_log_navigation import experiment_dirs
         for d in sorted(q for st in (REPO / "logs/stages").glob("stage-*")
                         for q in experiment_dirs(st)):
             body = (d / "README.md").read_text()
@@ -612,7 +612,7 @@ class TestTheStageMappingIsComplete:
 
     @pytest.fixture(scope="class")
     def attribution(self):
-        from consolidate import stage_attribution
+        from maintenance.consolidation import stage_attribution
         return stage_attribution
 
     def test_every_cited_path_including_untracked_really_exists(self, attribution):
@@ -631,12 +631,12 @@ class TestTheStageMappingIsComplete:
         assert external, "no external material is cited, so this proves nothing"
         #: A concrete cited path the skip-predicate audit can read out of this
         #: source, and one C1's manifest does NOT stage — the Stage-0
-        #: statistics cache. `artifacts/stage1/qwen3_0p6b_init_v0` would have
+        #: statistics cache. `artifacts/stages/stage-1/qwen3_0p6b_init_v0` would have
         #: been the wrong choice twice over: no separator-free name resolves,
         #: and that one IS staged, so the guard would not fire on a pod and the
         #: test would run against material that is not there.
-        if not (REPO / "artifacts/stage0/qwen3_4b_thinking_v1").is_dir():
-            pytest.skip("this checkout has no artifacts/stage0/; the "
+        if not (REPO / "artifacts/stages/stage-0/qwen3_4b_thinking_v1").is_dir():
+            pytest.skip("this checkout has no artifacts/stages/stage-0/; the "
                         "out-of-tree material these citations name is not "
                         "here to check")
         missing = [p for p in external if not (REPO / p).exists()]
@@ -731,7 +731,7 @@ class TestTheStageMappingIsComplete:
         here. A new area therefore has to be written down before it can appear,
         which is the same bargain every experiment row makes.
         """
-        from consolidate.render_log_navigation import STAGE_AREAS
+        from maintenance.consolidation.render_log_navigation import STAGE_AREAS
         known = {r["experiment_id"] for r in attribution.INVENTORY}
         for st in sorted((REPO / "logs/stages").glob("stage-*")):
             for d in st.iterdir():
@@ -753,7 +753,7 @@ class TestTheStageMappingIsComplete:
         committed = load(attribution.STAGE_INDEX)
         assert committed == attribution.document(REPO), (
             "logs/stages/index.json is stale; re-run "
-            "scripts/consolidate/stage_attribution.py --write")
+            "scripts/maintenance/consolidation/stage_attribution.py --write")
 
     def test_an_experiment_without_runs_is_still_reported(self, attribution):
         """Absent material is not absent work.
@@ -791,7 +791,7 @@ class TestSweepOutputsAreIsolated:
     def _mod(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "rpe", REPO / "scripts/autoinit/record_pod_environment.py")
+            "rpe", REPO / "scripts/shared/pod/record_pod_environment.py")
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)
         return m
@@ -864,7 +864,7 @@ class TestSweepOutputsAreIsolated:
         taken = tmp_path / "junit.xml"
         taken.write_text("<testsuite/>")
         r = sp.run([sys.executable,
-                    str(REPO / "scripts/autoinit/record_pod_environment.py"),
+                    str(REPO / "scripts/shared/pod/record_pod_environment.py"),
                     "--junit", str(taken)],
                    capture_output=True, text=True,
                    env={"PYTHONPATH": f"{REPO}/src", "PATH": "/usr/bin:/bin",
@@ -880,7 +880,7 @@ class TestSweepOutputsAreIsolated:
         import subprocess as sp
 
         r = sp.run([sys.executable,
-                    str(REPO / "scripts/autoinit/record_pod_environment.py"),
+                    str(REPO / "scripts/shared/pod/record_pod_environment.py"),
                     "--from-existing"],
                    capture_output=True, text=True,
                    env={"PYTHONPATH": f"{REPO}/src", "PATH": "/usr/bin:/bin",
@@ -889,7 +889,7 @@ class TestSweepOutputsAreIsolated:
         assert "cannot guess which one" in (r.stdout + r.stderr)
 
     def test_no_shared_default_remains(self):
-        src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+        src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
         assert "podsim_junit.xml" not in src, "the shared JUnit default is back"
         assert "podsim_pytest.log" not in src, "the shared log default is back"
         assert "def sweep_outputs" not in src, (
@@ -906,7 +906,7 @@ class TestEngineeringSpendIsAttributedByPackage:
     package stopped counting the moment it closed."""
 
     def _mod(self):
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         return m
 
     def _campaign(self, root: Path, name: str, *, cost, granted=None,
@@ -1109,7 +1109,7 @@ class TestTheCurrentViewReadsItsOwner:
     one prose line, so the line was wrong about all three at once."""
 
     def _view(self):
-        from consolidate.render_log_navigation import readiness_view
+        from maintenance.consolidation.render_log_navigation import readiness_view
         return readiness_view(REPO)
 
 
@@ -1137,7 +1137,7 @@ class TestTheCurrentViewReadsItsOwner:
     def test_a_launch_bound_claim_requires_the_current_tree(self, tmp_path,
                                                             monkeypatch):
         """A PASS swept at another commit is not a prepared launch-bound."""
-        from consolidate import render_log_navigation as m
+        from maintenance.consolidation import render_log_navigation as m
         v = self._view()
         #: The conjunction, asserted directly rather than through whichever
         #: combination happens to be live: readiness requires kind AND verdict
@@ -1163,7 +1163,7 @@ class TestRunOwnedGovernanceEvidence:
     def _L(self):
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "L", REPO / "scripts/pod/autoinit_c1_launch.py")
+            "L", REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py")
         m = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(m)
         return m
@@ -1197,7 +1197,7 @@ class TestRunOwnedGovernanceEvidence:
     def test_the_issuer_refuses_to_overwrite_an_authorization(self, tmp_path):
         """One-use means one artifact. Replacing one in place is how a consumed
         authorization becomes indistinguishable from a fresh one."""
-        src = (REPO / "scripts/autoinit/issue_c1_authorization.py").read_text()
+        src = (REPO / "scripts/stages/stage-1/phase_c1/issue_c1_authorization.py").read_text()
         assert "already exists. An authorization is one-use" in src
         assert "--run-id" in src
 
@@ -1215,9 +1215,9 @@ class TestARelocationRewritesOnlyWhatItOwns:
     A path string inside an artifact may be part of what a hash covers."""
 
     def test_the_protected_trees_are_declared(self):
-        from consolidate.relocate_logs import NEVER_REWRITE, rewritable
+        from maintenance.consolidation.relocate_logs import NEVER_REWRITE, rewritable
         assert "artifacts/" in NEVER_REWRITE
-        assert not rewritable("artifacts/stage3/c1_confirmation_v1/manifest.json")
+        assert not rewritable("artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json")
         assert "logs/stages/" in NEVER_REWRITE
         assert not rewritable("logs/stages/stage-1/phase_c1/runs/attempt10/manifest.json")
         assert rewritable("logs/README.md")
@@ -1225,7 +1225,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
     def test_the_frozen_battery_manifest_verifies(self):
         """The check the scorer makes, made here at $0."""
         from aadistill.infrastructure.manifest import sha256_json
-        p = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        p = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
         if not p.is_file():
             pytest.skip("the battery working copy is not present")
         m = json.loads(p.read_text())
@@ -1236,7 +1236,7 @@ class TestARelocationRewritesOnlyWhatItOwns:
 
     def test_it_matches_the_canonical_store(self):
         from aadistill.infrastructure.manifest import sha256_file
-        a = REPO / "artifacts/stage3/c1_confirmation_v1/manifest.json"
+        a = REPO / "artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json"
         b = Path("/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/"
                  "manifest.json")
         if not (a.is_file() and b.is_file()):
@@ -1258,7 +1258,7 @@ class TestProjectSessionCostShapes:
     """
 
     def _mod(self):
-        from consolidate import derive_budget as m
+        from maintenance.consolidation import derive_budget as m
         return m
 
     def _run(self, root: Path, name: str, doc: dict):

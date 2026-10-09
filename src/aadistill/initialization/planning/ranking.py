@@ -144,6 +144,44 @@ class BeamSchedule:
 
 
 @dataclass(frozen=True)
+class QualityOrder:
+    """Eligible states in the policy's own quality order, with nothing applied.
+
+    The ONE place the Pareto algorithm's output lives, so beam pruning and
+    finalist retention cannot drift apart about what "better" means. It carries
+    no width and no selection: `K` is the caller's, and so is the retention rule.
+
+    `ordered` is the fronts concatenated best-first, each front internally sorted
+    by the policy's deterministic tie-break. It is NOT a scalar score and not a
+    sort by any single objective -- collapsing a multi-objective search into one
+    number is the failure the fronts exist to avoid.
+    """
+
+    fronts: tuple[tuple[InitializationState, ...], ...]
+    rejected: tuple[tuple[InitializationState, str], ...] = ()
+
+    @property
+    def ordered(self) -> tuple[InitializationState, ...]:
+        return tuple(s for front in self.fronts for s in front)
+
+    @property
+    def ordered_ids(self) -> tuple[str, ...]:
+        return tuple(s.state_id for s in self.ordered)
+
+    def front_of(self, state_id: str) -> int | None:
+        for i, front in enumerate(self.fronts):
+            if any(s.state_id == state_id for s in front):
+                return i
+        return None
+
+    def take(self, k: int) -> tuple[InitializationState, ...]:
+        """The best `k` by quality order. Fewer if fewer are eligible."""
+        if k < 1:
+            raise RankingError("k must be at least 1")
+        return self.ordered[:k]
+
+
+@dataclass(frozen=True)
 class BeamRankingPolicy:
     policy_id: str
     version: int
@@ -267,6 +305,76 @@ class BeamRankingPolicy:
             return state.impl_ids[0] if state.impl_ids else "root"
         return "|".join(state.impl_ids[:-1]) or "root"   # parent_path
 
+    #: THE TWO RETENTION RULES, named so a record cannot be ambiguous about
+    #: which one produced it.
+    #:
+    #: Diversity is an EXPLORATION mechanism, not a winner-selection mechanism.
+    #: While a search is running its states are partial hypotheses and one early
+    #: proxy measurement must not extinguish a whole structural family, so beam
+    #: pruning keeps a slot per lineage. Once complete leaves exist that job is
+    #: finished, and the remaining question is only which complete candidates the
+    #: search objectives themselves rank highest.
+    #:
+    #: Conflating the two has a specific consequence: with rotation in force, a
+    #: sole-member lineage is retained ahead of better-ranked candidates that
+    #: share an already-represented lineage, so a finalist set is not the
+    #: prefix of the quality order and widening K does not admit the next-best
+    #: candidates. Which retention rule an experiment wants after its search
+    #: completes is an experiment's decision; it is recorded with that
+    #: experiment, not here.
+    RETENTION_QUALITY_ONLY = "quality_only"
+    RETENTION_WITH_DIVERSITY = "quality_with_lineage_diversity"
+
+    def quality_order(self, states: Sequence[InitializationState]
+                      ) -> "QualityOrder":
+        """Eligible states in SCIENTIFIC QUALITY ORDER. No diversity, no width.
+
+        The ordering is the policy's own and is not a new scalar score: epsilon
+        Pareto fronts, best front first, deterministic tie-break within each
+        front, fronts concatenated. Both retention rules consume this, so there
+        is exactly one implementation of the Pareto algorithm and a finalist
+        selection cannot drift from the beam's notion of quality.
+
+        ``K`` is not a parameter here. Take a prefix of ``ordered``, or call
+        :meth:`rank` with the width the caller wants.
+        """
+        required = self.required_metrics()
+        eligible: list[InitializationState] = []
+        rejected: list[tuple[InitializationState, str]] = []
+        for state in states:
+            if not _is_measured(state):
+                rejected.append((state, f"not measured ({state.validity.value})"))
+                continue
+            try:
+                state.ready_for_ranking(required)
+            except Exception as exc:                              # noqa: BLE001
+                rejected.append((state, f"unrankable: {exc}"))
+                continue
+            failed = [g.name for g in self.guardrails if not g.predicate(state)]
+            if failed:
+                rejected.append((state, f"guardrail {failed}"))
+                continue
+            eligible.append(state)
+
+        vectors = {s.state_id: self._vector(s) for s in eligible}
+        remaining = list(eligible)
+        fronts: list[list[InitializationState]] = []
+        while remaining:
+            front = [
+                s for s in remaining
+                if not any(self._dominates(vectors[o.state_id], vectors[s.state_id])
+                           for o in remaining if o is not s)
+            ]
+            if not front:  # pragma: no cover - only reachable with a broken comparator
+                raise RankingError(
+                    f"{self.qualified_id}: dominance produced an empty front over "
+                    f"{len(remaining)} states; the comparator is not a strict order")
+            fronts.append(sorted(front, key=self._tie_key))
+            ids = {id(s) for s in front}
+            remaining = [s for s in remaining if id(s) not in ids]
+        return QualityOrder(fronts=tuple(tuple(f) for f in fronts),
+                            rejected=tuple(rejected))
+
     def _select_with_diversity(self, ordered: Sequence[InitializationState],
                                room: int) -> list[InitializationState]:
         """Take ``room`` states, giving every lineage a slot before any gets two.
@@ -304,63 +412,55 @@ class BeamRankingPolicy:
         return picked
 
     def rank(self, states: Sequence[InitializationState],
-             beam_width: int | None) -> "RankingResult":
+             beam_width: int | None, *,
+             diversity: bool = True) -> "RankingResult":
         """Rank states; ``beam_width=None`` retains every eligible state.
 
         ``None`` is how the schedule expresses a warmup level. It is a distinct
         value rather than a very large width so the manifest can say "this level
         pruned nothing by design" instead of "this level happened not to prune".
+
+        ``diversity`` chooses the RETENTION RULE over one shared quality
+        ordering. ``True`` is beam pruning: lineage rotation, so exploration
+        survives an early proxy measurement. ``False`` is finalist retention:
+        the first ``beam_width`` states in quality order and nothing else. It
+        defaults to ``True`` so every existing beam keeps its behaviour
+        unchanged, and the result records which rule ran.
         """
         if beam_width is not None and beam_width < 1:
             raise RankingError("beam width must be at least 1")
-        required = self.required_metrics()
-        eligible, rejected = [], []
-        for state in states:
-            if not _is_measured(state):
-                rejected.append((state, f"not measured ({state.validity.value})"))
-                continue
-            try:
-                state.ready_for_ranking(required)
-            except Exception as exc:
-                rejected.append((state, f"unrankable: {exc}"))
-                continue
-            failed = [g.name for g in self.guardrails if not g.predicate(state)]
-            if failed:
-                rejected.append((state, f"guardrail {failed}"))
-                continue
-            eligible.append(state)
-
-        vectors = {s.state_id: self._vector(s) for s in eligible}
-        remaining = list(eligible)
-        fronts: list[list[InitializationState]] = []
-        while remaining:
-            front = [
-                s for s in remaining
-                if not any(self._dominates(vectors[o.state_id], vectors[s.state_id])
-                           for o in remaining if o is not s)
-            ]
-            if not front:  # pragma: no cover - only reachable with a broken comparator
-                raise RankingError(
-                    f"{self.qualified_id}: dominance produced an empty front over "
-                    f"{len(remaining)} states; the comparator is not a strict order")
-            fronts.append(sorted(front, key=self._tie_key))
-            ids = {id(s) for s in front}
-            remaining = [s for s in remaining if id(s) not in ids]
-
-        ordered = [state for front in fronts for state in front]
+        order = self.quality_order(states)
+        fronts, rejected = [list(f) for f in order.fronts], list(order.rejected)
+        ordered = list(order.ordered)
         room = len(ordered) if beam_width is None else beam_width
-        selected = self._select_with_diversity(ordered, room)
+        if diversity:
+            selected = self._select_with_diversity(ordered, room)
+        else:
+            selected = list(ordered[:room])
+        retention = (self.RETENTION_WITH_DIVERSITY if diversity
+                     else self.RETENTION_QUALITY_ONLY)
         chosen_ids = {s.state_id for s in selected}
+        position_in_order = {s.state_id: i for i, s in enumerate(ordered)}
 
         decisions: list[dict[str, Any]] = []
         for f_index, front in enumerate(fronts):
             for position, state in enumerate(front):
                 keep = state.state_id in chosen_ids
+                rank_in_order = position_in_order[state.state_id] + 1
                 if keep and beam_width is None:
                     reason = "kept: warmup level, no quality pruning by design"
+                elif keep and not diversity:
+                    reason = (f"kept: quality order {rank_in_order} of "
+                              f"{len(ordered)} (front {f_index}), top "
+                              f"{beam_width} by the policy's own ordering; "
+                              f"lineage diversity NOT applied")
                 elif keep:
                     reason = (f"kept: front {f_index}, lineage "
                               f"{self.lineage(state)!r}, beam {beam_width}")
+                elif not diversity:
+                    reason = (f"not retained: quality order {rank_in_order} of "
+                              f"{len(ordered)} (front {f_index}), outside the "
+                              f"top {beam_width}")
                 elif f_index:
                     reason = (f"pruned: epsilon-dominated (front {f_index}) and the "
                               f"beam of {beam_width} was already full")
@@ -373,6 +473,11 @@ class BeamRankingPolicy:
                     "path": state.path_label,
                     "front": f_index,
                     "position_in_front": position,
+                    #: The position in the SHARED quality order. Recorded
+                    #: because `(front, position_in_front)` alone needs the
+                    #: reader to reconstruct the concatenation, and a finalist
+                    #: record's whole claim is about this number.
+                    "quality_order": rank_in_order,
                     "lineage": self.lineage(state),
                     "selected": keep,
                     "objectives": {o.key: float(state.evaluation.values[o.key])
@@ -385,6 +490,7 @@ class BeamRankingPolicy:
         for state, why in rejected:
             decisions.append({"state_id": state.state_id, "path": state.path_label,
                               "front": None, "position_in_front": None,
+                              "quality_order": None,
                               "lineage": None, "selected": False, "objectives": {},
                               "diagnostics": {}, "reason": f"pruned: {why}"})
 
@@ -394,6 +500,7 @@ class BeamRankingPolicy:
             fronts=tuple(tuple(s.state_id for s in f) for f in fronts),
             decisions=tuple(decisions),
             lineages_kept=tuple(sorted({self.lineage(s) for s in selected})),
+            retention=retention,
         )
 
 
@@ -406,6 +513,10 @@ class RankingResult:
     fronts: tuple[tuple[str, ...], ...]
     decisions: tuple[dict[str, Any], ...]
     lineages_kept: tuple[str, ...] = ()
+    #: WHICH RETENTION RULE produced `selected`. Defaulted to the beam's rule so
+    #: a historical record deserialized without it still reads correctly: every
+    #: selection written before this field existed was lineage-diverse.
+    retention: str = "quality_with_lineage_diversity"
 
     @property
     def selected_ids(self) -> tuple[str, ...]:
@@ -421,6 +532,7 @@ class RankingResult:
             "beam_width": self.beam_width, "selected": list(self.selected_ids),
             "fronts": [list(f) for f in self.fronts],
             "lineages_kept": list(self.lineages_kept),
+            "retention": self.retention,
             "decisions": list(self.decisions),
         }
 

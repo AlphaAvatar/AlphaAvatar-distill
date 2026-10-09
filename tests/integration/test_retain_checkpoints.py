@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "scripts" / "pod"))
-from retain_checkpoints import (  # noqa: E402
+from shared.pod.retain_checkpoints import (  # noqa: E402
     choose_keep,
     deterioration_onset,
     read_trajectory,

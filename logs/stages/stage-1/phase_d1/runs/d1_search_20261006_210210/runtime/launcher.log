@@ -1,0 +1,43 @@
+[21:07:29] budget: expected 657 min $11.93 · soft $19.90 · hard $20.45 (authorized $21.49)
+[21:07:30] NVIDIA L40S $1.09/h, stock Low
+[21:07:30] account funds OK: the provider account holds $199.9506 against the $30.0000 this session must be able to fund
+[21:07:30] run d1_search_20261006_210210 on the supervised_target arm, design 83cd49ff2e83, config 8fa0a2c91079, no open blockers
+[21:07:30] session contract verified at $0: protocol ac23798a4572, config 8fa0a2c91079, suite a1197205e43a
+[21:07:30] science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1
+[21:07:31] launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers
+[21:07:31] session commit 77aedc90f93f verified: harness digests to 3b59b9480015…, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json differs from the authorized base
+[21:07:37] aad_autoinit_77aedc90.bundle (29052777 bytes, c44ff349c373) round-trips to 77aedc90f93f carrying this authorization and harness 3b59b9480015
+[21:07:37] precheck OK: 0 relay inputs (), 3 local assets
+[21:07:37] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[21:10:44] budget: expected 657 min $11.93 · soft $19.90 · hard $20.45 (authorized $21.49)
+[21:10:45] NVIDIA L40S $1.09/h, stock Low
+[21:10:45] account funds OK: the provider account holds $199.9506 against the $30.0000 this session must be able to fund
+[21:10:45] run d1_search_20261006_210210 on the supervised_target arm, design 83cd49ff2e83, config 8fa0a2c91079, no open blockers
+[21:10:45] session contract verified at $0: protocol ac23798a4572, config 8fa0a2c91079, suite a1197205e43a
+[21:10:45] science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1
+[21:10:46] launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers
+[21:10:46] session commit 77aedc90f93f verified: harness digests to 3b59b9480015…, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_210210/governance/authorization.json differs from the authorized base
+[21:10:51] aad_autoinit_77aedc90.bundle (29052777 bytes, c44ff349c373) round-trips to 77aedc90f93f carrying this authorization and harness 3b59b9480015
+[21:10:51] precheck OK: 0 relay inputs (), 3 local assets
+[21:10:52] watchdog detached — hard 1126 min = $20.45
+[21:10:52] created gw4ofgfphr07ea at $1.09/h
+[21:11:46]   starting (60s) — $0.02
+[21:12:49] TCP 22 at 202.181.159.240:15117 after 2.0 min
+[21:12:52] draw 1: ssh reachable — $0.04
+[21:13:22] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09
+[21:13:22] draw 1: running setup
+[21:19:21] draw 1: setup complete — $0.15
+[21:19:26] driver detached, pid 1532, confirmed by descriptor_probe — $0.16
+[21:21:36]   2026-10-06T21:19:24Z MARKER:DRIVER_START — $0.20
+[06:09:44]   2026-10-07T06:07:35Z MARKER:ALL_DONE — $9.79
+[06:09:44] polling ended: ALL_DONE — $9.79
+[06:11:37]   manifest rc=0
+5 file(s) across 5 class(es) -> /workspace/manifest.json
+  final_required: 5 · mutable_snapshot: 0 · final_streams_quiescent: True
+[06:17:00]   product e5e3edb0477b25147de952153da8fc21: rc=0, 1.11 GiB, identity MATCHED
+[06:18:51]   product 56388d47b6a71e1b49e44929e48d4061: rc=0, 1.11 GiB, identity MATCHED
+[06:20:43]   product a2b2f04ae642ac69d278c20feb42d52f: rc=0, 1.11 GiB, identity MATCHED
+[06:22:40]   product ea4fe4d356b8c8f40f048256df6b8999: rc=0, 1.11 GiB, identity MATCHED
+[06:22:40] teardown gate: allowed=True failed=None
+[06:22:40] deleting pod (gate passed)
+[06:22:51] pod deleted — 552.0 min, $10.03; provider confirms gone: True

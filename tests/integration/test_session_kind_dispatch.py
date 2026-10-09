@@ -21,6 +21,7 @@ reporting success.
 from __future__ import annotations
 
 import contextlib
+import importlib.util
 import io
 import re
 import sys
@@ -30,9 +31,9 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO / "src"))
-sys.path.insert(0, str(REPO / "scripts/pod"))
+sys.path.insert(0, str(REPO / "scripts"))
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 #: Enough to construct a `SessionSpec`; no pod, no provider, no network.
 BASE_ARGS = ["--scr", "/tmp/does-not-matter", "--session-commit", "d" * 40,
@@ -65,7 +66,7 @@ DEFAULT_KIND = "spend"
 #: Kinds that must NOT share the generic loader. Each names a distinct
 #: authorization type whose ceiling prices a distinct amount of work.
 DEDICATED_KINDS = ("phase_a", "phase_b", "recovery_continuation", "continuation_b",
-                   "c1")
+                   "c1", "d1")
 #: `[a-z0-9_]`, not `[a-z_]`. The original class could not match a kind with a
 #: digit in it, so `c1`'s branch was invisible to this parser and its body was
 #: attributed to the preceding branch — the test reported 'no branch handles c1'
@@ -120,12 +121,47 @@ UNBUILDABLE: list[tuple[str, str]] = []
 
 
 def launchers() -> dict[str, tuple[str, str]]:
-    """launcher module -> (SESSION_KIND it exports, authorization class name)."""
+    """launcher module -> (SESSION_KIND it exports, authorization class name).
+
+    **THE REGISTRY IS RESTORED BEFORE THIS RETURNS.** Building a spec runs the
+    launcher's own registration — the C3 launcher's `spec()` calls
+    `register_experimental_operators()` — and this function is called at MODULE
+    scope because `@pytest.mark.parametrize` needs its result at collection time.
+    So the additions land BEFORE any module-scoped fixture takes its `before`
+    snapshot, and the root `conftest`'s cross-module isolation can never remove
+    them: every later module inherits them as part of its baseline.
+
+    Measured: with this module in the run, `write_d1_design.build()` enumerated a
+    larger operator space and the D1 design stopped regenerating byte-identically
+    — a failure in another experiment's committed record, caused by a collection
+    -time side effect here. Cleaning up is this function's job because this
+    function is what dirtied it.
+    """
+    from aadistill.initialization.operators import base as _ops
+
+    before = set(_ops._IMPLEMENTATIONS)
+    try:
+        return _enumerate_launchers()
+    finally:
+        for impl_id in sorted(set(_ops._IMPLEMENTATIONS) - before):
+            _ops.unregister_implementation(impl_id)
+
+
+def _enumerate_launchers() -> dict[str, tuple[str, str]]:
     found = {}
-    for path in sorted((REPO / "scripts/pod").glob("*_launch.py")):
+    #: Launchers live with the experiment that owns them (`scripts/stages/...`)
+    #: or a stage-neutral capability (`scripts/shared/...`), so they are
+    #: enumerated by name shape across the whole tree rather than from one
+    #: flat directory.
+    paths = [p for p in sorted((REPO / "scripts").rglob("*_launch.py"))
+             if "__pycache__" not in p.parts]
+    for path in paths:
         mod_name = path.stem
         try:
-            mod = __import__(mod_name)
+            spec_obj = importlib.util.spec_from_file_location(mod_name, path)
+            mod = importlib.util.module_from_spec(spec_obj)
+            sys.modules[mod_name] = mod
+            spec_obj.loader.exec_module(mod)
         except BaseException:                     # noqa: BLE001 - not a launcher we can build
             continue
         if not (hasattr(mod, "spec") and hasattr(mod, "build_parser")):
@@ -281,7 +317,7 @@ def test_a_launcher_that_refuses_to_build_is_recorded_not_swallowed():
     The C2 replay launcher refuses on this tree by design: its spec is pinned to
     attempt 3's artifact digests, and the 2026-09-25 topology migration moved
     the operator bytes those digests were produced by. That refusal is correct
-    and is asserted directly in `scripts/experiments/stage-1/phase_c2/tests/test_c2_replay_specs.py`; what
+    and is asserted directly in `scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py`; what
     this pins is that it is RECORDED here rather than silently dropping a
     launcher out of the dispatch probe.
     """

@@ -19,11 +19,11 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-POD = REPO / "scripts/pod"
+POD = REPO / "scripts"
 
 # Every setup script that creates a vLLM environment.
 VLLM_SETUPS = sorted(
-    p for p in POD.glob("*_setup.sh")
+    p for p in POD.rglob("*_setup.sh")
     if re.search(r"pip install [^\n]*\bvllm\b", p.read_text())
 )
 

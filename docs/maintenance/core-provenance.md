@@ -1,0 +1,713 @@
+# Core provenance — where `src/aadistill`'s guards came from
+
+`src/aadistill` is the reusable algorithm core. It must read as mechanism:
+mathematical definitions, interfaces, invariants, capability requirements and
+failure semantics (AGENTS.md P3, 2.3). It must not document itself by one
+campaign's run history — which experiment measured what, at which probe size, on
+which seeds, for how many dollars — because a core that explains itself through
+`E7`, `Phase-A attempt 5` and `$0.6426` is owned by that campaign.
+
+Most of those guards are real, though, and each was paid for. Deleting the
+reason would make the next agent remove the guard. So the reasons live **here**,
+outside the core, keyed by the module and the mechanism they justify.
+
+**This file authorizes nothing.** It is a register of why code exists. The
+authoritative accounts stay where they already are: `logs/stages/stage-3/history/EXPERIMENTS.md` for
+runs, `logs/budget/ledger.md` for money, `logs/state/phase_index.md` for phase
+history, and the per-validation directories under the experiment that each validation serves, `logs/stages/stage-<id>/<experiment>/validations/`.
+
+`scripts/maintenance/architecture/core_ownership.py` rule `instance_prose` is what keeps
+core clean; this file is where what it removes is supposed to land.
+
+---
+
+## Register
+
+Captured 2026-09-10 from the prose that was removed from core, verbatim, so
+nothing was lost in the move. Each entry names the module whose mechanism the
+incident justifies.
+
+
+### `src/aadistill/data/e5_pack.py`
+
+```text
+    E5 examples are not sessions to be rendered: they are token streams that already
+    source trajectory are never co-packed — for E5 that matters as much as it did for
+    Production packing may cut the last session at a block boundary; E5 may not,
+    """Adapt one E5 example record to the packer's input type.
+    """Pack E5 examples with truncation forbidden.
+    `ladder.json` declares ONE rung, covering the training blocks only. An E5
+```
+
+### `src/aadistill/data/extra_stream.py`
+
+```text
+    E7 asks whether adding general-text teacher KD restores general language
+```
+
+### `src/aadistill/data/paired_corpus.py`
+
+```text
+    # Attempt 4 measured what makes this necessary: R's supervised continuation runs
+```
+
+### `src/aadistill/data/prefix_split.py`
+
+```text
+    E5 asks whether training on **student-visited** prefix states beats training on
+```
+
+### `src/aadistill/data/sessions.py`
+
+```text
+    # E5 forbids cutting any sample: a cut prefix changes the state
+```
+
+### `src/aadistill/evaluation/general_text.py`
+
+```text
+    E6b showed two objectives improving validation CE by the same amount while only
+    one moved autonomous behaviour, and the FineWeb NLL of the E1 lineage actually
+```
+
+### `src/aadistill/governance/authorization.py`
+
+```text
+    lived in prose: E6b overran by $0.56 with the number in a plan document, and a
+    finished corpus build idled ~$8.70 because teardown was tied to a generous
+    schema and stated "no code path to Phase A" for every artifact any
+```
+
+### `src/aadistill/governance/grant.py`
+
+```text
+    identity nobody computed. Phase A, Phase B, the continuation and C1 each carry
+```
+
+### `src/aadistill/governance/post_freeze.py`
+
+```text
+    frozen source sets — Phase A's harness, Phase B's executable, the recovery
+    #: Phase-B values now live in `scripts/stages/stage-1/phase_b/post_freeze.py`.
+    # `accounted_for` above answers one question: may a Phase-B launch run against
+    # But "Phase B may not launch against this tree" and "nobody ever explained why
+```
+
+### `src/aadistill/infrastructure/artifact_gate.py`
+
+```text
+    E6b lost its structured training logs to a bundling step that listed
+    `artifacts/audit/three_mode` and two JSON files — the set E6 needed — and never
+    from E6, which did not train. `tar` bundled what it was given, exited 0, the
+    that construct (E3, E4, E5 — frozen records of completed runs). It is banned
+    # required because it is the one E6b lost, and because it is the only artifact
+    tarball — that difference is the entire E6b artifact loss.
+    # the products this session OWES off-pod actually secured? Phase-A attempt 11
+```
+
+### `src/aadistill/infrastructure/budget.py`
+
+```text
+    E6b billed $7.68 against a $7.12 authorization. The proximate cause was a step
+    run actually sustained — a 14% miss, ~$0.81 of unbudgeted time. The structural
+    hashing, transfer and verification have somewhere to happen. E6b had no such
+    # The step time E6b actually sustained: L40S, Stage 3 ladder arms, 2916 steps,
+    # E6b — is superseded. It is recorded in `SUPERSEDED_STEP_SECONDS` so that a
+    This is the gate E6b did not have. The driver re-priced before each arm
+    `step_time_floor` defaults to the E6b measurement because that is the only
+    # materializes EARLY in a session — Phase A's reference-cache fallback is
+```
+
+### `src/aadistill/infrastructure/log_relay.py`
+
+Added 2026-09-15, with `session_runner.py` below, when `RelaySpec.whole_file`
+landed. The mechanism the incident justifies: a spec may declare that its writer
+rewrites the file, and such a spec is read from offset zero and replaced
+atomically rather than appended to, refusing rather than writing a document
+truncated at the chunk cap.
+
+```text
+    #: C1 attempt 18 mirrored `c1_evidence.json`, which the driver rewrites on
+    #: every state change, through the append path. The relay had synced 11,343
+    #: bytes of an early version; the driver replaced the file with a
+    #: 23,425-byte one; `tail -c +11344` then appended the NEW document's tail
+    #: to the OLD document's head. The local copy came out exactly the right
+    #: size and did not parse. The artifact-store copy was intact, so the run's
+    #: verdict was never in doubt — but the primary evidence file came home
+    #: unreadable, and had the store copy also failed there would have been
+    #: nothing.
+```
+
+The regression that pins the guard against a *stored* offset — not merely
+against never writing one — is `tests/infrastructure/test_log_relay.py::
+test_a_stored_offset_cannot_make_a_whole_file_spec_read_from_the_middle`. The
+number it uses, `11343`, is the offset the attempt-18 relay actually left
+behind; the guard survived every other test with itself removed, because a
+whole-file spec stores `0` and so reads `0` anyway.
+
+### `src/aadistill/infrastructure/provider.py`
+
+```text
+    * **Polling** goes over the RunPod GraphQL API. Every launcher since E2 reads
+```
+
+### `src/aadistill/infrastructure/remote.py`
+
+```text
+    had returned in 74 seconds. So the lesson is not "use setsid": E6b already did.
+    # killed the E6b setup at INIT_READY.
+```
+
+### `src/aadistill/infrastructure/session.py`
+
+```text
+    Phase-A attempt 1             $0.1075   ``SESSION_KIND`` leaked between two sessions
+    device canary attempt 1       $0.0603   the base read ``self.a.teacher_revision``; the
+    device canary retry           $0.0637   the shared setup copies two assets out of
+    been paid for. Phase-A attempt 5 died at $0.6426 on a calibration file that
+    #: Added 2026-08-22 because the five Attempt-12 leaves cannot travel by the
+    retry, which had honestly declared it wanted none, died at $0.0637 when that
+    #: deleted $2.82 of verified checkpoints on 2026-08-13 for want of this.
+    controls of a $2.82 session.
+    #: callable rather than a list because Phase A derives its nine probe streams
+    #: while having secured nothing at all. Phase-A attempt 11 staged five
+    #: log. C1 attempt 5's complete skip list was therefore ~100 lines that could
+    between two sessions sharing one setup script ($0.1075) because it was a
+    them anyway ($0.0637); here it reads `SESSION_ASSETS`.
+    Device-canary attempt 1 was lost at $0.0603 because the base read three
+```
+
+### `src/aadistill/infrastructure/session_prechecks.py`
+
+```text
+    Phase A each had their own copy of one, and nobody could see the asymmetry
+    checks out this commit. Continuation attempt 5 died at $0.1369 on a stale
+    `check_lineage` adds Phase A's stronger third question: is everything else in
+```
+
+### `src/aadistill/infrastructure/session_runner.py`
+
+```text
+    """Read the probe by LABEL, never by line position (see e8b: a $0.19 misread)."""
+    # $0.0603 because the machinery read three attributes its parser had
+    # both controls of a $2.82 session.
+    # The reports are fetched BEFORE the products: Phase A's
+```
+
+Added 2026-09-15, alongside `log_relay.py` above: the evidence document is the
+one relay spec that declares `whole_file`, and the removed prose named the run
+that proved it had to.
+
+```text
+            #: change, not appended to. Relayed through the offset scheme, C1
+            #: attempt 18's copy came home as the head of an early version
+            #: followed by the tail of the final one — right size, unparseable.
+```
+
+### `src/aadistill/infrastructure/source_identity.py`
+
+```text
+    inside a frozen source set, and rewriting them would move Phase-A and Phase-B
+```
+
+### `src/aadistill/infrastructure/watchdog.py`
+
+```text
+    Two E6b failures live here.
+    has been the documented last-resort cost layer since E4 and has never once been
+    the pod and must not hand the replacement a fresh meter (E6b launcher,
+    the E6b inference — quiet log, therefore quiet session — is not expressible.
+```
+
+### `src/aadistill/initialization/calibration/datasets.py`
+
+```text
+    is no longer an out-of-sample number. E8a already hit a near-miss here — its
+    existing E8 proof mean the same thing by the same rule.
+```
+
+### `src/aadistill/initialization/calibration/items.py`
+
+```text
+    it and :mod:`aadistill.autoinit.fixed_path` did not. C1 attempt 8 paid for that
+    defect appeared once before, on Phase-A attempt 5, and for the same reason.
+```
+
+### `src/aadistill/initialization/calibration/profiles.py`
+
+```text
+    E8a measured its depth objective on one frozen 67-item domain-balanced mixture.
+    without a pinned revision cannot support P4 reproduction, and leaving the
+```
+
+### `src/aadistill/initialization/device.py`
+
+```text
+    """The device contract for the Phase-A Stage-1 search path.
+    false on a GPU. Attempt 6 died in the search's reload validation; attempt 7 died
+    ``scripts/shared/training/search_depth_map.py`` inserted ``.cpu()``, and E8a runs that
+    reduction on the accelerator. Attempt 10 spent $11.43 discovering it. The
+    checked it. Attempt 9 died at $0.34 on ``project.py``'s ``avg``, allocated with a
+    # CPU budget. Added 2026-08-19 after Phase-A attempt 10.
+    `autoinit_preflight_setup.sh` has computed this correctly since E8b and
+```
+
+### `src/aadistill/initialization/operators/attention_activation.py`
+
+```text
+    executable source set that Phase B's closed preregistration binds to digest
+    not in the declared set, so the Phase-A/B executable identity is untouched. This
+    #: THE TRANSFER BOUNDARY, and the defect C1 attempt 9 died on.
+    #: evidence/cache form, and it is what gets hashed and kept. Attempt 9
+```
+
+### `src/aadistill/initialization/operators/base.py`
+
+```text
+    different algorithms for deciding it, and E8a showed they disagree: the
+```
+
+### `src/aadistill/initialization/operators/depth.py`
+
+```text
+    Two algorithms, deliberately kept as separate immutable ids because E8a showed
+    **This returned ``.cpu()`` until 2026-08-19, and that cost $11.43.** E8a —
+    copied off the device. Attempt 10 ran 10 h 47 m inside one expansion, GPU at
+    where E8a left them.
+    it against the real mixture: Phase-A attempt 5 died earlier, at the
+    ``scripts/shared/training/search_depth_map.py``, the E8a script whose algorithm this
+    # PARTIAL CACHING. Until 2026-08-27 this was all-or-nothing, and Phase-B
+    "E8a kept its cache on the accelerator and therefore checked
+    it, which is the $11.43 failure.
+```
+
+### `src/aadistill/initialization/operators/width.py`
+
+```text
+    sees the teacher's. Those are different projections, and E8a is the evidence that
+```
+
+### `src/aadistill/initialization/planning/fixed_path.py`
+
+```text
+    C1 session owns those constants and hands them in, exactly as it hands in
+```
+
+### `src/aadistill/initialization/planning/generation_compat.py`
+
+```text
+    Phase-A attempt 4 was refused at $0.2052 by a binding that was working exactly as
+```
+
+### `src/aadistill/initialization/planning/ranking.py`
+
+```text
+    preference. E7 moved held-out FineWeb NLL by −5.22 nats and autonomous behaviour
+    discarding one on a single step-0 measurement is exactly the mistake E8a
+    # Not a style rule: a single-objective beam is the failure mode E7
+    structural hypothesis on a step-0 measurement. E8a is the standing
+    #: **NLL is not an objective.** E7 is the reason, and it is a direct measurement
+    #: rather than a worry: a −5.22 nat swing in held-out NLL moved autonomous
+    #: a single step-0 measurement is the mistake E8a documented: a proxy that looked
+    should. Instead the preflight is marked as requiring review and Phase A does
+    #: flag appears under. These were literals naming Phase A, so a generic
+```
+
+### `src/aadistill/initialization/planning/recovery.py`
+
+```text
+    ->  rung 1: identical 0.86M recovery on seed sa, all of them
+    ->  rung 2: the control (unconditionally) + the best S searched leaves, seed sb
+    ->  optional seed sc, for tied candidates only
+    * **Selection is on autonomous behaviour, not state NLL** (E7: a −5.22 nat NLL
+    0.1290 on seed alone.
+    #: E1/P1 at the 0.86M probe rung. Frozen: AutoInitializer v1 changes the
+    never computed correctness that way, and cannot: of the battery's 190 prompts
+    only **170 are correctness-scorable**, because the 20 `code` items have no
+    measured. The behaviour metric moves **0.1290 on training seed alone**, and
+    #: and the Phase-A plan always declares one.
+    #: one study -- 0.1290 for behavior_v0 -- and it belongs to that
+    """Which **searched** leaves advance to seed sb.
+    ``tie_pending``            finalists are equivalent after sa+sb; seed sc is
+    fully compressed leaf — E8b measured exactly that reversal, DC beating DP by
+```
+
+### `src/aadistill/initialization/planning/search.py`
+
+```text
+    have continued to the watchdog's $23.05 ceiling.
+    # inside the beam. A correct Phase-B loader delegating to
+    # `config` entirely. So no state id, and no recorded Phase-A state, moves.
+    # Phase-A attempt 6 died here. `_validate` forwards both models through
+```
+
+Added 2026-09-15 with `SearchConfig.impl_profiles` and the module-level
+`expansion_profiles`. Two mechanisms, and the incidents that justify them:
+
+`expansion_profiles` is the single definition of the branching factor because a
+second implementation of the same rule went wrong the first time it was written.
+The Phase-C2 cost model counted profiles without the `CalibrationNeed.NONE`
+case and predicted **12** children of the root where Phase-B attempt 5 had
+generated **10** — a 20% over-count at level 0, on the model whose whole job is
+to price a search. Collapsing both callers onto one function is why the model
+now reproduces that run's level shape exactly (10 / 46 / 19 / 7).
+
+```text
+    pieces of code they disagreed immediately — the second one branched a
+    `CalibrationNeed.NONE` operator over both mixtures and predicted 12 children
+    of the root where Phase B generated 10.
+```
+
+`config_hash` omits `impl_profiles` when unset rather than emitting a null,
+because Phase A's and Phase B's `config_hash` values are recorded in their
+committed `search_result.json` and a key added for a later experiment would have
+moved both, making those records unverifiable against the current code (P4).
+
+```text
+    #: carries. Adding the key unconditionally would have moved Phase A's
+    #: and Phase B's `config_hash` — recorded in their committed
+    #: `search_result.json` — and made those records unverifiable against
+    #: the current code, which is the reproducibility P4 asks for.
+```
+
+### `src/aadistill/initialization/planning/stage1_import.py`
+
+```text
+    """Import a *completed, verified* Phase-A Stage-1 result. Nothing weaker.
+```
+
+### `src/aadistill/initialization/planning/stage1_selection.py`
+
+```text
+    Phase-B attempt 4 paid for and **completed** an eight-hour joint P=2 search. It
+    # because no file carries them. Attempt 5 omitted `arch_signature`,
+```
+
+### `src/aadistill/initialization/specs/identity_collapse.py`
+
+```text
+    Phase-B attempt 5 completed its joint P=2 search and then died in Stage 2 on
+    retained Phase-A finalists: same content-derived state id, same re-derived
+```
+
+### `src/aadistill/initialization/specs/metrics.py`
+
+```text
+    longest — the same rule E8a used (``domain_balanced_score``).
+```
+
+### `src/aadistill/initialization/specs/state.py`
+
+```text
+    E8, generalized to every node of the search. The binding is to the *artifact*
+```
+
+### `src/aadistill/initialization/statistics/attention.py`
+
+```text
+    and that is what killed Phase-A attempt 7. The same rule applies here, and
+    # FAIL CLOSED, and do not repair it here. C1 attempt 9 died on this exact
+```
+
+### `src/aadistill/initialization/statistics/collect.py`
+
+```text
+    # is what killed Phase-A attempt 7 in `ffn_abs_sum[idx] += ...`, and it
+```
+
+### `src/aadistill/initialization/transforms/nll_gate.py`
+
+```text
+    initialization NLL must not cancel or promote E8 — the endpoint is autonomous
+    # The three general-language / teacher-native series E8 requires per checkpoint.
+```
+
+### `src/aadistill/initialization/transforms/project.py`
+
+```text
+    # what killed Phase-A attempt 9 at $0.34, on the `+=` below, and no CPU
+```
+
+### `src/aadistill/models/student.py`
+
+```text
+    dies inside `Tensor.item()`. That is exactly what happened on E8 pod A: setup
+    failed after TEACHER_READY and the session self-terminated at $0.08.
+```
+
+### `src/aadistill/models/tokenizer_contract.py`
+
+```text
+    Phase-A attempt 11 lost a Stage-2 probe to this, after a 180-minute search had
+```
+
+### `src/aadistill/runtime/cost.py`
+
+```text
+    Attempt 3 makes the size of the gap concrete: 544.7 min of Stage 1, 388.2 min
+    Phase-B attempt 3 actually ran — 16.9 GiB of reference against a 13.4 GiB
+```
+
+### `src/aadistill/runtime/cpu_test_env.py`
+
+```text
+    C1 attempt 5's `--strict` skip-set comparison was correct machinery pointed at
+```
+
+### `src/aadistill/infrastructure/bundle_transport.py`
+
+Added 2026-09-15, when the transport question was extracted from one
+experiment's copy into reusable infrastructure. The prose the core may not carry:
+
+```text
+    C1 attempt 1 passed all eight pre-provider gates, created a pod and died at
+    `SETUP_RC=1`: the pod could not fetch `transfer/c1`, because no git bundle had
+    been created for the session commit. `$0.0786` for a 404.
+
+    `--bundle c1` was an alias for nothing, and the launcher accepted it.
+
+    The second copy is `scripts/stages/stage-1/phase_c1/bundle.py`. It stays because
+    it is a member of C1's frozen executable set: importing the core module from
+    it would move C1's harness digest and invalidate records describing completed
+    attempts, for no benefit to a phase closed by a verdict.
+```
+
+### `src/aadistill/runtime/device_handoff.py`
+
+```text
+    Phase-A attempt 12 died six seconds after Stage 1 succeeded:
+    nothing ever acted on it. Attempt 4's handoff said, in as many words,
+```
+
+### `src/aadistill/runtime/leaf_durability.py`
+
+```text
+    Phase-A attempt 11 spent **180.3 minutes** producing five valid, measured,
+    * **Headroom is measured, and refusal is the answer.** Attempt 11's five leaves
+```
+
+### `src/aadistill/runtime/pod_environment.py`
+
+```text
+    C1 attempt 3R reached `VLLM_READY → TEACHER_READY → ROPE_OK` and then died at the
+    setup test gate: `14 failed, 2650 passed`, `$0.3482`, no scientific stage. Seven
+    went by without anyone finding out, because no C1 attempt had ever reached
+    # WHY it failed. Attempt 6 named all 18 failing nodeids and
+    Two sweeps with the same digest skipped exactly the same tests. Attempt 5
+    Phase-A cases did not skip under SESSION_KIND=c1" is not something a generic
+    `session_prechecks.py` is a member of Phase B's and continuation B's frozen
+    # Attempt 4's sweep used simulate_pod_env.sh's GENERIC default HIDDEN_PATHS,
+```
+
+### `src/aadistill/runtime/setup_steps.py`
+
+Added 2026-09-16, with `SetupManifest.setup_markers_env` beside it, when the
+setup-step declaration became an execution contract. The prose the core may not
+carry:
+
+```text
+    Phase-C2 Search-1 attempt 2 declared no VLLM_READY -- it never calls vLLM --
+    and no frozen-asset expectation. The shared setup script installed the whole
+    vLLM environment anyway and asked the frozen-asset verifier its HISTORICAL
+    question, which demands artifacts/stages/stage-1/batteries/recovery_search_v2 and
+    recovery_search_scoring@v2. SETUP_RC=91, MARKER:FROZEN_ASSETS_FAILED, no
+    driver stage, nothing measured, $0.0552.
+
+    The script's own comment already recorded that C1 attempt 10 had died there
+    for $0.1177 for the same reason, and that a session on the migrated tree
+    must name its own expectation document. C1 did; C2 did not.
+```
+
+### `src/aadistill/runtime/staging_contract.py`
+
+```text
+    C1 attempt 4 died at the pod CPU test gate for `$0.6986` with six failures, and
+    # C1 attempt 5 died at the pod test gate for `$0.3150` because two tests about
+```
+
+### `src/aadistill/runtime/telemetry.py`
+
+```text
+    Phase-B attempt 3 spent 544.7 min in Stage 1 and stopped on its deadline. What
+```
+
+### `src/aadistill/training/train.py`
+
+```text
+    config hash. `kind` in particular is not decoration: the E7 comparison is
+    E7 preregisters one `lambda_extra` and runs no sweep. That is only safe if
+    # logged config computes, which is exactly what P4 forbids. Opting in per
+```
+
+### `src/aadistill/evaluation/protocol_field.py`
+
+The admission rule that refuses a pooled or paired field unless every member
+establishes one compatible measurement protocol. What core cannot say, and what
+paid for it:
+
+C2's behavioural confirmation field pooled **six** probes into one paired
+interval. Every row file was valid, every probe complete, the strata checks
+passed, the bootstrap seed `834816710` was pre-registered, and the frozen rule
+ran to a terminal `NO_GO` with `delta −0.008235` / `ucb_one_sided −0.000392`.
+The field spanned **three** distinct `generation_protocol_fingerprint` values —
+`e9d8da97…` for the four probes measured inside attempt5, `af7beb55…` for
+incumbent B's third seed (attempt13) and `bbba93df…` for the candidate's third
+seed (attempt12 → attempt14). The pair at that third seed therefore straddled
+two protocols, on the seed with the largest magnitude and the one whose delta
+moved by two prompts between attempt13 and attempt14.
+
+Nothing refused it. The interval was reported, and the maintainer closed the
+stage **without promotion** rather than as a NO_GO — a materially weaker
+outcome, because a canonical NO_GO is evidence against a candidate that a later
+stage can rely on, while this is an absence of admissible evidence either way.
+
+Two specifics the mechanism encodes:
+
+* **Fail closed on unjudgeable, not only on unequal.** All six probes lacked the
+  expanded protocol and runtime blocks, so `generation_compat` v2 — which
+  deliberately demotes the NVIDIA driver patch, because `image_digest` is really
+  `imageName@driver` and the provider assigns whatever host is free — could not
+  be applied. "Not shown to be comparable" is not "comparable".
+* **Do not reach for nondeterminism first.** The attempt13/attempt14 two-prompt
+  difference was originally attributed here to greedy-decoding nondeterminism.
+  That was asserted, not established, and the maintainer corrected it; the
+  established fact is differing recorded protocol identities. The runs did also
+  differ in driver patch (`@580.173.02` vs `@580.126.20`), which under v2 is
+  recorded-not-material and so settles nothing on its own.
+
+Owner of the full account:
+`logs/stages/stage-1/phase_c2_behavioural/analyses/c2_behavioural_verdict_20260923.md`.
+
+## GQA attention operators — provenance relocated 2026-09-25
+
+Moved out of `operators/attention/gqa/_statistics.py` and
+`operators/attention/gqa/activation_importance.py` when the operators were
+organised by topology. The mechanisms stayed; only this project's
+campaign-instance detail moved here, which is what
+`tests/architecture/test_core_ownership.py::instance_prose` asks for.
+
+**Accumulating attention statistics off the model's device.** Phase-A attempt 7
+died on a cross-device add in the residual/FFN collector. The per-head second
+moment follows the same rule for the same reason: the hook receives activations
+from the model, so an accumulator anywhere else is a cross-device add on every
+call. `state()` performs the single host transfer at the end.
+
+**`head_write_energy` fails closed on a device mismatch.** C1 attempt 9 handed
+`state()`'s host-resident snapshot straight to that function, where it met
+`o_proj.weight` on `cuda:0` and raised. The repair was a per-invocation working
+copy in the caller (`stats_to`), not a silent transfer inside the function: a
+transfer there would guess which device the caller meant and hide a caller that
+forgot to build the copy.
+
+**Why `activation_importance` is its own module.** `operators/attention.py` and
+`operators/__init__.py` were both members of `CONTINUATION_SOURCE_FILES_V2`, the
+executable source set Phase B's closed preregistration binds to digest
+`a5ce6311789e…`. Adding a class to either would have moved that digest and left
+a frozen historical document describing code that did not exist when it ran.
+(The 2026-09-25 topology migration moved those files anyway, prospectively and
+by maintainer instruction; the historical declarations were preserved exactly
+and now refuse, which is the intended behaviour.)
+
+**Why `SessionSpec.host_admission` exists.** A3 reuses attempt75's recovery
+controls as evidence, so its generations have to be comparable to theirs.
+`a3_attempt35` trained all three probes and generated the first, and the
+protocol admission then refused it at `$4.33`: all twenty material generation
+fields were identical to the controls -- vLLM 0.27.1, transformers 5.15.0,
+torch 2.13.0+cu130, dtype, every engine and sampling setting, stop ids,
+tokenizer, chat template, context, system message, and both source digests --
+and the host NVIDIA driver BRANCH had moved `580.159.03` -> `595.91.07`, which
+`generation_compat` declares a real runtime event rather than provenance.
+
+The refusal was correct. What was wrong is when it was asked: the driver
+version is in the image identity the provider confirms one ssh round trip
+after the pod answers, long before setup spends anything. The hook asks there
+and a refusal redraws, so the property costs a draw instead of a chain. The
+reusable core carries only the question; which hosts a session accepts is the
+session's own rule, derived in A3's case from the controls' own attestation.
+
+---
+
+## Materialization identity and the scoring-position policy — 2026-10-03
+
+Two new core modules, and both were paid for by measurements that belong here
+rather than in their docstrings.
+
+### `src/aadistill/initialization/specs/materialization.py`
+
+**The measurement.** A3 ran the incumbent
+`attention.activation_importance_v1` at `calibration_forward_batch_size=3`
+with `length_sorted_v1` packing and at the one-item-per-forward reference
+protocol, interleaved four times per session, on three separately rented NVIDIA
+L40S pods:
+
+```text
+A_bsz1   53e30566c5f7   == the frozen C3 incumbent, rebuilt on fresh hardware
+A_bsz3   7dd2f6f6980b   DIFFERENT
+result_spec_hash         IDENTICAL
+```
+
+Each protocol reproduced **its own** digest in every round and on every pod, so
+the difference is deterministic in the strong sense — reproducible within a
+session and across machines — rather than noise. Exactly one kept-head slot of
+448 differs, in layer 7 (head 13 against head 12) at a margin of `0.00047`;
+rank correlation across all 896 heads is `0.9999997`. Owner:
+`logs/stages/stage-1/phase_a3/analyses/a3_closeout.md`.
+
+**Why that needed a mechanism.** `compute_state_id` binds neither the
+`ExecutionConfig` nor the artifact digest, and resume, deduplication and
+checkpoint ownership all keyed on it, so the two artifacts above would have
+collided on one resumable, deduplicable state. The A3 closeout therefore refused
+to let the batched protocol enter D1/D2/D3 execution until the repository bound
+the numerical execution fingerprint to materialization/resume identity, and
+recorded that a passing behavioural result does not clear an engineering
+correctness property.
+
+**What was explicitly forbidden, and why the core says so without naming it.**
+A3 was not permitted to register `attention.activation_importance_bsz3`. The
+operator's semantics did not change, so a second id would have lied about the
+science and multiplied the registry by every execution knob forever. The module
+states the rule; `tests/initialization/test_materialization_identity.py` asserts the
+registry stays clean of ids naming a batch size.
+
+**Why the device CLASS and not the ordinal.** A-bsz1 rebuilt `53e30566c5f7`
+byte-identically on three different rented L40S pods, so which card is not part
+of the identity. `cpu` against `cuda` is, and a CPU dry run must not be able to
+satisfy a GPU resume.
+
+### `src/aadistill/initialization/scoring/`
+
+**The measured restriction.** `positions.supervised_target_v1` reads each frozen
+mixture's own `assistant` tag and admits `44,746` of `59,763` prediction
+positions on `calib.domain_balanced@v1` (74.9%), `46,825` of `59,763` on
+`calib.reasoning_heavy@v2` (78.4%), and `54,014` of `74,022` on
+`state_eval_v1` (73.0%). The remainder is prompt, system and user text the
+student is never asked to predict. 51 of 67 items in the first mixture are
+templated and 50 of 62 in the second; the untemplated remainder has no assistant
+turn and keeps every prediction position, which is what makes the policy a
+change of scoring rather than of data.
+
+**Why the incumbent policy is a named object rather than an absence.** Every
+committed operator result was computed over all positions, and
+`positions.all_v1` is that semantics, hashed, so a record can state it. It is
+numerically inert: the reducers detect it and perform the operations they
+performed before the abstraction existed. Verified by rebuilding a
+four-operator toy chain against the pre-change tree and obtaining the same
+artifact digest, the same kept layers, the same kept neurons and the same kept
+heads.
+
+**Why the state-eval batching bound exists.** A batched state evaluation
+materializes two `[B, T_max, V]` logit blocks at a `151,936` vocabulary; at
+batch 3 over the frozen suite's widest group (`2002` tokens) that is `3.40 GiB`
+for both models. `StateEvaluator` refuses before the first forward when the
+widest group would exceed its budget, because the alternative is discovering the
+limit as an OOM mid-search — which is how the causal-depth rehearsal died.
+
+**Why `length_sorted_v1` for that suite.** `2.1%` padding against `23.4%` at the
+mixture's own order, derived from the suite's own lengths at `$0`.
+
+**The deferred boundary.** The activation collectors implement only the binary
+form of a position policy, because their divisor is `residual_count`, an
+`int64` token count read by three call sites. A continuous confidence weight
+needs a weighted denominator in `StatsSpec`, which is D2's work;
+`require_binary_token_weights` refuses by name rather than rounding a weight to
+a mask.

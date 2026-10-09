@@ -32,7 +32,7 @@ from aadistill.models.tokenizer_contract import (  # noqa: E402
     TokenizerContractError, carries_tokenizer_files, resolve_training_tokenizer,
 )
 
-CANONICAL = REPO / "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
+CANONICAL = REPO / "artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint"
 #: The identity the frozen recovery protocol pins
 #: (`compare_recovery_fingerprints.phase_a_protocol`).
 FROZEN_SHA = "7781771acc3798ee454c1253c751f930eb1c18c1c3df62e2552cc6f1d394f654"
@@ -200,7 +200,7 @@ def test_the_trainer_declares_its_tokenizer_source_and_does_not_infer_it():
     """
     import ast
 
-    src = (REPO / "scripts/training/train_stage3.py").read_text()
+    src = (REPO / "scripts/shared/training/train_stage3.py").read_text()
     tree = ast.parse(src)
     calls = [n for n in ast.walk(tree)
              if isinstance(n, ast.Call)
@@ -220,9 +220,14 @@ def test_the_trainer_declares_its_tokenizer_source_and_does_not_infer_it():
 def test_the_tokenizer_is_resolved_before_any_data_is_built():
     """Refusing after the ladder is packed still wastes the pod's time; the
     contract has to fail at the cheapest possible point."""
-    src = (REPO / "scripts/training/train_stage3.py").read_text()
+    src = (REPO / "scripts/shared/training/train_stage3.py").read_text()
     resolve_at = src.index("resolve_training_tokenizer(")
-    for later in ("loading {source} from", "data_dir = REPO_ROOT", "load_teacher("):
+    #: Anchored on what the trainer does, not on one spelling of it:
+    #: `data_dir = REPO_ROOT / ...` became `data_dir = paths[...]` when path
+    #: resolution moved behind `effective_paths`. Computing paths is not
+    #: reading data — no I/O happens before the contract — so the property
+    #: this test exists for is unchanged.
+    for later in ("loading {source} from", 'data_dir = paths[', "load_teacher("):
         assert src.index(later) > resolve_at, (
             f"{later!r} happens before the tokenizer contract is checked")
 
@@ -237,7 +242,7 @@ def test_the_tokenizer_is_resolved_before_any_data_is_built():
 #: strictly better than the previous behaviour of silently training against a
 #: one-token vocabulary. Adding the two fields is then a one-line, deliberate act
 #: by whoever re-runs it, not a silent rewrite of the record.
-ACTIVE_RECOVERY_CONFIGS = ("configs/stage3/e1/e1_r0860k_sa_pca.json",)
+ACTIVE_RECOVERY_CONFIGS = ("configs/stages/stage-3/e1/e1_r0860k_sa_pca.json",)
 
 
 def test_every_active_recovery_config_declares_the_contract():
@@ -258,7 +263,7 @@ def test_the_historical_configs_are_left_alone():
     import glob
 
     edited = []
-    for p in sorted(glob.glob(str(REPO / "configs/stage3/*/*.json"))):
+    for p in sorted(glob.glob(str(REPO / "configs/stages/stage-3/*/*.json"))):
         rel = str(Path(p).relative_to(REPO))
         if rel in ACTIVE_RECOVERY_CONFIGS:
             continue
@@ -275,9 +280,27 @@ def test_the_frozen_recipe_pins_the_protocols_tokenizer():
     """`e1_r0860k_sa_pca.json` is what every Phase-A probe derives from, and the
     recovery protocol fingerprint pins `tokenizer_sha256`. If the recipe named a
     different one, probes would be comparable to nothing."""
-    cfg = json.loads((REPO / "configs/stage3/e1/e1_r0860k_sa_pca.json").read_text())
+    cfg = json.loads((REPO / "configs/stages/stage-3/e1/e1_r0860k_sa_pca.json").read_text())
     assert cfg["tokenizer_sha256"] == FROZEN_SHA
+    # The recipe is FROZEN: its bytes carry the spelling from when it was
+    # written, and the 2026-10-08 relocation resolves it rather than edits it.
     assert cfg["tokenizer_source"] == "artifacts/stage1/qwen3_0p6b_init_v0/checkpoint"
-    # And it is NOT the student path, which for a searched leaf carries nothing.
+    # And it is NOT the student path — or, as here, it is, and the student
+    # path carries a real tokenizer. The spelling is frozen; the bytes moved
+    # in the 2026-10-08 relocation, so ACCESS goes through the relocation
+    # registry (a committed data file, not a scripts import).
+    reloc = json.loads((REPO / "logs/index.json").read_text())
+    mapping = reloc["historical_paths"]["map"]
+
+    def _resolve(rel: str) -> str:
+        probe = rel
+        suffix = ""
+        while probe:
+            if probe in mapping:
+                return mapping[probe] + suffix
+            probe, _, tail = probe.rpartition("/")
+            suffix = "/" + tail + suffix
+        return rel
+
     assert cfg["tokenizer_source"] != cfg["student_path"] or (
-        REPO / cfg["student_path"] / "tokenizer.json").is_file()
+        REPO / _resolve(cfg["student_path"]) / "tokenizer.json").is_file()

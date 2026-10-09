@@ -142,6 +142,85 @@ def streams_at_risk(manifest: ArtifactManifest | None,
     return () if not tuple(declared_streams) else None
 
 
+#: What a poll saw, as distinct from WHY. `not state.billing` is one condition
+#: with several causes, and the launcher used to report all of them as "the pod
+#: is gone -- the watchdog acted".
+STOP_BY_WATCHDOG = "watchdog_hard_termination"
+STOP_BY_PROVIDER = "provider_stopped_or_terminated"
+STOP_STOPPED_NOT_GONE = "provider_stopped_pod_still_exists"
+STOP_UNKNOWN = "unknown_pod_not_billing"
+
+
+def observed_stop_cause(state: "PodState", *,
+                        watchdog_journal: Path | str | None,
+                        elapsed_minutes: float,
+                        hard_terminate_minutes: float) -> dict:
+    """Why did this pod stop billing? Classified from evidence, never asserted.
+
+    A session has stopped well short of its hard threshold because the PROVIDER
+    ACCOUNT BALANCE ran out, and both the launcher log and the emergency
+    closeout recorded that the watchdog had terminated the pod at that
+    threshold -- while the watchdog's own journal showed no action taken and
+    `over_hard_limit` false on every tick. Two records asserting a cause neither
+    had checked.
+
+    The journal is the evidence and it is on disk, so this reads it. The three
+    causes are genuinely different: a watchdog termination means the budget
+    boundary worked, a provider stop means something outside this project
+    happened, and a pod that STILL EXISTS but is not billing may hold a
+    recoverable workdir -- which `not state.billing` alone cannot tell you.
+    """
+    acted = False
+    ticks = 0
+    #: COERCED, because a `str` here raised `AttributeError: 'str' object has
+    #: no attribute 'is_file'` -- and the one place this runs is the emergency
+    #: closeout, where an exception costs money rather than time. The
+    #: production caller passes a `Path`, so this never fired; a journal path
+    #: that reaches a session as a string from a config or a record would have
+    #: turned "classify why the pod stopped" into "lose the closeout", which is
+    #: the failure this whole function exists to stop making.
+    journal = Path(watchdog_journal) if watchdog_journal is not None else None
+    if journal is not None and journal.is_file():
+        for line in journal.read_text().splitlines():
+            if not line.strip():
+                continue
+            try:
+                row = json.loads(line)
+            except ValueError:
+                continue
+            if row.get("event") == "poll":
+                ticks += 1
+                if row.get("action") not in (None, "", "none"):
+                    acted = True
+            if row.get("event") == "watchdog_end" and row.get("reason") in (
+                    "terminated", "over_hard_limit"):
+                acted = True
+    over = elapsed_minutes >= hard_terminate_minutes
+    if acted or over:
+        cause = STOP_BY_WATCHDOG
+    elif state.exists:
+        cause = STOP_STOPPED_NOT_GONE
+    elif journal is None or not journal.is_file():
+        cause = STOP_UNKNOWN
+    else:
+        cause = STOP_BY_PROVIDER
+    return {
+        "cause": cause,
+        "pod_exists": bool(state.exists),
+        "desired_status": state.desired_status,
+        "watchdog_took_an_action": acted,
+        "watchdog_ticks": ticks,
+        "elapsed_minutes": round(elapsed_minutes, 2),
+        "hard_terminate_minutes": round(hard_terminate_minutes, 2),
+        "over_hard_limit": bool(over),
+        "_rule": (
+            "a pod that stops billing short of its own hard threshold, with a "
+            "watchdog journal showing no action, was NOT stopped by this "
+            "project. Causes outside it include an exhausted provider account "
+            "balance, a host failure and an operator action."),
+    }
+
+
 class SessionRunner:
     """Runs one `SessionSpec`. Not a base class; there is nothing to override."""
 
@@ -237,8 +316,25 @@ class SessionRunner:
         return self.elapsed() / 60 * (self.price or self.a.max_price)
 
     def save(self) -> None:
-        (self.repo_root / self.a.out).write_text(
-            json.dumps(self.ev, indent=2, default=str) + "\n")
+        """Write the session record. THE DIRECTORY IS CREATED, not assumed.
+
+        `save()` is the only thing that puts the session record on the dev box,
+        and it is called on every path: immediately after `create()` registers a
+        pod id, after each draw, at the dry-run stop, from `teardown_now`, and
+        from `run_session`'s closeout. A missing parent directory therefore does
+        not fail where it is configured -- it raises a `FileNotFoundError` out
+        of the first `save()` after a pod starts billing, which is the one
+        moment the record matters most.
+
+        It held only because every launcher so far passed an `--out` whose
+        parent happened to exist. A session that files its record in its own run
+        directory -- `runs/<run_id>/runtime/session.json`, which is where the
+        shared run layout puts it -- has no such directory until something
+        creates it, and nothing did.
+        """
+        out = self.repo_root / self.a.out
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(json.dumps(self.ev, indent=2, default=str) + "\n")
 
     def context(self, **over) -> SessionContext:
         """What a spec callable may see. Never the runner itself."""
@@ -327,6 +423,47 @@ class SessionRunner:
             self.say(f"ABORT: ${self.price}/h above the priced ${self.a.max_price}/h")
             return False
         return True
+
+    def check_account_funds(self) -> bool:
+        """Can the PROVIDER ACCOUNT fund this session to its authorized bound?
+
+        THE GATE THAT WAS MISSING. A formal session passed every internal gate
+        -- identity, contract, staged inputs, readiness, commit lineage, bundle
+        -- and was stopped by its provider part-way through its authorized
+        bound because the ACCOUNT had run out of money. The spend was real and
+        bought no endpoint. Every gate in this project asked whether the
+        experiment was PERMITTED to spend; none asked whether the provider would
+        still be paid.
+
+        Entirely at `$0`, before `create()`, like `check_gpu_offered`.
+
+        The requirement comes from the SPEC, not from here: a per-campaign
+        dollar figure in reusable core would be the same defect as a hardcoded
+        experiment id. A session that declares no requirement is not gated, so
+        every existing launcher keeps behaving exactly as before.
+        """
+        #: `getattr` for the same reason `run()` reads `dry_run` that way: not
+        #: every caller builds a full `SessionSpec`. A real one always carries a
+        #: `BudgetSpec` -- it is a required field of a frozen dataclass, and the
+        #: field below has a default -- so the tolerance only ever applies to a
+        #: hand-built double, and the alternative is a gate that breaks every
+        #: test that drives `run()` with one.
+        budget = getattr(self.spec, "budget", None)
+        required = getattr(budget, "account_balance_required_usd", None)
+        if required is None:
+            return True
+        need = float(required(self.plan) if callable(required) else required)
+        balance = self.provider.account_balance()
+        ok, why = balance.covers(need)
+        self.ev["account_balance"] = {
+            **balance.as_dict(), "required_usd": round(need, 4),
+            "ok": bool(ok), "why": why,
+            "_rule": ("the provider account and this repository's allowances are "
+                      "different things and both must be sufficient; this is the "
+                      "provider half"),
+        }
+        self.say(("account funds OK: " if ok else "ABORT: ") + why)
+        return bool(ok)
 
     # -- 2. precheck: everything this session reads, checked at $0 ---------
     def run_prechecks(self) -> bool:
@@ -736,7 +873,7 @@ class SessionRunner:
         #: MAY THIS SESSION RUN ON THIS HOST? Asked before setup, so a host
         #: whose properties make the result incomparable costs one ssh round
         #: trip instead of a full chain. A refusal is redrawable, like a cold
-        #: host. See `docs/core-provenance.md` for what prompted it.
+        #: host. See `docs/maintenance/core-provenance.md` for what prompted it.
         admit = getattr(self.spec, "host_admission", None)
         if admit is not None:
             try:
@@ -809,7 +946,10 @@ class SessionRunner:
 
     # -- 5. run ------------------------------------------------------------
     def run(self) -> bool:
-        if not self.make_plan() or not self.run_prechecks():
+        #: `check_account_funds` sits with the other $0 gates and BEFORE the
+        #: dry-run stop, so a dry run reports the same answer a launch would get.
+        if (not self.make_plan() or not self.check_account_funds()
+                or not self.run_prechecks()):
             return False
 
         #: `--dry-run` MEANS something. Several launchers have advertised the
@@ -940,7 +1080,7 @@ class SessionRunner:
             #: change, not appended to, so relaying it by byte offset splices a
             #: new document's tail onto an old document's head — right size,
             #: unparseable, no error anywhere. The run log and the status file
-            #: above really are append-only. See `docs/core-provenance.md`.
+            #: above really are append-only. See `docs/maintenance/core-provenance.md`.
             RelaySpec(f"{self.repo}/artifacts/audit/{self.spec.artifacts.audit_dirname}/"
                       f"{self.spec.artifacts.evidence_filename}",
                       self.spec.artifacts.evidence_filename, required=False,
@@ -984,7 +1124,20 @@ class SessionRunner:
             state = self.provider.get(self.pod_id)
             if not state.billing:
                 terminal = "POD_GONE"
-                self.say("the pod is gone — the watchdog acted")
+                #: CLASSIFIED, not asserted. This said "the watchdog acted"
+                #: unconditionally; see `observed_stop_cause`.
+                self.ev["stop_cause"] = observed_stop_cause(
+                    state,
+                    watchdog_journal=(
+                        self.scr / self._watchdog_journal_name(self.pod_id)),
+                    elapsed_minutes=self.elapsed(),
+                    hard_terminate_minutes=self.plan.hard_terminate_minutes)
+                self.say(
+                    f"the pod stopped billing — {self.ev['stop_cause']['cause']}"
+                    f" (exists={state.exists}, "
+                    f"status={state.desired_status}, "
+                    f"{self.elapsed():.0f} of "
+                    f"{self.plan.hard_terminate_minutes:.0f} min)")
                 break
             live, _ = probe(target, job)
             if live != "ALIVE":
@@ -1180,14 +1333,46 @@ class SessionRunner:
             name = Path(remote).parent.name
             p = self.scr / "relay" / f"{name}.train_log.jsonl"
             events[name] = sum(1 for _ in p.open()) if p.is_file() else 0
+        #: `streams_at_risk` EXISTS FOR THIS, and this call site did not use it.
+        #:
+        #: `evaluate_teardown` defaults `streams_at_risk` to `None`, its
+        #: deliberately strict "the caller gave no evidence" value, which makes
+        #: `truncating` true; a session that declares NO event streams then has
+        #: an empty `incomplete`, and the gate raises
+        #:
+        #:     an emergency teardown over a non-quiescent event stream must name
+        #:     the streams it is truncating
+        #:
+        #: which is impossible to satisfy — there is no stream to name. The
+        #: helper settles exactly that case from the SPEC rather than from a
+        #: manifest, its docstring names C2 attempt 3 as the precedent, and it
+        #: was wired into `collect_and_teardown` and not into here. So the one
+        #: path taken when a pod disappears mid-run — the path where an orderly
+        #: closeout matters most — threw instead of recording its loss, and a
+        #: formal session has already lost its closeout to it after hours of
+        #: paid runtime.
+        #:
+        #: `None` is passed for the manifest because there is none on this path:
+        #: nothing was collected, which is the whole reason it is an emergency.
+        cause = self.ev.get("stop_cause") or {}
         decision = evaluate_teardown(
             {"training_complete": False, "evaluation_complete": False,
              "artifact_manifest_created": False, "required_files_present": False,
              "final_streams_quiescent": False},
             emergency_budget=True,
-            emergency_reason=(f"the watchdog terminated the pod at the hard "
-                              f"threshold ({self.plan.hard_terminate_minutes:.0f} "
-                              f"min / ${self.plan.hard_terminate_usd:.2f})"),
+            #: OBSERVED, not assumed. This asserted a watchdog hard-threshold
+            #: termination on every path out, including a stop well short of
+            #: the threshold whose own watchdog journal recorded no action at
+            #: all.
+            emergency_reason=(
+                f"the pod stopped billing at {self.elapsed():.0f} min of "
+                f"{self.plan.hard_terminate_minutes:.0f} "
+                f"(${self.plan.hard_terminate_usd:.2f}); observed cause "
+                f"{cause.get('cause', STOP_UNKNOWN)}"
+                + (", so the budget boundary acted as designed"
+                   if cause.get("cause") == STOP_BY_WATCHDOG else
+                   ", which this project did not cause")),
+            streams_at_risk=streams_at_risk(None, streams),
             incomplete_event_streams=streams)
         self.ev["teardown_gate"] = decision.as_dict()
         self.ev["relayed_events"] = events

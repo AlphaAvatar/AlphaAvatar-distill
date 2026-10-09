@@ -1,0 +1,204 @@
+{
+ "schema": "aadistill.phase_d1.root_state_derivation_record/v1",
+ "run_id": "d1_replay_001",
+ "stage_id": "1",
+ "experiment_id": "phase_d1_replay",
+ "recorded_utc": "2026-10-07T14:40:00Z",
+ "derived_at_commit": "fd2fb13da2944430cbc34a712dd7ae119f065530",
+ "_what_this_answers": "Which model-config state did D1's completed search expand from, and is it uniquely determined by the search's own records? A replay must start from that state, because `adapter.build_config` builds a child config from the parent's whole `to_dict()`, so every field of the root's LIVE config reaches every descendant's config.json, its config_sha256 and its artifact_digest.",
+ "_why_it_was_asked": "The replay's fourth paid subrun diverged at q2 step 0 -- 524493fde06f... against the pinned 292e36f13829... -- after 64 s of L40S time. The driver had loaded the teacher as published. This is a reconstruction of historical execution state, NOT a search over config values: a root fitted to an outcome would prove nothing about the outcome.",
+ "mechanism": {
+  "shared_root": "BeamSearch caches the root model (`_root_model`) and shares it across every level-0 expansion, so state an earlier expansion leaves on it is visible to a later one.",
+  "non_root_parents_are_immune": "`_load_state_model` reloads every non-root parent from its checkpoint, so each deeper expansion gets a fresh object and cannot carry a sibling's mutation.",
+  "the_two_candidate_sources": [
+   "scripts/pod/autoinit_d1_driver.py sets `model.config.use_cache = False` on the loaded teacher before handing it to the beam",
+   "src/aadistill/initialization/operators/depth/causal_kl_greedy.py sets the same field in place on the model it is handed"
+  ],
+  "only_one_field": "`use_cache` is the only config field a shipped operator assigns onto a model it was given. The adapter's `set_blocks` can write `num_hidden_layers`, and its one caller passes `update_config=False` with a comment saying why. Both are pinned by tests."
+ },
+ "candidate_set": [
+  "teacher_as_published",
+  "session_driver_use_cache_false"
+ ],
+ "chosen_candidate": "session_driver_use_cache_false",
+ "config_overrides": {
+  "use_cache": false
+ },
+ "step_0_discrimination": [
+  {
+   "candidate": "teacher_as_published",
+   "overrides": {},
+   "explains_every_step_0": false,
+   "steps": [
+    {
+     "state_id": "6d6006a0f66c94a331a5747b228179ec",
+     "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+     "impl_id": "ffn.activation_importance_v0",
+     "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+     "reconstructed_config_sha256": "d39b2e9b0f33f4b2f1f23eef194c902ec580a8625695ae346d2146dea858a5fe",
+     "matches": false
+    },
+    {
+     "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+     "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+     "impl_id": "depth.causal_kl_greedy_v1",
+     "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+     "reconstructed_config_sha256": "ab042e003f8348a866d38ff3e59c2c5d783338ce266da81e2f4e13e4def48851",
+     "matches": false
+    }
+   ]
+  },
+  {
+   "candidate": "session_driver_use_cache_false",
+   "overrides": {
+    "use_cache": false
+   },
+   "explains_every_step_0": true,
+   "steps": [
+    {
+     "state_id": "6d6006a0f66c94a331a5747b228179ec",
+     "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+     "impl_id": "ffn.activation_importance_v0",
+     "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+     "reconstructed_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+     "matches": true
+    },
+    {
+     "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+     "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+     "impl_id": "depth.causal_kl_greedy_v1",
+     "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+     "reconstructed_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+     "matches": true
+    }
+   ]
+  }
+ ],
+ "lineage_confirmation": [
+  {
+   "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+   "index": 1,
+   "impl_id": "depth.causal_kl_greedy_v1",
+   "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+   "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+   "matches": true
+  },
+  {
+   "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+   "index": 2,
+   "impl_id": "width.global_pca_v0",
+   "recorded_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+   "reconstructed_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+   "matches": true
+  },
+  {
+   "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+   "index": 3,
+   "impl_id": "attention.activation_importance_v1",
+   "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "matches": true
+  },
+  {
+   "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+   "index": 1,
+   "impl_id": "ffn.activation_importance_v0",
+   "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+   "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+   "matches": true
+  },
+  {
+   "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+   "index": 2,
+   "impl_id": "attention.activation_importance_v1",
+   "recorded_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+   "reconstructed_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+   "matches": true
+  },
+  {
+   "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+   "index": 3,
+   "impl_id": "width.global_pca_v0",
+   "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+   "matches": true
+  }
+ ],
+ "_scope": "2 step-0 identities discriminate the candidate; 6 later identities confirm it explains the whole config lineage. WEIGHTS are not checked here -- that is what the digest-pinned replay on the GPU is for.",
+ "the_expansion_order_this_predicted_and_did_not_need": {
+  "order": [
+   "ATTENTION(domain_balanced)",
+   "ATTENTION(reasoning_heavy)",
+   "DEPTH(domain_balanced)",
+   "DEPTH(reasoning_heavy)",
+   "FFN(domain_balanced)",
+   "FFN(reasoning_heavy)",
+   "RESIDUAL_WIDTH(domain_balanced)",
+   "RESIDUAL_WIDTH(reasoning_heavy)"
+  ],
+  "source": "first-appearance order in the search's state journal",
+  "finding": "the two ATTENTION expansions ran BEFORE any DEPTH expansion and their children still carry use_cache=False. So the sibling-mutation mechanism did not put the root in that state -- the session driver did, before the beam started, and the operator's in-place assignment was a no-op because the field was already False. All 8 level-0 states agree on ONE root state, which is why the derivation is unique rather than position-dependent."
+ },
+ "verification": {
+  "level_0_states_checked": 8,
+  "reconstructed_under_use_cache_false": [
+   {
+    "state_id": "a9bce03079fc96dcc2ba298d51e5d3f9",
+    "label": "ATTENTION(calib.domain_balanced@v1)",
+    "recorded": "d308c8f46689",
+    "as_published": "91a478176ed7"
+   },
+   {
+    "state_id": "74d40d5953e61801700b9000685f7bc1",
+    "label": "ATTENTION(calib.reasoning_heavy@v2)",
+    "recorded": "d308c8f46689",
+    "as_published": "91a478176ed7"
+   },
+   {
+    "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+    "label": "DEPTH(calib.domain_balanced@v1)",
+    "recorded": "4e5b71040b0b",
+    "as_published": "ab042e003f83"
+   },
+   {
+    "state_id": "0c1dc924e75cfaba27c006596119625f",
+    "label": "DEPTH(calib.reasoning_heavy@v2)",
+    "recorded": "4e5b71040b0b",
+    "as_published": "ab042e003f83"
+   },
+   {
+    "state_id": "6d6006a0f66c94a331a5747b228179ec",
+    "label": "FFN(calib.domain_balanced@v1)",
+    "recorded": "94ecfd1cee0f",
+    "as_published": "d39b2e9b0f33"
+   },
+   {
+    "state_id": "3695c4aebeabc6507c00adf9baac6bc6",
+    "label": "FFN(calib.reasoning_heavy@v2)",
+    "recorded": "94ecfd1cee0f",
+    "as_published": "d39b2e9b0f33"
+   },
+   {
+    "state_id": "c4781f375e80bf096ebc6382603a877d",
+    "label": "RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+    "recorded": "0482c506c36c",
+    "as_published": "838bad83d9b2"
+   },
+   {
+    "state_id": "d8ba16445423d4829588f7b345652587",
+    "label": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+    "recorded": "0482c506c36c",
+    "as_published": "838bad83d9b2"
+   }
+  ],
+  "result": "8 of 8 match use_cache=False; 0 of 8 match the teacher as published",
+  "cost": "$0. config.json only -- no weights, no device, 2.6 s",
+  "_the_four_distinct_values_are_geometry": "the 8 level-0 states carry 4 distinct config_sha256, one per operator KIND, because each kind changes a different geometry field. That is not evidence about the root; it is why reading them without reconstructing the configs explained nothing."
+ },
+ "what_remains_unverified_until_the_gpu_runs": "WEIGHTS. This establishes that the config half of every pinned identity is reproducible from the committed records. Whether the operators reproduce the same tensors bit-for-bit is what the digest-pinned replay measures, and a mismatch AFTER this derivation holds would be material.",
+ "enforcement": {
+  "at_0_dollars_before_launch": "scripts/pod/autoinit_d1_replay_launch.py :: write_plan",
+  "on_the_pod_before_any_weights_load": "scripts/pod/autoinit_d1_replay_driver.py via replay_specs.root_state_from_plan",
+  "regression": "scripts/experiments/stage-1/phase_d1/tests/test_d1_replay_root_state.py"
+ }
+}

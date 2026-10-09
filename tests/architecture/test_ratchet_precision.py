@@ -165,7 +165,7 @@ class TestWideningSourceAndAllowanceTogether:
     def test_the_real_baseline_names_a_revision_that_resolves(self):
         """The rule is inert unless the field actually points somewhere."""
         baseline = json.loads(
-            (REPO / "configs/architecture/core_boundary_baseline.json").read_text())
+            (REPO / "configs/maintenance/architecture/core_boundary_baseline.json").read_text())
         rev = baseline.get("accepted_revision")
         assert rev, "the baseline must name the revision its allowance was accepted at"
         out = subprocess.run(

@@ -869,16 +869,32 @@ class TestTheBlockerFieldsAgreeWithTheirOwner:
             (repo / "logs/stages/stage-1/phase_d1/plans/d1_design.json").read_text())
 
     def test_both_fields_name_exactly_the_designs_open_blockers(self):
+        """Every blocker the WRITER declares, not a list typed here.
+
+        The names were a hand-written tuple of three, so a fourth blocker was
+        neither required when open nor forbidden when closed -- this test went
+        on passing while the snapshot said "BLOCKED NO TIMES" and the design
+        reported one. Derived from `BLOCKER_SPECS` instead, which is the same
+        source `open_blockers()` iterates.
+        """
+        import sys
+        from pathlib import Path
+
+        repo = Path(__file__).resolve().parents[2]
+        sys.path.insert(0, str(repo / "scripts/autoinit"))
+        from stages.phase_d1 import write_d1_design as w
+
         design = self._design()
         open_ = set(design["open_blockers"])
         snap = snapshot()
         for field, text in (("blocker", snap["blocker"]),
                             ("d_series.blockers", snap["d_series"]["blockers"])):
-            for name in ("funding authorization", "per-session envelope",
-                         "evidence"):
-                #: `evidence` is the closed one and is named as CLOSED, so only
-                #: the two fundable blockers are checked for presence.
-                if name == "evidence":
+            for name, _owner in w.BLOCKER_SPECS:
+                #: `evidence` is the closed one and is named as CLOSED in both
+                #: fields, so its presence carries no information either way.
+                #: Skipped only while it is CLOSED -- if it reopened, the rule
+                #: below applies to it like every other.
+                if name == "evidence" and name not in open_:
                     continue
                 assert (name in text) is (name in open_), (
                     f"{field} {'omits' if name in open_ else 'still names'} "

@@ -131,11 +131,11 @@ def test_kd_forward_kl_properties():
 def test_select_trainable_real_stage3_patterns():
     patterns = json.loads(
         (Path(__file__).resolve().parents[2]
-         / "configs" / "stage3" / "recovery.json").read_text()
+         / "configs" / "stages" / "stage-3" / "recovery.json").read_text()
     )["trainable_patterns"]
     model = tiny_model(0)
     report = select_trainable(model, patterns)
-    # configs/stage3/recovery.json uses the attention-unfrozen freeze set adopted
+    # configs/stages/stage-3/recovery.json uses the attention-unfrozen freeze set adopted
     # by the 2026-07-27 start-point ablation: attention (incl. q_norm/k_norm),
     # FFN and every norm train; the tied embedding does not.
     for name, param in model.named_parameters():
@@ -320,8 +320,8 @@ def test_extra_val_sets_logged_separately(tmp_path):
 
 
 def test_validate_config_extra_val_forms(tmp_path):
-    toy_cfg(tmp_path, extra_val={"val_v0": "data/stage2"})  # valid
-    for bad_extra in ({"val": "x"}, {"v": 3}, ["data/stage2"]):
+    toy_cfg(tmp_path, extra_val={"val_v0": "data/stages/stage-2/stage2"})  # valid
+    for bad_extra in ({"val": "x"}, {"v": 3}, ["data/stages/stage-2/stage2"]):
         with pytest.raises(ValueError):
             toy_cfg(tmp_path, extra_val=bad_extra)
     with pytest.raises(ValueError, match="no primary val"):

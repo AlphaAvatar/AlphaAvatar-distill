@@ -1,0 +1,777 @@
+"""The launchers that will actually run next use one run identity.
+
+A convention that only tests obey is not a convention. `RunLayout` and
+`build_run_manifest` existed for a while with **no production caller at all**:
+every C1 attempt wrote its session record to the flat `logs/stages/stage-1/phase_c1/analyses/autoinit_c1_session.json`,
+which the next attempt overwrote, and `logs/stages/stage-1/phase_c1/runs/attempt9/` was assembled
+by hand afterwards. Meanwhile the three CUDA stage-F subruns wrote real
+directories under `logs/runs/` and recorded no manifest, so `logs/index.json`
+reported `runs_current: 0` with three runs sitting on disk.
+
+So these tests execute the real functions — `open_c1_run`, `close_c1_run`,
+`Engineering.write_evidence` — against a temporary repository root, rather than
+asserting on their source. `write_evidence` in particular had no coverage at
+all, and it is the function whose last defect was found by a dry run because it
+is only reached by a *completed* session.
+
+MOVED to Phase C1's own suite by the 2026-10-03 convergence round. Every test in
+this file loads `autoinit_c1_launch` and asserts C1's wiring -- its experiment
+id, its run ids, its grant, its authorization, its stage. The GENERIC properties
+it was filed under remain in core and are proved there with synthetic callers
+under `tmp_path`: `tests/runtime/test_run_convention.py` covers open/record/read,
+duplicate and occupied-run refusal, required and prepared roles, one-path-one-
+owner and a tampered manifest; `tests/runtime/test_run_layout_all_stages.py`
+covers the stage-agnostic schema and role vocabulary. A core integration test may
+drive a generic entry point with a synthetic caller; it should not need a closed
+experiment's launcher.
+"""
+from __future__ import annotations
+
+import json
+import types
+from pathlib import Path
+
+import pytest
+
+from shared.run_layout import RUNS_ROOT, RunConventionError, read_run
+from support.session_specs import load_session_launcher
+
+REPO = Path(__file__).resolve().parents[5]
+
+
+@pytest.fixture(scope="module")
+def L():
+    return load_session_launcher("autoinit_c1_launch")
+
+
+def _runs_dir(stage_id: str, experiment_id: str) -> str:
+    """Where a run of `experiment_id` lives, stage-first.
+
+    These tests built their fake trees under `logs/runs/<experiment>/<run>`,
+    which is the layout from before runs moved inside the experiment that owns
+    them. The discoverers look under `logs/stages/`, so every one of these
+    fixtures was describing a tree the code no longer writes.
+    """
+    return f"logs/stages/stage-{stage_id}/{experiment_id}/runs"
+
+
+def _args(tmp_path, run_id="attempt10", **over):
+    scr = tmp_path / "scr"
+    scr.mkdir(exist_ok=True)
+    return types.SimpleNamespace(
+        run_id=run_id, scr=str(scr), session_commit="a" * 40,
+        bundle="aad_autoinit_aaaaaaaa.bundle", **over)
+
+
+def _fake_repo(tmp_path, L, *, governance=True):
+    repo = tmp_path / "repo"
+    (repo / "logs").mkdir(parents=True, exist_ok=True)
+    #: The real pricing record, because `build_parser` derives `--max-price`
+    #: from it rather than carrying a second copy of the rate.
+    (repo / L.PRICING).parent.mkdir(parents=True, exist_ok=True)
+    (repo / L.PRICING).write_bytes((REPO / L.PRICING).read_bytes())
+    if governance:
+        (repo / L.AUTH_PATH).parent.mkdir(parents=True, exist_ok=True)
+        (repo / L.AUTH_PATH).write_text('{"authorization_id": "test"}')
+        (repo / L.BUNDLE_RECORD).parent.mkdir(parents=True, exist_ok=True)
+        (repo / L.BUNDLE_RECORD).write_text('{"bundle": "aad_test"}')
+    return repo
+
+
+def _write_session(repo, args, **over):
+    """What `SessionRunner.save()` leaves at `args.out`."""
+    body = {"session_id": "autoinit-c1", "session_plan_hash": "ph",
+            "harness_source_digest": "hd", "passed": False,
+            "terminal": "C1_INCOMPLETE", "pod_id": "podabc",
+            "cost": {"actual_usd": 1.044}, "provider_confirms_gone": True}
+    body.update(over)
+    path = repo / args.out
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(body))
+
+
+# --- the command line ------------------------------------------------------
+
+def test_the_launcher_requires_a_run_id(L):
+    with pytest.raises(SystemExit):
+        L.build_parser().parse_args(
+            ["--scr", "/tmp/x", "--session-commit", "0" * 40,
+             "--bundle", "aad_test.bundle"])
+
+
+def test_there_is_no_out_flag_to_point_somewhere_else(L):
+    """`--out` is how nine attempts shared one path. It is gone, not defaulted."""
+    flags = {o for a in L.build_parser()._actions for o in (a.option_strings or ())}
+    assert "--run-id" in flags
+    assert "--out" not in flags
+
+
+def test_the_parser_still_produces_every_attribute_the_runner_reads(L):
+    """`out` is DERIVED by `--run-id`, not filled in afterwards.
+
+    `SessionRunner` reads `args.out`. Device-canary attempt 1 died at `$0.0603`
+    on an attribute a hand-written namespace had and the real parser did not,
+    after the pod was created and billing, so the parser's namespace must be
+    complete on its own — `missing_arguments` is asked here as well as in
+    `test_device_canary_argument_contract`, because that is the property this
+    change could have broken.
+    """
+    from aadistill.infrastructure.session import missing_arguments
+    from support.session_specs import session_args
+
+    args = session_args(L)
+    assert not missing_arguments(args)
+    assert args.out == L.session_record_path(args.run_id)
+
+
+def test_the_parser_and_the_open_derive_the_same_path(tmp_path, L):
+    """One rule. Two derivations of one path is how they drift apart."""
+    repo = _fake_repo(tmp_path, L)
+    parsed = L.build_parser().parse_args(
+        ["--scr", str(tmp_path / "scr"), "--session-commit", "a" * 40,
+         "--bundle", "aad_autoinit_aaaaaaaa.bundle", "--run-id", "attempt10"])
+    from_parser = parsed.out
+    L.open_c1_run(parsed, repo)
+    assert parsed.out == from_parser
+    assert (repo / parsed.out).parent.is_dir()
+
+
+# --- opening the run -------------------------------------------------------
+
+def test_the_session_record_is_written_inside_the_run(tmp_path, L):
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    assert args.out == L.session_record_path("attempt10")
+    assert layout.rel_root == "phase_c1/runs/attempt10"
+    #: The parent exists, which `SessionRunner.save()` does not create.
+    assert (repo / args.out).parent.is_dir()
+
+
+def test_the_one_use_governance_artifacts_are_produced_into_the_run(tmp_path, L):
+    """Produced into the run, not copied from a shared repository-root file.
+
+    This used to check that the launcher SNAPSHOTTED the live authorization and
+    bundle record at open, because both lived at repository-root paths the next
+    issuance overwrote — the copy was the defence. On 2026-09-12 the issuer and
+    the bundle stager began writing into the run that owns them, so there is
+    nothing to copy and the defence is structural.
+
+    The property is the same one and is asserted directly: what a later
+    issuance writes cannot reach a run that has already been opened.
+    """
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+
+    #: Where this run's artifacts live, through the launcher's own helper.
+    auth = repo / L.auth_path_for(args.run_id)
+    auth.parent.mkdir(parents=True, exist_ok=True)
+    auth.write_text('{"authorization_id": "test"}')
+    assert auth.resolve() == layout.path("governance/authorization.json").resolve(), (
+        "the issuer and the run disagree about where the authorization lives")
+
+    #: A later issuance writes to ITS run, and to the global pointer. Neither
+    #: can reach this one.
+    (repo / L.auth_path_for("attempt99")).parent.mkdir(parents=True,
+                                                       exist_ok=True)
+    (repo / L.auth_path_for("attempt99")).write_text(
+        '{"authorization_id": "the NEXT attempt"}')
+    (repo / L.AUTH_POINTER).parent.mkdir(parents=True, exist_ok=True)
+    (repo / L.AUTH_POINTER).write_text('{"authorization_id": "a pointer"}')
+    assert json.loads(auth.read_text())["authorization_id"] == "test"
+
+    #: And nothing copies it in, which is what made the old defence necessary.
+    assert "authorization" not in [role for _src, role in L._RUN_GOVERNANCE]
+
+
+def test_an_absent_governance_artifact_does_not_stop_the_run(tmp_path, L):
+    """A pre-issuance dry run has no authorization file and must still open."""
+    repo = _fake_repo(tmp_path, L, governance=False)
+    layout = L.open_c1_run(_args(tmp_path), repo)
+    assert not layout.path("governance/authorization.json").exists()
+
+
+def _place_grant(repo, L, run_id="attempt10", body='{"granted_by": "m"}\n'):
+    """What a maintainer commits before the readiness sweep."""
+    #: Derived from the launcher, not rebuilt here: a second derivation of one
+    #: path is how the two drift when a stage level is inserted between them.
+    p = L.layout_for_run(repo, run_id).root / L.C1_RUN_ROLES["grant"]
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(body)
+    return p
+
+
+def test_a_grant_placed_before_the_run_opens_does_not_block_it(tmp_path, L):
+    """The seam this closes.
+
+    The grant must be committed while the tree is still clean, because the
+    launch-bound sweep is taken on the final pre-authorization tree and the
+    authorization is issued FROM the grant. `open_run` then found a file in the
+    run directory and refused it as a dead launcher's residue — so the only
+    remaining places for a grant were a flat `logs/..._attemptN_grant.json` or
+    nowhere.
+    """
+    repo = _fake_repo(tmp_path, L)
+    grant = _place_grant(repo, L)
+    layout = L.open_c1_run(_args(tmp_path), repo)
+    assert layout.path(L.C1_RUN_ROLES["grant"]).read_text() == grant.read_text()
+
+
+def test_the_grant_is_recorded_as_one_of_the_runs_roles(tmp_path, L):
+    """Traceable ownership: the run's own manifest names it."""
+    repo = _fake_repo(tmp_path, L)
+    _place_grant(repo, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    L.close_c1_run(layout, args, repo)
+    roles = read_run(repo, L.RUN_EXPERIMENT_ID, "attempt10",
+                 L.RUN_STAGE_ID)["roles"]
+    assert roles["grant"] == L.C1_RUN_ROLES["grant"]
+
+
+def test_a_dead_launchers_evidence_still_refuses_even_beside_a_grant(tmp_path, L):
+    """The exemption is for the grant, not for the run directory."""
+    repo = _fake_repo(tmp_path, L)
+    _place_grant(repo, L)
+    stale = (L.layout_for_run(repo, "attempt10").root
+             / L.C1_RUN_ROLES["driver_evidence"])
+    stale.parent.mkdir(parents=True, exist_ok=True)
+    stale.write_text("{}\n")
+    with pytest.raises(RunConventionError) as exc:
+        L.open_c1_run(_args(tmp_path), repo)
+    assert L.C1_RUN_ROLES["driver_evidence"] in str(exc.value)
+
+
+def test_a_run_id_that_collides_is_refused(tmp_path, L):
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    L.close_c1_run(layout, args, repo)
+    with pytest.raises(RunConventionError):
+        L.open_c1_run(_args(tmp_path), repo)
+
+
+def test_the_refusal_happens_before_the_session_spec_is_built(tmp_path, L,
+                                                              monkeypatch):
+    """`$0`, and before any provider call.
+
+    Executed, not read off the source: `main` is run with `spec` and
+    `run_session` replaced by recorders, and the collision must raise before
+    either is reached.
+    """
+    repo = _fake_repo(tmp_path, L)
+    monkeypatch.setattr(L, "REPO_ROOT", repo)
+    calls = []
+    monkeypatch.setattr(L, "spec", lambda a: calls.append("spec"))
+    monkeypatch.setattr(L, "run_session", lambda *a, **k: calls.append("run"))
+    argv = ["--scr", str(tmp_path / "scr"), "--session-commit", "a" * 40,
+            "--bundle", "aad_autoinit_aaaaaaaa.bundle", "--run-id", "attempt10"]
+    monkeypatch.setattr("sys.argv", ["autoinit_c1_launch.py", *argv])
+
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    L.close_c1_run(layout, args, repo)
+
+    with pytest.raises(RunConventionError):
+        L.main()
+    assert calls == [], f"work happened before the collision was caught: {calls}"
+
+
+# --- closing the run -------------------------------------------------------
+
+def test_a_completed_session_records_every_role_it_produced(tmp_path, L):
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args, passed=True, terminal="ALL_DONE")
+    scr = Path(args.scr)
+    (scr / "launch.log").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "launch.log").write_text("line\n")
+    #: Named after the pod that produced it, which is how a watchdog
+    #: writes from its first tick now.
+    (scr / "watchdog_podabc.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "watchdog_podabc.jsonl").write_text("{}\n")
+    (scr / "watchdog_podabc.out").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "watchdog_podabc.out").write_text("started\n")
+    (scr / "relay").mkdir()
+    #: Named the way the relay names them, from the spec, so this fixture
+    #: cannot drift away from what a real session leaves.
+    for src, _role in L._RUN_COLLECT:
+        if src.startswith("relay/"):
+            (scr / src).parent.mkdir(parents=True, exist_ok=True)
+            (scr / src).write_text("{}\n")
+    (scr / "store").mkdir()
+    (scr / "store" / "manifest.json").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "store" / "manifest.json").write_text("{}")
+
+    #: The governance artifacts a real session has by then are produced into
+    #: the run before it closes -- the grant by the maintainer, the readiness
+    #: record by the sweep, the authorization by the issuer, the bundle record
+    #: by the stager. This fixture drives `close_c1_run` alone, so it puts them
+    #: where their producers would.
+    for role in ("authorization", "bundle_record"):
+        q = layout.path(L.C1_RUN_ROLES[role])
+        q.parent.mkdir(parents=True, exist_ok=True)
+        q.write_text("{}\n")
+
+    doc = L.close_c1_run(layout, args, repo)
+    assert set(doc["roles"]) == {
+        "session_record", "launcher_log", "watchdog_journal", "authorization",
+        "bundle_record", "driver_evidence", "driver_log", "driver_status",
+        "artifact_manifest"}
+    #: They are the run's own, not copies: nothing collects them any more.
+    assert not L._RUN_GOVERNANCE
+    assert layout.path("evidence/driver_status.txt").is_file()
+    assert doc["status"]["terminal"] == "ALL_DONE"
+    assert doc["status"]["passed"] is True
+    assert doc["status"]["cost"]["actual_usd"] == 1.044
+    assert doc["authorizes"] == "nothing"
+    assert read_run(repo, "phase_c1", "attempt10",
+                L.RUN_STAGE_ID)["self_sha256"] == doc["self_sha256"]
+
+
+def test_a_setup_abort_records_the_session_record_alone(tmp_path, L):
+    """No driver evidence, no artifact manifest — six C1 attempts ended here."""
+    repo = _fake_repo(tmp_path, L, governance=False)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args, terminal=None, pod_id="")
+    doc = L.close_c1_run(layout, args, repo)
+    assert list(doc["roles"]) == ["session_record"]
+    assert doc["status"]["pod_id"] is None
+    assert doc["status"]["passed"] is False
+
+
+def test_the_manifest_references_the_scratch_root_rather_than_copying_it(
+        tmp_path, L):
+    """Large artifacts stay outside git; the manifest carries the reference."""
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    scr = Path(args.scr)
+    (scr / "store").mkdir()
+    (scr / "store" / "manifest.json").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "store" / "manifest.json").write_text("{}")
+    (scr / "store" / "c1_artifacts.tar.gz").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "store" / "c1_artifacts.tar.gz").write_bytes(b"\x00" * 4096)
+
+    doc = L.close_c1_run(layout, args, repo)
+    assert doc["plan"]["scratch_root"] == str(scr)
+    copied = [p for p in layout.root.rglob("*") if p.suffix == ".gz"]
+    assert not copied, f"an archive was copied into the repository: {copied}"
+
+
+def test_what_is_collected_is_what_the_relay_actually_leaves(L):
+    """Asked of the built spec, not of the three names written in the launcher.
+
+    `LogRelay` names each local copy `Path(remote).name` and puts it under
+    `<scr>/relay/`. The collection list is a second statement of those names,
+    and it runs once — after teardown, where a name that stopped matching loses
+    the evidence silently rather than failing. So the names are compared to the
+    spec the runner is handed.
+    """
+    from support.session_specs import session_args
+
+    spec = L.spec(session_args(L))
+    relayed = {Path(spec.run_log_path).name, Path(spec.status_path).name,
+               spec.artifacts.evidence_filename}
+    collected = {src.split("/", 1)[1] for src, _ in L._RUN_COLLECT
+                 if src.startswith("relay/")}
+    assert collected == relayed, (
+        f"the run collects {collected} from relay/, the relay writes {relayed}")
+
+
+def test_a_recording_failure_is_loud_and_does_not_overwrite_the_session_result(
+        tmp_path, L, monkeypatch, capsys):
+    """A session that passed and could not record itself must not exit 0.
+
+    And a session that already failed keeps its own code: the pod outcome is
+    what an operator acts on, and replacing it with a bookkeeping code would
+    hide the thing that actually happened.
+    """
+    repo = _fake_repo(tmp_path, L)
+    monkeypatch.setattr(L, "REPO_ROOT", repo)
+    monkeypatch.setattr(L, "spec", lambda a: None)
+    monkeypatch.setattr(L, "close_c1_run",
+                        lambda *a, **k: (_ for _ in ()).throw(OSError("disk")))
+    for session_rc, expected in ((0, L.RUN_NOT_RECORDED), (11, 11)):
+        monkeypatch.setattr(L, "run_session", lambda *a, rc=session_rc, **k: rc)
+        #: A scratch PER run id. Two runs sharing one writable output root is
+        #: refused now, and rightly: it is how one attempt came to collect
+        #: another's evidence.
+        argv = ["--scr", str(tmp_path / f"scr_rc{session_rc}"),
+                "--session-commit", "a" * 40,
+                "--bundle", "aad_autoinit_aaaaaaaa.bundle",
+                "--run-id", f"attempt_rc{session_rc}"]
+        monkeypatch.setattr("sys.argv", ["autoinit_c1_launch.py", *argv])
+        assert L.main() == expected
+        assert "RUN NOT RECORDED" in capsys.readouterr().out
+
+
+def test_the_status_names_the_key_the_runner_actually_writes(tmp_path, L):
+    """`terminal`, not `terminal_marker`.
+
+    A key the session record does not have reads as `None`, which is
+    indistinguishable from a session that produced no marker at all.
+    """
+    repo = _fake_repo(tmp_path, L, governance=False)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args, terminal="C1_REPLAY_MISMATCH")
+    assert L.close_c1_run(layout, args, repo)["status"][
+        "terminal"] == "C1_REPLAY_MISMATCH"
+
+
+# --- the second consumer: a different experiment, different roles ----------
+
+def test_the_cuda_validation_records_its_run_too(tmp_path):
+    """The real `write_evidence`, executed. It had no test at all.
+
+    Built with `object.__new__` because the constructor needs a provider API key
+    and a CLI on disk; the body under test reads only `self.a`, `self.scr` and
+    `self.ev`, and it is the body that matters.
+    """
+    import importlib.util
+
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    from shared.run_layout import claim_output_root
+
+    repo, scr = tmp_path / "repo", tmp_path / "scr"
+    (repo / "logs").mkdir(parents=True)
+    scr.mkdir(parents=True)
+    #: `Engineering.__init__` claims the scratch before any provider call; this
+    #: builds the receiver without it, so the claim is made the same way here.
+    claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "cuda_stage_f_20260911_s1",
+                      outputs=mod.RUN_OUTPUTS)
+    (scr / "artifacts" / "cuda_engineering").mkdir(parents=True)
+    (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "artifacts" / "cuda_engineering" / "suffix_evidence.json").write_text("{}")
+    (scr / "validation_stdout.txt").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "validation_stdout.txt").write_text("ok\n")
+
+    eng = object.__new__(mod.Engineering)
+    eng.a = types.SimpleNamespace(run_id="cuda_stage_f_20260911_s1",
+                                  execution_sha="a" * 40, image="img:tag")
+    eng.scr = scr
+    #: `write_evidence` reads the INSTANCE's key now, not a module constant: the
+    #: launcher is parameterized, so one validation's `logs/runs/` key must not
+    #: be a property of every validation that shares the entry point. A bypass
+    #: constructor owes what `__init__` would have set.
+    eng.experiment_id = mod.DEFAULT_EXPERIMENT_ID
+    eng.validation_label = "cuda-stage-f"
+    eng.stage_id = mod.DEFAULT_STAGE_ID
+    eng.ev = {"verdict": "CUDA ENGINEERING VALIDATION PASS", "pod_id": "p1",
+              "subrun_cost_usd": 0.0182, "campaign_cost_after_usd": 0.04}
+    eng.write_evidence(repo)
+
+    doc = read_run(repo, "cuda_stage_f", "cuda_stage_f_20260911_s1", "shared")
+    #: `closeout` joined the set when engineering subruns started pricing
+    #: themselves. Without it the project budget cumulative cannot see an
+    #: engineering campaign's spend at all: `project_sessions` reads
+    #: `<run>/closeout/outcome.json :: budget.this_attempt`, and the C2
+    #: full-search validation booked $0.1453 that the project book could not
+    #: see. So this is an added role, not a renamed one.
+    assert set(doc["roles"]) == {"evidence", "validation_stdout", "artifacts",
+                                 "closeout"}
+    #: Located the way the layout writes it, rather than by joining `doc["root"]`
+    #: -- that field is stage-relative and the join silently lands outside the
+    #: stage area.
+    found = list(repo.rglob("cuda_stage_f_20260911_s1/closeout/outcome.json"))
+    assert len(found) == 1, f"expected one closeout, found {found}"
+    outcome = json.loads(found[0].read_text())
+    assert "this_attempt" in outcome["budget"], (
+        "the closeout must state the cost in the field the budget deriver reads")
+    assert doc["status"]["verdict"] == "CUDA ENGINEERING VALIDATION PASS"
+    assert doc["status"]["subrun_cost_usd"] == 0.0182
+    assert doc["artifact_spec"] == "cuda_engineering_run_v1"
+    #: A different vocabulary from C1's, through the same functions.
+    assert "session_record" not in doc["roles"]
+
+
+def test_the_engineering_run_collects_its_watchdog_journals_by_pod(tmp_path):
+    """The backstop's own record of the resource it watched.
+
+    It is collected by PATTERN, not by a fixed filename: journals are named
+    after the pod, so a collector looking for `watchdog.jsonl` finds nothing
+    the launcher writes and reports a run that had a backstop as one that did
+    not. The role is a DIRECTORY for the same reason.
+    """
+    import importlib.util
+
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    from aadistill.infrastructure.session_runner import watchdog_journal_name
+    from shared.run_layout import claim_output_root
+
+    repo, scr = tmp_path / "repo", tmp_path / "scr"
+    (repo / "logs").mkdir(parents=True)
+    scr.mkdir(parents=True)
+    claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "r1", outputs=mod.RUN_OUTPUTS)
+    #: Exactly the names the launcher's own `launch_watchdog` derives.
+    (scr / watchdog_journal_name("p1")).write_text('{"event":"tick"}\n')
+    (scr / watchdog_journal_name("p1", "out")).write_text("detached\n")
+
+    eng = object.__new__(mod.Engineering)
+    eng.a = types.SimpleNamespace(run_id="r1", execution_sha="a" * 40,
+                                  image="img:tag")
+    eng.scr = scr
+    eng.experiment_id = mod.DEFAULT_EXPERIMENT_ID
+    eng.validation_label = "cuda-stage-f"
+    eng.stage_id = mod.DEFAULT_STAGE_ID
+    eng.ev = {"verdict": "PASS", "pod_id": "p1"}
+    eng.write_evidence(repo)
+
+    doc = read_run(repo, "cuda_stage_f", "r1", "shared")
+    assert "watchdog" in doc["roles"], (
+        "the journal was written and not collected")
+    wd = repo / "logs/stages/stage-shared/cuda_stage_f/runs/r1/runtime/watchdog"
+    assert sorted(q.name for q in wd.iterdir()) == [
+        "watchdog_p1.jsonl", "watchdog_p1.out"]
+
+
+def test_an_unclaimed_scratch_holding_only_a_journal_is_still_refused(tmp_path):
+    """Declaring the journals by PATTERN is what keeps this working.
+
+    They are named after a pod that does not exist when the claim is made, so
+    they cannot be declared statically -- and dropping them from the declared
+    outputs would mean a scratch root holding a previous run's backstop
+    evidence, and nothing else, reads as empty and gets written over.
+    """
+    import importlib.util
+
+    from shared.run_layout import OutputOwnershipError, claim_output_root
+
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert any("*" in o for o in mod.RUN_OUTPUTS), (
+        "no pattern output: a pod-named journal cannot be declared statically")
+
+    scr = tmp_path / "scr"
+    scr.mkdir()
+    (scr / "watchdog_p1.jsonl").parent.mkdir(parents=True, exist_ok=True)
+    (scr / "watchdog_p1.jsonl").write_text("{}\n")
+    with pytest.raises(OutputOwnershipError) as exc:
+        claim_output_root(scr, mod.DEFAULT_EXPERIMENT_ID, "r1",
+                          outputs=mod.RUN_OUTPUTS)
+    assert "watchdog_*.jsonl" in str(exc.value)
+    #: And it really was left alone.
+    assert (scr / "watchdog_p1.jsonl").read_text() == "{}\n"
+
+
+def test_the_two_consumers_share_no_role_name():
+    """If they ever converge, the convention has grown an experiment's opinion."""
+    import importlib.util
+
+    L = load_session_launcher("autoinit_c1_launch")
+    path = REPO / "scripts/shared/validation/cuda_engineering_launch.py"
+    spec = importlib.util.spec_from_file_location("cuda_engineering_launch", path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    assert set(L.C1_RUN_ROLES) & set(mod.RUN_ROLES) == set()
+    assert L.RUN_EXPERIMENT_ID != mod.DEFAULT_EXPERIMENT_ID
+
+
+# --- the index sees both, and says so when it cannot -----------------------
+
+def test_the_index_finds_a_recorded_run_and_reports_an_unrecorded_one(tmp_path,
+                                                                      L):
+    import importlib.util
+
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
+    spec = importlib.util.spec_from_file_location("record_run_index", path)
+    ri = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ri)
+
+    repo = _fake_repo(tmp_path, L)
+    args = _args(tmp_path)
+    layout = L.open_c1_run(args, repo)
+    _write_session(repo, args)
+    L.close_c1_run(layout, args, repo)
+
+    orphan = repo / _runs_dir("1", "phase_c1") / "attempt11"
+    (orphan / "runtime").mkdir(parents=True)
+    (orphan / "runtime" / "session.json").parent.mkdir(parents=True, exist_ok=True)
+    (orphan / "runtime" / "session.json").write_text("{}")
+
+    found = ri.discover_v3(repo)
+    assert [(r["experiment_id"], r["run_id"]) for r in found] == [
+        ("phase_c1", "attempt10")]
+    orphans = ri.discover_unrecorded(repo)
+    assert [(o["experiment_id"], o["run_id"]) for o in orphans] == [
+        ("phase_c1", "attempt11")]
+    assert orphans[0]["n_files"] == 1 and orphans[0]["digest"]
+
+
+def test_an_empty_run_directory_is_not_reported_as_an_orphan(tmp_path):
+    import importlib.util
+
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
+    spec = importlib.util.spec_from_file_location("record_run_index", path)
+    ri = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ri)
+    (tmp_path / _runs_dir("1", "phase_c1") / "attempt12").mkdir(parents=True)
+    assert ri.discover_unrecorded(tmp_path) == []
+
+
+def test_this_repositorys_index_still_accounts_for_every_run_on_disk():
+    """Against the real tree. The committed index must not silently drop a run.
+
+    `logs/index.json` read `runs_current: 0` while three CUDA stage-F
+    subruns existed under `logs/runs/`, because a directory without a manifest
+    matched neither discovery rule. Whatever is on disk is either recorded or
+    reported.
+    """
+    import importlib.util
+
+    path = REPO / "scripts/maintenance/architecture/record_run_index.py"
+    spec = importlib.util.spec_from_file_location("record_run_index", path)
+    ri = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(ri)
+
+    #: Scanned independently of the module under test, and pointed at the tree
+    #: that exists. This read `logs/runs/`, which is gone, so the glob matched
+    #: nothing and the comparison below was vacuous -- it could not have
+    #: reported an unaccounted run because it never saw one. It then had the
+    #: same fixed `*/*` assumption the index once had, which reads
+    #: `stage-1/phase_c1/plans` as a run.
+    runs_root = REPO / "logs/stages"
+
+    def _is_run(d):
+        return d.is_dir() and any(
+            q.is_file() and q.name != "README.md" for q in d.rglob("*"))
+
+    #: The canonical shape, and only it:
+    #: `stage-<id>/<experiment>/runs/<run>`. The experiment is the
+    #: GRANDPARENT; reading the parent gives the literal "runs".
+    on_disk = {(d.parent.parent.name, d.name)
+               for d in runs_root.glob("stage-*/*/runs/*") if _is_run(d)}
+    assert on_disk, "the scan found no run at all; it would pass vacuously"
+
+    index = ri.build_index(REPO)
+    #: EVERY index entry accounts for a run, including the legacy-registered
+    #: ones. They used to live outside `logs/runs/` so they could not appear in
+    #: this scan; log-layout-v1 brought them in, and excluding them here would
+    #: report a run that IS registered, with its component digests, as missing.
+    accounted = {(r["experiment_id"], r["run_id"]) for r in index["runs"]}
+    accounted |= {(u["experiment_id"], u["run_id"]) for u in index["unrecorded"]}
+    assert on_disk <= accounted, f"unaccounted run directories: {on_disk - accounted}"
+    committed = json.loads((REPO / "logs/index.json").read_text())
+    assert committed["counts"].get("runs_unrecorded") == len(index["unrecorded"])
+
+
+def test_a_prepared_run_is_reported_as_prepared_not_as_a_dead_launcher(tmp_path):
+    """The index is a consumer of the run-directory SHAPE, and the grant made a
+    new one reachable: a run that holds a governance input and nothing else.
+
+    Reporting that as "the launcher did not reach its closeout" would be a false
+    statement about a session that never started, and it is the kind of false
+    statement a committed index carries forward unchallenged.
+    """
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "record_run_index", REPO / "scripts/maintenance/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    runs = tmp_path / _runs_dir("1", "phase_c1")
+    prepared = runs / "attempt_prepared/governance"
+    prepared.mkdir(parents=True)
+    (prepared / "grant.json").parent.mkdir(parents=True, exist_ok=True)
+    (prepared / "grant.json").write_text('{"granted_by": "m"}\n')
+    died = runs / "attempt_died/evidence"
+    died.mkdir(parents=True)
+    (died / "c1_evidence.json").parent.mkdir(parents=True, exist_ok=True)
+    (died / "c1_evidence.json").write_text("{}\n")
+
+    found = {r["run_id"]: r["why"] for r in mod.discover_unrecorded(tmp_path)}
+    assert "PREPARED but not executed" in found["attempt_prepared"]
+    assert "did not reach its closeout" in found["attempt_died"]
+    assert "PREPARED" not in found["attempt_died"]
+
+
+# --- the stage grouping reaches the index and the launcher, not just the docs -
+
+def test_the_launcher_writes_under_its_declared_stage(L):
+    """The failure this guards: a directory diagram showing the new structure
+    while the launcher still writes the old one."""
+    import json as _json
+
+    cfg = _json.loads(
+        (REPO / "configs/stages/stage-1/phase_c1/authorization.json").read_text())
+    assert L.RUN_STAGE_ID == cfg["stage_id"], (
+        "the launcher's stage is not the one the experiment config declares")
+    assert L.session_record_path("attempt_x") == (
+        f"logs/stages/stage-{cfg['stage_id']}/phase_c1/runs/attempt_x/runtime/session.json")
+    assert L.layout_for_run(REPO, "attempt_x").root.as_posix().endswith(
+        f"logs/stages/stage-{cfg['stage_id']}/phase_c1/runs/attempt_x")
+
+
+def test_the_stage_is_declared_by_config_not_inferred_from_the_name():
+    """`phase_c1` is an experiment id. Reading a stage out of it would make
+    phase and stage the same dimension, which they are not."""
+    src = (REPO / "scripts/stages/stage-1/phase_c1/autoinit_c1_launch.py").read_text()
+    assert 'load_config(REPO_ROOT)["stage_id"]' in src
+    assert 'RUN_STAGE_ID = "3"' not in src, "the stage was hard-coded in the launcher"
+
+
+def test_the_index_discovers_both_layouts(tmp_path):
+    """A fixed two-level glob would make every stage-grouped run invisible
+    while the index went on reporting a confident total."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rri", REPO / "scripts/maintenance/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    from shared.run_layout import open_run, record_run, present_roles, ArtifactSpec
+    roles = {"session_record": "runtime/session.json"}
+    art = ArtifactSpec(spec_id="t", required=("session_record",))
+    for stage, exp, run in [(None, "legacy_exp", "r1"), ("3", "staged_exp", "r1")]:
+        lay = open_run(tmp_path, exp, run, roles=roles, stage_id=stage)
+        (lay.path("runtime/session.json")).write_text("{}\n")
+        record_run(lay, spec=art, plan={}, implementation={}, status={},
+                   roles=present_roles(lay, roles))
+
+    found = {(r["experiment_id"], r.get("stage")) for r in mod.discover_v3(tmp_path)}
+    assert ("legacy_exp", None) in found, "the legacy two-level run was lost"
+    assert ("staged_exp", "3") in found, "the stage-grouped run was not discovered"
+
+
+def test_a_directory_holding_only_a_readme_is_not_a_dead_run(tmp_path):
+    """It has not executed and it has not failed. Reporting it as unrecorded
+    would describe a launcher that died where nothing ever started."""
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location(
+        "rri2", REPO / "scripts/maintenance/architecture/record_run_index.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+
+    described = tmp_path / _runs_dir("3", "some_exp") / "prepared_only"
+    described.mkdir(parents=True)
+    (described / "README.md").parent.mkdir(parents=True, exist_ok=True)
+    (described / "README.md").write_text("# what goes here\n")
+    died = tmp_path / _runs_dir("3", "some_exp") / "died"
+    (died / "evidence").mkdir(parents=True)
+    (died / "evidence" / "partial.json").parent.mkdir(parents=True, exist_ok=True)
+    (died / "evidence" / "partial.json").write_text("{}\n")
+
+    ids = {u["run_id"] for u in mod.discover_unrecorded(tmp_path)}
+    assert "died" in ids, "a launcher that died was not reported"
+    assert "prepared_only" not in ids, "a described-but-unstarted run was reported"

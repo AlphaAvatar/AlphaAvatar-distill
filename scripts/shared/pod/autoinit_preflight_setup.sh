@@ -1,0 +1,1050 @@
+#!/usr/bin/env bash
+# Setup for the AutoInitializer micro-preflight. One session, four stages.
+#
+# Stages what Stage 0-3 need and nothing else: the canonical init, the recovery
+# pack, the frozen state-eval and recovery-search assets, the teacher, both
+# venvs, and the CPU suite. No E8 initializations, no depth builds, no corpus.
+#
+# The uv cold-host tripwire is GONE as of 2026-08-14, replaced by an offline
+# install from a relay wheelhouse: it existed to tell "slow PyPI" from "hung
+# host", could only do so by spending 8-28 min of paid setup, and still lost
+# four of five host draws. The cgroup CPU-budget function below is copied
+# verbatim from e8b_setup.sh and stays: it is what kept a 66-minute test suite
+# off a 128-vCPU host that reported `nproc` 128 while the cgroup granted a
+# fraction.
+#
+# Markers: ENV_READY -> REPO_READY -> ASSETS_STAGED -> TRAIN_ENV -> ASSETS_READY
+#          -> VLLM_READY -> TEACHER_READY -> ROPE_OK -> TESTS_OK
+#          -> AUTHORIZATION_OK -> SETUP_DONE
+
+set -euo pipefail
+
+WS=/workspace
+REPO=$WS/aad
+# The launcher probes this file to decide whether setup succeeded, so it must
+# be the file the launcher names. Hardcoding the preflight's filename cost
+# $0.1324: the continuation's setup ran to SETUP_DONE with SETUP_RC=0, wrote its
+# markers here, and the launcher grepped autoinit_continuation.status, found no
+# SETUP_DONE, and reported setup_failed on a session that had succeeded.
+# Double-quoted, and no apostrophe in the message: an unquoted `${v:?...}`
+# word is expanded, so a bare ' opens a quote that swallows whatever
+# follows until the next one. `bash -n` still passed on it.
+STATUS="${SESSION_STATUS:?the launcher must name the session status file}"
+mark() { echo "MARKER:$1"; echo "$(date -u +%FT%TZ) MARKER:$1" >>"$STATUS"; }
+say()  { echo "[$(date -u +%T)] $*"; }
+
+export HF_TOKEN="$(cat $WS/hf/token)"
+export HF_HOME=/root/.cache/huggingface
+
+say "apt: git, ninja, zstd"
+export DEBIAN_FRONTEND=noninteractive
+apt-get update -qq && apt-get install -y -qq git ninja-build zstd >/dev/null
+command -v ninja >/dev/null || { echo "ninja missing after install"; exit 1; }
+mark ENV_READY
+
+python3 -m pip install -q --no-input --break-system-packages \
+    "huggingface_hub[hf_transfer]" 2>&1 | tail -3
+
+say "fetching the repo bundle"
+python3 -c "
+import os, shutil
+from huggingface_hub import hf_hub_download
+name = os.environ['BUNDLE_NAME']
+p = hf_hub_download('AlphaAvatar/aadistill-artifacts', f'transfer/{name}',
+                    repo_type='model', token=os.environ['HF_TOKEN'])
+shutil.copy(p, f'/workspace/{name}')
+"
+rm -rf "$REPO"; git clone -q "$WS/$BUNDLE_NAME" "$REPO"
+cd "$REPO"; git checkout -q "$SESSION_COMMIT"; git rev-parse HEAD
+mark REPO_READY
+
+# THE SESSION SAYS WHICH SETUP STEPS RUN.
+#
+# `SetupManifest.setup_markers` has been declared by every session since this
+# script existed and was read by NOTHING: the sections below ran
+# unconditionally and emitted the markers as they went, so the declaration
+# described what would happen instead of deciding it. A session that omitted a
+# marker got the step anyway.
+#
+# That cost a paid pod. Phase-C2 Search-1 declares no VLLM_READY -- it never
+# calls vLLM -- and the script installed the whole vLLM environment; it declared
+# no frozen-asset expectation, and the verifier was asked its HISTORICAL
+# question, which demands another experiment's recovery corpus. SETUP_RC=91, no
+# driver stage, nothing measured, $0.0552.
+#
+# The rule lives in `aadistill.runtime.setup_steps` -- one implementation, so
+# the thing that decides what a paid pod does is the thing a test can call. A
+# `case` statement here would be a second rule the moment either was edited.
+#
+# FAIL CLOSED, and the exit codes are how. `if cmd; then` reads every non-zero
+# status as false, so an unusable declaration read through `if` would silently
+# skip every optional step -- the defect, inverted and worse.
+#
+# 0 is declared, 3 is not declared, ANYTHING ELSE ABORTS. The codes skip 1 and 2
+# deliberately: a python that cannot run the module exits 1 with a traceback,
+# and runpy/argparse exit 2. With 1 meaning "not declared", a syntax error under
+# an old interpreter read as *skip this step* -- and it was measured doing
+# exactly that at $0 on an interpreter one minor version too old, which would
+# have silently skipped the frozen-asset gate, the test gate AND the
+# authorization check on a billing pod.
+step_declared() {
+  local rc=0
+  PYTHONPATH="$REPO/src" python3 -m aadistill.runtime.setup_steps "$1" || rc=$?
+  case "$rc" in
+    0) return 0 ;;
+    3) say "step $1 not declared by this session — skipping"; return 1 ;;
+    *) say "SETUP STEP DECLARATION UNUSABLE (rc=$rc) asking about $1 — this is"
+       say "NOT the same as 'not declared' and must never be read as a skip"
+       mark "SETUP_MARKERS_UNUSABLE"; exit 98 ;;
+  esac
+}
+: "${SESSION_SETUP_MARKERS:?the launcher must declare this session setup steps}"
+say "declared setup steps: $SESSION_SETUP_MARKERS"
+
+# THE SESSION SAYS WHICH SCIENCE INPUTS, and this script no longer knows their
+# names, their destinations or their hashes. Until 2026-08-18 the block below
+# was three literal `fetch(prefix, [names], dest)` calls, a directory walk that
+# mirrored the recovery pack, and a `want = {...}` dict of four sha256 pins —
+# executed unconditionally for every session. The sessions' own `relay_inputs`
+# named at most three of the ten files staged: the micro-preflight and the
+# continuation consumed the calibration without declaring it, and the device
+# canary was given the whole recovery pack it had not asked for. That is the
+# relay-side twin of the local-asset defect that cost the canary retry $0.0637,
+# and it survived the fix that closed the other one.
+#
+# `SESSION_RELAY_INPUTS` is the session's own manifest as JSON: for each input
+# the REPOSITORY it comes from, a path within it, the repository directory it is
+# staged into on the pod, an optional second directory, and an optional sha256.
+# A session that declares nothing stages nothing.
+#
+# `repo` is declared per item rather than fixed here, because the five
+# Attempt-12 leaves live in a private TRANSPORT repo: the main relay had
+# 1.60 GiB of headroom against 5.55 GiB of leaves, and pushing them by scp
+# needed 1.99 MB/s against a dev box observed at 0.44-0.72 MB/s. This shell
+# still names no repository, path, filename or digest of its own.
+: "${SESSION_RELAY_INPUTS?the launcher must declare the relay science inputs for this session, even when there are none}"
+say "staging the session's declared science inputs from the relay"
+cd "$REPO"
+# `REPO=` inline rather than the literal `/workspace/aad` the old block carried,
+# so this exact code can be executed for real against a temporary tree. Four paid
+# pods have now died inside lines no $0 path could reach; a staging block that
+# can only run on a pod is one of them waiting to happen.
+REPO="$REPO" python3 - <<'FETCHEOF'
+import hashlib, json, os, shutil, sys, time
+from pathlib import Path
+from huggingface_hub import hf_hub_download
+TOKEN = os.environ["HF_TOKEN"]
+REPO = Path(os.environ["REPO"])
+
+inputs = json.loads(os.environ["SESSION_RELAY_INPUTS"])
+if not inputs:
+    print("  (this session declares no relay science input)", flush=True)
+
+# Retry policy unchanged from the hardcoded version: five attempts, linear
+# backoff. It is the one part of this block that was ever load-bearing on a real
+# host, so it is transformed rather than rewritten.
+def fetch_one(repo, path, tries=5):
+    last = None
+    for attempt in range(tries):
+        try:
+            return hf_hub_download(repo, path, repo_type="model", token=TOKEN)
+        except Exception as exc:
+            last = exc
+            time.sleep(5 * (attempt + 1))
+    sys.exit(f"FETCH FAILED {repo}:{path}: {last}")
+
+# Staged first, verified second, so a digest mismatch names the file rather than
+# stopping the run at whichever fetch happened to come next.
+staged = []
+for item in inputs:
+    src, dest = item["path"], item.get("dest")
+    repo = item.get("repo")
+    if not repo:
+        sys.exit(f"SESSION_RELAY_INPUTS carries {src} with no repo; this script "
+                 "names no repository of its own")
+    if not dest:
+        sys.exit(f"SESSION_RELAY_INPUTS carries {src} with no dest; setup only "
+                 "receives inputs it is meant to stage")
+    name = src.rsplit("/", 1)[-1]
+    cached = fetch_one(repo, src)
+    landed = []
+    for into in (dest, item.get("also_stage_to")):
+        if not into:
+            continue
+        d = REPO / into
+        d.mkdir(parents=True, exist_ok=True)
+        shutil.copy(cached, d / name)
+        landed.append(f"{into}/{name}")
+    print(f"  {repo}:{src} -> {', '.join(landed)}", flush=True)
+    staged.append((src, item.get("sha256"), landed))
+
+# Every declared digest, at every destination the file landed in. The old block
+# pinned the mirrored `ladder_uniform/blocks.npz` separately from the probe copy;
+# checking each landing site keeps that, without a second list to maintain.
+checked = 0
+for src, want, landed in staged:
+    if not want:
+        continue
+    for rel in landed:
+        got = hashlib.sha256((REPO / rel).read_bytes()).hexdigest()
+        if got != want:
+            sys.exit(f"FROZEN ASSET MISMATCH {rel}: {got}")
+        print(f"  {rel} {got[:16]}...", flush=True)
+        checked += 1
+print(f"  staged {len(staged)} inputs, verified {checked} digests", flush=True)
+FETCHEOF
+
+# Dev-box-only artifacts (untracked, ~1.6 MB total) that the launcher scp'd to
+# $WS/assets before this ran. Verified by content hash below, not merely by
+# presence: the whole preflight is a measurement of these exact prompts.
+#
+# THE SESSION SAYS WHICH ONES, and this script no longer knows their names.
+# Until 2026-08-18 the two lines here were `cp -r "$WS/assets/state_eval_v1"` and
+# `cp -r "$WS/assets/recovery_search_v2"`, unconditionally, under `set -e`. The
+# device-canary retry declared `LOCAL_ASSETS = ()` because it honestly needed
+# neither, the launcher therefore scp'd neither, and this script copied them
+# anyway — into an empty directory. It died here, at $0.0637, and the session's
+# declaration had been correct the whole time.
+#
+# `SESSION_ASSETS` is a comma-separated list of `name:install_dir` pairs, built
+# from the session's own manifest. An empty value installs nothing, which is what
+# a session that declared nothing must get.
+# No apostrophe in this message. Line 29 already records why: inside a
+# ${v?word} expansion a bare ' opens a quote that swallows the rest of the file,
+# and writing one here cost a `bash -n` failure within a minute of typing it.
+: "${SESSION_ASSETS?the launcher must declare the local assets for this session, even when there are none}"
+say "installing the session's declared local assets: ${SESSION_ASSETS:-(none)}"
+if [ -n "$SESSION_ASSETS" ]; then
+  IFS=',' read -r -a _assets <<< "$SESSION_ASSETS"
+  for entry in "${_assets[@]}"; do
+    name="${entry%%:*}"; into="${entry#*:}"
+    [ -n "$name" ] && [ -n "$into" ] && [ "$name" != "$into" ] || {
+      say "MALFORMED SESSION_ASSETS ENTRY: ${entry}"; mark "SESSION_ASSETS_MALFORMED"; exit 99; }
+    [ -e "$WS/assets/$name" ] || {
+      say "DECLARED ASSET NOT STAGED: $name — the launcher did not scp it"
+      mark "DECLARED_ASSET_MISSING:${name}"; exit 99; }
+    mkdir -p "$REPO/$into"
+    cp -r "$WS/assets/$name" "$REPO/$into/"
+    say "  $name -> $into/"
+  done
+fi
+# The four sha256 pins that used to live here are now fields on the session's
+# own declarations, verified above at every destination each file lands in.
+# `calib.domain_balanced@v1`'s items-file hash is one of them; the derived
+# token-content hash d65c1f40... is a different quantity and is still checked by
+# `resolve()` itself at stage 1, which is where it can be computed.
+mark ASSETS_STAGED
+
+say "training env: offline install from the relay wheelhouse"
+# uv is PINNED. The cache and resolver behaviour must be the one the wheelhouse
+# was built against, and `install.sh` without a version installs whatever is
+# latest that day.
+command -v uv >/dev/null || {
+  curl -LsSf "https://astral.sh/uv/${UV_VERSION:-0.11.11}/install.sh" | sh; }
+export PATH="$HOME/.local/bin:$PATH"
+cd "$REPO"
+sed -i 's|url = "https://download.pytorch.org/whl/cpu"|url = "https://download.pytorch.org/whl/cu128"|' pyproject.toml
+sed -i 's|name = "pytorch-cpu"|name = "pytorch-cu128"|' pyproject.toml
+sed -i 's|torch = { index = "pytorch-cpu" }|torch = { index = "pytorch-cu128" }|' pyproject.toml
+
+# --- offline dependency materialization -------------------------------------
+# Four of five host draws on 2026-08-14 died here, every one in the uv-sync
+# window, resolving and pulling ~3.8 GiB from PyPI over the drawn host's
+# network. The one healthy host did it in 45 s. The wheels now come from the
+# relay, which pods read fast, and the install runs `--offline --no-index`, so
+# the paid critical path contains no PyPI at all.
+#
+# `uv lock` is gone from the pod: `uv-cu128.lock` is that resolution, committed
+# and reviewed, and `--frozen` forbids re-resolving it. A resolve on the pod was
+# both a network round trip and a resolution nobody had seen.
+WHEELHOUSE=${WHEELHOUSE:-/workspace/wheelhouse}
+say "fetching the wheelhouse from the relay"
+python3 - <<'WHEELEOF'
+import os, sys, time
+from huggingface_hub import snapshot_download
+for attempt in range(4):
+    try:
+        p = snapshot_download("AlphaAvatar/aadistill-artifacts", repo_type="model",
+                              allow_patterns=["transfer/wheelhouse_cu128_cp312/*"],
+                              local_dir="/workspace/wh",
+                              token=os.environ["HF_TOKEN"])
+        break
+    except Exception as exc:
+        print(f"  wheelhouse attempt {attempt + 1} failed: {exc}", flush=True)
+        time.sleep(10 * (attempt + 1))
+else:
+    sys.exit("WHEELHOUSE FETCH FAILED")
+WHEELEOF
+mkdir -p "$WHEELHOUSE"
+cp /workspace/wh/transfer/wheelhouse_cu128_cp312/*.whl "$WHEELHOUSE"/ 2>/dev/null || true
+NWHL=$(ls "$WHEELHOUSE"/*.whl 2>/dev/null | wc -l)
+say "wheelhouse: ${NWHL} wheels, $(du -sh "$WHEELHOUSE" | cut -f1)"
+[ "$NWHL" -ge 91 ] || { say "WHEELHOUSE TOO SMALL (${NWHL} wheels)"; \
+  mark "WHEELHOUSE_INCOMPLETE:${NWHL}"; exit 92; }
+
+# No tripwire here any more, because there is nothing left to stall on: the
+# wheels are local, `--offline --no-index` forbids a network round trip, and
+# `--frozen` forbids a resolve. The cold-host detector existed to tell "slow
+# PyPI" from "hung host" and could only do it by burning 8-28 min of paid setup
+# first. An install that reads local files either works or fails immediately.
+#
+# It is deliberately NOT kept as a fallback: a fallback to the network would
+# reinstate the exact failure mode this removes, and would do it silently.
+# `uv pip install`, NOT `uv sync`. Attempt 3 died here in 4 minutes: `uv sync
+# --frozen` installs each package from the source recorded in the LOCK, and
+# torch's entry is `registry = "https://download.pytorch.org/whl/cu128"`.
+# `--find-links` adds a source; it does not override a registry-pinned one, so
+# with `--no-index` uv had no way to obtain torch and said so. `uv pip install`
+# against exported pins treats every package as a plain requirement, which
+# `--find-links` can satisfy.
+#
+# The interpreter is PINNED to 3.12 and uv may not download one. The wheelhouse
+# is cp312 — built for the 3.12.3 this pod image actually ran, read off a real
+# run's recorded runtime fingerprint — and uv left to choose picks the newest it
+# can find: on the dev box that was 3.14, against which every cp312 wheel is
+# unusable. `UV_PYTHON_DOWNLOADS=never` also keeps a python build off the wire.
+t0=$(date -u +%s)
+export UV_PYTHON_DOWNLOADS=never
+uv venv /opt/train --python 3.12 \
+  || { say "COULD NOT CREATE /opt/train ON PYTHON 3.12"; mark "PY312_MISSING"; exit 94; }
+uv pip install --python /opt/train/bin/python --offline --no-index \
+  --find-links "$WHEELHOUSE" -r "$REPO/requirements-cu128.txt" \
+  || { say "OFFLINE INSTALL FAILED — the wheelhouse does not satisfy the pins"
+       mark "WHEELHOUSE_UNSATISFIED"; exit 93; }
+# The project itself is local source, so it needs no index and no dependency
+# resolution: everything it depends on was just installed from the wheelhouse.
+# It IS built, though — hatchling and its chain (editables, pathspec, pluggy,
+# trove-classifiers, packaging, tomlkit) are in the wheelhouse for exactly that,
+# so build isolation resolves offline too. Installing the project rather than
+# leaning on PYTHONPATH keeps `import aadistill` meaning what it meant before.
+# `scripts` is on it too since the initialization migration: the experiment
+# instances moved out of src/aadistill, so the authorization types these
+# snippets import now live under `experiments.`.
+uv pip install --python /opt/train/bin/python --offline --no-index \
+  --find-links "$WHEELHOUSE" --no-deps -e "$REPO" \
+  || { say "PROJECT INSTALL FAILED"; mark "PROJECT_INSTALL_FAILED"; exit 95; }
+say "offline install completed in $(( $(date -u +%s) - t0 ))s"
+/opt/train/bin/python -c "import torch, transformers, sympy; \
+  assert torch.cuda.is_available(); \
+  print('train torch', torch.__version__, torch.cuda.get_device_name(0), \
+        '| transformers', transformers.__version__)"
+mark TRAIN_ENV
+
+# The frozen search assets are checked against PREREGISTERED constants, not
+# against hashes read out of their own manifests -- the latter proves only that a
+# file is self-consistent. All three state_eval identities (content, canonical
+# manifest, raw items) and recovery_search's content + manifest + scoring
+# contract are verified. A mismatch blocks before any scientific measurement.
+#
+# It runs HERE, after the train venv exists, and not beside the asset staging above, because
+# it needs `/opt/train`: the scoring-contract digest comes from
+# `aadistill.autoinit.recovery`, and importing that package imports torch. Placed
+# earlier it invoked an interpreter that does not exist yet, and the `||` branch
+# reported the missing interpreter as an identity mismatch -- which cost a $0.03
+# pod on 2026-08-13 and, worse, would have read as a corrupted asset. The gate is
+# still well before Stage 0: the driver has not started.
+# `SESSION_FROZEN_EXPECT` is optional and empty for every session that does not
+# set it, which keeps those sessions asking the historical question against the
+# verifier's compiled-in constants. A session running on the migrated tree must
+# name the document it expects instead: the initialization cutover relocated two
+# of the scoring contract's six declared files, so the contract legitimately
+# reads `@v3` there, and `--expect` is the distinction the verifier already
+# carried for exactly this. C1 attempt 10 died here for $0.1177 because nothing
+# passed it -- SETUP_RC=91, no driver stage, no probe trained.
+# DECLARED, or not run at all. A session that does not declare ASSETS_READY
+# has no frozen assets to verify and must not be asked another experiment's
+# historical question -- which is the $0.0552 Phase-C2 abort, exactly.
+if step_declared ASSETS_READY; then
+# And a session that DOES declare it must name its own expectation. The
+# verifier's compiled-in constants are the pre-cutover Phase-A/C1 set, so
+# falling back to them is how a session inherits a requirement for assets it
+# neither stages nor needs. Explicit or refused; never inherited.
+: "${SESSION_FROZEN_EXPECT:?a session declaring ASSETS_READY must name its frozen-asset expectation document}"
+FROZEN_EXPECT_ARGS=""
+if [ -n "${SESSION_FROZEN_EXPECT:-}" ]; then
+  if [ ! -f "$REPO/$SESSION_FROZEN_EXPECT" ]; then
+    say "SESSION_FROZEN_EXPECT names $SESSION_FROZEN_EXPECT, which is not in the checkout"
+    mark "FROZEN_ASSETS_FAILED"
+    exit 91
+  fi
+  FROZEN_EXPECT_ARGS="--expect $REPO/$SESSION_FROZEN_EXPECT"
+  say "verifying the frozen assets against $SESSION_FROZEN_EXPECT"
+else
+  say "verifying the frozen assets against the preregistered constants"
+fi
+FROZEN_RC=0
+FROZEN_OUT=$(cd "$REPO" && PYTHONPATH=src:scripts /opt/train/bin/python \
+    scripts/shared/pod/verify_frozen_assets.py $FROZEN_EXPECT_ARGS 2>&1) || FROZEN_RC=$?
+if [ "$FROZEN_RC" -ne 0 ]; then
+  say "FROZEN ASSET GATE FAILED -- output follows verbatim, because 'the "
+  say "verifier could not run' and 'these are not the preregistered assets' are "
+  say "different findings and must not be reported as the same one:"
+  echo "$FROZEN_OUT" | tail -25
+  mark "FROZEN_ASSETS_FAILED"
+  exit 91
+fi
+echo "$FROZEN_OUT" | tail -5
+mark ASSETS_READY
+fi
+
+# --- the vLLM environment, offline and pinned ------------------------------
+# DECLARED, or not built. Phase-C2 Search-1 never calls vLLM: it measures
+# candidates with the training stack and generates nothing. It paid for this
+# whole environment anyway, because the section was unconditional.
+if step_declared VLLM_READY; then
+# This step hung for 76 minutes on 2026-08-14 and cost $1.37: `pip install vllm`
+# was UNPINNED and went to PyPI, on a host whose network had already failed
+# three cold draws. The train venv beside it installed offline in 11 seconds.
+#
+# So the same treatment, and the whole environment rather than one wheel:
+# `requirements-vllm.txt` is 196 exact pins from `uv pip compile vllm==0.27.1`,
+# every wheel is staged on the relay, and the install is `--offline --no-index`.
+# `pip install --upgrade pip` is gone too — it was a second network call, and an
+# unpinned one.
+#
+# The two environments stay SEPARATE: /opt/train is torch 2.11.0+cu128 with
+# transformers 5.13.1, /opt/vllm is torch 2.13.0 with transformers 5.15.0. That
+# split is real and is what the RoPE check below verifies in both venvs.
+#
+# Pinning does NOT replace observation: the engine probe still reports the vLLM
+# version, torch version, dtype, context and stop tokens that actually loaded,
+# and the driver still attests the observed generation protocol against them.
+say "vLLM venv, offline from the relay wheelhouse"
+WH_VLLM=${WH_VLLM:-/workspace/wheelhouse_vllm}
+python3 - <<'VLLMWHEELEOF'
+import os, sys, time
+from huggingface_hub import snapshot_download
+for attempt in range(4):
+    try:
+        snapshot_download("AlphaAvatar/aadistill-artifacts", repo_type="model",
+                          allow_patterns=["transfer/wheelhouse_vllm_cp312/*"],
+                          local_dir="/workspace/whv",
+                          token=os.environ["HF_TOKEN"])
+        break
+    except Exception as exc:
+        print(f"  vllm wheelhouse attempt {attempt + 1} failed: {exc}", flush=True)
+        time.sleep(10 * (attempt + 1))
+else:
+    sys.exit("VLLM WHEELHOUSE FETCH FAILED")
+VLLMWHEELEOF
+mkdir -p "$WH_VLLM"
+cp /workspace/whv/transfer/wheelhouse_vllm_cp312/*.whl "$WH_VLLM"/ 2>/dev/null || true
+NWHLV=$(ls "$WH_VLLM"/*.whl 2>/dev/null | wc -l)
+say "vllm wheelhouse: ${NWHLV} wheels, $(du -sh "$WH_VLLM" | cut -f1)"
+# Count, then BYTES. A version pin says which release; the manifest says which
+# file. Verified before the install, so a truncated, re-uploaded or partial
+# wheelhouse cannot reach a paid run — the 175/196 partial that the relay quota
+# produced is exactly the state this refuses.
+# `|| { ... }` on the command line, not `[ $? -eq 0 ]` after the heredoc: this
+# script runs under `set -e`, so a failing python3 would kill it at this line
+# and the marker below would never be written. The launcher classifies by
+# marker, so that would have reported an unclassified death instead of a
+# wheelhouse mismatch.
+# The guard is one logical line: the heredoc body starts at the first
+# unescaped newline, so a `{ ... }` group broken across two lines would have
+# its closing brace read as python source, and the file would not parse at all.
+python3 - "$WH_VLLM" "$REPO/wheelhouse_vllm_sha256.json" <<'VERIFYWHEELEOF' \
+  || { say "VLLM WHEELHOUSE DOES NOT MATCH ITS FROZEN HASHES"; mark "VLLM_WHEELHOUSE_HASH_MISMATCH"; exit 96; }
+import hashlib, json, pathlib, sys
+wh, man = pathlib.Path(sys.argv[1]), json.load(open(sys.argv[2]))
+problems, checked = [], 0
+for row in man["wheels"]:
+    p = wh / row["file"]
+    if not p.is_file():
+        problems.append(f"MISSING {row['file']}"); continue
+    if p.stat().st_size != row["bytes"]:
+        problems.append(f"SIZE {row['file']}"); continue
+    h = hashlib.sha256()
+    with p.open("rb") as f:
+        for b in iter(lambda: f.read(1 << 24), b""):
+            h.update(b)
+    if h.hexdigest() != row["sha256"]:
+        problems.append(f"SHA256 {row['file']}")
+    checked += 1
+extra = sorted({p.name for p in wh.glob("*.whl")} - {r["file"] for r in man["wheels"]})
+print(f"wheelhouse verified {checked}/{man['n_wheels']} against "
+      f"{sys.argv[2].rsplit('/', 1)[-1]}", flush=True)
+if extra:
+    problems.append(f"UNDECLARED {extra[:5]}")
+if problems:
+    print("WHEELHOUSE VERIFICATION FAILED:", *problems[:10], sep="\n  ", flush=True)
+    sys.exit(1)
+VERIFYWHEELEOF
+tv0=$(date -u +%s)
+uv venv /opt/vllm --python 3.12 \
+  || { say "COULD NOT CREATE /opt/vllm ON PYTHON 3.12"; mark "PY312_MISSING"; exit 94; }
+uv pip install --python /opt/vllm/bin/python --offline --no-index \
+  --find-links "$WH_VLLM" -r "$REPO/requirements-vllm.txt" \
+  || { say "OFFLINE VLLM INSTALL FAILED — the wheelhouse does not satisfy the pins"
+       mark "VLLM_WHEELHOUSE_UNSATISFIED"; exit 97; }
+say "vllm offline install completed in $(( $(date -u +%s) - tv0 ))s"
+/opt/vllm/bin/python -c "import vllm, torch; \
+  print('vllm', vllm.__version__, '| torch', torch.__version__, torch.cuda.is_available())"
+mark VLLM_READY
+fi
+
+if step_declared TEACHER_READY; then
+say "downloading the teacher at the pinned revision"
+python3 -c "
+import os
+from huggingface_hub import snapshot_download
+snapshot_download('Qwen/Qwen3-4B-Thinking-2507', revision=os.environ['TEACHER_REVISION'],
+                  token=os.environ['HF_TOKEN'],
+                  allow_patterns=['*.json','*.safetensors','*.jinja','*.txt'])
+"
+mark TEACHER_READY
+fi
+
+if step_declared ROPE_OK; then
+# EVERY VENV THIS SESSION BUILT, discovered rather than listed. This loop named
+# /opt/vllm unconditionally, so a session that legitimately declares no
+# VLLM_READY would have failed here on a missing interpreter -- the skipped step
+# breaking the next one. The check itself is unchanged and still runs in every
+# environment that exists.
+say "checking the RoPE base resolves in every venv this session built"
+VENVS=""
+for CAND in /opt/train/bin/python /opt/vllm/bin/python; do
+  [ -x "$CAND" ] && VENVS="$VENVS $CAND"
+done
+[ -n "$VENVS" ] || { say "NO INTERPRETER TO CHECK ROPE IN"; mark "ROPE_NO_VENV"; exit 94; }
+for PY in $VENVS; do
+  $PY -c "
+import glob, sys, transformers
+sys.path.insert(0, '/workspace/aad/src')
+from transformers import AutoConfig
+from aadistill.models.student import assert_rope_from_config, stored_rope_base
+paths = sorted(glob.glob('/workspace/aad/artifacts/stages/stage-1/*/checkpoint/config.json'))
+if not paths: sys.exit('no staged checkpoint to check')
+for p in paths:
+    d = p.rsplit('/', 1)[0]
+    cfg = AutoConfig.from_pretrained(d)
+    base = assert_rope_from_config(cfg, d)
+    stored = stored_rope_base(cfg)
+    print(f'  transformers {transformers.__version__}: {d.rsplit(\"/\", 2)[-2]} '
+          f'stored {stored:,.0f} runtime {base:,.0f} OK')
+    if abs(stored - 5_000_000) > 1: sys.exit(f'{d} records RoPE base {stored}')
+"
+done
+mark ROPE_OK
+fi
+
+if step_declared TESTS_OK; then
+cpu_budget() {
+  local q p n=""
+  if [ -r /sys/fs/cgroup/cpu.max ]; then                    # cgroup v2
+    read -r q p < /sys/fs/cgroup/cpu.max || true
+    if [ "${q:-max}" != "max" ] && [ "${p:-0}" -gt 0 ] 2>/dev/null; then
+      n=$(( q / p ))
+    fi
+  elif [ -r /sys/fs/cgroup/cpu/cpu.cfs_quota_us ]; then     # cgroup v1
+    q=$(cat /sys/fs/cgroup/cpu/cpu.cfs_quota_us 2>/dev/null || echo -1)
+    p=$(cat /sys/fs/cgroup/cpu/cpu.cfs_period_us 2>/dev/null || echo 0)
+    if [ "$q" -gt 0 ] 2>/dev/null && [ "$p" -gt 0 ] 2>/dev/null; then
+      n=$(( q / p ))
+    fi
+  fi
+  # No quota (a bare host, like the dev box) means the affinity mask is the truth.
+  # NOT `nproc`: coreutils documents that it honours OMP_NUM_THREADS, so once this
+  # script starts setting that variable `nproc` stops reporting the machine and
+  # starts reporting our own cap — it returned 8 on a 13-cpu set that way.
+  if [ -z "$n" ] || [ "$n" -lt 1 ]; then
+    n=$(python3 -c 'import os; print(len(os.sched_getaffinity(0)))' 2>/dev/null \
+        || nproc --all)
+  fi
+  if [ "$n" -gt 16 ]; then n=16; fi                         # the suite needs no more
+  echo "$n"
+}
+NCPU=$(cpu_budget)
+CPUS=${TESTS_CPUS:-0-$(( NCPU - 1 ))}
+NTHREADS=$(( NCPU < 8 ? NCPU : 8 ))
+say "CPU test suite ($(nproc) vCPUs visible, cgroup budget ${NCPU}; cpu set ${CPUS})"
+cd "$REPO"
+set +e
+tt0=$(date -u +%s)
+# The ignore list comes from the session's manifest, and a test pins it equal to
+# the pod simulator's — a simulation that runs a different command from the pod
+# is not a simulation. Unquoted on purpose: `SESSION_TEST_IGNORES` is a
+# space-separated flag list, and quoting it would pass one long argument.
+# `--junitxml` is a REPORTING flag: it changes neither the selection nor the run,
+# and it is the only way to name every skip. Attempt 5's grep named both failures
+# exactly and not one of the 99 skips, and the counts prove a skip divergence
+# that is still unexplained because that list died with the pod.
+# The CPU-test environment, COMMAND-SCOPED. Everything above ran in the real one
+# — the pinned venv, the teacher download, both RoPE checks — and everything
+# below re-asserts it. Only pytest runs neutralized, because the launch-bound
+# diagnostic runs on a CPU box with an empty HF cache while this machine is an
+# L40S with the teacher already downloaded, and comparing their skip sets exactly
+# would refuse a HEALTHY pod for being one. The variables are declared once in
+# `aadistill.runtime.cpu_test_env` and emitted here, so the pod and the
+# simulator cannot drift apart into two prose lists.
+CPU_TEST_HOME=$(mktemp -d /workspace/cpu_test_scope.XXXXXX)
+mkdir -p "$CPU_TEST_HOME/home" "$CPU_TEST_HOME/hf/hub"
+CPU_TEST_ENV=$(/opt/train/bin/python "$REPO/scripts/shared/pod/cpu_test_env_args.py" \
+  --home "$CPU_TEST_HOME")
+say "CPU-test scope: env $CPU_TEST_ENV"
+OMP_NUM_THREADS=$NTHREADS MKL_NUM_THREADS=$NTHREADS OPENBLAS_NUM_THREADS=$NTHREADS \
+  taskset -c "$CPUS" \
+  env $CPU_TEST_ENV \
+  timeout "${TESTS_MAX_S:-2700}" /opt/train/bin/python -m pytest \
+  ${SESSION_TEST_PATHS:-tests/} -q \
+  --junitxml=/workspace/pytest_junit.xml \
+  ${SESSION_TEST_IGNORES:-} > /workspace/pytest.log 2>&1
+RC=$?
+tt=$(( $(date -u +%s) - tt0 ))
+set -e
+# On failure, name EVERY failure before the tail. C1 attempt 3R died here with
+# `14 failed, 2650 passed` and brought home exactly three names: the tail is four
+# lines and /workspace/pytest.log dies with the pod, so the other eleven had to be
+# reconstructed afterwards by guessing at the pod's environment. One grep is free.
+if [ "$RC" -ne 0 ]; then
+  echo "--- every failing nodeid ---"
+  grep -E '^(FAILED|ERROR) ' /workspace/pytest.log || true
+  echo "--- log tail ---"
+fi
+tail -4 /workspace/pytest.log
+# The complete outcome — failures, errors, EVERY skip and its reason, and the
+# exact set difference against the launch-bound sweep's skip set. Written to
+# /workspace/pytest_outcomes.json, which the launcher pulls off the pod before
+# teardown on a setup failure (`SessionSpec.setup_failure_files`), because a
+# setup abort never reaches artifact collection and the launcher's own window is
+# `tail -40`. Runs on BOTH paths: a passing gate whose skip set differs from the
+# sweep's is exactly as informative as a failing one, and cheaper to learn now.
+set +e
+/opt/train/bin/python "$REPO/scripts/shared/pod/summarize_pytest_outcomes.py" \
+  --junit /workspace/pytest_junit.xml \
+  --out /workspace/pytest_outcomes.json \
+  --expected "$REPO/logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json" \
+  --repo "$REPO" --strict
+SUMMARY_RC=$?
+set -e
+# The isolation was command-scoped; prove it did not leak into the science
+# runtime. Both are cheap and neither redownloads anything: the teacher is
+# already on disk and this only asks whether it is still there.
+/opt/train/bin/python -c 'import torch; assert torch.cuda.is_available()' \
+  || { say "CPU-test isolation leaked: CUDA is gone after the gate"; exit 1; }
+REAL_HF_HUB="${HF_HOME:-$HOME/.cache/huggingface}/hub"
+[ -d "$REAL_HF_HUB" ] || { say "CPU-test isolation leaked: $REAL_HF_HUB is gone"; exit 1; }
+say "real runtime intact after the CPU-test scope: CUDA available, teacher cache at $REAL_HF_HUB"
+rm -rf "$CPU_TEST_HOME"
+if [ "$RC" -eq 124 ]; then
+  say "COLD HOST: the CPU test suite did not finish in ${TESTS_MAX_S:-2700}s"
+  mark "HOST_COLD:tests:${TESTS_MAX_S:-2700}s:$(nproc)vcpu:cpuset${CPUS}"
+  exit 90
+fi
+[ "$RC" -eq 0 ] || { say "test suite failed rc=$RC"; exit 1; }
+# The suite passed but this machine did not run the suite the sweep certified.
+# Fail here, at setup cost, rather than train six probes under an environment
+# whose difference from the rehearsal is unnamed.
+[ "$SUMMARY_RC" -eq 0 ] || { say "skip set differs from the launch-bound sweep"; exit 1; }
+say "test suite passed in ${tt}s on cpu set ${CPUS}"
+mark "TESTS_OK:${tt}s"
+fi
+
+# The authorization must be loadable and bound to the live plan BEFORE the
+# driver starts, so a tampered or stale artifact fails at $0.30 rather than
+# after a stage has run.
+#
+# It is THIS SESSION's authorization, passed in by the launcher. Hardcoding the
+# micro-preflight artifact and the preflight plan made every session depend on
+# an unrelated one: on 2026-08-14 the continuation died here ($0.1369) because
+# the preflight plan hash had moved under `pooled_counts@v2` and a historical
+# artifact no longer matched it. Re-issuing that artifact would only postpone
+# the same failure to the next time either plan moves.
+if step_declared AUTHORIZATION_OK; then
+: "${SESSION_AUTH_PATH:?the launcher must name the session authorization}"
+: "${SESSION_PLAN_HASH:?the launcher must name the session plan hash}"
+# Which artifact TYPE this session's authorization is. The default is the narrow
+# `PreflightAuthorization`, which grants NOTHING: `phase_a` is absent from its
+# policy's allowed set, so `a.allows("phase_a")` is false and there is no flag
+# anyone could set. A Phase-A artifact still cannot be loaded by it — its
+# `phase_a_authorized` claim trips the policy check. Only a session that
+# explicitly declares SESSION_KIND=phase_a gets the type that can say yes, and
+# that type refuses anything not issued under the Phase-A schema.
+#
+# It was `SpendAuthorization` until the Milestone-A closure moved the harness
+# declaration and the Phase-A properties out of the governance primitive. That
+# bare type now REFUSES to load without a policy, so this branch would have
+# raised on a pod — a shell dispatch table is a consumer too, and it is the one
+# no import rewriter touches.
+SESSION_KIND="${SESSION_KIND:-spend}"
+say "verifying $SESSION_AUTH_PATH binds to this session's plan (kind=$SESSION_KIND)"
+if [ "$SESSION_KIND" = "phase_a" ]; then
+  # Deliberately NOT checked here: the science plan. Setup has no executing plan
+  # to compare against, so a check here could only compare two strings the
+  # launcher supplied. The driver's Stage 0 rebuilds the plan and calls
+  # `require_science_plan` on the rebuilt object, which is strictly stronger, and
+  # it also runs `assert_preregistered` against the frozen artifact.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_a.plan import PhaseAAuthorization
+a = PhaseAAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_phase_a is True, 'a Phase-A session needs a Phase-A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off Phase A'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows_phase_a}, '
+      f'followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "phase_b" ]; then
+  # A FOURTH type, and it needs its own branch for the same reason the third did.
+  # Phase B's artifact is a `PhaseBAuthorization`: its plan hash lives in
+  # `phase_b_session_plan_hash` and its floor in `planning_floor_usd`, because the
+  # pricing review removed `expected_usd` — no expected-value assumption over
+  # survivor identity or tie-break probability is defined anywhere. The spend
+  # branch below therefore cannot read it, and attempt 2 proved that at $0.2300:
+  # `SpendAuthorization.load` raised `KeyError: 'preflight_plan_hash'` here, one
+  # step after the test gate passed.
+  #
+  # Routing Phase B through the spend branch would be worse than the crash even if
+  # the artifact carried those keys: `SpendAuthorization.load` falls back to
+  # `HARNESS_SOURCE_FILES_V1` when `harness_source_files` is absent, so the check
+  # would pass while binding Phase B to PHASE A's file list.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_b.plan import PhaseBAuthorization
+a = PhaseBAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.allows_phase_b is True, 'a Phase-B session needs a Phase-B authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off Phase B'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, phase B {a.allows_phase_b}, '
+      f'phase A {a.allows_phase_a}, followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "continuation_b" ]; then
+  # A FIFTH type. Phase B's behavioural continuation is NOT a Phase-B session
+  # with a flag turned off: its grant prices one missing `sb` and at most two
+  # conditional `sc`, and it must never be substitutable for the `$35.6660`
+  # artifact that books a 16.5 h P=2 search already bought and retained.
+  #
+  # `ContinuationAuthorization.runs_search` is False BY TYPE — there is no field
+  # to set — so this branch asserts it as a contract the artifact cannot express
+  # otherwise. `PhaseBAuthorization.load` would reject a continuation artifact on
+  # schema, and the spend default would raise the attempt-2 KeyError; neither is
+  # a safe place for this session to land.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_b.continuation import ContinuationAuthorization
+a = ContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.runs_search is False, 'the continuation cannot purchase Stage 1 again'
+assert a.allows_phase_b is True, 'the continuation is a Phase-B session'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off the continuation'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, search {a.runs_search}, '
+      f'phase B {a.allows_phase_b}, followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c1" ]; then
+  # A SIXTH type. Phase-C1's grant measures a harness containing the C1 launcher,
+  # driver, fixed-path replayer and the new ATTENTION operator, none of which
+  # appear in any earlier file set, and it carries a ceiling derived from
+  # logs/stages/stage-1/phase_c1/plans/phase_c1_pricing.json for six 0.86M probes rather than for a search or a
+  # continuation. Every other branch would either refuse the artifact on schema or
+  # — worse — accept it while binding C1 to another phase's file list and price.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c1.authorization import C1Authorization
+a = C1Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c1_isolation is True, 'a C1 session needs a C1 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_beam_search is False, 'C1 replays one fixed path and runs no search'
+assert a.automatic_followon_start is False, 'nothing chains off C1'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C1 {a.authorizes_c1_isolation}, '
+      f'search {a.allows_beam_search}, phase A {a.allows_phase_a}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c3" ]; then
+  # A TENTH type. Phase-C3's grant measures a harness containing the C3
+  # launcher, driver, session, formal pricing and the causal-KL operator, none
+  # of which appear in any earlier file set, and it carries a ceiling DERIVED
+  # from a live securePrice re-query rather than from a committed pricing
+  # record -- $22.1452 at $1.09/h, against a $30.00 package envelope it may
+  # not simply be issued at.
+  #
+  # `allows_arm_elimination` is False BY TYPE: nine probes, no successive
+  # halving, no forced winner. `authorizes_c1_isolation` is False too, so a
+  # C3 artifact cannot be mistaken for permission to re-open C1.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c3.authorization import C3Authorization
+a = C3Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c3_isolation is True, 'a C3 session needs a C3 authorization'
+assert a.authorizes_c1_isolation is False, 'this artifact claims C1 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_beam_search is False, 'C3 replays one fixed path and runs no search'
+assert a.allows_arm_elimination is False, 'C3 runs nine probes and eliminates no arm'
+assert a.automatic_followon_start is False, 'nothing chains off C3, and C4 is not started'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C3 {a.authorizes_c3_isolation}, '
+      f'search {a.allows_beam_search}, elimination {a.allows_arm_elimination}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "a3" ]; then
+  # A3. Its grant measures a harness containing the A3 launcher, driver,
+  # session, authorization and off-pod comparison, none of which appear in any
+  # earlier file set, and it carries a ceiling DERIVED from a live securePrice
+  # re-query -- $8.2525 at $1.09/h against a $30.00 package envelope it may not
+  # simply be issued at.
+  #
+  # `allows_arm_elimination` is False BY TYPE: one arm, three seeds, no
+  # halving. `allows_control_retraining` is False because attempt75's three
+  # controls are REUSED -- retraining them would quietly make this a six-probe
+  # experiment the grant does not fund. `allows_on_pod_decision` is False
+  # because the comparison runs off pod at $0; attempt75 trained, preserved
+  # and scored nine probes and then lost its decision artifact to a crash in
+  # the on-pod aggregation.
+  #
+  # This branch exists because a missing one is NOT a type error: SESSION_KIND
+  # falls through to `spend`, loads a SpendAuthorization and refuses this
+  # artifact at exit 98 before any work. Phase B's attempt 2 proved what that
+  # costs ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c3.a3_authorization import A3Authorization
+a = A3Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_a3 is True, 'an A3 session needs an A3 authorization'
+assert a.authorizes_c1_isolation is False, 'this artifact claims C1 authorization'
+assert a.authorizes_c3_isolation is False, 'this artifact claims C3 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_beam_search is False, 'A3 replays one fixed path and runs no search'
+assert a.allows_arm_elimination is False, 'A3 runs three probes and eliminates no arm'
+assert a.allows_control_retraining is False, 'A3 reuses attempt75 controls'
+assert a.allows_on_pod_decision is False, 'A3 computes its comparison off pod'
+assert a.automatic_followon_start is False, 'nothing chains off A3'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, A3 {a.authorizes_a3}, '
+      f'search {a.allows_beam_search}, controls_retrained {a.allows_control_retraining}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "d1" ]; then
+  # D1. Its grant measures a harness containing the D1 launcher, driver, session
+  # and authorization, none of which appear in any earlier file set, and it
+  # carries a ceiling DERIVED from the MEASURED production Top-K cost -- not from
+  # a committed full-vocabulary planning record, which priced $31.1577 for the
+  # same session.
+  #
+  # D1 IS THE FIRST OF THESE THAT ACTUALLY RUNS A BEAM SEARCH, so
+  # `allows_beam_search` is asserted TRUE here where every other dedicated
+  # branch asserts it False. That is why the flag is stated rather than inferred
+  # from family resemblance: a branch copied from C1 or A3 would refuse the one
+  # artifact that is supposed to search.
+  #
+  # `allows_recovery` and `allows_behavioural` are False BY TYPE: the search
+  # commits a candidate set and stops, and neither behavioural rung can be bound
+  # until that set exists. They are separately authorized sessions.
+  #
+  # This branch exists because a missing one is not a type error: SESSION_KIND
+  # falls through to `spend`, and attempt 2 of Phase B proved what that costs
+  # ($0.2300, a KeyError one step after the test gate passed).
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_d1.d1_authorization import D1Authorization
+a = D1Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_d1_search is True, 'a D1 session needs a D1 authorization'
+assert a.allows_beam_search is True, 'a D1 search session must authorize the search'
+assert a.allows_recovery is False, 'D1 search commits a candidate set and trains nothing'
+assert a.allows_behavioural is False, 'the behavioural rungs are separate sessions'
+assert a.automatic_followon_start is False, 'nothing chains off the D1 search'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, D1 {a.authorizes_d1_search}, '
+      f'search {a.allows_beam_search}, arm {a.arm}, '
+      f'protocol {a.measurement_protocol_id[:12]}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2" ]; then
+  # A SEVENTH type. Phase-C2 Search-1's grant measures a harness containing the
+  # C2 launcher, driver, search space and baseline rule, none of which appear in
+  # any earlier file set, and it carries a ceiling derived from
+  # logs/stages/stage-1/phase_c2/plans/phase_c2_pricing.json for ONE search --
+  # with a conditional baseline rebuild -- rather than for probes, a
+  # continuation or a fixed-path replay.
+  #
+  # `allows_recovery_training` is False BY TYPE: this session trains nothing and
+  # has no battery. Every other branch would either refuse the artifact on
+  # schema or -- worse -- accept it while binding C2 to another phase's file
+  # list and price.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c2.session import C2Authorization
+a = C2Authorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_search1 is True, 'a C2 session needs a C2 authorization'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'C2 Search-1 trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off Search-1'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, C2 {a.authorizes_c2_search1}, '
+      f'training {a.allows_recovery_training}, phase A {a.allows_phase_a}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_baseline_completion" ]; then
+  # An EIGHTH type, and the one whose absence would have been most expensive to
+  # discover. Baseline completion carries a ceiling derived for ONE rebuild of
+  # the frozen B plus ONE state_eval -- $1.1950, not Search-1's $15.0446 -- and
+  # its artifact reports `authorizes_c2_search1 = False`.
+  #
+  # Without this branch SESSION_KIND falls through to `spend`, which loads a
+  # PreflightAuthorization and exits 98 AFTER setup has run on a billing pod.
+  # Phase-B attempt 2 paid $0.2300 to establish that a missing branch is not a
+  # type error.
+  #
+  # The `authorizes_c2_search1 is False` assertion is the governance boundary in
+  # its final position: a completion grant reaching the pod must not be able to
+  # authorize a ten-hour beam.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c2.baseline_completion import BaselineCompletionAuthorization
+a = BaselineCompletionAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_baseline_completion is True, 'this session needs a baseline-completion authorization'
+assert a.authorizes_c2_search1 is False, 'a completion grant must not authorize the Search-1 beam'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'baseline completion trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off baseline completion'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, completion {a.authorizes_c2_baseline_completion}, '
+      f'search1 {a.authorizes_c2_search1}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_full_search" ]; then
+  # A NINTH type, and its absence was caught by review rather than by a pod --
+  # which is the only reason this costs nothing. The full-search launcher sets
+  # SESSION_KIND=c2_full_search and there was no branch for it, so a formal pod
+  # would have completed paid setup and the whole test gate, reached this line,
+  # fallen through to `spend`, loaded a PreflightAuthorization and exited 98
+  # with the beam never started. Exactly the class that cost $0.2300 when
+  # SESSION_KIND=phase_b had no branch: a missing dispatch entry is not a type
+  # error, it is a late refusal on a billing machine.
+  #
+  # The search's artifact reports THREE falses, and each is a governance
+  # boundary in its final position: it must not be able to authorize Search-1's
+  # consumed beam, a baseline rebuild, or any behavioural work. The last matters
+  # most here -- the behavioural session's candidate identities do not exist
+  # until this search commits a Top-5, so an artifact that could authorize it on
+  # the pod would be authorizing work against candidates nobody has selected.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c2.full_search import FullSearchAuthorization
+a = FullSearchAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_full_search is True, 'this session needs a full-search authorization'
+assert a.authorizes_c2_search1 is False, 'a full-search grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'a full-search grant must not authorize a baseline rebuild'
+assert a.authorizes_behavioural_selection is False, 'the Top-5 does not exist yet; nothing may authorize behavioural work here'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'the full joint search trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off the full search; it ends at commit_top_k'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, full search {a.authorizes_c2_full_search}, '
+      f'search1 {a.authorizes_c2_search1}, completion {a.authorizes_c2_baseline_completion}, '
+      f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_replay" ]; then
+  # A TENTH type. The replay reconstructs the checkpoints behind a frozen Top-5
+  # and decides nothing, so its artifact must be unable to buy any of the work
+  # that WOULD decide something. The full-search flag is the one that matters
+  # most here and it is the one a careless reuse would set: the search is
+  # COMPLETE, the review forbade a fourth attempt, and an artifact that could
+  # authorize a beam would buy exactly the forbidden thing at a tenth of the
+  # price under a name that sounds like bookkeeping.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c2.replay import ReplayAuthorization
+a = ReplayAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_c2_replay is True, 'this session needs a replay authorization'
+assert a.authorizes_c2_full_search is False, 'a replay grant must not authorize a beam'
+assert a.authorizes_c2_search1 is False, 'a replay grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'a replay grant must not authorize a baseline rebuild'
+assert a.authorizes_behavioural_selection is False, 'a replay grant must not authorize behavioural work'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.allows_recovery_training is False, 'the replay trains nothing'
+assert a.automatic_followon_start is False, 'nothing chains off the replay'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, replay {a.authorizes_c2_replay}, '
+      f'full search {a.authorizes_c2_full_search}, '
+      f'behavioural {a.authorizes_behavioural_selection}, training {a.allows_recovery_training}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "c2_behavioural" ]; then
+  # An ELEVENTH type, and the ONLY C2 session that trains. Every other C2
+  # artifact reports allows_recovery_training False and C2Authorization.load
+  # refuses a document claiming it, so this branch must load the behavioural
+  # type specifically — delegating to the shared loader would refuse the only
+  # artifact that can authorize twelve recovery probes. The flags below are the
+  # ones a careless reuse would set: this must not be able to buy a beam, a
+  # re-ranking of the frozen Top-5, a re-measurement of B, or C3/C4 work.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.phase_c2.behavioural_governance import BehaviouralAuthorization
+a = BehaviouralAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_behavioural_selection is True, 'this session needs a behavioural authorization'
+assert a.allows_recovery_training is True, 'every one of the twelve probes is a training run'
+assert a.authorizes_c2_full_search is False, 'a behavioural grant must not authorize a beam'
+assert a.authorizes_c2_search1 is False, 'a behavioural grant must not authorize the Search-1 beam'
+assert a.authorizes_c2_baseline_completion is False, 'B is measured and frozen; this rebuilds bytes, it does not remeasure'
+assert a.authorizes_c2_replay is False, 'the replay is closed; its output is an input here'
+assert a.authorizes_later_cycles is False, 'C3 and C4 challenge whatever incumbent THIS session leaves'
+assert a.allows_phase_a is False, 'this artifact claims Phase A authorization'
+assert a.automatic_followon_start is False, 'nothing chains off the verdict'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, behavioural {a.authorizes_behavioural_selection}, '
+      f'training {a.allows_recovery_training}, full search {a.authorizes_c2_full_search}, '
+      f'later cycles {a.authorizes_later_cycles}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+elif [ "$SESSION_KIND" = "recovery_continuation" ]; then
+  # A THIRD type, not a relaxation of the second. The continuation's artifact
+  # carries `phase_a_authorized: true` (it runs Phase-A stages), so the spend
+  # branch below would refuse it — and the phase_a branch above would accept a
+  # full-search authorization in its place, at the search's ceiling.
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from stages.recovery_continuation.session import RecoveryContinuationAuthorization
+a = RecoveryContinuationAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert a.authorizes_recovery_continuation is True
+assert a.allows_beam_search is False, 'the continuation cannot reach a search'
+assert a.automatic_followon_start is False, 'nothing chains off the continuation'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.4f}, search {a.allows_beam_search}, '
+      f'followon {a.automatic_followon_start}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+else
+  cd "$REPO" && PYTHONPATH=src:scripts SESSION_AUTH_PATH="$SESSION_AUTH_PATH" \
+    SESSION_PLAN_HASH="$SESSION_PLAN_HASH" /opt/train/bin/python -c "
+import os
+from shared.preflight import PreflightAuthorization
+a = PreflightAuthorization.load(os.environ['SESSION_AUTH_PATH'])
+a.require_plan(os.environ['SESSION_PLAN_HASH'])
+assert not a.allows('phase_a'), 'this artifact claims Phase A authorization'
+print(f'  {a.authorization_id}: stages {list(a.authorized_stages)}, '
+      f'hard \${a.hard_cap_usd:.2f}, phase A {a.allows(\"phase_a\")}')
+" || { say "THE SESSION AUTHORIZATION DOES NOT BIND TO THIS SESSION'S PLAN"; mark "AUTHORIZATION_MISMATCH"; exit 98; }
+fi
+mark AUTHORIZATION_OK
+fi
+
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader
+mark SETUP_DONE
+say "setup complete"

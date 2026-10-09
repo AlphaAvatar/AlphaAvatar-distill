@@ -1,0 +1,2488 @@
+{
+ "arm": "supervised_target",
+ "authorization": {
+  "authorization_id": "autoinit.v1.phase_d1",
+  "authorized_session_commit": "1b27d6a632ad934d2e765c56018012db461c4e42",
+  "authorized_stages": [
+   "A",
+   "B",
+   "C",
+   "D"
+  ],
+  "config_hash": "8fa0a2c91079b24a6a8188c0c512ac03a7eba2fc07f2e6e749374039f6b483cf",
+  "hard_cap_usd": 21.4897,
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef"
+ },
+ "commit": {
+  "_next": "screening, as a SEPARATELY authorized session. Neither behavioural rung could be bound before this set existed.",
+  "_products": "these checkpoint directories are this session's PRODUCTS and must be secured off-pod before teardown: the next stage trains recovery probes FROM these initializations, and the screening price does not fund re-running two complete structural paths.",
+  "_what_this_is": "the committed candidate set the behavioural rungs will screen. This session ranks and commits; it trains nothing and evaluates no behaviour.",
+  "artifact_digests": [
+   "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+   "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+   "efd757689cded45ca4f644b0921b5f4253d00e3da31a0361c139ef407be12b8f",
+   "7d089558fe117990f7fa13f46ae058eafda1621042bd33ad1ff5773526590e83"
+  ],
+  "checkpoint_paths": [
+   "/workspace/aad/artifacts/audit/autoinit_d1/search/states/e5e3edb0477b25147de952153da8fc21/2944a761c18ae530c8437b62265de995",
+   "/workspace/aad/artifacts/audit/autoinit_d1/search/states/56388d47b6a71e1b49e44929e48d4061/d3e9e72e064964a975d2bdd00f131fc7",
+   "/workspace/aad/artifacts/audit/autoinit_d1/search/states/a2b2f04ae642ac69d278c20feb42d52f/1b41d294188b29b517ef3faa61084b82",
+   "/workspace/aad/artifacts/audit/autoinit_d1/search/states/ea4fe4d356b8c8f40f048256df6b8999/1e6aec83ba02deda2092c2d8d7eb71c5"
+  ],
+  "k": 4,
+  "n_selected": 4,
+  "ranking_policy": "beam.pareto_multi_objective@v2",
+  "selected_rows": [
+   {
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/autoinit_d1/search/states/e5e3edb0477b25147de952153da8fc21/2944a761c18ae530c8437b62265de995",
+    "num_parameters": 596049920,
+    "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+    "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+    "state_id": "e5e3edb0477b25147de952153da8fc21",
+    "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d"
+   },
+   {
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/autoinit_d1/search/states/56388d47b6a71e1b49e44929e48d4061/d3e9e72e064964a975d2bdd00f131fc7",
+    "num_parameters": 596049920,
+    "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+    "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+    "state_id": "56388d47b6a71e1b49e44929e48d4061",
+    "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876"
+   },
+   {
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "artifact_digest": "efd757689cded45ca4f644b0921b5f4253d00e3da31a0361c139ef407be12b8f",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/autoinit_d1/search/states/a2b2f04ae642ac69d278c20feb42d52f/1b41d294188b29b517ef3faa61084b82",
+    "num_parameters": 596049920,
+    "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+    "single_shard_sha256": "e331bef5b9dab0ba8d5795bdc9a8e33a7107b5871bcadce20667694e412b61a8",
+    "state_id": "a2b2f04ae642ac69d278c20feb42d52f",
+    "weights_digest": "415e56ee666888bb7e4c6b7a244731616ff17d87d592c7e642d94ef64c531d0e"
+   },
+   {
+    "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+    "artifact_digest": "7d089558fe117990f7fa13f46ae058eafda1621042bd33ad1ff5773526590e83",
+    "checkpoint_path": "/workspace/aad/artifacts/audit/autoinit_d1/search/states/ea4fe4d356b8c8f40f048256df6b8999/1e6aec83ba02deda2092c2d8d7eb71c5",
+    "num_parameters": 596049920,
+    "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+    "single_shard_sha256": "e009674b1d5dddeafc2febeb8241f2dc63cc926e05f35d4b7fb4cdfa2a25149b",
+    "state_id": "ea4fe4d356b8c8f40f048256df6b8999",
+    "weights_digest": "68d296e8aed0a6821b2be59108eaf1434b20384890dc459128585e54f5ed3d36"
+   }
+  ],
+  "selection_path": "stage1_selection.json",
+  "state_ids": [
+   "e5e3edb0477b25147de952153da8fc21",
+   "56388d47b6a71e1b49e44929e48d4061",
+   "a2b2f04ae642ac69d278c20feb42d52f",
+   "ea4fe4d356b8c8f40f048256df6b8999"
+  ]
+ },
+ "contract": {
+  "_authorizes": "nothing. A wired session is not a funded one; the one-use authorization is issued separately.",
+  "arm": "supervised_target",
+  "checked": [
+   "measurement_protocol_id declared and equal to the evaluator's",
+   "frozen suite content hash bound into the evaluator",
+   "distribution support on the search AND the evaluator",
+   "arm position policy on both, and declared by the design",
+   "micro_batch_size and packing",
+   "beam width and warmup levels",
+   "frozen operator set and both calibration profiles",
+   "design revision"
+  ],
+  "config_hash": "8fa0a2c91079b24a6a8188c0c512ac03a7eba2fc07f2e6e749374039f6b483cf",
+  "design_hash": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
+  "distribution_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  },
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+ },
+ "design_hash": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
+ "elapsed_seconds": 31690.84,
+ "ended_utc": "2026-10-07T06:07:35Z",
+ "environment": {
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "device_count": 1,
+  "gpu_name": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "total_memory_gib": 44.392
+ },
+ "experiment_id": "phase_d1",
+ "open_blockers": [],
+ "root_teacher": {
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9",
+  "verified": [
+   "model-00001-of-00003.safetensors",
+   "model-00002-of-00003.safetensors",
+   "model-00003-of-00003.safetensors"
+  ]
+ },
+ "run_id": "d1_search_20261006_210210",
+ "schema": "aadistill.phase_d1.search_session/v1",
+ "search": {
+  "config_hash": "8fa0a2c91079b24a6a8188c0c512ac03a7eba2fc07f2e6e749374039f6b483cf",
+  "finished_utc": "2026-10-07T06:07:34.964584+00:00",
+  "levels": [
+   {
+    "dead_ends": [],
+    "expanded_from": [
+     "68c056b6486e31bfee5ad95c1184cecd"
+    ],
+    "generated": [
+     "a9bce03079fc96dcc2ba298d51e5d3f9",
+     "74d40d5953e61801700b9000685f7bc1",
+     "20bd9506785d3d3e2468d5ed0f003203",
+     "0c1dc924e75cfaba27c006596119625f",
+     "6d6006a0f66c94a331a5747b228179ec",
+     "3695c4aebeabc6507c00adf9baac6bc6",
+     "c4781f375e80bf096ebc6382603a877d",
+     "d8ba16445423d4829588f7b345652587"
+    ],
+    "leaves": [],
+    "level": 0,
+    "ranking": {
+     "beam_width": null,
+     "decisions": [
+      {
+       "diagnostics": {
+        "state.nll.code": 0.7165369962628984,
+        "state.nll.general": 2.980090614127486,
+        "state.nll.pooled_all_domains": 1.0184880988249252,
+        "state.nll.rag_multihop": 0.5389546564103871,
+        "state.nll.reasoning_math": 0.5993888768583442,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 0.7879281092357092
+       },
+       "front": 0,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 1.2951975296408824,
+        "state.teacher_kl.equal_domain_mean": 0.511239766528942,
+        "state.teacher_kl.worst_domain": 0.6222262184873716
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "0c1dc924e75cfaba27c006596119625f"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 0.7165369962628984,
+        "state.nll.general": 2.980090614127486,
+        "state.nll.pooled_all_domains": 1.0184880988249252,
+        "state.nll.rag_multihop": 0.5389546564103871,
+        "state.nll.reasoning_math": 0.5993888768583442,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 0.7879281092357092
+       },
+       "front": 0,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 1.2951975296408824,
+        "state.teacher_kl.equal_domain_mean": 0.511239766528942,
+        "state.teacher_kl.worst_domain": 0.6222262184873716
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "20bd9506785d3d3e2468d5ed0f003203"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 1.4305720819681176,
+        "state.nll.general": 5.041276648900083,
+        "state.nll.pooled_all_domains": 1.9884531224904385,
+        "state.nll.rag_multihop": 1.2116643038967725,
+        "state.nll.reasoning_math": 1.2478070948145419,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 1.8012025640573925
+       },
+       "front": 1,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 4.278214745244517,
+        "state.teacher_kl.equal_domain_mean": 1.5607952011049286,
+        "state.teacher_kl.worst_domain": 2.831796972194512
+       },
+       "path": "FFN(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "6d6006a0f66c94a331a5747b228179ec"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 1.3843733666632412,
+        "state.nll.general": 5.189033054048507,
+        "state.nll.pooled_all_domains": 2.0199345907799673,
+        "state.nll.rag_multihop": 1.292896801582536,
+        "state.nll.reasoning_math": 1.2241155197028801,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 1.8481694923041179
+       },
+       "front": 1,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 4.125890004089229,
+        "state.teacher_kl.equal_domain_mean": 1.6054880673724217,
+        "state.teacher_kl.worst_domain": 2.9918821890617826
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "3695c4aebeabc6507c00adf9baac6bc6"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.1301026144298896,
+        "state.nll.general": 5.247165519689274,
+        "state.nll.pooled_all_domains": 3.1549033466967242,
+        "state.nll.rag_multihop": 2.682110432627471,
+        "state.nll.reasoning_math": 2.727365104151306,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.716595674353413
+       },
+       "front": 2,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 4.649977162180744,
+        "state.teacher_kl.equal_domain_mean": 2.6936147158389927,
+        "state.teacher_kl.worst_domain": 2.9802140188364112
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "a9bce03079fc96dcc2ba298d51e5d3f9"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.099801376306615,
+        "state.nll.general": 5.316549683058435,
+        "state.nll.pooled_all_domains": 3.2222366218066876,
+        "state.nll.rag_multihop": 2.8888527626053584,
+        "state.nll.reasoning_math": 2.7647782092889432,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.8010652691895688
+       },
+       "front": 2,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 4.274464057963097,
+        "state.teacher_kl.equal_domain_mean": 2.767658936777834,
+        "state.teacher_kl.worst_domain": 3.057492200538905
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "74d40d5953e61801700b9000685f7bc1"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 13.036877721180849,
+        "state.nll.general": 14.266847531629743,
+        "state.nll.pooled_all_domains": 13.174137955959845,
+        "state.nll.rag_multihop": 13.88256998022554,
+        "state.nll.reasoning_math": 12.81496572224075,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 12.590883514475447
+       },
+       "front": 3,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 19.2971684090706,
+        "state.teacher_kl.equal_domain_mean": 12.616529348611403,
+        "state.teacher_kl.worst_domain": 13.723357731003198
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "c4781f375e80bf096ebc6382603a877d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 12.936852241127411,
+        "state.nll.general": 14.141557044383744,
+        "state.nll.pooled_all_domains": 13.577591477961676,
+        "state.nll.rag_multihop": 14.555135368945786,
+        "state.nll.reasoning_math": 13.319246270508277,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 13.434625581988804
+       },
+       "front": 4,
+       "lineage": "root",
+       "objectives": {
+        "state.critical_token_kl": 21.176994486358442,
+        "state.teacher_kl.equal_domain_mean": 12.985221399522175,
+        "state.teacher_kl.worst_domain": 14.402049653574835
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "kept: warmup level, no quality pruning by design",
+       "selected": true,
+       "state_id": "d8ba16445423d4829588f7b345652587"
+      }
+     ],
+     "fronts": [
+      [
+       "0c1dc924e75cfaba27c006596119625f",
+       "20bd9506785d3d3e2468d5ed0f003203"
+      ],
+      [
+       "6d6006a0f66c94a331a5747b228179ec",
+       "3695c4aebeabc6507c00adf9baac6bc6"
+      ],
+      [
+       "a9bce03079fc96dcc2ba298d51e5d3f9",
+       "74d40d5953e61801700b9000685f7bc1"
+      ],
+      [
+       "c4781f375e80bf096ebc6382603a877d"
+      ],
+      [
+       "d8ba16445423d4829588f7b345652587"
+      ]
+     ],
+     "lineages_kept": [
+      "root"
+     ],
+     "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+     "policy_id": "beam.pareto_multi_objective@v2",
+     "selected": [
+      "0c1dc924e75cfaba27c006596119625f",
+      "20bd9506785d3d3e2468d5ed0f003203",
+      "6d6006a0f66c94a331a5747b228179ec",
+      "3695c4aebeabc6507c00adf9baac6bc6",
+      "a9bce03079fc96dcc2ba298d51e5d3f9",
+      "74d40d5953e61801700b9000685f7bc1",
+      "c4781f375e80bf096ebc6382603a877d",
+      "d8ba16445423d4829588f7b345652587"
+     ]
+    },
+    "seconds": 4050.0365312099457
+   },
+   {
+    "dead_ends": [],
+    "expanded_from": [
+     "0c1dc924e75cfaba27c006596119625f",
+     "20bd9506785d3d3e2468d5ed0f003203",
+     "6d6006a0f66c94a331a5747b228179ec",
+     "3695c4aebeabc6507c00adf9baac6bc6",
+     "a9bce03079fc96dcc2ba298d51e5d3f9",
+     "74d40d5953e61801700b9000685f7bc1",
+     "c4781f375e80bf096ebc6382603a877d",
+     "d8ba16445423d4829588f7b345652587"
+    ],
+    "generated": [
+     "fd60d4b4952cc980ea85ef4af6d82553",
+     "2b3b30d5548e46f8e7527ed86c8470d6",
+     "e5dcd6e95d6ef1d9e60a94f9504c33b8",
+     "a74b4299050bf0f23fc568ca4a00df7c",
+     "a629383bc12b4d881a89e098e54131e9",
+     "81f4b27a0de55e74fcf074876824e834",
+     "14f93b6d6a18fbcc5ff75c6e3ada66fb",
+     "e1b124ef3307596f1648993a29fab4ac",
+     "e3171b76379293f3e8bfc2be80d7836d",
+     "46fcf81e6820b8c178e86f7d9e4aca89",
+     "16ac66e6c9588d6c83b02807674e5721",
+     "250b22d4f9b90f2f435f20327ace9cdd",
+     "d501d0dedeabd4df6647d5102fba0499",
+     "f972788ba8a31306f6a6a5d293ef6987",
+     "5cedae7c1d21b0e99385fcb0d2bc8ea5",
+     "b5fceabc68e36eaaa449b825804a9097",
+     "9e252042d1501b47b2869a3d6a3dd899",
+     "ecedd59c33697e334515bb0ae4eb5aeb",
+     "04d0e1043d544fcac68d22ee9952b22b",
+     "628098392c9932174a9ba3f21814e0ea",
+     "9dc3372559875c4efb2fe899e93d1c5e",
+     "f17464de323cf54a9a7ae4c6f144418e",
+     "e8eb3e25c6d89126c95cea618b0339c0",
+     "ca82321212f5c5a3972cf0d72d021d62",
+     "7336cf539d013b3ac2ace2290408ab91",
+     "848b6cb7f88774462b209a8056227605",
+     "2cbe9af63c26358037a7dec5ec189a4f",
+     "4593e6117ece39196079e86e1479be3d",
+     "1d70917570cb2c2db0f8943f9c0be299",
+     "0dfe017d0da505fc22b07658aa86e821",
+     "72d6e4cdbca9f177123ed6164567d6b1",
+     "121c41e0c80ab048a0fa0030d385191b",
+     "6542084e923f84e82ba8b34efffc3a89",
+     "1a6cb2f67885f4aeb4344be3f1d3b9cc",
+     "d9c6f525ee351f05f9715171fdbd6771",
+     "02ab69377e3d77f27df03961f1d99e8d",
+     "3f7f4d89f5a278bebaf820ed60b262a0",
+     "85d2198eeb33dab289155c4a4054798e",
+     "3cabe05a4d6fa96858b073585bf157b8",
+     "236eed4e4561932d2b4309cef2461163",
+     "e8424a05d4f4f77758ba5a18cbfe5ad8",
+     "67a4ae8ceed37da328742281d90b2ded",
+     "9e1c3045830c2fddc6131f7236f465bb",
+     "7c9754aee083a867379681dc0be93ce0",
+     "3c95ea865a6bb5ebe45a3a4cc4db4a7b",
+     "e1777e31b3ffcdfd9daed0269c9deb4d",
+     "9d3c7811e38e1b594e4acd96cd32c9ad",
+     "770939e802ebdd7932bea9717f55344b"
+    ],
+    "leaves": [],
+    "level": 1,
+    "ranking": {
+     "beam_width": 6,
+     "decisions": [
+      {
+       "diagnostics": {
+        "state.nll.code": 1.785272293181216,
+        "state.nll.general": 5.476741796345132,
+        "state.nll.pooled_all_domains": 2.3693011584345305,
+        "state.nll.rag_multihop": 1.6833813629912961,
+        "state.nll.reasoning_math": 1.5893526649936023,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.175808489679999
+       },
+       "front": 0,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 6.489447664632415,
+        "state.teacher_kl.equal_domain_mean": 1.9509695378524896,
+        "state.teacher_kl.worst_domain": 3.2695710167548344
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "kept: front 0, lineage 'ffn.activation_importance_v0', beam 6",
+       "selected": true,
+       "state_id": "b5fceabc68e36eaaa449b825804a9097"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 1.8567691283203414,
+        "state.nll.general": 5.256908746173839,
+        "state.nll.pooled_all_domains": 2.386069463934033,
+        "state.nll.rag_multihop": 1.6586777055011699,
+        "state.nll.reasoning_math": 1.6307834509333166,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.2890486665344127
+       },
+       "front": 0,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 6.822113291109082,
+        "state.teacher_kl.equal_domain_mean": 1.9564980978953734,
+        "state.teacher_kl.worst_domain": 3.1049696617339113
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "kept: front 0, lineage 'ffn.activation_importance_v0', beam 6",
+       "selected": true,
+       "state_id": "5cedae7c1d21b0e99385fcb0d2bc8ea5"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 1.7919338575471635,
+        "state.nll.general": 5.332916537635178,
+        "state.nll.pooled_all_domains": 2.392717134287353,
+        "state.nll.rag_multihop": 1.7677011325038132,
+        "state.nll.reasoning_math": 1.610642189472282,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.273741841395631
+       },
+       "front": 1,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 6.9204081567399385,
+        "state.teacher_kl.equal_domain_mean": 1.9793717897459444,
+        "state.teacher_kl.worst_domain": 3.2020113472746834
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "9dc3372559875c4efb2fe899e93d1c5e"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 1.7894174014222566,
+        "state.nll.general": 5.393471065253241,
+        "state.nll.pooled_all_domains": 2.446927242146279,
+        "state.nll.rag_multihop": 1.77381805325486,
+        "state.nll.reasoning_math": 1.6526262566399592,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.401961106726758
+       },
+       "front": 2,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 8.451947266300172,
+        "state.teacher_kl.equal_domain_mean": 2.026105284246202,
+        "state.teacher_kl.worst_domain": 3.253089548546277
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "f17464de323cf54a9a7ae4c6f144418e"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.440359758991766,
+        "state.nll.general": 6.331201146352339,
+        "state.nll.pooled_all_domains": 3.820917556192899,
+        "state.nll.rag_multihop": 3.6496722448943024,
+        "state.nll.reasoning_math": 3.227665153462686,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 3.3797696766992034
+       },
+       "front": 2,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 8.153294547850457,
+        "state.teacher_kl.equal_domain_mean": 3.3894678783461964,
+        "state.teacher_kl.worst_domain": 4.056058970200628
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "kept: front 2, lineage 'attention.activation_importance_v1', beam 6",
+       "selected": true,
+       "state_id": "7336cf539d013b3ac2ace2290408ab91"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.6834258830942814,
+        "state.nll.general": 6.092047414985191,
+        "state.nll.pooled_all_domains": 3.9734786376652265,
+        "state.nll.rag_multihop": 3.871404925536347,
+        "state.nll.reasoning_math": 3.505530314685278,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 3.526094316580375
+       },
+       "front": 2,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.841822582457313,
+        "state.teacher_kl.equal_domain_mean": 3.5237772354315724,
+        "state.teacher_kl.worst_domain": 3.8218577303733587
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "kept: front 2, lineage 'attention.activation_importance_v1', beam 6",
+       "selected": true,
+       "state_id": "848b6cb7f88774462b209a8056227605"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.5955198280054246,
+        "state.nll.general": 6.1567037381049445,
+        "state.nll.pooled_all_domains": 4.031653018768782,
+        "state.nll.rag_multihop": 4.12335212646508,
+        "state.nll.reasoning_math": 3.4861969395224923,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 3.64691187096475
+       },
+       "front": 2,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.459243161464345,
+        "state.teacher_kl.equal_domain_mean": 3.5891444039626577,
+        "state.teacher_kl.worst_domain": 3.9334395939169107
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "121c41e0c80ab048a0fa0030d385191b"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 3.5955198280054246,
+        "state.nll.general": 6.1567037381049445,
+        "state.nll.pooled_all_domains": 4.031653018768782,
+        "state.nll.rag_multihop": 4.12335212646508,
+        "state.nll.reasoning_math": 3.4861969395224923,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 3.64691187096475
+       },
+       "front": 2,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.459243161464345,
+        "state.teacher_kl.equal_domain_mean": 3.5891444039626577,
+        "state.teacher_kl.worst_domain": 3.9334395939169107
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 4,
+       "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "72d6e4cdbca9f177123ed6164567d6b1"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 2.3293613423668376,
+        "state.nll.general": 7.727553045039895,
+        "state.nll.pooled_all_domains": 3.15029025627806,
+        "state.nll.rag_multihop": 2.310614972059974,
+        "state.nll.reasoning_math": 2.0487274973774046,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.685791787754624
+       },
+       "front": 3,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 9.540549589189427,
+        "state.teacher_kl.equal_domain_mean": 2.854438978296211,
+        "state.teacher_kl.worst_domain": 5.670771965225128
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "kept: front 3, lineage 'depth.causal_kl_greedy_v1', beam 6",
+       "selected": true,
+       "state_id": "e3171b76379293f3e8bfc2be80d7836d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 2.3293613423668376,
+        "state.nll.general": 7.727553045039895,
+        "state.nll.pooled_all_domains": 3.15029025627806,
+        "state.nll.rag_multihop": 2.310614972059974,
+        "state.nll.reasoning_math": 2.0487274973774046,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.685791787754624
+       },
+       "front": 3,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 9.540549589189427,
+        "state.teacher_kl.equal_domain_mean": 2.854438978296211,
+        "state.teacher_kl.worst_domain": 5.670771965225128
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e5dcd6e95d6ef1d9e60a94f9504c33b8"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 4.731756417333233,
+        "state.nll.general": 6.506741438512315,
+        "state.nll.pooled_all_domains": 4.799268299830495,
+        "state.nll.rag_multihop": 5.032154940735685,
+        "state.nll.reasoning_math": 4.420432508999641,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 4.227841898528734
+       },
+       "front": 3,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.591463949173639,
+        "state.teacher_kl.equal_domain_mean": 4.39424022577532,
+        "state.teacher_kl.worst_domain": 4.844411408502495
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "14f93b6d6a18fbcc5ff75c6e3ada66fb"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 4.731756417333233,
+        "state.nll.general": 6.506741438512315,
+        "state.nll.pooled_all_domains": 4.799268299830495,
+        "state.nll.rag_multihop": 5.032154940735685,
+        "state.nll.reasoning_math": 4.420432508999641,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 4.227841898528734
+       },
+       "front": 3,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.591463949173639,
+        "state.teacher_kl.equal_domain_mean": 4.39424022577532,
+        "state.teacher_kl.worst_domain": 4.844411408502495
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "fd60d4b4952cc980ea85ef4af6d82553"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 2.2216578502790623,
+        "state.nll.general": 7.848999701216264,
+        "state.nll.pooled_all_domains": 3.1585220035419215,
+        "state.nll.rag_multihop": 2.3397205129233196,
+        "state.nll.reasoning_math": 1.9690660812903058,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.787148811631707
+       },
+       "front": 4,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 9.664380207384069,
+        "state.teacher_kl.equal_domain_mean": 2.8633840956198737,
+        "state.teacher_kl.worst_domain": 5.771310866406337
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "46fcf81e6820b8c178e86f7d9e4aca89"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 2.2216578502790623,
+        "state.nll.general": 7.848999701216264,
+        "state.nll.pooled_all_domains": 3.1585220035419215,
+        "state.nll.rag_multihop": 2.3397205129233196,
+        "state.nll.reasoning_math": 1.9690660812903058,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 2.787148811631707
+       },
+       "front": 4,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 9.664380207384069,
+        "state.teacher_kl.equal_domain_mean": 2.8633840956198737,
+        "state.teacher_kl.worst_domain": 5.771310866406337
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "a74b4299050bf0f23fc568ca4a00df7c"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.251815728101685,
+        "state.nll.general": 7.05935208527191,
+        "state.nll.pooled_all_domains": 5.347982429110028,
+        "state.nll.rag_multihop": 5.474258553971259,
+        "state.nll.reasoning_math": 4.868386908453099,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 4.971837717284546
+       },
+       "front": 4,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.9347209864189,
+        "state.teacher_kl.equal_domain_mean": 4.938936477291211,
+        "state.teacher_kl.worst_domain": 5.281971784406807
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "2b3b30d5548e46f8e7527ed86c8470d6"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.251815728101685,
+        "state.nll.general": 7.05935208527191,
+        "state.nll.pooled_all_domains": 5.347982429110028,
+        "state.nll.rag_multihop": 5.474258553971259,
+        "state.nll.reasoning_math": 4.868386908453099,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 4.971837717284546
+       },
+       "front": 4,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 7.9347209864189,
+        "state.teacher_kl.equal_domain_mean": 4.938936477291211,
+        "state.teacher_kl.worst_domain": 5.281971784406807
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e1b124ef3307596f1648993a29fab4ac"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.485776723391637,
+        "state.nll.general": 9.436991409423449,
+        "state.nll.pooled_all_domains": 6.128611027627227,
+        "state.nll.rag_multihop": 6.6127116285236465,
+        "state.nll.reasoning_math": 4.820391141506356,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.849149511705876
+       },
+       "front": 5,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 12.743826434980589,
+        "state.teacher_kl.equal_domain_mean": 5.851172194624302,
+        "state.teacher_kl.worst_domain": 7.280820249182053
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "2cbe9af63c26358037a7dec5ec189a4f"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.59243560198924,
+        "state.nll.general": 9.684333869546714,
+        "state.nll.pooled_all_domains": 6.175981522277375,
+        "state.nll.rag_multihop": 6.600413773934503,
+        "state.nll.reasoning_math": 4.697982173124614,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.968976573352589
+       },
+       "front": 5,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 12.241557900479048,
+        "state.teacher_kl.equal_domain_mean": 5.915274813857797,
+        "state.teacher_kl.worst_domain": 7.5221380619648
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "6542084e923f84e82ba8b34efffc3a89"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.075422415010172,
+        "state.nll.general": 11.522711624606263,
+        "state.nll.pooled_all_domains": 6.073825456435145,
+        "state.nll.rag_multihop": 5.620165788081991,
+        "state.nll.reasoning_math": 4.383738028421567,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.721665516073298
+       },
+       "front": 5,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 11.534291555016539,
+        "state.teacher_kl.equal_domain_mean": 5.915836560140477,
+        "state.teacher_kl.worst_domain": 9.575345782569213
+       },
+       "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "f972788ba8a31306f6a6a5d293ef6987"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.629726812511824,
+        "state.nll.general": 9.407934574469513,
+        "state.nll.pooled_all_domains": 6.233167850212453,
+        "state.nll.rag_multihop": 6.928371603192329,
+        "state.nll.reasoning_math": 4.952443835747474,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.883819052949134
+       },
+       "front": 5,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 12.8146833642271,
+        "state.teacher_kl.equal_domain_mean": 5.9740813879649775,
+        "state.teacher_kl.worst_domain": 7.2656559790004644
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "4593e6117ece39196079e86e1479be3d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.5734429354916255,
+        "state.nll.general": 9.628954824918837,
+        "state.nll.pooled_all_domains": 6.245477186347712,
+        "state.nll.rag_multihop": 7.021191926394497,
+        "state.nll.reasoning_math": 4.8161265790937975,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.910405502533915
+       },
+       "front": 5,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 12.646313691831468,
+        "state.teacher_kl.equal_domain_mean": 5.994852403670333,
+        "state.teacher_kl.worst_domain": 7.453236706455555
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 4,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "1a6cb2f67885f4aeb4344be3f1d3b9cc"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.294094529423104,
+        "state.nll.general": 11.832847868323572,
+        "state.nll.pooled_all_domains": 7.140927071175325,
+        "state.nll.rag_multihop": 7.514658662389394,
+        "state.nll.reasoning_math": 5.518341200541814,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.559119743418882
+       },
+       "front": 5,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 11.488092256842963,
+        "state.teacher_kl.equal_domain_mean": 6.985141803678289,
+        "state.teacher_kl.worst_domain": 9.858622796901326
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 5,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "628098392c9932174a9ba3f21814e0ea"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.87802458713405,
+        "state.nll.general": 10.21579648794362,
+        "state.nll.pooled_all_domains": 6.768920930359653,
+        "state.nll.rag_multihop": 6.868193930772699,
+        "state.nll.reasoning_math": 5.741801989580429,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.44391040386962
+       },
+       "front": 6,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 12.45471423681731,
+        "state.teacher_kl.equal_domain_mean": 6.4137836265214645,
+        "state.teacher_kl.worst_domain": 7.920263859544402
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e8eb3e25c6d89126c95cea618b0339c0"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.038170228411236,
+        "state.nll.general": 12.100127193214512,
+        "state.nll.pooled_all_domains": 6.767180123394313,
+        "state.nll.rag_multihop": 6.703653883280918,
+        "state.nll.reasoning_math": 5.059151423071832,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.118707954729171
+       },
+       "front": 6,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 12.400027374669968,
+        "state.teacher_kl.equal_domain_mean": 6.654097588025357,
+        "state.teacher_kl.worst_domain": 10.119116221052785
+       },
+       "path": "FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "d501d0dedeabd4df6647d5102fba0499"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.239431531169403,
+        "state.nll.general": 10.222237742108288,
+        "state.nll.pooled_all_domains": 7.195273122594318,
+        "state.nll.rag_multihop": 7.356895868534829,
+        "state.nll.reasoning_math": 6.296824551118465,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.977323297338688
+       },
+       "front": 6,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 13.661393453320795,
+        "state.teacher_kl.equal_domain_mean": 6.788244751779611,
+        "state.teacher_kl.worst_domain": 7.83114693620483
+       },
+       "path": "FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "9e252042d1501b47b2869a3d6a3dd899"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.343017377559607,
+        "state.nll.general": 10.458384829811125,
+        "state.nll.pooled_all_domains": 7.2516184609181815,
+        "state.nll.rag_multihop": 7.781765863602622,
+        "state.nll.reasoning_math": 6.155125264486307,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.936339439271813
+       },
+       "front": 6,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 12.288913980824447,
+        "state.teacher_kl.equal_domain_mean": 6.900346094371716,
+        "state.teacher_kl.worst_domain": 8.062938890886072
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "ca82321212f5c5a3972cf0d72d021d62"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.480839772473014,
+        "state.nll.general": 10.044394627102804,
+        "state.nll.pooled_all_domains": 7.323501350676007,
+        "state.nll.rag_multihop": 7.674963597090931,
+        "state.nll.reasoning_math": 6.50776565178886,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.002547309132369
+       },
+       "front": 6,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 13.248154129660815,
+        "state.teacher_kl.equal_domain_mean": 6.9155436818713785,
+        "state.teacher_kl.worst_domain": 7.678720713883814
+       },
+       "path": "FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 4,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "ecedd59c33697e334515bb0ae4eb5aeb"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.077520799749835,
+        "state.nll.general": 12.024612871256203,
+        "state.nll.pooled_all_domains": 6.982209420625259,
+        "state.nll.rag_multihop": 7.249383997957391,
+        "state.nll.reasoning_math": 5.300108858947851,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.40571798581938
+       },
+       "front": 7,
+       "lineage": "ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 12.531543004014134,
+        "state.teacher_kl.equal_domain_mean": 6.866047259626005,
+        "state.teacher_kl.worst_domain": 10.099486835334488
+       },
+       "path": "FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 7) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "04d0e1043d544fcac68d22ee9952b22b"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.90141051301459,
+        "state.nll.general": 14.103987411620714,
+        "state.nll.pooled_all_domains": 9.444823549567746,
+        "state.nll.rag_multihop": 10.135039101611202,
+        "state.nll.reasoning_math": 7.842890802374496,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.590721984732275
+       },
+       "front": 8,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.455336964713327,
+        "state.teacher_kl.equal_domain_mean": 9.252383489649034,
+        "state.teacher_kl.worst_domain": 11.580471790081797
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "1d70917570cb2c2db0f8943f9c0be299"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.82660927038057,
+        "state.nll.general": 12.82167979469982,
+        "state.nll.pooled_all_domains": 9.571324022801374,
+        "state.nll.rag_multihop": 10.52229000381218,
+        "state.nll.reasoning_math": 8.200006972053853,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 9.247881521101169
+       },
+       "front": 8,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 16.18504654068629,
+        "state.teacher_kl.equal_domain_mean": 9.272965986361848,
+        "state.teacher_kl.worst_domain": 10.352202386907205
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "0dfe017d0da505fc22b07658aa86e821"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.274087485769913,
+        "state.nll.general": 11.582996060231942,
+        "state.nll.pooled_all_domains": 10.495791231155325,
+        "state.nll.rag_multihop": 11.10451102543766,
+        "state.nll.reasoning_math": 10.248135386717092,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.114363036283812
+       },
+       "front": 8,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.18153565198131,
+        "state.teacher_kl.equal_domain_mean": 10.127851072986974,
+        "state.teacher_kl.worst_domain": 10.923732288966614
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "16ac66e6c9588d6c83b02807674e5721"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.274087485769913,
+        "state.nll.general": 11.582996060231942,
+        "state.nll.pooled_all_domains": 10.495791231155325,
+        "state.nll.rag_multihop": 11.10451102543766,
+        "state.nll.reasoning_math": 10.248135386717092,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.114363036283812
+       },
+       "front": 8,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.18153565198131,
+        "state.teacher_kl.equal_domain_mean": 10.127851072986974,
+        "state.teacher_kl.worst_domain": 10.923732288966614
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 8) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "a629383bc12b4d881a89e098e54131e9"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 11.036828595089121,
+        "state.nll.general": 15.063044612015497,
+        "state.nll.pooled_all_domains": 12.191282862828071,
+        "state.nll.rag_multihop": 12.982985459038353,
+        "state.nll.reasoning_math": 11.358937189607222,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.736853082371837
+       },
+       "front": 8,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 15.16523290146993,
+        "state.teacher_kl.equal_domain_mean": 11.769172267833962,
+        "state.teacher_kl.worst_domain": 12.8107290938077
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 4,
+       "reason": "kept: front 8, lineage 'width.global_pca_v0', beam 6",
+       "selected": true,
+       "state_id": "770939e802ebdd7932bea9717f55344b"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 9.28581474143747,
+        "state.nll.general": 13.18789604887898,
+        "state.nll.pooled_all_domains": 9.84563248007513,
+        "state.nll.rag_multihop": 11.437588920722346,
+        "state.nll.reasoning_math": 8.221706842278593,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 9.276443139743192
+       },
+       "front": 9,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 16.420259984722293,
+        "state.teacher_kl.equal_domain_mean": 9.628217542027269,
+        "state.teacher_kl.worst_domain": 11.25525930849409
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "d9c6f525ee351f05f9715171fdbd6771"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 9.53010118945515,
+        "state.nll.general": 13.218553897249674,
+        "state.nll.pooled_all_domains": 10.027467068260336,
+        "state.nll.rag_multihop": 11.176493406637242,
+        "state.nll.reasoning_math": 8.42903885611888,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 9.723055848432288
+       },
+       "front": 9,
+       "lineage": "attention.activation_importance_v1",
+       "objectives": {
+        "state.critical_token_kl": 17.944871404592458,
+        "state.teacher_kl.equal_domain_mean": 9.752242061596366,
+        "state.teacher_kl.worst_domain": 10.993740311389104
+       },
+       "path": "ATTENTION(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "02ab69377e3d77f27df03961f1d99e8d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 11.150353211023232,
+        "state.nll.general": 13.205594813621946,
+        "state.nll.pooled_all_domains": 11.125535035303743,
+        "state.nll.rag_multihop": 12.47253350350309,
+        "state.nll.reasoning_math": 9.776772409186439,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.704266569826341
+       },
+       "front": 9,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 15.422613978078669,
+        "state.teacher_kl.equal_domain_mean": 10.773739066881003,
+        "state.teacher_kl.worst_domain": 12.282772377410183
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "3f7f4d89f5a278bebaf820ed60b262a0"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.912208433964807,
+        "state.nll.general": 13.571026905175467,
+        "state.nll.pooled_all_domains": 11.276595988153383,
+        "state.nll.rag_multihop": 13.077616563647831,
+        "state.nll.reasoning_math": 9.849855629955844,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.810413309280388
+       },
+       "front": 9,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 15.387654490027158,
+        "state.teacher_kl.equal_domain_mean": 10.947784025055123,
+        "state.teacher_kl.worst_domain": 12.890126105332783
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "85d2198eeb33dab289155c4a4054798e"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 12.41627551085576,
+        "state.nll.general": 13.34139752210921,
+        "state.nll.pooled_all_domains": 11.705008623075356,
+        "state.nll.rag_multihop": 11.900502471424478,
+        "state.nll.reasoning_math": 10.859409314079672,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.234114731331315
+       },
+       "front": 9,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 16.214732161480416,
+        "state.teacher_kl.equal_domain_mean": 11.275474264084371,
+        "state.teacher_kl.worst_domain": 12.22662154787917
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 4,
+       "reason": "pruned: epsilon-dominated (front 9) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "7c9754aee083a867379681dc0be93ce0"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.642230143818246,
+        "state.nll.general": 12.549748276961672,
+        "state.nll.pooled_all_domains": 11.30976871277617,
+        "state.nll.rag_multihop": 12.876174054696737,
+        "state.nll.reasoning_math": 10.53691364866691,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.05243626400364
+       },
+       "front": 10,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 18.640588637207077,
+        "state.teacher_kl.equal_domain_mean": 10.857410594654217,
+        "state.teacher_kl.worst_domain": 12.71825401256694
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 10) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e1777e31b3ffcdfd9daed0269c9deb4d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.631113118131013,
+        "state.nll.general": 13.307544147519788,
+        "state.nll.pooled_all_domains": 11.860145561326176,
+        "state.nll.rag_multihop": 13.814575905007057,
+        "state.nll.reasoning_math": 11.287143746143926,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.555980247145763
+       },
+       "front": 10,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 18.29020930793936,
+        "state.teacher_kl.equal_domain_mean": 11.435384905075544,
+        "state.teacher_kl.worst_domain": 13.646621296244053
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 10) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "250b22d4f9b90f2f435f20327ace9cdd"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.631113118131013,
+        "state.nll.general": 13.307544147519788,
+        "state.nll.pooled_all_domains": 11.860145561326176,
+        "state.nll.rag_multihop": 13.814575905007057,
+        "state.nll.reasoning_math": 11.287143746143926,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.555980247145763
+       },
+       "front": 10,
+       "lineage": "depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 18.29020930793936,
+        "state.teacher_kl.equal_domain_mean": 11.435384905075544,
+        "state.teacher_kl.worst_domain": 13.646621296244053
+       },
+       "path": "DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 10) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "81f4b27a0de55e74fcf074876824e834"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 12.191810897628278,
+        "state.nll.general": 13.622177817361967,
+        "state.nll.pooled_all_domains": 11.817161246098571,
+        "state.nll.rag_multihop": 12.840117051601615,
+        "state.nll.reasoning_math": 10.53141219865094,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.496609081973878
+       },
+       "front": 10,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 16.305023797935768,
+        "state.teacher_kl.equal_domain_mean": 11.453659918340566,
+        "state.teacher_kl.worst_domain": 12.650175027515527
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 10) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "9e1c3045830c2fddc6131f7236f465bb"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 11.106836567670813,
+        "state.nll.general": 15.081164518314752,
+        "state.nll.pooled_all_domains": 12.309603292021196,
+        "state.nll.rag_multihop": 13.052755527779908,
+        "state.nll.reasoning_math": 11.535537208822532,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.909887090652914
+       },
+       "front": 10,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 15.46450720297483,
+        "state.teacher_kl.equal_domain_mean": 11.872096875453447,
+        "state.teacher_kl.worst_domain": 12.880537177375357
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 4,
+       "reason": "pruned: epsilon-dominated (front 10) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "9d3c7811e38e1b594e4acd96cd32c9ad"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 11.853438501561422,
+        "state.nll.general": 13.766456421118596,
+        "state.nll.pooled_all_domains": 12.483726509780848,
+        "state.nll.rag_multihop": 13.71411175679637,
+        "state.nll.reasoning_math": 12.308194120929747,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 11.652163778930014
+       },
+       "front": 11,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 21.26010894486595,
+        "state.teacher_kl.equal_domain_mean": 11.961730086279974,
+        "state.teacher_kl.worst_domain": 13.550940478035063
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 11) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "3c95ea865a6bb5ebe45a3a4cc4db4a7b"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 12.178400358882561,
+        "state.nll.general": 13.946873161021443,
+        "state.nll.pooled_all_domains": 12.910080290513394,
+        "state.nll.rag_multihop": 13.708954659194678,
+        "state.nll.reasoning_math": 12.488323062480221,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 12.74207251875364
+       },
+       "front": 11,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 19.43096665188543,
+        "state.teacher_kl.equal_domain_mean": 12.31451407028154,
+        "state.teacher_kl.worst_domain": 13.543710456411771
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 11) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "236eed4e4561932d2b4309cef2461163"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 12.178400358882561,
+        "state.nll.general": 13.946873161021443,
+        "state.nll.pooled_all_domains": 12.910080290513394,
+        "state.nll.rag_multihop": 13.708954659194678,
+        "state.nll.reasoning_math": 12.488323062480221,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 12.74207251875364
+       },
+       "front": 11,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 19.43096665188543,
+        "state.teacher_kl.equal_domain_mean": 12.31451407028154,
+        "state.teacher_kl.worst_domain": 13.543710456411771
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 11) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "3cabe05a4d6fa96858b073585bf157b8"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 14.344243691091854,
+        "state.nll.general": 15.709277814072959,
+        "state.nll.pooled_all_domains": 14.666984109712219,
+        "state.nll.rag_multihop": 14.992288552193443,
+        "state.nll.reasoning_math": 13.745552469825524,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 15.14043963009296
+       },
+       "front": 12,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 19.57123833914014,
+        "state.teacher_kl.equal_domain_mean": 14.094474026293906,
+        "state.teacher_kl.worst_domain": 14.883545869803308
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 12) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e8424a05d4f4f77758ba5a18cbfe5ad8"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 14.808041859238068,
+        "state.nll.general": 15.763872284786457,
+        "state.nll.pooled_all_domains": 15.062562032953055,
+        "state.nll.rag_multihop": 15.298441370910663,
+        "state.nll.reasoning_math": 14.039575838758086,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 15.883537189214572
+       },
+       "front": 13,
+       "lineage": "width.global_pca_v0",
+       "objectives": {
+        "state.critical_token_kl": 21.202225586757955,
+        "state.teacher_kl.equal_domain_mean": 14.46624103574025,
+        "state.teacher_kl.worst_domain": 15.627546086107515
+       },
+       "path": "RESIDUAL_WIDTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 13) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "67a4ae8ceed37da328742281d90b2ded"
+      }
+     ],
+     "fronts": [
+      [
+       "b5fceabc68e36eaaa449b825804a9097",
+       "5cedae7c1d21b0e99385fcb0d2bc8ea5"
+      ],
+      [
+       "9dc3372559875c4efb2fe899e93d1c5e"
+      ],
+      [
+       "f17464de323cf54a9a7ae4c6f144418e",
+       "7336cf539d013b3ac2ace2290408ab91",
+       "848b6cb7f88774462b209a8056227605",
+       "121c41e0c80ab048a0fa0030d385191b",
+       "72d6e4cdbca9f177123ed6164567d6b1"
+      ],
+      [
+       "e3171b76379293f3e8bfc2be80d7836d",
+       "e5dcd6e95d6ef1d9e60a94f9504c33b8",
+       "14f93b6d6a18fbcc5ff75c6e3ada66fb",
+       "fd60d4b4952cc980ea85ef4af6d82553"
+      ],
+      [
+       "46fcf81e6820b8c178e86f7d9e4aca89",
+       "a74b4299050bf0f23fc568ca4a00df7c",
+       "2b3b30d5548e46f8e7527ed86c8470d6",
+       "e1b124ef3307596f1648993a29fab4ac"
+      ],
+      [
+       "2cbe9af63c26358037a7dec5ec189a4f",
+       "6542084e923f84e82ba8b34efffc3a89",
+       "f972788ba8a31306f6a6a5d293ef6987",
+       "4593e6117ece39196079e86e1479be3d",
+       "1a6cb2f67885f4aeb4344be3f1d3b9cc",
+       "628098392c9932174a9ba3f21814e0ea"
+      ],
+      [
+       "e8eb3e25c6d89126c95cea618b0339c0",
+       "d501d0dedeabd4df6647d5102fba0499",
+       "9e252042d1501b47b2869a3d6a3dd899",
+       "ca82321212f5c5a3972cf0d72d021d62",
+       "ecedd59c33697e334515bb0ae4eb5aeb"
+      ],
+      [
+       "04d0e1043d544fcac68d22ee9952b22b"
+      ],
+      [
+       "1d70917570cb2c2db0f8943f9c0be299",
+       "0dfe017d0da505fc22b07658aa86e821",
+       "16ac66e6c9588d6c83b02807674e5721",
+       "a629383bc12b4d881a89e098e54131e9",
+       "770939e802ebdd7932bea9717f55344b"
+      ],
+      [
+       "d9c6f525ee351f05f9715171fdbd6771",
+       "02ab69377e3d77f27df03961f1d99e8d",
+       "3f7f4d89f5a278bebaf820ed60b262a0",
+       "85d2198eeb33dab289155c4a4054798e",
+       "7c9754aee083a867379681dc0be93ce0"
+      ],
+      [
+       "e1777e31b3ffcdfd9daed0269c9deb4d",
+       "250b22d4f9b90f2f435f20327ace9cdd",
+       "81f4b27a0de55e74fcf074876824e834",
+       "9e1c3045830c2fddc6131f7236f465bb",
+       "9d3c7811e38e1b594e4acd96cd32c9ad"
+      ],
+      [
+       "3c95ea865a6bb5ebe45a3a4cc4db4a7b",
+       "236eed4e4561932d2b4309cef2461163",
+       "3cabe05a4d6fa96858b073585bf157b8"
+      ],
+      [
+       "e8424a05d4f4f77758ba5a18cbfe5ad8"
+      ],
+      [
+       "67a4ae8ceed37da328742281d90b2ded"
+      ]
+     ],
+     "lineages_kept": [
+      "attention.activation_importance_v1",
+      "depth.causal_kl_greedy_v1",
+      "ffn.activation_importance_v0",
+      "width.global_pca_v0"
+     ],
+     "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+     "policy_id": "beam.pareto_multi_objective@v2",
+     "selected": [
+      "b5fceabc68e36eaaa449b825804a9097",
+      "7336cf539d013b3ac2ace2290408ab91",
+      "e3171b76379293f3e8bfc2be80d7836d",
+      "770939e802ebdd7932bea9717f55344b",
+      "5cedae7c1d21b0e99385fcb0d2bc8ea5",
+      "848b6cb7f88774462b209a8056227605"
+     ]
+    },
+    "seconds": 23901.26530265808
+   },
+   {
+    "dead_ends": [],
+    "expanded_from": [
+     "b5fceabc68e36eaaa449b825804a9097",
+     "7336cf539d013b3ac2ace2290408ab91",
+     "e3171b76379293f3e8bfc2be80d7836d",
+     "770939e802ebdd7932bea9717f55344b",
+     "5cedae7c1d21b0e99385fcb0d2bc8ea5",
+     "848b6cb7f88774462b209a8056227605"
+    ],
+    "generated": [
+     "2382640bba1a8bac9020ad70c037b18b",
+     "1dfd37f91d51da38a17337b4c5ce371d",
+     "ddec05f3594766091a87a265a1a02ddb",
+     "21306b1d74d9d51962277111e1a4c5b5",
+     "1cfd20e82a2bcc68bc3f73129440795a",
+     "bde39af6bc89ec6817500ce967557b42",
+     "18f25e870bb803535d21c49fc5e021a0",
+     "ca55aef0450dc4bafe318007beb34498",
+     "1a844675a6f34ce9abb4da1c47a41f5c",
+     "64a7d1f34dc2b68e98437158087ac7aa",
+     "e3629b39db6c3c328b49eb3a11227527",
+     "3d4567c6fb6881a58844e3964076f3c0",
+     "f9fb6498056ca342c6e2ed6751b4a11d",
+     "d71cc4f5ee7544058ce2d949343405e8",
+     "039ea532dc4d48047cae62bb61b16796",
+     "f52484c8f522871c96a4a7c4332602cb",
+     "dfa47157d4751ca8054b332ed862b463",
+     "79a4e74575a8d3fa2ca896bd1fcaa6ea",
+     "dbfe4f23c073bcccdf5d0bf69250cbc7",
+     "99c4a3db72f83e28f44c878ffe9e51d9",
+     "7826829313167f72fcd94d4c28481c8f",
+     "c68900f0e5a388376c4e40ed8e086f1f",
+     "b3f8f7e248a6f3440ea413eaa1ec27bd",
+     "14e7b4be57af1c489a2b3de3f109c56f"
+    ],
+    "leaves": [],
+    "level": 2,
+    "ranking": {
+     "beam_width": 6,
+     "decisions": [
+      {
+       "diagnostics": {
+        "state.nll.code": 5.296631296325069,
+        "state.nll.general": 10.576813419480917,
+        "state.nll.pooled_all_domains": 6.233081399725717,
+        "state.nll.rag_multihop": 6.92024055318357,
+        "state.nll.reasoning_math": 4.778387548807858,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.605413186171628
+       },
+       "front": 0,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 11.249985901079125,
+        "state.teacher_kl.equal_domain_mean": 6.058115601786941,
+        "state.teacher_kl.worst_domain": 8.505488913742587
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "kept: front 0, lineage 'attention.activation_importance_v1|depth.causal_kl_greedy_v1', beam 6",
+       "selected": true,
+       "state_id": "1cfd20e82a2bcc68bc3f73129440795a"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 5.401261960951638,
+        "state.nll.general": 10.53125495288254,
+        "state.nll.pooled_all_domains": 6.285715610566864,
+        "state.nll.rag_multihop": 7.088930743719505,
+        "state.nll.reasoning_math": 4.8791332434400765,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 5.574831733042937
+       },
+       "front": 0,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 11.451101419432803,
+        "state.teacher_kl.equal_domain_mean": 6.116097565419649,
+        "state.teacher_kl.worst_domain": 8.45661448981975
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "kept: front 0, lineage 'attention.activation_importance_v1|depth.causal_kl_greedy_v1', beam 6",
+       "selected": true,
+       "state_id": "bde39af6bc89ec6817500ce967557b42"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.8107490765539955,
+        "state.nll.general": 9.014277779604592,
+        "state.nll.pooled_all_domains": 7.25180678293989,
+        "state.nll.rag_multihop": 8.35947327807678,
+        "state.nll.reasoning_math": 6.391223995057782,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 6.954821752977798
+       },
+       "front": 0,
+       "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 13.82692426993901,
+        "state.teacher_kl.equal_domain_mean": 6.936431284971052,
+        "state.teacher_kl.worst_domain": 8.16914115062166
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "kept: front 0, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0', beam 6",
+       "selected": true,
+       "state_id": "64a7d1f34dc2b68e98437158087ac7aa"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.162311665819719,
+        "state.nll.general": 8.661456267174453,
+        "state.nll.pooled_all_domains": 7.4660462704927335,
+        "state.nll.rag_multihop": 8.158326903361285,
+        "state.nll.reasoning_math": 6.786293120748558,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.417296827964396
+       },
+       "front": 0,
+       "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 14.311604376088297,
+        "state.teacher_kl.equal_domain_mean": 7.067653906868022,
+        "state.teacher_kl.worst_domain": 7.9602454475000535
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "kept: front 0, lineage 'depth.causal_kl_greedy_v1|ffn.activation_importance_v0', beam 6",
+       "selected": true,
+       "state_id": "1a844675a6f34ce9abb4da1c47a41f5c"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.257180813590497,
+        "state.nll.general": 10.108555703538787,
+        "state.nll.pooled_all_domains": 8.14257550911376,
+        "state.nll.rag_multihop": 8.600647040476742,
+        "state.nll.reasoning_math": 7.3204463310166,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.25322176213533
+       },
+       "front": 0,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 12.612773201437793,
+        "state.teacher_kl.equal_domain_mean": 7.696984540987401,
+        "state.teacher_kl.worst_domain": 8.419737096382718
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 4,
+       "reason": "kept: front 0, lineage 'ffn.activation_importance_v0|depth.causal_kl_greedy_v1', beam 6",
+       "selected": true,
+       "state_id": "21306b1d74d9d51962277111e1a4c5b5"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.380590073531273,
+        "state.nll.general": 11.943396469017744,
+        "state.nll.pooled_all_domains": 7.507157661015514,
+        "state.nll.rag_multihop": 8.079461161523579,
+        "state.nll.reasoning_math": 6.016448560281974,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.010904878790396
+       },
+       "front": 1,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 13.338515207994687,
+        "state.teacher_kl.equal_domain_mean": 7.340923401645716,
+        "state.teacher_kl.worst_domain": 10.036809529436502
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "79a4e74575a8d3fa2ca896bd1fcaa6ea"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 6.501378906507628,
+        "state.nll.general": 11.87071334216941,
+        "state.nll.pooled_all_domains": 7.53477712418576,
+        "state.nll.rag_multihop": 8.22907891975897,
+        "state.nll.reasoning_math": 5.919559817221409,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.107429991572396
+       },
+       "front": 1,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 13.922486866553573,
+        "state.teacher_kl.equal_domain_mean": 7.373428675034629,
+        "state.teacher_kl.worst_domain": 9.94194152996599
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "dfa47157d4751ca8054b332ed862b463"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.28659192171142,
+        "state.nll.general": 9.957731110974466,
+        "state.nll.pooled_all_domains": 7.75325188580457,
+        "state.nll.rag_multihop": 8.502194989199173,
+        "state.nll.reasoning_math": 6.828468165023713,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.42555758905626
+       },
+       "front": 1,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 14.206778505905557,
+        "state.teacher_kl.equal_domain_mean": 7.413434764229892,
+        "state.teacher_kl.worst_domain": 8.312998858100961
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->FFN(calib.domain_balanced@v1)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "7826829313167f72fcd94d4c28481c8f"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.583468493240139,
+        "state.nll.general": 11.475861830498289,
+        "state.nll.pooled_all_domains": 8.442900577018591,
+        "state.nll.rag_multihop": 9.502229588507298,
+        "state.nll.reasoning_math": 7.2435517324378855,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.059407779531822
+       },
+       "front": 1,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 13.729627138848665,
+        "state.teacher_kl.equal_domain_mean": 8.13697352617934,
+        "state.teacher_kl.worst_domain": 9.317035784256126
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 1) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "99c4a3db72f83e28f44c878ffe9e51d9"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.492606691500587,
+        "state.nll.general": 10.287086937352916,
+        "state.nll.pooled_all_domains": 7.917377259750979,
+        "state.nll.rag_multihop": 8.60986653904245,
+        "state.nll.reasoning_math": 6.951952734840649,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.516505243935104
+       },
+       "front": 2,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 14.391383845253356,
+        "state.teacher_kl.equal_domain_mean": 7.583122881802035,
+        "state.teacher_kl.worst_domain": 8.42150139582829
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "c68900f0e5a388376c4e40ed8e086f1f"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.494022776843248,
+        "state.nll.general": 11.327283672071268,
+        "state.nll.pooled_all_domains": 8.207941356563168,
+        "state.nll.rag_multihop": 9.143635169032663,
+        "state.nll.reasoning_math": 7.008578702483094,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 7.749899690275268
+       },
+       "front": 2,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 14.377047907142662,
+        "state.teacher_kl.equal_domain_mean": 7.910887145735728,
+        "state.teacher_kl.worst_domain": 8.959787112274624
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 2) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "dbfe4f23c073bcccdf5d0bf69250cbc7"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 7.703071235706456,
+        "state.nll.general": 10.46267972735065,
+        "state.nll.pooled_all_domains": 8.359087315263224,
+        "state.nll.rag_multihop": 8.929166271018051,
+        "state.nll.reasoning_math": 7.499778914500888,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.274462851859703
+       },
+       "front": 3,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.157049171426884,
+        "state.teacher_kl.equal_domain_mean": 7.953014933045748,
+        "state.teacher_kl.worst_domain": 8.748686812907458
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "ddec05f3594766091a87a265a1a02ddb"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.378156703569314,
+        "state.nll.general": 13.012774438438848,
+        "state.nll.pooled_all_domains": 9.652882322394808,
+        "state.nll.rag_multihop": 10.984276024902275,
+        "state.nll.reasoning_math": 8.35212205516458,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 9.274394564515312
+       },
+       "front": 3,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.119464164848566,
+        "state.teacher_kl.equal_domain_mean": 9.447592065739652,
+        "state.teacher_kl.worst_domain": 11.087116880116707
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 3) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "2382640bba1a8bac9020ad70c037b18b"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.459774143548938,
+        "state.nll.general": 12.179170667508277,
+        "state.nll.pooled_all_domains": 8.835480042819636,
+        "state.nll.rag_multihop": 9.700568157096267,
+        "state.nll.reasoning_math": 7.582111278093434,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.135164625365343
+       },
+       "front": 4,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 16.315161277727576,
+        "state.teacher_kl.equal_domain_mean": 8.57558503693028,
+        "state.teacher_kl.worst_domain": 9.814900443468842
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "18f25e870bb803535d21c49fc5e021a0"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.047603070453444,
+        "state.nll.general": 11.824639924185352,
+        "state.nll.pooled_all_domains": 9.516857204016336,
+        "state.nll.rag_multihop": 10.941131243061616,
+        "state.nll.reasoning_math": 8.403030564979819,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 9.630352565391846
+       },
+       "front": 4,
+       "lineage": "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 15.564349937858365,
+        "state.teacher_kl.equal_domain_mean": 9.19984246140162,
+        "state.teacher_kl.worst_domain": 10.73536114929322
+       },
+       "path": "FFN(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 4) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "1dfd37f91d51da38a17337b4c5ce371d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 8.499699085922602,
+        "state.nll.general": 12.334020444047185,
+        "state.nll.pooled_all_domains": 9.198074342073893,
+        "state.nll.rag_multihop": 10.702881744051052,
+        "state.nll.reasoning_math": 7.775812617974038,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 8.669045425221919
+       },
+       "front": 5,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 17.03719239293809,
+        "state.teacher_kl.equal_domain_mean": 8.955305833812925,
+        "state.teacher_kl.worst_domain": 10.508351613142516
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "ca55aef0450dc4bafe318007beb34498"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.622321720032895,
+        "state.nll.general": 13.868079035694063,
+        "state.nll.pooled_all_domains": 11.572648874015806,
+        "state.nll.rag_multihop": 12.753625023117799,
+        "state.nll.reasoning_math": 10.865826678653757,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.989416071474134
+       },
+       "front": 5,
+       "lineage": "width.global_pca_v0|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 16.098122732261007,
+        "state.teacher_kl.equal_domain_mean": 11.15211552562128,
+        "state.teacher_kl.worst_domain": 12.579375381648521
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->DEPTH(calib.domain_balanced@v1)",
+       "position_in_front": 1,
+       "reason": "kept: front 5, lineage 'width.global_pca_v0|ffn.activation_importance_v0', beam 6",
+       "selected": true,
+       "state_id": "039ea532dc4d48047cae62bb61b16796"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.622321720032895,
+        "state.nll.general": 13.868079035694063,
+        "state.nll.pooled_all_domains": 11.572648874015806,
+        "state.nll.rag_multihop": 12.753625023117799,
+        "state.nll.reasoning_math": 10.865826678653757,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.989416071474134
+       },
+       "front": 5,
+       "lineage": "width.global_pca_v0|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 16.098122732261007,
+        "state.teacher_kl.equal_domain_mean": 11.15211552562128,
+        "state.teacher_kl.worst_domain": 12.579375381648521
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->DEPTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "f52484c8f522871c96a4a7c4332602cb"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 14.636201267671812,
+        "state.nll.general": 16.339417231035018,
+        "state.nll.pooled_all_domains": 13.993401059625185,
+        "state.nll.rag_multihop": 15.307289340766257,
+        "state.nll.reasoning_math": 12.297760751843889,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 13.47878339382203
+       },
+       "front": 5,
+       "lineage": "width.global_pca_v0|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 15.837102301361378,
+        "state.teacher_kl.equal_domain_mean": 13.705644558603916,
+        "state.teacher_kl.worst_domain": 15.117088310301515
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 5) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "f9fb6498056ca342c6e2ed6751b4a11d"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 10.17626428897912,
+        "state.nll.general": 12.577783486126954,
+        "state.nll.pooled_all_domains": 10.572209466517592,
+        "state.nll.rag_multihop": 11.77394990755872,
+        "state.nll.reasoning_math": 9.231323734341373,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.522617346440542
+       },
+       "front": 6,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 22.25404548925655,
+        "state.teacher_kl.equal_domain_mean": 10.183563814556836,
+        "state.teacher_kl.worst_domain": 11.594118727040954
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "b3f8f7e248a6f3440ea413eaa1ec27bd"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 9.732519755205272,
+        "state.nll.general": 12.752385354979703,
+        "state.nll.pooled_all_domains": 10.618554198949813,
+        "state.nll.rag_multihop": 12.557550090129011,
+        "state.nll.reasoning_math": 9.447682627135965,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 10.2218473757163
+       },
+       "front": 6,
+       "lineage": "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+       "objectives": {
+        "state.critical_token_kl": 21.40316679875797,
+        "state.teacher_kl.equal_domain_mean": 10.274381745598662,
+        "state.teacher_kl.worst_domain": 12.377753273955722
+       },
+       "path": "ATTENTION(calib.domain_balanced@v1)->DEPTH(calib.reasoning_heavy@v2)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 1,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "14e7b4be57af1c489a2b3de3f109c56f"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 15.352390966596197,
+        "state.nll.general": 16.976949512138447,
+        "state.nll.pooled_all_domains": 14.87506602685931,
+        "state.nll.rag_multihop": 16.460184153124363,
+        "state.nll.reasoning_math": 12.912489286437141,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 14.738114195637255
+       },
+       "front": 6,
+       "lineage": "width.global_pca_v0|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 17.942788760041246,
+        "state.teacher_kl.equal_domain_mean": 14.57614638763963,
+        "state.teacher_kl.worst_domain": 16.27166407188664
+       },
+       "path": "RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->FFN(calib.reasoning_heavy@v2)->ATTENTION(calib.reasoning_heavy@v2)",
+       "position_in_front": 2,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "d71cc4f5ee7544058ce2d949343405e8"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 15.62322680114005,
+        "state.nll.general": 14.690207356790031,
+        "state.nll.pooled_all_domains": 15.57156414909206,
+        "state.nll.rag_multihop": 15.594703359029229,
+        "state.nll.reasoning_math": 16.03645994712749,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 15.496307898622995
+       },
+       "front": 6,
+       "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 17.215448675604193,
+        "state.teacher_kl.equal_domain_mean": 14.942470193186306,
+        "state.teacher_kl.worst_domain": 15.878168525994651
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.domain_balanced@v1)",
+       "position_in_front": 3,
+       "reason": "pruned: epsilon-dominated (front 6) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "e3629b39db6c3c328b49eb3a11227527"
+      },
+      {
+       "diagnostics": {
+        "state.nll.code": 16.52400231214496,
+        "state.nll.general": 15.92022541236111,
+        "state.nll.pooled_all_domains": 16.370763357977975,
+        "state.nll.rag_multihop": 16.676202758093524,
+        "state.nll.reasoning_math": 16.310719960084356,
+        "state.nll.teacher_reference_pooled": 0.5076325964397109,
+        "state.nll.tool": 16.448342360007437
+       },
+       "front": 7,
+       "lineage": "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+       "objectives": {
+        "state.critical_token_kl": 17.27978592764311,
+        "state.teacher_kl.equal_domain_mean": 15.843578803669235,
+        "state.teacher_kl.worst_domain": 16.471316637616603
+       },
+       "path": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)",
+       "position_in_front": 0,
+       "reason": "pruned: epsilon-dominated (front 7) and the beam of 6 was already full",
+       "selected": false,
+       "state_id": "3d4567c6fb6881a58844e3964076f3c0"
+      }
+     ],
+     "fronts": [
+      [
+       "1cfd20e82a2bcc68bc3f73129440795a",
+       "bde39af6bc89ec6817500ce967557b42",
+       "64a7d1f34dc2b68e98437158087ac7aa",
+       "1a844675a6f34ce9abb4da1c47a41f5c",
+       "21306b1d74d9d51962277111e1a4c5b5"
+      ],
+      [
+       "79a4e74575a8d3fa2ca896bd1fcaa6ea",
+       "dfa47157d4751ca8054b332ed862b463",
+       "7826829313167f72fcd94d4c28481c8f",
+       "99c4a3db72f83e28f44c878ffe9e51d9"
+      ],
+      [
+       "c68900f0e5a388376c4e40ed8e086f1f",
+       "dbfe4f23c073bcccdf5d0bf69250cbc7"
+      ],
+      [
+       "ddec05f3594766091a87a265a1a02ddb",
+       "2382640bba1a8bac9020ad70c037b18b"
+      ],
+      [
+       "18f25e870bb803535d21c49fc5e021a0",
+       "1dfd37f91d51da38a17337b4c5ce371d"
+      ],
+      [
+       "ca55aef0450dc4bafe318007beb34498",
+       "039ea532dc4d48047cae62bb61b16796",
+       "f52484c8f522871c96a4a7c4332602cb",
+       "f9fb6498056ca342c6e2ed6751b4a11d"
+      ],
+      [
+       "b3f8f7e248a6f3440ea413eaa1ec27bd",
+       "14e7b4be57af1c489a2b3de3f109c56f",
+       "d71cc4f5ee7544058ce2d949343405e8",
+       "e3629b39db6c3c328b49eb3a11227527"
+      ],
+      [
+       "3d4567c6fb6881a58844e3964076f3c0"
+      ]
+     ],
+     "lineages_kept": [
+      "attention.activation_importance_v1|depth.causal_kl_greedy_v1",
+      "depth.causal_kl_greedy_v1|ffn.activation_importance_v0",
+      "ffn.activation_importance_v0|depth.causal_kl_greedy_v1",
+      "width.global_pca_v0|ffn.activation_importance_v0"
+     ],
+     "policy_hash": "30a5305bc06dd1e886ea285fa7a3f90ac4b32f61bcb62bae35668f28922bf2e4",
+     "policy_id": "beam.pareto_multi_objective@v2",
+     "selected": [
+      "1cfd20e82a2bcc68bc3f73129440795a",
+      "64a7d1f34dc2b68e98437158087ac7aa",
+      "21306b1d74d9d51962277111e1a4c5b5",
+      "039ea532dc4d48047cae62bb61b16796",
+      "bde39af6bc89ec6817500ce967557b42",
+      "1a844675a6f34ce9abb4da1c47a41f5c"
+     ]
+    },
+    "seconds": 3395.6479275226593
+   },
+   {
+    "dead_ends": [],
+    "expanded_from": [
+     "1cfd20e82a2bcc68bc3f73129440795a",
+     "64a7d1f34dc2b68e98437158087ac7aa",
+     "21306b1d74d9d51962277111e1a4c5b5",
+     "039ea532dc4d48047cae62bb61b16796",
+     "bde39af6bc89ec6817500ce967557b42",
+     "1a844675a6f34ce9abb4da1c47a41f5c"
+    ],
+    "generated": [
+     "2689bf53408a834df7ea5389866911d9",
+     "a2b2f04ae642ac69d278c20feb42d52f",
+     "02fd55a04a5da55ee3de3e8142dc202b",
+     "56388d47b6a71e1b49e44929e48d4061",
+     "afd50c9ff0e3d20542bb5473ea745b55",
+     "e5e3edb0477b25147de952153da8fc21",
+     "e2b84a6d1c935d665affa8b43af0292d",
+     "ea4fe4d356b8c8f40f048256df6b8999",
+     "48683a21b36971e84a1c6ad8f1af2d4b",
+     "a1a6fa55a1a1c363830c4bf870a1c0bc",
+     "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+     "46875b77689f2acc022d173838464772"
+    ],
+    "leaves": [
+     "2689bf53408a834df7ea5389866911d9",
+     "a2b2f04ae642ac69d278c20feb42d52f",
+     "02fd55a04a5da55ee3de3e8142dc202b",
+     "56388d47b6a71e1b49e44929e48d4061",
+     "afd50c9ff0e3d20542bb5473ea745b55",
+     "e5e3edb0477b25147de952153da8fc21",
+     "e2b84a6d1c935d665affa8b43af0292d",
+     "ea4fe4d356b8c8f40f048256df6b8999",
+     "48683a21b36971e84a1c6ad8f1af2d4b",
+     "a1a6fa55a1a1c363830c4bf870a1c0bc",
+     "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+     "46875b77689f2acc022d173838464772"
+    ],
+    "level": 3,
+    "ranking": null,
+    "seconds": 335.41097354888916
+   }
+  ],
+  "n_complete_leaves": 12,
+  "n_leaves": 12,
+  "n_states": 93,
+  "resumed": [],
+  "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+  "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9"
+ },
+ "stage_id": "1",
+ "stages": [
+  {
+   "name": "environment",
+   "result": {
+    "gpu": "NVIDIA L40S"
+   },
+   "seconds": 1.18,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "registries_and_design",
+   "result": {
+    "design_hash": "83cd49ff2e833909"
+   },
+   "seconds": 0.037,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "session_and_contract",
+   "result": {
+    "config_hash": "8fa0a2c91079b24a",
+    "protocol": "ac23798a4572fab5"
+   },
+   "seconds": 0.07,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "authorization",
+   "result": {
+    "hard_cap_usd": 21.4897
+   },
+   "seconds": 0.004,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "teacher_and_reference",
+   "result": {
+    "revision": "768f209d9ea8",
+    "root_sha256": "6de20cc746dd"
+   },
+   "seconds": 6.971,
+   "stage": "B",
+   "status": "ok"
+  },
+  {
+   "name": "beam_search",
+   "result": {
+    "leaves": 12,
+    "states": 93
+   },
+   "seconds": 31682.536,
+   "stage": "C",
+   "status": "ok"
+  },
+  {
+   "name": "commit_top_k",
+   "result": {
+    "committed": 4,
+    "state_ids": [
+     "e5e3edb0477b25147de952153da8fc21",
+     "56388d47b6a71e1b49e44929e48d4061",
+     "a2b2f04ae642ac69d278c20feb42d52f",
+     "ea4fe4d356b8c8f40f048256df6b8999"
+    ]
+   },
+   "seconds": 0.04,
+   "stage": "D",
+   "status": "ok"
+  }
+ ],
+ "started_utc": "2026-10-06T21:19:24Z",
+ "status": "COMPLETE",
+ "teacher": {
+  "_resolved_by": "hf cache lookup",
+  "family": "qwen3",
+  "path": "/root/.cache/huggingface/hub/models--Qwen--Qwen3-4B-Thinking-2507/snapshots/768f209d9ea81521153ed38c47d515654e938aea",
+  "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+  "revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ },
+ "wiring": {
+  "allowed_impls": [
+   "attention.activation_importance_v1",
+   "depth.causal_kl_greedy_v1",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "arm": "supervised_target",
+  "beam": {
+   "warmup_levels": 1,
+   "width": 6
+  },
+  "config_hash": "8fa0a2c91079b24a6a8188c0c512ac03a7eba2fc07f2e6e749374039f6b483cf",
+  "design_hash": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
+  "distribution_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  },
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "experiment_id": "phase_d1",
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef",
+  "position_policy": {
+   "position_policy": "positions.supervised_target_v1@v1",
+   "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12"
+  },
+  "profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "root_teacher": {
+   "_combined_over": "the per-shard sha256 digests in shard order, so the root hash moves if any shard's content moves",
+   "_owner": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+   "n_shards": 3,
+   "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9",
+   "shard_sha256": {
+    "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+    "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+    "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+   }
+  },
+  "seed": 20260815,
+  "stage_id": "1",
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+ }
+}

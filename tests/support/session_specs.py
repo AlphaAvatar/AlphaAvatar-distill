@@ -30,11 +30,35 @@ SESSION_LAUNCHERS: tuple[tuple[str, tuple[str, ...]], ...] = (
     #: it needs no `extra` any more, because `session_args` now fills every
     #: required option from the parser itself -- `--max-price` included.
     ("autoinit_a3_launch", ()),
+    #: D1. Absent until 2026-10-05, so none of the four structural modules that
+    #: read this list covered it: not the declared-vs-read `required_env` check,
+    #: not the local-asset install-root check, not the setup-env forwarding
+    #: check. D1 declares `TEACHER_REVISION` and three local assets, and both of
+    #: those declarations are exactly what those modules exist to verify against
+    #: the shell that consumes them.
+    ("autoinit_d1_launch", ()),
+    #: D1's REPLAY, and the same omission as the entry above, found the same
+    #: way: the four structural modules that read this list -- the
+    #: declared-vs-read `required_env` check, the local-asset install-root
+    #: check, the setup-env forwarding check, and the sweep-registry check --
+    #: covered every session except this one. Its FIRST paid subrun died in
+    #: setup on an asset it had not declared, which is precisely the class the
+    #: local-asset check exists to catch at $0.
+    ("autoinit_d1_replay_launch", ()),
 )
 
 
 def load_session_launcher(name: str):
-    path = REPO / f"scripts/pod/{name}.py"
+    """Load a launcher by module basename, wherever its owner directory is.
+
+    Launchers live with the experiment that owns them (`scripts/stages/...`)
+    or with a stage-neutral capability (`scripts/shared/...`); the basename is
+    unique across the tree, which the assertion below keeps true.
+    """
+    hits = sorted((REPO / "scripts").rglob(f"{name}.py"))
+    hits = [h for h in hits if "__pycache__" not in h.parts]
+    assert len(hits) == 1, f"{name}.py: expected one owner, found {hits}"
+    path = hits[0]
     spec = importlib.util.spec_from_file_location(name, path)
     mod = importlib.util.module_from_spec(spec)
     sys.modules[name] = mod

@@ -1,0 +1,219 @@
+{
+ "schema": "aadistill.autoinit.c1_skip_predicate_classification/v1",
+ "_what_this_is": "the explicit C1 classification of every skip predicate the automatic audit cannot prove identical between the dev box and the pod. Written after C1 attempt 5 died at the pod test gate on a predicate keyed to the SIMULATOR's AAD_SYNTHETIC_HF_TOKEN. Each entry names the machine property the predicate actually reads and how a pod decides it.",
+ "how_it_is_checked": "scripts/stages/stage-1/phase_c1/audit_skip_predicates.py resolves what it can from the manifest, the git index and the source, and requires every remaining predicate to appear here. A registered line that no longer holds a predicate is STALE and also fails, so this cannot rot into a list of excuses.",
+ "classes": {
+  "devbox_only_artifact": {
+   "decides_on_pod": "SKIP",
+   "why": "the premise is a gitignored artifact from an earlier experiment that C1's SetupManifest does not stage. A pod never receives it, so the test skips there by design. This is the SAME class as the two attempt-5 failures \u2014 the difference is that these ask the FILESYSTEM whether the artifact is present, so the pod and the simulation both answer correctly, while attempt 5's asked for a simulator marker the pod does not set.",
+   "parity": "normalized_by_contract: the premise is host-local state reached either through $HOME (aad-artifacts / aad-scratch, and `os.path.expanduser(\"~\")` for the wheelhouse) or as a gitignored repo artifact. The contract points HOME at a fresh empty directory for the pytest command on BOTH machines, and the simulator hides the repo artifacts the pod never receives, so both decide absent. Verified mechanism, not assertion: the hardcoded /home/ecs-user literals were replaced with Path.home() precisely so the declared isolation could reach them."
+  },
+  "pinned_snapshot_source": {
+   "decides_on_pod": "SKIP",
+   "why": "depends on the seven pinned HF dataset snapshots, which live in the host HF cache and are not staged. Already a named readiness group (renderer parity / battery source); the sweep expects these skips.",
+   "parity": "normalized_by_contract: the seven pinned snapshots live in the Hugging Face hub cache. The contract sets HF_HOME/HF_HUB_CACHE to an empty isolated root and clears HUGGINGFACE_HUB_CACHE, HF_DATASETS_CACHE, TRANSFORMERS_CACHE and XDG_CACHE_HOME, so the cache is empty on the pod too and the same cases skip."
+  },
+  "local_hf_cache": {
+   "decides_on_pod": "SKIP or RUN, machine-dependent",
+   "why": "needs the teacher tokenizer from the local HF cache. The pod exports HF_TOKEN and can populate it; the bare dev box may not have it. Skips cleanly either way and asserts nothing about the code.",
+   "parity": "normalized_by_contract: the teacher tokenizer is read from the HF cache. Setup downloads the pinned teacher into the REAL cache before the gate, but the pytest command runs against the isolated empty one, so the pod makes the same decision as the diagnostic. The real cache is asserted intact after the gate and is never re-downloaded."
+  },
+  "staging_premise_property": {
+   "decides_on_pod": "SKIP",
+   "why": "the repaired attempt-5 guards. They ask the filesystem for the property they need, so the dev box runs them and the pod and the simulation skip them for the same stated reason.",
+   "parity": "normalized_by_contract: these ask the filesystem for unstaged artifacts. The simulator has moved them aside and the pod never received them, so both skip for the same stated reason."
+  },
+  "session_semantics": {
+   "decides_on_pod": "SKIP",
+   "why": "keyed on SESSION_KIND, which the SetupManifest sets identically in the simulation and on the pod. This is the CORRECT shape of an environment guard: the session declares it, so both agree.",
+   "parity": "same_on_pod: keyed on SESSION_KIND, which SessionSpec.setup_environment sets identically for the simulator and the pod. This is the CORRECT shape of an environment guard."
+  },
+  "manifest_derived": {
+   "decides_on_pod": "same as here",
+   "why": "decided by the SessionSpec or by tracked source text, not by the machine, so the sweep's verdict is the pod's verdict.",
+   "parity": "same_on_pod: decided by the SessionSpec or by tracked source text, not by the machine."
+  },
+  "machine_capability": {
+   "decides_on_pod": "SKIP or RUN, machine-dependent",
+   "why": "needs bubblewrap, the repo venv, the canonical checkpoint and a 196-wheel vLLM wheelhouse. A rehearsal harness, not a claim about C1; it skips with the specific capability it lacks.",
+   "parity": "normalized_by_contract: `_skip_reason()` needs bubblewrap, `.venv/bin/python`, the canonical `model.safetensors` and a 196-wheel wheelhouse at `expanduser(\"~/aad-artifacts/...\")`. Under the contract's fresh HOME the wheelhouse is empty and the checkpoint is hidden/unstaged, so the dev box skips for the same reason the pod does. (bwrap is present here and likely absent on the pod, but the decision is already SKIP on both before that matters.)"
+  }
+ },
+ "predicates": {
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_aggregation.py": {
+   "class": "devbox_only_artifact",
+   "why": "A3's comparison reads attempt75's durable control evidence -- per-sample rows and scored records under ~/aad-artifacts -- which no SetupManifest stages onto a pod. The module derives its root from Path.home() rather than a literal, so the declared HOME isolation reaches it and both machines decide absent. These tests belong where the evidence is: A3's aggregation runs OFF POD by design, precisely because attempt75 lost its on-pod decision artifact after a complete measurement."
+  },
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence": {
+   "class": "devbox_only_artifact",
+   "why": "the A3 launcher's controls gate verifies attempt75's per-sample rows and scored records under an ABSOLUTE path outside the repository, which no SetupManifest stages onto a pod and the pod simulator cannot hide. It was in A3's pod selection, so it RAN in the sweep and SKIPPED on the pod; the skip sets differed by one nodeid and the shared setup refused at SETUP_RC=1 with nothing failing. Now a dev-box test, where its premise is true, and A3's comparison is an off-pod step anyway."
+  },
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery": {
+   "class": "staging_premise_property",
+   "why": "the battery gate asks the FILESYSTEM whether artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json is staged -- a gitignored repo artifact. The dev box runs the assertion and the simulation and the pod skip it for the same observed reason, which is the repaired attempt-5 shape: ask for the property, never for a simulator marker."
+  },
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_production_rehearsal.py::_summary_template": {
+   "class": "devbox_only_artifact",
+   "why": "the rehearsal models its fake per-set summary on a REAL retained generation summary under artifacts/, because observe_generation_protocol fails closed on any missing declared field and a plausible subset would make the production path fail. Retained generations are gitignored artifacts a pod never receives, so the rehearsal skips there rather than certifying a protocol comparison it could not run."
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::require_role": {
+   "class": "pinned_snapshot_source"
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte": {
+   "class": "pinned_snapshot_source"
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_driver_execution.py::_summary_template": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable": {
+   "class": "devbox_only_artifact",
+   "note": "gate 12's second guard, added when the readiness record moved into the run that owns it. The condition reads a path taken from the pointer, so the audit cannot resolve a literal out of the source and a human has to say what it inspects: runs/<run>/governance/readiness.json, which `runs/` gitignores. A git bundle therefore never carries it and a pod never receives it, and the simulator moves it aside here \u2014 absent on both, SKIP on both. On a pod the FIRST guard in this test fires anyway, because a pod running the CPU suite is inside the measured suite whose outcome the record is built from. The gate this test mirrors resolves the record directly and is unaffected."
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host": {
+   "class": "pinned_snapshot_source"
+  },
+  "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible": {
+   "class": "staging_premise_property",
+   "note": "the other two guards in this module (the destination-absent and nothing-undeclared premises) need NO entry: they resolve automatically to artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint, which C1's manifest stages, so the audit proves the premise travels."
+  },
+  "scripts/stages/stage-1/phase_c2/tests/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk": {
+   "class": "devbox_only_artifact",
+   "why": "the premise is a real trained probe under /home/ecs-user/aad-artifacts, a gitignored artifact of attempt5 that no SetupManifest stages. On the dev box it checks the derived checkpoint footprint against bytes that actually exist, which is the whole point of the test; on a pod there is no probe and it skips by design. The derivation itself is checked unconditionally by the other tests in that file."
+  },
+  "scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py": {
+   "class": "manifest_derived",
+   "_why": "`digest_pinned_replay_is_buildable()` compares the current bytes of tracked operator sources against the commit attempt 3's artifact digests were produced by. Both sides are tracked source text carried by the bundle checkout, so a pod reaches the same verdict as this host -- it is not a machine capability and not a simulator marker."
+  },
+  "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims": {
+   "class": "pinned_snapshot_source"
+  },
+  "scripts/stages/stage-1/phase_c2/tests/test_replay_execution_preflight.py": {
+   "class": "manifest_derived",
+   "_why": "`digest_pinned_replay_is_buildable()` compares the current bytes of tracked operator sources against the commit attempt 3's artifact digests were produced by. Both sides are tracked source text carried by the bundle checkout, so a pod reaches the same verdict as this host -- it is not a machine capability and not a simulator marker."
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::skip_if_c1_session": {
+   "class": "session_semantics"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs": {
+   "class": "manifest_derived"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order": {
+   "class": "manifest_derived"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract": {
+   "class": "manifest_derived"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-1/recovery_continuation/tests/test_setup_end_to_end.py::sandbox": {
+   "class": "machine_capability"
+  },
+  "scripts/stages/stage-3/tests/test_e6_analysis.py": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-3/tests/test_e6_registration.py": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-3/tests/test_e7_streams.py": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-3/tests/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init": {
+   "class": "devbox_only_artifact"
+  },
+  "scripts/stages/stage-3/tests/test_frozen_records.py": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/data/test_dataset.py::tokenizer": {
+   "class": "local_hf_cache"
+  },
+  "tests/data/test_recovery_corpus_pipeline.py::tokenizer": {
+   "class": "devbox_only_artifact",
+   "why": "the fixture needs the recovery corpus and its tokenizer, neither of which any session stages. Same reason as the entry above: it was covered by C1's ignore list until that list stopped being a list of exclusions from the whole repository."
+  },
+  "tests/data/test_sessions.py::tokenizer": {
+   "class": "local_hf_cache"
+  },
+  "tests/docs/test_log_organisation.py": {
+   "class": "staging_premise_property",
+   "why": "the whole-tree log checks: the catalog renderer, the relocation record and the navigation regeneration read the logs/ tree as a set. The predicate compares `git ls-files logs` against the filesystem -- it asks for the property it needs rather than for a marker.",
+   "corrected_2026_09_13": "the original justification said a pod receives a staged subset of logs/, so the set differs there. It does NOT: a bundle checkout carries every TRACKED file, and the simulator hides only gitignored ones, so the honest answer on both machines is 'nothing is missing'. What actually fired the predicate was the sweep driver itself -- record_pod_environment.py stashes the readiness record while it runs -- and 23 tests therefore SKIPPED in the launch-bound sweep and RAN on attempt 14's pod. That one deliberate absence is now exempt, so both machines agree and this predicate should not fire at all in a healthy tree. It remains registered because a genuinely partial logs/ tree is still a thing these tests must not describe."
+  },
+  "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists": {
+   "class": "devbox_only_artifact",
+   "note": "the strict half of the stage index's evidence check. `verify()` requires existence of TRACKED citations only, so its answer is the same on a pod as here; this asserts the other 26 \u2014 `artifacts/**` and the untracked datasets \u2014 really exist where they are supposed to. C1's manifest does not stage them, so a pod decides SKIP by design. Two launch-bound sweeps failed before this split existed, on a repository that was correct."
+  },
+  "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store": {
+   "class": "devbox_only_artifact",
+   "why": "compares the repo-local battery working copy against the canonical artifact store under $HOME. Neither is staged to a pod, and the contract points HOME at a fresh empty directory for the pytest command on BOTH machines, so both decide absent and skip for the same stated reason. It asks the FILESYSTEM, not a simulator marker."
+  },
+  "tests/docs/test_repository_structure.py": {
+   "class": "staging_premise_property",
+   "why": "the markdown link resolver, for the same reason: a link from a staged document to an unstaged one is a fact about the staging, not a broken reference. Keyed on the same observed git-vs-filesystem comparison."
+  },
+  "tests/docs/test_storage_inventory.py::test_the_registry_covers_the_out_of_tree_store": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_capability.py": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_oracle_reasoning.py::tok": {
+   "class": "local_hf_cache"
+  },
+  "tests/evaluation/test_perf_trend.py::test_recorded_scores_match_their_scorecards": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/evaluation/test_strict_answer.py::test_gold_target_is_the_rendered_span_not_the_content_field": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/initialization/test_stage1_import.py": {
+   "class": "devbox_only_artifact",
+   "why": "the whole module runs against the retained Phase-A checkpoints at the host-local artifact store. It was accounted for by being in C1's four-module ignore list; that list became a positive selection of tests/c1_preflight/ on 2026-09-13, so it is classified here instead \u2014 where every other development-side predicate already is."
+  },
+  "tests/integration/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers": {
+   "class": "manifest_derived"
+  },
+  "tests/integration/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file": {
+   "class": "manifest_derived"
+  },
+  "tests/integration/test_reconstruct_training_events.py": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without": {
+   "class": "manifest_derived"
+  },
+  "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it": {
+   "class": "manifest_derived"
+  },
+  "tests/integration/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send": {
+   "class": "devbox_only_artifact"
+  },
+  "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies": {
+   "class": "manifest_derived",
+   "note": "The narrowing that let a session which does not declare ASSETS_READY out of the frozen-root requirement, added when D1 joined SESSION_LAUNCHERS. The premise is `runs_the_frozen_asset_gate(spec)`, which reads SetupManifest.setup_markers off the SessionSpec -- the same declaration the shared setup script reads to decide whether to run verify_frozen_assets.py at all. It is a function call and not a path literal, so the signal matcher cannot resolve it and a human has to say what it inspects. Tracked source text on both machines, so the simulator, the dev box and the pod decide it identically, and the sibling test_the_gate_still_binds_some_session is its non-vacuity guard."
+  },
+  "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so": {
+   "class": "machine_capability",
+   "why": "the premise is whether an S3-API client library is importable on this machine. It is not installed anywhere today -- the object storage backend is a lazy import precisely so a backend nobody has configured adds no dependency to every pod -- so the test exercises the missing-library refusal here and skips wherever one IS present. Either decision is correct and neither depends on the staged view: it is a property of the interpreter, like a GPU's presence."
+  },
+  "tests/training/test_train.py::teacher_tokenizer": {
+   "class": "local_hf_cache"
+  }
+ },
+ "_resolved_automatically": "guards on a TRACKED logs/ record need no entry: the audit resolves the path through the module attribute that names it and finds it in the git index, so the premise provably travels in the bundle.",
+ "_keying": "keyed by NODEID, not file:line. Line keys went stale the first time a comment was inserted above a constant, and a registry that goes stale on a whitespace change reports noise instead of drift.",
+ "_parity": "`parity` says why the DIAGNOSTIC and the PAID POD must decide a predicate the same way once both run under aadistill.autoinit.cpu_test_env. 'Classified' is not 'strictly comparable': attempt 5's --strict comparison was correct machinery pointed at two different machines.",
+ "_repo_layout_note": "test_every_path_named_in_the_repo_layout_exists needs NO entry: its trailing host-absence skip was removed after C1 attempt 6, so it now PASSES on the dev box, in the simulation and on a pod. Host-side existence is owned by test_storage_inventory.py, which is host-scoped on purpose."
+}

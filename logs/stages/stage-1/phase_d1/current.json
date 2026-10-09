@@ -1,0 +1,86 @@
+{
+  "schema": "aadistill.experiment_current/v1",
+  "_contract": "DERIVED navigation for the current state of phase_d1. Every value names its owner; edit the owner, then regenerate this file (it runs in the convergence chain). AUTHORIZES NOTHING.",
+  "experiment_id": "phase_d1",
+  "stage_id": 1,
+  "owners": {
+    "scripts": "scripts/stages/stage-1/phase_d1",
+    "logs": "logs/stages/stage-1/phase_d1",
+    "artifacts": "artifacts/stages/stage-1/phase_d1",
+    "family": "logs/stages/stage-1/families/d_series",
+    "repo_snapshot": "logs/state/current.json"
+  },
+  "design": {
+    "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "status": "DESIGNED / NOT AUTHORIZED / BLOCKED -- NO OPEN BLOCKER",
+    "open_blockers": [],
+    "_blockers_are_derived": "d1_session.open_blockers()"
+  },
+  "evidence": {
+    "battery_family": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json",
+    "roles_required": [
+      "d1_screening",
+      "d1_confirmation"
+    ],
+    "status_owner": "the family's current.json"
+  },
+  "candidates": {
+    "decision": "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "rule_applied": "quality_only",
+    "finalist_bytes_present": {
+      "q1": true,
+      "q2": true,
+      "q3": true,
+      "q4": true
+    },
+    "_presence_is_not_identity": "a directory existing is navigation; identity is the digest check `behavioural.require_arms_present()` performs"
+  },
+  "readiness": {
+    "_contract": "The battery-readiness answers a reviewer needs, each DERIVED from its named owner at generation time. The realized family manifest is the readiness authority; the capacity analysis is historical and can never reopen this block.",
+    "d_series_family": "d_series_behavioural_v1",
+    "family_status": "BUILT / VERIFIED",
+    "d1_screening_battery": "AVAILABLE",
+    "d1_confirmation_battery": "AVAILABLE",
+    "original_c1_pool_capacity": "EXHAUSTED, HISTORICAL ONLY",
+    "d1_evidence_blocker": "CLOSED",
+    "d1_screening": "PAUSED — no open blocker, no outstanding one-use authorization, no active run; the gate is the maintainer decision in logs/state/current.json :: next",
+    "_owners": {
+      "family_status": "logs/stages/stage-1/families/d_series/current.json",
+      "battery_roles": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
+      "pool_capacity": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json (record_role: historical_analysis; superseded for readiness by the family manifest)",
+      "blockers": "d1_session.open_blockers()",
+      "pause": "logs/state/current.json :: next"
+    }
+  },
+  "gates": {
+    "_contract": "Four different kinds of 'can D1 run?', kept distinct because conflating them has already produced a false blocker once.",
+    "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
+    "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
+    "open_scientific_blockers": [],
+    "maintainer_pause": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource."
+  },
+  "runs": {
+    "root": "logs/stages/stage-1/phase_d1/runs",
+    "all": [
+      "d1_replay_001",
+      "d1_replay_002",
+      "d1_search_20261005_173304",
+      "d1_search_20261005_193733",
+      "d1_search_20261006_055409",
+      "d1_search_20261006_095623",
+      "d1_search_20261006_101725",
+      "d1_search_20261006_210210",
+      "runner_iface"
+    ],
+    "with_closeout": [
+      "d1_search_20261006_055409",
+      "d1_search_20261006_101725",
+      "d1_search_20261006_210210"
+    ]
+  },
+  "active_run": null,
+  "next_scientific_action": "D-series execution readiness, on a FRESH branch from the integrated main (P12.2: the squash commit is not an ancestor of the old branch). D1 stays PAUSED before behavioural screening pending that readiness process: no execution grant, no screening authorization, no resource.",
+  "_next_owner": "logs/state/current.json :: next",
+  "authorizes": "nothing"
+}

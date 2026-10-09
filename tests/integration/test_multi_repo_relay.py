@@ -35,11 +35,11 @@ from aadistill.infrastructure.session import (  # noqa: E402
     RelayInput, SetupManifest,
 )
 #: The store THIS deployment means. It was a module constant in the core,
-#: computed at import by reading `configs/infrastructure/artifact_store.json`,
+#: computed at import by reading `configs/shared/infrastructure/artifact_store.json`,
 #: so importing the framework read the repository.
-from experiments.deployment import MAIN_RELAY  # noqa: E402
+from shared.deployment import MAIN_RELAY  # noqa: E402
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 RUNNER = REPO / "src/aadistill/infrastructure/session_runner.py"
 TRANSPORT = "AlphaAvatar/aadistill-transport"
 
@@ -193,7 +193,7 @@ def test_an_unreachable_repository_aborts_rather_than_assuming(monkeypatch):
 
 
 #: `test_the_ten_main_relay_science_inputs_are_unchanged` and its siblings moved to
-#: `scripts/experiments/stage-1/phase_a/tests/test_phase_a_relay_science_inputs.py`
+#: `scripts/stages/stage-1/phase_a/tests/test_phase_a_relay_science_inputs.py`
 #: in the 2026-10-03 convergence round: they load that experiment's own
 #: launcher by name, which makes them its tests rather than this suite's.
 

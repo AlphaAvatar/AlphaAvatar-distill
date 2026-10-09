@@ -327,7 +327,7 @@ class SpendAuthorization:
 
 
 #: MICRO_PREFLIGHT_AUTHORIZATION moved to
-#: `configs/experiments/micro_preflight/authorization.json`, loaded by
+#: `configs/shared/pod/micro_preflight/authorization.json`, loaded by
 #: `scripts/experiments/micro_preflight.py`. A specific maintainer grant --
 #: dollar amounts, a granted date, a plan hash -- is experiment instance data,
 #: and the reusable core should describe what an authorization IS without

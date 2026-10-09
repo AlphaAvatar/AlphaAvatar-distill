@@ -240,16 +240,16 @@ def test_request_ids_are_unique_across_prompt_sets():
     """
     import importlib.util
     spec = importlib.util.spec_from_file_location(
-        "uncapped_eval", REPO_ROOT / "scripts/evaluation/uncapped_eval.py")
+        "uncapped_eval", REPO_ROOT / "scripts/shared/evaluation/uncapped_eval.py")
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
-    src = (REPO_ROOT / "scripts/evaluation/uncapped_eval.py").read_text()
+    src = (REPO_ROOT / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     assert 'rid = f"{args.label}::{Path(prompts_path).stem}::{s[\'id\']}"' in src, \
         "request ids must be namespaced by prompt set"
 
 
 def test_engine_is_constructed_once_outside_the_set_loop():
-    src = (REPO_ROOT / "scripts/evaluation/uncapped_eval.py").read_text()
+    src = (REPO_ROOT / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     llm_line = src.index("llm = LLM(")
     loop_line = src.index("for prompts_path in args.prompts:")
     assert llm_line < loop_line, (
@@ -260,13 +260,13 @@ def test_engine_is_constructed_once_outside_the_set_loop():
 def test_detokenization_is_disabled():
     """The evaluator decodes once from final token ids; incremental detokenization
     is pure overhead on the decode path and changes no sampling semantics."""
-    src = (REPO_ROOT / "scripts/evaluation/uncapped_eval.py").read_text()
+    src = (REPO_ROOT / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     assert "detokenize=False" in src
 
 
 def test_sampling_semantics_are_unchanged():
     """Greedy, uncapped within the effective context, native stop ids."""
-    src = (REPO_ROOT / "scripts/evaluation/uncapped_eval.py").read_text()
+    src = (REPO_ROOT / "scripts/shared/evaluation/uncapped_eval.py").read_text()
     # The parameters now live in one dict used both to build SamplingParams and
     # to describe the run in its summary, so the two cannot disagree. The
     # semantics they encode are unchanged and still asserted here.

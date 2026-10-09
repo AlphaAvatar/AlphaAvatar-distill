@@ -1,0 +1,14 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d1_replay",
+ "note": "FAILURE spec: nothing is required. A replay that stopped at a digest mismatch still owes its evidence, and demanding a product on the failure path would block collecting what the run DOES have.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "d1_replay_record",
+   "pattern": "audit/autoinit_d1_replay/d1_replay.json",
+   "required": false,
+   "lifecycle": "evidence"
+  }
+ ]
+}

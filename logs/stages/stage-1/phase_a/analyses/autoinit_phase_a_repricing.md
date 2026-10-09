@@ -1,7 +1,7 @@
 # Phase A repricing from measured Stage-1/Stage-2 values
 
 Supersedes the cost table in
-[`autoinit_pilot_proposal.md`](../../../../shared/analyses/autoinit_pilot_proposal.md) §5, whose ranges came
+[`autoinit_pilot_proposal.md`](autoinit_pilot_proposal.md) §5, whose ranges came
 from an unmeasured statistics-pass split and a **stated, not measured** 1.20
 overhead factor. Both are now measured. L40S at $0.99/h throughout.
 

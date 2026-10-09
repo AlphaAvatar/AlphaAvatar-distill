@@ -1,0 +1,14 @@
+{
+ "spec": "aadistill.artifact_spec/v1",
+ "session": "autoinit_d1_replay",
+ "note": "success spec: the replay EVIDENCE, which is JSON and small. The reconstructed checkpoints are session PRODUCTS, secured by the launcher's fetch_products/products_secured pair, and are not here.",
+ "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts",
+ "entries": [
+  {
+   "artifact_class": "d1_replay_record",
+   "pattern": "audit/autoinit_d1_replay/d1_replay.json",
+   "required": true,
+   "lifecycle": "evidence"
+  }
+ ]
+}

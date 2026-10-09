@@ -1,6 +1,6 @@
 """The GPU measurement job, executed for real at toy scale on the dev box.
 
-`scripts/autoinit/measure_causal_depth_runtime.py` cannot run its `main()` here —
+`scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py` cannot run its `main()` here —
 it refuses without CUDA, deliberately, because measuring the accelerator path on
 the host would re-measure the defect. But four paid pods have now died inside
 lines no $0 path had ever executed, so its *body* runs here: `run_measurement` is
@@ -35,7 +35,7 @@ sys.path.insert(0, str(REPO / "scripts" / "training"))
 
 
 def load_job():
-    path = REPO / "scripts/autoinit/measure_causal_depth_runtime.py"
+    path = REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py"
     spec = importlib.util.spec_from_file_location("measure_causal_depth", path)
     mod = importlib.util.module_from_spec(spec)
     sys.modules["measure_causal_depth"] = mod
@@ -130,7 +130,7 @@ def test_the_weighted_extrapolation_differs_from_the_flat_one():
 def test_the_job_uses_the_operators_own_reference_cache():
     """Not a private dict: the operator's `_ReferenceLogits`, so the 0.66 gate
     and the recompute fallback are the ones that really run."""
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert "_ReferenceLogits" in src and "_forward_logits" in src
     body = src[src.index("def run_measurement"):src.index("def main")]
     assert "reference = _ReferenceLogits(" in body
@@ -158,14 +158,14 @@ def test_the_cache_decision_is_reported_and_is_the_operators_own():
 
 def test_the_teacher_revision_is_pinned_to_the_frozen_one():
     assert JOB.TEACHER_REVISION == "768f209d9ea81521153ed38c47d515654e938aea"
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert "refusing to measure against an unpinned Hub HEAD" in src
     # The default must BE the pin, not merely mention it.
     assert 'ap.add_argument("--teacher-revision", default=TEACHER_REVISION)' in src
 
 
 def test_the_frozen_revision_matches_the_rest_of_the_repository():
-    launcher = (REPO / "scripts/pod/autoinit_phase_a_launch.py").read_text()
+    launcher = (REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py").read_text()
     assert JOB.TEACHER_REVISION in launcher, (
         "the measurement job pins a different teacher revision from the session")
 
@@ -246,7 +246,7 @@ def test_the_declared_aggregation_difference_is_real_and_would_mislead():
 
 
 def test_the_job_runs_no_search_and_selects_no_depth_map():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert "greedy_removal" not in src, "the measurement job runs a greedy search"
     assert "depth_span_map" not in src
     assert "not_a_phase_a_attempt" in src
@@ -261,18 +261,18 @@ def test_the_job_runs_no_search_and_selects_no_depth_map():
 # can, and is what these assert.
 
 def test_the_production_peak_is_captured_before_the_comparison_path_exists():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     body = src[src.index("def run_measurement"):src.index("def main")]
     prod = body.index("production_peak =")
     release = body.index("reference._cache.clear()")
-    e8a = body.index("from search_depth_map import")
+    e8a = body.index("from shared.training.search_depth_map import")
     assert prod < release < e8a, (
         "the production peak must be taken BEFORE the cache is released and "
         "before E8a's path is built; otherwise it is not the Phase-A number")
 
 
 def test_the_production_cache_is_released_before_e8a_is_constructed():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     body = src[src.index("def run_measurement"):src.index("def main")]
     assert "reference._cache.clear()" in body and "del reference" in body
     assert "gc.collect()" in body
@@ -283,7 +283,7 @@ def test_the_production_cache_is_released_before_e8a_is_constructed():
 def test_e8a_runs_without_a_second_reference_cache():
     """The pairs validate backend numerics, not E8a throughput, and E8a defines
     recomputation as numerically identical."""
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert "cache_reference=False" in src
     assert "cache_reference=True" not in src
 
@@ -296,7 +296,7 @@ def test_the_two_peaks_are_reported_separately_and_not_substituted():
                                e8a_pairs=2)
     assert "production_peak_bytes" in core and "comparison_peak_bytes" in core
     assert core["e8a_cache_reference"] is False
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert '"which_is_the_phase_a_number": "production_peak_gib"' in src
 
 
@@ -328,7 +328,7 @@ def test_the_e8a_pairs_are_the_smallest_and_largest_skip_sets():
 
 
 def test_the_pair_count_was_not_increased():
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     assert 'ap.add_argument("--e8a-pairs", type=int, default=2,' in src
 
 
@@ -447,18 +447,18 @@ def test_the_entrypoint_runs_end_to_end_on_the_dev_box(tmp_path, monkeypatch):
 
 def test_the_entrypoint_imports_as_operator_items_from_its_real_owner():
     """The $0.18 line. `as_operator_items` is defined in
-    `scripts/autoinit/phase_a_search.py` and nowhere else."""
+    `scripts/stages/stage-1/phase_a/phase_a_search.py` and nowhere else."""
     import importlib.util
 
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
-    assert "from phase_a_search import as_operator_items" in src
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
+    assert "from stages.phase_a.phase_a_search import as_operator_items" in src
     assert "from aadistill.autoinit.datasets import as_operator_items" not in src
 
     # And it really is there, rather than merely spelled differently.
     spec = importlib.util.spec_from_file_location(
-        "phase_a_search_probe", REPO / "scripts/autoinit/phase_a_search.py")
+        "phase_a_search_probe", REPO / "scripts/stages/stage-1/phase_a/phase_a_search.py")
     assert spec is not None
-    owner = (REPO / "scripts/autoinit/phase_a_search.py").read_text()
+    owner = (REPO / "scripts/stages/stage-1/phase_a/phase_a_search.py").read_text()
     assert "def as_operator_items(" in owner
     datasets = (REPO / "src/aadistill/initialization/calibration/datasets.py").read_text()
     assert "def as_operator_items(" not in datasets, (
@@ -506,7 +506,7 @@ def test_main_is_only_parsing_and_a_call_to_the_seam():
     """No orchestration may live in `main()`, or it is untested again."""
     import ast
 
-    src = (REPO / "scripts/autoinit/measure_causal_depth_runtime.py").read_text()
+    src = (REPO / "scripts/stages/stage-1/measurement/measure_causal_depth_runtime.py").read_text()
     fn = next(n for n in ast.parse(src).body
               if isinstance(n, ast.FunctionDef) and n.name == "main")
     called = {n.func.id for n in ast.walk(fn)

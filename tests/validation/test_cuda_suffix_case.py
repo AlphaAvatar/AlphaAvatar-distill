@@ -29,8 +29,8 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-ENTRY = REPO / "scripts/validation/cuda_engineering_check.py"
-CONFIG = REPO / "configs/validation/cuda_engineering.json"
+ENTRY = REPO / "scripts/shared/validation/cuda_engineering_check.py"
+CONFIG = REPO / "configs/shared/validation/cuda_engineering.json"
 
 sys.path.insert(0, str(REPO / "src"))
 sys.path.insert(0, str(REPO / "tests/initialization"))
@@ -39,7 +39,7 @@ sys.path.insert(0, str(REPO / "scripts/validation"))
 from aadistill.initialization.operators.attention.gqa import activation_importance as attention_activation  # noqa: E402
 
 from support.device_split import CrossDeviceUse, on_cache_device  # noqa: E402
-from device_observations import DeviceObservations  # noqa: E402
+from shared.validation.device_observations import DeviceObservations  # noqa: E402
 
 
 @pytest.fixture
@@ -337,7 +337,7 @@ class TestTheMatrixAsksTheRightQuestion:
             "a run whose parent never reached the device must not pass")
 
     def test_the_source_no_longer_names_the_wrong_key(self):
-        src = (REPO / "scripts/validation/cuda_engineering_check.py").read_text()
+        src = (REPO / "scripts/shared/validation/cuda_engineering_check.py").read_text()
         code = "\n".join(l for l in src.splitlines()
                          if not l.lstrip().startswith("#"))
         assert "child_on_requested_device" not in code

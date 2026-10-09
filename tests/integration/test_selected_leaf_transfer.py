@@ -29,7 +29,7 @@ sys.path.insert(0, str(REPO / "src"))
 
 def load_launcher():
     spec = importlib.util.spec_from_file_location(
-        "phase_a_launch_leaf", REPO / "scripts/pod/autoinit_phase_a_launch.py")
+        "phase_a_launch_leaf", REPO / "scripts/stages/stage-1/phase_a/autoinit_phase_a_launch.py")
     mod = importlib.util.module_from_spec(spec)
     sys.modules["phase_a_launch_leaf"] = mod
     spec.loader.exec_module(mod)
@@ -87,8 +87,8 @@ def test_the_leaves_are_not_in_the_artifact_tarball():
     """The collector keeps the downloaded archive AND its extracted copy while
     verifying, so five incompressible 1.11 GiB safetensors would roughly double
     the temporary local footprint on a box already short of disk."""
-    for spec_name in ("configs/autoinit/phase_a_artifacts.json",
-                      "configs/autoinit/phase_a_artifacts_failed.json"):
+    for spec_name in ("configs/stages/stage-1/phase_a/phase_a_artifacts.json",
+                      "configs/stages/stage-1/phase_a/phase_a_artifacts_failed.json"):
         text = (REPO / spec_name).read_text()
         assert "selected_leaves" not in text, (
             f"{spec_name} names selected_leaves; the leaves must travel by the "

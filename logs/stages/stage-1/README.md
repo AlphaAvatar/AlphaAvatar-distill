@@ -25,7 +25,7 @@ What this stage receives from the pipeline before it.
 
 ## Data
 
-* `data/warmup/holdout_v1.manifest.json` — purpose: "Held-out perplexity eval for Stage 1 gate"; the gate compares the initialized student against a random baseline
+* `data/stages/stage-0/warmup/holdout_v1.manifest.json` — purpose: "Held-out perplexity eval for Stage 1 gate"; the gate compares the initialized student against a random baseline
 
 ## How it runs
 
@@ -37,9 +37,9 @@ source of truth.
 
 ## Outputs
 
-* `artifacts/stage1/qwen3_0p6b_init_v0` — the pinned init checkpoint every Stage-3 recovery run forks from, plus the random baseline saved beside it for comparison
-* `artifacts/stage1/state_eval_v1` — the state-evaluation suite the AutoInitializer search scores candidate initializations with
-* `artifacts/stage1/e8_contribution_init_v1` — the contribution-guided depth variant, built for E8
+* `artifacts/stages/stage-1/qwen3_0p6b_init_v0` — the pinned init checkpoint every Stage-3 recovery run forks from, plus the random baseline saved beside it for comparison
+* `artifacts/stages/stage-1/state_eval_v1` — the state-evaluation suite the AutoInitializer search scores candidate initializations with
+* `artifacts/stages/stage-1/e8_contribution_init_v1` — the contribution-guided depth variant, built for E8
 
 ## This stage's own areas
 
@@ -48,6 +48,7 @@ experiments.
 
 | area | what it holds |
 | --- | --- |
+| [`families/`](families/) | experiment FAMILIES — material owned by a group of sibling experiments (e.g. D1/D2/D3) rather than any single one; each family directory carries its own current.json |
 | [`history/`](history/) | records spanning this stage's experiments, kept verbatim |
 
 ## Pipeline activity
@@ -59,10 +60,10 @@ studies *of* it.
 | --- | --- | --- | --- |
 | PCA / sandwich structural initialization of the 0.6B student | `pipeline-activity` | none | complete |
 | Causal-depth runtime measurement — pricing a Stage-1 operator | `engineering-measurement` | [`measurement/`](measurement/) | complete |
-| D-series family and source records, spanning D1/D2/D3 | `experiment-spanning` | logs/shared/analyses | here by design, not by inheritance |
+| D-series family and source records, spanning D1/D2/D3 | `experiment-spanning` | logs/stages/stage-1/families/d_series/analyses | here by design, not by inheritance |
 | AutoInit program analyses and harness validations, spanning the Stage-1 experiments | `experiment-spanning` | logs/shared/ (BLOCKED — pinned by frozen sources) | pinned in place |
 
-`autoinit_program_material` is stage-1 material that stays where it is: scripts/pod/autoinit_phase_b_driver.py and scripts/pod/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/. Moving it would mean editing frozen-set members to tidy a directory. Declared rather than left looking stage-neutral.
+`autoinit_program_material` is stage-1 material that stays where it is: scripts/stages/stage-1/phase_b/autoinit_phase_b_driver.py and scripts/stages/stage-1/continuation_b/autoinit_continuation_b_driver.py read these exact paths and are named with a digest by consumed Phase-B and continuation-B authorizations, now under each phase's own history/superseded_authorizations/. Moving it would mean editing frozen-set members to tidy a directory. Declared rather than left looking stage-neutral.
 
 ## Experiments
 
@@ -80,13 +81,13 @@ What each one asked of this stage.
 | `phase_c2_behavioural` — Phase C2 behavioural selection — 12 probes over the frozen Top-5 | Does any of the five reconstructed Full-Search candidates beat the behavioural incumbent B, and by enough to take its place? Cheap-metric order is not behavioural order, so the search's own ranking cannot promote anything. Six screening probes rank the five candidates against B on one preregistered seed; exactly one advances; six confirmation probes test that one against B on three disjoint paired seeds under C1's frozen decision rule. Only the confirmation rung may name a C2 incumbent, and NO_GO and INCONCLUSIVE are results. | [`phase_c2_behavioural/`](phase_c2_behavioural/) | PROPOSED — not authorized; no grant, readiness, authorization or bundle |
 | `phase_c3` — Phase C3 — ATTENTION causal-KL isolation, 3 arms x 3 seeds | Does initializing ATTENTION with `attention.causal_kl_v1` beat the incumbent `attention.activation_importance_v1` after the same frozen 0.86M recovery? Three arms -- the incumbent A, and causal-KL at two calibration protocols B1 and B3 -- over three fresh paired seeds, each evaluated once on `c1_confirmation_v1`. The primary contrast is A vs B1; the B1/B3 comparison is secondary and names no winner. | [`phase_c3/`](phase_c3/) | EXECUTED, NO RESULT — nine probes trained, none evaluated, none preserved |
 | `phase_a3` — A3 — the ATTENTION calibration batching protocol, end to end | Does running the incumbent `attention.activation_importance_v1` at `calibration_forward_batch_size=3` with `calibration_batch_packing=length_sorted_v1` build the same artifact as the bsz=1 incumbent, and if it does not, does the artifact it DOES build recover to the same behaviour? One treatment arm over attempt75's three control seeds, each evaluated once on `c1_confirmation_v1`. An engineering adoption study: it names no population-level non-inferiority claim and inherits no runtime threshold. | [`phase_a3/`](phase_a3/) | EXECUTING — one chain, no result yet |
-| `phase_d1` — D1 — target-aware search | Does making structural scoring and global candidate evaluation SUPERVISED-TARGET-AWARE produce a better initialization than the incumbent full-sequence scoring, under the same operator set, the same calibration data, the same beam and the same recovery recipe? The four structural implementations are frozen at the current best per kind, so the scoring semantics are the only experimental variable. The first of three global scoring/search experiments; D2 and D3 are not started. | [`phase_d1/`](phase_d1/) | DESIGNED — not authorized, blocked on evidence and funding |
+| `phase_d1` — D1 — target-aware search | Does making structural scoring and global candidate evaluation SUPERVISED-TARGET-AWARE produce a better initialization than the incumbent full-sequence scoring, under the same operator set, the same calibration data, the same beam and the same recovery recipe? The four structural implementations are frozen at the current best per kind, so the scoring semantics are the only experimental variable. The first of three global scoring/search experiments; D2 and D3 are not started. | [`phase_d1/`](phase_d1/) | DESIGNED — see live_state for readiness |
 | `phase_c2` — Phase C2 — ATTENTION-aware composition/order re-search | With that ATTENTION operator now fixed, does re-optimizing the operator order and ATTENTION's calibration profile beat the frozen C1 treatment? | [`phase_c2/`](phase_c2/) | planned — space implemented and priced, NOT authorized |
 | `phase_c2_baseline_completion` — Phase C2 baseline completion — the B side of B→C | What does the frozen C1 treatment baseline B score on the same state_eval suite the five selected Search-1 candidates were measured on -- so that the B→C comparison Attempt 4 collected its ranking to ask can finally be computed? | [`phase_c2_baseline_completion/`](phase_c2_baseline_completion/) | granted — attempt5 grant committed, NOT yet authorized |
 
 ## Runs
 
-**205** run(s) are registered for this stage's
+**215** run(s) are registered for this stage's
 experiments. An experiment's plans, analyses, results, history,
 validations and runs are all inside its own directory; the
 canonical run list, across every stage, is
@@ -97,17 +98,18 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
-* `configs/autoinit/c2_replay_artifacts.json`
-* `configs/experiments/phase_a/source_sets.json`
-* `configs/experiments/phase_c1/authorization.json`
-* `configs/experiments/phase_c2/baseline_completion_authorization.json`
-* `configs/experiments/phase_c2/full_search_authorization.json`
-* `configs/stage1/qwen3_0p6b_from_4b_thinking.json`
-* `configs/stage1/qwen3_0p6b_from_4b_thinking_contribution.json`
-* `configs/validation/batching_refactor_cuda.json`
-* `configs/validation/c2_full_search_cuda.json`
-* `configs/validation/c2_full_search_performance.json`
-* `configs/validation/c2_state_eval_certification.json`
+* `configs/stages/stage-1/c2_full_search_cuda/c2_full_search_cuda.json`
+* `configs/stages/stage-1/c2_full_search_perf/c2_full_search_performance.json`
+* `configs/stages/stage-1/c2_state_eval_cert/c2_state_eval_certification.json`
+* `configs/stages/stage-1/phase_c1/authorization.json`
+* `configs/stages/stage-1/phase_c2_baseline_completion/baseline_completion_authorization.json`
+* `configs/stages/stage-1/phase_c2_full_search/full_search_authorization.json`
+* `configs/stages/stage-1/phase_c2_replay/c2_replay_artifacts.json`
+* `configs/stages/stage-1/phase_c3/batching_refactor_cuda.json`
+* `configs/stages/stage-1/phase_d1/d1_replay_artifacts.json`
+* `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json`
+* `configs/stages/stage-1/qwen3_0p6b_from_4b_thinking_contribution.json`
+* `configs/stages/stage-1/source_sets.json`
 * `logs/stages/stage-1/phase_c2/plans/phase_c2_full_search_protocol.json`
 * `logs/stages/stage-1/phase_c3/plans/a3_design.json`
 * `logs/stages/stage-1/phase_c3/plans/c3_preregistration.json`
@@ -119,10 +121,10 @@ A dataset manifest lives beside the data it describes, and
 an artifact lives outside git with its manifest. Neither is
 copied here.
 
-* `data/warmup/holdout_v1.manifest.json`
-* `artifacts/stage1/qwen3_0p6b_init_v0`
-* `artifacts/stage1/state_eval_v1`
-* `artifacts/stage1/e8_contribution_init_v1`
+* `data/stages/stage-0/warmup/holdout_v1.manifest.json`
+* `artifacts/stages/stage-1/qwen3_0p6b_init_v0`
+* `artifacts/stages/stage-1/state_eval_v1`
+* `artifacts/stages/stage-1/e8_contribution_init_v1`
 
 ## Current status
 

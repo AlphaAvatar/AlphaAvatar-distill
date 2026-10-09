@@ -28,10 +28,10 @@ has exactly one owner:
 | **what Phase A and Phase B concluded** | [`logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md`](logs/stages/stage-1/phase_a/phase_a_vs_phase_b_comparison.md) |
 | spend, caps, authorizations | [`logs/budget/ledger.md`](./logs/budget/ledger.md) |
 | which log owns which fact | [`logs/state/ownership.md`](./logs/state/ownership.md) |
-| where code lives | [`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) |
-| how a paid session is specified and run | [`docs/SESSION_ARCHITECTURE.md`](./docs/SESSION_ARCHITECTURE.md) |
-| which pod script is live, historical or terminated | [`docs/POD_SCRIPTS.md`](./docs/POD_SCRIPTS.md) |
-| AutoInitializer binding rules and pinned assets | [`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md) |
+| where code lives | [`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md) |
+| how a paid session is specified and run | [`docs/shared/SESSION_ARCHITECTURE.md`](./docs/shared/SESSION_ARCHITECTURE.md) |
+| which pod script is live, historical or terminated | [`docs/shared/POD_SCRIPTS.md`](./docs/shared/POD_SCRIPTS.md) |
+| AutoInitializer binding rules and pinned assets | [`docs/stages/stage-1/AUTOINIT_REFERENCE.md`](./docs/stages/stage-1/AUTOINIT_REFERENCE.md) |
 | what each experiment proved | [`logs/state/experiment_index.md`](./logs/state/experiment_index.md) |
 | decisions and their reasons | [`logs/budget/decisions.md`](./logs/budget/decisions.md) |
 | which checkpoints exist, and why | [`logs/maintenance/inventories/checkpoint_registry.json`](./logs/maintenance/inventories/checkpoint_registry.json) |
@@ -42,7 +42,7 @@ has exactly one owner:
 initialization operators, operator order and calibration configuration, with
 conditional remeasurement after every operator. Its design, pinned assets and
 binding rules are in
-[`docs/AUTOINIT_REFERENCE.md`](./docs/AUTOINIT_REFERENCE.md); its status is in
+[`docs/stages/stage-1/AUTOINIT_REFERENCE.md`](./docs/stages/stage-1/AUTOINIT_REFERENCE.md); its status is in
 `logs/state/current.md`, not here.
 
 The methods are meant to be **model-family-agnostic** — the same
@@ -278,7 +278,7 @@ variance estimate.
 
 The figure [`assets/performance_trend.svg`](./assets/performance_trend.svg)
 regenerates from [`assets/perf_trend.json`](./assets/perf_trend.json) with
-`uv run python scripts/evaluation/plot_perf_trend.py`.
+`uv run python scripts/shared/evaluation/plot_perf_trend.py`.
 
 </details>
 
@@ -322,33 +322,33 @@ The implemented pipeline runs end to end on CPU (GPU optional):
 
 ```bash
 # corpora (revision-pinned public sources; the jsonl files stay gitignored)
-uv run python scripts/data/build_warmup_v1.py       # Stage 0/1 warm-up (~1M tokens)
-uv run python scripts/data/build_holdout_v1.py      # held-out eval set
-uv run python scripts/data/build_stage2_v0.py       # offline mixture v0 (5.39M train tokens)
-uv run python scripts/data/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
+uv run python scripts/shared/data/build_warmup_v1.py       # Stage 0/1 warm-up (~1M tokens)
+uv run python scripts/shared/data/build_holdout_v1.py      # held-out eval set
+uv run python scripts/shared/data/build_stage2_v0.py       # offline mixture v0 (5.39M train tokens)
+uv run python scripts/shared/data/build_stage2_v1.py       # offline mixture v1 (22.13M train tokens)
 
 # Stage 0 → 1: teacher statistics (~1 h CPU; dry run with --limit 2), then init (~5 min)
-uv run python scripts/training/collect_stage0.py --config configs/stage0/qwen3_4b_thinking_v1.json
-uv run python scripts/training/init_stage1.py --config configs/stage1/qwen3_0p6b_from_4b_thinking.json
+uv run python scripts/shared/training/collect_stage0.py --config configs/stages/stage-0/qwen3_4b_thinking_v1.json
+uv run python scripts/shared/training/init_stage1.py --config configs/stages/stage-1/qwen3_0p6b_from_4b_thinking.json
 
 # gate check
-uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
-  --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
-  --model artifacts/stage1/qwen3_0p6b_init_v0/random_baseline
+uv run python scripts/shared/evaluation/eval_ppl.py --data data/stages/stage-0/warmup/holdout_v1.jsonl \
+  --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
+  --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/random_baseline
 
 # Stage 3 recovery: the canonical config, resumable through the same code path
-uv run python scripts/training/train_stage3.py --config configs/stage3/recovery.json
-uv run python scripts/training/train_stage3.py --config configs/stage3/recovery.json --resume
+uv run python scripts/shared/training/train_stage3.py --config configs/stages/stage-3/recovery.json
+uv run python scripts/shared/training/train_stage3.py --config configs/stages/stage-3/recovery.json --resume
 
 # any checkpoint, at the deployment precision (bf16 baseline + INT8 weight fake-quant)
-uv run python scripts/evaluation/eval_ppl.py --data data/warmup/holdout_v1.jsonl \
-  --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
+uv run python scripts/shared/evaluation/eval_ppl.py --data data/stages/stage-0/warmup/holdout_v1.jsonl \
+  --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
   --fake-quant int8 --fake-quant-scope decoder
 
 # behaviour, generated WITHOUT an artificial token budget (AGENTS.md P18)
-uv run python scripts/evaluation/eval_behavior.py --unrestricted \
-  --model artifacts/stage1/qwen3_0p6b_init_v0/checkpoint \
-  --out artifacts/eval/step0_behavior.json
+uv run python scripts/shared/evaluation/eval_behavior.py --unrestricted \
+  --model artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint \
+  --out artifacts/stages/stage-3/eval/step0_behavior.json
 ```
 
 The Stage 3 recovery corpus is generated by the teacher, so its first step needs
@@ -357,22 +357,22 @@ a GPU; the pack, the token ladder and the gate are CPU work on its output.
 ```bash
 # teacher generation (GPU, vLLM) — n=4 at the model's official preset,
 # 8192-token end-to-end sessions. --limits sets how many prompts per type.
-uv run python scripts/rollout/build_recovery_corpus.py --engine vllm --n 4 \
+uv run python scripts/shared/rollout/build_recovery_corpus.py --engine vllm --n 4 \
   --limits gsm8k=1700,openmath=900,code=1200,tool_calling=2600,rag_evidence=4100,multihop_qa=1074 \
-  --out artifacts/stage3_corpus_v2
+  --out artifacts/stages/stage-3_corpus_v2
 
 # one pass of system-grouped packing, cut into six nested token rungs (CPU)
-uv run python scripts/data/build_token_ladder.py \
-  --sessions artifacts/stage3_corpus_v2/sessions.jsonl \
+uv run python scripts/shared/data/build_token_ladder.py \
+  --sessions artifacts/stages/stage-3_corpus_v2/sessions.jsonl \
   --mixture gsm8k=0.22,openmath=0.17,code=0.16,tool_calling=0.15,rag_evidence=0.20,multihop_qa=0.10 \
-  --out artifacts/stage3_ladder_v2
+  --out artifacts/stages/stage-3_ladder_v2
 
 # gate: template, seeds, budgets, masks, packing, nesting, loader round-trip
-uv run python scripts/data/validate_corpus_gate.py \
-  --corpus artifacts/stage3_corpus_v2 --packed artifacts/stage3_ladder_v2 --skip-logits
+uv run python scripts/shared/data/validate_corpus_gate.py \
+  --corpus artifacts/stages/stage-3_corpus_v2 --packed artifacts/stages/stage-3_ladder_v2 --skip-logits
 ```
 
-`configs/stage3/recovery.json` is the single recovery recipe; a run differs from
+`configs/stages/stage-3/recovery.json` is the single recovery recipe; a run differs from
 it only in `data_dir` and `schedule.total_steps` — hardware never changes the
 experiment definition. Each step writes gitignored artifacts plus a full reproducibility manifest under `artifacts/` or `data/`.
 
@@ -392,60 +392,54 @@ Everything under `src/`, `scripts/`, and `logs/` grew from that instruction, fol
 
 ## 🗂️ Project structure
 
-Code is grouped by **responsibility**; configs, logs and tests by **training stage**.
-[`docs/REPO_LAYOUT.md`](./docs/REPO_LAYOUT.md) is the full map and the rule for where new files go.
+All six trees — scripts, logs, artifacts, configs, data, docs — share one owner-first namespace: `stages/stage-<n>/<experiment>` (with `families/<family>` for experiment families), `shared/`, `maintenance/`.
+[`docs/maintenance/REPO_LAYOUT.md`](./docs/maintenance/REPO_LAYOUT.md) is the full map and the rule for where new files go.
 
 ```text
 AlphaAvatar-distill/
 ├── AGENTS.md               # agent working contract (single source of truth)
-├── docs/REPO_LAYOUT.md     # where code, configs, logs and artifacts belong
+├── docs/maintenance/REPO_LAYOUT.md     # where code, configs, logs and artifacts belong
 ├── pyproject.toml          # uv-managed env; CPU torch index by default
 ├── src/aadistill/          # algorithm core — model-agnostic, config-driven
 │   ├── models/             #   teacher/student loading, INT8 fake-quant
-│   ├── init/               #   Stage 0/1: activation stats, projection, sandwich transplant
-│   ├── autoinit/           #   Teacher-Adaptive AutoInitializer: architecture adapters,
-│   │                       #   operator kind/implementation registry, versioned search
-│   │                       #   state, four-level metric taxonomy, Pareto beam ranking,
-│   │                       #   resumable beam search, search manifest, cost model
-│   ├── data/               #   mixture loader (schema, chat render, loss masks, packing),
-│   │                       #   session rendering + system-grouped packing (sessions.py),
-│   │                       #   diversity, per-slice correctness rules,
-│   │                       #   dense KD-only extra streams (extra_stream.py)
-│   ├── training/           #   Stage 3 recovery trainer (CE+KD, freeze policy, resume,
-│   │                       #   optional second KD-only stream with its own cursor)
-│   ├── rollout/            #   engine adapters, in-stack generation, hashed rollout
-│   │                       #   snapshots + importance-ratio diagnostics
-│   ├── evaluation/         #   usable_rollout (Stage 2/3 primary metric), strict
-│   │                       #   answer/protocol scorers, degeneration, oracle prefix,
-│   │                       #   general-text NLL/KL diagnostics (general_text.py)
-│   └── infrastructure/     #   env fingerprint, code-state hash, sha256 manifests ·
-│                           #   session budget thresholds · provider control plane ·
-│                           #   cost watchdog · detached remote launch · log relay ·
-│                           #   manifest-driven artifact collection + teardown gate
-├── scripts/                # entry points, one per responsibility
-│   ├── data/               #   mixture + eval-set builders · build_token_ladder ·
-│   │                       #   validate_corpus_gate
-│   ├── training/           #   collect_stage0 · init_stage1 · train_stage3 ·
-│   │                       #   build/validate arm configs · budget planning · preflight
-│   ├── evaluation/         #   eval_ppl · eval_behavior · uncapped_eval (P18, vLLM) ·
-│   │                       #   degeneration · audit_prompt_rendering · exposure_report ·
-│   │                       #   consolidate_e1 · build_test_cases · plot_perf_trend
-│   ├── rollout/            #   teacher generation · build_recovery_corpus
-│   ├── autoinit/           #   plan_search (branching + cost) · dry_run_search (zero cost)
-│   └── pod/                #   GPU session scripts + durable orchestrator (run_env.sh) ·
-│                           #   start_job · watchdog · collect_artifacts (session contract)
-├── configs/                # stage recipes: stage0/ · stage1/ · stage3/recovery.json
-│   └── autoinit/           #   frozen operator-implementation ledger (ids are immutable)
-├── data/                   # corpus manifests (jsonl gitignored, rebuildable)
-│   └── eval_behavior_v0/   #   76-prompt behavior set + manifest (both committed)
-├── tests/                  # 1,415 CPU tests, mirroring the source areas
-├── logs/                   # project memory — read STATE.md first
-│   ├── STATE.md            #   canonical handoff: a snapshot, not an archive
-│   ├── EXPERIMENTS.md      #   the consolidated record: what ran, results, cost
-│   ├── PROPOSAL.md         #   the single active plan, costed, with stopping rules
-│   ├── decisions.md        #   decision records (why, alternatives, risks)
-│   ├── supported_models.md #   model status table
-│   └── artifact_manifests.md  # artifacts stored outside git (HF), with hashes
+│   ├── initialization/     #   Stage 0/1 + the Teacher-Adaptive AutoInitializer:
+│   │                       #   adapters, operator registry, versioned search state,
+│   │                       #   Pareto beam search, calibration, recovery planning
+│   ├── data/               #   mixture loader, session rendering, loss masks, packing
+│   ├── training/           #   Stage-3 recovery trainer (CE+KD, freeze policy, resume)
+│   ├── rollout/            #   engine adapters, hashed rollout snapshots
+│   ├── evaluation/         #   usable_rollout, strict answer/protocol scorers,
+│   │                       #   degeneration, general-text diagnostics
+│   ├── governance/         #   authorization types, derived executable closures
+│   ├── runtime/            #   run layout mechanism, pod environment, staging contract
+│   └── infrastructure/     #   session spec/runner, provider control plane, budget,
+│                           #   watchdog, log relay, artifact gate
+├── scripts/                # executables, ONE OWNER EACH (2026-10-08 architecture)
+│   ├── stages/             #   experiment-owned code: stages/stage-<n>/<experiment>/
+│   │   └── stage-1/families/d_series/   # material owned by D1/D2/D3 together
+│   ├── shared/             #   stage-neutral: the application layer (calibration,
+│   │                       #   run_layout, recipes, …) and capabilities
+│   │                       #   data/ evaluation/ training/ rollout/ validation/ pod/
+│   └── maintenance/        #   repository tooling: architecture/ consolidation/
+│                           #   migration/ (the declarative move map lives here)
+├── configs/                # owner-first: stages/stage-<n>/<experiment>/ for
+│                           # experiment-owned specs and authorizations; stage-level
+│                           # registries at stages/stage-<n>/; shared/ and maintenance/
+├── data/                   # owner-first: data/stages/stage-<n>/<dataset>/ — manifests
+│                           # tracked, heavy files gitignored, rebuildable
+├── tests/                  # the CORE suite; experiment suites live with their
+│                           # experiments under scripts/stages/.../tests/
+├── logs/                   # project memory — read logs/README.md first
+│   ├── state/              #   current.json + current.md (the live snapshot),
+│   │                       #   ownership.md, artifact_manifests.md
+│   ├── stages/             #   stage → experiment → run evidence; families/ for
+│   │                       #   experiment-family records; index.json is the
+│   │                       #   ownership index (one leg per tree, all six)
+│   ├── budget/             #   ledger, decisions, consumed approvals
+│   └── maintenance/        #   inventories, registries, source-relocations
+├── artifacts/              # durable local products, by owner (gitignored except
+│                           # README.md and the generated index.json)
+├── docs/                   # durable reference, by owner — start at docs/README.md
 └── assets/                 # trend data + rendered figure
 ```
 

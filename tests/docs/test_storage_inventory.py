@@ -102,7 +102,7 @@ def _relocated(old: str) -> str:
     import sys
 
     sys.path.insert(0, str(REPO / "scripts"))
-    from architecture.record_run_index import resolve_historical
+    from maintenance.architecture.record_run_index import resolve_historical
 
     return resolve_historical(old, REPO)
 
@@ -218,7 +218,7 @@ def test_no_active_tombstone_names_a_routine_staging_destination():
 
     **This is the assertion Phase-A attempt 8 paid $0.19 to discover.** The
     tombstone `stage3_ladder_uniform_local_cache` named
-    `artifacts/stage3/ladder_uniform`; the pod's setup stages the frozen
+    `artifacts/stages/stage-3/ladder_uniform`; the pod's setup stages the frozen
     recovery pack into exactly that directory as the mirror the recovery-corpus
     loader reads. On the pod the path existed,
     `test_no_tombstoned_path_is_still_on_disk` fired, the blocking setup gate

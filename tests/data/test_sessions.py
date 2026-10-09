@@ -521,7 +521,7 @@ def test_the_packers_require_a_pad_id_rather_than_assuming_qwens():
 
     Two problems, and the second is the one that bites. A generic packer in
     `aadistill.data` carried one model family's constant, which the core is not
-    supposed to do. And `scripts/pod/e5_driver.py` packed with that default
+    supposed to do. And `scripts/stages/stage-3/e5/e5_driver.py` packed with that default
     while separately RECORDING `pad_id=151643` into the pack metadata — two
     independent statements of the same fact, agreeing by coincidence. Change the
     default and the recorded metadata would have described bytes that were
@@ -545,7 +545,7 @@ def test_the_e5_driver_packs_and_records_from_one_source():
     from pathlib import Path
 
     src = (Path(__file__).resolve().parents[2]
-           / "scripts/pod/e5_driver.py").read_text()
+           / "scripts/stages/stage-3/e5/e5_driver.py").read_text()
     assert re.search(r"^PAD_ID = 151643$", src, re.M), (
         "e5_driver no longer declares its pad id once")
     # No call may state the literal again -- that is how the two drifted apart.

@@ -25,9 +25,20 @@ directory; it does not stage the directory. C1 puts four files into
 visible. Modelling that destination as "present" would hide precisely the class of
 error that has now cost four paid aborts.
 
-**Local assets are whole trees.** A `LocalAsset` is scp'd and installed as a
-directory, so every file beneath it is staged, and that difference from
-`RelayInput` is part of the contract rather than an implementation detail.
+**A local asset stages whatever its source IS.** A `LocalAsset` naming a
+directory is scp'd and installed as a tree, so every file beneath it is staged;
+one naming a single FILE stages that file. The difference from `RelayInput` —
+which stages one named file into a destination it does not otherwise populate —
+is part of the contract rather than an implementation detail.
+
+This said "local assets are whole trees", and `staged_files` implemented
+exactly that: it collected an asset's contents `if tree.is_dir()` and dropped
+anything else. True until a session staged a resolved plan as one file, at
+which point the simulator hid a file the pod demonstrably had — its driver had
+loaded that plan and reached its first operator — and reported the test that
+reads it as an unexpected skip. A simulation that hides what the pod receives
+is not conservative; it is wrong in the direction that matters, because a
+launch-bound record would then describe a pod that does not exist.
 
 **Tooling is not an artifact.** `.venv`, `__pycache__` and the pytest caches are
 gitignored but are not session inputs — the pod has its own interpreter at
@@ -122,6 +133,49 @@ def ignores_for_selection(selection: str,
     return tuple(out)
 
 
+def pod_pytest_command(setup: Any, *, python: str = "python") -> str:
+    """The pod gate's OWN pytest invocation, in one place.
+
+    The shell runs exactly this shape:
+
+        pytest ${SESSION_TEST_PATHS:-tests/} -q ${SESSION_TEST_IGNORES:-}
+
+    so a selection has TWO halves and the simulation must reproduce both. The
+    contract and the recorder each built this string themselves and both built
+    it as `pytest tests/ -q <ignores>`, hardcoding the base path and dropping
+    `test_paths` on the floor.
+
+    That was invisible while every session expressed its selection as a
+    COMPLEMENT -- `test_ignores` over siblings inside `tests/` -- which is how
+    `ignores_for_selection` above describes the old mechanism. The 2026-10-03
+    boundary decision moved experiment tests OUT of `tests/` and made
+    `test_paths` the positive declaration, and the sweep was never taught the
+    new half. Every session that has since declared `test_paths` with no
+    ignores -- C1, A3 and now D1 -- therefore had its sweep run
+    `pytest tests/ -q`, the whole core suite, while its pod gate runs only its
+    own preflight directory. A simulation that runs a different command from
+    the pod is not a simulation, which is this machinery's own standard.
+
+    One owner, parameterized by interpreter: the contract records it under
+    `python` and the recorder invokes it with the repository venv, and
+    `check_invocation_matches` refuses if the two disagree about anything but
+    that word.
+    """
+    paths = " ".join(setup.test_paths) if setup.test_paths else "tests/"
+    ignores = [f"--ignore={p}" for p in setup.test_ignores]
+    return " ".join([python, "-m", "pytest", paths, "-q", *ignores])
+
+
+def pytest_arguments(command: str) -> list[str] | None:
+    """The arguments after `-m pytest`, or `None` if that is not this command.
+
+    Lets one equality compare a declared selection with an invoked one without
+    caring which interpreter ran it -- the only part that legitimately differs.
+    """
+    head, sep, tail = command.partition(" -m pytest ")
+    return tail.split() if sep else None
+
+
 def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
     """The staged view, read straight off the `SetupManifest` the runner uses.
 
@@ -164,10 +218,16 @@ def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
         "required_env": list(setup.required_env),
         "relay_inputs": relay,
         "local_assets": local,
+        #: BOTH HALVES OF THE SELECTION. `test_paths` was absent from this
+        #: contract, so it was absent from `digest` too -- a session could
+        #: change which suite its pod gate runs without invalidating a single
+        #: readiness record. It is hashed now, which is why every session's
+        #: staging digest moves once: the contract now describes something it
+        #: previously omitted, and a sweep that ran the wrong selection is
+        #: owed again rather than grandfathered.
+        "test_paths": list(setup.test_paths),
         "test_ignores": list(setup.test_ignores),
-        "pytest_selection": (
-            "python -m pytest tests/ -q "
-            + " ".join(f"--ignore={p}" for p in setup.test_ignores)),
+        "pytest_selection": pod_pytest_command(setup),
         "cpu_affinity_contract": (
             "the pod derives NCPU from its cgroup quota (never bare nproc, which "
             "reports the host's CPUs inside a container and also honours "
@@ -181,8 +241,11 @@ def derive_contract(setup: Any, *, session_id: str = "") -> dict[str, Any]:
         "tests_max_seconds": setup.tests_max_seconds,
         "granularity": (
             "RelayInput stages ONE NAMED FILE into its dest directory, not the "
-            "directory. LocalAsset installs a whole tree. Modelling a relay dest "
-            "as wholly present is the error this contract exists to prevent."),
+            "directory. LocalAsset installs whatever its source IS -- a whole "
+            "tree when it names a directory, one file when it names a file. "
+            "Modelling a relay dest as wholly present is the error this "
+            "contract exists to prevent; modelling a FILE asset as absent is "
+            "the error that made a sweep hide a plan the pod had loaded."),
     }
     contract["digest"] = contract_digest(contract)
     return contract
@@ -209,8 +272,19 @@ def staged_files(contract: dict[str, Any], repo_root: str | Path = ".") -> set[s
             out.add(r["staged_path"])
     for a in contract["local_assets"]:
         tree = root / a["staged_tree"]
+        #: A FILE ASSET IS STAGED TOO. This read `if tree.is_dir()` only, so a
+        #: `LocalAsset` whose target is a single file contributed NOTHING to the
+        #: staged set and fell into the hidden complement -- hiding, from the
+        #: simulator, a file the pod demonstrably has. The replay's resolved
+        #: plan is one file, the pod's driver loaded it and reached its first
+        #: operator, and the sweep still reported the test that reads it as an
+        #: unexpected skip. A simulation that hides what the pod receives is
+        #: not conservative, it is wrong in the direction that matters: a
+        #: launch-bound record would describe a pod that does not exist.
         if tree.is_dir():
             out |= {str(p.relative_to(root)) for p in tree.rglob("*") if p.is_file()}
+        elif tree.is_file():
+            out.add(str(tree.relative_to(root)))
     return out
 
 

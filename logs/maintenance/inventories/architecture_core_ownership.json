@@ -22,7 +22,7 @@
   "src/aadistill/initialization/adapters/__init__.py",
   "src/aadistill/initialization/adapters/qwen3.py"
  ],
- "deferred_total": 10,
+ "deferred_total": 11,
  "deferred_findings": [
   {
    "rule": "instance_prose",
@@ -90,7 +90,14 @@
   {
    "rule": "instance_prose",
    "path": "src/aadistill/initialization/planning/fixed_path.py",
-   "line": 564,
+   "line": 186,
+   "name": "cmt:$0.98",
+   "why": "a cost from this project's run history ('$0.98') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
+  },
+  {
+   "rule": "instance_prose",
+   "path": "src/aadistill/initialization/planning/fixed_path.py",
+   "line": 779,
    "name": "doc:C1 session",
    "why": "a phase/attempt from this project's run history ('C1 session') documents reusable core with one campaign's instance data; relocate it to docs/core-provenance.md and keep the mechanism"
   }

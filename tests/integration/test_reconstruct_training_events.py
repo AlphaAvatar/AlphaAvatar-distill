@@ -14,7 +14,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
+SCRIPT = REPO / "scripts/shared/pod/reconstruct_training_events.py"
 # Located through `$HOME`, not hardcoded: the C1 CPU-test contract runs pytest
 # under a fresh empty HOME so host-local state is invisible on BOTH machines.
 # An absolute literal is immune to that, which is what let host-local cases run
@@ -23,7 +23,7 @@ SCRIPT = REPO / "scripts/pod/reconstruct_training_events.py"
 E6B = Path.home() / "aad-artifacts/e6b"
 COMMITTED = REPO / "logs/stages/stage-3/e6b/analyses/e6b_reconstructed_training_events.json"
 
-RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/training/train_stage3.py --config /workspace/aad/configs/stage3/e6b/{name}.json
+RUN_LOG = """[17:25:51] $ /opt/train/bin/python scripts/shared/training/train_stage3.py --config /workspace/aad/configs/stages/stage-3/e6b/{name}.json
 device cuda; loading packed token ladder ...
 eval step 0: {{'val_blocks': 16, 'val_ce': 10.919939, 'val_ppl': 55267.4502, 'val_kd': 10.603207}}
 step 10/2916  loss 11.8970  ce 9.6091  kd 9.1515  lr 3.42e-06  4.25s
@@ -44,7 +44,7 @@ def run_script(tmp_path, config_name="e6b_p2_r2960k_sa"):
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-log", str(log), "--status",
          str(status), "--config",
-         str(REPO / f"configs/stage3/e6b/{config_name}.json"),
+         str(REPO / f"configs/stages/stage-3/e6b/{config_name}.json"),
          "--out", str(out)],
         capture_output=True, text=True, cwd=REPO, timeout=120)
     assert proc.returncode == 0, proc.stderr
@@ -55,6 +55,12 @@ def test_the_output_declares_its_provenance(tmp_path):
     doc, _ = run_script(tmp_path)
     assert doc["provenance"] == "reconstructed_from_driver_console"
     assert doc["original_event_stream_available"] is False
+    #: The FROZEN spelling, derived by the script from the arm config's
+    #: `out_dir`. Both are historical: the config is registered by E6b's
+    #: prospective registration, and this path states where the destroyed
+    #: event streams WERE. The committed reconstruction carries the same
+    #: spelling. (A path sweep had updated this literal alone, which only
+    #: agreed with the tree while the registered config was also drifted.)
     assert doc["original_event_stream_paths"] == [
         "artifacts/stage3/e6b_p2_r2960k_sa/train_log.jsonl"]
     assert "not a substitute" in doc["original_loss_note"]
@@ -158,8 +164,8 @@ def test_it_reproduces_from_the_surviving_console_log(tmp_path):
     proc = subprocess.run(
         [sys.executable, str(SCRIPT), "--run-log", str(E6B / "e6b_run.log"),
          "--status", str(E6B / "e6b.status"),
-         "--config", str(REPO / "configs/stage3/e6b/e6b_p2_r2960k_sa.json"),
-         "--config", str(REPO / "configs/stage3/e6b/e6b_p2_r2960k_sb.json"),
+         "--config", str(REPO / "configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json"),
+         "--config", str(REPO / "configs/stages/stage-3/e6b/e6b_p2_r2960k_sb.json"),
          "--out", str(out)],
         capture_output=True, text=True, cwd=REPO, timeout=300)
     assert proc.returncode == 0, proc.stderr

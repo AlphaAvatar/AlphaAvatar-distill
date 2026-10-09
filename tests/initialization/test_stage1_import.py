@@ -10,7 +10,7 @@ that make a continuation safe to start — is in
 records and its five preserved 1.11-GiB checkpoints from a host-local store,
 under a `skipif`, which made the core suite's result depend on whether an old
 experiment's bytes were still on this machine. That verification now lives in
-`scripts/experiments/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
+`scripts/stages/stage-1/phase_a/tests/test_phase_a_attempt12_import.py`,
 where the historical evidence is the subject rather than the fixture.
 """
 

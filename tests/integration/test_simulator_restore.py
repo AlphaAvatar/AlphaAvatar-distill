@@ -21,7 +21,7 @@ import sys
 from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[2]
-SCRIPT = REPO / "scripts/pod/simulate_pod_env.sh"
+SCRIPT = REPO / "scripts/shared/pod/simulate_pod_env.sh"
 
 
 def run_sim(root: Path, hide: Path, hidden_paths: str, cmd: str, **extra):
@@ -463,7 +463,7 @@ def test_the_ambient_python_fallback_is_gone_from_the_code():
 
 def test_every_nodeid_attempt_6_lost_is_in_this_module():
     """The repair is checked against the recorded failures, not a proxy."""
-    src = SCRIPT.parent.parent.parent / "tests/integration/test_simulator_restore.py"
+    src = REPO / "tests/integration/test_simulator_restore.py"
     text = src.read_text()
     missing = [n for n in ATTEMPT_6_FAILED if f"def {n}(" not in text]
     assert not missing, f"attempt 6 named nodeids this module no longer has: {missing}"
@@ -550,7 +550,7 @@ def test_a_store_outside_the_checkout_is_hidden_and_restored_exactly(tmp_path):
 def test_pruning_never_walks_above_the_checkout(tmp_path):
     """An emptied parent of a host-local store belongs to the machine.
 
-    Pruning exists to stop an EMPTY `artifacts/eval/battery_v2` from defeating a
+    Pruning exists to stop an EMPTY `artifacts/stages/stage-3/eval/battery_v2` from defeating a
     `skipif(not BATTERY.is_dir())`. That reasoning is about the checkout. Walking
     up from an absolute path would `rmdir` directories under `$HOME` that this
     simulation does not own, and restore would recreate them with different
@@ -721,12 +721,12 @@ def test_the_threshold_is_an_input_not_a_constant_in_the_core():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "rpe", REPO / "scripts/autoinit/record_pod_environment.py")
+        "rpe", REPO / "scripts/shared/pod/record_pod_environment.py")
     rpe = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rpe)
     assert rpe.min_free_gib() >= 20, "the derived requirement lost its headroom"
 
-    sim = (REPO / "scripts/pod/simulate_pod_env.sh").read_text()
+    sim = (REPO / "scripts/shared/pod/simulate_pod_env.sh").read_text()
     assert "PODSIM_MIN_FREE_GIB" in sim, "the simulator no longer takes the input"
     core = (REPO / "src/aadistill").rglob("*.py")
     offenders = [p.name for p in core if "MIN_FREE_GIB" in p.read_text()]
@@ -743,7 +743,7 @@ def test_the_threshold_is_overridable_and_says_what_it_describes():
     import importlib.util
 
     spec = importlib.util.spec_from_file_location(
-        "rpe_ovr", REPO / "scripts/autoinit/record_pod_environment.py")
+        "rpe_ovr", REPO / "scripts/shared/pod/record_pod_environment.py")
     rpe = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(rpe)
 

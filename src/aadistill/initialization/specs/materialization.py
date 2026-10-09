@@ -6,7 +6,7 @@ checkpoints, differing only in which calibration items shared a forward pass.
 That has been measured on real hardware in this project, reproducibly and across
 machines: the difference is deterministic, not noise. Same science, different
 bytes. (The run that measured it, the two digests and the replicate structure
-are in ``docs/core-provenance.md``, which is where a campaign's instance data
+are in ``docs/maintenance/core-provenance.md``, which is where a campaign's instance data
 belongs.)
 
 ``compute_state_id`` reads the root teacher, the target spec and each step's

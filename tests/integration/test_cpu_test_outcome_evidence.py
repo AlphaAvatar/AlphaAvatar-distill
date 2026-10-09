@@ -22,9 +22,9 @@ sys.path.insert(0, str(REPO / "scripts/pod"))
 
 from aadistill.infrastructure.session import ExecutionCommands  # noqa: E402
 from aadistill.runtime import pod_environment as pe
-import summarize_pytest_outcomes as S  # noqa: E402
+from shared.pod import summarize_pytest_outcomes as S  # noqa: E402
 
-SETUP = REPO / "scripts/pod/autoinit_preflight_setup.sh"
+SETUP = REPO / "scripts/shared/pod/autoinit_preflight_setup.sh"
 
 
 def _junit(tmp_path: Path, cases: dict[str, tuple[str, str]]) -> Path:
@@ -76,7 +76,7 @@ def test_the_setup_gate_summarizes_on_both_paths():
 
 
 #: `test_the_summary_survives_a_setup_abort` and its siblings moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_cpu_gate_evidence.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_cpu_gate_evidence.py`
 #: in the 2026-10-03 convergence round: they load that experiment's own
 #: launcher by name, which makes them its tests rather than this suite's.
 
@@ -101,9 +101,9 @@ def test_the_collector_never_raises_on_a_billing_pod(monkeypatch):
         #: `checkout_root` and `min_cuda_version` were added: twenty tests
         #: failed with AttributeError on a double, not on the code.
         commands=ExecutionCommands(
-            watchdog="scripts/pod/watchdog.py",
-            setup_script="scripts/pod/autoinit_preflight_setup.sh",
-            artifact_collector="scripts/pod/collect_artifacts.py",
+            watchdog="scripts/shared/pod/watchdog.py",
+            setup_script="scripts/shared/pod/autoinit_preflight_setup.sh",
+            artifact_collector="scripts/shared/pod/collect_artifacts.py",
             remote_python="/opt/train/bin/python",
             workspace_root="/workspace", checkout_root="/workspace/aad",
             min_cuda_version="13.0"),
@@ -160,7 +160,7 @@ def test_a_divergent_skip_set_is_refused_and_the_difference_printed(tmp_path):
         ("tests.a", "test_pod_only"): ("skipped", "r"),
     })
     proc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/summarize_pytest_outcomes.py"),
          "--junit", str(junit), "--out", str(tmp_path / "o.json"),
          "--expected", str(record), "--repo", str(tmp_path), "--strict",
          #: Explicitly none: `--session-authorization` defaults to
@@ -258,7 +258,7 @@ def test_a_session_that_owns_a_record_is_refused_when_it_cannot_be_compared(
         {"findings": {"counts": {"skipped": 3}}}))
     junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r")})
     proc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/summarize_pytest_outcomes.py"),
          "--junit", str(junit), "--out", str(tmp_path / "o.json"),
          "--repo", str(tmp_path), "--strict",
          "--session-authorization",
@@ -275,7 +275,7 @@ def test_an_owned_record_that_matches_passes_and_says_which_file(tmp_path):
     junit = _junit(tmp_path, {("tests.a", "test_s"): ("skipped", "r"),
                               ("tests.a", "test_p"): ("passed", "")})
     proc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/summarize_pytest_outcomes.py"),
          "--junit", str(junit), "--out", str(tmp_path / "o.json"),
          "--repo", str(tmp_path), "--strict",
          "--session-authorization", auth.relative_to(tmp_path).as_posix()],
@@ -296,7 +296,7 @@ def test_the_launch_bound_record_this_run_will_own_carries_the_skip_set():
     writes has no skip set in it. Asserted against the record `record_pod_environment`
     actually writes, not against a fixture of it.
     """
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src
     assert "all_skipped_nodeids" in json.dumps(
         pe.evaluate_sweep({"tests/a.py::test_s": "skipped"}, groups=GROUPS))
@@ -304,7 +304,7 @@ def test_the_launch_bound_record_this_run_will_own_carries_the_skip_set():
 
 def test_a_missing_junit_report_does_not_mask_the_suite_exit_code(tmp_path):
     proc = subprocess.run(
-        [sys.executable, str(REPO / "scripts/pod/summarize_pytest_outcomes.py"),
+        [sys.executable, str(REPO / "scripts/shared/pod/summarize_pytest_outcomes.py"),
          "--junit", str(tmp_path / "nope.xml"), "--out", str(tmp_path / "o.json"),
          "--strict"], capture_output=True, text=True)
     assert proc.returncode == 0, "the summary must never invent a gate failure"
@@ -388,7 +388,7 @@ def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
 
 #: Whether a particular experiment's harness MEASURES the summariser is that
 #: experiment's wiring. C1's version of that assertion moved to
-#: `scripts/experiments/stage-1/phase_c1/tests/test_c1_measures_the_summariser.py`
+#: `scripts/stages/stage-1/phase_c1/tests/test_c1_measures_the_summariser.py`
 #: in the 2026-10-03 convergence round; the generic property — that the
 #: summariser can refuse a pod whose suite passed — is what the tests above
 #: establish, and it holds whoever declares it.
@@ -397,7 +397,7 @@ def test_the_junit_parser_keeps_the_reason_not_just_the_status(tmp_path):
 @pytest.mark.parametrize("field", ["all_skipped_nodeids", "skip_set_digest",
                                    "n_skipped", "skip_reasons"])
 def test_the_recorder_writes_the_new_fields(field):
-    src = (REPO / "scripts/autoinit/record_pod_environment.py").read_text()
+    src = (REPO / "scripts/shared/pod/record_pod_environment.py").read_text()
     assert '"findings": findings,' in src, "the record embeds findings wholesale"
     assert field in json.dumps(pe.evaluate_sweep({}, {}, groups=GROUPS))
 

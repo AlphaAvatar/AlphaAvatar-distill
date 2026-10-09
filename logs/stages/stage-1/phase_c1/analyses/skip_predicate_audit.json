@@ -1,40 +1,40 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 143,
+ "modules_scanned": 152,
  "test_ignores": [],
  "n_predicates": 45,
  "by_signal": {
-  "filesystem_premise_onpod": 12,
+  "filesystem_premise_onpod": 11,
   "filesystem_premise_unresolved": 1,
   "gpu": 1,
   "optional_dependency": 10,
   "repository_content": 2,
-  "unrecognised": 13,
+  "unrecognised": 14,
   "unstaged_artifact": 6
  },
  "n_differs_on_pod": 17,
- "n_unrecognised": 14,
- "n_registered": 50,
- "registry": "configs/autoinit/c1_skip_predicate_classification.json",
+ "n_unrecognised": 15,
+ "n_registered": 51,
+ "registry": "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
  "registered_by_class": {
   "devbox_only_artifact": [
-   "scripts/experiments/stage-1/phase_a3/tests/test_a3_aggregation.py",
-   "scripts/experiments/stage-1/phase_a3/tests/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
-   "scripts/experiments/stage-1/phase_a3/tests/test_a3_production_rehearsal.py::_summary_template",
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py",
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_driver_execution.py::_summary_template",
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
-   "scripts/experiments/stage-1/phase_c2/tests/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
-   "scripts/experiments/stage-3/tests/test_e6_analysis.py",
-   "scripts/experiments/stage-3/tests/test_e6_registration.py",
-   "scripts/experiments/stage-3/tests/test_e7_streams.py",
-   "scripts/experiments/stage-3/tests/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
-   "scripts/experiments/stage-3/tests/test_frozen_records.py",
+   "scripts/stages/stage-1/phase_a3/tests/test_a3_aggregation.py",
+   "scripts/stages/stage-1/phase_a3/tests/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
+   "scripts/stages/stage-1/phase_a3/tests/test_a3_production_rehearsal.py::_summary_template",
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py",
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_driver_execution.py::_summary_template",
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+   "scripts/stages/stage-1/phase_c2/tests/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
+   "scripts/stages/stage-3/tests/test_e6_analysis.py",
+   "scripts/stages/stage-3/tests/test_e6_registration.py",
+   "scripts/stages/stage-3/tests/test_e7_streams.py",
+   "scripts/stages/stage-3/tests/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
+   "scripts/stages/stage-3/tests/test_frozen_records.py",
    "tests/data/test_recovery_corpus_pipeline.py::tokenizer",
    "tests/docs/test_log_organisation.py::test_every_cited_path_including_untracked_really_exists",
    "tests/docs/test_log_organisation.py::test_it_matches_the_canonical_store",
@@ -53,66 +53,67 @@
    "tests/training/test_train.py::teacher_tokenizer"
   ],
   "machine_capability": [
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_setup_end_to_end.py::sandbox",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_setup_end_to_end.py::sandbox",
    "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so"
   ],
   "manifest_derived": [
-   "scripts/experiments/stage-1/phase_c2/tests/test_c2_replay_specs.py",
-   "scripts/experiments/stage-1/phase_c2/tests/test_replay_execution_preflight.py",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
+   "scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py",
+   "scripts/stages/stage-1/phase_c2/tests/test_replay_execution_preflight.py",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
    "tests/integration/test_operational_hardening.py::test_no_command_substitution_over_globs_in_new_launchers",
    "tests/integration/test_pod_script_paths.py::test_setup_driver_and_launcher_agree_on_the_status_file",
    "tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
-   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it"
+   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
+   "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies"
   ],
   "pinned_snapshot_source": [
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::require_role",
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
-   "scripts/experiments/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
-   "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims"
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::require_role",
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
+   "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
+   "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims"
   ],
   "session_semantics": [
-   "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::skip_if_c1_session"
+   "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::skip_if_c1_session"
   ],
   "staging_premise_property": [
-   "scripts/experiments/stage-1/phase_a3/tests/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery",
-   "scripts/experiments/stage-1/phase_c1/tests/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+   "scripts/stages/stage-1/phase_a3/tests/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery",
+   "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
    "tests/docs/test_log_organisation.py",
    "tests/docs/test_repository_structure.py"
   ]
  },
  "stale_registry_entries": [
-  "scripts/experiments/stage-1/phase_a3/tests/test_a3_aggregation.py",
-  "scripts/experiments/stage-1/phase_a3/tests/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
-  "scripts/experiments/stage-1/phase_a3/tests/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery",
-  "scripts/experiments/stage-1/phase_a3/tests/test_a3_production_rehearsal.py::_summary_template",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::require_role",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_driver_execution.py::_summary_template",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
-  "scripts/experiments/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
-  "scripts/experiments/stage-1/phase_c1/tests/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
-  "scripts/experiments/stage-1/phase_c2/tests/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
-  "scripts/experiments/stage-1/phase_c2/tests/test_c2_replay_specs.py",
-  "scripts/experiments/stage-1/phase_c2/tests/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
-  "scripts/experiments/stage-1/phase_c2/tests/test_replay_execution_preflight.py",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::skip_if_c1_session",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
-  "scripts/experiments/stage-1/recovery_continuation/tests/test_setup_end_to_end.py::sandbox",
-  "scripts/experiments/stage-3/tests/test_e6_analysis.py",
-  "scripts/experiments/stage-3/tests/test_e6_registration.py",
-  "scripts/experiments/stage-3/tests/test_e7_streams.py",
-  "scripts/experiments/stage-3/tests/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
-  "scripts/experiments/stage-3/tests/test_frozen_records.py",
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_aggregation.py",
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_controls_evidence.py::test_the_controls_evidence_gate_passes_on_the_real_evidence",
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_launch_contract.py::test_the_battery_gate_requires_the_controls_own_battery",
+  "scripts/stages/stage-1/phase_a3/tests/test_a3_production_rehearsal.py::_summary_template",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::require_role",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_battery.py::test_the_shared_renderers_reproduce_the_frozen_battery_byte_for_byte",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_confirmation_scoring.py",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_driver_execution.py::_summary_template",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_committed_record_still_binds_the_live_executable",
+  "scripts/stages/stage-1/phase_c1/tests/test_c1_readiness_gates.py::test_the_gate_runs_the_seven_real_groups_on_this_host",
+  "scripts/stages/stage-1/phase_c1/tests/test_staging_contract.py::test_an_artifact_c1_does_not_stage_is_invisible",
+  "scripts/stages/stage-1/phase_c2/tests/test_behavioural_storage_lifecycle.py::test_the_footprint_reproduces_a_real_probe_on_disk",
+  "scripts/stages/stage-1/phase_c2/tests/test_c2_replay_specs.py",
+  "scripts/stages/stage-1/phase_c2/tests/test_phase_c2_full_search.py::test_the_screening_sample_was_drawn_under_the_domain_it_claims",
+  "scripts/stages/stage-1/phase_c2/tests/test_replay_execution_preflight.py",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_continuation_rehearsal.py",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::skip_if_c1_session",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_an_unverified_transport_declares_no_leaf_inputs",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_entrypoint_refuses_a_substituted_leaf",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_five_leaves_are_declared_in_the_selected_order",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaf_gate_reflects_whether_a_verified_transport_exists",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_leaves_are_staged_through_the_declared_relay_contract",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_recovery_continuation_session.py::test_the_real_stage1_entrypoint_imports_measures_admits_and_hands_off",
+  "scripts/stages/stage-1/recovery_continuation/tests/test_setup_end_to_end.py::sandbox",
+  "scripts/stages/stage-3/tests/test_e6_analysis.py",
+  "scripts/stages/stage-3/tests/test_e6_registration.py",
+  "scripts/stages/stage-3/tests/test_e7_streams.py",
+  "scripts/stages/stage-3/tests/test_e8_arms.py::test_the_validator_passes_its_config_checks_and_fails_closed_without_the_init",
+  "scripts/stages/stage-3/tests/test_frozen_records.py",
   "tests/initialization/test_stage1_import.py"
  ],
  "cpu_test_environment": {
@@ -179,8 +180,8 @@
  },
  "dependency_evidence": {
   "aadistill.evaluation.paired_stats": "committed at src/aadistill/evaluation/paired_stats.py, so the bundle checkout carries it; the test prepends REPO/src to sys.path, and pod setup additionally installs the project editable into /opt/train (`uv pip install --no-deps -e $REPO`)",
-  "analyze_e8b_behaviour": "committed at scripts/evaluation/analyze_e8b_behaviour.py; the test prepends REPO/scripts/evaluation to sys.path, so the bundle checkout is sufficient on both machines",
-  "shutil.which(\"bash\")": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts",
+  "analyze_e8b_behaviour": "committed at scripts/stages/stage-3/e8b/analyze_e8b_behaviour.py; the test prepends REPO/scripts/evaluation to sys.path, so the bundle checkout is sufficient on both machines",
+  "shutil.which(\"bash\")": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts",
   "importorskip(\"torch\")": "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] dependencies, not an extra: the dev box resolves it through the `pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` image that ships it, into whose interpreter setup installs the project. A machine where this import fails cannot run the project at all, so the skip fires on neither"
  },
  "parity_not_executable_at_zero_cost": "that CUDA_VISIBLE_DEVICES=\"\" hides an L40S cannot be executed on a CPU dev box. The contract is applied and the decision is proven stable here; the GPU half is first exercised on the next pod.",
@@ -198,6 +199,7 @@
   "tests/integration/test_session_architecture.py::test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
   "tests/integration/test_session_architecture.py::test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
   "tests/integration/test_session_architecture.py::test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
+  "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies",
   "tests/runtime/test_durable_store.py::test_a_configured_backend_with_no_client_library_says_so",
   "tests/training/test_train.py::teacher_tokenizer"
  ],
@@ -303,8 +305,8 @@
    "line": 639,
    "kind": "pytest.skip",
    "function": "test_every_cited_path_including_untracked_really_exists",
-   "condition": "not (REPO / \"artifacts/stage0/qwen3_4b_thinking_v1\").is_dir()",
-   "expanded": "not (REPO / \"artifacts/stage0/qwen3_4b_thinking_v1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
+   "condition": "not (REPO / \"artifacts/stages/stage-0/qwen3_4b_thinking_v1\").is_dir()",
+   "expanded": "not (REPO / \"artifacts/stages/stage-0/qwen3_4b_thinking_v1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
@@ -312,7 +314,7 @@
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "absent_on_both",
-   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage0/qwen3_4b_thinking_v1']"
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stages/stage-0/qwen3_4b_thinking_v1']"
   },
   {
    "file": "tests/docs/test_log_organisation.py",
@@ -320,7 +322,7 @@
    "kind": "pytest.skip",
    "function": "test_the_frozen_battery_manifest_verifies",
    "condition": "not p.is_file()",
-   "expanded": "not p.is_file() | p=REPO / \"artifacts/stage3/c1_confirmation_v1/manifest.json\" | REPO=Path(__file__).resolve().parents[2] | m=json.loads(p.read_text())",
+   "expanded": "not p.is_file() | p=REPO / \"artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json\" | REPO=Path(__file__).resolve().parents[2] | m=json.loads(p.read_text())",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -336,7 +338,7 @@
    "kind": "pytest.skip",
    "function": "test_it_matches_the_canonical_store",
    "condition": "not (a.is_file() and b.is_file())",
-   "expanded": "not (a.is_file() and b.is_file()) | a=REPO / \"artifacts/stage3/c1_confirmation_v1/manifest.json\" | b=Path(\"/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/\"\n                 \"manifest.json\") | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not (a.is_file() and b.is_file()) | a=REPO / \"artifacts/stages/stage-1/phase_c1/batteries/c1_confirmation_v1/manifest.json\" | b=Path(\"/home/ecs-user/aad-artifacts/autoinit/c1_confirmation_v1/\"\n                 \"manifest.json\") | REPO=Path(__file__).resolve().parents[2]",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
@@ -348,7 +350,7 @@
   },
   {
    "file": "tests/docs/test_repository_structure.py",
-   "line": 550,
+   "line": 594,
    "kind": "skipif",
    "function": "<module>",
    "condition": "_logs_tree_is_partial()",
@@ -384,7 +386,7 @@
    "kind": "skipif",
    "function": "<module>",
    "condition": "not BATTERY.is_dir()",
-   "expanded": "not BATTERY.is_dir() | BATTERY=Path(__file__).resolve().parents[2] / \"artifacts/eval/battery_v2\"",
+   "expanded": "not BATTERY.is_dir() | BATTERY=Path(__file__).resolve().parents[2] / \"artifacts/stages/stage-3/eval/battery_v2\"",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
@@ -392,7 +394,7 @@
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "absent_on_both",
-   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/eval/battery_v2']"
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stages/stage-3/eval/battery_v2']"
   },
   {
    "file": "tests/evaluation/test_oracle_reasoning.py",
@@ -432,7 +434,7 @@
    "kind": "pytest.skip",
    "function": "test_gold_target_is_the_rendered_span_not_the_content_field",
    "condition": "not p.is_file()",
-   "expanded": "not p.is_file() | p=Path(\"artifacts/stage3/corpus_v2/sessions.jsonl\") | s=json.loads(p.open().readline())",
+   "expanded": "not p.is_file() | p=Path(\"artifacts/stages/stage-3/corpus_v2/sessions.jsonl\") | s=json.loads(p.open().readline())",
    "signal": "unstaged_artifact",
    "verdict": "differs_on_pod",
    "why": "an artifact path C1's manifest does not stage; present on the dev box and absent on the pod",
@@ -440,15 +442,15 @@
    "readiness_group": null,
    "registered_as": "devbox_only_artifact",
    "parity": "absent_on_both",
-   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stage3/corpus_v2/sessions.jsonl']"
+   "parity_why": "neither tracked nor staged, so a pod never receives it and the simulator hides it here: ['artifacts/stages/stage-3/corpus_v2/sessions.jsonl']"
   },
   {
    "file": "tests/initialization/test_attention_causal_kl.py",
    "line": 913,
    "kind": "pytest.skip",
    "function": "test_the_domain_map_agrees_on_the_real_frozen_mixture",
-   "condition": "not (REPO / \"artifacts/stage1\").is_dir()",
-   "expanded": "not (REPO / \"artifacts/stage1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
+   "condition": "not (REPO / \"artifacts/stages/stage-1\").is_dir()",
+   "expanded": "not (REPO / \"artifacts/stages/stage-1\").is_dir() | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -512,7 +514,7 @@
    "kind": "pytest.skip",
    "function": "test_a_copy_that_acquires_a_tokenizer_is_refused",
    "condition": "not (canonical / \"tokenizer.json\").is_file()",
-   "expanded": "not (canonical / \"tokenizer.json\").is_file() | canonical=REPO / \"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not (canonical / \"tokenizer.json\").is_file() | canonical=REPO / \"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -524,7 +526,7 @@
   },
   {
    "file": "tests/initialization/test_operators_only_shrink.py",
-   "line": 25,
+   "line": 28,
    "kind": "importorskip",
    "function": "<module>",
    "condition": "pytest.importorskip(\"torch\")",
@@ -539,28 +541,12 @@
    "parity_why": "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] dependencies, not an extra: the dev box resolves it through the `pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` image that ships it, into whose interpreter setup installs the project. A machine where this import fails cannot run the project at all, so the skip fires on neither"
   },
   {
-   "file": "tests/initialization/test_operators_only_shrink.py",
-   "line": 147,
-   "kind": "pytest.skip",
-   "function": "test_each_round_bypasses_one_more_block_than_the_last",
-   "condition": "not record.is_file()",
-   "expanded": "not record.is_file() | record=REPO / \"logs/stages/stage-1/phase_d1/validations\"\n                  \"/topk-adoption/v1/runs/a4/adoption.slim.json\" | REPO=Path(__file__).resolve().parents[2]",
-   "signal": "filesystem_premise_onpod",
-   "verdict": "same_on_pod",
-   "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
-   "nodeid": "tests/initialization/test_operators_only_shrink.py::test_each_round_bypasses_one_more_block_than_the_last",
-   "readiness_group": null,
-   "registered_as": null,
-   "parity": "same_on_pod",
-   "parity_why": "every path it inspects is tracked or staged"
-  },
-  {
    "file": "tests/initialization/test_scoring_content_identity.py",
    "line": 542,
    "kind": "pytest.skip",
    "function": "test_the_frozen_asset_still_hashes_to_its_pinned_value",
    "condition": "not (asset / \"manifest.json\").is_file()",
-   "expanded": "not (asset / \"manifest.json\").is_file() | asset=Path(__file__).resolve().parents[2] / \"artifacts/stage1/state_eval_v1\"",
+   "expanded": "not (asset / \"manifest.json\").is_file() | asset=Path(__file__).resolve().parents[2] / \"artifacts/stages/stage-1/state_eval_v1\"",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -575,8 +561,8 @@
    "line": 71,
    "kind": "skipif",
    "function": "<module>",
-   "condition": "not (REPO / \"artifacts/stage1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stage1/reasoning_heavy_v2/items.jsonl\").is_file()",
-   "expanded": "not (REPO / \"artifacts/stage1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stage1/reasoning_heavy_v2/items.jsonl\").is_file() | REPO=Path(__file__).resolve().parents[2]",
+   "condition": "not (REPO / \"artifacts/stages/stage-1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl\").is_file()",
+   "expanded": "not (REPO / \"artifacts/stages/stage-1/e8_calibration_v1/items.jsonl\").is_file()\n    or not (REPO / \"artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl\").is_file() | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -588,11 +574,11 @@
   },
   {
    "file": "tests/integration/test_launcher_forwards_setup_env.py",
-   "line": 159,
+   "line": 163,
    "kind": "pytest.skip",
    "function": "test_launcher_forwards_every_variable_the_setup_reads",
    "condition": "setup == SHARED_SETUP",
-   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=POD / \"autoinit_preflight_setup.sh\" | POD=REPO / \"scripts/pod\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=REPO / \"scripts/shared/pod/autoinit_preflight_setup.sh\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "repository_content",
    "verdict": "same_on_pod",
    "why": "tracked content the bundle checkout carries",
@@ -604,11 +590,11 @@
   },
   {
    "file": "tests/integration/test_launcher_forwards_setup_env.py",
-   "line": 238,
+   "line": 242,
    "kind": "pytest.skip",
    "function": "test_forwarded_variables_have_a_launcher_side_default",
    "condition": "setup == SHARED_SETUP",
-   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=POD / \"autoinit_preflight_setup.sh\" | POD=REPO / \"scripts/pod\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "setup == SHARED_SETUP | SHARED_SETUP=REPO / \"scripts/shared/pod/autoinit_preflight_setup.sh\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "repository_content",
    "verdict": "same_on_pod",
    "why": "tracked content the bundle checkout carries",
@@ -620,7 +606,7 @@
   },
   {
    "file": "tests/integration/test_operational_hardening.py",
-   "line": 60,
+   "line": 70,
    "kind": "pytest.skip",
    "function": "test_no_command_substitution_over_globs_in_new_launchers",
    "condition": "path.name in FROZEN_RECORD_LAUNCHERS",
@@ -636,7 +622,7 @@
   },
   {
    "file": "tests/integration/test_pod_script_paths.py",
-   "line": 147,
+   "line": 174,
    "kind": "pytest.skip",
    "function": "test_setup_driver_and_launcher_agree_on_the_status_file",
    "condition": "len(paths) < 2",
@@ -652,7 +638,7 @@
   },
   {
    "file": "tests/integration/test_reconstruct_training_events.py",
-   "line": 134,
+   "line": 140,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not COMMITTED.is_file()",
@@ -668,7 +654,7 @@
   },
   {
    "file": "tests/integration/test_reconstruct_training_events.py",
-   "line": 154,
+   "line": 160,
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (E6B / \"e6b_run.log\").is_file()",
@@ -684,7 +670,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 158,
+   "line": 170,
    "kind": "pytest.skip",
    "function": "test_every_declared_asset_is_a_directory_the_launcher_can_actually_send",
    "condition": "not path.exists()",
@@ -700,7 +686,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 430,
+   "line": 486,
    "kind": "pytest.skip",
    "function": "test_a_checkpoint_is_staged_with_the_files_it_cannot_load_without",
    "condition": "\"model.safetensors\" not in staged",
@@ -716,7 +702,7 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 460,
+   "line": 516,
    "kind": "pytest.skip",
    "function": "test_a_session_that_asks_for_rope_ok_stages_a_config_for_it",
    "condition": "\"ROPE_OK\" not in tuple(spec.setup.setup_markers)",
@@ -732,11 +718,11 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 795,
+   "line": 848,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_accepts_the_canonical_config",
    "condition": "not src.is_file()",
-   "expanded": "not src.is_file() | src=REPO / \"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not src.is_file() | src=REPO / \"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -748,11 +734,11 @@
   },
   {
    "file": "tests/integration/test_session_architecture.py",
-   "line": 818,
+   "line": 871,
    "kind": "pytest.skip",
    "function": "test_the_real_rope_check_refuses_a_wrong_stored_base",
    "condition": "not src.is_file()",
-   "expanded": "not src.is_file() | src=REPO / \"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint/config.json\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not src.is_file() | src=REPO / \"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint/config.json\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -761,6 +747,22 @@
    "registered_as": null,
    "parity": "same_on_pod",
    "parity_why": "every path it inspects is tracked or staged"
+  },
+  {
+   "file": "tests/integration/test_session_setup_contract.py",
+   "line": 115,
+   "kind": "pytest.skip",
+   "function": "test_every_session_installs_every_root_the_shared_setup_verifies",
+   "condition": "not runs_the_frozen_asset_gate(spec)",
+   "expanded": "not runs_the_frozen_asset_gate(spec) | spec=dict((n, s) for n, _m, _a, s in all_specs())[name]",
+   "signal": "unrecognised",
+   "verdict": "unknown",
+   "why": "no known signal matched; a human must say whether a pod sees the same premise",
+   "nodeid": "tests/integration/test_session_setup_contract.py::test_every_session_installs_every_root_the_shared_setup_verifies",
+   "readiness_group": null,
+   "registered_as": "manifest_derived",
+   "parity": "same_on_pod",
+   "parity_why": "decided by the SessionSpec or by tracked source text, not by the machine."
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -776,7 +778,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -792,7 +794,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -808,7 +810,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -824,7 +826,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -840,7 +842,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -856,7 +858,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/integration/test_setup_gate_calibration.py",
@@ -872,7 +874,7 @@
    "readiness_group": null,
    "registered_as": null,
    "parity": "guaranteed_dependency",
-   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
+   "parity_why": "the pod's setup script IS executed as `bash /workspace/autoinit_preflight_setup.sh` by SessionRunner, and the simulator as `bash scripts/shared/pod/simulate_pod_env.sh`, so on both machines bash is present by construction before pytest starts"
   },
   {
    "file": "tests/models/test_tokenizer_contract.py",
@@ -880,7 +882,7 @@
    "kind": "skipif",
    "function": "<module>",
    "condition": "not (CANONICAL / \"tokenizer.json\").is_file()",
-   "expanded": "not (CANONICAL / \"tokenizer.json\").is_file() | CANONICAL=REPO / \"artifacts/stage1/qwen3_0p6b_init_v0/checkpoint\" | REPO=Path(__file__).resolve().parents[2]",
+   "expanded": "not (CANONICAL / \"tokenizer.json\").is_file() | CANONICAL=REPO / \"artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint\" | REPO=Path(__file__).resolve().parents[2]",
    "signal": "filesystem_premise_onpod",
    "verdict": "same_on_pod",
    "why": "every path it inspects is tracked or staged, so the premise travels to the pod",
@@ -974,5 +976,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "c26f1d8ade52a623db6fa0360ab9130133f7d3c2bc4ee3aef2b6403f32371aaf"
+ "digest": "a0ee6a2663cd02f39fc7b1e7f24bd584aed0f10a99316eb6926978f56972d8cf"
 }

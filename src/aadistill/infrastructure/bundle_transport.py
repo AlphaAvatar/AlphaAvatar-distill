@@ -5,7 +5,7 @@ the executable digest, the lineage, the authorization, the frozen science — an
 still create a pod that cannot **reach** that commit, because no bundle was ever
 built for it. That has happened, for real money, and "regenerate the bundle and
 re-upload it" being a documented step is what made it possible: a documented
-step depends on somebody remembering. `docs/core-provenance.md` records which
+step depends on somebody remembering. `docs/maintenance/core-provenance.md` records which
 session paid for it.
 
 The answer splits in two, and the split is the design:
@@ -36,7 +36,7 @@ attempts, for no benefit to work that will not run again. Whoever reopens it
 should collapse the two then. Until that happens, the shared rule the two must
 not disagree about — the digest formula — is imported here from
 `aadistill.governance.closure`, so neither file owns a private copy of it.
-`docs/core-provenance.md` names the copy and the reason.
+`docs/maintenance/core-provenance.md` names the copy and the reason.
 """
 
 from __future__ import annotations

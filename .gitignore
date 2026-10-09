@@ -25,31 +25,38 @@ dist/
 *.key
 *.pem
 
-# Downloaded third-party warm-up text (rebuild with scripts/build_warmup_v1.py;
+# Downloaded third-party warm-up text (rebuild with scripts/shared/data/build_warmup_v1.py;
 # the committed .manifest.json pins revisions and hashes)
-data/warmup/warmup_v1.jsonl
-data/warmup/holdout_v1.jsonl
+data/stages/stage-0/warmup/warmup_v1.jsonl
+data/stages/stage-0/warmup/holdout_v1.jsonl
 
-# Stage 2 offline mixture (rebuild with scripts/build_stage2_v0.py /
+# Stage 2 offline mixture (rebuild with scripts/shared/data/build_stage2_v0.py /
 # build_stage2_v1.py; committed manifests pin revisions and hashes)
-data/stage2/train/
-data/stage2/val/
-data/stage2/calib/
-data/stage2_v1/train/
-data/stage2_v1/val/
-data/stage2_v1/calib/
+data/stages/stage-2/stage2/train/
+data/stages/stage-2/stage2/val/
+data/stages/stage-2/stage2/calib/
+data/stages/stage-2/stage2_v1/train/
+data/stages/stage-2/stage2_v1/val/
+data/stages/stage-2/stage2_v1/calib/
 
-# Stage 3 teacher-target 2x2 arms (rebuild with scripts/data/build_stage3_pilot.py
+# Stage 3 teacher-target 2x2 arms (rebuild with scripts/shared/data/build_stage3_pilot.py
 # from the hashed generation corpus; the committed manifest.json pins both arms'
 # per-file hashes, counts and packing)
-data/stage3_pilot/*/train/
-data/stage3_pilot/*/val/
+data/stages/stage-3/stage3_pilot/*/train/
+data/stages/stage-3/stage3_pilot/*/val/
 
-# Heavy local artifacts (activation caches, checkpoints, datasets, run outputs)
-artifacts/
+# Heavy local artifacts (activation caches, checkpoints, datasets, run outputs).
+# The tree's own navigation (README + generated ownership index) is tracked;
+# everything else under artifacts/ is local-only bytes.
+artifacts/*
+!artifacts/README.md
+!artifacts/index.json
+# A run's `artifacts/` area holds heavy run products and stays dark, exactly
+# as the old unanchored `artifacts/` rule treated it.
+logs/**/artifacts/
 checkpoints/
 # Anchored, for the same reason `runs/` needed the exception below: unanchored,
-# it matched `configs/datasets/` and silently refused to track the dataset-asset
+# it matched `configs/shared/datasets/` and silently refused to track the dataset-asset
 # DECLARATIONS -- a small reviewable JSON that the pod must be able to read. The
 # file was written, never committed, and the pod simulation then hid it and
 # failed every test at conftest import. Heavy datasets live at the repo root.

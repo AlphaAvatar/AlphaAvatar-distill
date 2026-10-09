@@ -1,5 +1,6 @@
 {
  "_authorizes": "nothing",
+ "_record_role_means": "a point-in-time measurement of the ORIGINAL C1 source pools. It stays true as evidence and is kept as the provenance that made the realized family necessary; it must not be read as D1's current battery readiness, which the live record above owns.",
  "_what_remaining_means": "whole further batteries drawable under the FROZEN C1 mixture with no prompt shared, by id or by normalized content, with any isolation role or any battery already drawn. Zero means the next fresh battery cannot be built without changing the mixture or extending a source.",
  "_why_the_mixture_cannot_simply_shrink": "`correct_overall` and its SESOI are DEFINED ON the mixture, so a battery with a different stratum balance measures a different quantity. C2's screening battery preserves C1's mixture exactly for that reason: a screening delta only informs a confirmation delta if both are means over the same distribution. Changing it is a C0-level redesign, not a parameter tweak.",
  "batteries_remaining": 0,
@@ -23,6 +24,7 @@
   "total_prompt_hashes": 13883,
   "total_source_ids": 15120
  },
+ "live_state": false,
  "mixture": {
   "code": 100,
   "gsm8k": 150,
@@ -32,6 +34,7 @@
   "rag": 150,
   "tool": 100
  },
+ "record_role": "historical_analysis",
  "schema": "aadistill.autoinit.battery_evidence_capacity/v1",
  "strata": {
   "code": {
@@ -132,5 +135,6 @@
     "revision": "26d14ebfe18b1f7b524bd39b404b50af5dc97866"
    }
   }
- }
+ },
+ "superseded_for_readiness_by": "logs/stages/stage-1/families/d_series/current.json"
 }

@@ -2,7 +2,7 @@
 
 Phase-A attempt 10 spent $11.43 and produced nothing because
 `depth.causal_kl_greedy_v1` ran its full-vocabulary softmax/KL on the host: the
-port of `scripts/training/search_depth_map.py` inserted `.cpu()` on the logits
+port of `scripts/shared/training/search_depth_map.py` inserted `.cpu()` on the logits
 and the targets, E8a has neither, and nothing between the driver's affordability
 check and the cost watchdog ever looked at a clock.
 
@@ -13,7 +13,7 @@ Three properties are asserted here, each of which was false during that run:
 3. the search says where it is, so a stall is distinguishable from work.
 
 The equivalence of the repair — that no removal decision moved — is
-`scripts/autoinit/verify_depth_backend_equivalence.py`, run as its own artifact,
+`scripts/stages/stage-1/measurement/verify_depth_backend_equivalence.py`, run as its own artifact,
 and re-asserted in miniature at the bottom of this file.
 """
 

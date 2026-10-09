@@ -1,0 +1,71 @@
+{
+ "schema": "aadistill.executable_source_sets/v1",
+ "_contract": "Which files implement this project's scorer, trainer and generation protocol. EXPERIMENT INSTANCE DATA: a reusable core can say what a source digest IS without naming one project's scripts. Transcribed without edit, so every digest is unchanged. AUTHORIZES NOTHING.",
+ "recovery_scoring": {
+  "contract_id": "recovery_search_scoring",
+  "version": 4,
+  "files_v4": [
+   "scripts/shared/evaluation/score_recovery_search.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/initialization/planning/recovery.py"
+  ],
+  "files_v3_historical": [
+   "scripts/autoinit/score_recovery_search.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/initialization/planning/recovery.py"
+  ],
+  "_v3_is_historical": "v3 names the pre-2026-10-08 path of the scorer script; it is the record of what the C1 formal attempts, C2, C3, A3 and the D1 search bound. The information-architecture migration moved the scorer to scripts/shared/evaluation/ without changing a byte of it; v4 is the same six logical files at their current addresses.",
+  "files_v2_historical": [
+   "scripts/autoinit/score_recovery_search.py",
+   "src/aadistill/evaluation/usable_rollout.py",
+   "src/aadistill/evaluation/strict_answer.py",
+   "src/aadistill/evaluation/behavior.py",
+   "src/aadistill/evaluation/capability.py",
+   "src/aadistill/autoinit/recovery.py"
+  ],
+  "_v2_is_historical": "v2 names the pre-migration paths and is the record of what completed runs bound; it is not computable here"
+ },
+ "trainer": {
+  "set_version": 2,
+  "files": [
+   "scripts/shared/training/train_stage3.py",
+   "src/aadistill/training/train.py",
+   "src/aadistill/training/lora.py",
+   "src/aadistill/data/ladder.py",
+   "src/aadistill/data/dataset.py",
+   "src/aadistill/models/teacher.py",
+   "src/aadistill/models/student.py"
+  ],
+  "files_v1_historical": [
+   "scripts/training/train_stage3.py",
+   "src/aadistill/training/train.py",
+   "src/aadistill/training/lora.py",
+   "src/aadistill/data/ladder.py",
+   "src/aadistill/data/dataset.py",
+   "src/aadistill/models/teacher.py",
+   "src/aadistill/models/student.py"
+  ],
+  "_v1_is_historical": "v1 names the pre-2026-10-08 path of the trainer entry; it is what completed runs bound. The information-architecture migration moved the script without changing a byte of it."
+ },
+ "generation": {
+  "set_version": 2,
+  "files": [
+   "scripts/shared/evaluation/uncapped_eval.py",
+   "src/aadistill/evaluation/degeneration.py",
+   "src/aadistill/evaluation/behavior.py"
+  ],
+  "files_v1_historical": [
+   "scripts/evaluation/uncapped_eval.py",
+   "src/aadistill/evaluation/degeneration.py",
+   "src/aadistill/evaluation/behavior.py"
+  ],
+  "_v1_is_historical": "v1 names the pre-2026-10-08 path of the generation entry; it is what completed runs bound. The information-architecture migration moved the script without changing a byte of it."
+ },
+ "authorizes": "nothing"
+}

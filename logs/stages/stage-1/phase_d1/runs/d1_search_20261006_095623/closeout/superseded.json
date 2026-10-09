@@ -1,0 +1,79 @@
+{
+ "schema": "aadistill.phase_d1.run_superseded/v1",
+ "run_id": "d1_search_20261006_095623",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "outcome": "SUPERSEDED BEFORE LAUNCH by its OWN launch-bound sweep. Never launched, never consumed, $0.",
+ "recorded_utc": "2026-10-06T10:10:00Z",
+ "session_commit": "44e12be283ffef2119df31d46e8dab0e558409de",
+ "authorized_base_commit": "1202db53fdff01fb47dbcf6f786adb9866e59b5f",
+
+ "money": {
+  "provider_resources_created": 0,
+  "actual_usd": 0.0,
+  "one_use_grant_consumed": false,
+  "note": "no pod existed at any point. The authorization was issued and never presented to a launcher, so the grant is retired unconsumed rather than spent."
+ },
+
+ "why_superseded": {
+  "summary": "The launch-bound sweep did exactly the job it exists for and returned FAIL. This record is kept because a sweep catching a stale derived record before a launch is the mechanism working, not a mishap to erase.",
+  "verdict": "FAIL",
+  "counts": {"passed": 339, "skipped": 0, "failed": 2, "error": 0},
+  "failures": [
+   "scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py::TestTheCommittedRecords::test_the_design_regenerates_byte_identically",
+   "scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py::TestTheCommittedRecords::test_the_budget_position_is_derived_not_restated"
+  ],
+  "cause": "`logs/stages/stage-1/phase_d1/plans/d1_design.json` stopped regenerating byte-identically the moment the failed attempt's $0.2513 was booked, because the design document's `budget` section is DERIVED LIVE from scripts/consolidate/derive_budget.py. Its `provisional_shortfall_usd` moved from -10.1812 to -9.9299 -- exactly the $0.2513 -- and the narrative that restates it moved with it.",
+  "where_it_would_have_been_caught_otherwise": "ON THE BILLING POD. These two tests live in the suite D1 declares as its pod test gate, so an unswept launch would have reached TESTS_OK on an L40S and failed there. This is the second time in one session that D1's declared pod suite was the thing that found the defect; the first time it was already on a pod.",
+  "why_converge_before_sweep_missed_it": "`scripts/consolidate/converge_before_sweep.py` regenerates the skip-predicate audit, the per-experiment closure snapshots, the run and stage indexes, the readiness pointer, the navigation, the log inventory and the document links. `write_d1_design.py` is not in that list, so the one derived record whose generator reads the live budget was the one the convergence tool did not regenerate."
+ },
+
+ "what_changed_and_what_did_not": {
+  "the_science_is_BIT-IDENTICAL": {
+   "method": "every top-level key of the regenerated document compared against the committed one as sorted JSON",
+   "identical": 23,
+   "moved": 2,
+   "identical_keys": [
+    "_authorizes", "_contract", "_open_blockers", "_stage_id_meaning",
+    "behavioural_design", "contamination_protection", "evidence",
+    "execution_protocol", "execution_wiring_required", "experiment_id",
+    "gpu_validation_owed", "hypothesis", "incumbent", "inputs",
+    "materialization_prerequisite", "open_blockers", "recovery_recipe",
+    "schema", "scoring_policy", "search_stage", "stage_id", "status",
+    "what_this_may_not_be_used_to_claim"
+   ],
+   "moved_keys": ["budget", "design_hash"],
+   "open_blockers": "[] before and [] after"
+  },
+  "design_hash": {
+   "before": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+   "after": "a0babe43ba0a5dfbbf7276bf0c2e082375342e88e5cda9fc8e4b3acea7e4a12a",
+   "why_this_is_not_a_protocol_change": "`write_d1_design.build()` computes design_hash as sha256 over EVERY non-underscore top-level key, including the live `budget` block, so the document's fingerprint moves whenever the project's balance does. It has taken ELEVEN distinct values in the four days the record has existed -- 5bf1e3cb, b7002bb3, 76bddeec, 6db01608, 2c54dcd1, aae83151, dfea8e1e, e3bdc783, 72faa307, 4da9af37, 3affe2c6 -- so regenerating it is this repository's routine practice rather than an exception. The frozen SCIENCE is asserted directly and separately by `assert_session_contract`: measurement_protocol_id, config_hash, suite_content_sha256, position_policy_hash, the distribution support at K=200, micro_batch_size and packing, beam width and warmup levels, the frozen operator set and both calibration profiles.",
+   "who_pinned_the_old_value": "no test, no config and no executable. Only run records, which are historical evidence and are NOT rewritten: runs 173304, 193733, 055409 and this one keep the value they were issued against."
+  }
+ },
+
+ "recommendation_to_the_maintainer": {
+  "defect": "A FROZEN SCIENTIFIC PLAN IDENTITY SHOULD NOT BE A FUNCTION OF THE PROJECT'S WALLET.",
+  "detail": "Because `budget` is inside design_hash's preimage, every dollar spent anywhere in the project -- including an unrelated C1 engineering pod -- invalidates D1's committed design record, turns two tests in D1's declared pod gate red, and so blocks every D1 launch until the record is regenerated and the authorization re-issued against a new design hash. This round paid one full re-issue cycle for it, and the preregistered D1 screening and confirmation rungs will each pay it again.",
+  "minimal_fix": "narrow the hashed preimage to the design's frozen terms -- keep the cost model, the accepted 1125.55-minute bound and the derived ceiling inside the identity, and exclude the live balance, which is a property of the ledger and not of the design.",
+  "why_it_was_not_done_here": "it changes how a frozen identity is computed, which is a maintainer's call rather than something to slip in beside a launch. Regenerating the record is the established practice and is sufficient to launch; this is recorded as the root cause so the next rung does not rediscover it."
+ },
+
+ "retry_policy": {
+  "is_this_a_retried_experiment": false,
+  "why": "nothing was launched, measured or spent. Under AGENTS.md P12.1 this is ordinary engineering inside the already-approved phase envelope: no budget is widened and no frozen science is altered.",
+  "frozen_science_unchanged": "K=200, bsz=3, length_sorted_v1, beam width 6 with one warmup level, the four frozen operators, both calibration profiles, the supervised_target arm, Top-2, the same accepted 1125.55-minute bound at the same live $1.09/h.",
+  "successor_requires": [
+   "a new authorized base commit carrying the regenerated design",
+   "a new run id and a new one-use authorization binding the new design hash",
+   "a new canonical bundle derived from the new session commit",
+   "a fresh run-owned launch_bound sweep against that exact session tree"
+  ]
+ },
+
+ "what_is_preserved": {
+  "governance/authorization.json": "the issued one-use artifact, unmodified. Retired unconsumed. It binds design hash 3affe2c65c57 and config 8e2d4dccac0032ef, which are what it was issued against.",
+  "governance/readiness.json": "the FAIL sweep record, unmodified. It is the evidence that the launch-bound sweep refused this tree, and it names the two failing node ids and the commit it swept."
+ }
+}

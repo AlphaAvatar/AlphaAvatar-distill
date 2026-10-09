@@ -19,15 +19,15 @@ Recover the structurally initialized student offline — repair the damage compr
 
 What this stage receives from the pipeline before it.
 
-* the pinned Stage-1 init checkpoint `artifacts/stage1/qwen3_0p6b_init_v0/checkpoint`, which every arm forks from so that arms differ only in what is under test
+* the pinned Stage-1 init checkpoint `artifacts/stages/stage-1/qwen3_0p6b_init_v0/checkpoint`, which every arm forks from so that arms differ only in what is under test
 * the same pinned teacher, loaded to produce KD targets rather than to be imitated wholesale
 * Stage-2 data: today the teacher-target pilot corpus, with the public mixtures behind it
 
 ## Data
 
-* `data/stage3_pilot/manifest.json` — the recovery corpus in use: control and treatment arms over one shared accepted prompt subset, grouped code_math / multihop_qa / rag_evidence, with per-arm token and packing statistics
-* `data/stage3_pilot/treatment` — the treatment arm the canonical config points at by default
-* `data/eval_behavior_v0` — the behaviour evaluation set the stage is judged on — autonomous rollout, not held-out loss
+* `data/stages/stage-3/stage3_pilot/manifest.json` — the recovery corpus in use: control and treatment arms over one shared accepted prompt subset, grouped code_math / multihop_qa / rag_evidence, with per-arm token and packing statistics
+* `data/stages/stage-3/stage3_pilot/treatment` — the treatment arm the canonical config points at by default
+* `data/stages/stage-3/eval_behavior_v0` — the behaviour evaluation set the stage is judged on — autonomous rollout, not held-out loss
 
 ## How it runs
 
@@ -40,7 +40,7 @@ source of truth.
 
 ## Outputs
 
-* recovered checkpoints under `artifacts/stage3/<run_name>/`, each with its own run manifest. Outside git; the checkpoint registry and the tombstones record which still exist and what was frozen before any were deleted
+* recovered checkpoints under `artifacts/stages/stage-3/<run_name>/`, each with its own run manifest. Outside git; the checkpoint registry and the tombstones record which still exist and what was frozen before any were deleted
 
 ## This stage's own areas
 
@@ -91,11 +91,11 @@ because omitting it would misreport the stage; it gets no
 directory because an empty one would assert material that
 does not exist. Its evidence is in the stage index:
 
-* `ttb` — artifacts/stage3/ttb_ctrl_a/run_manifest.json; artifacts/stage3/ttb_treat_a/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `ttb` — artifacts/stages/stage-3/ttb_ctrl_a/run_manifest.json; artifacts/stages/stage-3/ttb_treat_a/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
 * `p0_real` — artifacts/audit/three_mode/P0-real-sa; artifacts/audit/three_mode/P0-real-sb; logs/stages/stage-3/history/EXPERIMENTS.md
 * `d0` — logs/stages/stage-3/history/EXPERIMENTS.md; artifacts/audit/three_mode/P0-real-sa
-* `p0` — configs/stage3/p0/p0_assistant_sa.json; artifacts/stage3/p0_assistant_sa/run_manifest.json; artifacts/stage3/p0_assistant_sb/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
-* `p2` — configs/stage3/p2/p2_ceheavy_sa.json; artifacts/stage3/p2_ceheavy_sa/run_manifest.json; configs/stage3/e4/e4_p2_r1600k_sa.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `p0` — configs/stages/stage-3/p0/p0_assistant_sa.json; artifacts/stages/stage-3/p0_assistant_sa/run_manifest.json; artifacts/stages/stage-3/p0_assistant_sb/run_manifest.json; logs/stages/stage-3/history/EXPERIMENTS.md
+* `p2` — configs/stages/stage-3/p2/p2_ceheavy_sa.json; artifacts/stages/stage-3/p2_ceheavy_sa/run_manifest.json; configs/stages/stage-3/e4/e4_p2_r1600k_sa.json; logs/stages/stage-3/history/EXPERIMENTS.md
 
 ### Arms and aliases, filed with their experiment
 
@@ -119,19 +119,19 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
-* `configs/stage3/e1/e1_r1600k_sa_pca.json`
-* `configs/stage3/e2/e2_d1_sa_pca.json`
-* `configs/stage3/e3/e3_a1_frozen_attn_sa.json`
-* `configs/stage3/e4/e4_p2_r1600k_sa.json`
-* `configs/stage3/e5/e5_c_sa.json`
-* `configs/stage3/e6b/e6b_p2_r2960k_sa.json`
-* `configs/stage3/e7/e7_control_r1600k_sa.json`
-* `configs/stage3/e8/e8_contrib_r2960k_sa.json`
-* `configs/stage3/e8b/e8b_dc_r1600k_sa.json`
-* `configs/stage3/p0/p0_assistant_sa.json`
-* `configs/stage3/p2/p2_ceheavy_sa.json`
-* `configs/stage3/recovery.json`
-* `configs/stage3/s2v1_from_init.json`
+* `configs/stages/stage-3/e1/e1_r1600k_sa_pca.json`
+* `configs/stages/stage-3/e2/e2_d1_sa_pca.json`
+* `configs/stages/stage-3/e3/e3_a1_frozen_attn_sa.json`
+* `configs/stages/stage-3/e4/e4_p2_r1600k_sa.json`
+* `configs/stages/stage-3/e5/e5_c_sa.json`
+* `configs/stages/stage-3/e6b/e6b_p2_r2960k_sa.json`
+* `configs/stages/stage-3/e7/e7_control_r1600k_sa.json`
+* `configs/stages/stage-3/e8/e8_contrib_r2960k_sa.json`
+* `configs/stages/stage-3/e8b/e8b_dc_r1600k_sa.json`
+* `configs/stages/stage-3/p0/p0_assistant_sa.json`
+* `configs/stages/stage-3/p2/p2_ceheavy_sa.json`
+* `configs/stages/stage-3/recovery.json`
+* `configs/stages/stage-3/s2v1_from_init.json`
 
 ## Canonical data and artifact manifests
 
@@ -139,7 +139,7 @@ A dataset manifest lives beside the data it describes, and
 an artifact lives outside git with its manifest. Neither is
 copied here.
 
-* `data/stage3_pilot/manifest.json`
+* `data/stages/stage-3/stage3_pilot/manifest.json`
 
 ## Decisions
 

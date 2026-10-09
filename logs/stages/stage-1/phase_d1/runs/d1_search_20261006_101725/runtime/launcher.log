@@ -1,0 +1,35 @@
+[10:22:30] budget: expected 657 min $11.93 · soft $19.90 · hard $20.45 (authorized $21.49)
+[10:22:31] NVIDIA L40S $1.09/h, stock Low
+[10:22:31] run d1_search_20261006_101725 on the supervised_target arm, design a0babe43ba0a, config 59b63de3455a, no open blockers
+[10:22:31] session contract verified at $0: protocol ac23798a4572, config 59b63de3455a, suite a1197205e43a
+[10:22:31] science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1
+[10:22:31] launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers
+[10:22:32] session commit 6c9ea7580227 verified: harness digests to 403a621c4062…, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/authorization.json differs from the authorized base
+[10:22:37] aad_autoinit_6c9ea758.bundle (25538842 bytes, 9a82a133a872) round-trips to 6c9ea7580227 carrying this authorization and harness 403a621c4062
+[10:22:37] precheck OK: 0 relay inputs (), 3 local assets
+[10:22:37] DRY RUN: every pre-provider gate passed; stopping before provider creation. Nothing was created and nothing bills.
+[10:23:50] budget: expected 657 min $11.93 · soft $19.90 · hard $20.45 (authorized $21.49)
+[10:23:51] NVIDIA L40S $1.09/h, stock Low
+[10:23:51] run d1_search_20261006_101725 on the supervised_target arm, design a0babe43ba0a, config 59b63de3455a, no open blockers
+[10:23:51] session contract verified at $0: protocol ac23798a4572, config 59b63de3455a, suite a1197205e43a
+[10:23:51] science inputs verified against their own pins: calib.domain_balanced@v1, calib.reasoning_heavy@v2, state_eval_v1
+[10:23:51] launch-readiness logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/launch_readiness.json matches this invocation on 7 bound facts and reports no open blockers
+[10:23:51] session commit 6c9ea7580227 verified: harness digests to 403a621c4062…, carries the authorization and only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_101725/governance/authorization.json differs from the authorized base
+[10:23:56] aad_autoinit_6c9ea758.bundle (25538842 bytes, 9a82a133a872) round-trips to 6c9ea7580227 carrying this authorization and harness 403a621c4062
+[10:23:56] precheck OK: 0 relay inputs (), 3 local assets
+[10:23:57] watchdog detached — hard 1126 min = $20.45
+[10:23:57] created zhk120whedjsg9 at $1.09/h
+[10:24:50]   starting (60s) — $0.02
+[10:25:53] TCP 22 at 64.247.206.209:18519 after 1.9 min
+[10:25:57] draw 1: ssh reachable — $0.04
+[10:26:42] draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.167.08
+[10:26:42] draw 1: running setup
+[10:32:23] draw 1: setup complete — $0.15
+[10:32:31] driver detached, pid 1457, confirmed by descriptor_probe — $0.16
+[10:34:45]   2026-10-06T10:32:27Z MARKER:DRIVER_START — $0.20
+[17:53:34]   relay errors: ['/workspace/autoinit_d1_run.log', '/workspace/autoinit_d1.status']
+[17:53:35] the pod is gone — the watchdog acted
+[17:53:35] polling ended: POD_GONE — $8.17
+[17:53:35] LAUNCHER ERROR: ArtifactError: an emergency teardown over a non-quiescent event stream must name the streams it is truncating; 'the final event stream is incomplete' has to be in the record, not inferred from it later
+[17:53:35] deleting pod (launcher error)
+[17:53:46] pod deleted — 449.8 min, $8.17; provider confirms gone: True

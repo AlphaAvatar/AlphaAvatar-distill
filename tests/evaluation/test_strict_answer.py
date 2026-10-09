@@ -135,7 +135,7 @@ def test_gold_target_is_the_rendered_span_not_the_content_field():
     """
     import json
     from pathlib import Path
-    p = Path("artifacts/stage3/corpus_v2/sessions.jsonl")
+    p = Path("artifacts/stages/stage-3/corpus_v2/sessions.jsonl")
     if not p.is_file():
         import pytest
         pytest.skip("corpus not present locally")

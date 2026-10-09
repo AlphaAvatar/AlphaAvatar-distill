@@ -172,7 +172,7 @@ class TestCompare:
                          "removed_files": [], "changed_files": []}
 
 
-#: `TestRealTree` moved to `scripts/experiments/stage-1/phase_c1/tests/test_closure_of_c1.py`
+#: `TestRealTree` moved to `scripts/stages/stage-1/phase_c1/tests/test_closure_of_c1.py`
 #: in the 2026-10-03 boundary round. Everything above is pinned by construction
 #: against a synthetic tree under `tmp_path`, so it describes the deriver; the
 #: four tests that moved asked whether C1's committed snapshot still matches this

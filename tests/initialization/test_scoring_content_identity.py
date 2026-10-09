@@ -8,7 +8,7 @@ chain of hashes that looked complete was not:
   assets with identical tokens and DIFFERENT supervised masks shared every hash
   in the operator path and could produce different DEPTH/FFN/WIDTH/ATTENTION
   decisions under one state id;
-* `scripts/autoinit/load_state_eval.py` built its suite without the manifest's
+* `scripts/shared/evaluation/load_state_eval.py` built its suite without the manifest's
   `content_sha256`, so `suite_hash` described the suite's declared SHAPE and not
   its prompts — and the resume path compares exactly that field.
 
@@ -512,7 +512,7 @@ class TestTheStateEvalLoaderRequiresTheContentHash:
         import importlib.util
         spec = importlib.util.spec_from_file_location(
             "load_state_eval_under_test",
-            "scripts/autoinit/load_state_eval.py")
+            "scripts/shared/evaluation/load_state_eval.py")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
         return module.load(root)
@@ -537,7 +537,7 @@ class TestTheStateEvalLoaderRequiresTheContentHash:
         from pathlib import Path
 
         driver_pin = "6421fa4cf12ee2a16f452557c486aa95beb37e4aac4f7c7fd72d380993b39833"
-        asset = Path(__file__).resolve().parents[2] / "artifacts/stage1/state_eval_v1"
+        asset = Path(__file__).resolve().parents[2] / "artifacts/stages/stage-1/state_eval_v1"
         if not (asset / "manifest.json").is_file():
             pytest.skip("the frozen state_eval asset is not staged here")
         suite, _, manifest = self._load(asset)

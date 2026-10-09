@@ -291,7 +291,7 @@ def check_role_isolation(
 # hashes, leakage proofs -- inside the reusable core, and made merely importing
 # this module change global state.
 #
-# They now live in `configs/datasets/assets.json`, loaded by
+# They now live in `configs/shared/datasets/assets.json`, loaded by
 # `scripts/experiments/datasets.py`. This module keeps only the mechanism.
 
 ASSET_DOCUMENT_SCHEMA = "aadistill.dataset_assets/v1"

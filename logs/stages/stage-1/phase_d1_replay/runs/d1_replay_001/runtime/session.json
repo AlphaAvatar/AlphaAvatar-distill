@@ -1,0 +1,385 @@
+{
+  "schema": "aadistill.autoinit.d1_replay_session/v1",
+  "session_id": "autoinit-d1-replay",
+  "session_spec": {
+    "session_id": "autoinit-d1-replay",
+    "schema": "aadistill.autoinit.d1_replay_session/v1",
+    "description": "D1: reconstruct two unretained quality-order finalists, eight digest-pinned operator steps. Decides nothing, measures nothing, trains nothing.",
+    "deployment": {
+      "artifact_collector": "scripts/pod/collect_artifacts.py",
+      "checkout_root": "/workspace/aad",
+      "min_cuda_version": "13.0",
+      "provider_cli_candidates": [
+        "/home/ecs-user/.local/bin/runpodctl",
+        "/home/ecs-user/.local/bin/runpodctl"
+      ],
+      "remote_python": "/opt/train/bin/python",
+      "setup_script": "scripts/pod/autoinit_preflight_setup.sh",
+      "watchdog": "scripts/pod/watchdog.py",
+      "workspace_root": "/workspace",
+      "selected_provider_cli": "/home/ecs-user/.local/bin/runpodctl"
+    },
+    "deployment_digest": "bebc5060c5411bd0a57323cde0b8a63383991798c3009112191d22358d1de96a",
+    "authorization_path": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+    "authorization_type": "SpendAuthorization.load",
+    "plan_id": "autoinit.d1_replay",
+    "plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "status_path": "/workspace/autoinit_d1_replay.status",
+    "run_log_path": "/workspace/autoinit_d1_replay_run.log",
+    "driver_job_id": "autoinit_d1_replay",
+    "markers": {
+      "success": "ALL_DONE",
+      "failure": [
+        "RUN_FAILED",
+        "DIGEST_MISMATCH"
+      ],
+      "incomplete": []
+    },
+    "artifacts": {
+      "audit_dirname": "autoinit_d1_replay",
+      "evidence_filename": "d1_replay.json",
+      "archive_basename": "d1_replay_artifacts.tar.gz",
+      "spec_success": "configs/autoinit/d1_replay_artifacts.json",
+      "spec_failed": "configs/autoinit/d1_replay_artifacts_failed.json",
+      "report_names": [
+        "d1_replay.json"
+      ]
+    },
+    "setup": {
+      "env": {},
+      "required_env": [
+        "SESSION_COMMIT",
+        "BUNDLE_NAME",
+        "SESSION_STATUS",
+        "SESSION_AUTH_PATH",
+        "SESSION_PLAN_HASH",
+        "SESSION_ASSETS",
+        "TEACHER_REVISION"
+      ],
+      "relay_inputs": [],
+      "local_assets": [
+        "state_eval_v1:artifacts/stage1",
+        "e8_calibration_v1:artifacts/stage1",
+        "reasoning_heavy_v2:artifacts/stage1",
+        "d1_replay_plan.json:artifacts/stage1"
+      ],
+      "uv_max_seconds": 1500,
+      "tests_max_seconds": 2700,
+      "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea",
+      "test_ignores": [],
+      "test_paths": [
+        "scripts/experiments/stage-1/phase_d1/tests"
+      ],
+      "setup_markers": [
+        "ENV_READY",
+        "REPO_READY",
+        "ASSETS_STAGED",
+        "TRAIN_ENV",
+        "TEACHER_READY",
+        "TESTS_OK",
+        "AUTHORIZATION_OK",
+        "SETUP_DONE"
+      ]
+    },
+    "n_prechecks": 0,
+    "teardown": {
+      "always": true,
+      "require_provider_confirmation": true
+    }
+  },
+  "timeline": [
+    {
+      "utc": "2026-10-07T13:45:34+00:00",
+      "elapsed_min": 0.0,
+      "msg": "budget: expected 128 min $2.33 \u00b7 soft $2.79 \u00b7 hard $3.15 (authorized $3.50)"
+    },
+    {
+      "utc": "2026-10-07T13:45:35+00:00",
+      "elapsed_min": 0.0,
+      "msg": "NVIDIA L40S $1.09/h, stock Low"
+    },
+    {
+      "utc": "2026-10-07T13:45:35+00:00",
+      "elapsed_min": 0.0,
+      "msg": "precheck OK: 0 relay inputs (), 4 local assets"
+    },
+    {
+      "utc": "2026-10-07T13:45:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "watchdog detached \u2014 hard 174 min = $3.15"
+    },
+    {
+      "utc": "2026-10-07T13:45:36+00:00",
+      "elapsed_min": 0.0,
+      "msg": "created 0tjfzjnmpf64pn at $1.09/h"
+    },
+    {
+      "utc": "2026-10-07T13:46:30+00:00",
+      "elapsed_min": 0.89,
+      "msg": "  starting (60s) \u2014 $0.02"
+    },
+    {
+      "utc": "2026-10-07T13:47:23+00:00",
+      "elapsed_min": 1.78,
+      "msg": "TCP 22 at 209.170.80.132:19181 after 1.8 min"
+    },
+    {
+      "utc": "2026-10-07T13:47:26+00:00",
+      "elapsed_min": 1.83,
+      "msg": "draw 1: ssh reachable \u2014 $0.03"
+    },
+    {
+      "utc": "2026-10-07T13:48:04+00:00",
+      "elapsed_min": 2.46,
+      "msg": "draw 1: image identity runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+    },
+    {
+      "utc": "2026-10-07T13:48:04+00:00",
+      "elapsed_min": 2.46,
+      "msg": "draw 1: running setup"
+    },
+    {
+      "utc": "2026-10-07T13:55:44+00:00",
+      "elapsed_min": 10.13,
+      "msg": "draw 1: setup complete \u2014 $0.18"
+    },
+    {
+      "utc": "2026-10-07T13:55:50+00:00",
+      "elapsed_min": 10.23,
+      "msg": "driver detached, pid 1515, confirmed by descriptor_probe \u2014 $0.19"
+    },
+    {
+      "utc": "2026-10-07T13:58:01+00:00",
+      "elapsed_min": 12.42,
+      "msg": "  2026-10-07T13:55:47Z MARKER:DRIVER_START \u2014 $0.23"
+    },
+    {
+      "utc": "2026-10-07T14:00:05+00:00",
+      "elapsed_min": 14.49,
+      "msg": "  relay errors: ['/workspace/autoinit_d1_replay_run.log', '/workspace/autoinit_d1_replay.status']"
+    },
+    {
+      "utc": "2026-10-07T14:00:06+00:00",
+      "elapsed_min": 14.5,
+      "msg": "the pod stopped billing \u2014 provider_stopped_or_terminated (exists=False, status=TERMINATED, 15 of 174 min)"
+    },
+    {
+      "utc": "2026-10-07T14:00:06+00:00",
+      "elapsed_min": 14.5,
+      "msg": "polling ended: POD_GONE \u2014 $0.26"
+    },
+    {
+      "utc": "2026-10-07T14:00:07+00:00",
+      "elapsed_min": 14.51,
+      "msg": "EMERGENCY: only relayed snapshots survive \u2014 {}"
+    }
+  ],
+  "stages": {
+    "setup": [
+      {
+        "draw": 1,
+        "setup_done": "1",
+        "host_cold": "0",
+        "setup_rc": "0",
+        "tail": "SETUP_RC=0"
+      }
+    ]
+  },
+  "authorization": {
+    "schema": "aadistill.autoinit.spend_authorization/v1",
+    "authorization_id": "autoinit.v1.d1_replay",
+    "version": 1,
+    "granted_utc": "2026-10-07T13:44:53+00:00",
+    "granted_by": "maintainer decision 2026-10-07: rematerialize the two quality-order finalists the completed D1 search measured and did not retain, with exact four-way identity equality required for adoption. Booked against the GPU ENGINEERING allowance -- a deterministic reconstruction check, not a new search and not a new candidate measurement.",
+    "plan_id": "autoinit.d1_replay",
+    "preflight_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "expected_usd": 2.3253,
+    "hard_cap_usd": 3.5,
+    "authorized_stages": [
+      0
+    ],
+    "stage_conditions": {
+      "0": "all eight operator steps are pinned to the digest the search recorded; a mismatch is terminal for that leaf and is NOT retried"
+    },
+    "scope_note": "ONE pod, two digest-pinned fixed paths, two checkpoints fetched and re-identified off-pod. Decides nothing, measures nothing, trains nothing. Does NOT authorize a beam search, recovery training, behavioural screening or confirmation.",
+    "phase_a_authorized": false,
+    "automatic_phase_a_start": false,
+    "authorized_session_commit": "f0633ec02f91cf5da6d94cc64b0ab6c9b7007c19",
+    "harness_source_digest": "2f085638e2ba68ab67421564bb060aea6b7c2ef9b97b2c1f77321addcae54d84",
+    "harness_source_files": [
+      "scripts/pod/autoinit_d1_replay_launch.py",
+      "scripts/pod/autoinit_d1_replay_driver.py",
+      "scripts/experiments/stage-1/phase_d1/replay_specs.py",
+      "scripts/experiments/stage-1/phase_d1/d1_session.py",
+      "scripts/pod/autoinit_preflight_setup.sh",
+      "scripts/pod/collect_artifacts.py",
+      "configs/autoinit/d1_replay_artifacts.json",
+      "configs/autoinit/d1_replay_artifacts_failed.json",
+      "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json"
+    ],
+    "per_launch_hard_usd": 3.5,
+    "provenance_commit": "f0633ec02f91cf5da6d94cc64b0ab6c9b7007c19",
+    "enforcement": "the launcher loads this artifact and refuses to create a pod whose priced hard threshold exceeds hard_cap_usd, refuses a stage not in authorized_stages, and has no code path to Phase A",
+    "authorization_sha256": "cb1dc1c1926af3af808e9d9bdf92829a684650926a951b23ecfafbd43c787710"
+  },
+  "session_plan_hash": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+  "harness_source_digest": "2f085638e2ba68ab67421564bb060aea6b7c2ef9b97b2c1f77321addcae54d84",
+  "harness_source_files": [
+    "configs/autoinit/d1_replay_artifacts.json",
+    "configs/autoinit/d1_replay_artifacts_failed.json",
+    "logs/stages/stage-1/phase_d1/decisions/post_search_finalist_retention.json",
+    "scripts/experiments/stage-1/phase_d1/d1_session.py",
+    "scripts/experiments/stage-1/phase_d1/replay_specs.py",
+    "scripts/pod/autoinit_d1_replay_driver.py",
+    "scripts/pod/autoinit_d1_replay_launch.py",
+    "scripts/pod/autoinit_preflight_setup.sh",
+    "scripts/pod/collect_artifacts.py"
+  ],
+  "budget_plan": {
+    "price_per_hour": 1.09,
+    "authorized_usd": 3.5,
+    "expected_minutes": 128.0,
+    "soft_stop_minutes": 153.6,
+    "artifact_recovery_reserve_minutes": 20.0,
+    "hard_terminate_minutes": 173.6,
+    "step_time": {
+      "seconds": 4.15,
+      "source": "unused; the replay trains nothing",
+      "measured": true
+    },
+    "breakdown": [
+      {
+        "name": "setup",
+        "minutes": 12.0
+      },
+      {
+        "name": "train",
+        "minutes": 0.0
+      },
+      {
+        "name": "evaluate",
+        "minutes": 0.0
+      },
+      {
+        "name": "transfer",
+        "minutes": 8.0
+      },
+      {
+        "name": "teacher_load_twice",
+        "minutes": 12.0
+      },
+      {
+        "name": "eight_pinned_operator_steps",
+        "minutes": 88.0
+      },
+      {
+        "name": "materialize_and_reload",
+        "minutes": 8.0
+      }
+    ],
+    "soft_stop_reserves": [],
+    "notes": [],
+    "soft_stop_reserve_minutes": 0,
+    "expected_usd": 2.3253,
+    "soft_stop_usd": 2.7904,
+    "artifact_recovery_reserve_usd": 0.3633,
+    "hard_terminate_usd": 3.1537
+  },
+  "quoted_price_per_hour": 1.09,
+  "stock_status": "Low",
+  "precheck": {
+    "relay_needed": [],
+    "relay_missing": [],
+    "relay_repos": {},
+    "relay_repo_files_listed": {},
+    "local_assets": [
+      "artifacts/stage1/state_eval_v1",
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/d1_replay_plan.json"
+    ],
+    "local_missing": []
+  },
+  "pod_id": "0tjfzjnmpf64pn",
+  "actual_price_per_hour": 1.09,
+  "terminate_after_utc": "2026-10-07T16:39:11Z",
+  "provider_resource_created": true,
+  "one_use_grant_consumed": true,
+  "watchdog_journals": [
+    "/home/ecs-user/aad-scratch/d1_replay_001/watchdog_0tjfzjnmpf64pn.jsonl"
+  ],
+  "watchdog_owns_pod": "0tjfzjnmpf64pn",
+  "image_identity": {
+    "image_name": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404",
+    "observed": [
+      "580.159.04"
+    ],
+    "digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04"
+  },
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_fd2fb13d.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1,d1_replay_plan.json:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+    "SESSION_COMMIT": "fd2fb13da2944430cbc34a712dd7ae119f065530",
+    "SESSION_PLAN_HASH": "ce3223423a42caec71b5c7843709f6ee5a689e9a072f77510c33e67d65284241",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1_replay.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/experiments/stage-1/phase_d1/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "driver_job": {
+    "job_id": "autoinit_d1_replay",
+    "pid": 1515,
+    "workdir": "/workspace/aad",
+    "command": "/opt/train/bin/python /workspace/aad/scripts/pod/autoinit_d1_replay_driver.py --out artifacts/audit/autoinit_d1_replay --run-id d1_replay_001 --plan /workspace/aad/artifacts/stage1/d1_replay_plan.json --products /workspace/aad/artifacts/audit/autoinit_d1_replay/products --status /workspace/autoinit_d1_replay.status --device cuda",
+    "log_path": "/workspace/autoinit_d1_replay_run.log",
+    "status_path": "/workspace/autoinit_d1_replay.status",
+    "pid_path": "/workspace/jobs/autoinit_d1_replay.pid",
+    "descriptor_path": "/workspace/jobs/autoinit_d1_replay.job.json",
+    "exit_path": "/workspace/jobs/autoinit_d1_replay.exit",
+    "started_utc": "2026-10-07T13:55:47Z",
+    "start_channel_closed": true,
+    "confirmed_by": "descriptor_probe"
+  },
+  "stop_cause": {
+    "cause": "provider_stopped_or_terminated",
+    "pod_exists": false,
+    "desired_status": "TERMINATED",
+    "watchdog_took_an_action": false,
+    "watchdog_ticks": 15,
+    "elapsed_minutes": 14.5,
+    "hard_terminate_minutes": 173.6,
+    "over_hard_limit": false,
+    "_rule": "a pod that stops billing short of its own hard threshold, with a watchdog journal showing no action, was NOT stopped by this project. Causes outside it include an exhausted provider account balance, a host failure and an operator action."
+  },
+  "terminal": "POD_GONE",
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): the pod stopped billing at 15 min of 174 ($3.15); observed cause provider_stopped_or_terminated, which this project did not cause. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'checkpoint_hashes_matched', 'required_products_secured', 'report_inputs_verified'] are LOST. No event stream was truncated: this session declares none, and quiescence failed because a final_required artifact is missing rather than because a producer was mid-write. The missing artifacts are listed above.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": false,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": false,
+      "required_products_secured": false,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "relayed_events": {},
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-07T14:00:07+00:00"
+}

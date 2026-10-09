@@ -1,0 +1,156 @@
+{
+  "_what_this_is": "one complete pod-like sweep of D1's own declared pod selection \u2014 scripts/experiments/stage-1/phase_d1/tests \u2014 under the environment the D1 SessionRunner really hands setup: empty HOME, isolated HF_HOME, synthetic HF_TOKEN, every gitignored artifact this session does NOT stage hidden, and SESSION_KIND=d1. It is the condition a fresh D1 pod is actually in before its beam starts. C1 attempt 3R's setup test gate refused for $0.3482 with zero scientific stages run, which is what this record exists to make impossible to discover on a billing machine. RUN-OWNED: there is no pointer and no global readiness file, so no later run overwrites this evidence and this record makes no claim about any other experiment.",
+  "binding_rule": "this record binds the EXECUTABLE via two digests, and the REPOSITORY via swept_base_commit lineage. The digests ignore logs/ and docs/ so that paperwork does not invalidate a sweep; the lineage rule then permits exactly two post-sweep tracked paths -- this record, and (in an issued session) the canonical authorization artifact -- because the pod suite READS repository state and a documentation commit can change what it asserts.",
+  "counts": {
+    "error": 0,
+    "failed": 0,
+    "passed": 346,
+    "skipped": 0
+  },
+  "d1_harness_digest": "3b59b948001568895e111adf592a043d0c2da1103f3d1bb26bc56bc77bc96c63",
+  "d1_harness_n_files": 96,
+  "environment": {
+    "artifact_hiding": "manifest-derived positive staged view: 11 files visible from the C1 SetupManifest, 1850 hidden as the computed complement and 0 host-local store(s) hidden as well. NOT the simulator's generic default.",
+    "dev_hf_cache_visible": false,
+    "hf_home_mode": "isolated \u2014 $PODSIM_ENV_ROOT/hf, outside the dev cache",
+    "hf_hub_cache_resolution": "$HF_HOME/hub, set explicitly as HF_HUB_CACHE",
+    "home_mode": "empty \u2014 a fresh directory created by the simulator",
+    "host_local_rule": "an absolute path outside the repository named by a document the launcher's gates read. The session stages an asset's bytes, never the store it was frozen in, so a pod has none of these. Derived from those documents rather than listed, and hidden by rename for the duration of the sweep.",
+    "host_local_stores_hidden": [],
+    "token_mode": "synthetic, non-empty; never printed, never a real credential"
+  },
+  "evidence": {
+    "executions_of_this_tree": [
+      "exec-001"
+    ],
+    "junit": "/home/ecs-user/aad-scratch/podsim/sweep-77aedc90f93f/exec-001/junit.xml",
+    "junit_sha256": "e6b6d363dfc7b7fdc9c6a8a505e040bd24ddd8cb6b213e9f484555026037257c",
+    "pytest_log": "/home/ecs-user/aad-scratch/podsim/sweep-77aedc90f93f/exec-001/pytest.log",
+    "pytest_log_sha256": "fe95673637fcb280fa275a5da9f72609e5fb2e9282b6395e1ef0ee0c5fdd8027"
+  },
+  "execution_id": "sweep-77aedc90f93f/exec-001",
+  "expected_environment_skips": [],
+  "failed_nodeids": [],
+  "findings": {
+    "all_skipped_nodeids": [],
+    "battery_staged_role_nodeid": null,
+    "battery_staged_role_outcome": null,
+    "counts": {
+      "error": 0,
+      "failed": 0,
+      "passed": 346,
+      "skipped": 0
+    },
+    "expected_environment_skips": [],
+    "failed_nodeids": [],
+    "known_non_environment_skips": [],
+    "n_skipped": 0,
+    "problems": [],
+    "skip_reasons": {},
+    "skip_set_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "skip_set_is_forensic_not_scientific": "the complete skip list exists so a pod/sweep divergence can be NAMED. The total is not a target and carries no scientific content; only the declared groups above express expectations.",
+    "unexpected_environment_skips": [],
+    "verdict": "PASS"
+  },
+  "invocation_realized": {
+    "declared_pytest_arguments": [
+      "scripts/experiments/stage-1/phase_d1/tests",
+      "-q"
+    ],
+    "declared_test_ignores": [],
+    "declared_test_paths": [
+      "scripts/experiments/stage-1/phase_d1/tests"
+    ],
+    "hidden_paths_passed": true,
+    "invoked_pytest_arguments": [
+      "scripts/experiments/stage-1/phase_d1/tests",
+      "-q"
+    ],
+    "invoked_test_ignores": [],
+    "problems": [],
+    "rule": "a manifest fact that is hashed but not realized in the invocation is refused here, before any PASS record exists",
+    "setup_environment_keys": [
+      "BUNDLE_NAME",
+      "SESSION_ASSETS",
+      "SESSION_AUTH_PATH",
+      "SESSION_COMMIT",
+      "SESSION_KIND",
+      "SESSION_PLAN_HASH",
+      "SESSION_RELAY_INPUTS",
+      "SESSION_SETUP_MARKERS",
+      "SESSION_STATUS",
+      "SESSION_TEST_IGNORES",
+      "SESSION_TEST_PATHS",
+      "TEACHER_REVISION",
+      "TESTS_MAX_S",
+      "UV_MAX_S"
+    ],
+    "setup_environment_realized": true,
+    "staging_contract_digest": "f2414740650ccfad4bed7c81436811b879598416805c9f02ad1705dc44b087db"
+  },
+  "n_tests": 346,
+  "pod_test_environment_digest": "b02627452fa43af8aec23e5ab8d1efc320629eef3e1736139848bf824a18883c",
+  "pod_test_environment_n_files": 171,
+  "pod_test_environment_named_files": [
+    "conftest.py",
+    "scripts/experiments/conftest.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_authorization.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_design.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_driver_dispatch.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_execution_contract.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_launch_contract.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_pod_environment.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_qualification_driver.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_runner_interface.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_d1_selection_and_products.py",
+    "scripts/experiments/stage-1/phase_d1/tests/test_frozen_path_monotonicity.py",
+    "scripts/pod/simulate_pod_env.sh"
+  ],
+  "problems": [],
+  "pytest_command": ".venv/bin/python -m pytest scripts/experiments/stage-1/phase_d1/tests -q",
+  "pytest_command_note": "verbatim from PODSIM_CMD. Test SELECTION is the session's own SESSION_TEST_IGNORES; --junitxml is appended by the simulator as a reporting flag so every skip and pass can be named exactly.",
+  "record_kind": "launch_bound",
+  "record_kind_note": "diagnostic: proves the pod-like suite passes on this exact tree and that the readiness machinery works. A launch-bound record is the one a maintainer-approved launch rests on. It is produced on the final CLEAN PRE-AUTHORIZATION tree -- after the grant and all metadata are committed, BEFORE the authorization is issued -- because a sweep run after issuance adds a second path to the lineage diff and session_commit_gate refuses.",
+  "schema": "aadistill.autoinit.d1_pod_environment/v1",
+  "seconds": 213.9,
+  "self_sha256": "a53edfc1d8534ced05f6e85abbe0222612fee0d47cd95934a39a0d9ac531886e",
+  "setup_environment": {
+    "BUNDLE_NAME": "aad_autoinit_77aedc90.bundle",
+    "SESSION_ASSETS": "state_eval_v1:artifacts/stage1,e8_calibration_v1:artifacts/stage1,reasoning_heavy_v2:artifacts/stage1",
+    "SESSION_AUTH_PATH": "logs/stages/stage-1/phase_d1/runs/spec_check/governance/authorization.json",
+    "SESSION_COMMIT": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f",
+    "SESSION_KIND": "d1",
+    "SESSION_PLAN_HASH": "83cd49ff2e833909936e36b96c1787cccf4c778920279d2c7b91c4bdef4850d5",
+    "SESSION_RELAY_INPUTS": "[]",
+    "SESSION_SETUP_MARKERS": "ENV_READY REPO_READY ASSETS_STAGED TRAIN_ENV TEACHER_READY TESTS_OK AUTHORIZATION_OK SETUP_DONE",
+    "SESSION_STATUS": "/workspace/autoinit_d1.status",
+    "SESSION_TEST_IGNORES": "",
+    "SESSION_TEST_PATHS": "scripts/experiments/stage-1/phase_d1/tests",
+    "TEACHER_REVISION": "768f209d9ea81521153ed38c47d515654e938aea",
+    "TESTS_MAX_S": "2700",
+    "UV_MAX_S": "1500"
+  },
+  "setup_environment_source": "SessionSpec.setup_environment(session_commit=<swept HEAD>, bundle=canonical_bundle_name(<swept HEAD>)) -- the same production method SessionRunner._launch calls. Not a reconstructed subset. No secret is stored: none of these keys carries one.",
+  "simulator": "scripts/pod/simulate_pod_env.sh",
+  "simulator_command": "<SessionSpec.setup_environment: 14 keys> HIDDEN_PATHS=<1850 derived paths, contract f2414740650c> PODSIM_CMD=<derived> PODSIM_JUNIT=/home/ecs-user/aad-scratch/podsim/sweep-77aedc90f93f/exec-001/junit.xml PODSIM_LOG=/home/ecs-user/aad-scratch/podsim/sweep-77aedc90f93f/exec-001/pytest.log bash scripts/pod/simulate_pod_env.sh",
+  "simulator_exit_code": 0,
+  "staging_contract": {
+    "digest": "f2414740650ccfad4bed7c81436811b879598416805c9f02ad1705dc44b087db",
+    "local_asset_destinations": [
+      "artifacts/stage1/e8_calibration_v1",
+      "artifacts/stage1/reasoning_heavy_v2",
+      "artifacts/stage1/state_eval_v1"
+    ],
+    "n_hidden_files": 1850,
+    "n_staged_files": 11,
+    "relay_file_destinations": [],
+    "session_kind": "d1",
+    "test_ignores": []
+  },
+  "staging_contract_digest": "f2414740650ccfad4bed7c81436811b879598416805c9f02ad1705dc44b087db",
+  "staging_contract_rule": "derived from spec(args).setup -- the same SetupManifest the SessionRunner launches. Relay inputs are modelled at FILE granularity (a RelayInput stages one named file into its dest, not the directory), local assets as whole trees. The hidden set is the computed complement, never a declared list.",
+  "swept_base_commit": "77aedc90f93f7f8b69e62bdf03de4dcc22ca273f",
+  "tree_clean": true,
+  "unexpected_environment_skips": [],
+  "verdict": "PASS"
+}

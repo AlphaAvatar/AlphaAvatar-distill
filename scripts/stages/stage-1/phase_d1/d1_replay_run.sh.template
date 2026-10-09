@@ -1,0 +1,12 @@
+#!/bin/bash
+# D1 finalist reconstruction: two digest-pinned fixed paths on one L40S.
+# Writes to the PER-ATTEMPT log the acquisition loop classifies from; a shared
+# append-mode log made one attempt's abort line decide another attempt's fate.
+cd /home/ecs-user/AlphaAvatar-distill
+LOG="${AAD_ATTEMPT_LOG:-/home/ecs-user/aad-scratch/d1_replay_001.launcher.log}"
+PYTHONPATH=src .venv/bin/python scripts/stages/stage-1/phase_d1/autoinit_d1_replay_launch.py \
+  --scr /home/ecs-user/aad-scratch/d1_replay_001 \
+  --run-id d1_replay_001 \
+  --session-commit SESSION_COMMIT_PLACEHOLDER \
+  --bundle aad_autoinit_BUNDLE_PLACEHOLDER.bundle >> "$LOG" 2>&1
+echo "LAUNCHER_EXIT=$?" >> "$LOG"

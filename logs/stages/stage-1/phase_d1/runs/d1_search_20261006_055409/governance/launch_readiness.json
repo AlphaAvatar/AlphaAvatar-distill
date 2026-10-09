@@ -1,0 +1,116 @@
+{
+ "_contract": "LAUNCH-BOUND. Every fact a launch consumes, derived at $0 immediately before it, with the identity it is bound to. It AUTHORIZES NOTHING: the one-use artifact does that, and this is what launch_readiness_gate checks the live invocation against.",
+ "_generated_by": "scripts/autoinit/write_d1_launch_readiness.py",
+ "arm": "supervised_target",
+ "authorization": {
+  "authorization_sha256": "b318eee03bcf322267383afc7a72e8e816e2d522c3096762c1c9236cf5468be8",
+  "authorized_stages": [
+   "A",
+   "B",
+   "C",
+   "D"
+  ],
+  "config_hash": "662dc65c0d0a8ae9f05920eaf51beef94861e42034d17b3b471f831de4b748bb",
+  "expected_usd": 12.5429,
+  "granted_utc": "2026-10-06T05:54:09+00:00",
+  "hard_cap_usd": 21.4897,
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef",
+  "path": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_055409/governance/authorization.json",
+  "run_id": "d1_search_20261006_055409",
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+ },
+ "authorizes": "nothing",
+ "balances_after_this_session": {
+  "formal_remaining_usd": 40.7534,
+  "package_remaining_usd": 45.7793,
+  "project_remaining_usd": 39.7744
+ },
+ "bundle": {
+  "_derived": "from the session commit; an alias fails at $0",
+  "_verified_by": "autoinit_d1_launch.bundle_staged_gate, which downloads this object and round-trips it. This record states the name and the local digest; it does NOT claim the remote object was verified.",
+  "local_record": "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_055409/governance/bundle.json",
+  "local_sha256": "f5eae8d9dcf3664c7f6fb8be7eb8ab035e03b48c1798b72779b505a93d588a5b",
+  "name": "aad_autoinit_dff810e8.bundle",
+  "relay_repo": "AlphaAvatar/aadistill-artifacts",
+  "repo_path": "transfer/aad_autoinit_dff810e8.bundle",
+  "staged": true
+ },
+ "derived_session": {
+  "_basis": "MEASURED production Top-K invocation, rebuilt end to end: 1194.2624 s",
+  "container_disk_gb": 400,
+  "container_disk_usd": 1.0422,
+  "expected_minutes": 656.95,
+  "expected_usd": 12.5429,
+  "hard_ceiling_minutes": 1125.55,
+  "hard_ceiling_usd": 21.4897,
+  "price_per_hour": 1.09
+ },
+ "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+ "evidence_layout": {
+  "_one_authoritative_layout": "the driver's --out, the relay's evidence spec, the report fetch and both artifact specs all name this directory",
+  "driver_out": "artifacts/audit/autoinit_d1"
+ },
+ "four_conditions": "ALL FOUR PASS",
+ "generated_utc": "2026-10-06T06:01:05+00:00",
+ "harness": {
+  "digest": "7f57922c138c36eb80e5711924b57e7ef0c93c73df86f1a12ca92356f1fa24ad",
+  "digest_at_bound_commit": "7f57922c138c36eb80e5711924b57e7ef0c93c73df86f1a12ca92356f1fa24ad",
+  "entry_points": [
+   "scripts/pod/autoinit_d1_launch.py",
+   "scripts/pod/autoinit_d1_driver.py",
+   "scripts/experiments/stage-1/phase_d1/d1_session.py",
+   "scripts/experiments/stage-1/phase_d1/d1_authorization.py",
+   "scripts/pod/collect_artifacts.py"
+  ],
+  "n_files": 96,
+  "unchanged": true
+ },
+ "launch_invocation": {
+  "_must_use": "dff810e8a896f28ec826633377a1781fbb7aca36",
+  "command": "PYTHONPATH=src:scripts .venv/bin/python scripts/pod/autoinit_d1_launch.py --scr <scr> --session-commit dff810e8a896f28ec826633377a1781fbb7aca36 --bundle aad_autoinit_dff810e8.bundle --run-id d1_search_20261006_055409 --arm supervised_target",
+  "head_at_preparation": "0dbe8325a73f5bb35cc77d9afbf2a8a01c57d456",
+  "why": "the authorization binds the commit whose closure it measured, and session_commit_gate refuses any other. Launching at the bound commit runs exactly the tree that was verified."
+ },
+ "lineage": {
+  "authorized_base": "35be7dadfa6887166c32cf44961444787f54519c",
+  "changed_paths": [
+   "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_055409/governance/authorization.json"
+  ],
+  "descends_from_base": true,
+  "ok": true,
+  "reason": "only logs/stages/stage-1/phase_d1/runs/d1_search_20261006_055409/governance/authorization.json differs from the authorized base",
+  "session_commit": "dff810e8a896f28ec826633377a1781fbb7aca36",
+  "unexpected_paths": []
+ },
+ "live_price": {
+  "_quoted": "live, immediately before issuance",
+  "gpu": "NVIDIA L40S",
+  "stock_status": "Low",
+  "usd_per_hour": 1.09
+ },
+ "no_resource_exists": true,
+ "open_blockers": [],
+ "products_owed": {
+  "gate": "ArtifactPolicy.products_secured requires BOTH, identity-verified at the destination, read from the authoritative stage1_selection.json in <scr>/store",
+  "what": "the committed Top-2 checkpoints",
+  "why": "the next D1 stage trains recovery probes FROM these initializations and the screening price does not fund rebuilding two complete structural paths"
+ },
+ "run_id": "d1_search_20261006_055409",
+ "schema": "aadistill.phase_d1.launch_readiness/v1",
+ "session_commit": "dff810e8a896f28ec826633377a1781fbb7aca36",
+ "stage_id": "1",
+ "staged_science_inputs": {
+  "local_assets": [
+   "state_eval_v1:artifacts/stage1",
+   "e8_calibration_v1:artifacts/stage1",
+   "reasoning_heavy_v2:artifacts/stage1"
+  ],
+  "state_eval": {
+   "content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc",
+   "items_sha256": "2a4a1d3bf8ed165b4cfa881f75488bcbbdee5e74d34afddb91fecbf76d1e106d",
+   "manifest_sha256": "95204907efa7efc681ef334f223073da6ca35dbf889b029a7672f5817ab72b05",
+   "n_items": 80
+  },
+  "teacher_revision": "768f209d9ea81521153ed38c47d515654e938aea"
+ }
+}

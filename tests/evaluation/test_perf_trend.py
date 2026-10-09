@@ -20,7 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "scripts" / "evaluation"))
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
-import plot_perf_trend as pt
+from shared.evaluation import plot_perf_trend as pt
 from aadistill.evaluation.behavior import behavior_score
 
 
@@ -58,10 +58,10 @@ def test_recorded_scores_match_their_scorecards():
     skips when the machine has none.
     """
     cards = {
-        "s1_ffn_norm_v0": "artifacts/stage3/reference_scorecards/s1_ffn_norm_v0_step660_behavior_v0.json",
-        "s2_blocks_v1": "artifacts/stage3/reference_scorecards/s2_blocks_v1_step2700_behavior_v0.json",
-        "s2v1_from_s1": "artifacts/stage3/s2v1_from_s1/eval_behavior_v0.json",
-        "s2v1_from_init": "artifacts/stage3/s2v1_from_init/eval_behavior_v0.json",
+        "s1_ffn_norm_v0": "artifacts/stages/stage-3/reference_scorecards/s1_ffn_norm_v0_step660_behavior_v0.json",
+        "s2_blocks_v1": "artifacts/stages/stage-3/reference_scorecards/s2_blocks_v1_step2700_behavior_v0.json",
+        "s2v1_from_s1": "artifacts/stages/stage-3/s2v1_from_s1/eval_behavior_v0.json",
+        "s2v1_from_init": "artifacts/stages/stage-3/s2v1_from_init/eval_behavior_v0.json",
     }
     recorded = {a["id"]: a["behavior"] for a in pt.load()["attempts"] if "behavior" in a}
     checked = 0

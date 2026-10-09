@@ -58,8 +58,8 @@ from aadistill.initialization.scoring.positions import (  # noqa: E402
 
 #: The two mixtures a search actually calibrates on. Skipped rather than faked
 #: when absent: the point of reading them is that they are the frozen artifact.
-MIXTURES = ("artifacts/stage1/e8_calibration_v1/items.jsonl",
-            "artifacts/stage1/reasoning_heavy_v2/items.jsonl")
+MIXTURES = ("artifacts/stages/stage-1/e8_calibration_v1/items.jsonl",
+            "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl")
 
 #: THE PATHS ARE LITERAL IN THE CONDITION, deliberately. `audit_skip_predicates`
 #: resolves a filesystem premise by reading the path out of the predicate's
@@ -69,8 +69,8 @@ MIXTURES = ("artifacts/stage1/e8_calibration_v1/items.jsonl",
 #: decide it the same way". Writing the literals here is what makes the parity
 #: derivable instead of owed.
 requires_the_frozen_mixtures = pytest.mark.skipif(
-    not (REPO / "artifacts/stage1/e8_calibration_v1/items.jsonl").is_file()
-    or not (REPO / "artifacts/stage1/reasoning_heavy_v2/items.jsonl").is_file(),
+    not (REPO / "artifacts/stages/stage-1/e8_calibration_v1/items.jsonl").is_file()
+    or not (REPO / "artifacts/stages/stage-1/reasoning_heavy_v2/items.jsonl").is_file(),
     reason=("the frozen calibration mixtures are gitignored out-of-tree "
             "assets; a checkout without them has no tags to read"))
 

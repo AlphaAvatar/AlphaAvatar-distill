@@ -1,0 +1,179 @@
+{
+ "_booked_recomputed_from_components": "0.1550 + 0.2116 + 0.1844 + 0.2634 + 0.7156 + 0.8400 + 1.0790 = 3.449",
+ "_ceiling_amendment_2026_10_07": {
+  "_the_binding_constraint_is_now_the_allowance_not_this_ceiling": "the GPU ENGINEERING allowance this campaign is charged to has $3.4959 remaining of $20.0000 after the five settled subruns. So the $10.0000 ceiling is headroom rather than available money, and the real bound on the next attempt is the allowance. The session prices at $2.0820 hard, which fits in both. Stated here because a ceiling that exceeds its own funding source is exactly the kind of number that reads as available.",
+  "from_usd": 3.5,
+  "granted_by": "MAINTAINER DECISION 2026-10-07, in response to a reported budget boundary: the $3.5000 ceiling had $1.8700 left and the session priced at $2.0856 hard, so both leaves did not fit and `plan_session` refused rather than shrinking the run to fit.",
+  "to_usd": 10.0,
+  "what_it_does_not_change": "the science. No protocol, no candidate set, no adoption criterion and no measurement moves. The session still decides nothing.",
+  "what_it_funds": "both leaves in one session at honest margins, plus headroom for a corrected attempt if one is needed."
+ },
+ "_cheapest_first_saved_the_fourth": "the driver orders paths by the cost of their FIRST operator, so the wrong root state surfaced after a 64-second FFN step rather than after a 41-minute DEPTH step. Evidence was pulled off-pod and the pod removed before q4's DEPTH began, which is about $0.75 the ordering did not spend.",
+ "_contract": "Cumulative cost of rematerializing D1's two unretained quality-order finalists, across every resource and subrun. A rerun does NOT reset it (AGENTS.md P12.1), so the ceiling a new attempt may be issued against is this ceiling MINUS the settled spend MINUS the teardown reserve.",
+ "_cost_derivation": "each subrun is (pod deletion or observed-gone timestamp - create timestamp) at the accepted $1.09/h, read from the launcher's own per-attempt log. The launcher's running figures agree to the cent where it printed them ($0.20 and $0.26 for subruns 2 and 4); subruns 1 and 3 aborted in setup before a final figure was printed, so theirs are derived from the timestamps the same way.",
+ "_each_subrun_is_its_own_commit": "four attempts, four trees: each repair was committed, swept and bound into its own authorization before the next pod. A corrected attempt is an explicit new subrun (P12.1), never an invisible provider retry.",
+ "_host_driver_versions_observed": {
+  "_why_this_is_recorded": "The GPU TYPE is pinned -- success here is digest equality, so an architecture substitution would manufacture a finding -- but the host DRIVER version is not selectable on this provider. r6 reproduced depth.causal_kl_greedy_v1 byte-exactly on 580.126.09, the same driver the search ran, so that result is driver-matched. r7 drew 595.91.07, which makes it informative either way: if DEPTH matches there too, the driver is not the discriminator and an FFN outcome stands on its own; if DEPTH stops matching, the driver is a confound that has to be controlled before any mismatch can be called material.",
+  "r4": "580.159.04",
+  "r5": "580.126.09",
+  "r6": "580.126.09",
+  "r7": "595.91.07",
+  "search d1_search_20261006_210210": "580.126.09"
+ },
+ "_package_id": "the C1 execution package, so the deriver charges this to its GPU ENGINEERING allowance. This session trains nothing, measures nothing and selects nothing -- it reconstructs two checkpoints the completed search already measured -- so it is engineering, not formal science.",
+ "_result": {
+  "_four_inputs_one_per_failed_subrun": "r4 the root state; r5 the operator config (Top-200 reference support and the supervised-target position policy, against sha256({})); r6 the two execution knobs that no hash covers (micro_batch_size=3, length_sorted_v1). Every one was an input the search recorded and the replay did not carry. None was a property of the checkpoints.",
+  "_the_driver_was_never_the_discriminator": "r7 ran on host driver 595.91.07 where the search and r6 both ran 580.126.09, and reproduced exactly across that difference. So r6's byte-exact DEPTH was not a driver-matched artefact, and the execution configuration was the whole cause.",
+  "differ": [],
+  "identities_required": [
+   "artifact_digest",
+   "weights_digest",
+   "single_shard_sha256",
+   "arch_signature"
+  ],
+  "q2": {
+   "adopted": true,
+   "seconds": 963.2,
+   "single_shard_sha256": "ca2d7368e3adce3e\u2026",
+   "state_id": "afd50c9ff0e3d20542bb5473ea745b55"
+  },
+  "q4": {
+   "adopted": true,
+   "seconds": 1280.3,
+   "single_shard_sha256": "973d40e93f784eed\u2026",
+   "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc"
+  }
+ },
+ "_status_is_derived_by": "filed per paid subrun against this ledger, which owns every draw; booked_usd is recomputed from the components.",
+ "_teardown_reserve": "held back so a session that reaches its ceiling can still be torn down and reconciled rather than discovering it cannot afford to stop.",
+ "_what_the_four_failures_have_in_common": "every one was in the replay HARNESS and none was in the science. No candidate was selected, no measurement was taken, no frozen protocol moved, and the completed search's 92 expansions, 12 leaves, committed ranking and frozen Top-4 are untouched by all of it. Two leaves (quality positions 1 and 3) were already secured and identity-verified off-pod by the search session itself and are unaffected.",
+ "authorization": "logs/budget/approvals/autoinit_d1_replay_authorization.json",
+ "authorizes": "nothing by itself; a session still needs the live price, the four limit checks, the account-balance gate and the same-failure gate to pass",
+ "booked_usd": 3.449,
+ "campaign_id": "d1_finalist_rematerialization",
+ "ceiling_usd": 10.0,
+ "inherited_spend": [],
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "schema": "aadistill.engineering_campaign/v1",
+ "status": "CLOSED -- 7 paid subruns, $3.4490 of $10.0000. Both unretained quality-order finalists reproduced EXACTLY and are secured off-pod with their digests re-derived from the arrived bytes and again independently on the development host.",
+ "subruns": [
+  {
+   "cost_usd": 0.155,
+   "elapsed_minutes": 8.53,
+   "gpu": "NVIDIA L40S",
+   "notes": "`D1SessionError: the frozen state-eval asset is not staged at artifacts/stage1/state_eval_v1`, at TESTS_OK. The session had declared only the two calibration mixtures on the reasoning that it evaluates nothing. That inverted the rule: a session declares what the SETUP requires, not what it reads, and this session's `test_paths` points the pod's blocking gate at D1's own suite, which loads that asset. Repaired by declaring the search session's proven three.",
+   "outcome": "SETUP FAILED -- the frozen state-eval asset was not staged",
+   "pod_id": "psl88q7qgqu44t",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "ca97e4e6f42ca8b1ad08ac1f9445f2f995518b80",
+   "stages_run": [
+    "setup(failed)"
+   ],
+   "subrun_id": "r1"
+  },
+  {
+   "cost_usd": 0.2116,
+   "elapsed_minutes": 11.65,
+   "gpu": "NVIDIA L40S",
+   "notes": "`KeyError: no calibration profile 'calib.domain_balanced@v1'; registered: []`. The driver had registered adapters and the C2 operators; calibration profiles are a SEPARATE registry, and `d1_session._register_frozen_operators` is the single owner of the list in the order the search fills it. The GPU qualification's first subrun failed the same way -- three of four registries filled -- so this was the second time one partial registration cost a pod. Repaired at both sites, with a regression that mutation-fails without it.",
+   "outcome": "DRIVER FAILED 5 s into step 0 -- an unfilled process-global registry",
+   "pod_id": "02oef2ib958x6j",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "1a8c3d40d1624f0d78af4c788031ec2e70cbf1f1",
+   "stages_run": [
+    "setup",
+    "driver(failed)"
+   ],
+   "subrun_id": "r2"
+  },
+  {
+   "cost_usd": 0.1844,
+   "elapsed_minutes": 10.15,
+   "gpu": "NVIDIA L40S",
+   "notes": "`ReplaySourceError: the state journal is not at /home/ecs-user/aad-scratch/.../states.jsonl`. The r2 repair's own regression called `replay_plan()`, which reads the 67 MB journal from an out-of-tree dev-box path, and the pod test gate ran it where that path does not exist. A pod for a test of mine. Repaired by reading the design's `frozen_implementations` mapping and the two declared profiles from the committed tree instead -- which is what a pod can actually answer.",
+   "outcome": "SETUP FAILED -- a regression of mine that could not run on a pod",
+   "pod_id": "29l0qxxx1i6906",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "7efa59c5982f75d02c3855b56171ce6cf218940f",
+   "stages_run": [
+    "setup(failed)"
+   ],
+   "subrun_id": "r3"
+  },
+  {
+   "cost_usd": 0.2634,
+   "elapsed_minutes": 14.5,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_001",
+   "gpu": "NVIDIA L40S",
+   "notes": "`ffn.activation_importance_v0` ran for 64 s and produced 524493fde06f... against the pinned 292e36f13829.... NOT a finding about the checkpoint: the reconstruction never reproduced the historical execution state, so there was nothing to compare. The driver's `load_root` was a bare `AutoModelForCausalLM.from_pretrained`, inheriting the teacher's published `use_cache: true`; the search's driver sets `use_cache = False` on the root before the beam runs, and `adapter.build_config` carries the parent's whole `to_dict()` into every child's `config.json` and therefore its `config_sha256`. The pre-launch check behind the comment asserting 'one root state, no reconstruction needed' had compared each level-0 expansion's OPERATOR `config_hash` -- uniform by construction, one value per calibration profile -- and not the MODEL config. Repaired by deriving the root state from the mechanism and resolving it against the recorded identities at $0; see evidence/root_state_derivation.json.",
+   "outcome": "DIGEST MISMATCH at q2 step 0 -- the replay started from the wrong ROOT STATE",
+   "pod_id": "0tjfzjnmpf64pn",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "fd2fb13da2944430cbc34a712dd7ae119f065530",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0"
+   ],
+   "subrun_id": "r4"
+  },
+  {
+   "cost_usd": 0.7156,
+   "elapsed_minutes": 39.4,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "The root-state repair held: q2's step 0 produced 0e49d105..., a different value from r4's 524493fd..., so the derived root was in force. But `materialize_fixed_path` built its hashed operator config as `{\"n_calibration_items\": n, **step.config}` -- no position policy, no distribution support -- so every operator ran under the full-vocabulary default and the incumbent policy. The search ran under reference_topk_tail_v1 (Top-200) and supervised_target. Recorded config_hash 464cb782ea8095 / 3a0f151e3f44b6; the replay's was 44136fa355b367, which is sha256 of {}. CORROBORATED BY TIMING BEFORE IT WAS DIAGNOSED: the same DEPTH operator, same profile, same L40S, same image and driver 580.126.09 as the search, took 1178.6 s in the search and 1732.5 s here -- full vocabulary holds O(T*V) where the sketch holds O(T*K). NOT MATERIAL. The mechanism did not reproduce the historical execution state, so the mismatch says nothing about the checkpoints. Repaired by one shared owner for the hashed config (planning/operator_config.py, used by both BeamSearch and the fixed path, reproducing the recorded hash exactly) plus FixedPathStep.expected_config_hash, which pins the INPUTS and is checked before the operator runs -- microseconds instead of 29 minutes. All 8 of 8 steps now agree at $0.",
+   "outcome": "DIGEST MISMATCH on both leaves at step 0 -- the operators ran under a DIFFERENT SCORING PROTOCOL from the search",
+   "pod_id": "1mgt50aapad7hv",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "ef1aac412eab640af20add9a923a463bdd948fd6",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0",
+    "q4 step 0"
+   ],
+   "subrun_id": "r5"
+  },
+  {
+   "cost_usd": 0.84,
+   "elapsed_minutes": 46.3,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "The operator-config repair held: every expected_config_hash check passed, and q4 step 0 -- the DEPTH operator, 1610.35 s of greedy causal-KL search -- matched its pinned digest e63a36e4e03b exactly. That is the first operator this programme has reproduced bit-for-bit across hosts. FFN mismatched at q2 step 0 (expected 292e36f13829, got 702e1e497d49) and q4 step 1 (expected 1bfd91c76373, got c12faacf5b54). CAUSE, single and specific: the two EXECUTION knobs. All eight recorded steps carry micro_batch_size=3 and calibration_batch_packing=length_sorted_v1; `materialize_fixed_path` defaults to DEFAULT_EXECUTION, which is 4 and original_order_v1, and the driver never passed D1's. These are deliberately NOT hashed -- they are runtime knobs -- so the config_hash pin could not see them. WHY FFN AND NOT DEPTH: DEPTH's greedy block choice compares KL gaps far larger than batch-order float noise; FFN selects the top 3072 of 9728 neurons, and near that cutoff the importance scores are dense enough that a different reduction order flips which neurons are kept. This is the documented sensitivity FixedPathStep.config was added for -- attention.causal_kl_v1 selects a different head map at a different calibration forward batch size. NOT MATERIAL: an input the search recorded and the replay did not carry, which is the fourth instance of that one class. A near-miss worth recording: the trace also carries stats_spec=4dd0e23a, against DEFAULT_STATS_SPEC's 08b0dffb -- but only on the two ATTENTION steps, because that operator declares its own required spec. Checking per-step rather than in aggregate stopped a repair to something that was not broken.",
+   "outcome": "PARTIAL REPRODUCTION. depth.causal_kl_greedy_v1 reproduced BYTE-EXACTLY; ffn.activation_importance_v0 did not, in both leaves",
+   "pod_id": "m0p1decj1an2mc",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "9dd6bc019ffbcaddb96ea966c6fd708bb3709c83",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 step 0",
+    "q4 steps 0-1"
+   ],
+   "subrun_id": "r6"
+  },
+  {
+   "_teardown": "THE GATE BLOCKED and the pod was removed by hand. `teardown gate: allowed=False failed=artifact_manifest_created` -- the collector's manifest step had returned rc=1 earlier -- so the launcher retained the pod for evidence and exited 11, with ownership VERIFIED (watchdog pid 1376924 live, 139 min hard cap). That is the gate behaving correctly: it refuses to delete a pod whose artifact manifest it could not create. But both products were ALREADY secured and identity-verified off-pod at that point, so the pod was pure cost; it was removed with `runpodctl` and the provider confirms gone, pods []. The manifest failure is an ordinary collector defect to repair, not a reason to hold a billing resource.",
+   "cost_usd": 1.079,
+   "elapsed_minutes": 59.4,
+   "evidence": "logs/stages/stage-1/phase_d1_replay/runs/d1_replay_002",
+   "gpu": "NVIDIA L40S",
+   "notes": "q2 afd50c9f: 963.2 s, steps [FFN 59.92, DEPTH 843.53, WIDTH 31.74, ATTENTION 10.82]. q4 3fcaf42e: 1280.3 s, steps [DEPTH 1155.7, FFN 48.15, ATTENTION 26.39, WIDTH 29.16]. n_adopted 2, MARKER:ALL_DONE. What made the difference: the execution configuration. FFN had failed in r5 and r6 and reproduced here at micro_batch_size=3 with length_sorted_v1 packing, the values all eight recorded steps carry. ACROSS A DIFFERENT DRIVER: this pod reported 595.91.07 where the search and r6 both ran 580.126.09, so the host driver was never the discriminator -- the execution configuration was. That also means r6's byte-exact DEPTH was not a driver-matched artefact. Four inputs had to be carried, one per failed subrun: the root state (r4), the operator config -- Top-200 reference support and the supervised-target position policy (r5), and the two execution knobs that no hash covers (r6). All three agreement checks now run at $0 before launch and again on the pod.",
+   "outcome": "COMPLETE. Both finalists reproduced EXACTLY -- all eight pinned steps, all four identities, differ: [] on both",
+   "pod_id": "mq4hnmcvkdbfgl",
+   "rate_usd_per_hour": 1.09,
+   "session_commit": "1301a297a0f10e5a7a559d7576bcbbab56bcf3da",
+   "stages_run": [
+    "setup",
+    "driver",
+    "q2 all 4 steps",
+    "q4 all 4 steps",
+    "fetch",
+    "teardown"
+   ],
+   "subrun_id": "r7"
+  }
+ ],
+ "teardown_reserve_usd": 0.1
+}

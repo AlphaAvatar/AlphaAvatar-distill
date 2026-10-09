@@ -28,7 +28,7 @@ REPO = Path(__file__).resolve().parents[2]
 CORE = REPO / "src/aadistill"
 
 _spec = importlib.util.spec_from_file_location(
-    "core_ownership_under_test", REPO / "scripts/architecture/core_ownership.py")
+    "core_ownership_under_test", REPO / "scripts/maintenance/architecture/core_ownership.py")
 OWN = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(OWN)
 
@@ -169,7 +169,7 @@ class TestCoreReadsRepositoryPaths:
     RESTORED = ('from pathlib import Path\n'
                 'def provider_cli_fallbacks():\n'
                 '    config = (Path(__file__).resolve().parents[2]\n'
-                '              / "configs/infrastructure/provider_cli.json")\n'
+                '              / "configs/shared/infrastructure/provider_cli.json")\n'
                 '    return tuple(config.read_text())\n')
 
     def test_the_restored_defect_is_caught(self):
@@ -402,7 +402,7 @@ class TestTheDeferralIsBoundedAndVisible:
         deferral is the review's set minus those — and their findings then
         COUNT, which is precisely what the constant's own docstring requires of
         a removal. They were not quietly dropped: their campaign-instance prose
-        was relocated to `docs/core-provenance.md`, which is the repair the
+        was relocated to `docs/maintenance/core-provenance.md`, which is the repair the
         `instance_prose` rule prescribes.
 
         What this refuses is the two ways of getting it wrong: repointing the

@@ -4,14 +4,14 @@ There are three suites and they are different things (AGENTS.md §2.8a):
 
 * the **core suite** — `pytest` — reusable framework behaviour under `tests/`;
 * a **current experiment suite** —
-  `pytest scripts/experiments/stage-1/phase_d1/tests`;
+  `pytest scripts/stages/stage-1/phase_d1/tests`;
 * **historical verification** — an explicit run of a closed experiment's tests.
 
 All three need the same two source roots importable and the same shipped
 registries populated. That is all this file does.
 
 **What it deliberately does NOT do.** It does not import
-`experiments.datasets`, `experiments.calibration` or any other experiment
+`shared.datasets`, `shared.calibration` or any other experiment
 registry. The root bootstrap used to, which meant collecting a core test
 required importing the application layer that registers one campaign's frozen
 assets — the coupling the 2026-10-03 test-boundary refactor removed. An

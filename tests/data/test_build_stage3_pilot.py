@@ -17,7 +17,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 _spec = importlib.util.spec_from_file_location(
-    "build_stage3_pilot", REPO_ROOT / "scripts" / "data" / "build_stage3_pilot.py"
+    "build_stage3_pilot", REPO_ROOT / "scripts/shared/data/build_stage3_pilot.py"
 )
 bsp = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(bsp)

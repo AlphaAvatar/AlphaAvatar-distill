@@ -24,9 +24,9 @@ What this stage consumes, and from where.
 
 ## Data
 
-* `data/warmup/warmup_v1.jsonl` — the warm-up corpus itself: five families — FineWeb-Edu, Dolly-15k, GSM8K, MBPP and a small project-authored set — deduplicated on content hash
-* `data/warmup/warmup_v1.manifest.json` — owns the per-source dataset id, revision, license, sample count and output hash. Read it rather than this page for any number
-* `data/warmup/holdout_v1.jsonl` — held-out FineWeb-Edu documents, disjoint from the warm-up corpus, kept for the Stage-1 perplexity gate
+* `data/stages/stage-0/warmup/warmup_v1.jsonl` — the warm-up corpus itself: five families — FineWeb-Edu, Dolly-15k, GSM8K, MBPP and a small project-authored set — deduplicated on content hash
+* `data/stages/stage-0/warmup/warmup_v1.manifest.json` — owns the per-source dataset id, revision, license, sample count and output hash. Read it rather than this page for any number
+* `data/stages/stage-0/warmup/holdout_v1.jsonl` — held-out FineWeb-Edu documents, disjoint from the warm-up corpus, kept for the Stage-1 perplexity gate
 
 ## How it runs
 
@@ -38,7 +38,7 @@ source of truth.
 
 ## Outputs
 
-* `artifacts/stage0/qwen3_4b_thinking_v1` — the statistics cache Stage 1 initializes from. Outside git; regenerable from the config and the corpus
+* `artifacts/stages/stage-0/qwen3_4b_thinking_v1` — the statistics cache Stage 1 initializes from. Outside git; regenerable from the config and the corpus
 
 ## Pipeline activity
 
@@ -71,8 +71,8 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
-* `configs/stage0/qwen3_4b_thinking.json`
-* `configs/stage0/qwen3_4b_thinking_v1.json`
+* `configs/stages/stage-0/qwen3_4b_thinking.json`
+* `configs/stages/stage-0/qwen3_4b_thinking_v1.json`
 
 ## Canonical data and artifact manifests
 
@@ -80,8 +80,8 @@ A dataset manifest lives beside the data it describes, and
 an artifact lives outside git with its manifest. Neither is
 copied here.
 
-* `data/warmup/warmup_v1.manifest.json`
-* `artifacts/stage0/qwen3_4b_thinking_v1`
+* `data/stages/stage-0/warmup/warmup_v1.manifest.json`
+* `artifacts/stages/stage-0/qwen3_4b_thinking_v1`
 
 ## Decisions
 

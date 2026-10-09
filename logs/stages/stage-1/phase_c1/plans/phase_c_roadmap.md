@@ -4,7 +4,7 @@
 > **Restructured 2026-09-17** by maintainer decision, after C1 returned a
 > verdict and C2's restricted Search-1 was accepted as validation evidence. The
 > programme is now four phases, C1–C4, and the shape they share is written down
-> once in [`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md)
+> once in [`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md)
 > as a family-neutral pattern rather than restated per phase.
 >
 > This file owns the **plan**. For current status read
@@ -219,7 +219,7 @@ Protocol and pricing:
 [`phase_c2_full_search_protocol.json`](../../phase_c2/plans/phase_c2_full_search_protocol.json) ·
 [`phase_c2_full_search_pricing.json`](../../phase_c2/plans/phase_c2_full_search_pricing.json).
 The space is **derived from the registry**, never written down:
-[`full_search_space.py`](../../../../../scripts/experiments/stage-1/phase_c2/full_search_space.py).
+[`full_search_space.py`](../../../../../scripts/stages/stage-1/phase_c2/full_search_space.py).
 
 > **Question C2.** With the promoted ATTENTION operator in the accepted library,
 > what is the globally preferred initialization composition when
@@ -359,7 +359,7 @@ incumbent is a legitimate terminal result.
 Two sessions, two authorizations, deliberately not combined:
 
 1. **full joint search** —
-   [`autoinit_phase_c2_full_search_driver.py`](../../../../../scripts/pod/autoinit_phase_c2_full_search_driver.py):
+   [`autoinit_phase_c2_full_search_driver.py`](../../../../../scripts/stages/stage-1/phase_c2_full_search/autoinit_phase_c2_full_search_driver.py):
    `bind_identities` → `full_joint_search` → `commit_top_k`, and it **stops**.
    It trains nothing, measures no behaviour, and has no code path into a
    behavioural stage. Executed end to end at toy scale, which found and closed a
@@ -410,7 +410,7 @@ If C3 does not promote, C4 does not run and the C2 incumbent stands.
 
 This is the same cycle as C1→C2, and that repetition is deliberate: it is a
 **pattern**, documented family-neutrally in
-[`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/OPERATOR_PROMOTION_CYCLE.md),
+[`../../../../../docs/OPERATOR_PROMOTION_CYCLE.md`](../../../../../docs/stages/stage-1/OPERATOR_PROMOTION_CYCLE.md),
 so a future teacher/student family, geometry or compression ratio reuses the
 machinery instead of a Qwen3-shaped copy of it.
 

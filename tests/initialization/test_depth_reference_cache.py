@@ -8,7 +8,7 @@ vocabulary x 4 B = **33.8 GiB** per invocation, and the OOM killer took the firs
 run that ever fed it the real mixture
 (`logs/stages/stage-1/phase_a/analyses/autoinit_phase_a_full_mixture_depth.json`).
 
-`scripts/training/search_depth_map.py` — the E8a script whose algorithm this
+`scripts/shared/training/search_depth_map.py` — the E8a script whose algorithm this
 operator declares it re-runs — already sized the cache and fell back to
 recomputing. The port dropped that. These tests pin the two properties that
 make the restored fallback safe to take automatically:

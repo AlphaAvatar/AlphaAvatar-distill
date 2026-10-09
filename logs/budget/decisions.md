@@ -1279,9 +1279,9 @@ these. `$0`, no pod, no GPU.
 
 - **Decision:** define a **family**, `d_series_behavioural_v1`, and freeze its
   allocation rule **today, before any D1 outcome exists**. Owner:
-  [`scripts/experiments/stage-1/phase_d_series/battery_family.py`](../../scripts/experiments/stage-1/phase_d_series/battery_family.py);
+  [`scripts/experiments/stage-1/phase_d_series/battery_family.py`](../../scripts/stages/stage-1/families/d_series/battery_family.py);
   record:
-  [`logs/shared/analyses/autoinit_d_series_battery_family.json`](../shared/analyses/autoinit_d_series_battery_family.json).
+  [`logs/shared/analyses/autoinit_d_series_battery_family.json`](../stages/stage-1/families/d_series/analyses/autoinit_d_series_battery_family.json).
 
   * **Six roles in a fixed build order**, each with its own frozen `rank_domain`
     string. Distinct domains give *independent* samples, not disjoint ones, so
@@ -3704,7 +3704,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** deduplicating profile-branched states after generation (rejected — they would still be generated and measured); keeping a single `model.safetensors` assumption and sharding only when forced (rejected — the failure is silent, and a hash of a missing file is the worst outcome); regenerating the control inside the search for uniformity (rejected — it would silently redefine what every historical behaviour number refers to); keeping NLL as a third objective with a large ε (rejected — E7 is evidence that it should not select at all, not that it should select weakly); five per-domain KLs as separate objectives (rejected for v1 — with six objectives over ~40 states almost nothing is dominated, so the tie-break rather than the dominance rule would be doing the selecting, which should be a decision rather than a side effect).
 - **Expected upside:** the first paid search is interpretable — the state count means something, the leaves are comparable to a real baseline, and no path dies for a reason E7 already invalidated. And it cannot fail on checkpoint semantics the dry run does not reach: sharding is now exercised by a CPU test with `max_shard_size="8KB"`.
 - **Risks:** delayed pruning widens the search — 39–56 states instead of 30–42, and the working-storage peak rises to **106 GiB** for Phase A. The budget margin against E8b's released $30.3667 is **$4.16** at the hard backstop, which is thin if the conditional third seed fires and setup goes badly. One further defect was found while fixing these: resume matched states from a journal written under a *different evaluation suite*, because state identity is the path and does not include the suite; restore now rejects a record whose `suite_hash` differs.
-- **Revisit when:** the five zero-cost prerequisites in [`autoinit_pilot_proposal.md`](../shared/analyses/autoinit_pilot_proposal.md) §3 are met. The statistics-pass GPU/CPU split remains the only reason every cost is a range.
+- **Revisit when:** the five zero-cost prerequisites in [`autoinit_pilot_proposal.md`](../stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md) §3 are met. The statistics-pass GPU/CPU split remains the only reason every cost is a range.
 
 ## 2026-08-12 — AutoInitializer v1: what is mechanical, and what the composite operator is for
 
@@ -3716,7 +3716,7 @@ The $0 full-subset audit ran (`scripts/autoinit/audit_tool_rendering.py`, all 20
 - **Alternatives considered:** decomposing the incumbent into four operators so the search space is uniform (rejected — it would silently redefine what `86fbba78…` means); checking operator contracts in tests only (rejected — the contract has to hold on a paid pod, where no test runs); a single scalar beam metric for simplicity (rejected on E7's evidence); hashing the calibration mixture by its file bytes (rejected — reformatting the JSON moves the file hash without changing a token, so the profile now re-derives E8a's `d65c1f40…` token-level identity from the loaded items).
 - **Expected upside:** the invariants that matter — intermediates never reaching recovery, leaves matching the target exactly, metrics binding to weights, order being preserved — are properties of the API rather than of reviewer attention. 112 tests, and the search core is proven family-agnostic against a non-transformers MoE fixture with structural fields and an operator kind the core has never seen.
 - **Risks:** the beam ranks on step-0 state metrics, and **nothing yet demonstrates that composed step-0 fidelity predicts post-recovery behaviour.** E7 showed one step-0-style metric does not. The Pareto policy and a generous Top-N mitigate but do not resolve this; the pilot's six probes are the first direct measurement of the correlation and must be reported either way. Two defects were found by the dry run that would otherwise have reached a pod: transformers derives `layer_types` from the layer count, so an inherited config is self-inconsistent after a depth change, and applying a spec by `setattr` after `from_dict` leaves derived fields describing the old geometry.
-- **Revisit when:** the prerequisites in [`autoinit_pilot_proposal.md`](../shared/analyses/autoinit_pilot_proposal.md) §3 are met — the state-evaluation suite and recovery search battery are built and leakage-checked, the halving plan is frozen, and the statistics-pass GPU/CPU split is measured. That last one is the only reason every cost in the proposal is a range.
+- **Revisit when:** the prerequisites in [`autoinit_pilot_proposal.md`](../stages/stage-1/phase_a/analyses/autoinit_pilot_proposal.md) §3 are met — the state-evaluation suite and recovery search battery are built and leakage-checked, the halving plan is frozen, and the statistics-pass GPU/CPU split is measured. That last one is the only reason every cost in the proposal is a range.
 
 ## 2026-08-05 — Experiment 3: baseline is P2-ceheavy, and LoRA gets no optimizer of its own
 
@@ -6671,7 +6671,7 @@ CalibrationError: calib.domain_balanced@v1:
   `stage2()`–`stage5()` orchestration with only training/generation stubbed.
 - **Decision:** execute them, and fix what execution found.
 
-  [`scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py`](../../scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py)
+  [`scripts/experiments/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py`](../../scripts/stages/stage-1/phase_a/tests/test_phase_a_stages1_5_execute.py)
   runs the real `PhaseADriver` stages **0 → 5** end to end on CPU. Substituted:
   the teacher/target geometry (32-wide/6-layer teacher, 16-wide/4-layer target,
   at the **real** 151,936 vocabulary so production calibration token ids are
@@ -7320,7 +7320,7 @@ two devices, cuda:0 and cpu!
   is clean. The choice was therefore between finishing and restoring, and
   restoring is the honest one at the point where the remaining work is the
   delicate part.
-- **What survives:** [`docs/SESSION_ARCHITECTURE.md`](../../docs/SESSION_ARCHITECTURE.md)
+- **What survives:** [`docs/SESSION_ARCHITECTURE.md`](../../docs/shared/SESSION_ARCHITECTURE.md)
   — the problem stated in money, the three failures it explains, the full type
   list, the manifest-driven setup contract, the structural checks it must ship
   with, what the aborted build demonstrated, and the order to do it in, with an
@@ -10223,6 +10223,56 @@ on a paid pod.
 - **Revisit when:** v2 reaches a terminal result, or the engineering
   allowance is exhausted again — whichever comes first. A third raise should
   be refused in favour of asking what keeps consuming it.
+
+## 2026-10-05 — APPROVED: a PHASE envelope for the complete D1 experiment
+
+- **Context:** the Top-K round is integrated, the production cost is measured and
+  the per-session envelope resolves at `$21.4897` against `$30.00`. The only
+  remaining blocker was categorical: `phase_d1` was outside the C1 package's
+  `funds_formal_sessions_of`, so no allowance covered it at any price.
+- **Decision, PROSPECTIVE AND CURRENT-ONLY:**
+
+  ```text
+  formal allowance         76.6523 -> 131.6523   (+55.0000)
+  package total            96.6523 -> 151.6523   (+55.0000)
+  project cumulative cap  410.0000 -> 465.0000   (+55.0000)
+  GPU engineering           20.0000 -> 20.0000    UNCHANGED
+  per-session envelope      30.0000 -> 30.0000    UNCHANGED
+  ```
+
+  and `phase_d1` joins `funds_formal_sessions_of.experiment_ids`, so D1's formal
+  sessions spend THIS package's formal allowance and are gated on it.
+- **What it funds:** the complete currently-derived D1 chain — `$21.4897` search,
+  `$14.7966` screening, `$14.7966` confirmation, **`$51.0829`** — three separately
+  authorized sessions, priced by `chain_cost` through `search_cost_model.bound`.
+  Derived after the amendment: formal `$62.2431`, package `$67.2690`, project
+  `$61.2641`; after reserving the chain, `$11.1602` / `$16.1861` / `$10.1812`.
+- **The headroom is intentional.** This is a PHASE envelope: D1 is not sized to one
+  flawless path and then sent back for a micro-budget approval after an ordinary
+  setup or provider failure.
+- **It does NOT authorize scientific repetition.** Re-running a valid GO, NO-GO or
+  INCONCLUSIVE, splicing probes, substituting a seed, selectively retaining
+  outputs, or changing arms, seeds, recipe, battery, statistics or decision rules
+  remains forbidden. D2 and D3 are not authorized. No K sweep, extra seed, wider
+  candidate field, new operator, changed beam breadth, changed recovery recipe,
+  changed battery or changed decision rule is authorized.
+- **Frozen scope:** `reference_topk_tail_v1` at K=200; `micro_batch_size=3`;
+  `length_sorted_v1`; beam width 6; 1 warmup level; the four frozen operators; both
+  calibration profiles; recovery `E1_KD_HEAVY_0860K`; Top-2 candidates with 2
+  screening and 3 confirmation seeds over 12 probes. The incumbent remains B.
+- **Not retrospective:** no historical grant, authorization, closeout or recorded
+  spend is rewritten. Each earlier amendment keeps its figures, which is how a
+  reader checks what each session ran under.
+- **Alternatives considered:** funding the search session alone (rejected — it
+  returns for approval twice more and the behavioural rungs are already priced);
+  raising the per-session envelope (rejected and unnecessary: the measured session
+  fits inside `$30.00`).
+- **Risks:** three of four cost cells are still unbatched planning figures. They
+  OVERSTATE, which is the safe direction for a ceiling, so the chain total is a
+  bound whose SIZE is provisional rather than a figure of unknown direction.
+- **Revisit when:** a valid GO, NO-GO or INCONCLUSIVE ends D1 — any of the three is
+  terminal — or a session reprice exceeds `$30.00`, or the remaining chain stops
+  fitting the formal, package or project limits.
 
 ## 2026-10-05 — Integration: the D-series Top-K protocol lands on `main`
 

@@ -9,12 +9,12 @@ check is all this is: it reads imports and string literals, it builds nothing.
 **Two rules, and the distinction between them is the whole point.**
 
 1. A core test may not import a SPECIFIC experiment package —
-   `experiments.phase_c1`, `experiments.phase_a3`, `experiments.phase_d1`, an
+   `stages.phase_c1`, `stages.phase_a3`, `stages.phase_d1`, an
    `eN` module. Those carry one campaign's arms, seeds, digests, budgets and
    wiring. A test that needs them is that experiment's test.
 2. A core test MAY import the SHARED APPLICATION LAYER —
-   `experiments.run_layout`, `experiments.calibration`, `experiments.datasets`,
-   `experiments.deployment` and their siblings at the top of
+   `shared.run_layout`, `shared.calibration`, `shared.datasets`,
+   `shared.deployment` and their siblings at the top of
    `scripts/experiments/`. These are cross-stage conventions, and a deliberate
    core↔application contract test is legitimate: `run_layout`'s convention is
    checked against `aadistill.runtime.run_layout`'s mechanism precisely because
@@ -44,32 +44,40 @@ import pytest
 
 REPO = pathlib.Path(__file__).resolve().parents[2]
 CORE = REPO / "tests"
-EXPERIMENTS = REPO / "scripts" / "experiments"
+STAGES = REPO / "scripts" / "stages"
+SHARED = REPO / "scripts" / "shared"
 
 
 def shared_application_modules() -> frozenset[str]:
-    """Modules at the top of `scripts/experiments/` — owned by no stage.
+    """Entries of `scripts/shared/` — owned by no stage.
 
     Derived from the tree so the allowance cannot drift from what is actually
-    shared. A package inside `stage-*/` is an experiment's and is not here.
+    shared: the application-layer modules (`run_layout`, `calibration`, …) and
+    the stage-neutral capability subpackages (`data`, `evaluation`, `pod`, …).
+    Anything inside `scripts/stages/` is an experiment's and is not here.
     """
     out = set()
-    for entry in EXPERIMENTS.iterdir():
+    for entry in SHARED.iterdir():
         if entry.name.startswith((".", "_")) or entry.name == "tests":
             continue
         if entry.is_file() and entry.suffix == ".py":
             out.add(entry.stem)
-        elif entry.is_dir() and not entry.name.startswith("stage-"):
+        elif entry.is_dir():
             out.add(entry.name)
     return frozenset(out)
 
 
 def experiment_packages() -> frozenset[str]:
-    """Package names living inside a stage directory — each one an experiment."""
+    """Package names inside a stage directory — each one an experiment, or,
+    under `families/`, an experiment family. Both are campaign-owned."""
     out = set()
-    for stage in sorted(EXPERIMENTS.glob("stage-*")):
+    for stage in sorted(STAGES.glob("stage-*")):
         for entry in stage.iterdir():
-            if entry.is_dir() and not entry.name.startswith((".", "_")):
+            if not entry.is_dir() or entry.name.startswith((".", "_")):
+                continue
+            if entry.name == "families":
+                out.update(f.name for f in entry.iterdir() if f.is_dir())
+            else:
                 out.add(entry.name)
     return frozenset(out)
 
@@ -91,19 +99,22 @@ def core_test_files() -> list[pathlib.Path]:
 
 
 def experiment_imports(path: pathlib.Path) -> set[str]:
-    """`experiments.*` module names this file imports, at any depth."""
+    """`stages.*` / `shared.*` module names this file imports, at any depth."""
     out = set()
     try:
         tree = ast.parse(path.read_text())
     except SyntaxError:                                   # pragma: no cover
         return out
+    def ours(name: str) -> bool:
+        return name.split(".")[0] in ("stages", "shared")
+
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom) and node.module \
-                and node.module.startswith("experiments"):
+                and ours(node.module):
             out.add(node.module)
         elif isinstance(node, ast.Import):
             for alias in node.names:
-                if alias.name.startswith("experiments"):
+                if ours(alias.name):
                     out.add(alias.name)
     return out
 
@@ -120,6 +131,27 @@ def test_the_allowed_and_forbidden_sets_are_disjoint_and_non_empty():
     assert "phase_c1" in experiments and "phase_a3" in experiments
 
 
+#: PRE-BOUNDARY REACH-INS, made visible by the 2026-10-08 migration. These
+#: imports existed before the boundary as FLAT imports of the dissolved
+#: `scripts/{autoinit,pod,evaluation}` directories — spelled that way, the
+#: guard could not see them. The migration converted every flat import to its
+#: owner's package name, which is what surfaced them. They are debt, not
+#: allowance: the set is asserted EXACTLY, so a new reach-in fails here and a
+#: repaired one must be deleted from this table. The repair direction is the
+#: rule's own message — move the assertion to the owning experiment's suite.
+PRE_BOUNDARY_REACH_INS: frozenset[tuple[str, str]] = frozenset({
+    ("tests/docs/test_current_state_consistency.py", "stages.phase_d1"),
+    ("tests/evaluation/test_oracle_reasoning.py",
+     "stages.d0.run_three_mode_diagnostic"),
+    ("tests/initialization/test_calibration_item_preparation.py",
+     "stages.phase_a.phase_a_search"),
+    ("tests/initialization/test_device_handoff.py", "stages.phase_a"),
+    ("tests/initialization/test_device_handoff.py",
+     "stages.phase_a.autoinit_phase_a_driver"),
+    ("tests/integration/test_operational_hardening.py", "stages.phase_a"),
+})
+
+
 def test_no_core_file_imports_a_specific_experiment():
     """Rule 1. ONE test, every offender named.
 
@@ -128,13 +160,22 @@ def test_no_core_file_imports_a_specific_experiment():
     """
     experiments = experiment_packages()
     offenders = []
+    found_reach_ins = set()
     for path in core_test_files():
         for module in sorted(experiment_imports(path)):
             owner = module.split(".")
             if len(owner) >= 2 and owner[1] in experiments:
+                key = (str(path.relative_to(REPO)), module)
+                if key in PRE_BOUNDARY_REACH_INS:
+                    found_reach_ins.add(key)
+                    continue
                 offenders.append(
                     f"{path.relative_to(REPO)} -> {module}  "
-                    f"(move to scripts/experiments/stage-*/{owner[1]}/tests/)")
+                    f"(move to scripts/stages/stage-*/{owner[1]}/tests/)")
+    stale = PRE_BOUNDARY_REACH_INS - found_reach_ins
+    assert not stale, (
+        "PRE_BOUNDARY_REACH_INS entries no longer present — delete them so "
+        f"the debt shrinks monotonically: {sorted(stale)}")
     assert not offenders, (
         "a core test reaches into a specific experiment:\n  "
         + "\n  ".join(offenders)
@@ -150,6 +191,10 @@ def test_every_experiments_import_from_core_is_a_shared_module():
     offenders = []
     for path in core_test_files():
         for module in sorted(experiment_imports(path)):
+            if (str(path.relative_to(REPO)), module) in PRE_BOUNDARY_REACH_INS:
+                continue
+            if module.split(".")[0] == "stages":
+                continue                    # rule 1's subject, reported there
             parts = module.split(".")
             if len(parts) > 1 and parts[1] not in shared:
                 offenders.append(f"{path.relative_to(REPO)} -> {module}")
@@ -201,7 +246,7 @@ def test_the_guard_would_catch_a_violation(tmp_path):
 
     bad_import = tmp_path / "test_bad_import.py"
     bad_import.write_text(
-        f"from experiments.{sorted(experiments)[0]} import authorization\n")
+        f"from stages.{sorted(experiments)[0]} import authorization\n")
     assert experiment_imports(bad_import), "the reader missed a plain import"
     module = next(iter(experiment_imports(bad_import)))
     assert module.split(".")[1] in experiments, "rule 1 would not fire"
@@ -209,7 +254,7 @@ def test_the_guard_would_catch_a_violation(tmp_path):
     deferred = tmp_path / "test_deferred.py"
     deferred.write_text(
         "def test_x():\n"
-        f"    from experiments.{sorted(experiments)[0]} import pod_environment\n")
+        f"    from stages.{sorted(experiments)[0]} import pod_environment\n")
     assert experiment_imports(deferred), (
         "an import inside a function is still an import; a guard that only reads "
         "module scope would pass the file that moved C1 into core")
@@ -234,7 +279,7 @@ def test_the_guard_would_catch_a_violation(tmp_path):
         "false positive that would have made it not worth having")
 
     allowed = tmp_path / "test_allowed.py"
-    allowed.write_text("from experiments.run_layout import RunLayout\n")
+    allowed.write_text("from shared.run_layout import RunLayout\n")
     assert all(m.split(".")[1] in shared for m in experiment_imports(allowed)), \
         "the guard would refuse a legitimate shared-application contract"
 

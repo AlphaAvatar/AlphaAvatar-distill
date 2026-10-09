@@ -57,6 +57,15 @@ from aadistill.initialization.specs.materialization import (
 from aadistill.initialization.specs.metrics import StateEvalSuite, StateEvaluation
 from aadistill.initialization.device import model_device
 from aadistill.initialization.execution import DEFAULT_EXECUTION, ExecutionConfig
+from aadistill.initialization.planning.isolation import (
+    isolate_parent_config,
+    parameter_fingerprint,
+    weights_disturbed,
+)
+from aadistill.initialization.planning.operator_config import (
+    hashed_operator_config,
+    operator_config_hash,
+)
 from aadistill.initialization.scoring.content import scoring_content_config
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -180,7 +189,7 @@ def expansion_profiles(
     this rule disagree immediately — the second one branched a
     `CalibrationNeed.NONE` operator over every active profile and over-counted
     the root's children — and a price for a space the search does not run is
-    worse than no price. See `docs/core-provenance.md`.
+    worse than no price. See `docs/maintenance/core-provenance.md`.
 
     Both rules live here:
 
@@ -343,7 +352,7 @@ class SearchConfig:
         #: the value its own record carries and stays verifiable against this
         #: code. A search that DOES restrict gets a different hash, which is the
         #: point: two searches reaching different leaves must not share an
-        #: identity. See `docs/core-provenance.md`.
+        #: identity. See `docs/maintenance/core-provenance.md`.
         return sha256_json(self.as_dict())
 
 
@@ -790,12 +799,16 @@ class BeamSearch:
 
     def _expand_one(self, parent: InitializationState, impl: OperatorImplementation,
                     profile: CalibrationProfile) -> InitializationState:
-        operator_config = {"n_calibration_items": len(self.calibration_for(profile)),
-                           **self._position_policy_config(impl, profile),
-                           **self._distribution_support_config()}
+        #: THROUGH THE SHARED OWNER. These were two private methods here, and
+        #: `materialize_fixed_path` -- which exists to replay a path this
+        #: produces -- built its own config with neither contributor in it. The
+        #: beam's behaviour is unchanged; the duplication is gone.
+        operator_config = hashed_operator_config(
+            implementation=impl, policy=self.config.position_policy,
+            support=self.config.distribution_support,
+            items=self.calibration_for(profile))
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
-        config_hash = sha256_json(
-            {k: v for k, v in operator_config.items() if k != "n_calibration_items"})
+        config_hash = operator_config_hash(operator_config)
 
         step = OperatorStep(
             index=len(parent.steps), kind=impl.kind, impl_id=impl.impl_id,
@@ -837,7 +850,32 @@ class BeamSearch:
             self.deadline.check(f"before {impl.impl_id} on {parent.spec.spec_hash[:12]}")
 
         started = time.time()
-        outcome = impl.execute(ctx)
+        #: SIBLING ISOLATION. The root model is CACHED and shared across every
+        #: level-0 expansion, so a mutation an operator makes to the object it
+        #: is handed outlives its own expansion -- and a mutated config is not
+        #: transient, because `build_config` carries a parent's whole
+        #: `to_dict()` into its child's `config.json` and therefore into its
+        #: `config_sha256` and `artifact_digest`. Without this, two searches
+        #: with identical science could produce different child digests purely
+        #: by enumerating their operators in a different order.
+        #:
+        #: It does NOT stop the mutation: an operator may need the field for
+        #: its own forwards, and a frozen operator whose historical identities
+        #: depend on its behaviour must not be altered to satisfy a later
+        #: rule. It contains it. `isolation` knows no field names.
+        config_touched: dict[str, Any] = {}
+        #: THE SECOND CHANNEL. Config is what a child inherits through
+        #: `build_config`; WEIGHTS are what it is built from. An operator that
+        #: scores by temporarily ablating its parent -- zeroing a head's output
+        #: columns, bypassing a block -- and fails to restore it would leave
+        #: every later sibling expanding a damaged parent, and the shared root
+        #: is where that persists. Per-parameter float64 sums on-device, so
+        #: this is milliseconds rather than a hash of 8 GiB.
+        weights_before = parameter_fingerprint(parent_model)
+        with isolate_parent_config(parent_model, config_touched):
+            outcome = impl.execute(ctx)
+        parent_weights_disturbed = weights_disturbed(
+            weights_before, parameter_fingerprint(parent_model))
         elapsed = time.time() - started
 
         state.steps = (*parent.steps, replace(
@@ -860,70 +898,31 @@ class BeamSearch:
             operator_timing=dict(outcome.artifacts.get("timing", {})),
             reference_cache=dict(outcome.artifacts.get("reference_cache", {})),
             reference_counters=dict(outcome.artifacts.get("reference_counters", {})),
+            #: Recorded, not just undone. A mutation silently restored is a
+            #: mutation nobody knows about, and the next reader wondering why a
+            #: historical digest depends on execution order deserves to find
+            #: the answer in the telemetry rather than re-derive it.
+            parent_config_restored=dict(config_touched),
+            #: RECORDED, NOT RAISED. An operator that leaves its parent
+            #: altered is a defect, but discovering it mid-search by throwing
+            #: away hours of paid expansions would be a worse outcome than
+            #: recording it and letting the ranking be reviewed. It lands in
+            #: the expansion's telemetry, where a reader asking why two
+            #: searches disagree will find it.
+            parent_weights_disturbed=parent_weights_disturbed,
             **self.telemetry.drain_phases())
         del outcome
         self.store.append(state)
         return state
 
-    def _position_policy_config(self, impl: OperatorImplementation,
-                                profile: CalibrationProfile) -> dict[str, Any]:
-        """The scoring-position policy AND its content, as HASHED operator config.
-
-        In `operator_config` rather than in `ctx.execution` because it changes
-        what is computed: two searches whose operators protect different
-        positions reach different leaves and must not share a state id. It is
-        therefore read by `config_hash`, which is what forks the whole subtree.
-
-        **The policy id alone was not enough**, and that is the gap this closes.
-        A policy that reads positions consumes metadata no other identity
-        covers: `profile_hash` pins the profile's SPEC, which pins one
-        `content_sha256`, which hashes only item ids and token ids. Two assets
-        with identical tokens and different supervised masks therefore agreed on
-        every term above — the policy hash included — while producing different
-        operator decisions. `scoring_content_config` binds what the policy
-        actually reads, so the mask is part of the scientific path identity.
-
-        **Omitted at the incumbent policy**, and omitted for an implementation
-        that consumes no calibration data. Both omissions preserve a recorded
-        identity rather than tidying one away: every committed state hashed an
-        operator config of `{}`, and a weight-only operator has no mechanism by
-        which a position policy could change its output — branching it would
-        manufacture byte-identical states, which is the same argument
-        `profile_for` already makes about the no-calibration sentinel.
-        """
-        if not consumes_calibration(impl):
-            return {}
-        policy = self.config.position_policy
-        named = policy_config(policy)
-        if not named:
-            return {}
-        items = self.calibration_for(profile)
-        return {**named, **scoring_content_config(items, policy)}
-
-    def _distribution_support_config(self) -> dict[str, Any]:
-        """The vocabulary partition as HASHED operator config, or `{}`.
-
-        In `operator_config` rather than in `ctx.execution` for the same reason as
-        the position policy: it changes what is computed, so two searches whose
-        operators reduce over different partitions reach different leaves and must
-        not share a `config_hash`.
-
-        **Omitted at the full vocabulary**, which preserves a recorded identity
-        rather than tidying one away: every committed state hashed an operator
-        config without this key, and emitting it now -- even as
-        `{"support": "full_vocab_v1"}` -- would change 785 historical
-        `measurement_protocol_id`s and every `config_hash` beside them.
-
-        Not restricted to calibrated operators, unlike the position policy. A
-        support reaches an operator through `OperatorContext` whether or not that
-        operator consumes calibration items, and an operator that ignores it is
-        free to; what must not happen is a declaration that disagrees with the
-        object, which `execute` refuses.
-        """
-        support = self.config.distribution_support
-        if support.is_full_vocab:
-            return {}
-        return {"distribution_support": support.as_dict()}
+    #: `_position_policy_config` and `_distribution_support_config` LIVED HERE
+    #: and are gone. Both are now
+    #: `aadistill.initialization.planning.operator_config`, because
+    #: `materialize_fixed_path` -- whose whole job is to replay a path this
+    #: produces -- had its own config builder with neither contributor in it,
+    #: and no mechanism could notice. Two implementations of one identity
+    #: disagree immediately; AGENTS.md's complexity ratchet says remove the
+    #: redundant one rather than keep both in step.
 
     def _materialization_for(self, semantic_state_id: str,
                              parent: InitializationState,
@@ -1281,13 +1280,18 @@ class SearchResult:
     def complete_leaves(self) -> list[InitializationState]:
         return [s for s in self.leaves if s.is_complete_leaf()]
 
-    def top_n(self, policy: BeamRankingPolicy, n: int) -> RankingResult:
+    def top_n(self, policy: BeamRankingPolicy, n: int, *,
+              diversity: bool = True) -> RankingResult:
         """Rank the complete target-size leaves. Intermediates cannot appear here.
 
         The guard is not decorative: ``require_recovery_admissible`` is what stops
         a 3.2B depth-only intermediate — which will often score *better* on
         teacher KL than any fully compressed leaf — from being promoted into a
         recovery probe it could never be a candidate for.
+
+        ``diversity`` is forwarded to the policy and defaults to ``True`` so this
+        method's historical behaviour is unchanged. For FINALIST retention call
+        :meth:`finalists`, which is the same computation with the rule named.
         """
         # Deliberately iterates `self.leaves` rather than the filtered
         # `complete_leaves`: silently dropping an inadmissible candidate would
@@ -1295,7 +1299,22 @@ class SearchResult:
         # this boundary is loud.
         for leaf in self.leaves:
             leaf.require_recovery_admissible()
-        return policy.rank(self.leaves, n)
+        return policy.rank(self.leaves, n, diversity=diversity)
+
+    def finalists(self, policy: BeamRankingPolicy, k: int) -> RankingResult:
+        """The best `k` complete leaves by QUALITY ORDER ALONE.
+
+        The post-search retention rule. Lineage diversity is an exploration
+        mechanism: while the search runs, a state is a partial hypothesis and one
+        early proxy measurement must not extinguish a structural family. Once
+        complete leaves exist that job is done, and the only remaining question
+        is which complete candidates the search objectives rank highest.
+
+        Separate from :meth:`top_n` by NAME rather than by a boolean at every
+        call site, because the two answer different questions and a record should
+        say which one it asked. The ordering is identical; only retention differs.
+        """
+        return self.top_n(policy, k, diversity=False)
 
     def summary(self) -> dict[str, Any]:
         pruned = [s for s in self.states.values() if s.validity is StateValidity.PRUNED]

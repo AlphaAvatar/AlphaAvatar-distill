@@ -24,9 +24,9 @@ What this stage receives from the pipeline before it.
 
 ## Data
 
-* `data/stage2/stage2_offline_v0.manifest.json` — mixture v0: the first grouped build, from public sources only
-* `data/stage2_v1/stage2_offline_v1.manifest.json` — mixture v1: the approved ~4.5x train scale-up for data-limited Stage-3 recovery. The current mixture
-* `data/stage3_pilot/manifest.json` — the teacher-generated pilot: a control/treatment 2x2 over one shared accepted prompt subset, which is what Stage 3 actually trains on today
+* `data/stages/stage-2/stage2/stage2_offline_v0.manifest.json` — mixture v0: the first grouped build, from public sources only
+* `data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json` — mixture v1: the approved ~4.5x train scale-up for data-limited Stage-3 recovery. The current mixture
+* `data/stages/stage-3/stage3_pilot/manifest.json` — the teacher-generated pilot: a control/treatment 2x2 over one shared accepted prompt subset, which is what Stage 3 actually trains on today
 
 Groups, as the manifests name them:
 
@@ -58,7 +58,7 @@ id, revision, license and sample count:
 
 ## Outputs
 
-* `data/stage2_v1` — the v1 mixture on disk: `train/`, `val/` and `calib/` per group. Untracked; rebuildable from the manifest and its builder
+* `data/stages/stage-2/stage2_v1` — the v1 mixture on disk: `train/`, `val/` and `calib/` per group. Untracked; rebuildable from the manifest and its builder
 
 ## Pipeline activity
 
@@ -91,7 +91,7 @@ canonical run list, across every stage, is
 `configs/` is the source of truth. A run's manifest records
 the config path and hash it ran under.
 
-* `data/stage2_v1/stage2_offline_v1.manifest.json`
+* `data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json`
 
 ## Canonical data and artifact manifests
 
@@ -99,10 +99,10 @@ A dataset manifest lives beside the data it describes, and
 an artifact lives outside git with its manifest. Neither is
 copied here.
 
-* `data/stage2/stage2_offline_v0.manifest.json`
-* `data/stage2_v1/stage2_offline_v1.manifest.json`
-* `data/stage3_pilot/manifest.json`
-* `data/stage2_v1`
+* `data/stages/stage-2/stage2/stage2_offline_v0.manifest.json`
+* `data/stages/stage-2/stage2_v1/stage2_offline_v1.manifest.json`
+* `data/stages/stage-3/stage3_pilot/manifest.json`
+* `data/stages/stage-2/stage2_v1`
 
 ## Decisions
 

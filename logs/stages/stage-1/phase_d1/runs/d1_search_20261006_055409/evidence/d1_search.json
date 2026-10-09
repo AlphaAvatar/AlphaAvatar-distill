@@ -1,0 +1,137 @@
+{
+ "arm": "supervised_target",
+ "contract": {
+  "_authorizes": "nothing. A wired session is not a funded one; the one-use authorization is issued separately.",
+  "arm": "supervised_target",
+  "checked": [
+   "measurement_protocol_id declared and equal to the evaluator's",
+   "frozen suite content hash bound into the evaluator",
+   "distribution support on the search AND the evaluator",
+   "arm position policy on both, and declared by the design",
+   "micro_batch_size and packing",
+   "beam width and warmup levels",
+   "frozen operator set and both calibration profiles",
+   "design revision"
+  ],
+  "config_hash": "662dc65c0d0a8ae9f05920eaf51beef94861e42034d17b3b471f831de4b748bb",
+  "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+  "distribution_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  },
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef",
+  "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12",
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+ },
+ "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+ "elapsed_seconds": 1.694,
+ "ended_utc": "2026-10-06T09:25:01Z",
+ "environment": {
+  "bf16_supported": true,
+  "capability": "8.9",
+  "cuda_runtime": "12.8",
+  "device_count": 1,
+  "gpu_name": "NVIDIA L40S",
+  "torch": "2.11.0+cu128",
+  "total_memory_gib": 44.394
+ },
+ "experiment_id": "phase_d1",
+ "failure": {
+  "message": "'D1Authorization' object has no attribute 'session_commit'",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/pod/autoinit_d1_driver.py\", line 290, in main\n    \"session_commit\": auth.session_commit,\n                      ^^^^^^^^^^^^^^^^^^^\nAttributeError: 'D1Authorization' object has no attribute 'session_commit'\n",
+  "type": "AttributeError"
+ },
+ "open_blockers": [],
+ "run_id": "d1_search_20261006_055409",
+ "schema": "aadistill.phase_d1.search_session/v1",
+ "stage_id": "1",
+ "stages": [
+  {
+   "name": "environment",
+   "result": {
+    "gpu": "NVIDIA L40S"
+   },
+   "seconds": 1.517,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "registries_and_design",
+   "result": {
+    "design_hash": "3affe2c65c57f405"
+   },
+   "seconds": 0.061,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "name": "session_and_contract",
+   "result": {
+    "config_hash": "662dc65c0d0a8ae9",
+    "protocol": "ac23798a4572fab5"
+   },
+   "seconds": 0.108,
+   "stage": "A",
+   "status": "ok"
+  },
+  {
+   "error": "AttributeError: 'D1Authorization' object has no attribute 'session_commit'",
+   "name": "authorization",
+   "seconds": 0.005,
+   "stage": "A",
+   "status": "failed"
+  }
+ ],
+ "started_utc": "2026-10-06T09:25:00Z",
+ "status": "FAILED",
+ "wiring": {
+  "allowed_impls": [
+   "attention.activation_importance_v1",
+   "depth.causal_kl_greedy_v1",
+   "ffn.activation_importance_v0",
+   "width.global_pca_v0"
+  ],
+  "arm": "supervised_target",
+  "beam": {
+   "warmup_levels": 1,
+   "width": 6
+  },
+  "config_hash": "662dc65c0d0a8ae9f05920eaf51beef94861e42034d17b3b471f831de4b748bb",
+  "design_hash": "3affe2c65c57f4059c16782b2a3d9dd06e391c58cfc726cefa2e0f818ab0b7ff",
+  "distribution_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  },
+  "execution": {
+   "calibration_batch_packing": "length_sorted_v1",
+   "micro_batch_size": 3
+  },
+  "experiment_id": "phase_d1",
+  "measurement_protocol_id": "ac23798a4572fab5da81c04c70e6c0ef",
+  "position_policy": {
+   "position_policy": "positions.supervised_target_v1@v1",
+   "position_policy_hash": "f5991d9abffee32f3cf237b25ea609b23711418c70382309282fa7f7b5d20a12"
+  },
+  "profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "root_teacher": {
+   "_combined_over": "the per-shard sha256 digests in shard order, so the root hash moves if any shard's content moves",
+   "_owner": "logs/stages/stage-1/phase_c1/plans/teacher_binding.json",
+   "n_shards": 3,
+   "repo_id": "Qwen/Qwen3-4B-Thinking-2507",
+   "revision": "768f209d9ea81521153ed38c47d515654e938aea",
+   "root_teacher_id": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+   "root_teacher_sha256": "6de20cc746dd42e96f93aeb4551b8d378e415a206309435d7eaefd39cfdf45f9",
+   "shard_sha256": {
+    "model-00001-of-00003.safetensors": "98178c1cddbca8ad76102afdbf76e4df79b64b82377ad4dca34c755cac00571a",
+    "model-00002-of-00003.safetensors": "57b5bd1f667d420350f169342a90b50e5ffc2aa202ba1819da1af3367ff2261f",
+    "model-00003-of-00003.safetensors": "e3cccb84e8926f3f18c334465639939a68af310b0729938fccc2de66a9a31953"
+   }
+  },
+  "seed": 20260815,
+  "stage_id": "1",
+  "suite_content_sha256": "a1197205e43aad0e71c0e1bb436ee7babba3b5d8bb25b9c4d5c464f659db20fc"
+ }
+}

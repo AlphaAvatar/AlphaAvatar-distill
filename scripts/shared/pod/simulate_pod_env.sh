@@ -1,0 +1,432 @@
+#!/usr/bin/env bash
+# Run the pod's test command with only the artifacts a pod session actually stages.
+#
+#   bash scripts/shared/pod/simulate_pod_env.sh
+#
+# Why this exists. A pod checks out the session bundle, which carries only
+# tracked files — everything under `artifacts/` is gitignored and does not
+# travel. The dev box has all of it, so the test suite passes here and can still
+# fail there, on a GPU that is already billing. That happened on 2026-08-08: the
+# E6 pod reached its test gate and died on three tests whose inputs it had no way
+# to possess, costing $0.10 and a full setup cycle to learn something a local run
+# could have said for free.
+#
+# So: move aside everything a pod does not stage, run the pod's exact command,
+# and restore unconditionally. A test that needs a gitignored artifact should
+# declare that with `skipif`, and this is how you find the ones that do not.
+#
+# The hidden set is deliberately a superset of what any one experiment stages.
+# If a future session stages more, the check is still sound — it just skips more
+# than it needs to, which errs toward catching problems rather than missing them.
+#
+# TWO DEFECTS, both of which corrupted this repository on 2026-08-15 and cost a
+# diagnosis that briefly read as data loss:
+#
+#   1. `restore` used `mv "$saved" "$dest"`. When the test run RECREATED the
+#      destination -- `artifacts/audit` is recreated by any driver rehearsal --
+#      `mv` moves the saved directory INSIDE the recreated one instead of
+#      replacing it. It happened twice, burying the real `artifacts/audit` at
+#      `artifacts/audit/artifacts@audit/artifacts@audit/` and silently turning
+#      11 tests into skips. A skip is not a failure, so the suite still read
+#      green.
+#   2. Nothing prevented two sweeps overlapping. The second's `restore` walks
+#      `$HIDE` and adopts the first's saved paths, so the two interleave.
+#
+# Fixed here: restore reproduces the EXACT pre-simulation state (a recreated
+# destination is quarantined, never nested and never silently deleted), and a
+# lock makes a concurrent sweep fail loudly instead of racing.
+#
+# CONSEQUENCE, and it is intended: `$HIDE.recreated` ACCUMULATES. Every sweep
+# that recreates `artifacts/audit` leaves a quarantined copy there, and nothing
+# prunes it, because "never delete a recreated destination" is the property
+# that fixed the 2026-08-15 scare. Its contents are regenerated files -- the
+# frozen-asset verifier rewrites `frozen_asset_verification.json` on every run
+# -- so the directory is safe to remove by hand at any time. It is recurring
+# scratch, not a retained artifact: see the WITHDRAWN `podsim_quarantine_residue`
+# entry in `logs/maintenance/inventories/checkpoint_tombstones.json` for why it must not be tombstoned.
+set -u
+PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
+cd "$PODSIM_ROOT" || exit 1
+HIDE=${HIDE_DIR:-/home/ecs-user/aad-scratch/podsim_hidden}
+LOCK=${PODSIM_LOCK:-"${HIDE}.lock"}
+QUAR="${HIDE}.recreated"
+
+# Single-instance exclusion. `mkdir` is atomic, so exactly one sweep wins; the
+# loser exits WITHOUT running and WITHOUT restoring, because the files under
+# $HIDE belong to the holder.
+if ! mkdir "$LOCK" 2>/dev/null; then
+  echo "REFUSING: another pod simulation holds $LOCK." >&2
+  echo "  Simulator sweeps must not overlap: the loser would restore the" >&2
+  echo "  winner's saved paths. If no sweep is running, remove $LOCK." >&2
+  exit 3
+fi
+HELD_LOCK=1
+
+# A non-empty $HIDE at startup means a previous sweep died before restoring.
+# Adopting those files would restore them under THIS run's assumptions; refuse
+# and let a human look.
+if [ -d "$HIDE" ] && [ -n "$(ls -A "$HIDE" 2>/dev/null)" ]; then
+  echo "REFUSING: $HIDE is not empty, so a previous sweep did not restore:" >&2
+  ls -A "$HIDE" | sed 's/^/    /' >&2
+  echo "  Restore those by hand before simulating again." >&2
+  rmdir "$LOCK" 2>/dev/null
+  exit 4
+fi
+
+# A sweep that runs out of disk is not a failed sweep, it is a DISPLACED
+# REPOSITORY. On 2026-09-11 the filesystem filled mid-run, the EXIT trap never
+# completed, and 869 gitignored artifacts -- 5.9 GiB -- were left sitting in
+# $HIDE while `git status` read clean, because gitignored files are exactly what
+# `git status` does not see. Two tracked files were truncated to zero bytes in
+# the same window.
+#
+# So the check happens HERE: after the lock, before anything is moved. Refusing
+# now costs nothing; refusing after the first `mv` means the caller has to
+# restore by hand, which is how this rule was learned. The threshold is an
+# input, not a constant compiled in: `PODSIM_MIN_FREE_GIB` is set by whatever
+# invokes the simulator, and it is measured on the filesystem that actually
+# holds $HIDE and the repository, not on whichever mount happens to be busiest.
+MIN_FREE_GIB=${PODSIM_MIN_FREE_GIB:-20}
+free_gib_of() { df -PBG "$1" 2>/dev/null | awk 'NR==2 {gsub("G","",$4); print $4}'; }
+HIDE_PARENT=$(dirname "$HIDE")
+mkdir -p "$HIDE_PARENT"
+for where in "$HIDE_PARENT" "$PODSIM_ROOT"; do
+  have=$(free_gib_of "$where")
+  if [ -z "$have" ]; then
+    echo "REFUSING: cannot read free space for $where" >&2
+    rmdir "$LOCK" 2>/dev/null
+    exit 5
+  fi
+  if [ "$have" -lt "$MIN_FREE_GIB" ]; then
+    echo "REFUSING: ${have}GiB free on the filesystem holding $where, below the" >&2
+    echo "  ${MIN_FREE_GIB}GiB this sweep requires. A sweep that fills the disk" >&2
+    echo "  leaves the repository's gitignored artifacts displaced in $HIDE and" >&2
+    echo "  git status will not show it. Free space first." >&2
+    rmdir "$LOCK" 2>/dev/null
+    exit 5
+  fi
+done
+echo "free space ok: $(free_gib_of "$PODSIM_ROOT")GiB >= ${MIN_FREE_GIB}GiB required"
+
+mkdir -p "$HIDE"
+
+# --- the second dimension: HOME and Hugging Face -----------------------------
+#
+# Hiding gitignored ARTIFACTS was only half of what a pod does not have. The
+# other half is $HOME. A fresh pod runs as root with an empty home, exports its
+# own HF_HOME, and holds no Hugging Face dataset cache and no credential file --
+# and this script said nothing about any of that.
+#
+# That gap cost C1 attempt 3R $0.3482 on 2026-09-04. Seven renderer-parity cases
+# read `~/.cache/huggingface/hub` directly, so they passed here and could never
+# pass on a pod; the simulator was run, was green, and described a machine that
+# does not exist. Of the fourteen, 7 renderer-parity and 2 repository-state
+# failures were identified; the other 5 remain UNEXPLAINED -- the leaf-transport
+# attribution was withdrawn because it does not reproduce under the pod's real
+# HF_TOKEN contract.
+#
+# So the simulated process gets: a fresh empty HOME, an isolated HF_HOME with
+# HF_HUB_CACHE beneath it, a non-empty synthetic HF_TOKEN exactly as pod setup
+# exports one before its test gate -- and no path back to the dev box's real
+# cache or real credential. The token is synthetic on purpose: these tests use
+# monkeypatched network calls, so they test transport logic, never possession of
+# a real credential, and a simulation that borrowed the operator's token would
+# hide a test that had quietly started needing it.
+#
+# Every variable is saved and put back by `restore_env`, which the same EXIT trap
+# runs before the artifacts are restored.
+ENVROOT=${PODSIM_ENV_ROOT:-"${HIDE}.env"}
+PODSIM_TOKEN=${PODSIM_HF_TOKEN:-"hf_podEquivalentSyntheticToken000000000"}
+
+#: Anything that could point the process back at the dev box's real HF state.
+#: `AAD_SYNTHETIC_HF_TOKEN` is the flag that says so out loud -- see below.
+ISOLATED_VARS="HOME HF_HOME HF_HUB_CACHE HF_TOKEN HUGGINGFACE_HUB_CACHE \
+HF_DATASETS_CACHE TRANSFORMERS_CACHE XDG_CACHE_HOME AAD_SYNTHETIC_HF_TOKEN \
+CUDA_VISIBLE_DEVICES"
+
+SAVED_ENV=""
+save_env() {
+  for v in $ISOLATED_VARS; do
+    if [ -n "${!v+set}" ]; then
+      SAVED_ENV="${SAVED_ENV}${v}=${!v}"$'\n'
+    else
+      SAVED_ENV="${SAVED_ENV}${v}"$'\n'          # bare name == was unset
+    fi
+  done
+}
+
+restore_env() {
+  [ -n "$SAVED_ENV" ] || return 0
+  while IFS= read -r line; do
+    [ -n "$line" ] || continue
+    case "$line" in
+      *=*) export "${line%%=*}"="${line#*=}" ;;
+      *)   unset "$line" ;;
+    esac
+  done <<< "$SAVED_ENV"
+  rm -rf "$ENVROOT"
+  SAVED_ENV=""
+  echo "restored the environment"
+}
+
+# The trap is armed HERE, after the lock is held and after the leftover check --
+# never before. That ordering is what stops a losing sweep from restoring the
+# winner's saved paths: a loser exits at the lock check with no trap installed,
+# so `restore` cannot run for it at all. An in-function "am I the holder?" guard
+# was tried and removed: it was unreachable, and an unreachable safeguard invites
+# exactly the false confidence this script has already cost once.
+restore() {
+  restore_env
+  # `find`, NOT `for p in "$HIDE"/*`. The hidden names are repo paths flattened
+  # with `@`, so a repo path beginning with a dot -- `.scratch/...` is the one
+  # that occurs -- flattens to a name beginning with a dot, and `*` does not
+  # match those. The loop therefore restored NOTHING for any dotted path,
+  # printed "restored the hidden artifacts" anyway, and left them in $HIDE; the
+  # next sweep then refused with "a previous sweep did not restore". Fifteen of
+  # the replay's `.scratch` artifacts had been displaced that way, and the
+  # refusal is the only reason anyone noticed.
+  restored=0
+  while IFS= read -r -d '' p; do
+    n=$(basename "$p" | tr '@' '/')
+    mkdir -p "$(dirname "$n")"
+    if [ -e "$n" ]; then
+      # The run recreated this path. It did not exist before the simulation, so
+      # it must not survive it -- but quarantine rather than delete, because
+      # deleting on a restore path is how a bug becomes data loss.
+      mkdir -p "$QUAR"
+      mv "$n" "$QUAR/$(basename "$p").recreated.$$" 2>/dev/null
+      echo "  quarantined a recreated $n -> $QUAR"
+    fi
+    mv "$p" "$n" && restored=$((restored+1))
+  done < <(find "$HIDE" -mindepth 1 -maxdepth 1 -print0 2>/dev/null)
+  rmdir "$HIDE" 2>/dev/null
+  rmdir "$LOCK" 2>/dev/null
+  # Do not CLAIM a clean restore without checking. The old message was
+  # unconditional, which is how a silent failure survived several sweeps.
+  left=$(ls -A "$HIDE" 2>/dev/null | wc -l)
+  if [ "$left" -gt 0 ]; then
+    echo "WARNING: restored $restored path(s) but $left remain in $HIDE." >&2
+    echo "  The tree is DISPLACED. Restore them before simulating again." >&2
+    ls -A "$HIDE" | sed 's/^/    /' >&2
+  else
+    echo "restored the hidden artifacts ($restored path(s))"
+  fi
+}
+trap restore EXIT INT TERM
+
+# Everything a pod does NOT get from the bundle. `artifacts/stages/stage-3/corpus_v2` and
+# `artifacts/shared/instruments/ladder_uniform_probe` are left in place because every pod
+# session stages those from the relay.
+#
+# `recovery_search_v1` joined this list on 2026-08-14: the v2 migration stopped
+# staging it, but `scripts/shared/tests/test_frozen_assets.py` still pointed at it, so
+# seven tests read an artifact no pod possesses. The dev box had it, the suite
+# passed here, and the pod's blocking test gate failed 7 minutes into a paid
+# setup. **When an asset stops being staged, add it here in the same commit.**
+#
+# `artifacts/stages/stage-1/...` is NOT a safe blanket exception, and assuming it was cost
+# a paid E8b-S2 pod on 2026-08-11. Sessions stage different initializations: an
+# E8b s2/s3 pod builds DP and DC only (`NEED_COMPRESSED=0`) and never sees the
+# compressed pair, so a test that assumed the compressed baseline was present ran
+# there for the first time and failed. Simulate the session you are about to launch
+# by hiding the initializations it does not stage, e.g. for s2/s3:
+#
+#   HIDDEN_PATHS="$(cat <<'EOS'
+#   artifacts/audit
+#   artifacts/stages/stage-3/ladder_uniform
+#   artifacts/stages/stage-1/qwen3_0p6b_init_v0
+#   artifacts/stages/stage-1/e8_contribution_init_v1
+#   EOS
+#   )" bash scripts/shared/pod/simulate_pod_env.sh
+#
+# and pin the cpu set the pod will have (`taskset -c 0-12`), since the suite's
+# behaviour depends on it.
+HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
+artifacts/stages/stage-3/ladder_uniform
+artifacts/stages/stage-1/batteries/recovery_search_v1
+artifacts/stages/stage-3/rescued
+artifacts/stages/stage-3/e1_results.json
+artifacts/stages/stage-3/e1_consolidated.json
+artifacts/stages/stage-3/e4_p2_r1600k_sa
+artifacts/stages/stage-3/e4_p2_r1600k_sb
+data/stages/stage-0/warmup/holdout_v1.jsonl"}
+
+n=0
+while IFS= read -r p; do
+  [ -n "$p" ] && [ -e "$p" ] || continue
+  mv "$p" "$HIDE/$(echo "$p" | tr '/' '@')" && n=$((n + 1))
+done <<< "$HIDDEN_PATHS"
+echo "hid $n path(s) a pod session does not receive"
+
+# Prune directories emptied by the hiding. A pod does not have an EMPTY
+# `artifacts/stages/stage-3/eval/battery_v2`; it has no such directory at all, and the
+# difference is not cosmetic. `tests/evaluation/test_capability.py` guards with
+# `skipif(not BATTERY.is_dir())`, so an empty directory left behind defeats the
+# guard: the tests run, find no rows and FAIL, where on a pod they skip. The
+# first manifest-derived sweep produced 28 such failures, 26 of them purely
+# because file-granularity hiding left the directory standing.
+#
+# `rmdir` only removes empty directories, and restore recreates the tree with
+# `mkdir -p "$(dirname "$n")"` before moving each path back, so this is exactly
+# reversible. Deepest-first, so parents empty out as children go.
+# ABSOLUTE entries are exempt from pruning. A host-local store outside the
+# checkout (`HIDDEN_PATHS` may name one, because a pod receives an asset's bytes
+# and never the store it was frozen in) has parents that belong to the machine,
+# not to this simulation: walking up from one could rmdir an emptied directory
+# under $HOME. Hiding and restoring it is exactly reversible; pruning around it
+# is not this script's business. Hiding a whole store also leaves no empty
+# directory behind, which is the only thing pruning exists to fix.
+pruned=0
+while IFS= read -r p; do
+  [ -n "$p" ] || continue
+  case "$p" in /*) continue ;; esac
+  d=$(dirname "$p")
+  while [ "$d" != "." ] && [ "$d" != "/" ]; do
+    rmdir "$d" 2>/dev/null || break
+    pruned=$((pruned + 1))
+    d=$(dirname "$d")
+  done
+done <<< "$(printf '%s\n' "$HIDDEN_PATHS" | sort -r)"
+echo "pruned $pruned director(ies) the hiding emptied"
+
+# Apply the HOME/HF isolation described above. Saved first, so the EXIT trap can
+# put the environment back whatever happens next.
+save_env
+rm -rf "$ENVROOT"
+mkdir -p "$ENVROOT/home" "$ENVROOT/hf/hub" || exit 5
+# ONE declaration, shared with the pod's setup gate: `aadistill.autoinit.cpu_test_env`.
+# Hand-writing the list here is how the diagnostic and the paid pod came to run
+# the same command under different environments -- the pod has an L40S and the
+# teacher downloaded, so an exact skip-set comparison would refuse a healthy pod.
+# The pod applies the same contract with `env` (one command); this subshell is
+# isolated wholesale and put back by the EXIT trap.
+# The emitter ships WITH this script, so it is resolved against the script's own
+# directory -- not `PODSIM_ROOT`, which the restore tests point at a synthetic
+# tree that has neither a venv nor a copy of the emitter. The interpreter is
+# absolute for the same reason a relative `.venv/bin/python` is wrong: it would
+# resolve against the caller's directory.
+PODSIM_SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
+# The interpreter is an INPUT, never a guess.
+#
+# It used to fall back to `command -v python3`, which is whatever ambient Python
+# the machine happens to have: on a pod there is no repo `.venv` (it uses
+# /opt/train), so the pod ALWAYS took a fallback the dev box never exercised, and
+# C1 attempt 6 lost all 18 `test_simulator_restore.py` cases at the pod CPU gate.
+# That fallback is not even safe here — this dev box's /usr/bin/python3 is 3.6.8
+# and cannot parse the emitter.
+#
+# So: an explicit `PODSIM_PYTHON` (the recorder and the tests pass their own
+# `sys.executable`, which is /opt/train/bin/python on a pod), else the repo venv
+# IF IT EXISTS, else refuse. Never an ambient interpreter.
+if [ -n "${PODSIM_PYTHON:-}" ]; then
+  PODSIM_PY="$PODSIM_PYTHON"
+  [ -x "$PODSIM_PY" ] || {
+    echo "REFUSING: PODSIM_PYTHON=$PODSIM_PY is not executable" >&2; exit 5; }
+elif [ -x "$PODSIM_SCRIPT_DIR/../../.venv/bin/python" ]; then
+  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
+else
+  echo "REFUSING: no interpreter. Pass PODSIM_PYTHON=\$sys.executable, or run" >&2
+  echo "  from a checkout whose .venv/bin/python exists. This script will NOT" >&2
+  echo "  pick an ambient python3: doing so cost C1 attempt 6 its CPU gate." >&2
+  exit 5
+fi
+# Captured and checked SEPARATELY: `eval "$(cmd)"` reports the status of `eval`,
+# not of `cmd`, so a failed emission would leave HOME pointing at the real one
+# and the isolation would silently not happen.
+PODSIM_ENV_SH=$("$PODSIM_PY" "$PODSIM_SCRIPT_DIR/cpu_test_env_args.py" \
+                --home "$ENVROOT" --format sh) || {
+  echo "REFUSING: could not emit the CPU-test environment contract" >&2; exit 5; }
+[ -n "$PODSIM_ENV_SH" ] || {
+  echo "REFUSING: the CPU-test environment contract emitted nothing" >&2; exit 5; }
+eval "$PODSIM_ENV_SH"
+export HF_TOKEN="$PODSIM_TOKEN"
+# Say out loud that the credential is a fake. A pod's token is real, so gates and
+# tests that AUTHENTICATE to the private relay work there and cannot work here --
+# `rope_input_gate` returned 401 in the 2026-09-04 sweep C for exactly this
+# reason. The honest options were to hand the simulation the operator's real
+# token, which would hide any test that had quietly started needing one, or to
+# let those few declare the requirement. This flag lets them declare it.
+export AAD_SYNTHETIC_HF_TOKEN=1
+# Assert the isolation instead of assuming it: a simulation that silently kept
+# the dev box's cache is the exact failure this dimension exists to prevent.
+if [ -e "$HOME/.cache/huggingface" ]; then
+  echo "REFUSING: the simulated HOME already has an HF cache at $HOME/.cache" >&2
+  exit 6
+fi
+if compgen -G "$HF_HUB_CACHE/datasets--*" > /dev/null; then
+  echo "REFUSING: the isolated hub cache is not empty; the dev box's datasets" >&2
+  echo "  are visible and the seven renderer-parity cases would not skip." >&2
+  exit 6
+fi
+# Never the token itself, only that one is present.
+echo "isolated HOME=$HOME (empty), HF_HOME=$HF_HOME, HF_TOKEN set (${#HF_TOKEN} chars, synthetic)"
+
+# Must stay byte-identical in its ignore list to the pod gate in
+# `autoinit_preflight_setup.sh`, or this simulates a command the pod does
+# not run.
+#
+# The second ignore is gone: `test_phase_a_stages1_5_execute.py` is a ~20-minute
+# Phase-A pre-flight rehearsal that would have spent a large share of the 2700 s
+# gate re-proving what the dev box already proved, against a timeout whose exit
+# 90 kills the session -- and since the 2026-10-03 boundary it lives in
+# `scripts/stages/stage-1/phase_a/tests/`, outside the core suite this command
+# collects. The exclusion became the default.
+#
+# The interpreter is the repo venv directly, not `uv run`. Two reasons, and both
+# are about fidelity: the pod's gate runs `/opt/train/bin/python -m pytest` against
+# a project installed editable, with no PYTHONPATH, which `.venv/bin/python -m pytest`
+# mirrors exactly -- and `uv run` would reach into `$HOME/.cache/uv`, which the
+# isolation above deliberately empties, so it would re-resolve the environment
+# inside a simulation rather than run the suite.
+PODSIM_CMD=${PODSIM_CMD:-".venv/bin/python -m pytest tests/ -q \
+  --ignore=tests/data/test_recovery_corpus_pipeline.py"}
+
+# The pod writes /workspace/pytest.log and the file dies with the pod; here the
+# log survives, which is the whole point of simulating. `tail -12` alone threw
+# away the FAILED list on every previous sweep.
+#
+# It lands OUTSIDE the repository on purpose. `logs/` is tracked and every entry
+# in it must be classified in `CATALOG.md`, so writing there would both dirty the
+# working tree the sweep is asserting is clean and fail a structural test.
+#
+# The default is derived from `$HIDE`, which is per-invocation, NOT a fixed global
+# path. A fixed default is a shared mutable file: unsetting PODSIM_LOG for the
+# suite (so nested runs cannot inherit it) made every nested simulation fall back
+# to the SAME default and truncate the outer sweep's log while the outer shell
+# still held an open fd at its own offset. The 2026-09-04 sweep A log came back
+# with its `FAILED` lines punched out -- `grep` found nothing in a file whose tail
+# plainly showed `3 failed`. Per-invocation by construction is the fix; inheriting
+# is not, because that is the bug this default exists to avoid.
+PODSIM_LOG=${PODSIM_LOG:-"${HIDE}.pytest.log"}
+mkdir -p "$(dirname "$PODSIM_LOG")"
+
+# `--junitxml` is a REPORTING flag: it changes nothing about which tests are
+# selected or how they execute, so the command still runs the pod's own suite.
+# It is the only way to name every skip and every pass exactly, which is what the
+# readiness record has to assert -- and what attempt 3R's `tail -4` could not say.
+if [ -n "${PODSIM_JUNIT:-}" ]; then
+  mkdir -p "$(dirname "$PODSIM_JUNIT")"
+  PODSIM_CMD="$PODSIM_CMD --junitxml=$PODSIM_JUNIT"
+  echo "junit report -> $PODSIM_JUNIT"
+fi
+
+echo "running: $PODSIM_CMD"
+
+# Capture, then UNSET, before running the suite. `tests/integration/test_simulator_restore.py`
+# drives this very script as a subprocess, and every PODSIM_* control variable
+# here is exported -- so a nested run inherited THIS invocation's settings. The
+# 2026-09-04 sweep proved what that costs: the nested simulators inherited
+# `PODSIM_JUNIT`, appended a second `--junitxml=` to their own one-line commands,
+# overwrote the outer sweep's report, and failed five tests that were correct.
+# They are inputs to one invocation and must not outlive it.
+_podsim_log="$PODSIM_LOG"
+_podsim_cmd="$PODSIM_CMD"
+unset PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT \
+      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON
+
+eval "$_podsim_cmd" > "$_podsim_log" 2>&1
+PODSIM_RC=$?
+grep -E '^(FAILED|ERROR) ' "$_podsim_log" || true
+tail -12 "$_podsim_log"
+echo "pytest rc=$PODSIM_RC; full log at $_podsim_log"
+exit "$PODSIM_RC"
