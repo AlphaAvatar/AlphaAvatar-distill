@@ -396,7 +396,9 @@
   "frozen_log_records_content_modified_this_round": [],
   "records_added_this_round": [
    "logs/maintenance/source-relocations/info-architecture/v2/data_pre_move.sha256",
-   "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+   "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+   "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+   "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json"
   ],
   "_touched_must_be_empty": "every entry above is a frozen record this round changed in place — the list being empty IS the guard"
  },

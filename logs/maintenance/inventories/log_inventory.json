@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-09T18:47:16+00:00",
+  "created_utc": "2026-10-09T19:12:10+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -11,7 +11,7 @@
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
     "files": 3313,
-    "bytes": 121241649,
+    "bytes": 121240521,
     "by_disposition": {
       "keep_canonical": 222,
       "keep_immutable": 2847,
@@ -8930,8 +8930,8 @@
     },
     {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-      "size_bytes": 74124,
-      "sha256": "2cf9bb5f3acb4d7c5271396a97119095259c87ebd8fb8d63bc23fd3535f11bc7",
+      "size_bytes": 74274,
+      "sha256": "0b1f28ec9c4d41fd71a164822781f9d0420fecf817c0fcad0bff45de530578fe",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50852,8 +50852,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/current.json",
-      "size_bytes": 4842,
-      "sha256": "70b9cd4b102fbd7fbb7dea749ae0141b45811759dd90836c7678026eb17ec46c",
+      "size_bytes": 4516,
+      "sha256": "78c11ee3091de41c33509a6b121fa0dc2359ed5241926b7c197337655146dea7",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50918,6 +50918,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py"
       ],
@@ -50937,6 +50938,7 @@
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
         "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/behavioural_materialize.py"
@@ -57260,8 +57262,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 18888,
-      "sha256": "2849f9bd89e6c52246378e179ddc9ba0900c3a57a844b41d87c645cc9cb6bb7c",
+      "size_bytes": 17936,
+      "sha256": "191be98688d1b7bc4d516a74d4a71dbe5ef43d07c8d3d3c659459916ec50da66",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
