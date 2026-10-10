@@ -1,0 +1,26 @@
+{
+  "schema": "aadistill.phase_d1.behavioural_session/v1",
+  "run_id": "d1_behavioural_20261010_090343",
+  "rung": "screening",
+  "started_utc": "2026-10-10T09:11:09+00:00",
+  "status": "FAILED",
+  "probes": [],
+  "cheap_preflight": {
+    "battery": {
+      "role": "d1_screening",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+      "n_prompts": 950,
+      "n_scorable": 850
+    },
+    "roles_disjoint": true,
+    "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+  },
+  "failure": {
+    "type": "TypeError",
+    "message": "materialize_fixed_path() missing 1 required keyword-only argument: 'root_loader'",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py\", line 631, in main\n    materialization = M.materialize_arms(\n                      ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 528, in materialize_arms\n    **materialize_incumbent(dest, device=device,\n      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 366, in materialize_incumbent\n    results = materialize_fixed_path(\n              ^^^^^^^^^^^^^^^^^^^^^^^\nTypeError: materialize_fixed_path() missing 1 required keyword-only argument: 'root_loader'\n"
+  },
+  "ended_utc": "2026-10-10T10:25:12+00:00"
+}

@@ -1,0 +1,105 @@
+{
+ "schema": "aadistill.phase_d1.run_failed/v1",
+ "run_id": "d1_behavioural_20261010_090343",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+ "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE, after reproducing all four candidate arms byte-exactly. B's materialization aborted on its first producer call; no probe trained, nothing measured, no selection exists.",
+ "classification": "PRE-SCIENCE ENGINEERING ABORT (P12.1): materialize_incumbent omitted `root_loader`, a REQUIRED keyword-only argument of materialize_fixed_path. NOT a DIGEST_MISMATCH: no pinned step of B's path ran.",
+ "what_this_run_nevertheless_established": {
+  "_this_is_real_evidence": "the four candidate arms were rebuilt on fresh hardware, each along its recorded operator sequence under the search's own execution configuration (mbs=3, length_sorted_v1), and every one reproduced the artifact digest the completed search recorded for it. The replay machinery is confirmed for the whole frozen Top-4, not only for the two leaves the rematerialization campaign covered.",
+  "candidates_reproduced": {
+   "q1": {
+    "state_id": "e5e3edb0477b25147de952153da8fc21",
+    "final_step_digest_prefix": "a7736a705b3e",
+    "path": "FFN->DEPTH->WIDTH->ATTENTION",
+    "step_seconds": [
+     48,
+     852,
+     28,
+     8
+    ]
+   },
+   "q2": {
+    "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+    "final_step_digest_prefix": "3a4b4ede6888",
+    "path": "FFN->DEPTH->WIDTH->ATTENTION",
+    "step_seconds": [
+     46,
+     850,
+     27,
+     7
+    ]
+   },
+   "q3": {
+    "state_id": "56388d47b6a71e1b49e44929e48d4061",
+    "final_step_digest_prefix": "9e04b4095713",
+    "path": "DEPTH->FFN->ATTENTION->WIDTH",
+    "step_seconds": [
+     1183,
+     35,
+     16,
+     26
+    ]
+   },
+   "q4": {
+    "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+    "final_step_digest_prefix": "253ebdee1f82",
+    "path": "DEPTH->FFN->ATTENTION->WIDTH",
+    "step_seconds": [
+     1184,
+     36,
+     16,
+     26
+    ]
+   }
+  },
+  "_digests_match_the_retention_record": "each prefix equals the artifact_digest post_search_finalist_retention.json records for that quality position; the shared step-0/step-1 digests across the two lineage pairs (292e36f13829 / e63a36e4e03b) are the expected consequence of two leaves sharing a prefix path.",
+  "intermediate_release_worked": "8.72 GiB freed per FFN-first arm and 12.09 GiB per DEPTH-first arm, 3 intermediates each, immediately after adoption -- the C2 attempt3 ENOSPC repair, observed working on a real pod.",
+  "arms_are_not_preserved_and_that_is_the_design": "an arm rematerializes deterministically from its pinned path, so it is not a session product (P8.4). Round-tripping 4.8 GiB over a 0.72 MB/s uplink would cost more pod time than the 74 minutes of rebuild it would save."
+ },
+ "repair": "materialize_incumbent now passes root_loader, loading the teacher AS PUBLISHED (no config overrides) -- C2's materialize_b passes none, and that rebuild reproduced B's exact digest; the candidates' `use_cache: False` belongs to the search's shared-root beam and would start B from a config C1 never used. The regression that should have caught this stubbed `def capture(spec, **kwargs)`, which is MORE PERMISSIVE than the function it replaced and so could not see a missing required argument: it now binds against the real signature, and a structural check binds BOTH producer call sites. B is also built FIRST now, so a defect on its distinct code path costs ~22 min instead of ~96.",
+ "a_second_finding_the_reordering_surfaced": "FixedPathSpec hashes include `device`, so B's spec hash is device-dependent and C1 froze the treatment path at `cuda`: assert_frozen_construction refuses a cpu rebuild of B at $0. Pinned by its own regression rather than worked around.",
+ "recorded_utc": "2026-10-10T10:34:11+00:00",
+ "session_commit": "a227fe8fa4af5f93abdb36653af64f6e5e2dc4e1",
+ "authorized_base_commit": "ae2fa14eb7bbc303be348172efff386e985de43c",
+ "authorization_sha256": "87230388f590eb90612bc477a1558b28cb83f16f281f23a08fbf75ff17562eb2",
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "7qwzxod4y77hlo",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 81.16,
+  "actual_usd": 1.4743,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "one_use_grant_consumed": true,
+  "note": "the issued one-use chain is consumed; the corrected attempt is a new subrun with a fresh chain under the same maintainer grant."
+ },
+ "cost": {
+  "actual_usd": 1.4743,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 81.16,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost; restated because derive_budget books from closeout/outcome.json"
+ },
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "teardown": {
+  "pod_deleted": true,
+  "provider_confirms_gone": true,
+  "final_desired_status": "TERMINATED",
+  "billing": false
+ },
+ "evidence": {
+  "driver_record": "evidence/d1_behavioural.json",
+  "driver_run_log": "evidence/autoinit_d1_behavioural_run.log",
+  "session_record": "runtime/session.json",
+  "probes_trained": 0,
+  "probes_scored": 0,
+  "trained_unscored_preserved": [],
+  "arms_materialized": 4,
+  "arms_adopted": 4
+ },
+ "observers": "launcher exited; the event monitor on its log is stopped at this closeout. The watch set is empty."
+}
