@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-10 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-11 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,10 +9,15 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 SCREENING AWAITS ITS ONE-USE MAINTAINER GRANT, AND NOTHING ELSE.** The
-execution-readiness process the 2026-10-10 pause gated on has been EXECUTED,
-on `exec/d1-behavioural-readiness`, cut fresh from the integrated `main`
-(`c8f714af`) per P12.2:
+**D1 SCREENING IS ENGINEERING-READY AND BLOCKED ON A BUDGET DECISION.** The
+maintainer's one-use grant was issued and consumed across four launcher
+invocations; all four aborted before formal measurement, all four defects are
+repaired, and the $16.7873 left of the $25.0053 envelope is below the $17.84
+measured cost of a complete 10-probe run. A fifth issuance is refused in code.
+See **Right now → screening** below, and
+`logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json` for
+the decision. Working branch `exec/d1-behavioural-readiness` at `84d681b6`, cut fresh from the
+integrated `main` per P12.2:
 
 ```text
 execution preregistration   plans/d1_behavioural_preregistration.json
@@ -113,14 +118,58 @@ execution/evidence defects; all three are repaired on this branch:**
                     evidence durable (P8.4: no remaining consumer).
 ```
 
-**What remains before formal screening — exactly one maintainer decision plus
-its mechanical consequences:** write the one-use screening grant; issue the
-authorization against it at the live rate; commit the authorization; run the
-launch-bound sweep; stage the bundle; write launch readiness; launch. No
-execution grant exists, no authorization is issued, and no resource has been
-created. Owed before the CONFIRMATION launch (blocking nothing about
-screening): the off-pod stratified prompt-cluster bootstrap verdict
-implementation.
+**SCREENING WAS AUTHORIZED, LAUNCHED FOUR TIMES, AND IS NOW BLOCKED ON MONEY —
+not on engineering.** The maintainer authorized ONE formal screening session on
+2026-10-10 with a $25.0053 one-use envelope at the accepted $1.09/h L40S rate.
+Four launcher invocations followed; **every one aborted before formal
+measurement**, each finding a distinct real defect, and together they consumed
+**$8.2180**, leaving **$16.7873**. The measured all-in cost of a complete
+10-probe run is **$17.84** (981.7 min), so **the remainder cannot fund one.**
+
+```text
+subrun            usd      min   aborted on
+082900          0.1715     9.4   root_loader seam called without its spec
+090343          1.4743    81.2   incumbent loader never supplied (4 arms OK)
+103442          3.0797   169.5   engine probe could not import its own dep
+132919          3.4925   192.3   evaluator hashed a different runtime than
+                                 the attestation (no AADISTILL_IMAGE_DIGEST
+                                 in the driver's child environment)
+                ------- -------
+                8.2180   452.4   of $25.0053 · $16.7873 left · need $17.84
+```
+
+**All four defects are repaired and regression-pinned**, and attempt 4
+established that the chain now works: the generation-protocol **attestation
+PASSED** (`a01049908e18…`), all five arms reproduced at their recorded
+identities on fresh hardware for the second consecutive attempt, and the
+trained-but-unscored durability mechanism was proven on a real failure —
+probe 1's checkpoint preserved and identity-verified 24.6 min before the run
+ended, with the teardown gate holding deletion until preservation succeeded.
+It is durable on the dev box (2.3 GiB, `71387681f3a9…`), is a P8.4 state-2
+artifact, and is **newly transportable**: both private HF repos now accept a
+2.22 GiB upload, having previously refused on quota.
+
+**A fifth launch is REFUSED IN CODE, and that closes a real safety hole.**
+`per_launch_hard_usd` used to be the full ceiling, making core's
+`require_within_launch_limit` vacuous for this session — four subruns each
+booked `within_authorization: true` at $25.0053 while the envelope drained, and
+a fifth would have carried a $24.63 hard GPU bound against $16.79, authorizing
+~$8 of overspend with no check in the way. The issuer now nets the envelope
+against prior subruns' closeouts (`behavioural_authorization
+.consumed_by_prior_subruns`), carries the **remainder** as the per-launch bound,
+and refuses issuance outright when the remainder cannot fund a complete run.
+
+**The decision this needs is the maintainer's**, recorded with the measured cost
+model and the levers examined at
+`logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json`.
+P12.1: this authority "never covers additional budget". Options there: (A) top
+up to ~$29–30 all-in for one complete measured run — recommended, and inside
+the $30 per-session envelope the grant already references; (B) resume probe 1
+and accept a 0.4% margin — not recommended; (C) stop D1 screening.
+
+Owed before the CONFIRMATION launch (blocking nothing about screening): nothing
+— the off-pod stratified prompt-cluster bootstrap verdict is implemented in
+`behavioural_verdict.py` and validated across GO / NO-GO(null) / NO-GO(veto).
 
 **THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
 into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
@@ -147,9 +196,13 @@ finalists re-verified after their physical moves — the finalists in the
 durable store at `/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
 
 **Nothing is running and nothing is billing.** An account-wide provider query
-returns **0 pods and 0 network volumes** at a spend rate of `$0/h`, against a
-balance of `$186.6019`. No behavioural authorization was issued, no pod was
-created, and no screening or confirmation work ran.
+on 2026-10-11 returns **0 pods** at a spend rate of `$0/h`, against a balance of
+`$178.2714`. Attempt 4's pod `7z4spas7bfpzi6` reports `exists=False`,
+`desired_status=TERMINATED`, `billing=False`. Both of its monitors were stopped
+in its terminal path (P12.3) and the watch set is empty. Four behavioural
+authorizations were issued and four pods created across the four subruns above;
+all are closed and torn down. No screening measurement exists and no
+confirmation work ran.
 
 **THE CONTROL ARM WAS THE ARM C1 BEAT, and that is now corrected.** The design
 declared `fe9683e6` / `c313d1b4` — C1's `attention.weight_proxy_v0` arm. C1
@@ -374,9 +427,18 @@ the selection semantics they ran under. `a2b2f04ae642ac69…` and
 `ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
 bytes are retired once q2 and q4 are secured.
 
-**Behavioural screening is BUILT and PAUSED.** Four candidates at two recovery
-seeds plus the incumbent at two matched seeds is ten screening probes, then one
-advancing candidate, then a fresh three-seed confirmation against B.
+**Behavioural screening is BUILT, EXERCISED ON REAL HARDWARE, and HALTED ON
+BUDGET.** Four candidates at two recovery seeds plus the incumbent at two
+matched seeds is ten screening probes, then one advancing candidate, then a
+fresh three-seed confirmation against B. No probe has yet been scored: four
+subruns reached, in order, arm materialization, the incumbent's build, the
+engine probe, and — on attempt 4 — a PASSING attestation plus a fully trained
+first probe, which the per-probe generation admission then correctly refused.
+Each of the four created one provider resource and each is closed and torn down.
+The priced cell below (1355.71 min / $25.0053) is the PRE-RUN estimate; the
+MEASURED model is 981.7 min / $17.84 and lives in
+`analyses/d1_screening_budget_boundary.json`, which supersedes the estimate for
+planning while leaving the authorized cell untouched.
 
 What exists and is verified at `$0`: the five-arm field, with the four
 candidates' secured bytes hashed against all four recorded identities and the

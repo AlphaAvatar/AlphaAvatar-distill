@@ -1,0 +1,100 @@
+{
+ "schema": "aadistill.phase_d1.boundary/v1",
+ "title": "D1 screening: the remaining one-use envelope is below the MEASURED cost of the frozen 10-probe schedule",
+ "status": "OPEN -- requires a maintainer decision. No further provider resource will be created until one exists.",
+ "record_role": "decision_required",
+ "recorded_utc": "2026-10-11",
+ "_contract": "A budget fact and the measurement behind it. It changes no frozen protocol value, proposes no protocol change, and authorizes nothing. It exists because P12.1 makes a cumulative-budget boundary a stop condition and the maintainer named 'a genuine authorization/resource-safety boundary' as a terminal condition.",
+
+ "the_boundary": {
+  "one_use_envelope_usd": 25.0053,
+  "consumed_usd": 8.2180,
+  "remaining_usd": 16.7873,
+  "remaining_gpu_minutes_at_1_09": 924.1,
+  "measured_need_for_a_complete_10_probe_run_minutes": 981.7,
+  "measured_need_usd": 17.8359,
+  "shortfall_minutes": 57.6,
+  "shortfall_usd": 1.0486,
+  "verdict": "A complete screening run does not fit. Launching anyway would most likely consume the remaining $16.79 and still produce no selection, because a partial schedule yields no valid verdict under the frozen design."
+ },
+
+ "where_the_8_22_went": {
+  "_note": "four launcher invocations, every one of which aborted BEFORE formal measurement. Each found a distinct real defect; none produced a scientific result, and none was a retry of a measurement.",
+  "subruns": [
+   {"run": "20261010_082900", "usd": 0.1715, "min": 9.44,
+    "found": "the root_loader seam was called without the spec it needed"},
+   {"run": "20261010_090343", "usd": 1.4743, "min": 81.16,
+    "found": "the incumbent's loader was never supplied; all four candidate arms reproduced byte-exactly"},
+   {"run": "20261010_103442", "usd": 3.0797, "min": 169.53,
+    "found": "the engine probe could not resolve its own imports (a stale sys.path insert left by the information-architecture migration); all five arms materialized; probe 1 trained and was preserved"},
+   {"run": "20261010_132919", "usd": 3.4925, "min": 192.25,
+    "found": "the driver spawned its children with an environment that never carried AADISTILL_IMAGE_DIGEST, so the evaluator hashed a different runtime than the attestation; ATTESTATION PASSED; all five arms materialized; probe 1 trained, preserved and identity-verified"}
+  ],
+  "_the_envelope_was_not_mispriced": "the $25.0053 ceiling was sized correctly for ONE launch of the science (authorized expectation $19.75; measured $17.84). It was consumed by engineering discovery, not by the experiment being more expensive than believed."
+ },
+
+ "the_measured_cost_model": {
+  "_provenance": "measured on run 20261010_132919, the only attempt that reached generation. Phase boundaries read from runtime/session.json :: timeline, which stamps each marker with elapsed minutes and dollars. This REPLACES the pre-run estimate of 1087 expected / 1356 hard minutes.",
+  "gpu": "NVIDIA L40S", "usd_per_hour": 1.09, "container_disk_gb": 120,
+  "fixed_overhead_minutes": {
+   "pod_boot_and_setup": 5.0,
+   "driver_start_to_materialize": 2.3,
+   "materialize_5_arms": 92.0,
+   "engine_probe_and_attestation": 5.2,
+   "teardown": 2.2,
+   "total": 106.7
+  },
+  "per_probe_minutes": {
+   "recovery_training": 60.9,
+   "uncapped_generation_850_scorable": 24.6,
+   "scoring": "~2 (ESTIMATED, not measured -- the admission refused before the scorer ran)",
+   "total": 87.5
+  },
+  "ten_probes": 875.0,
+  "all_in_minutes": 981.7,
+  "all_in_usd": 17.8359,
+  "_irreducible_core": "875 of the 981.7 minutes are the frozen science itself: 10 probes x (train + generate). No engineering change reduces it, and reducing the probe count would change the frozen design."
+ },
+
+ "levers_examined_and_what_they_are_worth": [
+  {"lever": "resume probe 1 from its preserved checkpoint instead of retraining it",
+   "saves_minutes": 60.9,
+   "status": "AVAILABLE and protocol-MANDATED where it applies. P8.4 state 2: 'restore the existing checkpoint and resume at scoring. Do not retrain it.' The driver already implements identity-checked resume. The standing fact d1_probe_training_is_not_bit_reproducible.json argues for it independently: retraining a frozen unit creates a SECOND artifact under one label rather than recreating the first.",
+   "transport": "NEWLY VIABLE. The private HF repos AlphaAvatar/aadistill-transport and aadistill-artifacts both accept a 2,384,999,680-byte LFS upload as of 2026-10-11 (batch endpoint returns an upload action). They previously refused on private-storage quota, which is what made an earlier session choose retraining. Upload from the dev box costs ~53 min of WALL CLOCK at the measured 0.72 MB/s uplink and $0 of GPU, because no pod need be running; the pod then pulls it at datacenter speed.",
+   "residual_need_minutes": 920.8,
+   "verdict": "NOT SUFFICIENT ALONE. 920.8 against 924.1 available is a 0.4% margin, on a chain that has shown 30x setup-time variance and four distinct infrastructure failures. That is not a margin, it is a coin flip with no teardown reserve."},
+
+  {"lever": "cache the five materialized arms durably so a later attempt downloads instead of rebuilding",
+   "saves_minutes": "up to ~77 of the 92-minute materialization",
+   "status": "VIABLE FOR A FUTURE ATTEMPT, WORTH NOTHING FOR THE NEXT ONE. The arms are built on the pod and attempt 4's pod is deleted, so the bytes no longer exist. The next attempt must rebuild them; it could upload them from the pod (fast uplink) for the attempt after that. Recorded because this cost has now been paid three times."},
+
+  {"lever": "reduce the probe count, shorten generation, or cap reasoning tokens",
+   "status": "REFUSED. Each would change the frozen design, the frozen battery or P18's unrestricted-generation rule. The maintainer's authorization is explicit: 'Do not modify the frozen scientific protocol, experiment field, recovery seeds or decision rules to fit the budget.'"},
+
+  {"lever": "a cheaper GPU",
+   "status": "NOT ASSESSED, and not assessable without changing the comparison. The incumbent B and the C1/C3 lineage were measured on an L40S, and batch-shape/reduction-order effects on this hardware have already moved a top-k selection once (see the A3 finding). Changing the GPU under a frozen protocol is a scientific decision, not a budget optimization."}
+ ],
+
+ "what_is_NOT_in_doubt": [
+  "the engineering chain. The generation-protocol attestation passed on this image and engine; all five arms -- q1-q4 and standing incumbent B -- reproduced at their recorded identities on fresh hardware twice consecutively; the trained-but-unscored durability mechanism was proven on a real failure, preserving and identity-verifying a checkpoint 24.6 minutes before the run ended, with the teardown gate holding deletion until preservation succeeded.",
+  "the frozen science. Design f9c6688f, preregistration aa70338a, arms, seeds, battery, recovery recipe and the C0 decision rule are untouched by anything in this record.",
+  "resource safety. Live provider query at closeout: 0 pods, $0.00/hr, attempt-4 pod exists=False desired_status=TERMINATED billing=False. Both monitors stopped in the terminal path."
+ ],
+
+ "the_decision_this_needs": {
+  "_whose": "the maintainer's. P12.1: 'This authority ends where engineering ends. It never covers additional budget.' The engineering defect that ended attempt 4 is repaired and regression-tested; the obstacle is money, which is not an engineering failure and not mine to resolve.",
+  "options": [
+   {"option": "A -- top up the session envelope to cover one complete measured run",
+    "what_it_costs": "the measured all-in need is $17.84 for a fresh 10-probe run, against $16.79 remaining. An envelope raised to roughly $29-30 all-in would fund a complete run with a ~20% margin for setup variance and one retry of a short pre-science failure, and stays inside the $30 per-session envelope already referenced by the grant.",
+    "why_it_is_the_recommended_one": "the $8.22 already spent bought four real defect fixes and a measured cost model; the chain is demonstrably ready; stopping now discards that investment and still leaves D1 without a behavioural selection."},
+   {"option": "B -- authorize the restore path and accept a thin margin",
+    "what_it_costs": "nothing additional, but 920.8 minutes of need against 924.1 available. Any setup draw above ~3 minutes of variance exhausts the envelope mid-schedule, which produces no verdict and no refund.",
+    "assessment": "not recommended."},
+   {"option": "C -- stop D1 behavioural screening here",
+    "what_it_costs": "the phase keeps its engineering, its records and its preserved checkpoints, and has no behavioural selection. The four candidate arms remain unranked against the standing incumbent."}
+  ],
+  "_not_self_answerable": "I have not chosen among these and have created no resource. A budget increase requires a maintainer decision; so would option C's effect on the phase's scientific plan."
+ },
+
+ "authorizes": "nothing"
+}

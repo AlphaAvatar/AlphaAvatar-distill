@@ -1,0 +1,9 @@
+{
+  "probe_id": "d1_screening_q1_s614923639",
+  "generation_fingerprint": "89262ea76f2856ffbeb5ecf648598d9a1ad5a7c9d0dbd0db58ca5c3555c13ece",
+  "evaluation_protocol_hash": "bcd3ef8361cab86686729a0f8d379454fb7d40cf0133bb6e5881afd0915e1925",
+  "attested_evaluation_protocol_hash": "a01049908e188516432a8df29bcc0a80c4f961fde1649b79b40243bd8f457b10",
+  "n_summaries": 7,
+  "comparable": false,
+  "reason": "evaluation protocols are not comparable (d1_screening_q1_s614923639): NOT COMPARABLE: generation protocol differs"
+}

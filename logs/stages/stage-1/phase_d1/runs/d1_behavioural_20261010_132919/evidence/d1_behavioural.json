@@ -1,0 +1,1073 @@
+{
+  "schema": "aadistill.phase_d1.behavioural_session/v1",
+  "run_id": "d1_behavioural_20261010_132919",
+  "rung": "screening",
+  "started_utc": "2026-10-10T13:38:44+00:00",
+  "status": "FAILED",
+  "probes": [
+    {
+      "probe_id": "d1_screening_q1_s614923639",
+      "arm": "q1",
+      "seed": 614923639,
+      "index": 0,
+      "trained": true,
+      "scored": false,
+      "config": "artifacts/audit/autoinit_d1_behavioural/configs/d1_screening_q1_s614923639.json",
+      "device_handoff": "0.01 GiB allocated and 0.02 GiB reserved after the release; the pre-release figure was allocator reservation, not a model leak",
+      "train_seconds": 3653.0,
+      "train_rc": 0,
+      "model_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_screening_q1_s614923639/checkpoints/step_001023/model",
+      "trained_sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
+      "trained_bytes": 2384234968,
+      "package_dir": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural_eval/d1_screening_q1_s614923639",
+      "generate_seconds": 1561.7,
+      "generate_rc": 0
+    }
+  ],
+  "cheap_preflight": {
+    "battery": {
+      "role": "d1_screening",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+      "n_prompts": 950,
+      "n_scorable": 850
+    },
+    "roles_disjoint": true,
+    "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+  },
+  "arm_materialization": {
+    "schema": "aadistill.phase_d1.behavioural_arm_materialization/v1",
+    "rung": "screening",
+    "arm_root": "/workspace/aad_arms",
+    "device": "cuda",
+    "root_state": {
+      "schema": "aadistill.phase_d1.root_state_derivation/v1",
+      "candidate_set": [
+        "teacher_as_published",
+        "session_driver_use_cache_false"
+      ],
+      "derived_from": "the session driver's root loader and the one in-place config mutation a shipped operator performs; non-root parents reload from disk and cannot carry sibling state",
+      "chosen_candidate": "session_driver_use_cache_false",
+      "config_overrides": {
+        "use_cache": false
+      },
+      "evidence": [
+        {
+          "candidate": "teacher_as_published",
+          "overrides": {},
+          "explains_every_step_0": false,
+          "steps": [
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "e5e3edb0477b25147de952153da8fc21",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "d39b2e9b0f33f4b2f1f23eef194c902ec580a8625695ae346d2146dea858a5fe",
+              "matches": false
+            },
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "d39b2e9b0f33f4b2f1f23eef194c902ec580a8625695ae346d2146dea858a5fe",
+              "matches": false
+            },
+            {
+              "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+              "leaf": "56388d47b6a71e1b49e44929e48d4061",
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "reconstructed_config_sha256": "ab042e003f8348a866d38ff3e59c2c5d783338ce266da81e2f4e13e4def48851",
+              "matches": false
+            },
+            {
+              "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+              "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "reconstructed_config_sha256": "ab042e003f8348a866d38ff3e59c2c5d783338ce266da81e2f4e13e4def48851",
+              "matches": false
+            }
+          ]
+        },
+        {
+          "candidate": "session_driver_use_cache_false",
+          "overrides": {
+            "use_cache": false
+          },
+          "explains_every_step_0": true,
+          "steps": [
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "e5e3edb0477b25147de952153da8fc21",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "matches": true
+            },
+            {
+              "state_id": "6d6006a0f66c94a331a5747b228179ec",
+              "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+              "impl_id": "ffn.activation_importance_v0",
+              "recorded_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "reconstructed_config_sha256": "94ecfd1cee0fbb64ad9313de67eeefc0cd96358cf68ac186e2f31cfa0147bd2d",
+              "matches": true
+            },
+            {
+              "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+              "leaf": "56388d47b6a71e1b49e44929e48d4061",
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "reconstructed_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "matches": true
+            },
+            {
+              "state_id": "20bd9506785d3d3e2468d5ed0f003203",
+              "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "recorded_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "reconstructed_config_sha256": "4e5b71040b0badb8e9b3f1c58f99ef6d3e69723612ab69ee783a8ba56887ad82",
+              "matches": true
+            }
+          ]
+        }
+      ],
+      "lineage_verified": [
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "matches": true
+        },
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "reconstructed_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "matches": true
+        },
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "matches": true
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "matches": true
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "reconstructed_config_sha256": "e01c73a6b0f796f1b5bc8bf867f8c2663b7bea6587cf4ec0e0b6e45eadedf591",
+          "matches": true
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "matches": true
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 1,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "matches": true
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 2,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+          "reconstructed_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+          "matches": true
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 3,
+          "impl_id": "width.global_pca_v0",
+          "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "matches": true
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 1,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "reconstructed_config_sha256": "2089b4a3e0e84a6ba28af766662433ec8da35bcea8354263a57cb4f5cd181ca4",
+          "matches": true
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 2,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+          "reconstructed_config_sha256": "3b718ed578f5a92c4116c54ed9c8b50c0c6ed2ea23e31b453be288490ff2d4ed",
+          "matches": true
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 3,
+          "impl_id": "width.global_pca_v0",
+          "recorded_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "reconstructed_config_sha256": "f69c2fb3a120db405cd48c4b643b28d10a38b7b2e3ba9a3618e110888f2a6841",
+          "matches": true
+        }
+      ],
+      "_lineage_scope": "4 step-0 identities discriminate the candidate; 12 later identities confirm it explains the whole config lineage. WEIGHTS are not checked here -- that is what the digest-pinned replay on the GPU is for.",
+      "agreed_with_plan": true
+    },
+    "execution_agreement": {
+      "schema": "aadistill.phase_d1.execution_agreement/v1",
+      "n_steps": 16,
+      "all_match": true,
+      "using": {
+        "micro_batch_size": 3,
+        "calibration_batch_packing": "length_sorted_v1"
+      },
+      "owner": "stages.phase_d1.d1_session.execution",
+      "steps": [
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 0,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "e5e3edb0477b25147de952153da8fc21",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 0,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 1,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 2,
+          "impl_id": "width.global_pca_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "afd50c9ff0e3d20542bb5473ea745b55",
+          "index": 3,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 0,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 1,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 2,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "56388d47b6a71e1b49e44929e48d4061",
+          "index": 3,
+          "impl_id": "width.global_pca_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 0,
+          "impl_id": "depth.causal_kl_greedy_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 1,
+          "impl_id": "ffn.activation_importance_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 2,
+          "impl_id": "attention.activation_importance_v1",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        },
+        {
+          "leaf": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "index": 3,
+          "impl_id": "width.global_pca_v0",
+          "recorded": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "using": {
+            "micro_batch_size": 3,
+            "calibration_batch_packing": "length_sorted_v1"
+          },
+          "matches": true,
+          "unrecorded": null
+        }
+      ],
+      "_why_a_separate_check": "micro_batch_size and calibration_batch_packing are excluded from `config_hash` by design, because they do not change the estimand. They DO change which neurons a top-k keeps when the scores near the cutoff are dense, so a replay must carry them even though no identity does."
+    },
+    "arms": [
+      {
+        "arm": "q1",
+        "reused": false,
+        "state_id": "e5e3edb0477b25147de952153da8fc21",
+        "spec_hash": "6c29df35150fafcfc2dec9ab85f42b05ca980c2a68650812f98a9e41f44923bf",
+        "intermediates_released": {
+          "arm": "e5e3edb0477b25147de952153da8fc21",
+          "removed_steps": [
+            "ffn.activation_importance_v0",
+            "depth.causal_kl_greedy_v1",
+            "width.global_pca_v0"
+          ],
+          "freed_gib": 8.716,
+          "failed": [],
+          "kept": "/workspace/aad_arms/e5e3edb0477b25147de952153da8fc21/steps/03_attention"
+        },
+        "seconds": 937.2,
+        "checkpoint_path": "/workspace/aad_arms/e5e3edb0477b25147de952153da8fc21/steps/03_attention",
+        "identity": {
+          "expected": {
+            "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+            "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+            "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "actual": {
+            "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+            "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+            "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "differ": []
+        },
+        "adopted": true
+      },
+      {
+        "arm": "q2",
+        "reused": false,
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "spec_hash": "2221484a60c2313cc9f21608d62d0b9332c4f4c6c7458cf44e44cf6ad7345d36",
+        "intermediates_released": {
+          "arm": "afd50c9ff0e3d20542bb5473ea745b55",
+          "removed_steps": [
+            "ffn.activation_importance_v0",
+            "depth.causal_kl_greedy_v1",
+            "width.global_pca_v0"
+          ],
+          "freed_gib": 8.716,
+          "failed": [],
+          "kept": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention"
+        },
+        "seconds": 934.2,
+        "checkpoint_path": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention",
+        "identity": {
+          "expected": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "actual": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "differ": []
+        },
+        "adopted": true
+      },
+      {
+        "arm": "q3",
+        "reused": false,
+        "state_id": "56388d47b6a71e1b49e44929e48d4061",
+        "spec_hash": "710e51bc7fe5120354dd38b978e106577582ffb3b5bf43c232f3cbf927b1404b",
+        "intermediates_released": {
+          "arm": "56388d47b6a71e1b49e44929e48d4061",
+          "removed_steps": [
+            "depth.causal_kl_greedy_v1",
+            "ffn.activation_importance_v0",
+            "attention.activation_importance_v1"
+          ],
+          "freed_gib": 12.087,
+          "failed": [],
+          "kept": "/workspace/aad_arms/56388d47b6a71e1b49e44929e48d4061/steps/03_residual_width"
+        },
+        "seconds": 1255.4,
+        "checkpoint_path": "/workspace/aad_arms/56388d47b6a71e1b49e44929e48d4061/steps/03_residual_width",
+        "identity": {
+          "expected": {
+            "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+            "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+            "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "actual": {
+            "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+            "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+            "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "differ": []
+        },
+        "adopted": true
+      },
+      {
+        "arm": "q4",
+        "reused": false,
+        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+        "spec_hash": "ecc148dd3765cccda2b5544127b28030e3d1ca11511437bb0dbcb2698e25d9af",
+        "intermediates_released": {
+          "arm": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "removed_steps": [
+            "depth.causal_kl_greedy_v1",
+            "ffn.activation_importance_v0",
+            "attention.activation_importance_v1"
+          ],
+          "freed_gib": 12.087,
+          "failed": [],
+          "kept": "/workspace/aad_arms/3fcaf42eaa91b3ed02eab6c2f3213bfc/steps/03_residual_width"
+        },
+        "seconds": 1246.9,
+        "checkpoint_path": "/workspace/aad_arms/3fcaf42eaa91b3ed02eab6c2f3213bfc/steps/03_residual_width",
+        "identity": {
+          "expected": {
+            "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+            "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+            "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "actual": {
+            "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+            "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+            "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          },
+          "differ": []
+        },
+        "adopted": true
+      },
+      {
+        "reused": false,
+        "arm": "B",
+        "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+        "construction": {
+          "path_id": "autoinit.v1.phase_c1.treatment",
+          "path_label": "DEPTH(calib.domain_balanced@v1)->FFN(calib.domain_balanced@v1)->RESIDUAL_WIDTH(calib.reasoning_heavy@v2)->ATTENTION(calib.domain_balanced@v1)",
+          "spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "expected_spec_hash": "3a233a9017b3b8a717ff18fc1aaa171dad84f36adc97920765d181ca98c53612",
+          "steps": [
+            {
+              "impl_id": "depth.causal_kl_greedy_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "ffn.activation_importance_v0",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": ""
+            },
+            {
+              "impl_id": "width.global_pca_v0",
+              "profile_id": "calib.reasoning_heavy@v2",
+              "expected_artifact_digest": "eea90c91346a0745b8b1b847503b48fe73c33bb9d75d92c196dc43598e91e722",
+              "label": "pre-ATTENTION parent b8820f41d062"
+            },
+            {
+              "impl_id": "attention.activation_importance_v1",
+              "profile_id": "calib.domain_balanced@v1",
+              "expected_artifact_digest": null,
+              "label": "treatment ATTENTION"
+            }
+          ],
+          "verified": true
+        },
+        "execution": {
+          "micro_batch_size": 1,
+          "calibration_batch_packing": "original_order_v1"
+        },
+        "intermediates_released": {
+          "arm": "B",
+          "removed_steps": [
+            "depth.causal_kl_greedy_v1",
+            "ffn.activation_importance_v0",
+            "width.global_pca_v0"
+          ],
+          "freed_gib": 10.64,
+          "failed": [],
+          "kept": "/workspace/aad_arms/B/steps/03_attention"
+        },
+        "seconds": 1258.1,
+        "checkpoint_path": "/workspace/aad_arms/B/steps/03_attention",
+        "identity": {
+          "verified": [
+            "arch_signature",
+            "artifact_digest",
+            "single_shard_sha256",
+            "weights_digest"
+          ],
+          "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4",
+          "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+          "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+          "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335"
+        },
+        "adopted": true
+      }
+    ],
+    "build_order": [
+      "B",
+      "q1",
+      "q2",
+      "q3",
+      "q4"
+    ],
+    "n_arms": 5
+  },
+  "contract": {
+    "schema": "aadistill.phase_d1.behavioural_contract/v1",
+    "rung": "screening",
+    "advancing_candidate": null,
+    "design_hash": "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2",
+    "recovery_recipe": {
+      "recipe_id": "e1_p1_kd_heavy@0.86M",
+      "declared_in_design": "E1_KD_HEAVY_0860K",
+      "tokens": 860000,
+      "pack": "artifacts/stage3/ladder_uniform_probe",
+      "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+      "ce_weight": 0.25,
+      "kd_weight": 1.0,
+      "temperature": 1.0,
+      "kd_scope": "all",
+      "block_len": 8192
+    },
+    "seeds": [
+      614923639,
+      516448251
+    ],
+    "n_probes": 10,
+    "n_probes_declared": 10,
+    "probes": [
+      {
+        "probe_id": "d1_screening_q1_s614923639",
+        "arm": "q1",
+        "seed": 614923639
+      },
+      {
+        "probe_id": "d1_screening_q1_s516448251",
+        "arm": "q1",
+        "seed": 516448251
+      },
+      {
+        "probe_id": "d1_screening_q2_s614923639",
+        "arm": "q2",
+        "seed": 614923639
+      },
+      {
+        "probe_id": "d1_screening_q2_s516448251",
+        "arm": "q2",
+        "seed": 516448251
+      },
+      {
+        "probe_id": "d1_screening_q3_s614923639",
+        "arm": "q3",
+        "seed": 614923639
+      },
+      {
+        "probe_id": "d1_screening_q3_s516448251",
+        "arm": "q3",
+        "seed": 516448251
+      },
+      {
+        "probe_id": "d1_screening_q4_s614923639",
+        "arm": "q4",
+        "seed": 614923639
+      },
+      {
+        "probe_id": "d1_screening_q4_s516448251",
+        "arm": "q4",
+        "seed": 516448251
+      },
+      {
+        "probe_id": "d1_screening_B_s614923639",
+        "arm": "B",
+        "seed": 614923639
+      },
+      {
+        "probe_id": "d1_screening_B_s516448251",
+        "arm": "B",
+        "seed": 516448251
+      }
+    ],
+    "arms": {
+      "n_arms": 5,
+      "arms": [
+        {
+          "arm": "q1",
+          "role": "candidate",
+          "quality_position": 1,
+          "state_id": "e5e3edb0477b25147de952153da8fc21",
+          "identities": {
+            "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+            "weights_digest": "fcc98b1c2bfd6ede83fb708ba2cd164fb41936e0a2674a8386448bbf3ab2466d",
+            "single_shard_sha256": "46fec7ddd33f27d01040165ef0df05fd956ff83035b7e049248b0165408ca00d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q2",
+          "role": "candidate",
+          "quality_position": 2,
+          "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+          "identities": {
+            "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+            "weights_digest": "0597e60c1a7fac06930e3e84c8f5341b1f7eb9470fc30b16efbf02f37208fdef",
+            "single_shard_sha256": "ca2d7368e3adce3e167a4376dcab425902530e7a77106146d336d676d2370c5d",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q3",
+          "role": "candidate",
+          "quality_position": 3,
+          "state_id": "56388d47b6a71e1b49e44929e48d4061",
+          "identities": {
+            "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+            "weights_digest": "8ab8e46ecbe955e314699b4ceab379ff6a7f2e7440b5aa840f14588e913b7876",
+            "single_shard_sha256": "532c37e52978b0dc6dc68e935f5387c2c8928b5b7a99c59ec1a99407cf23a099",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "q4",
+          "role": "candidate",
+          "quality_position": 4,
+          "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+          "identities": {
+            "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+            "weights_digest": "4f055824408c50eeadddb700ebce56f61d14185b4d123954801ec1911486c892",
+            "single_shard_sha256": "973d40e93f784eed6e811c599c7585dc6bb03b8e5dd99f904fac8acceb36f005",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        },
+        {
+          "arm": "B",
+          "role": "incumbent",
+          "quality_position": null,
+          "state_id": null,
+          "identities": {
+            "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+            "weights_digest": "85c5c50de3cd7e5242097e05e6f09057d9b27ae98ec49050219e75a2f49e2335",
+            "single_shard_sha256": "b24f0b63afd3b99f14d34d4fc508abbb26f65421dc5784f3738bd9565608d010",
+            "arch_signature": "09147a5c08d8ad7ad5bb18131bade73548a5fff08f0e0f99d6dd6ede227606c4"
+          }
+        }
+      ],
+      "_location_free": "paths are execution configuration and differ between the dev host and the pod; the identities bind the field either way"
+    },
+    "battery": {
+      "family_id": "d_series_behavioural_v1",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "role": "d1_screening",
+      "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+      "n_prompts": 950,
+      "n_scorable": 850,
+      "per_stratum": {
+        "code": 100,
+        "gsm8k": 150,
+        "knowledge": 150,
+        "math_verified": 150,
+        "multihop": 150,
+        "rag": 150,
+        "tool": 100
+      },
+      "root": "artifacts/stages/stage-1/families/d_series/batteries/d_series_behavioural_v1/d1_screening",
+      "files": [
+        {
+          "path": "d1_screening/code.jsonl",
+          "sha256": "c8b21743f2bf6048fa98ddc394f919f2a63f430fd056afe209e3a85edfbe3fa1",
+          "n_items": 100
+        },
+        {
+          "path": "d1_screening/gsm8k.jsonl",
+          "sha256": "c1fc5fe39b824d28a627adf92ed5589272e6052055879e11ef4e23896aad37f5",
+          "n_items": 150
+        },
+        {
+          "path": "d1_screening/knowledge.jsonl",
+          "sha256": "e82949b0fd49c890cd9aac113ca0ad4e639fbdab5c5e3658b5b9cc2e3947b69c",
+          "n_items": 150
+        },
+        {
+          "path": "d1_screening/math_verified.jsonl",
+          "sha256": "2d7c38a8ad6deaee0d3e1d8db2e10f07824a7db15d136905fc8b47898be627ba",
+          "n_items": 150
+        },
+        {
+          "path": "d1_screening/multihop.jsonl",
+          "sha256": "038b4a7f2635a508c9e07fb3b632167297cfb16f1635265bab974143895e5a2b",
+          "n_items": 150
+        },
+        {
+          "path": "d1_screening/rag.jsonl",
+          "sha256": "cbd5cd94666992c39dacedb654214a1f8d630c0512c5cc44a43593c9006bf8f4",
+          "n_items": 150
+        },
+        {
+          "path": "d1_screening/tool.jsonl",
+          "sha256": "c4b713de5c9893155db6850ca524bd52dba46095902a5da1b3d228c7d1557a71",
+          "n_items": 100
+        }
+      ],
+      "_capacity_blocker": "CLOSED",
+      "_not_the_exhausted_pool": "`d1_evidence_capacity.json` reports batteries_remaining 0 for the ORIGINAL C1 source populations, binding on MATH-500. This role was drawn from prospectively widened sources preserving the frozen stratum balance exactly, and the family's own record carries capacity_source_blocker CLOSED."
+    },
+    "roles_disjoint": {
+      "disjoint": true,
+      "per_stratum_screening_ids": {
+        "code": 100,
+        "gsm8k": 150,
+        "knowledge": 150,
+        "math_verified": 150,
+        "multihop": 150,
+        "rag": 150,
+        "tool": 100
+      }
+    },
+    "endpoint": "correct_overall",
+    "estimand": "prompt-mean of the seed-mean paired difference (candidate - B) over the three fixed confirmation seeds",
+    "inference": "stratified PROMPT-cluster bootstrap, seeds as fixed blocks; the interval is conditional on those three seed pairs and is not a seed-population claim",
+    "guardrails": "usable_rollout vetoes only, reported with every component and never positive ranking credit",
+    "rule": "three-way GO / NO-GO / INCONCLUSIVE, no forced winner",
+    "sesoi": 0.01,
+    "_sesoi_is_carried_forward_not_remeasured": "0.010 is C0's, and D-series absolute scores are not directly interchangeable with the historical C1 absolute scores because three capacity-limited strata draw from wider populations. The SESOI is carried forward as an explicit assumption about the within-family PAIRED difference, which is what this rung estimates: both arms are measured on the same role under the same protocol.",
+    "_decides_nothing": "this contract is derived from frozen records. The candidate field is the retention decision's, the recipe and seed counts are the design's, the battery is the realized family's, and the endpoint and SESOI are C0's."
+  },
+  "contract_hash": "1011b6da6f0b4f0e337fbe95e967556d64fcad1cd14963402dd21545aeb5226c",
+  "arm_verification": {
+    "n_arms": 5,
+    "arms": [
+      {
+        "arm": "q1",
+        "role": "candidate",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": 1,
+        "state_id": "e5e3edb0477b25147de952153da8fc21",
+        "artifact_digest": "a7736a705b3ee76d8e008964163e0157f6dd50cdbce60cbd12423719e6745ff6",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/e5e3edb0477b25147de952153da8fc21/steps/03_attention",
+        "num_parameters": 596049920
+      },
+      {
+        "arm": "q2",
+        "role": "candidate",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": 2,
+        "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+        "artifact_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/afd50c9ff0e3d20542bb5473ea745b55/steps/03_attention",
+        "num_parameters": 596049920
+      },
+      {
+        "arm": "q3",
+        "role": "candidate",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": 3,
+        "state_id": "56388d47b6a71e1b49e44929e48d4061",
+        "artifact_digest": "9e04b4095713599c319a723c7f342005e484e38e5db4a5a7f08620fdd4cdb18a",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/56388d47b6a71e1b49e44929e48d4061/steps/03_residual_width",
+        "num_parameters": 596049920
+      },
+      {
+        "arm": "q4",
+        "role": "candidate",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": 4,
+        "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+        "artifact_digest": "253ebdee1f82265bbba700885387e1a411134ea12dc5850454c17fee15e34a4f",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/3fcaf42eaa91b3ed02eab6c2f3213bfc/steps/03_residual_width",
+        "num_parameters": 596049920
+      },
+      {
+        "arm": "B",
+        "role": "incumbent",
+        "obtained_by": "secured bytes on this host, hashed here",
+        "quality_position": null,
+        "state_id": null,
+        "artifact_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+        "identities_checked": [
+          "arch_signature",
+          "artifact_digest",
+          "single_shard_sha256",
+          "weights_digest"
+        ],
+        "checkpoint_dir": "/workspace/aad_arms/B/steps/03_attention",
+        "num_parameters": 596049920
+      }
+    ]
+  },
+  "authorization": {
+    "path": "/workspace/aad/logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/authorization.json",
+    "authorization_id": "autoinit.v1.phase_d1_behavioural_screening",
+    "rung": "screening",
+    "contract_hash": "1011b6da6f0b4f0e337fbe95e967556d64fcad1cd14963402dd21545aeb5226c"
+  },
+  "schedule": [
+    "d1_screening_q1_s614923639",
+    "d1_screening_q1_s516448251",
+    "d1_screening_q2_s614923639",
+    "d1_screening_q2_s516448251",
+    "d1_screening_q3_s614923639",
+    "d1_screening_q3_s516448251",
+    "d1_screening_q4_s614923639",
+    "d1_screening_q4_s516448251",
+    "d1_screening_B_s614923639",
+    "d1_screening_B_s516448251"
+  ],
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "digest": "571713a7a62583e8b670ad1190371b0649375911a561bcbad406ad5956f18d01"
+  },
+  "probe_workdirs_released": [
+    {
+      "released": [],
+      "failed": [],
+      "kept": [],
+      "freed_gib": 0.0
+    }
+  ],
+  "probe_headroom": [
+    {
+      "probe": "d1_screening_q1_s614923639",
+      "free_gib": 62.783,
+      "need_gib": 15.545,
+      "transient_bytes": 9536798720,
+      "retained_bytes": 4769999360,
+      "package_bytes": 2384999680,
+      "need_bytes": 16691797760,
+      "checkpoint": {
+        "num_parameters": 596049920,
+        "save_dtype": "float32",
+        "bytes_per_parameter": 4,
+        "extra_bytes": 800000,
+        "bytes": 2384999680,
+        "gib": 2.221
+      },
+      "keep_last": 1
+    }
+  ],
+  "attested_evaluation_protocol_hash": "a01049908e188516432a8df29bcc0a80c4f961fde1649b79b40243bd8f457b10",
+  "failure": {
+    "type": "D1BehaviouralDriverError",
+    "message": "d1_screening_q1_s614923639: the generations were not produced under the attested evaluation protocol, so this probe cannot be scored. evaluation protocols are not comparable (d1_screening_q1_s614923639): NOT COMPARABLE: generation protocol differs",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py\", line 375, in admit_generation\n    observed.require_comparable(attested, context=name)\n  File \"/workspace/aad/src/aadistill/initialization/planning/generation.py\", line 576, in require_comparable\n    raise GenerationProtocolError(\naadistill.initialization.planning.generation.GenerationProtocolError: evaluation protocols are not comparable (d1_screening_q1_s614923639): NOT COMPARABLE: generation protocol differs\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py\", line 943, in main\n    admission = admit_generation(\n                ^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py\", line 381, in admit_generation\n    raise D1BehaviouralDriverError(\nD1BehaviouralDriverError: d1_screening_q1_s614923639: the generations were not produced under the attested evaluation protocol, so this probe cannot be scored. evaluation protocols are not comparable (d1_screening_q1_s614923639): NOT COMPARABLE: generation protocol differs\n"
+  },
+  "ended_utc": "2026-10-10T16:41:49+00:00"
+}

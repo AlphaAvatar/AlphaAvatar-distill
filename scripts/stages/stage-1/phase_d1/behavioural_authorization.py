@@ -35,6 +35,11 @@ from stages.phase_d1.d1_authorization import (  # noqa: E402
     live_secure_price,
 )
 
+#: Where this session's own subruns book what they spent. P12.1: "The budget is
+#: cumulative across every resource and subrun of the task. A rerun does not
+#: reset it."
+RUNS_GLOB = "logs/stages/stage-1/phase_d1/runs/d1_behavioural_*/closeout/outcome.json"
+
 DESIGN_REL = "logs/stages/stage-1/phase_d1/plans/d1_design.json"
 PREREG_REL = ("logs/stages/stage-1/phase_d1/plans/"
               "d1_behavioural_preregistration.json")
@@ -192,6 +197,60 @@ def reprice_rung_at(rate_usd_per_hour: float, rung: str,
     }
 
 
+def consumed_by_prior_subruns(repo_root: str | Path = REPO, *,
+                              rung: str | None = None) -> dict[str, Any]:
+    """What this RUNG's earlier subruns have already spent, from closeouts.
+
+    Reads `cost.actual_usd` -- the field `derive_budget` books from, so this
+    agrees with the budget book by construction rather than by a second
+    convention. A run with no closeout contributes nothing: it has either not
+    terminated or not been closed, and in both cases there is no settled
+    figure to net off. That is deliberately the conservative direction here --
+    an unclosed subrun makes the remainder look LARGER, which is why closing a
+    subrun is part of its terminal path and not optional tidying.
+
+    SCOPED BY RUNG, because the two rungs are two one-use grants with two
+    envelopes. Screening's four subruns spent $8.2180 of screening's $25.0053;
+    netting that against confirmation's separate $15.2025 would refuse a
+    confirmation launch for money it never had access to. A closeout that does
+    not say which rung it belongs to cannot be attributed, and is refused
+    rather than guessed at.
+    """
+    rows: list[dict[str, Any]] = []
+    for path in sorted(Path(repo_root).glob(RUNS_GLOB)):
+        try:
+            record = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError) as exc:
+            raise D1BehaviouralIssuanceRefused(
+                f"{path} cannot be read ({type(exc).__name__}), so this "
+                "session's consumed total is unknown. A paid authorization "
+                "may not be issued against an unknown remainder.") from exc
+        usd = (record.get("cost") or {}).get("actual_usd")
+        if usd is None:
+            raise D1BehaviouralIssuanceRefused(
+                f"{path} is a closeout with no cost.actual_usd. Its spend "
+                "cannot be netted off the envelope, so the remainder is "
+                "unknown.")
+        its_rung = record.get("rung")
+        if not its_rung:
+            raise D1BehaviouralIssuanceRefused(
+                f"{path} names no rung, so ${float(usd):.4f} cannot be "
+                "attributed to an envelope. The two rungs are two one-use "
+                "grants; an unattributable spend makes both remainders "
+                "unknown.")
+        if rung is not None and its_rung != rung:
+            continue
+        rows.append({"run_id": record.get("run_id"), "rung": its_rung,
+                     "usd": float(usd),
+                     "minutes": (record.get("cost") or {}).get(
+                         "elapsed_minutes")})
+    return {"n_subruns": len(rows),
+            "consumed_usd": round(sum(r["usd"] for r in rows), 4),
+            "subruns": rows,
+            "rung": rung,
+            "_source": RUNS_GLOB}
+
+
 def preregistration(repo_root: str | Path = REPO) -> dict[str, Any]:
     """The committed preregistration, verified against its own hash AND
     against what this tree derives. A stale preregistration names a session
@@ -234,11 +293,19 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                   granted_utc: str, run_id: str, rung: str,
                   advancing_candidate: str | None = None,
                   repo_root: str | Path = REPO,
+                  consumed_usd: float | None = None,
                   live_rate: float | None = None) -> dict[str, Any]:
     """The behavioural authorization payload, fully derived from this tree.
 
     `live_rate` is quoted here by default, immediately before issuance, which
     is what the package contract requires; passing one is for tests.
+
+    `consumed_usd` is what this session's earlier subruns already spent, and is
+    DERIVED from their closeouts by default -- an issuance must not have to be
+    told that the envelope is already partly spent. Passing it explicitly is
+    for tests that are about something other than the remainder; passing `0.0`
+    asserts a pristine envelope, so a test that does so is stating an
+    assumption rather than quietly inheriting one.
     """
     from stages.phase_d1 import behavioural as B
 
@@ -306,6 +373,41 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
               "neither the probe schedule nor the minute bound may be "
               "narrowed. Stop at $0.")
 
+    #: WHAT THIS SESSION'S EARLIER SUBRUNS ALREADY SPENT, netted off before
+    #: anything is authorized.
+    #:
+    #: THE DEFECT THIS CLOSES. `per_launch_hard_usd` used to be the full
+    #: `ceiling`, which made `require_within_launch_limit` -- whose own
+    #: docstring says "One launch may not spend the cumulative allowance of
+    #: several" -- vacuous for this session: the per-launch limit and the
+    #: cumulative cap were the same number, so the guard could never fire.
+    #: Four screening subruns each booked "within authorization" at $25.0053
+    #: while draining the envelope to $16.79, and a fifth would have carried a
+    #: $24.63 hard GPU bound against a $16.79 remainder -- authorizing an
+    #: ~$8 overspend of the maintainer's envelope that no check would catch.
+    #: Two coinciding numbers hid which one was being read.
+    spent = (consumed_by_prior_subruns(root, rung=rung)
+             if consumed_usd is None else
+             {"n_subruns": None, "consumed_usd": round(float(consumed_usd), 4),
+              "subruns": [], "rung": rung,
+              "_source": "supplied by the caller"})
+    remaining = round(ceiling - spent["consumed_usd"], 4)
+    if spent["consumed_usd"] > 0 and remaining < priced["expected_usd"]:
+        who = ("a caller-supplied prior spend of" if spent["n_subruns"] is None
+               else f"this session's {spent['n_subruns']} earlier subrun(s) "
+                    "consumed")
+        raise D1BehaviouralIssuanceRefused(
+            f"{who} "
+            f"${spent['consumed_usd']:.4f} of the ${ceiling:.4f} one-use "
+            f"envelope, leaving ${remaining:.4f}. A complete {rung} run is "
+            f"priced at ${priced['expected_usd']:.4f} expected, so the "
+            "remainder cannot fund one -- and a schedule that stops partway "
+            "yields no verdict under the frozen design.\n\n"
+            "The science does not shrink to fit the remainder: neither the "
+            "probe schedule nor the minute bound may be narrowed. A budget "
+            "increase is a MAINTAINER decision (P12.1: this authority 'never "
+            "covers additional budget'). Stop at $0 and report.")
+
     asked = grant.get("hard_cap_usd")
     if asked is not None and abs(float(asked) - ceiling) > 5e-4:
         raise D1BehaviouralIssuanceRefused(
@@ -343,7 +445,10 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         plan_hash=design["design_hash"],
         expected_usd=priced["expected_usd"],
         hard_cap_usd=ceiling,
-        per_launch_hard_usd=ceiling,
+        #: The REMAINDER, not the ceiling -- so a relaunch's watchdog bound is
+        #: what is actually left of the envelope rather than what the whole
+        #: session was once worth.
+        per_launch_hard_usd=remaining,
         authorized_stages=AUTHORIZED_STAGES,
         stage_conditions=STAGE_CONDITIONS,
         scope_note=str(grant.get("covers") or "")[:4000],
@@ -392,6 +497,18 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         "_derived": ("live from the tree by aadistill.governance.closure, "
                      "never a hand-maintained list"),
     }
+    #: The remainder, auditable in the artifact itself. A reader must be able
+    #: to see WHY the per-launch bound is below the ceiling without re-summing
+    #: the closeouts.
+    payload["envelope"] = {
+        "one_use_ceiling_usd": ceiling,
+        "consumed_by_prior_subruns_usd": spent["consumed_usd"],
+        "remaining_usd": remaining,
+        "prior_subruns": spent["subruns"],
+        "_rule": ("P12.1: the budget is cumulative across every resource and "
+                  "subrun of the task; a rerun does not reset it. "
+                  "per_launch_hard_usd carries the remainder."),
+    }
     payload.pop("authorization_sha256", None)
     payload["authorization_sha256"] = sha256_json(payload)
     return payload
@@ -401,5 +518,5 @@ __all__ = ["AUTHORIZED_STAGES", "BEHAVIOURAL_DECLARED_INPUTS",
            "BEHAVIOURAL_ENTRY_POINTS", "DESIGN_REL",
            "D1BehaviouralIssuanceRefused", "GRANT_MAY_NOT_STATE", "PREREG_REL",
            "STAGE_CONDITIONS", "behavioural_current_executable",
-           "build_payload", "preregistration", "reprice_rung_at",
-           "session_cell"]
+           "build_payload", "consumed_by_prior_subruns", "preregistration",
+           "reprice_rung_at", "session_cell"]

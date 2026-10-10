@@ -54,6 +54,7 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import os
 import subprocess
 import sys
 import time
@@ -289,7 +290,8 @@ def build_attested_protocol(package: Path, *, image_digest: str | None,
          str(REPO_ROOT / "scripts/shared/pod/autoinit_engine_probe.py"),
          "--model", str(package), "--out", str(probe_out)]
         + (["--image-digest", image_digest] if image_digest else []),
-        capture_output=True, text=True, timeout=1800)
+        capture_output=True, text=True, timeout=1800,
+        env=child_env(image_digest))
     (out / "engine_probe_tail.log").write_text(
         (engine.stdout + engine.stderr)[-2000:])
     if engine.returncode != 0 or not probe_out.is_file():
@@ -363,6 +365,16 @@ def admit_generation(name: str, gen_dir: Path, *, attested: Any,
         scoring_contract=scoring["contract"],
         scoring_digest=scoring["digest"],
         **battery_fields)
+    #: THE FULL COMPARISON, recorded whichever way it goes. `matched_against`
+    #: names the fields that differ; `require_comparable` raises with only a
+    #: summary sentence. The first version kept just that sentence, and when
+    #: the gate fired on attempt 132919 the record said "generation protocol
+    #: differs" and nothing else -- so establishing that the cause was a null
+    #: image digest in the evaluator took reading the engine probe's own
+    #: output and reasoning about which side could have seen what. A refusal
+    #: whose evidence does not name the field is a diagnosis the next reader
+    #: has to repeat.
+    verdict = observed.matched_against(attested)
     admission = {
         "probe_id": name,
         "generation_fingerprint": observed_gen.fingerprint,
@@ -370,21 +382,19 @@ def admit_generation(name: str, gen_dir: Path, *, attested: Any,
         "attested_evaluation_protocol_hash":
             attested.evaluation_protocol_hash,
         "n_summaries": len(summaries),
+        "comparable": bool(verdict["comparable"]),
+        "comparison": verdict,
+        "observed_generation": observed_gen.as_dict(),
+        "attested_generation": attested.generation.as_dict(),
     }
-    try:
-        observed.require_comparable(attested, context=name)
-    except Exception as exc:                                      # noqa: BLE001
-        admission["comparable"] = False
-        admission["reason"] = str(exc)[-1500:]
-        (out / f"{name}_generation_admission.json").write_text(
-            json.dumps(admission, indent=2) + "\n")
+    (out / f"{name}_generation_admission.json").write_text(
+        json.dumps(admission, indent=2, default=str) + "\n")
+    if not verdict["comparable"]:
         raise D1BehaviouralDriverError(
             f"{name}: the generations were not produced under the attested "
-            f"evaluation protocol, so this probe cannot be scored. {exc}"
-        ) from exc
-    admission["comparable"] = True
-    (out / f"{name}_generation_admission.json").write_text(
-        json.dumps(admission, indent=2) + "\n")
+            f"evaluation protocol, so this probe cannot be scored. "
+            f"{verdict['verdict']}. The admission record beside this names "
+            "every field that differs.")
     return admission
 
 
@@ -394,6 +404,37 @@ def admit_generation(name: str, gen_dir: Path, *, attested: Any,
 #: weights into an evidence archive whose consumers read JSON. Released with
 #: the probe's workdir once its evidence is acknowledged durable.
 EVAL_PACKAGES_REL = "artifacts/stages/stage-3/d1_behavioural_eval"
+
+
+def child_env(image_digest: str | None) -> dict[str, str]:
+    """The environment EVERY subprocess of this driver receives.
+
+    THE IMAGE DIGEST CANNOT BE OBSERVED INSIDE THE CONTAINER, so the launcher
+    supplies it and the children are given it here. `uncapped_eval` and
+    `train_stage3` both read `AADISTILL_IMAGE_DIGEST` from the environment,
+    and the engine probe falls back to it; a child that does not get it
+    records a NULL image digest, and the strict protocol reconstruction then
+    fails closed rather than accepting an unpinned runtime.
+
+    That is precisely what it did. Screening attempt 132919 attested the
+    protocol from the engine probe -- which this driver passed
+    `--image-digest` on the command line -- and then generated with
+    `uncapped_eval`, which found nothing in the environment and recorded
+    `image_digest: null`. The two `runtime_digest` values could not agree, the
+    per-probe admission refused the probe as NOT COMPARABLE, and the session
+    stopped before scoring anything. The gate behaved exactly as designed; the
+    driver had simply never supplied the value.
+    `autoinit_preflight_driver.child_env` is the precedent, and its docstring
+    predicted this failure in as many words.
+
+    `{**os.environ, ...}` and not a fresh mapping: PATH, the CUDA variables and
+    HF_HOME all belong to the pod, and replacing the environment wholesale
+    would break the children in a new way.
+    """
+    env = {**os.environ}
+    if image_digest:
+        env["AADISTILL_IMAGE_DIGEST"] = str(image_digest)
+    return env
 
 
 def probe_local_need_bytes(repo_root: Path) -> dict[str, Any]:
@@ -848,7 +889,8 @@ def main(argv: list[str] | None = None) -> int:
                     ["/opt/train/bin/python", str(TRAINER),
                      "--config", str(config)],
                     capture_output=True, text=True,
-                    timeout=int(args.probe_train_minutes * 60 * 2))
+                    timeout=int(args.probe_train_minutes * 60 * 2),
+                    env=child_env(args.image_digest))
                 (out / f"{probe.probe_id}_train_tail.log").write_text(
                     (train.stdout + train.stderr)[-2000:])
                 entry["train_seconds"] = round(time.time() - started, 1)
@@ -925,7 +967,11 @@ def main(argv: list[str] | None = None) -> int:
                  "--prompts", *prompt_files,
                  "--out-dir", str(gen_dir), "--diagnostics"],
                 capture_output=True, text=True,
-                timeout=int(args.probe_eval_minutes * 60 * 2))
+                timeout=int(args.probe_eval_minutes * 60 * 2),
+                #: THE SAME launcher-supplied digest the attestation used.
+                #: Without it uncapped_eval records image_digest null and the
+                #: admission refuses the probe as NOT COMPARABLE.
+                env=child_env(args.image_digest))
             (out / f"{probe.probe_id}_eval_tail.log").write_text(
                 (generate.stdout + generate.stderr)[-2000:])
             entry["generate_seconds"] = round(time.time() - started, 1)
@@ -968,7 +1014,8 @@ def main(argv: list[str] | None = None) -> int:
                  "--trained-run", str(model_root / "run_completion.json"),
                  "--generation-fingerprint",
                  admission["generation_fingerprint"]],
-                capture_output=True, text=True, timeout=1800)
+                capture_output=True, text=True, timeout=1800,
+                env=child_env(args.image_digest))
             (out / f"{probe.probe_id}_score_tail.log").write_text(
                 (score.stdout + score.stderr)[-2000:])
             if score.returncode != 0 or not result_path.is_file():

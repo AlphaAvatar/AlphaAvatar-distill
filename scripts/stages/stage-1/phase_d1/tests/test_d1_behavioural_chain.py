@@ -52,9 +52,15 @@ ACCEPTED_RATE = 1.09
 
 
 def _payload(**over):
+    #: `consumed_usd=0.0` states the assumption these tests are making: a
+    #: PRISTINE envelope. The real tree's envelope is partly spent by four
+    #: closed subruns, and issuance against it is refused -- which is asserted
+    #: on the real derivation by
+    #: TestTheEnvelopeIsNettedAgainstPriorSubruns, deliberately WITHOUT this
+    #: override, so no test here inherits the override silently.
     kwargs = dict(grant=GRANT, session_commit=HEAD,
                   granted_utc="2026-10-10T00:00:00+00:00",
-                  run_id="d1b_test", rung="screening",
+                  run_id="d1b_test", rung="screening", consumed_usd=0.0,
                   live_rate=ACCEPTED_RATE, repo_root=REPO)
     kwargs.update(over)
     return BA.build_payload(**kwargs)
@@ -1641,3 +1647,427 @@ class TestTheIncumbentsDeviceIsPartOfItsIdentity:
         spec = BL.frozen_baseline_spec(device="cuda")
         evidence = BL.assert_frozen_construction(spec)
         assert evidence["spec_hash"] == evidence["expected_spec_hash"]
+
+
+class TestEverySubprocessGetsTheLauncherSuppliedEnvironment:
+    """Screening attempt 132919: the attestation came from the engine probe,
+    which this driver passed `--image-digest`; generation came from
+    `uncapped_eval`, which reads `AADISTILL_IMAGE_DIGEST` from the environment
+    and found nothing, so it recorded `image_digest: null`. The two
+    `runtime_digest` values could not agree and the per-probe admission
+    refused the probe as NOT COMPARABLE -- the gate working, after 192 minutes
+    and $3.49. `autoinit_preflight_driver.child_env` is the precedent and its
+    docstring predicted exactly this.
+
+    The image digest cannot be observed inside a container, so it can only
+    arrive from the launcher. These checks are structural because the failure
+    is structural: a child that is spawned without the environment cannot be
+    detected by anything the child does."""
+
+    @staticmethod
+    def _driver_source() -> str:
+        return (REPO / "scripts/stages/stage-1/phase_d1/"
+                       "autoinit_d1_behavioural_driver.py").read_text()
+
+    def test_child_env_carries_the_digest_and_preserves_the_environment(self):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        env = driver.child_env("sha256:deadbeef")
+        assert env["AADISTILL_IMAGE_DIGEST"] == "sha256:deadbeef"
+        #: `{**os.environ, ...}`: PATH, the CUDA variables and HF_HOME belong
+        #: to the pod, and replacing the environment wholesale would break the
+        #: children in a new way.
+        assert "PATH" in env
+        assert "AADISTILL_IMAGE_DIGEST" not in driver.child_env(None)
+
+    def test_every_subprocess_call_passes_an_env(self):
+        """AST over the driver: a `subprocess.run` that spawns a child and
+        does not pass `env=` is the defect, whichever child it is."""
+        import ast
+
+        tree = ast.parse(self._driver_source())
+        bare: list[str] = []
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.Call):
+                continue
+            if ast.unparse(node.func) != "subprocess.run":
+                continue
+            keywords = {kw.arg for kw in node.keywords}
+            if "env" not in keywords:
+                bare.append(ast.unparse(node)[:90])
+        assert not bare, (
+            "these subprocess calls spawn a child without the "
+            f"launcher-supplied environment: {bare}")
+
+    def test_the_four_children_are_all_covered(self):
+        src = self._driver_source()
+        assert src.count("env=child_env") == 4, (
+            "the driver spawns the trainer, the engine probe, the evaluator "
+            "and the scorer; every one needs the environment")
+
+    def test_the_attesting_and_generating_sides_take_one_digest_source(self):
+        """The two sides of the comparison must read the SAME value. The
+        attestation receives it as `image_digest`, generation through
+        `child_env(args.image_digest)`; a second source is a second thing that
+        can disagree."""
+        src = self._driver_source()
+        assert "build_attested_protocol(\n" in src
+        attest = src.split("build_attested_protocol(\n", 1)[1][:200]
+        assert "image_digest=args.image_digest" in attest
+        #: and the evaluator's env comes from the same attribute
+        evaluate = src.split('str(UNCAPPED_EVAL),', 1)[1][:900]
+        assert "env=child_env(args.image_digest)" in evaluate
+
+    def test_the_launcher_supplies_it_on_the_command_line(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "--image-digest" in src
+        assert "ctx.image_digest" in src
+
+
+class TestARefusedAdmissionNamesTheFieldThatDiffered:
+    """The record must carry the DIAGNOSIS, not just the verdict.
+
+    Attempt 132919 refused probe 1 after 60.9 minutes of training and wrote
+    `reason: "NOT COMPARABLE: generation protocol differs"`. That sentence is
+    true and useless: it does not say which of the 28 material fields moved,
+    so finding the cause -- a null image digest on the evaluator side, because
+    the driver spawned it without `AADISTILL_IMAGE_DIGEST` -- meant reading
+    the engine probe's own output and reasoning about which side could have
+    observed what. `matched_against` had the answer the whole time in
+    `generation_comparison.mismatched_fields`, with both values; the first
+    version of the record threw it away.
+    """
+
+    @staticmethod
+    def _driver():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        spec = importlib.util.spec_from_file_location("_d1b_drv_adm", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    @staticmethod
+    def _summary(label: str, overrides: dict | None = None) -> dict:
+        """A summary carrying EVERY material field, derived from the contract.
+
+        Built by walking `SUMMARY_FIELD_PATHS` rather than by hand-listing
+        paths, so a field added to the fingerprint cannot leave this fixture
+        quietly incomplete -- the observer would then report it missing and
+        the test would fail for the right reason.
+        """
+        import sys
+
+        sys.path.insert(0, str(REPO / "src"))
+        from aadistill.initialization.planning.generation import (
+            NULLABLE_SUMMARY_FIELDS, SUMMARY_FIELD_PATHS,
+        )
+
+        out: dict = {"label": label, "prompts": label}
+        paths = {**SUMMARY_FIELD_PATHS, **NULLABLE_SUMMARY_FIELDS}
+        for field, path in paths.items():
+            value: object = f"v_{field}"
+            if field in NULLABLE_SUMMARY_FIELDS:
+                value = None
+            elif field == "stop_token_ids":
+                value = [151643, 151645]
+            node = out
+            parts = path.split(".")
+            for part in parts[:-1]:
+                node = node.setdefault(part, {})
+            node[parts[-1]] = value
+        for dotted, value in (overrides or {}).items():
+            node = out
+            parts = dotted.split(".")
+            for part in parts[:-1]:
+                node = node.setdefault(part, {})
+            node[parts[-1]] = value
+        return out
+
+    def _attested(self, summaries):
+        import sys
+
+        sys.path.insert(0, str(REPO / "src"))
+        from aadistill.initialization.planning.generation import (
+            RecoveryEvaluationProtocol, observe_generation_protocol,
+        )
+
+        return RecoveryEvaluationProtocol(
+            generation=observe_generation_protocol(summaries).protocol,
+            scoring_contract="c1_confirmation_scoring@v1",
+            scoring_digest="dig",
+            battery_artifact="a", battery_manifest_sha256="m",
+            battery_content_sha256="c")
+
+    #: The attempt-132919 shape: the runtime digest is the field that carries
+    #: the image digest, so a null digest on one side moves exactly this one.
+    def test_the_record_names_the_mismatched_field_and_both_values(
+            self, tmp_path):
+        driver = self._driver()
+        attested = self._attested([self._summary("code")])
+
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        drifted = self._summary(
+            "code", {"identity.runtime_digest": "DIFFERENT_DIGEST"})
+        (gen / "code.json").write_text(json.dumps(drifted))
+
+        with pytest.raises(Exception) as excinfo:
+            driver.admit_generation(
+                "d1_screening_q1_s614923639", gen, attested=attested,
+                scoring={"contract": "c1_confirmation_scoring@v1",
+                         "digest": "dig"},
+                battery_fields={"battery_artifact": "a",
+                                "battery_manifest_sha256": "m",
+                                "battery_content_sha256": "c"},
+                out=tmp_path)
+        assert "admission record" in str(excinfo.value)
+
+        record = json.loads(
+            (tmp_path /
+             "d1_screening_q1_s614923639_generation_admission.json").read_text())
+        assert record["comparable"] is False
+        mismatched = record["comparison"]["generation_comparison"][
+            "mismatched_fields"]
+        fields = {m["field"] for m in mismatched}
+        assert fields == {"runtime_digest"}, (
+            "the record must name exactly the field that moved; got "
+            f"{sorted(fields)}")
+        pair = next(m for m in mismatched if m["field"] == "runtime_digest")
+        assert {pair["self"], pair["other"]} == {
+            "DIFFERENT_DIGEST", "v_runtime_digest"}, (
+            "both values must be recorded, so the reader can tell which side "
+            "was wrong without re-deriving it")
+
+    def test_both_protocols_are_recorded_whole_not_only_the_hashes(
+            self, tmp_path):
+        """Two hashes that differ prove nothing about why. The record carries
+        both materialized protocols so a later reader can diff them."""
+        driver = self._driver()
+        attested = self._attested([self._summary("code")])
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        (gen / "code.json").write_text(json.dumps(
+            self._summary("code", {"engine.max_num_seqs": "moved"})))
+
+        with pytest.raises(Exception):
+            driver.admit_generation(
+                "p", gen, attested=attested,
+                scoring={"contract": "c1_confirmation_scoring@v1",
+                         "digest": "dig"},
+                battery_fields={"battery_artifact": "a",
+                                "battery_manifest_sha256": "m",
+                                "battery_content_sha256": "c"},
+                out=tmp_path)
+        record = json.loads(
+            (tmp_path / "p_generation_admission.json").read_text())
+        assert record["observed_generation"]["max_num_seqs"] == "moved"
+        assert record["attested_generation"]["max_num_seqs"] == \
+            "v_max_num_seqs"
+
+    def test_an_admitted_probe_records_the_same_comparison_shape(
+            self, tmp_path):
+        """The record is written on BOTH paths with the same keys, so a
+        consumer does not have to branch on the verdict to read it."""
+        driver = self._driver()
+        summaries = [self._summary("code")]
+        attested = self._attested(summaries)
+        gen = tmp_path / "gen"
+        gen.mkdir()
+        (gen / "code.json").write_text(json.dumps(summaries[0]))
+
+        admission = driver.admit_generation(
+            "p", gen, attested=attested,
+            scoring={"contract": "c1_confirmation_scoring@v1",
+                     "digest": "dig"},
+            battery_fields={"battery_artifact": "a",
+                            "battery_manifest_sha256": "m",
+                            "battery_content_sha256": "c"},
+            out=tmp_path)
+        assert admission["comparable"] is True
+        record = json.loads(
+            (tmp_path / "p_generation_admission.json").read_text())
+        assert record["comparison"]["generation_comparison"][
+            "mismatched_fields"] == []
+        assert set(record) >= {"comparable", "comparison",
+                               "observed_generation", "attested_generation",
+                               "generation_fingerprint", "n_summaries"}
+
+
+class TestTheEnvelopeIsNettedAgainstPriorSubruns:
+    """A relaunch's bound is the REMAINDER, not the whole envelope.
+
+    THE DEFECT. `per_launch_hard_usd` was set to the full `ceiling`, so
+    `SpendAuthorization.require_within_launch_limit` -- whose docstring is
+    *"One launch may not spend the cumulative allowance of several"* -- had a
+    per-launch limit identical to the cumulative cap and could never fire.
+    Four screening subruns each booked `within_authorization: true` at
+    $25.0053 while draining the envelope to $16.79, and a fifth would have
+    carried a $24.63 hard GPU bound against that $16.79 -- authorizing roughly
+    $8 of overspend past the maintainer's envelope with no check in the way.
+
+    The guard was present and correct; the two numbers it compared were the
+    same number. So these tests check the *difference*, and one of them
+    mutates the production assignment to prove the check is not vacuous.
+    """
+
+    def test_it_sums_the_real_closeouts_this_session_has_written(self):
+        spent = BA.consumed_by_prior_subruns(REPO)
+        assert spent["n_subruns"] >= 4, (
+            "the four closed screening subruns must be counted")
+        #: Each row is a real settled figure, not an estimate.
+        for row in spent["subruns"]:
+            assert row["usd"] > 0, row
+            assert row["run_id"], row
+        assert spent["consumed_usd"] == round(
+            sum(r["usd"] for r in spent["subruns"]), 4)
+
+    def test_the_real_tree_refuses_a_further_issuance(self):
+        """NO `consumed_usd` OVERRIDE. This is the live state: the remainder
+        cannot fund a complete run, so issuance stops at $0."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        spent = BA.consumed_by_prior_subruns(REPO)
+        remaining = priced["hard_ceiling_usd"] - spent["consumed_usd"]
+        assert remaining < priced["expected_usd"], (
+            "premise changed: the remainder now covers a complete run, so "
+            "this test no longer describes the tree it guards")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            BA.build_payload(grant=GRANT, session_commit=HEAD,
+                             granted_utc="2026-10-10T00:00:00+00:00",
+                             run_id="d1b_fifth", rung="screening",
+                             live_rate=ACCEPTED_RATE, repo_root=REPO)
+
+    def test_the_refusal_does_not_offer_to_shrink_the_science(self):
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused) as excinfo:
+            BA.build_payload(grant=GRANT, session_commit=HEAD,
+                             granted_utc="2026-10-10T00:00:00+00:00",
+                             run_id="d1b_fifth", rung="screening",
+                             live_rate=ACCEPTED_RATE, repo_root=REPO)
+        message = str(excinfo.value)
+        assert "MAINTAINER decision" in message
+        assert "does not shrink" in message
+
+    def test_a_partly_spent_envelope_lowers_the_per_launch_bound(self):
+        """The arithmetic, at a spend small enough to still be fundable."""
+        payload = _payload(consumed_usd=2.0)
+        assert payload["hard_cap_usd"] == 25.0053, (
+            "the ENVELOPE is unchanged; only what is left of it moves")
+        assert payload["per_launch_hard_usd"] == round(25.0053 - 2.0, 4)
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 2.0
+        assert payload["envelope"]["remaining_usd"] == \
+            payload["per_launch_hard_usd"]
+
+    def test_a_pristine_envelope_leaves_the_bound_at_the_ceiling(self):
+        payload = _payload(consumed_usd=0.0)
+        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"], (
+            "with nothing spent the remainder IS the ceiling; the fix must "
+            "not penalise a first launch")
+
+    def test_the_authorization_carries_the_remainder_not_the_ceiling(self):
+        """Read through the real loader, because that is what the launcher
+        reads -- a payload key nobody parses would prove nothing."""
+        import json as _json
+
+        from aadistill.governance.authorization import SpendAuthorization
+
+        from stages.phase_d1 import behavioural_governance as _BG
+        #: 2.0, not 5.0: at $1.09/h the screening cell expects $20.0521, so a
+        #: $5 prior spend would itself trip the refusal under test elsewhere.
+        payload = _payload(consumed_usd=2.0)
+        path = REPO / ".git" / "d1b_envelope_probe.json"
+        path.write_text(_json.dumps(payload))
+        try:
+            auth = SpendAuthorization.load(
+                path, policy=_BG.D1_BEHAVIOURAL_POLICY)
+            assert auth.per_launch_hard_usd == round(25.0053 - 2.0, 4)
+            #: And the core guard now actually BITES: a launch planning to
+            #: spend the full ceiling is refused by the remainder.
+            with pytest.raises(Exception, match="per-launch limit"):
+                auth.require_within_launch_limit(24.6287, what="planned hard")
+            #: while one inside the remainder passes.
+            auth.require_within_launch_limit(19.0, what="planned hard")
+        finally:
+            path.unlink(missing_ok=True)
+
+    def test_the_production_assignment_is_not_the_ceiling(self):
+        """MUTATION: the check is non-vacuous only if restoring the old
+        assignment breaks it. Two coinciding numbers are what hid this for
+        four subruns, so the structural fact is pinned in the source."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "behavioural_authorization.py").read_text()
+        assert "per_launch_hard_usd=remaining," in src
+        assert "per_launch_hard_usd=ceiling," not in src, (
+            "the per-launch bound is the ceiling again; the guard is vacuous")
+
+    def test_a_closeout_without_a_settled_cost_is_refused(self, tmp_path):
+        """Silently counting an unpriced closeout as $0 would make the
+        remainder look larger than it is, which is the dangerous direction."""
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_x/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text(json.dumps(
+            {"run_id": "d1_behavioural_x", "outcome": "FAILED"}))
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="no cost.actual_usd"):
+            BA.consumed_by_prior_subruns(tmp_path)
+
+    def test_an_unreadable_closeout_is_refused_not_skipped(self, tmp_path):
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_y/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text("{not json")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="unknown remainder"):
+            BA.consumed_by_prior_subruns(tmp_path)
+
+    def test_an_empty_tree_consumes_nothing(self, tmp_path):
+        spent = BA.consumed_by_prior_subruns(tmp_path)
+        assert spent == {"n_subruns": 0, "consumed_usd": 0, "subruns": [],
+                         "rung": None, "_source": BA.RUNS_GLOB}
+
+    def test_screenings_spend_is_not_charged_to_the_confirmation_envelope(self):
+        """THE TWO RUNGS ARE TWO ONE-USE GRANTS WITH TWO ENVELOPES.
+
+        Caught by the suite: the first version of this netting was
+        rung-blind, so screening's $8.2180 was subtracted from
+        confirmation's separate $15.2025 ceiling and refused a confirmation
+        issuance for money confirmation never had access to. A cumulative
+        rule applies within an envelope, not across two.
+        """
+        everything = BA.consumed_by_prior_subruns(REPO)
+        screening = BA.consumed_by_prior_subruns(REPO, rung="screening")
+        confirmation = BA.consumed_by_prior_subruns(REPO, rung="confirmation")
+        assert screening["consumed_usd"] == everything["consumed_usd"], (
+            "every subrun so far is a screening subrun")
+        assert confirmation["consumed_usd"] == 0, (
+            "no confirmation session has ever run; its envelope is pristine")
+        assert {r["rung"] for r in screening["subruns"]} == {"screening"}
+
+    def test_a_confirmation_issuance_is_not_blocked_by_screening_spend(self):
+        """The end-to-end consequence, through the real payload builder."""
+        #: NO consumed_usd override: the real derivation must return 0 for a
+        #: rung that has never run, even though screening has spent $8.2180.
+        payload = BA.build_payload(
+            grant={**GRANT, "rung": "confirmation", "hard_cap_usd": 15.2025,
+                   "covers": "ONE formal D1 behavioural CONFIRMATION session"},
+            session_commit=HEAD, granted_utc="t", run_id="d1b_conf_envelope",
+            rung="confirmation", advancing_candidate="q1",
+            live_rate=ACCEPTED_RATE, repo_root=REPO)
+        assert payload["rung"] == "confirmation"
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 0
+        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"]
+
+    def test_a_closeout_that_names_no_rung_is_refused(self, tmp_path):
+        """An unattributable spend makes BOTH remainders unknown, so it is a
+        refusal rather than a silent exclusion."""
+        run = (tmp_path / "logs/stages/stage-1/phase_d1/runs"
+                          "/d1_behavioural_z/closeout")
+        run.mkdir(parents=True)
+        (run / "outcome.json").write_text(json.dumps(
+            {"run_id": "d1_behavioural_z", "cost": {"actual_usd": 1.0}}))
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="names no rung"):
+            BA.consumed_by_prior_subruns(tmp_path, rung="screening")

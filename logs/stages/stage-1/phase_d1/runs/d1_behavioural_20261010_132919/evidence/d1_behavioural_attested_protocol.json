@@ -1,0 +1,139 @@
+{
+  "schema": "aadistill.phase_d1.behavioural_attested_protocol/v1",
+  "generation_protocol_fingerprint": "bfbc71e0c0622b4f0bf9131383f8c0d08193742f6d4269695beb50a0dc35adbf",
+  "evaluation_protocol_hash": "a01049908e188516432a8df29bcc0a80c4f961fde1649b79b40243bd8f457b10",
+  "scoring_contract": {
+    "contract": "c1_confirmation_scoring@v1",
+    "contract_id": "c1_confirmation_scoring",
+    "version": 1,
+    "digest": "571713a7a62583e8b670ad1190371b0649375911a561bcbad406ad5956f18d01",
+    "files": [
+      {
+        "path": "scripts/shared/evaluation/audit_tool_scoring.py",
+        "sha256": "8bea5061bc158679bea122626f1c0fea1e4e206ff5dc672a01ae7b118c4169d1",
+        "bytes": 10295
+      },
+      {
+        "path": "scripts/shared/evaluation/score_recovery_search.py",
+        "sha256": "8bb7a9d48d5e43eb7946c1e6eb8a480ad5b984e19888cb0ed925ed44abe75882",
+        "bytes": 22206
+      },
+      {
+        "path": "scripts/stages/stage-1/phase_c1/score_c1_confirmation.py",
+        "sha256": "a30ff69ca85d9d78d963c0a6fa8596e9fcd3e0f9f385e0f03ca11ef9a31e4d06",
+        "bytes": 14995
+      },
+      {
+        "path": "scripts/stages/stage-1/phase_c1/scoring.py",
+        "sha256": "f147a9e6e97b28028813b4b1f8089ca117b9c05e6230989dfb24545aaf87c0c4",
+        "bytes": 12166
+      },
+      {
+        "path": "scripts/stages/stage-1/phase_d1/score_d1_screening.py",
+        "sha256": "87b44cb92145b1e624969769f08b953ed5b414af5ecdb6670ecc847d52cfecdd",
+        "bytes": 9937
+      },
+      {
+        "path": "src/aadistill/data/tools.py",
+        "sha256": "2b3cc46aa26942227340f778e32b3faa4819b8d9a2a003c249e342f5f09b540a",
+        "bytes": 6043
+      },
+      {
+        "path": "src/aadistill/data/verify.py",
+        "sha256": "36de12ae18c3571318addeb026987f68c3cc74b9968bf43f5de1524c9b67d1f1",
+        "bytes": 7594
+      },
+      {
+        "path": "src/aadistill/evaluation/behavior.py",
+        "sha256": "c6f52721e8b86bc2d875683bfb9c35b4101379fa5d48de7a48db93959e2935c2",
+        "bytes": 19983
+      },
+      {
+        "path": "src/aadistill/evaluation/capability.py",
+        "sha256": "da1bc3b1069d927b6ab2cbf0eaaf6763bfa491d396189b3dcde95977e39d67ad",
+        "bytes": 19568
+      },
+      {
+        "path": "src/aadistill/evaluation/strict_answer.py",
+        "sha256": "ecb4356a89d3563214ea11ade2307b0d106588bb7ff59f6b8c5e3b9c98d380e3",
+        "bytes": 7628
+      },
+      {
+        "path": "src/aadistill/evaluation/usable_rollout.py",
+        "sha256": "8159acdd7a0a6953dfefac7acf4f6fb4706f69a7264b625e9f9b7ff1a74826ca",
+        "bytes": 6155
+      },
+      {
+        "path": "src/aadistill/initialization/planning/recovery.py",
+        "sha256": "1fcd5647e1c790107d0845529b2ef93cea9de87820a8d2ff971b298477bb0d8f",
+        "bytes": 111306
+      }
+    ],
+    "rule": "sha256 over sorted 'path:sha256' lines of the declared C1 scoring source set",
+    "semantic_parent": "recovery_search_scoring@v2",
+    "semantic_parent_digest": "808080a7c5d88d5a66760fd0d7eeabc5451c096ad0819f8c5663a0b8224660be",
+    "semantic_delta": "battery and result-schema binding only; correctness, usability, row composition, aggregation and capability semantics are the imported frozen implementations and are unchanged, which the historical numerical-equivalence gate demonstrates rather than asserts",
+    "closure_note": "wider than RECOVERY_SCORING_FILES_V2, which omits audit_tool_scoring.py, data/tools.py and data/verify.py although all three decide numbers. The historical contract is not rewritten; the hole is not repeated."
+  },
+  "evaluation_protocol": {
+    "evaluation_protocol_hash": "a01049908e188516432a8df29bcc0a80c4f961fde1649b79b40243bd8f457b10",
+    "generation": {
+      "generation_source_digest": "89a90fd432770b1c57f897d7eb6d41532bf8066b1cf46a009de0c295d4404733",
+      "generation_source_set_version": 1,
+      "vllm_version": "0.27.1",
+      "transformers_version": "5.15.0",
+      "torch_version": "2.13.0+cu130",
+      "dtype": "bfloat16",
+      "gpu_memory_utilization": 0.9,
+      "max_num_seqs": 256,
+      "max_num_batched_tokens": 8192,
+      "enforce_eager": false,
+      "tokenizer_source": "the evaluated checkpoint",
+      "tokenizer_sha256": "c1db93c8164f3e3ba2dbc8c6943fb574273a5efa87da4556ef9f460b5c0893b7",
+      "chat_template_sha256": "3802169b2a02b81e6adb7ab4f64f91ff02db753c8c3a64a01c35192d3a61d8d7",
+      "protocol": "project",
+      "system_message": "You are a helpful Assistant.",
+      "system_injection_rule": "injected only when the sample carries no system turn and protocol == project; a sample's own system prompt is preserved",
+      "chat_template_kwargs_json": "{}",
+      "thinking_mode": "template-default (not overridden)",
+      "trained_context": 8192,
+      "context_len_override": null,
+      "resolved_context": 8192,
+      "context_source": "trained_block_len",
+      "context_resolution_rule": "min(trained_context, architectural context); the effective context is the TRAINED context and this is not a 262K-context evaluation",
+      "temperature": 0.0,
+      "top_p": 1.0,
+      "top_k": -1,
+      "detokenize": false,
+      "max_tokens_rule": "per sample: resolved_context - len(prompt_ids); P18 unrestricted, never a chosen token budget",
+      "stop_token_ids": [
+        151645
+      ],
+      "stop_id_derivation_rule": "sorted union of config.eos_token_id, generation_config.eos_token_id, <|im_end|> and tokenizer.eos_token_id",
+      "degeneration_stop": true,
+      "degeneration_check_every": 256,
+      "degeneration_source_digest": "793540820d4fc0f42d0c855e0d79eb879b94efa451e06030b2a14c55683f4961",
+      "runtime_digest": "f0db1b430df37c766e9117ac24c0cbd1a4c89420a089b846884776a24d1594b6",
+      "protocol_id": "recovery_generation",
+      "version": 1,
+      "generation_protocol_fingerprint": "bfbc71e0c0622b4f0bf9131383f8c0d08193742f6d4269695beb50a0dc35adbf",
+      "is_materialized": true,
+      "unmaterialized_fields": [],
+      "excluded_by_design": [
+        "the checkpoint being generated from"
+      ],
+      "why_excluded": "the checkpoint is the treatment; a generation identity containing it would mark every pair of arms as mismatched"
+    },
+    "scoring_contract": "c1_confirmation_scoring@v1",
+    "scoring_digest": "571713a7a62583e8b670ad1190371b0649375911a561bcbad406ad5956f18d01",
+    "battery": {
+      "artifact": "d_series_behavioural_v1:d1_screening",
+      "manifest_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+      "content_sha256": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58"
+    },
+    "binding": "every control and every searched recovery probe must bind to this exact hash; a probe measured under a different one is not comparable to the thresholds materialized from these controls",
+    "notes": {}
+  },
+  "engine_probe": "engine_probe.json",
+  "report_sha256": "4f901bf169a68aa2dc184602fb9e47c33fddc3631b8355899c6eb7a74dc37286"
+}
