@@ -769,15 +769,31 @@ class TestTheIncumbentRebuildsUnderItsHistoricalProtocol:
     def test_materialize_incumbent_passes_it_to_the_producer(self,
                                                              monkeypatch,
                                                              tmp_path):
-        import aadistill.initialization.planning.fixed_path as FP
+        """And the capture BINDS AGAINST THE REAL SIGNATURE.
 
+        The first version of this test stubbed `def capture(spec, **kwargs)`,
+        which accepts anything -- so it proved the execution config was passed
+        and could not see that `root_loader`, a REQUIRED keyword-only
+        argument, was missing. Attempt 2 spent 81 minutes and $1.47 finding
+        that on a pod, after reproducing all four candidates byte-exactly. A
+        stub that is more permissive than the function it replaces tests the
+        stub.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_a3.a_bsz3 import A_BSZ1
+
+        real = inspect.signature(FP.materialize_fixed_path)
         captured = {}
 
         class _Stop(RuntimeError):
             pass
 
-        def capture(spec, **kwargs):
-            captured["execution"] = kwargs.get("execution")
+        def capture(*args, **kwargs):
+            #: Raises TypeError exactly where the producer would.
+            bound = real.bind(*args, **kwargs)
+            captured["bound"] = bound
             raise _Stop()
 
         monkeypatch.setattr(FP, "materialize_fixed_path", capture)
@@ -785,9 +801,79 @@ class TestTheIncumbentRebuildsUnderItsHistoricalProtocol:
             M.materialize_incumbent(tmp_path / "B", device="cuda",
                                     identities={"artifact_digest": "x" * 64},
                                     repo_root=REPO)
-        from stages.phase_a3.a_bsz3 import A_BSZ1
+        bound = captured["bound"]
+        assert bound.arguments["execution"] is A_BSZ1
+        assert callable(bound.arguments["root_loader"])
 
-        assert captured["execution"] is A_BSZ1
+    def test_the_incumbents_root_is_the_teacher_as_published(self,
+                                                             monkeypatch,
+                                                             tmp_path):
+        """B's root carries NO config overrides, and that is C2's answer.
+
+        `materialize_b` calls `materialize_arm` with no `config_overrides`,
+        and THAT rebuild reproduced B's exact digest. The candidates'
+        `use_cache: False` belongs to the D1 SEARCH's beam, whose shared root
+        a causal-KL DEPTH step mutated in place; C1 built B as a standalone
+        fixed path, so applying the beam's override here would start B from a
+        config C1 never used.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        real = inspect.signature(FP.materialize_fixed_path)
+        seen = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def fake_load_root_model(spec, *, config_overrides, device):
+            seen["overrides"] = dict(config_overrides)
+            seen["spec"] = spec
+            seen["device"] = device
+            return "root"
+
+        def capture(*args, **kwargs):
+            bound = real.bind(*args, **kwargs)
+            bound.arguments["root_loader"]()
+            raise _Stop()
+
+        monkeypatch.setattr(R, "load_root_model", fake_load_root_model)
+        monkeypatch.setattr(FP, "materialize_fixed_path", capture)
+        with pytest.raises(_Stop):
+            M.materialize_incumbent(tmp_path / "B", device="cuda",
+                                    identities={"artifact_digest": "x" * 64},
+                                    repo_root=REPO)
+        assert seen["overrides"] == {}, (
+            "B's root must be the teacher as published; the candidates' beam "
+            "override would start it from a config C1 never used")
+        assert seen["device"] == "cuda"
+        assert getattr(seen["spec"], "root_repo_id", None)
+
+    def test_both_producers_satisfy_the_real_producer_signature(self):
+        """One structural check over BOTH arm paths, by binding.
+
+        Two separate call sites reach `materialize_fixed_path` -- the
+        candidate replay and B's frozen construction -- and each has now
+        shipped a defect the other did not have. Binding both against the
+        real signature is the check that covers the pair.
+        """
+        import inspect
+
+        import aadistill.initialization.planning.fixed_path as FP
+
+        real = inspect.signature(FP.materialize_fixed_path)
+        required = {name for name, p in real.parameters.items()
+                    if p.default is inspect.Parameter.empty
+                    and p.kind is not inspect.Parameter.VAR_KEYWORD}
+        assert "root_loader" in required and "adapter" in required
+        for source in (inspect.getsource(M.materialize_candidate),
+                       inspect.getsource(M.materialize_incumbent)):
+            call = source[source.index("materialize_fixed_path("):]
+            for name in required - {"spec"}:
+                assert f"{name}=" in call, (
+                    f"a producer call omits the required {name!r}")
 
 
 class TestFailureClassificationSeparatesHarnessFromScience:
@@ -1151,6 +1237,15 @@ class TestDiskResidencyFollowsTheRealFreeCallSites:
                         "kept": str(dest)}}
 
         monkeypatch.setattr(M, "materialize_candidate", fake_candidate)
+        #: B first, and its spec hash is device-dependent; stubbed so this
+        #: test exercises the candidate loop's fail-closed release.
+        monkeypatch.setattr(
+            M, "materialize_incumbent",
+            lambda dest, **kw: {"arm": "B", "adopted": True,
+                                "checkpoint_path": str(dest),
+                                "intermediates_released": {
+                                    "removed_steps": [], "freed_gib": 0.0,
+                                    "failed": [], "kept": str(dest)}})
         with pytest.raises(M.D1MaterializeError,
                            match="NO FURTHER ARM"):
             M.materialize_arms("screening", plan_path=REPO / M.PLAN_REL,
@@ -1492,6 +1587,18 @@ class TestTheRootLoaderSeamCarriesTheSpec:
             captured["root"] = loader()
             raise _Stop()
 
+        #: B is built FIRST now and its spec hash is DEVICE-DEPENDENT -- C1
+        #: froze the treatment path at `cuda`, so `assert_frozen_construction`
+        #: correctly refuses a `cpu` rebuild. Stubbed here so this test
+        #: exercises the CANDIDATE seam it is about, through the real
+        #: materialize_arms wiring that shipped the defect.
+        monkeypatch.setattr(
+            M, "materialize_incumbent",
+            lambda dest, **kw: {"arm": "B", "adopted": True,
+                                "checkpoint_path": str(dest),
+                                "intermediates_released": {
+                                    "removed_steps": [], "freed_gib": 0.0,
+                                    "failed": [], "kept": str(dest)}})
         monkeypatch.setattr(R, "load_root_model", fake_load_root_model)
         monkeypatch.setattr(FP, "materialize_fixed_path", fake_materialize)
         with pytest.raises(_Stop):
@@ -1506,3 +1613,31 @@ class TestTheRootLoaderSeamCarriesTheSpec:
         assert getattr(spec, "root_revision", None)
         assert captured["overrides"] == {"use_cache": False}
         assert captured["root"] == "sentinel-root"
+
+
+class TestTheIncumbentsDeviceIsPartOfItsIdentity:
+    """`FixedPathSpec.as_dict` includes `device`, so B's spec hash is
+    device-dependent and C1 froze the treatment path at `cuda`.
+    `assert_frozen_construction` therefore refuses a `cpu` rebuild of B at
+    $0 -- which is exactly what it should do, and is how the B-first
+    reordering surfaced the fact. A pod builds on cuda; nothing may quietly
+    rebuild B somewhere else and call it B."""
+
+    def test_a_cpu_rebuild_of_b_is_refused_before_any_tensor_moves(
+            self, tmp_path):
+        from stages.phase_c2 import baseline as BL
+        from stages.phase_d1 import d1_session as D1S
+
+        D1S._register_frozen_operators()
+        with pytest.raises(BL.BaselineError, match="frozen treatment path"):
+            BL.assert_frozen_construction(
+                BL.frozen_baseline_spec(device="cpu"))
+
+    def test_the_cuda_construction_is_the_frozen_one(self):
+        from stages.phase_c2 import baseline as BL
+        from stages.phase_d1 import d1_session as D1S
+
+        D1S._register_frozen_operators()
+        spec = BL.frozen_baseline_spec(device="cuda")
+        evidence = BL.assert_frozen_construction(spec)
+        assert evidence["spec_hash"] == evidence["expected_spec_hash"]

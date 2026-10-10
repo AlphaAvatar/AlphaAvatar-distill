@@ -356,6 +356,7 @@ def materialize_incumbent(dest: Path, *, device: str,
     from aadistill.initialization.specs.arch import get_adapter
     from stages.phase_c2 import baseline as BL
     from stages.phase_d1 import d1_session as D1S
+    from stages.phase_d1 import replay_specs as R
 
     D1S._register_frozen_operators()
     spec = BL.frozen_baseline_spec(device=device)
@@ -364,7 +365,20 @@ def materialize_incumbent(dest: Path, *, device: str,
     dest.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
     results = materialize_fixed_path(
-        spec, adapter=get_adapter("qwen3"), workdir=dest,
+        spec, adapter=get_adapter("qwen3"),
+        #: B'S ROOT IS THE TEACHER AS PUBLISHED -- NO config overrides, and
+        #: that is a scientific fact read from C2's authoritative rebuild
+        #: rather than inherited from the candidates. `materialize_b` calls
+        #: `materialize_arm` with no `config_overrides`, and THAT rebuild
+        #: reproduced B's exact digest, twice (C2's and C3's behavioural
+        #: sessions). The candidates' `use_cache: False` belongs to the D1
+        #: SEARCH's beam, whose shared root model a causal-KL DEPTH step
+        #: mutated in place; C1 built B as a standalone fixed path with no
+        #: such shared root, so applying the beam's override here would start
+        #: B from a config C1 never used and diverge at step 0.
+        root_loader=lambda _s=spec: R.load_root_model(
+            _s, config_overrides={}, device=device),
+        workdir=dest,
         repo_root=repo_root, execution=execution)
     built = Path(results[-1].checkpoint_path)
     try:
@@ -449,6 +463,47 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
         "execution_agreement": execution_agreement,
         "arms": [],
     }
+    #: B FIRST, and the reason is the same one that orders the candidates by
+    #: their cheapest first operator: discover a path defect where it is
+    #: cheapest. B is built by a DIFFERENT code path from the candidates --
+    #: C1's frozen construction spec under A_bsz1, not a journal replay -- so
+    #: it is a distinct risk surface, and attempt 2 spent 74 minutes
+    #: reproducing all four candidates byte-exactly before a missing
+    #: `root_loader` stopped it on B's first line. One arm is ~22 min; four
+    #: candidates plus B is ~96.
+    incumbent = next(a for a in field if a.is_incumbent)
+    dest = Path(incumbent.checkpoint_dir)
+    from stages.phase_c2 import baseline as BL
+
+    b_steps = len(BL.frozen_baseline_spec(device=device).steps)
+    found, complete = final_checkpoint_in(dest, n_steps=b_steps)
+    row = None
+    if found is not None and complete:
+        say(f"[B] final checkpoint present at {found}; verifying, not "
+            "rebuilding")
+        try:
+            identity = _verify_bytes_at(found, dict(incumbent.identities),
+                                        what="incumbent B")
+            row = {"arm": "B", "reused": True, "identity": identity,
+                   "checkpoint_path": str(found)}
+        except D1MaterializeError as exc:
+            say(f"[B] existing bytes fail their identity "
+                f"({str(exc)[:120]}); rebuilding from the frozen spec")
+    if row is None:
+        say("[B] materializing from phase_c2.baseline.frozen_baseline_spec "
+            "under A_bsz1")
+        row = {"reused": False,
+               **materialize_incumbent(dest, device=device,
+                                       identities=dict(incumbent.identities),
+                                       repo_root=root)}
+        released = row["intermediates_released"]
+        if released["failed"]:
+            raise D1MaterializeError(
+                f"B: intermediate release failed ({released['failed']}); the "
+                "storage bound is falsified and the session stops with the "
+                "verified arm preserved.")
+    out["arms"].append(row)
+
     #: Cheapest first operator first, the replay driver's own ordering: a
     #: wrong shared input is reported after about a minute rather than after
     #: the DEPTH operator's forty.
@@ -503,38 +558,12 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
                 "NO FURTHER ARM MAY BE BUILT under a bound that does not "
                 "hold. The verified arm and its evidence are preserved.")
 
-    incumbent = next(a for a in field if a.is_incumbent)
-    dest = Path(incumbent.checkpoint_dir)
-    from stages.phase_c2 import baseline as BL
-
-    b_steps = len(BL.frozen_baseline_spec(device=device).steps)
-    found, complete = final_checkpoint_in(dest, n_steps=b_steps)
-    row = None
-    if found is not None and complete:
-        say(f"[B] final checkpoint present at {found}; verifying, not "
-            "rebuilding")
-        try:
-            identity = _verify_bytes_at(found, dict(incumbent.identities),
-                                        what="incumbent B")
-            row = {"arm": "B", "reused": True, "identity": identity,
-                   "checkpoint_path": str(found)}
-        except D1MaterializeError as exc:
-            say(f"[B] existing bytes fail their identity "
-                f"({str(exc)[:120]}); rebuilding from the frozen spec")
-    if row is None:
-        say("[B] materializing from phase_c2.baseline.frozen_baseline_spec "
-            "under A_bsz1")
-        row = {"reused": False,
-               **materialize_incumbent(dest, device=device,
-                                       identities=dict(incumbent.identities),
-                                       repo_root=root)}
-        released = row["intermediates_released"]
-        if released["failed"]:
-            raise D1MaterializeError(
-                f"B: intermediate release failed ({released['failed']}); the "
-                "storage bound is falsified and the session stops with the "
-                "verified arm preserved.")
-    out["arms"].append(row)
+    #: Recorded in FIELD order (q1..q4 then B) whatever the build order,
+    #: so the evidence reads as the field and not as a schedule.
+    order = {a.arm_id: i for i, a in enumerate(field)}
+    out["arms"].sort(key=lambda r: order.get(
+        str(r.get("arm") or ""), len(order)))
+    out["build_order"] = ["B", *[a.arm_id for a in ordered]]
     out["n_arms"] = len(out["arms"])
     return out
 
