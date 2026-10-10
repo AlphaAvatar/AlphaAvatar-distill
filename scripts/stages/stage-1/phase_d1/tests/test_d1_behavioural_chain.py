@@ -1457,3 +1457,52 @@ class TestTheFirstProbesTrainedWindowIsPreserved:
         #: And the gate accepts teardown once the preservation is verified.
         ok, why = launcher.probes_evidence_secured(ctx, [])
         assert ok and "preserved" in why
+
+
+class TestTheRootLoaderSeamCarriesTheSpec:
+    """The first paid screening subrun (sidscaxyh1c7o1, $0.17, 2 seconds of
+    driver) died on `'NoneType' object has no attribute 'root_repo_id'`:
+    materialize_arms bound `lambda: load_root(None)` where the replay driver
+    binds the leaf's own spec -- but the spec is built INSIDE
+    materialize_candidate, so only it can close over the value.
+    `--check-only` never reaches this seam (it materializes nothing), which is
+    exactly the injected-function blind spot. This drives the REAL wiring:
+    materialize_arms -> materialize_candidate -> the producer invoking the
+    loader -> load_root_model receiving a spec it can read the root off."""
+
+    def test_the_loader_receives_the_leafs_own_spec(self, monkeypatch,
+                                                    tmp_path):
+        import aadistill.initialization.planning.fixed_path as FP
+        from stages.phase_d1 import replay_specs as R
+
+        captured = {}
+
+        class _Stop(RuntimeError):
+            pass
+
+        def fake_load_root_model(spec, *, config_overrides, device):
+            captured["spec"] = spec
+            captured["overrides"] = dict(config_overrides)
+            return "sentinel-root"
+
+        def fake_materialize(spec, **kwargs):
+            #: The producer's real behaviour at the seam: call the loader
+            #: with NO arguments.
+            loader = kwargs["root_loader"]
+            captured["root"] = loader()
+            raise _Stop()
+
+        monkeypatch.setattr(R, "load_root_model", fake_load_root_model)
+        monkeypatch.setattr(FP, "materialize_fixed_path", fake_materialize)
+        with pytest.raises(_Stop):
+            M.materialize_arms("screening", plan_path=REPO / M.PLAN_REL,
+                               arm_root=tmp_path, device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+        spec = captured["spec"]
+        assert spec is not None, "the loader was handed None again"
+        assert getattr(spec, "root_repo_id", None), (
+            "the loader's spec carries no root_repo_id; load_root_model "
+            "reads the teacher identity off it")
+        assert getattr(spec, "root_revision", None)
+        assert captured["overrides"] == {"use_cache": False}
+        assert captured["root"] == "sentinel-root"

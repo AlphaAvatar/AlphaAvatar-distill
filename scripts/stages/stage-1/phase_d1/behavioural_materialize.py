@@ -254,11 +254,17 @@ def release_intermediate_steps(label: str, results: Any,
 
 def materialize_candidate(leaf: Any, dest: Path, *, device: str,
                           repo_root: str | Path = REPO_ROOT,
-                          root_loader: Callable[[], Any] | None = None,
+                          root_loader: Callable[[Any], Any] | None = None,
                           execution: Any = None,
                           on_step: Callable[[Any], None] | None = None,
                           ) -> dict[str, Any]:
     """One finalist along its pinned path, into `dest`. Every step gated.
+
+    `root_loader` takes THE SPEC this function builds -- `load_root_model`
+    reads `spec.root_repo_id`/`spec.root_revision` off it -- and is bound here,
+    where the spec exists. The first paid subrun died in two seconds because
+    the caller's lambda had nothing to bind and shipped `None`: the spec is
+    constructed inside this function, so only this function can close over it.
 
     Raises `D1ArmIdentityMismatch` -- the scientific stop -- only when the
     path COMPLETED under the verified inputs and the bytes still differ: a
@@ -277,7 +283,11 @@ def materialize_candidate(leaf: Any, dest: Path, *, device: str,
     try:
         results = materialize_fixed_path(
             spec, adapter=get_adapter(R.FAMILY),
-            root_loader=root_loader, workdir=dest,
+            #: `materialize_fixed_path` calls its loader with NO arguments;
+            #: the spec is closed over HERE, the one place it exists.
+            root_loader=(None if root_loader is None
+                         else (lambda _s=spec: root_loader(_s))),
+            workdir=dest,
             repo_root=repo_root, on_step=on_step, execution=execution)
     except FixedPathDigestMismatch as exc:
         raise D1ArmIdentityMismatch(
@@ -476,7 +486,7 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
             "path")
         row = materialize_candidate(
             leaf, dest, device=device, repo_root=root,
-            root_loader=lambda: load_root(None), execution=execution,
+            root_loader=load_root, execution=execution,
             on_step=lambda r: say(
                 f"  step {r.index} {r.impl_id} -> "
                 f"{r.identity.artifact_digest[:12]} ({r.seconds:.0f}s)"))
