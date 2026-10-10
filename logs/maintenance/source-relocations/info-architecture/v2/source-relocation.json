@@ -9,8 +9,8 @@
  "move_map_owner": "scripts/maintenance/migration/info_architecture_v2.py",
  "totals": {
   "tracked_files_relocated": 160,
-  "rename_pure": 146,
-  "rename_modified": 14,
+  "rename_pure": 145,
+  "rename_modified": 15,
   "relocation_pairs_added_to_historical_paths": 75
  },
  "_data_manifest": "data_pre_move.sha256, beside this record: the sha256 of every data/ file before the move, including the gitignored payloads",
@@ -637,9 +637,9 @@
   {
    "old": "configs/autoinit/d1_search_artifacts_failed.json",
    "new": "configs/stages/stage-1/phase_d1/d1_search_artifacts_failed.json",
-   "kind": "rename_pure",
+   "kind": "rename_modified",
    "sha256_at_base": "4357ce28330702f5b5b6b4be6823fd46227e44cdc93c661fdd0c716c40818b6d",
-   "sha256_now": "4357ce28330702f5b5b6b4be6823fd46227e44cdc93c661fdd0c716c40818b6d"
+   "sha256_now": "38951f2867de2e135584029605b6ba4d7e283a360b766c4449ceeaefa4d64636"
   },
   {
    "old": "configs/autoinit/device_canary_artifacts.json",
