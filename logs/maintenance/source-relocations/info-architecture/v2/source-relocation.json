@@ -395,18 +395,59 @@
   },
   "frozen_log_records_content_modified_this_round": [],
   "records_added_this_round": [
+   "logs/budget/approvals/autoinit_d1_behavioural_screening_grant.json",
+   "logs/budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json",
    "logs/maintenance/source-relocations/info-architecture/v2/data_pre_move.sha256",
    "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+   "logs/stages/stage-1/phase_d1/analyses/d1_behavioural_spend_reconciliation.json",
+   "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json",
+   "logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json",
+   "logs/stages/stage-1/phase_d1/analyses/d1_screening_continuation_identity.json",
    "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
-   "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json"
+   "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/closeout/outcome.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/evidence/autoinit_d1_behavioural_run.log",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/evidence/d1_behavioural.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/authorization.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/bundle.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/launch_readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/evidence/autoinit_d1_behavioural_run.log",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/evidence/d1_behavioural.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/authorization.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/bundle.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/launch_readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/engine_probe_tail.log",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/preserved_trained_q1_s614923639.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/bundle.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/launch_readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural_attested_protocol.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_screening_q1_s614923639_generation_admission.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/engine_probe.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/authorization.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/bundle.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/launch_readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/readiness.json",
+   "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json"
   ],
   "_touched_must_be_empty": "every entry above is a frozen record this round changed in place — the list being empty IS the guard"
  },
  "lineage_guard": {
   "_contract": "Every sealed record, compared against the TRUE pre-migration base across all four record trees. A sealed record may differ only in markdown link TARGETS — navigation that necessarily moves when a document does — with visible labels and all other content byte-identical. Any other difference is a violation.",
   "true_base": "35259b64e8a8813cb1cfad4c0bc456b53bc69dbc",
-  "sealed_records_inspected": 2876,
-  "byte_identical": 2871,
+  "sealed_records_inspected": 2875,
+  "byte_identical": 2870,
   "link_targets_repaired_only": [
    {
     "record": "logs/shared/analyses/autoinit_pilot_proposal.md",
@@ -765,7 +806,7 @@
    "new": "configs/stages/stage-1/phase_c1/executable_closure.json",
    "kind": "rename_modified",
    "sha256_at_base": "2f596b45dcf40ca1c0ca722ffc88f1df645179787b1f103095173c1be28ea115",
-   "sha256_now": "f4bac5fa91874fb9e9c63a49f84b86a73f19279fa67ecea3ee96a3a291cbfebc"
+   "sha256_now": "539f8fb3ded907bc19e01272925e046e1224aef42b51c55c8bdbbcd28b455f22"
   },
   {
    "old": "configs/experiments/phase_c1/frozen_assets.json",
@@ -821,7 +862,7 @@
    "new": "configs/stages/stage-1/phase_c3/executable_closure.json",
    "kind": "rename_modified",
    "sha256_at_base": "575df273869c5f121a1fd18a23defe67c8836b67cfd4900701db06ff3553441d",
-   "sha256_now": "2bb29c8c817486e9afd16709bf271c1ac3546ba17bc5dc14d712b6726d175097"
+   "sha256_now": "e4cfa1d605df98c6e337626a29bae57c455699f1120daaea258934660e3bae18"
   },
   {
    "old": "configs/experiments/phase_c3/frozen_assets.json",

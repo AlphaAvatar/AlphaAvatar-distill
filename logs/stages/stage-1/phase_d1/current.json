@@ -58,11 +58,15 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "MAINTAINER DECISION: grant ONE D1 behavioural SCREENING session ($25.0053 at $1.09/h; fits the $30 envelope and $68.7925 formal remaining). Then issue, sweep, bundle, readiness, launch. Until then D1 stays PAUSED before behavioural screening: no execution grant, no screening authorization, no resource."
+    "maintainer_pause": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
     "all": [
+      "d1_behavioural_20261010_082900",
+      "d1_behavioural_20261010_090343",
+      "d1_behavioural_20261010_103442",
+      "d1_behavioural_20261010_132919",
       "d1_replay_001",
       "d1_replay_002",
       "d1_search_20261005_173304",
@@ -74,13 +78,17 @@
       "runner_iface"
     ],
     "with_closeout": [
+      "d1_behavioural_20261010_082900",
+      "d1_behavioural_20261010_090343",
+      "d1_behavioural_20261010_103442",
+      "d1_behavioural_20261010_132919",
       "d1_search_20261006_055409",
       "d1_search_20261006_101725",
       "d1_search_20261006_210210"
     ]
   },
   "active_run": null,
-  "next_scientific_action": "MAINTAINER DECISION: grant ONE D1 behavioural SCREENING session ($25.0053 at $1.09/h; fits the $30 envelope and $68.7925 formal remaining). Then issue, sweep, bundle, readiness, launch. Until then D1 stays PAUSED before behavioural screening: no execution grant, no screening authorization, no resource.",
+  "next_scientific_action": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

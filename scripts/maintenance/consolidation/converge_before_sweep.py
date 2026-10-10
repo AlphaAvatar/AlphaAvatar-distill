@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
 """Everything deterministic that a launch-bound sweep assumes, checked in seconds.
 
-    PYTHONPATH=src python scripts/maintenance/consolidation/converge_before_sweep.py
-    PYTHONPATH=src python scripts/maintenance/consolidation/converge_before_sweep.py --write
+    python scripts/maintenance/consolidation/converge_before_sweep.py
+    python scripts/maintenance/consolidation/converge_before_sweep.py --write
+
+No PYTHONPATH is needed: this module puts `src` and `scripts` on its own
+`sys.path`, and `generator_env` passes both to every generator it spawns.
+The old usage line said `PYTHONPATH=src`, which was never sufficient --
+see `generator_env`.
 
 Three of the first four launch-bound sweeps failed on derived records that had
 not been regenerated: a skip predicate changed without re-running the audit, a
@@ -41,6 +46,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
@@ -92,6 +98,16 @@ GENERATORS: tuple[tuple[str, tuple[str, ...]], ...] = (
      ("scripts/maintenance/architecture/record_run_index.py", "--write")),
     ("stage index",
      ("scripts/maintenance/consolidation/stage_attribution.py", "--write")),
+    #: THE DESIGN, before the live-state records that read it. It is a derived
+    #: document -- `budget.position` is regenerated from `derive_budget` on
+    #: every write -- and it was NOT in this list, which is the exact class of
+    #: failure the tool exists for: booking D1's four behavioural subruns left
+    #: the committed design restating a formal remainder $8.3305 too generous,
+    #: and a test caught it rather than this. Its `design_hash` excludes money
+    #: by construction, so regenerating here cannot move the frozen scientific
+    #: identity.
+    ("phase_d1 design",
+     ("scripts/stages/stage-1/phase_d1/write_d1_design.py", "--write")),
     #: Live-state records for the active experiment and family, BEFORE the
     #: ownership views and the navigation: the stage index's `live_state` leg
     #: and the experiment READMEs read what these derive.
@@ -131,8 +147,33 @@ def git(*args: str) -> str:
                           capture_output=True, text=True, check=True).stdout
 
 
+def generator_env() -> dict[str, str]:
+    """The import paths every generator needs, supplied rather than assumed.
+
+    `run` used to spawn each generator with no `env`, so they inherited
+    whatever PYTHONPATH the caller happened to export -- and this module's own
+    usage line said `PYTHONPATH=src`, which is NOT enough: the navigation
+    renderer imports `maintenance.consolidation.closeout_reader`, a package
+    under `scripts`. So three of the generators failed with
+    `ModuleNotFoundError: No module named 'maintenance'` on every invocation,
+    and the tool reported "generator exited non-zero" -- a convergence check
+    whose generators cannot run reports drift it never looked for.
+
+    This is the same shape as the defect that cost D1's screening attempt 4:
+    a parent's in-process path setup does not reach its children, and a fact
+    the parent holds has to be put in the environment to travel.
+    """
+    env = {**os.environ}
+    roots = [str(REPO / "src"), str(REPO / "scripts")]
+    existing = env.get("PYTHONPATH")
+    env["PYTHONPATH"] = os.pathsep.join(
+        [*roots, *([existing] if existing else [])])
+    return env
+
+
 def run(argv: tuple[str, ...]) -> int:
     return subprocess.run([sys.executable, *argv], cwd=REPO,
+                          env=generator_env(),
                           capture_output=True, text=True).returncode
 
 

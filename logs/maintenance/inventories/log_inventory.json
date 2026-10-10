@@ -1,6 +1,6 @@
 {
   "schema": "aadistill.log_inventory/v1",
-  "created_utc": "2026-10-10T07:44:09+00:00",
+  "created_utc": "2026-10-10T21:15:24+00:00",
   "command": "scripts/maintenance/consolidation/build_log_inventory.py --out logs/maintenance/inventories/log_inventory.json",
   "roots": [
     "logs",
@@ -10,21 +10,21 @@
   ],
   "rule": "nothing is deleted before it appears here with a disposition and a reason. A duplicate's canonical copy is derived from who references it, not chosen by hand, except where CANONICAL_OVERRIDES states otherwise and says why.",
   "totals": {
-    "files": 3313,
-    "bytes": 121244925,
+    "files": 3354,
+    "bytes": 121909379,
     "by_disposition": {
       "keep_canonical": 222,
-      "keep_immutable": 2847,
-      "keep_referenced": 229,
+      "keep_immutable": 2887,
+      "keep_referenced": 230,
       "keep_unique_evidence": 15
     },
     "by_category": {
       "derived_summary": 6,
-      "immutable_record": 1509,
+      "immutable_record": 1543,
       "index": 8,
       "living_state": 2,
       "narrative": 934,
-      "raw_execution_artifact": 839,
+      "raw_execution_artifact": 846,
       "scratch_debug": 15
     },
     "duplicate_groups": 98,
@@ -3416,10 +3416,11 @@
         "logs/stages/stage-1/phase_a/history/autoinit_phase_a_attempts/attempt4/engine_probe.json",
         "logs/stages/stage-1/phase_a/runs/attempt11/engine_probe.json",
         "logs/stages/stage-1/phase_a3/runs/a3_attempt38/evidence/engine_probe.json",
-        "logs/stages/stage-1/phase_c3/runs/attempt66/evidence/engine_probe.json"
+        "logs/stages/stage-1/phase_c3/runs/attempt66/evidence/engine_probe.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/engine_probe.json"
       ],
       "canonical": null,
-      "canonical_reason": "4 of 4 sit inside a run directory the run index registers with a digest, so each is that run's own evidence and removing it would change what the index records about that run. Identical bytes across attempts are a reused or re-derived observation, not one object under several names",
+      "canonical_reason": "5 of 5 sit inside a run directory the run index registers with a digest, so each is that run's own evidence and removing it would change what the index records about that run. Identical bytes across attempts are a reused or re-derived observation, not one object under several names",
       "reclaimable_bytes": 0,
       "decided_by": "rule: per-run evidence"
     },
@@ -7368,7 +7369,7 @@
     {
       "path": "logs/README.md",
       "size_bytes": 6401,
-      "sha256": "2b0d2cbe68a3a4a500169a31078dd1d7eb45555d8920953a48e9e6f8e7488bb8",
+      "sha256": "df839df08807a5ae45fdbd57b9736c00ee1dc602f72a753f17fea29fd9ecab18",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -7807,6 +7808,39 @@
       "duplicate_of": null,
       "disposition": "keep_referenced",
       "disposition_reason": "named by scripts/stages/stage-1/continuation_b/issue_continuation_b_authorization.py"
+    },
+    {
+      "path": "logs/budget/approvals/autoinit_d1_behavioural_screening_grant.json",
+      "size_bytes": 3034,
+      "sha256": "b959bf137212121714ae30373c4a26c4505199a2a018f172ac540fe2bf4c38b2",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+      ],
+      "referenced_by_executable": [
+        "scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+      ],
+      "duplicate_of": null,
+      "disposition": "keep_referenced",
+      "disposition_reason": "named by scripts/stages/stage-1/phase_d1/issue_d1_behavioural_authorization.py"
+    },
+    {
+      "path": "logs/budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json",
+      "size_bytes": 4589,
+      "sha256": "49cff3e4d3957ee978505abdf850577ad629b568ef0f4cc1cd868c0090143362",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/budget/approvals/autoinit_d1_grant.json",
@@ -8303,8 +8337,8 @@
     },
     {
       "path": "logs/index.json",
-      "size_bytes": 169900,
-      "sha256": "a5b6b780e6b9f00cbc9591db9cc1be0abd7c907fdbd82c53cc4de978cdaae9bc",
+      "size_bytes": 172516,
+      "sha256": "4d1ab1c9b26b60d35580a6c671d3dd6e9a8ce73637e84c060b1f3bb19b77cbe3",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -8312,6 +8346,7 @@
         "docs/README.md",
         "docs/index.json",
         "docs/maintenance/REPO_LAYOUT.md",
+        "logs/budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json",
         "logs/budget/decisions.md",
         "logs/budget/ledger.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
@@ -8930,8 +8965,8 @@
     },
     {
       "path": "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
-      "size_bytes": 74278,
-      "sha256": "db952c3578f6f67eb6709de26699ecbace96d58ab5476130e692932ec4f78817",
+      "size_bytes": 78349,
+      "sha256": "d5539b0edd66db963bf2087e07d47dff50331600f00966baa616d943464c141e",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9785,7 +9820,7 @@
     {
       "path": "logs/stages/README.md",
       "size_bytes": 1495,
-      "sha256": "253e343ef18652716241565525cdf72469987df1a302203286a260d6ac3a5fda",
+      "sha256": "0e922f9d6cd8666d8d5c65d28a926c05a4afbfe8a0b7895aca07e28beed79356",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9804,7 +9839,7 @@
     {
       "path": "logs/stages/index.json",
       "size_bytes": 98503,
-      "sha256": "04e7faa51226e81e3c9b740352e98777a18055702eff229a9ab07d67ae1d9a1d",
+      "sha256": "290aa378b0eadd83b683be3c45dd1b9ce3e9231ed61fba99b7ef02c9c1017f4d",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -9863,7 +9898,7 @@
     {
       "path": "logs/stages/stage-1/README.md",
       "size_bytes": 12907,
-      "sha256": "b76c5c10e02064d5b1addf451a9f8fb54f058c208cf87e4b98bc2284ad84fdec",
+      "sha256": "5d2fa13f00ba494fbbe923c8d451a70a44a38619875b5f1bda727cc3bbaf6369",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -22527,7 +22562,7 @@
     {
       "path": "logs/stages/stage-1/phase_c1/analyses/skip_predicate_audit.json",
       "size_bytes": 56000,
-      "sha256": "fbbd4fc84f46a1112b0adc5b5241336a59d6eb61f8849704bc0e2ce774fd9457",
+      "sha256": "6fa734f89fd6fe31f94d03f23e9f96a952d79e91302efd284278d184a9e35e2a",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50785,8 +50820,8 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/README.md",
-      "size_bytes": 1020,
-      "sha256": "dfd9a22ef8292c169d4a65ec472d11f9f1239c045ee353ffa5b937026e4ac363",
+      "size_bytes": 1320,
+      "sha256": "cc8427a83a552cb839a72640bedddb0e59f74ddb643f846875d89f66116234df",
       "category": "narrative",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50796,6 +50831,22 @@
       "duplicate_of": null,
       "disposition": "keep_canonical",
       "disposition_reason": "sole copy, no superseding owner"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/analyses/d1_behavioural_spend_reconciliation.json",
+      "size_bytes": 1494,
+      "sha256": "faa40b4ac1380e6009ef56833224d0ff3c0ba09cade6a1ae3d4f99f00c710fdb",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json",
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json",
@@ -50851,9 +50902,57 @@
       "disposition_reason": "named by scripts/maintenance/consolidation/stage_attribution.py, scripts/stages/stage-1/families/d_series/battery_family.py, scripts/stages/stage-1/families/d_series/current.py"
     },
     {
+      "path": "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json",
+      "size_bytes": 3870,
+      "sha256": "3c5ff8e3a6b737af30afcba28c88e176f70ca99475123a1abe697877ecb70fa8",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json",
+      "size_bytes": 9022,
+      "sha256": "9d99cc86b5ad0fa36333dc65088f68e1de9298b004e29bb16f457d5749713a1c",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json",
+        "logs/state/current.md"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/analyses/d1_screening_continuation_identity.json",
+      "size_bytes": 6418,
+      "sha256": "c0e5ddeb60e0f34f73fd9ec5187fb8baea8f134c70d139e0cae1863df99c55e4",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
       "path": "logs/stages/stage-1/phase_d1/current.json",
-      "size_bytes": 4516,
-      "sha256": "78c11ee3091de41c33509a6b121fa0dc2359ed5241926b7c197337655146dea7",
+      "size_bytes": 5048,
+      "sha256": "6f178ee632eb13fb40daa460283577b23899f310e943cae5051b5dedb265e1c9",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -50919,6 +51018,14 @@
       "referenced_by": [
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json",
         "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/write_d1_behavioural_preregistration.py"
       ],
@@ -50940,6 +51047,14 @@
         "logs/maintenance/inventories/log_inventory.json",
         "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/authorization.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json",
         "scripts/stages/stage-1/phase_d1/behavioural_authorization.py",
         "scripts/stages/stage-1/phase_d1/behavioural_materialize.py"
       ],
@@ -50953,23 +51068,30 @@
     },
     {
       "path": "logs/stages/stage-1/phase_d1/plans/d1_design.json",
-      "size_bytes": 82921,
-      "sha256": "4e4622f6380ed351709fe1451d5dea4acea032eb8d023bf84ea1a29071e03e1d",
+      "size_bytes": 83337,
+      "sha256": "e9b35c268755007c40edcc5f00eea67f68403b24d472046f9a5868f1708eb2a0",
       "category": "immutable_record",
       "in_paid_attempt_chain": false,
       "referenced_by": [
         "logs/budget/decisions.md",
         "logs/maintenance/inventories/checkpoint_registry.json",
         "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
         "logs/stages/index.json",
         "logs/stages/stage-1/README.md",
         "logs/stages/stage-1/phase_d1/analyses/d1_control_arm_identity.json",
+        "logs/stages/stage-1/phase_d1/analyses/d1_screening_continuation_identity.json",
         "logs/stages/stage-1/phase_d1/current.json",
         "logs/stages/stage-1/phase_d1/plans/d1_behavioural_preregistration.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/launch_readiness.json",
         "logs/stages/stage-1/phase_d1/runs/d1_search_20261006_095623/closeout/superseded.json",
         "logs/stages/stage-1/phase_d1/validations/topk-adoption/v1/closeout.json",
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/README.md",
+        "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/families/d_series/tests/test_production_operator_timing.py",
         "scripts/stages/stage-1/families/d_series/tests/test_standing_incumbent.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
@@ -50984,6 +51106,7 @@
       "referenced_by_executable": [
         "scripts/maintenance/consolidation/stage_attribution.py",
         "scripts/maintenance/migration/README.md",
+        "scripts/maintenance/migration/write_relocation_record_v2.py",
         "scripts/stages/stage-1/families/d_series/tests/test_production_operator_timing.py",
         "scripts/stages/stage-1/families/d_series/tests/test_standing_incumbent.py",
         "scripts/stages/stage-1/phase_d1/behavioural.py",
@@ -50997,7 +51120,556 @@
       ],
       "duplicate_of": null,
       "disposition": "keep_referenced",
-      "disposition_reason": "named by scripts/maintenance/consolidation/stage_attribution.py, scripts/maintenance/migration/README.md, scripts/stages/stage-1/families/d_series/tests/test_production_operator_timing.py"
+      "disposition_reason": "named by scripts/maintenance/consolidation/stage_attribution.py, scripts/maintenance/migration/README.md, scripts/maintenance/migration/write_relocation_record_v2.py"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/closeout/outcome.json",
+      "size_bytes": 4028,
+      "sha256": "609c0523e1be6d1eb34ef1423b7db6023721de1e3386c104ce1b34a6cee52758",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/evidence/autoinit_d1_behavioural_run.log",
+      "size_bytes": 1817,
+      "sha256": "ff20d90dd4d40067e0c2d3110abed059786cab72e88a66cb81a22f6064e472d0",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/evidence/d1_behavioural.json",
+      "size_bytes": 2403,
+      "sha256": "bd2a8d58d40ebe6a9f53d809158d7156b4964d5148f2a6f2e0309e239491716d",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/authorization.json",
+      "size_bytes": 15220,
+      "sha256": "03df3330ed41fcf29403986f73dfe8cf567ea31a1f29ec27b59e223ffae234f0",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/bundle.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/bundle.json",
+      "size_bytes": 1451,
+      "sha256": "87405020f0243746e3c3c6045442a748e11360dab9fcc1170d751244a082e776",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/launch_readiness.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/launch_readiness.json",
+      "size_bytes": 5203,
+      "sha256": "2c391b57e4ec36069de21a4f75ec3cb55240f2accb1082291d873ce36510872b",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/governance/readiness.json",
+      "size_bytes": 11569,
+      "sha256": "12f1b6dcee9f094c1de2fc5fc0fee8e7aa6bf90598fcbc26c014b40e8cb09615",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900/runtime/session.json",
+      "size_bytes": 54788,
+      "sha256": "4920ec0f6ccca03419be303613660a27e2a3b07a8f589eb0e035176838ebccc5",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/closeout/outcome.json",
+      "size_bytes": 6041,
+      "sha256": "5ac10acc8e8c24665e80ccdb421bed2c7d33c2d9e6124ad81f98e8258185d41c",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/evidence/autoinit_d1_behavioural_run.log",
+      "size_bytes": 135587,
+      "sha256": "c2ea529b22b2b361262e6bb5b11318548bec398e89126e5c8b45e1f3ac7d434e",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/evidence/d1_behavioural.json",
+      "size_bytes": 1661,
+      "sha256": "ca085741bf85fd7d0cc5518a74c375af1d5ce862638b4c87e3302494cd8c3418",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/authorization.json",
+      "size_bytes": 15220,
+      "sha256": "4a5b52e1a7441a1036a832657307a45b170f781f186dc195f0f76a83338b9f5e",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/bundle.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/bundle.json",
+      "size_bytes": 1451,
+      "sha256": "3a5a950ca93fb994c2dbc5a2943271e15e98b203931f7bcdfa83df23ea38e834",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/launch_readiness.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/launch_readiness.json",
+      "size_bytes": 5203,
+      "sha256": "921e4f62ffa58b1e34037aaba5b5a440b98698d8a793e42fa955e1a6becb1f37",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/governance/readiness.json",
+      "size_bytes": 11568,
+      "sha256": "23e1e13d130789439483c5cdd6e40005bb6f32629476be778a82b81776d940e6",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343/runtime/session.json",
+      "size_bytes": 54954,
+      "sha256": "e50b50e2a02da2d44289909f1dbe3648fb9b2dd23db5a7033524ba35a5e3d6eb",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json",
+      "size_bytes": 7244,
+      "sha256": "982c0aec6cb03399765c4f5cba45bcb30b3653af3ed40a90c5b12df34fbbbccf",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+      "size_bytes": 43450,
+      "sha256": "42b0f151edbdca46fa752f6cf7b65c317476b566c194568f6fa333efcd7478b1",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/engine_probe_tail.log",
+      "size_bytes": 365,
+      "sha256": "6f192e81847e2df0b19b9f69ae46cac7e5ba77c92b6556c25a8a4cbae636a8ce",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/preserved_trained_q1_s614923639.json",
+      "size_bytes": 486,
+      "sha256": "41e7e7afbf597af7cce2ff2991f4567c1c2668325e94bda38361f43ce8264f15",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/authorization.json",
+      "size_bytes": 15220,
+      "sha256": "f4c813d1538ca571b4d89bf5aa264704cdcaf3fdec039287f9f12639aa7b9713",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/evidence/d1_behavioural.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/bundle.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/bundle.json",
+      "size_bytes": 1451,
+      "sha256": "5aeb9651e291864d158b25c407cc08af099510e11cff03dfbb079bcebb87178a",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/launch_readiness.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/launch_readiness.json",
+      "size_bytes": 5203,
+      "sha256": "b5c71fa9616403b445b67c1dc04ff70f8d41a744d98f84d1e7e17a8ee7029d7f",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/governance/readiness.json",
+      "size_bytes": 11568,
+      "sha256": "bcab89032b79a367f90e5cca7590636c3faaa009a56f2923dab50a35c88e1c2a",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/runtime/session.json",
+      "size_bytes": 56339,
+      "sha256": "513b56e7029dd3c4de7fcfaa34819b9d88db5434fedc334dd6881ad468527d19",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json",
+      "size_bytes": 10495,
+      "sha256": "65bcbd36b88b124bdedca8a27faae7b4618ec6bd882c24eefe22a8779ce360fb",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+      "size_bytes": 44508,
+      "sha256": "e4906a13ff82e1ed55dc3e82638600467a7efd84ccf550b3fcaab440d87524d4",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural_attested_protocol.json",
+      "size_bytes": 6892,
+      "sha256": "011210ea3ab2bda4f851d4d915d3ef7152b10788e85f490607900471220f3bff",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_screening_q1_s614923639_generation_admission.json",
+      "size_bytes": 520,
+      "sha256": "17ec54482eac54f86f981ab6e088a844301a4ee9e8717a93a168ce0012c9f6b9",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/engine_probe.json",
+      "size_bytes": 1779,
+      "sha256": "b8d6ebdca2c6976571952f13bfc6fba0aafa9bf4bdae53f6bec7dd8ac0ae9f2c",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/authorization.json",
+      "size_bytes": 15217,
+      "sha256": "dcd04958280d34140981661119b9c9d3369782bf00a9b411e5a9adacf4cafb50",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/evidence/d1_behavioural.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/bundle.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/launch_readiness.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/bundle.json",
+      "size_bytes": 1451,
+      "sha256": "57b904902003345f48d27c65da1f949aea55b3c79a4383cf7fda9af34be3ae11",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/launch_readiness.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/launch_readiness.json",
+      "size_bytes": 5200,
+      "sha256": "b991144d3276757e2725c796ce40d2a63d19085654e115100a8ccb2b7f214119",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json",
+        "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/governance/readiness.json",
+      "size_bytes": 11586,
+      "sha256": "d99c18e578ccd312318a6987a6c490d10257d4124beb7a6b08e2a1e0ed87965e",
+      "category": "immutable_record",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
+    },
+    {
+      "path": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/runtime/session.json",
+      "size_bytes": 56478,
+      "sha256": "3e762af92f3b48df09310d97cd152477b7554fbb6dce09d52dc5c5f48b8ca8f5",
+      "category": "raw_execution_artifact",
+      "in_paid_attempt_chain": false,
+      "referenced_by": [
+        "logs/maintenance/inventories/log_inventory.json",
+        "logs/maintenance/source-relocations/info-architecture/v2/source-relocation.json"
+      ],
+      "referenced_by_executable": [],
+      "duplicate_of": null,
+      "disposition": "keep_immutable",
+      "disposition_reason": "evidence of something that happened; AGENTS.md P11 and the CATALOG's HISTORICAL class forbid rewriting it"
     },
     {
       "path": "logs/stages/stage-1/phase_d1/runs/d1_replay_001/governance/readiness.json",
@@ -57262,8 +57934,8 @@
     },
     {
       "path": "logs/state/current.json",
-      "size_bytes": 17936,
-      "sha256": "191be98688d1b7bc4d516a74d4a71dbe5ef43d07c8d3d3c659459916ec50da66",
+      "size_bytes": 17959,
+      "sha256": "adfe190355426f37a7ba4e158dac4068c929da184b9192da31e472530c9fee49",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [
@@ -57334,8 +58006,8 @@
     },
     {
       "path": "logs/state/current.md",
-      "size_bytes": 240591,
-      "sha256": "455d4e1bc50326b12b4f2c9111fe48b9c0d909e7d5a868709f809e96c88343e3",
+      "size_bytes": 245044,
+      "sha256": "97de6fd567e88e3c8b753f818157d62f3f53953affb449259980013f5195e90a",
       "category": "living_state",
       "in_paid_attempt_chain": false,
       "referenced_by": [

@@ -130,15 +130,25 @@ FIRST_PARTY = ("shared", "stages", "aadistill", "experiments", "support")
 
 
 def _first_party_imports(path: Path) -> list[str]:
-    """Top-level first-party modules the file imports at MODULE level.
+    """Top-level first-party modules the file imports AT ANY DEPTH.
 
-    Module level only: that is what is resolved the instant a pod runs the
-    script, and what the engine probe died on. An import inside a function
-    body is resolved later, under whatever paths exist then.
+    THIS USED TO READ `tree.body` ONLY, and that made the whole test vacuous
+    on the module it was written for. `autoinit_engine_probe.py` does its
+    `from shared.evaluation.uncapped_eval import ...` inside `main()`, so a
+    module-level-only scan found nothing, the test skipped, and the stale
+    `sys.path` insert it exists to catch sailed through -- after costing D1's
+    screening attempt 3 sixty-one minutes of training and $2.98. The driver
+    skipped for the same reason.
+
+    Depth is the wrong axis. The paths a script inserts for itself are
+    inserted AT MODULE LEVEL and persist for the life of the process, so an
+    import inside a function is resolved against exactly those paths. What
+    matters is whether the set of paths the module installs can resolve every
+    first-party module it will ask for, whenever it asks.
     """
     tree = ast.parse(path.read_text())
     names: list[str] = []
-    for node in tree.body:
+    for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             names += [a.name.split(".")[0] for a in node.names]
         elif isinstance(node, ast.ImportFrom) and node.level == 0 and node.module:
@@ -157,9 +167,21 @@ def test_first_party_imports_resolve_under_the_scripts_own_paths(rel: str
     """
     path = REPO / rel
     assert path.is_file(), rel
+    #: ASSERTED, NOT SKIPPED. This was `pytest.skip(...)` for the hypothetical
+    #: module that imports nothing first-party, and C1's skip-predicate audit
+    #: was right to flag it UNRESOLVED: the condition is a function result, so
+    #: no signal matches it and nothing said the pod and the dev box must
+    #: decide it the same way. The deeper problem is that skipping is the wrong
+    #: behaviour -- every entry in these lists is declared BECAUSE a pod
+    #: executes it and it imports first-party code, so a module with no such
+    #: import is a declaration to fix, and silently skipping would hide the
+    #: day someone removed the import this guard exists for.
     wanted = _first_party_imports(path)
-    if not wanted:
-        pytest.skip(f"{rel} imports no first-party module at module level")
+    assert wanted, (
+        f"{rel} is declared as a pod-executed script but imports no "
+        "first-party module at module level. Either its imports moved inside "
+        "functions -- in which case this check no longer covers it and the "
+        "declaration should say so -- or it no longer belongs in the list.")
     paths = _self_inserted_paths(path)
     assert paths, (
         f"{rel} imports {wanted} at module level and puts nothing resolvable "
@@ -235,3 +257,31 @@ def test_the_bare_group_is_what_the_d1_driver_actually_spawns() -> None:
     for symbol in ("TRAINER", "UNCAPPED_EVAL", "SCORER",
                    "CONFIRMATION_SCORER"):
         assert symbol in src, symbol
+
+
+def test_the_check_is_not_vacuous_on_the_module_it_was_written_for() -> None:
+    """The engine probe MUST contribute a first-party import to check.
+
+    It did not, for the whole life of the first version: the scan read module
+    level only, the probe imports `shared.evaluation.uncapped_eval` inside
+    `main()`, so the parametrized case skipped and the stale `sys.path` insert
+    went unchecked by its own regression. A guard that silently covers nothing
+    is worse than no guard, so the premise is asserted rather than assumed.
+    """
+    wanted = _first_party_imports(REPO / "scripts/shared/pod/autoinit_engine_probe.py")
+    assert "shared" in wanted, (
+        "the engine probe no longer imports `shared`; this regression's "
+        "premise changed")
+    assert "aadistill" in wanted
+
+
+@pytest.mark.parametrize("rel", DRIVER_SPAWNED_BARE + D1_BEHAVIOURAL_POD)
+def test_every_declared_pod_script_contributes_something_to_check(rel: str
+                                                                  ) -> None:
+    """Non-vacuity for the whole declared set, not just the one example."""
+    wanted = _first_party_imports(REPO / rel)
+    assert wanted, (
+        f"{rel} is declared as a pod-executed script but imports no "
+        "first-party module at any depth, so the resolution check covers "
+        "nothing for it. Either it no longer belongs in the list, or the "
+        "import it was declared for has gone.")
