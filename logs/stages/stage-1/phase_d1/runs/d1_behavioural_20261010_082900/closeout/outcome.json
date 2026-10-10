@@ -1,0 +1,52 @@
+{
+ "schema": "aadistill.phase_d1.run_failed/v1",
+ "run_id": "d1_behavioural_20261010_082900",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+ "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE. The driver aborted ~2 s after detaching, during the FIRST candidate's arm materialization: no arm was built, no probe trained, nothing was measured, no selection exists.",
+ "classification": "PRE-SCIENCE ENGINEERING ABORT (P12.1): materialize_arms bound `lambda: load_root(None)` where the leaf's own FixedPathSpec was required -- the spec is constructed inside materialize_candidate, so the caller's lambda had nothing to bind and load_root_model read root_repo_id off None. NOT a DIGEST_MISMATCH and not a scientific finding: no pinned step ran.",
+ "repair": "materialize_candidate now closes the loader over its own built spec (root_loader takes the spec; the producer's no-arg loader is wrapped at the one place the spec exists). Regression TestTheRootLoaderSeamCarriesTheSpec drives the real materialize_arms -> materialize_candidate -> producer -> load_root_model wiring and pins the spec's root identity; --check-only cannot reach this seam, which is why a $0 gate did not.",
+ "recorded_utc": "2026-10-10T09:03:05+00:00",
+ "session_commit": "a4eb636a7d86f83f87a5c47b8bff992bc96f30bd",
+ "authorized_base_commit": "069508051464a85bc43972370261e67b5648c438",
+ "authorization_sha256": "dbf4e87de607e75e049de762746b960575c71e09cbda0922900a023d70aaeea1",
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "sidscaxyh1c7o1",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 9.44,
+  "actual_usd": 0.1715,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "one_use_grant_consumed": true,
+  "note": "the issued one-use AUTHORIZATION chain is consumed even though no science ran; a corrected attempt is a new subrun with a fresh chain under the same maintainer grant (P12.1: a formal launcher invocation that aborts before measurement begins is an engineering subrun, not a retried experiment)."
+ },
+ "cost": {
+  "actual_usd": 0.1715,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 9.44,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost, written by the shared SessionRunner. Restated here ONLY because derive_budget.py books a formal session from closeout/outcome.json :: cost.actual_usd."
+ },
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "teardown": {
+  "pod_deleted": true,
+  "provider_confirms_gone": true,
+  "final_desired_status": "TERMINATED",
+  "billing": false,
+  "gate": "EMERGENCY budget teardown over a failed gate (training_complete): a blocking stage failed (RUN_FAILED); the products of the stages that did not run do not exist and must not be demanded. Evidence is collected under the reduced spec and the pod is torn down.. Artifacts for the remaining checks ['trai"
+ },
+ "evidence": {
+  "driver_record": "evidence/d1_behavioural.json",
+  "driver_run_log": "evidence/autoinit_d1_behavioural_run.log",
+  "session_record": "runtime/session.json",
+  "probes_trained": 0,
+  "probes_scored": 0,
+  "trained_unscored_preserved": [],
+  "arms_materialized": 0
+ },
+ "observers": "the launcher exited (tmux session ended, rc 0) and the event monitor on its log is stopped at this closeout; the watch set is empty."
+}

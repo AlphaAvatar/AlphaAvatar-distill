@@ -1,0 +1,26 @@
+{
+  "schema": "aadistill.phase_d1.behavioural_session/v1",
+  "run_id": "d1_behavioural_20261010_082900",
+  "rung": "screening",
+  "started_utc": "2026-10-10T08:58:05+00:00",
+  "status": "FAILED",
+  "probes": [],
+  "cheap_preflight": {
+    "battery": {
+      "role": "d1_screening",
+      "family_content_id": "1e3445f1b6769169287f6d091e50086e3cf9b66398d1138af8f137b31e74cd58",
+      "allocation_rule_id": "f6047343c1c1ad2172f500e979c704c1",
+      "item_ids_sha256": "d7b95cddd0b889c62485b542aab224e998d0bafacb74ee6fc30fa13f93e8ac53",
+      "n_prompts": 950,
+      "n_scorable": 850
+    },
+    "roles_disjoint": true,
+    "pack_sha256": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c"
+  },
+  "failure": {
+    "type": "AttributeError",
+    "message": "'NoneType' object has no attribute 'root_repo_id'",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py\", line 631, in main\n    materialization = M.materialize_arms(\n                      ^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 477, in materialize_arms\n    row = materialize_candidate(\n          ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 278, in materialize_candidate\n    results = materialize_fixed_path(\n              ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/src/aadistill/initialization/planning/fixed_path.py\", line 540, in materialize_fixed_path\n    model = root_loader()\n            ^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 479, in <lambda>\n    root_loader=lambda: load_root(None), execution=execution,\n                        ^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py\", line 432, in load_root\n    return R.load_root_model(_spec, config_overrides=overrides,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/aad/scripts/stages/stage-1/phase_d1/replay_specs.py\", line 891, in load_root_model\n    spec.root_repo_id, dtype=torch.bfloat16, revision=spec.root_revision)\n    ^^^^^^^^^^^^^^^^^\nAttributeError: 'NoneType' object has no attribute 'root_repo_id'\n"
+  },
+  "ended_utc": "2026-10-10T08:58:09+00:00"
+}

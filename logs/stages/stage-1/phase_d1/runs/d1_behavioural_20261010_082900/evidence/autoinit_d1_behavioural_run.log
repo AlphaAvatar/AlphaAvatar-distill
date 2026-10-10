@@ -1,0 +1,29 @@
+[q1] materializing e5e3edb0477b25147de952153da8fc21 along its pinned path
+
+wrote /workspace/aad/artifacts/audit/autoinit_d1_behavioural/d1_behavioural.json  status=FAILED
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py", line 1065, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py", line 631, in main
+    materialization = M.materialize_arms(
+                      ^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py", line 477, in materialize_arms
+    row = materialize_candidate(
+          ^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py", line 278, in materialize_candidate
+    results = materialize_fixed_path(
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/src/aadistill/initialization/planning/fixed_path.py", line 540, in materialize_fixed_path
+    model = root_loader()
+            ^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py", line 479, in <lambda>
+    root_loader=lambda: load_root(None), execution=execution,
+                        ^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/behavioural_materialize.py", line 432, in load_root
+    return R.load_root_model(_spec, config_overrides=overrides,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/replay_specs.py", line 891, in load_root_model
+    spec.root_repo_id, dtype=torch.bfloat16, revision=spec.root_revision)
+    ^^^^^^^^^^^^^^^^^
+AttributeError: 'NoneType' object has no attribute 'root_repo_id'
