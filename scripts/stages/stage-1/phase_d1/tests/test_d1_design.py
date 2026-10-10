@@ -1376,3 +1376,98 @@ class TestTheLiveEvidenceOwnerCannotBeMisreadAsExhausted:
                         f.read_text().splitlines() if line.strip()}
             overlap = ids("d1_screening") & ids("d1_confirmation")
             assert not overlap, f"{stratum}: {len(overlap)} shared prompts"
+
+
+class TestTheShortfallComparesOnlyWorkStILLToFund:
+    """A completed chain session must not be charged to the balance twice.
+
+    THE DEFECT. `provisional_shortfall_usd` compared the WHOLE chain ceiling
+    -- search + screening + confirmation, $61.6975 -- against the live project
+    balance. The search is complete and may never be rerun, so once its
+    $21.4897 was actually booked the comparison charged the balance for work
+    the balance had already paid. Booking D1's four behavioural subruns
+    (+$8.3305) tipped it to +$6.7425 and opened the `funding authorization`
+    blocker, which would have refused the issuance the maintainer had just
+    authorized. A blocker that fires BECAUSE money was spent correctly is
+    measuring the wrong thing.
+    """
+
+    @staticmethod
+    def _writer():
+        import importlib.util
+
+        src = REPO / "scripts/stages/stage-1/phase_d1/write_d1_design.py"
+        spec = importlib.util.spec_from_file_location("_wdd_test", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_the_search_is_complete_and_the_other_two_are_not(self):
+        m = self._writer()
+        state = m._chain_sessions_still_to_fund(m.budget()["chain"])
+        assert state["complete"] == ["search"]
+        assert state["outstanding"] == ["confirmation", "screening"]
+
+    def test_completion_is_read_from_the_committed_product(self):
+        """Not asserted, and not a module constant: `ARM_SOURCES` would be
+        truthy whether or not a search had ever run."""
+        m = self._writer()
+        field = m._search_candidate_field()
+        assert len(field) == 4
+        decision = json.loads(
+            (REPO / m.SEARCH_PRODUCT_REL).read_text())
+        members = decision["the_frozen_behavioural_finalists"]["members"]
+        assert set(field) == {x["state_id"] for x in members}, (
+            "the field must be the committed finalists' own state_ids")
+
+    def test_the_outstanding_ceiling_excludes_the_completed_search(self):
+        m = self._writer()
+        chain = m.budget()["chain"]
+        state = m._chain_sessions_still_to_fund(chain)
+        search = chain["sessions"]["search"]["hard_ceiling_usd"]
+        assert state["outstanding_hard_ceiling_usd"] == pytest.approx(
+            state["whole_chain_hard_ceiling_usd"] - search, abs=5e-4)
+
+    def test_both_figures_are_reported_so_neither_is_hidden(self):
+        m = self._writer()
+        b = m.budget()
+        assert b["provisional_shortfall_usd"] < 0, (
+            "screening plus confirmation fit the remaining balance")
+        assert b["provisional_shortfall_against_whole_chain_usd"] > 0, (
+            "the whole-chain figure is still positive and still reported")
+        assert b["chain_completion"]["complete"] == ["search"]
+
+    def test_the_funding_blocker_is_closed(self):
+        """The consequence: no open blocker, so an authorization may issue."""
+        m = self._writer()
+        doc = json.loads(
+            (REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+             ).read_text())
+        assert doc["open_blockers"] == []
+        assert doc["budget"]["d1_is_in_the_funded_list"] is True
+
+    def test_spending_more_correctly_cannot_reopen_the_blocker(self):
+        """The property that was violated. Booking additional SCREENING spend
+        reduces the balance, and must not make the outstanding comparison
+        worse than the work outstanding -- only an unfunded outstanding
+        session may do that."""
+        m = self._writer()
+        chain = m.budget()["chain"]
+        state = m._chain_sessions_still_to_fund(chain)
+        outstanding = state["outstanding_hard_ceiling_usd"]
+        #: the balance would have to fall below the OUTSTANDING ceiling, not
+        #: below the whole chain's, before funding is genuinely short
+        assert outstanding < state["whole_chain_hard_ceiling_usd"]
+        for balance in (outstanding + 0.01, outstanding + 20.0):
+            assert outstanding - balance < 0, (
+                "a balance above the outstanding ceiling is not a shortfall")
+
+    def test_the_design_hash_is_unmoved_by_any_of_this(self):
+        """THE MAINTAINER'S CONDITION: the frozen design hash must not change.
+        It cannot, because money is excluded from the hashed preimage -- but
+        that is the whole reason the exclusion exists, so it is asserted."""
+        doc = json.loads(
+            (REPO / "logs/stages/stage-1/phase_d1/plans/d1_design.json"
+             ).read_text())
+        assert doc["design_hash"] == (
+            "f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2")

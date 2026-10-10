@@ -118,58 +118,64 @@ execution/evidence defects; all three are repaired on this branch:**
                     evidence durable (P8.4: no remaining consumer).
 ```
 
-**SCREENING WAS AUTHORIZED, LAUNCHED FOUR TIMES, AND IS NOW BLOCKED ON MONEY —
-not on engineering.** The maintainer authorized ONE formal screening session on
-2026-10-10 with a $25.0053 one-use envelope at the accepted $1.09/h L40S rate.
-Four launcher invocations followed; **every one aborted before formal
-measurement**, each finding a distinct real defect, and together they consumed
-**$8.2180**, leaving **$16.7873**. The measured all-in cost of a complete
-10-probe run is **$17.84** (981.7 min), so **the remainder cannot fund one.**
+**SCREENING IS FUNDED AND LAUNCHING.** The maintainer raised D1 behavioural
+screening's **cumulative all-in** envelope from $25.0053 to **$30.0000** on
+2026-10-10 UTC — at most **+$4.9947** of additional cumulative budget, not a
+fresh $30 — after four launcher invocations all aborted before formal
+measurement, each finding a distinct real defect. Every defect is repaired and
+regression-pinned.
 
 ```text
-subrun            usd      min   aborted on
-082900          0.1715     9.4   root_loader seam called without its spec
-090343          1.4743    81.2   incumbent loader never supplied (4 arms OK)
-103442          3.0797   169.5   engine probe could not import its own dep
-132919          3.4925   192.3   evaluator hashed a different runtime than
-                                 the attestation (no AADISTILL_IMAGE_DIGEST
-                                 in the driver's child environment)
-                ------- -------
-                8.2180   452.4   of $25.0053 · $16.7873 left · need $17.84
+subrun            all-in      min   aborted on
+082900            0.1712      9.4   root_loader seam called without its spec
+090343            1.4934     81.2   incumbent loader never supplied (4 arms OK)
+103442            3.1238    169.5   engine probe could not import its own dep
+132919            3.5421    192.3   evaluator hashed a different runtime than
+                                    the attestation (no AADISTILL_IMAGE_DIGEST
+                                    in the driver's child environment)
+                 -------  -------
+                  8.3305    452.4   of $30.0000 · $21.6695 remaining
 ```
 
-**All four defects are repaired and regression-pinned**, and attempt 4
-established that the chain now works: the generation-protocol **attestation
-PASSED** (`a01049908e18…`), all five arms reproduced at their recorded
-identities on fresh hardware for the second consecutive attempt, and the
-trained-but-unscored durability mechanism was proven on a real failure —
-probe 1's checkpoint preserved and identity-verified 24.6 min before the run
-ended, with the teardown gate holding deletion until preservation succeeded.
-It is durable on the dev box (2.3 GiB, `71387681f3a9…`), is a P8.4 state-2
-artifact, and is **newly transportable**: both private HF repos now accept a
-2.22 GiB upload, having previously refused on quota.
+**The accounting was wrong in two ways and both are fixed.** The four closeouts
+were absent from `logs/index.json`, which `derive_budget` uses to discover
+sessions, so their cost was booked nowhere; the index was regenerated through
+its owner `record_run_index.py` and all four are now discovered. And
+`cost.actual_usd` is GPU price × elapsed, **not** all-in, while every cap here
+is denominated all-in — so the subruns were understated by **$0.1125**. RunPod
+exposes no per-pod billing surface, so all-in was measured by **account-balance
+bracketing** (`reconcile_d1_behavioural_spend.py`): consecutive launches bracket
+each charge, and the residual against the $0.10/GB/month disk model is
+disk-shaped in all four cases. `derive_budget` now prefers `money.all_in_usd`;
+no closeout stated both shapes, so no historical total moved.
 
-**A fifth launch is REFUSED IN CODE, and that closes a real safety hole.**
-`per_launch_hard_usd` used to be the full ceiling, making core's
-`require_within_launch_limit` vacuous for this session — four subruns each
-booked `within_authorization: true` at $25.0053 while the envelope drained, and
-a fifth would have carried a $24.63 hard GPU bound against $16.79, authorizing
-~$8 of overspend with no check in the way. The issuer now nets the envelope
-against prior subruns' closeouts (`behavioural_authorization
-.consumed_by_prior_subruns`), carries the **remainder** as the per-launch bound,
-and refuses issuance outright when the remainder cannot fund a complete run.
+**This attempt's bound is derived, not inherited.** `narrow_to_remaining` caps
+it at min(the design's accepted minute bound, what the remainder funds after
+holding back a 45-minute teardown and evidence reserve): **$20.8238 all-in over
+1129 minutes** at the live $1.09/h, against a measured need of 981.7 minutes —
+about 15% headroom. Both cost terms scale with the runtime. The design's
+1355.71-minute cell is untouched and was not reused.
 
-**The decision this needs is the maintainer's**, recorded with the measured cost
-model and the levers examined at
-`logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json`.
-P12.1: this authority "never covers additional budget". Options there: (A) top
-up to ~$29–30 all-in for one complete measured run — recommended, and inside
-the $30 per-session envelope the grant already references; (B) resume probe 1
-and accept a 0.4% margin — not recommended; (C) stop D1 screening.
+**A completed session is no longer charged twice.** `provisional_shortfall_usd`
+compared the *whole* chain ceiling — search + screening + confirmation,
+$61.6975 — against the live balance, so booking the subruns correctly tipped it
+to +$6.7425 and opened a `funding authorization` blocker over a search that is
+complete and may never rerun. It now compares only work still to fund
+($40.2078), with completion **derived** from the artifact each session exists to
+bind. `open_blockers: []`, and **`design_hash` is unchanged at `f9c6688f…`** —
+money is excluded from the hashed preimage by construction.
 
-Owed before the CONFIRMATION launch (blocking nothing about screening): nothing
-— the off-pod stratified prompt-cluster bootstrap verdict is implemented in
-`behavioural_verdict.py` and validated across GO / NO-GO(null) / NO-GO(veto).
+**All ten probes train fresh in ONE session, and that is the protocol, not a
+convenience.** The frozen design states that *"all probes of a rung are trained
+and evaluated in ONE session on one host"*, a clause written so D1 would not
+inherit A3's between-session confound. Carrying either preserved q1 checkpoint
+into a replacement session would give exactly one of five ranked arms a
+cross-session training draw — an unquantifiable asymmetry on precisely the
+comparison the ranking makes, since CUDA training is not bit-reproducible. The
+two preserved checkpoints (`aadfb955…`, `71387681…` — the latter re-verified
+byte-identical) stay **archival evidence**, chosen against before any score
+existed. Analysis:
+`analyses/d1_screening_continuation_identity.json`.
 
 **THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
 into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
@@ -3751,12 +3757,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$68.7925` of `$156.6523` |
+| formal sessions | `$60.4620` of `$156.6523` |
 | GPU engineering | `$6.6510` of `$25.0741` |
-| package | `$75.4435` of `$181.7264` |
-| project cap | `$426.7145` spent of `$490.0000`, leaving `$63.2855` |
+| package | `$67.1130` of `$181.7264` |
+| project cap | `$435.0450` spent of `$490.0000`, leaving `$54.9550` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$68.7925`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 2.** 3 ceilings cost `$90.0000` and the formal allowance has `$60.4620`. Dividing the PACKAGE balance instead gives 2, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/maintenance/consolidation/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

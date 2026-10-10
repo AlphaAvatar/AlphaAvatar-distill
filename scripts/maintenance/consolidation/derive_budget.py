@@ -123,11 +123,24 @@ def formal_sessions(root: Path, funded: Sequence[str],
                 doc = json.loads(cand.read_text())
             except json.JSONDecodeError:
                 continue
-            #: Two shapes exist in the record set: `budget.this_attempt` and
-            #: `cost.actual_usd`. Both are read rather than one being normalised
-            #: away, because rewriting a closed session's evidence to suit a
-            #: reader is not a repair.
+            #: Three shapes exist in the record set. All are read rather than
+            #: one being normalised away, because rewriting a closed session's
+            #: evidence to suit a reader is not a repair.
+            #:
+            #: `money.all_in_usd` IS PREFERRED WHEN PRESENT, and the order
+            #: matters: `cost.actual_usd` is the GPU price times elapsed time,
+            #: which is what the runner can read from the provider, while every
+            #: cap in this project is denominated ALL-IN -- D1's ceiling
+            #: decomposes into `gpu_hard_usd` plus `disk_hard_usd` because
+            #: RunPod bills container disk separately. Booking the GPU-only
+            #: figure against an all-in ceiling understated D1's four
+            #: behavioural subruns by $0.1125 and made the remaining allowance
+            #: look larger than it was. No closeout in the set states both
+            #: shapes, so this ordering changes no historical total; it decides
+            #: which figure wins for documents that state both from now on.
             cost = (doc.get("budget") or {}).get("this_attempt")
+            if cost is None:
+                cost = (doc.get("money") or {}).get("all_in_usd")
             if cost is None:
                 cost = (doc.get("cost") or {}).get("actual_usd")
             if cost is not None:
@@ -206,16 +219,19 @@ def project_sessions(root: Path) -> list[dict]:
             #: carries GPU alone, because the runner reads GPU alone from the
             #: provider. Container disk is billed separately at $0.10/GB/month
             #: and a GPU-only figure silently understates a 120 GB session.
-            #: Ordered last all the same: a document that states both must be
-            #: read the way its own experiment's ledger reads it, and only the
-            #: behavioural closeout states `money` at all.
+            #: ORDERED BEFORE `cost.actual_usd`, which it previously was NOT.
+            #: Preferring a GPU-only figure over an all-in one, for a cap that
+            #: is denominated all-in, is the defect the 2026-10-11 maintainer
+            #: decision named: it understated D1's four behavioural subruns by
+            #: $0.1125. No closeout states both shapes, so no historical total
+            #: moves; this decides the winner for documents that state both.
             for shape, cost in (
                     ("budget.this_attempt",
                      (doc.get("budget") or {}).get("this_attempt")),
-                    ("cost.actual_usd",
-                     (doc.get("cost") or {}).get("actual_usd")),
                     ("money.all_in_usd",
                      (doc.get("money") or {}).get("all_in_usd")),
+                    ("cost.actual_usd",
+                     (doc.get("cost") or {}).get("actual_usd")),
                     #: AFFIRMATIVELY $0, which is not the same as unknown. A
                     #: closeout that states no provider resource was ever
                     #: created has said what it cost: nothing was billed

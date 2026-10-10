@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 77,
+  "runs_unrecorded": 81,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -828,8 +828,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 8,
-    "total": 8
+    "unrecorded": 12,
+    "total": 12
    },
    "phase_d1_replay": {
     "recorded": 0,
@@ -3282,6 +3282,38 @@
    "n_files": 2,
    "digest": "4958eba6ec7035f97ee22093324671e516acc2b62156482d04a4ceba67d95977",
    "why": "no run manifest; its closeout states: PREPARED_NEVER_AUTHORIZED_RETIRED_AT_ZERO"
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261010_082900",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_082900",
+   "n_files": 8,
+   "digest": "3f84c2b9c9df07d2330b972b2326ba5c5852bfdf6c0d19cce6fd14d7509fccca",
+   "why": "no run manifest; its closeout states: PRE-SCIENCE ENGINEERING ABORT (P12.1): materialize_arms bound `lambda: load_root(None)` where the leaf's own FixedPathSpec was required -- the spec is constructed inside materialize_candidate, so the caller's lambda had nothing to bind and load_root_model read root_repo_id off None. NOT a DIGEST_MISMATCH and not a scientific finding: no pinned step ran."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261010_090343",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_090343",
+   "n_files": 8,
+   "digest": "99b16498542d4d7949526fe44c49aaf4b506b8040f2e68ccf56ad4e7b3d3f655",
+   "why": "no run manifest; its closeout states: PRE-SCIENCE ENGINEERING ABORT (P12.1): materialize_incumbent omitted `root_loader`, a REQUIRED keyword-only argument of materialize_fixed_path. NOT a DIGEST_MISMATCH: no pinned step of B's path ran."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261010_103442",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442",
+   "n_files": 9,
+   "digest": "bcd99332471fc825f72e99e284bb22735fd75593a03d3c1548406ba47ec47488",
+   "why": "no run manifest; its closeout states: PRE-SCIENCE ENGINEERING ABORT (P12.1): the shared engine probe could not import its own dependency, so no generation protocol could be attested and the driver refused to score -- which is the admission gate behaving exactly as designed. NOT a DIGEST_MISMATCH and not a scientific finding."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261010_132919",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919",
+   "n_files": 10,
+   "digest": "c1cde5f21455f021524f62be417c403767b3610fd8dc49bad7d9493f4db886ab",
+   "why": "no run manifest; its closeout states: ORDINARY ENGINEERING FAILURE, before formal measurement. The refusal is the fail-closed gate working: it detected that the generations carried a different runtime identity than the attestation, and stopped before a scorer could produce a number under an identity its evidence did not support. Nothing scientific was measured, so there is nothing to have retried or pooled. P12.1's pre-science clause applies: preserve and close this subrun, diagnose, repair, build a fresh chain under a new attempt identity."
   },
   {
    "experiment_id": "phase_d1",

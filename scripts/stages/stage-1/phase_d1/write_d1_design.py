@@ -1536,6 +1536,112 @@ def _evidence_authorizes_note() -> str:
             "listed, derived, in `open_blockers`.")
 
 
+def _chain_sessions_still_to_fund(chain: dict[str, Any]) -> dict[str, Any]:
+    """Which chain sessions a grant would still have to pay for.
+
+    THE DEFECT THIS CLOSES. `provisional_shortfall_usd` compared the WHOLE
+    chain ceiling -- search + screening + confirmation, $61.6975 -- against the
+    live project balance. The search is COMPLETE and must never be rerun, so
+    once its $21.4897 was actually booked the comparison charged the balance
+    for work the balance had already paid for. Booking D1's four behavioural
+    subruns dropped the balance to $54.955 and the figure went to $6.7425,
+    opening the `funding authorization` blocker over a session that will never
+    run again. A blocker that fires because money was SPENT CORRECTLY is
+    measuring the wrong thing.
+
+    COMPLETION IS DERIVED, from the design's own stated dependency order:
+    *"the search commits a candidate set and stops; the screening rung cannot
+    be bound until that set exists, and the confirmation rung cannot be bound
+    until screening names the one candidate that advances."* So each session is
+    complete exactly when the artifact it exists to produce is bound:
+
+        search        -> the candidate field is bound
+        screening     -> a committed selection record names an advancing arm
+        confirmation  -> a committed verdict exists
+
+    Nothing is hardcoded as done, and a chain that grows another rung gets the
+    same treatment by naming its product.
+    """
+    produced = {
+        "search": bool(_search_candidate_field()),
+        "screening": bool(_screening_selection()),
+        "confirmation": bool(_confirmation_verdict()),
+    }
+    sessions = chain.get("sessions") or {}
+    outstanding = {name: cell for name, cell in sessions.items()
+                   if not produced.get(name, False)}
+    return {
+        "complete": sorted(n for n, done in produced.items() if done),
+        "outstanding": sorted(outstanding),
+        "outstanding_hard_ceiling_usd": round(
+            sum(float(c["hard_ceiling_usd"]) for c in outstanding.values()), 4),
+        "whole_chain_hard_ceiling_usd": float(chain["hard_ceiling_usd"]),
+        "_completion_is_derived_from": (
+            "the product each session exists to bind, per the design's own "
+            "dependency order -- never a hardcoded status"),
+    }
+
+
+#: The artifact each chain session exists to BIND. A session is complete when
+#: its product is committed -- read from the product, never asserted.
+SEARCH_PRODUCT_REL = ("logs/stages/stage-1/phase_d1/decisions/"
+                      "post_search_finalist_retention.json")
+
+
+def _search_candidate_field() -> tuple[str, ...]:
+    """The committed Top-K the search produced, or () if it has not.
+
+    Read from the maintainer's retention decision -- the artifact the search
+    exists to bind -- rather than from a module constant. `ARM_SOURCES` would
+    be truthy whether or not a search had ever run, which is an identity
+    masquerading as a check.
+    """
+    path = REPO / SEARCH_PRODUCT_REL
+    if not path.is_file():
+        return ()
+    try:
+        doc = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return ()
+    block = doc.get("the_frozen_behavioural_finalists") or {}
+    members = block.get("members") or []
+    #: Keyed by `state_id`, which is each finalist's own identity in the
+    #: completed search's ranking -- not a positional label.
+    field = tuple(str(m["state_id"]) for m in members if m.get("state_id"))
+    if len(field) != int(block.get("k") or 0):
+        raise SystemExit(
+            f"{SEARCH_PRODUCT_REL} declares k={block.get('k')} and names "
+            f"{len(field)} identified members. The search's committed field "
+            "cannot be read, so whether the search is complete is unknown.")
+    return field
+
+
+def _screening_selection() -> str | None:
+    """The arm a committed screening selection advanced, or None."""
+    for path in sorted(REPO.glob(
+            "logs/stages/stage-1/phase_d1/runs/d1_behavioural_*/"
+            "closeout/selection.json")):
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        #: A selection that advanced NOTHING is still a completed screening --
+        #: "no candidate advances" is a valid terminal outcome of the rung.
+        if doc.get("mechanical_selection_complete") or \
+                doc.get("advancing_candidate") is not None:
+            return str(doc.get("advancing_candidate") or "NONE")
+    return None
+
+
+def _confirmation_verdict() -> str | None:
+    """A committed confirmation verdict, or None."""
+    for path in sorted(REPO.glob(
+            "logs/stages/stage-1/phase_d1/**/confirmation_verdict.json")):
+        if path.is_file():
+            return path.as_posix()
+    return None
+
+
 def _shortfall_note(chain: dict[str, Any], project_remaining: float) -> str:
     """The gap between the chain ceiling and the live balance, and WHAT it is.
 
@@ -1870,7 +1976,18 @@ def budget() -> dict[str, Any]:
         #: balance. NOT the finalized amount by which the project cap must
         #: increase -- that figure does not exist until the GPU qualification
         #: reprices the chain.
+        #: AGAINST WHAT IS STILL TO FUND, not the whole chain. The search is
+        #: complete and may never be rerun, so charging the balance for its
+        #: $21.4897 again makes the figure go UP when money is spent correctly
+        #: -- which is what opened the `funding authorization` blocker after
+        #: D1's four behavioural subruns were booked. The whole-chain ceiling
+        #: is still reported beside it; it is a real quantity, just not the one
+        #: a funding decision compares.
         "provisional_shortfall_usd": round(
+            _chain_sessions_still_to_fund(chain)["outstanding_hard_ceiling_usd"]
+            - project_remaining, 4),
+        "chain_completion": _chain_sessions_still_to_fund(chain),
+        "provisional_shortfall_against_whole_chain_usd": round(
             chain["hard_ceiling_usd"] - project_remaining, 4),
         "funds_formal_sessions_of": list(funded),
         "d1_is_in_the_funded_list": "phase_d1" in funded,

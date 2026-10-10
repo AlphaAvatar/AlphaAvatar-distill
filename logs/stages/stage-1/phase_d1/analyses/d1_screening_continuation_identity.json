@@ -1,0 +1,51 @@
+{
+ "schema": "aadistill.phase_d1.finding/v1",
+ "title": "The preserved probe may NOT be carried into a replacement screening session, and no protocol decision is needed to proceed",
+ "status": "RESOLVED 2026-10-11 against the frozen design, before any score exists",
+ "record_role": "standing_fact",
+ "_contract": "The compatibility analysis the 2026-10-11 maintainer decision required before reusing a preserved training artifact. It changes no frozen value, requests no exception, and authorizes nothing. It records why the frozen design answers the question by itself.",
+
+ "the_question": "Attempts 3 and 4 both produced valid training for the frozen unit d1_screening_q1_s614923639 and zero valid scores. Their checkpoints differ in bytes (aadfb955... and 71387681...). The maintainer's condition was to PREFER the most recent valid preserved artifact (71387681...) as an evaluation-only continuation under P8.4, AFTER establishing that such a continuation is compatible with the frozen paired-screening protocol.",
+
+ "the_answer": "IT IS NOT COMPATIBLE. The frozen design forbids it directly, in a clause written for exactly this hazard.",
+
+ "the_governing_clause": {
+  "where": "logs/stages/stage-1/phase_d1/plans/d1_design.json :: behavioural_design.protocol_uniformity",
+  "how": "all probes of a rung are trained and evaluated in ONE session on one host, under one image digest, one engine version and one scoring contract",
+  "requirement": "every probe in one comparison field is GENERATED and EVALUATED under one protocol identity",
+  "_not_a_between_session_comparison": "A3's remaining unquantified alternative explanation is that its treatment and controls were measured in different sessions. D1 does not inherit that: both arms of each rung are measured together.",
+  "_reading": "The clause says TRAINED and evaluated, not merely evaluated. Carrying one probe's training across a session boundary is the one thing it names as the defect D1 was designed not to inherit."
+ },
+
+ "why_it_is_a_real_confound_and_not_a_formality": [
+  "The screening field RANKS five arms against each other at each of two seeds. Importing q1's s614923639 training from a different session, on a different physical host, would give exactly ONE of the five ranked arms a cross-session training draw while q2, q3, q4 and B got same-session draws.",
+  "That asymmetry falls precisely on the comparison the ranking makes. Within-session training nondeterminism is shared by every arm and is the noise the paired design already absorbs; a nuisance applied to one arm only is a confound, not noise.",
+  "The size is UNKNOWN and would stay unknown. Training is not bit-reproducible on CUDA (see d1_probe_training_is_not_bit_reproducible.json), so the cross-session component cannot be separated from the arm effect after the fact. An unquantifiable alternative explanation attached to one arm is what A3 was left with.",
+  "The maintainer's own condition names the hazard: 'An operational session boundary must not silently become a treatment difference.' Here it would not be silent -- it would be documented -- but it would still be a treatment difference."
+ ],
+
+ "why_NO_maintainer_protocol_decision_is_required": {
+  "the_third_option": "Train all ten probes in one session, which is what the frozen design SAYS. That requires no exception, no policy change and no protocol decision -- it is the protocol.",
+  "it_is_now_affordable": "The continuation was only ever an optimization for an envelope that no longer binds. After the 2026-10-11 amendment the reconciled remainder is $21.6695 against a MEASURED all-in need of ~$18.10 for a complete fresh ten-probe run, with the attempt's narrowed hard bound at 1129 minutes against a measured 981.7. The clean path fits with roughly 15% headroom.",
+  "so_the_stop_condition_is_not_reached": "The maintainer asked for a stop only if the prohibition 'actually forbids this continuation' AND a protocol decision were therefore needed. It does forbid it, but the remedy is to execute the frozen protocol rather than to amend it, so there is nothing to decide.",
+  "_and_no_policy_is_rewritten": "This is settled BEFORE any score exists, from the design text alone. Nothing here depends on an outcome, and the cross-session prohibition is left exactly as committed."
+ },
+
+ "this_is_not_retraining_for_convenience": {
+  "_the_maintainers_constraint": "'Do not retrain a valid, restorable scientific unit merely for convenience.'",
+  "the_reason_is_scientific": "the retrain buys protocol uniformity across the five ranked arms, which the frozen design requires in terms. It is not chosen to avoid work -- the opposite: it costs 60.9 GPU-minutes ($1.12 all-in) that the continuation would have saved, out of a $3.57 margin.",
+  "the_continuation_would_also_have_cost_real_work": "the maintainer required proof of COMPLETED LFS upload and download rather than an available batch action. That is a 2.22 GiB upload at the measured 0.72 MB/s dev-box uplink -- about 53 minutes of wall clock -- plus a verified download, to save $1.12 and acquire a confound."
+ },
+
+ "what_happens_to_the_two_preserved_checkpoints": {
+  "disposition": "ARCHIVAL EVIDENCE. Neither is an input to any measurement.",
+  "attempt_103442": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+  "attempt_132919": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6, verified byte-identical at 2026-10-11 by recomputing the shard's sha256",
+  "not_pooled_and_not_chosen_by_outcome": "neither was selected using behavioural scores, because neither has any: both sessions produced zero valid scores. The choice recorded here is made on the design text, before any score exists.",
+  "they_remain_proof": "that the trained-but-unscored durability mechanism works on a real failure, which is why they were preserved and why that is still worth having."
+ },
+
+ "when_the_resume_mechanism_IS_the_right_tool": "Whole-field carry-over, not partial. A session that trains all ten probes and then fails at scoring or aggregation can resume and score those ten: they share one training session and one host, so protocol_uniformity holds. The mechanism is not being retired -- its compatible use is the whole field, and the incompatible use is importing a subset into a differently-trained field. The driver's identity-checked resume and its regressions stand unchanged.",
+
+ "authorizes": "nothing"
+}

@@ -1254,7 +1254,11 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--host-draws", type=int, default=3)
     ap.add_argument("--setup-timeout-s", type=float, default=5400.0)
     ap.add_argument("--poll-seconds", type=float, default=120.0)
-    #: MUST OUTLAST THE HARD THRESHOLD. Screening's own bound is 1355.71 min.
+    #: MUST OUTLAST THE HARD THRESHOLD. The design's screening cell
+    #: bounds at 1355.71 min and an attempt's authorized bound is at
+    #: most that -- narrowed to the remaining envelope by
+    #: behavioural_authorization.narrow_to_remaining -- so this
+    #: outlasts any bound the authorization can carry.
     ap.add_argument("--poll-limit-min", type=float, default=1600.0)
     ap.add_argument("--settle-seconds", type=float, default=20.0)
     ap.add_argument("--uv-max-s", type=int, default=1500)

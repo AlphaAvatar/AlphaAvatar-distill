@@ -74,7 +74,18 @@
   "authorized_usd": 25.0053,
   "within_authorization": true,
   "one_use_grant_consumed": true,
-  "note": "the issued one-use chain is consumed; the corrected attempt is a new subrun with a fresh chain under the same maintainer grant."
+  "note": "the issued one-use chain is consumed; the corrected attempt is a new subrun with a fresh chain under the same maintainer grant.",
+  "all_in_usd": 1.4934,
+  "all_in_source": "provider account-balance bracketing",
+  "all_in_derivation": {
+   "balance_at_this_launch_usd": 186.4307067011,
+   "balance_at_next_read_usd": 184.9373067011,
+   "gpu_only_usd": 1.4743,
+   "residual_vs_gpu_usd": 0.0191,
+   "modelled_container_disk_usd": 0.0222,
+   "_why": "cost.actual_usd is GPU price x elapsed and is NOT all-in; the envelope is denominated all-in. RunPod exposes no per-pod billing surface, so the account balance is the provider-side measurement. The residual is disk-shaped and is shown against the model rather than replaced by it.",
+   "_owner": "scripts/stages/stage-1/phase_d1/reconcile_d1_behavioural_spend.py"
+  }
  },
  "cost": {
   "actual_usd": 1.4743,

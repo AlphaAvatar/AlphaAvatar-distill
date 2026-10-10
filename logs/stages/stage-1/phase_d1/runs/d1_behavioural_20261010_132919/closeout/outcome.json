@@ -4,11 +4,8 @@
  "stage_id": "stage-1",
  "experiment_id": "phase_d1",
  "rung": "screening",
-
  "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE, after materializing all five arms at their recorded identities, PASSING the generation-protocol attestation, and training the first probe. The per-probe generation admission then refused that probe: its rollouts were not produced under the attested protocol. No probe was scored; no ranking and no selection exist.",
-
  "classification": "ORDINARY ENGINEERING FAILURE, before formal measurement. The refusal is the fail-closed gate working: it detected that the generations carried a different runtime identity than the attestation, and stopped before a scorer could produce a number under an identity its evidence did not support. Nothing scientific was measured, so there is nothing to have retried or pooled. P12.1's pre-science clause applies: preserve and close this subrun, diagnose, repair, build a fresh chain under a new attempt identity.",
-
  "root_cause": {
   "what_differed": "the generation protocol's `runtime_digest`",
   "attested": "f0db1b430df37c766e9117ac24c0cbd1a4c89420, observed by the engine probe, which received the pod image digest on its command line (--image-digest) and recorded runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.126.09",
@@ -16,7 +13,6 @@
   "why_it_was_invisible_until_now": "the driver sets its own sys.path in process, which puts nothing in os.environ. Every subprocess it spawns inherits an environment the launcher populated for the DRIVER, not for the driver's children. The launcher does pass the digest on the driver's command line, and the driver did forward it to the engine probe as a flag -- so the attesting side had it and the evaluating side could not.",
   "_this_is_the_same_shape_as_attempt_3": "attempt 3 died because a pod-spawned subprocess could not resolve its own imports, for the same structural reason: a driver's in-process setup does not reach its children. That failure produced tests/integration/test_pod_script_imports_resolve.py, whose docstring states the contract explicitly -- 'a driver sets its own sys.path in process and that does NOT put anything in os.environ, so every subprocess it spawns inherits an environment with no PYTHONPATH'. The environment half of that same sentence was left unguarded."
  },
-
  "repair": {
   "fix": "scripts/stages/stage-1/phase_d1/autoinit_d1_behavioural_driver.py :: child_env(image_digest), wired into all four subprocess.run call sites (engine probe, trainer, evaluator, scorer). It copies os.environ and adds AADISTILL_IMAGE_DIGEST when the launcher supplied one, so every child observes the runtime the attestation describes.",
   "audited": "every environment variable the driver's five spawned processes read. AADISTILL_IMAGE_DIGEST is the only one; both scorers read none. The fix is therefore complete for this class rather than a patch of the one observed site.",
@@ -26,14 +22,12 @@
   ],
   "second_defect_this_exposed": "the admission record kept only str(exc) -- 'NOT COMPARABLE: generation protocol differs' -- while matched_against() had named the field and both values all along in generation_comparison.mismatched_fields. Diagnosing a $3.49 refusal should not require reading the engine probe's output and reasoning about which side could have observed what. The record now carries the whole comparison on both paths."
  },
-
  "what_this_run_established": [
   "the generation-protocol ATTESTATION passes on this image and this engine: a01049908e188516432a8df29bcc0a80c4f961fde1649b79b40243bd8f457b10, secured off-pod. Attempt 3 could not reach it at all.",
   "all five arms -- q1, q2, q3, q4 and standing incumbent B -- materialized and verified at their recorded identities on fresh hardware, for the second consecutive attempt. Arm reproduction is no longer a source of doubt.",
   "the trained-but-unscored durability mechanism works on a REAL failure: probe 1's checkpoint was preserved and identity-verified at 165.4 min, 24.6 minutes BEFORE the failure that ended the run, and the teardown gate recorded allowed=True failed=training_complete -- it permitted deletion only after preservation succeeded.",
-  "a MEASURED cost model for the rung, replacing the pre-run estimate. See logs/stages/stage-1/phase_d1/analyses/d1_screening_measured_cost_model.json."
+  "a MEASURED cost model for the rung, replacing the pre-run estimate: 981.7 min all-in against an estimated 1087. Recorded in logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json :: the_measured_cost_model."
  ],
-
  "the_preserved_probe": {
   "probe_id": "d1_screening_q1_s614923639",
   "trained_sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
@@ -41,15 +35,13 @@
   "train_seconds": 3653.0,
   "state": "P8.4 state 4 -> state 2. Training was valid; only the generation runtime identity was wrong, and that is downstream of training. The checkpoint is trained, durable and not validly scored.",
   "durable_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639 (2.3 GiB, on the dev box, with preserved_identity.json and run_completion.json)",
-  "reuse_is_not_authorized_by_preservation": "P8.2.1. Whether a replacement session resumes it at scoring is the frozen protocol's rule, not a consequence of the file existing. It is ALSO not currently transportable -- see the cost model's transport note.",
+  "reuse_is_not_authorized_by_preservation": "P8.2.1. Whether a replacement session resumes it at scoring is the frozen protocol's rule, not a consequence of the file existing. Transport IS available (both private HF repos accept 2.22 GiB as of 2026-10-11); whether the continuation is COMPATIBLE with the frozen paired-screening protocol is a separate question, analysed in logs/stages/stage-1/phase_d1/analyses/d1_screening_continuation_identity.json.",
   "_second_artifact_under_one_label": "this is now the SECOND preserved checkpoint for (q1, seed 614923639), after attempt 103442's aadfb955. The standing fact d1_probe_training_is_not_bit_reproducible.json governs: they are two artifacts for one label and must never be pooled."
  },
-
  "recorded_utc": "2026-10-11T00:00:00+00:00",
  "session_commit": "0a698242ac30",
  "authorized_base_commit": "0a698242ac30",
  "authorization_sha256": "see governance/authorization.json :: authorization_sha256",
-
  "money": {
   "provider_resources_created": 1,
   "pod_id": "7z4spas7bfpzi6",
@@ -60,9 +52,19 @@
   "authorized_usd": 25.0053,
   "within_authorization": true,
   "one_use_grant_consumed": true,
-  "_cumulative": "this subrun brings the session's consumed total to $8.2180 of the $25.0053 one-use envelope. The remaining $16.7873 is BELOW the measured cost of the 10-probe schedule; see the cost model and the boundary record."
+  "_cumulative": "SUPERSEDED BY RECONCILIATION. This subrun's measured all-in charge is $3.5421 (see all_in_derivation), not the $3.4925 GPU-only figure. The four subruns' measured all-in total is $8.3305, against the envelope RAISED to $30.0000 by the maintainer decision of 2026-10-11 (+$4.9947 cumulative). Owner: analyses/d1_behavioural_spend_reconciliation.json.",
+  "all_in_usd": 3.5421,
+  "all_in_source": "provider account-balance bracketing",
+  "all_in_derivation": {
+   "balance_at_this_launch_usd": 181.8135052152,
+   "balance_at_next_read_usd": 178.2714052152,
+   "gpu_only_usd": 3.4925,
+   "residual_vs_gpu_usd": 0.0496,
+   "modelled_container_disk_usd": 0.0527,
+   "_why": "cost.actual_usd is GPU price x elapsed and is NOT all-in; the envelope is denominated all-in. RunPod exposes no per-pod billing surface, so the account balance is the provider-side measurement. The residual is disk-shaped and is shown against the model rather than replaced by it.",
+   "_owner": "scripts/stages/stage-1/phase_d1/reconcile_d1_behavioural_spend.py"
+  }
  },
-
  "cost": {
   "actual_usd": 3.4925,
   "price_per_hour": 1.09,
@@ -71,7 +73,6 @@
   "within_authorization": true,
   "_owner": "runtime/session.json :: cost; restated because derive_budget books from closeout/outcome.json"
  },
-
  "teardown": {
   "pod_deleted": true,
   "provider_confirms_gone": true,
@@ -80,7 +81,6 @@
   "reverified_at_closeout": "2026-10-11, live provider query: 0 pods, current_spend_per_hr 0.0, pod 7z4spas7bfpzi6 exists=False desired_status=TERMINATED billing=False",
   "gate": "allowed only AFTER the trained-unscored probe was preserved (allowed=True failed=training_complete)"
  },
-
  "evidence": {
   "secured_off_pod": [
    "evidence/d1_behavioural.json -- the session record, status FAILED, with the failure traceback",
@@ -90,12 +90,13 @@
   ],
   "not_collected": "the raw per-set generation summaries. The failed-path artifact spec marks them not-required and the poll hook secures generations only for SCORED probes, so a probe refused at admission leaves them on the pod. P18's save-every-generation requirement attaches to EVALUATED samples in a measurement, and this probe produced no measurement -- so this is not a P18 breach. It did cost diagnosis time, which is why the admission record now carries both protocols whole: the record, not the generations, is the right owner of that evidence."
  },
-
  "observers": {
-  "monitors_stopped_in_this_terminal_path": ["bw3c16x21", "b7fwtj0qe"],
+  "monitors_stopped_in_this_terminal_path": [
+   "bw3c16x21",
+   "b7fwtj0qe"
+  ],
   "watch_set_now_empty": true,
   "_p12_3": "closed here rather than noticed later"
  },
-
  "next_action": "DO NOT RELAUNCH. The engineering defect is repaired, but the remaining $16.7873 of the one-use envelope is below the measured cost of the frozen 10-probe schedule. This is a cumulative-budget boundary and therefore a maintainer decision, not an engineering repair. See logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json."
 }

@@ -580,7 +580,7 @@
   "total_probes": 16
  },
  "budget": {
-  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $-1.588 is the gap between the chain hard ceiling of $61.6975 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
+  "BLOCKER": "D1 is NOT FUNDABLE, and the DEFINITE reason is authorization scope rather than arithmetic: `phase_d1` is not in the C1 execution package's `funds_formal_sessions_of` list, so NO existing allowance covers it at any price. A maintainer grant is required for the phase. That alone blocks D1 and does not depend on any cost estimate.\n\nTHE SHORTFALL'S DIRECTION IS NOW KNOWN AND ITS SIZE IS STILL PROVISIONAL. `provisional_shortfall_usd` = $6.7425 is the gap between the chain hard ceiling of $61.6975 and the live balance. The dominant cell is MEASURED -- depth.causal_kl_greedy_v1 at 22.9759 min from one real batched invocation -- and the three unmeasured cells keep an unbatched basis that OVERSTATES, so the ceiling is a bound and a grant smaller than this gap cannot fund the chain. It remains PROVISIONAL because those three cells are not measured, so it is NOT the finalized amount by which the project cap must increase: this document does not claim what the cap should become, which is a maintainer decision.",
   "_SECOND_BLOCKER_THE_PER_SESSION_CEILING": "SATISFIED ON MEASUREMENT: the corrected production Top-K search session prices at $21.4897 against the $30.00 envelope, so this is no longer a blocker. This is a SEPARATE constraint from the project-level cap: `per_attempt_hard_ceiling_usd` binds each session independently, and the C1 authorization shows the grant issuer refusing a session price that disagreed with its pricing file -- so a D1 grant that moved only the cumulative cap would still not authorize the search session.",
   "_per_session_envelope_compatibility": "DERIVED from the measured production Top-K session price against $30.00. RESOLVED_FITS means the measured session ceiling is inside the envelope; RESOLVED_NEEDS_RAISE means it is outside and the envelope would have to move; UNRESOLVED means no production Top-K timing exists yet, which blocks authorization because authorization needs a figure it can bind -- not because incompatibility is proven.\n\nTHE PROVISIONAL FULL-VOCAB FIGURES BELOW DO NOT DECIDE THIS. They are historical planning evidence from UNBATCHED telemetry for a protocol D1 will not run. `open_blockers` used to require both this field AND that the provisional basis fit, so a measurement proving D1 fits would have stayed blocked by an estimate it supersedes.",
   "_price_status": "MIXED, and the dominant cell is MEASURED. The Top-K protocol owes nothing: its production cost is settled evidence.\n\nMEASURED, under the production protocol: depth.causal_kl_greedy_v1. One real `impl.execute` invocation of 1194.2624 s over 260 candidate subsets -- the max over both DEPTH calibration profiles -- rebuilt end to end into 22.9759 min at the root with the committed non-operator MAX. This is the same quantity `BeamSearch._expand_one` records as `operator_seconds`, so it is comparable with the frozen table it replaces.\n\nA PLANNING BASIS, deliberately left alone: the three non-KL structural cells keep their committed UNBATCHED whole-expansion figures. They reduce activation statistics rather than KL, so the distribution support cannot move them, and an unbatched basis OVERSTATES -- which is the safe direction for a ceiling.\n\nMEASURED, by the full-vocabulary GPU qualification: the batched direction, which this field once called UNKNOWN. Batching costs x1.97 on the dominant DEPTH operator at all positions and x1.08 at the target-aware policy, so the policy's smaller reduction very nearly cancels the penalty. Against the frozen per-cell table it does NOT bound the all-positions bsz=3 case (39.117 over a 34.354 maximum) and DOES bound the protocol D1 runs (21.420 under a 29.248 mean).\n\nAND `securePrice` is re-queried live at authorization, so every dollar figure here is a derived consequence of an hour-old quote.\n\nSO: the search session's figure is a BOUND rather than a plan. The chain total remains provisional in SIZE because three cells are unmeasured, and it is not a finalized authorization price -- what the project cap should become is a maintainer decision this document does not take.",
@@ -652,6 +652,18 @@
    },
    "total_probes": 16
   },
+  "chain_completion": {
+   "_completion_is_derived_from": "the product each session exists to bind, per the design's own dependency order -- never a hardcoded status",
+   "complete": [
+    "search"
+   ],
+   "outstanding": [
+    "confirmation",
+    "screening"
+   ],
+   "outstanding_hard_ceiling_usd": 40.2078,
+   "whole_chain_hard_ceiling_usd": 61.6975
+  },
   "d1_is_in_the_funded_list": true,
   "d_series_extrapolation": {
    "_caveat": "an extrapolation, not a price. D2 adds a reference forward per operator-local comparison and D3 adds a student-confidence component; neither is measured, so neither is priced here. The figure is the floor of the D-series, not its cost.",
@@ -670,11 +682,11 @@
    "_cap_cross_check": 490.0,
    "_derived_by": "scripts/consolidate/derive_budget.py, CALLED by this writer rather than copied from it. A hand-copied balance expires the next time anything spends, and this document is regenerated often enough that it would expire quietly.",
    "engineering_remaining_usd": 6.651,
-   "formal_remaining_usd": 68.7925,
+   "formal_remaining_usd": 60.462,
    "full_ceiling_sessions_fundable": 2,
-   "package_remaining_usd": 75.4435,
+   "package_remaining_usd": 67.113,
    "project_cap_usd": 490.0,
-   "project_remaining_usd": 63.2855
+   "project_remaining_usd": 54.955
   },
   "price_basis": {
    "_a_launch_requotes": "an hour-old price is not a price. securePrice is re-queried live immediately before authorization and every ceiling re-derived from it.",
@@ -684,7 +696,8 @@
   "price_status": "MEASURED PRODUCTION TOP-K BASIS for the search session: $21.4897 hard ceiling from an END-TO-END DEPTH cell whose operator term is ONE MEASURED `impl.execute` invocation (19.9044 min, the max of both DEPTH profiles) plus the committed non-operator MAX. The chain's other sessions keep their full-vocab basis.",
   "provisional_basis_fits_per_session_envelope": true,
   "provisional_per_session_excess_usd": -4.9947,
-  "provisional_shortfall_usd": -1.588,
+  "provisional_shortfall_against_whole_chain_usd": 6.7425,
+  "provisional_shortfall_usd": -14.7472,
   "sessions": 3,
   "topk_production_basis": {
    "_other_three_cells_unchanged": "ffn.activation_importance_v0, width.global_pca_v0 and attention.activation_importance_v1 reduce activation statistics, not KL, so the distribution support cannot move them.",

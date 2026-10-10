@@ -197,6 +197,73 @@ def reprice_rung_at(rate_usd_per_hour: float, rung: str,
     }
 
 
+#: Minutes of all-in spend held back from the attempt's runtime bound so that
+#: teardown and final evidence preservation are FUNDED rather than hoped for.
+#:
+#: Measured basis: attempt 132919's teardown took 2.2 minutes (timeline
+#: 190.0 -> 192.2) and its off-pod evidence securing took 2.3 (165.4 -> 167.7).
+#: A completing screening session has more to move at the end -- ten probes'
+#: scores, per-sample rows and raw generations -- so the reserve is set at an
+#: order of magnitude above the measured teardown rather than at it. It is
+#: expressed in MINUTES because that is what was measured; the dollars follow
+#: from the live rate.
+TEARDOWN_RESERVE_MINUTES = 45.0
+
+
+def narrow_to_remaining(priced: Mapping[str, Any], *, remaining_usd: float,
+                        reserve_minutes: float = TEARDOWN_RESERVE_MINUTES
+                        ) -> dict[str, Any]:
+    """THIS ATTEMPT's bounds: the priced cell, capped by what is left.
+
+    The frozen design's cell is not touched -- `reprice_rung_at` still owns the
+    accepted minute bound and the accepted disk dollars. This narrows the bound
+    a single attempt may carry, which is a different quantity: after four
+    subruns the envelope's remainder is smaller than one full session's price,
+    so reusing the design's 1355.71-minute bound would arm a watchdog that
+    permits more spend than the maintainer authorized.
+
+    Both terms move with the runtime, GPU and disk alike -- a bound that scaled
+    only the GPU term would understate what a long run actually costs, which is
+    the same GPU-only-is-not-all-in error one level up.
+
+    The minute figure is FLOORED. It is a limit, and a limit that rounds up is
+    a limit that can be exceeded.
+    """
+    import math
+
+    minutes_priced = float(priced["hard_ceiling_minutes"])
+    disk_per_min = float(priced["disk_hard_usd"]) / minutes_priced
+    gpu_per_min = float(priced["price_per_hour"]) / 60.0
+    all_in_per_min = gpu_per_min + disk_per_min
+
+    reserve_usd = round(reserve_minutes * all_in_per_min, 4)
+    spendable = remaining_usd - reserve_usd
+    if spendable <= 0:
+        raise D1BehaviouralIssuanceRefused(
+            f"the remaining ${remaining_usd:.4f} does not even cover the "
+            f"${reserve_usd:.4f} teardown and evidence-preservation reserve. "
+            "An attempt that cannot fund its own teardown must not start.")
+
+    minutes = min(minutes_priced, math.floor(spendable / all_in_per_min))
+    gpu_hard = round(minutes / 60.0 * float(priced["price_per_hour"]), 4)
+    disk_hard = round(minutes * disk_per_min, 4)
+    return {
+        "hard_runtime_minutes": float(minutes),
+        "gpu_hard_usd": gpu_hard,
+        "disk_hard_usd": disk_hard,
+        "all_in_hard_usd": round(gpu_hard + disk_hard, 4),
+        "teardown_reserve_usd": reserve_usd,
+        "teardown_reserve_minutes": float(reserve_minutes),
+        "remaining_usd": round(remaining_usd, 4),
+        "all_in_usd_per_minute": round(all_in_per_min, 6),
+        "narrowed": minutes < minutes_priced,
+        "priced_hard_ceiling_minutes": minutes_priced,
+        "_why": ("the attempt's bound is min(the design's accepted minute "
+                 "bound, what the remaining envelope funds after holding back "
+                 "teardown). Both the GPU and the disk term scale with it."),
+    }
+
+
 def consumed_by_prior_subruns(repo_root: str | Path = REPO, *,
                               rung: str | None = None) -> dict[str, Any]:
     """What this RUNG's earlier subruns have already spent, from closeouts.
@@ -225,12 +292,23 @@ def consumed_by_prior_subruns(repo_root: str | Path = REPO, *,
                 f"{path} cannot be read ({type(exc).__name__}), so this "
                 "session's consumed total is unknown. A paid authorization "
                 "may not be issued against an unknown remainder.") from exc
-        usd = (record.get("cost") or {}).get("actual_usd")
+        #: ALL-IN FIRST, exactly as `derive_budget` reads it. `cost.actual_usd`
+        #: is GPU price x elapsed, and the envelope is denominated all-in: the
+        #: GPU-only figures understated these four subruns by $0.1125, which is
+        #: a remainder that looks larger than it is. `money.all_in_usd` is the
+        #: provider-measured charge written by
+        #: `reconcile_d1_behavioural_spend.py`.
+        money = record.get("money") or {}
+        usd = money.get("all_in_usd")
+        basis = "money.all_in_usd"
+        if usd is None:
+            usd = (record.get("cost") or {}).get("actual_usd")
+            basis = "cost.actual_usd (GPU ONLY -- not reconciled)"
         if usd is None:
             raise D1BehaviouralIssuanceRefused(
-                f"{path} is a closeout with no cost.actual_usd. Its spend "
-                "cannot be netted off the envelope, so the remainder is "
-                "unknown.")
+                f"{path} is a closeout with no money.all_in_usd and no "
+                "cost.actual_usd. Its spend cannot be netted off the "
+                "envelope, so the remainder is unknown.")
         its_rung = record.get("rung")
         if not its_rung:
             raise D1BehaviouralIssuanceRefused(
@@ -241,13 +319,15 @@ def consumed_by_prior_subruns(repo_root: str | Path = REPO, *,
         if rung is not None and its_rung != rung:
             continue
         rows.append({"run_id": record.get("run_id"), "rung": its_rung,
-                     "usd": float(usd),
+                     "usd": float(usd), "basis": basis,
                      "minutes": (record.get("cost") or {}).get(
                          "elapsed_minutes")})
     return {"n_subruns": len(rows),
             "consumed_usd": round(sum(r["usd"] for r in rows), 4),
             "subruns": rows,
             "rung": rung,
+            "all_reconciled": all(r["basis"] == "money.all_in_usd"
+                                  for r in rows),
             "_source": RUNS_GLOB}
 
 
@@ -391,15 +471,46 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
              {"n_subruns": None, "consumed_usd": round(float(consumed_usd), 4),
               "subruns": [], "rung": rung,
               "_source": "supplied by the caller"})
-    remaining = round(ceiling - spent["consumed_usd"], 4)
+    #: THE ENVELOPE THE REMAINDER IS TAKEN FROM.
+    #:
+    #: By default it is the price of one session -- the original one-use shape,
+    #: where the grant funds a single launch. A grant may instead state a
+    #: CUMULATIVE envelope, which is what the 2026-10-11 maintainer decision
+    #: did: it raised D1 screening's cumulative all-in envelope from $25.0053
+    #: to $30.0000 and charged all four historical subruns against it. That is
+    #: additive rather than a replacement, so a grant written in the older
+    #: shape still issues exactly as before.
+    envelope = ceiling
+    envelope_source = "the rung's priced ceiling at the live rate"
+    stated_envelope = grant.get("cumulative_envelope_usd")
+    if stated_envelope is not None:
+        envelope = round(float(stated_envelope), 4)
+        envelope_source = "the grant's stated CUMULATIVE envelope"
+        prior = grant.get("previous_envelope_usd")
+        added = grant.get("additional_authorized_usd")
+        if prior is not None and added is not None and \
+                abs((float(prior) + float(added)) - envelope) > 5e-4:
+            raise D1BehaviouralIssuanceRefused(
+                f"the grant states a ${envelope:.4f} cumulative envelope but "
+                f"${float(prior):.4f} previous + ${float(added):.4f} "
+                "additional do not sum to it. A budget amendment whose parts "
+                "disagree with its total cannot be audited.")
+        if envelope > float(money["per_session_envelope_usd"]) + 5e-4:
+            raise D1BehaviouralIssuanceRefused(
+                f"the stated ${envelope:.4f} cumulative envelope exceeds the "
+                f"${money['per_session_envelope_usd']:.4f} per-session limit, "
+                "which this amendment was required to preserve.")
+
+    remaining = round(envelope - spent["consumed_usd"], 4)
     if spent["consumed_usd"] > 0 and remaining < priced["expected_usd"]:
         who = ("a caller-supplied prior spend of" if spent["n_subruns"] is None
                else f"this session's {spent['n_subruns']} earlier subrun(s) "
                     "consumed")
         raise D1BehaviouralIssuanceRefused(
             f"{who} "
-            f"${spent['consumed_usd']:.4f} of the ${ceiling:.4f} one-use "
-            f"envelope, leaving ${remaining:.4f}. A complete {rung} run is "
+            f"${spent['consumed_usd']:.4f} of the ${envelope:.4f} "
+            f"envelope ({envelope_source}), leaving ${remaining:.4f}. A "
+            f"complete {rung} run is "
             f"priced at ${priced['expected_usd']:.4f} expected, so the "
             "remainder cannot fund one -- and a schedule that stops partway "
             "yields no verdict under the frozen design.\n\n"
@@ -409,11 +520,25 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
             "covers additional budget'). Stop at $0 and report.")
 
     asked = grant.get("hard_cap_usd")
+    if asked is not None and stated_envelope is not None:
+        raise D1BehaviouralIssuanceRefused(
+            "the grant states BOTH a per-attempt hard_cap_usd and a "
+            "cumulative_envelope_usd. In envelope mode the per-attempt cap is "
+            "DERIVED from the envelope minus what is already spent; a second "
+            "stated figure is a second thing that can disagree with it.")
     if asked is not None and abs(float(asked) - ceiling) > 5e-4:
         raise D1BehaviouralIssuanceRefused(
             f"the grant asks for ${float(asked):.4f}; the ceiling DERIVED at "
             f"the live ${quote['usd_per_hour']:.4f}/h is ${ceiling:.4f}. The "
             "authorization carries the derived figure.")
+
+    #: THIS ATTEMPT's bounds, narrowed to the remainder. The maintainer's
+    #: 2026-10-11 condition is explicit that the previous 1355.71-minute hard
+    #: runtime estimate may not be blindly reused when the per-launch available
+    #: budget is lower, and that the launcher/watchdog bound must be no greater
+    #: than the remaining authorized ALL-IN allowance with a real teardown and
+    #: evidence-preservation reserve.
+    bounds = narrow_to_remaining(priced, remaining_usd=remaining)
     stated_cap = grant.get("cumulative_cap_usd")
     if stated_cap is not None and \
             abs(float(stated_cap) - money["project_cap_usd"]) > 5e-4:
@@ -444,7 +569,11 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         plan_id="autoinit.v1.phase_d1_behavioural",
         plan_hash=design["design_hash"],
         expected_usd=priced["expected_usd"],
-        hard_cap_usd=ceiling,
+        #: THE ATTEMPT's cap, which is the narrowed all-in figure rather than
+        #: the design cell's. In the original one-use shape with nothing spent
+        #: these coincide; after four subruns against a raised cumulative
+        #: envelope they do not, and the smaller one is what was authorized.
+        hard_cap_usd=bounds["all_in_hard_usd"],
         #: The REMAINDER, not the ceiling -- so a relaunch's watchdog bound is
         #: what is actually left of the envelope rather than what the whole
         #: session was once worth.
@@ -468,13 +597,18 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         advancing_candidate=str(advancing_candidate or ""),
         run_id=str(run_id).strip(),
         money={**money, "derived_session": priced, "live_quote": quote,
+               "attempt_bounds": bounds,
+               "envelope": {"envelope_usd": envelope,
+                            "envelope_source": envelope_source,
+                            "consumed_usd": spent["consumed_usd"],
+                            "remaining_usd": remaining},
                "four_conditions": "all four checked at the LIVE rate; see "
                                   "check_the_four_conditions"},
         rate_usd_per_hour=quote["usd_per_hour"],
-        hard_runtime_minutes=priced["hard_ceiling_minutes"],
-        gpu_hard_usd=priced["gpu_hard_usd"],
-        disk_hard_usd=priced["disk_hard_usd"],
-        all_in_hard_usd=ceiling,
+        hard_runtime_minutes=bounds["hard_runtime_minutes"],
+        gpu_hard_usd=bounds["gpu_hard_usd"],
+        disk_hard_usd=bounds["disk_hard_usd"],
+        all_in_hard_usd=bounds["all_in_hard_usd"],
         one_use=("ONE grant, ONE issuance, ONE launcher session. A failure is "
                  "this session's result; a retry is a new grant and a new "
                  "authorization."),
@@ -501,10 +635,14 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     #: to see WHY the per-launch bound is below the ceiling without re-summing
     #: the closeouts.
     payload["envelope"] = {
-        "one_use_ceiling_usd": ceiling,
+        "one_use_ceiling_usd": envelope,
+        "rung_priced_ceiling_usd": ceiling,
         "consumed_by_prior_subruns_usd": spent["consumed_usd"],
         "remaining_usd": remaining,
         "prior_subruns": spent["subruns"],
+        "all_reconciled_to_all_in": spent.get("all_reconciled"),
+        "envelope_source": envelope_source,
+        "attempt_bounds": bounds,
         "_rule": ("P12.1: the budget is cumulative across every resource and "
                   "subrun of the task; a rerun does not reset it. "
                   "per_launch_hard_usd carries the remainder."),
@@ -518,5 +656,6 @@ __all__ = ["AUTHORIZED_STAGES", "BEHAVIOURAL_DECLARED_INPUTS",
            "BEHAVIOURAL_ENTRY_POINTS", "DESIGN_REL",
            "D1BehaviouralIssuanceRefused", "GRANT_MAY_NOT_STATE", "PREREG_REL",
            "STAGE_CONDITIONS", "behavioural_current_executable",
-           "build_payload", "consumed_by_prior_subruns", "preregistration",
-           "reprice_rung_at", "session_cell"]
+           "TEARDOWN_RESERVE_MINUTES", "build_payload",
+           "consumed_by_prior_subruns", "narrow_to_remaining",
+           "preregistration", "reprice_rung_at", "session_cell"]

@@ -1953,18 +1953,35 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
     def test_a_partly_spent_envelope_lowers_the_per_launch_bound(self):
         """The arithmetic, at a spend small enough to still be fundable."""
         payload = _payload(consumed_usd=2.0)
-        assert payload["hard_cap_usd"] == 25.0053, (
+        assert payload["envelope"]["one_use_ceiling_usd"] == 25.0053, (
             "the ENVELOPE is unchanged; only what is left of it moves")
         assert payload["per_launch_hard_usd"] == round(25.0053 - 2.0, 4)
         assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 2.0
         assert payload["envelope"]["remaining_usd"] == \
             payload["per_launch_hard_usd"]
 
-    def test_a_pristine_envelope_leaves_the_bound_at_the_ceiling(self):
+    def test_a_pristine_envelope_leaves_the_remainder_at_the_ceiling(self):
         payload = _payload(consumed_usd=0.0)
-        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"], (
-            "with nothing spent the remainder IS the ceiling; the fix must "
-            "not penalise a first launch")
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"], (
+            "with nothing spent the remainder IS the priced ceiling; the fix "
+            "must not penalise a first launch")
+
+    def test_the_attempt_cap_never_exceeds_the_launch_limit(self):
+        """The two are different quantities and must stay ordered: the
+        per-launch limit is what is LEFT of the envelope, the hard cap is what
+        THIS attempt may spend after holding back teardown."""
+        #: $8.3305 is only fundable under the RAISED envelope, so it is paired
+        #: with the amendment grant rather than the legacy one.
+        cases = [({}, 0.0), ({}, 2.0),
+                 ({"grant": TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds
+                   .AMENDMENT}, 8.3305)]
+        for extra, consumed in cases:
+            payload = _payload(consumed_usd=consumed, **extra)
+            assert payload["hard_cap_usd"] <= payload["per_launch_hard_usd"], (
+                f"at ${consumed} consumed the attempt's cap "
+                f"${payload['hard_cap_usd']} exceeds the per-launch limit "
+                f"${payload['per_launch_hard_usd']}")
 
     def test_the_authorization_carries_the_remainder_not_the_ceiling(self):
         """Read through the real loader, because that is what the launcher
@@ -2026,7 +2043,8 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
     def test_an_empty_tree_consumes_nothing(self, tmp_path):
         spent = BA.consumed_by_prior_subruns(tmp_path)
         assert spent == {"n_subruns": 0, "consumed_usd": 0, "subruns": [],
-                         "rung": None, "_source": BA.RUNS_GLOB}
+                         "rung": None, "all_reconciled": True,
+                         "_source": BA.RUNS_GLOB}
 
     def test_screenings_spend_is_not_charged_to_the_confirmation_envelope(self):
         """THE TWO RUNGS ARE TWO ONE-USE GRANTS WITH TWO ENVELOPES.
@@ -2058,7 +2076,8 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
             live_rate=ACCEPTED_RATE, repo_root=REPO)
         assert payload["rung"] == "confirmation"
         assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 0
-        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"]
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "confirmation", REPO)
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"]
 
     def test_a_closeout_that_names_no_rung_is_refused(self, tmp_path):
         """An unattributable spend makes BOTH remainders unknown, so it is a
@@ -2071,3 +2090,164 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
         with pytest.raises(BA.D1BehaviouralIssuanceRefused,
                            match="names no rung"):
             BA.consumed_by_prior_subruns(tmp_path, rung="screening")
+
+
+class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
+    """The 2026-10-11 amendment: a CUMULATIVE envelope, and an attempt bound
+    derived from what is left of it rather than from the design's cell.
+
+    The maintainer's conditions, each checked: the envelope is cumulative and
+    all four historical subruns are charged against it; the per-session limit
+    is preserved; consumed is read ALL-IN rather than GPU-only; and the
+    launcher/watchdog bound is no greater than the remaining allowance with a
+    real teardown and evidence reserve, rather than the previous 1355-minute
+    estimate reused blindly.
+    """
+
+    AMENDMENT = {
+        "granted_by": "maintainer-test",
+        "covers": "ONE formal D1 behavioural SCREENING session",
+        "rung": "screening",
+        "previous_envelope_usd": 25.0053,
+        "additional_authorized_usd": 4.9947,
+        "cumulative_envelope_usd": 30.0,
+        "cumulative_cap_usd": 490.0,
+        "granted_utc": "2026-10-11",
+    }
+
+    def test_consumed_is_read_all_in_not_gpu_only(self):
+        """The reconciliation must be what the issuer nets off. GPU-only
+        understated these four subruns by $0.1125."""
+        spent = BA.consumed_by_prior_subruns(REPO, rung="screening")
+        assert spent["all_reconciled"] is True, (
+            "every screening closeout must carry money.all_in_usd; one that "
+            "does not would be netted at its GPU-only figure")
+        assert {r["basis"] for r in spent["subruns"]} == {"money.all_in_usd"}
+        assert spent["consumed_usd"] == 8.3305
+
+    def test_the_envelope_is_cumulative_and_charges_all_four(self):
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        env = payload["envelope"]
+        assert env["one_use_ceiling_usd"] == 30.0
+        assert env["consumed_by_prior_subruns_usd"] == 8.3305
+        assert env["remaining_usd"] == round(30.0 - 8.3305, 4)
+        assert len(env["prior_subruns"]) == 4, (
+            "all four historical subruns are charged against the envelope")
+        assert env["all_reconciled_to_all_in"] is True
+
+    def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
+        bad = {**self.AMENDMENT, "additional_authorized_usd": 9.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="do not sum to it"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_the_per_session_limit_is_preserved_not_assumed(self):
+        """The amendment was required to preserve the $30 per-session limit,
+        so an envelope above it is refused rather than trusted."""
+        bad = {**self.AMENDMENT, "cumulative_envelope_usd": 31.0,
+               "additional_authorized_usd": 5.9947}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="exceeds the"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_a_grant_may_not_state_both_an_envelope_and_a_per_attempt_cap(self):
+        bad = {**self.AMENDMENT, "hard_cap_usd": 25.0053}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="BOTH"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_the_attempt_bound_is_narrowed_below_the_designs_cell(self):
+        """THE MAINTAINER'S CONDITION: 1355.71 may not be reused when the
+        available budget is lower."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert priced["hard_ceiling_minutes"] == 1355.71, "premise"
+        assert payload["hard_runtime_minutes"] < 1355.71, (
+            "the bound must be narrowed, not inherited")
+        assert payload["money"]["attempt_bounds"]["narrowed"] is True
+
+    def test_the_bound_costs_no_more_than_the_remaining_allowance(self):
+        """All-in at the authorized runtime, plus the reserve, must fit."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        b = payload["money"]["attempt_bounds"]
+        committed = b["all_in_hard_usd"] + b["teardown_reserve_usd"]
+        assert committed <= b["remaining_usd"] + 1e-6, (
+            f"${committed:.4f} committed against ${b['remaining_usd']:.4f} "
+            "remaining -- the watchdog would permit more than was authorized")
+        #: and the ceiling the artifact carries is the narrowed figure
+        assert payload["hard_cap_usd"] == b["all_in_hard_usd"]
+        assert payload["all_in_hard_usd"] == b["all_in_hard_usd"]
+
+    def test_both_cost_terms_scale_with_the_narrowed_runtime(self):
+        """A bound that scaled only the GPU term would understate a long run
+        -- the same GPU-only-is-not-all-in error one level up."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        ratio = b["hard_runtime_minutes"] / priced["hard_ceiling_minutes"]
+        assert b["gpu_hard_usd"] == pytest.approx(
+            priced["gpu_hard_usd"] * ratio, rel=1e-3)
+        assert b["disk_hard_usd"] == pytest.approx(
+            priced["disk_hard_usd"] * ratio, rel=1e-3)
+        assert b["all_in_hard_usd"] == pytest.approx(
+            b["gpu_hard_usd"] + b["disk_hard_usd"], abs=1e-4)
+
+    def test_the_minute_bound_is_floored_because_it_is_a_limit(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        assert b["hard_runtime_minutes"] == float(
+            int(b["hard_runtime_minutes"])), "a limit rounds DOWN"
+        #: one more minute would cost more than the remainder allows
+        over = (b["hard_runtime_minutes"] + 1) * b["all_in_usd_per_minute"]
+        assert over + b["teardown_reserve_usd"] > b["remaining_usd"]
+
+    def test_an_attempt_that_cannot_fund_its_teardown_is_refused(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund its own teardown"):
+            BA.narrow_to_remaining(priced, remaining_usd=0.10)
+
+    def test_the_frozen_cell_funds_its_bound_but_not_bound_plus_teardown(self):
+        """A true fact about the design's cell, surfaced by the reserve.
+
+        `hard_ceiling_usd` $25.0053 is exactly what 1355.71 minutes COST; it
+        holds nothing back for the teardown that happens after the bound is
+        reached and is billed too. So even a pristine envelope at the cell's
+        own price narrows slightly -- by the reserve, not by a shortfall. The
+        frozen design is NOT edited for this; the attempt's bound simply
+        reserves what the cell does not."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=25.0053)
+        assert b["hard_runtime_minutes"] < priced["hard_ceiling_minutes"]
+        #: and the whole of the gap is the reserve, nothing else
+        lost_minutes = priced["hard_ceiling_minutes"] - b["hard_runtime_minutes"]
+        assert lost_minutes * b["all_in_usd_per_minute"] == pytest.approx(
+            b["teardown_reserve_usd"], abs=0.02)
+
+    def test_an_envelope_that_also_funds_teardown_keeps_the_full_bound(self):
+        """Non-vacuity in the other direction: the cap is a min(), so an
+        envelope with room for bound PLUS teardown is not narrowed at all."""
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        b = BA.narrow_to_remaining(priced, remaining_usd=26.0)
+        assert b["hard_runtime_minutes"] == priced["hard_ceiling_minutes"]
+        assert b["narrowed"] is False
+
+    def test_the_legacy_one_use_grant_shape_still_issues(self):
+        """Additive, not a replacement: a grant with no envelope field is
+        priced exactly as before."""
+        payload = _payload(consumed_usd=0.0)
+        assert payload["envelope"]["one_use_ceiling_usd"] == 25.0053
+        assert payload["envelope"]["envelope_source"].startswith(
+            "the rung's priced ceiling")
+        #: the design's bound less the teardown reserve the cell does not
+        #: itself hold back -- see the test above
+        assert 1300 < payload["hard_runtime_minutes"] < 1355.71
+
+    def test_the_remaining_allowance_funds_the_measured_need(self):
+        """The decision's premise, asserted so a later rate move cannot
+        quietly invalidate it."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        b = payload["money"]["attempt_bounds"]
+        #: 981.7 min is the measured all-in need from attempt 132919's own
+        #: phase markers; see analyses/d1_screening_budget_boundary.json.
+        assert b["hard_runtime_minutes"] >= 981.7, (
+            "the authorized bound no longer covers a complete measured run")

@@ -29,21 +29,21 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 106.2829,
+  "_package_spent_usd": 114.6134,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 490.0,
-  "cumulative_spend_usd": 426.7145,
+  "cumulative_spend_usd": 435.045,
   "engineering_remaining_usd": 6.651,
-  "formal_remaining_usd": 68.7925,
+  "formal_remaining_usd": 60.462,
   "full_ceiling_sessions_fundable": 2,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 75.4435,
+  "package_remaining_usd": 67.113,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "project_cap_usd": 465.0,
   "remaining_is_not_permission": true,
-  "remaining_usd": 63.2855,
+  "remaining_usd": 54.955,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -75,7 +75,7 @@
  "d_series": {
   "authorizes": "nothing",
   "behavioural_design": "Top-4 candidates / 2 screening seeds / 3 confirmation seeds = 10 + 6 probes over 5 and 2 arms. Owner: d1_design.json.",
-  "behavioural_pricing": "Owner: d1_design.json :: budget.chain -- screening $25.0053, confirmation $15.2025. The 2026-10-08 per-arm materialization correction is recorded there.",
+  "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
   "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
   "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
   "execution_wiring": "SEARCH complete. SCREENING chain COMPLETE, tested at $0: driver with on-pod digest-pinned arm materialization, launcher, one-use issuer, preregistration, replay plan, sweep contract phase_d1_behavioural, dispatch branch, both pinned scorers. Confirmation verdict computation is owed before that launch. Owners: d1_design.json, the preregistration.",
@@ -128,13 +128,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "MAINTAINER DECISION: grant ONE D1 behavioural SCREENING session ($25.0053 at $1.09/h; fits the $30 envelope and $68.7925 formal remaining). Then issue, sweep, bundle, readiness, launch. Until then D1 stays PAUSED before behavioural screening: no execution grant, no screening authorization, no resource.",
+ "next": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "the maintainer grant named in `next`, then the committed chain. Verified at $0; no provider resource exists.",
   "not_next": "no paid resource before the launch review; no recovery, screening or confirmation session (each separately authorized); no D2/D3; no retry of a complete measurement; no K sweep; no change to the frozen design. Owner: decisions.md and the 2026-10-05 amendment.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 SEARCH COMPLETE; SCREENING AWAITS ITS GRANT.",
-  "then": "the D1 screening session after its grant: $25.0053 of the $68.7925 remaining formal allowance; confirmation $15.2025 follows its own issuance."
+  "then": "D1 screening under the raised envelope; confirmation $15.2025 follows its own separate issuance."
  },
  "phase_b_result": {
   "authorizes": "nothing",
