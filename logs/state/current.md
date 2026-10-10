@@ -80,6 +80,39 @@ evidence's own scored rows under the frozen rule, refusing any record whose
 recorded selection disagrees — never trusting a file that merely says
 `advanced: true`.
 
+**The second review (ENGINEERING NO-GO on `ca9db3e0`) found three
+execution/evidence defects; all three are repaired on this branch:**
+
+```text
+1  disk residency   C2's attempt3/attempt5 ENOSPC shapes existed here too.
+                    Arm construction intermediates are released the moment an
+                    arm verifies (final checkpoint kept; fail-closed on a
+                    failed release); scored probes' workdirs and eval packages
+                    are released at the launcher's evidence-durable ACK
+                    boundary, before each next probe; real filesystem headroom
+                    is checked against the derived per-probe footprint
+                    (training_dtypes + runtime.cost, ~16 GiB) before every
+                    training. The 120 GB provision stands -- the lifecycle was
+                    fixed, not the provision. Eval packages moved OUT of the
+                    audit dir (they carry weights; the archive carries JSON).
+2  protocol evidence  engine_probe.json, the attested protocol and every
+                    per-probe generation admission are in both artifact
+                    specs (required on success); the poll hook pulls the
+                    admission beside each result and the teardown gate
+                    requires it plus the attestation off-pod. Found while
+                    fixing it: ArtifactSpec accepts only final_required/
+                    mutable_snapshot, and BOTH committed failed-path specs
+                    (behavioural AND the search's, on main) carried the
+                    invented word 'evidence' -- unloadable exactly on the
+                    failed path they exist for. All four specs now load
+                    through the real loader, regression-pinned.
+3  trained-unscored   preservation now runs on EVERY poll, not at closeout,
+                    so a provider disappearance between training and scoring
+                    cannot lose a completed checkpoint; a preserved copy is
+                    pruned the moment its probe is validly scored and its
+                    evidence durable (P8.4: no remaining consumer).
+```
+
 **What remains before formal screening — exactly one maintainer decision plus
 its mechanical consequences:** write the one-use screening grant; issue the
 authorization against it at the live rate; commit the authorization; run the
