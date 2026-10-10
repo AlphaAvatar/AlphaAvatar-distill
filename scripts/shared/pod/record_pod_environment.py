@@ -477,9 +477,17 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
             f"setup environment mismatch between the manifest and the child "
             f"process: {sorted(env_mismatch)}")
 
-    if child_env.get("HIDDEN_PATHS") is None:
-        problems.append("no derived HIDDEN_PATHS was passed; the simulation would "
-                        "fall back to the generic default")
+    #: Either form: the env string (tests, hand runs) or the file the recorder
+    #: now writes, because one env entry caps at MAX_ARG_STRLEN and the joined
+    #: derived set outgrew it. A named file that does not exist is as absent
+    #: as no variable at all.
+    hidden_file = child_env.get("HIDDEN_PATHS_FILE")
+    hidden_delivered = (
+        child_env.get("HIDDEN_PATHS") is not None
+        or (hidden_file is not None and Path(hidden_file).is_file()))
+    if not hidden_delivered:
+        problems.append("no derived HIDDEN_PATHS was passed (env or file); the "
+                        "simulation would fall back to the generic default")
     if child_env.get("PODSIM_CMD") != pytest_cmd:
         problems.append("PODSIM_CMD is not the command this record describes")
 
@@ -492,7 +500,7 @@ def check_invocation_matches(contract, setup_env, pytest_cmd, child_env):
         "setup_environment_keys": sorted(setup_env),
         "setup_environment_realized": not env_mismatch,
         "staging_contract_digest": contract["digest"],
-        "hidden_paths_passed": child_env.get("HIDDEN_PATHS") is not None,
+        "hidden_paths_passed": hidden_delivered,
         "problems": problems,
         "rule": ("a manifest fact that is hashed but not realized in the "
                  "invocation is refused here, before any PASS record exists"),
@@ -717,9 +725,20 @@ def main() -> int:
     pytest_cmd = pod_pytest_command(spec.setup, python=".venv/bin/python")
     # The production setup environment is MERGED IN, so the child pytest runs
     # under SESSION_KIND=c1 and the rest of what the pod is given.
+    #: THE HIDDEN SET TRAVELS IN A FILE, not an env string. One env entry is
+    #: capped by the kernel at MAX_ARG_STRLEN (128 KiB), and the joined list
+    #: crossed it at ~1,850 gitignored paths (~152 KiB): execve refused the
+    #: whole sweep with `Argument list too long` -- for every experiment,
+    #: because the complement is derived from one repository census. The
+    #: simulator reads the file back and an explicitly set HIDDEN_PATHS env
+    #: still wins there, so hand runs and the restore tests keep their form.
+    hidden_blob = "\n".join(hidden)
+    hidden_file = (Path(tempfile.mkdtemp(prefix="podsim-hidden-"))
+                   / "hidden_paths.txt")
+    hidden_file.write_text(hidden_blob + ("\n" if hidden_blob else ""))
     env = {**os.environ, **setup_env,
            "PODSIM_JUNIT": args.junit, "PODSIM_LOG": args.log,
-           "HIDDEN_PATHS": "\n".join(hidden), "PODSIM_CMD": pytest_cmd,
+           "HIDDEN_PATHS_FILE": str(hidden_file), "PODSIM_CMD": pytest_cmd,
            # The interpreter the simulator uses to emit the CPU-test contract.
            # Explicit, because on a pod there is no repo venv and the ambient
            # fallback that used to cover that gap cost attempt 6 its CPU gate.
@@ -728,7 +747,7 @@ def main() -> int:
            # passed from here because this is where the footprint is known.
            "PODSIM_MIN_FREE_GIB": str(min_free_gib())}
     command = (f"<SessionSpec.setup_environment: {len(setup_env)} keys> "
-               f"HIDDEN_PATHS=<{len(hidden)} derived paths, contract "
+               f"HIDDEN_PATHS_FILE=<{len(hidden)} derived paths, contract "
                f"{contract['digest'][:12]}> PODSIM_CMD=<derived> "
                f"PODSIM_JUNIT={args.junit} PODSIM_LOG={args.log} bash {SIMULATOR}")
     print(f"staging contract {contract['digest'][:12]}… — "

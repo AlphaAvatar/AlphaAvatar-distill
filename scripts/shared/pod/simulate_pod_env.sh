@@ -241,6 +241,18 @@ trap restore EXIT INT TERM
 #
 # and pin the cpu set the pod will have (`taskset -c 0-12`), since the suite's
 # behaviour depends on it.
+#
+# THE DERIVED SET TRAVELS IN A FILE. A single env string is capped by the
+# kernel at MAX_ARG_STRLEN (128 KiB), and the 2026-10-10 launch-bound sweep
+# died at execve with `Argument list too long` once the repository's gitignored
+# census passed ~1,850 paths (~152 KiB joined) -- for EVERY experiment, since
+# the complement is derived from one census. The recorder passes
+# HIDDEN_PATHS_FILE instead; an explicitly provided HIDDEN_PATHS env (tests,
+# hand runs, the heredoc above) still wins, so nothing invoking this script
+# directly changes meaning.
+if [ -z "${HIDDEN_PATHS:-}" ] && [ -n "${HIDDEN_PATHS_FILE:-}" ] && [ -f "${HIDDEN_PATHS_FILE}" ]; then
+  HIDDEN_PATHS="$(cat "$HIDDEN_PATHS_FILE")"
+fi
 HIDDEN_PATHS=${HIDDEN_PATHS:-"artifacts/audit
 artifacts/stages/stage-3/ladder_uniform
 artifacts/stages/stage-1/batteries/recovery_search_v1
@@ -422,7 +434,8 @@ echo "running: $PODSIM_CMD"
 _podsim_log="$PODSIM_LOG"
 _podsim_cmd="$PODSIM_CMD"
 unset PODSIM_JUNIT PODSIM_LOG PODSIM_CMD PODSIM_ROOT PODSIM_ENV_ROOT \
-      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON
+      PODSIM_HF_TOKEN HIDE_DIR PODSIM_LOCK HIDDEN_PATHS PODSIM_PYTHON \
+      HIDDEN_PATHS_FILE
 
 eval "$_podsim_cmd" > "$_podsim_log" 2>&1
 PODSIM_RC=$?
