@@ -20,7 +20,17 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(REPO / "src"))
-sys.path.insert(0, str(REPO / "scripts/evaluation"))
+#: `scripts`, not `scripts/evaluation`. The information-architecture migration
+#: moved the evaluator to `scripts/shared/evaluation/` and rewrote the import
+#: below to `shared.evaluation.uncapped_eval` -- which needs `scripts` on the
+#: path, because `shared` is a package under it -- but left this insert
+#: pointing at a directory that no longer exists. The probe therefore could
+#: not import its own dependency on any machine, and nothing noticed because
+#: every phase that runs it (C1, C3, A3) closed before the migration. D1's
+#: screening paid 164 minutes and $2.98 to find it: five arms materialized,
+#: the first probe trained for 60.9 minutes, and the attestation then refused
+#: because no protocol could be observed.
+sys.path.insert(0, str(REPO / "scripts"))
 
 
 def main() -> None:
