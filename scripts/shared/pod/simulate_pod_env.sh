@@ -45,7 +45,13 @@
 # scratch, not a retained artifact: see the WITHDRAWN `podsim_quarantine_residue`
 # entry in `logs/maintenance/inventories/checkpoint_tombstones.json` for why it must not be tombstoned.
 set -u
-PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../.." && pwd)"}
+# THREE levels up, not two: the information-architecture migration moved this
+# script from scripts/pod/ to scripts/shared/pod/, and the self-derived root
+# silently became scripts/ -- the first post-migration sweep then hid zero
+# paths, lost line 320's relative dirname, and reported the repo venv missing
+# from a directory that never had one. A self-locating script's depth is part
+# of any move of it.
+PODSIM_ROOT=${PODSIM_ROOT:-"$(cd "$(dirname "$0")/../../.." && pwd)"}
 cd "$PODSIM_ROOT" || exit 1
 HIDE=${HIDE_DIR:-/home/ecs-user/aad-scratch/podsim_hidden}
 LOCK=${PODSIM_LOCK:-"${HIDE}.lock"}
@@ -334,8 +340,8 @@ if [ -n "${PODSIM_PYTHON:-}" ]; then
   PODSIM_PY="$PODSIM_PYTHON"
   [ -x "$PODSIM_PY" ] || {
     echo "REFUSING: PODSIM_PYTHON=$PODSIM_PY is not executable" >&2; exit 5; }
-elif [ -x "$PODSIM_SCRIPT_DIR/../../.venv/bin/python" ]; then
-  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../.venv/bin/python"
+elif [ -x "$PODSIM_SCRIPT_DIR/../../../.venv/bin/python" ]; then
+  PODSIM_PY="$PODSIM_SCRIPT_DIR/../../../.venv/bin/python"
 else
   echo "REFUSING: no interpreter. Pass PODSIM_PYTHON=\$sys.executable, or run" >&2
   echo "  from a checkout whose .venv/bin/python exists. This script will NOT" >&2
