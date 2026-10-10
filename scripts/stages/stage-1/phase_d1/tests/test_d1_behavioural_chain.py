@@ -457,7 +457,19 @@ class TestTheLauncherDeclaresTheSessionCompletely:
 
         ctx.evidence = {"probe_evidence_secured": {
             "p1": {"result.json": True, "per_sample.jsonl": True,
-                   "generations": False}}}
+                   "admission.json": False, "generations": False}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "admission" in why
+
+        ctx.evidence = {"probe_evidence_secured": {
+            "p1": {"result.json": True, "per_sample.jsonl": True,
+                   "admission.json": True, "generations": False}}}
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "attested" in why
+
+        store = tmp_path / "store"
+        store.mkdir(exist_ok=True)
+        (store / "d1_behavioural_attested_protocol.json").write_text("{}")
         ok, why = launcher.probes_evidence_secured(ctx, [])
         assert ok and "final archive" in why
 
@@ -1072,3 +1084,264 @@ class TestTheConfirmationCandidateIsRecomputedNotTrusted:
                                                   "arm": "q1"}}))
         with pytest.raises(SystemExit, match="schema"):
             issuer.advanced_arm_from(path)
+
+
+class TestDiskResidencyFollowsTheRealFreeCallSites:
+    """The 2026-10-10 second review: C2 attempt3 died at ENOSPC with five full
+    arm paths resident, and attempt5 at probe 11/12 under accumulated probe
+    workdirs. The same program shapes exist here, so the same releases do --
+    and a resource bound has to follow the real free() call sites."""
+
+    @staticmethod
+    def _steps(tmp_path, n=4):
+        from types import SimpleNamespace
+
+        results = []
+        for index, kind in enumerate(["ffn", "depth", "width", "attn"][:n]):
+            d = tmp_path / "steps" / f"{index:02d}_{kind}"
+            d.mkdir(parents=True)
+            (d / "model.safetensors").write_bytes(b"x" * 64)
+            results.append(SimpleNamespace(checkpoint_path=str(d),
+                                           impl_id=f"{kind}.v0"))
+        return results
+
+    def test_intermediates_are_released_and_the_final_is_kept(self, tmp_path):
+        results = self._steps(tmp_path)
+        out = M.release_intermediate_steps("q1", results, tmp_path)
+        assert out["removed_steps"] == ["ffn.v0", "depth.v0", "width.v0"]
+        assert not Path(results[0].checkpoint_path).exists()
+        assert Path(results[-1].checkpoint_path).is_dir()
+        assert out["failed"] == []
+
+    def test_nothing_outside_the_arms_workdir_is_touched(self, tmp_path):
+        from types import SimpleNamespace
+
+        outside = tmp_path / "elsewhere" / "step"
+        outside.mkdir(parents=True)
+        (outside / "x").write_bytes(b"x")
+        results = self._steps(tmp_path / "arm")
+        results.insert(0, SimpleNamespace(checkpoint_path=str(outside),
+                                          impl_id="outside.v0"))
+        out = M.release_intermediate_steps("q1", results, tmp_path / "arm")
+        assert outside.is_dir()
+        assert "outside.v0" not in out["removed_steps"]
+
+    def test_a_release_failure_is_reported_not_raised(self, tmp_path):
+        from types import SimpleNamespace
+
+        results = self._steps(tmp_path)
+        results.insert(0, SimpleNamespace(
+            checkpoint_path=str(tmp_path / "steps" / "99_gone"),
+            impl_id="gone.v0"))
+        out = M.release_intermediate_steps("q1", results, tmp_path)
+        assert any("gone.v0" in f for f in out["failed"])
+
+    def test_the_arm_loop_fails_closed_on_a_failed_release(self, monkeypatch,
+                                                           tmp_path):
+        """The 120 GB provision is derived on the assumption intermediates
+        are freed; a falsified assumption stops the session with the verified
+        arm preserved."""
+        def fake_candidate(leaf, dest, **kwargs):
+            return {"state_id": leaf.state_id, "spec_hash": "x",
+                    "seconds": 0.0, "checkpoint_path": str(dest),
+                    "identity": {}, "adopted": True,
+                    "intermediates_released": {
+                        "removed_steps": [], "freed_gib": 0.0,
+                        "failed": ["ffn.v0: Permission denied"],
+                        "kept": str(dest)}}
+
+        monkeypatch.setattr(M, "materialize_candidate", fake_candidate)
+        with pytest.raises(M.D1MaterializeError,
+                           match="NO FURTHER ARM"):
+            M.materialize_arms("screening", plan_path=REPO / M.PLAN_REL,
+                               arm_root=tmp_path, device="cpu",
+                               repo_root=REPO, say=lambda _s: None)
+
+    def test_the_probe_footprint_is_derived_not_typed(self):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        need = driver.probe_local_need_bytes(REPO)
+        assert need["need_bytes"] == (need["transient_bytes"]
+                                      + need["retained_bytes"]
+                                      + need["package_bytes"])
+        #: fp32 training of a ~0.6B model: the working set alone is > 8 GiB,
+        #: so a derived value below that means the derivation broke.
+        assert need["transient_bytes"] > 8 * 2**30
+        assert need["checkpoint"]["num_parameters"] == int(
+            B.design(REPO)["incumbent"]["num_parameters"])
+
+    def test_headroom_refuses_before_training(self, monkeypatch, tmp_path):
+        import aadistill.runtime.leaf_durability as LD
+
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        monkeypatch.setattr(LD, "free_bytes_at", lambda _p: 1 * 2**30)
+        record: dict = {}
+        with pytest.raises(driver.D1BehaviouralDriverError,
+                           match="REFUSING before training"):
+            driver.require_probe_headroom("p1", record, lambda: None)
+        assert record["probe_headroom"][0]["free_gib"] == 1.0
+
+    def test_acked_scored_workdirs_release_and_the_bound_fails_closed(
+            self, monkeypatch, tmp_path):
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        monkeypatch.setattr(driver, "REPO_ROOT", tmp_path)
+        ack_dir = (tmp_path
+                   / "artifacts/audit/autoinit_d1_behavioural/release_acks")
+        ack_dir.mkdir(parents=True)
+        work = tmp_path / "artifacts/stages/stage-3/d1_behavioural"
+        pkg = tmp_path / driver.EVAL_PACKAGES_REL
+        for probe_id in ("p_acked", "p_unacked", "p_unscored"):
+            (work / probe_id).mkdir(parents=True)
+            (work / probe_id / "w").write_bytes(b"x" * 32)
+            (pkg / probe_id).mkdir(parents=True)
+        (ack_dir / "p_acked.json").write_text("{}")
+        (ack_dir / "p_unscored.json").write_text("{}")
+        record = {"probes": [
+            {"probe_id": "p_acked", "scored": True},
+            {"probe_id": "p_unacked", "scored": True},
+            {"probe_id": "p_unscored", "scored": False},
+        ]}
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["released"] == ["p_acked"]
+        assert not (work / "p_acked").exists()
+        assert not (pkg / "p_acked").exists()
+        #: Unacked stays; unscored stays even though acked -- an ack is not a
+        #: score, and only a validly scored probe's weights lose their
+        #: consumer.
+        assert (work / "p_unacked").is_dir()
+        assert (work / "p_unscored").is_dir()
+        assert out["kept"] == ["p_unacked"]
+
+    def test_packages_are_built_outside_the_audit_dir(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert 'out / "packages"' not in src
+        assert "EVAL_PACKAGES_REL" in src
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        assert not driver.EVAL_PACKAGES_REL.startswith("artifacts/audit")
+
+    def test_release_runs_before_each_probe(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert src.index("release_acked_probe_workdirs(record, save)") < \
+            src.index("require_probe_headroom(probe.probe_id")
+        assert src.index("require_probe_headroom(probe.probe_id") < \
+            src.index('"--config", str(config)')
+
+
+class TestProtocolEvidenceTravelsInTheArtifactContracts:
+    """Second-review finding 2: the raw protocol-identity evidence -- engine
+    probe, attestation, per-probe admissions -- must be collected, not just
+    the hashes results carry. And the specs must LOAD: an invented lifecycle
+    word makes the whole document unloadable and the collector exits 1 --
+    which is exactly what the committed failed specs would have done, on the
+    exact path (a failed session) they exist for."""
+
+    @staticmethod
+    def _load(rel):
+        import importlib.util
+
+        src = REPO / "scripts/shared/pod/collect_artifacts.py"
+        spec = importlib.util.spec_from_file_location("_collect", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod.load_specs(str(REPO / rel))
+
+    def test_all_four_d1_specs_load_through_the_real_loader(self):
+        for rel in (
+                "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+                "configs/stages/stage-1/phase_d1/"
+                "d1_behavioural_artifacts_failed.json",
+                "configs/stages/stage-1/phase_d1/d1_search_artifacts.json",
+                "configs/stages/stage-1/phase_d1/"
+                "d1_search_artifacts_failed.json"):
+            assert self._load(rel), rel
+
+    def test_the_success_spec_requires_the_protocol_evidence(self):
+        entries = {e.artifact_class: e for e in self._load(
+            "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json")}
+        for cls in ("d1_behavioural_attested_protocol",
+                    "d1_behavioural_engine_probe",
+                    "d1_behavioural_generation_admissions"):
+            assert entries[cls].required, cls
+        assert "engine_probe.json" in entries[
+            "d1_behavioural_engine_probe"].pattern
+
+    def test_the_failed_spec_collects_them_optionally(self):
+        entries = {e.artifact_class: e for e in self._load(
+            "configs/stages/stage-1/phase_d1/"
+            "d1_behavioural_artifacts_failed.json")}
+        for cls in ("d1_behavioural_attested_protocol",
+                    "d1_behavioural_engine_probe",
+                    "d1_behavioural_generation_admissions"):
+            assert cls in entries and not entries[cls].required, cls
+
+    def test_the_poll_hook_pulls_the_admission_beside_the_result(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "_generation_admission.json" in src
+        #: And the ack is written only when all three strict pieces arrived.
+        ack_block = src.split('state["release_acked"] = ', 1)[0]
+        tail = ack_block[ack_block.rfind("if ("):]
+        for piece in ("result.json", "per_sample.jsonl", "admission.json"):
+            assert piece in tail, piece
+
+
+class TestTrainedUnscoredDurabilityRunsDuringTheSession:
+    """Second-review finding 3: closeout-only preservation repeats the C1
+    failure -- a provider disappearance between training and scoring loses a
+    completed checkpoint. Preservation now runs on every poll, and a preserved
+    copy is pruned the moment its probe is validly scored."""
+
+    def test_the_poll_hook_preserves_and_prunes(self):
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        body = src.split("def secure_probe_evidence(", 1)[1]
+        body = body.split("\ndef ", 1)[0]
+        assert "preserve_trained_unscored(ctx)" in body
+        assert "prune_preserved_scored(ctx)" in body
+
+    def test_pruning_requires_a_scored_probe_with_durable_evidence(
+            self, tmp_path):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        store = tmp_path / "products" / "trained_unscored"
+        kept = store / "p_kept"
+        kept.mkdir(parents=True)
+        (kept / "w").write_bytes(b"x")
+        pruned = store / "p_pruned"
+        pruned.mkdir(parents=True)
+        (pruned / "w").write_bytes(b"x")
+        outside = tmp_path / "elsewhere"
+        outside.mkdir()
+
+        class _Args:
+            scr = str(tmp_path)
+            ckpt_store = None
+
+        class _Ctx:
+            args = _Args()
+            evidence = {
+                "trained_unscored_preserved": {
+                    "p_pruned": {"verified": True, "dest": str(pruned)},
+                    "p_kept": {"verified": True, "dest": str(kept)},
+                    "p_outside": {"verified": True, "dest": str(outside)},
+                },
+                "probe_evidence_secured": {
+                    "p_pruned": {"result.json": True,
+                                 "per_sample.jsonl": True,
+                                 "admission.json": True},
+                    "p_outside": {"result.json": True,
+                                  "per_sample.jsonl": True,
+                                  "admission.json": True},
+                },
+            }
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        launcher.prune_preserved_scored(_Ctx())
+        assert not pruned.exists(), "scored + durable evidence -> pruned"
+        assert kept.is_dir(), "no durable evidence yet -> kept"
+        assert outside.is_dir(), "containment: never deletes outside the store"

@@ -48,6 +48,13 @@ PLAN_REL = "logs/stages/stage-1/phase_d1/plans/d1_behavioural_replay_plan.json"
 #: driver command and the driver's default cannot disagree.
 POD_ARM_ROOT = "/workspace/aad_arms"
 
+#: Where the launcher acknowledges that a scored probe's evidence is durable
+#: off-pod, and therefore that the pod may release that probe's local training
+#: bytes. Under the audit dir on purpose: the acks are tiny JSON and they are
+#: themselves evidence of the release boundary. One constant, imported by the
+#: driver (which reads it) and the launcher (which writes it).
+RELEASE_ACK_REL = "artifacts/audit/autoinit_d1_behavioural/release_acks"
+
 
 class D1MaterializeError(RuntimeError):
     """A materialization premise does not hold. ORDINARY ENGINEERING.
@@ -206,6 +213,45 @@ def final_checkpoint_in(dest: Path, *, n_steps: int) -> tuple[Path | None, bool]
     return last, index == n_steps - 1
 
 
+def release_intermediate_steps(label: str, results: Any,
+                               workdir: Path) -> dict[str, Any]:
+    """Delete an arm's intermediate step checkpoints, keeping the final one.
+
+    C2's production repair, reapplied where the same program shape reappeared:
+    `materialize_fixed_path` writes every step of a four-step path under the
+    arm's workdir and returns them all, and C2 behavioural attempt3 died at
+    `No space left on device` with five full paths resident -- 32.8 minutes of
+    completed compute lost to bytes nothing would ever read again. An
+    intermediate step's checkpoint has no consumer once the NEXT step's bytes
+    exist; the final checkpoint is the arm.
+
+    Same guards as C2's call site, because this deletes: never the final
+    checkpoint, and never a path outside this arm's own workdir. NEVER RAISES
+    -- a cleanup error must not destroy a verified arm -- and the CALLER fails
+    closed on a non-empty `failed`, because the 120 GB provision is derived on
+    the assumption these are freed.
+    """
+    import shutil
+
+    final = Path(results[-1].checkpoint_path).resolve()
+    freed, removed, failed = 0, [], []
+    for step in results[:-1]:
+        path = Path(step.checkpoint_path).resolve()
+        if path == final or not path.is_relative_to(Path(workdir).resolve()):
+            continue
+        try:
+            size = sum(f.stat().st_size for f in path.rglob("*")
+                       if f.is_file())
+            shutil.rmtree(path)
+            freed += size
+            removed.append(step.impl_id)
+        except OSError as exc:                                  # noqa: PERF203
+            failed.append(f"{step.impl_id}: {exc}")
+    return {"arm": label, "removed_steps": removed,
+            "freed_gib": round(freed / 2**30, 3), "failed": failed,
+            "kept": str(final)}
+
+
 def materialize_candidate(leaf: Any, dest: Path, *, device: str,
                           repo_root: str | Path = REPO_ROOT,
                           root_loader: Callable[[], Any] | None = None,
@@ -247,7 +293,9 @@ def materialize_candidate(leaf: Any, dest: Path, *, device: str,
             f"{leaf.state_id}: reconstruction completed and does not carry "
             f"the recorded identity: {detail['differ']}. Diagnose, never "
             "substitute.")
+    released = release_intermediate_steps(leaf.state_id, results, dest)
     return {"state_id": leaf.state_id, "spec_hash": spec.spec_hash,
+            "intermediates_released": released,
             "seconds": round(time.time() - t0, 1),
             #: THE PRODUCER'S OWN ANSWER: the last step's checkpoint
             #: directory. Every consumer -- the identity verification, the
@@ -313,9 +361,11 @@ def materialize_incumbent(dest: Path, *, device: str,
         identity = _verify_bytes_at(built, identities, what="incumbent B")
     except D1MaterializeError as exc:
         raise D1ArmIdentityMismatch(str(exc)) from exc
+    released = release_intermediate_steps("B", results, dest)
     return {"arm": "B", "spec_hash": spec.spec_hash,
             "construction": construction,
             "execution": execution.as_fingerprint(),
+            "intermediates_released": released,
             "seconds": round(time.time() - t0, 1),
             "checkpoint_path": str(built), "identity": identity,
             "adopted": True}
@@ -431,6 +481,17 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
                 f"  step {r.index} {r.impl_id} -> "
                 f"{r.identity.artifact_digest[:12]} ({r.seconds:.0f}s)"))
         out["arms"].append({"arm": arm.arm_id, "reused": False, **row})
+        released = row["intermediates_released"]
+        say(f"  released {len(released['removed_steps'])} intermediate(s), "
+            f"{released['freed_gib']:.2f} GiB")
+        if released["failed"]:
+            raise D1MaterializeError(
+                f"{arm.arm_id}: intermediate release failed "
+                f"({released['failed']}). The 120 GB provision is derived on "
+                "the assumption each arm's construction intermediates are "
+                "freed when it is verified; that assumption is falsified, so "
+                "NO FURTHER ARM MAY BE BUILT under a bound that does not "
+                "hold. The verified arm and its evidence are preserved.")
 
     incumbent = next(a for a in field if a.is_incumbent)
     dest = Path(incumbent.checkpoint_dir)
@@ -457,6 +518,12 @@ def materialize_arms(rung: str, *, plan_path: str | Path,
                **materialize_incumbent(dest, device=device,
                                        identities=dict(incumbent.identities),
                                        repo_root=root)}
+        released = row["intermediates_released"]
+        if released["failed"]:
+            raise D1MaterializeError(
+                f"B: intermediate release failed ({released['failed']}); the "
+                "storage bound is falsified and the session stops with the "
+                "verified arm preserved.")
     out["arms"].append(row)
     out["n_arms"] = len(out["arms"])
     return out
@@ -497,8 +564,9 @@ def resolve_arm_checkpoints(rung: str, arm_root: str | Path,
     return out
 
 
-__all__ = ["PLAN_REL", "POD_ARM_ROOT", "D1ArmIdentityMismatch",
+__all__ = ["PLAN_REL", "POD_ARM_ROOT", "RELEASE_ACK_REL", "D1ArmIdentityMismatch",
            "D1MaterializeError", "final_checkpoint_in", "incumbent_execution",
            "load_plan", "materialize_arms", "materialize_candidate",
+           "release_intermediate_steps",
            "materialize_incumbent", "plan_sha256",
            "resolve_arm_checkpoints", "write_plan"]

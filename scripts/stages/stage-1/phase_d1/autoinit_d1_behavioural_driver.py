@@ -388,6 +388,160 @@ def admit_generation(name: str, gen_dir: Path, *, attested: Any,
     return admission
 
 
+#: Where a probe's EVALUATION PACKAGE is built. NOT under the audit dir: a
+#: package carries the trained weights beside the frozen tokenizer, and the
+#: success archive collects the audit dir -- ten packages would put ~12 GiB of
+#: weights into an evidence archive whose consumers read JSON. Released with
+#: the probe's workdir once its evidence is acknowledged durable.
+EVAL_PACKAGES_REL = "artifacts/stages/stage-3/d1_behavioural_eval"
+
+
+def probe_local_need_bytes(repo_root: Path) -> dict[str, Any]:
+    """Local bytes ONE probe needs: its transient set plus what it retains.
+
+    C2's derivation, through its one owner: `training_dtypes` reads the SAME
+    frozen recipe D1's probes train under (the import is the point -- a copy
+    here could disagree with the file the trainer actually reads), and the
+    arithmetic lives in `aadistill.runtime.cost`, which takes every dtype as
+    an argument. The parameter count is the design's own: all five arms share
+    one target geometry and the incumbent block records it.
+    """
+    from aadistill.runtime import cost as COST
+    from stages.phase_c2.behavioural import training_dtypes
+    from stages.phase_d1 import behavioural as D1B
+
+    tr = training_dtypes(repo_root)
+    params = int(D1B.design(repo_root)["incumbent"]["num_parameters"])
+    ck = COST.CheckpointFootprint(
+        params, tr["save_dtype"],
+        extra_bytes=int(tr["checkpoint_extra_bytes"]))
+    transient = COST.training_working_set_bytes(
+        params, weight_dtype=tr["weight_dtype"],
+        grad_dtype=tr["grad_dtype"], moment_dtype=tr["moment_dtype"],
+        n_moments=tr["n_moments"])
+    retained = (1 + int(tr["keep_last"])) * ck.bytes
+    #: Plus the evaluation package this driver builds beside the workdir: the
+    #: trained weights again, once.
+    package = ck.bytes
+    return {"transient_bytes": transient, "retained_bytes": retained,
+            "package_bytes": package,
+            "need_bytes": transient + retained + package,
+            "checkpoint": ck.as_dict(), "keep_last": tr["keep_last"]}
+
+
+def require_probe_headroom(name: str, record: dict[str, Any],
+                           save: Any) -> dict[str, Any]:
+    """Refuse BEFORE training if the disk cannot hold this probe.
+
+    C2 attempt5 reached ENOSPC at probe 11 of 12 because completed workdirs
+    accumulated; the refusal here lands with every finished probe's evidence
+    durable, which is a diagnosis, where an ENOSPC mid-checkpoint-write is a
+    loss.
+    """
+    from aadistill.runtime.leaf_durability import free_bytes_at
+
+    need = probe_local_need_bytes(REPO_ROOT)
+    root = REPO_ROOT / "artifacts"
+    root.mkdir(parents=True, exist_ok=True)
+    free = free_bytes_at(root)
+    row = {"probe": name, "free_gib": round(free / 2**30, 3),
+           "need_gib": round(need["need_bytes"] / 2**30, 3), **need}
+    record.setdefault("probe_headroom", []).append(row)
+    save()
+    if free < need["need_bytes"]:
+        raise D1BehaviouralDriverError(
+            f"{name}: {free / 2**30:.2f} GiB free where this probe needs "
+            f"{need['need_bytes'] / 2**30:.2f} GiB "
+            f"({need['transient_bytes'] / 2**30:.2f} transient + "
+            f"{need['retained_bytes'] / 2**30:.2f} retained + "
+            f"{need['package_bytes'] / 2**30:.2f} package). REFUSING before "
+            "training rather than discovering it in the middle of a "
+            "checkpoint write: every probe finished so far is durable and "
+            "this stop preserves them.")
+    return row
+
+
+def release_acked_probe_workdirs(record: dict[str, Any],
+                                 save: Any) -> dict[str, Any]:
+    """Release the local bytes of every SCORED probe the launcher has ACKED.
+
+    THE ACKNOWLEDGEMENT BOUNDARY, exactly C2's: the launcher writes an ack
+    only after the probe's required evidence (result, per-sample rows,
+    admission) arrived off-pod, so a release here never races durability. What
+    is released: the probe's training workdir (checkpoints, optimizer state)
+    and its evaluation package -- bytes with NO remaining consumer once the
+    probe is validly scored (P8.4 state 1). Its generations and results stay
+    in the audit dir; they are the evidence.
+
+    Same guards as C2's call site: scored-only, containment under this
+    session's own artifact roots, never raises per item -- and the CALLER
+    fails closed on `failed`, because the storage bound assumes the release
+    happened.
+    """
+    import shutil
+
+    out = {"released": [], "failed": [], "kept": [], "freed_gib": 0.0}
+    ack_dir = REPO_ROOT / "artifacts/audit/autoinit_d1_behavioural/release_acks"
+    try:
+        acked = {p.stem for p in ack_dir.glob("*.json")} \
+            if ack_dir.is_dir() else set()
+    except OSError as exc:
+        out["failed"].append(f"cannot read {ack_dir}: {exc}")
+        record.setdefault("probe_workdirs_released", []).append(out)
+        save()
+        return out
+    roots = (REPO_ROOT / "artifacts/stages/stage-3/d1_behavioural",
+             REPO_ROOT / EVAL_PACKAGES_REL)
+    freed = 0
+    for entry in record.get("probes", []):
+        probe_id = str(entry.get("probe_id") or "")
+        if not probe_id or not entry.get("scored"):
+            continue
+        if entry.get("workdir_released"):
+            continue
+        if probe_id not in acked:
+            out["kept"].append(probe_id)
+            continue
+        failed_here = False
+        for base in roots:
+            local = base / probe_id
+            if not local.is_dir():
+                continue
+            if not local.resolve().is_relative_to(REPO_ROOT.resolve()):
+                out["failed"].append(f"{probe_id}: {local} escapes the "
+                                     "workspace; nothing here deletes it")
+                failed_here = True
+                continue
+            try:
+                size = sum(f.stat().st_size for f in local.rglob("*")
+                           if f.is_file())
+                shutil.rmtree(local)
+                freed += size
+            except OSError as exc:
+                out["failed"].append(f"{probe_id}: {exc}")
+                failed_here = True
+        if not failed_here:
+            entry["workdir_released"] = True
+            out["released"].append(probe_id)
+    out["freed_gib"] = round(freed / 2**30, 3)
+    record.setdefault("probe_workdirs_released", []).append(out)
+    save()
+    if out["released"] or out["failed"]:
+        print(f"  released {len(out['released'])} probe workdir(s), "
+              f"{out['freed_gib']:.2f} GiB"
+              + (f" (FAILED: {out['failed']})" if out["failed"] else "")
+              + (f"; {len(out['kept'])} not yet acked" if out["kept"] else ""),
+              flush=True)
+    if out["failed"]:
+        raise D1BehaviouralDriverError(
+            f"probe workdir release failed: {out['failed']}. The storage "
+            "bound assumes each scored probe's local bytes are freed once "
+            "its evidence is acknowledged durable; that assumption is "
+            "falsified, so no further probe may be trained under it. Every "
+            "scored probe's evidence is preserved.")
+    return out
+
+
 def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
     """Is a COMPLETED trained checkpoint already on this host for a probe?
 
@@ -641,6 +795,11 @@ def main(argv: list[str] | None = None) -> int:
             save()
             print(f"[{index + 1}/{len(probes)}] {probe.probe_id}", flush=True)
 
+            #: Reclaim what the launcher has acknowledged durable BEFORE this
+            #: unit starts: C2 attempt5 reached ENOSPC at probe 11 of 12
+            #: because completed workdirs accumulated for the whole rung.
+            release_acked_probe_workdirs(record, save)
+
             model_root = (REPO_ROOT
                           / f"artifacts/stages/stage-3/d1_behavioural/{probe.probe_id}")
             #: RESUME AT EVALUATION when a completed trained checkpoint is
@@ -657,6 +816,10 @@ def main(argv: list[str] | None = None) -> int:
                 save()
                 print(f"  resuming at evaluation from {model_dir}", flush=True)
             else:
+                #: The next unit's footprint against the filesystem's own
+                #: answer, not the provision's: a refusal here lands with
+                #: every finished probe durable.
+                require_probe_headroom(probe.probe_id, record, save)
                 config = probe_config(probe, audit=out,
                                       frozen_recipe=FROZEN_RECIPE,
                                       pack_dir=PACK_DIR,
@@ -728,7 +891,10 @@ def main(argv: list[str] | None = None) -> int:
             #: version of this driver passed a `--battery` flag the evaluator
             #: does not have, which argparse would have refused with exit 2 on
             #: a billing pod, after the probe had already trained.
-            package_dir = out / "packages" / probe.probe_id
+            #: OUTSIDE the audit dir: a package carries the trained weights
+            #: and the success archive collects the audit dir.
+            package_dir = REPO_ROOT / EVAL_PACKAGES_REL / probe.probe_id
+            entry["package_dir"] = str(package_dir)
             build_evaluation_package(
                 model_dir, tokenizer_source=TOKENIZER_SOURCE,
                 dest=package_dir,

@@ -246,6 +246,12 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                                 f"{probe_id}.json", False),
                 "per_sample.jsonl": (f"{REPO}/{EVIDENCE_DIR}/per_sample/"
                                      f"{probe_id}.jsonl", False),
+                #: The probe's generation-admission record: the raw evidence
+                #: that THIS probe's protocol was observed comparable, not
+                #: just the hash the result carries.
+                "admission.json": (f"{REPO}/{EVIDENCE_DIR}/"
+                                   f"{probe_id}_generation_admission.json",
+                                   False),
                 "generations": (f"{REPO}/{EVIDENCE_DIR}/generations/"
                                 f"{probe_id}", True),
             }
@@ -261,9 +267,117 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                 state[name] = bool(ok)
                 if ok:
                     ctx.say(f"  probe {probe_id}: secured {name}")
+            #: EVIDENCE DURABLE -> THE POD MAY RELEASE. The ack is written
+            #: only when every strict piece arrived, which is what makes the
+            #: driver's workdir release never race durability.
+            if (state.get("result.json") and state.get("per_sample.jsonl")
+                    and state.get("admission.json")
+                    and not state.get("release_acked")):
+                state["release_acked"] = write_release_ack(ctx, probe_id)
+        #: The session-level protocol evidence, once: the attestation and the
+        #: engine probe are what an auditor reconstructs the protocol identity
+        #: from, and the recorded hash alone is not that.
+        store = Path(ctx.args.scr) / STORE_SUBDIR
+        store.mkdir(parents=True, exist_ok=True)
+        for name in ("d1_behavioural_attested_protocol.json",
+                     "engine_probe.json"):
+            target = store / name
+            if not target.is_file():
+                rc = _scp_from_pod(ctx, f"{REPO}/{EVIDENCE_DIR}/{name}",
+                                   target)
+                if rc == 0 and target.is_file():
+                    ctx.say(f"  secured {name}")
+        #: Trained-but-unscored durability DURING the run (P8.2.1: persist at
+        #: the moment of completion, not at a closeout that may never come) --
+        #: and prune preserved copies whose probe has since been validly
+        #: scored, because those bytes then have no remaining consumer.
+        preserve_trained_unscored(ctx)
+        prune_preserved_scored(ctx)
     except Exception as exc:                                    # noqa: BLE001
         ctx.evidence.setdefault("on_poll_errors", []).append(
             f"secure_probe_evidence: {type(exc).__name__}: {exc}")
+
+
+def write_release_ack(ctx: SessionContext, probe_id: str) -> bool:
+    """Tell the pod this probe's evidence is durable, so it may release.
+
+    C2's mechanism, under D1's ack path. MUST NOT raise (poll loop); a failure
+    costs pod disk, which the driver's fail-closed release then reports.
+    """
+    import tempfile
+
+    ack_dir = f"{REPO}/{M.RELEASE_ACK_REL}"
+    payload = json.dumps({
+        "schema": "aadistill.phase_d1.behavioural_release_ack/v1",
+        "probe_id": probe_id,
+        "evidence": ["result.json", "per_sample.jsonl", "admission.json"],
+        "_what_this_permits": (
+            "releasing this probe's LOCAL training workdir and evaluation "
+            "package on the pod. The probe is validly scored and its "
+            "scientific evidence is off-pod; its weights have no remaining "
+            "consumer (P8.4 state 1)."),
+    })
+    try:
+        ctx.target.run(f"mkdir -p {ack_dir}", timeout=60)
+        with tempfile.TemporaryDirectory() as tmp:
+            local = Path(tmp) / f"{probe_id}.json"
+            local.write_text(payload + "\n")
+            rc = subprocess.run(
+                ["scp", "-P", str(ctx.target.port),
+                 "-o", "StrictHostKeyChecking=no",
+                 "-o", "UserKnownHostsFile=/dev/null",
+                 str(local), f"root@{ctx.host}:{ack_dir}/{probe_id}.json"],
+                capture_output=True, timeout=120).returncode
+        ok = rc == 0
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("release_ack_errors", []).append(
+            f"{probe_id}: {type(exc).__name__}: {exc}")
+        return False
+    ctx.evidence.setdefault("release_acks", []).append(
+        {"probe_id": probe_id, "delivered": ok})
+    if ok:
+        ctx.say(f"  probe {probe_id}: release ack delivered")
+    return ok
+
+
+def prune_preserved_scored(ctx: SessionContext) -> None:
+    """Delete preserved trained-unscored copies whose probe is now scored.
+
+    P8.4: preserve only bytes with an actual remaining scoring consumer. A
+    probe preserved during its scoring window loses that consumer the moment
+    its score and evidence are durable, so the local copy is removed --
+    containment-checked under the preservation root -- and the row says so.
+    MUST NOT raise.
+    """
+    import shutil
+
+    try:
+        preserved = ctx.evidence.get("trained_unscored_preserved") or {}
+        if not preserved:
+            return
+        secured = ctx.evidence.get("probe_evidence_secured") or {}
+        store = (Path(getattr(ctx.args, "ckpt_store", None)
+                      or Path(ctx.args.scr) / "products")
+                 / "trained_unscored").resolve()
+        for probe_id, row in preserved.items():
+            if row.get("pruned") or not row.get("verified"):
+                continue
+            state = secured.get(probe_id) or {}
+            if not (state.get("result.json") and state.get("per_sample.jsonl")
+                    and state.get("admission.json")):
+                continue
+            dest = Path(row.get("dest") or "")
+            if not dest.is_dir() or not dest.resolve().is_relative_to(store):
+                continue
+            shutil.rmtree(dest)
+            row["pruned"] = True
+            row["_why"] = ("validly scored and its evidence durable; the "
+                           "weights have no remaining consumer (P8.4)")
+            ctx.say(f"  probe {probe_id}: pruned preserved trained copy "
+                    "(now scored)")
+    except Exception as exc:                                    # noqa: BLE001
+        ctx.evidence.setdefault("on_poll_errors", []).append(
+            f"prune_preserved_scored: {type(exc).__name__}: {exc}")
 
 
 #: Where a probe's training writes on the pod, and where a restore puts a
@@ -500,16 +614,30 @@ def probes_evidence_secured(ctx: SessionContext,
                      "preserved and identity-verified")
         return True, note
     secured = ctx.evidence.get("probe_evidence_secured") or {}
+    #: The ADMISSION record is strict beside the result and the rows: it is
+    #: the raw evidence that this probe's generations were produced under the
+    #: attested protocol, and a result whose admission did not come home
+    #: carries a hash nobody can audit.
     missing = sorted(
         probe_id for probe_id in want
         if not (secured.get(probe_id, {}).get("result.json")
-                and secured.get(probe_id, {}).get("per_sample.jsonl")))
+                and secured.get(probe_id, {}).get("per_sample.jsonl")
+                and secured.get(probe_id, {}).get("admission.json")))
     if missing:
         return False, (
             f"{len(want)} probes scored and {len(want) - len(missing)} have "
-            f"their result and per-sample rows off-pod; missing {missing}. "
-            "Deleting the pod now would destroy measurements this session "
-            "already paid for.")
+            f"their result, per-sample rows and generation admission "
+            f"off-pod; missing {missing}. Deleting the pod now would destroy "
+            "measurements this session already paid for.")
+    #: And the session-level protocol evidence itself: the attestation every
+    #: admission was compared against.
+    attested = Path(ctx.args.scr) / STORE_SUBDIR / \
+        "d1_behavioural_attested_protocol.json"
+    if not attested.is_file():
+        return False, (
+            f"{len(want)} probes scored and the attested evaluation protocol "
+            "record is not off-pod; the per-probe admissions compare against "
+            "it and without it the protocol identity cannot be audited.")
 
     no_generations = sorted(
         probe_id for probe_id in want

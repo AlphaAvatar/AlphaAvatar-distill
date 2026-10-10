@@ -1,7 +1,7 @@
 {
  "spec": "aadistill.artifact_spec/v1",
  "session": "autoinit_d1_behavioural",
- "note": "success spec: every permanent artifact a D1 behavioural session must not lose. Entries are ArtifactSpec kwargs loaded by scripts/shared/pod/collect_artifacts.py. THE TRAINED PROBE CHECKPOINTS ARE NOT HERE and are not meant to be: once a probe is scored, its weights have no downstream consumer (P8.4 -- the decision reads scores and per-sample rows, and the confirmation rung retrains from the ARM initializations at fresh seeds), and the arms themselves rematerialize deterministically from their pinned paths. What this spec requires is the session's scientific EVIDENCE: the session record with its contract, materialization gates, ranking and selection; every probe's result and per-sample rows; and the complete raw generations P18 requires saved for every evaluated sample.",
+ "note": "success spec: every permanent artifact a D1 behavioural session must not lose. Entries are ArtifactSpec kwargs loaded by scripts/shared/pod/collect_artifacts.py. THE TRAINED PROBE CHECKPOINTS ARE NOT HERE and are not meant to be: once a probe is scored, its weights have no downstream consumer (P8.4 -- the decision reads scores and per-sample rows, and the confirmation rung retrains from the ARM initializations at fresh seeds), and the arms themselves rematerialize deterministically from their pinned paths. What this spec requires is the session's scientific EVIDENCE: the session record with its contract, materialization gates, ranking and selection; every probe's result and per-sample rows; and the complete raw generations P18 requires saved for every evaluated sample. PROTOCOL-IDENTITY EVIDENCE is collected in full: the engine probe, the attested evaluation protocol and every per-probe generation-admission record -- the raw evidence an auditor reconstructs the protocol identity from, not just the hash a result carries. The release acks travel too: they are the record of the evidence-durable boundary each workdir release stood on.",
  "patterns_are_relative_to": "the collector's --root, which SessionRunner sets to <checkout>/artifacts. So `audit/autoinit_d1_behavioural/x` is <checkout>/artifacts/audit/autoinit_d1_behavioural/x. A pattern carrying the root's own name can never match; see the search spec for what that cost.",
  "one_authoritative_layout": "artifacts/audit/autoinit_d1_behavioural/ is where the driver writes and where the relay, the report fetch, the launcher's poll hook and this spec all read.",
  "entries": [
@@ -34,7 +34,34 @@
    "artifact_class": "d1_behavioural_probe_configs",
    "pattern": "audit/autoinit_d1_behavioural/configs",
    "required": false,
-   "lifecycle": "evidence"
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_behavioural_attested_protocol",
+   "pattern": "audit/autoinit_d1_behavioural/d1_behavioural_attested_protocol.json",
+   "required": true,
+   "min_bytes": 256,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_behavioural_engine_probe",
+   "pattern": "audit/autoinit_d1_behavioural/engine_probe.json",
+   "required": true,
+   "min_bytes": 128,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_behavioural_generation_admissions",
+   "pattern": "audit/autoinit_d1_behavioural/*_generation_admission.json",
+   "required": true,
+   "min_matches": 1,
+   "lifecycle": "final_required"
+  },
+  {
+   "artifact_class": "d1_behavioural_release_acks",
+   "pattern": "audit/autoinit_d1_behavioural/release_acks",
+   "required": false,
+   "lifecycle": "final_required"
   }
  ]
 }
