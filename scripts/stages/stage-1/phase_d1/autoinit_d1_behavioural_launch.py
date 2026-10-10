@@ -1064,19 +1064,35 @@ def prechecks(args) -> tuple:
     )
 
 
-def budget_spec(repo_root: Path, rung: str) -> BudgetSpec:
+def budget_spec(repo_root: Path, rung: str, *,
+                authorized_minutes: float | None = None) -> BudgetSpec:
     """The `BudgetSpec` the runner plans from, DECOMPOSING the accepted bound.
 
     The accepted behavioural bound is the design's priced cell, which already
     carries its own overrun factor -- so the reserve is DERIVED as whatever
     makes the plan land exactly on that bound, exactly as the search launcher
     does. Two models of one session is the defect; there is one total.
+
+    `authorized_minutes` CAPS that bound, and the cap is the maintainer's
+    2026-10-11 condition: the launcher/watchdog hard bound must be no greater
+    than the remaining authorized all-in allowance. Without it this planned at
+    the design's full 1355.71 minutes while the artifact authorized 1129, so
+    the runner would have armed a watchdog permitting $24.63 against a
+    $20.82 authorization -- one derived quantity with two consumers, which is
+    the same defect the docstring above warns about, one level up.
+
+    When the cap bites and the plan no longer fits, this raises. It does NOT
+    quietly reduce the contingency, the recovery reserve or the probe schedule:
+    a session that cannot hold its reserves needs a decision, not a thinner
+    reserve.
     """
     from aadistill.infrastructure.budget import MEASURED_STEP_SECONDS, Phase
 
     cell = BA.session_cell(rung, repo_root)
     overhead = cell["session_overhead_minutes"]
     accepted_hard = cell["hard_ceiling_minutes"]
+    if authorized_minutes is not None:
+        accepted_hard = min(accepted_hard, float(authorized_minutes))
     expected_total = cell["expected_minutes"]
     contingency = 0.10
     recovery_reserve = 30.0
@@ -1087,7 +1103,13 @@ def budget_spec(repo_root: Path, rung: str) -> BudgetSpec:
             f"the accepted {accepted_hard:.2f}-minute bound cannot hold the "
             f"expected {expected_total:.2f} min plus a {contingency:.0%} "
             f"contingency and a {recovery_reserve:.0f}-minute recovery "
-            "reserve. Obtain a larger authorization or a smaller session; do "
+            f"reserve -- it is short by {abs(reserve):.2f} min"
+            + (f", and that bound is the AUTHORIZED "
+               f"{float(authorized_minutes):.2f} rather than the design's "
+               f"{cell['hard_ceiling_minutes']:.2f}"
+               if authorized_minutes is not None
+               and authorized_minutes < cell["hard_ceiling_minutes"] else "")
+            + ". Obtain a larger authorization or a smaller session; do "
             "not shrink the reserve to fit.")
 
     return BudgetSpec(
@@ -1122,6 +1144,25 @@ def budget_spec(repo_root: Path, rung: str) -> BudgetSpec:
     )
 
 
+def _authorized_minutes(args) -> float | None:
+    """The runtime bound THIS RUN's authorization carries, read from it.
+
+    The spec declares `authorization_path` and the runner loads the artifact
+    later, so the plan was built before anything had read what was authorized
+    -- which is how a 1355.71-minute plan came to sit under a 1129-minute
+    authorization. Read here, through the same loader and the same path the
+    spec declares, so the two cannot be different artifacts.
+
+    `None` when no authorization exists yet: a caller inspecting the spec
+    before issuance gets the design's bound, which is the right answer for a
+    question about the design.
+    """
+    path = REPO_ROOT / auth_path_for(getattr(args, "run_id", None))
+    if not path.is_file():
+        return None
+    return D1BehaviouralAuthorization.load(path).hard_runtime_minutes
+
+
 def spec(args) -> SessionSpec:
     rung = getattr(args, "rung", "screening")
     return SessionSpec(
@@ -1148,7 +1189,8 @@ def spec(args) -> SessionSpec:
         #: `require_plan` with it, so an authorization issued against another
         #: design revision is refused at exit 98 before any work.
         plan_hash=D1B.design(REPO_ROOT)["design_hash"],
-        budget=budget_spec(REPO_ROOT, rung),
+        budget=budget_spec(REPO_ROOT, rung,
+                           authorized_minutes=_authorized_minutes(args)),
         setup=SetupManifest(
             env={"SESSION_KIND": SESSION_KIND},
             required_env=("SESSION_COMMIT", "BUNDLE_NAME", "SESSION_STATUS",

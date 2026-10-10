@@ -118,12 +118,26 @@ execution/evidence defects; all three are repaired on this branch:**
                     evidence durable (P8.4: no remaining consumer).
 ```
 
-**SCREENING IS FUNDED AND LAUNCHING.** The maintainer raised D1 behavioural
-screening's **cumulative all-in** envelope from $25.0053 to **$30.0000** on
-2026-10-10 UTC — at most **+$4.9947** of additional cumulative budget, not a
-fresh $30 — after four launcher invocations all aborted before formal
-measurement, each finding a distinct real defect. Every defect is repaired and
-regression-pinned.
+**SCREENING IS PREPARED AND BLOCKED ON A $0.94 PLANNING GAP.** The maintainer
+raised the **cumulative all-in** envelope from $25.0053 to **$30.0000** on
+2026-10-10 UTC (at most **+$4.9947**, not a fresh $30). Every accounting
+precondition is discharged and the whole chain is built — sweep, authorization,
+bundle, readiness — and the launcher's **dry run then refused at $0**: the
+design's expected 1087.16 min plus a 10% contingency and a 30-minute recovery
+reserve need 1225.88 min, and $21.6695 funds **1174.00**. Short by 51.88 min =
+**$0.9406**; cumulative needed **$30.9406**.
+
+**The money covers the work; it does not cover the design's superseded estimate
+of the work.** On attempt 4's MEASURED basis the same reserves need 1109.87 min
+= $20.47, a cumulative $28.80 that fits with $1.20 spare. The 105-minute
+difference is all in the estimate: session overhead 82.0 estimated against
+14.7 measured, arm materialization 110.0 against 92.0 (twice, on two pods).
+Both ways to close the gap are the maintainer's — a ~$1 increase is not
+authorized and would also move the $30 per-session limit the amendment
+preserved; re-pricing the cell costs nothing and the design's own
+"measurement is authoritative" principle favours it, but the decision forbids
+modifying the design to make a grant acceptable. Owner:
+`analyses/d1_screening_estimate_vs_measurement_boundary.json`.
 
 ```text
 subrun            all-in      min   aborted on

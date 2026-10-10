@@ -1914,15 +1914,24 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
     """
 
     def test_it_sums_the_real_closeouts_this_session_has_written(self):
+        #: DERIVED, never typed: the campaign writes a closeout per subrun and
+        #: a literal count goes stale the next time one lands -- which it did,
+        #: the moment attempt 200001 closed at $0.
+        on_disk = sorted(REPO.glob(BA.RUNS_GLOB))
         spent = BA.consumed_by_prior_subruns(REPO)
-        assert spent["n_subruns"] >= 4, (
-            "the four closed screening subruns must be counted")
-        #: Each row is a real settled figure, not an estimate.
+        assert spent["n_subruns"] == len(on_disk) > 0
         for row in spent["subruns"]:
-            assert row["usd"] > 0, row
+            #: $0 is a legitimate settled figure -- a chain can be consumed
+            #: before any resource exists -- so the assertion is that the row
+            #: is identified and priced, not that it is expensive.
+            assert row["usd"] >= 0, row
             assert row["run_id"], row
         assert spent["consumed_usd"] == round(
             sum(r["usd"] for r in spent["subruns"]), 4)
+        #: and the paid ones are the four that created a pod
+        paid = [r for r in spent["subruns"] if r["usd"] > 0]
+        assert len(paid) == 4
+        assert round(sum(r["usd"] for r in paid), 4) == 8.3305
 
     def test_the_real_tree_refuses_a_further_issuance(self):
         """NO `consumed_usd` OVERRIDE. This is the live state: the remainder
@@ -2131,8 +2140,10 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         assert env["one_use_ceiling_usd"] == 30.0
         assert env["consumed_by_prior_subruns_usd"] == 8.3305
         assert env["remaining_usd"] == round(30.0 - 8.3305, 4)
-        assert len(env["prior_subruns"]) == 4, (
-            "all four historical subruns are charged against the envelope")
+        assert len(env["prior_subruns"]) == len(
+            sorted(REPO.glob(BA.RUNS_GLOB))), (
+            "every historical subrun is charged against the envelope, "
+            "derived from the closeouts rather than a typed count")
         assert env["all_reconciled_to_all_in"] is True
 
     def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
@@ -2251,3 +2262,115 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         #: phase markers; see analyses/d1_screening_budget_boundary.json.
         assert b["hard_runtime_minutes"] >= 981.7, (
             "the authorized bound no longer covers a complete measured run")
+
+
+class TestTheLauncherPlansWithinWhatWasAuthorized:
+    """The watchdog bound may not exceed the authorization. Two consumers of
+    one derived quantity, and only one of them was reading it.
+
+    THE DEFECT. `budget_spec` built the runner's plan from the design's priced
+    cell alone -- 1355.71 minutes, $24.63 -- while the artifact for the same
+    run authorized 1129 minutes and $20.82. Nothing compared them, so the
+    runner would have armed a watchdog permitting $3.80 more than the
+    maintainer granted. The dry run caught it at $0, which is what dry runs
+    are for, and the maintainer's 2026-10-11 condition states it directly:
+    the launcher/watchdog hard bound must be no greater than the remaining
+    authorized all-in allowance.
+    """
+
+    @staticmethod
+    def _launcher():
+        import importlib.util
+
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py")
+        spec = importlib.util.spec_from_file_location("_d1b_lnch", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_an_uncapped_plan_still_lands_on_the_designs_bound(self):
+        """The unchanged behaviour, so the cap is visibly the new thing."""
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        plan = m.budget_spec(REPO, "screening").plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(
+            cell["hard_ceiling_minutes"], abs=0.02)
+
+    def test_the_cap_binds_when_it_is_below_the_designs_bound(self):
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        capped = cell["expected_minutes"] * 1.10 + 30.0 + 5.0
+        plan = m.budget_spec(
+            REPO, "screening", authorized_minutes=capped).plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(capped, abs=0.02)
+        assert plan.hard_terminate_minutes < cell["hard_ceiling_minutes"]
+
+    def test_a_cap_that_cannot_hold_the_reserves_refuses(self):
+        """It does NOT thin the contingency or the recovery reserve to fit --
+        the exact behaviour the maintainer's condition and the function's own
+        error message both require."""
+        m = self._launcher()
+        with pytest.raises(SystemExit, match="short by"):
+            m.budget_spec(REPO, "screening", authorized_minutes=600.0)
+
+    def test_the_refusal_says_the_bound_was_the_authorized_one(self):
+        m = self._launcher()
+        with pytest.raises(SystemExit) as excinfo:
+            m.budget_spec(REPO, "screening", authorized_minutes=600.0)
+        assert "AUTHORIZED" in str(excinfo.value), (
+            "a reader must be able to tell an authorized-bound shortfall from "
+            "a design that never fit its own cell")
+
+    def test_a_cap_above_the_designs_bound_changes_nothing(self):
+        m = self._launcher()
+        cell = BA.session_cell("screening", REPO)
+        plan = m.budget_spec(
+            REPO, "screening", authorized_minutes=99_999.0).plan(
+            price_per_hour=ACCEPTED_RATE, authorized_usd=25.0053)
+        assert plan.hard_terminate_minutes == pytest.approx(
+            cell["hard_ceiling_minutes"], abs=0.02)
+
+    def test_the_launcher_reads_the_authorization_the_spec_declares(self):
+        """Through the same path and loader, so the plan and the artifact
+        cannot be two different documents."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        assert "authorized_minutes=_authorized_minutes(args)" in src
+        assert "auth_path_for(getattr(args" in src
+        assert "D1BehaviouralAuthorization.load(path).hard_runtime_minutes" \
+            in src
+
+    def test_the_recovery_reserve_has_exactly_one_owner(self):
+        """THE OTHER HALF OF THE DEFECT. The authorization used to subtract a
+        45-minute teardown reserve of its own while the launcher's spec
+        already reserved 30 minutes for artifact recovery inside the bound it
+        enforces -- one concern, two reserves, and 45 of the dry run's $3.80
+        shortfall was the double count."""
+        assert BA.TEARDOWN_RESERVE_MINUTES == 0.0, (
+            "the authorization must not hold back a second teardown reserve")
+        m = self._launcher()
+        import inspect
+        body = inspect.getsource(m.budget_spec)
+        assert "recovery_reserve = 30.0" in body
+        assert BA.LAUNCHER_RECOVERY_MINUTES == 30.0, (
+            "the figure the issuer's refusal quotes must be the launcher's "
+            "actual reserve")
+
+    def test_the_authorized_bound_is_the_full_remainder(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        bounds = BA.narrow_to_remaining(priced, remaining_usd=21.6695)
+        assert bounds["all_in_hard_usd"] == pytest.approx(21.6695, abs=0.02), (
+            "with the double count gone the attempt may plan against the "
+            "whole remainder; the recovery window lives inside the plan")
+
+    def test_a_remainder_below_the_recovery_window_is_refused(self):
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        rate = 1.09 / 60.0 + priced["disk_hard_usd"] / priced[
+            "hard_ceiling_minutes"]
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="artifact-recovery window"):
+            BA.narrow_to_remaining(
+                priced, remaining_usd=round(25.0 * rate, 4))

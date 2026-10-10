@@ -197,17 +197,27 @@ def reprice_rung_at(rate_usd_per_hour: float, rung: str,
     }
 
 
-#: Minutes of all-in spend held back from the attempt's runtime bound so that
-#: teardown and final evidence preservation are FUNDED rather than hoped for.
+#: ZERO, AND THAT IS A CORRECTION. This held back 45 minutes so that teardown
+#: and final evidence preservation would be funded -- and the launcher's
+#: `BudgetSpec` already reserves 30 minutes for exactly that, as
+#: `artifact_recovery_reserve_minutes`, INSIDE the bound the runner enforces.
+#: Two reserves for one concern is the same defect as two models of one
+#: session: the dry run refused with a $3.80 shortfall and 45 of those minutes
+#: were mine, held back twice.
 #:
-#: Measured basis: attempt 132919's teardown took 2.2 minutes (timeline
-#: 190.0 -> 192.2) and its off-pod evidence securing took 2.3 (165.4 -> 167.7).
-#: A completing screening session has more to move at the end -- ten probes'
-#: scores, per-sample rows and raw generations -- so the reserve is set at an
-#: order of magnitude above the measured teardown rather than at it. It is
-#: expressed in MINUTES because that is what was measured; the dollars follow
-#: from the live rate.
-TEARDOWN_RESERVE_MINUTES = 45.0
+#: The reserve has ONE owner, the launcher's spec, where the runner can
+#: actually act on it: it stops at the soft bound and leaves the recovery
+#: window to collect artifacts. An authorization that also subtracts it is
+#: describing money the plan has already set aside. Measured teardown on
+#: attempt 132919 was 2.2 minutes (timeline 190.0 -> 192.2), against that
+#: 30-minute window.
+TEARDOWN_RESERVE_MINUTES = 0.0
+
+#: The launcher's `artifact_recovery_reserve_minutes`. Named here so the
+#: refusal above can state the real floor rather than a second guess at it;
+#: the VALUE lives in `autoinit_d1_behavioural_launch.budget_spec`, and a test
+#: asserts the two agree.
+LAUNCHER_RECOVERY_MINUTES = 30.0
 
 
 def narrow_to_remaining(priced: Mapping[str, Any], *, remaining_usd: float,
@@ -238,11 +248,17 @@ def narrow_to_remaining(priced: Mapping[str, Any], *, remaining_usd: float,
 
     reserve_usd = round(reserve_minutes * all_in_per_min, 4)
     spendable = remaining_usd - reserve_usd
-    if spendable <= 0:
+    #: The launcher's own spec reserves `artifact_recovery_reserve_minutes`
+    #: inside whatever bound this returns, so an attempt whose bound is below
+    #: that window cannot fund its own teardown however the dollars are
+    #: labelled.
+    if spendable <= 0 or spendable / all_in_per_min <= LAUNCHER_RECOVERY_MINUTES:
         raise D1BehaviouralIssuanceRefused(
-            f"the remaining ${remaining_usd:.4f} does not even cover the "
-            f"${reserve_usd:.4f} teardown and evidence-preservation reserve. "
-            "An attempt that cannot fund its own teardown must not start.")
+            f"the remaining ${remaining_usd:.4f} funds "
+            f"{max(spendable, 0.0) / all_in_per_min:.0f} minutes, which does "
+            f"not clear the launcher's {LAUNCHER_RECOVERY_MINUTES:.0f}-minute "
+            "artifact-recovery window. An attempt that cannot fund its own "
+            "teardown must not start.")
 
     minutes = min(minutes_priced, math.floor(spendable / all_in_per_min))
     gpu_hard = round(minutes / 60.0 * float(priced["price_per_hour"]), 4)

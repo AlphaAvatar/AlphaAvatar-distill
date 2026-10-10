@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 81,
+  "runs_unrecorded": 82,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -828,8 +828,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 12,
-    "total": 12
+    "unrecorded": 13,
+    "total": 13
    },
    "phase_d1_replay": {
     "recorded": 0,
@@ -3314,6 +3314,14 @@
    "n_files": 10,
    "digest": "c1cde5f21455f021524f62be417c403767b3610fd8dc49bad7d9493f4db886ab",
    "why": "no run manifest; its closeout states: ORDINARY ENGINEERING FAILURE, before formal measurement. The refusal is the fail-closed gate working: it detected that the generations carried a different runtime identity than the attestation, and stopped before a scorer could produce a number under an identity its evidence did not support. Nothing scientific was measured, so there is nothing to have retried or pooled. P12.1's pre-science clause applies: preserve and close this subrun, diagnose, repair, build a fresh chain under a new attempt identity."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261010_200001",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_200001",
+   "n_files": 6,
+   "digest": "e8a9c513af47be3f657dfe3fc1d062d87eeb8ca97926bba52bb22b0edc77ae87",
+   "why": "no run manifest; its closeout states: A BUDGET BOUNDARY, not an engineering failure and not a scientific one. Every accounting precondition the 2026-10-11 decision set is discharged and every $0 gate before the budget plan passed. The gap is $0.9406 between the authorized remainder and what the launcher's planning rule demands, and the two ways to close it are both reserved to the maintainer: a budget increase is not authorized, and re-pricing the frozen design's cell to make the grant sufficient is explicitly forbidden. See analyses/d1_screening_estimate_vs_measurement_boundary.json."
   },
   {
    "experiment_id": "phase_d1",
