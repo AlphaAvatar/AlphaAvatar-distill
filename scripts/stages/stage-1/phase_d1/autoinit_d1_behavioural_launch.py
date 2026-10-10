@@ -227,11 +227,16 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
 
     MUST NOT raise: a durability helper that throws into a paid session's poll
     loop is a defect regardless of who catches it.
+
+    THE SCORED COUNT GATES ONLY THE SCORED-EVIDENCE LOOP. The first version
+    returned on `not units`, so during the FIRST probe's trained-but-unscored
+    interval -- zero probes scored, one completed checkpoint on the pod, the
+    exact window the C1 failure lived in -- the trained-unscored preservation
+    below was never reached, and the provider-disappearance repair protected
+    every window except the first one it was written for.
     """
     try:
-        units = finished_probes(ctx)
-        if not units:
-            return
+        units = finished_probes(ctx) or []
         store = probe_store(ctx)
         secured = ctx.evidence.setdefault("probe_evidence_secured", {})
         for unit in units:
@@ -468,9 +473,28 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
             want = str(unit.get("trained_sha256") or "")
             got = (hashlib.sha256(shard.read_bytes()).hexdigest()
                    if shard.is_file() else None)
-            verified = bool(want) and got == want
+            #: VERIFIED means THE WHOLE RESUME SET arrived, not that one shard
+            #: hashes right. The driver's evaluation-only resume consumes four
+            #: things -- the training-completion record, the checkpoint tag,
+            #: the model directory with its config, and digest-matching
+            #: weights -- and a preservation marked durable on the shard alone
+            #: would restore an incomplete set that `trained_checkpoint_state`
+            #: then reads as "never finished training" and RETRAINS, which is
+            #: exactly what P8.4 state 2 forbids.
+            latest = dest / "checkpoints" / "latest.txt"
+            completeness = {
+                "transfers_ok": all(rc == 0 for rc in rcs.values()),
+                "run_completion": (dest / "run_completion.json").is_file(),
+                "latest_tag": (latest.is_file()
+                               and latest.read_text().strip() == tag),
+                "model_config": (dest / "checkpoints" / tag / "model"
+                                 / "config.json").is_file(),
+                "weights_digest": bool(want) and got == want,
+            }
+            verified = all(completeness.values())
             row = {"rcs": rcs, "trained_sha256": want,
-                   "arrived_sha256": got, "verified": verified,
+                   "arrived_sha256": got, "completeness": completeness,
+                   "verified": verified,
                    "dest": str(dest)}
             preserved[probe_id] = row
             if verified:

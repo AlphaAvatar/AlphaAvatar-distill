@@ -1345,3 +1345,115 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         assert not pruned.exists(), "scored + durable evidence -> pruned"
         assert kept.is_dir(), "no durable evidence yet -> kept"
         assert outside.is_dir(), "containment: never deletes outside the store"
+
+
+class TestTheFirstProbesTrainedWindowIsPreserved:
+    """Third review: `secure_probe_evidence` returned on zero scored probes,
+    so trained-unscored preservation never ran during the FIRST probe's
+    trained-but-unscored interval -- the exact provider-disappearance window
+    the repair was written for. These drive the REAL poll hook (a source
+    assertion cannot see a premature return), with only the transfers
+    simulated at `_scp_from_pod`."""
+
+    SHARD = b"trained-weights-of-probe-one"
+
+    def _run_hook(self, tmp_path, monkeypatch, *, fail_remote=None):
+        import hashlib
+
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        sha = hashlib.sha256(self.SHARD).hexdigest()
+        model_dir = f"{launcher.POD_PROBE_ROOT}/p1/checkpoints/step100/model"
+        relay = tmp_path / "relay"
+        relay.mkdir()
+        #: ZERO scored probes, ONE completed training: the first probe's
+        #: window, verbatim.
+        (relay / "d1_behavioural.json").write_text(json.dumps({
+            "probes": [{"probe_id": "p1", "trained": True, "scored": False,
+                        "model_dir": model_dir, "trained_sha256": sha}]}))
+        remote_files = {
+            f"{launcher.POD_PROBE_ROOT}/p1/run_completion.json":
+                json.dumps({"final_step": 100}).encode(),
+            f"{launcher.POD_PROBE_ROOT}/p1/checkpoints/latest.txt":
+                b"step100",
+        }
+        shard = self.SHARD
+
+        def fake_scp(ctx, remote, dest, *, recursive=False, limit_min=5):
+            if fail_remote and fail_remote in remote:
+                return 1
+            dest = Path(dest)
+            if recursive:
+                #: scp -r of `.../model` into the pre-created tag dir nests
+                #: it as `<tag>/model/`, which is what the real transfer does.
+                target = dest / "model" if remote.endswith("/model") else dest
+                target.mkdir(parents=True, exist_ok=True)
+                (target / "config.json").write_text("{}")
+                (target / "model.safetensors").write_bytes(shard)
+                return 0
+            data = remote_files.get(remote)
+            if data is None:
+                return 1
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(data)
+            return 0
+
+        monkeypatch.setattr(launcher, "_scp_from_pod", fake_scp)
+
+        class _Args:
+            scr = str(tmp_path)
+            ckpt_store = None
+            ckpt_fetch_limit_min = 45
+
+        class _Ctx:
+            args = _Args()
+            evidence = {}
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        ctx = _Ctx()
+        launcher.secure_probe_evidence(ctx)
+        return launcher, ctx, sha
+
+    def test_zero_scored_probes_still_preserve_the_trained_one(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, sha = self._run_hook(tmp_path, monkeypatch)
+        assert not ctx.evidence.get("on_poll_errors"), \
+            ctx.evidence.get("on_poll_errors")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True, row
+        assert all(row["completeness"].values()), row["completeness"]
+        assert row["arrived_sha256"] == sha
+        assert (Path(row["dest"]) / "preserved_identity.json").is_file()
+
+    def test_an_incomplete_transfer_is_not_durable(self, tmp_path,
+                                                   monkeypatch):
+        """A matching shard must not compensate for a failed transfer of the
+        other resume inputs: a set without its training-completion record
+        restores as 'never finished training' and RETRAINS the frozen unit."""
+        launcher, ctx, _sha = self._run_hook(
+            tmp_path, monkeypatch, fail_remote="run_completion.json")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is False
+        assert row["completeness"]["weights_digest"] is True
+        assert row["completeness"]["run_completion"] is False
+        assert not (Path(row["dest"]) / "preserved_identity.json").exists()
+        #: And the teardown gate therefore still refuses: unpreserved.
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert not ok and "p1" in why
+
+    def test_a_complete_preservation_resumes_at_evaluation_only(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, sha = self._run_hook(tmp_path, monkeypatch)
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        state = driver.trained_checkpoint_state(Path(row["dest"]))
+        assert state is not None
+        assert state["model_dir"].endswith("checkpoints/step100/model")
+        assert state.get("restored_sha256_verified") is True
+        #: And the gate accepts teardown once the preservation is verified.
+        ok, why = launcher.probes_evidence_secured(ctx, [])
+        assert ok and "preserved" in why
