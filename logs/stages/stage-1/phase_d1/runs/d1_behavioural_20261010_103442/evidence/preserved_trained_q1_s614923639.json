@@ -1,0 +1,7 @@
+{
+ "schema": "aadistill.phase_d1.preserved_trained_probe/v1",
+ "probe_id": "d1_screening_q1_s614923639",
+ "trained_sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+ "tag": "step_001023",
+ "_reuse_is_not_authorized_by_preservation": "P8.2.1: saving this checkpoint authorizes nothing about reusing it. Whether a replacement session may resume it at evaluation is the frozen protocol's rule (P8.4 state 2), enforced by the driver's identity-checked resume."
+}

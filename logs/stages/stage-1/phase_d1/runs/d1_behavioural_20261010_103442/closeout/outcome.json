@@ -1,0 +1,101 @@
+{
+ "schema": "aadistill.phase_d1.run_failed/v1",
+ "run_id": "d1_behavioural_20261010_103442",
+ "stage_id": "1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+ "outcome": "LAUNCHED AND FAILED BEFORE SCIENCE, after materializing ALL FIVE arms at their recorded identities and training the first probe. No probe was scored; no ranking and no selection exist.",
+ "classification": "PRE-SCIENCE ENGINEERING ABORT (P12.1): the shared engine probe could not import its own dependency, so no generation protocol could be attested and the driver refused to score -- which is the admission gate behaving exactly as designed. NOT a DIGEST_MISMATCH and not a scientific finding.",
+ "root_cause": {
+  "error": "ModuleNotFoundError: No module named 'shared'",
+  "where": "scripts/shared/pod/autoinit_engine_probe.py line 44",
+  "why": "the information-architecture migration moved the evaluator to scripts/shared/evaluation/ and rewrote the probe's import to `shared.evaluation.uncapped_eval` -- which needs `scripts` on sys.path, because `shared` is a package under it -- but left the probe's own insert naming `scripts/evaluation`, which has not existed since. The probe could not import on ANY machine.",
+  "why_no_gate_caught_it": "every phase that runs the probe (C1, C3, A3) closed before the migration, and it is only ever executed as a bare subprocess on a pod. A driver sets sys.path IN PROCESS, which puts nothing in os.environ, so its subprocesses inherit no PYTHONPATH and must be self-sufficient.",
+  "evidence": "evidence/engine_probe_tail.log"
+ },
+ "repair": "the probe inserts `scripts` rather than `scripts/evaluation`. tests/integration/test_pod_script_imports_resolve.py pins the CLASS: for every script a driver spawns bare, each module-level first-party import must resolve under the paths that script sets for ITSELF, with no ambient PYTHONPATH -- and the complementary contract is asserted too, that the runner supplies PYTHONPATH for the collector and watchdog, which deliberately set none. A repo-wide sweep found 127 stale path inserts; all but this one are no-ops because the module resolves through another entry the script also adds, and they are left for a maintenance round rather than edited during a live experiment.",
+ "what_this_run_established": {
+  "all_five_arms_materialized_and_adopted": {
+   "build_order": [
+    "B",
+    "q1",
+    "q2",
+    "q3",
+    "q4"
+   ],
+   "B": "rebuilt from phase_c2.baseline.frozen_baseline_spec under A_bsz1 from the teacher as published, and ADOPTED at the design's four bound identities -- the FIRST time B has been rebuilt in the D1 chain, confirming both scientific decisions of the previous repair round on real hardware",
+   "candidates": {
+    "q1": "a7736a705b3e",
+    "q2": "3a4b4ede6888",
+    "q3": "9e04b4095713",
+    "q4": "253ebdee1f82"
+   },
+   "_each_equals_the_retention_record": true,
+   "checkpoint_paths": "the producer's own steps/03_* directories, which the first version of this chain would have mis-verified",
+   "minutes": 93.4
+  },
+  "the_b_first_reordering_paid_for_itself": "B was adopted ~20 minutes in rather than after 74 minutes of candidates, which is what the previous round's reordering was for.",
+  "the_durability_repair_worked_on_a_real_failure": "probe d1_screening_q1_s614923639 trained for 60.9 minutes, was never scored, and was preserved off-pod and identity-verified against the sha256 the driver recorded at training completion (aadfb955...). The teardown gate refused until that was true, then allowed. This is exactly the state-2 window the third review required be covered, and it was covered by the poll-loop preservation rather than at closeout.",
+  "the_headroom_check_ran": {
+   "free_gib": 62.783,
+   "need_gib": 15.545
+  },
+  "intermediate_release_worked": "8.72-12.09 GiB freed per arm, 3 per arm"
+ },
+ "the_preserved_probe": {
+  "probe_id": "d1_screening_q1_s614923639",
+  "trained_sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+  "bytes": 2384234968,
+  "train_seconds": 3654.3,
+  "location": "<scr>/products/trained_unscored/ on the launcher host",
+  "identity_record": "evidence/preserved_trained_q1_s614923639.json",
+  "will_the_next_attempt_restore_it": "NO, and the reason is transport cost",
+  "_why_not": "restoring means UPLOADING 2.38 GiB from this host at a measured ~0.72 MB/s -- about 53 minutes of billing pod time -- against ~61 minutes to retrain the same frozen unit at the same arm, seed and recipe. The saving is ~8 minutes and the restore path has never executed on a pod, so it would be a new risk surface on a paid session for no material gain. P8.4's own framing is that unnecessary data movement is an engineering defect and that $0 of GPU is not free. The copy is KEPT as evidence that the mechanism works and as insurance if a later attempt loses the same unit at greater cost.",
+  "_preservation_is_not_permission": "P8.2.1: holding these bytes authorizes nothing about reusing them."
+ },
+ "recorded_utc": "2026-10-10T13:28:32+00:00",
+ "session_commit": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6",
+ "authorized_base_commit": "bc8be594cdea651d94199eb370ef0626d93cf6c2",
+ "authorization_sha256": "3997dcd2a78c557d6166ffbd551fa2d7cd126e6ad7cd8f873f5f2c8dc3979c04",
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "g35iu7j61wd7w2",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 169.53,
+  "actual_usd": 3.0797,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "one_use_grant_consumed": true
+ },
+ "cost": {
+  "actual_usd": 3.0797,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 169.53,
+  "authorized_usd": 25.0053,
+  "within_authorization": true,
+  "_owner": "runtime/session.json :: cost; restated because derive_budget books from closeout/outcome.json"
+ },
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "teardown": {
+  "pod_deleted": true,
+  "provider_confirms_gone": true,
+  "final_desired_status": "TERMINATED",
+  "billing": false,
+  "gate": "allowed only AFTER the trained-unscored probe was preserved"
+ },
+ "evidence": {
+  "driver_record": "evidence/d1_behavioural.json",
+  "engine_probe_tail": "evidence/engine_probe_tail.log",
+  "preserved_probe_identity": "evidence/preserved_trained_q1_s614923639.json",
+  "session_record": "runtime/session.json",
+  "probes_trained": 1,
+  "probes_scored": 0,
+  "trained_unscored_preserved": [
+   "d1_screening_q1_s614923639"
+  ],
+  "arms_materialized": 5,
+  "arms_adopted": 5
+ },
+ "observers": "launcher exited; both event monitors stopped at this closeout. The watch set is empty."
+}
