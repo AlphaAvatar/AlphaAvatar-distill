@@ -72,8 +72,15 @@ SESSION_KIND = "d1_behavioural"
 #: search lost $8.1716 to exactly that.
 ACCOUNT_OPERATIONAL_RESERVE_USD = 5.0
 
-#: THE POD'S BLOCKING TEST GATE runs D1's OWN suite, positively declared.
-TEST_PATHS = ("scripts/stages/stage-1/phase_d1/tests",)
+#: THE POD'S BLOCKING TEST GATE runs the BEHAVIOURAL POD PREFLIGHT, positively
+#: declared -- not the whole `phase_d1/tests` directory, which carries the
+#: SEARCH and REPLAY chains' tests: those consume the search's staged assets,
+#: the teacher snapshot and the dev host's durable checkpoint store, none of
+#: which this session stages, and the first launch-bound sweep failed 77 of
+#: them under the pod environment for exactly that reason. The preflight is
+#: what a mis-staged behavioural pod would get wrong, checkable on its CPU.
+TEST_PATHS = (
+    "scripts/stages/stage-1/phase_d1/tests/behavioural_pod_preflight",)
 
 REPO = "/workspace/aad"
 
