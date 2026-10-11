@@ -118,26 +118,28 @@ execution/evidence defects; all three are repaired on this branch:**
                     evidence durable (P8.4: no remaining consumer).
 ```
 
-**SCREENING IS PREPARED AND BLOCKED ON A $0.94 PLANNING GAP.** The maintainer
-raised the **cumulative all-in** envelope from $25.0053 to **$30.0000** on
-2026-10-10 UTC (at most **+$4.9947**, not a fresh $30). Every accounting
-precondition is discharged and the whole chain is built — sweep, authorization,
-bundle, readiness — and the launcher's **dry run then refused at $0**: the
-design's expected 1087.16 min plus a 10% contingency and a 30-minute recovery
-reserve need 1225.88 min, and $21.6695 funds **1174.00**. Short by 51.88 min =
-**$0.9406**; cumulative needed **$30.9406**.
+**D1 SCREENING IS RUNNING.** Launched 2026-10-11 08:40 UTC on pod
+`b9cwmt7haborw6` (NVIDIA L40S, $1.09/h), run
+`d1_behavioural_20261011_083610`, after all seven pre-provider gates passed
+in a dry run that created nothing. Ten probes — q1–q4 and standing incumbent
+B at seeds 614923639 and 516448251 — all trained and evaluated in **one
+session on one host**, as `protocol_uniformity` requires. Watchdog armed at
+1355 min = $24.62 against a $24.9922 authorization.
 
-**The money covers the work; it does not cover the design's superseded estimate
-of the work.** On attempt 4's MEASURED basis the same reserves need 1109.87 min
-= $20.47, a cumulative $28.80 that fits with $1.20 spare. The 105-minute
-difference is all in the estimate: session overhead 82.0 estimated against
-14.7 measured, arm materialization 110.0 against 92.0 (twice, on two pods).
-Both ways to close the gap are the maintainer's — a ~$1 increase is not
-authorized and would also move the $30 per-session limit the amendment
-preserved; re-pricing the cell costs nothing and the design's own
-"measurement is authoritative" principle favours it, but the decision forbids
-modifying the design to make a grant acceptable. Owner:
-`analyses/d1_screening_estimate_vs_measurement_boundary.json`.
+**The maintainer added $100.00** of cumulative all-in authority for the
+remaining phase on 2026-10-10 UTC. The books are raised by exactly that each
+(project cap 490 → **590**, formal allowance 156.6523 → **256.6523**, package
+total 181.7264 → **281.7264**); the GPU engineering allowance and the **$30.00
+per-session limit are untouched**, and historical spend is not reset —
+$8.3305 across five subruns stays charged as incurred.
+
+**The $0.94 gap was the funding MODEL, not the money.** Netting prior subruns
+off a fresh session's cap bounded a ten-probe run at the remainder of a $30
+envelope that four engineering subruns had drawn down. Phase mode charges the
+phase for every subrun and bounds each session by **its own derived hard
+ceiling**. Worst case for the whole remaining phase — screening $25.0053 plus
+confirmation $15.2025 on top of the $8.3305 spent — is **$48.5383 of
+$130.00**, so confirmation is funded and needs no further funding decision.
 
 ```text
 subrun            all-in      min   aborted on
