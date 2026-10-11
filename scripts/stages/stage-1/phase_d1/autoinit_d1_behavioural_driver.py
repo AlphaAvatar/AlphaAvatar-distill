@@ -644,9 +644,23 @@ def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
                     "trained_under_image", "tag"):
             if doc.get(key):
                 state[key] = doc[key]
-        state["_training_session_differs"] = bool(
-            doc.get("trained_in_run")
-            and doc["trained_in_run"] != RUN_ID_FOR_PROVENANCE[0])
+        #: UNKNOWN IS NOT "SAME". A sidecar written before provenance was
+        #: stamped carries no `trained_in_run`, and defaulting that to False
+        #: would assert single-session training for a probe whose origin
+        #: nobody recorded -- the dangerous direction, and a real case:
+        #: attempt 7 runs a bundle that predates this field, so its preserved
+        #: probes are exactly that shape.
+        origin = doc.get("trained_in_run")
+        if not origin:
+            state["trained_in_run"] = "UNKNOWN"
+            state["_training_session_differs"] = "UNKNOWN"
+            state["_why_unknown"] = (
+                "the preservation sidecar predates provenance stamping; this "
+                "probe's training session cannot be established from it and "
+                "must not be assumed to be this one")
+        else:
+            state["_training_session_differs"] = (
+                origin != RUN_ID_FOR_PROVENANCE[0])
     return state
 
 

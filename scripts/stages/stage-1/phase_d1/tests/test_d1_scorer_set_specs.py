@@ -329,3 +329,24 @@ class TestAReusedProbeCarriesItsTrainingProvenance:
         launcher = (REPO / "scripts/stages/stage-1/phase_d1/"
                            "autoinit_d1_behavioural_launch.py").read_text()
         assert "--run-id '{run_id}'" in launcher or '--run-id' in launcher
+
+    def test_an_unstamped_sidecar_reports_UNKNOWN_not_same_session(
+            self, tmp_path):
+        """A sidecar written before provenance stamping must not assert
+        single-session training. Attempt 7 runs a bundle that predates the
+        field, so its preserved probes are exactly this shape and a silent
+        False would have claimed an origin nobody recorded."""
+        import hashlib
+
+        mod = self._driver()
+        mod.RUN_ID_FOR_PROVENANCE[0] = "run_B"
+        root = self._preserved(tmp_path, trained_in_run="run_A")
+        side = root / "preserved_identity.json"
+        doc = json.loads(side.read_text())
+        for gone in ("trained_in_run", "trained_on_pod", "trained_under_image"):
+            doc.pop(gone, None)
+        side.write_text(json.dumps(doc))
+        state = mod.trained_checkpoint_state(root)
+        assert state["_training_session_differs"] == "UNKNOWN"
+        assert state["trained_in_run"] == "UNKNOWN"
+        assert "must not be assumed" in state["_why_unknown"]
