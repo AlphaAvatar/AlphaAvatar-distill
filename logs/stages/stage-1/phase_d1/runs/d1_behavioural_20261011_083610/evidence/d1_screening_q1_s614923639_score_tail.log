@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/score_d1_screening.py", line 209, in <module>
+    main()
+  File "/workspace/aad/scripts/stages/stage-1/phase_d1/score_d1_screening.py", line 122, in main
+    scored = score_battery(
+             ^^^^^^^^^^^^^^
+  File "/workspace/aad/scripts/stages/stage-1/phase_c1/score_c1_confirmation.py", line 104, in score_battery
+    if len(samples) != spec["n"]:
+                       ~~~~^^^^^
+TypeError: string indices must be integers, not 'str'

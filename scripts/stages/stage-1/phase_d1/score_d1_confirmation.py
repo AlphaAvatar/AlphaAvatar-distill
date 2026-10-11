@@ -72,7 +72,17 @@ def battery_sets(role: str = ROLE) -> dict[str, object]:
     950 prompts 850 scorable.
     """
     strata = FAMILY.strata()
-    sets = {name: f"{name}.jsonl" for name in sorted(strata)}
+    #: SPECS, not filenames. `score_battery` reads `spec["n"]` and
+    #: `spec["domain"]` out of each value -- it derives the file path from the
+    #: KEY -- so a name->filename mapping makes it raise
+    #: `TypeError: string indices must be integers` on the first set. That is
+    #: what ended screening attempt 6 after the attestation had passed, the
+    #: admission had passed, and probe 1 had trained for 66 minutes: 182.8
+    #: paid minutes to discover a dict shape. Both counts come from
+    #: `battery_family.strata`, which owns them, so nothing here invents a
+    #: expected item count.
+    sets = {name: {"n": n, "domain": domain}
+            for name, (domain, n, _ok) in sorted(strata.items())}
     scorable = {name for name, (_domain, _n, ok) in strata.items() if ok}
     behaviour_only = set(sets) - scorable
     return {"sets": sets, "scorable_sets": scorable,
