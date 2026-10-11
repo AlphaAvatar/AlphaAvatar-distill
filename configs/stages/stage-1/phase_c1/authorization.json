@@ -8,7 +8,7 @@
   "_the_2026_09_17_raise_is_an_accounting_envelope": "NOT a spend authorization and NOT permission to launch either C2 session. It is the project's cumulative accounting bound, which the C2 chain's ceilings must fit inside; each session still needs its own grant, readiness record, one-use authorization and bundle. The headroom is NOT transferable to C3, C4 or any unrelated experiment, and the C1 formal/engineering/package allowances below did NOT move.",
   "_why_restated": "so a mis-priced session is REFUSED rather than mirrored. A ceiling that only echoes its source is not an independent check, and this is the last place a mis-priced session can be stopped before a grant exists. Amended 2026-09-04 for the approved repricing to the secure L40S rate of $1.09/h; every minute assumption is unchanged. The superseded triple at $0.99/h was 13.7578 / 12.2070 / 13.4277.",
   "_why_this_experiments_config_owns_a_project_number": "historical: the cap was first stated with C1's approved package and derive_budget.py reads it from here (scripts/consolidate/derive_budget.py :: project_balance). It is a PROJECT fact living in one experiment's config, which is poor ownership; it is left in place because moving it would repoint every consumer during a round whose purpose is a governance chain, and a cap with two owners is worse than a cap with an awkward one.",
-  "cumulative_cap_usd": 490.0,
+  "cumulative_cap_usd": 590.0,
   "hard_ceiling_usd": 15.1475,
   "planning_floor_usd": 13.4401,
   "soft_stop_usd": 14.7841
@@ -64,7 +64,7 @@
    "consuming the frozen confirmation battery for an endpoint",
    "formal execution -- that comes from the $55.0000 formal allowance, and the two do not transfer"
   ],
-  "formal_allowance_usd": 156.6523,
+  "formal_allowance_usd": 256.6523,
   "formal_attempts_include_the_first": true,
   "formal_attempts_max": null,
   "funds_formal_sessions_of": {
@@ -91,7 +91,7 @@
    "changing arms, seeds, recipe, battery, statistics or the behavioural vetoes"
   ],
   "package_id": "phase_c1.execution_package.2026-09-11",
-  "package_total_usd": 181.7264,
+  "package_total_usd": 281.7264,
   "per_attempt_hard_ceiling_usd": 30.0,
   "reconciliation_margin_usd": 0.6577,
   "stop_and_report": [
@@ -189,5 +189,27 @@
   "retry": "THIS authorization funds exactly ONE launcher session. Inside that session the launcher may take up to the approved number of acquisition draws, replacing a host that was created and never became usable; at most ONE resource may be billing at any instant, enforced by SessionRunner.release_and_confirm, and every draw shares this session's single ceiling. A FURTHER session needs a new grant, a new launch-bound readiness record, a new authorization and a new bundle -- see execution_package for when that is permitted without a further maintainer decision.",
   "training": "all six trainings must complete before any evaluation; a training failure is C1_INCOMPLETE, not a partial confirmation experiment"
  },
- "stage_id": "1"
+ "stage_id": "1",
+ "_amendment_2026_10_10_d1_completion": {
+  "granted_by": "maintainer, 2026-10-10 UTC, +$100.00 cumulative all-in for the remaining D1 behavioural phase",
+  "added_usd": 100.0,
+  "raised": [
+   "accepted_pricing.cumulative_cap_usd",
+   "execution_package.formal_allowance_usd",
+   "execution_package.package_total_usd"
+  ],
+  "deliberately_unchanged": {
+   "gpu_engineering_allowance_usd": 25.0741,
+   "per_attempt_hard_ceiling_usd": 30.0,
+   "_why": "the maintainer's terms: the GPU engineering allowance remains unchanged and the $30.00 per-session limit is preserved, with each session separately bounded by its own derived hard ceiling."
+  },
+  "historical_spend_is_not_reset": "cumulative_spend_at_approval_usd and every recorded subrun cost stay exactly as incurred. This raises the ceilings; it erases nothing.",
+  "before": {
+   "cumulative_cap_usd": 490.0,
+   "formal_allowance_usd": 156.6523,
+   "package_total_usd": 181.7264,
+   "gpu_engineering_allowance_usd": 25.0741,
+   "per_attempt_hard_ceiling_usd": 30.0
+  }
+ }
 }

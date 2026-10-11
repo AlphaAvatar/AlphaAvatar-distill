@@ -1,0 +1,52 @@
+{
+ "schema": "aadistill.budget.grant/v2",
+ "granted_by": "maintainer, 2026-10-10 UTC, after independent review of exec/d1-behavioural-readiness@f2583eea4b3aa2a0d7d3d74c5832112faa724351",
+ "granted_utc": "2026-10-10",
+ "rung": "screening",
+
+ "_contract": "A PHASE-LEVEL funding decision for the remaining D1 behavioural work: screening, confirmation if screening advances a candidate, ordinary engineering repairs and authorized pre-science retries, evidence preservation, transport, teardown and closeout. It is NOT permission to spend the allowance on one pod, and NOT permission to rerun a successful scientific measurement.",
+
+ "previous_phase_allowance_usd": 30.0,
+ "additional_authorized_usd": 100.0,
+ "phase_allowance_usd": 130.0,
+
+ "_what_the_allowance_means": "CUMULATIVE and ALL-IN across every resource and subrun of the remaining phase. Each SESSION is separately bounded by its own derived hard ceiling at the live rate -- the maintainer's terms -- and prior subruns are charged against the PHASE rather than netted off a fresh session's cap. Netting them off the session cap is what produced the $0.94 gap that stopped attempt 200001: it bounded a fresh ten-probe run at the remainder of a $30 envelope four engineering subruns had already drawn down.",
+
+ "cumulative_cap_usd": 590.0,
+
+ "_books_raised_by_100_each": {
+  "project_cumulative_cap_usd": 590.0,
+  "formal_allowance_usd": 256.6523,
+  "package_total_usd": 281.7264,
+  "_owner": "configs/stages/stage-1/phase_c1/authorization.json :: accepted_pricing.cumulative_cap_usd, execution_package.{formal_allowance_usd,package_total_usd}",
+  "_amendment_record": "the same config's _amendment_2026_10_10_d1_completion block, which names what was raised, what was deliberately not, and the before-values"
+ },
+
+ "_deliberately_unchanged": {
+  "gpu_engineering_allowance_usd": 25.0741,
+  "per_session_envelope_usd": 30.0,
+  "_why": "the maintainer's terms: the GPU engineering allowance remains unchanged and the $30.00 per-session limit is preserved. The issuer checks each session's derived ceiling against that limit rather than assuming it."
+ },
+
+ "_historical_spend_is_not_reset": "$8.3305 across five prior screening subruns stays recorded and charged as actually incurred -- four paid, one consumed at $0. cumulative_spend_usd remains $435.045. This raises ceilings; it erases nothing.",
+
+ "covers": "The remaining D1 behavioural phase on the frozen design f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2 and preregistration aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de. SCREENING: the d1_screening battery, arms q1-q4 plus standing incumbent B (53e30566...), seeds 614923639 and 516448251, exactly 10 paired recovery/evaluation probes, all ten trained and evaluated in ONE session on ONE host. CONFIRMATION, conditional on screening mechanically advancing a candidate: that candidate plus B, the three frozen confirmation seeds, six probes on d1_confirmation, verdict computed off-pod under the frozen inference rule. Each rung takes its own one-use authorization derived from this grant; no further maintainer funding decision is needed inside this scope.",
+
+ "does_not_authorize": [
+  "spending the phase allowance on a single pod, or any session above its own derived hard ceiling or the $30.00 per-session limit",
+  "a change to the frozen design, preregistration, arms, seeds, battery, recovery recipe, scoring, SESOI, guardrails or decision rule",
+  "substitution of checkpoint identities, or pooling the two historical q1 checkpoints",
+  "importing a historical probe into the screening comparison field",
+  "a rerun of the completed D1 structural full search",
+  "re-running, resuming or pooling a scientific measurement once formal measurement has begun, or rerunning one that already produced a complete valid endpoint",
+  "automatic promotion or adoption of any checkpoint outside the established scientific decision and maintainer adoption process"
+ ],
+
+ "engineering_autonomy": "Diagnose ordinary infrastructure and GPU execution failures, repair the actual cause, run the relevant regression and continue autonomously inside this allowance. Do not return for approval over routine pricing estimates, minor engineering overruns or individual pre-science retries while the authorized funds remain sufficient. Do not run the full test suite after every small change. GPU validation is allowed wherever CUDA, numerical equivalence or real model execution warrants it; CPU-only testing is not mandatory.",
+
+ "_the_price_is_derived_not_asked": "This grant states no per-session hard_cap_usd; the issuer refuses a grant that states both a phase allowance and a per-session cap. Each session's ceiling is derived from the live secure rate and the rung's priced cell. A lower live rate lowers it. A derived ceiling above the per-session limit, or a phase commitment above the allowance, is a refusal and a return to the maintainer -- never an automatic increase.",
+
+ "terminal_condition": "Continue until (1) screening and, if applicable, confirmation produce complete valid durable results; (2) an actual scientific identity or protocol conflict invalidates the frozen experiment; or (3) a genuine resource-safety or cumulative authorization boundary cannot be resolved inside this scope. For ordinary failures, repair and continue.",
+
+ "authorizes": "an additional $100.00 of cumulative all-in spending authority for the remaining D1 behavioural phase, and nothing else"
+}

@@ -41,7 +41,7 @@ GRANT = {
     "covers": "ONE formal D1 behavioural SCREENING session",
     "rung": "screening",
     "hard_cap_usd": 25.0053,
-    "cumulative_cap_usd": 490.0,
+    "cumulative_cap_usd": 590.0,
     "granted_utc": "2026-10-10",
     "does_not_authorize": ["a beam", "D2", "D3"],
 }
@@ -2019,14 +2019,25 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
             path.unlink(missing_ok=True)
 
     def test_the_production_assignment_is_not_the_ceiling(self):
-        """MUTATION: the check is non-vacuous only if restoring the old
-        assignment breaks it. Two coinciding numbers are what hid this for
-        four subruns, so the structural fact is pinned in the source."""
+        """MUTATION: the check is non-vacuous only if the old assignment would
+        break it. Two coinciding numbers are what hid this for four subruns.
+
+        Asserted BEHAVIOURALLY plus one narrow source check. The first version
+        pinned the literal `per_launch_hard_usd=remaining,` and phase-level
+        funding rewrote that line into a conditional -- a phrasing lock that
+        expired while the property it stood for still held."""
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "behavioural_authorization.py").read_text()
-        assert "per_launch_hard_usd=remaining," in src
         assert "per_launch_hard_usd=ceiling," not in src, (
-            "the per-launch bound is the ceiling again; the guard is vacuous")
+            "the per-launch bound is the unconditional priced ceiling again; "
+            "the guard is vacuous")
+        #: Under one-session funding with money spent, the bound MUST be
+        #: strictly below the priced ceiling -- which is the whole property.
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        partly = _payload(consumed_usd=2.0)
+        assert partly["per_launch_hard_usd"] < priced["hard_ceiling_usd"]
+        assert partly["per_launch_hard_usd"] == round(
+            priced["hard_ceiling_usd"] - 2.0, 4)
 
     def test_a_closeout_without_a_settled_cost_is_refused(self, tmp_path):
         """Silently counting an unpriced closeout as $0 would make the
@@ -2120,7 +2131,7 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         "previous_envelope_usd": 25.0053,
         "additional_authorized_usd": 4.9947,
         "cumulative_envelope_usd": 30.0,
-        "cumulative_cap_usd": 490.0,
+        "cumulative_cap_usd": 590.0,
         "granted_utc": "2026-10-11",
     }
 
@@ -2374,3 +2385,144 @@ class TestTheLauncherPlansWithinWhatWasAuthorized:
                            match="artifact-recovery window"):
             BA.narrow_to_remaining(
                 priced, remaining_usd=round(25.0 * rate, 4))
+
+
+class TestPhaseLevelFundingBoundsEachSessionByItsOwnCeiling:
+    """The 2026-10-10 +$100 decision's shape, and why it closes the gap.
+
+    Under one-session funding the issuer netted prior subruns off the session's
+    cap, so a fresh ten-probe run was bounded at the remainder of a $30
+    envelope four engineering subruns had drawn down -- $21.6695, against a
+    launcher plan needing $22.61. That $0.94 gap stopped attempt 200001.
+
+    Phase funding separates the two quantities the maintainer's terms separate:
+    the PHASE holds a cumulative allowance and is charged for every subrun as
+    actually incurred, while each SESSION is bounded by its own derived hard
+    ceiling and by the preserved $30 per-session limit.
+    """
+
+    GRANT = {
+        "granted_by": "maintainer-test",
+        "covers": "the remaining D1 behavioural phase",
+        "rung": "screening",
+        "previous_phase_allowance_usd": 30.0,
+        "additional_authorized_usd": 100.0,
+        "phase_allowance_usd": 130.0,
+        "cumulative_cap_usd": 590.0,
+        "granted_utc": "2026-10-10",
+    }
+
+    def test_the_session_takes_its_own_derived_ceiling_not_the_remainder(self):
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        #: Floored to whole minutes, so within one minute's cost of the cell.
+        assert payload["hard_cap_usd"] == pytest.approx(
+            priced["hard_ceiling_usd"], abs=0.02)
+        env = payload["envelope"]
+        assert env["one_use_ceiling_usd"] == 130.0
+        assert env["rung_priced_ceiling_usd"] == priced["hard_ceiling_usd"]
+        assert "PHASE allowance" in env["envelope_source"]
+
+    def test_prior_subruns_are_charged_to_the_phase_not_the_session(self):
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        env = payload["envelope"]
+        spent = BA.consumed_by_prior_subruns(REPO)
+        assert env["consumed_by_prior_subruns_usd"] == spent["consumed_usd"]
+        assert env["remaining_usd"] == round(130.0 - spent["consumed_usd"], 4)
+        #: and the session's cap is UNAFFECTED by that spend -- the defect
+        #: this mode exists to fix.
+        assert payload["hard_cap_usd"] > env["remaining_usd"] - 100.0
+
+    def test_prior_spend_is_read_across_BOTH_rungs(self):
+        """One allowance funds screening and confirmation, so the phase
+        commitment must see every subrun, not just this rung's."""
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        phase_wide = BA.consumed_by_prior_subruns(REPO)
+        assert payload["envelope"]["consumed_by_prior_subruns_usd"] == \
+            phase_wide["consumed_usd"]
+        assert payload["envelope"]["prior_subruns"], "non-vacuous"
+
+    def test_the_launchers_plan_fits_the_authorized_bound(self):
+        """THE WHOLE POINT. The same comparison the dry run made, which
+        refused under the old model and must pass under this one."""
+        import importlib.util
+
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py")
+        spec = importlib.util.spec_from_file_location("_d1b_l2", src)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        plan = m.budget_spec(
+            REPO, "screening",
+            authorized_minutes=payload["hard_runtime_minutes"]).plan(
+            price_per_hour=ACCEPTED_RATE,
+            authorized_usd=payload["hard_cap_usd"])
+        assert plan.hard_terminate_usd <= payload["hard_cap_usd"] + 1e-6
+        #: with the reserves INTACT, not thinned to fit
+        assert plan.artifact_recovery_reserve_minutes == 30.0
+        assert plan.soft_stop_minutes < plan.hard_terminate_minutes
+
+    def test_the_per_session_limit_is_still_enforced(self):
+        """Preserved by the amendment's terms, so a derived ceiling above it
+        is refused even though the $130 phase could easily afford $31.
+
+        Enforced by `check_the_four_conditions`, which is its OWNER. Phase
+        mode adds no second copy: this test originally asserted a duplicate
+        message and that is how the duplicate was found."""
+        import stages.phase_d1.behavioural_authorization as mod
+
+        real = mod.reprice_rung_at
+
+        def inflated(rate, rung, root=REPO):
+            out = dict(real(rate, rung, root))
+            out["hard_ceiling_usd"] = 31.0
+            return out
+
+        mod.reprice_rung_at = inflated
+        try:
+            with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                               match="per-session envelope"):
+                _payload(grant=self.GRANT, consumed_usd=None)
+        finally:
+            mod.reprice_rung_at = real
+
+    def test_a_phase_commitment_above_the_allowance_is_refused(self):
+        """The real safety check: everything spent plus what this session may
+        spend, against the allowance."""
+        tight = {**self.GRANT, "phase_allowance_usd": 20.0,
+                 "previous_phase_allowance_usd": 10.0,
+                 "additional_authorized_usd": 10.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="phase allowance"):
+            _payload(grant=tight, consumed_usd=None)
+
+    def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
+        bad = {**self.GRANT, "additional_authorized_usd": 50.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="do not sum to it"):
+            _payload(grant=bad, consumed_usd=None)
+
+    def test_a_grant_may_not_state_both_funding_models(self):
+        both = {**self.GRANT, "cumulative_envelope_usd": 30.0}
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="BOTH a phase_allowance_usd"):
+            _payload(grant=both, consumed_usd=None)
+
+    def test_one_launch_may_not_plan_the_whole_phase_allowance(self):
+        """`per_launch_hard_usd` must be the SESSION's ceiling, not the
+        phase remainder -- otherwise core's require_within_launch_limit would
+        wave through five sessions' worth in one launch, which is the precise
+        thing its docstring says it prevents."""
+        payload = _payload(grant=self.GRANT, consumed_usd=None)
+        assert payload["per_launch_hard_usd"] == payload["hard_cap_usd"]
+        assert payload["per_launch_hard_usd"] < \
+            payload["envelope"]["remaining_usd"]
+
+    def test_the_one_session_model_still_behaves_as_before(self):
+        """Additive: a grant with no phase allowance is unchanged."""
+        payload = _payload(consumed_usd=0.0)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert payload["envelope"]["one_use_ceiling_usd"] == \
+            priced["hard_ceiling_usd"]
+        assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"]

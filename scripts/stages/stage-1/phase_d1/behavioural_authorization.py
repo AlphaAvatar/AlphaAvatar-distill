@@ -482,7 +482,21 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     #: $24.63 hard GPU bound against a $16.79 remainder -- authorizing an
     #: ~$8 overspend of the maintainer's envelope that no check would catch.
     #: Two coinciding numbers hid which one was being read.
-    spent = (consumed_by_prior_subruns(root, rung=rung)
+    #: WHICH FUNDING MODEL BOUNDS THIS ISSUANCE, decided before anything is
+    #: netted -- the answer changes the SCOPE of the prior spend that is read.
+    stated_phase = grant.get("phase_allowance_usd")
+    stated_envelope = grant.get("cumulative_envelope_usd")
+    if stated_phase is not None and stated_envelope is not None:
+        raise D1BehaviouralIssuanceRefused(
+            "the grant states BOTH a phase_allowance_usd and a "
+            "cumulative_envelope_usd. They are different funding models -- "
+            "one bounds the phase and lets each session take its derived "
+            "ceiling, the other bounds one session cumulatively -- and a "
+            "grant that states both does not say which bounds this issuance.")
+    phase_mode = stated_phase is not None
+
+    spent = (consumed_by_prior_subruns(root,
+                                       rung=None if phase_mode else rung)
              if consumed_usd is None else
              {"n_subruns": None, "consumed_usd": round(float(consumed_usd), 4),
               "subruns": [], "rung": rung,
@@ -498,7 +512,48 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     #: shape still issues exactly as before.
     envelope = ceiling
     envelope_source = "the rung's priced ceiling at the live rate"
-    stated_envelope = grant.get("cumulative_envelope_usd")
+    #: What `narrow_to_remaining` bounds THIS SESSION by. Normally the
+    #: remainder of the envelope; under phase-level funding, the session's own
+    #: derived ceiling. Set below.
+    session_budget: float | None = None
+
+    #: PHASE-LEVEL FUNDING, the 2026-10-10 +$100 decision's shape. The phase
+    #: holds a cumulative allowance and EACH SESSION is bounded by its own
+    #: derived hard ceiling rather than by what is left of one session's
+    #: envelope -- the maintainer's terms: "each new session separately
+    #: bounded by its own derived hard ceiling", and "Do not reset or erase
+    #: historical expenditure. All previous subruns remain recorded and
+    #: charged as actually incurred."
+    #:
+    #: So prior subruns are NOT netted off this session's cap. They are
+    #: charged against the PHASE, and the check that matters is whether the
+    #: phase can still fund this session on top of all it has spent. Netting
+    #: them off the session cap is exactly what produced the $0.94 gap: it
+    #: bounded a fresh ten-probe run at the remainder of a $30 envelope that
+    #: four engineering subruns had already drawn down.
+    if phase_mode:
+        envelope = round(float(stated_phase), 4)
+        envelope_source = ("the grant's PHASE allowance; this session takes "
+                           "its own derived hard ceiling")
+        prior = grant.get("previous_phase_allowance_usd")
+        added = grant.get("additional_authorized_usd")
+        if prior is not None and added is not None and \
+                abs((float(prior) + float(added)) - envelope) > 5e-4:
+            raise D1BehaviouralIssuanceRefused(
+                f"the grant states a ${envelope:.4f} phase allowance but "
+                f"${float(prior):.4f} previous + ${float(added):.4f} "
+                "additional do not sum to it. A funding amendment whose parts "
+                "disagree with its total cannot be audited.")
+        #: THE PER-SESSION LIMIT is NOT re-checked here. It already has an
+        #: owner: `check_the_four_conditions`, run above, refuses a derived
+        #: ceiling above the per-session envelope in those words. A second
+        #: copy of a live check is a second thing that can disagree with it,
+        #: and the suite caught this one asserting its own message instead of
+        #: the real owner's.
+        #: THE PHASE COMMITMENT: everything already spent, plus what this
+        #: session may spend, against the allowance. Scoped to the whole phase
+        #: rather than one rung, because one allowance funds both rungs.
+        session_budget = ceiling
     if stated_envelope is not None:
         envelope = round(float(stated_envelope), 4)
         envelope_source = "the grant's stated CUMULATIVE envelope"
@@ -518,7 +573,16 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
                 "which this amendment was required to preserve.")
 
     remaining = round(envelope - spent["consumed_usd"], 4)
-    if spent["consumed_usd"] > 0 and remaining < priced["expected_usd"]:
+    if phase_mode:
+        committed = round(spent["consumed_usd"] + ceiling, 4)
+        if committed > envelope + 5e-4:
+            raise D1BehaviouralIssuanceRefused(
+                f"the phase has spent ${spent['consumed_usd']:.4f} and this "
+                f"session's derived ceiling is ${ceiling:.4f}, which together "
+                f"commit ${committed:.4f} against a ${envelope:.4f} phase "
+                "allowance. The science does not shrink to fit: a budget "
+                "increase is a MAINTAINER decision.")
+    elif spent["consumed_usd"] > 0 and remaining < priced["expected_usd"]:
         who = ("a caller-supplied prior spend of" if spent["n_subruns"] is None
                else f"this session's {spent['n_subruns']} earlier subrun(s) "
                     "consumed")
@@ -554,7 +618,9 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
     #: budget is lower, and that the launcher/watchdog bound must be no greater
     #: than the remaining authorized ALL-IN allowance with a real teardown and
     #: evidence-preservation reserve.
-    bounds = narrow_to_remaining(priced, remaining_usd=remaining)
+    bounds = narrow_to_remaining(
+        priced, remaining_usd=session_budget if session_budget is not None
+        else remaining)
     stated_cap = grant.get("cumulative_cap_usd")
     if stated_cap is not None and \
             abs(float(stated_cap) - money["project_cap_usd"]) > 5e-4:
@@ -590,10 +656,18 @@ def build_payload(*, grant: Mapping[str, Any], session_commit: str,
         #: these coincide; after four subruns against a raised cumulative
         #: envelope they do not, and the smaller one is what was authorized.
         hard_cap_usd=bounds["all_in_hard_usd"],
-        #: The REMAINDER, not the ceiling -- so a relaunch's watchdog bound is
-        #: what is actually left of the envelope rather than what the whole
-        #: session was once worth.
-        per_launch_hard_usd=remaining,
+        #: WHAT ONE LAUNCH MAY PLAN, which is NOT the same quantity as the
+        #: envelope's remainder.
+        #:
+        #: Under one-session funding it IS the remainder: a relaunch's bound
+        #: must be what is left, not what the whole session was once worth.
+        #: Under PHASE funding it is this session's own derived ceiling --
+        #: passing the $121.67 phase remainder would let
+        #: `require_within_launch_limit` wave through five sessions' worth of
+        #: allowance in one launch, which is the precise thing its docstring
+        #: says it exists to prevent.
+        per_launch_hard_usd=(bounds["all_in_hard_usd"] if phase_mode
+                             else remaining),
         authorized_stages=AUTHORIZED_STAGES,
         stage_conditions=STAGE_CONDITIONS,
         scope_note=str(grant.get("covers") or "")[:4000],

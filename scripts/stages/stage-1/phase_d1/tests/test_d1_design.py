@@ -1032,15 +1032,34 @@ class TestThePhaseFundingAmendment:
         derivation is in the authorization's own amendment block.
         """
         ep, ap = self._terms()
-        #: 2026-10-07.
-        assert ep["formal_allowance_usd"] == 156.6523
-        assert ap["cumulative_cap_usd"] == 490.0
+        #: 2026-10-10, THE THIRD DECISION: +$100.00 of cumulative all-in
+        #: authority for the remaining D1 behavioural phase, raising the
+        #: project cap, the formal allowance and the package total by exactly
+        #: that much each. The maintainer's terms left the engineering
+        #: allowance and the per-session limit alone, and said so.
+        assert ap["cumulative_cap_usd"] == 590.0
+        assert ep["formal_allowance_usd"] == 256.6523
+        assert ep["package_total_usd"] == 281.7264
         #: 2026-10-08: +$5.0741, the derived shortfall and nothing more.
+        #: UNCHANGED by the 2026-10-10 decision, by its own terms.
         assert ep["gpu_engineering_allowance_usd"] == 25.0741
-        #: Derived, not independently granted -- see the test below.
-        assert ep["package_total_usd"] == 181.7264
-        #: UNCHANGED by BOTH amendments.
+        #: UNCHANGED by ALL THREE amendments.
         assert ep["per_attempt_hard_ceiling_usd"] == 30.0
+        #: And the +100 is recorded as a decision, with its before-values, so
+        #: the raise is auditable rather than merely present.
+        a = ep["_amendment_2026_10_10_d1_completion"] if \
+            "_amendment_2026_10_10_d1_completion" in ep else \
+            json.loads((REPO / "configs/stages/stage-1/phase_c1"
+                               "/authorization.json").read_text())[
+                "_amendment_2026_10_10_d1_completion"]
+        assert a["added_usd"] == 100.0
+        assert a["before"]["cumulative_cap_usd"] == 490.0
+        assert a["before"]["formal_allowance_usd"] == 156.6523
+        assert a["before"]["package_total_usd"] == 181.7264
+        assert a["deliberately_unchanged"][
+            "gpu_engineering_allowance_usd"] == 25.0741
+        assert a["deliberately_unchanged"][
+            "per_attempt_hard_ceiling_usd"] == 30.0
 
     def test_the_engineering_raise_is_exactly_the_derived_shortfall(self):
         """A raise bigger than the shortfall would be a new grant wearing a
@@ -1064,7 +1083,13 @@ class TestThePhaseFundingAmendment:
         campaign, not to raise the cap by default."""
         ep, ap = self._terms()
         cap = ep["_amendment_2026_10_08_engineering_allowance"]["project_cap"]
-        assert cap["cap_usd"] == ap["cumulative_cap_usd"] == 490.0
+        #: $490.0 is what the cap WAS on 2026-10-08, and this block is that
+        #: date's evidence. It was asserted equal to the LIVE cap, which held
+        #: only until a later decision moved one -- the 2026-10-10 +$100 did.
+        #: The historical figure is not rewritten; what is asserted is that
+        #: the live cap never silently went BELOW it.
+        assert cap["cap_usd"] == 490.0
+        assert ap["cumulative_cap_usd"] >= cap["cap_usd"]
         assert cap["remaining_usd"] >= cap["cap_usd"] - cap[
             "cumulative_spend_usd"] - 1e-9
         assert cap["remaining_usd"] > ep[
@@ -1433,8 +1458,12 @@ class TestTheShortfallComparesOnlyWorkStILLToFund:
         b = m.budget()
         assert b["provisional_shortfall_usd"] < 0, (
             "screening plus confirmation fit the remaining balance")
-        assert b["provisional_shortfall_against_whole_chain_usd"] > 0, (
-            "the whole-chain figure is still positive and still reported")
+        #: The STRUCTURAL relation, not a sign: the whole-chain figure charges
+        #: the completed search too, so it is always the larger of the two.
+        #: Asserting it POSITIVE held only while the balance sat between the
+        #: two ceilings, and the 2026-10-10 +$100 moved the balance above both.
+        assert (b["provisional_shortfall_against_whole_chain_usd"]
+                > b["provisional_shortfall_usd"])
         assert b["chain_completion"]["complete"] == ["search"]
 
     def test_the_funding_blocker_is_closed(self):
