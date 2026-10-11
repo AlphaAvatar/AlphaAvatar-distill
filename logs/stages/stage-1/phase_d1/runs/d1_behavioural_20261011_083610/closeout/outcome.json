@@ -24,9 +24,13 @@
  ],
  "the_preserved_probe": {
   "probe_id": "d1_screening_q1_s614923639",
-  "trained_sha256": "f8ddbb103e34",
+  "trained_sha256": "f8ddbb103e343d51e5d974263e19b0aea55772a6ae19b34b4e59a027c81a9527",
   "state": "trained, durable, not validly scored -- the THIRD artifact under this label after aadfb955 (attempt 3) and 71387681 (attempt 4). Archival evidence only; protocol_uniformity forbids importing it into a differently-trained field.",
-  "_standing_fact": "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+  "_standing_fact": "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json",
+  "tag": "step_001023",
+  "weight_bytes": 2384234968,
+  "weights_retired_utc": "2026-10-11",
+  "weights_retired_why": "trained but NEVER validly scored, and permanently unusable as science: protocol_uniformity requires every probe of a rung to be trained in ONE session, so a single probe from a failed session can never enter a comparison field. It had no possible consumer. The full sha256 above, the tag and the byte count are the identity, and they outlive the bytes."
  },
  "recorded_utc": "2026-10-11T12:00:00+00:00",
  "session_commit": "fef6bb64654809e61b656b8074323a52418e60ed",
@@ -64,9 +68,20 @@
   "gate": "allowed=True failed=training_complete -- deletion permitted only after the trained-unscored probe was preserved"
  },
  "evidence": {
-  "secured": ["evidence/d1_behavioural.json", "evidence/d1_screening_q1_s614923639_generation_admission.json", "evidence/d1_screening_q1_s614923639_score_tail.log", "evidence/d1_screening_q1_s614923639_eval_tail.log"],
+  "secured": [
+   "evidence/d1_behavioural.json",
+   "evidence/d1_screening_q1_s614923639_generation_admission.json",
+   "evidence/d1_screening_q1_s614923639_score_tail.log",
+   "evidence/d1_screening_q1_s614923639_eval_tail.log"
+  ],
   "_the_score_tail_is_the_diagnosis": "pulled off the pod before teardown; it carries the TypeError traceback naming score_battery line 104."
  },
- "observers": {"monitors_stopped_in_this_terminal_path": ["bzweb63o0", "bpiofnfqe"], "watch_set_now_empty": true},
+ "observers": {
+  "monitors_stopped_in_this_terminal_path": [
+   "bzweb63o0",
+   "bpiofnfqe"
+  ],
+  "watch_set_now_empty": true
+ },
  "next_action": "Relaunched as attempt 7 with both scorers repaired. No maintainer decision required: the phase allowance has $118.31 remaining."
 }

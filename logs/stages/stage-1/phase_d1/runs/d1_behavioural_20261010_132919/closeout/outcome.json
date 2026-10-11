@@ -36,7 +36,10 @@
   "state": "P8.4 state 4 -> state 2. Training was valid; only the generation runtime identity was wrong, and that is downstream of training. The checkpoint is trained, durable and not validly scored.",
   "durable_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639 (2.3 GiB, on the dev box, with preserved_identity.json and run_completion.json)",
   "reuse_is_not_authorized_by_preservation": "P8.2.1. Whether a replacement session resumes it at scoring is the frozen protocol's rule, not a consequence of the file existing. Transport IS available (both private HF repos accept 2.22 GiB as of 2026-10-11); whether the continuation is COMPATIBLE with the frozen paired-screening protocol is a separate question, analysed in logs/stages/stage-1/phase_d1/analyses/d1_screening_continuation_identity.json.",
-  "_second_artifact_under_one_label": "this is now the SECOND preserved checkpoint for (q1, seed 614923639), after attempt 103442's aadfb955. The standing fact d1_probe_training_is_not_bit_reproducible.json governs: they are two artifacts for one label and must never be pooled."
+  "_second_artifact_under_one_label": "this is now the SECOND preserved checkpoint for (q1, seed 614923639), after attempt 103442's aadfb955. The standing fact d1_probe_training_is_not_bit_reproducible.json governs: they are two artifacts for one label and must never be pooled.",
+  "weight_bytes": 2384234968,
+  "weights_retired_utc": "2026-10-11",
+  "weights_retired_why": "trained but NEVER validly scored, and permanently unusable as science: protocol_uniformity requires every probe of a rung to be trained in ONE session, so a single probe from a failed session can never enter a comparison field. It had no possible consumer. The full sha256 above, the tag and the byte count are the identity, and they outlive the bytes."
  },
  "recorded_utc": "2026-10-11T00:00:00+00:00",
  "session_commit": "0a698242ac30",

@@ -2991,6 +2991,51 @@
    "expected_reconstruction_cost": "GPU, not budgeted -- E1 cost $47.60 for all 24 arms",
    "frozen_results_location": "artifacts/stage3/e1_results.json",
    "deleted_utc": "2026-09-30T00:00:00+00:00"
+  },
+  {
+   "deleted_utc": "2026-10-11",
+   "artifact": "d1_behavioural_20261010_103442 :: d1_screening_q1_s614923639 (trained-unscored)",
+   "sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+   "tag": "step_001023",
+   "bytes": 2384234968,
+   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_103442/products/trained_unscored/d1_screening_q1_s614923639",
+   "store": "dev-box scratch (never uploaded; no HF quota involved)",
+   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
+   "evidence_kept": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+   ],
+   "freed_gib": 2.2205
+  },
+  {
+   "deleted_utc": "2026-10-11",
+   "artifact": "d1_behavioural_20261010_132919 :: d1_screening_q1_s614923639 (trained-unscored)",
+   "sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
+   "tag": "step_001023",
+   "bytes": 2384234968,
+   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639",
+   "store": "dev-box scratch (never uploaded; no HF quota involved)",
+   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
+   "evidence_kept": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+   ],
+   "freed_gib": 2.2205
+  },
+  {
+   "deleted_utc": "2026-10-11",
+   "artifact": "d1_behavioural_20261011_083610 :: d1_screening_q1_s614923639 (trained-unscored)",
+   "sha256": "f8ddbb103e343d51e5d974263e19b0aea55772a6ae19b34b4e59a027c81a9527",
+   "tag": "step_001023",
+   "bytes": 2384234968,
+   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_083610/products/trained_unscored/d1_screening_q1_s614923639",
+   "store": "dev-box scratch (never uploaded; no HF quota involved)",
+   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
+   "evidence_kept": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/closeout/outcome.json",
+    "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
+   ],
+   "freed_gib": 2.2205
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."

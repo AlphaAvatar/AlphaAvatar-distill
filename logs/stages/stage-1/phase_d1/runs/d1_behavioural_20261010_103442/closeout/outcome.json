@@ -51,7 +51,11 @@
   "identity_record": "evidence/preserved_trained_q1_s614923639.json",
   "will_the_next_attempt_restore_it": "NO, and the reason is transport cost",
   "_why_not": "restoring means UPLOADING 2.38 GiB from this host at a measured ~0.72 MB/s -- about 53 minutes of billing pod time -- against ~61 minutes to retrain the same frozen unit at the same arm, seed and recipe. The saving is ~8 minutes and the restore path has never executed on a pod, so it would be a new risk surface on a paid session for no material gain. P8.4's own framing is that unnecessary data movement is an engineering defect and that $0 of GPU is not free. The copy is KEPT as evidence that the mechanism works and as insurance if a later attempt loses the same unit at greater cost.",
-  "_preservation_is_not_permission": "P8.2.1: holding these bytes authorizes nothing about reusing them."
+  "_preservation_is_not_permission": "P8.2.1: holding these bytes authorizes nothing about reusing them.",
+  "tag": "step_001023",
+  "weight_bytes": 2384234968,
+  "weights_retired_utc": "2026-10-11",
+  "weights_retired_why": "trained but NEVER validly scored, and permanently unusable as science: protocol_uniformity requires every probe of a rung to be trained in ONE session, so a single probe from a failed session can never enter a comparison field. It had no possible consumer. The full sha256 above, the tag and the byte count are the identity, and they outlive the bytes."
  },
  "recorded_utc": "2026-10-10T13:28:32+00:00",
  "session_commit": "d8b9b8837e28e54704c3d8cb926a6d33876f8ea6",
