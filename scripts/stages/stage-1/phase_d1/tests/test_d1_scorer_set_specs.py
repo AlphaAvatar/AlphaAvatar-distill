@@ -350,3 +350,98 @@ class TestAReusedProbeCarriesItsTrainingProvenance:
         assert state["_training_session_differs"] == "UNKNOWN"
         assert state["trained_in_run"] == "UNKNOWN"
         assert "must not be assumed" in state["_why_unknown"]
+
+
+class TestPreservedWeightsSurviveAFailureAndAreReleasedOnSuccess:
+    """The project rule needs the weights to still EXIST when a replacement
+    attempt starts, and the old policy deleted them mid-rung.
+
+    `trained_unscored_probes` filtered `trained and not scored`, so a probe
+    that trained and scored inside one 120-second poll interval was never
+    fetched off-pod at all -- its weights existed only on the pod and died
+    with it. And `prune_preserved_scored` ran from the POLL hook, deleting a
+    probe's preserved copy the moment its score was durable. Between them, a
+    failure at probe 7 left attempt 8 with no weights for probes 1-6 and no
+    way to reuse their measurements either, because a probe scored in an
+    earlier session was evaluated under that session's attested protocol.
+    """
+
+    @staticmethod
+    def _launcher():
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py")
+        spec = importlib.util.spec_from_file_location("_d1b_pres", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    def test_preservation_covers_every_trained_probe_not_only_unscored(self):
+        import inspect
+
+        mod = self._launcher()
+        src = inspect.getsource(mod.trained_probes_to_preserve)
+        assert 'p.get("trained") and p.get("model_dir")' in src
+        assert 'not p.get("scored")' not in src, (
+            "excluding scored probes is the race that lost them: scoring "
+            "follows training inside one poll interval")
+
+    def test_the_release_is_not_called_from_the_poll_hook(self):
+        import inspect
+
+        mod = self._launcher()
+        assert "prune_preserved_scored" not in inspect.getsource(
+            mod.secure_probe_evidence), (
+            "releasing mid-rung is what made a replacement attempt retrain")
+        assert "prune_preserved_scored(ctx)" in inspect.getsource(
+            mod.fetch_probe_evidence), "it must still have a caller"
+
+    def test_the_release_refuses_unless_the_rung_completed(self):
+        """A no-op on every failure terminal, which is the whole point."""
+        mod = self._launcher()
+
+        class Ctx:
+            def __init__(self, terminal):
+                self.evidence = {"terminal": terminal,
+                                 "trained_unscored_preserved": {"p": {
+                                     "verified": True, "dest": "/nonexistent"}},
+                                 "probe_evidence_secured": {}}
+                self.args = type("A", (), {"scr": "/tmp", "ckpt_store": None})()
+            def say(self, *a, **k): pass
+
+        for terminal in ("RUN_FAILED", "POLL_LIMIT", "POD_GONE", ""):
+            ctx = Ctx(terminal)
+            mod.prune_preserved_scored(ctx)
+            row = ctx.evidence["trained_unscored_preserved"]["p"]
+            assert not row.get("pruned"), (
+                f"terminal {terminal!r} released preserved weights; a "
+                "replacement attempt needs them")
+
+    def test_the_teardown_gate_holds_for_every_trained_probe(self, tmp_path):
+        """A pod must not go while ANY trained probe's weights are only on
+        it -- scored or not, they are what a replacement resumes.
+
+        Exercised through the real gate rather than by matching its message:
+        a SCORED probe with unpreserved weights must refuse teardown, which
+        the old gate allowed.
+        """
+        mod = self._launcher()
+        record = tmp_path / "d1_behavioural.json"
+        record.write_text(json.dumps({"probes": [
+            {"probe_id": "p_scored", "trained": True, "scored": True,
+             "model_dir": "/workspace/p_scored"},
+        ]}))
+
+        class Ctx:
+            def __init__(self):
+                self.evidence = {"probe_evidence_secured": {}}
+                self.args = type("A", (), {"scr": str(tmp_path),
+                                           "ckpt_store": None})()
+            def say(self, *a, **k): pass
+
+        ctx = Ctx()
+        mod.evidence_locations = lambda _c: [record]
+        ok, note = mod.probes_evidence_secured(ctx, [])
+        assert ok is False, (
+            "a SCORED probe whose weights are not preserved off-pod must "
+            f"hold the pod; the gate allowed teardown with note={note!r}")
+        assert "p_scored" in note

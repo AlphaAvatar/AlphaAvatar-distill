@@ -300,11 +300,30 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                 if rc == 0 and target.is_file():
                     ctx.say(f"  secured {name}")
         #: Trained-but-unscored durability DURING the run (P8.2.1: persist at
-        #: the moment of completion, not at a closeout that may never come) --
-        #: and prune preserved copies whose probe has since been validly
-        #: scored, because those bytes then have no remaining consumer.
+        #: the moment of completion, not at a closeout that may never come).
+        #:
+        #: PRUNING IS NOT DONE HERE ANY MORE. It used to delete a probe's
+        #: weights the moment its score was durable, on the reasoning that a
+        #: scored checkpoint has no remaining consumer. It has exactly one,
+        #: and it is the project's standing rule: a replacement attempt must
+        #: RESUME preserved checkpoints rather than retrain them. Pruning
+        #: mid-rung made that impossible for every probe already scored --
+        #: attempt 8 would have found no weights and no result on a fresh pod
+        #: and retrained from zero, 61 minutes a probe.
+        #:
+        #: It cannot be fixed by carrying the SCORES forward instead: a probe
+        #: scored in an earlier session was generated and evaluated under
+        #: THAT session's attested protocol, and `protocol_uniformity`'s
+        #: binding clause requires one protocol identity across the field.
+        #: Those hashes do differ in practice -- attempts 6 and 7 drew pod
+        #: images with different NVIDIA drivers, which the runtime digest
+        #: hashes. Keeping the weights lets a replacement RE-EVALUATE every
+        #: probe under its own single attested protocol, which satisfies the
+        #: requirement and still retrains nothing.
+        #:
+        #: The bytes are released at a SUCCESSFUL terminal instead, where
+        #: there is genuinely no further consumer.
         preserve_trained_unscored(ctx)
-        prune_preserved_scored(ctx)
     except Exception as exc:                                    # noqa: BLE001
         ctx.evidence.setdefault("on_poll_errors", []).append(
             f"secure_probe_evidence: {type(exc).__name__}: {exc}")
@@ -353,14 +372,22 @@ def write_release_ack(ctx: SessionContext, probe_id: str) -> bool:
 
 
 def prune_preserved_scored(ctx: SessionContext) -> None:
-    """Delete preserved trained-unscored copies whose probe is now scored.
+    """Release preserved weights ONCE THE RUNG HAS COMPLETED SUCCESSFULLY.
 
-    P8.4: preserve only bytes with an actual remaining scoring consumer. A
-    probe preserved during its scoring window loses that consumer the moment
-    its score and evidence are durable, so the local copy is removed --
-    containment-checked under the preservation root -- and the row says so.
-    MUST NOT raise.
+    Called from the terminal path, never from the poll hook. P8.4 says to keep
+    only bytes with a remaining consumer, and until the rung completes there
+    IS one: the project's standing rule is that a replacement attempt resumes
+    preserved checkpoints instead of retraining them, and a probe whose
+    weights were deleted mid-rung can only be retrained. Once every probe is
+    scored and its evidence durable, no attempt needs the weights again --
+    the ranking is a pure function of the scored rows, and
+    `rank_screening_offpod.py` can compute it without a pod at all.
+
+    Containment-checked under the preservation root. MUST NOT raise.
     """
+    if str(ctx.evidence.get("terminal") or "") not in ("ALL_DONE",
+                                                       "RUNG_COMPLETE"):
+        return
     import shutil
 
     try:
@@ -398,13 +425,31 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
 POD_PROBE_ROOT = f"{REPO}/artifacts/stages/stage-3/d1_behavioural"
 
 
-def trained_unscored_probes(ctx: SessionContext) -> list[dict] | None:
-    """Probes that FINISHED TRAINING and were not scored, or None if unknown.
+def trained_probes_to_preserve(ctx: SessionContext) -> list[dict] | None:
+    """Every probe that FINISHED TRAINING, or None if the record is unknown.
 
-    P8.4 state 2: trained + not validly scored means the WEIGHTS are owed --
-    scoring genuinely consumes them, and the protocol forbids retraining a
-    frozen unit for a different outcome. A probe that scored is state 1 and
-    its weights are deliberately NOT fetched.
+    THIS USED TO EXCLUDE SCORED PROBES, and that is the defect. The filter was
+    `trained and not scored`, on P8.4 state 1's reasoning that a scored
+    checkpoint is archival evidence rather than an execution dependency. Two
+    things were wrong with it.
+    
+    First, it raced. Scoring follows training immediately and the poll runs
+    every 120 s, so a probe that trained and scored inside one poll interval
+    was NEVER FETCHED AT ALL -- its weights existed only on the pod and died
+    with it.
+
+    Second, a scored checkpoint does have a consumer here: the project's
+    standing rule is that a replacement attempt resumes preserved checkpoints
+    instead of retraining them. Carrying the SCORES forward instead does not
+    work, because a probe scored in an earlier session was generated and
+    evaluated under that session's attested protocol and
+    `protocol_uniformity`'s binding clause requires one protocol identity
+    across the field -- and those hashes do differ between pods in practice.
+    Keeping the weights lets a replacement RE-EVALUATE every probe under its
+    own single attested protocol: no retraining, and the requirement holds.
+
+    The bytes are released at a successful terminal, by
+    `prune_preserved_scored`, where no attempt needs them again.
     """
     for path in evidence_locations(ctx):
         if not path.is_file():
@@ -414,8 +459,7 @@ def trained_unscored_probes(ctx: SessionContext) -> list[dict] | None:
         except json.JSONDecodeError:
             continue
         return [p for p in record.get("probes", [])
-                if p.get("trained") and not p.get("scored")
-                and p.get("model_dir")]
+                if p.get("trained") and p.get("model_dir")]
     return None
 
 
@@ -435,7 +479,7 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
     import shutil
 
     try:
-        units = trained_unscored_probes(ctx)
+        units = trained_probes_to_preserve(ctx)
         if not units:
             return
         store = Path(getattr(ctx.args, "ckpt_store", None)
@@ -597,9 +641,20 @@ def restore_trained_probes(ctx: SessionContext) -> bool:
 
 
 def fetch_probe_evidence(ctx: SessionContext) -> list:
-    """Closeout sweep: anything the poll loop did not already secure."""
+    """Closeout sweep: anything the poll loop did not already secure.
+
+    Runs at the terminal, after `ev["terminal"]` is set, which is what lets
+    the release below know whether the rung finished. On a FAILURE it releases
+    nothing: the preserved weights are exactly what a replacement attempt
+    resumes instead of retraining.
+    """
     secure_probe_evidence(ctx)
     preserve_trained_unscored(ctx)
+    #: Release only on a completed rung, and only per probe whose result,
+    #: per-sample rows and admission record are all confirmed off-pod -- so a
+    #: probe whose evidence did not come home keeps its weights even on a
+    #: nominally successful terminal.
+    prune_preserved_scored(ctx)
     return [
         {"probe_id": probe_id, **state}
         for probe_id, state in sorted(
@@ -633,30 +688,37 @@ def probes_evidence_secured(ctx: SessionContext,
     #: and that is precisely the pod that must not be deleted early. Scoring
     #: genuinely consumes these weights and the protocol forbids retraining a
     #: frozen unit for a different outcome.
-    unscored = trained_unscored_probes(ctx)
-    if unscored is None:
+    #: EVERY TRAINED PROBE, not only the unscored ones. The gate used to let
+    #: a pod go while a SCORED probe's weights sat on it unpreserved, which
+    #: was consistent with pruning them -- and both are wrong under the
+    #: project's standing rule that a replacement attempt resumes preserved
+    #: checkpoints rather than retraining them. A scored probe's weights are
+    #: what lets a replacement RE-EVALUATE it under its own attested
+    #: protocol instead of spending 61 minutes recreating bytes that existed.
+    trained = trained_probes_to_preserve(ctx)
+    if trained is None:
         return False, (
             "the driver evidence could not be read while deciding whether any "
-            "trained-but-unscored checkpoint is owed; refusing teardown on an "
-            "unknown")
+            "trained checkpoint is owed; refusing teardown on an unknown")
     preserved = ctx.evidence.get("trained_unscored_preserved") or {}
     unpreserved = sorted(
-        str(u.get("probe_id")) for u in unscored
+        str(u.get("probe_id")) for u in trained
         if not preserved.get(str(u.get("probe_id")), {}).get("verified"))
     if unpreserved:
         return False, (
-            f"{len(unscored)} probe(s) finished TRAINING without a valid "
-            f"score and {unpreserved} are not preserved off-pod. P8.4 state "
-            "2: their weights are what a resumed scoring consumes, and "
-            "retraining them for a different outcome is forbidden -- the pod "
+            f"{len(trained)} probe(s) finished TRAINING and {unpreserved} are "
+            "not preserved off-pod. Their weights are what a replacement "
+            "attempt resumes -- at scoring for an unscored probe, at "
+            "re-evaluation for a scored one -- and retraining a frozen unit "
+            "for a different outcome is forbidden; the pod "
             "holds the only copy.")
 
     want = {str(u.get("probe_id")) for u in units if u.get("probe_id")}
     if not want:
         note = "the driver scored no probe, so no scored evidence is owed"
-        if unscored:
-            note += (f"; {len(unscored)} trained-unscored checkpoint(s) "
-                     "preserved and identity-verified")
+        if trained:
+            note += (f"; {len(trained)} trained checkpoint(s) preserved and "
+                     "identity-verified, reusable by a replacement attempt")
         return True, note
     secured = ctx.evidence.get("probe_evidence_secured") or {}
     #: The ADMISSION record is strict beside the result and the rows: it is
@@ -689,9 +751,9 @@ def probes_evidence_secured(ctx: SessionContext,
         if not secured.get(probe_id, {}).get("generations"))
     note = (f"all {len(want)} scored probes' results and per-sample rows "
             "off-pod")
-    if unscored:
-        note += (f"; {len(unscored)} trained-unscored checkpoint(s) preserved "
-                 "and identity-verified")
+    if trained:
+        note += (f"; {len(trained)} trained checkpoint(s) preserved and "
+                 "identity-verified, reusable by a replacement attempt")
     if no_generations:
         note += (f"; generations for {no_generations} rely on the required "
                  "final archive")
