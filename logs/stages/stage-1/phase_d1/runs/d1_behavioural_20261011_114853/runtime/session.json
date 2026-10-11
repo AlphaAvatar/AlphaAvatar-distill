@@ -239,6 +239,31 @@
       "utc": "2026-10-11T11:55:39+00:00",
       "elapsed_min": 4.16,
       "msg": "driver detached, pid 2501, confirmed by descriptor_probe \u2014 $0.08"
+    },
+    {
+      "utc": "2026-10-11T11:57:49+00:00",
+      "elapsed_min": 6.33,
+      "msg": "  2026-10-11T11:55:38Z MARKER:MATERIALIZE_START \u2014 $0.11"
+    },
+    {
+      "utc": "2026-10-11T12:29:49+00:00",
+      "elapsed_min": 38.31,
+      "msg": "  relay errors: ['/workspace/autoinit_d1_behavioural_run.log', '/workspace/autoinit_d1_behavioural.status']"
+    },
+    {
+      "utc": "2026-10-11T12:29:49+00:00",
+      "elapsed_min": 38.33,
+      "msg": "the pod stopped billing \u2014 provider_stopped_or_terminated (exists=False, status=TERMINATED, 38 of 1355 min)"
+    },
+    {
+      "utc": "2026-10-11T12:29:49+00:00",
+      "elapsed_min": 38.33,
+      "msg": "polling ended: POD_GONE \u2014 $0.70"
+    },
+    {
+      "utc": "2026-10-11T12:29:50+00:00",
+      "elapsed_min": 38.34,
+      "msg": "EMERGENCY: only relayed snapshots survive \u2014 {}"
     }
   ],
   "stages": {
@@ -1043,5 +1068,44 @@
     "started_utc": "2026-10-11T11:55:37Z",
     "start_channel_closed": true,
     "confirmed_by": "descriptor_probe"
-  }
+  },
+  "probe_evidence_read_from": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_114853/relay/d1_behavioural.json",
+  "probe_evidence_secured": {},
+  "stop_cause": {
+    "cause": "provider_stopped_or_terminated",
+    "pod_exists": false,
+    "desired_status": "TERMINATED",
+    "watchdog_took_an_action": false,
+    "watchdog_ticks": 38,
+    "elapsed_minutes": 38.33,
+    "hard_terminate_minutes": 1355.0,
+    "over_hard_limit": false,
+    "_rule": "a pod that stops billing short of its own hard threshold, with a watchdog journal showing no action, was NOT stopped by this project. Causes outside it include an exhausted provider account balance, a host failure and an operator action."
+  },
+  "terminal": "POD_GONE",
+  "teardown_gate": {
+    "allowed": true,
+    "emergency": true,
+    "failed_check": "training_complete",
+    "reason": "EMERGENCY budget teardown over a failed gate (training_complete): the pod stopped billing at 38 min of 1355 ($24.62); observed cause provider_stopped_or_terminated, which this project did not cause. Artifacts for the remaining checks ['training_complete', 'evaluation_complete', 'artifact_manifest_created', 'required_files_present', 'final_streams_quiescent', 'archive_created', 'archive_contents_verified', 'transfer_complete', 'local_hashes_verified', 'checkpoint_hashes_matched', 'required_products_secured', 'report_inputs_verified'] are LOST. No event stream was truncated: this session declares none, and quiescence failed because a final_required artifact is missing rather than because a producer was mid-write. The missing artifacts are listed above.",
+    "checks": {
+      "training_complete": false,
+      "evaluation_complete": false,
+      "artifact_manifest_created": false,
+      "required_files_present": false,
+      "final_streams_quiescent": false,
+      "archive_created": false,
+      "archive_contents_verified": false,
+      "transfer_complete": false,
+      "local_hashes_verified": false,
+      "checkpoint_hashes_matched": false,
+      "required_products_secured": false,
+      "report_inputs_verified": false
+    },
+    "incomplete_event_streams": []
+  },
+  "relayed_events": {},
+  "passed": false,
+  "cleanup_is_not_success": "artifacts are collected and the pod is torn down on every path; the session outcome is decided by the driver's terminal marker alone",
+  "finished_utc": "2026-10-11T12:29:50+00:00"
 }

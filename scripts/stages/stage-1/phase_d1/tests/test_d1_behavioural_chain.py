@@ -1068,7 +1068,11 @@ class TestTrainedButUnscoredProbesSurviveAndResume:
                         "trained_sha256": "a" * 64}]}))
         ctx = _Ctx()
         ok, why = launcher.probes_evidence_secured(ctx, [])
-        assert not ok and "P8.4" in why
+        #: The PROPERTY, not the citation. The refusal used to quote "P8.4"
+        #: and now explains the reuse rule instead; what must hold is that it
+        #: refuses and names the unpreserved probe.
+        assert not ok
+        assert "not preserved off-pod" in why and "p1" in why
 
         ctx.evidence = {"trained_unscored_preserved": {
             "p1": {"verified": True}}}
@@ -1098,16 +1102,31 @@ class TestTrainedButUnscoredProbesSurviveAndResume:
         assert launcher.restore_trained_probes(_Ctx()) is False
         assert any("unverifiable" in s for s in said)
 
-    def test_scored_probes_weights_are_never_fetched(self):
-        """P8.4 state 1: completed + validly scored contributes evidence, not
-        checkpoint bytes."""
-        from support.session_specs import load_session_launcher
+    def test_every_trained_probe_is_fetched_including_scored_ones(self):
+        """REVERSED DELIBERATELY, 2026-10-11. This asserted P8.4 state 1 --
+        completed and validly scored contributes evidence, not checkpoint
+        bytes -- and two things were wrong with it.
 
-        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        The filter `trained and not scored` RACED: scoring follows training
+        immediately and the poll runs every 120 s, so a probe that trained and
+        scored inside one interval was never fetched at all and its weights
+        died with the pod. And a scored checkpoint does have a consumer here:
+        the project's standing rule that a replacement attempt resumes
+        preserved checkpoints instead of retraining them. Carrying the SCORES
+        forward instead is inadmissible -- a probe scored in an earlier
+        session was generated and evaluated under that session's attested
+        protocol, and protocol_uniformity's binding clause requires one
+        protocol identity across the field.
+
+        See logs/stages/stage-1/phase_d1/decisions/
+        reuse_preserved_checkpoints.md.
+        """
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
-        assert "if p.get(\"trained\") and not p.get(\"scored\")" in src
-        assert launcher is not None
+        assert 'p.get("trained") and p.get("model_dir")' in src
+        assert 'if p.get("trained") and not p.get("scored")' not in src, (
+            "the scored-exclusion filter is back; it loses every probe that "
+            "scores inside one poll interval")
 
 
 class TestTheConfirmationCandidateIsRecomputedNotTrusted:
@@ -1393,16 +1412,29 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
     completed checkpoint. Preservation now runs on every poll, and a preserved
     copy is pruned the moment its probe is validly scored."""
 
-    def test_the_poll_hook_preserves_and_prunes(self):
+    def test_the_poll_hook_preserves_and_does_NOT_prune(self):
+        """The release moved OUT of the poll hook, 2026-10-11. Pruning
+        mid-rung deleted the weights a replacement attempt needs: a failure at
+        probe k left it with nothing for probes 1..k-1 and no admissible way
+        to reuse their measurements. It now runs at the terminal, gated on a
+        completed rung."""
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
-        body = src.split("def secure_probe_evidence(", 1)[1]
-        body = body.split("\ndef ", 1)[0]
-        assert "preserve_trained_unscored(ctx)" in body
-        assert "prune_preserved_scored(ctx)" in body
+        poll = src.split("def secure_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
+        assert "preserve_trained_unscored(ctx)" in poll
+        assert "prune_preserved_scored" not in poll, (
+            "releasing from the poll hook is what made a replacement retrain")
+        terminal = src.split("def fetch_probe_evidence(", 1)[1].split("\ndef ", 1)[0]
+        assert "prune_preserved_scored(ctx)" in terminal, (
+            "the release must still have a caller, at the terminal")
 
-    def test_pruning_requires_a_scored_probe_with_durable_evidence(
+    def test_pruning_requires_a_COMPLETED_RUNG_and_durable_evidence(
             self, tmp_path):
+        """A scored probe with durable evidence is NO LONGER enough, 2026-10-11.
+        Until the rung completes, those weights are what a replacement attempt
+        re-evaluates instead of retraining, so the release self-gates on the
+        terminal and is a no-op on every failure. The per-probe evidence and
+        containment guards are unchanged and still checked."""
         from support.session_specs import load_session_launcher
 
         launcher = load_session_launcher("autoinit_d1_behavioural_launch")
@@ -1423,6 +1455,10 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         class _Ctx:
             args = _Args()
             evidence = {
+                #: THE RUNG COMPLETED. Without this the release is a no-op,
+                #: which is the whole point of the 2026-10-11 change -- a
+                #: failure must leave every trained probe's weights in place.
+                "terminal": "ALL_DONE",
                 "trained_unscored_preserved": {
                     "p_pruned": {"verified": True, "dest": str(pruned)},
                     "p_kept": {"verified": True, "dest": str(kept)},
@@ -1443,9 +1479,29 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
                 pass
 
         launcher.prune_preserved_scored(_Ctx())
-        assert not pruned.exists(), "scored + durable evidence -> pruned"
+        assert not pruned.exists(), (
+            "completed rung + scored + durable evidence -> released")
         assert kept.is_dir(), "no durable evidence yet -> kept"
         assert outside.is_dir(), "containment: never deletes outside the store"
+
+        #: AND THE NEW GATE: every failure terminal keeps the bytes, because
+        #: a replacement attempt re-evaluates them rather than retraining.
+        for terminal in ("RUN_FAILED", "POD_GONE", "POLL_LIMIT", ""):
+            again = store / "p_failed"
+            again.mkdir(parents=True, exist_ok=True)
+            (again / "w").write_bytes(b"x")
+            ctx = _Ctx()
+            ctx.evidence = {**_Ctx.evidence, "terminal": terminal,
+                            "trained_unscored_preserved": {
+                                "p_failed": {"verified": True,
+                                             "dest": str(again)}},
+                            "probe_evidence_secured": {
+                                "p_failed": {"result.json": True,
+                                             "per_sample.jsonl": True,
+                                             "admission.json": True}}}
+            launcher.prune_preserved_scored(ctx)
+            assert again.is_dir(), (
+                f"terminal {terminal!r} released weights a replacement needs")
 
 
 class TestTheFirstProbesTrainedWindowIsPreserved:
@@ -1930,8 +1986,24 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
             sum(r["usd"] for r in spent["subruns"]), 4)
         #: and the paid ones are the four that created a pod
         paid = [r for r in spent["subruns"] if r["usd"] > 0]
-        assert len(paid) == 4
-        assert round(sum(r["usd"] for r in paid), 4) == 8.3305
+        #: DERIVED. A literal count expires the next time a subrun closes --
+        #: it read 4, then attempt 6 and 7 closed and made it 6.
+        on_disk_paid = 0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            if float((doc.get("money") or {}).get("all_in_usd") or 0) > 0:
+                on_disk_paid += 1
+        assert len(paid) == on_disk_paid > 0
+        #: DERIVED from the closeouts, never typed: each new subrun moves
+        #: this figure, and a literal expires the next time one lands -- which
+        #: is exactly what happened when attempt 7 closed at $0.6837.
+        from_disk = 0.0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            usd = (doc.get("money") or {}).get("all_in_usd")
+            if usd:
+                from_disk += float(usd)
+        assert round(sum(r["usd"] for r in paid), 4) == round(from_disk, 4)
 
     def test_the_real_tree_refuses_a_further_issuance(self):
         """NO `consumed_usd` OVERRIDE. This is the live state: the remainder
@@ -1980,8 +2052,10 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
         """The two are different quantities and must stay ordered: the
         per-launch limit is what is LEFT of the envelope, the hard cap is what
         THIS attempt may spend after holding back teardown."""
-        #: $8.3305 is only fundable under the RAISED envelope, so it is paired
-        #: with the amendment grant rather than the legacy one.
+        #: Explicit spends, so the ordering property is tested rather than
+        #: whatever the campaign happens to have spent today. $8.3305 is only
+        #: fundable under the RAISED envelope, so it is paired with the
+        #: amendment grant rather than the legacy one.
         cases = [({}, 0.0), ({}, 2.0),
                  ({"grant": TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds
                    .AMENDMENT}, 8.3305)]
@@ -2143,19 +2217,39 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
             "every screening closeout must carry money.all_in_usd; one that "
             "does not would be netted at its GPU-only figure")
         assert {r["basis"] for r in spent["subruns"]} == {"money.all_in_usd"}
-        assert spent["consumed_usd"] == 8.3305
+        #: Derived, not typed -- see the note in the sibling test.
+        expected = 0.0
+        for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+            doc = json.loads(path.read_text())
+            usd = (doc.get("money") or {}).get("all_in_usd")
+            if usd is not None:
+                expected += float(usd)
+        assert spent["consumed_usd"] == round(expected, 4)
 
-    def test_the_envelope_is_cumulative_and_charges_all_four(self):
-        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+    def test_the_envelope_is_cumulative_and_charges_every_subrun(self):
+        """The one-session envelope model, which the 2026-10-11 phase grant
+        SUPERSEDED but which remains a supported grant shape. Tested at an
+        explicit spend: the live campaign total has since grown past what a
+        $30 one-session envelope can fund, and that refusal is asserted
+        separately below rather than breaking the arithmetic here."""
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
         env = payload["envelope"]
         assert env["one_use_ceiling_usd"] == 30.0
         assert env["consumed_by_prior_subruns_usd"] == 8.3305
         assert env["remaining_usd"] == round(30.0 - 8.3305, 4)
-        assert len(env["prior_subruns"]) == len(
-            sorted(REPO.glob(BA.RUNS_GLOB))), (
-            "every historical subrun is charged against the envelope, "
-            "derived from the closeouts rather than a typed count")
-        assert env["all_reconciled_to_all_in"] is True
+        assert "CUMULATIVE" in env["envelope_source"]
+
+    def test_the_live_total_has_outgrown_the_one_session_envelope(self):
+        """The consequence, asserted rather than left to surprise a reader:
+        the campaign has spent past what a $30 ONE-SESSION envelope can fund,
+        which is precisely why the maintainer moved to a phase allowance."""
+        spent = BA.consumed_by_prior_subruns(REPO)
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
+        assert 30.0 - spent["consumed_usd"] < priced["expected_usd"]
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            _payload(grant=self.AMENDMENT, consumed_usd=None)
+        assert spent["all_reconciled"] is True
 
     def test_the_parts_of_the_amendment_must_sum_to_its_total(self):
         bad = {**self.AMENDMENT, "additional_authorized_usd": 9.0}
@@ -2176,12 +2270,12 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         bad = {**self.AMENDMENT, "hard_cap_usd": 25.0053}
         with pytest.raises(BA.D1BehaviouralIssuanceRefused,
                            match="BOTH"):
-            _payload(grant=bad, consumed_usd=None)
+            _payload(grant=bad, consumed_usd=8.3305)
 
     def test_the_attempt_bound_is_narrowed_below_the_designs_cell(self):
         """THE MAINTAINER'S CONDITION: 1355.71 may not be reused when the
         available budget is lower."""
-        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
         priced = BA.reprice_rung_at(ACCEPTED_RATE, "screening", REPO)
         assert priced["hard_ceiling_minutes"] == 1355.71, "premise"
         assert payload["hard_runtime_minutes"] < 1355.71, (
@@ -2190,7 +2284,7 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
 
     def test_the_bound_costs_no_more_than_the_remaining_allowance(self):
         """All-in at the authorized runtime, plus the reserve, must fit."""
-        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
         b = payload["money"]["attempt_bounds"]
         committed = b["all_in_hard_usd"] + b["teardown_reserve_usd"]
         assert committed <= b["remaining_usd"] + 1e-6, (
@@ -2267,7 +2361,7 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
     def test_the_remaining_allowance_funds_the_measured_need(self):
         """The decision's premise, asserted so a later rate move cannot
         quietly invalidate it."""
-        payload = _payload(grant=self.AMENDMENT, consumed_usd=None)
+        payload = _payload(grant=self.AMENDMENT, consumed_usd=8.3305)
         b = payload["money"]["attempt_bounds"]
         #: 981.7 min is the measured all-in need from attempt 132919's own
         #: phase markers; see analyses/d1_screening_budget_boundary.json.

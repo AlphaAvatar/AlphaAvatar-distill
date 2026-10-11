@@ -1,0 +1,70 @@
+{
+ "schema": "aadistill.phase_d1.behavioural_closeout/v1",
+ "run_id": "d1_behavioural_20261011_114853",
+ "stage_id": "stage-1",
+ "experiment_id": "phase_d1",
+ "rung": "screening",
+
+ "outcome": "STOPPED DELIBERATELY DURING ARM MATERIALIZATION, on the maintainer's instruction, to relaunch under the amended checkpoint-reuse rules. 38 of 1355 authorized minutes, $0.6837 all-in. No probe trained, nothing was measured, no ranking and no selection exist.",
+
+ "classification": "NOT A FAILURE. Every stage this run reached succeeded: all seven pre-provider gates passed, setup completed in 1.9 minutes, the driver detached, and arm materialization was 32 minutes into its measured 94 when the pod was terminated. It was stopped because its bundle predates the preservation rules adopted mid-run, and continuing would have spent ~15 hours under a policy that discards reusable work.",
+
+ "why_it_was_stopped": {
+  "the_rule": "For the same experiment, a replacement attempt must REUSE preserved checkpoints rather than retrain them. Adopted as a project principle on 2026-10-11 and recorded in logs/stages/stage-1/phase_d1/decisions/reuse_preserved_checkpoints.md.",
+  "what_this_run_would_have_done": "its bundle (staged at 709b29c7) preserves only trained-but-UNSCORED probes and prunes each preserved copy from the POLL hook the moment that probe's score is durable. A failure at probe k would therefore have left a replacement with no weights for probes 1..k-1 and no admissible way to reuse their measurements either -- a probe scored in an earlier session was generated and evaluated under THAT session's attested protocol, and protocol_uniformity's binding clause requires one protocol identity across the field.",
+  "why_it_could_not_be_retrofitted": "the pod releases each scored probe's workdir once the launcher writes its ack, leaving roughly one 120-second poll cycle to pull 2.22 GiB. Racing that on a billing machine was not a reasonable trade.",
+  "the_arithmetic": "stopping cost $0.6837 and 32 minutes of materialization. Had attempt 7 failed late under the old policy, a replacement would have retrained up to nine probes at ~61 minutes each -- about nine hours and ~$10 -- to recreate bytes that had existed and been deleted."
+ },
+
+ "what_this_run_established": [
+  "the scorer repair holds: nothing in the chain refused before materialization, which is as far as this run was allowed to go.",
+  "the pod image for this draw was runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@580.159.04 -- a DIFFERENT NVIDIA driver from attempt 6's @580.126.09. The runtime digest hashes it, so the two sessions' attested evaluation protocols would not have been equal. That is the concrete reason a scored measurement cannot be carried across attempts, and it was observed rather than assumed."
+ ],
+
+ "recorded_utc": "2026-10-11T12:35:00+00:00",
+ "session_commit": "fef6bb64654809e61b656b8074323a52418e60ed",
+ "authorized_base_commit": "94ba588d6da293fe44ea8fd8c9b72961e0f84509",
+ "authorization_sha256": "605ffcf8b73a7454a846281a6777a5bd603d93d69c6d25e852dfc58e0cc5ae88",
+ "swept_base_commit": "262cbf89",
+
+ "money": {
+  "provider_resources_created": 1,
+  "pod_id": "96emr1e7eadqc0",
+  "gpu": "NVIDIA L40S",
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 38.0,
+  "all_in_usd": 0.6837,
+  "all_in_source": "provider account balance 174.9148915818 -> 174.2311915818",
+  "authorized_usd": 24.9922,
+  "within_authorization": true,
+  "one_use_grant_consumed": true,
+  "_launcher_wrote_no_cost": "the POD_GONE path exited before stamping runtime/session.json :: cost, so the figure above is the provider-measured balance delta rather than a restatement of it.",
+  "phase_allowance_usd": 130.0,
+  "phase_consumed_after_this_run_usd": 12.3707
+ },
+
+ "cost": {
+  "actual_usd": 0.6837,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 38.0,
+  "authorized_usd": 24.9922,
+  "within_authorization": true,
+  "_owner": "provider account-balance bracketing; the launcher's POD_GONE path wrote no cost block"
+ },
+
+ "teardown": {
+  "pod_deleted": true,
+  "provider_confirms_gone": true,
+  "final_desired_status": "TERMINATED",
+  "billing": false,
+  "how": "terminated through the provider API (runpodctl remove pod), after which the launcher's own poll detected provider_stopped_or_terminated and took its terminal path. The tmux session exited on its own; it was not killed mid-launch.",
+  "teardown_gate": "not consulted -- no probe had trained, so no weights were owed off-pod."
+ },
+
+ "observers": {
+  "monitors_stopped_in_this_terminal_path": ["bowjpetry", "bgl0yr7sd"],
+  "watch_set_now_empty": true
+ },
+
+ "next_action": "Relaunch as attempt 8 on the amended rules: every trained probe preserved regardless of scoring status, release only at a completed rung, and a widened teardown gate that holds the pod while any trained probe's weights are only on it."
+}

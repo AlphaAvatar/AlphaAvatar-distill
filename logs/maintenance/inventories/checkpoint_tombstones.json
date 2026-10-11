@@ -34,10 +34,10 @@
  "note": "A tombstone is the precondition for deletion. Every entry carries the hash, the reason, whether reconstruction is possible, the recipe and its cost, and where the frozen results live. A scientific conclusion must never depend on a file still happening to exist at some path.",
  "totals": {
   "_owner": "the active-tombstone accounting. Derive counts and bytes from here, not by summing the list and hoping the caller remembered to skip withdrawals.",
-  "tombstones_total": 37,
-  "active": 35,
-  "active_retired_bytes": 89298262997,
-  "active_retired_human": "83.165 GiB",
+  "tombstones_total": 40,
+  "active": 38,
+  "active_retired_bytes": 96450967901,
+  "active_retired_human": "89.827 GiB",
   "withdrawn": 2,
   "withdrawn_ids": [
    "podsim_quarantine_residue",
@@ -45,7 +45,7 @@
   ],
   "withdrawn_bytes": 20361115,
   "physical_vs_active": "The 2026-08-18 cleanup physically removed SEVEN storage units totalling 3.660 GiB, and logs/storage_measurements.json measures that on disk. Two of those tombstones were later WITHDRAWN as a class error -- podsim_quarantine_residue and stage3_ladder_uniform_local_cache -- because each names a destination a routine command recreates by design. The deletions still happened and the bytes were still freed; what is no longer asserted is that those paths are retired. So the physical count (7 units, 3.660 GiB) and the ACTIVE-tombstone count (16 units, 3.6406 GiB) legitimately differ, and neither figure is a correction of the other.",
-  "_size_coverage": "24 of 35 active entries carry a size; the older ones predate the field and are not back-filled, so the byte total is a LOWER BOUND on what has been retired."
+  "_size_coverage": "27 of 38 active entries carry a size; the older ones predate the field and are not back-filled, so the byte total is a LOWER BOUND on what has been retired."
  },
  "tombstones": [
   {
@@ -2993,49 +2993,145 @@
    "deleted_utc": "2026-09-30T00:00:00+00:00"
   },
   {
-   "deleted_utc": "2026-10-11",
-   "artifact": "d1_behavioural_20261010_103442 :: d1_screening_q1_s614923639 (trained-unscored)",
-   "sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
-   "tag": "step_001023",
-   "bytes": 2384234968,
-   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_103442/products/trained_unscored/d1_screening_q1_s614923639",
+   "canonical_id": "d1_screening_q1_s614923639_20261010_103442",
+   "historical_paths": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_103442/products/trained_unscored/d1_screening_q1_s614923639"
+   ],
+   "relay_path": null,
+   "relay_hash_verified": null,
    "store": "dev-box scratch (never uploaded; no HF quota involved)",
-   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
-   "evidence_kept": [
-    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "D1 behavioural screening",
+   "seed": 614923639,
+   "scientific_role": "trained-but-never-scored recovery probe for arm q1 at the first frozen screening seed, preserved when its session failed",
+   "weights_sha256": "aadfb955cee4cef96e46a7c9285080270af5a965021ec3dfc8cdb98764221bb1",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.220 GiB",
+   "n_files": 1,
+   "members": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_103442/products/trained_unscored/d1_screening_q1_s614923639/checkpoints/step_001023/model/model.safetensors"
+   ],
+   "deleted_utc": "2026-10-11",
+   "deletion_criterion": "no_possible_consumer",
+   "deletion_criterion_meaning": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit.",
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json"
+   ],
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "re-run the frozen recipe e1_p1_kd_heavy@0.86M on arm q1 at seed 614923639 from its materialized checkpoint; the result will be a DIFFERENT artifact, which is why reconstruction is not deterministic",
+   "expected_reconstruction_cost": "~61 GPU-minutes on an L40S, ~$1.11",
+   "canonical_surviving_evidence": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/closeout/outcome.json :: the_preserved_probe",
     "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
    ],
-   "freed_gib": 2.2205
+   "frozen_results_location": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_103442/ -- the run produced no measurement; its closeout is the record",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null,
+   "reason_physical_weights_deleted": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit."
   },
   {
-   "deleted_utc": "2026-10-11",
-   "artifact": "d1_behavioural_20261010_132919 :: d1_screening_q1_s614923639 (trained-unscored)",
-   "sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
-   "tag": "step_001023",
-   "bytes": 2384234968,
-   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639",
+   "canonical_id": "d1_screening_q1_s614923639_20261010_132919",
+   "historical_paths": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639"
+   ],
+   "relay_path": null,
+   "relay_hash_verified": null,
    "store": "dev-box scratch (never uploaded; no HF quota involved)",
-   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
-   "evidence_kept": [
-    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "D1 behavioural screening",
+   "seed": 614923639,
+   "scientific_role": "trained-but-never-scored recovery probe for arm q1 at the first frozen screening seed, preserved when its session failed",
+   "weights_sha256": "71387681f3a9d2162ad9aebd88b6c44eb32cd99f65437d4a95250790f86ab6c6",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.220 GiB",
+   "n_files": 1,
+   "members": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261010_132919/products/trained_unscored/d1_screening_q1_s614923639/checkpoints/step_001023/model/model.safetensors"
+   ],
+   "deleted_utc": "2026-10-11",
+   "deletion_criterion": "no_possible_consumer",
+   "deletion_criterion_meaning": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit.",
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json"
+   ],
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "re-run the frozen recipe e1_p1_kd_heavy@0.86M on arm q1 at seed 614923639 from its materialized checkpoint; the result will be a DIFFERENT artifact, which is why reconstruction is not deterministic",
+   "expected_reconstruction_cost": "~61 GPU-minutes on an L40S, ~$1.11",
+   "canonical_surviving_evidence": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/closeout/outcome.json :: the_preserved_probe",
     "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
    ],
-   "freed_gib": 2.2205
+   "frozen_results_location": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261010_132919/ -- the run produced no measurement; its closeout is the record",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null,
+   "reason_physical_weights_deleted": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit."
   },
   {
-   "deleted_utc": "2026-10-11",
-   "artifact": "d1_behavioural_20261011_083610 :: d1_screening_q1_s614923639 (trained-unscored)",
-   "sha256": "f8ddbb103e343d51e5d974263e19b0aea55772a6ae19b34b4e59a027c81a9527",
-   "tag": "step_001023",
-   "bytes": 2384234968,
-   "was_at": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_083610/products/trained_unscored/d1_screening_q1_s614923639",
+   "canonical_id": "d1_screening_q1_s614923639_20261011_083610",
+   "historical_paths": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_083610/products/trained_unscored/d1_screening_q1_s614923639"
+   ],
+   "relay_path": null,
+   "relay_hash_verified": null,
    "store": "dev-box scratch (never uploaded; no HF quota involved)",
-   "why": "trained, never validly scored, and no possible future consumer: protocol_uniformity forbids a single probe from a failed session entering any comparison field. Three artifacts existed under one (arm, seed) label because CUDA recovery training is not bit-reproducible; none is an input to any measurement.",
-   "evidence_kept": [
-    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/closeout/outcome.json",
+   "retention_tier": "TIER_3_RECORD_ONLY",
+   "experiment": "D1 behavioural screening",
+   "seed": 614923639,
+   "scientific_role": "trained-but-never-scored recovery probe for arm q1 at the first frozen screening seed, preserved when its session failed",
+   "weights_sha256": "f8ddbb103e343d51e5d974263e19b0aea55772a6ae19b34b4e59a027c81a9527",
+   "config_sha256": null,
+   "architecture": {
+    "num_hidden_layers": 28,
+    "hidden_size": 1024,
+    "intermediate_size": 3072,
+    "num_attention_heads": 16,
+    "num_key_value_heads": 8,
+    "vocab_size": 151936
+   },
+   "size_bytes": 2384234968,
+   "size_human": "2.220 GiB",
+   "n_files": 1,
+   "members": [
+    "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_083610/products/trained_unscored/d1_screening_q1_s614923639/checkpoints/step_001023/model/model.safetensors"
+   ],
+   "deleted_utc": "2026-10-11",
+   "deletion_criterion": "no_possible_consumer",
+   "deletion_criterion_meaning": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit.",
+   "references_at_deletion": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/closeout/outcome.json"
+   ],
+   "deterministic_reconstruction_possible": false,
+   "reconstruction_recipe": "re-run the frozen recipe e1_p1_kd_heavy@0.86M on arm q1 at seed 614923639 from its materialized checkpoint; the result will be a DIFFERENT artifact, which is why reconstruction is not deterministic",
+   "expected_reconstruction_cost": "~61 GPU-minutes on an L40S, ~$1.11",
+   "canonical_surviving_evidence": [
+    "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/closeout/outcome.json :: the_preserved_probe",
     "logs/stages/stage-1/phase_d1/analyses/d1_probe_training_is_not_bit_reproducible.json"
    ],
-   "freed_gib": 2.2205
+   "frozen_results_location": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_083610/ -- the run produced no measurement; its closeout is the record",
+   "withdrawn": false,
+   "withdrawn_reason": null,
+   "withdrawn_utc": null,
+   "reason_physical_weights_deleted": "the unit was trained and NEVER validly scored, and it can never enter a comparison field: protocol_uniformity requires every probe of a rung to be trained in one session, so a single probe from a failed session has no admissible use. Three artifacts existed under one (arm, seed) label because CUDA recovery training is reproducible in distribution and not bit-for-bit."
   }
  ],
  "schema_note": "v2 adds store, size_bytes, n_files, members, references_at_deletion, deletion_criterion, canonical_surviving_evidence and relay_hash_verified. v1 entries are unchanged and remain valid: every field they carried still means what it meant. A withdrawn entry is kept, never removed: the reason a tombstone was wrong is worth as much as the tombstone."
