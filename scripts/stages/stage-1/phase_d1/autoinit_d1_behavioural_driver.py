@@ -583,6 +583,14 @@ def release_acked_probe_workdirs(record: dict[str, Any],
     return out
 
 
+#: THIS session's run id, filled by `main` before any probe is handled. A
+#: one-element list rather than a module global rebound at import time: the
+#: provenance comparison needs the id of the run doing the resuming, and
+#: threading it through every call site would touch five signatures for one
+#: string.
+RUN_ID_FOR_PROVENANCE: list[str] = [""]
+
+
 def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
     """Is a COMPLETED trained checkpoint already on this host for a probe?
 
@@ -615,7 +623,8 @@ def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
     }
     sidecar = model_root / "preserved_identity.json"
     if sidecar.is_file():
-        want = json.loads(sidecar.read_text()).get("trained_sha256")
+        doc = json.loads(sidecar.read_text())
+        want = doc.get("trained_sha256")
         got = hashlib.sha256(shard.read_bytes()).hexdigest() \
             if shard.is_file() else None
         if not want or got != want:
@@ -625,11 +634,25 @@ def trained_checkpoint_state(model_root: Path) -> dict[str, Any] | None:
                 f"{str(want)[:12]}; resuming on it would score bytes nobody "
                 "preserved")
         state["restored_sha256_verified"] = True
+        #: PROVENANCE TRAVELS WITH THE REUSE. Resuming a preserved checkpoint
+        #: instead of retraining it is the project's standing rule, and it is
+        #: scientifically safe only if the field can say which probes were
+        #: trained in an earlier session. Carried onto the probe record so the
+        #: ranking's inputs name their own origin rather than looking
+        #: single-session by default.
+        for key in ("trained_in_run", "trained_on_pod",
+                    "trained_under_image", "tag"):
+            if doc.get(key):
+                state[key] = doc[key]
+        state["_training_session_differs"] = bool(
+            doc.get("trained_in_run")
+            and doc["trained_in_run"] != RUN_ID_FOR_PROVENANCE[0])
     return state
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    RUN_ID_FOR_PROVENANCE[0] = str(getattr(args, "run_id", "") or "")
     out = REPO_ROOT / args.out
     out.mkdir(parents=True, exist_ok=True)
     status = args.status or "/workspace/autoinit_d1_behavioural.status"

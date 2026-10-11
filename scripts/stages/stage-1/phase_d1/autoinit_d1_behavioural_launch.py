@@ -510,6 +510,20 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
                     "probe_id": probe_id,
                     "trained_sha256": want,
                     "tag": tag,
+                    #: WHICH SESSION TRAINED IT, and on which host. A reused
+                    #: probe is the project's standing rule -- a new attempt
+                    #: must resume a preserved checkpoint rather than retrain
+                    #: it -- and that rule is only scientifically safe if the
+                    #: field can SAY which probes were trained elsewhere.
+                    #: Without this the sidecar carried an identity but no
+                    #: provenance, so a mixed-session field would have looked
+                    #: identical to a single-session one in every record a
+                    #: reader consults.
+                    "trained_in_run": str(getattr(ctx.args, "run_id", "") or ""),
+                    "trained_on_pod": str(ctx.evidence.get("pod_id") or ""),
+                    "trained_under_image": str(
+                        (ctx.evidence.get("image_identity") or {}).get("digest")
+                        or ctx.evidence.get("image_identity") or ""),
                     "_reuse_is_not_authorized_by_preservation": (
                         "P8.2.1: saving this checkpoint authorizes nothing "
                         "about reusing it. Whether a replacement session may "

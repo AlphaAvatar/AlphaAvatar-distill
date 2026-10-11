@@ -236,3 +236,96 @@ class TestTheDriverReadsOnlyKeysTheScorerWrites:
         #: and the probe entry really does carry arm and seed, from the probe
         assert '"arm": probe.arm_id' in src
         assert '"seed": probe.seed' in src
+
+
+class TestAReusedProbeCarriesItsTrainingProvenance:
+    """The project rule: a new attempt RESUMES a preserved checkpoint rather
+    than retraining it. That is only scientifically safe if the field can say
+    which probes were trained in an earlier session, so the provenance travels
+    with the bytes and the record names it.
+
+    See logs/stages/stage-1/phase_d1/decisions/reuse_preserved_checkpoints.md.
+    """
+
+    @staticmethod
+    def _driver():
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py")
+        spec = importlib.util.spec_from_file_location("_d1b_prov", src)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod
+
+    @staticmethod
+    def _preserved(tmp_path, *, trained_in_run, payload=b"weights"):
+        import hashlib
+
+        root = tmp_path / "probe"
+        model = root / "checkpoints" / "step_000042" / "model"
+        model.mkdir(parents=True)
+        (model / "model.safetensors").write_bytes(payload)
+        (model / "config.json").write_text("{}")
+        (root / "checkpoints" / "latest.txt").write_text("step_000042")
+        (root / "run_completion.json").write_text(json.dumps({"ok": True}))
+        (root / "preserved_identity.json").write_text(json.dumps({
+            "schema": "aadistill.phase_d1.preserved_trained_probe/v1",
+            "probe_id": "d1_screening_q1_s614923639",
+            "trained_sha256": hashlib.sha256(payload).hexdigest(),
+            "tag": "step_000042",
+            "trained_in_run": trained_in_run,
+            "trained_on_pod": "podA",
+            "trained_under_image": "img@1",
+        }))
+        return root
+
+    def test_a_probe_trained_elsewhere_is_flagged(self, tmp_path):
+        mod = self._driver()
+        mod.RUN_ID_FOR_PROVENANCE[0] = "run_B"
+        state = mod.trained_checkpoint_state(
+            self._preserved(tmp_path, trained_in_run="run_A"))
+        assert state is not None, "a complete preserved probe must be resumable"
+        assert state["restored_sha256_verified"] is True
+        assert state["trained_in_run"] == "run_A"
+        assert state["trained_on_pod"] == "podA"
+        assert state["_training_session_differs"] is True, (
+            "a field mixing training sessions must say so in the record a "
+            "reader consults")
+
+    def test_a_probe_trained_here_is_not_flagged(self, tmp_path):
+        """Non-vacuity: the flag must distinguish, not always fire."""
+        mod = self._driver()
+        mod.RUN_ID_FOR_PROVENANCE[0] = "run_A"
+        state = mod.trained_checkpoint_state(
+            self._preserved(tmp_path, trained_in_run="run_A"))
+        assert state["_training_session_differs"] is False
+
+    def test_tampered_bytes_are_refused_not_resumed(self, tmp_path):
+        """Reuse never means trusting whatever arrived: the shard is re-hashed
+        against the digest the preservation recorded."""
+        mod = self._driver()
+        mod.RUN_ID_FOR_PROVENANCE[0] = "run_B"
+        root = self._preserved(tmp_path, trained_in_run="run_A")
+        shard = next(root.rglob("model.safetensors"))
+        shard.write_bytes(b"tampered")
+        with pytest.raises(Exception, match="nobody preserved"):
+            mod.trained_checkpoint_state(root)
+
+    def test_the_launcher_stamps_the_training_run_into_the_sidecar(self):
+        """The producer side, so the consumer above is not reading a field
+        nothing writes."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_launch.py").read_text()
+        block = src.split('"aadistill.phase_d1.preserved_trained_probe/v1"', 1)[1][:1400]
+        for field in ("trained_in_run", "trained_on_pod", "trained_under_image"):
+            assert field in block, f"the sidecar does not record {field}"
+
+    def test_the_driver_has_a_run_id_to_compare_against(self):
+        """A stamp nobody computes is worse than no stamp: the comparison needs
+        this session's own id, so the driver must actually take one."""
+        src = (REPO / "scripts/stages/stage-1/phase_d1/"
+                      "autoinit_d1_behavioural_driver.py").read_text()
+        assert 'ap.add_argument("--run-id", required=True)' in src
+        assert "RUN_ID_FOR_PROVENANCE[0] = str(getattr(args" in src
+        launcher = (REPO / "scripts/stages/stage-1/phase_d1/"
+                           "autoinit_d1_behavioural_launch.py").read_text()
+        assert "--run-id '{run_id}'" in launcher or '--run-id' in launcher
