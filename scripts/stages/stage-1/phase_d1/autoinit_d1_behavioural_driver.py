@@ -504,15 +504,23 @@ def require_probe_headroom(name: str, record: dict[str, Any],
 
 def release_acked_probe_workdirs(record: dict[str, Any],
                                  save: Any) -> dict[str, Any]:
-    """Release the local bytes of every SCORED probe the launcher has ACKED.
+    """Release the local bytes of every SCORED probe whose CHECKPOINT is acked.
 
-    THE ACKNOWLEDGEMENT BOUNDARY, exactly C2's: the launcher writes an ack
-    only after the probe's required evidence (result, per-sample rows,
-    admission) arrived off-pod, so a release here never races durability. What
-    is released: the probe's training workdir (checkpoints, optimizer state)
-    and its evaluation package -- bytes with NO remaining consumer once the
-    probe is validly scored (P8.4 state 1). Its generations and results stay
-    in the audit dir; they are the evidence.
+    THE ACKNOWLEDGEMENT BOUNDARY: the launcher writes an ack only after the
+    probe's required evidence (result, per-sample rows, admission) arrived
+    off-pod AND its trained checkpoint was preserved off-pod, verified against
+    the digest recorded here at training completion. What is released: the
+    probe's training workdir and its evaluation package. Its generations and
+    results stay in the audit dir; they are the evidence.
+
+    THE ACK MUST NAME THE BYTES IT RELEASES. The workdir holds the only on-pod
+    copy of the trained weights, and those weights are what a replacement
+    attempt restores to re-evaluate the probe instead of retraining it. An
+    ack on evidence alone -- the first version -- let this delete weights the
+    launcher's preservation had not fetched yet, so the release now requires
+    the ack's `checkpoint_sha256` to equal this probe's `trained_sha256`. An
+    ack without it, or naming other bytes, keeps the workdir; the headroom
+    check before each training bounds the disk that costs.
 
     Same guards as C2's call site: scored-only, containment under this
     session's own artifact roots, never raises per item -- and the CALLER
@@ -524,8 +532,13 @@ def release_acked_probe_workdirs(record: dict[str, Any],
     out = {"released": [], "failed": [], "kept": [], "freed_gib": 0.0}
     ack_dir = REPO_ROOT / "artifacts/audit/autoinit_d1_behavioural/release_acks"
     try:
-        acked = {p.stem for p in ack_dir.glob("*.json")} \
-            if ack_dir.is_dir() else set()
+        acked: dict[str, str] = {}
+        for p in (ack_dir.glob("*.json") if ack_dir.is_dir() else ()):
+            try:
+                acked[p.stem] = str(json.loads(p.read_text()).get(
+                    "checkpoint_sha256") or "")
+            except (ValueError, AttributeError):
+                acked[p.stem] = ""
     except OSError as exc:
         out["failed"].append(f"cannot read {ack_dir}: {exc}")
         record.setdefault("probe_workdirs_released", []).append(out)
@@ -540,7 +553,8 @@ def release_acked_probe_workdirs(record: dict[str, Any],
             continue
         if entry.get("workdir_released"):
             continue
-        if probe_id not in acked:
+        want = str(entry.get("trained_sha256") or "")
+        if probe_id not in acked or not want or acked[probe_id] != want:
             out["kept"].append(probe_id)
             continue
         failed_here = False

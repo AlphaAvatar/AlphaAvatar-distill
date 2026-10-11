@@ -19,13 +19,17 @@ branch asserts recovery False, and `allows_beam_search` False where the
 search's asserts it True. A missing dispatch entry is not a type error: it
 falls through to `spend`, and Phase B's attempt 2 proved what that costs.
 
-**THE SESSION'S PRODUCTS ARE EVIDENCE, NOT CHECKPOINTS.** Once a probe is
-scored its weights have no downstream consumer (P8.4): the ranking reads
-scores, the verdict reads per-sample rows, and the confirmation rung retrains
-from the ARM initializations at fresh seeds. What must come home -- and comes
-home DURING the run, on every poll -- is each finished probe's result, its
-per-sample rows and its raw generations, plus the session record carrying the
-contract, the materialization gates, the ranking and the selection.
+**THE SESSION'S PRODUCTS ARE EVIDENCE, AND UNTIL THE RUNG COMPLETES, EVERY
+TRAINED CHECKPOINT TOO.** What must come home -- and comes home DURING the
+run, on every poll -- is each finished probe's result, its per-sample rows,
+its admission and its raw generations, plus the session record. Each trained
+checkpoint is also preserved off-pod, identity-verified, because a
+replacement attempt resumes it (re-evaluation, never retraining) rather than
+recomputing it; the pod may release a probe's workdir only once the ack names
+the digest of that preserved copy. The preserved copies are released at a
+SUCCESSFUL terminal: the ranking reads scores, the verdict reads per-sample
+rows, and the confirmation rung retrains from the ARM initializations at
+fresh seeds, so no consumer of screening probe weights remains.
 """
 from __future__ import annotations
 
@@ -243,6 +247,24 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
     every window except the first one it was written for.
     """
     try:
+        #: Trained-checkpoint durability FIRST (P8.2.1: persist at the moment
+        #: of completion, not at a closeout that may never come), and BEFORE
+        #: the ack below, because the ack now depends on it.
+        #:
+        #: PRUNING IS NOT DONE HERE. It used to delete a probe's preserved
+        #: weights the moment its score was durable, on the reasoning that a
+        #: scored checkpoint has no remaining consumer. It has exactly one,
+        #: and it is the project's standing rule: a replacement attempt must
+        #: RESUME preserved checkpoints rather than retrain them. Carrying the
+        #: SCORES forward instead does not work -- a probe scored in an earlier
+        #: session was generated and evaluated under THAT session's attested
+        #: protocol, and `protocol_uniformity`'s binding clause requires one
+        #: protocol identity across the field; attempts 6 and 7 drew pod
+        #: images with different NVIDIA drivers, which the runtime digest
+        #: hashes. Keeping the weights lets a replacement RE-EVALUATE every
+        #: probe under its own single attested protocol. The bytes are released
+        #: at a SUCCESSFUL terminal instead, where there is no further consumer.
+        preserve_trained_unscored(ctx)
         units = finished_probes(ctx) or []
         store = probe_store(ctx)
         secured = ctx.evidence.setdefault("probe_evidence_secured", {})
@@ -279,13 +301,22 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                 state[name] = bool(ok)
                 if ok:
                     ctx.say(f"  probe {probe_id}: secured {name}")
-            #: EVIDENCE DURABLE -> THE POD MAY RELEASE. The ack is written
-            #: only when every strict piece arrived, which is what makes the
-            #: driver's workdir release never race durability.
+            #: EVIDENCE AND CHECKPOINT DURABLE -> THE POD MAY RELEASE. The ack
+            #: authorizes the driver to delete this probe's training workdir,
+            #: which holds the ONLY on-pod copy of its trained weights -- so it
+            #: is written only when every strict evidence piece arrived AND
+            #: the checkpoint itself is preserved off-pod, identity-verified
+            #: against the digest the driver recorded at training completion.
+            #: An ack on evidence alone let the driver delete weights the
+            #: preservation had not yet fetched (it ran AFTER this loop, and
+            #: a 45-minute transfer can fail), and a replacement attempt then
+            #: had nothing to resume and retrained the probe.
+            checkpoint = durable_checkpoint_sha256(ctx, unit)
             if (state.get("result.json") and state.get("per_sample.jsonl")
-                    and state.get("admission.json")
+                    and state.get("admission.json") and checkpoint
                     and not state.get("release_acked")):
-                state["release_acked"] = write_release_ack(ctx, probe_id)
+                state["release_acked"] = write_release_ack(
+                    ctx, probe_id, checkpoint_sha256=checkpoint)
         #: The session-level protocol evidence, once: the attestation and the
         #: engine probe are what an auditor reconstructs the protocol identity
         #: from, and the recorded hash alone is not that.
@@ -299,66 +330,76 @@ def secure_probe_evidence(ctx: SessionContext) -> None:
                                    target)
                 if rc == 0 and target.is_file():
                     ctx.say(f"  secured {name}")
-        #: Trained-but-unscored durability DURING the run (P8.2.1: persist at
-        #: the moment of completion, not at a closeout that may never come).
-        #:
-        #: PRUNING IS NOT DONE HERE ANY MORE. It used to delete a probe's
-        #: weights the moment its score was durable, on the reasoning that a
-        #: scored checkpoint has no remaining consumer. It has exactly one,
-        #: and it is the project's standing rule: a replacement attempt must
-        #: RESUME preserved checkpoints rather than retrain them. Pruning
-        #: mid-rung made that impossible for every probe already scored --
-        #: attempt 8 would have found no weights and no result on a fresh pod
-        #: and retrained from zero, 61 minutes a probe.
-        #:
-        #: It cannot be fixed by carrying the SCORES forward instead: a probe
-        #: scored in an earlier session was generated and evaluated under
-        #: THAT session's attested protocol, and `protocol_uniformity`'s
-        #: binding clause requires one protocol identity across the field.
-        #: Those hashes do differ in practice -- attempts 6 and 7 drew pod
-        #: images with different NVIDIA drivers, which the runtime digest
-        #: hashes. Keeping the weights lets a replacement RE-EVALUATE every
-        #: probe under its own single attested protocol, which satisfies the
-        #: requirement and still retrains nothing.
-        #:
-        #: The bytes are released at a SUCCESSFUL terminal instead, where
-        #: there is genuinely no further consumer.
-        preserve_trained_unscored(ctx)
     except Exception as exc:                                    # noqa: BLE001
         ctx.evidence.setdefault("on_poll_errors", []).append(
             f"secure_probe_evidence: {type(exc).__name__}: {exc}")
 
 
-def write_release_ack(ctx: SessionContext, probe_id: str) -> bool:
-    """Tell the pod this probe's evidence is durable, so it may release.
+def durable_checkpoint_sha256(ctx: SessionContext, unit: dict) -> str | None:
+    """The digest of this probe's trained checkpoint IF it is durable off-pod.
 
-    C2's mechanism, under D1's ack path. MUST NOT raise (poll loop); a failure
-    costs pod disk, which the driver's fail-closed release then reports.
+    Durable means `preserve_trained_unscored` verified the whole resume set
+    and the preserved digest is the one the driver recorded for THIS probe.
+    Anything else -- not yet fetched, a failed or partial transfer, a digest
+    the driver never recorded -- is None, and no ack may be written on None.
+    """
+    probe_id = str(unit.get("probe_id") or "")
+    want = str(unit.get("trained_sha256") or "")
+    row = (ctx.evidence.get("trained_unscored_preserved") or {}).get(
+        probe_id) or {}
+    if want and row.get("verified") and row.get("trained_sha256") == want:
+        return want
+    return None
+
+
+def _scp_to_pod(ctx: SessionContext, sources: list[str], remote_dir: str, *,
+                recursive: bool = False, timeout: float | None = 120) -> int:
+    """Push local files INTO a pod directory, creating it first. Returns rc.
+
+    The one upload helper, so the ack and the restore travel the same way and
+    a test can substitute the transport in one place.
+    """
+    ctx.target.run(f"mkdir -p {remote_dir}", timeout=120)
+    cmd = ["scp"] + (["-r"] if recursive else [])
+    cmd += ["-P", str(ctx.target.port), "-o", "StrictHostKeyChecking=no",
+            "-o", "UserKnownHostsFile=/dev/null",
+            *sources, f"root@{ctx.host}:{remote_dir}/"]
+    return subprocess.run(cmd, capture_output=True,
+                          timeout=timeout).returncode
+
+
+def write_release_ack(ctx: SessionContext, probe_id: str, *,
+                      checkpoint_sha256: str) -> bool:
+    """Tell the pod this probe's evidence AND checkpoint are durable.
+
+    C2's mechanism, under D1's ack path, extended by the checkpoint: the ack
+    names the digest of the preserved weights, and the driver releases the
+    workdir only when that digest equals the one it recorded for the probe --
+    so a release is provably covered by a durable copy of the exact bytes it
+    deletes. MUST NOT raise (poll loop); a failure costs pod disk, which the
+    driver's headroom check then bounds.
     """
     import tempfile
 
     ack_dir = f"{REPO}/{M.RELEASE_ACK_REL}"
     payload = json.dumps({
-        "schema": "aadistill.phase_d1.behavioural_release_ack/v1",
+        "schema": "aadistill.phase_d1.behavioural_release_ack/v2",
         "probe_id": probe_id,
         "evidence": ["result.json", "per_sample.jsonl", "admission.json"],
+        "checkpoint_sha256": checkpoint_sha256,
         "_what_this_permits": (
             "releasing this probe's LOCAL training workdir and evaluation "
-            "package on the pod. The probe is validly scored and its "
-            "scientific evidence is off-pod; its weights have no remaining "
-            "consumer (P8.4 state 1)."),
+            "package on the pod. The probe is validly scored, its scientific "
+            "evidence is off-pod, and its trained checkpoint is preserved "
+            "off-pod with the digest named here -- which is what a "
+            "replacement attempt restores to re-evaluate it instead of "
+            "retraining it."),
     })
     try:
-        ctx.target.run(f"mkdir -p {ack_dir}", timeout=60)
         with tempfile.TemporaryDirectory() as tmp:
             local = Path(tmp) / f"{probe_id}.json"
             local.write_text(payload + "\n")
-            rc = subprocess.run(
-                ["scp", "-P", str(ctx.target.port),
-                 "-o", "StrictHostKeyChecking=no",
-                 "-o", "UserKnownHostsFile=/dev/null",
-                 str(local), f"root@{ctx.host}:{ack_dir}/{probe_id}.json"],
-                capture_output=True, timeout=120).returncode
+            rc = _scp_to_pod(ctx, [str(local)], ack_dir)
         ok = rc == 0
     except Exception as exc:                                    # noqa: BLE001
         ctx.evidence.setdefault("release_ack_errors", []).append(
@@ -463,6 +504,61 @@ def trained_probes_to_preserve(ctx: SessionContext) -> list[dict] | None:
     return None
 
 
+def _already_preserved(dest: Path, tag: str, want: str) -> dict | None:
+    """The completeness row of a VERIFIED copy already at `dest`, else None.
+
+    The same four checks a fresh preservation makes, re-run against the bytes
+    on disk, plus a sidecar naming the same digest. Never trusts the sidecar
+    alone: a sidecar beside a different shard is exactly the substitution the
+    resume refuses.
+    """
+    import hashlib
+
+    sidecar = dest / "preserved_identity.json"
+    if not want or not sidecar.is_file():
+        return None
+    try:
+        doc = json.loads(sidecar.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    shard = dest / "checkpoints" / tag / "model" / "model.safetensors"
+    latest = dest / "checkpoints" / "latest.txt"
+    completeness = {
+        "run_completion": (dest / "run_completion.json").is_file(),
+        "latest_tag": latest.is_file() and latest.read_text().strip() == tag,
+        "model_config": (dest / "checkpoints" / tag / "model"
+                         / "config.json").is_file(),
+        "sidecar_digest": doc.get("trained_sha256") == want,
+        "weights_digest": shard.is_file() and hashlib.sha256(
+            shard.read_bytes()).hexdigest() == want,
+    }
+    return {"completeness": completeness} if all(completeness.values()) \
+        else None
+
+
+def training_provenance(ctx: SessionContext, unit: dict) -> dict[str, str]:
+    """WHERE this probe's weights were trained -- not where they were seen.
+
+    A probe RESUMED from a preserved checkpoint was trained by an earlier
+    session, and the driver carries that session's provenance onto the probe
+    record as `resumed_from_trained`. Stamping the current run instead would
+    let a mixed-session field read as single-session in the very record a
+    reader conditions on; an origin nobody recorded stays UNKNOWN.
+    """
+    resumed = unit.get("resumed_from_trained") or {}
+    if resumed:
+        return {key: str(resumed.get(key) or "UNKNOWN")
+                for key in ("trained_in_run", "trained_on_pod",
+                            "trained_under_image")}
+    return {
+        "trained_in_run": str(getattr(ctx.args, "run_id", "") or ""),
+        "trained_on_pod": str(ctx.evidence.get("pod_id") or ""),
+        "trained_under_image": str(
+            (ctx.evidence.get("image_identity") or {}).get("digest")
+            or ctx.evidence.get("image_identity") or ""),
+    }
+
+
 def preserve_trained_unscored(ctx: SessionContext) -> None:
     """Fetch every trained-but-unscored probe's checkpoint off-pod. Verified.
 
@@ -493,6 +589,20 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
             tag = Path(remote_model).parent.name
             remote_root = f"{POD_PROBE_ROOT}/{probe_id}"
             dest = store / probe_id
+            want = str(unit.get("trained_sha256") or "")
+            #: ALREADY DURABLE HERE -- a probe this session RESUMED from this
+            #: store, or one an earlier poll verified before the launcher
+            #: restarted. Re-fetching would cost a transfer for identical
+            #: bytes and, worse, rewrite the sidecar's provenance with THIS
+            #: run's id, claiming a training session that never happened.
+            existing = _already_preserved(dest, tag, want)
+            if existing is not None:
+                preserved[probe_id] = {**existing, "dest": str(dest),
+                                       "verified": True,
+                                       "trained_sha256": want,
+                                       "arrived_sha256": want,
+                                       "already_durable": True}
+                continue
             (dest / "checkpoints" / tag).mkdir(parents=True, exist_ok=True)
             rcs = {
                 "run_completion.json": _scp_from_pod(
@@ -521,7 +631,6 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
                             shutil.move(str(item),
                                         str(dest / "checkpoints" / tag
                                             / "model" / item.name))
-            want = str(unit.get("trained_sha256") or "")
             got = (hashlib.sha256(shard.read_bytes()).hexdigest()
                    if shard.is_file() else None)
             #: VERIFIED means THE WHOLE RESUME SET arrived, not that one shard
@@ -563,11 +672,7 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
                     #: provenance, so a mixed-session field would have looked
                     #: identical to a single-session one in every record a
                     #: reader consults.
-                    "trained_in_run": str(getattr(ctx.args, "run_id", "") or ""),
-                    "trained_on_pod": str(ctx.evidence.get("pod_id") or ""),
-                    "trained_under_image": str(
-                        (ctx.evidence.get("image_identity") or {}).get("digest")
-                        or ctx.evidence.get("image_identity") or ""),
+                    **training_provenance(ctx, unit),
                     "_reuse_is_not_authorized_by_preservation": (
                         "P8.2.1: saving this checkpoint authorizes nothing "
                         "about reusing it. Whether a replacement session may "
@@ -606,8 +711,6 @@ def restore_trained_probes(ctx: SessionContext) -> bool:
     if not probes:
         ctx.say(f"  --restore-trained {root}: nothing to restore")
         return True
-    import subprocess as sp
-
     for probe_dir in probes:
         sidecar = probe_dir / "preserved_identity.json"
         if not sidecar.is_file():
@@ -615,21 +718,12 @@ def restore_trained_probes(ctx: SessionContext) -> bool:
                     "refusing to push unverifiable bytes")
             return False
         remote_root = f"{POD_PROBE_ROOT}/{probe_dir.name}"
-        sp.run(["ssh", "-p", str(ctx.target.port),
-                "-o", "StrictHostKeyChecking=no",
-                "-o", "UserKnownHostsFile=/dev/null",
-                f"root@{ctx.host}", f"mkdir -p {remote_root}"],
-               capture_output=True, timeout=120)
         #: PUSH, deliberately without the LocalAsset machinery: its 600 s
         #: per-asset cap exists for small science inputs, and a 1.2 GiB
         #: checkpoint at the measured ~0.72 MB/s uplink is ~28 minutes --
         #: a priced contingency, not a routine transfer.
-        rc = sp.run(["scp", "-r", "-P", str(ctx.target.port),
-                     "-o", "StrictHostKeyChecking=no",
-                     "-o", "UserKnownHostsFile=/dev/null",
-                     *[str(p) for p in sorted(probe_dir.iterdir())],
-                     f"root@{ctx.host}:{remote_root}/"],
-                    capture_output=True, timeout=None).returncode
+        rc = _scp_to_pod(ctx, [str(p) for p in sorted(probe_dir.iterdir())],
+                         remote_root, recursive=True, timeout=None)
         ctx.evidence.setdefault("trained_unscored_restored", {})[
             probe_dir.name] = {"rc": rc, "from": str(probe_dir)}
         if rc != 0:
@@ -648,8 +742,8 @@ def fetch_probe_evidence(ctx: SessionContext) -> list:
     nothing: the preserved weights are exactly what a replacement attempt
     resumes instead of retraining.
     """
+    #: Preserves every trained checkpoint first, then the scored evidence.
     secure_probe_evidence(ctx)
-    preserve_trained_unscored(ctx)
     #: Release only on a completed rung, and only per probe whose result,
     #: per-sample rows and admission record are all confirmed off-pod -- so a
     #: probe whose evidence did not come home keeps its weights even on a

@@ -1309,27 +1309,44 @@ class TestDiskResidencyFollowsTheRealFreeCallSites:
         ack_dir.mkdir(parents=True)
         work = tmp_path / "artifacts/stages/stage-3/d1_behavioural"
         pkg = tmp_path / driver.EVAL_PACKAGES_REL
-        for probe_id in ("p_acked", "p_unacked", "p_unscored"):
+        ids = ("p_acked", "p_unacked", "p_unscored", "p_evidence_only",
+               "p_other_bytes")
+        for probe_id in ids:
             (work / probe_id).mkdir(parents=True)
             (work / probe_id / "w").write_bytes(b"x" * 32)
             (pkg / probe_id).mkdir(parents=True)
-        (ack_dir / "p_acked.json").write_text("{}")
-        (ack_dir / "p_unscored.json").write_text("{}")
+
+        def ack(probe_id, sha):
+            (ack_dir / f"{probe_id}.json").write_text(json.dumps(
+                {"probe_id": probe_id, "checkpoint_sha256": sha}))
+
+        ack("p_acked", "a" * 64)
+        ack("p_unscored", "c" * 64)
+        #: THE V1 SHAPE: evidence durable, checkpoint not named. It released
+        #: weights the preservation had not fetched; it must not any more.
+        (ack_dir / "p_evidence_only.json").write_text("{}")
+        ack("p_other_bytes", "f" * 64)
         record = {"probes": [
-            {"probe_id": "p_acked", "scored": True},
-            {"probe_id": "p_unacked", "scored": True},
-            {"probe_id": "p_unscored", "scored": False},
+            {"probe_id": "p_acked", "scored": True, "trained_sha256": "a" * 64},
+            {"probe_id": "p_unacked", "scored": True, "trained_sha256": "b" * 64},
+            {"probe_id": "p_unscored", "scored": False,
+             "trained_sha256": "c" * 64},
+            {"probe_id": "p_evidence_only", "scored": True,
+             "trained_sha256": "d" * 64},
+            {"probe_id": "p_other_bytes", "scored": True,
+             "trained_sha256": "e" * 64},
         ]}
         out = driver.release_acked_probe_workdirs(record, lambda: None)
         assert out["released"] == ["p_acked"]
         assert not (work / "p_acked").exists()
         assert not (pkg / "p_acked").exists()
         #: Unacked stays; unscored stays even though acked -- an ack is not a
-        #: score, and only a validly scored probe's weights lose their
-        #: consumer.
-        assert (work / "p_unacked").is_dir()
-        assert (work / "p_unscored").is_dir()
-        assert out["kept"] == ["p_unacked"]
+        #: score. An ack that does not name THIS probe's trained digest stays
+        #: too: it is not evidence that the bytes about to be deleted survive.
+        for probe_id in ("p_unacked", "p_unscored", "p_evidence_only",
+                         "p_other_bytes"):
+            assert (work / probe_id).is_dir(), probe_id
+        assert out["kept"] == ["p_unacked", "p_evidence_only", "p_other_bytes"]
 
     def test_packages_are_built_outside_the_audit_dir(self):
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
@@ -1399,10 +1416,13 @@ class TestProtocolEvidenceTravelsInTheArtifactContracts:
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
         assert "_generation_admission.json" in src
-        #: And the ack is written only when all three strict pieces arrived.
+        #: And the ack is written only when all three strict pieces arrived
+        #: AND the checkpoint is durable -- the behaviour itself is driven
+        #: end to end in TestTheReleaseWaitsForTheDurableCheckpoint.
         ack_block = src.split('state["release_acked"] = ', 1)[0]
         tail = ack_block[ack_block.rfind("if ("):]
-        for piece in ("result.json", "per_sample.jsonl", "admission.json"):
+        for piece in ("result.json", "per_sample.jsonl", "admission.json",
+                      "checkpoint"):
             assert piece in tail, piece
 
 
@@ -1614,6 +1634,221 @@ class TestTheFirstProbesTrainedWindowIsPreserved:
         #: And the gate accepts teardown once the preservation is verified.
         ok, why = launcher.probes_evidence_secured(ctx, [])
         assert ok and "preserved" in why
+
+
+class TestTheReleaseWaitsForTheDurableCheckpoint:
+    """The real Poll -> Preservation -> ACK -> Release chain, then Restore ->
+    Resume on a replacement pod. Only the TRANSPORT is simulated: two local
+    directories stand in for the pod's repository and the dev box's scratch,
+    and every launcher and driver function between them is the production one.
+
+    The defect (2026-10-11): the ack was written on durable EVIDENCE alone,
+    inside the scored-evidence loop and before the checkpoint preservation ran,
+    so the driver could delete a scored probe's workdir -- the only on-pod copy
+    of its trained weights -- before the weights left the pod. A replacement
+    attempt then had nothing to resume and retrained the probe."""
+
+    SHARD = b"trained-weights-of-probe-one"
+    POD_REPO = "/workspace/aad/"
+
+    @classmethod
+    def _pod_with_a_scored_probe(cls, pod):
+        import hashlib
+
+        probe = pod / "artifacts/stages/stage-3/d1_behavioural/p1"
+        model = probe / "checkpoints/step100/model"
+        model.mkdir(parents=True)
+        (model / "config.json").write_text("{}")
+        (model / "model.safetensors").write_bytes(cls.SHARD)
+        (probe / "checkpoints/latest.txt").write_text("step100")
+        (probe / "run_completion.json").write_text('{"final_step": 100}')
+        (pod / "artifacts/stages/stage-3/d1_behavioural_eval/p1").mkdir(
+            parents=True)
+        audit = pod / "artifacts/audit/autoinit_d1_behavioural"
+        for rel, body in (("results/p1.json", '{"correct_overall": 0.5}'),
+                          ("per_sample/p1.jsonl", '{"id": 1}\n'),
+                          ("p1_generation_admission.json", "{}"),
+                          ("generations/p1/set.json", "{}"),
+                          ("d1_behavioural_attested_protocol.json", "{}"),
+                          ("engine_probe.json", "{}")):
+            (audit / rel).parent.mkdir(parents=True, exist_ok=True)
+            (audit / rel).write_text(body)
+        sha = hashlib.sha256(cls.SHARD).hexdigest()
+        return {"probe_id": "p1", "arm": "q1", "trained": True, "scored": True,
+                "model_dir": cls.POD_REPO + str(model.relative_to(pod)),
+                "trained_sha256": sha}
+
+    @classmethod
+    def _transport(cls, monkeypatch, launcher, pod, *, failing, calls):
+        import shutil
+
+        def local(remote):
+            assert remote.startswith(cls.POD_REPO), remote
+            return pod / remote[len(cls.POD_REPO):]
+
+        def scp_from(ctx, remote, dest, *, recursive=False, limit_min=5):
+            calls.append(remote)
+            src, dest = local(remote), Path(dest)
+            if any(f in remote for f in failing) or not src.exists():
+                return 1
+            if recursive:
+                #: scp -r semantics: into an existing directory it nests, and
+                #: it overwrites what is already there.
+                shutil.copytree(src, dest / src.name if dest.is_dir() else dest,
+                                dirs_exist_ok=True)
+            else:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src, dest)
+            return 0
+
+        def scp_to(ctx, sources, remote_dir, *, recursive=False, timeout=120):
+            target = local(remote_dir)
+            target.mkdir(parents=True, exist_ok=True)
+            for s in map(Path, sources):
+                if s.is_dir():
+                    shutil.copytree(s, target / s.name)
+                else:
+                    shutil.copy2(s, target / s.name)
+            return 0
+
+        monkeypatch.setattr(launcher, "_scp_from_pod", scp_from)
+        monkeypatch.setattr(launcher, "_scp_to_pod", scp_to)
+
+    @staticmethod
+    def _ctx(scr, *, run_id, restore=None, store=None):
+        class _Args:
+            pass
+
+        args = _Args()
+        args.scr, args.run_id, args.restore_trained = str(scr), run_id, restore
+        args.ckpt_store, args.ckpt_fetch_limit_min = store, 45
+
+        class _Ctx:
+            evidence = {"pod_id": f"pod_of_{run_id}"}
+            host = ""
+            target = None
+
+            @staticmethod
+            def say(_msg):
+                pass
+
+        ctx = _Ctx()
+        ctx.args = args
+        ctx.evidence = {"pod_id": f"pod_of_{run_id}"}
+        return ctx
+
+    @staticmethod
+    def _mirror(scr, probes):
+        (scr / "relay").mkdir(parents=True, exist_ok=True)
+        (scr / "relay/d1_behavioural.json").write_text(
+            json.dumps({"probes": probes}))
+
+    def test_no_ack_and_no_release_until_the_checkpoint_is_durable(
+            self, tmp_path, monkeypatch):
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        driver = TestGenerationAdmissionGuardsTheScoringPath._driver()
+        pod, dev = tmp_path / "pod", tmp_path / "dev"
+        entry = self._pod_with_a_scored_probe(pod)
+        self._mirror(dev, [entry])
+        monkeypatch.setattr(driver, "REPO_ROOT", pod)
+        workdir = pod / "artifacts/stages/stage-3/d1_behavioural/p1"
+        ack = pod / "artifacts/audit/autoinit_d1_behavioural/release_acks/p1.json"
+
+        #: POLL 1: the evidence arrives, the checkpoint transfer FAILS.
+        calls: list = []
+        self._transport(monkeypatch, launcher, pod,
+                        failing={"/checkpoints/step100/model"}, calls=calls)
+        ctx = self._ctx(dev, run_id="run_A")
+        launcher.secure_probe_evidence(ctx)
+        assert not ctx.evidence.get("on_poll_errors"), ctx.evidence
+        secured = ctx.evidence["probe_evidence_secured"]["p1"]
+        assert secured["result.json"] and secured["per_sample.jsonl"] \
+            and secured["admission.json"], secured
+        assert ctx.evidence["trained_unscored_preserved"]["p1"]["verified"] \
+            is False
+        assert not ack.exists(), "acked on evidence alone -- the defect"
+        record = {"probes": [dict(entry)]}
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["kept"] == ["p1"] and workdir.is_dir()
+
+        #: POLL 2: the transfer succeeds; preservation, ack and release follow
+        #: IN THAT ORDER, within one poll.
+        self._transport(monkeypatch, launcher, pod, failing=set(), calls=calls)
+        launcher.secure_probe_evidence(ctx)
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True, row
+        doc = json.loads(ack.read_text())
+        assert doc["checkpoint_sha256"] == entry["trained_sha256"]
+        out = driver.release_acked_probe_workdirs(record, lambda: None)
+        assert out["released"] == ["p1"]
+        assert not workdir.exists()
+        assert not (pod / driver.EVAL_PACKAGES_REL / "p1").exists()
+        #: The released bytes survive off-pod, provenance-stamped.
+        sidecar = json.loads(
+            (Path(row["dest"]) / "preserved_identity.json").read_text())
+        assert sidecar["trained_in_run"] == "run_A"
+
+        #: RESTORE onto a REPLACEMENT pod; the REAL resume consumer accepts
+        #: the bytes, and says they were trained elsewhere.
+        pod2 = tmp_path / "pod2"
+        self._transport(monkeypatch, launcher, pod2, failing=set(), calls=calls)
+        ctx_b = self._ctx(tmp_path / "dev_b", run_id="run_B",
+                          restore=str(Path(row["dest"]).parent))
+        assert launcher.restore_trained_probes(ctx_b) is True
+        monkeypatch.setattr(driver, "RUN_ID_FOR_PROVENANCE", ["run_B"])
+        state = driver.trained_checkpoint_state(
+            pod2 / "artifacts/stages/stage-3/d1_behavioural/p1")
+        assert state is not None and state["restored_sha256_verified"]
+        assert state["trained_in_run"] == "run_A"
+        assert state["_training_session_differs"] is True
+
+        #: RE-PRESERVED by the replacement session into ITS store: the
+        #: original provenance travels, not the resuming run's id.
+        resumed = {**entry, "resumed_from_trained": state,
+                   "model_dir": entry["model_dir"]}
+        self._mirror(tmp_path / "dev_b", [resumed])
+        launcher.preserve_trained_unscored(ctx_b)
+        row_b = ctx_b.evidence["trained_unscored_preserved"]["p1"]
+        assert row_b["verified"] is True, row_b
+        again = json.loads(
+            (Path(row_b["dest"]) / "preserved_identity.json").read_text())
+        assert again["trained_in_run"] == "run_A", (
+            "the replacement stamped its own run as the training session")
+
+    def test_an_already_durable_copy_is_not_fetched_again(
+            self, tmp_path, monkeypatch):
+        """A replacement whose store IS its restore source re-verifies the
+        bytes on disk instead of re-downloading them, and keeps the sidecar."""
+        from support.session_specs import load_session_launcher
+
+        launcher = load_session_launcher("autoinit_d1_behavioural_launch")
+        pod, dev = tmp_path / "pod", tmp_path / "dev"
+        entry = self._pod_with_a_scored_probe(pod)
+        self._mirror(dev, [entry])
+        calls: list = []
+        self._transport(monkeypatch, launcher, pod, failing=set(), calls=calls)
+        ctx = self._ctx(dev, run_id="run_A")
+        launcher.preserve_trained_unscored(ctx)
+        dest = Path(ctx.evidence["trained_unscored_preserved"]["p1"]["dest"])
+        before = (dest / "preserved_identity.json").read_text()
+
+        calls.clear()
+        later = self._ctx(dev, run_id="run_B")
+        launcher.preserve_trained_unscored(later)
+        row = later.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] and row["already_durable"]
+        assert calls == [], f"re-fetched identical bytes: {calls}"
+        assert (dest / "preserved_identity.json").read_text() == before
+
+        #: And a corrupted copy is NOT accepted as durable: it is re-fetched.
+        shard = dest / "checkpoints/step100/model/model.safetensors"
+        shard.write_bytes(b"corrupted")
+        third = self._ctx(dev, run_id="run_C")
+        launcher.preserve_trained_unscored(third)
+        assert calls, "a copy that no longer verifies must be fetched again"
+        assert third.evidence["trained_unscored_preserved"]["p1"]["verified"]
 
 
 class TestTheRootLoaderSeamCarriesTheSpec:

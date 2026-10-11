@@ -79,3 +79,56 @@ useful consequence is that the reuse rule saves the most where it matters:
 - **Revisit when:** a rung's reused fraction is large enough that the
   host/driver residual could plausibly rival the SESOI, or when a future design
   makes training-session identity part of its binding requirement.
+
+## 2026-10-11 — The release must wait for the durable checkpoint
+
+- **Context:** the pod-side release (`release_acked_probe_workdirs`) deletes a
+  scored probe's training workdir — the only on-pod copy of its trained
+  weights — once the launcher's ack exists. The ack was written when the
+  result, per-sample rows and admission were off-pod, inside the evidence loop
+  and *before* `preserve_trained_unscored` ran in the same poll. Nothing tied
+  it to the checkpoint, so a failed or slow weight transfer let the driver
+  delete weights that existed nowhere else, and the next attempt could only
+  retrain that probe.
+- **Decision:** the ack now requires the checkpoint to be preserved off-pod and
+  identity-verified (`durable_checkpoint_sha256`), preservation runs before the
+  ack in every poll, and the ack (schema v2) names `checkpoint_sha256`. The
+  driver releases only when that digest equals the probe's recorded
+  `trained_sha256`; an evidence-only (v1) ack or one naming other bytes keeps
+  the workdir. The headroom check before each training still bounds pod disk —
+  retention is until durability, not unbounded.
+- Two related defects fixed in the same chain: a replacement session that
+  re-preserves a **resumed** probe now carries the original training
+  provenance into the new sidecar, where it used to stamp its own run id. And
+  a copy that is already durable at the destination (re-verified on disk, not
+  trusted from its sidecar) is not downloaded again.
+- **Regression:** `TestTheReleaseWaitsForTheDurableCheckpoint` drives the real
+  launcher and driver functions through poll → preservation → ack → release
+  → restore on a replacement pod → resume, with only the transport simulated.
+  Mutating the ack gate back to evidence-only makes it fail.
+
+### What reuse costs over this transport — measured, not assumed
+
+A trained D1 probe checkpoint is **2,384,234,968 bytes** (attempt 6's preserved
+`q1/s614923639`). Download pod → dev box runs at about 11.5 MB/s, roughly 3.5
+minutes a probe, so preservation during the run is cheap. **Restore runs the
+other way**, over the dev-box uplink, measured at about 0.72 MB/s on
+2026-08-08: about **55 minutes a probe** before the driver starts, against
+about 46 minutes of training. Over this transport, restoring a probe for
+re-evaluation is therefore **roughly break-even with retraining it, not the
+~61-minute saving the table above implies**. The rule is still correct, because
+it preserves the training draw that was actually measured. But the economics
+are wrong until restore stops depending on the uplink.
+A pod-side durable backend would fix that, either HF with quota (which needs
+retiring the audited historical weights) or a provider network volume. Choose
+between them before the next experiment whose checkpoints are this large.
+Until then, a replacement attempt should restore preserved probes and accept
+the cost: with that cost it keeps exactly the training draws already recorded.
+
+### Attempt 8 starts with nothing to restore
+
+The three preserved `q1/s614923639` checkpoints from attempts 3, 4 and 6 were
+retired on 2026-10-11 (`e23f0a66`) with full-digest tombstones. Attempt 7
+trained no probe. Attempt 8 therefore trains all ten screening probes in one
+session. No earlier checkpoint exists for it to pick from, so no checkpoint can
+be selected by its outcome.
