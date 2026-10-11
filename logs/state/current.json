@@ -119,10 +119,10 @@
  "latest_verification": {
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py:readiness_view",
   "latest_sweep": {
+   "describes_head": false,
    "kind": "launch_bound",
-   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "describes_head": false
+   "verdict": "PASS"
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
@@ -201,10 +201,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "an account-wide provider query returns [] for both pods and network volumes. Both campaign volumes -- 59qt99zeg5 (40 GB) and a0zqgxsm7p (10 GB) -- are deleted.",
+  "_verified": "D1 screening attempt 8, launched 2026-10-11 14:06 UTC; owner: its runtime/session.json.",
   "network_volumes": 0,
-  "paid_compute": false,
-  "pods": 0
+  "paid_compute": true,
+  "pod_id": "kz0r9zerjsvapk",
+  "pods": 1,
+  "run_id": "d1_behavioural_20261011_135910"
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

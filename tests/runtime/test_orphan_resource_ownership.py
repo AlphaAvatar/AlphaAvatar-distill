@@ -70,8 +70,12 @@ def test_a_live_watchdog_naming_this_pod_IS_ownership():
          f"import time; time.sleep(30)  # watchdog --pod-id {pod}"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
-        for _ in range(50):          # let /proc settle
-            if Path(f"/proc/{proc.pid}/cmdline").exists():
+        #: Wait for the EXEC, not the fork: between the two, /proc/<pid>/
+        #: cmdline exists and still carries the PARENT's argv, and the
+        #: verifier then correctly reports a reused pid -- a flake under load.
+        for _ in range(250):
+            cmdline = Path(f"/proc/{proc.pid}/cmdline")
+            if cmdline.exists() and pod.encode() in cmdline.read_bytes():
                 break
             time.sleep(0.02)
         out = _Runner(pod_id=pod, pid=proc.pid).verify_watchdog_owns_pod()

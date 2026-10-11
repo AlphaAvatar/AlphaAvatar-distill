@@ -9,8 +9,7 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 SCREENING ATTEMPT 8 IS BEING LAUNCHED under the existing phase
-allowance.** Seven screening subruns have run since 2026-10-10. None scored a
+**D1 SCREENING ATTEMPT 8 IS RUNNING under the existing phase allowance.** Seven screening subruns have run since 2026-10-10. None scored a
 probe, and every one stopped before formal measurement. Six were engineering
 aborts, each repaired in turn. Attempt 7 was stopped on maintainer instruction
 because its bundle predated the checkpoint-reuse rules. The maintainer's
@@ -65,7 +64,7 @@ pack, batteries, tokenizer  pinned relay objects / small scp assets, digest-chec
                             nothing re-tokenized or re-built.
 ```
 
-**Nothing is running and nothing is billing** as of this commit: an account-wide provider query on 2026-10-11 returns 0 pods at `$0/h` against a balance of `$174.2161`, and no watcher or helper session from attempt 7 remains.
+**Attempt 8 is live on pod `kz0r9zerjsvapk`** (NVIDIA L40S, `$1.09/h`, host driver 595.91.07), run `d1_behavioural_20261011_135910`, launched 14:06 UTC after all seven pre-provider gates passed; setup took 4 minutes and the driver detached at 14:11:59 UTC. Authorization `$24.9922` over 1355 minutes; watchdog hard bound `$24.62`. Ten probes, one session, one host. The launcher runs under tmux `d1a8` on the dev box with its scratch at `/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_135910`.
 
 **Frozen and unchanged:** design `f9c6688f…`, preregistration `aa70338a…`, arms
 q1–q4 plus standing incumbent B (`53e30566…`), seeds 614923639 and 516448251,
