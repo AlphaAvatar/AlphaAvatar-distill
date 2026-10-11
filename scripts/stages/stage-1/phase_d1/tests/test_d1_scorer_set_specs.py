@@ -316,8 +316,33 @@ class TestAReusedProbeCarriesItsTrainingProvenance:
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
         block = src.split('"aadistill.phase_d1.preserved_trained_probe/v1"', 1)[1][:1400]
-        for field in ("trained_in_run", "trained_on_pod", "trained_under_image"):
-            assert field in block, f"the sidecar does not record {field}"
+        assert "**training_provenance(ctx, unit)" in block, (
+            "the sidecar no longer takes its provenance from its one owner")
+        #: And the owner fills all three: from THIS run for a probe trained
+        #: here, from the ORIGINAL run for one resumed from a preserved copy --
+        #: stamping the resuming run there would be false provenance.
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(
+            "_d1b_prov", REPO / "scripts/stages/stage-1/phase_d1/"
+                                "autoinit_d1_behavioural_launch.py")
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+
+        class Ctx:
+            args = type("A", (), {"run_id": "run_B"})()
+            evidence = {"pod_id": "pod_B",
+                        "image_identity": {"digest": "img_B"}}
+
+        here = mod.training_provenance(Ctx(), {"probe_id": "p"})
+        assert here == {"trained_in_run": "run_B", "trained_on_pod": "pod_B",
+                        "trained_under_image": "img_B"}
+        resumed = mod.training_provenance(Ctx(), {
+            "probe_id": "p", "resumed_from_trained": {
+                "trained_in_run": "run_A", "trained_on_pod": "pod_A"}})
+        assert resumed == {"trained_in_run": "run_A",
+                           "trained_on_pod": "pod_A",
+                           "trained_under_image": "UNKNOWN"}
 
     def test_the_driver_has_a_run_id_to_compare_against(self):
         """A stamp nobody computes is worse than no stamp: the comparison needs

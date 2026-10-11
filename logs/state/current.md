@@ -9,222 +9,68 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 SCREENING IS ENGINEERING-READY AND BLOCKED ON A BUDGET DECISION.** The
-maintainer's one-use grant was issued and consumed across four launcher
-invocations; all four aborted before formal measurement, all four defects are
-repaired, and the $16.7873 left of the $25.0053 envelope is below the $17.84
-measured cost of a complete 10-probe run. A fifth issuance is refused in code.
-See **Right now → screening** below, and
-`logs/stages/stage-1/phase_d1/analyses/d1_screening_budget_boundary.json` for
-the decision. Working branch `exec/d1-behavioural-readiness` at `84d681b6`, cut fresh from the
-integrated `main` per P12.2:
+**D1 SCREENING ATTEMPT 8 IS BEING LAUNCHED under the existing phase
+allowance.** Seven screening subruns have run since 2026-10-10. None scored a
+probe, and every one stopped before formal measurement. Six were engineering
+aborts, each repaired in turn. Attempt 7 was stopped on maintainer instruction
+because its bundle predated the checkpoint-reuse rules. The maintainer's
+2026-10-11 instruction confirms the phase authorization ($130.00 all-in,
+$30.00 per session) and orders screening to completion, then confirmation if a
+candidate advances. It changes no frozen science and no budget limit.
 
 ```text
-execution preregistration   plans/d1_behavioural_preregistration.json
-                            aa70338a22bdaae1…  — C0's seed hash-binding,
-                            written while no probe, grant or resource exists;
-                            regenerates identically across hash seeds
-replay plan                 plans/d1_behavioural_replay_plan.json
-                            fe58c3a5be23e54f…  — all four finalists' pinned
-                            paths resolved from the search journal at $0
-launcher                    autoinit_d1_behavioural_launch.py — seven $0 gates
-                            incl. same_failure_gate; per-probe evidence pulled
-                            off-pod on every poll; evidence-not-checkpoints
-                            products contract (P8.4)
-one-use issuer              issue_d1_behavioural_authorization.py over
-                            behavioural_authorization.build_payload — live
-                            secure rate, four budget conditions, contract and
-                            preregistration hash-bound, read back through the
-                            loading type
-driver                      arm materialization ON THE POD along digest-pinned
-                            paths (candidates replay the search's recorded
-                            steps; B from frozen_baseline_spec), location-free
-                            contract asserted before any probe, rung-pinned
-                            scorers, evidence announced per probe
-sweep contract              --experiment phase_d1_behavioural, run-owned
-dispatch                    SESSION_KIND=d1_behavioural branch asserting the
-                            behavioural type's claims
+subrun                         all-in      min   ended on
+d1_behavioural_20261010_082900  0.1712      9.4   root_loader seam called without its spec
+d1_behavioural_20261010_090343  1.4934     81.2   incumbent loader never supplied
+d1_behavioural_20261010_103442  3.1238    169.5   engine probe could not import its own dep
+d1_behavioural_20261010_132919  3.5421    192.3   evaluator had no image digest in its env
+d1_behavioural_20261010_200001  0.0000      0.0   budget boundary, no pod (funding model)
+d1_behavioural_20261011_083610  3.3565    182.8   scorer passed filenames, not set specs
+d1_behavioural_20261011_114853  0.6837     38.0   stopped by the maintainer, not a failure
+                               -------  -------
+                               12.3707    673.2   of the $130.00 phase allowance
 ```
 
-The confirmation rung's field-narrowing (2 arms × 3 seeds = 6 probes, candidate
-bound at issuance from the screening selection record) is implemented; its
-off-pod verdict computation is owed before the CONFIRMATION launch and blocks
-nothing about screening.
+Owner of every figure: each run's `closeout/outcome.json`, summed by
+`behavioural_authorization.consumed_by_prior_subruns`. The project-wide books
+come from `derive_budget.py` (table near the end of this file). Attempts 6
+and 7 were missing from `logs/index.json` until `record_run_index.py`
+regenerated it on 2026-10-11. `derive_budget` discovers sessions through that
+index, so neither was booked before; formal spend moved 96.1903 → 100.2305.
 
-**The 2026-10-10 independent review returned ENGINEERING NO-GO on the first
-HEAD (`6a76bc10`) and its four findings are repaired on this branch:**
+**What changed for attempt 8 (`cd1be28e`): the pod releases a probe's weights
+only once they are durable.** The release ack used to be written on durable
+*evidence* alone, before the checkpoint preservation ran, so the driver could
+delete a scored probe's workdir while its weights existed nowhere else. Now
+preservation runs first in every poll. The ack requires the checkpoint
+preserved off-pod and identity-verified, and it names `checkpoint_sha256`. The
+driver releases only when that digest equals the probe's recorded
+`trained_sha256`. Decision record:
+[`decisions/reuse_preserved_checkpoints.md`](../stages/stage-1/phase_d1/decisions/reuse_preserved_checkpoints.md).
+
+**What attempt 8 reuses, and what it recomputes.**
 
 ```text
-1  checkpoint layout   materialize_fixed_path writes workdir/steps/NN_kind;
-                       every consumer now reads the PRODUCER'S checkpoint_path
-                       (final_checkpoint_in + resolved_paths through the
-                       contract), and a confirmation pod byte-verifies only
-                       its two arms while binding the full frozen field
-2  B's execution       materialize_incumbent passes A3's A_bsz1 (mbs=1,
-                       original_order_v1) from its owner, never
-                       DEFAULT_EXECUTION and never the candidates' bsz=3
-3  admission           C1's engine attestation + per-probe observed-protocol
-                       admission run BEFORE scoring; results bind
-                       --trained-run and the OBSERVED generation fingerprint
-4  trained-unscored    P8.4 state 2: the driver hashes each trained
-                       checkpoint at completion, teardown refuses while one
-                       is pod-only (checked BEFORE the no-scored-probes early
-                       return), the failure path preserves it off-pod
-                       verified, and a replacement session restores + resumes
-                       at evaluation (identity re-checked) instead of
-                       retraining; scored probes' weights are never fetched
+trained probe checkpoints   NONE EXIST. Attempts 3, 4 and 6's three q1/s614923639
+                            copies were retired with full-digest tombstones
+                            (e23f0a66) before any was scored; attempt 7 trained
+                            none. All ten probes train in this ONE session, so
+                            nothing can be chosen by its outcome.
+arm initializations         rebuilt ON THE POD along the search's digest-pinned
+                            paths (~92 min measured) and byte-verified against the
+                            recorded identities. Not shipped: ~1.1 GiB each over a
+                            ~0.72 MB/s dev-box uplink is slower than the rebuild,
+                            and the HF relay has no quota for them.
+pack, batteries, tokenizer  pinned relay objects / small scp assets, digest-checked;
+                            nothing re-tokenized or re-built.
 ```
 
-Failure classification is corrected with them: only `D1ArmIdentityMismatch` —
-a completed pinned path diverging after its root state, operator configs and
-execution knobs were verified against the search's own records — maps to the
-scientific `DIGEST_MISMATCH` marker; every harness, path or configuration
-error is ordinary `RUN_FAILED` engineering (P12.1). And a confirmation
-issuance now RECOMPUTES the mechanical selection from the secured screening
-evidence's own scored rows under the frozen rule, refusing any record whose
-recorded selection disagrees — never trusting a file that merely says
-`advanced: true`.
+**Nothing is running and nothing is billing** as of this commit: an account-wide provider query on 2026-10-11 returns 0 pods at `$0/h` against a balance of `$174.2161`, and no watcher or helper session from attempt 7 remains.
 
-**The second review (ENGINEERING NO-GO on `ca9db3e0`) found three
-execution/evidence defects; all three are repaired on this branch:**
-
-```text
-1  disk residency   C2's attempt3/attempt5 ENOSPC shapes existed here too.
-                    Arm construction intermediates are released the moment an
-                    arm verifies (final checkpoint kept; fail-closed on a
-                    failed release); scored probes' workdirs and eval packages
-                    are released at the launcher's evidence-durable ACK
-                    boundary, before each next probe; real filesystem headroom
-                    is checked against the derived per-probe footprint
-                    (training_dtypes + runtime.cost, ~16 GiB) before every
-                    training. The 120 GB provision stands -- the lifecycle was
-                    fixed, not the provision. Eval packages moved OUT of the
-                    audit dir (they carry weights; the archive carries JSON).
-2  protocol evidence  engine_probe.json, the attested protocol and every
-                    per-probe generation admission are in both artifact
-                    specs (required on success); the poll hook pulls the
-                    admission beside each result and the teardown gate
-                    requires it plus the attestation off-pod. Found while
-                    fixing it: ArtifactSpec accepts only final_required/
-                    mutable_snapshot, and BOTH committed failed-path specs
-                    (behavioural AND the search's, on main) carried the
-                    invented word 'evidence' -- unloadable exactly on the
-                    failed path they exist for. All four specs now load
-                    through the real loader, regression-pinned.
-3  trained-unscored   preservation now runs on EVERY poll, not at closeout,
-                    so a provider disappearance between training and scoring
-                    cannot lose a completed checkpoint; a preserved copy is
-                    pruned the moment its probe is validly scored and its
-                    evidence durable (P8.4: no remaining consumer).
-```
-
-**D1 SCREENING IS RUNNING.** Launched 2026-10-11 08:40 UTC on pod
-`b9cwmt7haborw6` (NVIDIA L40S, $1.09/h), run
-`d1_behavioural_20261011_083610`, after all seven pre-provider gates passed
-in a dry run that created nothing. Ten probes — q1–q4 and standing incumbent
-B at seeds 614923639 and 516448251 — all trained and evaluated in **one
-session on one host**, as `protocol_uniformity` requires. Watchdog armed at
-1355 min = $24.62 against a $24.9922 authorization.
-
-**The maintainer added $100.00** of cumulative all-in authority for the
-remaining phase on 2026-10-10 UTC. The books are raised by exactly that each
-(project cap 490 → **590**, formal allowance 156.6523 → **256.6523**, package
-total 181.7264 → **281.7264**); the GPU engineering allowance and the **$30.00
-per-session limit are untouched**, and historical spend is not reset —
-$8.3305 across five subruns stays charged as incurred.
-
-**The $0.94 gap was the funding MODEL, not the money.** Netting prior subruns
-off a fresh session's cap bounded a ten-probe run at the remainder of a $30
-envelope that four engineering subruns had drawn down. Phase mode charges the
-phase for every subrun and bounds each session by **its own derived hard
-ceiling**. Worst case for the whole remaining phase — screening $25.0053 plus
-confirmation $15.2025 on top of the $8.3305 spent — is **$48.5383 of
-$130.00**, so confirmation is funded and needs no further funding decision.
-
-```text
-subrun            all-in      min   aborted on
-082900            0.1712      9.4   root_loader seam called without its spec
-090343            1.4934     81.2   incumbent loader never supplied (4 arms OK)
-103442            3.1238    169.5   engine probe could not import its own dep
-132919            3.5421    192.3   evaluator hashed a different runtime than
-                                    the attestation (no AADISTILL_IMAGE_DIGEST
-                                    in the driver's child environment)
-                 -------  -------
-                  8.3305    452.4   of $30.0000 · $21.6695 remaining
-```
-
-**The accounting was wrong in two ways and both are fixed.** The four closeouts
-were absent from `logs/index.json`, which `derive_budget` uses to discover
-sessions, so their cost was booked nowhere; the index was regenerated through
-its owner `record_run_index.py` and all four are now discovered. And
-`cost.actual_usd` is GPU price × elapsed, **not** all-in, while every cap here
-is denominated all-in — so the subruns were understated by **$0.1125**. RunPod
-exposes no per-pod billing surface, so all-in was measured by **account-balance
-bracketing** (`reconcile_d1_behavioural_spend.py`): consecutive launches bracket
-each charge, and the residual against the $0.10/GB/month disk model is
-disk-shaped in all four cases. `derive_budget` now prefers `money.all_in_usd`;
-no closeout stated both shapes, so no historical total moved.
-
-**This attempt's bound is derived, not inherited.** `narrow_to_remaining` caps
-it at min(the design's accepted minute bound, what the remainder funds after
-holding back a 45-minute teardown and evidence reserve): **$20.8238 all-in over
-1129 minutes** at the live $1.09/h, against a measured need of 981.7 minutes —
-about 15% headroom. Both cost terms scale with the runtime. The design's
-1355.71-minute cell is untouched and was not reused.
-
-**A completed session is no longer charged twice.** `provisional_shortfall_usd`
-compared the *whole* chain ceiling — search + screening + confirmation,
-$61.6975 — against the live balance, so booking the subruns correctly tipped it
-to +$6.7425 and opened a `funding authorization` blocker over a search that is
-complete and may never rerun. It now compares only work still to fund
-($40.2078), with completion **derived** from the artifact each session exists to
-bind. `open_blockers: []`, and **`design_hash` is unchanged at `f9c6688f…`** —
-money is excluded from the hashed preimage by construction.
-
-**All ten probes train fresh in ONE session, and that is the protocol, not a
-convenience.** The frozen design states that *"all probes of a rung are trained
-and evaluated in ONE session on one host"*, a clause written so D1 would not
-inherit A3's between-session confound. Carrying either preserved q1 checkpoint
-into a replacement session would give exactly one of five ranked arms a
-cross-session training draw — an unquantifiable asymmetry on precisely the
-comparison the ranking makes, since CUDA training is not bit-reproducible. The
-two preserved checkpoints (`aadfb955…`, `71387681…` — the latter re-verified
-byte-identical) stay **archival evidence**, chosen against before any score
-existed. Analysis:
-`analyses/d1_screening_continuation_identity.json`.
-
-**THE SIX-TREE INFORMATION-ARCHITECTURE MIGRATION IS COMPLETE AND INTEGRATED**
-into `main` by squash-merge, on maintainer authorization of 2026-10-10 after
-independent review returned GO. Its source branch `migration/info-architecture`
-is **preserved and must never be deleted**: committed records cite commit
-hashes that are reachable only there, and every one of them was verified
-reachable before the integration. Round 1 (2026-10-08)
-made `scripts/`, `logs/` and `artifacts/` owner-first; round 2 (2026-10-09)
-finished the architecture across `configs/`, `data/` and `docs/` —
-`configs/stages/stage-{n}/{experiment}/`, `data/stages/stage-{n}/`,
-`docs/{stages,shared,maintenance}` — each round with its own declarative move
-map (`scripts/maintenance/migration/info_architecture.py`, `…_v2.py`), the
-old→new table extended to 731 pairs in `logs/index.json ::
-historical_paths.map`, the ownership index projected into all six trees
-(`{scripts,artifacts,configs,data,docs}/index.json`), derived `current.json`
-live-state records (D1's now answers battery readiness mechanically), and
-hash-anchored records at
-`logs/maintenance/source-relocations/info-architecture/{v1,v2}/`. The
-checkpoint registry was rebuilt **hashed** with the four D1 finalists'
-scientific identities bound and byte-verified. No scientific identity moved:
-the D1 design regenerates byte-identically (`design_hash f9c6688f…`), the
-allocation rule is still `f6047343…`, all 42 battery digests and all four
-finalists re-verified after their physical moves — the finalists in the
-durable store at `/home/ecs-user/aad-artifacts/phase_d1/`, out of scratch.
-
-**Nothing is running and nothing is billing.** An account-wide provider query
-on 2026-10-11 returns **0 pods** at a spend rate of `$0/h`, against a balance of
-`$178.2714`. Attempt 4's pod `7z4spas7bfpzi6` reports `exists=False`,
-`desired_status=TERMINATED`, `billing=False`. Both of its monitors were stopped
-in its terminal path (P12.3) and the watch set is empty. Four behavioural
-authorizations were issued and four pods created across the four subruns above;
-all are closed and torn down. No screening measurement exists and no
-confirmation work ran.
+**Frozen and unchanged:** design `f9c6688f…`, preregistration `aa70338a…`, arms
+q1–q4 plus standing incumbent B (`53e30566…`), seeds 614923639 and 516448251,
+the `d1_screening` battery, the recovery recipe, the scorers and the ranking
+rule.
 
 **THE CONTROL ARM WAS THE ARM C1 BEAT, and that is now corrected.** The design
 declared `fe9683e6` / `c313d1b4` — C1's `attention.weight_proxy_v0` arm. C1
@@ -449,14 +295,13 @@ the selection semantics they ran under. `a2b2f04ae642ac69…` and
 `ea4fe4d356b8c8f4…` are retained as measurements and hashes, and their weight
 bytes are retired once q2 and q4 are secured.
 
-**Behavioural screening is BUILT, EXERCISED ON REAL HARDWARE, and HALTED ON
-BUDGET.** Four candidates at two recovery seeds plus the incumbent at two
-matched seeds is ten screening probes, then one advancing candidate, then a
-fresh three-seed confirmation against B. No probe has yet been scored: four
+**Behavioural screening is BUILT and EXERCISED ON REAL HARDWARE; its live
+state is the top of this section.** Four candidates at two recovery seeds plus
+the incumbent at two matched seeds is ten screening probes, then one advancing
+candidate, then a fresh three-seed confirmation against B. The first four
 subruns reached, in order, arm materialization, the incumbent's build, the
-engine probe, and — on attempt 4 — a PASSING attestation plus a fully trained
-first probe, which the per-probe generation admission then correctly refused.
-Each of the four created one provider resource and each is closed and torn down.
+engine probe, and a PASSING attestation plus a fully trained first probe,
+which the per-probe generation admission then correctly refused.
 The priced cell below (1355.71 min / $25.0053) is the PRE-RUN estimate; the
 MEASURED model is 981.7 min / $17.84 and lives in
 `analyses/d1_screening_budget_boundary.json`, which supersedes the estimate for
