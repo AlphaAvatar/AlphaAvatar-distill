@@ -1,0 +1,36 @@
+{'val_blocks': 16, 'val_ce': 1.219444, 'val_ppl': 3.3853, 'val_kd': 1.073425}
+step 1020/1023  loss 1.1764  ce 0.7533  kd 0.9881  lr 5.00e-06  4.44s
+eval step 1023 (final): {'val_blocks': 16, 'val_ce': 1.218871, 'val_ppl': 3.3834, 'val_kd': 1.073873}
+{
+  "steps": 1023,
+  "final_eval": {
+    "val_blocks": 16,
+    "val_ce": 1.218871,
+    "val_ppl": 3.3834,
+    "val_kd": 1.073873
+  },
+  "checkpoint": "/workspace/aad/artifacts/stages/stage-3/d1_behavioural/d1_screening_q2_s516448251/checkpoints/step_001023"
+}
+
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]
+Loading weights: 100%|██████████| 398/398 [00:00<00:00, 9742.24it/s]
+
+Loading weights:   0%|          | 0/310 [00:00<?, ?it/s]
+Loading weights:   9%|▊         | 27/310 [00:00<00:01, 249.76it/s]
+Loading weights:  45%|████▌     | 140/310 [00:00<00:00, 748.56it/s]
+Loading weights:  82%|████████▏ | 255/310 [00:00<00:00, 927.65it/s]
+Loading weights: 100%|██████████| 310/310 [00:00<00:00, 953.85it/s]
+/opt/train/lib/python3.12/site-packages/torch/autograd/graph.py:869: UserWarning: Flash Attention defaults to a non-deterministic algorithm. To explicitly enable determinism call torch.use_deterministic_algorithms(True, warn_only=False). (Triggered internally at /pytorch/aten/src/ATen/native/transformers/cuda/attention_backward.cu:124.)
+  return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.14s/it]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.14s/it]
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.60s/it]
+Writing model shards: 100%|██████████| 1/1 [00:01<00:00,  1.60s/it]
+
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.57s/it]
+Writing model shards: 100%|██████████| 1/1 [00:02<00:00,  2.57s/it]

@@ -1,0 +1,28 @@
+shards: 100% Completed | 1/1 [00:00<00:00,  1.40it/s]
+(EngineCore pid=54769) 
+Loading safetensors checkpoint shards: 100% Completed | 1/1 [00:00<00:00,  1.40it/s]
+(EngineCore pid=54769) 
+(EngineCore pid=54769) 
+Capturing CUDA graphs (PIECEWISE):   0%|          | 0/51 [00:00<?, ?it/s]
+Capturing CUDA graphs (PIECEWISE):   8%|▊         | 4/51 [00:00<00:01, 32.02it/s]
+Capturing CUDA graphs (PIECEWISE):  16%|█▌        | 8/51 [00:00<00:01, 34.50it/s]
+Capturing CUDA graphs (PIECEWISE):  25%|██▌       | 13/51 [00:00<00:00, 38.81it/s]
+Capturing CUDA graphs (PIECEWISE):  33%|███▎      | 17/51 [00:00<00:00, 39.03it/s]
+Capturing CUDA graphs (PIECEWISE):  41%|████      | 21/51 [00:00<00:00, 34.32it/s]
+Capturing CUDA graphs (PIECEWISE):  49%|████▉     | 25/51 [00:00<00:01, 25.58it/s]
+Capturing CUDA graphs (PIECEWISE):  55%|█████▍    | 28/51 [00:00<00:00, 26.30it/s]
+Capturing CUDA graphs (PIECEWISE):  63%|██████▎   | 32/51 [00:01<00:00, 27.68it/s]
+Capturing CUDA graphs (PIECEWISE):  71%|███████   | 36/51 [00:01<00:00, 29.40it/s]
+Capturing CUDA graphs (PIECEWISE):  78%|███████▊  | 40/51 [00:01<00:00, 31.99it/s]
+Capturing CUDA graphs (PIECEWISE):  86%|████████▋ | 44/51 [00:01<00:00, 33.67it/s]
+Capturing CUDA graphs (PIECEWISE):  96%|█████████▌| 49/51 [00:01<00:00, 36.74it/s]
+Capturing CUDA graphs (PIECEWISE): 100%|██████████| 51/51 [00:01<00:00, 32.69it/s]
+(EngineCore pid=54769) 
+Capturing CUDA graphs (FULL):   0%|          | 0/35 [00:00<?, ?it/s]
+Capturing CUDA graphs (FULL):  14%|█▍        | 5/35 [00:00<00:00, 47.97it/s]
+Capturing CUDA graphs (FULL):  31%|███▏      | 11/35 [00:00<00:00, 50.37it/s]
+Capturing CUDA graphs (FULL):  49%|████▊     | 17/35 [00:00<00:00, 49.36it/s]
+Capturing CUDA graphs (FULL):  63%|██████▎   | 22/35 [00:00<00:00, 47.55it/s]
+Capturing CUDA graphs (FULL):  80%|████████  | 28/35 [00:00<00:00, 50.97it/s]
+Capturing CUDA graphs (FULL):  97%|█████████▋| 34/35 [00:00<00:00, 53.30it/s]
+Capturing CUDA graphs (FULL): 100%|██████████| 35/35 [00:00<00:00, 51.57it/s]

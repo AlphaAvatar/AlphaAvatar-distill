@@ -1,0 +1,11 @@
+{
+ "label": "d1_screening_q4_s516448251",
+ "seed": 516448251,
+ "role": "D1_SCREENING",
+ "arm": "q4",
+ "n": 950,
+ "n_scorable": 850,
+ "usable_rollout_rate": 0.6474,
+ "correct_overall": 0.0141,
+ "correct_given_usable": 0.0215
+}

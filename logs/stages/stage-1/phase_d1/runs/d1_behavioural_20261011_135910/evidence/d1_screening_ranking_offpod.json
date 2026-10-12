@@ -1,0 +1,201 @@
+{
+ "schema": "aadistill.phase_d1.offpod_screening_ranking/v1",
+ "_contract": "the frozen ranking and mechanical selection, computed off-pod from secured evidence. The rule, the pooling, the tie-break and the guardrail veto are behavioural.rank_screening's; nothing is recomputed here.",
+ "store": "/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_135910/store/probes",
+ "n_probes_read": 10,
+ "result_sha256_by_probe": {
+  "d1_screening_B_s516448251": "617528d265350982468c72a256d5d589ce0f9637151b4895f501881dac5beca7",
+  "d1_screening_B_s614923639": "d50d227d63aabad6585b44be5033d8df1dc3c8748febdd015d962958c56c7563",
+  "d1_screening_q1_s516448251": "3004c45f34ca1fb3428d0a7b83ec0f7d72cc56ccd5698359ef188e9cfe0aae93",
+  "d1_screening_q1_s614923639": "2687c2dab886ae1e30e8b00961f9543e5b34e11b75ad51a6501920826586aa99",
+  "d1_screening_q2_s516448251": "01871b5ea5506322626865930fcf51a179ac0bdc93ea38397e60ae650c4ce55d",
+  "d1_screening_q2_s614923639": "d817d365b610bca4c3dee629564efaa997afae72b35e8fa5e8eb2393c620742f",
+  "d1_screening_q3_s516448251": "487db7ea24684de972f27646536fde6b0394685c6739f4b21e29c03ce0cbda11",
+  "d1_screening_q3_s614923639": "871bc7122d8923bf968e5068fbc131ba308723c1e0a7901af43365d15989f512",
+  "d1_screening_q4_s516448251": "a8a81ab2e819a659681b11249a8502db1931ba8ebe1840520b9333881eb943fd",
+  "d1_screening_q4_s614923639": "436527f6a76eea6f56a55ed48b8fb2c0e4ea330682afb06237aee900b573636f"
+ },
+ "ranking": {
+  "schema": "aadistill.phase_d1.screening_ranking/v1",
+  "endpoint": "correct_overall",
+  "pooling": "seed mean over this rung's preregistered seeds",
+  "seeds": [
+   516448251,
+   614923639
+  ],
+  "incumbent": {
+   "arm": "B",
+   "state_id": null,
+   "n_seeds": 2,
+   "seeds": [
+    516448251,
+    614923639
+   ],
+   "correct_overall": 0.02175,
+   "usable_rollout_rate": 0.58685,
+   "per_seed": {
+    "516448251": {
+     "correct_overall": 0.0259,
+     "usable_rollout_rate": 0.6284
+    },
+    "614923639": {
+     "correct_overall": 0.0176,
+     "usable_rollout_rate": 0.5453
+    }
+   }
+  },
+  "ranked": [
+   {
+    "arm": "q2",
+    "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+    "quality_position": 2,
+    "correct_overall": 0.03,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.00825,
+    "usable_rollout_rate": 0.7068,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.11995,
+    "delta_usable_per_seed": {
+     "516448251": 0.0505,
+     "614923639": 0.1894
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0224,
+      "usable_rollout_rate": 0.6789
+     },
+     "614923639": {
+      "correct_overall": 0.0376,
+      "usable_rollout_rate": 0.7347
+     }
+    },
+    "screening_position": 0
+   },
+   {
+    "arm": "q1",
+    "state_id": "e5e3edb0477b25147de952153da8fc21",
+    "quality_position": 1,
+    "correct_overall": 0.02885,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.0071,
+    "usable_rollout_rate": 0.66105,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.0742,
+    "delta_usable_per_seed": {
+     "516448251": 0.0084,
+     "614923639": 0.14
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0271,
+      "usable_rollout_rate": 0.6368
+     },
+     "614923639": {
+      "correct_overall": 0.0306,
+      "usable_rollout_rate": 0.6853
+     }
+    },
+    "screening_position": 1
+   },
+   {
+    "arm": "q3",
+    "state_id": "56388d47b6a71e1b49e44929e48d4061",
+    "quality_position": 3,
+    "correct_overall": 0.022350000000000002,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": 0.0006,
+    "usable_rollout_rate": 0.5789500000000001,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": -0.0079,
+    "delta_usable_per_seed": {
+     "516448251": -0.081,
+     "614923639": 0.0652
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0212,
+      "usable_rollout_rate": 0.5474
+     },
+     "614923639": {
+      "correct_overall": 0.0235,
+      "usable_rollout_rate": 0.6105
+     }
+    },
+    "screening_position": 2
+   },
+   {
+    "arm": "q4",
+    "state_id": "3fcaf42eaa91b3ed02eab6c2f3213bfc",
+    "quality_position": 4,
+    "correct_overall": 0.01705,
+    "incumbent_correct_overall": 0.02175,
+    "delta_vs_b": -0.0047,
+    "usable_rollout_rate": 0.6226499999999999,
+    "incumbent_usable_rollout_rate": 0.58685,
+    "delta_usable_pooled": 0.0358,
+    "delta_usable_per_seed": {
+     "516448251": 0.019,
+     "614923639": 0.0526
+    },
+    "vetoed": false,
+    "vetoes": [],
+    "per_seed": {
+     "516448251": {
+      "correct_overall": 0.0141,
+      "usable_rollout_rate": 0.6474
+     },
+     "614923639": {
+      "correct_overall": 0.02,
+      "usable_rollout_rate": 0.5979
+     }
+    },
+    "screening_position": 3
+   }
+  ],
+  "_guardrail_is_a_veto_only": "usable_rollout never earns positive ranking credit. A candidate cannot rank higher for being more usable; it can only be removed for being materially less usable than the incumbent. Thresholds are C0's: pooled > -0.05, every seed > -0.1.",
+  "_tie_break": "the frozen quality position, then the state id. Both were fixed before any behavioural datum existed.",
+  "_this_is_not_a_verdict": "a RANKING. The advancing candidate's screening estimate is inflated by the winner's curse by construction; the design records the inflation and the confirmation rung on disjoint prompts and disjoint seeds is what estimates the effect."
+ },
+ "selection": {
+  "arm": "q2",
+  "state_id": "afd50c9ff0e3d20542bb5473ea745b55",
+  "quality_position": 2,
+  "correct_overall": 0.03,
+  "incumbent_correct_overall": 0.02175,
+  "delta_vs_b": 0.00825,
+  "usable_rollout_rate": 0.7068,
+  "incumbent_usable_rollout_rate": 0.58685,
+  "delta_usable_pooled": 0.11995,
+  "delta_usable_per_seed": {
+   "516448251": 0.0505,
+   "614923639": 0.1894
+  },
+  "vetoed": false,
+  "vetoes": [],
+  "per_seed": {
+   "516448251": {
+    "correct_overall": 0.0224,
+    "usable_rollout_rate": 0.6789
+   },
+   "614923639": {
+    "correct_overall": 0.0376,
+    "usable_rollout_rate": 0.7347
+   }
+  },
+  "screening_position": 0,
+  "advanced": true,
+  "outcome": "ONE_CANDIDATE_ADVANCES",
+  "margin_over_runner_up": 0.00115,
+  "runner_up": "q1",
+  "tie_broken": false,
+  "n_vetoed": 0,
+  "_the_confirmation_is_a_single_hypothesis": "one candidate advances, so the confirmation needs no multiplicity correction. That is a deliberate trade of breadth for a clean bound."
+ },
+ "_this_authorizes_no_promotion": "screening advances ONE candidate to confirmation. Promotion or adoption of any checkpoint is a separate scientific decision and a separate maintainer decision."
+}
