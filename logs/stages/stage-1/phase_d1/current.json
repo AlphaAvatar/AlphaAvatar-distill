@@ -44,7 +44,7 @@
     "d1_confirmation_battery": "AVAILABLE",
     "original_c1_pool_capacity": "EXHAUSTED, HISTORICAL ONLY",
     "d1_evidence_blocker": "CLOSED",
-    "d1_screening": "ACTIVE: d1_behavioural_20261012_064341",
+    "d1_screening": "PAUSED — no open blocker, no outstanding one-use authorization, no active run; the gate is the maintainer decision in logs/state/current.json :: next",
     "_owners": {
       "family_status": "logs/stages/stage-1/families/d_series/current.json",
       "battery_roles": "logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
@@ -58,7 +58,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json."
+    "maintainer_pause": "MAINTAINER DECISION. D1 closed NO-GO (q2 vs B, delta -0.000392, UCB +0.007451 < SESOI 0.01); B stands. No D1 spend remains planned ($40.8301 of $130 used). D2/D3 or a new preregistered endpoint each need a new decision."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -91,13 +91,14 @@
       "d1_behavioural_20261011_083610",
       "d1_behavioural_20261011_114853",
       "d1_behavioural_20261011_135910",
+      "d1_behavioural_20261012_064341",
       "d1_search_20261006_055409",
       "d1_search_20261006_101725",
       "d1_search_20261006_210210"
     ]
   },
   "active_run": null,
-  "next_scientific_action": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json.",
+  "next_scientific_action": "MAINTAINER DECISION. D1 closed NO-GO (q2 vs B, delta -0.000392, UCB +0.007451 < SESOI 0.01); B stands. No D1 spend remains planned ($40.8301 of $130 used). D2/D3 or a new preregistered endpoint each need a new decision.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

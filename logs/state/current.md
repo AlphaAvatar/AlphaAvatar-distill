@@ -9,13 +9,46 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 CONFIRMATION IS RUNNING: q2 against B.** The run is
-`d1_behavioural_20261012_064341` on pod `wzr7llw0shqc2k` (NVIDIA L40S, $1.09/h),
-created 2026-10-12 06:45 UTC. It trains six probes on the three frozen
-confirmation seeds and `d1_confirmation`. The one-use authorization covers
-$15.1982 over 824 minutes, and the watchdog hard bound is $14.97. The verdict
-will be computed off-pod with `behavioural_verdict.py`, under the frozen
-three-way rule.
+**NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
+0 network volumes and $0/h (2026-10-12 16:09 UTC).
+
+**D1 CONFIRMATION IS COMPLETE. THE VERDICT IS `NO-GO`.** q2 does not confirm
+against B, so B remains the standing incumbent and nothing is promoted. The run
+was `d1_behavioural_20261012_064341` on pod `wzr7llw0shqc2k` (NVIDIA L40S,
+$1.09/h). All six probes were trained and evaluated uncapped on
+`d1_confirmation` at the three frozen confirmation seeds. They were scored in ONE
+session under ONE attested evaluation protocol (`c82260e0…`), and every
+generation admission was comparable. The teardown gate passed all twelve checks,
+and the launcher deleted the pod itself.
+
+```text
+probe                correct_overall    usable_rollout
+q2  s396880939     0.0353 (30/850)    0.6958
+q2  s766527341     0.0576 (49/850)    0.7137
+q2  s1004399678    0.0271 (23/850)    0.6579
+B   s396880939     0.0424 (36/850)    0.6147
+B   s766527341     0.0471 (40/850)    0.6000
+B   s1004399678    0.0318 (27/850)    0.5674
+
+pooled          q2 0.0400 (102/2550)   B 0.0404 (103/2550)
+delta q2 - B    -0.000392   one-sided 95% [-0.007843, +0.007451]   SESOI 0.010
+per-seed        -0.007059, +0.010588, -0.004706   (1 of 3 positive, 2 required)
+usable delta    +0.0951 pooled; +0.0811, +0.1137, +0.0905 per seed (guardrail: pass)
+verdict         NO-GO: the upper bound is below the SESOI; 0 vetoes
+```
+
+Owners: [`evidence/confirmation_verdict.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/evidence/confirmation_verdict.json)
+(sha `4c0db018…`, verdict_sha256 `dea0678e…`) and the run's
+[`closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341/closeout/outcome.json).
+The verdict was computed ONCE, off-pod, by `behavioural_verdict.py`. It read the
+durable store at a clean commit (`da7a0711`) and used C0's rule unchanged: the
+stratified prompt-cluster bootstrap with 20000 iterations and D1's own seed
+188612737. No measurement was repeated.
+
+**The usable-rollout gain is real but it is not the endpoint.** q2 raises the
+usable-rollout rate by about 9.5 points on every confirmation seed, as it did in
+screening. Under the frozen design that is a guardrail, and it passed. It cannot
+turn a NO-GO into a GO. A claim built on it needs its own preregistration.
 
 **D1 SCREENING IS COMPLETE.** In attempt 8 (`d1_behavioural_20261011_135910`),
 all ten probes trained, were evaluated uncapped on `d1_screening` and were
@@ -59,8 +92,9 @@ d1_behavioural_20261010_200001  0.0000      0.0   budget boundary, no pod (fundi
 d1_behavioural_20261011_083610  3.3565    182.8   scorer passed filenames, not set specs
 d1_behavioural_20261011_114853  0.6837     38.0   stopped by the maintainer, not a failure
 d1_behavioural_20261011_135910 18.1148    982.1   COMPLETE: 10/10 scored, q2 advances
+d1_behavioural_20261012_064341 10.3446    561.0   COMPLETE: 6/6 scored, confirmation NO-GO
                                -------  -------
-                               30.4855   1655.3   of the $130.00 phase allowance
+                               40.8301   2216.3   of the $130.00 phase allowance
 ```
 
 Owner of every figure: each run's `closeout/outcome.json`, summed by
@@ -131,8 +165,8 @@ excluded       20260726, 20260801, 20260813, 696460635, 1635674081, 1656475568
 
 C0 requires the seeds materialized and hash-bound **before** any candidate
 behavioural result exists, and none does: no probe trained, no authorization
-issued, no pod created. **Still owed before any launch:** an execution
-preregistration that hash-binds these values. It does not exist yet.
+issued, no pod created. The execution preregistration that hash-binds these
+values was written afterwards, before any launch (`aa70338a…`).
 
 **AND THE ARM-MATERIALIZATION COST WAS PRICED ONCE FOR FIVE ARMS.**
 `parent_replay_and_incumbent_rebuild: 22.0` sat in the *fixed* session
@@ -3631,12 +3665,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$138.3070` of `$256.6523` |
+| formal sessions | `$127.9624` of `$256.6523` |
 | GPU engineering | `$6.6510` of `$25.0741` |
-| package | `$144.9580` of `$281.7264` |
-| project cap | `$457.2000` spent of `$590.0000`, leaving `$132.8000` |
+| package | `$134.6134` of `$281.7264` |
+| project cap | `$467.5446` spent of `$590.0000`, leaving `$122.4554` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$138.3070`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$127.9624`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/maintenance/consolidation/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

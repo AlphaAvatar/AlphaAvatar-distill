@@ -23,27 +23,27 @@
   "package_id": "phase_c1.execution_package.2026-09-11 (amended 2026-09-11b)"
  },
  "baseline_commit": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json:swept_base_commit",
- "blocker": "D1 IS FUNDED AND BLOCKED NO TIMES, and PAUSED BEFORE BEHAVIOURAL SCREENING awaiting its ONE-USE maintainer grant; the 2026-10-10 readiness round built, tested at $0 and committed the execution chain and its hash-bound preregistration. No grant, no authorization, no resource. NOTHING IS RUNNING. Owner: plans/d1_behavioural_preregistration.json.",
+ "blocker": "D1 BLOCKED NO TIMES and COMPLETE: screening advanced q2; confirmation returned NO-GO. NOTHING IS RUNNING. Owner: runs/d1_behavioural_20261012_064341/closeout/outcome.json.",
  "branch": "exec/d1-behavioural-readiness",
  "budget": {
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 136.7684,
+  "_package_spent_usd": 147.113,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 590.0,
-  "cumulative_spend_usd": 457.2,
+  "cumulative_spend_usd": 467.5446,
   "engineering_remaining_usd": 6.651,
-  "formal_remaining_usd": 138.307,
+  "formal_remaining_usd": 127.9624,
   "full_ceiling_sessions_fundable": 4,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 144.958,
+  "package_remaining_usd": 134.6134,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "project_cap_usd": 465.0,
   "remaining_is_not_permission": true,
-  "remaining_usd": 132.8,
+  "remaining_usd": 122.4554,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -128,13 +128,13 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "LAUNCH D1 behavioural SCREENING. Envelope $30.0000 cumulative all-in (+$4.9947, maintainer 2026-10-10 UTC); $8.3305 consumed, $21.6695 left; this attempt $20.8238 / 1129 min vs a measured 981.7. All ten probes train fresh in ONE session. Owners: budget/approvals/autoinit_d1_behavioural_screening_grant_amendment.json and analyses/{d1_behavioural_spend_reconciliation,d1_screening_continuation_identity}.json.",
+ "next": "MAINTAINER DECISION. D1 closed NO-GO (q2 vs B, delta -0.000392, UCB +0.007451 < SESOI 0.01); B stands. No D1 spend remains planned ($40.8301 of $130 used). D2/D3 or a new preregistered endpoint each need a new decision.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "the maintainer grant named in `next`, then the committed chain. Verified at $0; no provider resource exists.",
+  "next_work": "a maintainer decision on what follows D1; no chain is prepared and no provider resource exists.",
   "not_next": "no paid resource before the launch review; no recovery, screening or confirmation session (each separately authorized); no D2/D3; no retry of a complete measurement; no K sweep; no change to the frozen design. Owner: decisions.md and the 2026-10-05 amendment.",
-  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION with its Top-5 ACCEPTED and FROZEN. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 SEARCH COMPLETE; SCREENING AWAITS ITS GRANT.",
-  "then": "D1 screening under the raised envelope; confirmation $15.2025 follows its own separate issuance."
+  "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
+  "then": "nothing is queued."
  },
  "phase_b_result": {
   "authorizes": "nothing",
@@ -201,12 +201,12 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "D1 confirmation d1_behavioural_20261012_064341, pod created 2026-10-12 06:45:57 UTC; owner: its runtime/session.json.",
+  "_verified": "provider query 2026-10-12 16:09 UTC: 0 pods, 0 network volumes, $0/h. Last pod wzr7llw0shqc2k deleted by its launcher 16:06:59Z.",
   "network_volumes": 0,
-  "paid_compute": true,
-  "pod_id": "wzr7llw0shqc2k",
-  "pods": 1,
-  "run_id": "d1_behavioural_20261012_064341"
+  "paid_compute": false,
+  "pod_id": null,
+  "pods": 0,
+  "run_id": null
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {
@@ -215,12 +215,12 @@
   "C1": "COMPLETE / GO",
   "C2": "CLOSED WITHOUT PROMOTION",
   "C3": "COMPLETE / NO_GO",
-  "D1": "DESIGNED 2026-10-03 / NOT AUTHORIZED / BLOCKED -- see `d_series.blockers`",
-  "D2": "NOT STARTED",
+  "D1": "COMPLETE / NO-GO 2026-10-12 -- q2 advanced from screening and did not confirm against B",
+  "D2": "NOT STARTED / NOT AUTHORIZED -- owes its own engineering and a maintainer decision",
   "D3": "NOT STARTED",
   "F1": "SKIPPED by maintainer instruction 2026-10-03; ffn.activation_importance_v0 carried forward",
-  "_next_is_not_null_because": "the 2026-10-01 order that made it null was superseded on 2026-10-03. D1 is blocked rather than forbidden.",
-  "next_scientific_stage": "D1"
+  "_next_is_not_null_because": "the 2026-10-03 D-series directive orders D1, D2, D3; D1 is complete, so D2 is next in order, though not authorized.",
+  "next_scientific_stage": "D2"
  },
  "storage": {
   "_reclaimed": "attempt75's nine probe weights retired, 19.984 GiB. Owner: logs/maintenance/inventories/archival_retirement_20261001.json",

@@ -3351,9 +3351,9 @@
    "experiment_id": "phase_d1",
    "run_id": "d1_behavioural_20261012_064341",
    "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341",
-   "n_files": 5,
-   "digest": "60a4189f78d37e6a60e6faf523061d27081493d01e25de5d567ea16cbf12426f",
-   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
+   "n_files": 52,
+   "digest": "76ad37bcbda366847b5b2e37fa2dc2009a16671c7d13578a0e1ea5e6d551476f",
+   "why": "no run manifest; its closeout states: VALID CONFIRMATION RESULT: NO-GO. q2 does not confirm against B on the preregistered endpoint; B remains the standing incumbent. Nothing is promoted."
   },
   {
    "experiment_id": "phase_d1",
