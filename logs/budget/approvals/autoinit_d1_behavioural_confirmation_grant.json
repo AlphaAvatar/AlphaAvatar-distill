@@ -1,0 +1,33 @@
+{
+ "schema": "aadistill.budget.grant/v2",
+ "granted_by": "maintainer, 2026-10-11 UTC, formal execution instruction for D1 (\"当前阶段级资金授权已经涵盖这一条件执行，不需要再为普通的 Confirmation 启动单独向维护者申请阶段资金。但仍然需要生成合法的、独立的一次性 Confirmation Execution Authorization.\"), under the phase grant logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json",
+ "granted_utc": "2026-10-11",
+ "rung": "confirmation",
+
+ "_contract": "The CONFIRMATION-RUNG instance of the existing D1 behavioural PHASE grant. It adds no money and no scope: the phase grant already covers confirmation conditional on screening mechanically advancing a candidate, and says each rung takes its own one-use authorization derived from it. The issuer requires the grant's `rung` to equal the issuance's, so the phase grant (rung=screening) cannot itself issue a confirmation artifact; this record restates the same phase allowance with rung=confirmation. The candidate is NOT named here -- it is read and recomputed from the secured screening session evidence at issuance.",
+
+ "source_grant": "logs/budget/approvals/autoinit_d1_behavioural_phase_grant.json",
+ "previous_phase_allowance_usd": 30.0,
+ "additional_authorized_usd": 100.0,
+ "phase_allowance_usd": 130.0,
+ "_what_the_allowance_means": "the SAME cumulative all-in phase allowance the source grant states, not a second one. Every subrun of both rungs is charged against it; the issuer sums all of them (phase mode reads prior spend across rungs).",
+ "cumulative_cap_usd": 590.0,
+ "_deliberately_unchanged": {
+  "gpu_engineering_allowance_usd": 25.0741,
+  "per_session_envelope_usd": 30.0
+ },
+
+ "covers": "D1 CONFIRMATION on the frozen design f9c6688f91dc9d471c8a63f030aabffc4f9b29eefe18e437ff5e5fb1520ce6f2 and preregistration aa70338a22bdaae1067105261614a63bed4b0f7737f0a6cc3b59d2555835e3de: the candidate screening's frozen rule advanced, plus standing incumbent B (53e30566...), the three frozen confirmation seeds, six probes on d1_confirmation in one session, and the GO / NO-GO / INCONCLUSIVE verdict computed off-pod under the frozen inference rule. Screening data are not used for statistical confirmation.",
+
+ "does_not_authorize": [
+  "a session above its own derived hard ceiling or the $30.00 per-session limit",
+  "a change to the frozen design, preregistration, arms, seeds, battery, recovery recipe, scoring, SESOI, guardrails, bootstrap or decision rule",
+  "naming, choosing or substituting the advancing candidate",
+  "a second confirmation measurement after a complete valid one, for any outcome",
+  "automatic promotion or adoption of any checkpoint; a GO is evidence for a separate maintainer adoption decision"
+ ],
+
+ "terminal_condition": "Continue until confirmation produces a complete valid durable result and its frozen verdict; an actual scientific identity or protocol conflict; or a genuine resource-safety or cumulative authorization boundary. Ordinary failures before formal measurement are repaired and retried inside the phase allowance.",
+
+ "authorizes": "issuing ONE confirmation-rung one-use authorization per launch attempt from the existing D1 phase allowance, and nothing else"
+}
