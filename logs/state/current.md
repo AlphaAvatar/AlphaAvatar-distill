@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-11 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-12 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -9,13 +9,42 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 ## Right now
 
-**D1 SCREENING ATTEMPT 8 IS RUNNING under the existing phase allowance.** Seven screening subruns have run since 2026-10-10. None scored a
-probe, and every one stopped before formal measurement. Six were engineering
-aborts, each repaired in turn. Attempt 7 was stopped on maintainer instruction
-because its bundle predated the checkpoint-reuse rules. The maintainer's
-2026-10-11 instruction confirms the phase authorization ($130.00 all-in,
-$30.00 per session) and orders screening to completion, then confirmation if a
-candidate advances. It changes no frozen science and no budget limit.
+**Nothing is running and nothing is billing.** The provider reports 0 pods and
+$0/h (2026-10-12 06:28 UTC). **D1 SCREENING IS COMPLETE.** In attempt 8
+(`d1_behavioural_20261011_135910`), all ten probes trained, were evaluated
+uncapped on `d1_screening` and were scored in ONE session under ONE attested
+evaluation protocol, and every generation admission was comparable. The frozen
+rule **advanced q2**. Next comes D1 **confirmation** of q2 against B, on the three
+frozen confirmation seeds and `d1_confirmation`. It runs under a fresh one-use
+confirmation authorization drawn from the same $130.00 phase allowance, and is
+being prepared now.
+
+```text
+probe              correct_overall   usable_rollout
+q1  s614923639   0.0306 (26/850)   0.6853
+q1  s516448251   0.0271 (23/850)   0.6368
+q2  s614923639   0.0376 (32/850)   0.7347
+q2  s516448251   0.0224 (19/850)   0.6789
+q3  s614923639   0.0235 (20/850)   0.6105
+q3  s516448251   0.0212 (18/850)   0.5474
+q4  s614923639   0.0200 (17/850)   0.5979
+q4  s516448251   0.0141 (12/850)   0.6474
+B   s614923639   0.0176 (15/850)   0.5453
+B   s516448251   0.0259 (22/850)   0.6284
+
+pooled over both seeds; B = 0.02175
+arm correct   delta_vs_B  guardrail
+q2  0.03000  +0.00825  pass  ADVANCES
+q1  0.02885  +0.00710  pass
+q3  0.02235  +0.00060  pass
+q4  0.01705  -0.00470  pass      (runner-up q1 by 0.00115)
+```
+
+Owner: the run's [`closeout/outcome.json`](../stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910/closeout/outcome.json).
+`rank_screening_offpod.py` recomputed the ranking and the selection from the
+secured store, and both are identical. The screening delta carries the winner's
+curse, so only the confirmation rung estimates the effect. A GO would promote
+nothing on its own.
 
 ```text
 subrun                         all-in      min   ended on
@@ -26,45 +55,27 @@ d1_behavioural_20261010_132919  3.5421    192.3   evaluator had no image digest 
 d1_behavioural_20261010_200001  0.0000      0.0   budget boundary, no pod (funding model)
 d1_behavioural_20261011_083610  3.3565    182.8   scorer passed filenames, not set specs
 d1_behavioural_20261011_114853  0.6837     38.0   stopped by the maintainer, not a failure
+d1_behavioural_20261011_135910 18.0988    982.1   COMPLETE: 10/10 scored, q2 advances
                                -------  -------
-                               12.3707    673.2   of the $130.00 phase allowance
+                               30.4695   1655.3   of the $130.00 phase allowance
 ```
 
 Owner of every figure: each run's `closeout/outcome.json`, summed by
 `behavioural_authorization.consumed_by_prior_subruns`. The project-wide books
-come from `derive_budget.py` (table near the end of this file). Attempts 6
-and 7 were missing from `logs/index.json` until `record_run_index.py`
-regenerated it on 2026-10-11. `derive_budget` discovers sessions through that
-index, so neither was booked before; formal spend moved 96.1903 → 100.2305.
+come from `derive_budget.py` (table near the end of this file).
 
-**What changed for attempt 8 (`cd1be28e`): the pod releases a probe's weights
-only once they are durable.** The release ack used to be written on durable
-*evidence* alone, before the checkpoint preservation ran, so the driver could
-delete a scored probe's workdir while its weights existed nowhere else. Now
-preservation runs first in every poll. The ack requires the checkpoint
-preserved off-pod and identity-verified, and it names `checkpoint_sha256`. The
-driver releases only when that digest equals the probe's recorded
-`trained_sha256`. Decision record:
-[`decisions/reuse_preserved_checkpoints.md`](../stages/stage-1/phase_d1/decisions/reuse_preserved_checkpoints.md).
-
-**What attempt 8 reuses, and what it recomputes.**
-
-```text
-trained probe checkpoints   NONE EXIST. Attempts 3, 4 and 6's three q1/s614923639
-                            copies were retired with full-digest tombstones
-                            (e23f0a66) before any was scored; attempt 7 trained
-                            none. All ten probes train in this ONE session, so
-                            nothing can be chosen by its outcome.
-arm initializations         rebuilt ON THE POD along the search's digest-pinned
-                            paths (~92 min measured) and byte-verified against the
-                            recorded identities. Not shipped: ~1.1 GiB each over a
-                            ~0.72 MB/s dev-box uplink is slower than the rebuild,
-                            and the HF relay has no quota for them.
-pack, batteries, tokenizer  pinned relay objects / small scp assets, digest-checked;
-                            nothing re-tokenized or re-built.
-```
-
-**Attempt 8 is live on pod `kz0r9zerjsvapk`** (NVIDIA L40S, `$1.09/h`, host driver 595.91.07), run `d1_behavioural_20261011_135910`, launched 14:06 UTC after all seven pre-provider gates passed; setup took 4 minutes and the driver detached at 14:11:59 UTC. Authorization `$24.9922` over 1355 minutes; watchdog hard bound `$24.62`. Ten probes, one session, one host. The launcher runs under tmux `d1a8` on the dev box with its scratch at `/home/ecs-user/aad-scratch/sessions/d1_behavioural_20261011_135910`.
+**Attempt 8 was the first D1 behavioural session to reach ALL_DONE, and its
+teardown gate blocked on two closeout links no earlier attempt had executed.**
+The artifact specs declared `results/`, `per_sample/` and `generations/` as
+bare directories, but the manifest counts files. And the per-probe fetch
+entries carry no `rc`, so the runner's fail-closed reader rejected all ten
+secured probes. The pod was held under its watchdog. Its whole evidence tree
+was pulled and verified byte-identical to the poll-secured copies, and only
+then was the pod deleted through the provider. Both links are repaired in
+`351f6e99`, and the archive chain was verified on the real output. One gap
+remains: the per-step `train_log.jsonl` survives only for the two B probes.
+Every probe's training identity is in its scored result, and preservation now
+keeps those records.
 
 **Frozen and unchanged:** design `f9c6688f…`, preregistration `aa70338a…`, arms
 q1–q4 plus standing incumbent B (`53e30566…`), seeds 614923639 and 516448251,
@@ -3617,12 +3628,12 @@ these by hand; run the deriver.**
 
 | limit | remaining |
 | --- | --- |
-| formal sessions | `$156.4218` of `$256.6523` |
+| formal sessions | `$138.3230` of `$256.6523` |
 | GPU engineering | `$6.6510` of `$25.0741` |
-| package | `$163.0728` of `$281.7264` |
-| project cap | `$439.0852` spent of `$590.0000`, leaving `$150.9148` |
+| package | `$144.9740` of `$281.7264` |
+| project cap | `$457.1840` spent of `$590.0000`, leaving `$132.8160` |
 
-**Full-ceiling sessions the FORMAL allowance funds: 5.** 6 ceilings cost `$180.0000` and the formal allowance has `$156.4218`. Dividing the PACKAGE balance instead gives 5, which is the error: the engineering allowance cannot pay for a formal probe.
+**Full-ceiling sessions the FORMAL allowance funds: 4.** 5 ceilings cost `$150.0000` and the formal allowance has `$138.3230`. Dividing the PACKAGE balance instead gives 4, which is the error: the engineering allowance cannot pay for a formal probe.
 
 *Generated by `scripts/maintenance/consolidation/render_log_navigation.py` from `derive_budget.py`; do not edit by hand.*
 

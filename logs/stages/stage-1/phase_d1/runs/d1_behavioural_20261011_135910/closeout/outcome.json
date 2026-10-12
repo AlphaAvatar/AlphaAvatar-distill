@@ -394,6 +394,14 @@
   "phase_allowance_usd": 130.0,
   "phase_consumed_after_this_run_usd": 30.4695
  },
+ "cost": {
+  "actual_usd": 18.0988,
+  "price_per_hour": 1.09,
+  "elapsed_minutes": 982.1,
+  "authorized_usd": 24.9922,
+  "within_authorization": true,
+  "_owner": "provider account-balance bracketing; the launcher's gate-blocked path wrote no cost block, and the watchdog's last accrual was $17.8425 at 982.15 min"
+ },
  "teardown": {
   "pod_deleted": true,
   "provider_confirms_gone": true,

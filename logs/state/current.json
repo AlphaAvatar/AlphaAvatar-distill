@@ -29,21 +29,21 @@
   "_amendments": "three revisions to 2026-10-03; the amounts and reasons are in decisions.md.",
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py, from derive_budget.py",
   "_owner": "derived by scripts/maintenance/consolidation/derive_budget.py. The four limits bind SEPARATELY and do not transfer; the anchor, the planning floor (priced is not funded) and every rule are explained there.",
-  "_package_spent_usd": 118.6536,
+  "_package_spent_usd": 136.7524,
   "_project_spend_before_this_package_usd": 267.8998,
   "authorized_cap_usd": 590.0,
-  "cumulative_spend_usd": 439.0852,
+  "cumulative_spend_usd": 457.184,
   "engineering_remaining_usd": 6.651,
-  "formal_remaining_usd": 156.4218,
-  "full_ceiling_sessions_fundable": 5,
+  "formal_remaining_usd": 138.323,
+  "full_ceiling_sessions_fundable": 4,
   "ledger": "logs/budget/ledger.md",
-  "package_remaining_usd": 163.0728,
+  "package_remaining_usd": 144.974,
   "per_session_ceiling_usd": 30.0,
   "per_session_envelope_compatibility": "RESOLVED_FITS",
   "planning_floor_usd": 13.4401,
   "project_cap_usd": 465.0,
   "remaining_is_not_permission": true,
-  "remaining_usd": 150.9148,
+  "remaining_usd": 132.816,
   "terms": "configs/experiments/phase_c1/authorization.json:execution_package"
  },
  "c2_closure": {
@@ -119,10 +119,10 @@
  "latest_verification": {
   "_derived_by": "scripts/maintenance/consolidation/render_log_navigation.py:readiness_view",
   "latest_sweep": {
-   "describes_head": false,
    "kind": "launch_bound",
+   "verdict": "PASS",
    "swept_base_commit": "e80eb60b6d027499a2655b6fabef59647feff643",
-   "verdict": "PASS"
+   "describes_head": false
   },
   "launch_bound_failures": 1,
   "launch_bound_ready": false,
@@ -201,12 +201,10 @@
   "logs/README.md -- START HERE, the index"
  ],
  "running": {
-  "_verified": "D1 screening attempt 8, launched 2026-10-11 14:06 UTC; owner: its runtime/session.json.",
+  "_verified": "provider account query 2026-10-12 06:28 UTC: pods [] and $0/h after attempt 8's pod kz0r9zerjsvapk was deleted.",
   "network_volumes": 0,
-  "paid_compute": true,
-  "pod_id": "kz0r9zerjsvapk",
-  "pods": 1,
-  "run_id": "d1_behavioural_20261011_135910"
+  "paid_compute": false,
+  "pods": 0
  },
  "schema": "aadistill.current_state/v2",
  "stage_ladder": {

@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 84,
+  "runs_unrecorded": 85,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -828,8 +828,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 15,
-    "total": 15
+    "unrecorded": 16,
+    "total": 16
    },
    "phase_d1_replay": {
     "recorded": 0,
@@ -3338,6 +3338,14 @@
    "n_files": 6,
    "digest": "f416f1e2dc2248db528f7d1bb6939679b97d29739449227927e54f77b78fc3c2",
    "why": "no run manifest; its closeout states: NOT A FAILURE. Every stage this run reached succeeded: all seven pre-provider gates passed, setup completed in 1.9 minutes, the driver detached, and arm materialization was 32 minutes into its measured 94 when the pod was terminated. It was stopped because its bundle predates the preservation rules adopted mid-run, and continuing would have spent ~15 hours under a policy that discards reusable work."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261011_135910",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910",
+   "n_files": 71,
+   "digest": "59babc1d964417e84227b515bbcd7ee6fdea90c7d308c1c94c587c4e8df0a088",
+   "why": "no run manifest; its closeout states: VALID SCREENING RESULT. One candidate advances to confirmation; this is a ranking input, not evidence that may promote."
   },
   {
    "experiment_id": "phase_d1",
