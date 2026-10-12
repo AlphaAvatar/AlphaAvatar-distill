@@ -77,14 +77,14 @@
   "behavioural_design": "Top-4 candidates / 2 screening seeds / 3 confirmation seeds = 10 + 6 probes over 5 and 2 arms. Owner: d1_design.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
   "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
-  "d2_owed_engineering": "D2/D3 are NOT authorized and owe their own engineering before any launch. Owner: decisions.md 2026-10-05.",
+  "d2_owed_engineering": "model-dependent confidence weights, sketch entropy, weighted collectors (4 divisors), D3's combined objective. Owner: d2_d3_shared_evaluation_design.md section 7.",
   "execution_wiring": "SEARCH complete. SCREENING chain COMPLETE, tested at $0: driver with on-pod digest-pinned arm materialization, launcher, one-use issuer, preregistration, replay plan, sweep contract phase_d1_behavioural, dispatch branch, both pinned scorers. Confirmation verdict computation is owed before that launch. Owners: d1_design.json, the preregistration.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
   "owner": "phase_d1/plans/d1_design.json owns every D1 figure and its claim boundary.",
   "scoring_protocol": "reference_topk_tail_v1, K=200: reference-defined support plus one K+1 tail bucket from the COMPLEMENT's logits, carried by SearchConfig.distribution_support -- an OPTIONAL term, absent under the historical full-vocab contract, folded into one measurement_protocol_id. Owner: scripts/stages/stage-1/families/d_series/scoring_protocol.py",
   "seeds": "MATERIALIZED and HASH-BOUND in plans/d1_behavioural_preregistration.json (2 screening, 3 confirmation, 6 exclusions), before any candidate result exists. Owner: the preregistration.",
-  "state": "D1 PAUSED BEFORE BEHAVIOURAL SCREENING pending its one-use maintainer grant; its search is complete, its family built, and its execution chain implemented and preregistered (2026-10-10). D2 and D3 NOT STARTED."
+  "state": "D1 COMPLETE / NO-GO. D2 and D3 NOT STARTED; they will measure on the shared protocol d_series_shared_eval@v1. Owner: families/d_series/plans/."
  },
  "deferred": "duplicate_checkpoints 2.92 GiB KEEP/unresolved, and historical_probe_reuse REFUSED by scoring_contract_matches_live. Both owned by logs/state/current.md; neither blocks anything.",
  "dirty": false,
@@ -103,7 +103,7 @@
   "session_plan_hash": "9377a2dc61f21790dd111d72a5de0e039ea1d31afef2d09e18c98a0b0cc2a0aa",
   "stage3_evaluation_protocol_hash": "250f72efbd43b86a475e8dda293b45f07ee61a4d858e147f4a5bd7681c32c2e4"
  },
- "generated_utc": "2026-10-10T00:00:00Z",
+ "generated_utc": "2026-10-13T00:00:00Z",
  "handoff": "logs/state/current.md -- the human view; logs/README.md is the index",
  "history": "per-attempt records, failure patterns and costs: logs/budget/decisions.md, logs/budget/ledger.md, the per-run dirs.",
  "latest_run": {
@@ -128,10 +128,10 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "MAINTAINER 2026-10-12: D1 route kept; B stays the anchor, q2 is the working baseline (not promoted). Next: R0 GPU equivalence of prediction_rows=scored_v1 (needs an engineering grant, ~$1.5), then R1 calib.teacher_native@v1 at $0. Owner: phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
+ "next": "MAINTAINER 2026-10-13: R0 -> D2 -> D3 on d_series_shared_eval@v1 (B/q2 D1 units imported, not retrained); R0 ready, needs a grant (hard ceiling $3.60). Owner: families/d_series/plans/d2_d3_shared_evaluation_design.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
-  "next_work": "R0 then R1 of the next-round design; no chain is prepared and no provider resource exists.",
+  "next_work": "R0 (granted separately), then D2's engineering and preregistration on the shared protocol; R1 at $0 in parallel. No provider resource exists.",
   "not_next": "no paid resource before the launch review; no recovery, screening or confirmation session (each separately authorized); no D2/D3; no retry of a complete measurement; no K sweep; no change to the frozen design. Owner: decisions.md and the 2026-10-05 amendment.",
   "status": "C0/C1 COMPLETE. C2 CLOSED WITHOUT PROMOTION. C3 COMPLETE / NO_GO. C4 NOT AUTHORIZED. A3 COMPLETE. D1 COMPLETE / NO-GO (q2 did not confirm; B stands).",
   "then": "nothing is queued."

@@ -10459,3 +10459,51 @@ on a paid pod.
   `logs/stages/stage-1/phase_d1/analyses/d1_followup_technical_review_and_next_round.md`.
 - **Revisit when:** the R0 GPU equivalence validation of `scored_v1` has run,
   or a D2/D3/Stage-0 design is put forward for authorization.
+
+## 2026-10-13 — R0 → D2 → D3 on a shared behavioural evaluation; reuse D1's B/q2 evidence
+
+- **Context:** after D1's NO-GO, the maintainer accepted the `scored_v1`
+  direction and decided that D2 and D3 must not retrain the B and q2 controls
+  D1 already trained, evaluated and scored. D1 left ten B/q2 units (2 screening
+  + 3 confirmation seeds each), with checkpoints retired but per-sample rows,
+  raw generations, training identities and hashes preserved.
+- **Decision (maintainer):**
+  1. Order: R0 (pre-vocabulary row-selection GPU validation) → D2 (teacher
+     reference confidence) → D3 (student confidence) → Stage-0
+     teacher-native. R1's $0 corpus work may run in parallel; its profile
+     never enters D2/D3.
+  2. D2/D3 each run a full search under their own objective. q2 is not
+     recompressed. B stays the standing incumbent and the anchor.
+  3. A new, versioned **shared behavioural evaluation protocol** reuses
+     `d1_screening` / `d1_confirmation`, D1's seeds, recipe and evaluation
+     protocol, and imports B's and q2's measured units. The frozen family
+     roles, D1's records and NO-GO, and the reserved d2/d3 batteries are not
+     changed.
+  4. New GPU spend, R0 included, needs its own explicit grant.
+- **Implemented under it (engineering, $0):** the protocol
+  `d_series_shared_eval@v1`, `protocol_hash` `5ed198ae…`, with its audit and
+  design (`logs/stages/stage-1/families/d_series/plans/`):
+  - 10/10 units verified, re-scored byte-exactly from the raw generations;
+  - D1's verdict and ranking re-derived identically through the shared path;
+  - D2/D3 controlled jointly at a one-sided α of 0.025 each;
+  - a pass on the shared rows nominates for fresh confirmation and never
+    promotes.
+
+  The R0 plan, an ungranted campaign and launch repairs are under
+  `logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/`.
+- **Alternatives considered:**
+  - **Retrain B and q2 per experiment:** about $31 more across D2 and D3, and
+    the retrain would be a new draw, not the artifact D1 measured.
+  - **Rename the old batteries and keep their GO rule:** rejected. It hides
+    the adaptive reuse and the cross-session boundary.
+- **Expected upside:** D2/D3 GPU money goes to their own candidates: 2K + 3
+  probes per experiment instead of 2K + 8.
+- **Risks:**
+  - Both shared rungs have been observed.
+  - The candidate and its controls are trained and generated in different
+    sessions; this is pinned by identity, not measured.
+  - D2 and D3 share B's rows, so their tests are dependent.
+
+  Each is bounded in the protocol's statistics and claim boundary.
+- **Revisit when:** R0 is granted, a D2 preregistration is put forward, or a
+  `SHARED_GO` makes the fresh-confirmation control question concrete.

@@ -1,6 +1,6 @@
 # Current state
 
-**Updated:** 2026-10-12 (UTC). The human view. Every number here has an owner
+**Updated:** 2026-10-13 (UTC). The human view. Every number here has an owner
 named beside it, and this file restates none of them from memory — a second
 hand-maintained copy of a cost or a status is how two documents come to
 disagree.
@@ -11,6 +11,24 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
 0 network volumes and $0/h (2026-10-12 16:09 UTC).
+
+**NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
+decision, 2026-10-13).** D2/D3 do not retrain B or q2.
+- A new, versioned protocol `d_series_shared_eval@v1` (`protocol_hash`
+  `5ed198ae…`) reuses `d1_screening` / `d1_confirmation`, D1's seeds, recipe
+  and evaluation protocol, and imports B's and q2's ten measured units.
+- The $0 audit verified **10/10 units**: hashes match, and the raw generations
+  re-score byte-exactly. Re-derived through the shared path, D1's verdict and
+  ranking are identical. Checkpoints are retired, so the units are reusable
+  **as measured** only.
+- D2/D3 are controlled jointly at a one-sided α of 0.025 each. A pass on the
+  shared rows (`SHARED_GO`) nominates for a fresh confirmation on the
+  reserved d2/d3 battery and never promotes.
+- **R0 is ready but unfunded:** expected $1.53, hard ceiling $3.60 all-in.
+  Launch repairs are done at $0. It needs a grant, which writes its
+  `authorization.json`.
+- Owner:
+  [`families/d_series/plans/d2_d3_shared_evaluation_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_shared_evaluation_design.md).
 
 **THE D1 ROUTE IS KEPT (maintainer decision, 2026-10-12).** The NO-GO below
 stands and nothing is promoted.

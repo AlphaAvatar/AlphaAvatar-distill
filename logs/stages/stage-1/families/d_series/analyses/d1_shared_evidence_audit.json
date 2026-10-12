@@ -1,0 +1,639 @@
+{
+ "schema": "aadistill.d_series.shared_evidence_audit/v1",
+ "_contract": "Whether every B/q2 unit D1 measured can be consumed by the shared protocol: bytes re-hashed against the committed records, per-sample rows recomputed from the raw generations by the rung's own scorer, and D1's two decisions re-derived through the shared path. $0, CPU. Deterministic: rerun to check.",
+ "protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+ "implementation_sha256": {
+  "scripts/stages/stage-1/families/d_series/shared_evaluation.py": "05a462b0fdbc488bfabb512f3eeab15667554d9737459321d2083d06a6df086d",
+  "scripts/shared/evaluation/evidence_reuse.py": "634024565e28b3cbb6dc307b76fcd55ea3b02608eb9a40da06a78e3cf66647f4"
+ },
+ "rescored": true,
+ "summary": {
+  "units": 10,
+  "result_verified": 10,
+  "rescore_reproduces_per_sample": 10,
+  "checkpoint_bytes_present": 0,
+  "all_reusable": true,
+  "d1_verdict_reproduced": true,
+  "d1_screening_ranking_reproduced": true,
+  "tree_matches_pinned_implementation": true
+ },
+ "tree_drift": {
+  "trainer": [],
+  "generation": [],
+  "scoring": []
+ },
+ "units": [
+  {
+   "probe_id": "d1_screening_B_s516448251",
+   "rung": "shared_screening",
+   "arm": "B",
+   "seed": 516448251,
+   "training": {
+    "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 516448251,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414"
+   },
+   "trained_sha256": "c401f096bee54aa90594984c8070a699393a72271807099e6bc3a6d810cd90ab",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261011_135910",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_screening_B_s614923639",
+   "rung": "shared_screening",
+   "arm": "B",
+   "seed": 614923639,
+   "training": {
+    "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 614923639,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414"
+   },
+   "trained_sha256": "1ed85ca4b9fbe0caa7abdcefe5678a86fd7888cd78d7c27fb10606cd9147737e",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261011_135910",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_screening_q2_s516448251",
+   "rung": "shared_screening",
+   "arm": "q2",
+   "seed": 516448251,
+   "training": {
+    "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 516448251,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414"
+   },
+   "trained_sha256": "3dd9c6523d0628ee3596b0dbe706017a4346992cd274f68872c3ea1719793d83",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261011_135910",
+    "training_identity_from": "the session's other run manifests (one checkout, one pod)",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_screening_q2_s614923639",
+   "rung": "shared_screening",
+   "arm": "q2",
+   "seed": 614923639,
+   "training": {
+    "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 614923639,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "e47508268ff52aa575d6a276735907f48a9589d0d5b2ffca492ad7b82dedc414"
+   },
+   "trained_sha256": "132455ab48509f748890c09a4b91ec891d2a51626aa848c025907671a508a251",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261011_135910",
+    "training_identity_from": "the session's other run manifests (one checkout, one pod)",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_B_s1004399678",
+   "rung": "shared_confirmation",
+   "arm": "B",
+   "seed": 1004399678,
+   "training": {
+    "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 1004399678,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_B_s396880939",
+   "rung": "shared_confirmation",
+   "arm": "B",
+   "seed": 396880939,
+   "training": {
+    "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 396880939,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_B_s766527341",
+   "rung": "shared_confirmation",
+   "arm": "B",
+   "seed": 766527341,
+   "training": {
+    "initialization_digest": "53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 766527341,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_q2_s1004399678",
+   "rung": "shared_confirmation",
+   "arm": "q2",
+   "seed": 1004399678,
+   "training": {
+    "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 1004399678,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_q2_s396880939",
+   "rung": "shared_confirmation",
+   "arm": "q2",
+   "seed": 396880939,
+   "training": {
+    "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 396880939,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  },
+  {
+   "probe_id": "d1_confirmation_q2_s766527341",
+   "rung": "shared_confirmation",
+   "arm": "q2",
+   "seed": 766527341,
+   "training": {
+    "initialization_digest": "3a4b4ede6888e2b0242d59234f1df18f0cac02893617e678992e54eaa243b82b",
+    "recipe_digest": "a4b0dcab5348e951a005c9bf2cc0a7ff622c88d45b0859d1d24d7ea2a82bea90",
+    "data_digest": "6f324cb0f37bc0f07128e554ce8c161879419537478950496534f75fcecb249c",
+    "seed": 766527341,
+    "teacher": "Qwen/Qwen3-4B-Thinking-2507@768f209d9ea81521153ed38c47d515654e938aea",
+    "trainer_source_digest": "a1807e347f4266799e02ace5af3ba61b4338529dc3271d62d2c787bc85cb1db6",
+    "training_runtime_digest": "9bd30885dfee79d9e9d4b2541c4aa7433ba5c516f5df3f905d314db33afea3ef",
+    "device_class": "NVIDIA L40S"
+   },
+   "evaluation": {
+    "evaluation_protocol_hash": "c82260e092419e2cc2b1083657405d10da3d328a20a2f0bbdf185089783a7e73"
+   },
+   "trained_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+   "provenance": {
+    "trained_in_run": "d1_behavioural_20261012_064341",
+    "training_identity_from": "this probe's run manifest",
+    "training_image_digest": "runpod/pytorch:1.1.0-cu1300-torch291-ubuntu2404@595.91.07"
+   },
+   "checks": {
+    "result_self_hash": true,
+    "durable_result_equals_committed": true,
+    "per_sample_present": true,
+    "per_sample_sha256": true,
+    "per_sample_rows": true,
+    "per_sample_pairable": true,
+    "generations_sha256": true,
+    "checkpoint_bytes_present": false,
+    "rescore_reproduces_per_sample": true
+   },
+   "result_verified": true
+  }
+ ],
+ "reuse_requests": [
+  {
+   "request": "B @ shared_screening seed 516448251",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_screening_B_s516448251",
+   "trained_sha256": "c401f096bee54aa90594984c8070a699393a72271807099e6bc3a6d810cd90ab",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "B @ shared_screening seed 614923639",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_screening_B_s614923639",
+   "trained_sha256": "1ed85ca4b9fbe0caa7abdcefe5678a86fd7888cd78d7c27fb10606cd9147737e",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "q2 @ shared_screening seed 516448251",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_screening_q2_s516448251",
+   "trained_sha256": "3dd9c6523d0628ee3596b0dbe706017a4346992cd274f68872c3ea1719793d83",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "q2 @ shared_screening seed 614923639",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_screening_q2_s614923639",
+   "trained_sha256": "132455ab48509f748890c09a4b91ec891d2a51626aa848c025907671a508a251",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "B @ shared_confirmation seed 1004399678",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_B_s1004399678",
+   "trained_sha256": "3a33d94ee8fa71c765b65daabd7fdf731d8fe490412e8f5491feb905f8784ff4",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "B @ shared_confirmation seed 396880939",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_B_s396880939",
+   "trained_sha256": "bd6ac2cbae400fcddd75f00663b56f3ecdc5cf185d68c8ddc458d04f10c21891",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "B @ shared_confirmation seed 766527341",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_B_s766527341",
+   "trained_sha256": "0e0d08d7af6f288e6ea5e96778c011fddb18dd0532dc7314341490d124ec08ec",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "q2 @ shared_confirmation seed 1004399678",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_q2_s1004399678",
+   "trained_sha256": "5bbe8c0a0af654a0db5a0980aa5cdc1946f0b08fed6888421fdde364ece1baff",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "q2 @ shared_confirmation seed 396880939",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_q2_s396880939",
+   "trained_sha256": "1f46be0949d67c008209ba8f4614be63643bf84d9dea4589927d7e294bb0c3dd",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  },
+  {
+   "request": "q2 @ shared_confirmation seed 766527341",
+   "outcome": "REUSE_RESULT",
+   "unit": "d1_confirmation_q2_s766527341",
+   "trained_sha256": "6ac63a97422e69a0cb2d34c97ed3f71e050854f72dec44ae1c30df3c416cf4ed",
+   "why": "training and evaluation identity match and the result evidence re-hashes to its record"
+  }
+ ],
+ "reuse_outcomes_illustrated": {
+  "a new D2/D3 candidate (unseen initialization)": {
+   "outcome": "RECOMPUTE_ALL",
+   "unit": null,
+   "why": "no completed unit shares the initialization digest; the model weights differ, so training and evaluation must both run"
+  },
+  "B at a shared seed, evaluated on a reserved fresh battery": {
+   "outcome": "TRAIN_FROM_INIT",
+   "unit": "d1_confirmation_B_s396880939",
+   "differs": [
+    "evaluation_protocol_hash"
+   ],
+   "why": "d1_confirmation_B_s396880939 was trained under this identity but evaluated under a different ['evaluation_protocol_hash'], and its checkpoint is retired. Retraining yields a new draw (training is not bit-reproducible), not the bytes d1_confirmation_B_s396880939 measured"
+  },
+  "B at a shared seed under a different trainer implementation": {
+   "outcome": "TRAIN_FROM_INIT",
+   "unit": null,
+   "nearest": "d1_confirmation_B_s396880939",
+   "differs": [
+    "trainer_source_digest"
+   ],
+   "why": "the initialization is reusable but no completed unit matches the training identity (nearest, d1_confirmation_B_s396880939, differs in ['trainer_source_digest'])"
+  },
+  "B at a seed D1 never trained": {
+   "outcome": "TRAIN_FROM_INIT",
+   "unit": null,
+   "nearest": "d1_confirmation_B_s1004399678",
+   "differs": [
+    "seed"
+   ],
+   "why": "the initialization is reusable but no completed unit matches the training identity (nearest, d1_confirmation_B_s1004399678, differs in ['seed'])"
+  }
+ },
+ "d1_replay": {
+  "confirmation": {
+   "verdict": "NO-GO",
+   "delta": -0.000392156862745098,
+   "lcb_one_sided": -0.00784313725490196,
+   "ucb_one_sided": 0.007450980392156863,
+   "per_seed_delta": [
+    -0.007058823529411765,
+    0.010588235294117647,
+    -0.004705882352941176
+   ]
+  },
+  "screening_order": [
+   "q2",
+   "q1",
+   "q3",
+   "q4"
+  ],
+  "screening_selection": "q2"
+ },
+ "q2_vs_b_at_family_alpha": {
+  "alpha_one_sided": 0.025,
+  "verdict": "NO-GO",
+  "delta": -0.000392156862745098,
+  "lcb_one_sided": -0.009411764705882352,
+  "ucb_one_sided": 0.008627450980392156,
+  "shared_outcome": "NO_GO",
+  "_reading": "descriptive: q2 is not a D2/D3 candidate and this consumes none of the family's alpha. It is what a candidate equal to q2 would be read as"
+ },
+ "probe_economy": {
+  "rate_usd_per_hour": 1.09,
+  "rate_owner": "the two source sessions' runtime/session.json",
+  "per_probe_minutes": {
+   "train_mean": 61.3,
+   "train_max": 61.47,
+   "generate_mean": 24.17,
+   "generate_max": 34.56,
+   "mean_total": 85.47,
+   "max_total": 96.04,
+   "from": "10 imported B/q2 units' relay timings"
+  },
+  "seed_spread": {
+   "seed_sd": 0.010696,
+   "dof": 6,
+   "groups": [
+    [
+     -0.0035,
+     0.02
+    ],
+    [
+     0.0012,
+     0.013
+    ],
+    [
+     -0.0047,
+     0.0059
+    ],
+    [
+     -0.0118,
+     0.0024
+    ],
+    [
+     -0.007059,
+     0.010588,
+     -0.004706
+    ]
+   ],
+   "_from": "D1's four screening arms (2 seeds each) and its confirmation arm (3 seeds), deltas vs B, pooled within arm"
+  },
+  "per_experiment": [
+   {
+    "top_k": 1,
+    "probes_d1_style": 10,
+    "probes_shared": 5,
+    "probes_saved": 5,
+    "probes_with_q2_retrained_as_second_control": 15,
+    "gpu_usd_shared_expected": 7.76,
+    "gpu_usd_shared_ceiling": 8.72,
+    "gpu_usd_saved_vs_d1_style": 7.76,
+    "screening_inflation_at_null": 0.0,
+    "p_advance_true_sesoi_candidate": 1.0
+   },
+   {
+    "top_k": 2,
+    "probes_d1_style": 12,
+    "probes_shared": 7,
+    "probes_saved": 5,
+    "probes_with_q2_retrained_as_second_control": 17,
+    "gpu_usd_shared_expected": 10.87,
+    "gpu_usd_shared_ceiling": 12.21,
+    "gpu_usd_saved_vs_d1_style": 7.76,
+    "screening_inflation_at_null": 0.004267,
+    "p_advance_true_sesoi_candidate": 0.8249
+   },
+   {
+    "top_k": 3,
+    "probes_d1_style": 14,
+    "probes_shared": 9,
+    "probes_saved": 5,
+    "probes_with_q2_retrained_as_second_control": 19,
+    "gpu_usd_shared_expected": 13.97,
+    "gpu_usd_shared_ceiling": 15.7,
+    "gpu_usd_saved_vs_d1_style": 7.76,
+    "screening_inflation_at_null": 0.006401,
+    "p_advance_true_sesoi_candidate": 0.7224
+   },
+   {
+    "top_k": 4,
+    "probes_d1_style": 16,
+    "probes_shared": 11,
+    "probes_saved": 5,
+    "probes_with_q2_retrained_as_second_control": 21,
+    "gpu_usd_shared_expected": 17.08,
+    "gpu_usd_shared_ceiling": 19.19,
+    "gpu_usd_saved_vs_d1_style": 7.76,
+    "screening_inflation_at_null": 0.007785,
+    "p_advance_true_sesoi_candidate": 0.6518
+   }
+  ],
+  "reference_materialization_minutes_per_session": {
+   "shared_screening": {
+    "q2": 15.73,
+    "B": 21.07
+   },
+   "shared_confirmation": {
+    "q2": 15.81,
+    "B": 21.33
+   }
+  },
+  "_excludes": "session setup, candidate materialization on the pod, the engine probe and teardown: per-session overheads that both designs pay. The shared design ALSO skips materializing the reference arms on the pod in every session, which D1 paid (reference_materialization_minutes_per_session, from the relay)",
+  "_d1_style_means": "K candidates + B on 2 screening seeds, then the advanced candidate + B on 3 confirmation seeds -- D1's own field shape"
+ },
+ "gaps": [
+  "trained checkpoints of all ten units are retired: a unit can be REUSED AS MEASURED, never re-evaluated under another protocol",
+  "the screening session kept run manifests for B only; q2's screening trainer/runtime identity is the session's (one checkout, one pod), recorded as such per unit",
+  "the durable store is a single dev-box copy, pinned by each source run's files.sha256 manifest and now registered reproducibility_required in the checkpoint registry"
+ ]
+}

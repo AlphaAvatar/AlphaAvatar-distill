@@ -61,5 +61,22 @@
     "d1_evidence_capacity": "logs/stages/stage-1/phase_d1/analyses/d1_evidence_capacity.json",
     "_why": "that record answers how many further batteries the ORIGINAL C1 pools could yield (zero); the realized family superseded it for readiness on 2026-10-03 and it is kept as provenance"
   },
+  "shared_evaluation": {
+    "protocol_id": "d_series_shared_eval@v1",
+    "protocol_hash": "5ed198aed960e987f137ec6342ef7fa6ac24c8484b991bac8cd6a210f7ae742d",
+    "record": "logs/stages/stage-1/families/d_series/plans/d_series_shared_eval_v1.json",
+    "audit": "logs/stages/stage-1/families/d_series/analyses/d1_shared_evidence_audit.json",
+    "design": "logs/stages/stage-1/families/d_series/plans/d2_d3_shared_evaluation_design.md",
+    "reuses_roles": [
+      "d1_confirmation",
+      "d1_screening"
+    ],
+    "reserved_roles": [
+      "d2_confirmation",
+      "d2_screening",
+      "d3_confirmation",
+      "d3_screening"
+    ]
+  },
   "authorizes": "nothing"
 }

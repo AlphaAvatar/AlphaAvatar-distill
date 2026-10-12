@@ -1,0 +1,14 @@
+{
+ "schema": "aadistill.engineering_campaign/v1",
+ "campaign_id": "d_series_prediction_rows_r0",
+ "_contract": "Cumulative cost of R0 across every resource and subrun. A rerun does NOT reset it.",
+ "status": "AWAITING_GRANT -- no session can be funded: the authorization record it names does not exist until the maintainer grants R0",
+ "authorization": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/authorization.json",
+ "package_id": "phase_c1.execution_package.2026-09-11",
+ "_package_id": "the GPU ENGINEERING book, as for the Top-K adoption validation",
+ "plan": "logs/stages/stage-1/families/d_series/validations/prediction-rows-r0/v1/plan.json",
+ "teardown_reserve_usd": 0.3,
+ "inherited_spend": [],
+ "subruns": [],
+ "authorizes": "nothing by itself"
+}
