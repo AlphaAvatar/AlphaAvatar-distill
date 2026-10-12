@@ -54,10 +54,14 @@ from aadistill.initialization.scoring.protocol_identity import (
     UNDECLARED_EXECUTION,
     measurement_protocol_id,
 )
+from aadistill.initialization.scoring.rows import (
+    scored_prediction_logits, split_rows,
+)
 from aadistill.initialization.scoring.support import (
     FULL_VOCAB_V1, DistributionSupport, ReferenceDistributionSketch,
     distortion_on_reference_support, sketch_reference,
 )
+from aadistill.initialization.specs.arch import adapter_for_config
 from aadistill.initialization.scoring.positions import (
     ALL_POSITIONS_V1,
     PREDICTION_AXIS,
@@ -162,6 +166,30 @@ class StateEvaluator:
                 w.require_nonempty()
                 self._weights[item.item_id] = w.weights
         self.execution = execution
+        #: PRE-VOCABULARY ROW SELECTION (`ExecutionConfig.prediction_rows`). When
+        #: on, teacher and candidate project only the rows this policy weights;
+        #: per item, the same boolean vector selects both, so the two
+        #: distributions stay position-aligned. `None` keeps the historical
+        #: all-rows path untouched.
+        self._row_select: dict[str, torch.Tensor] | None = None
+        if execution.selects_prediction_rows:
+            if numerics is None:
+                #: The protocol id binds execution only through the declared
+                #: numerical environment; without one it records
+                #: `UNDECLARED_EXECUTION`, and a scored-row measurement would
+                #: then carry the SAME id as an all-rows one. A non-default
+                #: arithmetic path must be visible in the identity it reports.
+                raise MeasurementError(
+                    f"prediction_rows={execution.prediction_rows!r} needs a "
+                    "declared NumericalEnvironment (`numerics=`), so that the "
+                    "measurement protocol id records the row-selected path")
+            self._row_select = {
+                item.item_id: (
+                    torch.ones(int(item.input_ids.shape[1]) - 1,
+                               dtype=torch.bool)
+                    if self._weights is None
+                    else self._weights[item.item_id] > 0)
+                for item in self.items}
         self.batch_budget_bytes = int(batch_budget_bytes)
         self.numerics = numerics
         #: The suite's CONTENT identity, taken as a parameter rather than read
@@ -264,14 +292,28 @@ class StateEvaluator:
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
+                if self._row_select is not None:
+                    #: Only the scored rows: the others are never read.
+                    self._ref_logits[item.item_id] = self._scored_rows_of(
+                        teacher, item, ids)
+                    continue
                 #: On the COMPUTE DEVICE, not the host. See `_reference_for`.
                 self._ref_logits[item.item_id] = (
                     teacher(ids).logits[0, :-1].float())
         self._ref_ready = True
 
     @torch.no_grad()
-    def _sketch_for(self, item: SuiteItem,
-                    ref_logits: torch.Tensor) -> ReferenceDistributionSketch:
+    def _scored_rows_of(self, model, item: SuiteItem,
+                        ids: torch.Tensor) -> torch.Tensor:
+        """One item's scored-row logits, float32, as the per-item path reads them."""
+        rows = self._row_select[item.item_id].to(ids.device)[None, :]
+        return scored_prediction_logits(adapter_for_config(model.config), model,
+                                        ids, None, rows).float()
+
+    @torch.no_grad()
+    def _sketch_for(self, item: SuiteItem, ref_logits: torch.Tensor,
+                    targets: torch.Tensor | None = None,
+                    ) -> ReferenceDistributionSketch:
         """This item's reference sketch, cached when the strategy says to.
 
         **The sketch definition is science; the caching policy is execution**, and
@@ -291,8 +333,11 @@ class StateEvaluator:
         hit = self._ref_sketches.get(item.item_id)
         if hit is not None:
             return hit
+        #: `targets` is supplied only on the scored-row path, where the logits
+        #: hold the selected rows and the targets must be those rows' tokens.
         sketch = sketch_reference(
-            ref_logits, item.input_ids[0, 1:].to(ref_logits.device),
+            ref_logits, (item.input_ids[0, 1:].to(ref_logits.device)
+                         if targets is None else targets),
             top_k=int(self.distribution_support.top_k), chunk=self.chunk)
         #: Cached under the same policy as the logits it was built from. A
         #: strategy that declines to hold `[T, V]` may still hold `[T, K]`, so
@@ -322,6 +367,8 @@ class StateEvaluator:
         if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
             return self._ref_logits[item.item_id]
         ids = item.input_ids.to(self.device)
+        if self._row_select is not None:
+            return self._scored_rows_of(self._teacher, item, ids)
         return self._teacher(ids).logits[0, :-1].float()
 
     # --- how the two forwards are issued ------------------------------------
@@ -405,6 +452,9 @@ class StateEvaluator:
         numerical execution property, recorded in the fingerprint, and not a
         change of estimand.
         """
+        if self._row_select is not None:
+            yield from self._scored_logit_pairs(model)
+            return
         if self._reference_path:
             for item in self.items:
                 ids = item.input_ids.to(self.device)
@@ -412,7 +462,7 @@ class StateEvaluator:
                 # the intended suite that is ~0.5 GiB each rather than 33.8 GiB
                 # held for the whole run.
                 yield item, self._reference_for(item), \
-                    model(ids).logits[0, :-1].float()
+                    model(ids).logits[0, :-1].float(), None
             return
 
         by_id = {i.item_id: i for i in self.items}
@@ -448,8 +498,55 @@ class StateEvaluator:
                 #: at a time so the saving does not arise, and touching it to
                 #: tidy a batched path's memory would spend a budget for
                 #: nothing.
-                yield item, ref_rows[row], cand_rows[row]
+                yield item, ref_rows[row], cand_rows[row], None
             del cand_block, cand_rows, ref_rows
+
+    @torch.no_grad()
+    def _scored_logit_pairs(self, model):
+        """``(item, reference rows, candidate rows, selection)`` per item.
+
+        The scored-row twin of `_logit_pairs`: the same forwards in the same
+        groups, but only each item's selected prediction rows reach the output
+        head. The selection is returned so `evaluate` can hand the reducer the
+        matching targets, tags and weights.
+        """
+        if self._reference_path:
+            for item in self.items:
+                ids = item.input_ids.to(self.device)
+                yield (item, self._reference_for(item),
+                       self._scored_rows_of(model, item, ids),
+                       self._row_select[item.item_id])
+            return
+        adapter = adapter_for_config(model.config)
+        for packed in self._ensure_groups(model):
+            batch = packed.batch
+            ids = batch.input_ids.to(self.device)
+            attn = batch.attention_mask.to(self.device)
+            rows = torch.zeros(int(ids.shape[0]), int(ids.shape[1]) - 1,
+                               dtype=torch.bool, device=self.device)
+            members = []
+            for row, index in enumerate(packed.original_indices):
+                item = self.items[index]
+                if batch.items[row]["item_id"] != item.item_id:
+                    raise MeasurementError(
+                        f"row {row} of a packed group claims item "
+                        f"{batch.items[row]['item_id']!r} at suite index "
+                        f"{index}, which holds {item.item_id!r}")
+                select = self._row_select[item.item_id]
+                rows[row, :int(select.numel())] = select.to(self.device)
+                members.append(item)
+            cand_rows = split_rows(
+                scored_prediction_logits(adapter, model, ids, attn, rows), rows)
+            if self.reference_strategy is ReferenceStrategy.CACHE_IN_MEMORY:
+                ref_rows = [self._ref_logits[i.item_id] for i in members]
+            else:
+                ref_rows = split_rows(scored_prediction_logits(
+                    adapter_for_config(self._teacher.config), self._teacher,
+                    ids, attn, rows), rows)
+            for row, item in enumerate(members):
+                yield item, ref_rows[row], cand_rows[row], \
+                    self._row_select[item.item_id]
+            del cand_rows, ref_rows
 
     @torch.no_grad()
     def _reference_rows(self, batch, ids) -> list[torch.Tensor]:
@@ -478,7 +575,7 @@ class StateEvaluator:
 
         per_subtype: dict[str, DistortionSums] = {}
         totals = DistortionSums()
-        for item, ref, cand in self._logit_pairs(model):
+        for item, ref, cand, select in self._logit_pairs(model):
             if cand.shape != ref.shape:
                 raise MeasurementError(
                     f"item {item.item_id}: candidate logits {tuple(cand.shape)} do not "
@@ -502,6 +599,16 @@ class StateEvaluator:
             #: host float vector meeting a CUDA tensor raises.
             weights = (None if self._weights is None
                        else self._weights[item.item_id].to(ref.device))
+            full_tags = None
+            if select is not None:
+                #: The reducer sees only the selected rows, so it gets exactly
+                #: their targets, tags and weights. Every weighted sum is over
+                #: the same non-zero-weight positions as on the all-rows path.
+                select = select.to(ref.device)
+                targets = targets[select]
+                full_tags = tags
+                tags = {name: mask[select] for name, mask in tags.items()}
+                weights = None if weights is None else weights[select]
             if self.distribution_support.is_full_vocab:
                 sums = distortion(ref, cand, targets, tags=tags,
                                   weights=weights, chunk=self.chunk)
@@ -511,8 +618,11 @@ class StateEvaluator:
                 #: reference strategy says to and recomputes otherwise, and the
                 #: numbers are identical either way.
                 sums = distortion_on_reference_support(
-                    self._sketch_for(item, ref), cand, targets, tags=tags,
-                    weights=weights, chunk=self.chunk)
+                    (self._sketch_for(item, ref) if select is None
+                     else self._sketch_for(item, ref, targets)),
+                    cand, targets, tags=tags, weights=weights, chunk=self.chunk)
+            if full_tags is not None:
+                _restore_unselected_counts(sums, select, full_tags)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
             totals.merge(sums)
             del ref, cand
@@ -595,6 +705,30 @@ class StateEvaluator:
                     "reference_path": self._reference_path},
             runtime=dict(runtime or {}),
         )
+
+
+def _restore_unselected_counts(sums: DistortionSums, select: torch.Tensor,
+                               full_tags: Mapping[str, torch.Tensor]) -> None:
+    """Put back the two COUNTS a row-selected reduction cannot see.
+
+    Every weighted quantity is already exact: an unselected row has weight zero
+    and contributes nothing on either path. What it still contributes on the
+    all-rows path is to two counts that are evidence rather than estimand --
+    `positions` (predictions looked at) and each tag's position count -- so
+    they are restored from the full masks. A tag whose every position was
+    unselected is reported as the all-rows path reports it: present, with its
+    count, zero weight and no mean.
+    """
+    sums.positions = int(select.numel())
+    for name, mask in full_tags.items():
+        count = float(mask.sum())
+        if not count:
+            continue
+        entry = sums.tagged.get(name)
+        if entry is None:
+            sums.tagged[name] = [0.0, 0.0, count]
+        else:
+            entry[2] = count
 
 
 def _per_domain_ce(per_subtype: Mapping[str, DistortionSums],

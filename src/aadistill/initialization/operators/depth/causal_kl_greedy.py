@@ -27,9 +27,13 @@ from typing import Any
 
 import torch
 
+from aadistill.initialization.scoring.rows import (
+    scatter_rows, scored_prediction_logits, scored_rows, split_rows,
+)
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
-    sketch_forward_kl_mean, sketch_forward_kl_mean_batch, sketch_reference,
+    masked_item_means, sketch_forward_kl, sketch_forward_kl_mean,
+    sketch_forward_kl_mean_batch, sketch_reference,
 )
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
@@ -130,6 +134,20 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: full-vocabulary path is unchanged and is what produced every frozen
         #: DEPTH decision; the sketch path holds O(T*K) instead of O(T*V).
         support = ctx.distribution_support
+        #: PRE-VOCABULARY ROW SELECTION, opt-in through the execution config.
+        #: Only on the reference-support path: the full-vocabulary path is the
+        #: oracle every Top-K comparison is measured against, and it stays on the
+        #: historical all-rows arithmetic so it remains one.
+        select_rows = ctx.execution.selects_prediction_rows
+        if select_rows:
+            if support.is_full_vocab:
+                raise OperatorError(
+                    f"{self.impl_id}: prediction_rows="
+                    f"{ctx.execution.prediction_rows!r} is implemented for the "
+                    "reference-support reduction only. full_vocab_v1 is the "
+                    "oracle the coarsened support is validated against, and it "
+                    "stays on the historical all-rows path")
+            adapter.requires(Capability.OUTPUT_HEAD)
         if support.is_full_vocab:
             reference = _ReferenceLogits(model, items, compute)
             sketches = None
@@ -166,6 +184,9 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         #: from the hashed config and therefore forks the state, unlike the batch
         #: size and packing above it.
         active = active_positions(items, ctx.position_policy)
+        if select_rows:
+            #: The reference state now holds only the scored rows; size it so.
+            sketches.restrict_to_scored(active)
 
         # Operational timings, kept OUT of every returned metric and hash.
         #
@@ -194,12 +215,70 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                   "calibration_batch_packing": packing,
                   "distortion_calls": 0, "split_is_attributed": bool(cuda_sync)
                   or torch.device(compute).type != "cuda"}
+        if select_rows:
+            #: How many prediction slots reached the output head, against how
+            #: many the forwards held. Telemetry only, like everything here.
+            timing.update({"prediction_rows": ctx.execution.prediction_rows,
+                           "scored_rows": 0, "forward_rows": 0})
 
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
             for group, indices in groups:
+                if select_rows:
+                    #: Same groups, same weights, same per-item means; only the
+                    #: rows that reach the output head differ. See
+                    #: `aadistill.initialization.scoring.rows`.
+                    t0 = time.perf_counter()
+                    batch_weights = (None if active is None else
+                                     active.prediction_weights_for(group, indices))
+                    mask = group.prediction_mask().to(compute)
+                    rows = scored_rows(mask, batch_weights)
+                    #: The reference first and OUTSIDE the bypass: it is the
+                    #: intact parent, at exactly the rows the candidate scores.
+                    idx, lp, tail = sketches.sketch_rows(group, rows, adapter)
+                    if cuda_sync:
+                        cuda_sync()
+                    t1 = time.perf_counter()
+                    ids = group.input_ids.to(compute)
+                    attn = group.attention_mask.to(compute)
+                    if skip:
+                        with bypassed_blocks(model, skip):
+                            abls = scored_prediction_logits(adapter, model, ids,
+                                                            attn, rows)
+                    else:
+                        abls = scored_prediction_logits(adapter, model, ids,
+                                                        attn, rows)
+                    if cuda_sync:
+                        cuda_sync()
+                    t2 = time.perf_counter()
+                    timing["reference_seconds"] += t1 - t0
+                    timing["ablated_seconds"] += t2 - t1
+                    timing["ablated_forwards"] += 1
+                    timing["ablated_items"] += len(group.items)
+                    kl = sketch_forward_kl(idx, lp, tail, abls,
+                                           has_tail=sketches.has_tail)
+                    values = masked_item_means(scatter_rows(kl, rows), mask,
+                                               weights=batch_weights)
+                    for item, value in zip(group.items, values.tolist()):
+                        per_subtype.setdefault(item["subtype"], []).append(value)
+                        timing["distortion_calls"] += 1
+                    if ctx.score_observer is not None:
+                        #: Execution only, as on the all-rows path. `refs` and
+                        #: `abls` are ROW tensors here (`rows` says which), so an
+                        #: observer that reshapes them as `[B, T, ...]` blocks
+                        #: must not be attached to a row-selected invocation.
+                        ctx.score_observer(
+                            skip=frozenset(skip), group=group, indices=indices,
+                            refs=(idx, lp, tail), abls=abls, mask=mask,
+                            weights=batch_weights, values=values,
+                            support=support, rows=rows)
+                    timing["scored_rows"] += int(rows.sum())
+                    timing["forward_rows"] += int(mask.numel())
+                    timing["distortion_seconds"] += time.perf_counter() - t2
+                    del abls, kl
+                    continue
                 # Order matters: the reference is the UNBYPASSED parent, so when
                 # it is being recomputed it must not be taken inside the bypass.
                 t0 = time.perf_counter()
@@ -355,6 +434,10 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                    #: Execution evidence, recorded even at the default so a run's
                    #: trace states which grouping its forwards used.
                    "calibration_batch_packing": packing,
+                   #: Recorded only when it is not the historical path, so a
+                   #: trace of an all-rows run is unchanged field for field.
+                   **({"prediction_rows": ctx.execution.prediction_rows}
+                      if select_rows else {}),
                    #: SCIENCE evidence: what the policy named in the hashed config
                    #: actually restricted.
                    "scoring_positions": (None if active is None
@@ -494,6 +577,8 @@ class _ReferenceSketches:
         self.vocab = int(model.config.vocab_size)
         self._cache: dict[str, tuple[torch.Tensor, torch.Tensor, torch.Tensor]] = {}
         items = list(items)
+        self._items = items
+        self.scored_rows_only = False
         positions = sum(int(i["input_ids"].shape[1]) - 1 for i in items)
         self.positions = positions
         k = max(1, min(self.top_k, self.vocab))
@@ -547,6 +632,68 @@ class _ReferenceSketches:
                 self.recomputes += 1
         del block
         return self._assemble(batch, cached)
+
+    def restrict_to_scored(self, active) -> None:
+        """Hold sketches for the SCORED rows only, and re-size the budget so.
+
+        Under pre-vocabulary row selection a position the policy gives weight
+        zero is never projected, so its sketch would never be read. The cache
+        decision is re-taken against the smaller footprint; the values do not
+        depend on it either way.
+        """
+        scored = 0
+        for index, item in enumerate(self._items):
+            weights = (None if active is None
+                       else active.prediction_weights_for_item(index))
+            scored += (int(item["input_ids"].shape[1]) - 1 if weights is None
+                       else int((weights > 0).sum()))
+        k = self.effective_top_k
+        self.scored_rows_only = True
+        self.positions = scored
+        self.estimate_bytes = scored * (k * 4 + k * 8) + scored * 4 * 3
+        budget = (None if self.available_bytes is None
+                  else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
+        self.enabled = budget is None or self.estimate_bytes <= budget
+        self.mode = "cached" if self.enabled else "recomputed"
+
+    def sketch_rows(self, batch, rows, adapter):
+        """``([N, K] indices, [N, K] log probs, [N] tail)`` for the scored rows.
+
+        Row-major over the batch -- the order `scored_prediction_logits` returns
+        the candidate's rows in -- so position ``n`` of the reference and of the
+        candidate is the same prediction of the same item. Filled from the SAME
+        canonical batch the candidate forwards use, for the reason the class
+        docstring gives.
+        """
+        items = list(batch.items)
+        cached = [self._cache.get(item["item_id"]) for item in items]
+        if not all(c is not None for c in cached):
+            logits = scored_prediction_logits(
+                adapter, self.model, batch.input_ids.to(self.device),
+                batch.attention_mask.to(self.device), rows)
+            n = int(logits.shape[0])
+            sk = sketch_reference(
+                logits, torch.zeros(n, dtype=torch.long, device=logits.device),
+                top_k=self.top_k, chunk=512)
+            del logits
+            parts = list(zip(split_rows(sk.support_indices, rows),
+                             split_rows(sk.support_log_probs, rows),
+                             split_rows(sk.tail_log_prob, rows)))
+            for index, item in enumerate(items):
+                if cached[index] is not None:
+                    self.hits += 1
+                    continue
+                cached[index] = tuple(x.clone() for x in parts[index])
+                if self.enabled:
+                    self._cache[item["item_id"]] = cached[index]
+                    self.fills += 1
+                else:
+                    self.recomputes += 1
+        else:
+            self.hits += len(items)
+        return (torch.cat([c[0] for c in cached]),
+                torch.cat([c[1] for c in cached]),
+                torch.cat([c[2] for c in cached]))
 
     def _assemble(self, batch, rows):
         """Cached per-item sketches back into the canonical padded shapes.
@@ -608,6 +755,7 @@ class _ReferenceSketches:
             "cached": self.enabled,
             "distribution_support": SUPPORT_REFERENCE_TOPK_TAIL_V1,
             "top_k": self.effective_top_k,
+            **({"scored_rows_only": True} if self.scored_rows_only else {}),
             "has_tail": self.has_tail,
             "items_total": len(self._cache) or None,
             "positions": self.positions,

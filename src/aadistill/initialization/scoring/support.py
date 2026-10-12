@@ -561,6 +561,19 @@ def sketch_forward_kl_mean_batch(support_indices: torch.Tensor,
     """
     kl = sketch_forward_kl(support_indices, support_log_probs, tail_log_prob,
                            cand_logits, has_tail=has_tail)
+    return masked_item_means(kl, prediction_mask, weights=weights)
+
+
+def masked_item_means(kl: torch.Tensor, prediction_mask: torch.Tensor,
+                      *, weights: torch.Tensor | None = None) -> torch.Tensor:
+    """``[B]`` per-item weighted means of per-position values ``kl`` ``[B, T]``.
+
+    The reduction half of :func:`sketch_forward_kl_mean_batch`, separated so the
+    pre-vocabulary row path (:mod:`aadistill.initialization.scoring.rows`) forms
+    its per-item means with the SAME operations: it scatters its selected-row
+    values into the dense layout and calls this. A value at a position this
+    masks out is never read, which is what lets the row path leave zeros there.
+    """
     m = prediction_mask.to(kl.device).float()
     if weights is not None:
         m = m * weights.to(kl.device).float()

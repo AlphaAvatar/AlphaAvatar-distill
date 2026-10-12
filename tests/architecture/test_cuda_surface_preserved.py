@@ -1784,6 +1784,60 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "NO CUDA SURFACE: filesystem reads and JSON parsing only; it "
             "issues no kernel and performs no reduction.",
      }),
+    ("69920a19cca4e61f7413faf161df16ab6796c68f",
+     "pre-vocabulary row selection: prediction_rows=scored_v1",
+     {
+        "src/aadistill/initialization/execution.py":
+            "ExecutionConfig gains `prediction_rows` (`all_v1` default, "
+            "`scored_v1`) and OPTIONAL_FINGERPRINT_FIELDS. At the default the "
+            "trace and the fingerprint carry no new key, so every recorded "
+            "execution identity is byte-identical; `scored_v1` forks the "
+            "fingerprint. Validation refuses an unknown value.",
+        "src/aadistill/initialization/specs/materialization.py":
+            "numerical_execution_fingerprint hashes OPTIONAL_FINGERPRINT_FIELDS "
+            "only when present; the five-field preimage is unchanged when they "
+            "are absent (a test derives it independently).",
+        "src/aadistill/initialization/specs/arch.py":
+            "Capability.OUTPUT_HEAD and two ArchitectureAdapter methods, "
+            "`final_hidden_states` and `output_logits`, whose defaults raise "
+            "UnsupportedCapability. No existing method changes.",
+        "src/aadistill/initialization/adapters/qwen3.py":
+            "Qwen3 declares OUTPUT_HEAD and implements the two methods as "
+            "`model.model(...).last_hidden_state` and `model.lm_head(...)` -- "
+            "the factorization Qwen3ForCausalLM.forward itself performs. No "
+            "existing method changes. ON THE HISTORICAL SURFACE: the 7027a8f4 "
+            "validation does NOT cover these two methods, and nothing here "
+            "claims it does.",
+        "src/aadistill/initialization/scoring/rows.py":
+            "NEW: scored-row selection -- backbone over the whole sequence, "
+            "output head on the selected prediction rows only (causal shift "
+            "`hidden[:, :-1]`), row-major split/scatter back to the dense "
+            "layout.",
+        "src/aadistill/initialization/scoring/support.py":
+            "the per-item reduction of `sketch_forward_kl_mean_batch` is split "
+            "out as `masked_item_means`, operation for operation, so the "
+            "scored-row path forms its per-item means with the same code. The "
+            "batched function is that call composed with `sketch_forward_kl`.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "a `scored_v1` branch on the reference-support path only: reference "
+            "sketches and candidate KL over the scored rows, per-item means via "
+            "`masked_item_means`; full_vocab_v1 + scored_v1 is refused. The "
+            "all-rows branches, trace and reference-cache decision are "
+            "unchanged field for field at the default. The operator signature "
+            "is unchanged: the capability is checked at run time, not "
+            "declared, so no DEPTH state id forks.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "StateEvaluator: a `scored_v1` path that projects only each item's "
+            "weighted rows for teacher and candidate, hands the reducer the "
+            "matching targets/tags/weights, and restores the two counts "
+            "(`positions`, per-tag positions) from the full masks; refused "
+            "without declared numerics. `_logit_pairs` yields a fourth element "
+            "(None on the historical paths). "
+            "CUDA: CPU-verified only (tests/initialization/"
+            "test_prediction_row_selection.py); the GPU equivalence of the "
+            "scored path is owed by the R0 validation in "
+            "phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
+     }),
 )
 
 
@@ -1863,6 +1917,10 @@ CURRENT_CUDA_SURFACE = (
     "src/aadistill/initialization/operators/width/residual/global_pca.py",
     "src/aadistill/initialization/statistics/collect.py",
     "src/aadistill/initialization/statistics/contribution.py",
+    #: The reference-support reduction DEPTH runs on every candidate, and the
+    #: scored-row forward it runs under `prediction_rows="scored_v1"`.
+    "src/aadistill/initialization/scoring/support.py",
+    "src/aadistill/initialization/scoring/rows.py",
 )
 
 #: Backwards-compatible alias for the constraint that a declared core change may

@@ -502,7 +502,7 @@ def _depth_operator_premises(repo: Path) -> dict[str, Any]:
 
 def production_operator_context(*, adapter, model, target_spec, profile, items,
                                 seed: int, device: str, workdir: Path, policy,
-                                observer=None):
+                                observer=None, prediction_rows: str = "all_v1"):
     """An `OperatorContext` built the way `BeamSearch._expand_one` builds one.
 
     Separate from the stage so that the construction -- not a paraphrase of it --
@@ -533,13 +533,18 @@ def production_operator_context(*, adapter, model, target_spec, profile, items,
         distribution_support=SP.D_SERIES_SUPPORT,
         execution=ExecutionConfig(
             micro_batch_size=SP.D_SERIES_MICRO_BATCH_SIZE,
-            calibration_batch_packing=SP.D_SERIES_BATCH_PACKING),
+            calibration_batch_packing=SP.D_SERIES_BATCH_PACKING,
+            #: The one execution knob this driver varies on purpose: the
+            #: pre-vocabulary row selection R0 measures. Default = D1's path.
+            prediction_rows=prediction_rows),
         position_policy=policy, score_observer=observer)
 
 
 def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
                                           journal: Journal,
-                                          workdir: Path) -> dict[str, Any]:
+                                          workdir: Path,
+                                          prediction_rows: str = "all_v1",
+                                          ) -> dict[str, Any]:
     """Time ONE REAL ``depth.causal_kl_greedy_v1`` invocation. Both profiles.
 
     **This stage exists because its predecessor timed a shadow loop.** The first
@@ -626,7 +631,7 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
             adapter=adapter, model=model, target_spec=spec.target_spec,
             profile=profile, items=items, seed=spec.seed, device="cuda",
             workdir=workdir / f"P-{profile_id.replace('@', '-')}",
-            policy=policy, observer=stamp)
+            policy=policy, observer=stamp, prediction_rows=prediction_rows)
 
         torch.cuda.reset_peak_memory_stats()
         #: TIMED EXACTLY AS `BeamSearch._expand_one` TIMES IT -- `time.time()`
@@ -660,6 +665,11 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
             "candidate_subsets": int(timing.get("candidate_subsets") or 0),
             "rounds": len(rounds),
             "removed": [r.get("chosen") for r in rounds],
+            "prediction_rows": prediction_rows,
+            #: Every candidate's score, so two invocations that differ only in
+            #: execution can be compared candidate for candidate offline.
+            "round_tables": [[[e.get("candidate"), e.get("score")]
+                              for e in (r.get("table") or [])] for r in rounds],
             "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
             "operator_timing": timing,
             "reference_cache": cache,
@@ -1029,7 +1039,8 @@ def build_positional_candidate(*, repo: Path, workdir: Path,
 
 
 def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
-                       journal: Journal, numerics=None) -> dict[str, Any]:
+                       journal: Journal, numerics=None,
+                       prediction_rows: str = "all_v1") -> dict[str, Any]:
     """Item 10D and the state-eval half of 10E, both supports, one pair of models.
 
     Two evaluators over the SAME suite and the SAME loaded models. The forwards are
@@ -1074,8 +1085,12 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     #: restating it.
     policy = get_position_policy(POLICY_ID if "@" in POLICY_ID
                                  else f"{POLICY_ID}@v1")
+    #: The SAME execution main() bound the two protocol ids under, including
+    #: the row selection; an evaluator built from a different one would report
+    #: an identity nobody bound.
     execution = ExecutionConfig(micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
-                                calibration_batch_packing=D_SERIES_BATCH_PACKING)
+                                calibration_batch_packing=D_SERIES_BATCH_PACKING,
+                                prediction_rows=prediction_rows)
 
     out: dict[str, Any] = {"arms": {}}
     for label, support in (("full_vocab_v1", FULL_VOCAB_V1),
@@ -1173,6 +1188,12 @@ def main(argv: list[str] | None = None) -> int:
                          "DEPTH operator invocation per profile, ~25 min each). A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
+    ap.add_argument("--prediction-rows", default="all_v1",
+                    choices=("all_v1", "scored_v1"),
+                    help="ExecutionConfig.prediction_rows for stages D and P. "
+                         "scored_v1 projects only the scored rows; stage C "
+                         "compares full-vocabulary against Top-K blocks and is "
+                         "refused under it.")
     ap.add_argument("--check-only", action="store_true",
                     help="every stage except the two expensive ones: the CUDA "
                          "probe, the four process-global registries, the frozen "
@@ -1245,7 +1266,8 @@ def main(argv: list[str] | None = None) -> int:
         numerics = _numerics(record["environment"])
         execution = ExecutionConfig(
             micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
-            calibration_batch_packing=D_SERIES_BATCH_PACKING)
+            calibration_batch_packing=D_SERIES_BATCH_PACKING,
+            prediction_rows=args.prediction_rows)
         #: BOTH protocol identities bound before anything expensive, and the pair
         #: must DIFFER -- if they agreed, the whole comparison would be of one
         #: measurement against itself.
@@ -1269,6 +1291,12 @@ def main(argv: list[str] | None = None) -> int:
         wanted = {x.strip() for x in (args.stages or "C,D,P").split(",")
                   if x.strip()}
         record["stages_requested"] = sorted(wanted)
+        record["prediction_rows"] = args.prediction_rows
+        if "C" in wanted and args.prediction_rows != "all_v1":
+            raise AdoptionError(
+                "stage C compares full-vocabulary against Top-K logit BLOCKS and "
+                "its observer reshapes them as [B, T, V]; it is defined on the "
+                "all-rows path only. Run C under --prediction-rows all_v1.")
         unknown = wanted - {"C", "D", "P"}
         if unknown:
             raise AdoptionError(
@@ -1361,7 +1389,7 @@ def main(argv: list[str] | None = None) -> int:
                 record["D_state_eval"] = stage_D_state_eval(
                     repo=repo, artifact_path=candidate,
                     teacher_path=teacher_path, journal=journal,
-                    numerics=numerics)
+                    numerics=numerics, prediction_rows=args.prediction_rows)
                 cmp_ = record["D_state_eval"]["comparison"]
                 st.result = {
                     "protocol_ids_differ": cmp_["protocol_ids_differ"],
@@ -1372,7 +1400,8 @@ def main(argv: list[str] | None = None) -> int:
                 record["P_production_timing"] = (
                     stage_P_production_operator_invocation(
                         repo=repo, teacher_path=teacher_path, journal=journal,
-                        workdir=out / "P"))
+                        workdir=out / "P",
+                        prediction_rows=args.prediction_rows))
                 st.result = {"invocation_s_max":
                              record["P_production_timing"][
                                  "operator_invocation_seconds_max"]}

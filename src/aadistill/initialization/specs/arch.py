@@ -68,6 +68,10 @@ class Capability:
     RMS_NORM = "rms_norm"
     ACTIVATION_STATS = "activation_stats"
     LOGIT_COMPARABLE = "logit_comparable"
+    #: The model factors as ``logits = head(final_hidden_states(ids))``, so a
+    #: caller can run the backbone over a whole sequence and project only the
+    #: rows it will score. See ``ArchitectureAdapter.final_hidden_states``.
+    OUTPUT_HEAD = "output_head"
 
 
 @dataclass(frozen=True)
@@ -265,6 +269,30 @@ class ArchitectureAdapter(ABC):
 
     def final_norm(self, model: Any) -> Any:
         raise UnsupportedCapability(f"{self.family} adapter has no final norm accessor")
+
+    def final_hidden_states(self, model: Any, input_ids: Any,
+                            attention_mask: Any = None) -> Any:
+        """``[B, T, H]``: exactly what the model's output head reads.
+
+        Everything the family applies between the last block and the output
+        projection -- the final norm, any scaling -- is applied here, so that
+        ``output_logits(model, final_hidden_states(model, ids))`` equals the
+        model's own logits position for position. A family whose logits are not
+        a row-wise function of these states must not declare
+        ``Capability.OUTPUT_HEAD``.
+        """
+        raise UnsupportedCapability(
+            f"{self.family} adapter does not factor its output head")
+
+    def output_logits(self, model: Any, hidden: Any) -> Any:
+        """The output head on hidden rows of any leading shape: ``[..., H] -> [..., V]``.
+
+        Row-wise by contract: projecting a subset of rows yields those rows of
+        the full projection. Any family-specific post-processing of logits
+        (softcapping, a logit scale) belongs here, not in a caller.
+        """
+        raise UnsupportedCapability(
+            f"{self.family} adapter does not factor its output head")
 
     def head_groups(self, spec: ArchSpec) -> tuple[int, int, int]:
         """(query heads, key/value heads, head dim) for grouped attention."""

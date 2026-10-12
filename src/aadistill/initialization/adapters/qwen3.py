@@ -55,6 +55,7 @@ class Qwen3Adapter(ArchitectureAdapter):
         Capability.RMS_NORM,
         Capability.ACTIVATION_STATS,
         Capability.LOGIT_COMPARABLE,
+        Capability.OUTPUT_HEAD,
     })
     structural_fields = QWEN3_STRUCTURAL_FIELDS
 
@@ -219,6 +220,18 @@ class Qwen3Adapter(ArchitectureAdapter):
 
     def final_norm(self, model: Any) -> Any:
         return model.model.norm
+
+    def final_hidden_states(self, model: Any, input_ids: Any,
+                            attention_mask: Any = None) -> Any:
+        #: `Qwen3Model` applies the final norm itself, and `Qwen3ForCausalLM`
+        #: computes `lm_head(last_hidden_state[:, slice])` with nothing between
+        #: them, so this is the tensor its own logits are a projection of.
+        return model.model(input_ids=input_ids, attention_mask=attention_mask,
+                           use_cache=False).last_hidden_state
+
+    def output_logits(self, model: Any, hidden: Any) -> Any:
+        #: No softcapping or logit scale in this family.
+        return model.lm_head(hidden)
 
     def head_groups(self, spec: ArchSpec) -> tuple[int, int, int]:
         return spec["num_attention_heads"], spec["num_key_value_heads"], spec["head_dim"]
