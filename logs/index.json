@@ -743,7 +743,7 @@
  "counts": {
   "runs_legacy_v1": 41,
   "runs_current": 99,
-  "runs_unrecorded": 85,
+  "runs_unrecorded": 86,
   "legacy_components": 77,
   "by_experiment": {
    "c2_full_search_cuda": {
@@ -828,8 +828,8 @@
    },
    "phase_d1": {
     "recorded": 0,
-    "unrecorded": 16,
-    "total": 16
+    "unrecorded": 17,
+    "total": 17
    },
    "phase_d1_replay": {
     "recorded": 0,
@@ -3344,8 +3344,16 @@
    "run_id": "d1_behavioural_20261011_135910",
    "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261011_135910",
    "n_files": 71,
-   "digest": "59babc1d964417e84227b515bbcd7ee6fdea90c7d308c1c94c587c4e8df0a088",
+   "digest": "333099f17261454124d1b5c80088d7ac871c3e8e6a03154f27e99ed28a5f0195",
    "why": "no run manifest; its closeout states: VALID SCREENING RESULT. One candidate advances to confirmation; this is a ranking input, not evidence that may promote."
+  },
+  {
+   "experiment_id": "phase_d1",
+   "run_id": "d1_behavioural_20261012_064341",
+   "root": "logs/stages/stage-1/phase_d1/runs/d1_behavioural_20261012_064341",
+   "n_files": 5,
+   "digest": "60a4189f78d37e6a60e6faf523061d27081493d01e25de5d567ea16cbf12426f",
+   "why": "no valid run manifest; predates the run-manifest convention or the launcher did not reach its closeout"
   },
   {
    "experiment_id": "phase_d1",

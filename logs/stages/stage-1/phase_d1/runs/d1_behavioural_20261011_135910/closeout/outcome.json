@@ -384,18 +384,18 @@
   "gpu": "NVIDIA L40S",
   "price_per_hour": 1.09,
   "elapsed_minutes": 982.1,
-  "all_in_usd": 18.0988,
-  "all_in_source": "provider account balance 174.2160768536 -> 156.1172806337",
+  "all_in_usd": 18.1148,
+  "all_in_source": "provider account balance 174.2160768536 (pre-launch) -> 156.1012673226 (the next launch's pre-launch query, 2026-10-12 06:45 UTC, 0 pods throughout); the balance was 156.1172806337 ten seconds after deletion and settled $0.0160 lower with no resource billing",
   "watchdog_accrued_usd": 17.8425,
   "authorized_usd": 24.9922,
   "within_authorization": true,
   "one_use_grant_consumed": true,
   "per_session_cap_usd": 30.0,
   "phase_allowance_usd": 130.0,
-  "phase_consumed_after_this_run_usd": 30.4695
+  "phase_consumed_after_this_run_usd": 30.4855
  },
  "cost": {
-  "actual_usd": 18.0988,
+  "actual_usd": 18.1148,
   "price_per_hour": 1.09,
   "elapsed_minutes": 982.1,
   "authorized_usd": 24.9922,
