@@ -51,6 +51,21 @@ GRANT = {
 ACCEPTED_RATE = 1.09
 
 
+def _screening_only_tree(root: Path) -> Path:
+    """The real SCREENING closeouts, copied to `root` at their own paths.
+
+    What the envelope tests mean by "confirmation has never run", built from
+    the repository's own records rather than typed, so the real derivation
+    still reads real money."""
+    for path in sorted(REPO.glob(BA.RUNS_GLOB)):
+        if json.loads(path.read_text()).get("rung") != "screening":
+            continue
+        dest = root / path.relative_to(REPO)
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(path.read_bytes())
+    return root
+
+
 def _payload(**over):
     #: `consumed_usd=0.0` states the assumption these tests are making: a
     #: PRISTINE envelope. The real tree's envelope is partly spent by four
@@ -274,10 +289,13 @@ class TestIssuanceDerivesEverythingAndRefusesTheRest:
         grant = {**GRANT, "rung": "confirmation",
                  "hard_cap_usd": 15.2025,
                  "covers": "ONE formal D1 behavioural CONFIRMATION session"}
+        #: A pristine envelope, as `_payload` states: this test is about the
+        #: payload's shape, and the real confirmation envelope is now spent.
         payload = BA.build_payload(
             grant=grant, session_commit=HEAD, granted_utc="t",
             run_id="d1b_conf_test", rung="confirmation",
-            advancing_candidate="q1", live_rate=ACCEPTED_RATE, repo_root=REPO)
+            advancing_candidate="q1", consumed_usd=0.0,
+            live_rate=ACCEPTED_RATE, repo_root=REPO)
         assert payload["n_probes"] == 6
         assert payload["advancing_candidate"] == "q1"
         assert payload["seeds"] == list(B.confirmation_seeds(REPO))
@@ -2470,16 +2488,32 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
         everything = BA.consumed_by_prior_subruns(REPO)
         screening = BA.consumed_by_prior_subruns(REPO, rung="screening")
         confirmation = BA.consumed_by_prior_subruns(REPO, rung="confirmation")
-        assert screening["consumed_usd"] == everything["consumed_usd"], (
-            "every subrun so far is a screening subrun")
-        assert confirmation["consumed_usd"] == 0, (
-            "no confirmation session has ever run; its envelope is pristine")
+        assert screening["consumed_usd"] + confirmation["consumed_usd"] == \
+            pytest.approx(everything["consumed_usd"], abs=1e-4), (
+            "the two rungs partition the phase's spend")
         assert {r["rung"] for r in screening["subruns"]} == {"screening"}
+        assert {r["rung"] for r in confirmation["subruns"]} <= {"confirmation"}
+        #: Over the real screening closeouts alone -- confirmation never run --
+        #: confirmation's envelope is pristine however much screening spent.
+        alone = _screening_only_tree(self._tmp)
+        assert BA.consumed_by_prior_subruns(alone)["consumed_usd"] == \
+            screening["consumed_usd"] > 0
+        assert BA.consumed_by_prior_subruns(
+            alone, rung="confirmation")["consumed_usd"] == 0
 
-    def test_a_confirmation_issuance_is_not_blocked_by_screening_spend(self):
+    @pytest.fixture(autouse=True)
+    def _tmp_root(self, tmp_path):
+        self._tmp = tmp_path
+
+    def test_a_confirmation_issuance_is_not_blocked_by_screening_spend(
+            self, monkeypatch):
         """The end-to-end consequence, through the real payload builder."""
-        #: NO consumed_usd override: the real derivation must return 0 for a
-        #: rung that has never run, even though screening has spent $8.2180.
+        #: NO consumed_usd override: the real derivation, over the real
+        #: screening closeouts, must return 0 for a rung that has never run.
+        real = BA.consumed_by_prior_subruns
+        alone = _screening_only_tree(self._tmp)
+        monkeypatch.setattr(BA, "consumed_by_prior_subruns",
+                            lambda root=REPO, *, rung=None: real(alone, rung=rung))
         payload = BA.build_payload(
             grant={**GRANT, "rung": "confirmation", "hard_cap_usd": 15.2025,
                    "covers": "ONE formal D1 behavioural CONFIRMATION session"},
@@ -2490,6 +2524,25 @@ class TestTheEnvelopeIsNettedAgainstPriorSubruns:
         assert payload["envelope"]["consumed_by_prior_subruns_usd"] == 0
         priced = BA.reprice_rung_at(ACCEPTED_RATE, "confirmation", REPO)
         assert payload["per_launch_hard_usd"] == priced["hard_ceiling_usd"]
+
+    def test_a_second_confirmation_is_refused_once_the_rung_has_run(self):
+        """The real confirmation closeout spends the confirmation envelope, so
+        the issuer refuses a repeat: a complete measurement is not re-run
+        looking for another result (P12.1)."""
+        spent = BA.consumed_by_prior_subruns(REPO, rung="confirmation")
+        priced = BA.reprice_rung_at(ACCEPTED_RATE, "confirmation", REPO)
+        if spent["n_subruns"] == 0 or (
+                priced["hard_ceiling_usd"] - spent["consumed_usd"]
+                >= priced["expected_usd"]):
+            pytest.skip("the confirmation envelope can still fund a run")
+        with pytest.raises(BA.D1BehaviouralIssuanceRefused,
+                           match="cannot fund one"):
+            BA.build_payload(
+                grant={**GRANT, "rung": "confirmation", "hard_cap_usd": 15.2025,
+                       "covers": "ONE formal D1 behavioural CONFIRMATION session"},
+                session_commit=HEAD, granted_utc="t", run_id="d1b_conf_again",
+                rung="confirmation", advancing_candidate="q2",
+                live_rate=ACCEPTED_RATE, repo_root=REPO)
 
     def test_a_closeout_that_names_no_rung_is_refused(self, tmp_path):
         """An unattributable spend makes BOTH remainders unknown, so it is a
@@ -2540,7 +2593,7 @@ class TestTheRaisedCumulativeEnvelopeAndNarrowedAttemptBounds:
         for path in sorted(REPO.glob(BA.RUNS_GLOB)):
             doc = json.loads(path.read_text())
             usd = (doc.get("money") or {}).get("all_in_usd")
-            if usd is not None:
+            if usd is not None and doc.get("rung") == "screening":
                 expected += float(usd)
         assert spent["consumed_usd"] == round(expected, 4)
 

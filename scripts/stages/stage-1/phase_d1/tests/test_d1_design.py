@@ -1427,11 +1427,31 @@ class TestTheShortfallComparesOnlyWorkStILLToFund:
         spec.loader.exec_module(mod)
         return mod
 
-    def test_the_search_is_complete_and_the_other_two_are_not(self):
+    def test_each_session_is_complete_exactly_when_its_product_exists(self):
+        """Derived from the committed products, never a snapshot of them: the
+        search binds the finalist field, screening a selection, confirmation
+        a verdict."""
         m = self._writer()
         state = m._chain_sessions_still_to_fund(m.budget()["chain"])
-        assert state["complete"] == ["search"]
-        assert state["outstanding"] == ["confirmation", "screening"]
+        produced = {"search": bool(m._search_candidate_field()),
+                    "screening": m._screening_selection() is not None,
+                    "confirmation": m._confirmation_verdict() is not None}
+        assert state["complete"] == sorted(k for k, v in produced.items() if v)
+        assert state["outstanding"] == sorted(
+            k for k, v in produced.items() if not v)
+        assert produced["search"], "the D1 search is complete and frozen"
+
+    def test_screening_completion_is_read_from_the_screening_closeout(self):
+        """The screening run's closeout owns the selection; no separate
+        selection.json is written. Attempt 8's committed selection advanced
+        q2, so the reader must return exactly that arm."""
+        m = self._writer()
+        closeout = json.loads((
+            REPO / "logs/stages/stage-1/phase_d1/runs/"
+            "d1_behavioural_20261011_135910/closeout/outcome.json"
+        ).read_text())
+        assert closeout["rung"] == "screening"
+        assert m._screening_selection() == closeout["selection"]["arm"] == "q2"
 
     def test_completion_is_read_from_the_committed_product(self):
         """Not asserted, and not a module constant: `ARM_SOURCES` would be
@@ -1449,9 +1469,11 @@ class TestTheShortfallComparesOnlyWorkStILLToFund:
         m = self._writer()
         chain = m.budget()["chain"]
         state = m._chain_sessions_still_to_fund(chain)
-        search = chain["sessions"]["search"]["hard_ceiling_usd"]
+        done = sum(chain["sessions"][n]["hard_ceiling_usd"]
+                   for n in state["complete"])
+        assert "search" in state["complete"]
         assert state["outstanding_hard_ceiling_usd"] == pytest.approx(
-            state["whole_chain_hard_ceiling_usd"] - search, abs=5e-4)
+            state["whole_chain_hard_ceiling_usd"] - done, abs=5e-4)
 
     def test_both_figures_are_reported_so_neither_is_hidden(self):
         m = self._writer()
@@ -1464,7 +1486,7 @@ class TestTheShortfallComparesOnlyWorkStILLToFund:
         #: two ceilings, and the 2026-10-10 +$100 moved the balance above both.
         assert (b["provisional_shortfall_against_whole_chain_usd"]
                 > b["provisional_shortfall_usd"])
-        assert b["chain_completion"]["complete"] == ["search"]
+        assert "search" in b["chain_completion"]["complete"]
 
     def test_the_funding_blocker_is_closed(self):
         """The consequence: no open blocker, so an authorization may issue."""

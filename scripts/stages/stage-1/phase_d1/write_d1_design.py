@@ -1630,6 +1630,19 @@ def _screening_selection() -> str | None:
         if doc.get("mechanical_selection_complete") or \
                 doc.get("advancing_candidate") is not None:
             return str(doc.get("advancing_candidate") or "NONE")
+    #: The screening run's closeout is the selection's canonical owner: it
+    #: carries the `selection` block the frozen rule produced, so no separate
+    #: selection.json is written beside it.
+    for path in sorted(REPO.glob(
+            "logs/stages/stage-1/phase_d1/runs/d1_behavioural_*/"
+            "closeout/outcome.json")):
+        try:
+            doc = json.loads(path.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        selection = doc.get("selection") or {}
+        if doc.get("rung") == "screening" and selection.get("outcome"):
+            return str(selection.get("arm") or "NONE")
     return None
 
 
