@@ -260,6 +260,32 @@ CLASSIFY: dict[str, dict] = {
         never_delete="D1 finalists are frozen scientific inputs of a paused experiment",
         reconstruction="byte-exact replay from the committed search record",
         reconstruction_cost="paid GPU (~$0.5-1 per finalist)", disposition="keep"),
+    "aad-artifacts/phase_d1/d1_behavioural_20261011_135910": dict(
+        experiment="phase_d1", role="D1 screening rung evidence store (no weights)",
+        retention="reproducibility_required", status="active",
+        why="the per-sample rows and raw generations of the ten D1 screening "
+            "probes. The D-series shared evaluation protocol imports B's and "
+            "q2's units from here (logs/stages/stage-1/families/d_series/plans/"
+            "d_series_shared_eval_v1.json); its audit re-hashes them and "
+            "re-scores the generations",
+        never_delete="the only copy of the generations the shared protocol "
+                     "pairs D2/D3 candidates with; the trained checkpoints are "
+                     "retired, so nothing can regenerate them",
+        reconstruction=None,
+        reconstruction_cost="not reconstructible: retraining is a new draw",
+        disposition="keep"),
+    "aad-artifacts/phase_d1/d1_behavioural_20261012_064341": dict(
+        experiment="phase_d1", role="D1 confirmation rung evidence store (no weights)",
+        retention="reproducibility_required", status="active",
+        why="the per-sample rows and raw generations of the six D1 "
+            "confirmation probes, from which D1's verdict was computed and "
+            "which the D-series shared evaluation protocol imports as B's and "
+            "q2's confirmation units",
+        never_delete="the only copy of the rows D2/D3 confirmations pair with; "
+                     "the trained checkpoints are retired",
+        reconstruction=None,
+        reconstruction_cost="not reconstructible: retraining is a new draw",
+        disposition="keep"),
     "stages/stage-1/families/d_series/batteries/d_series_behavioural_v1": dict(
         experiment="d_series", role="D-series behavioural battery family v1 (42 batteries)",
         retention="reproducibility_required", status="active",

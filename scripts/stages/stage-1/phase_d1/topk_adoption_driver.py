@@ -544,6 +544,7 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
                                           journal: Journal,
                                           workdir: Path,
                                           prediction_rows: str = "all_v1",
+                                          deadline=None, progress=None,
                                           ) -> dict[str, Any]:
     """Time ONE REAL ``depth.causal_kl_greedy_v1`` invocation. Both profiles.
 
@@ -611,7 +612,17 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
 
     per_profile: dict[str, Any] = {}
     invocations: list[float] = []
+    stopped_before: str | None = None
     for profile_id in D1_DEPTH_PROFILES:
+        #: BETWEEN invocations, never inside one: an operator stopped part-way
+        #: yields a number for a partial invocation, which is worse than none
+        #: (the operator context deliberately carries no deadline). A profile
+        #: not started is recorded as such and the completed one is kept.
+        if deadline is not None and deadline.remaining() <= 0:
+            stopped_before = profile_id
+            journal.event(stage=f"P.{profile_id}", status="skipped",
+                          reason="wall-clock deadline reached")
+            break
         profile = get_profile(profile_id)
         items = prepare_calibration_items(profile.resolve(repo),
                                           profile_id=profile.qualified_id)
@@ -719,6 +730,8 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
                 if totals else None),
         }
         invocations.append(elapsed)
+        if progress is not None:
+            progress(per_profile)
         journal.event(stage=f"P.{profile_id}", status="ok",
                       invocation_s=round(elapsed, 2),
                       candidates=int(timing.get("candidate_subsets") or 0),
@@ -726,6 +739,10 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
         del outcome, ctx, model
         torch.cuda.empty_cache()
 
+    if not invocations:
+        raise AdoptionError(
+            f"stage P reached its deadline before {stopped_before}; no DEPTH "
+            "invocation completed, so there is nothing to record")
     weighting = _weighting_cost_both_policies(
         repo=repo, profile_id=D1_DEPTH_PROFILES[0],
         policies={"treatment": SUPERVISED_TARGET_V1,
@@ -741,6 +758,7 @@ def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
             "`operator_seconds`. A record without this marker was produced by the "
             "superseded shadow loop and cannot price."),
         "profiles": list(D1_DEPTH_PROFILES),
+        "stopped_before_profile": stopped_before,
         "position_policy": policy_config(policy) or {"position_policy": "incumbent"},
         "per_profile": per_profile,
         #: THE PRICING INPUT. One measured invocation, the MAX over the profiles.
@@ -1334,6 +1352,14 @@ def main(argv: list[str] | None = None) -> int:
         if args.deadline_s > 0:
             deadline = WallClockDeadline(args.deadline_s)
 
+        def flush() -> None:
+            #: A PARTIAL record after every stage, so an ssh timeout that kills
+            #: this process mid-stage still leaves every stage that finished.
+            #: The final write below overwrites it on every path that returns.
+            (out / "adoption.json").write_text(json.dumps(
+                {**record, "status": "IN_PROGRESS"}, indent=1, sort_keys=True,
+                default=str) + "\n")
+
         if "C" in wanted:
             with journal.stage("C_depth_dual_scores") as st:
                 record["C_depth"] = stage_C_depth_dual_scores(
@@ -1394,6 +1420,7 @@ def main(argv: list[str] | None = None) -> int:
                 st.result = {
                     "protocol_ids_differ": cmp_["protocol_ids_differ"],
                     "worst_domain_agrees": cmp_["worst_domain_agrees"]}
+            flush()
 
         if "P" in wanted:
             with journal.stage("P_production_operator_invocation") as st:
@@ -1401,7 +1428,11 @@ def main(argv: list[str] | None = None) -> int:
                     stage_P_production_operator_invocation(
                         repo=repo, teacher_path=teacher_path, journal=journal,
                         workdir=out / "P",
-                        prediction_rows=args.prediction_rows))
+                        prediction_rows=args.prediction_rows,
+                        deadline=deadline,
+                        progress=lambda done: (out / "P_progress.json").write_text(
+                            json.dumps(done, indent=1, sort_keys=True,
+                                       default=str) + "\n")))
                 st.result = {"invocation_s_max":
                              record["P_production_timing"][
                                  "operator_invocation_seconds_max"]}

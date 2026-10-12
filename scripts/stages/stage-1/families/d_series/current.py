@@ -85,7 +85,33 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
                 "C1 pools could yield (zero); the realized family superseded "
                 "it for readiness on 2026-10-03 and it is kept as provenance"),
         },
+        "shared_evaluation": _shared_evaluation(repo_root),
         "authorizes": "nothing",
+    }
+
+
+def _shared_evaluation(repo_root: Path) -> dict[str, Any] | None:
+    """Where the shared protocol lives and which identity it carries.
+
+    Navigation only: the protocol record owns its content and the audit owns
+    its verification. Absent before the protocol was written.
+    """
+    from stages.d_series import shared_evaluation as shared
+
+    path = repo_root / shared.RECORD
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    return {
+        "protocol_id": f"{record['protocol_id']}@v{record['version']}",
+        "protocol_hash": record["protocol_hash"],
+        "record": shared.RECORD,
+        "audit": shared.AUDIT,
+        "design": "logs/stages/stage-1/families/d_series/plans/"
+                  "d2_d3_shared_evaluation_design.md",
+        "reuses_roles": sorted(r["reuses_battery"]["role"]
+                               for r in record["rungs"].values()),
+        "reserved_roles": sorted(record["reserved_independent_batteries"]),
     }
 
 

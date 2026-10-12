@@ -43,7 +43,7 @@ def records(tmp_path):
     that would happen to work from the test's cwd.
     """
     def build(*, ceiling=7.77, reserve=0.25, inherited=(), subruns=(),
-              authorization="auth.json"):
+              authorization="auth.json", status=None):
         (tmp_path / "auth.json").write_text(json.dumps({
             "schema": "aadistill.validation_authorization/v1",
             "all_in_ceiling_usd": ceiling}))
@@ -55,7 +55,8 @@ def records(tmp_path):
             "inherited_spend": [{"subrun_id": f"i{n}", "cost_usd": c}
                                 for n, c in enumerate(inherited)],
             "subruns": [{"subrun_id": f"s{n}", "cost_usd": c}
-                        for n, c in enumerate(subruns)]}))
+                        for n, c in enumerate(subruns)],
+            **({"status": status} if status is not None else {})}))
         return campaign
     return build, tmp_path
 
@@ -179,6 +180,31 @@ def test_a_missing_authorization_is_refused_not_defaulted(mod, records,
         mod.derive(campaign, session_cap_usd=2.5, rate_usd_per_hour=1.09)
 
 
+@pytest.mark.parametrize("status", [
+    "CLOSED -- 8 paid subruns, $3.6878 of $8.0000",
+    "CLOSED \u2014 two subruns, measured",
+    "COMPLETE and CLOSED 2026-09-24. Four rounds.",
+])
+def test_a_closed_campaign_funds_nothing(mod, records, monkeypatch, status):
+    """Every closed spelling the live records use is refused, not priced."""
+    build, root = records
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/x.py"))
+    with pytest.raises(mod.BudgetError, match="closed"):
+        mod.derive(build(status=status), session_cap_usd=2.5,
+                   rate_usd_per_hour=1.09)
+
+
+@pytest.mark.parametrize("status", [
+    None, "OPEN -- granted 2026-10-13", "REOPENED -- a review withdrew one",
+])
+def test_an_open_campaign_is_priced(mod, records, monkeypatch, status):
+    build, root = records
+    monkeypatch.setattr(mod, "__file__", str(root / "a/b/c/x.py"))
+    d = mod.derive(build(status=status), session_cap_usd=2.5,
+                   rate_usd_per_hour=1.09)
+    assert d["ok"] is True
+
+
 def test_the_real_records_derive_a_usable_session():
     """The live records, through the real module. No fixtures.
 
@@ -206,6 +232,18 @@ def test_the_real_records_derive_a_usable_session():
     assert d["ok"] is (d["session_ceiling"] >= mod.MIN_USEFUL_USD)
 
 
+TOPK_CAMPAIGN = ("logs/stages/stage-1/phase_d1/validations/topk-adoption"
+                 "/v1/campaign.json")
+
+
+def test_the_closed_topk_campaign_is_refused():
+    """The campaign the Top-K launcher used to name as a constant is CLOSED."""
+    mod = _module()
+    with pytest.raises(mod.BudgetError, match="closed"):
+        mod.derive(REPO / TOPK_CAMPAIGN, session_cap_usd=3.00,
+                   rate_usd_per_hour=1.09)
+
+
 def test_the_cli_prints_seven_shell_readable_fields(capsys):
     """The launcher `read -r`s this line. Its shape is the contract."""
     mod = _module()
@@ -216,3 +254,9 @@ def test_the_cli_prints_seven_shell_readable_fields(capsys):
     assert len(fields) == 7, fields
     assert fields[-1] in {"yes", "no"}
     float(fields[0]); float(fields[4]); int(fields[5])
+
+
+def test_the_cli_refuses_a_closed_campaign(capsys):
+    mod = _module()
+    assert mod.main([str(REPO / TOPK_CAMPAIGN)]) == 4
+    assert "closed" in capsys.readouterr().err
