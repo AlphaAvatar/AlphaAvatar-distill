@@ -10413,3 +10413,49 @@ on a paid pod.
 - **Revisit when:** the Top-K adoption qualification is complete and reviewed. The
   next maintainer decision after that is the final formal D1 funding/envelope
   authorization.
+
+## 2026-10-12 — MAINTAINER DECISION: keep the D1 route; q2 is the working initialization baseline, B stays the anchor
+
+- **Context:** D1's confirmation (`d1_behavioural_20261012_064341`) returned
+  **NO-GO** for q2 against B under the frozen rule. The delta was -0.000392,
+  with a one-sided 95% upper bound of +0.007451, below the SESOI of 0.010.
+  q2's usable-rollout gain (+0.0951 pooled, positive on every seed) is a
+  guardrail observation, not the endpoint.
+- **Decision:**
+  1. The NO-GO stands as D1's scientific conclusion and is not rewritten.
+  2. The D1 technical route is **kept**, and becomes the basis for later
+     technical work:
+     - the `positions.supervised_target_v1` policy;
+     - the `reference_topk_tail_v1` support at K=200;
+     - the verified batch execution (micro-batch 3, `length_sorted_v1`).
+  3. **B** (`53e30566…`) remains the standing incumbent and the anchor of every
+     formal comparison.
+  4. **q2** (state `afd50c9f…`, artifact `3a4b4ede…`) is the **working
+     initialization baseline** for method work. It is not promoted and not an
+     incumbent.
+  5. D2, D3 and the Stage-0 teacher-native data experiments reuse D1's search,
+     operators, protocol, identities and valid initializations. They change one
+     factor at a time.
+  6. A new formal paid experiment needs its own auditable design and
+     authorization. Engineering inside an existing authorization proceeds
+     autonomously.
+- **Alternatives considered:**
+  - **Abandon the D1 route after one confirmation miss.** Rejected: the miss is
+    evidence about q2 against B on the endpoint. It is not evidence against the
+    target-aware objective's generic capabilities.
+  - **Promote q2.** Rejected: it contradicts the frozen decision rule.
+- **Expected upside:** future rounds start from implemented, verified machinery
+  rather than from the pre-D1 algorithms. Two efficiency directions are now
+  measurable:
+  - pre-vocabulary position selection, implemented opt-in as
+    `ExecutionConfig.prediction_rows="scored_v1"`;
+  - teacher-native calibration coverage.
+- **Risks:**
+  - A working baseline can drift into being treated as an incumbent. The
+    mitigation is structural: B is a required arm of every formal comparison.
+  - The pre-vocabulary saving on D1-shaped data is modest, about 8% of DEPTH
+    wall time by derivation, and is still unmeasured on a GPU.
+- **Owner of the technical review and the next-round design:**
+  `logs/stages/stage-1/phase_d1/analyses/d1_followup_technical_review_and_next_round.md`.
+- **Revisit when:** the R0 GPU equivalence validation of `scored_v1` has run,
+  or a D2/D3/Stage-0 design is put forward for authorization.

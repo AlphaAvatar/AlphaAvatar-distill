@@ -58,7 +58,7 @@
     "formal_funding": "priced in the frozen design (logs/stages/stage-1/phase_d1/plans/d1_design.json :: pricing); the budget terms live with the C1 grant the design cites",
     "one_use_execution_authorization": "none outstanding — a chain is built fresh per attempt and consumed by it (P12.1)",
     "open_scientific_blockers": [],
-    "maintainer_pause": "MAINTAINER DECISION. D1 closed NO-GO (q2 vs B, delta -0.000392, UCB +0.007451 < SESOI 0.01); B stands. No D1 spend remains planned ($40.8301 of $130 used). D2/D3 or a new preregistered endpoint each need a new decision."
+    "maintainer_pause": "MAINTAINER 2026-10-12: D1 route kept; B stays the anchor, q2 is the working baseline (not promoted). Next: R0 GPU equivalence of prediction_rows=scored_v1 (needs an engineering grant, ~$1.5), then R1 calib.teacher_native@v1 at $0. Owner: phase_d1/analyses/d1_followup_technical_review_and_next_round.md."
   },
   "runs": {
     "root": "logs/stages/stage-1/phase_d1/runs",
@@ -98,7 +98,7 @@
     ]
   },
   "active_run": null,
-  "next_scientific_action": "MAINTAINER DECISION. D1 closed NO-GO (q2 vs B, delta -0.000392, UCB +0.007451 < SESOI 0.01); B stands. No D1 spend remains planned ($40.8301 of $130 used). D2/D3 or a new preregistered endpoint each need a new decision.",
+  "next_scientific_action": "MAINTAINER 2026-10-12: D1 route kept; B stays the anchor, q2 is the working baseline (not promoted). Next: R0 GPU equivalence of prediction_rows=scored_v1 (needs an engineering grant, ~$1.5), then R1 calib.teacher_native@v1 at $0. Owner: phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
   "_next_owner": "logs/state/current.json :: next",
   "authorizes": "nothing"
 }

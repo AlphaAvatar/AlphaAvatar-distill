@@ -12,6 +12,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
 0 network volumes and $0/h (2026-10-12 16:09 UTC).
 
+**THE D1 ROUTE IS KEPT (maintainer decision, 2026-10-12).** The NO-GO below
+stands and nothing is promoted.
+- B (`53e30566…`) stays the incumbent and the anchor of every formal comparison.
+- q2 (`3a4b4ede…`) is the **working initialization baseline** for method work.
+- Pre-vocabulary position selection is now implemented, opt-in and versioned,
+  as `ExecutionConfig.prediction_rows="scored_v1"`. Only scored rows reach the
+  output head; the historical path and every recorded identity are unchanged.
+  It is verified on CPU, and its GPU equivalence validation (R0) needs an
+  engineering grant.
+- Owner of the code review, the measured Top-K benefits, the Stage-0
+  teacher-native data gap and the next-round design:
+  [`analyses/d1_followup_technical_review_and_next_round.md`](../stages/stage-1/phase_d1/analyses/d1_followup_technical_review_and_next_round.md).
+
 **D1 CONFIRMATION IS COMPLETE. THE VERDICT IS `NO-GO`.** q2 does not confirm
 against B, so B remains the standing incumbent and nothing is promoted. The run
 was `d1_behavioural_20261012_064341` on pod `wzr7llw0shqc2k` (NVIDIA L40S,
