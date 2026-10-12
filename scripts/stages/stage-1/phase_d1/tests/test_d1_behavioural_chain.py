@@ -347,6 +347,22 @@ class TestTheLauncherDeclaresTheSessionCompletely:
         assert spec.session_id == "autoinit-d1-behavioural"
         assert spec.plan_hash == B.design(REPO)["design_hash"]
 
+    def test_the_runner_reads_a_secured_probe_as_a_good_fetch(self):
+        """Attempt 8: all ten probes secured, and `checkpoint_hashes_matched`
+        was still False -- the runner's fail-closed default reads `rc`, which
+        the per-probe evidence entries never carry. The policy must say how
+        its own entries read, and stay fail-closed for a missing piece."""
+        spec = self._spec(self._launcher())
+        ok = spec.artifacts.fetch_result_ok
+        secured = {"probe_id": "p", "result.json": True,
+                   "per_sample.jsonl": True, "admission.json": True,
+                   "generations": True, "release_acked": True}
+        assert ok(secured)
+        for piece in ("result.json", "per_sample.jsonl", "admission.json"):
+            assert not ok({**secured, piece: False}), piece
+        assert not ok({"probe_id": "p"})
+        assert not ok(None)
+
     def test_the_status_path_is_named_once(self):
         """A driver writing markers to a path its launcher does not poll made
         every marker invisible on a paid session."""
@@ -1412,6 +1428,51 @@ class TestProtocolEvidenceTravelsInTheArtifactContracts:
                     "d1_behavioural_generation_admissions"):
             assert cls in entries and not entries[cls].required, cls
 
+    @staticmethod
+    def _driver_layout(root: Path) -> None:
+        """The tree the driver writes at ALL_DONE, as observed on attempt 8's
+        pod: per-probe files INSIDE results/, per_sample/, generations/<probe>/,
+        configs/ and release_acks/ -- directories, never files, at those
+        names."""
+        audit = root / "audit/autoinit_d1_behavioural"
+        probe = "d1_screening_q1_s614923639"
+        files = {
+            "d1_behavioural.json": "x" * 600,
+            "d1_behavioural_attested_protocol.json": "x" * 300,
+            "engine_probe.json": "x" * 200,
+            f"{probe}_generation_admission.json": "{}",
+            f"{probe}_train_tail.log": "t",
+            f"results/{probe}.json": "{}",
+            f"per_sample/{probe}.jsonl": "{}\n",
+            f"generations/{probe}/gsm8k.generations.jsonl": "{}\n",
+            f"generations/{probe}/gsm8k.json": "{}",
+            f"configs/{probe}.json": "{}",
+            f"release_acks/{probe}.json": "{}",
+        }
+        for rel, text in files.items():
+            (audit / rel).parent.mkdir(parents=True, exist_ok=True)
+            (audit / rel).write_text(text)
+
+    @pytest.mark.parametrize("rel", (
+        "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts.json",
+        "configs/stages/stage-1/phase_d1/d1_behavioural_artifacts_failed.json"))
+    def test_every_class_matches_the_files_the_driver_writes(self, tmp_path,
+                                                             rel):
+        """Attempt 8 (2026-10-12) scored all ten probes and its teardown gate
+        then BLOCKED: results, per_sample and generations were declared as
+        bare directory paths, and the manifest counts FILES matched by the
+        glob, so a directory never satisfies a class. Every class of both
+        specs must now match real files in the driver's layout."""
+        from aadistill.infrastructure.artifact_gate import build_manifest
+
+        self._driver_layout(tmp_path)
+        specs = self._load(rel)
+        manifest = build_manifest(tmp_path, specs)
+        assert manifest.ok, manifest.missing
+        matched = {e.artifact_class for e in manifest.entries}
+        assert matched == {s.artifact_class for s in specs}, (
+            sorted({s.artifact_class for s in specs} - matched))
+
     def test_the_poll_hook_pulls_the_admission_beside_the_result(self):
         src = (REPO / "scripts/stages/stage-1/phase_d1/"
                       "autoinit_d1_behavioural_launch.py").read_text()
@@ -1465,6 +1526,8 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         pruned = store / "p_pruned"
         pruned.mkdir(parents=True)
         (pruned / "w").write_bytes(b"x")
+        (pruned / "run_completion.json").write_text("{}")
+        (pruned / "train_log.jsonl").write_text("{}\n")
         outside = tmp_path / "elsewhere"
         outside.mkdir()
 
@@ -1501,6 +1564,11 @@ class TestTrainedUnscoredDurabilityRunsDuringTheSession:
         launcher.prune_preserved_scored(_Ctx())
         assert not pruned.exists(), (
             "completed rung + scored + durable evidence -> released")
+        #: Only the WEIGHTS go: the training records move beside the
+        #: probe's scored evidence first (attempt 8 lost eight train logs).
+        records = tmp_path / "store" / "probes" / "p_pruned" / "training"
+        assert sorted(p.name for p in records.iterdir()) == [
+            "run_completion.json", "train_log.jsonl"]
         assert kept.is_dir(), "no durable evidence yet -> kept"
         assert outside.is_dir(), "containment: never deletes outside the store"
 
@@ -1554,6 +1622,8 @@ class TestTheFirstProbesTrainedWindowIsPreserved:
                 json.dumps({"final_step": 100}).encode(),
             f"{launcher.POD_PROBE_ROOT}/p1/checkpoints/latest.txt":
                 b"step100",
+            f"{launcher.POD_PROBE_ROOT}/p1/train_log.jsonl":
+                b'{"step": 100}\n',
         }
         shard = self.SHARD
 
@@ -1605,6 +1675,19 @@ class TestTheFirstProbesTrainedWindowIsPreserved:
         assert all(row["completeness"].values()), row["completeness"]
         assert row["arrived_sha256"] == sha
         assert (Path(row["dest"]) / "preserved_identity.json").is_file()
+        #: The training log travels with the checkpoint; a record the pod
+        #: never wrote (run_manifest here) is reported, never fatal.
+        assert row["training_records"] == {"train_log.jsonl": True,
+                                           "run_manifest.json": False}
+        assert (Path(row["dest"]) / "train_log.jsonl").is_file()
+
+    def test_a_missing_training_log_does_not_unverify_the_checkpoint(
+            self, tmp_path, monkeypatch):
+        launcher, ctx, _sha = self._run_hook(
+            tmp_path, monkeypatch, fail_remote="train_log.jsonl")
+        row = ctx.evidence["trained_unscored_preserved"]["p1"]
+        assert row["verified"] is True
+        assert row["training_records"]["train_log.jsonl"] is False
 
     def test_an_incomplete_transfer_is_not_durable(self, tmp_path,
                                                    monkeypatch):

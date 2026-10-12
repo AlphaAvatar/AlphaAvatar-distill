@@ -449,6 +449,18 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
             dest = Path(row.get("dest") or "")
             if not dest.is_dir() or not dest.resolve().is_relative_to(store):
                 continue
+            #: The WEIGHTS have no consumer; the small training records do.
+            #: They move beside the probe's scored evidence before the copy
+            #: goes, so the run keeps its training log and completion record.
+            kept = []
+            for name in ("run_completion.json", *TRAINING_RECORDS,
+                         "preserved_identity.json"):
+                if (dest / name).is_file():
+                    records = probe_store(ctx) / probe_id / "training"
+                    records.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(dest / name, records / name)
+                    kept.append(name)
+            row["training_records_kept"] = kept
             shutil.rmtree(dest)
             row["pruned"] = True
             row["_why"] = ("validly scored and its evidence durable; the "
@@ -464,6 +476,10 @@ def prune_preserved_scored(ctx: SessionContext) -> None:
 #: preserved probe back. Named once; the driver's `model_root` is the same
 #: expression over its own REPO_ROOT.
 POD_PROBE_ROOT = f"{REPO}/artifacts/stages/stage-3/d1_behavioural"
+
+#: A trained probe's small records beside `run_completion.json`: the event
+#: stream and the run manifest the trainer writes in the probe's root.
+TRAINING_RECORDS = ("train_log.jsonl", "run_manifest.json")
 
 
 def trained_probes_to_preserve(ctx: SessionContext) -> list[dict] | None:
@@ -652,9 +668,17 @@ def preserve_trained_unscored(ctx: SessionContext) -> None:
                 "weights_digest": bool(want) and got == want,
             }
             verified = all(completeness.values())
+            #: THE TRAINING RECORDS travel too, best effort and OUTSIDE the
+            #: resume set: they are the probe's metric log (P4), not a resume
+            #: input, so a failed fetch must not unverify a durable checkpoint.
+            #: Attempt 8 kept no train_log for the eight probes whose workdirs
+            #: the pod released, because nothing here fetched one.
+            records = {name: _scp_from_pod(ctx, f"{remote_root}/{name}",
+                                           dest / name) == 0
+                       for name in TRAINING_RECORDS}
             row = {"rcs": rcs, "trained_sha256": want,
                    "arrived_sha256": got, "completeness": completeness,
-                   "verified": verified,
+                   "verified": verified, "training_records": records,
                    "dest": str(dest)}
             preserved[probe_id] = row
             if verified:
@@ -753,6 +777,21 @@ def fetch_probe_evidence(ctx: SessionContext) -> list:
         {"probe_id": probe_id, **state}
         for probe_id, state in sorted(
             (ctx.evidence.get("probe_evidence_secured") or {}).items())]
+
+
+def probe_fetch_ok(entry: object) -> bool:
+    """Did one `fetch_probe_evidence` entry come home? The policy's answer for
+    the runner's `checkpoint_hashes_matched` check.
+
+    The entries are per-probe dicts of `{piece: arrived}` with no `rc`, so the
+    runner's fail-closed default read every one of them as a failed transfer:
+    attempt 8 secured all ten probes and its teardown still could not pass.
+    An entry is good when the three strict pieces arrived -- the same three
+    the release ack and `probes_evidence_secured` demand.
+    """
+    return isinstance(entry, dict) and all(
+        entry.get(piece) is True
+        for piece in ("result.json", "per_sample.jsonl", "admission.json"))
 
 
 def probes_evidence_secured(ctx: SessionContext,
@@ -1422,6 +1461,7 @@ def spec(args) -> SessionSpec:
             report_names=("d1_behavioural.json",),
             on_poll=secure_probe_evidence,
             fetch_products=fetch_probe_evidence,
+            fetch_result_ok=probe_fetch_ok,
             products_secured=probes_evidence_secured),
         teardown=TeardownPolicy(
             note="delete the pod, verify from the provider that it is gone, "

@@ -12,19 +12,19 @@
   },
   {
    "artifact_class": "d1_behavioural_results",
-   "pattern": "audit/autoinit_d1_behavioural/results",
+   "pattern": "audit/autoinit_d1_behavioural/results/*.json",
    "required": false,
    "lifecycle": "final_required"
   },
   {
    "artifact_class": "d1_behavioural_per_sample",
-   "pattern": "audit/autoinit_d1_behavioural/per_sample",
+   "pattern": "audit/autoinit_d1_behavioural/per_sample/*.jsonl",
    "required": false,
    "lifecycle": "final_required"
   },
   {
    "artifact_class": "d1_behavioural_generations",
-   "pattern": "audit/autoinit_d1_behavioural/generations",
+   "pattern": "audit/autoinit_d1_behavioural/generations/*/*",
    "required": false,
    "lifecycle": "final_required"
   },
@@ -54,7 +54,7 @@
   },
   {
    "artifact_class": "d1_behavioural_release_acks",
-   "pattern": "audit/autoinit_d1_behavioural/release_acks",
+   "pattern": "audit/autoinit_d1_behavioural/release_acks/*.json",
    "required": false,
    "lifecycle": "final_required"
   }
