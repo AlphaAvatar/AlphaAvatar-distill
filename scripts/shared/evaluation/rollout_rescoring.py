@@ -21,16 +21,24 @@ It needs the STUDENT'S checkpoint (for its distributions) and the teacher. A
 unit whose checkpoint is gone cannot be rescored, and nothing here estimates
 what it would have shown.
 
-The trajectory is the token sequence the caller passes. When only decoded
-text survives, re-tokenizing it is an APPROXIMATION of the generated ids; the
-caller records whether the count matched the engine's.
+The trajectory is the token sequence the caller passes, and every result
+says WHICH: ``ids_source="engine"`` (the generator's own ids, checked here
+against the record's count and decoded text, and refused if either differs)
+or ``ids_source="retokenized_text"`` (an APPROXIMATION of the generated ids,
+labelled as such, with whether its count matched the engine's).
+
+Failure isolation: :func:`rescore_unit` writes NOTHING into a unit's
+evaluation outputs and never raises for one sample -- a failed sample is
+recorded as failed, the rest continue, and a completed per-sample score is
+untouched whatever happens here.
 
 Thresholds for "high confidence" and "high KL" are the caller's, registered
 before any result: this module holds none.
 """
 from __future__ import annotations
 
-from typing import Any, Mapping
+import hashlib
+from typing import Any, Iterable, Mapping
 
 import torch
 
@@ -102,10 +110,50 @@ def rescore_trajectory(student, teacher, prompt_ids: torch.Tensor,
     return {k: torch.cat(v) for k, v in out.items()}
 
 
+class RescoringError(ValueError):
+    """A trajectory that is not the one the record describes."""
+
+
+def _sha(ids: torch.Tensor) -> str:
+    return hashlib.sha256(ids.reshape(-1).to(torch.int64).cpu().numpy()
+                          .tobytes()).hexdigest()
+
+
+def alignment_evidence(record: Mapping[str, Any], prompt_ids: torch.Tensor,
+                       completion_ids: torch.Tensor, tokenizer, *,
+                       ids_source: str, tokenizer_sha256: str,
+                       generation_fingerprint: str) -> dict[str, Any]:
+    """What was rescored, and whether it is the sequence that was generated."""
+    if ids_source not in ("engine", "retokenized_text"):
+        raise RescoringError(f"unknown ids_source {ids_source!r}")
+    decoded = tokenizer.decode(completion_ids[0].tolist(),
+                               skip_special_tokens=False)
+    count_ok = int(completion_ids.shape[1]) == int(record["generated_tokens"])
+    text_ok = decoded == record.get("raw")
+    if ids_source == "engine" and not (count_ok and text_ok):
+        raise RescoringError(
+            f"{record.get('id')}: the engine ids do not reproduce the record "
+            f"(count {int(completion_ids.shape[1])} vs "
+            f"{record['generated_tokens']}, text match {text_ok}); they are "
+            "not the generated trajectory")
+    return {"id": record.get("id"), "ids_source": ids_source,
+            "exact": ids_source == "engine",
+            "prompt_tokens": int(prompt_ids.shape[1]),
+            "completion_tokens": int(completion_ids.shape[1]),
+            "engine_generated_tokens": int(record["generated_tokens"]),
+            "count_matches_engine": count_ok,
+            "decodes_to_recorded_text": text_ok,
+            "prompt_ids_sha256": _sha(prompt_ids),
+            "completion_ids_sha256": _sha(completion_ids),
+            "tokenizer_sha256": tokenizer_sha256,
+            "generation_fingerprint": generation_fingerprint}
+
+
 def summarize_trajectory(terms: Mapping[str, torch.Tensor], *,
                          reasoning_positions: int | None,
                          high_confidence: float,
-                         high_kl: float) -> dict[str, Any]:
+                         high_kl: float,
+                         low_topk_mass: float | None = None) -> dict[str, Any]:
     """Per-sample means, split into reasoning and answer, and the quadrant.
 
     ``reasoning_positions`` is how many leading completion positions are the
@@ -127,15 +175,70 @@ def summarize_trajectory(terms: Mapping[str, torch.Tensor], *,
 
     split = None if reasoning_positions is None else int(reasoning_positions)
     quadrant = ((c >= float(high_confidence)) & (kl >= float(high_kl)))
-    return {
+    out = {
         "positions": n,
         "all": means(slice(0, n)),
         "reasoning": None if split is None else means(slice(0, split)),
         "answer": None if split is None else means(slice(split, n)),
         "high_confidence_high_kl_fraction": float(quadrant.double().mean()),
         "thresholds": {"high_confidence": float(high_confidence),
-                       "high_kl": float(high_kl)},
+                       "high_kl": float(high_kl),
+                       "low_topk_mass": (None if low_topk_mass is None
+                                         else float(low_topk_mass))},
     }
+    if low_topk_mass is not None and "student_topk_mass" in terms:
+        #: High CONDITIONAL confidence on a Top-K that holds little of the
+        #: student's real probability: the confidence is about a small slice.
+        thin = ((c >= float(high_confidence))
+                & (terms["student_topk_mass"] < float(low_topk_mass)))
+        out["high_confidence_low_topk_mass_fraction"] = float(
+            thin.double().mean())
+    return out
 
 
-__all__ = ["rescore_trajectory", "summarize_trajectory"]
+def rescore_unit(student, teacher, samples: Iterable[Mapping[str, Any]], *,
+                 tokenizer, think_close_id: int | None, tokenizer_sha256: str,
+                 generation_fingerprint: str, support_top_k: int,
+                 entropy_top_k: int, thresholds: Mapping[str, float]
+                 ) -> dict[str, Any]:
+    """Rescore every sample of a unit; one failure never stops the others.
+
+    ``samples`` yields ``{"record", "prompt_ids", "completion_ids",
+    "ids_source"}``. The return value is the unit's diagnostic evidence, to be
+    persisted by the caller BEFORE the checkpoint is released; it is a
+    separate artifact from the unit's evaluation outputs.
+    """
+    rows, failures = [], []
+    for sample in samples:
+        record = sample["record"]
+        try:
+            evidence = alignment_evidence(
+                record, sample["prompt_ids"], sample["completion_ids"],
+                tokenizer, ids_source=sample["ids_source"],
+                tokenizer_sha256=tokenizer_sha256,
+                generation_fingerprint=generation_fingerprint)
+            terms = rescore_trajectory(
+                student, teacher, sample["prompt_ids"],
+                sample["completion_ids"], support_top_k=support_top_k,
+                entropy_top_k=entropy_top_k)
+            completion = sample["completion_ids"][0].tolist()
+            split = (completion.index(think_close_id)
+                     if think_close_id is not None
+                     and think_close_id in completion else None)
+            rows.append({"alignment": evidence,
+                         "summary": summarize_trajectory(
+                             terms, reasoning_positions=split,
+                             high_confidence=thresholds["high_confidence"],
+                             high_kl=thresholds["high_kl"],
+                             low_topk_mass=thresholds.get("low_topk_mass"))})
+        except Exception as exc:                    # noqa: BLE001
+            failures.append({"id": record.get("id"),
+                             "error": f"{type(exc).__name__}: {exc}"})
+    return {"rows": rows, "failures": failures,
+            "n_exact": sum(r["alignment"]["exact"] for r in rows),
+            "thresholds": dict(thresholds),
+            "complete": not failures}
+
+
+__all__ = ["RescoringError", "alignment_evidence", "rescore_trajectory",
+           "rescore_unit", "summarize_trajectory"]

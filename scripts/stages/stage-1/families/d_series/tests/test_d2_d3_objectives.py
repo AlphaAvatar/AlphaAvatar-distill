@@ -17,7 +17,7 @@ torch = pytest.importorskip("torch")
 
 REPO = Path(__file__).resolve().parents[6]
 
-from stages.d_series import calibrate_d3_lambda as CAL  # noqa: E402
+from stages.d_series import reference_calibration as CAL  # noqa: E402
 from stages.d_series import objectives as O  # noqa: E402
 
 from aadistill.initialization.scoring.objective import (  # noqa: E402
@@ -97,17 +97,74 @@ class TestTheLambdaRule:
         with pytest.raises(ValueError, match=match):
             O.lambda_from_reference(kl, conf)
 
-    def test_the_record_carries_the_rule_and_reports_sensitivity_apart(self):
-        per_set = {
-            "a": [{"item_id": f"a{i}", "kl": 0.1 * i, "confidence": 0.3 + 0.01 * i}
-                  for i in range(1, 31)],
-            "b": [{"item_id": f"b{i}", "kl": 0.2 * i, "confidence": 0.4 + 0.01 * i}
-                  for i in range(1, 11)],
-        }
-        record = CAL.calibrate(per_set, identities={"student": "toy"})
+    def test_the_record_carries_both_rules_and_reports_sensitivity_apart(self):
+        rows = [{"set": "a", "item_id": f"a{i}", "content": f"c{i}",
+                 "kl": 0.1 * i, "confidence": 0.3 + 0.01 * i,
+                 "scored_positions": 5} for i in range(1, 31)]
+        draws = ([{"set": "a", "item_id": f"a{i}", "content": f"c{i}"}
+                  for i in range(1, 31)]
+                 + [{"set": "b", "item_id": f"b{i}", "content": f"c{i}"}
+                    for i in (1, 1, 2)])
+        positions = {"kl": torch.linspace(0, 1, 101),
+                     "confidence": torch.linspace(0, 1, 101),
+                     "topk_mass": torch.linspace(0, 1, 101)}
+        record = CAL.calibrate(rows, draws, positions,
+                               identities={"student": "toy"})
         assert record["rule_hash"] == O.lambda_rule()["rule_hash"]
-        assert "refused" in record["per_set_sensitivity_not_used"]["b"]
-        assert record["reward_scale"] > 0
+        assert record["threshold_rule_hash"] == \
+            O.diagnostic_threshold_rule()["rule_hash"]
+        assert record["independence"] == {"draws": 33, "unique_items": 30,
+                                          "scored_positions": 101}
+        assert "refused" in record["lambda_sensitivity_not_used"]["set:b"]
+        assert record["lambda_sensitivity_not_used"]["with_duplicate_draws"][
+            "n_items"] == 33
+        t = record["diagnostic_thresholds"]
+        assert t["high_kl"] == pytest.approx(0.9)
+        assert t["low_topk_mass"] == pytest.approx(0.1)
+
+
+class TestUniqueItems:
+
+    def test_repeated_draws_count_once(self):
+        a = {"item_id": "x", "input_ids": torch.tensor([[1, 2, 3]])}
+        b = {"item_id": "y", "input_ids": torch.tensor([[4, 5]])}
+        again = {"item_id": "x-dup", "input_ids": torch.tensor([[1, 2, 3]])}
+        unique, draws, report = CAL.unique_items({"s1": [a, b],
+                                                  "s2": [again, again]})
+        assert report["draws"] == 4 and report["unique"] == 2
+        assert report["per_set"]["s2"] == {"draws": 2, "unique_within": 1,
+                                           "new_unique": 0}
+        assert [n for n, _ in unique] == ["s1", "s1"]
+
+
+class TestOfflineFlags:
+
+    JOINT = {"confidence_edges": [i / 10 for i in range(11)],
+             "kl_edges": [1e-3, 3e-3, 1e-2, 3e-2, 0.1, 0.3, 1.0, 3.0, 10.0],
+             "topk_mass_edges": [i / 10 for i in range(11)],
+             "confidence_x_kl": [[1] * 10 for _ in range(10)],
+             "confidence_x_topk_mass": [[1] * 10 for _ in range(10)]}
+
+    def test_thresholds_on_the_grid_count_exactly(self):
+        f = O.flag_counts(self.JOINT, {"high_confidence": 0.9, "high_kl": 1.0,
+                                       "low_topk_mass": 0.2})
+        #: confidence bin 9 x KL bins >= 1.0 (edges index 6 -> bins 7..9).
+        assert f["high_confidence_high_kl"] == 3
+        assert f["high_confidence_low_topk_mass"] == 2
+        assert f["high_raw_kl"] == 30 and f["positions"] == 100
+
+    def test_off_grid_thresholds_never_overcount(self):
+        exact = O.flag_counts(self.JOINT, {"high_confidence": 0.9,
+                                           "high_kl": 1.0, "low_topk_mass": 0.2})
+        off = O.flag_counts(self.JOINT, {"high_confidence": 0.85,
+                                         "high_kl": 0.5, "low_topk_mass": 0.25})
+        assert off["high_confidence_high_kl"] <= exact[
+            "high_confidence_high_kl"] + 10
+        snapped = O.flag_counts(self.JOINT, {"high_confidence": 0.85,
+                                             "high_kl": 0.5,
+                                             "low_topk_mass": 0.25})
+        #: 0.85 -> 0.9, 0.5 -> 1.0, 0.25 -> 0.2: identical to the grid case.
+        assert snapped == exact
 
 
 class TestTheInputsAreComputedOnTheStudent:
@@ -130,20 +187,36 @@ class TestTheInputsAreComputedOnTheStudent:
             n = int(item["input_ids"].shape[1]) - 1
             item["tags"] = {**item["tags"], "assistant": torch.arange(n) >= 5}
         items = prepare_calibration_items(raw, profile_id="toy@v1")
-        rows = CAL.item_terms(teacher, student, items,
-                              policy=SUPERVISED_TARGET_V1, support_top_k=8,
-                              entropy_top_k=8, device="cpu")
+        rows, positions = CAL.item_terms(
+            teacher, student, [("toy", i) for i in items],
+            policy=SUPERVISED_TARGET_V1, support_top_k=8, entropy_top_k=8,
+            device="cpu")
         assert len(rows) == len(items)
+        assert int(positions["kl"].numel()) == sum(r["scored_positions"]
+                                                   for r in rows)
         for r in rows:
             assert math.isfinite(r["kl"]) and r["kl"] >= 0
             assert 0.0 <= r["confidence"] <= 1.0
             assert r["scored_positions"] == int(
                 items[0]["input_ids"].shape[1]) - 1 - 5
         #: The SAME model as student gives zero KL: the reference is the teacher.
-        same = CAL.item_terms(teacher, teacher, items[:1],
-                              policy=SUPERVISED_TARGET_V1, support_top_k=8,
-                              entropy_top_k=8, device="cpu")
+        same, _ = CAL.item_terms(teacher, teacher, [("toy", items[0])],
+                                 policy=SUPERVISED_TARGET_V1, support_top_k=8,
+                                 entropy_top_k=8, device="cpu")
         assert same[0]["kl"] == pytest.approx(0.0, abs=1e-6)
+
+    def test_rescoring_timing_projects_a_measured_rate(self):
+        from support.toy import TEACHER_GEOMETRY, build_tiny_model, make_items
+        from aadistill.initialization.calibration.items import (
+            prepare_calibration_items,
+        )
+        teacher = build_tiny_model(TEACHER_GEOMETRY)
+        student = build_tiny_model(TEACHER_GEOMETRY, seed=19)
+        items = prepare_calibration_items(make_items(), profile_id="toy@v1")
+        t = CAL.time_rescoring(teacher, student, [("toy", i) for i in items],
+                               n=2, support_top_k=8, entropy_top_k=8)
+        assert t["sequences"] == 2 and t["tokens"] == 48
+        assert t["projected_minutes_per_probe"] >= 0
 
 
 def test_the_committed_contract_is_current():
@@ -179,7 +252,46 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
                 assert analysis["arms"] == "new D2/D3 candidates only"
         assert "NOT available" in diag["historical_units"]
 
-    def test_the_objective_identities_did_not_move_with_the_text(self):
+    def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 2
+        assert record["revision"] == 3
+        assert record["d2"]["objective"]["aggregation"] == \
+            "kl_path_weighting_per_consumer/v2"
+
+    def test_the_scope_names_three_places_and_excludes_three_operators(self):
+        scope = O.contract(REPO)["objective_scope"]
+        assert len(scope["acts_directly_on"]) == 3
+        assert "FFN" in scope["does_not_act_on"][0]
+        assert "INTERMEDIATE" in scope["intermediate_vs_final_student"]
+
+    def test_lambda_and_thresholds_precede_d2(self):
+        assert "BEFORE D2" in O.lambda_rule()["when"]
+        never = O.diagnostic_threshold_rule()["never"]
+        assert any("ranking" in n for n in never)
+
+
+class TestTheD2Budget:
+
+    def test_it_is_derived_and_current(self):
+        from stages.d_series import d2_budget as BUD
+        record = json.loads((REPO / BUD.RECORD).read_text())
+        assert record == json.loads(json.dumps(BUD.build()))
+
+    def test_the_shared_protocol_field_trains_no_b_or_q2(self):
+        from stages.d_series import d2_budget as BUD
+        b = BUD.build(k_candidates=4)
+        assert b["steps"]["d2_screening"]["n_probes"] == 8
+        assert b["steps"]["d2_screening"]["n_arms_materialized"] == 4
+        assert b["steps"]["d2_confirmation"]["n_probes"] == 3
+        assert b["every_session_under_cap"] is True
+
+    def test_the_unmeasured_diagnostic_is_not_in_any_ceiling(self):
+        from stages.d_series import d2_budget as BUD
+        b = BUD.build()
+        hard = sum(b["steps"][k]["hard"]["all_in_usd"]
+                   for k in ("reference_calibration", "d2_search",
+                             "d2_screening", "d2_confirmation"))
+        assert b["totals"]["hard_ceiling_usd"] == pytest.approx(
+            hard + b["steps"]["r0"]["hard"]["all_in_usd"])
+        assert "only after" in b["totals"]["rescoring_excluded"]

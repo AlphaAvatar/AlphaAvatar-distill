@@ -951,6 +951,12 @@ def main() -> int:
             #: three related numbers and remembering the third is the same
             #: defect this function was written to remove from `latest_run`.
             b["authorized_cap_usd"] = project["cap_usd"]
+            #: ONE CAP. The snapshot also carried a hand-maintained
+            #: `project_cap_usd` (465.0) beside this derived one (590.0) after
+            #: the cap was amended, so the state file contradicted itself, with
+            #: spend above one cap and below the other. Nothing reads that
+            #: key; the deriver is the budget authority, and this is its value.
+            b.pop("project_cap_usd", None)
             #: The per-experiment breakdown stays in the DERIVER. The snapshot
             #: is the minimal view and has a size guard; it carries the number,
             #: and `derive_budget.py --json` carries how it was reached.

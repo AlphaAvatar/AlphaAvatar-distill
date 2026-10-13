@@ -31,8 +31,8 @@ from aadistill.initialization.scoring.rows import (
     scatter_rows, scored_prediction_logits, scored_rows, split_rows,
 )
 from aadistill.initialization.scoring.objective import (
-    COMPONENTS as OBJECTIVE_COMPONENTS, confidence_histogram,
-    item_component_means, position_terms,
+    COMPONENTS as OBJECTIVE_COMPONENTS, add_joint_histograms,
+    confidence_histogram, item_component_means, position_terms,
 )
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
@@ -245,7 +245,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             timing["objective_seconds"] = 0.0
 
         def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
-                             group, components, histogram,
+                             group, components, histogram, joint,
                              rows=None) -> torch.Tensor:
             """Per-item objective means from one group's per-position KL.
 
@@ -267,6 +267,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             hist = confidence_histogram(terms["student_confidence"], scored)
             for i, h in enumerate(hist):
                 histogram[i] += h
+            joint[0] = add_joint_histograms(joint[0], terms, scored)
             host = {k: v.tolist() for k, v in means.items()}
             for row, item in enumerate(group.items):
                 bucket = components.setdefault(item["subtype"], {})
@@ -279,6 +280,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             per_subtype: dict[str, list[float]] = {}
             components: dict[str, dict[str, list[float]]] = {}
             histogram = [0] * 10
+            joint: list[Any] = [None]
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
             for group, indices in groups:
@@ -323,7 +325,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             idx, lp, tail, abls, has_tail=sketches.has_tail)
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
-                            components, histogram, rows=rows)
+                            components, histogram, joint, rows=rows)
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
@@ -399,7 +401,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             idx, lp, tail, abls, has_tail=sketches.has_tail)
                         values = objective_values(
                             kl, log_z, abls, tail, mask, batch_weights, group,
-                            components, histogram)
+                            components, histogram, joint)
                     elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
@@ -436,7 +438,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                         torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
                                    device=dev),
                         None if item_w is None else item_w.to(dev)[None],
-                        group, components, histogram)
+                        group, components, histogram, joint)
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         float(value[0]))
                     timing["distortion_calls"] += 1
@@ -469,6 +471,7 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                                   for sub, c in components.items()}
                     record[name], _ = domain_balanced_score(by_subtype, domains)
                 record["confidence_histogram"] = histogram
+                record["joint_histograms"] = joint[0]
                 objective_candidates[_subset_key(skip)] = record
             return primary
 

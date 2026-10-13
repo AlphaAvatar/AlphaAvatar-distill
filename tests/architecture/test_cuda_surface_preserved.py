@@ -1893,6 +1893,25 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "passed to the operator config and context so a path replays "
             "under the objective it ran with.",
      }),
+    ("5fc5150dafea2ce06a1e5d1c26878a9c0e9ae4dc",
+     "D2/D3 independent review: KL-path aggregation and joint diagnostics",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "the objective identity's aggregation field becomes "
+            "`kl_path_weighting_per_consumer/v2` (was item-equal in state "
+            "evaluation); `add_joint_histograms` records confidence x KL-grid "
+            "and confidence x Top-K-mass counts over scored positions. No "
+            "threshold in code; nothing reads the grid to decide.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "`_ObjectiveAccumulator` aggregates across items with the KL-only "
+            "path's weighting (T_x-weighted within a sub-type, critical classes "
+            "pooled over items) and reports the raw KL under it, which equals "
+            "state.teacher_kl.* and state.critical_token_kl (tested). KL-only "
+            "metrics and every path without an objective unchanged.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "records the joint histograms per candidate subset under an "
+            "objective. No change without one.",
+     }),
 )
 
 

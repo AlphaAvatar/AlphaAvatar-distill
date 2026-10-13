@@ -36,8 +36,9 @@ the number of scored positions ``T_x``::
 
 and not over a dynamic weight sum. ``sum w KL / sum w`` would cancel a uniform
 rise in confidence, which is exactly the effect the uncertainty-weighted form
-exists to let through. Items are then aggregated by the caller's existing
-sub-type and domain rule; nothing here pools positions across items.
+exists to let through. Across items each consumer keeps the weighting its
+KL-only path already uses (see :data:`AGGREGATION`), so that replacing the KL
+by the integrand is the only change a consumer makes.
 
 **What a confident student cannot buy.** ``KL_t = +inf`` stays ``+inf`` under
 every form, including at ``c_t = 1``: a candidate assigning zero probability to
@@ -74,7 +75,14 @@ FORMS = (FORM_UNCERTAINTY_WEIGHTED_KL, FORM_KL_MINUS_CONFIDENCE_REWARD)
 ENTROPY_DEFINITION = "student_own_topk_conditional_entropy/v1"
 CONFIDENCE_MAPPING = "one_minus_entropy_over_log_k/v1"
 DENOMINATOR = "scored_position_count/v1"
-ITEM_AGGREGATION = "per_item_fixed_denominator_then_caller_rule/v1"
+#: How per-item values are combined ACROSS items: by the same weighting each
+#: consumer's KL-only path uses, so the integrand is the only difference. DEPTH
+#: averages items equally within a sub-type (as its KL-only path does); the
+#: state evaluator weights items by T_x within a sub-type and pools each
+#: critical class over items (as its KL-only path does). v1 averaged items
+#: equally in the state evaluator too, which changed the length weighting
+#: against D1 and was replaced before any run used it.
+AGGREGATION = "kl_path_weighting_per_consumer/v2"
 DIRECTION = "minimize"
 
 #: Rows per reduction block. A transient bound, not semantics: Top-K over a
@@ -132,7 +140,7 @@ class ScoringObjective:
             "entropy_top_k": int(self.entropy_top_k),
             "confidence_mapping": CONFIDENCE_MAPPING,
             "denominator": DENOMINATOR,
-            "item_aggregation": ITEM_AGGREGATION,
+            "aggregation": AGGREGATION,
             "direction": DIRECTION,
         }
         if self.reward_scale is not None:
@@ -275,6 +283,11 @@ COMPONENTS = ("objective", "raw_kl", "student_entropy", "student_confidence",
 #: Confidence histogram edges: ten equal bins on [0, 1].
 CONFIDENCE_BINS = 10
 
+#: The KL axis of the joint diagnostic histograms: a fixed, log-spaced
+#: RECORDING GRID in nats, not a threshold. Flags are computed offline against
+#: thresholds registered elsewhere; no decision reads this grid.
+KL_GRID_EDGES = (1e-3, 3e-3, 1e-2, 3e-2, 0.1, 0.3, 1.0, 3.0, 10.0)
+
 
 @torch.no_grad()
 def position_terms(objective: ScoringObjective, kl: torch.Tensor,
@@ -320,10 +333,55 @@ def confidence_histogram(confidence: torch.Tensor,
                                            minlength=CONFIDENCE_BINS).tolist()]
 
 
-__all__ = ["COMPONENTS", "CONFIDENCE_BINS", "CONFIDENCE_MAPPING",
-           "DENOMINATOR", "DIRECTION", "ENTROPY_DEFINITION",
-           "FORM_KL_MINUS_CONFIDENCE_REWARD", "FORM_UNCERTAINTY_WEIGHTED_KL",
-           "FORMS", "ITEM_AGGREGATION", "ObjectiveError", "ScoringObjective",
+def add_joint_histograms(acc: dict[str, Any] | None,
+                         terms: Mapping[str, torch.Tensor],
+                         scored: torch.Tensor) -> dict[str, Any]:
+    """Accumulate two joint histograms over scored positions.
+
+    ``confidence_x_kl``: confidence decile x :data:`KL_GRID_EDGES` bin.
+    ``confidence_x_topk_mass``: confidence decile x student Top-K mass decile
+    -- where a high CONDITIONAL confidence sits on a Top-K that holds little of
+    the student's actual probability. Threshold-free by construction: the
+    records carry the grid, and any registered threshold is applied afterwards.
+    """
+    keep = scored.to(terms["student_confidence"].device).bool()
+    conf = terms["student_confidence"][keep].float()
+    kl = terms["raw_kl"][keep].float()
+    mass = terms["student_topk_mass"][keep].float()
+    n_kl = len(KL_GRID_EDGES) + 1
+    if acc is None:
+        acc = {"confidence_edges": [i / CONFIDENCE_BINS
+                                    for i in range(CONFIDENCE_BINS + 1)],
+               "kl_edges": list(KL_GRID_EDGES),
+               "topk_mass_edges": [i / CONFIDENCE_BINS
+                                   for i in range(CONFIDENCE_BINS + 1)],
+               "confidence_x_kl": [[0] * n_kl for _ in range(CONFIDENCE_BINS)],
+               "confidence_x_topk_mass": [[0] * CONFIDENCE_BINS
+                                          for _ in range(CONFIDENCE_BINS)]}
+    if conf.numel() == 0:
+        return acc
+    c_bin = torch.clamp((conf * CONFIDENCE_BINS).long(), 0, CONFIDENCE_BINS - 1)
+    m_bin = torch.clamp((mass * CONFIDENCE_BINS).long(), 0, CONFIDENCE_BINS - 1)
+    edges = torch.tensor(KL_GRID_EDGES, dtype=kl.dtype, device=kl.device)
+    k_bin = torch.bucketize(kl, edges, right=True)
+    ck = torch.bincount(c_bin * n_kl + k_bin,
+                        minlength=CONFIDENCE_BINS * n_kl).tolist()
+    cm = torch.bincount(c_bin * CONFIDENCE_BINS + m_bin,
+                        minlength=CONFIDENCE_BINS ** 2).tolist()
+    for i in range(CONFIDENCE_BINS):
+        for j in range(n_kl):
+            acc["confidence_x_kl"][i][j] += int(ck[i * n_kl + j])
+        for j in range(CONFIDENCE_BINS):
+            acc["confidence_x_topk_mass"][i][j] += int(
+                cm[i * CONFIDENCE_BINS + j])
+    return acc
+
+
+__all__ = ["AGGREGATION", "COMPONENTS", "CONFIDENCE_BINS",
+           "CONFIDENCE_MAPPING", "DENOMINATOR", "DIRECTION",
+           "ENTROPY_DEFINITION", "FORM_KL_MINUS_CONFIDENCE_REWARD",
+           "FORM_UNCERTAINTY_WEIGHTED_KL", "FORMS", "KL_GRID_EDGES",
+           "ObjectiveError", "ScoringObjective", "add_joint_histograms",
            "confidence_from_entropy", "confidence_histogram",
            "fixed_denominator_item_means", "item_component_means",
            "objective_config", "position_terms",

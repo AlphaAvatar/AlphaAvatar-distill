@@ -150,3 +150,65 @@ class TestRescoringReadsTheStudentOnItsOwnPrefix:
         assert s["high_confidence_high_kl_fraction"] == pytest.approx(0.5)
         assert s["reasoning"]["student_confidence"] == pytest.approx(0.9)
         assert s["answer"]["kl_teacher_student"] == pytest.approx(2.5)
+
+
+class _DecodeTok:
+    """Decodes ids as space-joined numbers, which is enough to check text."""
+
+    def decode(self, ids, skip_special_tokens=False):
+        return " ".join(str(i) for i in ids)
+
+
+class TestRescoringIntegrationContract:
+
+    RECORD = {"id": "s1", "generated_tokens": 3, "raw": "11 13 17"}
+
+    def test_engine_ids_must_reproduce_the_record(self):
+        prompt = torch.tensor([[3, 5]])
+        ok = RR.alignment_evidence(self.RECORD, prompt, torch.tensor([[11, 13, 17]]),
+                                   _DecodeTok(), ids_source="engine",
+                                   tokenizer_sha256="t", generation_fingerprint="g")
+        assert ok["exact"] and ok["count_matches_engine"]
+        assert ok["decodes_to_recorded_text"]
+        with pytest.raises(RR.RescoringError, match="not the generated"):
+            RR.alignment_evidence(self.RECORD, prompt, torch.tensor([[11, 13]]),
+                                  _DecodeTok(), ids_source="engine",
+                                  tokenizer_sha256="t",
+                                  generation_fingerprint="g")
+
+    def test_retokenized_text_is_labelled_an_approximation(self):
+        ev = RR.alignment_evidence(self.RECORD, torch.tensor([[3]]),
+                                   torch.tensor([[11, 13]]), _DecodeTok(),
+                                   ids_source="retokenized_text",
+                                   tokenizer_sha256="t",
+                                   generation_fingerprint="g")
+        assert ev["exact"] is False and ev["count_matches_engine"] is False
+        assert ev["generation_fingerprint"] == "g"
+
+    def test_low_topk_mass_is_flagged_beside_confidence(self):
+        terms = {"student_confidence": torch.tensor([0.95, 0.95, 0.2]),
+                 "kl_teacher_student": torch.tensor([0.1, 0.1, 0.1]),
+                 "student_topk_mass": torch.tensor([0.2, 0.9, 0.1])}
+        s = RR.summarize_trajectory(terms, reasoning_positions=None,
+                                    high_confidence=0.9, high_kl=1.0,
+                                    low_topk_mass=0.5)
+        assert s["high_confidence_low_topk_mass_fraction"] == pytest.approx(1 / 3)
+
+    def test_one_failing_sample_does_not_stop_the_unit(self, pair):
+        teacher, student = pair
+        good = {"record": {"id": "a", "generated_tokens": 2, "raw": "x"},
+                "prompt_ids": torch.tensor([[3, 5, 7]]),
+                "completion_ids": torch.tensor([[11, 13]]),
+                "ids_source": "retokenized_text"}
+        bad = {"record": {"id": "b", "generated_tokens": 9, "raw": "y"},
+               "prompt_ids": torch.tensor([[3, 5, 7]]),
+               "completion_ids": torch.tensor([[11, 13]]),
+               "ids_source": "engine"}
+        out = RR.rescore_unit(
+            student, teacher, [bad, good], tokenizer=_DecodeTok(),
+            think_close_id=None, tokenizer_sha256="t",
+            generation_fingerprint="g", support_top_k=16, entropy_top_k=8,
+            thresholds={"high_confidence": 0.8, "high_kl": 1.0,
+                        "low_topk_mass": 0.5})
+        assert [f["id"] for f in out["failures"]] == ["b"]
+        assert len(out["rows"]) == 1 and out["complete"] is False

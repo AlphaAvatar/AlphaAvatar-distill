@@ -280,7 +280,7 @@ class TestIdentity:
     def test_every_definitional_choice_is_named(self):
         d = WEIGHTED.as_dict()
         for key in ("entropy_definition", "entropy_top_k", "confidence_mapping",
-                    "denominator", "item_aggregation", "direction", "form"):
+                    "denominator", "aggregation", "direction", "form"):
             assert key in d
         assert d["direction"] == "minimize"
         assert "reward_scale" not in d
@@ -508,13 +508,18 @@ class TestDepthUnderAnObjective:
 # --- 6. the state evaluator ----------------------------------------------------
 
 def _suite():
+    """UNEQUAL lengths, so item-equal and T_x-weighted aggregation differ."""
     items = []
-    for raw in make_items(seed=202):
-        n = int(raw["input_ids"].shape[1]) - 1
-        tags = {**raw["tags"], "assistant": torch.arange(n) >= 4}
-        items.append(SuiteItem(item_id=raw["item_id"],
-                               input_ids=raw["input_ids"], domain=raw["domain"],
-                               subtype=raw["subtype"], tags=tags))
+    for k, raw in enumerate(make_items(seed=202)):
+        keep = 10 + 4 * k
+        ids = raw["input_ids"][:, :keep]
+        n = keep - 1
+        tags = {name: mask[:n] for name, mask in raw["tags"].items()}
+        tags["eos_like"] = tags["eos_like"] | (torch.arange(n) == n - 1)
+        tags["assistant"] = torch.arange(n) >= 4
+        items.append(SuiteItem(item_id=raw["item_id"], input_ids=ids,
+                               domain=raw["domain"], subtype=raw["subtype"],
+                               tags=tags))
     suite = StateEvalSuite(
         suite_id="test.objective", version=1, domains=("general", "math"),
         subtypes={"general": ("text",), "math": ("arith",)},
@@ -559,16 +564,21 @@ class TestStateEvaluationUnderAnObjective:
             WEIGHTED.as_dict()
         assert "scoring_objective" not in base.detail["reduction"]
 
-    def test_the_primary_is_per_item_then_subtype_then_domain(self, model,
-                                                              candidate):
+    def test_items_are_weighted_by_their_scored_positions(self, model,
+                                                          candidate):
+        """The KL-only path's weighting: T_x-weighted item means per sub-type."""
         _, ev = _evaluate(model, candidate, objective=REWARD)
         suite, items = _suite()
         per_item = ev.detail["objective"]["per_item"]
-        by_subtype: dict[str, list[float]] = {}
+        num: dict[str, float] = {}
+        den: dict[str, int] = {}
         for item in items:
-            by_subtype.setdefault(item.subtype, []).append(
-                per_item[item.item_id]["objective"])
-        means = {k: sum(v) / len(v) for k, v in by_subtype.items()}
+            rec = per_item[item.item_id]
+            num[item.subtype] = num.get(item.subtype, 0.0) + (
+                rec["objective"] * rec["scored_positions"])
+            den[item.subtype] = den.get(item.subtype, 0) + rec["scored_positions"]
+        assert len({r["scored_positions"] for r in per_item.values()}) > 1
+        means = {k: num[k] / den[k] for k in num}
         primary, per_domain = domain_balanced_score(
             means, {d: list(suite.subtypes[d]) for d in suite.domains})
         assert ev.values["state.objective.equal_domain_mean"] == \
@@ -579,6 +589,48 @@ class TestStateEvaluationUnderAnObjective:
             rec = per_item[item.item_id]
             assert rec["objective"] == pytest.approx(
                 rec["raw_kl"] - 0.25 * rec["student_confidence"], abs=1e-6)
+
+    def test_raw_kl_under_the_objective_reproduces_the_kl_metrics(
+            self, model, candidate):
+        """THE KL-ONLY CONTROL. Aggregating the raw KL the way the objective
+        is aggregated gives the KL-only metrics of the same evaluation, so a
+        ranking difference cannot come from how items were weighted."""
+        _, ev = _evaluate(model, candidate, objective=WEIGHTED)
+        v = ev.values
+        assert v["state.objective.raw_kl.equal_domain_mean"] == pytest.approx(
+            v["state.teacher_kl.equal_domain_mean"], rel=1e-6)
+        assert v["state.objective.raw_kl.worst_domain"] == pytest.approx(
+            v["state.teacher_kl.worst_domain"], rel=1e-6)
+        for domain, value in ev.detail["objective"]["per_domain"][
+                "raw_kl"].items():
+            assert value == pytest.approx(v[f"state.teacher_kl.{domain}"],
+                                          rel=1e-6)
+        assert v["state.objective.raw_kl.critical_token"] == pytest.approx(
+            v["state.critical_token_kl"], rel=1e-6)
+
+    def test_item_equal_weighting_would_not_reproduce_them(self, model,
+                                                           candidate):
+        """The control is not vacuous: on this suite the two weightings differ."""
+        _, ev = _evaluate(model, candidate, objective=WEIGHTED)
+        suite, items = _suite()
+        per_item = ev.detail["objective"]["per_item"]
+        by_subtype: dict[str, list[float]] = {}
+        for item in items:
+            by_subtype.setdefault(item.subtype, []).append(
+                per_item[item.item_id]["raw_kl"])
+        item_equal, _ = domain_balanced_score(
+            {k: sum(x) / len(x) for k, x in by_subtype.items()},
+            {d: list(suite.subtypes[d]) for d in suite.domains})
+        assert item_equal != pytest.approx(
+            ev.values["state.teacher_kl.equal_domain_mean"], rel=1e-6)
+
+    def test_joint_histograms_count_every_scored_position(self, model,
+                                                         candidate):
+        _, ev = _evaluate(model, candidate, objective=WEIGHTED)
+        joint = ev.detail["objective"]["joint_histograms"]
+        total = ev.detail["objective"]["scored_positions"]["total"]
+        assert sum(map(sum, joint["confidence_x_kl"])) == total
+        assert sum(map(sum, joint["confidence_x_topk_mass"])) == total
 
     def test_the_row_path_measures_the_same_objective(self, model, candidate):
         _, base = _evaluate(model, candidate, objective=WEIGHTED, batch=3)

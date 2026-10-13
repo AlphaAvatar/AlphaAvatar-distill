@@ -56,10 +56,14 @@ from aadistill.initialization.scoring.objective import (  # noqa: E402
 
 SCHEMA = "aadistill.d_series.objective_contract/v1"
 CONTRACT = "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json"
-#: Where D3's measured lambda is recorded once it exists. Absent until then,
-#: and D3's objective cannot be built without it.
-LAMBDA_RECORD = ("logs/stages/stage-1/families/d_series/analyses/"
-                 "d3_lambda_calibration.json")
+#: The B-vs-teacher REFERENCE CALIBRATION: D3's lambda AND the diagnostic
+#: thresholds, measured once BEFORE D2's formal search and never revised.
+#: Absent until then; D3's objective and the diagnostic flags cannot be built
+#: without it.
+REFERENCE_CALIBRATION = ("logs/stages/stage-1/families/d_series/analyses/"
+                         "d2_d3_reference_calibration.json")
+#: Kept for readers of the revision-2 contract, which named it this.
+LAMBDA_RECORD = REFERENCE_CALIBRATION
 
 #: K for the student's own Top-K entropy. Maintainer-selected 2026-10-13, the
 #: same value as the reference support's K but a separate parameter: the two
@@ -68,7 +72,7 @@ LAMBDA_RECORD = ("logs/stages/stage-1/families/d_series/analyses/"
 ENTROPY_TOP_K = 200
 
 D2_OBJECTIVE = ScoringObjective(
-    objective_id="objective.d2_student_uncertainty_weighted_kl", version=1,
+    objective_id="objective.d2_student_uncertainty_weighted_kl", version=2,
     form=FORM_UNCERTAINTY_WEIGHTED_KL, entropy_top_k=ENTROPY_TOP_K)
 
 D3_OBJECTIVE_ID = "objective.d3_kl_minus_student_confidence"
@@ -77,24 +81,78 @@ D3_OBJECTIVE_ID = "objective.d3_kl_minus_student_confidence"
 def d3_objective(reward_scale: float) -> ScoringObjective:
     """D3's objective at a MEASURED lambda. Built from the record, not typed."""
     return ScoringObjective(
-        objective_id=D3_OBJECTIVE_ID, version=1,
+        objective_id=D3_OBJECTIVE_ID, version=2,
         form=FORM_KL_MINUS_CONFIDENCE_REWARD, entropy_top_k=ENTROPY_TOP_K,
         reward_scale=float(reward_scale))
 
 
 def frozen_d3_objective(repo_root: Path = REPO_ROOT) -> ScoringObjective:
     """D3's objective from the committed lambda record, or a refusal."""
-    path = repo_root / LAMBDA_RECORD
+    path = repo_root / REFERENCE_CALIBRATION
     if not path.is_file():
         raise RuntimeError(
-            f"{LAMBDA_RECORD} does not exist: D3's lambda has not been measured "
-            "and frozen, so D3 has no objective and no search may start")
+            f"{REFERENCE_CALIBRATION} does not exist: D3's lambda has not been "
+            "measured and frozen, so D3 has no objective and no search may "
+            "start")
     record = json.loads(path.read_text())
     if record.get("rule_hash") != lambda_rule()["rule_hash"]:
         raise RuntimeError(
             "the lambda record was computed under a different rule than the "
             "one this contract registers")
     return d3_objective(record["reward_scale"])
+
+
+def frozen_diagnostic_thresholds(repo_root: Path = REPO_ROOT) -> dict[str, float]:
+    """The review-flag thresholds from the committed reference calibration."""
+    path = repo_root / REFERENCE_CALIBRATION
+    if not path.is_file():
+        raise RuntimeError(f"{REFERENCE_CALIBRATION} does not exist: the "
+                           "diagnostic thresholds have not been measured")
+    record = json.loads(path.read_text())
+    if record.get("threshold_rule_hash") != diagnostic_threshold_rule()["rule_hash"]:
+        raise RuntimeError("the thresholds were derived under a different rule")
+    return dict(record["diagnostic_thresholds"])
+
+
+def flag_counts(joint: dict[str, Any], thresholds: dict[str, float]
+                ) -> dict[str, int]:
+    """The registered flags from a recorded joint histogram, conservatively.
+
+    A 'high' threshold is applied at the first grid edge AT OR ABOVE it and a
+    'low' one at the last edge AT OR BELOW it, so a flag never counts a
+    position the exact threshold would not. Offline only: nothing a search
+    decides reads this.
+    """
+    def first_at_or_above(edges, value):
+        for i, e in enumerate(edges):
+            if e >= value:
+                return i
+        return len(edges)
+
+    def last_at_or_below(edges, value):
+        idx = 0
+        for i, e in enumerate(edges):
+            if e <= value:
+                idx = i
+        return idx
+
+    c_edges = joint["confidence_edges"]
+    #: confidence bin i covers [c_edges[i], c_edges[i+1]).
+    c_from = first_at_or_above(c_edges, thresholds["high_confidence"])
+    #: KL bin j covers [kl_edges[j-1], kl_edges[j]) with bin 0 below edge 0.
+    k_from = first_at_or_above(joint["kl_edges"], thresholds["high_kl"]) + 1
+    m_upto = last_at_or_below(joint["topk_mass_edges"],
+                              thresholds["low_topk_mass"])
+    ck, cm = joint["confidence_x_kl"], joint["confidence_x_topk_mass"]
+    return {
+        "high_confidence_high_kl": sum(ck[i][j] for i in range(c_from, len(ck))
+                                       for j in range(k_from, len(ck[i]))),
+        "high_confidence_low_topk_mass": sum(cm[i][j]
+                                             for i in range(c_from, len(cm))
+                                             for j in range(0, m_upto)),
+        "high_raw_kl": sum(row[j] for row in ck for j in range(k_from, len(row))),
+        "positions": sum(map(sum, ck)),
+    }
 
 
 #: ONE ranking policy for both: it ranks on the objective metrics, and which
@@ -152,11 +210,20 @@ LAMBDA_REFERENCE = {
 def lambda_rule() -> dict[str, Any]:
     """The registered rule, with its own hash. Fixed before any D2/D3 search."""
     rule = {
-        "schema": "aadistill.d_series.d3_lambda_rule/v1",
+        "schema": "aadistill.d_series.d3_lambda_rule/v2",
         "statistic": "per-item means over each item's scored positions (1/T_x)",
         "formula": "lambda = IQR(item KL) / IQR(item confidence)",
-        "pooling": ("every item of the three item sets once, unweighted; the "
-                    "per-set values are reported as sensitivity, never chosen"),
+        "pooling": (
+            "every UNIQUE item of the three item sets once, unweighted, unique "
+            "by content identity (sha256 of the token ids). The three sets "
+            "hold 209 draws but 147 unique items: reasoning_heavy@v2's 62 "
+            "draws are 51 unique items, all of them also in "
+            "domain_balanced@v1, which sampled with replacement from the same "
+            "pool. Counting a repeated draw twice would weight it twice. The "
+            "with-duplicates value and each set alone are reported as "
+            "sensitivity, never chosen"),
+        "when": ("ONCE, BEFORE D2's formal search -- not before D3 -- and never "
+                 "revised by any D2 or D3 search or behavioural result"),
         "rounding": "3 significant figures",
         "reference": LAMBDA_REFERENCE,
         "why_this_scale": (
@@ -173,9 +240,55 @@ def lambda_rule() -> dict[str, Any]:
             "starts and never revised: a lambda chosen after seeing D2 or D3 "
             "search or behavioural results would be a selection on outcomes."),
         "sensitivity_reported_not_used": [
-            "SD ratio", "each item set alone", "q2 as the student"],
+            "SD ratio", "with duplicate draws (209)", "each item set alone",
+            "q2 as the student"],
         "refusals": ["IQR(item confidence) == 0", "a non-finite or non-positive "
                      "lambda", "fewer than 20 items"],
+    }
+    rule["rule_hash"] = sha256_json(rule)
+    return rule
+
+
+def diagnostic_threshold_rule() -> dict[str, Any]:
+    """Where the review flags' thresholds come from. Registered, hashed.
+
+    The flags are DIAGNOSTIC. They are computed offline from records the
+    search already writes, they never enter a score, a ranking, a pruning, a
+    retention or any manual step, and a high raw KL is never a reason to drop
+    a candidate -- a confident student departing from the teacher is the
+    hypothesis under test, not a defect.
+    """
+    rule = {
+        "schema": "aadistill.d_series.diagnostic_threshold_rule/v1",
+        "source": ("the same B-vs-teacher reference calibration as lambda, over "
+                   "the scored positions of the 147 unique items, measured "
+                   "before D2's formal search"),
+        "thresholds": {
+            "high_kl": "p90 of per-position Top-200 + tail KL (teacher || B)",
+            "high_confidence": "p90 of B's per-position Top-200 confidence",
+            "low_topk_mass": "p10 of B's per-position Top-200 mass",
+        },
+        "flags": {
+            "high_confidence_high_kl": ("confident AND far from the teacher: "
+                                        "alternative reasoning or "
+                                        "overconfidence, told apart only by "
+                                        "correctness"),
+            "high_confidence_low_topk_mass": (
+                "a confident Top-200 that holds little of the student's real "
+                "probability"),
+            "high_raw_kl": "raw KL at or above high_kl, recorded, never acted on",
+        },
+        "application": {
+            "rollout_rescoring": "per position, exact thresholds",
+            "depth_candidates_and_states": (
+                "from the recorded joint histograms; a 'high' threshold is "
+                "applied at the first grid edge at or above it and a 'low' one "
+                "at the last edge at or below it, so a flag never counts a "
+                "position the exact threshold would not"),
+        },
+        "never": ["enters a score, ranking, pruning or retention",
+                  "triggers a manual intervention in a running search",
+                  "is set or revised after D2/D3 candidate results exist"],
     }
     rule["rule_hash"] = sha256_json(rule)
     return rule
@@ -353,10 +466,95 @@ CLAIM_BOUNDARY = {
         "checkpoints are retired and whose generations carry no "
         "log-probabilities",
         "a mechanism from the exploratory diagnostics alone",
+        "that the local selection rules of all four operators use student "
+        "confidence (only DEPTH's does; see objective_scope)",
+        "that confidence read on intermediate search candidates describes the "
+        "final recovered student's capacity adaptation",
+        "that the family-wise bound across D1-D3 is an unconditional "
+        "guarantee: it is a nominal accounting bound, conditional on each "
+        "test's nominal level, which adaptive reuse of the observed "
+        "confirmation data can violate",
     ],
     "validation": ("Top-K confidence is a proxy for structure selection; its "
                    "usefulness is established only by independent behavioural "
                    "evidence after recovery training"),
+}
+
+
+#: Where the new objective acts, and where it does not. Stated as data so no
+#: summary can say "all four operators" by accident.
+OBJECTIVE_SCOPE = {
+    "acts_directly_on": [
+        "DEPTH's operator-local candidate evaluation (depth.causal_kl_greedy_v1)",
+        "global state evaluation of every child",
+        "beam ranking and pruning (OBJECTIVE_PARETO_V1)",
+    ],
+    "does_not_act_on": [
+        "FFN, residual WIDTH and ATTENTION operator-local selection: they keep "
+        "D1's target-aware activation statistic unchanged; their children are "
+        "reached by the objective only through state evaluation and the beam",
+    ],
+    "do_not_claim": ("that the local rules of all four operators use student "
+                     "confidence"),
+    "intermediate_vs_final_student": (
+        "the confidence the search reads belongs to INTERMEDIATE candidates -- "
+        "the parent with some layers bypassed in DEPTH, partially compressed "
+        "children in state evaluation -- before any recovery training. It is "
+        "not the confidence of the final ~0.6B student after recovery, and "
+        "it is not evidence about that model's capacity adaptation; only the "
+        "behavioural evaluation after recovery speaks to that"),
+}
+
+#: The aggregation confound and its control (independent review item 1).
+AGGREGATION_CONTROL = {
+    "issue": ("revision 2 averaged state-evaluation items EQUALLY, where D1's "
+              "KL-only state metrics weight items by scored positions within a "
+              "sub-type and pool critical classes over items. That changed "
+              "length weighting as well as the integrand, so a D1-vs-D2 "
+              "ranking change could not be attributed to confidence"),
+    "resolution": ("each consumer keeps its KL-only path's weighting "
+                   "(objective identity field `aggregation`, "
+                   "kl_path_weighting_per_consumer/v2): DEPTH averages items "
+                   "equally, as D1's DEPTH did; state evaluation weights items "
+                   "by T_x and pools critical classes. The per-item formula "
+                   "keeps the fixed 1/T_x and never divides by a sum of "
+                   "confidence weights"),
+    "built_in_kl_only_control": (
+        "every objective evaluation also reports state.objective.raw_kl.* -- "
+        "the raw KL aggregated exactly as the objective is -- which equals "
+        "D1's state.teacher_kl.* and state.critical_token_kl in the same "
+        "evaluation (tested to 1e-6). Rankings by raw_kl and by the objective "
+        "on the same states isolate the effect of the integrand"),
+}
+
+#: What the behavioural driver must satisfy when it wires the rescoring in.
+ROLLOUT_RESCORING_INTEGRATION = {
+    "token_ids": (
+        "use the generation engine's exact ids. The current generator "
+        "(scripts/shared/evaluation/uncapped_eval.py) holds them in memory "
+        "but records only decoded text; recording them changes a file in the "
+        "generation source set, hence the generation fingerprint and the "
+        "shared protocol's evaluation identity. That is a VERSIONED decision "
+        "(d_series_shared_eval v2 with a record-only equivalence check), not "
+        "an edit. Until it is taken, ids_source=retokenized_text, labelled "
+        "approximate per sample"),
+    "alignment_evidence": ["prompt ids sha256", "completion ids sha256",
+                           "tokenizer sha256", "generation fingerprint",
+                           "count and decoded-text match with the record"],
+    "untouched": ["D1's evaluation evidence",
+                  "the shared protocol's scoring contract and endpoint"],
+    "checkpoint_release": ("only after the diagnostic evidence is persisted "
+                           "durably, when a consumer exists"),
+    "failure_isolation": ("a rescoring failure is recorded per sample and never "
+                          "alters or blocks a completed per-sample score "
+                          "(rollout_rescoring.rescore_unit)"),
+    "cost": ("MEASURE before pricing: the reference calibration session times "
+             "the rescoring on the real teacher and B over sequences of D1's "
+             "measured lengths; the behavioural ceiling includes it only after "
+             "that measurement. The 3-5 min/probe figure is an estimate, not a "
+             "bound"),
+    "historical_units": ("no logits, confidence or student-side quantity is "
+                         "computed or estimated for B or q2"),
 }
 
 
@@ -418,7 +616,8 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                "objective_hash": None if d3 is None else d3.objective_hash,
                "status": ("FROZEN" if d3 is not None else
                           "PENDING_LAMBDA: the rule is registered; the value is "
-                          "measured on the reference pair before D3's search"),
+                          "measured on the reference pair BEFORE D2's formal "
+                          "search, with the diagnostic thresholds"),
                "formula": ("L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], "
                            "minimized (S = -L maximized)"),
                "hypothesis": (
@@ -430,11 +629,13 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
                    "that signal is useful is decided by task correctness after "
                    "recovery training, not by the reward."),
                "lambda_rule": lambda_rule(),
-               "lambda_record": LAMBDA_RECORD},
+               "lambda_record": REFERENCE_CALIBRATION},
+        "diagnostic_threshold_rule": diagnostic_threshold_rule(),
         "ranking": {"policy": OBJECTIVE_PARETO_V1.qualified_id,
                     "policy_hash": OBJECTIVE_PARETO_V1.policy_hash,
                     "objectives": [o.key for o in OBJECTIVE_PARETO_V1.objectives],
                     "epsilon": dict(OBJECTIVE_PARETO_V1.epsilon)},
+        "objective_scope": OBJECTIVE_SCOPE,
         "where_each_objective_applies": {
             "depth.causal_kl_greedy_v1": (
                 "OPERATOR-LOCAL, exactly: the candidate is the parent with S "
@@ -461,9 +662,13 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
         "d2_degeneracy_watch": (
             "a candidate can lower D2's objective by becoming more confident "
             "at high-KL positions. D2's ranking never sees raw KL, so raw KL, "
-            "confidence and the weight distribution are recorded on every "
-            "candidate and state, and a low D2 score is never read as higher "
-            "fidelity"),
+            "confidence, Top-K mass and the weight distribution are recorded "
+            "on every candidate and state, and a low D2 score is never read as "
+            "higher fidelity. High raw KL is a registered DIAGNOSTIC FLAG "
+            "(diagnostic_threshold_rule), never an elimination criterion and "
+            "never a manual intervention"),
+        "aggregation_control": AGGREGATION_CONTROL,
+        "rollout_rescoring_integration": ROLLOUT_RESCORING_INTEGRATION,
         "independence": (
             "D3's definition, K and lambda rule are fixed in this record before "
             "D2 runs; no D2 behavioural or search result may adjust them"),
@@ -474,7 +679,7 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
             "introduced in D2 or D3"),
         "behavioural_diagnostics": BEHAVIOURAL_DIAGNOSTICS,
         "claim_boundary": CLAIM_BOUNDARY,
-        "revision": 2,
+        "revision": 3,
         "revision_history": [
             {"revision": 1, "date": "2026-10-13",
              "change": "D2/D3 objectives, identities, ranking, lambda rule"},
@@ -482,7 +687,16 @@ def contract(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
              "change": ("capacity-aware motivation, hypotheses, measurement "
                         "distinctions, behavioural diagnostics and claim "
                         "boundary (maintainer supplement). Objective "
-                        "identities, ranking and lambda rule unchanged")}],
+                        "identities, ranking and lambda rule unchanged")},
+            {"revision": 3, "date": "2026-10-13",
+             "change": ("independent review: (1) state-evaluation aggregation "
+                        "now uses the KL-only path's T_x weighting, objectives "
+                        "re-versioned v2; (2) lambda and diagnostic thresholds "
+                        "measured before D2's search, on 147 unique items "
+                        "(lambda rule v2); (3) objective scope and "
+                        "intermediate-student boundary; (4) high raw KL is a "
+                        "registered flag only; (5) rescoring integration "
+                        "contract")}],
     }
     out = {**science, "contract_hash": sha256_json(science),
            "authorizes": "nothing"}

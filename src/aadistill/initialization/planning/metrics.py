@@ -48,8 +48,9 @@ from aadistill.initialization.calibration.packing import (
 from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.scoring.content import scoring_content_identity
 from aadistill.initialization.scoring.objective import (
-    COMPONENTS as OBJECTIVE_COMPONENTS, ObjectiveError, confidence_histogram,
-    item_component_means, position_terms, require_binary_scoring_weights,
+    COMPONENTS as OBJECTIVE_COMPONENTS, ObjectiveError, add_joint_histograms,
+    confidence_histogram, item_component_means, position_terms,
+    require_binary_scoring_weights,
 )
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
@@ -746,23 +747,38 @@ class StateEvaluator:
 
 
 class _ObjectiveAccumulator:
-    """Per-item student-confidence objective terms, aggregated like the KL.
+    """Student-confidence objective terms, aggregated with the KL path's weighting.
 
-    Per item: every component averaged over the item's scored positions with
-    the fixed denominator ``T_x``. Then the sub-type mean of item means, then
-    `domain_balanced_score` -- per item first, never a token pool across items.
-    Critical-token classes follow the same rule: per item over that item's
-    scored class positions, then the mean over items, then the unweighted mean
-    over classes.
+    PER ITEM, every component is a fixed-denominator mean over the item's
+    ``T_x`` scored positions; those per-item values are recorded. ACROSS
+    items, the objective uses exactly the weighting the KL-only metrics use,
+    so that switching the integrand is the ONLY difference between them:
+
+    * within a sub-type, items are weighted by ``T_x`` -- equivalently, the
+      integrand is pooled over the sub-type's scored positions and divided by
+      their COUNT (never by a sum of confidence weights);
+    * each critical-token class is pooled over every item's scored positions
+      of that class and divided by their count;
+    * then `domain_balanced_score`, and the unweighted mean over classes.
+
+    Consequence, and the check that it holds: the ``raw_kl`` component
+    aggregated here reproduces ``state.teacher_kl.*`` and
+    ``state.critical_token_kl`` of the same evaluation. A ranking difference
+    between the KL-only metrics and the objective is then attributable to the
+    integrand, not to how items were weighted.
     """
 
     def __init__(self, objective: Any, critical_tags: Sequence[str]) -> None:
         self.objective = objective
         self.critical_tags = tuple(critical_tags)
+        #: sub-type -> component -> [sum over scored positions, count]
         self.per_subtype: dict[str, dict[str, list[float]]] = {}
-        self.per_class: dict[str, list[float]] = {}
+        #: class -> component -> [sum over scored class positions, count], for
+        #: the objective and for the raw KL (the KL-only control).
+        self.per_class: dict[str, dict[str, list[float]]] = {}
         self.per_item: dict[str, dict[str, float]] = {}
         self.histogram = [0] * 10
+        self.joint: dict[str, Any] | None = None
         self.confidences: list[torch.Tensor] = []
         self.components: list[torch.Tensor] = []
         self._kl: list[torch.Tensor] = []
@@ -793,23 +809,30 @@ class _ObjectiveAccumulator:
         means, counts = item_component_means(
             {k: v[None] for k, v in terms.items()}, mask, w)
         scored = mask[0] if w is None else (w[0] > 0)
+        n_scored = int(counts[0])
         record = {name: float(means[name][0]) for name in OBJECTIVE_COMPONENTS}
-        record["scored_positions"] = int(counts[0])
+        record["scored_positions"] = n_scored
         self.per_item[item.item_id] = record
         bucket = self.per_subtype.setdefault(item.subtype, {})
         for name in OBJECTIVE_COMPONENTS:
-            bucket.setdefault(name, []).append(record[name])
+            acc = bucket.setdefault(name, [0.0, 0])
+            acc[0] += float(terms[name][scored].double().sum())
+            acc[1] += n_scored
         for tag in self.critical_tags:
             if tag not in tags:
                 continue
             m = tags[tag].to(kl.device).bool() & scored
             n = int(m.sum())
             if n:
-                self.per_class.setdefault(tag, []).append(
-                    float(terms["objective"][m].double().sum()) / n)
+                cls = self.per_class.setdefault(tag, {})
+                for name in ("objective", "raw_kl"):
+                    acc = cls.setdefault(name, [0.0, 0])
+                    acc[0] += float(terms[name][m].double().sum())
+                    acc[1] += n
         for i, h in enumerate(confidence_histogram(
                 terms["student_confidence"], scored)):
             self.histogram[i] += h
+        self.joint = add_joint_histograms(self.joint, terms, scored)
         self.confidences.append(terms["student_confidence"][scored].float().cpu())
         self.components.append(terms["component"][scored].float().cpu())
         self._kl, self._log_z = [], []
@@ -820,7 +843,7 @@ class _ObjectiveAccumulator:
         values: dict[str, float] = {}
         per_domain_all: dict[str, dict[str, float]] = {}
         for name in OBJECTIVE_COMPONENTS:
-            by_subtype = {sub: sum(c[name]) / len(c[name])
+            by_subtype = {sub: c[name][0] / c[name][1]
                           for sub, c in self.per_subtype.items()}
             primary, per_domain = domain_balanced_score(by_subtype, domain_map)
             label = name_of.get(name, name)
@@ -836,14 +859,18 @@ class _ObjectiveAccumulator:
                     primary)
         values["state.objective.raw_kl.worst_domain"] = float(
             max(per_domain_all["raw_kl"].values()))
-        class_means = {tag: sum(v) / len(v)
-                       for tag, v in self.per_class.items() if v}
-        for tag, v in class_means.items():
-            values[f"state.objective.critical_token.{tag}"] = float(v)
-        present = [class_means[t] for t in self.critical_tags if t in class_means]
-        if present:
-            values["state.objective.critical_token"] = float(
-                sum(present) / len(present))
+        class_means = {}
+        for name, prefix in (("objective", "state.objective.critical_token"),
+                             ("raw_kl", "state.objective.raw_kl.critical_token")):
+            means = {tag: c[name][0] / c[name][1]
+                     for tag, c in self.per_class.items() if c[name][1]}
+            if name == "objective":
+                class_means = means
+            for tag, v in means.items():
+                values[f"{prefix}.{tag}"] = float(v)
+            present = [means[t] for t in self.critical_tags if t in means]
+            if present:
+                values[prefix] = float(sum(present) / len(present))
         counts = sorted(r["scored_positions"] for r in self.per_item.values())
         conf = torch.cat(self.confidences) if self.confidences else None
         comp = torch.cat(self.components) if self.components else None
@@ -857,6 +884,7 @@ class _ObjectiveAccumulator:
 
         detail = {
             "definition": self.objective.as_dict(),
+            "aggregation": OBJECTIVE_STATE_AGGREGATION,
             "per_domain": per_domain_all,
             "critical_classes": class_means,
             "scored_positions": {
@@ -865,11 +893,20 @@ class _ObjectiveAccumulator:
                 "median": counts[len(counts) // 2] if counts else 0,
                 "max": counts[-1] if counts else 0},
             "confidence_histogram": list(self.histogram),
+            "joint_histograms": self.joint,
             "confidence_quantiles": quantiles(conf),
             f"{name_of['component']}_quantiles": quantiles(comp),
             "per_item": self.per_item,
         }
         return values, detail
+
+
+#: How the state evaluator aggregates a declared objective across items. Named
+#: so a record says it; it is the KL-only path's weighting by construction.
+OBJECTIVE_STATE_AGGREGATION = (
+    "per_item_fixed_denominator; sub-type = scored-position-pooled (items "
+    "weighted by T_x); critical class = pooled over items; then equal sub-type "
+    "and equal domain -- the KL-only metrics' weighting/v1")
 
 
 def _restore_unselected_counts(sums: DistortionSums, select: torch.Tensor,

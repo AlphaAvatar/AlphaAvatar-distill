@@ -573,12 +573,30 @@ def build_protocol(repo_root: Path = REPO_ROOT) -> dict[str, Any]:
         "decided_by": ("maintainer decision 2026-10-13, "
                        "logs/budget/decisions.md"),
         **science,
+        "errata": [dict(e) for e in ERRATA],
         "authorizes": "nothing",
     }
 
 
-#: Record keys outside the hashed science: presentation and provenance.
-_ENVELOPE = ("schema", "_contract", "protocol_hash", "decided_by", "authorizes")
+#: Record keys outside the hashed science: presentation, provenance and errata.
+_ENVELOPE = ("schema", "_contract", "protocol_hash", "decided_by", "authorizes",
+             "errata")
+
+#: Corrections to how a hashed field READS, which change no rule, number or
+#: identity -- so they sit outside the hash and the protocol stays v1.
+ERRATA = (
+    {"date": "2026-10-13", "source": "independent review",
+     "field": "statistics.family.d1_already_spent",
+     "correction": (
+         "`union_bound_over_d1_d2_d3` = 0.10 is a NOMINAL accounting bound: "
+         "the sum of the three tests' nominal one-sided levels. It holds only "
+         "if each test attains its nominal level, which adaptive reuse of the "
+         "already-observed d1_confirmation rows can violate. It is not an "
+         "unconditional guarantee, and its `_meaning` sentence (\"the "
+         "probability that ANY of the three experiments falsely clears this "
+         "battery is at most this bound\") must be read with that condition. "
+         "No rule, alpha, outcome or identity changes.")},
+)
 
 
 def verify_record(record: Mapping[str, Any]) -> bool:
