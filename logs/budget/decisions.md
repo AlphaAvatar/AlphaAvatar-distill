@@ -10700,3 +10700,42 @@ on a paid pod.
     a cap decision;
   - decide the reservation rule.
 - **No paid resource authorized.**
+
+## 2026-10-13 — Post-48fcc638 review: R0 and the reference calibration GRANTED
+
+- **Context:** the independent review of `48fcc638` accepts the
+  reference-cache fix direction (D1 telemetry: 15/16 DEPTH recomputes beside
+  a large reserved-but-unallocated pool). It leaves D1's NO-GO, B, q2, the
+  shared evaluation v1 and the D2/D3 science unchanged.
+- **Decision (maintainer):**
+  - **Grants:**
+    - R0: **$4.00 all-in / $3.60 per session**;
+    - reference calibration: the complete option, **$1.76 / $1.42**;
+    - together at most **$5.76**, with teardown reserves inside each grant
+      and never counted twice.
+  - **Order:** R0 first, saved and reviewed, then the calibration. Ordinary
+    engineering failures are repaired inside the cumulative amount, and a
+    retry never resets it.
+  - **Stage L must record:**
+    - allocator and driver memory before and after `empty_cache()`;
+    - the sketch estimate and the admission decision;
+    - hits, fills and recomputes;
+    - operator wall time and peak memory;
+    - cached-vs-recomputed numerical agreement.
+
+    One root DEPTH profile proves the mechanism, not every future expansion.
+    The D2 search must keep recording cache modes and stop safely on a
+    recompute regression.
+  - **`d2_budget.py`** switches price only on hash-bound, validated stage-L
+    evidence. A single timing keeps a variation margin.
+  - **D2 objective `scored_v1` equivalence** needs its own GPU evidence;
+    until then D2 uses `all_v1`.
+  - **Programme statistics:** separate the hard ceilings from the unmeasured
+    diagnostic estimates. The $590 cap is unchanged, and D2 stays at K = 4.
+  - **D2 preregistration:** accepted in principle; the formal search needs
+    its own grant.
+  - **Next:** the D2 launcher, with `soft_stop_minutes`.
+  - **The token-id wrapper** stays diagnostic until it is validated in a
+    real vLLM environment.
+- **Activation:** R0's `authorization.json` is written and its campaign is
+  OPEN. The calibration is activated after R0's review, on its final plan.
