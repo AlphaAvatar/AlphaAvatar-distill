@@ -30,10 +30,14 @@ import torch
 from aadistill.initialization.scoring.rows import (
     scatter_rows, scored_prediction_logits, scored_rows, split_rows,
 )
+from aadistill.initialization.scoring.objective import (
+    COMPONENTS as OBJECTIVE_COMPONENTS, confidence_histogram,
+    item_component_means, position_terms,
+)
 from aadistill.initialization.scoring.support import (
     SUPPORT_REFERENCE_TOPK_TAIL_V1, ReferenceDistributionSketch,
     masked_item_means, sketch_forward_kl, sketch_forward_kl_mean,
-    sketch_forward_kl_mean_batch, sketch_reference,
+    sketch_forward_kl_mean_batch, sketch_forward_kl_terms, sketch_reference,
 )
 from aadistill.initialization.statistics.contribution import (
     bypassed_blocks,
@@ -88,6 +92,11 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                            "tie_word_embeddings"})
     calibration = CalibrationNeed.FORWARD_LOGITS
     objective = "forward KL(parent || parent-with-S-bypassed), domain-balanced"
+    #: Under a run's `ScoringObjective` the per-position quantity this averages
+    #: is that objective's integrand, formed from the SAME candidate forward:
+    #: the candidate here is the parent with S bypassed, so its logits are the
+    #: student's and its own Top-K is read from them. See `scoring.objective`.
+    consumes_scoring_objective = True
     deterministic = True
     requires_seed = False
     produces = ("depth_map", "search_rounds")
@@ -148,6 +157,18 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     "oracle the coarsened support is validated against, and it "
                     "stays on the historical all-rows path")
             adapter.requires(Capability.OUTPUT_HEAD)
+        #: A STUDENT-CONFIDENCE OBJECTIVE, when the run declares one. Defined on
+        #: the reference-support KL only: full_vocab_v1 is the oracle path and
+        #: stays the historical KL-only objective.
+        objective = ctx.scoring_objective
+        if objective is not None and support.is_full_vocab:
+            raise OperatorError(
+                f"{self.impl_id}: scoring objective {objective.qualified_id} "
+                "is defined on the reference Top-K + tail KL; full_vocab_v1 is "
+                "the KL-only oracle path")
+        #: Per candidate subset: every component's domain-balanced value, so a
+        #: low objective can always be read against the raw KL it came from.
+        objective_candidates: dict[str, dict[str, Any]] = {}
         if support.is_full_vocab:
             reference = _ReferenceLogits(model, items, compute)
             sketches = None
@@ -220,9 +241,44 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             #: many the forwards held. Telemetry only, like everything here.
             timing.update({"prediction_rows": ctx.execution.prediction_rows,
                            "scored_rows": 0, "forward_rows": 0})
+        if objective is not None:
+            timing["objective_seconds"] = 0.0
+
+        def objective_values(kl, log_z, cand_logits, tail_log, mask, weights,
+                             group, components, histogram,
+                             rows=None) -> torch.Tensor:
+            """Per-item objective means from one group's per-position KL.
+
+            `cand_logits` are the candidate's -- the student whose confidence
+            this reads. Every component is averaged over the same scored
+            positions with the same fixed denominator, and kept per sub-type.
+            On the row path the inputs are the selected ROWS and only the
+            per-row scalars are scattered back; no ``[B, T, V]`` block is built.
+            """
+            t0 = time.perf_counter()
+            terms = position_terms(objective, kl, cand_logits, log_z,
+                                   tail_log if sketches.has_tail else None)
+            if rows is not None:
+                terms = {k: scatter_rows(v.float(), rows)
+                         for k, v in terms.items()}
+            means, _ = item_component_means(terms, mask, weights)
+            scored = mask.bool() if weights is None else (
+                mask.bool() & (weights.to(mask.device) > 0))
+            hist = confidence_histogram(terms["student_confidence"], scored)
+            for i, h in enumerate(hist):
+                histogram[i] += h
+            host = {k: v.tolist() for k, v in means.items()}
+            for row, item in enumerate(group.items):
+                bucket = components.setdefault(item["subtype"], {})
+                for name in OBJECTIVE_COMPONENTS:
+                    bucket.setdefault(name, []).append(host[name][row])
+            timing["objective_seconds"] += time.perf_counter() - t0
+            return means["objective"]
 
         def score(skip: frozenset[int]) -> float:
             per_subtype: dict[str, list[float]] = {}
+            components: dict[str, dict[str, list[float]]] = {}
+            histogram = [0] * 10
             timing["candidate_subsets"] += 1
             item_started = time.perf_counter()
             for group, indices in groups:
@@ -257,10 +313,17 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     timing["ablated_seconds"] += t2 - t1
                     timing["ablated_forwards"] += 1
                     timing["ablated_items"] += len(group.items)
-                    kl = sketch_forward_kl(idx, lp, tail, abls,
-                                           has_tail=sketches.has_tail)
-                    values = masked_item_means(scatter_rows(kl, rows), mask,
-                                               weights=batch_weights)
+                    if objective is None:
+                        kl = sketch_forward_kl(idx, lp, tail, abls,
+                                               has_tail=sketches.has_tail)
+                        values = masked_item_means(scatter_rows(kl, rows), mask,
+                                                   weights=batch_weights)
+                    else:
+                        kl, log_z = sketch_forward_kl_terms(
+                            idx, lp, tail, abls, has_tail=sketches.has_tail)
+                        values = objective_values(
+                            kl, log_z, abls, tail, mask, batch_weights, group,
+                            components, histogram, rows=rows)
                     for item, value in zip(group.items, values.tolist()):
                         per_subtype.setdefault(item["subtype"], []).append(value)
                         timing["distortion_calls"] += 1
@@ -330,7 +393,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                     batch_weights = (None if active is None else
                                      active.prediction_weights_for(group, indices))
                     mask = group.prediction_mask().to(abls.device)
-                    if sketches is not None:
+                    if sketches is not None and objective is not None:
+                        idx, lp, tail = refs
+                        kl, log_z = sketch_forward_kl_terms(
+                            idx, lp, tail, abls, has_tail=sketches.has_tail)
+                        values = objective_values(
+                            kl, log_z, abls, tail, mask, batch_weights, group,
+                            components, histogram)
+                    elif sketches is not None:
                         idx, lp, tail = refs
                         values = sketch_forward_kl_mean_batch(
                             idx, lp, tail, abls, mask,
@@ -351,6 +421,25 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                             refs=refs, abls=abls, mask=mask,
                             weights=batch_weights, values=values,
                             support=support)
+                elif sketches is not None and objective is not None:
+                    dev = abls.device
+                    kl, log_z = sketch_forward_kl_terms(
+                        refs.support_indices.to(dev),
+                        refs.support_log_probs.to(dev),
+                        refs.tail_log_prob.to(dev), abls,
+                        has_tail=sketches.has_tail)
+                    item_w = (None if active is None else
+                              active.prediction_weights_for_item(indices[0]))
+                    value = objective_values(
+                        kl[None], log_z[None], abls[None],
+                        refs.tail_log_prob.to(dev)[None],
+                        torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
+                                   device=dev),
+                        None if item_w is None else item_w.to(dev)[None],
+                        group, components, histogram)
+                    per_subtype.setdefault(group.items[0]["subtype"], []).append(
+                        float(value[0]))
+                    timing["distortion_calls"] += 1
                 elif sketches is not None:
                     per_subtype.setdefault(group.items[0]["subtype"], []).append(
                         sketch_forward_kl_mean(
@@ -373,6 +462,14 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             timing["item_seconds"] += time.perf_counter() - item_started
             means = {k: sum(v) / len(v) for k, v in per_subtype.items()}
             primary, _ = domain_balanced_score(means, domains)
+            if objective is not None:
+                record = {}
+                for name in OBJECTIVE_COMPONENTS:
+                    by_subtype = {sub: sum(c[name]) / len(c[name])
+                                  for sub, c in components.items()}
+                    record[name], _ = domain_balanced_score(by_subtype, domains)
+                record["confidence_histogram"] = histogram
+                objective_candidates[_subset_key(skip)] = record
             return primary
 
         n_remove = ctx.parent_spec[DEPTH_FIELD] - ctx.target_spec[DEPTH_FIELD]
@@ -419,17 +516,25 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
         child = _build_child_with_layers(ctx, kept)
 
         final_score = result["rounds"][-1]["chosen_score"] if result["rounds"] else 0.0
+        values = {"op.depth.causal_kl.final": float(final_score),
+                  "op.depth.causal_kl.evaluations": float(result["evaluations"])}
+        if objective is not None and result["rounds"]:
+            #: Under an objective the chosen score IS the objective, so the KL
+            #: key carries the chosen subset's raw KL and the objective has its
+            #: own key -- the KL never silently means something else.
+            final = objective_candidates[_subset_key(result["removed"])]
+            values["op.depth.causal_kl.final"] = float(final["raw_kl"])
+            values["op.depth.objective.final"] = float(final["objective"])
         return OperatorOutcome(
             model=child,
             local_metrics=OperatorLocalMetrics(
                 impl_id=self.impl_id,
                 objective=self.objective,
                 reference="parent_state",
-                values={
-                    "op.depth.causal_kl.final": float(final_score),
-                    "op.depth.causal_kl.evaluations": float(result["evaluations"]),
-                },
-                detail={"removal_order": result["removal_order"]}),
+                values=values,
+                detail={"removal_order": result["removal_order"],
+                        **({} if objective is None else
+                           {"scoring_objective": objective.qualified_id})}),
             trace={"micro_batch_size": batch_size,
                    #: Execution evidence, recorded even at the default so a run's
                    #: trace states which grouping its forwards used.
@@ -442,6 +547,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                    #: actually restricted.
                    "scoring_positions": (None if active is None
                                          else active.report()),
+                   **({} if objective is None else
+                      {"scoring_objective": objective.as_dict()}),
                    "kept_layers": kept, "removed_layers": result["removed"],
                    "removal_order": result["removal_order"],
                    "source": "causal_kl_greedy"},
@@ -452,6 +559,8 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
             # have free. The numbers are identical either way, so the decision
             # belongs with the byproducts.
             artifacts={"search_rounds": result["rounds"],
+                       **({} if objective is None else
+                          {"objective_candidates": objective_candidates}),
                        "reference_cache": (reference or sketches).decision(),
                        # Operational only. `artifacts` is already excluded from
                        # the trace and from state identity — see the note above
@@ -462,6 +571,11 @@ class DepthCausalKLGreedyV1(OperatorImplementation):
                        "reference_counters": (reference or sketches).counters()},
         )
 
+
+
+def _subset_key(skip) -> str:
+    """A candidate subset as a record key: its layers, ascending."""
+    return ",".join(str(i) for i in sorted(int(x) for x in skip))
 
 
 def _domain_map(items) -> dict[str, list[str]]:

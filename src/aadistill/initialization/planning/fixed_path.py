@@ -256,6 +256,10 @@ class FixedPathSpec:
     #: with each other and with nothing else.
     position_policy: Any = None
     distribution_support: Any = None
+    #: The run's `ScoringObjective`, for a path a student-confidence search
+    #: produced. Same contract as the two above: it changes what a consuming
+    #: operator computes, so a replay must run under the one that ran.
+    scoring_objective: Any = None
 
     def __post_init__(self) -> None:
         if not self.steps:
@@ -303,6 +307,8 @@ class FixedPathSpec:
                      self.distribution_support.as_dict()}),
             **({} if self.position_policy is None
                else {"position_policy": self.position_policy.policy_hash}),
+            **({} if self.scoring_objective is None
+               else {"scoring_objective": self.scoring_objective.as_dict()}),
         }
 
     @property
@@ -629,7 +635,7 @@ def _run_steps(
         operator_config = hashed_operator_config(
             implementation=impl, policy=spec.position_policy,
             support=spec.distribution_support, items=items,
-            declared=step.config)
+            declared=step.config, objective=spec.scoring_objective)
         #: PINNED INPUTS, CHECKED BEFORE THE OPERATOR RUNS. The output pin is
         #: what the path exists for, but it only speaks afterwards: the DEPTH
         #: operator takes half an hour to tell you its inputs were wrong. This
@@ -680,6 +686,7 @@ def _run_steps(
             #: reference support.
             **({} if spec.distribution_support is None
                else {"distribution_support": spec.distribution_support}),
+            scoring_objective=spec.scoring_objective,
             stats_cache=cache,
             stats_cache_key=(
                 None if parent_digest is None else stats_cache_key(

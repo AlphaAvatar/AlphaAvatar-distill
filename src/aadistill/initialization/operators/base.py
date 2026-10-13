@@ -188,6 +188,11 @@ class OperatorContext:
     #: because nothing between the driver's affordability check and the cost
     #: watchdog ever consulted a clock.
     deadline: Any = None
+    #: WHAT A KL-SCORED DECISION MINIMIZES, when it is not the KL alone: a
+    #: `ScoringObjective` adding the candidate student's own confidence. Run-level
+    #: like the support, and consumed only by implementations that declare
+    #: `consumes_scoring_objective`; `None` is the historical KL-only objective.
+    scoring_objective: Any = None
 
     def cached_stats(self, collect):
         """Statistics for this parent under this profile, collected at most once."""
@@ -243,6 +248,11 @@ class OperatorImplementation(ABC):
     preserves: frozenset[str] = frozenset()
     calibration: CalibrationNeed = CalibrationNeed.NONE
     objective: str = ""
+    #: Whether this implementation's SELECTION reads a run's `ScoringObjective`.
+    #: Not part of `signature()`: adding it there would move every frozen
+    #: implementation's signature hash, and the objective an invocation used is
+    #: bound where it varies -- in the hashed operator config.
+    consumes_scoring_objective: bool = False
     deterministic: bool = True
     requires_seed: bool = False
     produces: tuple[str, ...] = ()
@@ -358,6 +368,25 @@ class OperatorImplementation(ABC):
                 "state id is derived from, so a mismatch records a divergence "
                 "that was not the one computed. Under the full-vocabulary "
                 "contract the config key is ABSENT, not null.")
+        #: AND THE OBJECTIVE, by the same two-sides rule. An implementation
+        #: that consumes one must be handed the object its config declares; one
+        #: that does not must not declare it, because its state id would then
+        #: name an objective its selection never read.
+        declared_objective = (ctx.config or {}).get("scoring_objective")
+        actual_objective = (None if ctx.scoring_objective is None
+                            else ctx.scoring_objective.as_dict())
+        if self.consumes_scoring_objective:
+            if declared_objective != actual_objective:
+                raise ContractViolation(
+                    f"{self.impl_id}: config declares scoring objective "
+                    f"{declared_objective!r} but was handed "
+                    f"{actual_objective!r}. The declared value is what the "
+                    "state id is derived from.")
+        elif declared_objective is not None:
+            raise ContractViolation(
+                f"{self.impl_id} does not consume a scoring objective, so its "
+                "config may not declare one; the state id would name an "
+                "objective the selection never read")
         outcome = self.apply(ctx)
         if outcome.model is ctx.model:
             raise ContractViolation(

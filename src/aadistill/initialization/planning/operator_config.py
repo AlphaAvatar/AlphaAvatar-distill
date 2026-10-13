@@ -45,6 +45,7 @@ from typing import Any
 from aadistill.infrastructure.manifest import sha256_json
 from aadistill.initialization.calibration.profiles import consumes_calibration
 from aadistill.initialization.scoring.content import scoring_content_config
+from aadistill.initialization.scoring.objective import objective_config
 from aadistill.initialization.scoring.positions import policy_config
 
 #: Keys the EXECUTOR owns and a caller may not declare. `n_calibration_items`
@@ -96,9 +97,26 @@ def distribution_support_config(support: Any) -> dict[str, Any]:
     return {"distribution_support": support.as_dict()}
 
 
+def scoring_objective_config(implementation: Any,
+                             objective: Any) -> dict[str, Any]:
+    """The run's scoring objective as hashed config, for an operator that uses it.
+
+    `{}` when no objective is declared, and `{}` for an implementation that
+    does not declare `consumes_scoring_objective`: an operator whose selection
+    never reads the objective produces the same child under any objective, and
+    forking its state id would manufacture byte-identical states under two
+    names -- the reason a weight-only operator carries no position policy.
+    """
+    if objective is None or not getattr(implementation,
+                                        "consumes_scoring_objective", False):
+        return {}
+    return objective_config(objective)
+
+
 def hashed_operator_config(*, implementation: Any, policy: Any,
                            support: Any, items: Sequence[Any],
-                           declared: Mapping[str, Any] | None = None
+                           declared: Mapping[str, Any] | None = None,
+                           objective: Any = None,
                            ) -> dict[str, Any]:
     """Everything an operator is applied with, including `n_calibration_items`.
 
@@ -120,6 +138,7 @@ def hashed_operator_config(*, implementation: Any, policy: Any,
         "n_calibration_items": len(items),
         **position_policy_config(implementation, policy, items),
         **distribution_support_config(support),
+        **scoring_objective_config(implementation, objective),
         **extra,
     }
 

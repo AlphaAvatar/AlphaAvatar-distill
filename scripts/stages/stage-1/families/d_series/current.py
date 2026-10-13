@@ -86,7 +86,26 @@ def build(repo_root: Path = REPO) -> dict[str, Any]:
                 "it for readiness on 2026-10-03 and it is kept as provenance"),
         },
         "shared_evaluation": _shared_evaluation(repo_root),
+        "objectives": _objectives(repo_root),
         "authorizes": "nothing",
+    }
+
+
+def _objectives(repo_root: Path) -> dict[str, Any] | None:
+    """Where D2's and D3's registered objectives live. Navigation only."""
+    from stages.d_series import objectives
+
+    path = repo_root / objectives.CONTRACT
+    if not path.is_file():
+        return None
+    record = json.loads(path.read_text())
+    return {
+        "contract": objectives.CONTRACT,
+        "contract_hash": record["contract_hash"],
+        "design": "logs/stages/stage-1/families/d_series/plans/"
+                  "d2_d3_objective_design.md",
+        "d2_objective_hash": record["d2"]["objective_hash"],
+        "d3_status": record["d3"]["status"].split(":")[0],
     }
 
 

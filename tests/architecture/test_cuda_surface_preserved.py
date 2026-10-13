@@ -1838,6 +1838,61 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "scored path is owed by the R0 validation in "
             "phase_d1/analyses/d1_followup_technical_review_and_next_round.md.",
      }),
+    ("d83def1a595836961a0e2e79daa3af77662da2b6",
+     "student-confidence scoring objectives (D2/D3 contract, 2026-10-13)",
+     {
+        "src/aadistill/initialization/scoring/objective.py":
+            "NEW: `ScoringObjective` with two forms (student-uncertainty-"
+            "weighted KL; KL minus a student-confidence reward), the student's "
+            "own Top-K conditional entropy, the fixed-denominator per-item "
+            "reducer and the binary-weight refusal. Generic: no K, lambda, "
+            "experiment or model value. Used only when an objective is "
+            "declared.",
+        "src/aadistill/initialization/scoring/support.py":
+            "`sketch_forward_kl_terms` returns the KL AND the candidate "
+            "log-normalizer it already computed; `sketch_forward_kl` is its "
+            "first element, operation for operation. "
+            "`distortion_on_reference_support` gains an optional "
+            "`position_sink` that reads each block's KL and log-normalizer; "
+            "absent, the arithmetic is unchanged.",
+        "src/aadistill/initialization/scoring/protocol_identity.py":
+            "ReductionSemantics gains an optional `scoring_objective`, "
+            "serialized only when set, so every existing measurement protocol "
+            "id is byte-identical.",
+        "src/aadistill/initialization/planning/operator_config.py":
+            "`scoring_objective_config`: the objective joins the hashed "
+            "operator config only for implementations declaring "
+            "`consumes_scoring_objective`; `{}` otherwise, so no historical "
+            "config hash moves.",
+        "src/aadistill/initialization/operators/base.py":
+            "OperatorContext.scoring_objective (default None); the class flag "
+            "`consumes_scoring_objective` (NOT in `signature()`, so no "
+            "implementation signature hash moves); `execute` refuses a "
+            "declared objective that disagrees with the handed one, or one "
+            "declared on a non-consuming operator.",
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "consumes a declared objective on all three reference-support row "
+            "paths: the candidate's own Top-K entropy from the SAME candidate "
+            "forward, per-item fixed-denominator means, per-candidate "
+            "component records in artifacts. Refused on full_vocab_v1. With "
+            "no objective the historical branches are unchanged.",
+        "src/aadistill/initialization/planning/metrics.py":
+            "StateEvaluator(scoring_objective=...): `_ObjectiveAccumulator` "
+            "forms the objective from the reducer's position sink and the "
+            "candidate logits, adding `state.objective.*`; the KL metrics are "
+            "unchanged (tested equal). Refused on full_vocab_v1 and with "
+            "continuous position weights.",
+        "src/aadistill/initialization/planning/search.py":
+            "SearchConfig.scoring_objective (absent from as_dict when None); "
+            "plumbed to the operator config and context; refuses a measurer "
+            "or a measurement under another objective and a ranking policy "
+            "that does not rank on `state.objective.*` exactly when an "
+            "objective is declared.",
+        "src/aadistill/initialization/planning/fixed_path.py":
+            "FixedPathSpec.scoring_objective (absent from as_dict when None), "
+            "passed to the operator config and context so a path replays "
+            "under the objective it ran with.",
+     }),
 )
 
 
@@ -1921,6 +1976,9 @@ CURRENT_CUDA_SURFACE = (
     #: scored-row forward it runs under `prediction_rows="scored_v1"`.
     "src/aadistill/initialization/scoring/support.py",
     "src/aadistill/initialization/scoring/rows.py",
+    #: The student Top-K entropy DEPTH runs per candidate under a declared
+    #: scoring objective. CPU-verified; owes the GPU validation with D2.
+    "src/aadistill/initialization/scoring/objective.py",
 )
 
 #: Backwards-compatible alias for the constraint that a declared core change may

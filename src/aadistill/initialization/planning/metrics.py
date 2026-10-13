@@ -47,6 +47,10 @@ from aadistill.initialization.calibration.packing import (
 )
 from aadistill.initialization.execution import ExecutionConfig
 from aadistill.initialization.scoring.content import scoring_content_identity
+from aadistill.initialization.scoring.objective import (
+    COMPONENTS as OBJECTIVE_COMPONENTS, ObjectiveError, confidence_histogram,
+    item_component_means, position_terms, require_binary_scoring_weights,
+)
 from aadistill.initialization.scoring.protocol_identity import (
     PROTOCOL_FIELD,
     ReductionSemantics,
@@ -129,6 +133,11 @@ class StateEvaluator:
         #: `measurement_protocol_id` byte-identical -- see `ReductionSemantics`.
         #: `reference_topk_tail_v1` is a different measurement and moves the id.
         distribution_support: DistributionSupport = FULL_VOCAB_V1,
+        #: WHAT IS AVERAGED, when it is not the KL alone: a `ScoringObjective`
+        #: adding the candidate's own Top-K confidence. `None` keeps the
+        #: historical KL-only metrics and every protocol id byte-identical; a
+        #: declared objective ADDS `state.objective.*` and moves the id.
+        scoring_objective: Any = None,
     ) -> None:
         if not items:
             raise MeasurementError(f"{suite.qualified_id}: no items to score")
@@ -228,9 +237,22 @@ class StateEvaluator:
         self._ref_sketches: dict[str, ReferenceDistributionSketch] = {}
         self._sketch_cache_bytes = 0
         self.cache_budget_bytes = int(cache_budget_bytes)
+        self.scoring_objective = scoring_objective
+        if scoring_objective is not None:
+            if distribution_support.is_full_vocab:
+                raise MeasurementError(
+                    f"scoring objective {scoring_objective.qualified_id} is "
+                    "defined on the reference Top-K + tail KL; full_vocab_v1 "
+                    "is the KL-only oracle")
+            for weights in (self._weights or {}).values():
+                try:
+                    require_binary_scoring_weights(weights)
+                except ObjectiveError as exc:
+                    raise MeasurementError(str(exc)) from exc
         self.reduction = ReductionSemantics(
             chunk=int(chunk), reference_strategy=reference_strategy.value,
-            distribution_support=distribution_support)
+            distribution_support=distribution_support,
+            scoring_objective=scoring_objective)
         self.measurement_protocol_id = measurement_protocol_id(
             suite_structural_identity=suite.suite_hash,
             suite_content_identity=(suite_content_sha256
@@ -575,6 +597,9 @@ class StateEvaluator:
 
         per_subtype: dict[str, DistortionSums] = {}
         totals = DistortionSums()
+        objective_acc = (None if self.scoring_objective is None
+                         else _ObjectiveAccumulator(self.scoring_objective,
+                                                    self.suite.critical_tags))
         for item, ref, cand, select in self._logit_pairs(model):
             if cand.shape != ref.shape:
                 raise MeasurementError(
@@ -617,10 +642,16 @@ class StateEvaluator:
                 #: `_sketch_for` honours that split -- it caches when the
                 #: reference strategy says to and recomputes otherwise, and the
                 #: numbers are identical either way.
+                sketch = (self._sketch_for(item, ref) if select is None
+                          else self._sketch_for(item, ref, targets))
+                #: The objective reads the per-position KL and log-normalizer
+                #: the reducer computes anyway; the sink cannot change a sum.
+                sink = None if objective_acc is None else objective_acc.sink()
                 sums = distortion_on_reference_support(
-                    (self._sketch_for(item, ref) if select is None
-                     else self._sketch_for(item, ref, targets)),
-                    cand, targets, tags=tags, weights=weights, chunk=self.chunk)
+                    sketch, cand, targets, tags=tags, weights=weights,
+                    chunk=self.chunk, position_sink=sink)
+                if objective_acc is not None:
+                    objective_acc.add_item(item, cand, sketch, weights, tags)
             if full_tags is not None:
                 _restore_unselected_counts(sums, select, full_tags)
             per_subtype.setdefault(item.subtype, DistortionSums()).merge(sums)
@@ -657,6 +688,11 @@ class StateEvaluator:
         general = self.suite.general_domain
         if general and general in per_domain_ce:
             values["state.nll.general"] = float(per_domain_ce[general])
+
+        objective_detail = None
+        if objective_acc is not None:
+            objective_values, objective_detail = objective_acc.finish(domain_map)
+            values.update(objective_values)
 
         tagged = agg["tagged"]
         for tag, entry in tagged.items():
@@ -702,9 +738,138 @@ class StateEvaluator:
                     #: batch shape is a numerical condition and the fingerprint
                     #: that binds it lives on the state, not here.
                     "execution": self.execution.as_trace(),
-                    "reference_path": self._reference_path},
+                    "reference_path": self._reference_path,
+                    **({} if objective_detail is None
+                       else {"objective": objective_detail})},
             runtime=dict(runtime or {}),
         )
+
+
+class _ObjectiveAccumulator:
+    """Per-item student-confidence objective terms, aggregated like the KL.
+
+    Per item: every component averaged over the item's scored positions with
+    the fixed denominator ``T_x``. Then the sub-type mean of item means, then
+    `domain_balanced_score` -- per item first, never a token pool across items.
+    Critical-token classes follow the same rule: per item over that item's
+    scored class positions, then the mean over items, then the unweighted mean
+    over classes.
+    """
+
+    def __init__(self, objective: Any, critical_tags: Sequence[str]) -> None:
+        self.objective = objective
+        self.critical_tags = tuple(critical_tags)
+        self.per_subtype: dict[str, dict[str, list[float]]] = {}
+        self.per_class: dict[str, list[float]] = {}
+        self.per_item: dict[str, dict[str, float]] = {}
+        self.histogram = [0] * 10
+        self.confidences: list[torch.Tensor] = []
+        self.components: list[torch.Tensor] = []
+        self._kl: list[torch.Tensor] = []
+        self._log_z: list[torch.Tensor] = []
+
+    def sink(self):
+        self._kl, self._log_z = [], []
+
+        def take(start: int, stop: int, kl: torch.Tensor,
+                 log_z: torch.Tensor) -> None:
+            self._kl.append(kl.detach())
+            self._log_z.append(log_z.detach())
+        return take
+
+    @torch.no_grad()
+    def add_item(self, item: Any, cand: torch.Tensor, sketch: Any,
+                 weights: torch.Tensor | None,
+                 tags: Mapping[str, torch.Tensor]) -> None:
+        kl = torch.cat(self._kl)
+        log_z = torch.cat(self._log_z)
+        terms = position_terms(
+            self.objective, kl, cand, log_z,
+            sketch.tail_log_prob.to(kl.device)
+            if sketch.top_k < sketch.vocab_size else None)
+        mask = torch.ones(1, int(kl.shape[0]), dtype=torch.bool,
+                          device=kl.device)
+        w = None if weights is None else weights.to(kl.device)[None]
+        means, counts = item_component_means(
+            {k: v[None] for k, v in terms.items()}, mask, w)
+        scored = mask[0] if w is None else (w[0] > 0)
+        record = {name: float(means[name][0]) for name in OBJECTIVE_COMPONENTS}
+        record["scored_positions"] = int(counts[0])
+        self.per_item[item.item_id] = record
+        bucket = self.per_subtype.setdefault(item.subtype, {})
+        for name in OBJECTIVE_COMPONENTS:
+            bucket.setdefault(name, []).append(record[name])
+        for tag in self.critical_tags:
+            if tag not in tags:
+                continue
+            m = tags[tag].to(kl.device).bool() & scored
+            n = int(m.sum())
+            if n:
+                self.per_class.setdefault(tag, []).append(
+                    float(terms["objective"][m].double().sum()) / n)
+        for i, h in enumerate(confidence_histogram(
+                terms["student_confidence"], scored)):
+            self.histogram[i] += h
+        self.confidences.append(terms["student_confidence"][scored].float().cpu())
+        self.components.append(terms["component"][scored].float().cpu())
+        self._kl, self._log_z = [], []
+
+    def finish(self, domain_map: Mapping[str, Sequence[str]]
+               ) -> tuple[dict[str, float], dict[str, Any]]:
+        name_of = {"component": self.objective.component_name()}
+        values: dict[str, float] = {}
+        per_domain_all: dict[str, dict[str, float]] = {}
+        for name in OBJECTIVE_COMPONENTS:
+            by_subtype = {sub: sum(c[name]) / len(c[name])
+                          for sub, c in self.per_subtype.items()}
+            primary, per_domain = domain_balanced_score(by_subtype, domain_map)
+            label = name_of.get(name, name)
+            per_domain_all[label] = per_domain
+            if name == "objective":
+                values["state.objective.equal_domain_mean"] = float(primary)
+                values["state.objective.worst_domain"] = float(
+                    max(per_domain.values()))
+                for domain, score in per_domain.items():
+                    values[f"state.objective.domain.{domain}"] = float(score)
+            else:
+                values[f"state.objective.{label}.equal_domain_mean"] = float(
+                    primary)
+        values["state.objective.raw_kl.worst_domain"] = float(
+            max(per_domain_all["raw_kl"].values()))
+        class_means = {tag: sum(v) / len(v)
+                       for tag, v in self.per_class.items() if v}
+        for tag, v in class_means.items():
+            values[f"state.objective.critical_token.{tag}"] = float(v)
+        present = [class_means[t] for t in self.critical_tags if t in class_means]
+        if present:
+            values["state.objective.critical_token"] = float(
+                sum(present) / len(present))
+        counts = sorted(r["scored_positions"] for r in self.per_item.values())
+        conf = torch.cat(self.confidences) if self.confidences else None
+        comp = torch.cat(self.components) if self.components else None
+        qs = (0.05, 0.25, 0.5, 0.75, 0.95)
+
+        def quantiles(x: torch.Tensor | None) -> dict[str, float] | None:
+            if x is None or x.numel() == 0:
+                return None
+            q = torch.quantile(x.double(), torch.tensor(qs, dtype=torch.float64))
+            return {f"p{int(p * 100):02d}": float(v) for p, v in zip(qs, q)}
+
+        detail = {
+            "definition": self.objective.as_dict(),
+            "per_domain": per_domain_all,
+            "critical_classes": class_means,
+            "scored_positions": {
+                "items": len(counts), "total": int(sum(counts)),
+                "min": counts[0] if counts else 0,
+                "median": counts[len(counts) // 2] if counts else 0,
+                "max": counts[-1] if counts else 0},
+            "confidence_histogram": list(self.histogram),
+            "confidence_quantiles": quantiles(conf),
+            f"{name_of['component']}_quantiles": quantiles(comp),
+            "per_item": self.per_item,
+        }
+        return values, detail
 
 
 def _restore_unselected_counts(sums: DistortionSums, select: torch.Tensor,

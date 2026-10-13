@@ -109,6 +109,11 @@ from aadistill.initialization.specs.state import (
 )
 
 
+
+#: The metric namespace a `ScoringObjective`'s state measurement fills. A ranking
+#: policy ranks on it exactly when the search declares an objective.
+OBJECTIVE_METRIC_PREFIX = "state.objective."
+
 class SearchError(RuntimeError):
     """The search cannot proceed as configured."""
 
@@ -270,6 +275,14 @@ class SearchConfig:
     #: `src/aadistill` holds no `top_k` value: a campaign's K is the experiment
     #: layer's, supplied as a `DistributionSupport`.
     distribution_support: DistributionSupport = FULL_VOCAB_V1
+    #: WHAT EVERY KL-SCORED DECISION AND THE BEAM METRIC MINIMIZE, when it is
+    #: not the KL alone: a `ScoringObjective` adding the candidate student's own
+    #: Top-K confidence. Run-level for the same reason as the two fields above --
+    #: a candidate chosen under one objective must not be pruned under another
+    #: -- and OMITTED from `as_dict` when `None`, so every committed search keeps
+    #: its `config_hash`. The ranking policy must rank on `state.objective.*`
+    #: exactly when this is set; `BeamSearch` refuses a mismatch.
+    scoring_objective: Any = None
     #: The measurement protocol the injected measurer takes its numbers under,
     #: as declared by the driver that built it — `StateEvaluator` exposes it as
     #: `measurement_protocol_id`. ONE field covering the suite's content, the
@@ -330,6 +343,9 @@ class SearchConfig:
             #: point of putting it here.
             **({} if self.distribution_support.is_full_vocab else
                {"distribution_support": self.distribution_support.as_dict()}),
+            #: ABSENT when no objective is declared -- same rule, same reason.
+            **({} if self.scoring_objective is None else
+               {"scoring_objective": self.scoring_objective.as_dict()}),
             #: ABSENT when undeclared, for the same compatibility reason: a
             #: search recorded before measurement-protocol identity existed must
             #: still hash to the value its own record carries.
@@ -496,6 +512,35 @@ class BeamSearch:
                     f"reduces over {measurer_support.support_id}. The operators "
                     "would choose candidates under one partition and the beam "
                     "would prune them under another. Refused at construction.")
+        #: ONE OBJECTIVE for the operators, the measurer and the ranking. The
+        #: measurer half is a courtesy here, as for the support, and enforced
+        #: per measurement; the ranking half is only checkable here.
+        objective = self.config.scoring_objective
+        measurer_objective = getattr(measurer, "scoring_objective", None)
+        if hasattr(measurer, "scoring_objective"):
+            if ((None if measurer_objective is None
+                 else measurer_objective.as_dict())
+                    != (None if objective is None else objective.as_dict())):
+                raise SearchError(
+                    "this search's scoring objective and its measurer's "
+                    "differ; operators would choose under one objective and "
+                    "the beam would prune under another")
+        ranked_on_objective = [o.key for o in config.policy.objectives
+                               if o.key.startswith(OBJECTIVE_METRIC_PREFIX)]
+        if objective is None and ranked_on_objective:
+            raise SearchError(
+                f"ranking policy {config.policy.qualified_id} ranks on "
+                f"{ranked_on_objective} but this search declares no scoring "
+                "objective, so no measurement will carry those metrics")
+        if objective is not None and (len(ranked_on_objective)
+                                      != len(config.policy.objectives)):
+            raise SearchError(
+                f"this search minimizes {objective.qualified_id}, so its "
+                f"ranking policy must rank on {OBJECTIVE_METRIC_PREFIX}* only; "
+                f"{config.policy.qualified_id} ranks on "
+                f"{[o.key for o in config.policy.objectives]}. A candidate "
+                "selected under the objective and pruned under the KL is two "
+                "experiments reported as one")
         self.measurement_protocol_id = (
             declared or (str(measurer_protocol) if measurer_protocol else None))
 
@@ -728,6 +773,19 @@ class BeamSearch:
                 "beam metric must reduce over ONE partition; a candidate selected "
                 "on a Top-K objective and pruned on a full-vocabulary metric is "
                 "two experiments reported as one.")
+        #: AND THE SAME OBJECTIVE, read from what the measurer reduced. Absent
+        #: means the KL-only objective, which every historical record measured.
+        measured_objective = ((evaluation.detail or {}).get("reduction")
+                              or {}).get("scoring_objective")
+        expected_objective = (None if self.config.scoring_objective is None
+                              else self.config.scoring_objective.as_dict())
+        if measured_objective != expected_objective:
+            state.mark_invalid(
+                f"the measurer reduced under objective {measured_objective} but "
+                f"this search runs {expected_objective}")
+            raise SearchError(
+                f"{state.state_id}: {state.invalid_reason}. The operators and the "
+                "beam metric must minimize ONE objective.")
         #: AND THE WHOLE PROTOCOL, not only the policy. The check above catches
         #: a measurer scoring other POSITIONS; this catches the rest of the list
         #: — a measurer whose suite content, scoring content, reduction semantics
@@ -806,7 +864,8 @@ class BeamSearch:
         operator_config = hashed_operator_config(
             implementation=impl, policy=self.config.position_policy,
             support=self.config.distribution_support,
-            items=self.calibration_for(profile))
+            items=self.calibration_for(profile),
+            objective=self.config.scoring_objective)
         plan = impl.plan(parent.spec, self.config.target_spec, self.adapter, operator_config)
         config_hash = operator_config_hash(operator_config)
 
@@ -841,6 +900,7 @@ class BeamSearch:
             #: `OperatorImplementation.execute` refuses a disagreement between the
             #: two, so passing one without the other fails closed.
             distribution_support=self.config.distribution_support,
+            scoring_objective=self.config.scoring_objective,
             deadline=self.deadline)
 
         # Before the expansion, so a budget already spent does not buy one more

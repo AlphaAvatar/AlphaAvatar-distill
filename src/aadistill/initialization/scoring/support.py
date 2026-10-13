@@ -305,6 +305,7 @@ def distortion_on_reference_support(
     tags: Mapping[str, torch.Tensor] | None = None,
     weights: torch.Tensor | None = None,
     chunk: int = 512,
+    position_sink: Any = None,
 ) -> DistortionSums:
     """The six quantities, reduced on the reference's ``K+1`` partition.
 
@@ -327,6 +328,12 @@ def distortion_on_reference_support(
     ``weights`` and ``tags`` keep the semantics they have in the full reducer: a
     tag selects a diagnostic subset of positions, the weights say how much each
     position counts, and a tagged accumulator takes the product.
+
+    ``position_sink(start, stop, kl, cand_log_z)``, when given, receives each
+    block's per-position forward KL and candidate log-normalizer as soon as
+    they exist, so a per-position objective can be formed without a second
+    vocabulary-wide pass. It reads; it cannot change anything accumulated
+    here, and when absent nothing in this function's arithmetic differs.
     """
     if cand_logits.ndim != 2:
         raise ValueError(f"candidate logits must be [T, V], got "
@@ -413,6 +420,8 @@ def distortion_on_reference_support(
             kl = kl_support + _term(p_tail, p_tail_log, q_tail_log)
             #: Reverse KL on the SAME partition, roles swapped.
             rkl = rkl_support + _term(q_tail, q_tail_log, p_tail_log)
+        if position_sink is not None:
+            position_sink(start, stop, kl, cand_log_z.squeeze(-1))
 
         ref_ce = -sketch.target_log_prob[start:stop].to(device).float()
         agree = (cand_argmax
@@ -481,6 +490,27 @@ def sketch_forward_kl(support_indices: torch.Tensor,
                       *, has_tail: bool) -> torch.Tensor:
     """Per-position forward KL on the reference's ``K+1`` partition.
 
+    The KL half of :func:`sketch_forward_kl_terms`, which also returns the
+    candidate's log-normalizer; the arithmetic is the same operations in the
+    same order either way.
+    """
+    return sketch_forward_kl_terms(support_indices, support_log_probs,
+                                   tail_log_prob, cand_logits,
+                                   has_tail=has_tail)[0]
+
+
+def sketch_forward_kl_terms(support_indices: torch.Tensor,
+                            support_log_probs: torch.Tensor,
+                            tail_log_prob: torch.Tensor,
+                            cand_logits: torch.Tensor,
+                            *, has_tail: bool
+                            ) -> tuple[torch.Tensor, torch.Tensor]:
+    """``(kl, log_z)``: the forward KL and the candidate's log-normalizer.
+
+    ``log_z`` ``[...]`` is returned because a student-confidence objective
+    needs it for the Top-K mass, and recomputing a vocabulary-wide reduction
+    the KL has already paid for would double this reducer's cost.
+
     Generic over leading dimensions: ``support_indices`` and
     ``support_log_probs`` are ``[..., K]``, ``tail_log_prob`` is ``[...]`` and
     ``cand_logits`` is ``[..., V]``; the result is ``[...]``. ONE implementation
@@ -506,7 +536,7 @@ def sketch_forward_kl(support_indices: torch.Tensor,
     kl = _term(p_log.exp(), p_log, q_log).sum(dim=-1)
     if not has_tail:
         #: K >= V: no tail bucket exists.
-        return kl
+        return kl, log_z.squeeze(-1)
     p_tail_log = tail_log_prob.float()
     #: The candidate's tail from ITS OWN complement logits on the reference
     #: support. NOT `1 - sum(support)`, which crosses float32 resolution once the
@@ -516,7 +546,8 @@ def sketch_forward_kl(support_indices: torch.Tensor,
     #: UNCONDITIONAL. Only zero REFERENCE mass makes the forward term vanish, and
     #: `_term` is what decides that. A candidate with zero complement mass against
     #: a non-zero reference tail is `+inf`, and that is preserved.
-    return kl + _term(p_tail_log.exp(), p_tail_log, q_tail_log)
+    return (kl + _term(p_tail_log.exp(), p_tail_log, q_tail_log),
+            log_z.squeeze(-1))
 
 
 def sketch_forward_kl_mean(sketch: ReferenceDistributionSketch,

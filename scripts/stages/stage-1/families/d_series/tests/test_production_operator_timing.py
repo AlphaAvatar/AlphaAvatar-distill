@@ -70,6 +70,11 @@ JUSTIFIED_OMISSIONS = {
     #: part-way would produce a number for a partial invocation, which is worse
     #: than no number; the pod's own watchdog bounds the subrun instead.
     "deadline",
+    #: A student-confidence scoring objective (2026-10-13). This builder times
+    #: D1's KL-only path -- the Top-K adoption and R0 both validate exactly
+    #: that, and its default is None -- so omitting it is the measured path,
+    #: not a gap. A builder timing a D2/D3 invocation must pass it.
+    "scoring_objective",
 }
 
 
