@@ -224,7 +224,9 @@ def test_sidecar_ids_are_the_engines_and_verify_against_records(runs):
         records = {r["id"]: r for r in _records(
             tmp / "wrapped" / f"{stem}.generations.jsonl")}
         assert sorted(r["id"] for r in rows) == sorted(records)
+        assert header["not_yet_validated"].startswith("a real vLLM engine")
         for row in rows:
+            assert row["alignment"]["aligned"] is True
             assert row["output_token_ids"] == truth[row["request_id"]]
             rec = records[row["id"]]
             assert len(row["output_token_ids"]) == rec["generated_tokens"]
@@ -259,4 +261,5 @@ def test_verify_rows_catches_a_wrong_id_list():
     assert W.verify_rows([rec], good, [2])["exact"]
     bad = {"x": {**good["x"], "output_token_ids": [5, 6, 7]}}
     out = W.verify_rows([rec], bad, [2])
-    assert not out["exact"] and any("EOS" in p for p in out["problems"])
+    assert not out["exact"] and any("eos" in p for p in out["problems"])
+    assert W.row_alignment(rec, bad["x"], [2])["aligned"] is False

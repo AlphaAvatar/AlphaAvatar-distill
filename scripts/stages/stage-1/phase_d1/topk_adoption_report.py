@@ -150,14 +150,24 @@ def lines(doc: dict) -> list[str]:
         out.append(f"L  B rebuilt in {(lc.get('B') or {}).get('seconds')}s; "
                    f"lambda {cal.get('reward_scale')}; thresholds "
                    f"{cal.get('diagnostic_thresholds')}")
-        for name in ("state_eval", "depth_one_round"):
+        for name in ("state_eval", "d2_rows_state_eval", "depth_one_round",
+                     "depth_recompute_equivalence", "d2_rows_depth"):
             t = lc.get(f"timing_{name}") or {}
+            agree = t.get("agreement") or {}
             shown = {k: t.get(k) for k in (
                 "skipped", "failed", "overhead_factor",
                 "overhead_seconds_per_evaluation",
-                "overhead_seconds_per_candidate", "same_cache_mode")
+                "overhead_seconds_per_candidate", "same_cache_mode",
+                "cache_fix_validated", "within_tolerance",
+                "max_abs_difference", "exact", "recompute_slowdown")
                 if t.get(k) is not None}
-            out.append(f"   timing {name}: {shown or 'not reached'}")
+            shown.update({f"agreement.{k}": agree.get(k) for k in (
+                "within_tolerance", "max_relative_difference", "choice_agrees")
+                if agree.get(k) is not None})
+            out.append(f"   {name}: {shown or 'not reached'}")
+        verdict = lc.get("d2_scored_rows_equivalence") or {}
+        if verdict:
+            out.append(f"   D2 scored-rows equivalence: {verdict.get('verdict')}")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "

@@ -194,8 +194,10 @@ class TestRescoringIntegrationContract:
         assert exact["ids_source"] == "engine"
         assert exact["completion_ids"].tolist() == [[11, 13, 17]]
         #: A stratum whose sidecar did not verify is not trusted row by row.
+        unaligned = {**row, "alignment": {"aligned": False}}
         for sidecar in (None, ({"exact": False}, {"s1": row}),
-                        ({"exact": True}, {})):
+                        ({"exact": True}, {}),
+                        ({"exact": True}, {"s1": unaligned})):
             s = RR.trajectory_sample(self.RECORD, sidecar, retok)
             assert s["ids_source"] == "retokenized_text"
             assert s["completion_ids"].tolist() == [[11, 13]]

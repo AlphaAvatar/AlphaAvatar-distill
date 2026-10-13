@@ -220,6 +220,7 @@
     "hard_ceiling_usd": 33.3038
    },
    "pricing_in_force": "records_max",
+   "container_disk_gb": 400,
    "hard_records_max": {
     "minutes": 1744.3,
     "gpu_usd": 31.69,

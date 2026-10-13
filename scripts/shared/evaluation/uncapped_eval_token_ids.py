@@ -147,6 +147,20 @@ def _install(hook: _Hook, auto_tokenizer, generator_main) -> None:
     hook.restore = restore                       # type: ignore[attr-defined]
 
 
+def row_alignment(rec: dict, row: dict, stop_ids: list[int]) -> dict[str, bool]:
+    """One record's alignment checks, kept WITH its row in the sidecar."""
+    out, prompt = row["output_token_ids"], row["prompt_token_ids"]
+    checks = {
+        "count_matches_generated_tokens": len(out) == int(rec["generated_tokens"]),
+        "prompt_count_matches": len(prompt) == int(rec["prompt_tokens"]),
+        "decodes_to_recorded_text": row["raw_sha256"] == _sha(rec["raw"]),
+        "eos_agrees_with_stop_reason": ((bool(out) and out[-1] in stop_ids)
+                                        == (rec["stop_reason"] == "eos")),
+    }
+    checks["aligned"] = all(checks.values())
+    return checks
+
+
 def verify_rows(records: list[dict], rows: dict[str, dict],
                 stop_ids: list[int]) -> dict[str, Any]:
     """Per record: are these the ids the record's text was decoded from?"""
@@ -156,17 +170,9 @@ def verify_rows(records: list[dict], rows: dict[str, dict],
         if row is None:
             problems.append(f"{rec['id']}: no ids")
             continue
-        out, prompt = row["output_token_ids"], row["prompt_token_ids"]
-        if len(out) != int(rec["generated_tokens"]):
-            problems.append(f"{rec['id']}: {len(out)} ids vs "
-                            f"{rec['generated_tokens']} generated")
-        if len(prompt) != int(rec["prompt_tokens"]):
-            problems.append(f"{rec['id']}: prompt {len(prompt)} vs "
-                            f"{rec['prompt_tokens']}")
-        if row["raw_sha256"] != _sha(rec["raw"]):
-            problems.append(f"{rec['id']}: decoded text differs from the record")
-        if (bool(out) and out[-1] in stop_ids) != (rec["stop_reason"] == "eos"):
-            problems.append(f"{rec['id']}: EOS disagrees with stop_reason")
+        checks = row_alignment(rec, row, stop_ids)
+        problems += [f"{rec['id']}: {name}" for name, ok in checks.items()
+                     if name != "aligned" and not ok]
     extra = sorted(set(rows) - {str(r["id"]) for r in records})
     problems += [f"{i}: ids without a record" for i in extra]
     return {"records": len(records), "rows": len(rows),
@@ -194,6 +200,15 @@ def write_sidecars(hook: _Hook | None, outputs: list[tuple[str, Path]], *,
                      if rows else None)
             header = {
                 "schema": SCHEMA, "diagnostic_only": True,
+                "validated_environments": [
+                    "the real generator with a stub engine "
+                    "(tests/evaluation/test_uncapped_eval_token_ids.py)"],
+                "not_yet_validated": ("a real vLLM engine: required, with its "
+                                      "cost, before a behavioural driver "
+                                      "enables this wrapper"),
+                "separate_from_endpoint": ("never read by admission or "
+                                           "scoring; an unaligned row is used "
+                                           "only as a labelled approximation"),
                 "available": bool(rows),
                 "reason_unavailable": None if rows else (reason or "hook captured nothing"),
                 "exact": bool(check and check["exact"]),
@@ -208,12 +223,15 @@ def write_sidecars(hook: _Hook | None, outputs: list[tuple[str, Path]], *,
                 "hook_errors": (hook.errors[:20] if hook else []),
             }
             path = summary_path.with_name(f"{stem}{SIDECAR_SUFFIX}")
+            stops = list(summary.get("stop_ids") or [])
             with open(path, "w") as f:
                 f.write(json.dumps(header) + "\n")
                 for rec in records:
                     row = rows.get(str(rec["id"]))
                     if row is not None:
-                        f.write(json.dumps(row) + "\n")
+                        f.write(json.dumps({
+                            **row, "alignment": row_alignment(rec, row, stops)})
+                            + "\n")
         except Exception as exc:                   # noqa: BLE001
             print(f"[token-ids] sidecar for {stem} not written: "
                   f"{type(exc).__name__}: {exc}", file=sys.stderr, flush=True)

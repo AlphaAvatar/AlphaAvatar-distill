@@ -164,6 +164,9 @@ def trajectory_sample(record: Mapping[str, Any],
     """
     header, rows = sidecar if sidecar else ({}, {})
     row = rows.get(str(record.get("id"))) if header.get("exact") else None
+    #: A row that failed its own alignment is never treated as exact.
+    if row is not None and (row.get("alignment") or {}).get("aligned") is False:
+        row = None
     if row is not None:
         return {"record": record, "ids_source": "engine",
                 "prompt_ids": torch.tensor([row["prompt_token_ids"]]),
