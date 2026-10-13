@@ -568,6 +568,14 @@ inside the item. That follows from defining the statistic over supervised
 
 ### D2 — target-aware + reference-confidence weighting
 
+> **SUPERSEDED 2026-10-13 (maintainer decision).** This reference-confidence
+> definition is no longer D2. D2 now weights the KL by the **candidate
+> student's own Top-200 uncertainty**: `L(x) = (1/T_x) Σ (1 − c_s(t)) KL_t`,
+> where `c_s = 1 − H_s^(200)/log 200`, with a fixed per-item denominator. The
+> owner of the current definition is
+> [`d2_d3_objective_contract_v1.json`](../../families/d_series/plans/d2_d3_objective_contract_v1.json).
+> The text below is kept unchanged as history.
+
 From D1, add confidence weighting based on the **reference** distribution. For
 an active target position,
 
@@ -602,6 +610,15 @@ deliberately not built in D1's round: nothing consumed it, and the experiment
 that does is this one.
 
 ### D3 — target-aware + KL + pure student confidence
+
+> **SUPERSEDED 2026-10-13 (maintainer decision).** D3 now uses the **same
+> student Top-200 conditional entropy** as D2, not a full-vocabulary entropy,
+> and adds confidence as a separate reward: `L(x) = (1/T_x) Σ [KL_t − λ c_s(t)]`.
+> `λ` follows a registered rule: the inter-quartile-range ratio of per-item KL
+> to per-item confidence, measured on teacher vs. B before D3's search and
+> then frozen. The owner of the current definition is
+> [`d2_d3_objective_contract_v1.json`](../../families/d_series/plans/d2_d3_objective_contract_v1.json).
+> The text below is kept unchanged as history.
 
 A distinct experiment, and the maintainer's original hypothesis: student
 confidence itself becomes part of the evaluation rather than merely weighting

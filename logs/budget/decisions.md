@@ -10507,3 +10507,55 @@ on a paid pod.
   Each is bounded in the protocol's statistics and claim boundary.
 - **Revisit when:** R0 is granted, a D2 preregistration is put forward, or a
   `SHARED_GO` makes the fresh-confirmation control question concrete.
+
+## 2026-10-13 — D2/D3 objectives corrected: the candidate student's own Top-200 confidence
+
+- **Context:** the roadmap's D2 weighted KL by reference-distribution
+  confidence, and its D3 used full-vocabulary student entropy. The maintainer
+  replaced both before any D2/D3 work ran.
+- **Decision (maintainer):**
+  1. D1, D2 and D3 keep the same positions, profiles, Top-200 + tail KL,
+     geometry, operators, beam, recipe and behavioural endpoint.
+  2. D2 and D3 both read the candidate student's own Top-200 conditional
+     entropy:
+     - `H_s = −Σ_{S_t} q̃ log q̃` over its own Top-K, renormalized;
+     - `c_s = 1 − H_s / log 200`.
+  3. **D2:** `L = (1/T_x) Σ (1 − c_s) KL`. The denominator is fixed and never
+     `Σ w`. The aggregation is per item first, then D1's sub-type/domain rule.
+  4. **D3:** `L = (1/T_x) Σ [KL − λ c_s]`, with confidence as a separate reward
+     and never a weight. `λ > 0` is frozen before D3 from an independent
+     reference.
+  5. D2 and D3 have distinct identities. D1's frozen protocol and NO-GO, the
+     shared evaluation protocol and R0 are unchanged.
+  6. No paid resource is authorized.
+- **Implemented (engineering, $0):**
+  - generic core `scoring/objective.py`, bound into identity on
+    `distribution_support`'s route and absent when undeclared;
+  - DEPTH consumes it from the same candidate forward;
+  - the state evaluator adds `state.objective.*` with D1's metrics unchanged;
+  - the search refuses an objective/measurer/ranking mismatch;
+  - FFN/WIDTH/ATTENTION keep D1's local statistic, because no candidate
+    student exists at their selection. Their children receive the objective
+    through state evaluation and the beam, and the parent-confidence proxy is
+    not adopted;
+  - the λ rule is registered: the IQR ratio of per-item KL to confidence on
+    teacher vs. B, over 209 items. Its GPU measurement (about $0.55) is owed
+    before D3;
+  - records: `logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json`
+    and `d2_d3_objective_design.md`. The roadmap's old D2/D3 sections are
+    marked superseded and kept verbatim.
+- **Alternatives considered:**
+  - **A weight-sum denominator:** rejected by the maintainer, because it
+    cancels a uniform confidence rise.
+  - **Parent confidence as a proxy in the activation statistics:** not
+    adopted. It is not the candidate's confidence, and D3's reward has no
+    weight analogue.
+- **Risks:**
+  - D2 can be lowered by a candidate becoming confident at high-KL positions,
+    so raw KL is recorded beside every objective and a low D2 score is never
+    read as fidelity.
+  - D2/D3 state evaluation averages per item where D1 pooled tokens within a
+    sub-type, so `state.objective.raw_kl.*` separates the two effects.
+- **Revisit when:** the D2 driver and preregistration are put forward
+  (including the behavioural K, decided on screening ability and winner's
+  curse, not cost alone), or the λ session runs.

@@ -1,0 +1,132 @@
+{
+ "schema": "aadistill.d_series.objective_contract/v1",
+ "decided_by": "maintainer decision 2026-10-13 (logs/budget/decisions.md)",
+ "supersedes": "logs/stages/stage-1/phase_c1/plans/phase_c_roadmap.md, sections 'D2 -- target-aware + reference-confidence weighting' and 'D3 -- target-aware + KL + pure student confidence'. Kept verbatim there as history, with a pointer here.",
+ "shared_with_d1": {
+  "positions": "positions.supervised_target_v1@v1",
+  "calibration_profiles": [
+   "calib.domain_balanced@v1",
+   "calib.reasoning_heavy@v2"
+  ],
+  "kl_support": {
+   "support_id": "reference_topk_tail_v1",
+   "top_k": 200
+  },
+  "geometry_operators_beam": "D1's, unchanged",
+  "recovery_recipe": "e1_p1_kd_heavy@0.86M",
+  "behavioural_protocol": "d_series_shared_eval@v1, unchanged by this contract"
+ },
+ "d1": {
+  "objective": null,
+  "_meaning": "D1 declares no scoring objective; its per-item mean of the KL is the historical, KL-only path and its identities are untouched"
+ },
+ "aggregation_difference_from_d1": {
+  "depth": "none: D1's DEPTH already averages per item over T_x, then by sub-type and domain",
+  "state_evaluation": "D1's state KL pools TOKENS within a sub-type; the D2/D3 objective averages PER ITEM first, as the decision requires. So D2/D3 also record D1's KL under the per-item rule (state.objective.raw_kl.*), which separates the effect of the aggregation from the effect of confidence"
+ },
+ "d2": {
+  "objective": {
+   "schema": "aadistill.scoring_objective/v1",
+   "objective_id": "objective.d2_student_uncertainty_weighted_kl",
+   "version": 1,
+   "form": "student_uncertainty_weighted_kl",
+   "entropy_definition": "student_own_topk_conditional_entropy/v1",
+   "entropy_top_k": 200,
+   "confidence_mapping": "one_minus_entropy_over_log_k/v1",
+   "denominator": "scored_position_count/v1",
+   "item_aggregation": "per_item_fixed_denominator_then_caller_rule/v1",
+   "direction": "minimize"
+  },
+  "objective_hash": "999f002bee0701a5528480b8bcb66cd47bfcdd41cb88a7d175569f96fac81a01",
+  "formula": "L(x) = (1/T_x) sum_{t in T_x} (1 - c_t) KL_t, minimized",
+  "hypothesis": "a position the student is confident about needs less fidelity to the reference, even where its KL is large"
+ },
+ "d3": {
+  "objective_template": {
+   "schema": "aadistill.scoring_objective/v1",
+   "objective_id": "objective.d3_kl_minus_student_confidence",
+   "version": 1,
+   "form": "kl_minus_student_confidence_reward",
+   "entropy_definition": "student_own_topk_conditional_entropy/v1",
+   "entropy_top_k": 200,
+   "confidence_mapping": "one_minus_entropy_over_log_k/v1",
+   "denominator": "scored_position_count/v1",
+   "item_aggregation": "per_item_fixed_denominator_then_caller_rule/v1",
+   "direction": "minimize"
+  },
+  "reward_scale": null,
+  "objective_hash": null,
+  "status": "PENDING_LAMBDA: the rule is registered; the value is measured on the reference pair before D3's search",
+  "formula": "L(x) = (1/T_x) sum_{t in T_x} [KL_t - lambda c_t], minimized (S = -L maximized)",
+  "hypothesis": "student self-confidence earns a positive reward of its own that can offset part of a KL penalty",
+  "lambda_rule": {
+   "schema": "aadistill.d_series.d3_lambda_rule/v1",
+   "statistic": "per-item means over each item's scored positions (1/T_x)",
+   "formula": "lambda = IQR(item KL) / IQR(item confidence)",
+   "pooling": "every item of the three item sets once, unweighted; the per-set values are reported as sensitivity, never chosen",
+   "rounding": "3 significant figures",
+   "reference": {
+    "reference_model": "the original teacher, Qwen/Qwen3-4B-Thinking-2507 @ 768f209d",
+    "student_model": "the standing incumbent B, artifact 53e30566c5f795f1870d76c1fa6a970ddc507fa5459047f3010ffab8aa890342, rebuilt by stages.phase_c2.baseline.frozen_baseline_spec",
+    "item_sets": [
+     "calib.domain_balanced@v1",
+     "calib.reasoning_heavy@v2",
+     "state_eval_v1"
+    ],
+    "positions": "positions.supervised_target_v1@v1",
+    "kl": "reference_topk_tail_v1, K=200, reference = the teacher",
+    "entropy": "the student's own Top-200 conditional entropy"
+   },
+   "why_this_scale": "lambda converts confidence into KL units. Equating the two components' between-item spread on a reference pair means neither dominates the ranking by scale alone: one inter-quartile range of confidence is worth one inter-quartile range of KL. The IQR rather than the SD because per-item KL is heavy-tailed and the SD would let a few items set the trade-off.",
+   "why_this_reference": "a pair NO D-series search produced: the teacher every search starts from and the incumbent every candidate is compared with, at the geometry every search ends at. Measured before D2's search starts and never revised: a lambda chosen after seeing D2 or D3 search or behavioural results would be a selection on outcomes.",
+   "sensitivity_reported_not_used": [
+    "SD ratio",
+    "each item set alone",
+    "q2 as the student"
+   ],
+   "refusals": [
+    "IQR(item confidence) == 0",
+    "a non-finite or non-positive lambda",
+    "fewer than 20 items"
+   ],
+   "rule_hash": "5ba538c734079fa5b0e91c409040943509cb0c3b1a84999c06e0958b7c3190c8"
+  },
+  "lambda_record": "logs/stages/stage-1/families/d_series/analyses/d3_lambda_calibration.json"
+ },
+ "ranking": {
+  "policy": "beam.pareto_scoring_objective@v1",
+  "policy_hash": "836ae1d3667d72a51bc96b7168c382f31b387eb4183f22bff1e2e53aded8642e",
+  "objectives": [
+   "state.objective.equal_domain_mean",
+   "state.objective.worst_domain",
+   "state.objective.critical_token"
+  ],
+  "epsilon": {
+   "state.objective.equal_domain_mean": 0.0001,
+   "state.objective.worst_domain": 0.0001,
+   "state.objective.critical_token": 0.0001
+  }
+ },
+ "where_each_objective_applies": {
+  "depth.causal_kl_greedy_v1": "OPERATOR-LOCAL, exactly: the candidate is the parent with S bypassed, and its KL against the parent and its own Top-K entropy come from the same forward",
+  "ffn / residual_width / attention activation operators": "NOT operator-local. Their selection reads parent activation statistics and no candidate exists until it is made, so there is no candidate KL or confidence to weight. They keep D1's target-aware statistic, and their state ids do not fork. The objective reaches their children through state evaluation and the beam",
+  "state evaluation": "every child, against the original teacher; the student is the child itself",
+  "beam ranking and pruning": "beam.pareto_scoring_objective@v1"
+ },
+ "diagnostics_recorded": [
+  "raw KL",
+  "student Top-K entropy",
+  "student confidence",
+  "uncertainty weight (D2) / confidence reward (D3)",
+  "objective",
+  "scored positions per item",
+  "confidence histogram and quantiles",
+  "student Top-K mass",
+  "reference tail mass",
+  "D1's KL metrics, unchanged, beside them"
+ ],
+ "d2_degeneracy_watch": "a candidate can lower D2's objective by becoming more confident at high-KL positions. D2's ranking never sees raw KL, so raw KL, confidence and the weight distribution are recorded on every candidate and state, and a low D2 score is never read as higher fidelity",
+ "independence": "D3's definition, K and lambda rule are fixed in this record before D2 runs; no D2 behavioural or search result may adjust them",
+ "contract_hash": "81ca563c259c13425b61e6e24d54c6da76ced51a0ea7a4e6a75fb7e935b3317d",
+ "authorizes": "nothing"
+}

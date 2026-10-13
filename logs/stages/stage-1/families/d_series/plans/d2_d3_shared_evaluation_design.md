@@ -186,8 +186,11 @@ The savings in detail:
   forbids: (K+2)·2 + 9 probes, so 10 probes saved per experiment and 20
   across D2 and D3, about $31.
 - The figures exclude session setup, candidate materialization and the D2/D3
-  searches themselves. D1's search measured 552 min, $10.03, at full
-  vocabulary; Top-K and `scored_v1` should lower it.
+  searches themselves. D1's search measured 552 min, $10.03, already under
+  the Top-200 + tail support (corrected 2026-10-13: an earlier version of
+  this page said "at full vocabulary", which the search's own record
+  contradicts). For the D2/D3 search price, see
+  [`d2_d3_objective_design.md`](d2_d3_objective_design.md) §7.
 
 K is each experiment's preregistered choice, not this protocol's. At D1's
 measured spread, **K = 2** gives the best balance:
@@ -205,8 +208,8 @@ discriminates at 0.65.
 | --- | --- | --- | --- |
 | teacher corpus / tokenization | `corpus_v2`, tokenizer `7781771a…` | corpus hash, tokenizer sha | reused as is (R1 only *reads* it) |
 | calibration materialization | `calib.domain_balanced@v1`, `calib.reasoning_heavy@v2` items | profile qualified id + items sha | reused; **no new profile in D2/D3** |
-| teacher reference sketches | state-eval sketch (Top-200 + tail + exact target log-prob), DEPTH parent sketch | teacher revision, suite/profile content, support, execution fingerprint | rebuilt per session from cached inputs. D2 adds an entropy field computed at build time from the already-normalized row (one extra O(V) reduction); the entropy is not recoverable from Top-K + tail afterwards |
-| confidence statistics | D2 `c_ref` per (parent, profile) | parent digest + profile + policy hash (the stats-cache key shape) | cacheable per parent, like activation statistics; D3's candidate confidence is per candidate and never cached |
+| teacher reference sketches | state-eval sketch (Top-200 + tail + exact target log-prob), DEPTH parent sketch | teacher revision, suite/profile content, support, execution fingerprint | rebuilt per session from cached inputs, unchanged by D2/D3: the reference carries no confidence term under the 2026-10-13 definitions |
+| student confidence | the candidate's own Top-200 entropy, per position | the candidate's identity (subset S for DEPTH, artifact digest for a state) | **never cached across candidates**: it is computed from the same candidate forward as its KL (see [`d2_d3_objective_design.md`](d2_d3_objective_design.md)) |
 | D1 search journal, states | journal, Top-4 identities, q2 state `afd50c9f…` | state id + artifact digest | diagnostic only: D1's path re-scored under the D2/D3 objective as a fixed-reference comparison. Never a substitute for the full search |
 | B, q2 initialization | `53e30566…`, `3a4b4ede…` | artifact digest | not needed on the pod under the shared protocol; their measured units are imported instead |
 | recovery data, recipe, seeds | pack `6f324cb0…`, recipe digest `a4b0dcab…`, D1 seeds | as pinned | reused unchanged; identical by construction |
@@ -214,93 +217,24 @@ discriminates at 0.65.
 | generations, per-sample scores | durable store, hash-pinned | per-sample sha256 | **consumed directly** by ranking and verdict |
 | aggregates, bootstrap inputs | rows → `decision_inputs` | per-sample sha256 + bootstrap seed rule | recomputed off-pod at $0; bootstrap seed per (protocol, experiment, rung) |
 
-## 7. D2 and D3: what the objectives need that does not exist yet
+## 7. D2 and D3 objectives
 
-**The definitions** come from the roadmap (`phase_c1/plans/phase_c_roadmap.md`
-569–632).
+**Superseded 2026-10-13.** The maintainer corrected the D2/D3 objectives.
+Both now read the **candidate student's own Top-200 conditional entropy**:
 
-- **D2:**
-  - weight `w = target_mask · c_ref`, with `c_ref = 1 − H(p_ref)/log|V|`;
-  - the reference is the **intact parent** for operator-local statistics and
-    the **frozen teacher** for state evaluation.
-- **D3:**
-  - KL is kept, and `C_student = 1 − H(q)/log|V|` is added as a **separately
-    visible** component;
-  - both are joined in a preregistered combination whose normalization and
-    mixing are frozen from incumbent/reference calibration before any search
-    result.
+- D2 weights the KL by `1 − c` over a fixed denominator.
+- D3 adds `λc` as a separate reward.
 
-**What already holds in code:**
+The reference-confidence D2 and the full-vocabulary D3 that this section used
+to analyse are no longer the design. That text remains in commit `d83def1a`.
 
-- weights are float tensors with a `weighted` form;
-- the KL/CE/critical-token reducers form Σw denominators;
-- `scored_v1`'s row selection is a superset for any w ≥ 0;
-- the activation collectors **refuse** continuous weights by name
-  (`require_binary_token_weights`), so nothing silently rounds w to a mask.
-
-**D2 must implement:**
-
-1. **Model-dependent weights.** A weight producer that combines the pre-model
-   target mask with `c_ref` from a reference forward. Today every policy is
-   evaluated from tags alone, before any model runs (`positions.py:257–265`,
-   `metrics.py:161–167`).
-2. **Entropy in the reference sketch.** `sketch_reference` stores no entropy,
-   and the DEPTH parent sketch is built with all-zero targets, so neither can
-   provide `c_ref` today. The fix is one reduction over the already-normalized
-   row at build time.
-3. **Operator-local `c_ref` before the hooks fire.** FFN and attention
-   statistics are collected *during* the parent forward, so `c_ref` needs one
-   extra parent forward per (parent, profile), cached under the stats-cache
-   key.
-4. **Weighted collectors.** Weighted numerators, a float Σw `StatsSpec`
-   quantity, and divisors at **four** call sites:
-   - `uncentered_moment`;
-   - `ffn_neuron_importance`;
-   - `residual_covariance`;
-   - `head_write_energy`, which the roadmap's "three call sites" missed.
-
-   The `n < 2` guards need adjusting, and the binary refusal is relaxed only
-   on the new path.
-5. **Identity.** A new policy id binding the reference identity (parent digest
-   or teacher revision) and the entropy definition into the config hash and
-   the measurement protocol id.
-6. **Aggregation.** State evaluation pools within a subtype, while DEPTH
-   averages per item. The protocol must state which is meant under continuous
-   weights. Optionally, move `masked_item_means`' float32 denominator to
-   float64.
-
-**D3 must implement:**
-
-1. **Candidate entropy.** A full-vocabulary candidate-entropy reducer in both
-   state evaluation and DEPTH. The logits and normalizer already exist there.
-2. **New state metrics.** A confidence component plus the combined objective,
-   both bound into the protocol id, with a ranking objective and ε.
-3. **Frozen combination.** The normalization and mixing coefficient as a
-   hashed experiment-layer artifact, never in `src`.
-4. **No gaming channel.** `C_student` may never sit in a KL denominator; it
-   enters only as its own component.
-
-**Decisions owed before D3 can be preregistered:**
-
-- what "student" means for FFN, WIDTH and ATTENTION, which have no candidate
-  forward;
-- whether H is taken over the full vocabulary or over the K + 1 partition;
-- D3's mixing rule.
-
-On the first: read literally it is the parent's confidence, which makes D3
-identical to D2 on those operators.
-
-**For both, under `scored_v1`:** rows are selected by the **pre-model target
-mask only**. The confidence factor exists only after logits, so it multiplies
-in afterwards. Selecting rows by confidence would be circular, and the
-superset property holds because c ≥ 0.
-
-**Diagnostics to keep:**
-
-- Every D2/D3 state also reports D1's fixed-weight (`supervised_target_v1`)
-  metrics, so a candidate-dependent weighting can be read against a fixed
-  reference.
-- For D3, KL, raw confidence and the combined score are kept side by side.
+The current definitions, the operator-by-operator student-identity review, the
+implementation, the costs and the λ rule are in
+[`d2_d3_objective_design.md`](d2_d3_objective_design.md) and
+[`d2_d3_objective_contract_v1.json`](d2_d3_objective_contract_v1.json).
+The shared behavioural protocol on this page is unaffected: the objective
+changes what a search minimizes, not how candidates are trained, generated or
+scored.
 
 ## 8. R0 (see the plan)
 
@@ -365,14 +299,14 @@ This round adds **nothing** to `src/aadistill`.
 - Everything instance-specific lives in this family's script and records:
   - battery roles, seeds, digests and runs;
   - the GPU class, α and the family membership.
-- The D2/D3 core work in §7 is expressed through generic contracts:
-  - a weight producer that may depend on a model;
-  - a Σw statistics quantity;
-  - an entropy field on a reference sketch;
-  - adapters keep owning family structure.
+- The D2/D3 core work (2026-10-13) is generic:
+  - a `ScoringObjective` with two forms;
+  - the student Top-K entropy;
+  - a fixed-denominator reducer.
 
-  None of these names Qwen, D2, D3, a dimension or a ratio, so they serve any
-  stage, family, scale or topology.
+  It is bound into identity the same way `distribution_support` is. It names
+  no Qwen, D2, D3, dimension or ratio, and the instances live in
+  `scripts/stages/stage-1/families/d_series/objectives.py`.
 
 ## 10. R1 (Stage-0 teacher-native), when it is built
 

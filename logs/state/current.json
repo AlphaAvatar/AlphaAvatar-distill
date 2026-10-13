@@ -77,7 +77,7 @@
   "behavioural_design": "Top-4 candidates / 2 screening seeds / 3 confirmation seeds = 10 + 6 probes over 5 and 2 arms. Owner: d1_design.json.",
   "behavioural_pricing": "Owner: d1_design.json :: budget.chain; attempt bounds: the run's governance/authorization.json :: money.attempt_bounds.",
   "blockers": "NONE OPEN. Incumbent identity CORRECTED 2026-10-08 and the check kept armed. Evidence CLOSED. ENVELOPE RESOLVED_FITS. FUNDING AUTHORIZED 2026-10-05. Owner d1_design.json.",
-  "d2_owed_engineering": "model-dependent confidence weights, sketch entropy, weighted collectors (4 divisors), D3's combined objective. Owner: d2_d3_shared_evaluation_design.md section 7.",
+  "d2_owed_engineering": "D2 search driver + preregistration (K, raw-KL review threshold); D3 lambda GPU session (~$0.55). Core objective support DONE. Owner: d2_d3_objective_design.md section 10.",
   "execution_wiring": "SEARCH complete. SCREENING chain COMPLETE, tested at $0: driver with on-pod digest-pinned arm materialization, launcher, one-use issuer, preregistration, replay plan, sweep contract phase_d1_behavioural, dispatch branch, both pinned scorers. Confirmation verdict computation is owed before that launch. Owners: d1_design.json, the preregistration.",
   "family_and_sources": "d_series_behavioural_v1 BUILT and VERIFIED. Owner: logs/stages/stage-1/families/d_series/analyses/autoinit_d_series_family_manifest.json",
   "incumbent": "B = C1's PROMOTED TREATMENT, 53e30566..., attention.activation_importance_v1; state_id null, built as a fixed path, rebuilt on the pod. DERIVED from C1's verdict by phase_d_series/incumbent.py. The design named C1's BEATEN arm c313d1b4... until 2026-10-08. Owner: phase_d1/analyses/d1_control_arm_identity.json.",
@@ -128,7 +128,7 @@
   "launch_bound_ready": false,
   "owned_by": "logs/stages/stage-1/phase_c1/analyses/c1_pod_environment_verification.json"
  },
- "next": "MAINTAINER 2026-10-13: R0 -> D2 -> D3 on d_series_shared_eval@v1 (B/q2 D1 units imported, not retrained); R0 ready, needs a grant (hard ceiling $3.60). Owner: families/d_series/plans/d2_d3_shared_evaluation_design.md.",
+ "next": "MAINTAINER 2026-10-13: D2/D3 objectives corrected (student Top-200 confidence; D2 (1-c)KL fixed 1/T_x, D3 KL-lambda*c). R0 ready, needs a grant; then D2 driver+prereg. Owner: families/d_series/plans/d2_d3_objective_design.md.",
  "next_starting_point": {
   "accepted_incumbent": "B = frozen C1 treatment",
   "next_work": "R0 (granted separately), then D2's engineering and preregistration on the shared protocol; R1 at $0 in parallel. No provider resource exists.",

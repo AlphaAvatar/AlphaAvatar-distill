@@ -1,19 +1,19 @@
 {
  "schema": "aadistill.autoinit.c1_skip_predicate_audit/v1",
  "_what_this_is": "every skip construct in the C1-SELECTED suite, with the signal its condition reads and whether a pod sees the same premise. Written after attempt 5 died on a predicate keyed to the simulator.",
- "modules_scanned": 154,
+ "modules_scanned": 155,
  "test_ignores": [],
- "n_predicates": 46,
+ "n_predicates": 47,
  "by_signal": {
   "filesystem_premise_onpod": 11,
   "filesystem_premise_unresolved": 1,
   "gpu": 1,
-  "optional_dependency": 11,
+  "optional_dependency": 12,
   "repository_content": 2,
   "unrecognised": 14,
   "unstaged_artifact": 6
  },
- "n_differs_on_pod": 18,
+ "n_differs_on_pod": 19,
  "n_unrecognised": 15,
  "n_registered": 51,
  "registry": "configs/stages/stage-1/phase_c1/c1_skip_predicate_classification.json",
@@ -143,7 +143,7 @@
  "strict_cpu_test_parity_ready": "REVIEW",
  "parity_by_resolution": {
   "absent_on_both": 3,
-  "guaranteed_dependency": 11,
+  "guaranteed_dependency": 12,
   "normalized_by_contract": 14,
   "same_on_pod": 18
  },
@@ -573,6 +573,22 @@
    "parity_why": "every path it inspects is tracked or staged"
   },
   {
+   "file": "tests/initialization/test_scoring_objective.py",
+   "line": 24,
+   "kind": "importorskip",
+   "function": "<module>",
+   "condition": "pytest.importorskip(\"torch\")",
+   "expanded": "pytest.importorskip(\"torch\") | torch=pytest.importorskip(\"torch\")",
+   "signal": "optional_dependency",
+   "verdict": "differs_on_pod",
+   "why": "the pod's image is not the dev box's venv",
+   "nodeid": "tests/initialization/test_scoring_objective.py",
+   "readiness_group": null,
+   "registered_as": null,
+   "parity": "guaranteed_dependency",
+   "parity_why": "`torch>=2.6` is a HARD dependency in pyproject.toml's [project] dependencies, not an extra: the dev box resolves it through the `pytorch-cpu` index and every GPU pod runs a `runpod/pytorch:*-torch*` image that ships it, into whose interpreter setup installs the project. A machine where this import fails cannot run the project at all, so the skip fires on neither"
+  },
+  {
    "file": "tests/initialization/test_scoring_position_policy.py",
    "line": 71,
    "kind": "skipif",
@@ -992,5 +1008,5 @@
   }
  },
  "verdict": "REVIEW",
- "digest": "a6d72b3d06196ef0ebda4a84afc86b6ab125e7977178cc2873959d7e5713d942"
+ "digest": "c8540638dd6c0cfb8199d37205a2184ad372cfc08a4f8b1882effb4bac5d0e37"
 }

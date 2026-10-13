@@ -12,6 +12,19 @@ Start at [`README.md`](../README.md) if you do not know which document you want.
 **NOTHING IS RUNNING AND NOTHING IS BILLING.** The provider reports 0 pods,
 0 network volumes and $0/h (2026-10-12 16:09 UTC).
 
+**D2/D3 OBJECTIVES CORRECTED (maintainer decision, 2026-10-13).** Both read
+the candidate student's own Top-200 conditional entropy,
+`c_s = 1 − H_s/log 200`.
+- D2 minimizes `(1/T_x) Σ (1 − c_s) KL`, with a fixed denominator.
+- D3 minimizes `(1/T_x) Σ [KL − λ c_s]`, with λ frozen by a registered rule
+  before D3. The λ session is about $0.55 and is owed.
+- The generic core support is implemented and bound into identity, and is
+  absent when undeclared, so D1, R0 and the shared protocol are unchanged.
+- DEPTH and state evaluation use it exactly. FFN/WIDTH/ATTENTION keep D1's
+  local statistic, because no candidate exists at their selection.
+- Owner:
+  [`d2_d3_objective_design.md`](../stages/stage-1/families/d_series/plans/d2_d3_objective_design.md).
+
 **NEXT ROUND: R0 → D2 → D3 ON A SHARED BEHAVIOURAL EVALUATION (maintainer
 decision, 2026-10-13).** D2/D3 do not retrain B or q2.
 - A new, versioned protocol `d_series_shared_eval@v1` (`protocol_hash`

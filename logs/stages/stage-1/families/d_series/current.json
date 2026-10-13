@@ -78,5 +78,12 @@
       "d3_screening"
     ]
   },
+  "objectives": {
+    "contract": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_contract_v1.json",
+    "contract_hash": "81ca563c259c13425b61e6e24d54c6da76ced51a0ea7a4e6a75fb7e935b3317d",
+    "design": "logs/stages/stage-1/families/d_series/plans/d2_d3_objective_design.md",
+    "d2_objective_hash": "999f002bee0701a5528480b8bcb66cd47bfcdd41cb88a7d175569f96fac81a01",
+    "d3_status": "PENDING_LAMBDA"
+  },
   "authorizes": "nothing"
 }
