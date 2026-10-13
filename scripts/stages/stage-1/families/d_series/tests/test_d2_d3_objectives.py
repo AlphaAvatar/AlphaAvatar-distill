@@ -255,7 +255,7 @@ class TestTheContractStatesWhyAndWhereTheClaimsStop:
     def test_the_record_carries_the_objectives_it_declares(self):
         record = O.contract(REPO)
         assert record["d2"]["objective_hash"] == O.D2_OBJECTIVE.objective_hash
-        assert record["revision"] == 3
+        assert record["revision"] == 4
         assert record["d2"]["objective"]["aggregation"] == \
             "kl_path_weighting_per_consumer/v2"
 
@@ -284,7 +284,15 @@ class TestTheD2Budget:
         assert b["steps"]["d2_screening"]["n_probes"] == 8
         assert b["steps"]["d2_screening"]["n_arms_materialized"] == 4
         assert b["steps"]["d2_confirmation"]["n_probes"] == 3
-        assert b["every_session_under_cap"] is True
+        for k in ("d2_screening", "d2_confirmation"):
+            assert b["steps"][k]["hard"]["all_in_usd"] <= b["per_session_cap_usd"]
+        #: The search is reported, not assumed: under D1's recompute-mode
+        #: maxima it may exceed the cap, and the flag must say so.
+        search = b["steps"]["d2_search"]
+        assert b["every_session_under_cap"] == (
+            search["hard"]["all_in_usd"] <= b["per_session_cap_usd"])
+        assert search["hard_if_cache_fix_validated"]["all_in_usd"] <= \
+            b["per_session_cap_usd"]
 
     def test_the_unmeasured_diagnostic_is_not_in_any_ceiling(self):
         from stages.d_series import d2_budget as BUD
@@ -295,3 +303,159 @@ class TestTheD2Budget:
         assert b["totals"]["hard_ceiling_usd"] == pytest.approx(
             hard + b["steps"]["r0"]["hard"]["all_in_usd"])
         assert "only after" in b["totals"]["rescoring_excluded"]
+
+
+
+class TestTheContractCannotContradictItsAggregation:
+    """Revision 3 shipped with a stale sentence saying the state objective
+    averaged items equally. The contract is generated, so the check is on the
+    generator's output: no description may claim item-equal state weighting,
+    and the stated aggregation must be the one the objectives carry."""
+
+    STALE = ("per item first", "averages per item", "item-equal",
+             "items equally in the state", "per-item rule")
+
+    def _walk(self, obj, path=""):
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                yield from self._walk(v, f"{path}/{k}")
+        elif isinstance(obj, list):
+            for i, v in enumerate(obj):
+                yield from self._walk(v, f"{path}[{i}]")
+        elif isinstance(obj, str):
+            yield path, obj
+
+    def test_no_state_evaluation_text_claims_item_equal_weighting(self):
+        record = O.contract(REPO)
+        offenders = [
+            (path, text) for path, text in self._walk(record)
+            if "state" in path.lower() and "revision_history" not in path
+            and "aggregation_control/issue" not in path
+            and any(s in text.lower() for s in self.STALE)]
+        assert offenders == []
+
+    def test_the_stated_aggregation_is_the_objectives(self):
+        record = O.contract(REPO)
+        stated = record["aggregation_difference_from_d1"][
+            "matches_objective_identity_field"]
+        assert stated == O.D2_OBJECTIVE.as_dict()["aggregation"]
+        assert stated == O.d3_objective(1.0).as_dict()["aggregation"]
+
+
+class TestTheProgrammeScenarios:
+    """Arithmetic with INJECTED limits: the live ledger moves, the rules don't."""
+
+    LIMITS = {"project_remaining_usd": 122.4554, "project_cap_usd": 590.0,
+              "formal_remaining_usd": 127.9624,
+              "engineering_remaining_usd": 6.651, "per_session_cap_usd": 30.0}
+
+    def _scen(self, limits=None):
+        from stages.d_series import d2_budget as BUD
+        return BUD.programme_scenarios(limits or self.LIMITS)
+
+    def test_reserves_are_counted_once_per_session(self):
+        from stages.d_series import d2_budget as BUD
+        s = self._scen()
+        b = BUD.build()["steps"]
+        expected = round(sum(b[k]["hard"]["all_in_usd"] + BUD.TEARDOWN_RESERVE_USD
+                             for k in ("d2_search", "d2_screening",
+                                       "d2_confirmation")), 2)
+        assert s["search_pricing"]["records_max"]["d2_block"][
+            "hard_with_reserves"] == expected
+        #: R0's and the calibration's reserves are INSIDE their grants.
+        assert s["engineering"]["hard_with_reserves"] == \
+            round(b["r0"]["grant_proposed_usd"]
+                  + b["reference_calibration"]["grant_proposed_usd"], 2)
+
+    def test_the_reservation_rule_is_reported_not_assumed(self):
+        for pricing in self._scen()["search_pricing"].values():
+            rule = pricing["reservation_rule"]
+            assert rule["satisfied"] == (
+                rule["left_after_d2_at_hard_usd"]
+                >= rule["needed_for_d3_and_fresh_at_hard_usd"])
+        rich = self._scen({**self.LIMITS, "project_remaining_usd": 500.0})
+        for pricing in rich["search_pricing"].values():
+            assert pricing["reservation_rule"]["satisfied"] is True
+            assert pricing["reservation_rule"]["shortfall_usd"] == 0.0
+
+    def test_every_scenario_states_whether_it_fits(self):
+        s = self._scen()
+        for pricing in s["search_pricing"].values():
+            for scen in pricing["scenarios"].values():
+                assert scen["fits_project_at_hard"] == (
+                    scen["project_remaining_after_hard_usd"] >= 0)
+            assert pricing["search_fits_per_session_cap"] == (
+                pricing["search_hard_usd"] <= self.LIMITS["per_session_cap_usd"])
+        assert s["engineering_fits_allowance"] is True
+
+    def test_the_price_in_force_is_the_unvalidated_one(self):
+        s = self._scen()
+        assert s["search_pricing_in_force"] == "records_max"
+        assert (s["search_pricing"]["cache_fix_validated"]["search_hard_usd"]
+                < s["search_pricing"]["records_max"]["search_hard_usd"])
+
+
+class TestTheSearchPriceComesFromD1sRecords:
+    """D2's search priced from D1's own telemetry, verified, by D1's machinery."""
+
+    def test_the_telemetry_is_d1s_by_its_recorded_hash(self, tmp_path, monkeypatch):
+        from stages.d_series import d2_budget as BUD
+        rows = BUD.d1_search_telemetry()
+        assert len(rows) == 92
+        fake = tmp_path / BUD.D1_TELEMETRY
+        fake.parent.mkdir(parents=True)
+        fake.write_bytes((REPO / BUD.D1_TELEMETRY).read_bytes() + b"\n")
+        manifest = tmp_path / BUD.D1_SEARCH_RUN / "evidence/manifest.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text((REPO / BUD.D1_SEARCH_RUN /
+                             "evidence/manifest.json").read_text())
+        monkeypatch.setattr(BUD, "REPO_ROOT", tmp_path)
+        with pytest.raises(ValueError, match="not D1's telemetry"):
+            BUD.d1_search_telemetry()
+
+    def test_the_basis_separates_what_the_objective_touches(self):
+        from stages.d_series import d2_budget as BUD
+        basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
+        assert basis["expansions"] == 92
+        assert basis["depth"]["expansions"] == 16
+        assert basis["depth"]["recomputed"] == 15
+        assert basis["depth"]["candidates_per_expansion"] == [260]
+        assert basis["cells_total_minutes"] < basis["session_minutes"]
+        depth = basis["cells_minutes"][BUD.DEPTH_IMPL]
+        assert depth["root_max"] > depth["deeper_max"] > 30
+
+    def test_a_measured_overhead_replaces_the_provisional(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        session = tmp_path / "adoption.json"
+        session.write_text(json.dumps({"L_reference_calibration": {
+            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.2,
+                                       "same_cache_mode": True},
+            "timing_state_eval": {"overhead_seconds_per_evaluation": 0.5}}}))
+        basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
+        measured = BUD.objective_overhead(session, basis)
+        assert measured["source"].startswith("measured")
+        assert measured["depth_seconds_per_candidate"] == {"expected": 0.2,
+                                                           "bound": 0.2}
+        provisional = BUD.objective_overhead(None, basis)
+        assert provisional["source"].startswith("provisional")
+        #: A pair that did not complete on one cache mode measures nothing.
+        session.write_text(json.dumps({"L_reference_calibration": {
+            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.2,
+                                       "same_cache_mode": False},
+            "timing_state_eval": {"skipped": "deadline"}}}))
+        fallback = BUD.objective_overhead(session, basis)
+        assert fallback["source"].startswith("provisional")
+        assert "measurement_unusable" in fallback
+
+    def test_only_depth_and_state_evaluation_carry_the_overhead(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        zero = tmp_path / "zero.json"
+        zero.write_text(json.dumps({"L_reference_calibration": {
+            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.0,
+                                       "same_cache_mode": True},
+            "timing_state_eval": {"overhead_seconds_per_evaluation": 0.0}}}))
+        with_zero = BUD.priced_from_records(1.09, 400, zero)
+        provisional = BUD.priced_from_records(1.09, 400)
+        assert with_zero["expected_added_minutes"] == 0.0
+        assert provisional["priced"]["hard_ceiling_minutes"] > \
+            with_zero["priced"]["hard_ceiling_minutes"]

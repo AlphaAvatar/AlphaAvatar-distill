@@ -1912,6 +1912,19 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "records the joint histograms per candidate subset under an "
             "objective. No change without one.",
      }),
+    ("88fdcddc5d99fe8e007717f53952adf46900c9cf",
+     "post-revision-3 review: the reference cache's hoarded-memory fallback",
+     {
+        "src/aadistill/initialization/operators/depth/causal_kl_greedy.py":
+            "`_available_memory_bytes` calls `torch.cuda.empty_cache()` before "
+            "`mem_get_info` on CUDA, so the reference-cache admission is no "
+            "longer sized against blocks the allocator holds unused (D1's "
+            "search: 15/16 DEPTH expansions recomputed with 36 GiB "
+            "reclaimable). THIS IS A DECLARED SEMANTIC CHANGE to the admission "
+            "decision and the wall clock; no tensor, kernel, score or identity "
+            "moves. GPU validation is owed: stage L's DEPTH pair runs under a "
+            "deliberately hoarded pool and records the cache mode.",
+     }),
 )
 
 

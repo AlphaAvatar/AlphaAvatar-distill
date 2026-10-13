@@ -185,6 +185,21 @@ class TestRescoringIntegrationContract:
         assert ev["exact"] is False and ev["count_matches_engine"] is False
         assert ev["generation_fingerprint"] == "g"
 
+    def test_an_exact_sidecar_row_is_used_and_anything_else_retokenized(self):
+        row = {"id": "s1", "prompt_token_ids": [3, 5],
+               "output_token_ids": [11, 13, 17]}
+        retok = lambda rec: (torch.tensor([[9]]), torch.tensor([[11, 13]]))  # noqa: E731
+        exact = RR.trajectory_sample(self.RECORD, ({"exact": True}, {"s1": row}),
+                                     retok)
+        assert exact["ids_source"] == "engine"
+        assert exact["completion_ids"].tolist() == [[11, 13, 17]]
+        #: A stratum whose sidecar did not verify is not trusted row by row.
+        for sidecar in (None, ({"exact": False}, {"s1": row}),
+                        ({"exact": True}, {})):
+            s = RR.trajectory_sample(self.RECORD, sidecar, retok)
+            assert s["ids_source"] == "retokenized_text"
+            assert s["completion_ids"].tolist() == [[11, 13]]
+
     def test_low_topk_mass_is_flagged_beside_confidence(self):
         terms = {"student_confidence": torch.tensor([0.95, 0.95, 0.2]),
                  "kl_teacher_student": torch.tensor([0.1, 0.1, 0.1]),

@@ -16,6 +16,11 @@
 # parent, which the prefix builds from the root teacher; fetching an artifact
 # no stage reads would be paying to move bytes nothing consumes.
 set -uo pipefail
+#: THE SESSION CLOCK starts here, with the launcher's ssh timeout. The driver
+#: deadline used to be counted from after setup, so it believed it had the
+#: setup minutes (up to ~14) that the ssh timeout had already spent -- and a
+#: stage gated on it could start work the timeout would cut.
+REMOTE_T0=$(date -u +%s)
 
 say() { echo "[pod $(date -u +%H:%M:%S)] $*"; }
 OUTROOT=/workspace/out
@@ -186,6 +191,7 @@ MODES="${ADOPT_PREDICTION_ROWS:-all_v1}"
 for MODE in $MODES; do
   PYTHONPATH=src:scripts:scripts/data /opt/train/bin/python \
       scripts/stages/stage-1/phase_d1/topk_adoption_driver.py --check-only \
+      --stages "${ADOPT_STAGES:-C,D,P}" \
       --prediction-rows "$MODE" \
       --out "${OUTROOT}/preflight_${MODE}" > "${OUTROOT}/preflight_${MODE}.log" 2>&1
   PRE_RC=$?
@@ -201,13 +207,13 @@ done
 # --- the runs, one per mode, in order ---------------------------------------
 # The deadline is the launcher's remaining seconds, so the operator deadline and
 # the session ceiling cannot disagree about what is affordable. Each mode gets
-# what is LEFT when it starts, not a fresh copy of the whole.
-STARTED=$(date -u +%s)
+# what is LEFT when it starts, not a fresh copy of the whole -- counted from
+# REMOTE_T0, so setup is charged to it as the ssh timeout charges it.
 RC=0
 for MODE in $MODES; do
   LEFT=0
   if [ "${ADOPT_DEADLINE_S:-0}" -gt 0 ]; then
-    LEFT=$(( ADOPT_DEADLINE_S - ( $(date -u +%s) - STARTED ) ))
+    LEFT=$(( ADOPT_DEADLINE_S - ( $(date -u +%s) - REMOTE_T0 ) ))
     if [ "$LEFT" -le 60 ]; then
       say "no time left for ${MODE}; stopping with what the earlier modes recorded"
       note "deadline_before_${MODE}"

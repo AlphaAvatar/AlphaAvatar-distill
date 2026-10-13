@@ -144,6 +144,20 @@ def lines(doc: dict) -> list[str]:
             out.append(f"   weighting setup: treatment "
                        f"{(wt.get('treatment') or {}).get('setup_seconds')}s vs "
                        f"control {(wt.get('control') or {}).get('setup_seconds')}s")
+    lc = doc.get("L_reference_calibration") or {}
+    if lc:
+        cal = lc.get("calibration") or {}
+        out.append(f"L  B rebuilt in {(lc.get('B') or {}).get('seconds')}s; "
+                   f"lambda {cal.get('reward_scale')}; thresholds "
+                   f"{cal.get('diagnostic_thresholds')}")
+        for name in ("state_eval", "depth_one_round"):
+            t = lc.get(f"timing_{name}") or {}
+            shown = {k: t.get(k) for k in (
+                "skipped", "failed", "overhead_factor",
+                "overhead_seconds_per_evaluation",
+                "overhead_seconds_per_candidate", "same_cache_mode")
+                if t.get(k) is not None}
+            out.append(f"   timing {name}: {shown or 'not reached'}")
     for stage in doc.get("stages") or []:
         if stage.get("status") == "failed":
             out.append(f"stage {stage['stage']} FAILED after "

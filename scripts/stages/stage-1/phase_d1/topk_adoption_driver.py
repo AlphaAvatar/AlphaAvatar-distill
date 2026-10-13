@@ -16,6 +16,12 @@ D  state evaluation: equal-domain KL, worst domain, critical-token KL, ordering
 E  performance: sketch bytes, recomputes, wall clock, peak memory
 ```
 
+Stage L, added for the D-series reference calibration (2026-10-13), reuses this
+driver's environment, registries, teacher fetch and deadline: it rebuilds the
+standing incumbent B, measures D3's lambda and the diagnostic thresholds from
+the teacher-vs-B pass, writes that record, and only then times the D2
+objective's overhead on the production state-evaluation and DEPTH paths.
+
 **A moved decision is not a failure.** This is an explicitly authorized new
 scientific protocol (maintainer decision 2026-10-04), so a difference means the
 D-series protocol is observably different from the historical full-vocabulary one
@@ -502,7 +508,8 @@ def _depth_operator_premises(repo: Path) -> dict[str, Any]:
 
 def production_operator_context(*, adapter, model, target_spec, profile, items,
                                 seed: int, device: str, workdir: Path, policy,
-                                observer=None, prediction_rows: str = "all_v1"):
+                                observer=None, prediction_rows: str = "all_v1",
+                                objective=None):
     """An `OperatorContext` built the way `BeamSearch._expand_one` builds one.
 
     Separate from the stage so that the construction -- not a paraphrase of it --
@@ -518,13 +525,19 @@ def production_operator_context(*, adapter, model, target_spec, profile, items,
     from aadistill.initialization.execution import ExecutionConfig
     from aadistill.initialization.operators.base import OperatorContext
     from aadistill.initialization.scoring.content import scoring_content_config
+    from aadistill.initialization.scoring.objective import objective_config
     from aadistill.initialization.scoring.positions import policy_config
     from stages.d_series import scoring_protocol as SP
 
+    #: `objective` is the D2/D3 scoring objective, declared in the hashed config
+    #: AND handed to the context, as `BeamSearch._expand_one` does; `execute`
+    #: refuses a disagreement. None (the default) is D1's KL-only path, so the
+    #: Top-K adoption and R0 configs are unchanged byte for byte.
     operator_config = SP.operator_config(
         {"n_calibration_items": len(items),
          **policy_config(policy),
-         **scoring_content_config(items, policy)})
+         **scoring_content_config(items, policy),
+         **objective_config(objective)})
     workdir.mkdir(parents=True, exist_ok=True)
     return OperatorContext(
         adapter=adapter, model=model, parent_spec=adapter.spec_of(model),
@@ -537,7 +550,8 @@ def production_operator_context(*, adapter, model, target_spec, profile, items,
             #: The one execution knob this driver varies on purpose: the
             #: pre-vocabulary row selection R0 measures. Default = D1's path.
             prediction_rows=prediction_rows),
-        position_policy=policy, score_observer=observer)
+        position_policy=policy, score_observer=observer,
+        scoring_objective=objective)
 
 
 def stage_P_production_operator_invocation(*, repo: Path, teacher_path: str,
@@ -1190,6 +1204,318 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
     return out
 
 
+# --- stage L: the reference calibration, before D2's search ---------------
+
+#: How long each objective-overhead timing PAIR may take at most, in seconds.
+#: A pair starts only when the deadline still leaves this much, so a pair is
+#: never cut in half and the calibration record -- written first -- never waits
+#: on one. From measured maxima: state evaluation a3 (11.1 s per evaluation,
+#: three evaluations plus priming, x4); one DEPTH round = 36 of a8's 260
+#: candidates at 4.81 s max + 30 s outside the loop, once without and once with
+#: the objective at up to twice the scoring loop.
+L_PAIR_BOUND_S = {"state_eval": 120, "depth_one_round": 645}
+
+
+def _time_left(deadline, need_s: float) -> bool:
+    return deadline is None or deadline.remaining() >= need_s
+
+
+def _reference_calibration_premises(repo: Path) -> dict[str, Any]:
+    """Everything stage L rests on, at `$0`, before a model is resident."""
+    from aadistill.initialization.scoring.positions import get_position_policy
+    from stages.d_series import incumbent as INC
+    from stages.d_series import objectives as O
+    from stages.d_series import reference_calibration as CAL
+    from stages.phase_c2 import baseline as BL
+    from stages.phase_d1 import d1_session as D1S
+
+    inc = INC.standing_incumbent(repo)
+    D1S._register_frozen_operators()
+    #: "cuda": the device is part of the frozen spec hash (strings only, no
+    #: GPU), and stage L builds B on cuda -- a cpu spec is not B's spec.
+    spec = BL.frozen_baseline_spec(device="cuda")
+    construction = BL.assert_frozen_construction(spec)
+    _, _, report = CAL.unique_items(CAL.load_item_sets(repo))
+    CAL.assert_registered_pool(report)
+    policy = get_position_policy(O.LAMBDA_REFERENCE["positions"])
+    return {"incumbent": {k: inc[k] for k in INC.IDENTITY_FIELDS},
+            "b_spec_hash": spec.spec_hash, "construction": construction,
+            "pool": {k: report[k] for k in ("draws", "unique")},
+            "policy": policy.qualified_id,
+            "lambda_rule_hash": O.lambda_rule()["rule_hash"],
+            "threshold_rule_hash": O.diagnostic_threshold_rule()["rule_hash"],
+            "d2_objective_hash": O.D2_OBJECTIVE.objective_hash}
+
+
+def _state_eval_objective_timing(*, repo: Path, teacher, student, numerics,
+                                 prediction_rows: str) -> dict[str, Any]:
+    """`evaluate()` on B, KL-only vs the D2 objective, same models, same suite.
+
+    KL-only twice (first and last) so a warm-up cannot pass for overhead. The
+    objective run's raw-KL control must equal the KL-only run's teacher KL --
+    the CPU test's 1e-6 claim, checked once on the production GPU path.
+    """
+    import torch
+
+    from aadistill.initialization.execution import ExecutionConfig
+    from aadistill.initialization.planning.metrics import StateEvaluator
+    from aadistill.initialization.scoring.positions import get_position_policy
+    from shared.evaluation import load_state_eval
+    from stages.d_series import objectives as O
+    from stages.d_series.scoring_protocol import (
+        D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
+    )
+    from stages.phase_d1.d1_qualification_driver import _load_suite
+
+    suite, items, content_sha256 = _load_suite(load_state_eval, repo)
+    policy = get_position_policy(f"{POLICY_ID}@v1")
+    execution = ExecutionConfig(micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
+                                calibration_batch_packing=D_SERIES_BATCH_PACKING,
+                                prediction_rows=prediction_rows)
+    runs: list[dict[str, Any]] = []
+    values: dict[str, dict[str, Any]] = {}
+    for label, objective in (("kl_only", None), ("d2_objective", O.D2_OBJECTIVE),
+                             ("kl_only_again", None)):
+        ev = StateEvaluator(suite, items, device="cuda", position_policy=policy,
+                            execution=execution,
+                            distribution_support=D_SERIES_SUPPORT,
+                            suite_content_sha256=content_sha256,
+                            numerics=numerics, scoring_objective=objective)
+        ev.prime_reference(teacher)
+        torch.cuda.synchronize()
+        torch.cuda.reset_peak_memory_stats()
+        t0 = time.time()
+        evaluation = ev.evaluate(student, "reference_calibration_timing")
+        torch.cuda.synchronize()
+        seconds = time.time() - t0
+        runs.append({"arm": label, "seconds": round(seconds, 3),
+                     "measurement_protocol_id": ev.measurement_protocol_id,
+                     "peak_memory_bytes": int(torch.cuda.max_memory_allocated())})
+        values[label] = dict(evaluation.values or {})
+        del ev
+        torch.cuda.empty_cache()
+    ids = {r["arm"]: r["measurement_protocol_id"] for r in runs}
+    if ids["kl_only"] == ids["d2_objective"]:
+        raise AdoptionError("the objective did not move the measurement "
+                            "protocol id, so the two arms are not distinguished")
+    kl = values["kl_only"]
+    raw = {k[len("state.objective.raw_kl."):]: v
+           for k, v in values["d2_objective"].items()
+           if k.startswith("state.objective.raw_kl.")}
+    paired = {k: (float(raw[k]), float(kl[f"state.teacher_kl.{k}"]))
+              for k in raw if f"state.teacher_kl.{k}" in kl
+              and isinstance(raw[k], (int, float))}
+    base = min(r["seconds"] for r in runs if r["arm"] != "d2_objective")
+    obj = next(r["seconds"] for r in runs if r["arm"] == "d2_objective")
+    return {"runs": runs, "suite_items": len(items),
+            "overhead_seconds_per_evaluation": round(obj - base, 3),
+            "overhead_factor": round(obj / base, 4) if base else None,
+            "raw_kl_control": {
+                "metrics_compared": len(paired),
+                "max_abs_difference": (max(abs(a - b) for a, b in paired.values())
+                                       if paired else None)},
+            "_values_of": "B, the incumbent -- never a D2 candidate"}
+
+
+def _hoard_allocator(leave_bytes: int = 256 * 2**20) -> int:
+    """Fill the caching allocator with free-but-reserved blocks, as a search does.
+
+    D1's search entered 15 of 16 DEPTH expansions with 0.12 GiB driver-free and
+    36 GiB reserved-but-unused. This reproduces the hoard in one freed segment
+    so stage L can show, on the GPU, that the reference cache's headroom probe
+    returns it before deciding (`_available_memory_bytes`, 2026-10-13).
+    """
+    import torch
+
+    free, _total = torch.cuda.mem_get_info()
+    n = max(0, int(free) - int(leave_bytes))
+    if n:
+        block = torch.empty(n, dtype=torch.uint8, device="cuda")
+        del block                                   # reserved, not released
+    return n
+
+
+def _depth_one_round_timing(*, repo: Path, teacher_path: str, workdir: Path,
+                            prediction_rows: str, journal: Journal
+                            ) -> dict[str, Any]:
+    """One DEPTH round at the root, KL-only vs the D2 objective. TIMING ONLY.
+
+    The production operator through the production context builder, timed as
+    `BeamSearch._expand_one` times it. Neither the chosen layer nor the round
+    table is kept: this session produces lambda, and nothing that looks like a
+    D2 search result may exist before D2's search.
+    """
+    import shutil
+
+    import torch
+
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+    from aadistill.initialization.operators.base import get_implementation
+    from aadistill.initialization.operators.depth._common import DEPTH_FIELD
+    from aadistill.initialization.scoring.positions import SUPERVISED_TARGET_V1
+    from aadistill.initialization.specs.arch import get_adapter
+    from stages.d_series import objectives as O
+    from stages.phase_a3 import a3_session as A3S
+
+    adapter = get_adapter("qwen3")
+    spec = A3S.path_spec(workdir_device="cuda")
+    impl = get_implementation(spec.steps[0].impl_id)
+    profile = get_profile(D1_DEPTH_PROFILES[0])
+    items = prepare_calibration_items(profile.resolve(repo),
+                                      profile_id=profile.qualified_id)
+    arms: dict[str, Any] = {}
+    for label, objective in (("kl_only", None), ("d2_objective", O.D2_OBJECTIVE)):
+        model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+        model.config.use_cache = False
+        parent = adapter.spec_of(model)
+        target = parent.replace(**{DEPTH_FIELD: int(parent[DEPTH_FIELD]) - 1})
+        wd = workdir / f"depth-{label}"
+        ctx = production_operator_context(
+            adapter=adapter, model=model, target_spec=target, profile=profile,
+            items=items, seed=spec.seed, device="cuda", workdir=wd,
+            policy=SUPERVISED_TARGET_V1, prediction_rows=prediction_rows,
+            objective=objective)
+        hoarded = _hoard_allocator()
+        torch.cuda.reset_peak_memory_stats()
+        started = time.time()
+        outcome = impl.execute(ctx)
+        elapsed = time.time() - started
+        timing = dict(outcome.artifacts.get("timing") or {})
+        cache = dict(outcome.artifacts.get("reference_cache") or {})
+        before = cache.get("memory_before") or {}
+        arms[label] = {
+            "operator_invocation_seconds": round(elapsed, 3),
+            "candidate_subsets": int(timing.get("candidate_subsets") or 0),
+            "scoring_loop_seconds": timing.get("item_seconds"),
+            "objective_seconds": timing.get("objective_seconds"),
+            "reference_cache_mode": cache.get("mode"),
+            "hoarded_gib": round(hoarded / 2**30, 3),
+            "driver_free_gib_before_probe": before.get("driver_free_gib"),
+            "reclaimable_gib_before_probe": before.get(
+                "reclaimable_by_empty_cache_gib"),
+            "available_bytes_after_probe": cache.get("available_bytes"),
+            "headroom_source": cache.get("headroom_source"),
+            "peak_memory_bytes": int(torch.cuda.max_memory_allocated())}
+        journal.event(stage=f"L.depth.{label}", status="ok",
+                      invocation_s=round(elapsed, 2))
+        del outcome, ctx, model
+        shutil.rmtree(wd, ignore_errors=True)
+        torch.cuda.empty_cache()
+    a, b = arms["kl_only"], arms["d2_objective"]
+    n = max(1, a["candidate_subsets"])
+    return {"profile": profile.qualified_id, "arms": arms,
+            "same_cache_mode": a["reference_cache_mode"] == b["reference_cache_mode"],
+            #: The allocator-hoard fix, on the GPU: both arms entered the
+            #: operator with the pool hoarded and still cached the reference.
+            "cache_fix_validated": all(
+                x["reference_cache_mode"] == "cached" and x["hoarded_gib"] > 1
+                and (x["driver_free_gib_before_probe"] or 0) < 1
+                for x in (a, b)),
+            "overhead_seconds_per_candidate": round(
+                (b["operator_invocation_seconds"]
+                 - a["operator_invocation_seconds"]) / n, 4),
+            "overhead_factor": round(b["operator_invocation_seconds"]
+                                     / a["operator_invocation_seconds"], 4),
+            "_price_as": ("added seconds per candidate, not as a ratio: the "
+                          "objective's per-position work is the same in later "
+                          "rounds, whose forwards are cheaper"),
+            "_valid_only_if": "same_cache_mode"}
+
+
+def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
+                                  journal: Journal, workdir: Path, out: Path,
+                                  numerics, prediction_rows: str,
+                                  deadline=None, flush=None) -> dict[str, Any]:
+    """B rebuilt, lambda and thresholds measured and WRITTEN, then timing.
+
+    Order is the protection: the calibration record is on disk (and flushed)
+    before either timing pair starts, each pair starts only when the deadline
+    leaves its bound, and a failed pair is recorded, never raised -- the pairs
+    are cost-model evidence, the calibration is the deliverable.
+    """
+    import torch
+
+    from aadistill.initialization.specs.arch import get_adapter
+    from stages.d_series import incumbent as INC
+    from stages.d_series import reference_calibration as CAL
+    from stages.phase_d1 import behavioural_materialize as BM
+
+    result: dict[str, Any] = {}
+    inc = INC.standing_incumbent(repo)
+    with journal.stage("L.materialize_B") as st:
+        row = BM.materialize_incumbent(
+            workdir / "B", device="cuda",
+            identities={k: inc[k] for k in INC.IDENTITY_FIELDS}, repo_root=repo)
+        st.result = {"seconds": row["seconds"]}
+    result["B"] = {k: row[k] for k in ("spec_hash", "seconds", "identity",
+                                       "intermediates_released")}
+    torch.cuda.empty_cache()
+
+    adapter = get_adapter("qwen3")
+    teacher = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+    student = adapter.load(row["checkpoint_path"], dtype="bfloat16",
+                           device="cuda")
+    for m in (teacher, student):
+        m.config.use_cache = False
+    binding = json.loads((repo / TEACHER_BINDING).read_text())
+    with journal.stage("L.calibration") as st:
+        item_sets = CAL.load_item_sets(repo)
+        record = CAL.run(teacher, student, item_sets, device="cuda",
+                         rescoring_timing=CAL.RESCORING_TIMING_ITEMS,
+                         identities={
+                             "teacher_revision": binding["revision"],
+                             "student_identity": row["identity"],
+                             "student_artifact_digest":
+                                 row["identity"]["artifact_digest"]})
+        CAL.assert_registered_pool(record["identities"]["item_sets"])
+        (out / "reference_calibration.json").write_text(
+            json.dumps(record, indent=1) + "\n")
+        st.result = {"lambda": record["reward_scale"],
+                     "record_sha256": record["record_sha256"]}
+    result["calibration"] = {
+        "record": "reference_calibration.json",
+        "record_sha256": record["record_sha256"],
+        "reward_scale": record["reward_scale"],
+        "diagnostic_thresholds": record["diagnostic_thresholds"],
+        "independence": record["independence"],
+        "rescoring_cost_measured": record["rescoring_cost_measured"]}
+    if flush is not None:
+        flush(result)
+
+    def pair(name: str, fn) -> None:
+        if not _time_left(deadline, L_PAIR_BOUND_S[name]):
+            result[f"timing_{name}"] = {"skipped": "deadline would not cover "
+                                        f"{L_PAIR_BOUND_S[name]} s"}
+            journal.event(stage=f"L.timing_{name}", status="skipped")
+            return
+        t0 = time.time()
+        try:
+            result[f"timing_{name}"] = fn()
+        except Exception as exc:                    # noqa: BLE001
+            result[f"timing_{name}"] = {
+                "failed": f"{type(exc).__name__}: {exc}",
+                "traceback": traceback.format_exc()}
+        result[f"timing_{name}"]["wall_seconds"] = round(time.time() - t0, 3)
+        journal.event(stage=f"L.timing_{name}",
+                      status="failed" if "failed" in result[f"timing_{name}"]
+                      else "ok")
+        if flush is not None:
+            flush(result)
+
+    pair("state_eval", lambda: _state_eval_objective_timing(
+        repo=repo, teacher=teacher, student=student, numerics=numerics,
+        prediction_rows=prediction_rows))
+    del teacher, student
+    torch.cuda.empty_cache()
+    pair("depth_one_round", lambda: _depth_one_round_timing(
+        repo=repo, teacher_path=teacher_path, workdir=workdir,
+        prediction_rows=prediction_rows, journal=journal))
+    return result
+
+
 # --- main -------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> int:
@@ -1202,8 +1528,11 @@ def main(argv: list[str] | None = None) -> int:
                          "and exit. The launcher pushes exactly these.")
     ap.add_argument("--stages", default="C,D,P",
                     help="which stages to run: C (the DEPTH dual scoring, ~30 "
-                         "min), D (the state evaluation, minutes) and P (ONE REAL "
-                         "DEPTH operator invocation per profile, ~25 min each). A "
+                         "min), D (the state evaluation, minutes), P (ONE REAL "
+                         "DEPTH operator invocation per profile, ~25 min each) "
+                         "and L (the D-series reference calibration: B rebuilt, "
+                         "lambda and thresholds, then objective-overhead "
+                         "timing). A "
                          "subrun that needs only D builds its candidate with "
                          "depth.positional_v0 instead of repeating the search.")
     ap.add_argument("--prediction-rows", default="all_v1",
@@ -1315,13 +1644,14 @@ def main(argv: list[str] | None = None) -> int:
                 "stage C compares full-vocabulary against Top-K logit BLOCKS and "
                 "its observer reshapes them as [B, T, V]; it is defined on the "
                 "all-rows path only. Run C under --prediction-rows all_v1.")
-        unknown = wanted - {"C", "D", "P"}
+        unknown = wanted - {"C", "D", "P", "L"}
         if unknown:
             raise AdoptionError(
                 f"--stages names {sorted(unknown)}; known: C (DEPTH dual "
                 "scoring), D (state evaluation), P (one real DEPTH operator "
-                "invocation). A typo would silently run less than intended and "
-                "look like a clean result.")
+                "invocation), L (the D-series reference calibration). A typo "
+                "would silently run less than intended and look like a clean "
+                "result.")
 
         #: EVERY PREMISE STAGE P RESTS ON, before the teacher is resident and
         #: before a candidate is scored. The superseded timing stage needed none of
@@ -1334,6 +1664,14 @@ def main(argv: list[str] | None = None) -> int:
                 st.result = {
                     "impl": record["P_premises"]["impl_id"],
                     "weighted_arm": record["P_premises"]["ceiling_arm"]}
+
+        #: Stage L's premises: B's identities and $0 construction gate, the
+        #: registered 209-draw / 147-unique pool, the policy and both rules.
+        #: Only when L is asked for, so R0's check-only is unchanged.
+        if "L" in wanted:
+            with journal.stage("reference_calibration_premises") as st:
+                record["L_premises"] = _reference_calibration_premises(repo)
+                st.result = {"pool": record["L_premises"]["pool"]}
 
         with journal.stage("teacher_fetch_verify") as st:
             teacher_path = fetch_teacher(repo)
@@ -1359,6 +1697,23 @@ def main(argv: list[str] | None = None) -> int:
             (out / "adoption.json").write_text(json.dumps(
                 {**record, "status": "IN_PROGRESS"}, indent=1, sort_keys=True,
                 default=str) + "\n")
+
+        if "L" in wanted:
+            #: FIRST, before any other stage: B's DEPTH step needs the GPU to
+            #: itself, and the calibration is the deliverable the timing pairs
+            #: must never cost.
+            with journal.stage("L_reference_calibration") as st:
+                def l_flush(partial: dict[str, Any]) -> None:
+                    record["L_reference_calibration"] = partial
+                    flush()
+                record["L_reference_calibration"] = stage_L_reference_calibration(
+                    repo=repo, teacher_path=teacher_path, journal=journal,
+                    workdir=out / "work", out=out, numerics=numerics,
+                    prediction_rows=args.prediction_rows, deadline=deadline,
+                    flush=l_flush)
+                st.result = {"lambda": record["L_reference_calibration"][
+                    "calibration"]["reward_scale"]}
+            flush()
 
         if "C" in wanted:
             with journal.stage("C_depth_dual_scores") as st:

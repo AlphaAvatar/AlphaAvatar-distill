@@ -22,8 +22,9 @@ unit whose checkpoint is gone cannot be rescored, and nothing here estimates
 what it would have shown.
 
 The trajectory is the token sequence the caller passes, and every result
-says WHICH: ``ids_source="engine"`` (the generator's own ids, checked here
-against the record's count and decoded text, and refused if either differs)
+says WHICH: ``ids_source="engine"`` (the generator's own ids, from the
+read-only ``uncapped_eval_token_ids`` sidecar, checked here against the
+record's count and decoded text, and refused if either differs)
 or ``ids_source="retokenized_text"`` (an APPROXIMATION of the generated ids,
 labelled as such, with whether its count matched the engine's).
 
@@ -149,6 +150,29 @@ def alignment_evidence(record: Mapping[str, Any], prompt_ids: torch.Tensor,
             "generation_fingerprint": generation_fingerprint}
 
 
+def trajectory_sample(record: Mapping[str, Any],
+                      sidecar: tuple[Mapping[str, Any], Mapping[str, Any]] | None,
+                      retokenize) -> dict[str, Any]:
+    """One rescoring sample: the engine's ids when the sidecar is exact.
+
+    ``sidecar`` is ``(header, id -> row)`` from
+    ``uncapped_eval_token_ids.load_sidecar`` or ``None``. Engine ids are used
+    only when the stratum's header says ``exact`` and the record has a row;
+    otherwise ``retokenize(record)`` supplies ``(prompt_ids, completion_ids)``
+    and the sample is labelled ``retokenized_text``. Either way
+    :func:`alignment_evidence` checks it against the record again.
+    """
+    header, rows = sidecar if sidecar else ({}, {})
+    row = rows.get(str(record.get("id"))) if header.get("exact") else None
+    if row is not None:
+        return {"record": record, "ids_source": "engine",
+                "prompt_ids": torch.tensor([row["prompt_token_ids"]]),
+                "completion_ids": torch.tensor([row["output_token_ids"]])}
+    prompt_ids, completion_ids = retokenize(record)
+    return {"record": record, "ids_source": "retokenized_text",
+            "prompt_ids": prompt_ids, "completion_ids": completion_ids}
+
+
 def summarize_trajectory(terms: Mapping[str, torch.Tensor], *,
                          reasoning_positions: int | None,
                          high_confidence: float,
@@ -241,4 +265,4 @@ def rescore_unit(student, teacher, samples: Iterable[Mapping[str, Any]], *,
 
 
 __all__ = ["RescoringError", "alignment_evidence", "rescore_trajectory",
-           "rescore_unit", "summarize_trajectory"]
+           "rescore_unit", "summarize_trajectory", "trajectory_sample"]

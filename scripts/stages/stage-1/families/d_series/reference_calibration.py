@@ -58,6 +58,23 @@ from aadistill.initialization.scoring.support import (  # noqa: E402
 #: Used only to PROJECT a measured per-token rate to a probe.
 D1_TOKENS_PER_PROBE = 951268
 
+#: The pool lambda rule v2 is registered over (its `pooling` text). A staged
+#: mixture that yields a different pool is not the registered reference, and a
+#: session refuses it before any model is resident.
+REGISTERED_POOL = {"draws": 209, "unique": 147}
+
+#: Items the rescoring timing runs on -- the plan's 1-5 min component.
+RESCORING_TIMING_ITEMS = 24
+
+
+def assert_registered_pool(report: Mapping[str, Any]) -> None:
+    got = {"draws": int(report["draws"]), "unique": int(report["unique"])}
+    if got != REGISTERED_POOL:
+        raise ValueError(
+            f"the item sets resolve to {got}, not the registered "
+            f"{REGISTERED_POOL}; lambda and the thresholds would be computed "
+            "over a different reference than the one fixed before D2")
+
 
 def _ids(item: Any) -> torch.Tensor:
     return item["input_ids"] if isinstance(item, dict) else item.input_ids
@@ -233,6 +250,54 @@ def time_rescoring(teacher, student, items: Sequence[tuple[str, Any]], *,
                              "quantity is measured here")}
 
 
+def load_item_sets(repo_root: str | Path = REPO_ROOT) -> dict[str, list[Any]]:
+    """The registered item sets, by name. Profiles must be registered first."""
+    from aadistill.initialization.calibration.items import (
+        prepare_calibration_items,
+    )
+    from aadistill.initialization.calibration.profiles import get_profile
+    from shared.evaluation import load_state_eval
+    from stages.d_series import objectives as O
+
+    repo_root = Path(repo_root)
+    item_sets: dict[str, list[Any]] = {}
+    for qualified in O.LAMBDA_REFERENCE["item_sets"]:
+        if qualified.startswith("calib."):
+            profile = get_profile(qualified)
+            item_sets[qualified] = list(prepare_calibration_items(
+                profile.resolve(str(repo_root)), profile_id=profile.qualified_id))
+        else:
+            item_sets[qualified] = list(load_state_eval.load(
+                repo_root / "artifacts/stages/stage-1/state_eval_v1")[1])
+    return item_sets
+
+
+def run(teacher, student, item_sets: Mapping[str, Sequence[Any]], *,
+        device: str, rescoring_timing: int,
+        identities: Mapping[str, Any]) -> dict[str, Any]:
+    """The whole calibration on two loaded models. Returns the record."""
+    from aadistill.initialization.scoring.positions import get_position_policy
+    from stages.d_series import objectives as O
+    from stages.d_series import scoring_protocol as SP
+
+    unique, draws, report = unique_items(item_sets)
+    policy = get_position_policy(O.LAMBDA_REFERENCE["positions"])
+    started = time.time()
+    rows, positions = item_terms(
+        teacher, student, unique, policy=policy,
+        support_top_k=SP.D_SERIES_TOP_K, entropy_top_k=O.ENTROPY_TOP_K,
+        device=device)
+    timing = (time_rescoring(teacher, student, unique, n=rescoring_timing,
+                             support_top_k=SP.D_SERIES_TOP_K,
+                             entropy_top_k=O.ENTROPY_TOP_K)
+              if rescoring_timing > 0 else None)
+    return calibrate(rows, draws, positions, timing=timing, identities={
+        **dict(identities),
+        "support_top_k": SP.D_SERIES_TOP_K, "entropy_top_k": O.ENTROPY_TOP_K,
+        "device": device, "dtype": "bfloat16", "item_sets": report,
+        "seconds": round(time.time() - started, 1)})
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -247,53 +312,21 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = ap.parse_args(argv)
 
     from aadistill.initialization.adapters import register_builtin_adapters
-    from aadistill.initialization.calibration.items import (
-        prepare_calibration_items,
-    )
-    from aadistill.initialization.calibration.profiles import get_profile
-    from aadistill.initialization.scoring.positions import get_position_policy
     from aadistill.initialization.specs.arch import get_adapter
     from shared.calibration import register_builtin_profiles
-    from shared.evaluation import load_state_eval
-    from stages.d_series import objectives as O
-    from stages.d_series import scoring_protocol as SP
 
     register_builtin_adapters()
     register_builtin_profiles()
-    item_sets: dict[str, list[Any]] = {}
-    for qualified in O.LAMBDA_REFERENCE["item_sets"]:
-        if qualified.startswith("calib."):
-            profile = get_profile(qualified)
-            item_sets[qualified] = list(prepare_calibration_items(
-                profile.resolve(str(REPO_ROOT)), profile_id=profile.qualified_id))
-        else:
-            item_sets[qualified] = list(load_state_eval.load(
-                REPO_ROOT / "artifacts/stages/stage-1/state_eval_v1")[1])
-    unique, draws, report = unique_items(item_sets)
-
-    policy = get_position_policy(O.LAMBDA_REFERENCE["positions"])
+    item_sets = load_item_sets(REPO_ROOT)
     adapter = get_adapter("qwen3")
     teacher = adapter.load(args.teacher, dtype="bfloat16", device=args.device)
     student = adapter.load(args.student, dtype="bfloat16", device=args.device)
     for m in (teacher, student):
         m.config.use_cache = False
-
-    started = time.time()
-    rows, positions = item_terms(
-        teacher, student, unique, policy=policy,
-        support_top_k=SP.D_SERIES_TOP_K, entropy_top_k=O.ENTROPY_TOP_K,
-        device=args.device)
-    timing = (time_rescoring(teacher, student, unique,
-                             n=args.rescoring_timing,
-                             support_top_k=SP.D_SERIES_TOP_K,
-                             entropy_top_k=O.ENTROPY_TOP_K)
-              if args.rescoring_timing > 0 else None)
-    record = calibrate(rows, draws, positions, timing=timing, identities={
-        "teacher_revision": args.teacher_revision,
-        "student_artifact_digest": args.student_artifact_digest,
-        "support_top_k": SP.D_SERIES_TOP_K, "entropy_top_k": O.ENTROPY_TOP_K,
-        "device": args.device, "dtype": "bfloat16", "item_sets": report,
-        "seconds": round(time.time() - started, 1)})
+    record = run(teacher, student, item_sets, device=args.device,
+                 rescoring_timing=args.rescoring_timing, identities={
+                     "teacher_revision": args.teacher_revision,
+                     "student_artifact_digest": args.student_artifact_digest})
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(record, indent=1) + "\n")
     print(f"lambda = {record['reward_scale']}; thresholds "

@@ -70,11 +70,6 @@ JUSTIFIED_OMISSIONS = {
     #: part-way would produce a number for a partial invocation, which is worse
     #: than no number; the pod's own watchdog bounds the subrun instead.
     "deadline",
-    #: A student-confidence scoring objective (2026-10-13). This builder times
-    #: D1's KL-only path -- the Top-K adoption and R0 both validate exactly
-    #: that, and its default is None -- so omitting it is the measured path,
-    #: not a gap. A builder timing a D2/D3 invocation must pass it.
-    "scoring_objective",
 }
 
 
@@ -394,6 +389,110 @@ class TestTheRealOperatorRunsThroughThatBuilder:
             else:
                 assert got is not None and torch.equal(got, expected), (
                     "the reducer was handed weights the policy did not produce")
+
+
+class TestTheObjectiveKeyword:
+    """Stage L times the D2 objective through the SAME builder (2026-10-13).
+
+    The default must leave D1's KL-only context -- and so the Top-K adoption's
+    and R0's hashed configs -- exactly as they were; the objective must reach
+    both the hashed config and the context, because `execute` refuses a
+    disagreement; and the real operator must run with it and report the
+    objective's own seconds, which is what stage L's DEPTH pair reads.
+    """
+
+    @staticmethod
+    def _ctx(tmp_path, objective=None, layers=5):
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from aadistill.initialization.operators.register import (
+            register_builtin_operators,
+        )
+        from aadistill.initialization.scoring.positions import (
+            SUPERVISED_TARGET_V1,
+        )
+        from aadistill.initialization.specs.arch import get_adapter
+
+        register_builtin_adapters()
+        register_builtin_operators()
+        #: A vocabulary above the objective's Top-200: the student's own Top-K
+        #: entropy is refused when K exceeds V, as it should be.
+        model = build_tiny_model({**GEOMETRY, "vocab_size": 256})
+        model.config.use_cache = False
+        adapter = get_adapter("qwen3")
+        parent = adapter.spec_of(model)
+        return drv.production_operator_context(
+            adapter=adapter, model=model,
+            target_spec=parent.replace(num_hidden_layers=layers),
+            profile=None, items=_toy_items(), seed=0, device="cpu",
+            workdir=tmp_path / "w", policy=SUPERVISED_TARGET_V1,
+            objective=objective)
+
+    def test_the_default_is_d1s_kl_only_context(self, tmp_path):
+        ctx = self._ctx(tmp_path)
+        assert ctx.scoring_objective is None
+        assert "scoring_objective" not in ctx.config
+
+    def test_the_objective_reaches_config_and_context(self, tmp_path):
+        from stages.d_series import objectives as O
+
+        ctx = self._ctx(tmp_path, O.D2_OBJECTIVE)
+        assert ctx.scoring_objective is O.D2_OBJECTIVE
+        assert ctx.config["scoring_objective"] == O.D2_OBJECTIVE.as_dict()
+
+    def test_one_round_runs_with_the_objective_and_reports_its_seconds(
+            self, tmp_path):
+        from aadistill.initialization.operators.base import get_implementation
+        from stages.d_series import objectives as O
+
+        impl = get_implementation("depth.causal_kl_greedy_v1")
+        plain = impl.execute(self._ctx(tmp_path / "a"))
+        with_obj = impl.execute(self._ctx(tmp_path / "b", O.D2_OBJECTIVE))
+        assert len(with_obj.artifacts["search_rounds"]) == 1
+        assert with_obj.artifacts["timing"]["candidate_subsets"] == \
+            plain.artifacts["timing"]["candidate_subsets"] == \
+            GEOMETRY["num_hidden_layers"]
+        assert with_obj.artifacts["timing"].get("objective_seconds") is not None
+        assert plain.artifacts["timing"].get("objective_seconds") is None
+
+
+class TestStageLPremises:
+    """Stage L's `$0` premises resolve on the dev box's staged inputs."""
+
+    def test_the_registered_pool_is_refused_when_it_moves(self):
+        from stages.d_series import reference_calibration as CAL
+
+        CAL.assert_registered_pool(dict(CAL.REGISTERED_POOL))
+        with pytest.raises(ValueError, match="registered"):
+            CAL.assert_registered_pool({"draws": 209, "unique": 146})
+
+    def test_the_timing_pairs_are_gated_on_their_whole_bound(self):
+        class Left:
+            def __init__(self, s):
+                self.s = s
+
+            def remaining(self):
+                return self.s
+
+        for name, bound in drv.L_PAIR_BOUND_S.items():
+            assert drv._time_left(Left(bound), bound)
+            assert not drv._time_left(Left(bound - 1), bound)
+        assert drv._time_left(None, 10 ** 9)
+
+    def test_the_premises_resolve(self):
+        mixture = REPO / "artifacts/stages/stage-1/state_eval_v1/items.jsonl"
+        if not mixture.is_file():
+            pytest.skip("state_eval_v1 is not staged on this host")
+        from aadistill.initialization.adapters import register_builtin_adapters
+        from shared.calibration import register_builtin_profiles
+
+        register_builtin_adapters()
+        register_builtin_profiles()
+        try:
+            premises = drv._reference_calibration_premises(REPO)
+        except FileNotFoundError as exc:
+            pytest.skip(f"a calibration mixture is not staged here: {exc}")
+        assert premises["pool"] == {"draws": 209, "unique": 147}
+        assert premises["incumbent"]["artifact_digest"].startswith("53e30566")
 
 
 class TestTheCeilingArm:

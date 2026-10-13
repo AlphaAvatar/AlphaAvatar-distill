@@ -1185,12 +1185,24 @@ def _available_memory_bytes(device: Any) -> tuple[int | None, str]:
     The fallback when it does not fit is **recompute**, never a silent move to
     the host: a host-resident reference would drag the whole reduction back with
     it, which is the failure that cost a full paid search.
+
+    **The allocator's hoard is returned first** (2026-10-13). `mem_get_info`
+    counts blocks PyTorch has reserved but holds unused as taken, and inside a
+    search the earlier operators and state evaluations leave tens of GiB of
+    them. D1's formal search shows it: 15 of its 16 DEPTH expansions fell back
+    to recompute with 0.12 GiB "free" and 36.0 GiB reclaimable by
+    `empty_cache()` -- the remedy `memory_snapshot` names -- for a 0.14 GiB
+    sketch, and the recomputed invocations took 1,336-2,486 s against the
+    cached one's 1,179 s. `empty_cache()` changes no tensor and no kernel, and
+    cached and recomputed references are the same numbers, so only the
+    admission decision and the wall clock move.
     """
     dev = torch.device(device) if not isinstance(device, torch.device) else device
     if dev.type == "cuda":                       # pragma: no cover - needs a GPU
         try:
+            torch.cuda.empty_cache()
             free, _total = torch.cuda.mem_get_info(dev)
-            return int(free), f"cuda.mem_get_info:{dev}"
+            return int(free), f"cuda.mem_get_info:{dev} after empty_cache"
         except Exception:                                          # noqa: BLE001
             return None, "cuda.mem_get_info unavailable"
     return _host_available_memory_bytes()
