@@ -429,15 +429,29 @@
      "hard_ceiling_minutes": 1744.33,
      "hard_ceiling_usd": 33.3038
     },
+    "pricing_in_force": "records_max",
+    "hard_records_max": {
+     "minutes": 1744.3,
+     "gpu_usd": 31.69,
+     "disk_usd": 1.62,
+     "all_in_usd": 33.3
+    },
     "hard_if_cache_fix_validated": {
      "minutes": 1240.0,
      "gpu_usd": 22.53,
      "disk_usd": 1.15,
      "all_in_usd": 23.68
     },
+    "calibration_evidence": {
+     "usable": false,
+     "cache_fix_validated": false,
+     "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+     "why": "no stage-L session is booked with evidence"
+    },
     "cache_fix": {
      "what": "`_available_memory_bytes` returns the allocator's hoard (empty_cache) before reading the driver: D1's search recomputed the reference in 15/16 DEPTH expansions with 0.12 GiB free and 36 GiB reclaimable",
      "validated_on_gpu": false,
+     "_validated_on_gpu_is": "DERIVED from the booked, hash-verified stage-L evidence above; never set by hand",
      "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
      "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
      "depth_cell_minutes_if_validated": {

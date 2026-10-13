@@ -47,7 +47,7 @@ import sys
 import time
 import traceback
 from pathlib import Path
-from typing import Any
+from typing import Any, Mapping
 
 REPO_DEFAULT = Path(__file__).resolve().parents[4]
 STATE_EVAL = "artifacts/stages/stage-1/state_eval_v1"
@@ -1206,18 +1206,41 @@ def stage_D_state_eval(*, repo: Path, artifact_path: str, teacher_path: str,
 
 # --- stage L: the reference calibration, before D2's search ---------------
 
-#: How long each objective-overhead timing PAIR may take at most, in seconds.
-#: A pair starts only when the deadline still leaves this much, so a pair is
-#: never cut in half and the calibration record -- written first -- never waits
-#: on one. From measured maxima: state evaluation a3 (11.1 s per evaluation,
-#: three evaluations plus priming, x4); one DEPTH round = 36 of a8's 260
-#: candidates at 4.81 s max + 30 s outside the loop, once without and once with
-#: the objective at up to twice the scoring loop.
-L_PAIR_BOUND_S = {"state_eval": 120, "depth_one_round": 645}
+#: Each stage-L step's bound, in seconds. A step starts only when the deadline
+#: still covers its whole bound -- and, for an EXTENDED step, the bounds of the
+#: core steps still to come -- so no step is cut in half, no extended step
+#: starves a core one, and the calibration record, written first, waits on
+#: none. From measured maxima:
+#:   state_eval        a3: 11.1 s per evaluation; three evaluations + priming
+#:   depth_one_round   36 of a8's 260 candidates at 4.81 s + 30 s outside the
+#:                     loop, without and with the objective (up to 2x the loop)
+#:   d2_rows_state_eval  one D2 evaluation under scored_v1, + priming
+#:   depth_recompute_equivalence  one KL-only arm forced to recompute: 36 x
+#:                     D1's 9.56 s per recomputed candidate + 30 s, x1.3
+#:   d2_rows_depth     one D2 arm under scored_v1, bounded by its all_v1 twin
+L_STEP_BOUND_S = {"state_eval": 120, "d2_rows_state_eval": 60,
+                  "depth_one_round": 645, "depth_recompute_equivalence": 480,
+                  "d2_rows_depth": 330}
+L_CORE_STEPS = ("state_eval", "depth_one_round")
+
+#: REGISTERED BEFORE THE SESSION. D2's objective under `scored_v1` against
+#: `all_v1`: R0's KL tolerances, carried over unchanged. Cached against
+#: recomputed references: the code claims identical numbers, so EXACT.
+D2_ROWS_TOLERANCES = {"depth_candidate_relative": 1e-5, "depth_choice": "exact",
+                      "state_eval_absolute": 1e-5}
+CACHE_EQUIVALENCE = {"depth_candidate_relative": 0.0, "depth_choice": "exact"}
 
 
 def _time_left(deadline, need_s: float) -> bool:
     return deadline is None or deadline.remaining() >= need_s
+
+
+def step_need_s(name: str, done: set[str]) -> int:
+    """Seconds a stage-L step needs left: its bound, plus -- for an extended
+    step -- every core step's bound not yet run, so it cannot starve one."""
+    later_core = (0 if name in L_CORE_STEPS else
+                  sum(L_STEP_BOUND_S[c] for c in L_CORE_STEPS if c not in done))
+    return L_STEP_BOUND_S[name] + later_core
 
 
 def _reference_calibration_premises(repo: Path) -> dict[str, Any]:
@@ -1238,30 +1261,30 @@ def _reference_calibration_premises(repo: Path) -> dict[str, Any]:
     _, _, report = CAL.unique_items(CAL.load_item_sets(repo))
     CAL.assert_registered_pool(report)
     policy = get_position_policy(O.LAMBDA_REFERENCE["positions"])
+    contract = json.loads((repo / O.CONTRACT).read_text())
     return {"incumbent": {k: inc[k] for k in INC.IDENTITY_FIELDS},
             "b_spec_hash": spec.spec_hash, "construction": construction,
             "pool": {k: report[k] for k in ("draws", "unique")},
             "policy": policy.qualified_id,
             "lambda_rule_hash": O.lambda_rule()["rule_hash"],
             "threshold_rule_hash": O.diagnostic_threshold_rule()["rule_hash"],
-            "d2_objective_hash": O.D2_OBJECTIVE.objective_hash}
+            "d2_objective_hash": O.D2_OBJECTIVE.objective_hash,
+            "contract_hash": contract["contract_hash"],
+            "tolerances": {"d2_rows": D2_ROWS_TOLERANCES,
+                           "cache_equivalence": CACHE_EQUIVALENCE},
+            "step_bounds_s": dict(L_STEP_BOUND_S)}
 
 
-def _state_eval_objective_timing(*, repo: Path, teacher, student, numerics,
-                                 prediction_rows: str) -> dict[str, Any]:
-    """`evaluate()` on B, KL-only vs the D2 objective, same models, same suite.
-
-    KL-only twice (first and last) so a warm-up cannot pass for overhead. The
-    objective run's raw-KL control must equal the KL-only run's teacher KL --
-    the CPU test's 1e-6 claim, checked once on the production GPU path.
-    """
+def _state_evaluations(*, repo: Path, teacher, student, numerics,
+                       arms: tuple[tuple[str, Any, str], ...]
+                       ) -> tuple[list[dict[str, Any]], dict[str, dict]]:
+    """`evaluate()` on B per (label, objective, prediction_rows), timed."""
     import torch
 
     from aadistill.initialization.execution import ExecutionConfig
     from aadistill.initialization.planning.metrics import StateEvaluator
     from aadistill.initialization.scoring.positions import get_position_policy
     from shared.evaluation import load_state_eval
-    from stages.d_series import objectives as O
     from stages.d_series.scoring_protocol import (
         D_SERIES_BATCH_PACKING, D_SERIES_MICRO_BATCH_SIZE, D_SERIES_SUPPORT,
     )
@@ -1269,52 +1292,117 @@ def _state_eval_objective_timing(*, repo: Path, teacher, student, numerics,
 
     suite, items, content_sha256 = _load_suite(load_state_eval, repo)
     policy = get_position_policy(f"{POLICY_ID}@v1")
-    execution = ExecutionConfig(micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
-                                calibration_batch_packing=D_SERIES_BATCH_PACKING,
-                                prediction_rows=prediction_rows)
     runs: list[dict[str, Any]] = []
     values: dict[str, dict[str, Any]] = {}
-    for label, objective in (("kl_only", None), ("d2_objective", O.D2_OBJECTIVE),
-                             ("kl_only_again", None)):
-        ev = StateEvaluator(suite, items, device="cuda", position_policy=policy,
-                            execution=execution,
-                            distribution_support=D_SERIES_SUPPORT,
-                            suite_content_sha256=content_sha256,
-                            numerics=numerics, scoring_objective=objective)
+    for label, objective, rows in arms:
+        ev = StateEvaluator(
+            suite, items, device="cuda", position_policy=policy,
+            execution=ExecutionConfig(
+                micro_batch_size=D_SERIES_MICRO_BATCH_SIZE,
+                calibration_batch_packing=D_SERIES_BATCH_PACKING,
+                prediction_rows=rows),
+            distribution_support=D_SERIES_SUPPORT,
+            suite_content_sha256=content_sha256, numerics=numerics,
+            scoring_objective=objective)
         ev.prime_reference(teacher)
         torch.cuda.synchronize()
         torch.cuda.reset_peak_memory_stats()
         t0 = time.time()
         evaluation = ev.evaluate(student, "reference_calibration_timing")
         torch.cuda.synchronize()
-        seconds = time.time() - t0
-        runs.append({"arm": label, "seconds": round(seconds, 3),
+        runs.append({"arm": label, "prediction_rows": rows,
+                     "seconds": round(time.time() - t0, 3),
                      "measurement_protocol_id": ev.measurement_protocol_id,
-                     "peak_memory_bytes": int(torch.cuda.max_memory_allocated())})
-        values[label] = dict(evaluation.values or {})
+                     "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
+                     "suite_items": len(items)})
+        values[label] = {k: v for k, v in (evaluation.values or {}).items()
+                         if isinstance(v, (int, float))}
         del ev
         torch.cuda.empty_cache()
+    return runs, values
+
+
+#: The objective's raw-KL metric -> the KL-only metric it must equal.
+RAW_KL_TO_KL = (("state.objective.raw_kl.equal_domain_mean",
+                 "state.teacher_kl.equal_domain_mean"),
+                ("state.objective.raw_kl.worst_domain",
+                 "state.teacher_kl.worst_domain"),
+                ("state.objective.raw_kl.critical_token",
+                 "state.critical_token_kl"))
+RAW_KL_CLASS_PREFIX = ("state.objective.raw_kl.critical_token.",
+                       "state.critical_token_kl.")
+
+
+def raw_kl_control(kl: Mapping[str, float], d2: Mapping[str, float]
+                   ) -> dict[str, Any]:
+    """The KL-only control on the GPU: raw KL under the objective vs D1's KL."""
+    pairs = [(d2[a], kl[b]) for a, b in RAW_KL_TO_KL if a in d2 and b in kl]
+    src, dst = RAW_KL_CLASS_PREFIX
+    pairs += [(v, kl[dst + k[len(src):]]) for k, v in d2.items()
+              if k.startswith(src) and dst + k[len(src):] in kl]
+    return {"metrics_compared": len(pairs),
+            "max_abs_difference": (max(abs(float(a) - float(b))
+                                       for a, b in pairs) if pairs else None)}
+
+
+def objective_agreement(a: Mapping[str, float], b: Mapping[str, float],
+                        tolerance: float) -> dict[str, Any]:
+    """Every `state.objective.*` metric of two evaluations, compared."""
+    keys = sorted(k for k in set(a) & set(b) if k.startswith("state.objective."))
+    worst = max((abs(float(a[k]) - float(b[k])) for k in keys), default=None)
+    return {"metrics_compared": len(keys), "max_abs_difference": worst,
+            "only_in_one": sorted((set(a) ^ set(b))),
+            "within_tolerance": (worst is not None and worst <= tolerance
+                                 and set(a) == set(b)),
+            "tolerance_absolute": tolerance}
+
+
+def _state_eval_objective_timing(*, repo: Path, teacher, student, numerics,
+                                 prediction_rows: str, keep: dict) -> dict[str, Any]:
+    """KL-only vs the D2 objective on B, same models and suite.
+
+    KL-only twice (first and last) so a warm-up cannot pass for overhead. The
+    objective run's raw-KL control must equal the KL-only run's teacher KL --
+    the CPU test's 1e-6 claim, checked on the production GPU path. The D2
+    values are kept for the scored-rows comparison; they are B's, the
+    incumbent's, never a D2 candidate's.
+    """
+    from stages.d_series import objectives as O
+
+    runs, values = _state_evaluations(
+        repo=repo, teacher=teacher, student=student, numerics=numerics,
+        arms=(("kl_only", None, prediction_rows),
+              ("d2_objective", O.D2_OBJECTIVE, prediction_rows),
+              ("kl_only_again", None, prediction_rows)))
+    keep["d2_values"] = values["d2_objective"]
     ids = {r["arm"]: r["measurement_protocol_id"] for r in runs}
     if ids["kl_only"] == ids["d2_objective"]:
         raise AdoptionError("the objective did not move the measurement "
                             "protocol id, so the two arms are not distinguished")
     kl = values["kl_only"]
-    raw = {k[len("state.objective.raw_kl."):]: v
-           for k, v in values["d2_objective"].items()
-           if k.startswith("state.objective.raw_kl.")}
-    paired = {k: (float(raw[k]), float(kl[f"state.teacher_kl.{k}"]))
-              for k in raw if f"state.teacher_kl.{k}" in kl
-              and isinstance(raw[k], (int, float))}
     base = min(r["seconds"] for r in runs if r["arm"] != "d2_objective")
     obj = next(r["seconds"] for r in runs if r["arm"] == "d2_objective")
-    return {"runs": runs, "suite_items": len(items),
+    return {"runs": runs,
             "overhead_seconds_per_evaluation": round(obj - base, 3),
             "overhead_factor": round(obj / base, 4) if base else None,
-            "raw_kl_control": {
-                "metrics_compared": len(paired),
-                "max_abs_difference": (max(abs(a - b) for a, b in paired.values())
-                                       if paired else None)},
+            "raw_kl_control": raw_kl_control(kl, values["d2_objective"]),
+            "b_values": {"kl_only": kl, "d2_objective": values["d2_objective"]},
             "_values_of": "B, the incumbent -- never a D2 candidate"}
+
+
+def _d2_rows_state_eval(*, repo: Path, teacher, student, numerics,
+                        keep: dict) -> dict[str, Any]:
+    """D2 on B under scored_v1, against the all_v1 values just measured."""
+    from stages.d_series import objectives as O
+
+    if "d2_values" not in keep:
+        raise AdoptionError("the all_v1 D2 evaluation did not run")
+    runs, values = _state_evaluations(
+        repo=repo, teacher=teacher, student=student, numerics=numerics,
+        arms=(("d2_objective_scored_v1", O.D2_OBJECTIVE, "scored_v1"),))
+    return {"runs": runs, **objective_agreement(
+        keep["d2_values"], values["d2_objective_scored_v1"],
+        D2_ROWS_TOLERANCES["state_eval_absolute"])}
 
 
 def _hoard_allocator(leave_bytes: int = 256 * 2**20) -> int:
@@ -1335,15 +1423,22 @@ def _hoard_allocator(leave_bytes: int = 256 * 2**20) -> int:
     return n
 
 
-def _depth_one_round_timing(*, repo: Path, teacher_path: str, workdir: Path,
-                            prediction_rows: str, journal: Journal
-                            ) -> dict[str, Any]:
-    """One DEPTH round at the root, KL-only vs the D2 objective. TIMING ONLY.
+def _memory_view(snapshot: dict | None) -> dict[str, Any]:
+    snap = snapshot or {}
+    return {k: snap.get(k) for k in (
+        "driver_free_gib", "allocator_allocated_gib", "allocator_reserved_gib",
+        "reclaimable_by_empty_cache_gib")}
 
-    The production operator through the production context builder, timed as
-    `BeamSearch._expand_one` times it. Neither the chosen layer nor the round
-    table is kept: this session produces lambda, and nothing that looks like a
-    D2 search result may exist before D2's search.
+
+def _depth_arm(*, repo: Path, teacher_path: str, workdir: Path, label: str,
+               objective, prediction_rows: str, hoard: bool,
+               force_recompute: bool, journal: Journal
+               ) -> tuple[dict[str, Any], list[tuple[str, float]]]:
+    """One DEPTH round at the root through the production builder.
+
+    Returns the arm's record and its candidate table. The TABLE never enters
+    the record for a D2 arm: this session produces lambda, and nothing that
+    looks like a D2 search result may exist before D2's search.
     """
     import shutil
 
@@ -1354,10 +1449,10 @@ def _depth_one_round_timing(*, repo: Path, teacher_path: str, workdir: Path,
     )
     from aadistill.initialization.calibration.profiles import get_profile
     from aadistill.initialization.operators.base import get_implementation
+    from aadistill.initialization.operators.depth import causal_kl_greedy as CKG
     from aadistill.initialization.operators.depth._common import DEPTH_FIELD
     from aadistill.initialization.scoring.positions import SUPERVISED_TARGET_V1
     from aadistill.initialization.specs.arch import get_adapter
-    from stages.d_series import objectives as O
     from stages.phase_a3 import a3_session as A3S
 
     adapter = get_adapter("qwen3")
@@ -1366,84 +1461,114 @@ def _depth_one_round_timing(*, repo: Path, teacher_path: str, workdir: Path,
     profile = get_profile(D1_DEPTH_PROFILES[0])
     items = prepare_calibration_items(profile.resolve(repo),
                                       profile_id=profile.qualified_id)
-    arms: dict[str, Any] = {}
-    for label, objective in (("kl_only", None), ("d2_objective", O.D2_OBJECTIVE)):
-        model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
-        model.config.use_cache = False
-        parent = adapter.spec_of(model)
-        target = parent.replace(**{DEPTH_FIELD: int(parent[DEPTH_FIELD]) - 1})
-        wd = workdir / f"depth-{label}"
-        ctx = production_operator_context(
-            adapter=adapter, model=model, target_spec=target, profile=profile,
-            items=items, seed=spec.seed, device="cuda", workdir=wd,
-            policy=SUPERVISED_TARGET_V1, prediction_rows=prediction_rows,
-            objective=objective)
-        hoarded = _hoard_allocator()
+    model = adapter.load(teacher_path, dtype="bfloat16", device="cuda")
+    model.config.use_cache = False
+    parent = adapter.spec_of(model)
+    target = parent.replace(**{DEPTH_FIELD: int(parent[DEPTH_FIELD]) - 1})
+    wd = workdir / f"depth-{label}"
+    ctx = production_operator_context(
+        adapter=adapter, model=model, target_spec=target, profile=profile,
+        items=items, seed=spec.seed, device="cuda", workdir=wd,
+        policy=SUPERVISED_TARGET_V1, prediction_rows=prediction_rows,
+        objective=objective)
+    hoarded = _hoard_allocator() if hoard else 0
+    probe = CKG._available_memory_bytes
+    if force_recompute:
+        CKG._available_memory_bytes = (
+            lambda _device: (0, "forced recompute (equivalence arm)"))
+    try:
         torch.cuda.reset_peak_memory_stats()
         started = time.time()
         outcome = impl.execute(ctx)
         elapsed = time.time() - started
-        timing = dict(outcome.artifacts.get("timing") or {})
-        cache = dict(outcome.artifacts.get("reference_cache") or {})
-        before = cache.get("memory_before") or {}
-        arms[label] = {
-            "operator_invocation_seconds": round(elapsed, 3),
-            "candidate_subsets": int(timing.get("candidate_subsets") or 0),
-            "scoring_loop_seconds": timing.get("item_seconds"),
-            "objective_seconds": timing.get("objective_seconds"),
-            "reference_cache_mode": cache.get("mode"),
-            "hoarded_gib": round(hoarded / 2**30, 3),
-            "driver_free_gib_before_probe": before.get("driver_free_gib"),
-            "reclaimable_gib_before_probe": before.get(
-                "reclaimable_by_empty_cache_gib"),
-            "available_bytes_after_probe": cache.get("available_bytes"),
-            "headroom_source": cache.get("headroom_source"),
-            "peak_memory_bytes": int(torch.cuda.max_memory_allocated())}
-        journal.event(stage=f"L.depth.{label}", status="ok",
-                      invocation_s=round(elapsed, 2))
-        del outcome, ctx, model
-        shutil.rmtree(wd, ignore_errors=True)
-        torch.cuda.empty_cache()
-    a, b = arms["kl_only"], arms["d2_objective"]
-    n = max(1, a["candidate_subsets"])
-    return {"profile": profile.qualified_id, "arms": arms,
-            "same_cache_mode": a["reference_cache_mode"] == b["reference_cache_mode"],
-            #: The allocator-hoard fix, on the GPU: both arms entered the
-            #: operator with the pool hoarded and still cached the reference.
-            "cache_fix_validated": all(
-                x["reference_cache_mode"] == "cached" and x["hoarded_gib"] > 1
-                and (x["driver_free_gib_before_probe"] or 0) < 1
-                for x in (a, b)),
-            "overhead_seconds_per_candidate": round(
-                (b["operator_invocation_seconds"]
-                 - a["operator_invocation_seconds"]) / n, 4),
-            "overhead_factor": round(b["operator_invocation_seconds"]
-                                     / a["operator_invocation_seconds"], 4),
-            "_price_as": ("added seconds per candidate, not as a ratio: the "
-                          "objective's per-position work is the same in later "
-                          "rounds, whose forwards are cheaper"),
-            "_valid_only_if": "same_cache_mode"}
+    finally:
+        CKG._available_memory_bytes = probe
+    timing = dict(outcome.artifacts.get("timing") or {})
+    cache = dict(outcome.artifacts.get("reference_cache") or {})
+    counters = dict(outcome.artifacts.get("reference_counters") or {})
+    rounds = list(outcome.artifacts.get("search_rounds") or [])
+    table = [(repr(e.get("candidate")), float(e.get("score")))
+             for e in (rounds[0].get("table") or [])] if rounds else []
+    record = {
+        "objective": None if objective is None else objective.qualified_id,
+        "prediction_rows": prediction_rows,
+        "operator_invocation_seconds": round(elapsed, 3),
+        "candidate_subsets": int(timing.get("candidate_subsets") or 0),
+        "scoring_loop_seconds": timing.get("item_seconds"),
+        "objective_seconds": timing.get("objective_seconds"),
+        "peak_memory_bytes": int(torch.cuda.max_memory_allocated()),
+        "hoarded_gib": round(hoarded / 2**30, 3),
+        "forced_recompute": force_recompute,
+        "cache": {"mode": cache.get("mode"), "cached": cache.get("cached"),
+                  "sketch_bytes_estimate": cache.get("sketch_bytes"),
+                  "available_bytes_after_probe": cache.get("available_bytes"),
+                  "headroom_source": cache.get("headroom_source"),
+                  "memory_before_probe": _memory_view(cache.get("memory_before")),
+                  "memory_after_probe": _memory_view(
+                      cache.get("memory_after_probe"))},
+        "counters": counters,
+    }
+    journal.event(stage=f"L.depth.{label}", status="ok",
+                  invocation_s=round(elapsed, 2), mode=cache.get("mode"))
+    del outcome, ctx, model
+    shutil.rmtree(wd, ignore_errors=True)
+    torch.cuda.empty_cache()
+    return record, table
+
+
+def table_agreement(a: list[tuple[str, float]], b: list[tuple[str, float]],
+                    *, relative_tolerance: float) -> dict[str, Any]:
+    """Two candidate tables of one round: same candidates, same scores, same
+    choice. Statistics only -- a caller keeps or drops the tables themselves."""
+    da, db = dict(a), dict(b)
+    common = sorted(set(da) & set(db))
+    rel = max((abs(da[k] - db[k]) / max(abs(da[k]), 1e-30) for k in common),
+              default=None)
+    choice = (bool(common) and min(common, key=da.get) == min(common, key=db.get))
+    return {"candidates": len(common), "same_candidates": set(da) == set(db),
+            "max_relative_difference": rel,
+            "rank_spearman": spearman([da[k] for k in common],
+                                      [db[k] for k in common]),
+            "choice_agrees": choice,
+            "within_tolerance": (set(da) == set(db) and rel is not None
+                                 and rel <= relative_tolerance and choice),
+            "relative_tolerance": relative_tolerance}
+
+
+def _cache_fix_evidence(arm: dict[str, Any]) -> bool:
+    """Entered with the pool hoarded, released it, and still CACHED."""
+    before = arm["cache"]["memory_before_probe"]
+    after = arm["cache"]["memory_after_probe"]
+    est = float(arm["cache"]["sketch_bytes_estimate"] or 0) / 2**30
+    return (arm["cache"]["mode"] == "cached" and arm["hoarded_gib"] > 1
+            and (before.get("driver_free_gib") or 0) < 1
+            and (after.get("driver_free_gib") or 0)
+            >= (before.get("driver_free_gib") or 0) + est
+            and int(arm["counters"].get("reference_recomputes", -1)) == 0
+            and int(arm["counters"].get("reference_fills", 0)) > 0)
 
 
 def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
                                   journal: Journal, workdir: Path, out: Path,
                                   numerics, prediction_rows: str,
                                   deadline=None, flush=None) -> dict[str, Any]:
-    """B rebuilt, lambda and thresholds measured and WRITTEN, then timing.
+    """B rebuilt, lambda and thresholds measured and WRITTEN, then evidence.
 
     Order is the protection: the calibration record is on disk (and flushed)
-    before either timing pair starts, each pair starts only when the deadline
-    leaves its bound, and a failed pair is recorded, never raised -- the pairs
-    are cost-model evidence, the calibration is the deliverable.
+    before any timing or equivalence step starts; each step starts only when
+    the deadline covers its bound (and an extended step, the core bounds still
+    to come); a failed step is recorded, never raised -- those steps are cost
+    and engineering evidence, the calibration is the deliverable.
     """
     import torch
 
     from aadistill.initialization.specs.arch import get_adapter
     from stages.d_series import incumbent as INC
+    from stages.d_series import objectives as O
     from stages.d_series import reference_calibration as CAL
     from stages.phase_d1 import behavioural_materialize as BM
 
-    result: dict[str, Any] = {}
+    result: dict[str, Any] = {"step_bounds_s": dict(L_STEP_BOUND_S)}
     inc = INC.standing_incumbent(repo)
     with journal.stage("L.materialize_B") as st:
         row = BM.materialize_incumbent(
@@ -1485,11 +1610,13 @@ def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
     if flush is not None:
         flush(result)
 
-    def pair(name: str, fn) -> None:
-        if not _time_left(deadline, L_PAIR_BOUND_S[name]):
-            result[f"timing_{name}"] = {"skipped": "deadline would not cover "
-                                        f"{L_PAIR_BOUND_S[name]} s"}
-            journal.event(stage=f"L.timing_{name}", status="skipped")
+    def step(name: str, fn) -> None:
+        done = {k[len("timing_"):] for k in result if k.startswith("timing_")}
+        need = step_need_s(name, done)
+        if not _time_left(deadline, need):
+            result[f"timing_{name}"] = {"skipped": f"deadline would not cover "
+                                        f"{need} s"}
+            journal.event(stage=f"L.{name}", status="skipped")
             return
         t0 = time.time()
         try:
@@ -1499,21 +1626,110 @@ def stage_L_reference_calibration(*, repo: Path, teacher_path: str,
                 "failed": f"{type(exc).__name__}: {exc}",
                 "traceback": traceback.format_exc()}
         result[f"timing_{name}"]["wall_seconds"] = round(time.time() - t0, 3)
-        journal.event(stage=f"L.timing_{name}",
+        journal.event(stage=f"L.{name}",
                       status="failed" if "failed" in result[f"timing_{name}"]
                       else "ok")
         if flush is not None:
             flush(result)
 
-    pair("state_eval", lambda: _state_eval_objective_timing(
+    keep: dict[str, Any] = {}
+    step("state_eval", lambda: _state_eval_objective_timing(
         repo=repo, teacher=teacher, student=student, numerics=numerics,
-        prediction_rows=prediction_rows))
+        prediction_rows=prediction_rows, keep=keep))
+    step("d2_rows_state_eval", lambda: _d2_rows_state_eval(
+        repo=repo, teacher=teacher, student=student, numerics=numerics,
+        keep=keep))
     del teacher, student
     torch.cuda.empty_cache()
-    pair("depth_one_round", lambda: _depth_one_round_timing(
-        repo=repo, teacher_path=teacher_path, workdir=workdir,
-        prediction_rows=prediction_rows, journal=journal))
+
+    tables: dict[str, list] = {}
+
+    def arm(label, objective, rows, *, hoard=True, force_recompute=False):
+        rec, table = _depth_arm(
+            repo=repo, teacher_path=teacher_path, workdir=workdir, label=label,
+            objective=objective, prediction_rows=rows, hoard=hoard,
+            force_recompute=force_recompute, journal=journal)
+        tables[label] = table
+        return rec
+
+    def depth_pair() -> dict[str, Any]:
+        a = arm("kl_only", None, prediction_rows)
+        b = arm("d2_objective", O.D2_OBJECTIVE, prediction_rows)
+        n = max(1, a["candidate_subsets"])
+        return {"profile": D1_DEPTH_PROFILES[0], "arms": {"kl_only": a,
+                                                         "d2_objective": b},
+                "same_cache_mode": a["cache"]["mode"] == b["cache"]["mode"],
+                "cache_fix_validated": all(_cache_fix_evidence(x)
+                                           for x in (a, b)),
+                "overhead_seconds_per_candidate": round(
+                    (b["operator_invocation_seconds"]
+                     - a["operator_invocation_seconds"]) / n, 4),
+                "overhead_factor": round(b["operator_invocation_seconds"]
+                                         / a["operator_invocation_seconds"], 4),
+                #: KL-only is D1's own objective at the root: its table is
+                #: D1-path evidence, recorded for the equivalence check.
+                "kl_only_round_table": tables["kl_only"],
+                "_price_as": ("added seconds per candidate, not as a ratio: "
+                              "the objective's per-position work is the same "
+                              "in later rounds, whose forwards are cheaper"),
+                "_one_root_profile": ("proves the mechanism on one hoarded "
+                                      "root invocation, not that every future "
+                                      "expansion stays cached")}
+
+    def recompute_equivalence() -> dict[str, Any]:
+        if "kl_only" not in tables:
+            raise AdoptionError("the cached KL-only arm did not run")
+        r = arm("kl_only_forced_recompute", None, prediction_rows,
+                hoard=False, force_recompute=True)
+        agree = table_agreement(
+            tables["kl_only"], tables["kl_only_forced_recompute"],
+            relative_tolerance=CACHE_EQUIVALENCE["depth_candidate_relative"])
+        return {"arm": r, "agreement": agree,
+                "exact": agree["within_tolerance"],
+                "recompute_slowdown": None}
+
+    def d2_rows_depth() -> dict[str, Any]:
+        if "d2_objective" not in tables:
+            raise AdoptionError("the all_v1 D2 arm did not run")
+        r = arm("d2_objective_scored_v1", O.D2_OBJECTIVE, "scored_v1")
+        agree = table_agreement(
+            tables["d2_objective"], tables["d2_objective_scored_v1"],
+            relative_tolerance=D2_ROWS_TOLERANCES["depth_candidate_relative"])
+        return {"arm": r, "agreement": agree,
+                "_no_table": "D2's candidate scores and choice are not "
+                             "recorded; only their agreement"}
+
+    step("depth_one_round", depth_pair)
+    step("depth_recompute_equivalence", recompute_equivalence)
+    step("d2_rows_depth", d2_rows_depth)
+    rc = result.get("timing_depth_recompute_equivalence") or {}
+    dp = result.get("timing_depth_one_round") or {}
+    if "arm" in rc and "arms" in dp:
+        rc["recompute_slowdown"] = round(
+            rc["arm"]["operator_invocation_seconds"]
+            / dp["arms"]["kl_only"]["operator_invocation_seconds"], 4)
+    result["d2_scored_rows_equivalence"] = d2_rows_verdict(result)
+    if flush is not None:
+        flush(result)
     return result
+
+
+def d2_rows_verdict(result: dict[str, Any]) -> dict[str, Any]:
+    """PASS only when both D2 comparisons ran and are within tolerance."""
+    se = result.get("timing_d2_rows_state_eval") or {}
+    dp = (result.get("timing_d2_rows_depth") or {}).get("agreement") or {}
+    if "within_tolerance" not in se or "within_tolerance" not in dp:
+        verdict = "INCOMPLETE"
+    elif se["within_tolerance"] and dp["within_tolerance"]:
+        verdict = "PASS"
+    else:
+        verdict = "FAIL"
+    return {"verdict": verdict, "tolerances": D2_ROWS_TOLERANCES,
+            "state_eval_within": se.get("within_tolerance"),
+            "depth_within": dp.get("within_tolerance"),
+            "consequence": ("D2 may run scored_v1" if verdict == "PASS" else
+                            "D2 runs all_v1: R0's KL-only verdict does not "
+                            "extend to the confidence objective")}
 
 
 # --- main -------------------------------------------------------------------

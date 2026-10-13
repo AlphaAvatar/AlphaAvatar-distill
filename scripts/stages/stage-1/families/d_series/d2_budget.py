@@ -135,13 +135,91 @@ def telemetry_basis(rows: Sequence[dict[str, Any]], elapsed_minutes: float
     }
 
 
-def objective_overhead(calibration_session: str | Path | None,
+#: The reference calibration's campaign: the ONE place a stage-L session is
+#: booked, with its evidence file and that file's sha256. The price reads the
+#: evidence through it and nowhere else -- no CLI switch, no field to edit.
+CALIBRATION_CAMPAIGN = ("logs/stages/stage-1/families/d_series/validations/"
+                        "reference-calibration/v1/campaign.json")
+#: A single measured overhead is a measurement, not a bound: the planning
+#: bound carries this variation margin on it. The watchdog cap is the
+#: enforceable stop either way.
+MEASURED_OVERHEAD_BOUND_FACTOR = 1.5
+
+
+def calibration_evidence(repo_root: str | Path | None = None) -> dict[str, Any]:
+    """The stage-L GPU evidence, VERIFIED, or the reason it cannot be used.
+
+    Usable only when a subrun is booked in the calibration campaign with its
+    evidence path and sha256, the bytes hash to it, the session COMPLETED stage
+    L, and it ran the objective, rules and incumbent this programme registers.
+    Anything else leaves the price on D1's records, labelled why.
+    """
+    from stages.d_series import incumbent as INC
+    from stages.d_series import objectives as O
+
+    root = Path(repo_root) if repo_root is not None else REPO_ROOT
+    out: dict[str, Any] = {"usable": False, "cache_fix_validated": False,
+                           "campaign": CALIBRATION_CAMPAIGN}
+    try:
+        campaign = json.loads((root / CALIBRATION_CAMPAIGN).read_text())
+    except (OSError, ValueError) as exc:
+        return {**out, "why": f"campaign unreadable: {exc}"}
+    booked = [r for r in campaign.get("subruns") or []
+              if r.get("evidence_session") and r.get("evidence_session_sha256")]
+    if not booked:
+        return {**out, "why": "no stage-L session is booked with evidence"}
+    row = booked[-1]
+    path = root / row["evidence_session"]
+    out.update({"subrun_id": row.get("subrun_id"),
+                "evidence_session": row["evidence_session"],
+                "evidence_session_sha256": row["evidence_session_sha256"]})
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        return {**out, "why": f"evidence unreadable: {exc}"}
+    import hashlib
+    if hashlib.sha256(raw).hexdigest() != row["evidence_session_sha256"]:
+        return {**out, "why": "the evidence does not hash to what the campaign "
+                              "booked"}
+    doc = json.loads(raw)
+    lc = doc.get("L_reference_calibration") or {}
+    prem = doc.get("L_premises") or {}
+    inc = INC.standing_incumbent()
+    checks = {
+        "session_complete": doc.get("status") == "COMPLETE",
+        "stage_l_ran": bool(lc.get("calibration")),
+        "d2_objective": prem.get("d2_objective_hash")
+        == O.D2_OBJECTIVE.objective_hash,
+        "lambda_rule": prem.get("lambda_rule_hash") == O.lambda_rule()["rule_hash"],
+        "threshold_rule": prem.get("threshold_rule_hash")
+        == O.diagnostic_threshold_rule()["rule_hash"],
+        "incumbent": ((lc.get("B") or {}).get("identity") or {}).get(
+            "artifact_digest") == inc["artifact_digest"],
+    }
+    depth = lc.get("timing_depth_one_round") or {}
+    state = lc.get("timing_state_eval") or {}
+    usable = all(checks.values())
+    return {**out, "checks": checks, "usable": usable,
+            "cache_fix_validated": bool(usable and depth.get(
+                "cache_fix_validated") is True),
+            "depth": {k: depth.get(k) for k in (
+                "overhead_seconds_per_candidate", "same_cache_mode",
+                "cache_fix_validated", "skipped", "failed")},
+            "state_eval": {k: state.get(k) for k in (
+                "overhead_seconds_per_evaluation", "skipped", "failed")},
+            "d2_scored_rows_equivalence": (lc.get("d2_scored_rows_equivalence")
+                                           or {}).get("verdict"),
+            "why": None if usable else "an identity or completion check failed"}
+
+
+def objective_overhead(evidence: dict[str, Any] | None,
                        basis: dict[str, Any]) -> dict[str, Any]:
     """Seconds the D2 objective adds per DEPTH candidate and per evaluation.
 
-    MEASURED from a reference-calibration session's stage L when one is given
-    and both pairs completed on one cache mode; otherwise PROVISIONAL, from
-    the estimate, and labelled so.
+    MEASURED when the verified stage-L evidence carries both timings on one
+    cache mode -- expected = the measurement, bound = the measurement x
+    MEASURED_OVERHEAD_BOUND_FACTOR, because one timing is not a bound.
+    Otherwise PROVISIONAL, from the estimate, and labelled so.
     """
     per_cand = basis["depth"]["loop_seconds_per_candidate_mean"]
     se_mean = basis["state_evaluation"]["seconds_mean"]
@@ -154,31 +232,28 @@ def objective_overhead(calibration_session: str | Path | None,
             "expected": round(se_mean * (OBJECTIVE_OVERHEAD_EXPECTED - 1), 4),
             "bound": round(basis["state_evaluation"]["seconds_max"]
                            * (OBJECTIVE_OVERHEAD_PROVISIONAL - 1), 4)}}
-    if calibration_session is None:
+    if not evidence or not evidence.get("usable"):
         return provisional
-    doc = json.loads(Path(calibration_session).read_text())
-    lc = doc.get("L_reference_calibration") or {}
-    d, e = lc.get("timing_depth_one_round") or {}, lc.get("timing_state_eval") or {}
-    usable = ("overhead_seconds_per_candidate" in d and d.get("same_cache_mode")
-              and "overhead_seconds_per_evaluation" in e)
-    if not usable:
-        return {**provisional, "measurement_unusable": {
-            "session": str(calibration_session),
-            "depth": {k: d.get(k) for k in ("skipped", "failed",
-                                            "same_cache_mode")},
-            "state_eval": {k: e.get(k) for k in ("skipped", "failed")}}}
+    d, e = evidence.get("depth") or {}, evidence.get("state_eval") or {}
+    if not (d.get("overhead_seconds_per_candidate") is not None
+            and d.get("same_cache_mode")
+            and e.get("overhead_seconds_per_evaluation") is not None):
+        return {**provisional, "measurement_unusable": {"depth": d,
+                                                        "state_eval": e}}
     dc = max(0.0, float(d["overhead_seconds_per_candidate"]))
     se = max(0.0, float(e["overhead_seconds_per_evaluation"]))
-    return {"source": f"measured: {calibration_session} (stage L)",
-            "depth_seconds_per_candidate": {"expected": dc, "bound": dc},
-            "state_eval_seconds_per_evaluation": {"expected": se, "bound": se},
-            "_one_measurement": ("one GPU-bound pair at the root; the per-"
-                                 "candidate work the objective adds does not "
-                                 "depend on the parent's depth")}
+    f = MEASURED_OVERHEAD_BOUND_FACTOR
+    return {"source": (f"measured once: {evidence['evidence_session']} (stage "
+                       "L); the bound adds a variation margin"),
+            "depth_seconds_per_candidate": {"expected": dc,
+                                            "bound": round(dc * f, 4)},
+            "state_eval_seconds_per_evaluation": {"expected": se,
+                                                  "bound": round(se * f, 4)},
+            "bound_factor_on_one_measurement": f}
 
 
 def priced_from_records(rate: float, disk_gb: int,
-                        calibration_session: str | Path | None = None,
+                        evidence: dict[str, Any] | None = None,
                         depth_cell: str = "records_max") -> dict[str, Any]:
     """D2's search priced by D1's machinery on a cost model rebuilt from D1's
     own search telemetry, plus the objective's added seconds.
@@ -204,7 +279,7 @@ def priced_from_records(rate: float, disk_gb: int,
     outcome = _read(f"{D1_SEARCH_RUN}/closeout/outcome.json")
     elapsed = float(outcome["cost"]["elapsed_minutes"])
     basis = telemetry_basis(d1_search_telemetry(), elapsed)
-    ov = objective_overhead(calibration_session, basis)
+    ov = objective_overhead(evidence, basis)
     cands = max(basis["depth"]["candidates_per_expansion"])
     W._ensure_the_frozen_operators_are_registered()
     frozen = d1.cost_model()
@@ -260,8 +335,7 @@ def _usd(minutes: float, rate: float, disk_gb: float) -> dict[str, float]:
             "disk_usd": round(disk, 2), "all_in_usd": round(gpu + disk, 2)}
 
 
-def build(k_candidates: int = 4,
-          calibration_session: str | Path | None = None) -> dict[str, Any]:
+def build(k_candidates: int = 4) -> dict[str, Any]:
     chain = _read(D1_DESIGN)["budget"]["chain"]
     rate = float(chain["price_per_hour"])
     search = chain["sessions"]["search"]
@@ -283,19 +357,27 @@ def build(k_candidates: int = 4,
     setup_exp = sum(c[1] for c in r0["expected"]["components_minutes"][:2])
     setup_hard = sum(c[1] for c in r0["ceiling_cached_path"][
         "components_minutes"][:2])
-    from stages.phase_d1.topk_adoption_driver import L_PAIR_BOUND_S
+    from stages.phase_d1.topk_adoption_driver import (
+        L_CORE_STEPS, L_STEP_BOUND_S,
+    )
 
     calib_exp = setup_exp + 21.3 + 1.0 + 1.0 + 1.0 + 1.0
     calib_hard = setup_hard + per_arm + 2.0 + 5.0 + 5.0 + 2.0
-    #: The objective-overhead timing pairs (stage L). Expected from a3 (state
-    #: evaluation 10.4-11.1 s, three evaluations) and a8 (36 of 260 candidates
-    #: at p50 4.50 s + ~30 s outside the loop, twice); bound = the driver's
-    #: own per-pair gate, so the plan and the gate cannot disagree.
-    timing_exp = 0.7 + 7.0
-    timing_bound = sum(L_PAIR_BOUND_S.values()) / 60
-    calib = {"expected": _usd(calib_exp + timing_exp, rate, 60),
+    #: Stage L's evidence steps. Expected from a3 (state evaluation 10.4-11.1 s)
+    #: and a8 (36 of 260 candidates at p50 4.50 s + ~30 s outside the loop),
+    #: a recomputed candidate at D1's 9.56 s; bounds = the driver's own
+    #: per-step gate, so the plan and the gate cannot disagree.
+    step_exp = {"state_eval": 0.7, "d2_rows_state_eval": 0.4,
+                "depth_one_round": 7.0, "depth_recompute_equivalence": 6.2,
+                "d2_rows_depth": 3.5}
+    core_bound = sum(L_STEP_BOUND_S[k] for k in L_CORE_STEPS) / 60
+    extended_bound = sum(v for k, v in L_STEP_BOUND_S.items()
+                         if k not in L_CORE_STEPS) / 60
+    calib = {"expected": _usd(calib_exp + sum(step_exp.values()), rate, 60),
              "hard": _usd(calib_hard, rate, 60),
-             "hard_with_timing": _usd(calib_hard + timing_bound, rate, 60),
+             "hard_with_timing": _usd(calib_hard + core_bound, rate, 60),
+             "hard_with_every_step": _usd(calib_hard + core_bound
+                                          + extended_bound, rate, 60),
              "components": {
                  "setup_and_overhead": [setup_exp, setup_hard],
                  "b_materialization": [21.3, per_arm],
@@ -303,37 +385,39 @@ def build(k_candidates: int = 4,
                  "teacher_and_b_forwards_147_items": [1.0, 5.0],
                  "rescoring_timing": [1.0, 5.0],
                  "teardown": [1.0, 2.0],
-                 "objective_timing_state_eval_pair": [
-                     0.7, L_PAIR_BOUND_S["state_eval"] / 60],
-                 "objective_timing_depth_one_round_pair": [
-                     7.0, L_PAIR_BOUND_S["depth_one_round"] / 60]},
-             "timing_pairs_are": (
-                 "deadline-gated and optional: the calibration record is "
-                 "written first, and a pair starts only when the driver's "
-                 "deadline still covers its whole bound. So `hard` -- the "
-                 "must-complete work -- prices the session cap, and the pairs "
-                 "run inside it whenever the work before them is not at its "
-                 "maxima (expected: always)"),
+                 **{f"stage_L_{k}": [step_exp[k], round(v / 60, 2)]
+                    for k, v in L_STEP_BOUND_S.items()}},
+             "steps_are": (
+                 "deadline-gated: the calibration record is written first; a "
+                 "step starts only when the driver's deadline covers its whole "
+                 "bound, and an extended step also the core bounds still to "
+                 "come. The session cap prices the must-complete work plus the "
+                 "two CORE steps at their bounds; the extended steps (the "
+                 "cached-vs-recomputed and D2 scored-rows equivalences) run "
+                 "inside the same cap whenever earlier work beats its bound "
+                 "(expected: always)"),
+             "core_steps": list(L_CORE_STEPS),
              "_basis": ("setup from R0's plan (measured a2/a8 components); B "
                         "rebuild measured 1279.8 s (expected) and D1's 22 min "
                         "per arm (bound); forwards from state-evaluation "
                         "timings (80 items in ~11 s at the frozen suite) with a "
                         "5x allowance")}
-    calib["grant_proposed_usd"] = round(calib["hard"]["all_in_usd"]
+    #: THE GRANTED SHAPE (maintainer, post-48fcc638 review): the cap covers
+    #: the must-complete work and both core steps at their bounds.
+    calib["session_cap_proposed_usd"] = calib["hard_with_timing"]["all_in_usd"]
+    calib["grant_proposed_usd"] = round(calib["session_cap_proposed_usd"]
                                         + TEARDOWN_RESERVE_USD + 0.04, 2)
-    calib["session_cap_proposed_usd"] = calib["hard"]["all_in_usd"]
-    calib["alternative_guaranteeing_timing"] = {
-        "session_cap_usd": calib["hard_with_timing"]["all_in_usd"],
-        "grant_usd": round(calib["hard_with_timing"]["all_in_usd"]
-                           + TEARDOWN_RESERVE_USD + 0.04, 2),
-        "buys": ("both timing pairs even when every earlier component is at "
-                 "its maximum; a maintainer choice, not taken by this record")}
 
     #: D2 search: priced from D1's own search records (see priced_from_records).
     disk_search = int(search["container_disk_gb"])
-    rec = priced_from_records(rate, disk_search, calibration_session)
-    cached = priced_from_records(rate, disk_search, calibration_session,
+    evidence = calibration_evidence()
+    records = priced_from_records(rate, disk_search, evidence)
+    cached = priced_from_records(rate, disk_search, evidence,
                                  depth_cell="cached_validated")
+    #: THE PRICE IN FORCE follows the verified evidence and nothing else.
+    in_force = ("cache_fix_validated" if evidence["cache_fix_validated"]
+                else "records_max")
+    rec = cached if in_force == "cache_fix_validated" else records
     search_exp_min = rec["expected_minutes"]
     search_hard_min = rec["priced"]["hard_ceiling_minutes"]
     d2_search = {
@@ -350,14 +434,21 @@ def build(k_candidates: int = 4,
         "hard": _usd(search_hard_min, rate, disk_search),
         "depth_cell_minutes": rec["depth_cell_minutes"],
         "priced_by": rec["priced"],
+        "pricing_in_force": in_force,
+        "hard_records_max": _usd(records["priced"]["hard_ceiling_minutes"],
+                                 rate, disk_search),
         "hard_if_cache_fix_validated": _usd(
             cached["priced"]["hard_ceiling_minutes"], rate, disk_search),
+        "calibration_evidence": evidence,
         "cache_fix": {
             "what": ("`_available_memory_bytes` returns the allocator's "
                      "hoard (empty_cache) before reading the driver: D1's "
                      "search recomputed the reference in 15/16 DEPTH "
                      "expansions with 0.12 GiB free and 36 GiB reclaimable"),
-            "validated_on_gpu": False,
+            "validated_on_gpu": evidence["cache_fix_validated"],
+            "_validated_on_gpu_is": ("DERIVED from the booked, hash-verified "
+                                     "stage-L evidence above; never set by "
+                                     "hand"),
             "validated_by": ("stage L's DEPTH pair, which runs under a "
                              "deliberately hoarded pool and records "
                              "reference_cache.mode; or D2's own first DEPTH "
@@ -530,27 +621,36 @@ def programme_scenarios(limits: dict[str, float],
                                   {}).get("all_in_usd", 0.0) for n in hard), 2)}
 
         def scenario(blocks):
+            remaining = limits["project_remaining_usd"]
             exp_ = round(engineering["expected"]
                          + sum(b["expected"] for _, b in blocks), 2)
             hard_ = round(engineering["hard_with_reserves"]
                           + sum(b["hard_with_reserves"] for _, b in blocks), 2)
             resc = round(sum(b["rescoring_estimate"] for _, b in blocks), 2)
+            #: THREE DIFFERENT KINDS OF NUMBER, never summed under one name:
+            #: (1) hard ceilings + teardown reserves -- bounds the launchers
+            #: enforce; (2) the rescoring diagnostic -- an UNMEASURED estimate;
+            #: (3) their sum -- a conservative planning view, not a ceiling.
             return {"blocks": ["engineering (R0 + reference calibration)"]
                     + [n for n, _ in blocks],
-                    "expected_usd": exp_, "hard_with_reserves_usd": hard_,
-                    "plus_rescoring_estimate_usd": resc,
+                    "expected_usd": exp_,
+                    "hard_with_reserves_usd": hard_,
+                    "unverified_diagnostic_estimate_usd": resc,
+                    "conservative_planning_usd": round(hard_ + resc, 2),
                     "project_remaining_after_hard_usd": round(
-                        limits["project_remaining_usd"] - hard_ - resc, 2),
-                    "fits_project_at_hard": hard_ + resc
-                    <= limits["project_remaining_usd"],
-                    "fits_project_at_expected": exp_
-                    <= limits["project_remaining_usd"]}
+                        remaining - hard_, 2),
+                    "project_remaining_after_conservative_usd": round(
+                        remaining - hard_ - resc, 2),
+                    "fits_project_at_hard": hard_ <= remaining,
+                    "fits_project_conservative": hard_ + resc <= remaining,
+                    "fits_project_at_expected": exp_ <= remaining}
 
-        needed = (block["hard_with_reserves"] + block["rescoring_estimate"]
+        needed = (block["hard_with_reserves"]
                   + fresh_block["hard_with_reserves"])
         left = (limits["project_remaining_usd"]
                 - engineering["hard_with_reserves"]
-                - block["hard_with_reserves"] - block["rescoring_estimate"])
+                - block["hard_with_reserves"])
+        estimates = 2 * block["rescoring_estimate"]
         return {
             "search_hard_usd": search_hard_usd,
             "search_fits_per_session_cap": (search_hard_usd
@@ -566,7 +666,12 @@ def programme_scenarios(limits: dict[str, float],
                 "left_after_d2_at_hard_usd": round(left, 2),
                 "needed_for_d3_and_fresh_at_hard_usd": round(needed, 2),
                 "satisfied": left >= needed,
-                "shortfall_usd": round(max(0.0, needed - left), 2)}}
+                "shortfall_usd": round(max(0.0, needed - left), 2),
+                "conservative_with_unverified_estimates": {
+                    "estimates_usd": round(estimates, 2),
+                    "satisfied": left >= needed + estimates,
+                    "shortfall_usd": round(max(0.0, needed + estimates - left),
+                                           2)}}}
 
     return {
         "schema": "aadistill.d_series.programme_budget/v2",
@@ -587,16 +692,14 @@ def programme_scenarios(limits: dict[str, float],
             "after engineering and D2 at hard ceilings still covers D3 and one "
             "fresh confirmation at theirs"),
         "search_pricing": {
-            "records_max": under(search["hard"]["all_in_usd"]),
+            "records_max": under(search["hard_records_max"]["all_in_usd"]),
             "cache_fix_validated": under(
                 search["hard_if_cache_fix_validated"]["all_in_usd"])},
-        "search_pricing_in_force": (
-            "cache_fix_validated" if search["cache_fix"]["validated_on_gpu"]
-            else "records_max"),
+        "search_pricing_in_force": search["pricing_in_force"],
         "levers_if_short": {
             "validate_the_reference_cache_fix": {
                 "saves_hard_usd_per_search": round(
-                    search["hard"]["all_in_usd"]
+                    search["hard_records_max"]["all_in_usd"]
                     - search["hard_if_cache_fix_validated"]["all_in_usd"], 2),
                 "how": ("the reference calibration's stage L DEPTH pair, "
                         "already in its plan, at no extra session")},
@@ -625,12 +728,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     ap.add_argument("--scenarios", action="store_true",
                     help="also write the dated programme snapshot, reading "
                          "the live limits from the budget authority")
-    ap.add_argument("--calibration-session", default=None,
-                    help="a reference-calibration session's adoption.json: "
-                         "its stage-L timing pairs replace the provisional "
-                         "objective overhead")
     args = ap.parse_args(argv)
-    budget = build(calibration_session=args.calibration_session)
+    #: No evidence switch on the command line: the price reads the stage-L
+    #: session booked in the calibration campaign, verified by its sha256.
+    budget = build()
     if args.scenarios:
         import importlib.util
         spec = importlib.util.spec_from_file_location(

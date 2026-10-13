@@ -1923,7 +1923,9 @@ ROUNDS: tuple[tuple[str, str, dict[str, str]], ...] = (
             "reclaimable). THIS IS A DECLARED SEMANTIC CHANGE to the admission "
             "decision and the wall clock; no tensor, kernel, score or identity "
             "moves. GPU validation is owed: stage L's DEPTH pair runs under a "
-            "deliberately hoarded pool and records the cache mode.",
+            "deliberately hoarded pool and records the cache mode. The "
+            "Top-K sketch cache also records `memory_after_probe` beside "
+            "`memory_before` (diagnostic only).",
      }),
 )
 

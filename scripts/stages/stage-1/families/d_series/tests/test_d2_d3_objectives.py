@@ -388,6 +388,16 @@ class TestTheProgrammeScenarios:
                 pricing["search_hard_usd"] <= self.LIMITS["per_session_cap_usd"])
         assert s["engineering_fits_allowance"] is True
 
+    def test_hard_ceilings_and_unverified_estimates_stay_apart(self):
+        for pricing in self._scen()["search_pricing"].values():
+            for scen in pricing["scenarios"].values():
+                assert scen["project_remaining_after_hard_usd"] == round(
+                    self.LIMITS["project_remaining_usd"]
+                    - scen["hard_with_reserves_usd"], 2)
+                assert scen["conservative_planning_usd"] == round(
+                    scen["hard_with_reserves_usd"]
+                    + scen["unverified_diagnostic_estimate_usd"], 2)
+
     def test_the_price_in_force_is_the_unvalidated_one(self):
         s = self._scen()
         assert s["search_pricing_in_force"] == "records_max"
@@ -424,37 +434,92 @@ class TestTheSearchPriceComesFromD1sRecords:
         depth = basis["cells_minutes"][BUD.DEPTH_IMPL]
         assert depth["root_max"] > depth["deeper_max"] > 30
 
-    def test_a_measured_overhead_replaces_the_provisional(self, tmp_path):
+    @staticmethod
+    def _evidence_repo(tmp_path, *, cache_fix=True, objective_hash=None,
+                       tamper=False):
+        """A tmp tree holding a booked stage-L session, as a closeout books it."""
+        import hashlib
         from stages.d_series import d2_budget as BUD
-        session = tmp_path / "adoption.json"
-        session.write_text(json.dumps({"L_reference_calibration": {
-            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.2,
-                                       "same_cache_mode": True},
-            "timing_state_eval": {"overhead_seconds_per_evaluation": 0.5}}}))
+        from stages.d_series import incumbent as INC
+        session = {
+            "status": "COMPLETE",
+            "L_premises": {
+                "d2_objective_hash": objective_hash or O.D2_OBJECTIVE.objective_hash,
+                "lambda_rule_hash": O.lambda_rule()["rule_hash"],
+                "threshold_rule_hash": O.diagnostic_threshold_rule()["rule_hash"]},
+            "L_reference_calibration": {
+                "B": {"identity": {"artifact_digest":
+                                   INC.standing_incumbent()["artifact_digest"]}},
+                "calibration": {"reward_scale": 1.0},
+                "timing_depth_one_round": {
+                    "overhead_seconds_per_candidate": 0.2,
+                    "same_cache_mode": True, "cache_fix_validated": cache_fix},
+                "timing_state_eval": {"overhead_seconds_per_evaluation": 0.5}}}
+        ev = tmp_path / "logs/session/adoption.json"
+        ev.parent.mkdir(parents=True)
+        body = json.dumps(session).encode()
+        ev.write_bytes(body)
+        camp = tmp_path / BUD.CALIBRATION_CAMPAIGN
+        camp.parent.mkdir(parents=True)
+        camp.write_text(json.dumps({"subruns": [{
+            "subrun_id": "c1", "cost_usd": 0.5,
+            "evidence_session": "logs/session/adoption.json",
+            "evidence_session_sha256": hashlib.sha256(
+                body + (b" " if tamper else b"")).hexdigest()}]}))
+        return tmp_path
+
+    def test_no_booked_session_keeps_the_records_price(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        ev = BUD.calibration_evidence(tmp_path)
+        assert ev["usable"] is False and ev["cache_fix_validated"] is False
+
+    def test_verified_evidence_switches_price_and_overhead(self, tmp_path):
+        from stages.d_series import d2_budget as BUD
+        ev = BUD.calibration_evidence(self._evidence_repo(tmp_path))
+        assert ev["usable"] and ev["cache_fix_validated"]
         basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
-        measured = BUD.objective_overhead(session, basis)
-        assert measured["source"].startswith("measured")
-        assert measured["depth_seconds_per_candidate"] == {"expected": 0.2,
-                                                           "bound": 0.2}
-        provisional = BUD.objective_overhead(None, basis)
-        assert provisional["source"].startswith("provisional")
-        #: A pair that did not complete on one cache mode measures nothing.
-        session.write_text(json.dumps({"L_reference_calibration": {
-            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.2,
-                                       "same_cache_mode": False},
-            "timing_state_eval": {"skipped": "deadline"}}}))
-        fallback = BUD.objective_overhead(session, basis)
-        assert fallback["source"].startswith("provisional")
-        assert "measurement_unusable" in fallback
+        ov = BUD.objective_overhead(ev, basis)
+        assert ov["source"].startswith("measured once")
+        #: One timing is a measurement, not a bound: the bound has a margin.
+        assert ov["depth_seconds_per_candidate"] == {
+            "expected": 0.2, "bound": round(0.2 * BUD.MEASURED_OVERHEAD_BOUND_FACTOR, 4)}
+
+    @pytest.mark.parametrize("bad", ["tamper", "objective", "no_fix"])
+    def test_evidence_that_does_not_verify_changes_nothing(self, tmp_path, bad):
+        from stages.d_series import d2_budget as BUD
+        root = self._evidence_repo(
+            tmp_path, tamper=bad == "tamper",
+            objective_hash="0" * 64 if bad == "objective" else None,
+            cache_fix=bad != "no_fix")
+        ev = BUD.calibration_evidence(root)
+        assert ev["cache_fix_validated"] is False
+        if bad != "no_fix":
+            assert ev["usable"] is False
+            basis = BUD.telemetry_basis(BUD.d1_search_telemetry(), 551.99)
+            assert BUD.objective_overhead(ev, basis)["source"].startswith(
+                "provisional")
+
+    def test_the_committed_record_carries_the_evidence_it_priced_on(self):
+        from stages.d_series import d2_budget as BUD
+        record = json.loads((REPO / BUD.RECORD).read_text())
+        search = record["steps"]["d2_search"]
+        assert search["pricing_in_force"] == (
+            "cache_fix_validated"
+            if search["calibration_evidence"]["cache_fix_validated"]
+            else "records_max")
+        assert search["cache_fix"]["validated_on_gpu"] == \
+            search["calibration_evidence"]["cache_fix_validated"]
+        want = (search["hard_if_cache_fix_validated"]
+                if search["pricing_in_force"] == "cache_fix_validated"
+                else search["hard_records_max"])
+        assert search["hard"] == want
 
     def test_only_depth_and_state_evaluation_carry_the_overhead(self, tmp_path):
         from stages.d_series import d2_budget as BUD
-        zero = tmp_path / "zero.json"
-        zero.write_text(json.dumps({"L_reference_calibration": {
-            "timing_depth_one_round": {"overhead_seconds_per_candidate": 0.0,
-                                       "same_cache_mode": True},
-            "timing_state_eval": {"overhead_seconds_per_evaluation": 0.0}}}))
-        with_zero = BUD.priced_from_records(1.09, 400, zero)
+        ev = BUD.calibration_evidence(self._evidence_repo(tmp_path))
+        ev["depth"]["overhead_seconds_per_candidate"] = 0.0
+        ev["state_eval"]["overhead_seconds_per_evaluation"] = 0.0
+        with_zero = BUD.priced_from_records(1.09, 400, ev)
         provisional = BUD.priced_from_records(1.09, 400)
         assert with_zero["expected_added_minutes"] == 0.0
         assert provisional["priced"]["hard_ceiling_minutes"] > \

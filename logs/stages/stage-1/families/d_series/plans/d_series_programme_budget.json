@@ -11,12 +11,12 @@
  "limits_owner": "scripts/maintenance/consolidation/derive_budget.py (the one budget authority)",
  "engineering_grants": {
   "r0": 4.0,
-  "reference_calibration": 1.52
+  "reference_calibration": 1.76
  },
  "engineering_fits_allowance": true,
  "engineering": {
-  "expected": 2.21,
-  "hard_with_reserves": 5.52
+  "expected": 2.4,
+  "hard_with_reserves": 5.76
  },
  "fresh_confirmation": {
   "expected": 12.23,
@@ -44,11 +44,14 @@
       "engineering (R0 + reference calibration)",
       "d2"
      ],
-     "expected_usd": 36.42,
-     "hard_with_reserves_usd": 68.39,
-     "plus_rescoring_estimate_usd": 1.32,
-     "project_remaining_after_hard_usd": 52.75,
+     "expected_usd": 36.61,
+     "hard_with_reserves_usd": 68.63,
+     "unverified_diagnostic_estimate_usd": 1.32,
+     "conservative_planning_usd": 69.95,
+     "project_remaining_after_hard_usd": 53.83,
+     "project_remaining_after_conservative_usd": 52.51,
      "fits_project_at_hard": true,
+     "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
@@ -57,11 +60,14 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 70.63,
-     "hard_with_reserves_usd": 131.26,
-     "plus_rescoring_estimate_usd": 2.64,
-     "project_remaining_after_hard_usd": -11.44,
+     "expected_usd": 70.82,
+     "hard_with_reserves_usd": 131.5,
+     "unverified_diagnostic_estimate_usd": 2.64,
+     "conservative_planning_usd": 134.14,
+     "project_remaining_after_hard_usd": -9.04,
+     "project_remaining_after_conservative_usd": -11.68,
      "fits_project_at_hard": false,
+     "fits_project_conservative": false,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
@@ -71,19 +77,27 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.86,
-     "hard_with_reserves_usd": 146.76,
-     "plus_rescoring_estimate_usd": 2.64,
-     "project_remaining_after_hard_usd": -26.94,
+     "expected_usd": 83.05,
+     "hard_with_reserves_usd": 147.0,
+     "unverified_diagnostic_estimate_usd": 2.64,
+     "conservative_planning_usd": 149.64,
+     "project_remaining_after_hard_usd": -24.54,
+     "project_remaining_after_conservative_usd": -27.18,
      "fits_project_at_hard": false,
+     "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 52.75,
-    "needed_for_d3_and_fresh_at_hard_usd": 79.69,
+    "left_after_d2_at_hard_usd": 53.83,
+    "needed_for_d3_and_fresh_at_hard_usd": 78.37,
     "satisfied": false,
-    "shortfall_usd": 26.94
+    "shortfall_usd": 24.54,
+    "conservative_with_unverified_estimates": {
+     "estimates_usd": 2.64,
+     "satisfied": false,
+     "shortfall_usd": 27.18
+    }
    }
   },
   "cache_fix_validated": {
@@ -105,11 +119,14 @@
       "engineering (R0 + reference calibration)",
       "d2"
      ],
-     "expected_usd": 36.42,
-     "hard_with_reserves_usd": 58.77,
-     "plus_rescoring_estimate_usd": 1.32,
-     "project_remaining_after_hard_usd": 62.37,
+     "expected_usd": 36.61,
+     "hard_with_reserves_usd": 59.01,
+     "unverified_diagnostic_estimate_usd": 1.32,
+     "conservative_planning_usd": 60.33,
+     "project_remaining_after_hard_usd": 63.45,
+     "project_remaining_after_conservative_usd": 62.13,
      "fits_project_at_hard": true,
+     "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "B_d2_d3": {
@@ -118,11 +135,14 @@
       "d2",
       "d3"
      ],
-     "expected_usd": 70.63,
-     "hard_with_reserves_usd": 112.02,
-     "plus_rescoring_estimate_usd": 2.64,
-     "project_remaining_after_hard_usd": 7.8,
+     "expected_usd": 70.82,
+     "hard_with_reserves_usd": 112.26,
+     "unverified_diagnostic_estimate_usd": 2.64,
+     "conservative_planning_usd": 114.9,
+     "project_remaining_after_hard_usd": 10.2,
+     "project_remaining_after_conservative_usd": 7.56,
      "fits_project_at_hard": true,
+     "fits_project_conservative": true,
      "fits_project_at_expected": true
     },
     "C_d2_d3_fresh_confirmation": {
@@ -132,19 +152,27 @@
       "d3",
       "fresh_confirmation"
      ],
-     "expected_usd": 82.86,
-     "hard_with_reserves_usd": 127.52,
-     "plus_rescoring_estimate_usd": 2.64,
-     "project_remaining_after_hard_usd": -7.7,
+     "expected_usd": 83.05,
+     "hard_with_reserves_usd": 127.76,
+     "unverified_diagnostic_estimate_usd": 2.64,
+     "conservative_planning_usd": 130.4,
+     "project_remaining_after_hard_usd": -5.3,
+     "project_remaining_after_conservative_usd": -7.94,
      "fits_project_at_hard": false,
+     "fits_project_conservative": false,
      "fits_project_at_expected": true
     }
    },
    "reservation_rule": {
-    "left_after_d2_at_hard_usd": 62.37,
-    "needed_for_d3_and_fresh_at_hard_usd": 70.07,
+    "left_after_d2_at_hard_usd": 63.45,
+    "needed_for_d3_and_fresh_at_hard_usd": 68.75,
     "satisfied": false,
-    "shortfall_usd": 7.7
+    "shortfall_usd": 5.3,
+    "conservative_with_unverified_estimates": {
+     "estimates_usd": 2.64,
+     "satisfied": false,
+     "shortfall_usd": 7.94
+    }
    }
   }
  },

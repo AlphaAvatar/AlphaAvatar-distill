@@ -26,10 +26,10 @@
   },
   "reference_calibration": {
    "expected": {
-    "minutes": 37.4,
-    "gpu_usd": 0.68,
+    "minutes": 47.5,
+    "gpu_usd": 0.86,
     "disk_usd": 0.01,
-    "all_in_usd": 0.68
+    "all_in_usd": 0.87
    },
    "hard": {
     "minutes": 64.6,
@@ -42,6 +42,12 @@
     "gpu_usd": 1.41,
     "disk_usd": 0.01,
     "all_in_usd": 1.42
+   },
+   "hard_with_every_step": {
+    "minutes": 91.8,
+    "gpu_usd": 1.67,
+    "disk_usd": 0.01,
+    "all_in_usd": 1.68
    },
    "components": {
     "setup_and_overhead": [
@@ -68,24 +74,35 @@
      1.0,
      2.0
     ],
-    "objective_timing_state_eval_pair": [
+    "stage_L_state_eval": [
      0.7,
      2.0
     ],
-    "objective_timing_depth_one_round_pair": [
+    "stage_L_d2_rows_state_eval": [
+     0.4,
+     1.0
+    ],
+    "stage_L_depth_one_round": [
      7.0,
      10.75
+    ],
+    "stage_L_depth_recompute_equivalence": [
+     6.2,
+     8.0
+    ],
+    "stage_L_d2_rows_depth": [
+     3.5,
+     5.5
     ]
    },
-   "timing_pairs_are": "deadline-gated and optional: the calibration record is written first, and a pair starts only when the driver's deadline still covers its whole bound. So `hard` -- the must-complete work -- prices the session cap, and the pairs run inside it whenever the work before them is not at its maxima (expected: always)",
+   "steps_are": "deadline-gated: the calibration record is written first; a step starts only when the driver's deadline covers its whole bound, and an extended step also the core bounds still to come. The session cap prices the must-complete work plus the two CORE steps at their bounds; the extended steps (the cached-vs-recomputed and D2 scored-rows equivalences) run inside the same cap whenever earlier work beats its bound (expected: always)",
+   "core_steps": [
+    "state_eval",
+    "depth_one_round"
+   ],
    "_basis": "setup from R0's plan (measured a2/a8 components); B rebuild measured 1279.8 s (expected) and D1's 22 min per arm (bound); forwards from state-evaluation timings (80 items in ~11 s at the frozen suite) with a 5x allowance",
-   "grant_proposed_usd": 1.52,
-   "session_cap_proposed_usd": 1.18,
-   "alternative_guaranteeing_timing": {
-    "session_cap_usd": 1.42,
-    "grant_usd": 1.76,
-    "buys": "both timing pairs even when every earlier component is at its maximum; a maintainer choice, not taken by this record"
-   }
+   "session_cap_proposed_usd": 1.42,
+   "grant_proposed_usd": 1.76
   },
   "d2_search": {
    "measured_basis": {
@@ -202,15 +219,29 @@
     "hard_ceiling_minutes": 1744.33,
     "hard_ceiling_usd": 33.3038
    },
+   "pricing_in_force": "records_max",
+   "hard_records_max": {
+    "minutes": 1744.3,
+    "gpu_usd": 31.69,
+    "disk_usd": 1.62,
+    "all_in_usd": 33.3
+   },
    "hard_if_cache_fix_validated": {
     "minutes": 1240.0,
     "gpu_usd": 22.53,
     "disk_usd": 1.15,
     "all_in_usd": 23.68
    },
+   "calibration_evidence": {
+    "usable": false,
+    "cache_fix_validated": false,
+    "campaign": "logs/stages/stage-1/families/d_series/validations/reference-calibration/v1/campaign.json",
+    "why": "no stage-L session is booked with evidence"
+   },
    "cache_fix": {
     "what": "`_available_memory_bytes` returns the allocator's hoard (empty_cache) before reading the driver: D1's search recomputed the reference in 15/16 DEPTH expansions with 0.12 GiB free and 36 GiB reclaimable",
     "validated_on_gpu": false,
+    "_validated_on_gpu_is": "DERIVED from the booked, hash-verified stage-L evidence above; never set by hand",
     "validated_by": "stage L's DEPTH pair, which runs under a deliberately hoarded pool and records reference_cache.mode; or D2's own first DEPTH expansions",
     "until_validated": "the planning bound prices DEPTH at D1's measured recompute-mode maxima",
     "depth_cell_minutes_if_validated": {
@@ -282,7 +313,7 @@
   }
  },
  "totals": {
-  "expected_usd": 36.42,
+  "expected_usd": 36.61,
   "hard_ceiling_usd": 66.75,
   "teardown_reserves_usd": 1.5,
   "hard_plus_reserves_usd": 68.25,

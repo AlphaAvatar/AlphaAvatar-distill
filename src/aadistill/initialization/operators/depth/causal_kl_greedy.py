@@ -709,6 +709,10 @@ class _ReferenceSketches:
             * next(model.parameters()).dtype.itemsize)
         self.memory_before = memory_snapshot(device)
         self.available_bytes, self.headroom_source = _available_memory_bytes(device)
+        #: AFTER the probe, which returns the allocator's hoard first: the pair
+        #: of snapshots is the evidence that the release happened and what it
+        #: freed. Diagnostic only, like `memory_before`.
+        self.memory_after_probe = memory_snapshot(device)
         budget = (None if self.available_bytes is None
                   else _ReferenceLogits.BUDGET_FRACTION * self.available_bytes)
         self.enabled = budget is None or self.estimate_bytes <= budget
@@ -883,6 +887,7 @@ class _ReferenceSketches:
             "available_bytes": self.available_bytes,
             "headroom_source": self.headroom_source,
             "memory_before": self.memory_before,
+            "memory_after_probe": self.memory_after_probe,
         }
 
 
